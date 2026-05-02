@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Yoink</title>
+  <style>
+    body {
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      width: 320px;
+      margin: 0;
+      padding: 14px;
+      background: #1f1f22;
+      color: #e6e6e6;
+      font-size: 13px;
+    }
+    h1 {
+      font-size: 14px;
+      margin: 0 0 10px;
+      font-weight: 600;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #888;
+      flex-shrink: 0;
+    }
+    .dot.up { background: #57d983; box-shadow: 0 0 6px rgba(87,217,131,0.6); }
+    .dot.down { background: #d95757; box-shadow: 0 0 6px rgba(217,87,87,0.6); }
+    .dot.live {
+      background: #57d983;
+      box-shadow: 0 0 6px rgba(87,217,131,0.6);
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      margin-bottom: 4px;
+      color: #b0b0b0;
+    }
+    input[type="number"], input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 6px 8px;
+      background: #2b2b2f;
+      color: #e6e6e6;
+      border: 1px solid #3a3a3f;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    .hint {
+      color: #888;
+      font-size: 11px;
+      margin-top: 6px;
+    }
+    .saved {
+      color: #57d983;
+      font-size: 11px;
+      margin-top: 6px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .saved.show { opacity: 1; }
+    .footer {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid #2b2b2f;
+      color: #888;
+      font-size: 11px;
+    }
+    code {
+      background: #2b2b2f;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 11px;
+    }
+    .panel {
+      margin-top: 12px;
+      padding: 8px 10px;
+      background: #2b2b2f;
+      border: 1px solid #3a3a3f;
+      border-radius: 4px;
+    }
+    .panel.session-active { border-color: #3a6e4a; background: #1f2b22; }
+    .panel-title {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .panel-line {
+      font-size: 12px;
+      color: #e6e6e6;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .panel-muted { color: #888; }
+    .session-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e6e6e6;
+      margin: 4px 0;
+    }
+    .session-meta { font-size: 11px; color: #aaa; margin-bottom: 6px; }
+    button.primary, button.secondary, button.danger {
+      width: 100%;
+      padding: 7px 8px;
+      border: 1px solid;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+    button.primary { background: #3a6e4a; color: #d9ffe7; border-color: #4a8a5a; margin-top: 8px; }
+    button.primary:hover { background: #468a5a; }
+    button.secondary { background: #3a3a3f; color: #e6e6e6; border-color: #4a4a4f; margin-top: 8px; }
+    button.secondary:hover { background: #45454a; }
+    button.danger { background: #3a1f1f; color: #ffd9d9; border-color: #6a3a3a; margin-top: 8px; }
+    button.danger:hover { background: #4a2a2a; }
+    button[disabled] { opacity: 0.5; cursor: not-allowed; }
+    .button-row { display: flex; gap: 6px; }
+    .button-row > button { width: auto; flex: 1; margin-top: 8px; }
+    .recent {
+      margin-top: 6px;
+      max-height: 110px;
+      overflow-y: auto;
+    }
+    .recent-item {
+      font-size: 11px;
+      color: #b0b0b0;
+      padding: 3px 6px;
+      border-radius: 3px;
+      cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .recent-item:hover { background: #3a3a3f; color: #fff; }
+    .recent-item .meta { color: #777; font-size: 10px; margin-left: 4px; }
+    details > summary {
+      cursor: pointer;
+      list-style: none;
+      color: #b0b0b0;
+      font-size: 11px;
+    }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::before { content: "▸ "; }
+    details[open] > summary::before { content: "▾ "; }
+    .prompts { margin-top: 6px; }
+    .prompt-item {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      margin-top: 4px;
+    }
+    .prompt-label {
+      flex: 1;
+      font-size: 12px;
+      color: #d0d0d0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .copy-btn {
+      flex-shrink: 0;
+      padding: 3px 8px;
+      background: #3a3a3f;
+      color: #e6e6e6;
+      border: 1px solid #4a4a4f;
+      border-radius: 3px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: #45454a; }
+    .copy-btn.copied { background: #3a6e4a; border-color: #4a8a5a; color: #d9ffe7; }
+    .warn {
+      margin-top: 8px;
+      padding: 6px 8px;
+      background: #3a2f1f;
+      color: #ffe6c9;
+      border: 1px solid #6a5a3a;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Yoink</h1>
+
+  <div class="row">
+    <span id="dot" class="dot"></span>
+    <span id="status">Checking server...</span>
+  </div>
+
+  <label for="interval">Screenshot interval (seconds)</label>
+  <input id="interval" type="number" min="5" max="300" step="1" value="30">
+  <div class="hint">Range 5–300. Saved automatically.</div>
+  <div id="saved" class="saved">Saved.</div>
+
+  <!-- Research Session: inactive state -->
+  <div id="session-inactive" class="panel">
+    <div class="panel-title">Research session</div>
+    <details id="start-section">
+      <summary>Start a new session</summary>
+      <label for="session-name">Session name (optional)</label>
+      <input id="session-name" type="text" placeholder="e.g. social strategy research" maxlength="80">
+      <button id="start-session" class="primary">Start session</button>
+    </details>
+    <details style="margin-top:8px">
+      <summary>Recent sessions</summary>
+      <div id="recent-sessions" class="recent">
+        <div class="panel-muted" style="font-size:11px;padding:4px 6px">Loading...</div>
+      </div>
+    </details>
+  </div>
+
+  <!-- Research Session: active state -->
+  <div id="session-active" class="panel session-active hidden">
+    <div class="panel-title">
+      <span><span id="active-dot" class="dot live"></span>&nbsp;Active session</span>
+    </div>
+    <div id="active-name" class="session-name">—</div>
+    <div id="active-meta" class="session-meta">0 videos added</div>
+
+    <details>
+      <summary>Recent additions</summary>
+      <div id="recent-additions" class="recent">
+        <div class="panel-muted" style="font-size:11px;padding:4px 6px">No videos yet. Right-click a thumbnail or use the in-page button.</div>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Suggested prompts (paste corpus first, then prompt)</summary>
+      <div id="prompts" class="prompts"></div>
+    </details>
+
+    <div class="button-row">
+      <button id="end-session" class="primary">End &amp; Send to Claude</button>
+      <button id="cancel-session" class="danger">Cancel</button>
+    </div>
+    <div id="session-warn" class="warn hidden"></div>
+  </div>
+
+  <!-- Background queue -->
+  <div class="panel">
+    <div class="panel-title">Background queue</div>
+    <div id="current-job" class="panel-line panel-muted">Idle.</div>
+    <div id="queue-depth" class="panel-line panel-muted">0 videos queued.</div>
+    <button id="clear-queue" class="secondary" disabled>Clear queue</button>
+  </div>
+
+  <div class="footer">
+    Server: <code>http://127.0.0.1:5179</code><br>
+    Click <b>Send to Claude</b> under any video, or right-click a YouTube
+    link/thumbnail.
+  </div>
+
+  <script src="lib/extract.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

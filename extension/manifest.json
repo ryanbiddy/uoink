@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Yoink",
+  "short_name": "Yoink",
+  "version": "1.0.0",
+  "description": "Yoink any YouTube video into Claude or ChatGPT — full transcript, screenshots, and metadata in one structured doc.",
+  "permissions": ["clipboardWrite", "notifications", "storage", "contextMenus", "activeTab", "offscreen"],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://m.youtube.com/*",
+    "https://youtu.be/*",
+    "http://127.0.0.1:5179/*",
+    "http://localhost:5179/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/watch*"],
+      "js": ["lib/extract.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

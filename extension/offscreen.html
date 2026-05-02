@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Send to Claude clipboard helper</title>
+</head>
+<body>
+  <!-- Hidden textarea used by execCommand('copy'). The offscreen document
+       is the only context in MV3 where a service worker can reach the
+       clipboard. -->
+  <textarea id="sink" style="position:fixed;left:-9999px;top:-9999px;"></textarea>
+  <script src="offscreen.js"></script>
+</body>
+</html>

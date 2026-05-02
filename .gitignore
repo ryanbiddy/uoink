@@ -1,0 +1,10 @@
+node_modules/
+__pycache__/
+*.pyc
+server.log
+.env
+dist/
+build/
+*.zip
+video.*
+YouTube Extracts/

@@ -1,0 +1,14 @@
+[
+  {
+    "label": "Find patterns",
+    "text": "Find the patterns across these videos. What advice do all of them agree on? Where do they disagree? Cite the specific video and timestamp for each claim."
+  },
+  {
+    "label": "Pull tactics",
+    "text": "Pull out every concrete tactic mentioned across these videos. Group them by theme. For each tactic, cite which video it came from."
+  },
+  {
+    "label": "Summarize + synthesize",
+    "text": "Summarize each video in 2 sentences, then write one synthesis paragraph that ties them together — what is the larger picture this set of videos reveals?"
+  }
+]
