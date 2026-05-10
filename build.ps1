@@ -69,9 +69,9 @@ $PILLOW_VERSION = '10.4.0'
 #   2. Subsequent builds fail with "SHA256 mismatch" if anything changes,
 #      and Confirm-Hash deletes the bad cached file so a re-run pulls
 #      fresh.
-$PYTHON_SHA256 = ''   # python-3.11.9-embed-amd64.zip
-$FFMPEG_SHA256 = ''   # ffmpeg-7.1-essentials_build.zip
-$GETPIP_SHA256 = ''   # get-pip.py (rolls forward; lock if you want to pin)
+$PYTHON_SHA256 = "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b"
+$FFMPEG_SHA256 = "6f58ce889f59c311410f7d2b18895b33c03456463486f3b1ebc93d97a0f54541"
+$GETPIP_SHA256 = "66904bccb878e363db6236ea900e6935e507dcb887e9f178f6212edfe7f46a76"
 
 # ---- Helpers ------------------------------------------------------------
 function Write-Step($msg) {
