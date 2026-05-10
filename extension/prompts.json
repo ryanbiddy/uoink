@@ -38,5 +38,20 @@
     "id": "plan-my-video",
     "label": "Help me plan a video on this topic",
     "prompt": "Based on this video, help me plan a video of my own on a similar topic. Suggest a hook, a structure, key points to hit, and what to avoid based on what this video did well or poorly. Ask me clarifying questions about my niche and angle before drafting."
+  },
+  {
+    "id": "format-twitter-thread",
+    "label": "Format as Twitter thread",
+    "prompt": "Format this analysis as a Twitter thread. Each tweet should be under 280 characters. Start with a strong hook, then break the analysis into individual tweets, and end with a takeaway. Number each tweet."
+  },
+  {
+    "id": "format-linkedin-post",
+    "label": "Format as LinkedIn post",
+    "prompt": "Format this analysis as a LinkedIn post in a professional but conversational voice. Start with a strong opening line that creates curiosity, use line breaks generously for scannability, include 3-5 key insights as bullet points, and end with a question to drive engagement."
+  },
+  {
+    "id": "format-shareable-insights",
+    "label": "Shareable insights with timestamps",
+    "prompt": "Pull the 5 most shareable insights from this video. For each insight, include the timestamp from the transcript, a one-line summary, and a quotable phrase that someone could screenshot or paste."
   }
 ]

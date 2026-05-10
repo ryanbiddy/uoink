@@ -545,7 +545,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts.append("")
     parts.append("---")
     parts.append("")
-    parts.append("*Yoinked with [Yoink](https://yoink.video) by ReplayRyan*")
+    parts.append("*[Yoinked with Yoink by ReplayRyan](https://yoink.video)*")
     parts.append("")
 
     return "\n".join(parts)
