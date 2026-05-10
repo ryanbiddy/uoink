@@ -30,6 +30,24 @@ const clearBtn = document.getElementById("clear-queue");
 
 // ---- Server status --------------------------------------------------------
 const statusHelp = document.getElementById("status-help");
+const sendClaudeBtn = document.getElementById("send-claude");
+const sendChatgptBtn = document.getElementById("send-chatgpt");
+const destHint = document.getElementById("dest-hint");
+const DEST_HINT_DEFAULT = destHint ? destHint.textContent : "";
+const DEST_DISABLED_TIP = "Server must be running to yoink";
+
+function setDestButtonsEnabled(enabled) {
+  for (const b of [sendClaudeBtn, sendChatgptBtn]) {
+    if (!b) continue;
+    b.disabled = !enabled;
+    b.title = enabled ? "" : DEST_DISABLED_TIP;
+  }
+  if (destHint) {
+    destHint.textContent = enabled
+      ? DEST_HINT_DEFAULT
+      : "Start the Yoink helper to enable these.";
+  }
+}
 
 async function ping() {
   const data = await STC.ping();
@@ -37,17 +55,23 @@ async function ping() {
     dot.classList.remove("down"); dot.classList.add("up");
     status.textContent = "Yoink is running.";
     if (statusHelp) statusHelp.classList.add("hidden");
+    setDestButtonsEnabled(true);
   } else {
     dot.classList.remove("up"); dot.classList.add("down");
-    status.textContent = "Yoink server is offline.";
+    status.textContent = "Yoink server offline";
     if (statusHelp) statusHelp.classList.remove("hidden");
+    setDestButtonsEnabled(false);
   }
 }
 
 if (statusHelp) {
   statusHelp.addEventListener("click", (ev) => {
     ev.preventDefault();
-    showToast("Run start_server.bat from your Yoink install folder.");
+    chrome.tabs.create({
+      url: chrome.runtime.getURL("setup.html?source=offline"),
+      active: true,
+    });
+    window.close();
   });
 }
 
@@ -455,6 +479,7 @@ loadRecentSessions();
 loadRecentYoinks();
 
 const queueTimer = setInterval(refreshQueue, 1000);
+const pingTimer = setInterval(ping, 3000);
 const sessionTimer = setInterval(async () => {
   // Periodically pull active session from server in case background updated
   // it while popup was open (e.g. context-menu add finished).
@@ -463,5 +488,6 @@ const sessionTimer = setInterval(async () => {
 }, 2000);
 window.addEventListener("unload", () => {
   clearInterval(queueTimer);
+  clearInterval(pingTimer);
   clearInterval(sessionTimer);
 });

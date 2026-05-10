@@ -23,6 +23,7 @@
 
   // ---- Styles (scoped via the unique class prefix) ----------------------
   const STYLE_ID = "stc-yt-styles";
+  const DOT_CLASS = "stc-yt-status-dot";
   function injectStyles() {
     if (document.getElementById(STYLE_ID)) return;
     const style = document.createElement("style");
@@ -45,13 +46,54 @@
         line-height: 36px;
         cursor: pointer;
         white-space: nowrap;
-        transition: background-color 0.12s ease;
+        transition: background-color 0.12s ease, box-shadow 0.18s ease;
       }
       .${BTN_CLASS}:hover { background: rgba(255,255,255,0.2); }
       .${BTN_CLASS}:active { background: rgba(255,255,255,0.28); }
       .${BTN_CLASS}[disabled] { opacity: 0.7; cursor: progress; }
       .${BTN_CLASS}.stc-yt-error { background: rgba(217,87,87,0.25); color: #ffd9d9; }
       .${BTN_CLASS}.stc-yt-success { background: rgba(87,217,131,0.25); color: #d9ffe7; }
+
+      /* Live server status — an 8px dot to the left of the label. */
+      .${BTN_CLASS} .${DOT_CLASS} {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        background: #888;
+        transition: background-color 0.18s ease, box-shadow 0.18s ease;
+      }
+      .${BTN_CLASS}.yoink-status-online { /* base style; dot turns green */ }
+      .${BTN_CLASS}.yoink-status-online:hover {
+        box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.35);
+      }
+      .${BTN_CLASS}.yoink-status-online .${DOT_CLASS} {
+        background: #57d983;
+        box-shadow: 0 0 6px rgba(87,217,131,0.55);
+      }
+      .${BTN_CLASS}.yoink-status-offline .${DOT_CLASS} {
+        background: #f59e0b;
+        box-shadow: 0 0 6px rgba(245,158,11,0.55);
+      }
+      .${BTN_CLASS}.yoink-status-checking .${DOT_CLASS} {
+        background: #888;
+        animation: stc-yt-pulse 1.4s ease-in-out infinite;
+      }
+      .${BTN_CLASS}.yoink-status-checking { cursor: progress; }
+      /* One-shot transition flash when state actually changes. */
+      .${BTN_CLASS} .${DOT_CLASS}.stc-yt-flash {
+        animation: stc-yt-dot-flash 0.55s ease-out;
+      }
+      @keyframes stc-yt-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.35; }
+      }
+      @keyframes stc-yt-dot-flash {
+        0% { transform: scale(1); }
+        45% { transform: scale(1.7); }
+        100% { transform: scale(1); }
+      }
+
       .${BTN_CLASS} .stc-yt-icon { width: 16px; height: 16px; flex-shrink: 0; }
       .${BTN_CLASS} .stc-yt-spinner {
         width: 14px; height: 14px;
@@ -71,6 +113,7 @@
             fill="currentColor"/>
     </svg>
   `;
+  const DOT_SVG = `<span class="${DOT_CLASS}" aria-hidden="true"></span>`;
 
   function setButtonState(btn, state, label) {
     btn.classList.remove("stc-yt-error", "stc-yt-success");
@@ -80,8 +123,9 @@
       btn.disabled = true;
       btn.innerHTML = `<span class="stc-yt-spinner"></span><span>${label}</span>`;
     } else {
-      btn.disabled = false;
-      btn.innerHTML = `${ICON_SVG}<span>${label}</span>`;
+      // Only re-enable when not in the "checking" status (which gates clicks).
+      btn.disabled = serverStatus === "checking";
+      btn.innerHTML = `${DOT_SVG}${ICON_SVG}<span>${label}</span>`;
     }
   }
 
@@ -119,6 +163,90 @@
     }
   }
 
+  // ---- Live server status ------------------------------------------------
+  // Visible signal next to the button label so the user knows whether a
+  // click will yoink (online) or pop the setup guide (offline).
+  const STATUS_POLL_MS = 10_000;
+  let serverStatus = "checking"; // "checking" | "online" | "offline"
+  let statusTimer = null;
+  let statusInflight = false;
+
+  function applyStatusToButton(btn) {
+    if (!btn) return;
+    // Mid-yoink — don't clobber the working state. Status applies when the
+    // post-yoink reset puts the button back into default mode.
+    if (btn.querySelector(".stc-yt-spinner")) return;
+    btn.classList.remove("yoink-status-online", "yoink-status-offline", "yoink-status-checking");
+    btn.classList.add(`yoink-status-${serverStatus}`);
+    if (serverStatus === "online") {
+      btn.title = "Extract transcript + screenshots and open Claude";
+      btn.disabled = false;
+    } else if (serverStatus === "offline") {
+      btn.title = "Yoink server offline — click to start";
+      btn.disabled = false;
+    } else {
+      btn.title = "Checking Yoink status...";
+      btn.disabled = true;
+    }
+  }
+
+  function flashDot(btn) {
+    const dot = btn && btn.querySelector(`.${DOT_CLASS}`);
+    if (!dot) return;
+    dot.classList.remove("stc-yt-flash");
+    // Re-trigger the animation by forcing a reflow, then re-adding the class.
+    void dot.offsetWidth;
+    dot.classList.add("stc-yt-flash");
+  }
+
+  function setServerStatus(next) {
+    if (serverStatus === next) return;
+    const prev = serverStatus;
+    serverStatus = next;
+    const btn = document.getElementById(BTN_ID);
+    if (btn) {
+      applyStatusToButton(btn);
+      // Flash on real online↔offline transitions, not on the initial
+      // checking→online or checking→offline reveal.
+      if (prev !== "checking") flashDot(btn);
+    }
+  }
+
+  async function pollStatus() {
+    if (statusInflight) return;
+    statusInflight = true;
+    try {
+      const res = await STC.ping();
+      setServerStatus(res && res.ok ? "online" : "offline");
+    } catch {
+      setServerStatus("offline");
+    } finally {
+      statusInflight = false;
+    }
+  }
+
+  function startStatusPolling() {
+    stopStatusPolling();
+    pollStatus(); // immediate
+    statusTimer = setInterval(pollStatus, STATUS_POLL_MS);
+  }
+  function stopStatusPolling() {
+    if (statusTimer) {
+      clearInterval(statusTimer);
+      statusTimer = null;
+    }
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      stopStatusPolling();
+    } else {
+      // Fire an immediate check on resume so a server we missed coming back
+      // online doesn't make the user wait the full 10s.
+      startStatusPolling();
+    }
+  });
+
   // ---- Active session awareness -----------------------------------------
   let activeSession = null;
 
@@ -153,6 +281,16 @@
   async function onClick(btn) {
     const rawUrl = window.location.href;
     if (!/youtube\.com\/watch/.test(rawUrl)) return;
+
+    // Gate by live server status: don't even attempt yoink while the helper
+    // is down — pop the setup guide instead. The "checking" state is
+    // disabled at the button level so this branch usually isn't reached.
+    if (serverStatus === "checking") return;
+    if (serverStatus === "offline") {
+      notify("Yoink isn't running yet", "Opening setup guide...");
+      openSetupOffline();
+      return;
+    }
 
     const url = STC.normalizeYouTubeUrl(rawUrl) || rawUrl;
     activeSession = await getActiveFromStorage(); // freshen in case popup just changed it
@@ -284,8 +422,8 @@
     btn.id = BTN_ID;
     btn.className = BTN_CLASS;
     btn.type = "button";
-    btn.title = "Extract transcript + screenshots and open Claude";
     setButtonState(btn, "default", defaultLabel());
+    applyStatusToButton(btn);
     btn.addEventListener("click", (ev) => {
       ev.preventDefault();
       ev.stopPropagation();
@@ -329,13 +467,19 @@
     }
     if (currentVideoId() !== stored.videoId) return;
 
+    // Wait for live status to settle so the click isn't swallowed by the
+    // "checking" gate on a freshly-loaded YouTube tab.
+    if (serverStatus === "checking") {
+      try { await pollStatus(); } catch { /* ignore */ }
+    }
+
     // Clear before clicking so a concurrent injection (mutation observer +
     // retry loop both fire) can't double-trigger.
     await new Promise((r) => {
       try { chrome.storage.local.remove("auto_yoink", r); } catch { r(); }
     });
 
-    if (!btn.disabled) btn.click();
+    btn.click();
   }
 
   function tryInjectWithRetries() {
@@ -357,4 +501,7 @@
   observer.observe(document.body, { childList: true, subtree: true });
 
   tryInjectWithRetries();
+  // Kick off /ping polling so the button has a real status before the
+  // user has time to click. Pause/resume is wired via visibilitychange.
+  startStatusPolling();
 })();

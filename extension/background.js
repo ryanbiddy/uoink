@@ -225,6 +225,24 @@ function tryOpenPopup() {
   } catch { /* ignore */ }
 }
 
+// ---- Setup tab (offline) -------------------------------------------------
+// Throttle so a queue of context-menu jobs failing in sequence doesn't spawn
+// a stack of setup tabs.
+let _lastSetupOpenTs = 0;
+async function openSetupOffline() {
+  const now = Date.now();
+  if (now - _lastSetupOpenTs < 8000) return;
+  _lastSetupOpenTs = now;
+  try {
+    await chrome.tabs.create({
+      url: chrome.runtime.getURL("setup.html?source=offline"),
+      active: true,
+    });
+  } catch (e) {
+    console.warn("[stc] openSetupOffline failed", e);
+  }
+}
+
 // ---- Notifications -------------------------------------------------------
 function notify(title, message) {
   return new Promise((resolve) => {
@@ -435,8 +453,8 @@ async function runExtractJob(job) {
     data = await STC.postExtract(job.url, job.interval);
   } catch (e) {
     console.error("[Yoink] server unreachable", e);
-    notify("Yoink server is offline",
-           "Start Yoink from your system tray, or run start_server.bat from the install folder.");
+    notify("Yoink isn't running yet", "Opening setup guide...");
+    openSetupOffline();
     return;
   }
   if (!data || !data.ok) {
@@ -482,8 +500,8 @@ async function runSessionAddJob(job) {
     data = await STC.addToSession(job.session_id, job.url, job.interval);
   } catch (e) {
     console.error("[Yoink] server unreachable", e);
-    notify("Yoink server is offline",
-           "Start Yoink from your system tray, or run start_server.bat from the install folder.");
+    notify("Yoink isn't running yet", "Opening setup guide...");
+    openSetupOffline();
     return;
   }
   if (!data || !data.ok) {
