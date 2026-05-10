@@ -214,3 +214,10 @@ This is the canonical list of ideas that aren't in the current shipped version. 
   - Strategic clarity matters for launch. "Yoink for YouTube research" is sharper positioning than "Yoink for video, sort of, depending on the site."
 - **Trigger:** v2 ships and YouTube depth (Channel Decoder, Niche Corpus, Playlist mode) is stable AND clear user demand for specific platforms (10+ unsolicited requests for the same platform)
 - **Marketing hint for v1:** Optionally include a small "Podcast support and other platforms on the roadmap" line on the landing page or FAQ to signal ambition without overpromising
+
+### System tray status app (v1.1)
+- **Destination:** v1.1 (post-launch, 2-4 weeks after v1)
+- **What:** Persistent system tray icon (bottom-right of Windows near clock) showing live server status. Right-click menu shows: server status (green/red), recent yoinks (last 5 with click-to-open), in-progress yoinks with progress, "Open Yoink folder," "Stop server."
+- **Why deferred from v1:** New component with new failure modes (tray icon visibility, antivirus conflicts, Windows icon caching). Not blocking launch — current notification flow is sufficient. Adding it as a v1.1 update gives a marketing moment ("now with system tray status").
+- **Implementation notes:** Use pystray (Python tray icon library) plus a small background thread that polls server state. Server already exposes /health and /recent endpoints — tray would consume them. Estimated 4-6 hours of focused work.
+- **Trigger:** Ship v1.1 with this as the headline feature once launch dust settles
