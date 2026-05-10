@@ -1413,11 +1413,45 @@ class Handler(BaseHTTPRequestHandler):
 # Startup
 # ---------------------------------------------------------------------------
 def maybe_toast(title: str, body: str):
+    """Show a transient balloon-style notification on Windows so the user
+    knows the server actually started. Uses System.Windows.Forms.NotifyIcon
+    via PowerShell -- works on Win10/11 with no pip dependencies, lives in
+    the user session, auto-dismisses after the system's balloon timeout,
+    and is suppressed gracefully by Focus Assist instead of throwing.
+
+    Fire-and-forget: we Popen the PowerShell process and return. It exits
+    on its own ~6s later after disposing the tray icon. Quietly no-ops on
+    non-Windows or when PowerShell isn't on PATH."""
+    if sys.platform != "win32":
+        return
+    # Single-quote escape for PowerShell single-quoted strings.
+    t = title.replace("'", "''")
+    b = body.replace("'", "''")
+    ps = (
+        "Add-Type -AssemblyName System.Windows.Forms;"
+        "Add-Type -AssemblyName System.Drawing;"
+        "$n = New-Object System.Windows.Forms.NotifyIcon;"
+        "$n.Icon = [System.Drawing.SystemIcons]::Information;"
+        "$n.BalloonTipIcon = 'Info';"
+        f"$n.BalloonTipTitle = '{t}';"
+        f"$n.BalloonTipText = '{b}';"
+        "$n.Visible = $true;"
+        "$n.ShowBalloonTip(5000);"
+        # Keep the tray icon alive long enough for Windows to render the
+        # balloon (the timeout arg is advisory; Windows uses a fixed ~5s).
+        "Start-Sleep -Seconds 6;"
+        "$n.Dispose()"
+    )
     try:
-        from win11toast import toast
-        toast(title, body, duration="short")
-    except Exception:
-        pass
+        subprocess.Popen(
+            ["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden",
+             "-Command", ps],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            **SUBPROCESS_KW,
+        )
+    except Exception as e:
+        log.debug("toast spawn failed: %s", e)
 
 
 def _existing_server_responds() -> bool:
@@ -1470,7 +1504,14 @@ def main():
     log.info("Ready to yoink. Click any YouTube video's Yoink button.")
     log.info("Output: %s", DESKTOP_ROOT)
     log.info("Log file: %s", LOG_PATH)
-    maybe_toast("Yoink", f"Yoink v{VERSION} is running. Ready to yoink.")
+    # Only fires here -- the single-instance / bind-failure paths above
+    # exit() before reaching this line, so a duplicate launch doesn't
+    # double-notify.
+    maybe_toast(
+        "Yoink is running",
+        "Click the orange Y on any YouTube video to yoink. "
+        "To stop, find 'Stop Yoink Server' in your Start Menu.",
+    )
     try:
         server.serve_forever()
     except KeyboardInterrupt:
