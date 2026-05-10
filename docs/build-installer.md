@@ -78,12 +78,27 @@ All three are cached under `build\cache\` after the first download. Delete the c
 
 | Component | Version | SHA256 | Notes |
 |---|---|---|---|
-| Python embeddable | 3.11.9 (amd64) | locked in `build.ps1` | Acceptance: 3.11.9 is the last 3.11.x with binary installers from python.org. Later 3.11.x are source-only security releases that we'd have to build ourselves. v1 ships 3.11.9 knowing the gap; v1.5 plan: move to the latest 3.12 embeddable. |
-| ffmpeg | 7.1 essentials build | locked in `build.ps1` | Pulled from `github.com/GyanD/codexffmpeg/releases` (gyan.dev's GitHub mirror) for stable URLs. |
+| Python embeddable | 3.11.9 (amd64) | **TODO: lock pre-launch** | Acceptance: 3.11.9 is the last 3.11.x with binary installers from python.org. Later 3.11.x are source-only security releases that we'd have to build ourselves. v1 ships 3.11.9 knowing the gap; v1.5 plan: move to the latest 3.12 embeddable. |
+| ffmpeg | 7.1 essentials build | **TODO: lock pre-launch** | Pulled from `github.com/GyanD/codexffmpeg/releases` (gyan.dev's GitHub mirror) for stable URLs. |
 | yt-dlp | 2026.03.17 | (pip) | Pinned via `pip install yt-dlp==2026.03.17`. Bump after compatibility-testing a new release. |
 | Pillow | 10.4.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==10.4.0`. |
 
-The `Confirm-Hash` helper in `build.ps1` verifies SHA256 for the directly-downloaded artifacts (Python embeddable + ffmpeg + get-pip.py). To bootstrap on first run the `$..._SHA256` constants are empty; the build prints the computed hash with a warning, you paste it in, commit, and subsequent builds verify. A mismatch on any artifact deletes the cached file and fails the build, so a compromised mirror or silent upstream change can't slip through.
+### SHA256 hashes are NOT yet locked
+
+The `Confirm-Hash` helper in `build.ps1` verifies SHA256 for the directly-downloaded artifacts (Python embeddable + ffmpeg + get-pip.py). The `$..._SHA256` constants currently ship **empty**, which means:
+
+- The build runs but prints `WARNING: <component> has no locked SHA256. Computed: <hash>` for each unlocked artifact.
+- A compromised mirror or silent upstream change would slip through unnoticed.
+
+**Lock these before launch.** Procedure:
+
+1. Run `.\build.ps1` once on a network-connected machine.
+2. Copy each `Computed: <hash>` value from the warning lines.
+3. Paste them into the matching `$PYTHON_SHA256`, `$FFMPEG_SHA256`, `$GETPIP_SHA256` constants in `build.ps1`.
+4. Re-run `.\build.ps1` -- it should now print `<component> hash OK` instead of the warnings.
+5. Commit the locked hashes. Subsequent builds fail with `SHA256 mismatch` if anything changes (and `Confirm-Hash` deletes the bad cached file so a re-run pulls fresh).
+
+This is the last item to land before launch; do not ship the installer to users with these still empty.
 
 yt-dlp's hash isn't pinned because pip's hash-locking requires a `requirements.txt` with `--require-hashes`, and we accept the trust-pip-itself model for v1 -- a compromised release of yt-dlp on PyPI affects the entire Python ecosystem, not just us.
 
@@ -126,11 +141,11 @@ Add signing to `build.ps1` after step 3 (compile) — see `signtool sign /fd SHA
 
 `get-pip.py` installs pip + setuptools + wheel into the embeddable. We strip those after `yt-dlp` is installed (see step 2e in `build.ps1`) so the shipped install only contains what the server actually imports. If a future yt-dlp adds a transitive dep, it'll land in `site-packages` automatically and get included.
 
-### "Edit prompts" link in the popup
+### Prompts library is read-only in v1
 
-The popup's `Edit prompts ▸` link sends a request to the server's `/open-prompts` endpoint, which expects `<HERE>\extension\prompts.json` to exist on disk. That path is the dev-mode layout. Installed users don't have an `extension\` folder next to the server — the extension is loaded from the Chrome Web Store.
+The popup ships with 11 starter prompts loaded from `extension/prompts.json` inside the extension package. The original "Edit prompts" link was removed in v1 because its on-disk path (`<HERE>\extension\prompts.json`) only exists in dev mode -- installed users have no `extension\` folder next to the server. The `/open-prompts` server endpoint still exists for dev-mode use but isn't surfaced in the UI.
 
-For installed users, "Edit prompts" will fail silently. Tracked as a v1.1 task: store user-overridden prompts in `chrome.storage.local` instead of on disk.
+Tracked as a v1.1 task: store user-overridden prompts in `chrome.storage.local` and add an inline editor in the popup, so the prompt set is portable across installs and editable without touching the filesystem.
 
 ### `topics.json` is read-only after install
 

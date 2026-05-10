@@ -19,11 +19,21 @@ const SUGGESTED_VIDEO = {
   byline: "Lenny's Podcast",
 };
 
-// Flip to true the moment Yoink-Setup-1.0.0.exe is published to
-// github.com/ryanbiddy/yoink/releases/latest. While this is false the
-// download button shows a "coming soon" state and is disabled, so the
-// first user to install the extension before the installer artifact is
-// uploaded doesn't hit a 404 on the GitHub release page.
+// LAUNCH GATE -- flip to `true` only after Yoink-Setup-1.0.0.exe is live
+// at github.com/ryanbiddy/yoink/releases/latest. Procedure (also in
+// docs/build-installer.md, "Launch checklist"):
+//   1. Lock SHA256 hashes in build.ps1 (currently TODO).
+//   2. Run .\build.ps1 -- builds Yoink-Setup-1.0.0.exe.
+//   3. Smoke-test on a clean Windows VM.
+//   4. git tag v1.0.0 && git push --tags.
+//   5. Create the GitHub release, attach the .exe.
+//   6. Verify https://github.com/ryanbiddy/yoink/releases/latest/download/Yoink-Setup-1.0.0.exe
+//      resolves to the file.
+//   7. Flip this flag to `true` and commit.
+//   8. Republish the extension to the Chrome Web Store.
+//
+// Until then, the download button on setup.html shows "Coming soon" and
+// the click handler is no-op'd so first-wave users don't hit a 404.
 const INSTALLER_PUBLISHED = false;
 
 // ---- Constants -----------------------------------------------------------

@@ -492,7 +492,7 @@ async function runExtractJob(job) {
     return;
   }
   if (!data || !data.ok) {
-    notify("Yoink failed", (data && data.error) || "Yoink hit an unknown error.");
+    notify("Yoink failed", STC.friendlyError(data && data.error));
     return;
   }
 
@@ -524,7 +524,7 @@ async function runSessionAddJob(job) {
     return;
   }
   if (!data || !data.ok) {
-    notify("Yoink failed", (data && data.error) || "Yoink hit an unknown error.");
+    notify("Yoink failed", STC.friendlyError(data && data.error));
     return;
   }
 

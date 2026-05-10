@@ -40,8 +40,8 @@ Paste it into Claude or ChatGPT. Ask "Decode the hook," "Outline the structure,"
 
 1. Install the extension and run the local Yoink helper (a small Python server bundled with the install).
 2. Open any YouTube video. Click the **Yoink** button under the player (or right-click any thumbnail).
-3. Yoink extracts transcript, screenshots, comments, channel context, and metadata into one `yoink.md` file. The corpus is auto-copied to your clipboard.
-4. Open Claude or ChatGPT. Paste. Run a prompt. Get analysis.
+3. Yoink extracts transcript, screenshots, comments, channel context, and metadata into one `<video-slug>.md` file (e.g. `karpathy-deep-dive-into-llms.md`) under `Desktop\Yoink\<topic>\<slug>\`. A structured `<slug>.json` sidecar lands beside it for programmatic use. A master `_all-yoinks-index.md` at the root tracks every yoink you've done.
+4. The clipboard version is **multimodal**: same content as the on-disk file, but with up to 12 screenshots inlined as base64 images. Paste into Claude or ChatGPT and the AI sees the transcript text **and** the screenshots in one shot — no separate uploads.
 
 ### Research sessions (multi-video corpora)
 
@@ -49,9 +49,8 @@ Yoinking related videos? Start a **session** in the popup, yoink as many videos 
 
 ### Customization
 
-- Edit `topics.json` to add or rename topic folders and tweak keyword rules
-- Edit `prompts.json` to add your own starter prompts to the popup library
-- Both reload at runtime — no extension restart needed
+- Edit `topics.json` (in your install folder) to add or rename topic folders and tweak keyword rules. Reloaded on the next yoink — no restart needed.
+- The popup ships with 11 starter prompts. v1.1 adds an inline editor; until then the prompts are part of the extension package.
 
 ### Requirements
 

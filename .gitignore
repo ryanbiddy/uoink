@@ -12,14 +12,29 @@ installer/staging/
 video.*
 Yoink/
 
-# User-facing yoink output. In dev mode the server may write to repo-local
-# Desktop\Yoink-style paths; ignoring these patterns prevents private
-# transcripts and screenshots from accidentally landing in commits.
-# Note: existing `Yoink/` entry above covers the per-topic folders
-# (Desktop\Yoink\<topic>\<slug>\). On Windows NTFS git is typically
-# configured with core.ignorecase=true, so a `/[A-Z]*/` pattern would
-# accidentally match docs/ and extension/ too -- avoid that.
+# User-facing yoink output. In dev mode the server's Desktop resolves to
+# the user's actual Desktop -- and on this machine the OneDrive Desktop
+# IS the directory the repo lives in, so topic folders land at the repo
+# root. Ignore them explicitly. New topics added to topics.json need a
+# new line here. Future-proof with /Yoink-Output/ for an eventual
+# explicit-output-dir refactor.
 _sessions/
 _all-yoinks-index.md
+/Yoink-Output/
+
+# Topic folders (one per entry in topics.json + the Uncategorized
+# fallback). On Windows NTFS git uses core.ignorecase=true, so a generic
+# `/[A-Z]*/` glob would also match docs/ and extension/ -- list each one
+# explicitly instead.
+/AI and ML/
+/Developer Marketing/
+/Job Hunt and Career/
+/New Tools to Try/
+/Productivity and Workflows/
+/Social Media Research/
+/Uncategorized/
+
+# Private launch copy drafts. Keep these local unless deliberately published.
+docs/launch/
 
 .claude/

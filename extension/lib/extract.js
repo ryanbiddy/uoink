@@ -284,6 +284,19 @@
     return _proxy("stcSessionAdd", { session_id: sessionId, url, interval });
   }
 
+  // Translate raw server errors into copy a non-technical user can act
+  // on. By the time this runs the built-in 403-retry has already
+  // refreshed the token once and still got rejected, so surfacing
+  // "missing or invalid token" verbatim only confuses the user. Map
+  // anything that smells like an auth failure to a recovery instruction.
+  function friendlyError(rawMsg) {
+    const msg = String(rawMsg || "Yoink hit an unknown error.");
+    if (/token/i.test(msg) || /\bforbidden\b/i.test(msg)) {
+      return "Yoink helper authorization changed. Try reloading the extension or restarting the Yoink helper from your Start Menu.";
+    }
+    return msg;
+  }
+
   // Shared "yoinked!" notification builder. Called from both the in-page
   // YouTube button success path (content.js) and the SW-driven queue path
   // (background.js) so the first-yoink CTA fires no matter which path the
@@ -349,5 +362,6 @@
     openFolder,
     buildYoinkedMessage,
     getToken,
+    friendlyError,
   };
 })(typeof self !== "undefined" ? self : globalThis);

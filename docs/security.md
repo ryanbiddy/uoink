@@ -13,7 +13,7 @@ What we are **not** trying to defend against:
 
 - A *different* extension you've installed reading the token via its own `chrome-extension://` origin. v2 will pin the published Chrome Web Store extension ID and reject other origins; v1 trusts every extension equally.
 - Network-level attackers. The server only binds to `127.0.0.1` and never serves on a public interface; the attacker would already need to be on your machine.
-- Compromised dependencies. We pin yt-dlp / Python / ffmpeg versions and lock SHA256 hashes for the directly-downloaded artifacts (see `docs/build-installer.md`); a compromised PyPI release of yt-dlp is still possible, and is the same risk every Python tool faces.
+- Compromised dependencies. We pin yt-dlp / Python / ffmpeg / Pillow versions; SHA256 verification is wired into `build.ps1` for the directly-downloaded artifacts (Python embeddable, ffmpeg, get-pip.py) but the `_SHA256` constants ship empty and need to be locked before launch (see `docs/build-installer.md`). Until that lock happens the build runs unverified; afterward, a compromised mirror or silent upstream change fails the build with a clear `SHA256 mismatch` error. A compromised PyPI release of yt-dlp or Pillow is still possible and is the same risk every Python tool faces.
 
 ## Authentication mechanism
 
@@ -31,7 +31,7 @@ Endpoints fall into three groups:
 
    The historical strict-Origin-only gate was tightened against a threat (CSRF from a webpage) that the browser's CORS preflight already blocks via the `X-Yoink-Client` mechanism above, while breaking real users on Chromium forks that ship slightly different SW behavior. The relaxed gate is more permissive on paper but functionally equivalent against the actual attack model.
 
-3. **Everything else** -- `/extract`, `/recent`, `/session/*`, `/open-prompts`, `/open-index`, `/open-folder`. All require the `X-Yoink-Token` header (or `?token=...` query param). Mismatch -> 403 with no further info. We use `secrets.compare_digest` for the comparison so a timing attack can't recover the token byte-by-byte.
+3. **Everything else** -- `/extract`, `/recent`, `/session/*`, `/open-prompts`, `/open-index`, `/open-folder`. All require the `X-Yoink-Token` **header** (header-only; the previous `?token=` query-param fallback was removed in v1 to prevent the token leaking into browser history, server access logs, and HTTP debug tooling that captures URLs but not headers). Mismatch -> 403 with no further info. We use `secrets.compare_digest` for the comparison so a timing attack can't recover the token byte-by-byte.
 
 The extension fetches `/token` lazily on the first authed request, caches the value in `chrome.storage.local`, and includes it in every subsequent request. If the server regenerates the token (uninstall/reinstall), the next request returns 403 -- the extension catches that, refreshes from `/token`, and retries once.
 

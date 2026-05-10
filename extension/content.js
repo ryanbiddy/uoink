@@ -330,7 +330,7 @@
     }
 
     if (!data || !data.ok) {
-      const msg = (data && data.error) || "Yoink hit an unknown error.";
+      const msg = STC.friendlyError(data && data.error);
       setButtonState(btn, "error", "Yoink failed");
       btn.title = msg;
       notify("Yoink failed", msg);
@@ -394,7 +394,7 @@
     }
 
     if (!data || !data.ok) {
-      const msg = (data && data.error) || "Yoink hit an unknown error.";
+      const msg = STC.friendlyError(data && data.error);
       setButtonState(btn, "error", "Yoink failed");
       btn.title = msg;
       notify("Yoink failed", msg);
@@ -512,7 +512,7 @@
   observer.observe(document.body, { childList: true, subtree: true });
 
   tryInjectWithRetries();
-  // Kick off /ping polling so the button has a real status before the
+  // Kick off /health polling so the button has a real status before the
   // user has time to click. Pause/resume is wired via visibilitychange.
   startStatusPolling();
 })();

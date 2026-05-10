@@ -41,21 +41,17 @@ For developers running from source, see [REQUIREMENTS.md](./REQUIREMENTS.md). Bu
 3. Markdown corpus copied to clipboard, opens Claude or ChatGPT
 4. Paste, run a prompt, get analysis
 
-## Customizing the prompt library
+## Prompt library
 
-The Yoink popup ships with eleven starter prompts ("Decode the hook", "Outline the structure", "Format as Twitter thread", and so on). They live in `extension/prompts.json` and are fully editable — add your own, delete the ones you don't use, rename labels, anything goes.
+The Yoink popup ships with 11 starter prompts ("Decode the hook", "Outline the structure", "Format as Twitter thread", and so on). For v1 the prompts are baked into the extension package and aren't user-editable from the UI — a v1.1 task adds an inline editor that persists user prompts via `chrome.storage.local`.
 
-In v1 the prompt file lives inside the unpacked extension, so editing it requires a dev install. The in-popup "Edit prompts" link is hidden in v1 because the on-disk path it opened only exists in dev mode -- a unified prompt store between extension and server is tracked for v1.1.
-
-The format is:
+If you're running from source, the file lives at `extension/prompts.json` and changes take effect the next time you open the popup:
 
 ```json
 [
   { "id": "my-prompt", "label": "Short button label", "prompt": "The full prompt body..." }
 ]
 ```
-
-Changes take effect the next time you open the popup — no extension reload required if you're running from a `chrome://extensions/`-loaded unpacked copy.
 
 ## Customizing topic folders
 

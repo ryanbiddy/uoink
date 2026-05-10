@@ -55,9 +55,20 @@ $PILLOW_VERSION = '10.4.0'
 
 # ---- Hash verification --------------------------------------------------
 # Lock in known-good SHA256s so a compromised mirror or silent upstream
-# change can't slip into the install. To bootstrap: leave a hash empty,
-# run the build once, and the build will print the computed hash + a
-# warning. Paste it here, commit, and the next build verifies.
+# change can't slip into the install.
+#
+# TODO(launch): lock these by running build.ps1 once on a network-connected
+# machine, copying the hashes from the "no locked SHA256" warnings the
+# Confirm-Hash helper prints, and pasting them below. Until that's done,
+# the build runs unverified -- a compromised mirror would slip through
+# silently. This is the last item to land before launch; do not ship the
+# installer to users with these still empty.
+#
+# Procedure once locked:
+#   1. Build succeeds with locked hashes -> commit the values.
+#   2. Subsequent builds fail with "SHA256 mismatch" if anything changes,
+#      and Confirm-Hash deletes the bad cached file so a re-run pulls
+#      fresh.
 $PYTHON_SHA256 = ''   # python-3.11.9-embed-amd64.zip
 $FFMPEG_SHA256 = ''   # ffmpeg-7.1-essentials_build.zip
 $GETPIP_SHA256 = ''   # get-pip.py (rolls forward; lock if you want to pin)

@@ -488,11 +488,53 @@ def _replace_comments_section(yoink_path: Path, body: str) -> None:
         log.warning("could not write yoink.md to update comments: %s", e)
 
 
+def _shape_comment_for_sidecar(c: dict) -> dict:
+    """Pick the fields a downstream consumer actually wants. yt-dlp's raw
+    comment objects carry a lot of internal cruft (parent ids, author
+    channel ids, thumbnails) that bloats the sidecar without value."""
+    return {
+        "author": c.get("author"),
+        "text": c.get("text"),
+        "like_count": c.get("like_count") or 0,
+        "time_text": c.get("_time_text") or c.get("time_text"),
+        "is_pinned": bool(c.get("is_pinned")),
+        "is_favorited": bool(c.get("is_favorited")),
+        "reply_count": c.get("reply_count") or 0,
+    }
+
+
+def _update_sidecar_comments(output_folder: Path, comments: list | None,
+                              status: str) -> None:
+    """Patch the JSON sidecar in place once the comments worker resolves.
+    Best-effort: a missing or unwritable sidecar is logged and ignored
+    (the markdown is still the user-facing artifact)."""
+    sidecar_path = output_folder / f"{output_folder.name}.json"
+    if not sidecar_path.exists():
+        return
+    try:
+        data = json.loads(sidecar_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        log.warning("sidecar comments update: read failed (%s)", e)
+        return
+    data["comments"] = comments
+    data["comments_status"] = status
+    tmp = sidecar_path.with_suffix(".json.tmp")
+    try:
+        tmp.write_text(
+            json.dumps(data, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        tmp.replace(sidecar_path)
+    except OSError as e:
+        log.warning("sidecar comments update: write failed (%s)", e)
+
+
 def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
                      max_comments: int = 100, top_n: int = 50) -> None:
-    """Background-thread body. Fetches comments via yt-dlp, then rewrites
-    the comments section of yoink.md in place. Never raises — failures
-    just leave a 'disabled or unavailable' note.
+    """Background-thread body. Fetches comments via yt-dlp, rewrites the
+    comments section of the corpus md AND patches the JSON sidecar with
+    structured comment objects + a comments_status field. Never raises --
+    failures leave the disabled/unavailable note + matching status.
     """
     try:
         info_template = output_folder / "%(id)s_yoink_comments.%(ext)s"
@@ -514,12 +556,14 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
             log.warning("comments info.json not found for %s", url)
             _replace_comments_section(yoink_path,
                 "*Comments could not be retrieved.*")
+            _update_sidecar_comments(output_folder, [], "unavailable")
             return
         info = json.loads(info_files[0].read_text(encoding="utf-8"))
         raw_comments = info.get("comments") or []
         if not raw_comments:
             _replace_comments_section(yoink_path,
                 "*Comments are disabled on this video.*")
+            _update_sidecar_comments(output_folder, [], "disabled")
             return
         ranked = sorted(
             raw_comments,
@@ -527,6 +571,11 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
             reverse=True,
         )[:top_n]
         _replace_comments_section(yoink_path, _render_comments(ranked))
+        _update_sidecar_comments(
+            output_folder,
+            [_shape_comment_for_sidecar(c) for c in ranked],
+            "fetched",
+        )
         log.info("comments appended to %s (%d of %d)",
                  yoink_path, len(ranked), len(raw_comments))
     except subprocess.CalledProcessError as e:
@@ -534,10 +583,12 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
         log.warning("comments yt-dlp failed: %s", stderr.splitlines()[-1] if stderr else e.returncode)
         _replace_comments_section(yoink_path,
             "*Comments are disabled on this video.*")
+        _update_sidecar_comments(output_folder, [], "disabled")
     except Exception as e:
         log.warning("comments worker crashed: %s", e)
         _replace_comments_section(yoink_path,
             "*Comments could not be retrieved.*")
+        _update_sidecar_comments(output_folder, [], "unavailable")
 
 
 def _start_comments_thread(url: str, output_folder: Path,
@@ -839,9 +890,15 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # in a machine-shaped form: future MCP server / programmatic tooling
     # consumes this without having to parse the human-facing md. Written
     # next to the md so it travels with the folder.
+    #
+    # `comments` ships as `null` here and is filled in by the comments
+    # worker once yt-dlp returns -- mirrors the markdown placeholder
+    # behavior. Consumers see `comments_status: "pending"` until the
+    # worker either succeeds (`fetched`), finds none (`disabled`), or
+    # fails (`unavailable`).
     try:
         sidecar = {
-            "schema_version": 1,
+            "schema_version": 2,  # bumped: structured screenshots + comments
             "url": url,
             "title": title,
             "topic": topic,
@@ -859,10 +916,19 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "transcript": [
                 {"start": s, "end": e, "text": t} for s, e, t in entries
             ],
+            # Structured shape: timestamp + relative path + bare filename so
+            # consumers don't have to parse paths or recompute timestamps.
             "screenshots": [
-                f"screenshots/{p.name}" for p in shots
+                {
+                    "timestamp": fmt_time(int(i * interval)),
+                    "path": f"screenshots/{p.name}",
+                    "filename": p.name,
+                }
+                for i, p in enumerate(shots)
             ],
             "channel_context": channel_ctx,
+            "comments": None,
+            "comments_status": "pending",
         }
         sidecar_path = output_folder / f"{output_folder.name}.json"
         sidecar_path.write_text(
@@ -1470,16 +1536,14 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- Auth helpers ----
     def _request_token(self) -> str:
-        """Pull the auth token from either the X-Yoink-Token header or a
-        ?token=... query param. Header is preferred."""
-        h = self.headers.get("X-Yoink-Token")
-        if h:
-            return h.strip()
-        try:
-            qs = parse_qs(urlparse(self.path).query)
-            return (qs.get("token") or [""])[0].strip()
-        except Exception:
-            return ""
+        """Pull the auth token from the X-Yoink-Token header.
+
+        Header-only by design: the previous ?token= query-param fallback
+        was unused (the extension always set the header) and would have
+        leaked the token into the user's browser history, the server's
+        own access logs, and any HTTP debugging tooling that captures
+        URLs but redacts headers."""
+        return (self.headers.get("X-Yoink-Token") or "").strip()
 
     def _check_token(self) -> bool:
         return secrets.compare_digest(self._request_token(), TOKEN)
