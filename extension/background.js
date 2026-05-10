@@ -17,6 +17,9 @@ const MENU_PAGE = "stc-extract-page";
 const MENU_SESSION = "stc-extract-session";
 const ICON_URL = chrome.runtime.getURL("icons/icon-128.png");
 const OFFSCREEN_URL = "offscreen.html";
+// CLIPBOARD covers the existing copy path; MATCH_MEDIA lets the doc stay
+// alive so it can push prefers-color-scheme change events back here.
+const OFFSCREEN_REASONS = ["CLIPBOARD", "MATCH_MEDIA"];
 
 const LINK_PATTERNS = [
   "https://www.youtube.com/watch*",
@@ -33,14 +36,20 @@ const PAGE_PATTERNS = [
 chrome.runtime.onInstalled.addListener(async () => {
   await rebuildContextMenus();
   await refreshActiveSession();
+  syncThemeIcon().catch((e) => console.warn("[stc] theme sync failed", e));
   restoreQueue().catch((e) => console.warn("[stc] restore failed", e));
 });
 
 chrome.runtime.onStartup.addListener(async () => {
   await rebuildContextMenus();
   await refreshActiveSession();
+  syncThemeIcon().catch((e) => console.warn("[stc] theme sync failed", e));
   restoreQueue().catch((e) => console.warn("[stc] restore failed", e));
 });
+
+// SW spins up on demand (notification click, message, alarm, etc) and the OS
+// theme may have flipped while it was idle. Re-sync on every wake.
+syncThemeIcon().catch((e) => console.warn("[stc] theme sync failed", e));
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes.active_session) {
@@ -150,6 +159,11 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return true;
   }
 
+  if (msg.type === "themeChanged" && typeof msg.isDark === "boolean") {
+    updateIconForTheme(msg.isDark).catch((e) => console.warn("[stc] setIcon failed", e));
+    return;
+  }
+
   // Content-script-proxied extract calls. Page-context fetches from YouTube
   // can be killed by client-side blockers (Chrome tracking protection, AV
   // web shields) before reaching the loopback server. The SW is in the
@@ -215,7 +229,10 @@ function notify(title, message) {
   });
 }
 
-// ---- Offscreen clipboard -------------------------------------------------
+// ---- Offscreen (clipboard + theme detection) -----------------------------
+// The offscreen doc is now long-lived: closing it would kill the
+// matchMedia listener that drives theme-aware icon swaps. Both clipboard
+// writes and theme detection share a single document.
 async function ensureOffscreen() {
   if (chrome.offscreen && chrome.offscreen.hasDocument) {
     if (await chrome.offscreen.hasDocument()) return;
@@ -227,8 +244,10 @@ async function ensureOffscreen() {
   }
   await chrome.offscreen.createDocument({
     url: OFFSCREEN_URL,
-    reasons: ["CLIPBOARD"],
-    justification: "Write extracted transcript to the system clipboard.",
+    reasons: OFFSCREEN_REASONS,
+    justification:
+      "Write extracted transcript to the system clipboard, and watch " +
+      "prefers-color-scheme so the toolbar icon matches the browser theme.",
   });
 }
 
@@ -244,8 +263,51 @@ async function copyToClipboard(text) {
   } catch (e) {
     console.error("[stc] copyToClipboard failed", e);
     return false;
-  } finally {
-    try { await chrome.offscreen.closeDocument(); } catch { /* ignore */ }
+  }
+}
+
+// ---- Theme-aware toolbar icon -------------------------------------------
+// Chrome's manifest `theme_icons` field is honored by Chrome and Edge but
+// not by every Chromium fork (notably Comet, where the icon stays stuck on
+// the default). Drive the swap from JS instead so it works everywhere.
+async function updateIconForTheme(isDark) {
+  const variant = isDark ? "dark" : "light";
+  await chrome.action.setIcon({
+    path: {
+      "16": `icons/icon-16-${variant}.png`,
+      "32": `icons/icon-32-${variant}.png`,
+      "48": `icons/icon-48-${variant}.png`,
+      "128": `icons/icon-128-${variant}.png`,
+    },
+  });
+}
+
+async function syncThemeIcon() {
+  // MV3 service workers don't expose matchMedia, so the offscreen doc owns
+  // detection and pushes change events back to us. We still pull on wake in
+  // case the OS theme flipped while the SW was idle.
+  if (typeof self.matchMedia === "function") {
+    try {
+      const mq = self.matchMedia("(prefers-color-scheme: dark)");
+      await updateIconForTheme(mq.matches);
+      mq.addEventListener("change", (e) => {
+        updateIconForTheme(e.matches).catch(() => { /* ignore */ });
+      });
+      return;
+    } catch { /* fall through to offscreen */ }
+  }
+
+  await ensureOffscreen();
+  try {
+    const res = await chrome.runtime.sendMessage({
+      target: "offscreen",
+      type: "queryTheme",
+    });
+    if (res && typeof res.isDark === "boolean") {
+      await updateIconForTheme(res.isDark);
+    }
+  } catch (e) {
+    console.warn("[stc] queryTheme failed", e);
   }
 }
 

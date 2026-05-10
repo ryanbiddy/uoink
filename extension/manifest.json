@@ -19,13 +19,7 @@
       "32": "icons/icon-32-light.png",
       "48": "icons/icon-48-light.png",
       "128": "icons/icon-128-light.png"
-    },
-    "theme_icons": [
-      { "size": 16, "light": "icons/icon-16-light.png", "dark": "icons/icon-16-dark.png" },
-      { "size": 32, "light": "icons/icon-32-light.png", "dark": "icons/icon-32-dark.png" },
-      { "size": 48, "light": "icons/icon-48-light.png", "dark": "icons/icon-48-dark.png" },
-      { "size": 128, "light": "icons/icon-128-light.png", "dark": "icons/icon-128-dark.png" }
-    ]
+    }
   },
   "icons": {
     "16": "icons/icon-16-light.png",
