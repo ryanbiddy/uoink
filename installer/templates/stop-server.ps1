@@ -13,7 +13,7 @@ if (Test-Path $pidFile) {
     Remove-Item -Force -ErrorAction SilentlyContinue $pidFile
 }
 
-# Defensive sweep — kill any pythonw.exe whose command line points at this
+# Defensive sweep -- kill any pythonw.exe whose command line points at this
 # install's server.py. Catches the hard-kill case where server.pid was left
 # behind on a previous crash.
 Get-CimInstance Win32_Process -Filter "Name = 'pythonw.exe'" |

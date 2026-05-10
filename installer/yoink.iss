@@ -1,4 +1,4 @@
-; Yoink — Inno Setup script.
+; Yoink -- Inno Setup script.
 ;
 ; Built by ../build.ps1, which stages all files under installer\staging\
 ; before invoking ISCC against this script. ISCC writes the final
@@ -19,7 +19,7 @@
 #define AppURL        "https://yoink.video"
 
 [Setup]
-; Stable AppId — keep this fixed across releases so upgrades replace cleanly.
+; Stable AppId -- keep this fixed across releases so upgrades replace cleanly.
 AppId={{2A91D3F7-7E9B-4F3D-8EAD-1F2C9F2F8AAB}
 AppName={#AppName}
 AppVersion={#AppVersion}
@@ -52,7 +52,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 ; + the stdlib zip). After staging, Lib\site-packages contains yt_dlp.
 Source: "staging\python\*"; DestDir: "{app}\python"; Flags: recursesubdirs ignoreversion createallsubdirs
 
-; Bundled binaries — prepended to PATH at runtime by server.py.
+; Bundled binaries -- prepended to PATH at runtime by server.py.
 Source: "staging\bin\*"; DestDir: "{app}\bin"; Flags: recursesubdirs ignoreversion
 
 ; Server source.

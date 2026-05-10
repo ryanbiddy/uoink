@@ -23,7 +23,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-# Suppress Invoke-WebRequest's progress UI — on PS 5.1 it slows large
+# Suppress Invoke-WebRequest's progress UI -- on PS 5.1 it slows large
 # downloads to a crawl due to a known performance bug.
 $ProgressPreference = 'SilentlyContinue'
 
@@ -88,7 +88,7 @@ New-Item -ItemType Directory -Force -Path $CacheDir, $BuildDir | Out-Null
 
 # ---- Sanity checks ------------------------------------------------------
 if (-not (Test-Path $IconSrc)) {
-    throw "Missing $IconSrc — regenerate from extension\icons\icon-128-light.png"
+    throw "Missing $IconSrc -- regenerate from extension\icons\icon-128-light.png"
 }
 foreach ($f in @('server.py','yt_extract.py','topics.json')) {
     if (-not (Test-Path (Join-Path $RepoRoot $f))) {
@@ -115,14 +115,14 @@ New-Item -ItemType Directory -Force -Path $StagingDir, "$StagingDir\python", "$S
 Write-Host '    extracting Python embeddable...'
 Expand-Archive -Path $pythonZip -DestinationPath "$StagingDir\python" -Force
 
-# 2b. Enable site-packages — embeddable distributions ship with the
+# 2b. Enable site-packages -- embeddable distributions ship with the
 #     `import site` line commented out, which prevents Lib\site-packages
 #     from being on sys.path. Uncomment it.
 $pthFile = Get-ChildItem -Path "$StagingDir\python" -Filter '*._pth' | Select-Object -First 1
 if (-not $pthFile) { throw 'Embeddable archive missing python*._pth' }
 $pthContent = Get-Content -Raw $pthFile.FullName
 $pthContent = $pthContent -replace '#\s*import\s+site', 'import site'
-# Encode as ASCII (no BOM) — the embeddable launcher reads _pth as bytes
+# Encode as ASCII (no BOM) -- the embeddable launcher reads _pth as bytes
 # and a UTF-16 / UTF-8 BOM here will break sys.path setup.
 [System.IO.File]::WriteAllText($pthFile.FullName, $pthContent, [System.Text.Encoding]::ASCII)
 
@@ -132,7 +132,7 @@ $embedPython = "$StagingDir\python\python.exe"
 & $embedPython $getPipPy --no-warn-script-location
 if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 
-# 2d. Install yt-dlp (no .pyc compilation — saves space, embeddable
+# 2d. Install yt-dlp (no .pyc compilation -- saves space, embeddable
 #     compiles on demand at runtime)
 Write-Host '    installing yt-dlp...'
 & $embedPython -m pip install --no-warn-script-location --no-compile yt-dlp
@@ -156,7 +156,7 @@ foreach ($g in $stripGlobs) {
 Get-ChildItem -Path "$StagingDir\python" -Filter '__pycache__' -Recurse -Directory -ErrorAction SilentlyContinue |
     ForEach-Object { Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $_.FullName }
 
-# 2f. ffmpeg — pull just ffmpeg.exe (and ffprobe.exe if present)
+# 2f. ffmpeg -- pull just ffmpeg.exe (and ffprobe.exe if present)
 Write-Host '    extracting ffmpeg...'
 $ffmpegTmp = Join-Path $BuildDir '_ffmpeg_tmp'
 if (Test-Path $ffmpegTmp) { Remove-Item -Recurse -Force $ffmpegTmp }
