@@ -2,9 +2,11 @@ node_modules/
 __pycache__/
 *.pyc
 server.log
+server.pid
 .env
 dist/
 build/
+installer/staging/
 *.zip
 video.*
 Yoink/

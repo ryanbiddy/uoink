@@ -31,6 +31,15 @@ from urllib.parse import parse_qs, urlparse
 # --- Import helpers from the existing CLI script ---------------------------
 HERE = Path(__file__).parent.resolve()
 sys.path.insert(0, str(HERE))
+
+# When shipped via the Windows installer, ffmpeg.exe lives next to server.py
+# in a `bin\` folder. Prepend it to PATH so subprocess calls (`ffmpeg ...`)
+# find the bundled binary without depending on the user's environment. No-op
+# in dev where bin\ doesn't exist — falls back to whatever's on PATH.
+_BIN_DIR = HERE / "bin"
+if _BIN_DIR.is_dir():
+    os.environ["PATH"] = str(_BIN_DIR) + os.pathsep + os.environ.get("PATH", "")
+
 from yt_extract import parse_srt, slugify, fmt_time  # noqa: E402
 
 # --- Constants -------------------------------------------------------------
@@ -895,8 +904,10 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if self.path == "/ping":
-            log.info("GET /ping from %s -> ok", self.client_address[0])
+        # /health is a friendlier alias for the same liveness probe; both
+        # paths return the same payload so existing clients keep working.
+        if self.path == "/ping" or self.path == "/health":
+            log.info("GET %s from %s -> ok", self.path, self.client_address[0])
             return self._send_json(200, {"ok": True, "version": VERSION})
         if self.path == "/session/list":
             return self._handle_session_list()
@@ -1287,6 +1298,19 @@ def maybe_toast(title: str, body: str):
 def main():
     DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
     SESSIONS_ROOT.mkdir(parents=True, exist_ok=True)
+
+    # PID file lets stop-server.bat (shipped by the installer) terminate the
+    # right process without resorting to "kill all pythonw.exe". Cleaned up
+    # on graceful exit; stale entries from a hard kill are simply overwritten
+    # the next time the server starts.
+    pid_file = HERE / "server.pid"
+    try:
+        pid_file.write_text(str(os.getpid()), encoding="utf-8")
+    except OSError:
+        pass
+    import atexit
+    atexit.register(lambda: pid_file.unlink(missing_ok=True))
+
     server = ThreadingHTTPServer((HOST, PORT), Handler)
     log.info("Yoink server v%s running on http://%s:%d", VERSION, HOST, PORT)
     log.info("Ready to yoink. Click any YouTube video's Yoink button.")
