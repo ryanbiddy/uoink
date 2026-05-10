@@ -469,6 +469,20 @@ document.getElementById("edit-prompts").addEventListener("click", async (ev) => 
   }
 });
 
+// ---- View all yoinks ------------------------------------------------------
+// Opens _all-yoinks-index.md in the user's default markdown viewer.
+document.getElementById("open-index").addEventListener("click", async (ev) => {
+  ev.preventDefault();
+  try {
+    const res = await STC.openIndex();
+    if (!res || res.ok === false) {
+      showToast("Couldn't open the yoinks index — server may be down.");
+    }
+  } catch {
+    showToast("Couldn't open the yoinks index — server may be down.");
+  }
+});
+
 // ---- Boot -----------------------------------------------------------------
 ping();
 loadInterval();

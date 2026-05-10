@@ -163,6 +163,7 @@
   function getActiveSession() { return _getJson("/session/active"); }
   function openSession(sessionId) { return _postJson("/session/open", { session_id: sessionId }); }
   function openPromptsFile() { return _getJson("/open-prompts"); }
+  function openIndex() { return _getJson("/open-index"); }
   function listRecent() { return _getJson("/recent"); }
   function openFolder(path) {
     return _getJson("/open-folder?path=" + encodeURIComponent(path));
@@ -228,11 +229,11 @@
     // Topic-aware default copy (subsequent yoinks).
     const realTopic = data && data.topic && data.topic !== "Uncategorized" ? data.topic : null;
     const topicLine = realTopic ? `Saved to: ${realTopic}. ` : "";
-    const tail = "Comments will appear in yoink.md when ready.";
+    const tail = "Comments will arrive shortly in the saved corpus file.";
     if (copied) {
       return `${topicLine}Paste with Ctrl+V in Claude or ChatGPT. ${tail}`.trim();
     }
-    return `${topicLine}Clipboard was blocked — open yoink.md in the folder.`.trim();
+    return `${topicLine}Clipboard was blocked — open the saved file in the yoink folder.`.trim();
   }
 
   global.STC = {
@@ -254,6 +255,7 @@
     postExtractViaBg,
     addToSessionViaBg,
     openPromptsFile,
+    openIndex,
     listRecent,
     openFolder,
     buildYoinkedMessage,

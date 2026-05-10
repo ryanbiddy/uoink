@@ -717,12 +717,20 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         interval=interval, channel_ctx=channel_ctx,
         yoinked_at=_now_iso(), topic=topic,
     )
-    yoink_path = output_folder / "yoink.md"
+    # Filename matches the folder's slug -- "kapathy-talk/kapathy-talk.md"
+    # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
+    # outside its folder.
+    yoink_path = _corpus_path(output_folder)
     yoink_path.write_text(yoink_md, encoding="utf-8")
 
     video_file.unlink(missing_ok=True)
 
-    # Comments fetch in background; updates yoink.md when done.
+    # Refresh the master _all-yoinks-index.md after every successful yoink.
+    # Cheap (one stat per video folder), and re-scanning means a folder the
+    # user manually deleted simply drops out of the index next time.
+    _regenerate_index()
+
+    # Comments fetch in background; updates the corpus file when done.
     _start_comments_thread(url, output_folder, yoink_path)
 
     if open_explorer:
@@ -829,6 +837,169 @@ def _normalize_youtube_url(raw: str) -> str | None:
     return f"https://www.youtube.com/watch?v={video_id}"
 
 
+INDEX_FILENAME = "_all-yoinks-index.md"
+
+
+def _index_path() -> Path:
+    """Master index location -- DESKTOP_ROOT/_all-yoinks-index.md. Leading
+    underscore keeps it sorted to the top in Explorer."""
+    return DESKTOP_ROOT / INDEX_FILENAME
+
+
+def _corpus_path(folder: Path) -> Path:
+    """Canonical corpus file path: <folder>/<folder.name>.md.
+
+    Per-video filename matches the folder's slug so the file stays
+    identifiable when moved out of its folder, and so the master index can
+    link to it cleanly. The legacy filename was always 'yoink.md', which
+    made every corpus indistinguishable once dragged out."""
+    return folder / f"{folder.name}.md"
+
+
+def _resolve_corpus_path(folder: Path) -> Path | None:
+    """Return the corpus md file in `folder`, falling back to the legacy
+    yoink.md name if the new <slug>.md isn't there yet. Returns None if
+    neither exists."""
+    candidate = _corpus_path(folder)
+    if candidate.exists():
+        return candidate
+    legacy = folder / "yoink.md"
+    if legacy.exists():
+        return legacy
+    return None
+
+
+def _scan_yoinks() -> list[dict]:
+    """Walk DESKTOP_ROOT/<topic>/<slug>/ and collect index metadata for
+    every per-video yoink that still exists on disk. Folders the user has
+    deleted simply drop out of future regenerations -- the index reflects
+    what's actually there now, not historical state.
+
+    Dedupes by URL: if the same video URL appears in two folders (e.g.,
+    user yoinked it once, renamed the title in YouTube, yoinked again),
+    keep the most recent. Falls back to relative path when URL is missing.
+
+    Skips _sessions/ and any other underscore-prefixed top-level folder
+    (the index file itself lives there, plus future internal folders)."""
+    if not DESKTOP_ROOT.exists():
+        return []
+    by_key: dict[str, dict] = {}
+    for topic_dir in DESKTOP_ROOT.iterdir():
+        if not topic_dir.is_dir():
+            continue
+        if topic_dir.name.startswith("_") or topic_dir.name.startswith("."):
+            continue
+        topic = topic_dir.name
+        for video_dir in topic_dir.iterdir():
+            if not video_dir.is_dir():
+                continue
+            corpus = _resolve_corpus_path(video_dir)
+            if corpus is None:
+                continue
+
+            title = video_dir.name
+            url = ""
+            channel = ""
+            meta_path = video_dir / "metadata.json"
+            if meta_path.exists():
+                try:
+                    m = json.loads(meta_path.read_text(encoding="utf-8"))
+                    title = m.get("title") or title
+                    url = (m.get("webpage_url")
+                           or m.get("original_url") or "")
+                    channel = (m.get("channel") or m.get("uploader") or "")
+                except (OSError, json.JSONDecodeError):
+                    pass
+
+            mtime = corpus.stat().st_mtime
+            yoinked_at = datetime.fromtimestamp(mtime).date().isoformat()
+            rel_path = f"{topic}/{video_dir.name}/{corpus.name}"
+            entry = {
+                "title": title,
+                "topic": topic,
+                "channel": channel,
+                "yoinked_at": yoinked_at,
+                "yoinked_at_ts": mtime,
+                "rel_path": rel_path,
+                "url": url,
+            }
+
+            key = url or rel_path
+            existing = by_key.get(key)
+            if existing is None or mtime > existing["yoinked_at_ts"]:
+                by_key[key] = entry
+    return list(by_key.values())
+
+
+def _render_index(entries: list[dict]) -> str:
+    """Markdown for _all-yoinks-index.md. Topic sections sorted A-Z; videos
+    within each topic sorted most-recent first. 'Recent (last 20)' section
+    at the bottom for a quick chronological view."""
+    parts = [
+        "# All Yoinks",
+        f"_Last updated: {_now_iso()}_  ",
+        f"_Total yoinks: {len(entries)}_",
+        "",
+    ]
+
+    if not entries:
+        parts.append("_No yoinks yet. Click the orange Y on any YouTube video to start._")
+        parts.append("")
+        return "\n".join(parts)
+
+    # By topic
+    parts.append("## By topic")
+    parts.append("")
+    by_topic: dict[str, list[dict]] = {}
+    for e in entries:
+        by_topic.setdefault(e["topic"], []).append(e)
+    for topic in sorted(by_topic.keys(), key=str.lower):
+        items = sorted(by_topic[topic], key=lambda x: x["yoinked_at_ts"], reverse=True)
+        plural = "" if len(items) == 1 else "s"
+        parts.append(f"### {topic} ({len(items)} yoink{plural})")
+        for e in items:
+            byline = f" -- {e['channel']}" if e["channel"] else ""
+            parts.append(
+                f"- [{e['title']}]({_md_link_path(e['rel_path'])}) "
+                f"-- Yoinked {e['yoinked_at']}{byline}"
+            )
+        parts.append("")
+
+    # Recent (last 20)
+    recent = sorted(entries, key=lambda x: x["yoinked_at_ts"], reverse=True)[:20]
+    parts.append("## Recent (last 20)")
+    parts.append("")
+    for e in recent:
+        parts.append(
+            f"- [{e['title']}]({_md_link_path(e['rel_path'])}) -- {e['yoinked_at']}"
+        )
+    parts.append("")
+
+    return "\n".join(parts)
+
+
+def _md_link_path(rel: str) -> str:
+    """Markdown links want forward slashes. On Windows our Path joins
+    produce backslashes; replace so Obsidian / VS Code preview / GitHub
+    render the link correctly."""
+    return rel.replace("\\", "/")
+
+
+def _regenerate_index() -> None:
+    """Rebuild _all-yoinks-index.md from a fresh scan of DESKTOP_ROOT.
+
+    Best-effort: failures here shouldn't fail the yoink that triggered the
+    regeneration, so we log + swallow rather than raise. Runs synchronously
+    after each successful extraction; the scan is small (one stat per
+    video folder) and dwarfed by the actual extraction cost."""
+    try:
+        entries = _scan_yoinks()
+        DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
+        _index_path().write_text(_render_index(entries), encoding="utf-8")
+    except Exception as e:
+        log.warning("index regeneration failed: %s", e)
+
+
 def _is_valid_session_id(s: str) -> bool:
     """Session IDs become path segments under SESSIONS_ROOT, so anything
     that isn't a strict alphanumeric+_- token would let a caller traverse
@@ -924,26 +1095,28 @@ def _build_corpus(session: dict) -> str:
         url = v.get("url", "")
         video_slug = v.get("video_slug", "")
         rel = f"{video_slug}/"
-        yoink_path = folder / video_slug / "yoink.md"
+        # Resolver handles both <slug>.md (new) and yoink.md (legacy folders
+        # captured before the rename).
+        yoink_path = _resolve_corpus_path(folder / video_slug)
 
         parts.append(f"## Video {i}: {title}")
         parts.append(f"Source: {url}")
         parts.append(f"Local folder: {rel}")
         parts.append("")
 
-        if yoink_path.exists():
+        if yoink_path is not None and yoink_path.exists():
             try:
                 body = yoink_path.read_text(encoding="utf-8")
-                # Strip the per-video H1 (the title) — we already emitted Video N: title.
+                # Strip the per-video H1 (the title) -- we already emitted Video N: title.
                 body = re.sub(r"^# .+\n", "", body, count=1)
                 # Strip the leading metadata lines we'd duplicate (URL/Yoinked/etc.).
                 # The bold-prefixed lines come right after the title block.
                 body = re.sub(r"^(\*\*[^*]+:\*\*[^\n]*\n)+", "", body)
                 parts.append(_demote_headings(body.strip()))
             except OSError as e:
-                parts.append(f"> _Failed to read yoink.md: {e}_")
+                parts.append(f"> _Failed to read corpus file: {e}_")
         else:
-            parts.append("> _yoink.md not found — extraction may have failed._")
+            parts.append("> _Corpus file not found -- extraction may have failed._")
 
         parts.append("")
         parts.append("---")
@@ -1024,6 +1197,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if self.path == "/open-prompts":
             return self._handle_open_prompts()
+        if self.path == "/open-index":
+            return self._handle_open_index()
         if self.path == "/recent":
             return self._handle_recent()
         if self.path.startswith("/open-folder?"):
@@ -1045,8 +1220,7 @@ class Handler(BaseHTTPRequestHandler):
                 for video_dir in topic_dir.iterdir():
                     if not video_dir.is_dir():
                         continue
-                    yoink_md = video_dir / "yoink.md"
-                    if not yoink_md.exists():
+                    if _resolve_corpus_path(video_dir) is None:
                         continue
                     candidates.append((video_dir.stat().st_mtime,
                                        topic_dir.name, video_dir))
@@ -1095,6 +1269,26 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             return self._send_json(200, {"ok": False, "error": str(e)})
         self._send_json(200, {"ok": True, "folder": str(p)})
+
+    # ---- /open-index ----
+    # Open _all-yoinks-index.md in the user's default markdown viewer
+    # (typically VS Code, Obsidian, or Notepad). Regenerates the file first
+    # in case it doesn't exist yet (e.g. user hasn't yoinked anything in
+    # this install but is exploring the popup).
+    def _handle_open_index(self):
+        try:
+            _regenerate_index()
+            target = _index_path()
+            if not target.exists():
+                return self._send_json(200, {
+                    "ok": False,
+                    "error": "Index file couldn't be created.",
+                })
+            os.startfile(str(target))  # type: ignore[attr-defined]
+        except Exception as e:
+            return self._send_json(200, {"ok": False, "error": str(e)})
+        log.info("GET /open-index -> %s", target)
+        self._send_json(200, {"ok": True, "path": str(target)})
 
     # ---- /open-prompts ----
     # Pop Explorer at extension/prompts.json so the user can edit their custom
