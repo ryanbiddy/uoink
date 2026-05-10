@@ -25,7 +25,13 @@ from pathlib import Path
 
 
 def slugify(text: str) -> str:
-    return re.sub(r"[^\w\-]+", "_", text.strip())[:80].strip("_")
+    # ASCII-only so the resulting slug is safe as a filesystem path segment
+    # AND satisfies the server's strict session_id regex
+    # ([A-Za-z0-9_-]{1,64}). Without re.ASCII, \w matches Unicode word
+    # chars and a session named "cafe" with non-ASCII letters would slug to
+    # those same letters -- which the API would later reject when the user
+    # tried to add to it.
+    return re.sub(r"[^\w\-]+", "_", text.strip(), flags=re.ASCII)[:80].strip("_")
 
 
 def fmt_time(seconds: float) -> str:

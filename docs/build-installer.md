@@ -123,6 +123,27 @@ For installed users, "Edit prompts" will fail silently. Tracked as a v1.1 task: 
 
 `topics.json` ships with the installer and lives in `%LOCALAPPDATA%\Yoink\`. Users can edit it (the path is user-writable) but there's no UI for it; today this is a power-user knob. Treat it as configuration that the next installer version will overwrite.
 
+## Launch checklist
+
+Before flipping the extension's download button live:
+
+1. **Build a release artifact:** `.\build.ps1` → produces `build\Yoink-Setup-1.0.0.exe`.
+2. **Smoke-test on a clean Windows VM** (see Testing matrix below).
+3. **Tag the release in git:** `git tag v1.0.0 && git push --tags`.
+4. **Publish to GitHub releases:**
+   - Create a new release at `https://github.com/ryanbiddy/yoink/releases/new`.
+   - Tag: `v1.0.0`. Title: `Yoink 1.0.0`.
+   - Attach `build\Yoink-Setup-1.0.0.exe` as the release asset.
+   - Publish (not draft).
+   - Verify `https://github.com/ryanbiddy/yoink/releases/latest/download/Yoink-Setup-1.0.0.exe` resolves to the file.
+5. **Flip the extension's `INSTALLER_PUBLISHED` flag:**
+   - Edit `extension/setup.js` and set `const INSTALLER_PUBLISHED = true;`.
+   - Reload the extension and visit `setup.html` -- the **Download Yoink Setup for Windows** button should now be active and link to the latest release.
+   - Commit + push: `git commit -am "Enable installer download button (release published)"`.
+6. **Publish the extension** to the Chrome Web Store with the updated `setup.js`.
+
+The flag exists so the extension can ship to early users *before* the installer is uploaded -- they see "Coming soon" instead of clicking through to a 404. Forgetting to flip it after publishing the release is recoverable but visible: the download button stays "Coming soon" until the next extension release.
+
 ## Testing matrix
 
 After `build.ps1` finishes, smoke-test by:

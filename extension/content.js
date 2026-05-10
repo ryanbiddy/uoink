@@ -216,7 +216,18 @@
     if (statusInflight) return;
     statusInflight = true;
     try {
-      const res = await STC.ping();
+      // Proxy through the SW: direct loopback fetches from a YouTube content
+      // script can be intercepted by Chrome tracking protection or AV web
+      // shields, which would paint the button "offline" even when the
+      // server is responding.
+      const res = await new Promise((resolve) => {
+        try {
+          chrome.runtime.sendMessage({ type: "stcPing" }, (r) => {
+            if (chrome.runtime.lastError) return resolve(null);
+            resolve(r || null);
+          });
+        } catch { resolve(null); }
+      });
       setServerStatus(res && res.ok ? "online" : "offline");
     } catch {
       setServerStatus("offline");
@@ -349,15 +360,10 @@
 
     openTab("https://claude.ai/new");
 
-    // Lead with the topic so the user spots Uncategorized landings; suppress
-    // the "Saved to: ..." line entirely when the topic is missing or
-    // Uncategorized so the notification doesn't read awkwardly.
-    const realTopic = data.topic && data.topic !== "Uncategorized" ? data.topic : null;
-    const topicLine = realTopic ? `Saved to: ${realTopic}. ` : "";
-    const tail = "Comments will appear in yoink.md when ready.";
-    const message = copied
-      ? `${topicLine}Paste with Ctrl+V in Claude or ChatGPT. ${tail}`.trim()
-      : `${topicLine}Clipboard was blocked — open yoink.md in the folder.`.trim();
+    // Same shared helper used by the SW queue path. First successful yoink
+    // (whether triggered here or through the right-click menu) gets the
+    // CTA copy; subsequent yoinks fall back to the topic-aware copy.
+    const message = await STC.buildYoinkedMessage(data, copied);
     notify("Yoinked!", message);
 
     setButtonState(btn, "success", "Yoinked ✓");

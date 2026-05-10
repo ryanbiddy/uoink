@@ -60,7 +60,60 @@ SUBPROCESS_KW = {"creationflags": CREATE_NO_WINDOW} if sys.platform == "win32" e
 # isn't on PATH by default on Windows, so a bare "yt-dlp" call fails.
 YTDLP_CMD = [sys.executable, "-m", "yt_dlp"]
 
-DESKTOP_ROOT = Path(os.environ["USERPROFILE"]) / "Desktop" / "Yoink"
+def _get_desktop_dir() -> Path:
+    """Resolve the user's actual Desktop, honoring OneDrive Desktop
+    redirection. Naive %USERPROFILE%\\Desktop misses users whose Desktop is
+    redirected to OneDrive (Documents and Desktop opt-in by default in
+    consumer OneDrive setups), and the yoinks would land in a directory the
+    user can't see in Explorer."""
+    fallback = Path(os.environ.get("USERPROFILE", str(Path.home()))) / "Desktop"
+    if sys.platform != "win32":
+        return fallback
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class _GUID(ctypes.Structure):
+            _fields_ = [
+                ("Data1", ctypes.c_uint32),
+                ("Data2", ctypes.c_uint16),
+                ("Data3", ctypes.c_uint16),
+                ("Data4", ctypes.c_ubyte * 8),
+            ]
+
+        # FOLDERID_Desktop = {B4BFCC3A-DB2C-424C-B029-7FE99A87C641}
+        FOLDERID_Desktop = _GUID(
+            0xB4BFCC3A, 0xDB2C, 0x424C,
+            (ctypes.c_ubyte * 8)(0xB0, 0x29, 0x7F, 0xE9, 0x9A, 0x87, 0xC6, 0x41),
+        )
+        SHGetKnownFolderPath = ctypes.windll.shell32.SHGetKnownFolderPath
+        SHGetKnownFolderPath.argtypes = [
+            ctypes.POINTER(_GUID),
+            wintypes.DWORD,
+            wintypes.HANDLE,
+            ctypes.POINTER(ctypes.c_wchar_p),
+        ]
+        SHGetKnownFolderPath.restype = ctypes.c_long  # HRESULT
+
+        out = ctypes.c_wchar_p()
+        hr = SHGetKnownFolderPath(
+            ctypes.byref(FOLDERID_Desktop), 0, None, ctypes.byref(out)
+        )
+        if hr == 0 and out.value:
+            try:
+                return Path(out.value)
+            finally:
+                ctypes.windll.ole32.CoTaskMemFree(out)
+    except Exception:
+        # Module loads before logging is configured and pythonw.exe has no
+        # stderr, so we silently fall back. Users will still see their files
+        # under %USERPROFILE%\\Desktop -- not optimal for OneDrive users,
+        # but workable as a degraded mode.
+        pass
+    return fallback
+
+
+DESKTOP_ROOT = _get_desktop_dir() / "Yoink"
 SESSIONS_ROOT = DESKTOP_ROOT / "_sessions"
 
 # --- Logging ---------------------------------------------------------------
@@ -728,6 +781,62 @@ def friendly_error(e: BaseException) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Input validation
+# ---------------------------------------------------------------------------
+_YOUTUBE_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"}
+_VIDEO_ID_RE = re.compile(r"^[\w-]{6,}$")
+_SESSION_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+
+
+def _normalize_youtube_url(raw: str) -> str | None:
+    """Parse the URL, verify the hostname is in the YouTube allowlist, pull
+    the video ID, and return the canonical https://www.youtube.com/watch?v=
+    form. Returns None for anything that isn't a real YouTube video URL --
+    bare strings, attacker-shaped URLs like https://evil.com/youtube.com/x,
+    non-video YouTube paths (channels, search), etc.
+    """
+    if not raw:
+        return None
+    try:
+        u = urlparse(raw if "://" in raw else "https://" + raw)
+    except ValueError:
+        return None
+    host = (u.hostname or "").lower()
+    if host not in _YOUTUBE_HOSTS:
+        return None
+
+    video_id = None
+    if host == "youtu.be":
+        first = (u.path or "").lstrip("/").split("/", 1)[0]
+        if _VIDEO_ID_RE.match(first):
+            video_id = first
+    else:
+        if u.path == "/watch":
+            qs = parse_qs(u.query)
+            v = (qs.get("v") or [""])[0]
+            if _VIDEO_ID_RE.match(v):
+                video_id = v
+        elif u.path.startswith("/shorts/"):
+            seg = u.path.split("/", 3)[2] if len(u.path.split("/", 3)) > 2 else ""
+            if _VIDEO_ID_RE.match(seg):
+                video_id = seg
+        elif u.path.startswith("/embed/"):
+            seg = u.path.split("/", 3)[2] if len(u.path.split("/", 3)) > 2 else ""
+            if _VIDEO_ID_RE.match(seg):
+                video_id = seg
+    if not video_id:
+        return None
+    return f"https://www.youtube.com/watch?v={video_id}"
+
+
+def _is_valid_session_id(s: str) -> bool:
+    """Session IDs become path segments under SESSIONS_ROOT, so anything
+    that isn't a strict alphanumeric+_- token would let a caller traverse
+    the filesystem (../, absolute paths, drive letters)."""
+    return bool(s) and bool(_SESSION_ID_RE.match(s))
+
+
+# ---------------------------------------------------------------------------
 # Session helpers
 # ---------------------------------------------------------------------------
 def _now_iso() -> str:
@@ -1030,6 +1139,18 @@ class Handler(BaseHTTPRequestHandler):
         log.info("POST %s -> 404", self.path)
         self._send_json(404, {"ok": False, "error": "not found"})
 
+    def _validate_session_id(self, body: dict):
+        """Pull and validate session_id from a request body. Returns
+        (session_id, None) on success or (None, error_message) on failure.
+        Rejects anything that isn't strictly alphanumeric+_-, since the id
+        becomes a path segment under SESSIONS_ROOT."""
+        session_id = (body.get("session_id") or "").strip()
+        if not session_id:
+            return None, "session_id required"
+        if not _is_valid_session_id(session_id):
+            return None, "session_id has invalid characters"
+        return session_id, None
+
     # ---- /extract ----
     def _validate_url_interval(self, body: dict):
         url = (body.get("url") or "").strip()
@@ -1038,11 +1159,15 @@ class Handler(BaseHTTPRequestHandler):
             interval = int(interval)
         except (TypeError, ValueError):
             return None, None, "interval must be an integer"
-        if "youtube.com" not in url and "youtu.be" not in url:
-            return None, None, "URL must contain youtube.com or youtu.be"
         if not (5 <= interval <= 300):
             return None, None, "interval must be between 5 and 300"
-        return url, interval, None
+        # Strict hostname allowlist. Substring checks ("youtube.com" in url)
+        # accept attacker-shaped URLs like https://evil.com/youtube.com/foo,
+        # which yt-dlp would happily fetch as an arbitrary URL.
+        normalized = _normalize_youtube_url(url)
+        if not normalized:
+            return None, None, "URL must be a youtube.com or youtu.be video link"
+        return normalized, interval, None
 
     def _handle_extract(self, body: dict):
         url, interval, err = self._validate_url_interval(body)
@@ -1111,12 +1236,12 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- /session/add ----
     def _handle_session_add(self, body: dict):
-        session_id = (body.get("session_id") or "").strip()
+        session_id, sid_err = self._validate_session_id(body)
+        if sid_err:
+            return self._send_json(400, {"ok": False, "error": sid_err})
         url, interval, err = self._validate_url_interval(body)
         if err:
             return self._send_json(400, {"ok": False, "error": err})
-        if not session_id:
-            return self._send_json(400, {"ok": False, "error": "session_id required"})
 
         session = _read_session(session_id)
         if not session:
@@ -1170,9 +1295,9 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- /session/close ----
     def _handle_session_close(self, body: dict):
-        session_id = (body.get("session_id") or "").strip()
-        if not session_id:
-            return self._send_json(400, {"ok": False, "error": "session_id required"})
+        session_id, sid_err = self._validate_session_id(body)
+        if sid_err:
+            return self._send_json(400, {"ok": False, "error": sid_err})
 
         with _session_lock:
             session = _read_session(session_id)
@@ -1213,9 +1338,9 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- /session/cancel ----
     def _handle_session_cancel(self, body: dict):
-        session_id = (body.get("session_id") or "").strip()
-        if not session_id:
-            return self._send_json(400, {"ok": False, "error": "session_id required"})
+        session_id, sid_err = self._validate_session_id(body)
+        if sid_err:
+            return self._send_json(400, {"ok": False, "error": sid_err})
 
         with _session_lock:
             session = _read_session(session_id)
@@ -1235,9 +1360,9 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- /session/open ----
     def _handle_session_open(self, body: dict):
-        session_id = (body.get("session_id") or "").strip()
-        if not session_id:
-            return self._send_json(400, {"ok": False, "error": "session_id required"})
+        session_id, sid_err = self._validate_session_id(body)
+        if sid_err:
+            return self._send_json(400, {"ok": False, "error": sid_err})
         folder = _session_folder(session_id)
         if not folder.exists():
             return self._send_json(404, {"ok": False, "error": f"session '{session_id}' not found"})
@@ -1295,14 +1420,44 @@ def maybe_toast(title: str, body: str):
         pass
 
 
+def _existing_server_responds() -> bool:
+    """Probe /health on the loopback port. True if another Yoink is already
+    running here -- used to short-circuit a duplicate launch from the
+    Start Menu / autostart key without writing a stale PID file."""
+    try:
+        with urllib.request.urlopen(
+            f"http://{HOST}:{PORT}/health", timeout=0.5
+        ) as r:
+            return r.status == 200
+    except Exception:
+        return False
+
+
 def main():
     DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
     SESSIONS_ROOT.mkdir(parents=True, exist_ok=True)
 
-    # PID file lets stop-server.bat (shipped by the installer) terminate the
-    # right process without resorting to "kill all pythonw.exe". Cleaned up
-    # on graceful exit; stale entries from a hard kill are simply overwritten
-    # the next time the server starts.
+    # Single-instance guard. The Start Menu shortcut + the HKCU\Run autostart
+    # entry can both fire on a fresh login, and a user clicking the shortcut
+    # twice would otherwise spawn parallel pythonw.exe processes that all
+    # try to bind 5179. Probe the canonical /health endpoint first.
+    if _existing_server_responds():
+        log.info("Yoink server already running on http://%s:%d -- exiting", HOST, PORT)
+        sys.exit(0)
+
+    # Bind FIRST. Writing the PID file before the bind would create stale
+    # files when another instance still owns the port (and would also have
+    # the wrong PID -- ours, not the live one).
+    try:
+        server = ThreadingHTTPServer((HOST, PORT), Handler)
+    except OSError as e:
+        # Port held by something we couldn't probe via /health (different
+        # app, half-open socket, etc). Exit 0 so the Windows autostart
+        # mechanism doesn't surface an error dialog to the user.
+        log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
+        sys.exit(0)
+
+    # Bind succeeded -- now safe to claim the PID file.
     pid_file = HERE / "server.pid"
     try:
         pid_file.write_text(str(os.getpid()), encoding="utf-8")
@@ -1311,7 +1466,6 @@ def main():
     import atexit
     atexit.register(lambda: pid_file.unlink(missing_ok=True))
 
-    server = ThreadingHTTPServer((HOST, PORT), Handler)
     log.info("Yoink server v%s running on http://%s:%d", VERSION, HOST, PORT)
     log.info("Ready to yoink. Click any YouTube video's Yoink button.")
     log.info("Output: %s", DESKTOP_ROOT)

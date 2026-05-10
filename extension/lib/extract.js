@@ -194,6 +194,47 @@
     return _proxy("stcSessionAdd", { session_id: sessionId, url, interval });
   }
 
+  // Shared "yoinked!" notification builder. Called from both the in-page
+  // YouTube button success path (content.js) and the SW-driven queue path
+  // (background.js) so the first-yoink CTA fires no matter which path the
+  // user takes -- previously only the SW path set the flag, and a normal
+  // YouTube-button click never got the special copy.
+  //
+  // Returns the message string to pass to chrome.notifications.create (each
+  // caller fires it via its own context-appropriate path). Atomically marks
+  // has_completed_first_yoink on the first successful + copied yoink.
+  async function buildYoinkedMessage(data, copied) {
+    const FIRST_YOINK_MSG =
+      "Your first corpus is in your clipboard. Paste in Claude to see what it can do →";
+    let firstTime = false;
+    try {
+      const stored = await new Promise((r) => {
+        try {
+          chrome.storage.local.get({ has_completed_first_yoink: false }, (i) => r(i));
+        } catch { r({ has_completed_first_yoink: false }); }
+      });
+      firstTime = !stored.has_completed_first_yoink;
+      if (firstTime && copied) {
+        await new Promise((r) => {
+          try {
+            chrome.storage.local.set({ has_completed_first_yoink: true }, () => r());
+          } catch { r(); }
+        });
+      }
+    } catch { /* fall through to topic-aware copy */ }
+
+    if (firstTime && copied) return FIRST_YOINK_MSG;
+
+    // Topic-aware default copy (subsequent yoinks).
+    const realTopic = data && data.topic && data.topic !== "Uncategorized" ? data.topic : null;
+    const topicLine = realTopic ? `Saved to: ${realTopic}. ` : "";
+    const tail = "Comments will appear in yoink.md when ready.";
+    if (copied) {
+      return `${topicLine}Paste with Ctrl+V in Claude or ChatGPT. ${tail}`.trim();
+    }
+    return `${topicLine}Clipboard was blocked — open yoink.md in the folder.`.trim();
+  }
+
   global.STC = {
     SERVER,
     DEFAULT_INTERVAL,
@@ -215,5 +256,6 @@
     openPromptsFile,
     listRecent,
     openFolder,
+    buildYoinkedMessage,
   };
 })(typeof self !== "undefined" ? self : globalThis);

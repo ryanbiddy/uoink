@@ -160,6 +160,15 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return true;
   }
 
+  if (msg.type === "stcPing") {
+    // Proxy /health probes through the SW. Direct localhost fetches from a
+    // YouTube content script can be killed by client-side blockers (Chrome
+    // tracking protection, AV web shields) before they reach the loopback
+    // server, which would falsely paint the in-page button as offline.
+    STC.ping().then((data) => sendResponse(data || null));
+    return true;
+  }
+
   if (msg.type === "notify") {
     notify(msg.title || "Yoink", msg.message || "")
       .then((id) => sendResponse({ ok: true, id }));
@@ -461,31 +470,11 @@ async function runExtractJob(job) {
   const copied = await copyToClipboard(data.yoink_md);
   await chrome.tabs.create({ url: "https://claude.ai/new", active: true });
 
-  const { has_completed_first_yoink = false } = await chrome.storage.local.get({
-    has_completed_first_yoink: false,
-  });
-
-  let message;
-  if (!has_completed_first_yoink && copied) {
-    // First-yoink CTA: prove the value loop end-to-end. Any topic/folder
-    // detail would dilute the "now go paste it" call to action.
-    message = "Your first corpus is in your clipboard. Paste in Claude to see what it can do →";
-  } else {
-    // Lead with the topic so the user spots Uncategorized landings; suppress
-    // the "Saved to: ..." line entirely when the topic is missing or
-    // Uncategorized so the notification doesn't read awkwardly.
-    const realTopic = data.topic && data.topic !== "Uncategorized" ? data.topic : null;
-    const topicLine = realTopic ? `Saved to: ${realTopic}. ` : "";
-    const tail = "Comments will appear in yoink.md when ready.";
-    message = copied
-      ? `${topicLine}Paste with Ctrl+V in Claude or ChatGPT. ${tail}`.trim()
-      : `${topicLine}Clipboard was blocked — open yoink.md in the folder.`.trim();
-  }
+  // Shared helper handles first-yoink-vs-subsequent copy + atomically marks
+  // the has_completed_first_yoink flag. Same code is called from content.js
+  // so the in-page YouTube button gets the same first-time CTA.
+  const message = await STC.buildYoinkedMessage(data, copied);
   notify("Yoinked!", message);
-
-  if (!has_completed_first_yoink && copied) {
-    await chrome.storage.local.set({ has_completed_first_yoink: true });
-  }
 }
 
 async function runSessionAddJob(job) {

@@ -19,6 +19,13 @@ const SUGGESTED_VIDEO = {
   byline: "Lenny's Podcast",
 };
 
+// Flip to true the moment Yoink-Setup-1.0.0.exe is published to
+// github.com/ryanbiddy/yoink/releases/latest. While this is false the
+// download button shows a "coming soon" state and is disabled, so the
+// first user to install the extension before the installer artifact is
+// uploaded doesn't hit a 404 on the GitHub release page.
+const INSTALLER_PUBLISHED = false;
+
 // ---- Constants -----------------------------------------------------------
 const SERVER = "http://127.0.0.1:5179";
 const PING_PATH = "/ping"; // server exposes /ping (not /health)
@@ -36,6 +43,7 @@ const step4 = document.getElementById("step-4");
 
 const getStartedBtn = document.getElementById("get-started-btn");
 const skipInstall = document.getElementById("skip-install");
+const downloadBtn = document.getElementById("download-btn");
 
 const statusBlock = document.getElementById("status-block");
 const statusText = document.getElementById("status-text");
@@ -231,7 +239,20 @@ yoinkSuggestedBtn.addEventListener("click", async () => {
   }
 });
 
+// ---- Pre-launch download button state -----------------------------------
+function applyDownloadState() {
+  if (INSTALLER_PUBLISHED || !downloadBtn) return;
+  downloadBtn.classList.add("disabled");
+  downloadBtn.setAttribute("aria-disabled", "true");
+  downloadBtn.textContent = "Coming soon";
+  downloadBtn.title = "Installer publishes at launch.";
+  // Stop the link from navigating to a not-yet-existing release page.
+  downloadBtn.addEventListener("click", (ev) => ev.preventDefault());
+  downloadBtn.removeAttribute("href");
+}
+
 // ---- Boot ----------------------------------------------------------------
+applyDownloadState();
 applySource();
 startPolling();
 

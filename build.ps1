@@ -138,12 +138,17 @@ Write-Host '    installing yt-dlp...'
 & $embedPython -m pip install --no-warn-script-location --no-compile yt-dlp
 if ($LASTEXITCODE -ne 0) { throw 'pip install yt-dlp failed' }
 
-# 2e. Trim dev-only and build-time files we don't need at runtime
+# 2e. Trim dev-only and build-time files we don't need at runtime.
+# distutils-precedence.pth is dropped by setuptools and tries to import
+# `_distutils_hack` at every Python startup. We strip setuptools above, so
+# the .pth file would print a noisy ModuleNotFoundError warning on every
+# server launch -- delete it too.
 Write-Host '    trimming embeddable...'
 $stripGlobs = @(
     "$StagingDir\python\Lib\site-packages\pip*",
     "$StagingDir\python\Lib\site-packages\setuptools*",
     "$StagingDir\python\Lib\site-packages\_distutils*",
+    "$StagingDir\python\Lib\site-packages\distutils-precedence.pth",
     "$StagingDir\python\Lib\site-packages\wheel*",
     "$StagingDir\python\Lib\site-packages\__pycache__"
 )
