@@ -338,6 +338,19 @@
       return;
     }
 
+    // Sprint 3: Smart Screenshot Picker intercept. Default off keeps v1
+    // behavior byte-identical. When enabled, we hand the corpus off to the
+    // popup via chrome.storage.local instead of clipboard + Claude tab.
+    if (await _useScreenshotPicker()) {
+      await STC.stashPickerCorpus(data);
+      notify("Yoink ready",
+             "Click the Yoink icon to pick which screenshots to include.");
+      setButtonState(btn, "success", "Pick screenshots →");
+      btn.title = `Saved to: ${data.folder}. Click the Yoink icon to finish.`;
+      resetButtonAfter(btn, 5000);
+      return;
+    }
+
     // Prefer the multimodal paste version (transcript + base64-embedded
     // screenshots) so a single Ctrl+V delivers both into Claude/ChatGPT.
     // The file version (yoink_md) is the dev-mode fallback when Pillow
@@ -374,6 +387,17 @@
     setButtonState(btn, "success", "Yoinked ✓");
     btn.title = `Saved to: ${data.folder}`;
     resetButtonAfter(btn, 3000);
+  }
+
+  async function _useScreenshotPicker() {
+    try {
+      const res = await STC.getSettings();
+      return !!(res && res.ok && res.settings &&
+                res.settings.smart_screenshot_picker_enabled === true);
+    } catch (e) {
+      console.warn("[Yoink] settings fetch failed, picker disabled", e);
+      return false;
+    }
   }
 
   async function runSessionAdd(btn, url, interval) {

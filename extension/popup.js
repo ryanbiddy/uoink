@@ -11,6 +11,34 @@ globalThis.YOINK_USE_MOCK_API = USE_MOCK_API;
 const DEFAULT_INTERVAL = 30;
 const CORPUS_WARN_CHARS = 500_000;
 
+// Sprint 3: Comment Intelligence + Hook Type background-work indicator.
+// Both features land their analysis after extraction completes; Hook Type
+// now waits for comments too (post-Sprint-3-backend decision), so the
+// "still running" copy is the same for both. Returns the user-facing
+// string given the settings snapshot, or "" if neither feature is on.
+// Used by the playlist done panel AND the picker's done state.
+function buildBackgroundAiIndicator(settings) {
+  if (!settings) return "";
+  const ci = !!settings.comment_intelligence_enabled;
+  const hook = !!settings.hook_type_enabled;
+  // Skip the indicator entirely if no key is set — the features won't run.
+  if ((ci || hook) && settings.anthropic_key_set === false) return "";
+  if (ci && hook) {
+    return "Comment Intelligence and Hook Type are still running in the " +
+      "background — re-open per-video .md files in a few minutes for the " +
+      "full analysis.";
+  }
+  if (ci) {
+    return "Comment Intelligence is still running in the background — " +
+      "re-open per-video .md files in a few minutes for analysis.";
+  }
+  if (hook) {
+    return "Hook Type analysis is still running in the background — " +
+      "re-open per-video .md files in a few minutes.";
+  }
+  return "";
+}
+
 // ---- DOM handles ----------------------------------------------------------
 const dot = document.getElementById("dot");
 const status = document.getElementById("status");
@@ -573,6 +601,7 @@ window.addEventListener("unload", () => {
   const doneSummary = document.getElementById("pl-done-summary");
   const doneMeta = document.getElementById("pl-done-meta");
   const doneMessageEl = document.getElementById("pl-done-message");
+  const doneCiEl = document.getElementById("pl-done-ci");
   const doneWarningsEl = document.getElementById("pl-done-warnings");
   const doneFailedListEl = document.getElementById("pl-done-failed-list");
   const openFolderBtn = document.getElementById("pl-open-folder-btn");
@@ -712,6 +741,8 @@ window.addEventListener("unload", () => {
     progressFill.style.width = "0%";
     progressText.textContent = "Queued…";
     progressCiEl.classList.add("hidden");
+    doneCiEl.classList.add("hidden");
+    doneCiEl.textContent = "";
     for (const chip of phaseRow.querySelectorAll(".pl-phase-chip")) {
       chip.classList.remove("active", "done");
     }
@@ -1032,6 +1063,13 @@ window.addEventListener("unload", () => {
     renderWarnings(doneWarningsEl, job.warnings || []);
     renderFailedList(failedVideos);
 
+    // Sprint 3: CI/Hook still-running indicator. Shown when either feature
+    // is enabled (and the user has a key set); the per-video .md files
+    // keep updating on disk after the playlist transitions to completed.
+    const aiCopy = buildBackgroundAiIndicator(cachedSettings);
+    doneCiEl.textContent = aiCopy;
+    doneCiEl.classList.toggle("hidden", !aiCopy);
+
     showOnly(donePanel);
 
     if (copied) showToast("Playlist yoinked! Paste in Claude or ChatGPT.");
@@ -1108,4 +1146,318 @@ window.addEventListener("unload", () => {
   // Start in single-video mode (default). Panel visibility inside playlist
   // mode is controlled entirely from here.
   showOnly(inputPanel);
+})();
+
+// =====================================================================
+// v3 — Smart Screenshot Picker
+// =====================================================================
+// Activates when chrome.storage.local.pending_picker is set by the
+// background or content-script intercept. When active, the picker view
+// owns the popup surface (mode selector and both mode panels hide). On
+// Copy/Cancel: writes the chosen corpus to clipboard, clears the pending
+// state, opens Claude, and closes the popup — same end behavior as v1
+// auto-copy, just user-mediated.
+// ---------------------------------------------------------------------
+
+(function setupPickerMode() {
+  const pickerMode = document.getElementById("picker-mode");
+  const modeSelectorWrap = document.getElementById("mode-selector-wrap");
+  const modeSingleEl = document.getElementById("mode-single");
+  const modePlaylistEl = document.getElementById("mode-playlist");
+  const pickerTitleEl = document.getElementById("picker-title");
+  const pickerCountEl = document.getElementById("picker-count");
+  const pickerSelectAllLink = document.getElementById("picker-select-all");
+  const pickerGridEl = document.getElementById("picker-grid");
+  const pickerErrorEl = document.getElementById("picker-error");
+  const pickerDoneIndicatorEl = document.getElementById("picker-done-indicator");
+  const pickerCancelBtn = document.getElementById("picker-cancel-btn");
+  const pickerCopyBtn = document.getElementById("picker-copy-btn");
+
+  // ---- State ----
+  let pendingPicker = null;
+  let screenshots = [];      // [{ alt, path }] parsed from yoink_md
+  let selectedSet = new Set(); // 0-based indices selected for copy
+  let cachedSettings = null;
+  let thumbCache = new Map();  // path -> blob/data URL (avoid refetching)
+
+  // One-time settings snapshot for the CI/Hook done indicator. Same
+  // pattern as the playlist controller (its own fetch is isolated from
+  // this one — cheap enough that the duplication is worth the
+  // encapsulation).
+  (async function loadSettings() {
+    try {
+      const res = await STC.getSettings();
+      if (res && res.ok && res.settings) cachedSettings = res.settings;
+    } catch { /* settings fetch is non-fatal */ }
+  })();
+
+  // ---- Visibility ----
+  function showPicker() {
+    pickerMode.classList.remove("hidden");
+    modeSelectorWrap.classList.add("hidden");
+    modeSingleEl.classList.add("hidden");
+    modePlaylistEl.classList.add("hidden");
+  }
+  function hidePicker() {
+    pickerMode.classList.add("hidden");
+    modeSelectorWrap.classList.remove("hidden");
+    // Whichever mode the user was in before the picker activated isn't
+    // tracked — restoring to single-video matches the v1 boot default.
+    modeSingleEl.classList.remove("hidden");
+    modePlaylistEl.classList.add("hidden");
+  }
+
+  // ---- Parse screenshots from yoink_md ----
+  // Match the file-reference markdown: ![alt](C:/.../shot_0001.jpg).
+  // Tolerant of leading whitespace; rejects data: URLs (those belong to
+  // the multimodal paste corpus, not the canonical screenshot list).
+  function parseScreenshots(yoinkMd) {
+    if (!yoinkMd) return [];
+    const out = [];
+    const re = /!\[([^\]]*)\]\(([^)]+)\)/g;
+    let m;
+    while ((m = re.exec(yoinkMd)) !== null) {
+      const src = m[2].trim();
+      if (src.startsWith("data:")) continue;
+      out.push({ alt: m[1] || "", path: src });
+    }
+    return out;
+  }
+
+  // Build a filtered corpus by removing image lines at the given drop
+  // indices. Operates on whichever corpus the user wants to send to
+  // clipboard — for the multimodal-paste case (corpus_md_paste) this
+  // preserves the base64-embedded form for KEPT screenshots while
+  // dropping unselected ones. Image lines are matched in source order
+  // and aligned to the yoink_md parse positionally.
+  function buildFilteredCorpus(sourceCorpus, dropIndices) {
+    if (!sourceCorpus) return "";
+    if (!dropIndices || !dropIndices.length) return sourceCorpus;
+    const lines = sourceCorpus.split(/\r?\n/);
+    const imgLineIndices = [];
+    const re = /!\[[^\]]*\]\([^)]+\)/;
+    for (let i = 0; i < lines.length; i++) {
+      if (re.test(lines[i])) imgLineIndices.push(i);
+    }
+    const dropSet = new Set();
+    for (const idx of dropIndices) {
+      if (idx >= 0 && idx < imgLineIndices.length) {
+        dropSet.add(imgLineIndices[idx]);
+      }
+    }
+    return lines.filter((_, i) => !dropSet.has(i)).join("\n");
+  }
+
+  // ---- Rendering ----
+  function updateCount() {
+    pickerCountEl.textContent =
+      `${selectedSet.size} of ${screenshots.length} selected`;
+    pickerSelectAllLink.textContent =
+      selectedSet.size === screenshots.length ? "Deselect all" : "Select all";
+    pickerCopyBtn.disabled = false; // 0-selected is a valid (text-only) copy
+  }
+
+  function renderGrid() {
+    pickerGridEl.innerHTML = "";
+    if (!screenshots.length) {
+      const empty = document.createElement("div");
+      empty.className = "picker-empty";
+      empty.textContent = "No screenshots found in this yoink.";
+      pickerGridEl.appendChild(empty);
+      pickerCopyBtn.disabled = false; // copy the unmodified corpus
+      pickerSelectAllLink.classList.add("hidden");
+      return;
+    }
+    pickerSelectAllLink.classList.remove("hidden");
+    for (let i = 0; i < screenshots.length; i++) {
+      const s = screenshots[i];
+      const tile = document.createElement("div");
+      tile.className = "picker-thumb loading";
+      if (selectedSet.has(i)) tile.classList.add("selected");
+      tile.dataset.index = String(i);
+      tile.title = s.alt || s.path;
+
+      const img = document.createElement("img");
+      img.alt = s.alt || "";
+      // Lazy-load thumbnails. The grid is typically <20 items; firing
+      // them all in parallel is fine for local server load.
+      _loadThumb(s.path).then((src) => {
+        img.src = src;
+        tile.classList.remove("loading");
+      }).catch((err) => {
+        tile.classList.remove("loading");
+        console.warn("[picker] thumb load failed", s.path, err);
+        // Leave the diagonal-stripe loading background visible so the
+        // tile is still clickable (user can include/exclude even when
+        // the thumb didn't render).
+      });
+      tile.appendChild(img);
+
+      const idxBadge = document.createElement("div");
+      idxBadge.className = "picker-thumb-index";
+      idxBadge.textContent = String(i + 1);
+      tile.appendChild(idxBadge);
+
+      const check = document.createElement("div");
+      check.className = "picker-thumb-check";
+      check.textContent = "✓";
+      tile.appendChild(check);
+
+      tile.addEventListener("click", () => toggleIndex(i));
+      pickerGridEl.appendChild(tile);
+    }
+  }
+
+  async function _loadThumb(path) {
+    if (thumbCache.has(path)) return thumbCache.get(path);
+    const src = await STC.getScreenshotThumbnail(path);
+    thumbCache.set(path, src);
+    return src;
+  }
+
+  function toggleIndex(i) {
+    if (selectedSet.has(i)) selectedSet.delete(i);
+    else selectedSet.add(i);
+    const tile = pickerGridEl.querySelector(`[data-index="${i}"]`);
+    if (tile) tile.classList.toggle("selected", selectedSet.has(i));
+    updateCount();
+  }
+
+  pickerSelectAllLink.addEventListener("click", () => {
+    if (selectedSet.size === screenshots.length) {
+      selectedSet.clear();
+    } else {
+      selectedSet = new Set(screenshots.map((_, i) => i));
+    }
+    for (const tile of pickerGridEl.querySelectorAll(".picker-thumb")) {
+      const i = parseInt(tile.dataset.index, 10);
+      tile.classList.toggle("selected", selectedSet.has(i));
+    }
+    updateCount();
+  });
+
+  // ---- Activation ----
+  function showError(msg) {
+    pickerErrorEl.textContent = msg || "";
+    pickerErrorEl.classList.toggle("hidden", !msg);
+  }
+
+  function activate(payload) {
+    pendingPicker = payload || null;
+    if (!pendingPicker) { hidePicker(); return; }
+    showError("");
+    pickerTitleEl.textContent = pendingPicker.title || "Untitled video";
+    screenshots = parseScreenshots(pendingPicker.yoink_md);
+    selectedSet = new Set(screenshots.map((_, i) => i)); // default all selected
+    thumbCache.clear();
+    renderGrid();
+    updateCount();
+
+    // CI/Hook indicator on the picker (single-video done surface).
+    const aiCopy = buildBackgroundAiIndicator(cachedSettings);
+    pickerDoneIndicatorEl.textContent = aiCopy;
+    pickerDoneIndicatorEl.classList.toggle("hidden", !aiCopy);
+
+    showPicker();
+  }
+
+  // ---- Finish actions (Copy / Cancel) ----
+  async function _writeClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      try {
+        const r = await chrome.runtime.sendMessage({
+          type: "copyToClipboard", text,
+        });
+        return !!(r && r.ok);
+      } catch { return false; }
+    }
+  }
+
+  async function _clearPending() {
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.remove("pending_picker", () => resolve());
+      } catch { resolve(); }
+    });
+  }
+
+  async function _finish(kind /* "copy" | "cancel" */) {
+    if (!pendingPicker) { hidePicker(); return; }
+    pickerCopyBtn.disabled = true;
+    pickerCancelBtn.disabled = true;
+    pickerCopyBtn.textContent = kind === "copy" ? "Copying…" : "Copying…";
+
+    // Source corpus: prefer multimodal paste so KEPT screenshots stay
+    // base64-embedded. Falls back to yoink_md when corpus_md_paste isn't
+    // present (dev mode without Pillow, etc).
+    const sourceCorpus =
+      pendingPicker.corpus_md_paste || pendingPicker.yoink_md || "";
+
+    let clipboardText;
+    if (kind === "copy") {
+      const dropIndices = [];
+      for (let i = 0; i < screenshots.length; i++) {
+        if (!selectedSet.has(i)) dropIndices.push(i);
+      }
+      clipboardText = buildFilteredCorpus(sourceCorpus, dropIndices);
+    } else {
+      // Cancel = copy unmodified corpus (matches v1 default behavior).
+      clipboardText = sourceCorpus;
+    }
+
+    const copied = await _writeClipboard(clipboardText);
+    await _clearPending();
+
+    // Open Claude tab to match the v1 auto-copy flow, then close popup.
+    try {
+      await chrome.tabs.create({ url: "https://claude.ai/new", active: true });
+    } catch (e) {
+      console.warn("[picker] tab create failed", e);
+    }
+
+    try {
+      await chrome.runtime.sendMessage({
+        type: "notify",
+        title: copied ? "Yoinked!" : "Yoink ready (clipboard blocked)",
+        message: copied
+          ? (kind === "copy"
+              ? `Pasted-ready: ${selectedSet.size} of ${screenshots.length} screenshots kept.`
+              : "Full corpus copied. Paste with Ctrl+V in Claude.")
+          : `Open the saved file in the yoink folder.`,
+      });
+    } catch { /* notify is fire-and-forget */ }
+
+    window.close();
+  }
+
+  pickerCopyBtn.addEventListener("click", () => _finish("copy"));
+  pickerCancelBtn.addEventListener("click", () => _finish("cancel"));
+
+  // ---- Boot ----
+  // On popup open, check if a picker is waiting. Also subscribe to
+  // storage changes so an open popup auto-switches if a fresh yoink
+  // arrives mid-session.
+  function _readPending() {
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.get({ pending_picker: null }, (items) => {
+          resolve((items && items.pending_picker) || null);
+        });
+      } catch { resolve(null); }
+    });
+  }
+  (async function bootPicker() {
+    const p = await _readPending();
+    if (p) activate(p);
+  })();
+
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== "local" || !changes.pending_picker) return;
+    const next = changes.pending_picker.newValue;
+    if (next) activate(next);
+    else hidePicker();
+  });
 })();

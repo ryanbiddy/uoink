@@ -26,21 +26,32 @@
 
   // Persistent mock-settings state. Survives mock job lifecycle but is reset
   // on popup close (module scope). Flip the constants below to test the
-  // enabled-CI path without going through updateSettings().
+  // enabled-feature paths without going through updateSettings().
+  // Settings shape matches docs/v2-comment-intelligence.md (Sprint 3
+  // extension: hook_type_enabled + smart_screenshot_picker_enabled).
   const MOCK_DEFAULT_SETTINGS = {
     comment_intelligence_enabled: false,
+    hook_type_enabled: false,
+    smart_screenshot_picker_enabled: false,
     anthropic_key_set: false,
   };
-  // FLIP THIS to true to exercise the Comment Intelligence indicator path
-  // in mock mode without persisting a fake key through updateSettings().
+  // FLIP these to true to exercise their respective UI paths in mock mode
+  // without persisting a fake key through updateSettings.
+  // Note: any FORCE flag that needs a key (CI / Hook Type) also flips
+  // anthropic_key_set to true so the "key required" gate is satisfied.
   const MOCK_FORCE_CI_ENABLED = false;
+  const MOCK_FORCE_HOOK_TYPE_ENABLED = false;
+  const MOCK_FORCE_SCREENSHOT_PICKER = false;
+  const _needsKey =
+    MOCK_FORCE_CI_ENABLED || MOCK_FORCE_HOOK_TYPE_ENABLED;
   let mockSettings = {
-    comment_intelligence_enabled: MOCK_FORCE_CI_ENABLED
-      ? true
-      : MOCK_DEFAULT_SETTINGS.comment_intelligence_enabled,
-    anthropic_key_set: MOCK_FORCE_CI_ENABLED
-      ? true
-      : MOCK_DEFAULT_SETTINGS.anthropic_key_set,
+    comment_intelligence_enabled:
+      MOCK_FORCE_CI_ENABLED || MOCK_DEFAULT_SETTINGS.comment_intelligence_enabled,
+    hook_type_enabled:
+      MOCK_FORCE_HOOK_TYPE_ENABLED || MOCK_DEFAULT_SETTINGS.hook_type_enabled,
+    smart_screenshot_picker_enabled:
+      MOCK_FORCE_SCREENSHOT_PICKER || MOCK_DEFAULT_SETTINGS.smart_screenshot_picker_enabled,
+    anthropic_key_set: _needsKey || MOCK_DEFAULT_SETTINGS.anthropic_key_set,
   };
   // Keys are never echoed back. We store presence-only, mirroring the real
   // server's `anthropic_key_set` boolean.
@@ -246,6 +257,8 @@
   function _settingsSnapshot() {
     return {
       comment_intelligence_enabled: mockSettings.comment_intelligence_enabled,
+      hook_type_enabled: mockSettings.hook_type_enabled,
+      smart_screenshot_picker_enabled: mockSettings.smart_screenshot_picker_enabled,
       anthropic_key_set: mockSavedKeyPresent,
     };
   }
@@ -254,17 +267,27 @@
     return { ok: true, settings: _settingsSnapshot() };
   }
 
-  // POST /settings rules per the contract:
-  // - comment_intelligence_enabled is required and must be boolean.
+  // POST /settings rules per the Sprint 3 contract:
+  // - comment_intelligence_enabled, hook_type_enabled,
+  //   smart_screenshot_picker_enabled are optional booleans. Omitted fields
+  //   keep their existing value.
   // - anthropic_key omitted -> existing saved key preserved.
   // - anthropic_key non-empty string -> replaces saved key.
   // - anthropic_key null or empty string -> clears saved key.
   async function updateSettings(body) {
     const b = body || {};
-    if (typeof b.comment_intelligence_enabled !== "boolean") {
-      return { ok: false, error: "comment_intelligence_enabled must be boolean" };
+    const flagFields = [
+      "comment_intelligence_enabled",
+      "hook_type_enabled",
+      "smart_screenshot_picker_enabled",
+    ];
+    for (const f of flagFields) {
+      if (!Object.prototype.hasOwnProperty.call(b, f)) continue;
+      if (typeof b[f] !== "boolean") {
+        return { ok: false, error: `${f} must be boolean` };
+      }
+      mockSettings[f] = b[f];
     }
-    mockSettings.comment_intelligence_enabled = b.comment_intelligence_enabled;
     if (Object.prototype.hasOwnProperty.call(b, "anthropic_key")) {
       const k = b.anthropic_key;
       if (k === null || k === "") {
@@ -386,6 +409,36 @@
     return { combined_md_path, combined_md_text, per_video };
   }
 
+  // ---- Screenshot thumbnail mock (GET /file?path=) ----------------------
+  // Returns a small inline SVG data URL keyed by the file basename, so that
+  // the picker grid shows visually distinct thumbnails in mock mode without
+  // network egress. Path is hashed into a hue so the same path stably renders
+  // the same color (helps the user visually identify "the cyan one") in QA.
+  function _hash(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+    return Math.abs(h);
+  }
+  function _basename(p) {
+    if (!p) return "screenshot";
+    const m = String(p).match(/[^\\/]+$/);
+    return m ? m[0] : String(p);
+  }
+  async function getScreenshotThumbnail(path) {
+    // Real backend returns a blob URL via getScreenshotThumbnail. The mock
+    // returns a data URL — both work as <img src>.
+    const hue = _hash(path || "") % 360;
+    const label = _basename(path).replace(/\.[^.]+$/, "").slice(0, 14);
+    const svg =
+      `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='68' viewBox='0 0 120 68'>` +
+        `<rect width='120' height='68' fill='hsl(${hue}, 30%, 28%)'/>` +
+        `<rect x='3' y='3' width='114' height='62' fill='none' stroke='hsl(${hue}, 40%, 50%)' stroke-width='1'/>` +
+        `<text x='60' y='38' fill='hsl(${hue}, 25%, 88%)' font-size='10' text-anchor='middle' ` +
+        `font-family='monospace'>${label}</text>` +
+      `</svg>`;
+    return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+  }
+
   global.MOCK_API = {
     playlistPreview,
     playlistStart,
@@ -395,5 +448,6 @@
     getSettings,
     updateSettings,
     testAnthropicKey,
+    getScreenshotThumbnail,
   };
 })(typeof self !== "undefined" ? self : globalThis);

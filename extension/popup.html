@@ -454,6 +454,116 @@
       margin-right: 4px;
       color: #ff9090;
     }
+
+    /* ---- v3 Smart Screenshot Picker ------------------------------- */
+    .picker-header {
+      font-size: 12px;
+      color: #b0b0b0;
+      margin: 0 0 8px;
+    }
+    .picker-title {
+      font-size: 13px;
+      color: #e6e6e6;
+      font-weight: 600;
+      margin: 0 0 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .picker-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    .picker-toggle {
+      cursor: pointer;
+      color: #b0b0b0;
+      text-decoration: none;
+    }
+    .picker-toggle:hover { color: #e6e6e6; }
+    .picker-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      max-height: 240px;
+      overflow-y: auto;
+      padding: 2px;
+      margin-bottom: 8px;
+    }
+    .picker-thumb {
+      position: relative;
+      border: 2px solid #3a3a3f;
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      background: #2b2b2f;
+      aspect-ratio: 16 / 9;
+    }
+    .picker-thumb.selected { border-color: #4a8a5a; }
+    .picker-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 0.55;
+      transition: opacity 0.15s;
+    }
+    .picker-thumb.selected img { opacity: 1; }
+    .picker-thumb.loading {
+      background:
+        repeating-linear-gradient(
+          135deg,
+          #2b2b2f 0px, #2b2b2f 8px,
+          #303035 8px, #303035 16px
+        );
+    }
+    .picker-thumb-index {
+      position: absolute;
+      top: 3px;
+      left: 4px;
+      background: rgba(0, 0, 0, 0.65);
+      color: #e6e6e6;
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .picker-thumb-check {
+      position: absolute;
+      top: 3px;
+      right: 4px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #3a3a3f;
+      color: #888;
+      text-align: center;
+      line-height: 14px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .picker-thumb.selected .picker-thumb-check {
+      background: #57d983;
+      color: #1f2b22;
+    }
+    .picker-empty {
+      color: #888;
+      font-size: 11px;
+      text-align: center;
+      padding: 16px 8px;
+    }
+    .picker-error {
+      color: #ffd9d9;
+      background: #3a1f1f;
+      border: 1px solid #6a3a3a;
+      border-radius: 4px;
+      padding: 5px 8px;
+      font-size: 10.5px;
+    }
   </style>
 </head>
 <body>
@@ -465,10 +575,32 @@
     <a id="status-help" class="edit-prompts-link hidden" style="margin-left: auto;">Click for instructions →</a>
   </div>
 
+  <!-- ============================================================
+       v3 SMART SCREENSHOT PICKER (single-video only)
+       Hidden until popup.js detects chrome.storage.local.pending_picker.
+       When visible, mode selector + #mode-single + #mode-playlist all
+       hide so the picker owns the popup surface.
+       ============================================================ -->
+  <div id="picker-mode" class="hidden">
+    <div class="picker-header">Pick the screenshots to include in this paste:</div>
+    <div id="picker-title" class="picker-title">—</div>
+    <div class="picker-toolbar">
+      <span id="picker-count">0 selected</span>
+      <a id="picker-select-all" class="picker-toggle">Deselect all</a>
+    </div>
+    <div id="picker-grid" class="picker-grid"></div>
+    <div id="picker-error" class="picker-error hidden"></div>
+    <div id="picker-done-indicator" class="pl-ci-indicator hidden"></div>
+    <div class="button-row">
+      <button id="picker-cancel-btn" class="secondary">Cancel</button>
+      <button id="picker-copy-btn" class="primary">Copy with selected</button>
+    </div>
+  </div>
+
   <!-- v2 mode selector. Single-video mode is the default and behaves
        identically to v1. Playlist mode swaps in the playlist UI below.
        Channel and Niche are placeholders for future modes. -->
-  <div class="mode-selector" role="tablist">
+  <div id="mode-selector-wrap" class="mode-selector" role="tablist">
     <button class="mode-btn active" data-mode="single" role="tab" aria-selected="true">Single video</button>
     <button class="mode-btn" data-mode="playlist" role="tab" aria-selected="false">Playlist</button>
     <button class="mode-btn" disabled title="Coming soon">Channel</button>
@@ -620,6 +752,7 @@
       </div>
       <div id="pl-done-meta" class="hint"></div>
       <div id="pl-done-message" class="pl-message"></div>
+      <div id="pl-done-ci" class="pl-ci-indicator hidden"></div>
       <div id="pl-done-warnings" class="pl-warn-strip hidden"></div>
       <div id="pl-done-failed-list" class="pl-failed-list hidden"></div>
       <div class="button-row">

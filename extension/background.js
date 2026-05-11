@@ -498,6 +498,16 @@ async function runExtractJob(job) {
 
   await setState({ current: { ...job, startedAt: Date.now(), title: data.title || null } });
 
+  // Sprint 3: Smart Screenshot Picker intercept. When the user has the
+  // picker setting enabled, we hand the corpus off to the popup instead of
+  // auto-copying. Default off keeps v1 behavior byte-identical.
+  if (await _useScreenshotPicker()) {
+    await STC.stashPickerCorpus(data);
+    notify("Yoink ready",
+           "Click the Yoink icon to pick which screenshots to include.");
+    return;
+  }
+
   // Prefer the multimodal paste version (transcript + base64-embedded
   // screenshots) so a single Ctrl+V into Claude/ChatGPT delivers both.
   // Fall back to the file version if the server didn't generate one
@@ -511,6 +521,20 @@ async function runExtractJob(job) {
   // so the in-page YouTube button gets the same first-time CTA.
   const message = await STC.buildYoinkedMessage(data, copied);
   notify("Yoinked!", message);
+}
+
+// Fetches /settings on demand and returns true if the picker is enabled.
+// Cheap (local request) and called once per job, so we don't bother caching
+// here — the SW gets recycled often anyway.
+async function _useScreenshotPicker() {
+  try {
+    const res = await STC.getSettings();
+    return !!(res && res.ok && res.settings &&
+              res.settings.smart_screenshot_picker_enabled === true);
+  } catch (e) {
+    console.warn("[Yoink] settings fetch failed, picker disabled by default", e);
+    return false;
+  }
 }
 
 async function runSessionAddJob(job) {

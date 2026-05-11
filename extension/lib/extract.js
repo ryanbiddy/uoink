@@ -289,6 +289,71 @@
     return _postJson("/settings/test-key", body);
   }
 
+  // ---- Smart Screenshot Picker (Sprint 3) ------------------------------
+  // getScreenshotThumbnail wraps the authenticated GET /file?path=<abs-path>
+  // endpoint Codex shipped on codex/v2-sprint3. Returns a string usable as
+  // <img src>: a blob URL in production (created from the response body),
+  // a data URL in mock mode. Callers MAY want to URL.revokeObjectURL() the
+  // returned blob URL when the thumbnail is no longer needed; for the
+  // popup picker we just rely on the popup unload for cleanup.
+  async function getScreenshotThumbnail(path) {
+    if (_useMock()) return global.MOCK_API.getScreenshotThumbnail(path);
+    if (!path || typeof path !== "string") {
+      throw new Error("getScreenshotThumbnail: path required");
+    }
+    const res = await _authedFetch(
+      `/file?path=${encodeURIComponent(path)}`,
+      { method: "GET" }
+    );
+    if (!res.ok) {
+      // Surface a short, friendly reason. The server's error string is in
+      // a JSON body when content-type allows; otherwise just status text.
+      let detail = `${res.status}`;
+      try {
+        const body = await res.json();
+        if (body && body.error) detail = body.error;
+      } catch { /* binary or empty body */ }
+      throw new Error(`thumbnail fetch failed: ${detail}`);
+    }
+    const ct = res.headers.get("Content-Type") || "";
+    if (!/^image\//i.test(ct)) {
+      throw new Error(`thumbnail fetch returned non-image content-type: ${ct}`);
+    }
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+  }
+
+  // ---- Pending picker stash --------------------------------------------
+  // When smart_screenshot_picker_enabled is true, both background.js (queue
+  // path) and content.js (in-page-button path) hand the freshly-extracted
+  // corpus off to the popup via chrome.storage.local rather than auto-
+  // copying. The popup's boot path reads `pending_picker` and renders the
+  // picker view. Shared helper so the intercept logic stays in one place.
+  //
+  // We stash the multimodal paste version (corpus_md_paste) AND the file-
+  // reference version (yoink_md) — yoink_md is parsed for absolute
+  // screenshot paths (which get sent to /file for thumbnails); the
+  // clipboard payload is built from corpus_md_paste so selected screenshots
+  // retain their base64-embedded form.
+  async function stashPickerCorpus(data) {
+    const payload = {
+      created_at: new Date().toISOString(),
+      title: (data && data.title) || "",
+      folder: (data && data.folder) || "",
+      corpus_md_paste: (data && data.corpus_md_paste) || "",
+      yoink_md: (data && data.yoink_md) || "",
+      topic: (data && data.topic) || null,
+    };
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.set({ pending_picker: payload }, () => resolve(true));
+      } catch (e) {
+        console.error("[Yoink] stashPickerCorpus failed", e);
+        resolve(false);
+      }
+    });
+  }
+
   function startSession(name) { return _postJson("/session/start", { name: name || "" }); }
   function addToSession(sessionId, url, interval) {
     return _postJson("/session/add", { session_id: sessionId, url, interval });
@@ -418,5 +483,7 @@
     getSettings,
     updateSettings,
     testAnthropicKey,
+    getScreenshotThumbnail,
+    stashPickerCorpus,
   };
 })(typeof self !== "undefined" ? self : globalThis);
