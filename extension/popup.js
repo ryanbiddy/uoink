@@ -1,5 +1,13 @@
 // Popup script. STC.* helpers come from lib/extract.js loaded just before.
 
+// ---- v2 dev flag ----------------------------------------------------------
+// FLIP TO FALSE WHEN CODEX BACKEND LANDS.
+// Routes STC.playlist* / STC.jobStatus / STC.jobCancel through the local mock
+// layer (lib/mock-api.js) instead of the real server. See docs/v2-api.md
+// (lands on codex/v2-backend-playlist) for the contract these mocks shadow.
+const USE_MOCK_API = true;
+globalThis.YOINK_USE_MOCK_API = USE_MOCK_API;
+
 const DEFAULT_INTERVAL = 30;
 const CORPUS_WARN_CHARS = 500_000;
 
@@ -490,3 +498,562 @@ window.addEventListener("unload", () => {
   clearInterval(pingTimer);
   clearInterval(sessionTimer);
 });
+
+// =====================================================================
+// v2 — Playlist mode
+// =====================================================================
+// Self-contained: only touches its own DOM (#mode-playlist + .mode-btn) and
+// the #mode-single wrapper visibility. The single-video flow above runs
+// untouched whenever mode = "single".
+// ---------------------------------------------------------------------
+
+(function setupPlaylistMode() {
+  const POLL_MS = 1000;
+  const PLAYLIST_CAP = 10;
+  const PHASES = ["metadata", "download", "screenshots", "comments"];
+
+  // Inline SVG placeholder for thumbs the i.ytimg.com fetch couldn't load
+  // (mock IDs, age-restricted, or offline). Keeps the row layout stable.
+  const PLACEHOLDER_THUMB =
+    "data:image/svg+xml;utf8," +
+    encodeURIComponent(
+      "<svg xmlns='http://www.w3.org/2000/svg' width='80' height='45' viewBox='0 0 80 45'>" +
+        "<rect width='80' height='45' fill='#3a3a3f'/>" +
+        "<text x='40' y='28' fill='#888' font-size='11' text-anchor='middle' " +
+        "font-family='sans-serif'>YT</text></svg>"
+    );
+
+  const modeSingleEl = document.getElementById("mode-single");
+  const modePlaylistEl = document.getElementById("mode-playlist");
+  const modeBtns = document.querySelectorAll(".mode-btn[data-mode]");
+
+  // Input panel
+  const inputPanel = document.getElementById("pl-input-panel");
+  const urlInput = document.getElementById("pl-url");
+  const previewBtn = document.getElementById("pl-preview-btn");
+  const inputError = document.getElementById("pl-input-error");
+
+  // Preview panel
+  const previewPanel = document.getElementById("pl-preview-panel");
+  const previewPlaylistTitleEl = document.getElementById("pl-preview-playlist-title");
+  const previewSubtitleEl = document.getElementById("pl-preview-subtitle");
+  const previewWarningsEl = document.getElementById("pl-preview-warnings");
+  const previewListEl = document.getElementById("pl-preview-list");
+  const startBtn = document.getElementById("pl-start-btn");
+
+  // Progress panel
+  const progressPanel = document.getElementById("pl-progress-panel");
+  const progressPlaylistTitleEl = document.getElementById("pl-progress-playlist-title");
+  const progressFill = document.getElementById("pl-progress-fill");
+  const progressText = document.getElementById("pl-progress-text");
+  const progressMessageEl = document.getElementById("pl-progress-message");
+  const progressWarningsEl = document.getElementById("pl-progress-warnings");
+  const phaseRow = document.getElementById("pl-phase-row");
+  const cancelBtnEl = document.getElementById("pl-cancel-btn");
+
+  // Done panel
+  const donePanel = document.getElementById("pl-done-panel");
+  const doneSummary = document.getElementById("pl-done-summary");
+  const doneMeta = document.getElementById("pl-done-meta");
+  const doneMessageEl = document.getElementById("pl-done-message");
+  const doneWarningsEl = document.getElementById("pl-done-warnings");
+  const doneFailedListEl = document.getElementById("pl-done-failed-list");
+  const openFolderBtn = document.getElementById("pl-open-folder-btn");
+  const startAnotherBtn = document.getElementById("pl-start-another-btn");
+
+  // Cancelled panel
+  const cancelledPanel = document.getElementById("pl-cancelled-panel");
+  const cancelledSummaryEl = document.getElementById("pl-cancelled-summary");
+  const cancelledMetaEl = document.getElementById("pl-cancelled-meta");
+  const cancelledMessageEl = document.getElementById("pl-cancelled-message");
+  const cancelledWarningsEl = document.getElementById("pl-cancelled-warnings");
+  const cancelledRestartBtn = document.getElementById("pl-cancelled-restart-btn");
+
+  // Failed panel
+  const failedPanel = document.getElementById("pl-failed-panel");
+  const failedMsg = document.getElementById("pl-failed-msg");
+  const failedRestartBtn = document.getElementById("pl-failed-restart-btn");
+
+  // ---- State -----------------------------------------------------------
+  let previewedUrl = null;
+  let previewedPlaylist = null;       // unwrapped res.playlist from /playlist/preview
+  let activeJobId = null;
+  let pollTimer = null;
+  let resultPayload = null;           // job.result on completion
+  let lastJob = null;                 // most recent job object (any state)
+
+  // ---- mode switching --------------------------------------------------
+  function setMode(mode) {
+    for (const b of modeBtns) {
+      const isActive = b.dataset.mode === mode;
+      b.classList.toggle("active", isActive);
+      b.setAttribute("aria-selected", isActive ? "true" : "false");
+    }
+    if (mode === "playlist") {
+      modeSingleEl.classList.add("hidden");
+      modePlaylistEl.classList.remove("hidden");
+    } else {
+      modePlaylistEl.classList.add("hidden");
+      modeSingleEl.classList.remove("hidden");
+    }
+  }
+  for (const b of modeBtns) {
+    b.addEventListener("click", () => {
+      if (b.disabled) return;
+      setMode(b.dataset.mode);
+    });
+  }
+
+  // ---- helpers ---------------------------------------------------------
+  function fmtDuration(seconds) {
+    if (seconds == null) return "—";
+    const s = Math.max(0, parseInt(seconds, 10) || 0);
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return `${m}:${String(r).padStart(2, "0")}`;
+  }
+
+  function fmtNullable(v) { return (v == null || v === "") ? "—" : v; }
+
+  function showOnly(panel) {
+    for (const el of [inputPanel, previewPanel, progressPanel, donePanel, cancelledPanel, failedPanel]) {
+      if (!el) continue;
+      el.classList.toggle("hidden", el !== panel);
+    }
+  }
+
+  function showError(msg) {
+    inputError.textContent = msg;
+    inputError.classList.remove("hidden");
+  }
+  function clearError() {
+    inputError.textContent = "";
+    inputError.classList.add("hidden");
+  }
+
+  // Render the contract's `warnings: [...]` array into a strip element.
+  // Hides the strip when the array is empty/missing.
+  function renderWarnings(stripEl, warnings) {
+    if (!stripEl) return;
+    const list = Array.isArray(warnings) ? warnings : [];
+    if (!list.length) {
+      stripEl.textContent = "";
+      stripEl.classList.add("hidden");
+      return;
+    }
+    // Multi-warning support: join with " · ". The contract only specifies
+    // "playlist exceeds cap" today but the shape is an array — handle N.
+    stripEl.textContent = list.join(" · ");
+    stripEl.classList.remove("hidden");
+  }
+
+  function setText(el, text) {
+    if (!el) return;
+    el.textContent = text || "";
+    el.classList.toggle("hidden", !text);
+  }
+
+  function resetPlaylistUI() {
+    stopPolling();
+    activeJobId = null;
+    resultPayload = null;
+    lastJob = null;
+    previewedUrl = null;
+    previewedPlaylist = null;
+    urlInput.value = "";
+    clearError();
+    previewListEl.innerHTML = "";
+    renderWarnings(previewWarningsEl, []);
+    renderWarnings(progressWarningsEl, []);
+    renderWarnings(doneWarningsEl, []);
+    renderWarnings(cancelledWarningsEl, []);
+    setText(previewPlaylistTitleEl, "");
+    setText(previewSubtitleEl, "");
+    setText(progressPlaylistTitleEl, "");
+    setText(progressMessageEl, "");
+    setText(doneMessageEl, "");
+    setText(cancelledMessageEl, "");
+    setText(cancelledMetaEl, "");
+    doneFailedListEl.innerHTML = "";
+    doneFailedListEl.classList.add("hidden");
+    progressFill.style.width = "0%";
+    progressText.textContent = "Queued…";
+    for (const chip of phaseRow.querySelectorAll(".pl-phase-chip")) {
+      chip.classList.remove("active", "done");
+    }
+    showOnly(inputPanel);
+  }
+
+  // ---- preview ---------------------------------------------------------
+  function isLikelyPlaylistUrl(s) {
+    // Light client-side guard — the backend is authoritative. Just enough to
+    // catch an obvious mis-paste so we don't 500ms-spin on garbage.
+    if (!s) return false;
+    try {
+      const u = new URL(s);
+      if (!/youtube\.com$|youtu\.be$/.test(u.hostname.replace(/^www\.|^m\./, ""))) return false;
+      return u.searchParams.has("list") || u.pathname.includes("/playlist");
+    } catch {
+      return false;
+    }
+  }
+
+  previewBtn.addEventListener("click", async () => {
+    const raw = (urlInput.value || "").trim();
+    clearError();
+    if (!isLikelyPlaylistUrl(raw)) {
+      showError("That doesn't look like a YouTube playlist URL.");
+      return;
+    }
+    previewBtn.disabled = true;
+    previewBtn.textContent = "Previewing…";
+    try {
+      const res = await STC.playlistPreview(raw);
+      if (!res || !res.ok || !res.playlist) {
+        showError((res && res.error) || "Couldn't preview that playlist.");
+        return;
+      }
+      previewedUrl = raw;
+      previewedPlaylist = res.playlist;
+      renderPreview(res.playlist);
+      showOnly(previewPanel);
+    } catch (e) {
+      showError(`Preview failed: ${e && e.message || e}`);
+    } finally {
+      previewBtn.disabled = false;
+      previewBtn.textContent = "Preview";
+    }
+  });
+
+  function renderPreview(playlist) {
+    // Playlist heading line + uploader.
+    previewPlaylistTitleEl.textContent = playlist.title || "(untitled playlist)";
+    const uploader = fmtNullable(playlist.uploader);
+    const vc = playlist.video_count != null ? playlist.video_count : (playlist.videos || []).length;
+    const willProc = playlist.will_process_count != null ? playlist.will_process_count : (playlist.videos || []).length;
+    previewSubtitleEl.textContent = `${uploader} · ${willProc} of ${vc} videos`;
+
+    // Message (e.g., "Playlist has 12 videos -- yoinking the first 10.")
+    // is displayed as the warnings strip when present alongside warnings,
+    // otherwise we surface it inside the warnings strip too — it carries
+    // the same "be aware of the cap" signal as the warnings list.
+    // Per the contract, prefer `message` (human copy) when both exist;
+    // fall back to the raw warnings list when only warnings are present.
+    const warnings = playlist.warnings || [];
+    if (playlist.message) {
+      renderWarnings(previewWarningsEl, [playlist.message]);
+    } else {
+      renderWarnings(previewWarningsEl, warnings);
+    }
+
+    // Video list — contract shape: {index, id, url, title, channel, duration_seconds}
+    previewListEl.innerHTML = "";
+    for (const v of (playlist.videos || [])) {
+      const row = document.createElement("div");
+      row.className = "pl-video";
+
+      // Thumb from YouTube's standard mqdefault path. The onerror swap is
+      // what handles mock IDs (which 404) and the offline case.
+      const img = document.createElement("img");
+      img.className = "pl-thumb";
+      img.alt = "";
+      if (v.id) img.src = `https://i.ytimg.com/vi/${encodeURIComponent(v.id)}/mqdefault.jpg`;
+      else img.src = PLACEHOLDER_THUMB;
+      img.addEventListener("error", () => {
+        if (img.src !== PLACEHOLDER_THUMB) img.src = PLACEHOLDER_THUMB;
+      });
+      row.appendChild(img);
+
+      const meta = document.createElement("div");
+      meta.className = "pl-meta";
+      const title = document.createElement("div");
+      title.className = "pl-title";
+      title.textContent = v.title || "(untitled)";
+      const sub = document.createElement("div");
+      sub.className = "pl-duration";
+      // channel and duration_seconds may both be null per the contract.
+      // Use the nullable-format helper instead of erroring.
+      const channelLabel = fmtNullable(v.channel);
+      const durationLabel = fmtDuration(v.duration_seconds);
+      sub.textContent = `${channelLabel} · ${durationLabel}`;
+      meta.appendChild(title);
+      meta.appendChild(sub);
+      row.appendChild(meta);
+
+      previewListEl.appendChild(row);
+    }
+
+    startBtn.disabled = !(playlist.videos && playlist.videos.length);
+  }
+
+  // ---- start -----------------------------------------------------------
+  startBtn.addEventListener("click", async () => {
+    if (!previewedUrl) return;
+    startBtn.disabled = true;
+    startBtn.textContent = "Starting…";
+    try {
+      const res = await STC.playlistStart(previewedUrl);
+      // Contract: returns both top-level job_id and nested job.
+      if (!res || !res.ok || !res.job_id) {
+        showError((res && res.error) || "Couldn't start playlist yoink.");
+        showOnly(inputPanel);
+        return;
+      }
+      activeJobId = res.job_id;
+      lastJob = res.job || null;
+
+      // Pre-paint the progress panel from the start response so we don't
+      // wait a poll tick for the title/warnings/message to appear.
+      progressFill.style.width = "0%";
+      const total = (res.job && res.job.videos_total) ||
+        (previewedPlaylist && previewedPlaylist.will_process_count) ||
+        PLAYLIST_CAP;
+      progressText.textContent = `Queued — ${total} videos`;
+      progressPlaylistTitleEl.textContent =
+        (res.job && res.job.playlist_title) ||
+        (previewedPlaylist && previewedPlaylist.title) || "";
+      progressPlaylistTitleEl.classList.toggle("hidden", !progressPlaylistTitleEl.textContent);
+      setText(progressMessageEl, (res.job && res.job.message) || "");
+      renderWarnings(progressWarningsEl, (res.job && res.job.warnings) || []);
+
+      for (const chip of phaseRow.querySelectorAll(".pl-phase-chip")) {
+        chip.classList.remove("active", "done");
+      }
+      showOnly(progressPanel);
+      startPolling();
+    } catch (e) {
+      showError(`Start failed: ${e && e.message || e}`);
+      showOnly(inputPanel);
+    } finally {
+      startBtn.disabled = false;
+      startBtn.textContent = "Yoink playlist";
+    }
+  });
+
+  // ---- polling ---------------------------------------------------------
+  function startPolling() {
+    stopPolling();
+    pollOnce();
+    pollTimer = setInterval(pollOnce, POLL_MS);
+  }
+  function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+
+  async function pollOnce() {
+    if (!activeJobId) return;
+    let res;
+    try {
+      res = await STC.jobStatus(activeJobId);
+    } catch (e) {
+      // Transient network blip; let the next tick try again.
+      console.warn("[playlist] jobStatus failed", e);
+      return;
+    }
+    if (!res || !res.ok || !res.job) {
+      stopPolling();
+      enterFailed((res && res.error) || "Status check failed.");
+      return;
+    }
+    const job = res.job;
+    lastJob = job;
+    renderProgress(job);
+
+    if (job.state === "completed") {
+      stopPolling();
+      resultPayload = job.result || null;
+      await onCompleted(job);
+    } else if (job.state === "cancelled") {
+      stopPolling();
+      onCancelled(job);
+    } else if (job.state === "failed") {
+      stopPolling();
+      enterFailed(job.error || "Playlist yoink failed.");
+    }
+  }
+
+  function renderProgress(job) {
+    const total = job.videos_total ||
+      (previewedPlaylist && previewedPlaylist.will_process_count) ||
+      PLAYLIST_CAP;
+    const done = job.videos_done || 0;
+    const failed = job.videos_failed || 0;
+    // Progress = successful + failed (both consume a "slot"), so the bar
+    // doesn't stall when a video fails.
+    const advanced = Math.min(total, done + failed);
+    const pct = total > 0 ? Math.min(100, Math.round((advanced / total) * 100)) : 0;
+    progressFill.style.width = `${pct}%`;
+
+    if (job.state === "queued") {
+      progressText.textContent = `Queued — ${total} videos`;
+    } else if (job.current_video) {
+      const title = job.current_video.title || "(untitled)";
+      const idx = job.current_video.index || (advanced + 1);
+      progressText.textContent = `Video ${idx} of ${total}: ${title}`;
+    } else if (job.state === "running") {
+      progressText.textContent = `${done} of ${total} videos done`;
+    }
+
+    setText(progressMessageEl, job.message || "");
+    renderWarnings(progressWarningsEl, job.warnings || []);
+    if (job.playlist_title) {
+      progressPlaylistTitleEl.textContent = job.playlist_title;
+      progressPlaylistTitleEl.classList.remove("hidden");
+    }
+
+    // Phase chips: highlight active, mark prior phases done.
+    const activeIdx = PHASES.indexOf(job.current_video_phase);
+    for (const chip of phaseRow.querySelectorAll(".pl-phase-chip")) {
+      const phase = chip.dataset.phase;
+      const idx = PHASES.indexOf(phase);
+      chip.classList.remove("active", "done");
+      if (activeIdx < 0) continue;
+      if (idx < activeIdx) chip.classList.add("done");
+      else if (idx === activeIdx) chip.classList.add("active");
+    }
+  }
+
+  // ---- cancel ----------------------------------------------------------
+  cancelBtnEl.addEventListener("click", async () => {
+    if (!activeJobId) return;
+    cancelBtnEl.disabled = true;
+    cancelBtnEl.textContent = "Cancelling…";
+    try {
+      const res = await STC.jobCancel(activeJobId);
+      // Contract: cancel returns the full updated job. If we got it, render
+      // the cancelled view immediately instead of waiting for the next poll
+      // tick — same data, faster transition.
+      if (res && res.ok && res.job) {
+        stopPolling();
+        lastJob = res.job;
+        onCancelled(res.job);
+      }
+      // If res.ok is false (e.g. "job is already finished"), let the next
+      // poll tick observe the real terminal state.
+    } catch (e) {
+      console.warn("[playlist] cancel failed", e);
+    } finally {
+      // Reset button state in case the panel hasn't flipped yet.
+      setTimeout(() => {
+        cancelBtnEl.disabled = false;
+        cancelBtnEl.textContent = "Cancel";
+      }, 1500);
+    }
+  });
+
+  function onCancelled(job) {
+    const done = job.videos_done || 0;
+    const failed = job.videos_failed || 0;
+    const total = job.videos_total || PLAYLIST_CAP;
+    cancelledSummaryEl.textContent = "Cancelled.";
+    setText(cancelledMetaEl, `${done} of ${total} videos completed${failed ? ` · ${failed} failed` : ""}`);
+    setText(cancelledMessageEl, job.message || "");
+    renderWarnings(cancelledWarningsEl, job.warnings || []);
+    showOnly(cancelledPanel);
+  }
+
+  // ---- completion ------------------------------------------------------
+  async function onCompleted(job) {
+    const result = job.result || {};
+    let copied = false;
+    const corpusText = result.combined_md_text || "";
+    if (corpusText) {
+      try {
+        await navigator.clipboard.writeText(corpusText);
+        copied = true;
+      } catch {
+        try {
+          const r = await chrome.runtime.sendMessage({
+            type: "copyToClipboard",
+            text: corpusText,
+          });
+          copied = !!(r && r.ok);
+        } catch { /* leave copied=false */ }
+      }
+    }
+
+    const perVideo = result.per_video || [];
+    const successCount = perVideo.filter((p) => p.ok).length;
+    const failedVideos = perVideo.filter((p) => p.ok === false);
+    const kb = corpusText ? (corpusText.length / 1024).toFixed(1) : "0";
+
+    doneSummary.textContent = copied
+      ? "Done — corpus copied to clipboard"
+      : "Done — clipboard blocked, open the folder";
+
+    const totalProcessed = perVideo.length || job.videos_total || 0;
+    const metaBits = [`${successCount} of ${totalProcessed} videos`, `${kb} KB combined`];
+    if (failedVideos.length) metaBits.splice(1, 0, `${failedVideos.length} failed`);
+    doneMeta.textContent = metaBits.join(" · ");
+
+    setText(doneMessageEl, job.message || "");
+    renderWarnings(doneWarningsEl, job.warnings || []);
+    renderFailedList(failedVideos);
+
+    showOnly(donePanel);
+
+    if (copied) showToast("Playlist yoinked! Paste in Claude or ChatGPT.");
+  }
+
+  function renderFailedList(failed) {
+    doneFailedListEl.innerHTML = "";
+    if (!failed.length) {
+      doneFailedListEl.classList.add("hidden");
+      return;
+    }
+    for (const f of failed) {
+      const item = document.createElement("div");
+      item.className = "pl-failed-item";
+
+      const titleLine = document.createElement("div");
+      const icon = document.createElement("span");
+      icon.className = "pl-failed-icon";
+      icon.textContent = "⚠";
+      const titleSpan = document.createElement("span");
+      titleSpan.className = "pl-failed-title";
+      titleSpan.textContent = `#${f.index} ${f.title || "(untitled)"}`;
+      titleLine.appendChild(icon);
+      titleLine.appendChild(titleSpan);
+      item.appendChild(titleLine);
+
+      const errLine = document.createElement("div");
+      errLine.className = "pl-failed-error";
+      errLine.textContent = f.error || "Failed (no detail provided).";
+      item.appendChild(errLine);
+
+      doneFailedListEl.appendChild(item);
+    }
+    doneFailedListEl.classList.remove("hidden");
+  }
+
+  openFolderBtn.addEventListener("click", async () => {
+    const path = resultPayload && resultPayload.combined_md_path;
+    if (!path) {
+      showToast("No folder path available.");
+      return;
+    }
+    try {
+      // openFolder is the existing v1 server endpoint — in mock mode the
+      // server may not be running, in which case the toast below is the
+      // recovery.
+      const res = await STC.openFolder(path);
+      if (!res || res.ok === false) showToast("Couldn't open folder — server may be offline.");
+    } catch {
+      showToast("Couldn't open folder — server may be offline.");
+    }
+  });
+
+  startAnotherBtn.addEventListener("click", resetPlaylistUI);
+  cancelledRestartBtn.addEventListener("click", resetPlaylistUI);
+  failedRestartBtn.addEventListener("click", resetPlaylistUI);
+
+  function enterFailed(msg) {
+    failedMsg.textContent = msg;
+    showOnly(failedPanel);
+  }
+
+  // ---- boot ------------------------------------------------------------
+  // Start in single-video mode (default). Panel visibility inside playlist
+  // mode is controlled entirely from here.
+  showOnly(inputPanel);
+})();
