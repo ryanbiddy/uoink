@@ -1154,12 +1154,14 @@ def _hook_type_worker(output_folder: Path, yoink_path: Path,
 
 
 def _start_hook_type_thread(output_folder: Path, yoink_path: Path,
-                            metadata: dict, entries: list) -> threading.Thread | None:
+                            metadata: dict, entries: list,
+                            top_comment: str | None = None) -> threading.Thread | None:
     if not _should_start_hook_type(metadata):
         return None
     t = threading.Thread(
         target=_hook_type_worker,
-        args=(output_folder, yoink_path, _hook_type_context(metadata, entries)),
+        args=(output_folder, yoink_path,
+              _hook_type_context(metadata, entries, top_comment)),
         name=f"hook-type-{output_folder.name}",
         daemon=True,
     )
@@ -1315,12 +1317,23 @@ def _start_comment_intelligence_thread(output_folder: Path, yoink_path: Path,
 
 
 def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
+                     metadata: dict | None = None, entries: list | None = None,
                      max_comments: int = 100, top_n: int = 50) -> None:
     """Background-thread body. Fetches comments via yt-dlp, rewrites the
     comments section of the corpus md AND patches the JSON sidecar with
     structured comment objects + a comments_status field. Never raises --
     failures leave the disabled/unavailable note + matching status.
     """
+    shaped_comments: list[dict] = []
+
+    def _start_hook_after_comments():
+        if metadata is None or entries is None:
+            return
+        top_comment = shaped_comments[0].get("text") if shaped_comments else None
+        _start_hook_type_thread(
+            output_folder, yoink_path, metadata, entries, top_comment=top_comment
+        )
+
     try:
         info_template = output_folder / "%(id)s_yoink_comments.%(ext)s"
         subprocess.run(
@@ -1342,6 +1355,7 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
             _replace_comments_section(yoink_path,
                 "*Comments could not be retrieved.*")
             _update_sidecar_comments(output_folder, [], "unavailable")
+            _start_hook_after_comments()
             return
         info = json.loads(info_files[0].read_text(encoding="utf-8"))
         raw_comments = info.get("comments") or []
@@ -1349,6 +1363,7 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
             _replace_comments_section(yoink_path,
                 "*Comments are disabled on this video.*")
             _update_sidecar_comments(output_folder, [], "disabled")
+            _start_hook_after_comments()
             return
         ranked = sorted(
             raw_comments,
@@ -1358,6 +1373,7 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
         shaped_comments = [_shape_comment_for_sidecar(c) for c in ranked]
         _replace_comments_section(yoink_path, _render_comments(ranked))
         _update_sidecar_comments(output_folder, shaped_comments, "fetched")
+        _start_hook_after_comments()
         _start_comment_intelligence_thread(output_folder, yoink_path, shaped_comments)
         log.info("comments appended to %s (%d of %d)",
                  yoink_path, len(ranked), len(raw_comments))
@@ -1367,18 +1383,22 @@ def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
         _replace_comments_section(yoink_path,
             "*Comments are disabled on this video.*")
         _update_sidecar_comments(output_folder, [], "disabled")
+        _start_hook_after_comments()
     except Exception as e:
         log.warning("comments worker crashed: %s", e)
         _replace_comments_section(yoink_path,
             "*Comments could not be retrieved.*")
         _update_sidecar_comments(output_folder, [], "unavailable")
+        _start_hook_after_comments()
 
 
 def _start_comments_thread(url: str, output_folder: Path,
-                           yoink_path: Path) -> threading.Thread:
+                           yoink_path: Path,
+                           metadata: dict | None = None,
+                           entries: list | None = None) -> threading.Thread:
     t = threading.Thread(
         target=_comments_worker,
-        args=(url, output_folder, yoink_path),
+        args=(url, output_folder, yoink_path, metadata, entries),
         name=f"comments-{output_folder.name}",
         daemon=True,
     )
@@ -1758,14 +1778,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             log.warning("paste corpus generation failed: %s", e)
             paste_md = None
 
-    # Hook Type is optional and runs in the background. It updates the saved
-    # corpus + sidecar when done; the immediate clipboard payload stays fast.
-    _start_hook_type_thread(output_folder, yoink_path, metadata, entries)
-
-    # Comments fetch in background; updates the corpus file when done.
+    # Comments fetch in background; updates the corpus file when done. Hook
+    # Type waits for this comments worker to finish so it can include the top
+    # comment when one is available.
     if phase_callback:
         phase_callback("comments")
-    _start_comments_thread(url, output_folder, yoink_path)
+    _start_comments_thread(url, output_folder, yoink_path, metadata, entries)
     if phase_callback:
         phase_callback("done")
 
@@ -2581,11 +2599,11 @@ def _resolve_served_file(raw_path: str) -> tuple[Path | None, str | None, int, s
         resolved = p.resolve()
         if any(part == ".." for part in resolved.parts):
             return None, None, 400, "path invalid"
-        sessions_root = SESSIONS_ROOT.resolve()
+        yoink_root = DESKTOP_ROOT.resolve()
         try:
-            resolved.relative_to(sessions_root)
+            resolved.relative_to(yoink_root)
         except ValueError:
-            return None, None, 403, "path escapes sessions root"
+            return None, None, 403, "path escapes Yoink root"
     except (OSError, ValueError):
         return None, None, 400, "path invalid"
 
@@ -3086,7 +3104,7 @@ class Handler(BaseHTTPRequestHandler):
     # ---- /file?path=... ----
     # Authenticated thumbnail serving for extension UI. MV3 popups cannot
     # reliably render file:// paths, so the helper exposes a very narrow
-    # image-only, session-root-only file endpoint.
+    # image-only, Yoink-output-root-only file endpoint.
     def _handle_file(self):
         qs = parse_qs(urlparse(self.path).query)
         raw_path = (qs.get("path") or [""])[0]

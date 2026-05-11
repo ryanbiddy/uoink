@@ -41,14 +41,16 @@ Field rules:
 ## Invocation flow
 
 1. `_run_extraction()` writes the normal per-video `.md` and JSON sidecar.
-2. If `hook_type_enabled` is true, an Anthropic key is set, and the video has a title or description, Yoink starts a background Hook Type thread.
-3. The thread calls `analyze_hook_type(context)` with:
+2. `_start_comments_thread()` starts the existing comments fetch in the background.
+3. Hook Type waits for that comments worker to finish updating the Top Comments section. It runs after comments are fetched, marked disabled, or marked unavailable.
+4. If `hook_type_enabled` is true, an Anthropic key is set, and the video has a title or description, Yoink starts a Hook Type thread.
+5. The thread calls `analyze_hook_type(context)` with:
    - video title
    - channel name
    - description
    - first 250 words of transcript
-   - top comment, when available to the caller
-4. The analysis writes/replaces a Hook Analysis section near the top of the per-video markdown and patches the sidecar.
+   - top comment, when comments were fetched
+6. The analysis writes/replaces a Hook Analysis section near the top of the per-video markdown and patches the sidecar.
 
 Playlist jobs do not wait for Hook Type. The combined playlist corpus snapshots whatever per-video hook sections exist when the job transitions to `completed`.
 
@@ -139,4 +141,4 @@ Anthropic 401:
 
 ## Open questions
 
-- Should Hook Type wait for comments so the top comment is usually available, or keep the faster current behavior and include top comment only when already available?
+None.

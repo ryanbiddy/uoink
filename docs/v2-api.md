@@ -552,7 +552,7 @@ Example response:
 
 ### GET /file?path=<absolute-path>
 
-Serve an image file from a Yoink session folder so the MV3 extension popup can render screenshot thumbnails without relying on `file://` URLs.
+Serve an image file from the Yoink output root so the MV3 extension popup can render screenshot thumbnails without relying on `file://` URLs.
 
 Auth: `X-Yoink-Token` required.
 
@@ -562,7 +562,7 @@ Query parameters:
 
 | Field | Type | Required | Notes |
 |---|---:|---:|---|
-| `path` | string | yes | Absolute path to an image file under the Yoink sessions root. URL-encode the value. |
+| `path` | string | yes | Absolute path to an image file under the Yoink output root. URL-encode the value. |
 
 Success response: HTTP 200
 
@@ -578,7 +578,7 @@ Body: raw image bytes.
 Example request:
 
 ```http
-GET /file?path=C%3A%5CUsers%5CRyan%5CDesktop%5CYoink%5C_sessions%5Cplaylist%5Cvideo-1%5Cscreenshots%5Cshot_0001.jpg HTTP/1.1
+GET /file?path=C%3A%5CUsers%5CRyan%5CDesktop%5CYoink%5CMarketing%5Cvideo-1%5Cscreenshots%5Cshot_0001.jpg HTTP/1.1
 X-Yoink-Token: <token>
 ```
 
@@ -587,7 +587,7 @@ Path validation rules:
 - Resolve the absolute path before serving.
 - Reject missing, relative, malformed, or parent-directory paths.
 - Reject any raw or resolved path containing a `..` path segment.
-- Reject paths that do not resolve under the Yoink sessions root.
+- Reject paths that do not resolve under the Yoink output root (`Desktop\Yoink`, resolved through the same Windows known-folder logic used for single-video and session output).
 - Reject missing paths and non-regular files.
 - Reject files larger than 10 MB.
 - Allow only `.png`, `.jpg`, `.jpeg`, and `.webp`.
@@ -601,7 +601,7 @@ Error responses:
 | 400 | `path invalid` | Path is relative, malformed, or contains a parent-directory segment. |
 | 400 | `file too large` | File exceeds the 10 MB cap. |
 | 403 | `missing or invalid token` | `X-Yoink-Token` missing or stale. |
-| 403 | `path escapes sessions root` | Resolved path is outside the Yoink sessions root. |
+| 403 | `path escapes Yoink root` | Resolved path is outside the Yoink output root. |
 | 404 | `file not found` | File is missing or not a regular file. |
 | 415 | `unsupported file type` | Extension or magic bytes are not an allowed image type. |
 
