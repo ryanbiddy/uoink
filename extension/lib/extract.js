@@ -266,6 +266,10 @@
     if (_useMock()) return global.MOCK_API.jobCancel(jobId);
     return _postJson(`/jobs/${encodeURIComponent(jobId)}/cancel`, {});
   }
+  function jobsList() {
+    if (_useMock()) return global.MOCK_API.jobsList();
+    return _getJson("/jobs");
+  }
 
   function startSession(name) { return _postJson("/session/start", { name: name || "" }); }
   function addToSession(sessionId, url, interval) {
@@ -392,5 +396,6 @@
     playlistStart,
     jobStatus,
     jobCancel,
+    jobsList,
   };
 })(typeof self !== "undefined" ? self : globalThis);

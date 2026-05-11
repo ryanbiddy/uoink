@@ -315,15 +315,6 @@
       color: #888;
       margin-top: 2px;
     }
-    .pl-cap-notice {
-      margin-top: 8px;
-      padding: 6px 8px;
-      background: #3a2f1f;
-      color: #ffe6c9;
-      border: 1px solid #6a5a3a;
-      border-radius: 4px;
-      font-size: 11px;
-    }
     .pl-progress-bar {
       width: 100%;
       height: 8px;
@@ -395,6 +386,63 @@
       border: 1px solid #6a3a3a;
       border-radius: 4px;
       font-size: 11px;
+    }
+    /* Warning strip — softer than .pl-error, reuses the v1 .warn palette
+       (#3a2f1f / #ffe6c9 / #6a5a3a) for contract `warnings` arrays. */
+    .pl-warn-strip {
+      margin-top: 8px;
+      padding: 6px 8px;
+      background: #3a2f1f;
+      color: #ffe6c9;
+      border: 1px solid #6a5a3a;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    .pl-message {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #b0b0b0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .pl-subtitle {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .pl-failed-list {
+      margin-top: 8px;
+      max-height: 120px;
+      overflow-y: auto;
+      border: 1px solid #6a3a3a;
+      border-radius: 4px;
+      background: #2b1f1f;
+    }
+    .pl-failed-item {
+      padding: 5px 8px;
+      border-bottom: 1px solid #3a1f1f;
+      font-size: 11px;
+      color: #ffd9d9;
+    }
+    .pl-failed-item:last-child { border-bottom: none; }
+    .pl-failed-title {
+      color: #ffe6c9;
+      font-weight: 600;
+    }
+    .pl-failed-error {
+      color: #b0a09a;
+      margin-top: 2px;
+    }
+    .pl-failed-icon {
+      display: inline-block;
+      width: 12px;
+      text-align: center;
+      margin-right: 4px;
+      color: #ff9090;
     }
   </style>
 </head>
@@ -527,7 +575,9 @@
     <!-- Step 2: preview list + start -->
     <div class="panel hidden" id="pl-preview-panel">
       <div class="panel-title">Videos to yoink</div>
-      <div id="pl-cap-notice" class="pl-cap-notice hidden"></div>
+      <div id="pl-preview-playlist-title" class="panel-line"></div>
+      <div id="pl-preview-subtitle" class="pl-subtitle"></div>
+      <div id="pl-preview-warnings" class="pl-warn-strip hidden"></div>
       <div id="pl-preview-list" class="pl-preview-list"></div>
       <button id="pl-start-btn" class="primary" disabled>Yoink playlist</button>
     </div>
@@ -535,8 +585,11 @@
     <!-- Step 3: progress while job runs -->
     <div class="panel hidden" id="pl-progress-panel">
       <div class="panel-title">Yoinking playlist</div>
+      <div id="pl-progress-playlist-title" class="panel-line panel-muted"></div>
       <div class="pl-progress-bar"><div id="pl-progress-fill" class="pl-progress-fill"></div></div>
       <div id="pl-progress-text" class="pl-progress-text">Queued…</div>
+      <div id="pl-progress-message" class="pl-message"></div>
+      <div id="pl-progress-warnings" class="pl-warn-strip hidden"></div>
       <div class="pl-phase-row" id="pl-phase-row">
         <div class="pl-phase-chip" data-phase="metadata">metadata</div>
         <div class="pl-phase-chip" data-phase="download">download</div>
@@ -553,6 +606,9 @@
         <span id="pl-done-summary">Done — corpus copied to clipboard</span>
       </div>
       <div id="pl-done-meta" class="hint"></div>
+      <div id="pl-done-message" class="pl-message"></div>
+      <div id="pl-done-warnings" class="pl-warn-strip hidden"></div>
+      <div id="pl-done-failed-list" class="pl-failed-list hidden"></div>
       <div class="button-row">
         <button id="pl-open-folder-btn" class="secondary">Open folder</button>
         <button id="pl-start-another-btn" class="primary">Start another</button>
@@ -561,7 +617,10 @@
 
     <!-- Cancelled state -->
     <div class="panel hidden" id="pl-cancelled-panel">
-      <div class="panel-line panel-muted">Cancelled.</div>
+      <div class="panel-line panel-muted" id="pl-cancelled-summary">Cancelled.</div>
+      <div id="pl-cancelled-meta" class="hint"></div>
+      <div id="pl-cancelled-message" class="pl-message"></div>
+      <div id="pl-cancelled-warnings" class="pl-warn-strip hidden"></div>
       <button id="pl-cancelled-restart-btn" class="primary">Start another</button>
     </div>
 
