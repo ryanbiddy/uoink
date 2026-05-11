@@ -550,6 +550,61 @@ Example response:
 }
 ```
 
+### GET /file?path=<absolute-path>
+
+Serve an image file from a Yoink session folder so the MV3 extension popup can render screenshot thumbnails without relying on `file://` URLs.
+
+Auth: `X-Yoink-Token` required.
+
+Request body: none.
+
+Query parameters:
+
+| Field | Type | Required | Notes |
+|---|---:|---:|---|
+| `path` | string | yes | Absolute path to an image file under the Yoink sessions root. URL-encode the value. |
+
+Success response: HTTP 200
+
+Headers:
+
+```http
+Content-Type: image/jpeg
+Cache-Control: private, max-age=300
+```
+
+Body: raw image bytes.
+
+Example request:
+
+```http
+GET /file?path=C%3A%5CUsers%5CRyan%5CDesktop%5CYoink%5C_sessions%5Cplaylist%5Cvideo-1%5Cscreenshots%5Cshot_0001.jpg HTTP/1.1
+X-Yoink-Token: <token>
+```
+
+Path validation rules:
+
+- Resolve the absolute path before serving.
+- Reject missing, relative, malformed, or parent-directory paths.
+- Reject any raw or resolved path containing a `..` path segment.
+- Reject paths that do not resolve under the Yoink sessions root.
+- Reject missing paths and non-regular files.
+- Reject files larger than 10 MB.
+- Allow only `.png`, `.jpg`, `.jpeg`, and `.webp`.
+- Validate magic bytes match the extension-derived MIME type before serving.
+
+Error responses:
+
+| HTTP status | Error string | Meaning |
+|---:|---|---|
+| 400 | `path required` | Query string omitted `path`. |
+| 400 | `path invalid` | Path is relative, malformed, or contains a parent-directory segment. |
+| 400 | `file too large` | File exceeds the 10 MB cap. |
+| 403 | `missing or invalid token` | `X-Yoink-Token` missing or stale. |
+| 403 | `path escapes sessions root` | Resolved path is outside the Yoink sessions root. |
+| 404 | `file not found` | File is missing or not a regular file. |
+| 415 | `unsupported file type` | Extension or magic bytes are not an allowed image type. |
+
 ## Job state machine
 
 All async jobs use the same state machine:
@@ -681,6 +736,13 @@ The following v1 endpoints keep their current shapes and semantics:
 - `GET /open-folder`
 
 No v2 playlist work may break existing single-video, session, health, token, recent-yoinks, or open-folder clients.
+
+## Client-side helpers needed from Claude Code
+
+Claude Code owns `extension/lib/extract.js` in Sprint 3. Backend contracts now need these client helpers:
+
+- `getScreenshotThumbnail(path)` wraps authenticated `GET /file?path=<absolute-path>`, validates the response is an image, and returns a blob URL for use in `<img src>`.
+- `getSettings`, `updateSettings`, and `testAnthropicKey` already exist. Confirm their settings shape includes `hook_type_enabled` and `smart_screenshot_picker_enabled` alongside `comment_intelligence_enabled` and `anthropic_key_set`.
 
 ## Error model
 

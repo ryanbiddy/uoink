@@ -1,6 +1,6 @@
 # Yoink v2 Comment Intelligence contract
 
-Status: draft implemented in `codex/v2-sprint2`
+Status: implemented in `codex/v2-sprint2`; settings extended in `codex/v2-sprint3`
 
 ## Overview
 
@@ -26,6 +26,8 @@ Returns public settings only. It never returns the Anthropic API key.
   "ok": true,
   "settings": {
     "comment_intelligence_enabled": true,
+    "hook_type_enabled": false,
+    "smart_screenshot_picker_enabled": false,
     "anthropic_key_set": true
   }
 }
@@ -38,13 +40,15 @@ Request body:
 ```json
 {
   "comment_intelligence_enabled": true,
+  "hook_type_enabled": false,
+  "smart_screenshot_picker_enabled": false,
   "anthropic_key": "sk-ant-..."
 }
 ```
 
 Field rules:
 
-- `comment_intelligence_enabled` is required and must be boolean.
+- `comment_intelligence_enabled`, `hook_type_enabled`, and `smart_screenshot_picker_enabled` are optional booleans. Fields omitted from a POST keep their existing value.
 - `anthropic_key` is optional. If omitted, the existing saved key is preserved.
 - `anthropic_key` as a non-empty string replaces the saved key.
 - `anthropic_key` as `null` or an empty string clears the saved key.
@@ -57,6 +61,8 @@ Response body matches `GET /settings`:
   "ok": true,
   "settings": {
     "comment_intelligence_enabled": true,
+    "hook_type_enabled": false,
+    "smart_screenshot_picker_enabled": false,
     "anthropic_key_set": true
   }
 }
@@ -87,6 +93,8 @@ Success:
   "error": null,
   "settings": {
     "comment_intelligence_enabled": true,
+    "hook_type_enabled": false,
+    "smart_screenshot_picker_enabled": false,
     "anthropic_key_set": true
   }
 }
@@ -101,6 +109,8 @@ Failed validation:
   "error": "invalid x-api-key",
   "settings": {
     "comment_intelligence_enabled": true,
+    "hook_type_enabled": false,
+    "smart_screenshot_picker_enabled": false,
     "anthropic_key_set": false
   }
 }

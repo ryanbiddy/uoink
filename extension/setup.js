@@ -73,6 +73,8 @@ const ciStatus = document.getElementById("ci-status");
 const ciSaveBtn = document.getElementById("ci-save-btn");
 const ciTestBtn = document.getElementById("ci-test-btn");
 const ciClearBtn = document.getElementById("ci-clear-btn");
+const hookTypeEnabled = document.getElementById("hook-type-enabled");
+const smartScreenshotPickerEnabled = document.getElementById("smart-screenshot-picker-enabled");
 
 // ---- Suggested-video population -----------------------------------------
 function videoIdFromUrl(url) {
@@ -248,7 +250,15 @@ function setCIStatus(text, mode) {
 }
 
 function setCIControlsEnabled(enabled) {
-  for (const el of [ciEnabled, ciKeyInput, ciSaveBtn, ciTestBtn, ciClearBtn]) {
+  for (const el of [
+    ciEnabled,
+    ciKeyInput,
+    ciSaveBtn,
+    ciTestBtn,
+    ciClearBtn,
+    hookTypeEnabled,
+    smartScreenshotPickerEnabled,
+  ]) {
     if (el) el.disabled = !enabled;
   }
   if (!enabled) setCIStatus("Start Yoink to manage settings.", "warn");
@@ -257,6 +267,10 @@ function setCIControlsEnabled(enabled) {
 function renderCISettings(settings) {
   if (!settings) return;
   if (ciEnabled) ciEnabled.checked = !!settings.comment_intelligence_enabled;
+  if (hookTypeEnabled) hookTypeEnabled.checked = !!settings.hook_type_enabled;
+  if (smartScreenshotPickerEnabled) {
+    smartScreenshotPickerEnabled.checked = !!settings.smart_screenshot_picker_enabled;
+  }
   if (ciKeyInput) {
     ciKeyInput.value = "";
     ciKeyInput.dataset.dirty = "false";
@@ -294,6 +308,10 @@ if (ciSaveBtn) {
     if (!window.STC || !STC.updateSettings) return;
     const body = {
       comment_intelligence_enabled: !!(ciEnabled && ciEnabled.checked),
+      hook_type_enabled: !!(hookTypeEnabled && hookTypeEnabled.checked),
+      smart_screenshot_picker_enabled: !!(
+        smartScreenshotPickerEnabled && smartScreenshotPickerEnabled.checked
+      ),
     };
     const rawKey = ciKeyInput ? ciKeyInput.value.trim() : "";
     const keyDirty = ciKeyInput && ciKeyInput.dataset.dirty === "true";
@@ -350,6 +368,10 @@ if (ciClearBtn) {
     try {
       const res = await STC.updateSettings({
         comment_intelligence_enabled: !!(ciEnabled && ciEnabled.checked),
+        hook_type_enabled: !!(hookTypeEnabled && hookTypeEnabled.checked),
+        smart_screenshot_picker_enabled: !!(
+          smartScreenshotPickerEnabled && smartScreenshotPickerEnabled.checked
+        ),
         anthropic_key: null,
       });
       if (!res || !res.ok) {

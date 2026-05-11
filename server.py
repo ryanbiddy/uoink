@@ -62,6 +62,7 @@ SUBPROCESS_KW = {"creationflags": CREATE_NO_WINDOW} if sys.platform == "win32" e
 MAX_BODY_BYTES = 64 * 1024            # 64KB POST body cap
 MAX_SCREENSHOTS = 200                  # cap per video
 PLAYLIST_VIDEO_CAP = 10                # v2 Playlist Mode first-ship cap
+MAX_SERVED_FILE_BYTES = 10 * 1024 * 1024
 LONG_VIDEO_SECONDS = 2 * 60 * 60       # 2 hours -- log warning above this
 YTDLP_TIMEOUT_SEC = 30 * 60            # main extract timeout
 COMMENTS_TIMEOUT_SEC = 5 * 60
@@ -140,6 +141,8 @@ def _check_token_rate_limit() -> bool:
 def _default_settings() -> dict:
     return {
         "comment_intelligence_enabled": False,
+        "hook_type_enabled": False,
+        "smart_screenshot_picker_enabled": False,
         # Plaintext by product decision for v2. Treat settings.json like any
         # other local credential store; encryption is v2.1+.
         "anthropic_key": "",
@@ -160,6 +163,10 @@ def _read_settings() -> dict:
                 log.warning("settings read failed: %s", e)
         data["comment_intelligence_enabled"] = bool(
             data.get("comment_intelligence_enabled")
+        )
+        data["hook_type_enabled"] = bool(data.get("hook_type_enabled"))
+        data["smart_screenshot_picker_enabled"] = bool(
+            data.get("smart_screenshot_picker_enabled")
         )
         if not isinstance(data.get("anthropic_key"), str):
             data["anthropic_key"] = ""
@@ -184,6 +191,10 @@ def _public_settings(data: dict | None = None) -> dict:
     key = data.get("anthropic_key") if isinstance(data.get("anthropic_key"), str) else ""
     return {
         "comment_intelligence_enabled": bool(data.get("comment_intelligence_enabled")),
+        "hook_type_enabled": bool(data.get("hook_type_enabled")),
+        "smart_screenshot_picker_enabled": bool(
+            data.get("smart_screenshot_picker_enabled")
+        ),
         "anthropic_key_set": bool(key and not data.get("anthropic_key_invalid")),
     }
 
@@ -199,14 +210,18 @@ def _mark_anthropic_key_invalid() -> None:
         log.warning("settings invalid-key write failed: %s", e)
 
 
-def _anthropic_key_available() -> str | None:
+def _anthropic_key_for_feature(feature_flag: str) -> str | None:
     data = _read_settings()
     key = data.get("anthropic_key") or ""
-    if not data.get("comment_intelligence_enabled"):
+    if not data.get(feature_flag):
         return None
     if data.get("anthropic_key_invalid"):
         return None
     return key.strip() or None
+
+
+def _anthropic_key_available() -> str | None:
+    return _anthropic_key_for_feature("comment_intelligence_enabled")
 
 
 class AnthropicAPIError(Exception):
@@ -388,6 +403,7 @@ _session_lock = threading.Lock()
 _jobs: dict[str, dict] = {}
 _jobs_lock = threading.Lock()
 _settings_lock = threading.Lock()
+_corpus_update_lock = threading.Lock()
 
 # Markers in yoink.md so the comments section can be replaced after the
 # background fetch finishes. HTML comments are invisible in rendered markdown.
@@ -395,6 +411,19 @@ COMMENTS_START_MARK = "<!-- yoink:comments-start -->"
 COMMENTS_END_MARK = "<!-- yoink:comments-end -->"
 CI_START_MARK = "<!-- yoink:comment-intelligence-start -->"
 CI_END_MARK = "<!-- yoink:comment-intelligence-end -->"
+HOOK_START_MARK = "<!-- HOOK_START -->"
+HOOK_END_MARK = "<!-- HOOK_END -->"
+HOOK_TYPES = {
+    "curiosity_gap",
+    "question",
+    "contrarian",
+    "story_open",
+    "promise_list",
+    "demo",
+    "authority",
+    "stakes",
+    "other",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -723,28 +752,29 @@ def _replace_comments_section(yoink_path: Path, body: str) -> None:
     """Atomically rewrite the COMMENTS_START..COMMENTS_END block in yoink.md.
     Safe to call from a background thread.
     """
-    try:
-        text = yoink_path.read_text(encoding="utf-8")
-    except OSError as e:
-        log.warning("could not read yoink.md to update comments: %s", e)
-        return
+    with _corpus_update_lock:
+        try:
+            text = yoink_path.read_text(encoding="utf-8")
+        except OSError as e:
+            log.warning("could not read yoink.md to update comments: %s", e)
+            return
 
-    pattern = re.compile(
-        re.escape(COMMENTS_START_MARK) + r".*?" + re.escape(COMMENTS_END_MARK),
-        re.DOTALL,
-    )
-    replacement = f"{COMMENTS_START_MARK}\n{body.rstrip()}\n{COMMENTS_END_MARK}"
-    new_text, n = pattern.subn(replacement, text, count=1)
-    if n == 0:
-        log.warning("comments markers not found in yoink.md; skipping update")
-        return
+        pattern = re.compile(
+            re.escape(COMMENTS_START_MARK) + r".*?" + re.escape(COMMENTS_END_MARK),
+            re.DOTALL,
+        )
+        replacement = f"{COMMENTS_START_MARK}\n{body.rstrip()}\n{COMMENTS_END_MARK}"
+        new_text, n = pattern.subn(replacement, text, count=1)
+        if n == 0:
+            log.warning("comments markers not found in yoink.md; skipping update")
+            return
 
-    tmp = yoink_path.with_suffix(".md.tmp")
-    try:
-        tmp.write_text(new_text, encoding="utf-8")
-        tmp.replace(yoink_path)
-    except OSError as e:
-        log.warning("could not write yoink.md to update comments: %s", e)
+        tmp = yoink_path.with_suffix(".md.tmp")
+        try:
+            tmp.write_text(new_text, encoding="utf-8")
+            tmp.replace(yoink_path)
+        except OSError as e:
+            log.warning("could not write yoink.md to update comments: %s", e)
 
 
 def _shape_comment_for_sidecar(c: dict) -> dict:
@@ -788,7 +818,7 @@ def _update_sidecar_comments(output_folder: Path, comments: list | None,
         log.warning("sidecar comments update: write failed (%s)", e)
 
 
-def _extract_json_object(text: str) -> dict:
+def _extract_json_object(text: str, *, label: str = "AI response") -> dict:
     cleaned = (text or "").strip()
     if cleaned.startswith("```"):
         cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
@@ -796,13 +826,13 @@ def _extract_json_object(text: str) -> dict:
     start = cleaned.find("{")
     end = cleaned.rfind("}")
     if start == -1 or end == -1 or end <= start:
-        raise AnthropicAPIError(None, "Comment Intelligence returned no JSON object")
+        raise AnthropicAPIError(None, f"{label} returned no JSON object")
     try:
         parsed = json.loads(cleaned[start:end + 1])
     except json.JSONDecodeError as e:
-        raise AnthropicAPIError(None, f"Comment Intelligence returned invalid JSON: {e}") from None
+        raise AnthropicAPIError(None, f"{label} returned invalid JSON: {e}") from None
     if not isinstance(parsed, dict):
-        raise AnthropicAPIError(None, "Comment Intelligence returned an unexpected shape")
+        raise AnthropicAPIError(None, f"{label} returned an unexpected shape")
     return parsed
 
 
@@ -913,11 +943,228 @@ def analyze_comments(comments: list[dict], *, api_key: str | None = None) -> dic
     )
     try:
         resp = _anthropic_messages(key, system=system, user=user, max_tokens=1200)
-        return _normalize_comment_analysis(_extract_json_object(_anthropic_text(resp)))
+        return _normalize_comment_analysis(
+            _extract_json_object(_anthropic_text(resp), label="Comment Intelligence")
+        )
     except AnthropicAPIError as e:
         if e.status == 401:
             _mark_anthropic_key_invalid()
         raise
+
+
+def _first_words(text: str, limit: int) -> str:
+    words = re.split(r"\s+", (text or "").strip())
+    words = [w for w in words if w]
+    return " ".join(words[:limit])
+
+
+def _hook_display_name(hook_type: str) -> str:
+    return (hook_type or "other").replace("_", " ").title()
+
+
+def _normalize_hook_analysis(data: dict) -> dict:
+    hook_type = _clean_text(data.get("hook_type"), limit=80).lower()
+    if hook_type not in HOOK_TYPES:
+        hook_type = "other"
+    return {
+        "model": ANTHROPIC_MODEL,
+        "hook_type": hook_type,
+        "hook_explanation": _clean_text(data.get("hook_explanation"), limit=600),
+    }
+
+
+def analyze_hook_type(context: dict, *, api_key: str | None = None) -> dict:
+    """Classify one video's opening style.
+
+    Kept as a small vendor-neutral function so Sprint 4 can wrap it as an
+    MCP tool without coupling the tool surface to Anthropic.
+    """
+    key = (api_key or _anthropic_key_for_feature("hook_type_enabled") or "").strip()
+    if not key:
+        raise AnthropicAPIError(None, "Anthropic API key not configured")
+
+    title = _clean_text(context.get("title"), limit=220)
+    description = _clean_text(context.get("description"), limit=1200)
+    if not title and not description:
+        raise AnthropicAPIError(None, "no title or description to classify")
+
+    payload = {
+        "title": title,
+        "channel": _clean_text(context.get("channel"), limit=160),
+        "description": description,
+        "transcript_first_250_words": _first_words(
+            str(context.get("transcript") or ""), 250
+        ),
+        "top_comment": _clean_text(context.get("top_comment"), limit=600),
+    }
+    system = (
+        "You classify YouTube video hook styles for a creator-operator. "
+        "Return valid JSON only. Pick exactly one allowed hook_type."
+    )
+    user = (
+        "Classify this video's hook style. Return this exact JSON shape:\n"
+        '{"hook_type": string, "hook_explanation": string}\n\n'
+        "Allowed hook_type values: curiosity_gap, question, contrarian, "
+        "story_open, promise_list, demo, authority, stakes, other.\n"
+        "hook_explanation must be one or two sentences about what makes the "
+        "opening fit that hook type.\n\n"
+        f"Video context JSON:\n{json.dumps(payload, ensure_ascii=False)}"
+    )
+    try:
+        resp = _anthropic_messages(key, system=system, user=user, max_tokens=320)
+        return _normalize_hook_analysis(
+            _extract_json_object(_anthropic_text(resp), label="Hook Type")
+        )
+    except AnthropicAPIError as e:
+        if e.status == 401:
+            _mark_anthropic_key_invalid()
+        raise
+
+
+def _render_hook_analysis(analysis: dict) -> str:
+    return "\n".join([
+        "## Hook Analysis",
+        HOOK_START_MARK,
+        f"**Hook Type:** {_hook_display_name(analysis.get('hook_type') or 'other')}",
+        f"**Analysis:** {analysis.get('hook_explanation') or 'No explanation returned.'}",
+        HOOK_END_MARK,
+    ])
+
+
+def _render_hook_failure(reason: str) -> str:
+    return "\n".join([
+        "## Hook Analysis",
+        HOOK_START_MARK,
+        f"Hook Type: analysis failed - {reason}",
+        HOOK_END_MARK,
+    ])
+
+
+def _replace_hook_analysis_section(yoink_path: Path, body: str) -> None:
+    with _corpus_update_lock:
+        try:
+            text = yoink_path.read_text(encoding="utf-8")
+        except OSError as e:
+            log.warning("could not read corpus to update Hook Type: %s", e)
+            return
+
+        pattern = re.compile(
+            r"(?:^|\n)## Hook Analysis\s*\n"
+            + re.escape(HOOK_START_MARK)
+            + r".*?"
+            + re.escape(HOOK_END_MARK)
+            + r"\n?",
+            re.DOTALL,
+        )
+        if pattern.search(text):
+            new_text = pattern.sub("\n" + body.rstrip() + "\n\n", text, count=1)
+        else:
+            # Insert immediately after the top metadata block, before the first
+            # horizontal rule that separates metadata from the rest of the corpus.
+            marker = "\n---\n"
+            if marker in text:
+                new_text = text.replace(marker, "\n" + body.rstrip() + "\n\n---\n", 1)
+            else:
+                new_text = text.rstrip() + "\n\n" + body.rstrip() + "\n"
+
+        tmp = yoink_path.with_suffix(".md.tmp")
+        try:
+            tmp.write_text(new_text, encoding="utf-8")
+            tmp.replace(yoink_path)
+        except OSError as e:
+            log.warning("could not write Hook Type section: %s", e)
+
+
+def _update_sidecar_hook_type(output_folder: Path, *, status: str,
+                              hook_type: str | None = None,
+                              hook_explanation: str | None = None,
+                              error: str | None = None) -> None:
+    sidecar_path = output_folder / f"{output_folder.name}.json"
+    if not sidecar_path.exists():
+        return
+    try:
+        data = json.loads(sidecar_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        log.warning("sidecar Hook Type update: read failed (%s)", e)
+        return
+    data["hook_type_status"] = status
+    data["hook_type"] = hook_type
+    data["hook_explanation"] = hook_explanation
+    data["hook_type_error"] = error
+    data["hook_type_updated_at"] = _now_iso()
+    tmp = sidecar_path.with_suffix(".json.tmp")
+    try:
+        tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp.replace(sidecar_path)
+    except OSError as e:
+        log.warning("sidecar Hook Type update: write failed (%s)", e)
+
+
+def _hook_type_context(metadata: dict, entries: list, top_comment: str | None = None) -> dict:
+    transcript = " ".join(t for _s, _e, t in entries)
+    return {
+        "title": metadata.get("title") or "",
+        "description": metadata.get("description") or "",
+        "channel": metadata.get("channel") or metadata.get("uploader") or "",
+        "transcript": transcript,
+        "top_comment": top_comment or "",
+    }
+
+
+def _should_start_hook_type(metadata: dict) -> bool:
+    if not _anthropic_key_for_feature("hook_type_enabled"):
+        return False
+    return bool((metadata.get("title") or "").strip()
+                or (metadata.get("description") or "").strip())
+
+
+def _hook_type_worker(output_folder: Path, yoink_path: Path,
+                      context: dict) -> None:
+    try:
+        analysis = analyze_hook_type(context)
+        _replace_hook_analysis_section(yoink_path, _render_hook_analysis(analysis))
+        _update_sidecar_hook_type(
+            output_folder,
+            status="completed",
+            hook_type=analysis.get("hook_type"),
+            hook_explanation=analysis.get("hook_explanation"),
+        )
+        log.info("Hook Type appended to %s", yoink_path)
+    except AnthropicAPIError as e:
+        reason = _short_reason(e.reason)
+        if e.status == 401:
+            log.warning("Hook Type skipped: Anthropic API key invalid")
+        else:
+            log.warning("Hook Type failed: %s", reason)
+        _replace_hook_analysis_section(yoink_path, _render_hook_failure(reason))
+        _update_sidecar_hook_type(
+            output_folder,
+            status="failed",
+            error=reason,
+        )
+    except Exception as e:
+        reason = _short_reason(str(e))
+        log.warning("Hook Type crashed: %s", reason)
+        _replace_hook_analysis_section(yoink_path, _render_hook_failure(reason))
+        _update_sidecar_hook_type(
+            output_folder,
+            status="failed",
+            error=reason,
+        )
+
+
+def _start_hook_type_thread(output_folder: Path, yoink_path: Path,
+                            metadata: dict, entries: list) -> threading.Thread | None:
+    if not _should_start_hook_type(metadata):
+        return None
+    t = threading.Thread(
+        target=_hook_type_worker,
+        args=(output_folder, yoink_path, _hook_type_context(metadata, entries)),
+        name=f"hook-type-{output_folder.name}",
+        daemon=True,
+    )
+    t.start()
+    return t
 
 
 def _render_comment_intelligence(analysis: dict) -> str:
@@ -958,29 +1205,30 @@ def _render_comment_intelligence(analysis: dict) -> str:
 
 def _replace_comment_intelligence_section(yoink_path: Path, body: str) -> None:
     block = f"{CI_START_MARK}\n{body.rstrip()}\n{CI_END_MARK}"
-    try:
-        text = yoink_path.read_text(encoding="utf-8")
-    except OSError as e:
-        log.warning("could not read corpus to update Comment Intelligence: %s", e)
-        return
+    with _corpus_update_lock:
+        try:
+            text = yoink_path.read_text(encoding="utf-8")
+        except OSError as e:
+            log.warning("could not read corpus to update Comment Intelligence: %s", e)
+            return
 
-    pattern = re.compile(
-        re.escape(CI_START_MARK) + r".*?" + re.escape(CI_END_MARK),
-        re.DOTALL,
-    )
-    if pattern.search(text):
-        new_text = pattern.sub(block, text, count=1)
-    elif COMMENTS_END_MARK in text:
-        new_text = text.replace(COMMENTS_END_MARK, COMMENTS_END_MARK + "\n\n" + block, 1)
-    else:
-        new_text = text.rstrip() + "\n\n" + block + "\n"
+        pattern = re.compile(
+            re.escape(CI_START_MARK) + r".*?" + re.escape(CI_END_MARK),
+            re.DOTALL,
+        )
+        if pattern.search(text):
+            new_text = pattern.sub(block, text, count=1)
+        elif COMMENTS_END_MARK in text:
+            new_text = text.replace(COMMENTS_END_MARK, COMMENTS_END_MARK + "\n\n" + block, 1)
+        else:
+            new_text = text.rstrip() + "\n\n" + block + "\n"
 
-    tmp = yoink_path.with_suffix(".md.tmp")
-    try:
-        tmp.write_text(new_text, encoding="utf-8")
-        tmp.replace(yoink_path)
-    except OSError as e:
-        log.warning("could not write Comment Intelligence section: %s", e)
+        tmp = yoink_path.with_suffix(".md.tmp")
+        try:
+            tmp.write_text(new_text, encoding="utf-8")
+            tmp.replace(yoink_path)
+        except OSError as e:
+            log.warning("could not write Comment Intelligence section: %s", e)
 
 
 def _update_sidecar_comment_intelligence(output_folder: Path, *,
@@ -1428,6 +1676,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # outside its folder.
     yoink_path = _corpus_path(output_folder)
     yoink_path.write_text(yoink_md, encoding="utf-8")
+    hook_type_pending = _should_start_hook_type(metadata)
 
     # Structured JSON sidecar (STRAT). Same data the markdown carries but
     # in a machine-shaped form: future MCP server / programmatic tooling
@@ -1472,6 +1721,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "channel_context": channel_ctx,
             "comments": None,
             "comments_status": "pending",
+            "hook_type_status": "pending" if hook_type_pending else "skipped",
+            "hook_type": None,
+            "hook_explanation": None,
+            "hook_type_error": None,
             "comment_intelligence": None,
             "comment_intelligence_status": "not_run",
             "comment_intelligence_error": None,
@@ -1504,6 +1757,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         except Exception as e:
             log.warning("paste corpus generation failed: %s", e)
             paste_md = None
+
+    # Hook Type is optional and runs in the background. It updates the saved
+    # corpus + sidecar when done; the immediate clipboard payload stays fast.
+    _start_hook_type_thread(output_folder, yoink_path, metadata, entries)
 
     # Comments fetch in background; updates the corpus file when done.
     if phase_callback:
@@ -2282,6 +2539,70 @@ def _build_playlist_corpus(job: dict, *, text_only: bool) -> str:
     return "\n".join(parts)
 
 
+# ---------------------------------------------------------------------------
+# Authenticated file serving for extension UI thumbnails
+# ---------------------------------------------------------------------------
+_SERVED_IMAGE_TYPES = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp",
+}
+
+
+def _path_has_parent_ref(raw: str) -> bool:
+    parts = str(raw).replace("\\", "/").split("/")
+    return any(part == ".." for part in parts)
+
+
+def _magic_matches(path: Path, mime: str) -> bool:
+    try:
+        head = path.read_bytes()[:16]
+    except OSError:
+        return False
+    if mime == "image/png":
+        return head.startswith(b"\x89PNG\r\n\x1a\n")
+    if mime == "image/jpeg":
+        return head.startswith(b"\xff\xd8\xff")
+    if mime == "image/webp":
+        return len(head) >= 12 and head[:4] == b"RIFF" and head[8:12] == b"WEBP"
+    return False
+
+
+def _resolve_served_file(raw_path: str) -> tuple[Path | None, str | None, int, str | None]:
+    if not raw_path:
+        return None, None, 400, "path required"
+    if _path_has_parent_ref(raw_path):
+        return None, None, 400, "path invalid"
+    try:
+        p = Path(raw_path)
+        if not p.is_absolute():
+            return None, None, 400, "path invalid"
+        resolved = p.resolve()
+        if any(part == ".." for part in resolved.parts):
+            return None, None, 400, "path invalid"
+        sessions_root = SESSIONS_ROOT.resolve()
+        try:
+            resolved.relative_to(sessions_root)
+        except ValueError:
+            return None, None, 403, "path escapes sessions root"
+    except (OSError, ValueError):
+        return None, None, 400, "path invalid"
+
+    if not resolved.exists() or not resolved.is_file():
+        return None, None, 404, "file not found"
+    try:
+        if resolved.stat().st_size > MAX_SERVED_FILE_BYTES:
+            return None, None, 400, "file too large"
+    except OSError:
+        return None, None, 404, "file not found"
+
+    mime = _SERVED_IMAGE_TYPES.get(resolved.suffix.lower())
+    if not mime or not _magic_matches(resolved, mime):
+        return None, None, 415, "unsupported file type"
+    return resolved, mime, 200, None
+
+
 def _finish_job_cancelled(job_id: str):
     _update_job(
         job_id,
@@ -2561,6 +2882,19 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_file(self, path: Path, mime: str):
+        try:
+            body = path.read_bytes()
+        except OSError:
+            return self._send_json(404, {"ok": False, "error": "file not found"})
+        self.send_response(200)
+        self.send_header("Content-Type", mime)
+        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "private, max-age=300")
+        self._send_cors(self._cors_origin())
+        self.end_headers()
+        self.wfile.write(body)
+
     # Sentinel raised by _read_json_body when validation fails. Carries the
     # HTTP status the caller should send back. Keeps the caller code simple
     # (one try/except instead of three checks per endpoint).
@@ -2627,6 +2961,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if bare == "/settings":
             return self._handle_settings_get()
+        if bare == "/file":
+            return self._handle_file()
         if bare == "/open-prompts":
             return self._handle_open_prompts()
         if bare == "/open-index":
@@ -2674,17 +3010,22 @@ class Handler(BaseHTTPRequestHandler):
         self._send_json(200, {"ok": True, "settings": _public_settings()})
 
     def _handle_settings_post(self, body: dict):
-        if "comment_intelligence_enabled" not in body:
+        boolean_fields = (
+            "comment_intelligence_enabled",
+            "hook_type_enabled",
+            "smart_screenshot_picker_enabled",
+        )
+        if not any(f in body for f in boolean_fields) and "anthropic_key" not in body:
             return self._send_json(400, {
                 "ok": False,
-                "error": "comment_intelligence_enabled required",
+                "error": "settings field required",
             })
-        enabled = body.get("comment_intelligence_enabled")
-        if not isinstance(enabled, bool):
-            return self._send_json(400, {
-                "ok": False,
-                "error": "comment_intelligence_enabled must be boolean",
-            })
+        for field in boolean_fields:
+            if field in body and not isinstance(body.get(field), bool):
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": f"{field} must be boolean",
+                })
         if "anthropic_key" in body and body.get("anthropic_key") is not None:
             if not isinstance(body.get("anthropic_key"), str):
                 return self._send_json(400, {
@@ -2698,7 +3039,9 @@ class Handler(BaseHTTPRequestHandler):
                 })
 
         data = _read_settings()
-        data["comment_intelligence_enabled"] = enabled
+        for field in boolean_fields:
+            if field in body:
+                data[field] = body[field]
         if "anthropic_key" in body:
             raw_key = body.get("anthropic_key")
             if raw_key is None or raw_key.strip() == "":
@@ -2739,6 +3082,18 @@ class Handler(BaseHTTPRequestHandler):
             "error": None if ok else reason,
             "settings": _public_settings(),
         })
+
+    # ---- /file?path=... ----
+    # Authenticated thumbnail serving for extension UI. MV3 popups cannot
+    # reliably render file:// paths, so the helper exposes a very narrow
+    # image-only, session-root-only file endpoint.
+    def _handle_file(self):
+        qs = parse_qs(urlparse(self.path).query)
+        raw_path = (qs.get("path") or [""])[0]
+        path, mime, status, error = _resolve_served_file(raw_path)
+        if error:
+            return self._send_json(status, {"ok": False, "error": error})
+        return self._send_file(path, mime)
 
     # ---- /recent ----
     # Walk Desktop\Yoink\<topic>\<slug>\ and return the 3 most recent video
