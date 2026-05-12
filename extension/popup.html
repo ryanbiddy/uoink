@@ -455,6 +455,70 @@
       color: #ff9090;
     }
 
+    /* ---- v6 active-playlist pill (visible in single-video while a
+       playlist runs in the background) ---------------------------------- */
+    .active-playlist-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin: 8px 0;
+      padding: 5px 10px;
+      background: #1f2b22;
+      color: #d9ffe7;
+      border: 1px solid #3a6e4a;
+      border-radius: 12px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .active-playlist-pill:hover { background: #243325; }
+    .active-playlist-pill .dot.live { width: 8px; height: 8px; }
+    .active-playlist-pill .pill-label {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .active-playlist-pill .pill-arrow {
+      color: #9fe0bb;
+      font-size: 12px;
+    }
+
+    /* ---- v6 last-yoink completed affordance (on the playlist input
+       panel, when a recent completed job exists) ----------------------- */
+    .pl-last-yoink {
+      margin-top: 8px;
+      padding: 6px 8px;
+      background: #2b2b2f;
+      border: 1px solid #3a3a3f;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    }
+    .pl-last-yoink-label {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #b0b0b0;
+    }
+    .pl-last-yoink-label .pl-last-yoink-title {
+      color: #e6e6e6;
+    }
+    .pl-last-yoink-btn {
+      flex-shrink: 0;
+      padding: 3px 8px;
+      background: #3a3a3f;
+      color: #e6e6e6;
+      border: 1px solid #4a4a4f;
+      border-radius: 3px;
+      font-size: 10.5px;
+      cursor: pointer;
+    }
+    .pl-last-yoink-btn:hover { background: #45454a; }
+
     /* ---- v3 Smart Screenshot Picker ------------------------------- */
     .picker-header {
       font-size: 12px;
@@ -621,6 +685,14 @@
        ============================================================ -->
   <div id="mode-single">
 
+  <!-- v6: pill is hidden by default; popup.js shows it when single-video
+       mode is active AND a playlist job is running in the background. -->
+  <div id="active-playlist-pill" class="active-playlist-pill hidden" role="button" tabindex="0">
+    <span class="dot live"></span>
+    <span id="active-playlist-pill-label" class="pill-label">Playlist running</span>
+    <span class="pill-arrow">→</span>
+  </div>
+
   <!-- Destination -->
   <div class="panel">
     <div class="panel-title">Send to</div>
@@ -721,6 +793,15 @@
       <input id="pl-url" type="text" placeholder="https://www.youtube.com/playlist?list=...">
       <button id="pl-preview-btn" class="secondary">Preview</button>
       <div id="pl-input-error" class="pl-error hidden"></div>
+      <!-- v6 (item 3): recoverActiveJob populates this when no in-flight
+           job exists but a recent completed playlist is available. -->
+      <div id="pl-last-yoink" class="pl-last-yoink hidden">
+        <div class="pl-last-yoink-label">
+          <span>Last yoink: </span>
+          <span id="pl-last-yoink-title" class="pl-last-yoink-title">—</span>
+        </div>
+        <button id="pl-last-yoink-btn" class="pl-last-yoink-btn">Open folder</button>
+      </div>
     </div>
 
     <!-- Step 2: preview list + start -->

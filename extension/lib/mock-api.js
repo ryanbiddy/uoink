@@ -42,6 +42,13 @@
   const MOCK_FORCE_CI_ENABLED = false;
   const MOCK_FORCE_HOOK_TYPE_ENABLED = false;
   const MOCK_FORCE_SCREENSHOT_PICKER = false;
+  // Sprint 6 recovery-flow fixtures. The mock job-state machine resets when
+  // the popup closes, so item-3 ("last yoink completed" affordance on boot)
+  // and item-4 ("playlist running" pill in single-video) are normally
+  // impossible to exercise from scratch — flip these to inject fake state
+  // into jobsList() at popup boot. Set at most one to true at a time.
+  const MOCK_FORCE_RECOVERY_RUNNING = false;     // simulates close+reopen mid-job
+  const MOCK_FORCE_RECOVERY_COMPLETED = false;   // simulates last-yoink affordance
   const _needsKey =
     MOCK_FORCE_CI_ENABLED || MOCK_FORCE_HOOK_TYPE_ENABLED;
   let mockSettings = {
@@ -192,6 +199,14 @@
   }
 
   function jobStatus(jobId) {
+    // Sprint 6 fixture: if the running-recovery flag is set, also serve
+    // jobStatus for the fixture id so polling doesn't immediately
+    // terminate with "job not found". The fixture state is frozen — it
+    // exists to exercise the recovery UI + active-playlist pill, not to
+    // simulate progress.
+    if (MOCK_FORCE_RECOVERY_RUNNING && jobId === "fixture_running_job") {
+      return Promise.resolve({ ok: true, job: _fixtureRunningJob() });
+    }
     if (!job || jobId !== MOCK_JOB_ID) {
       return Promise.resolve({ ok: false, error: "job not found" });
     }
@@ -250,8 +265,78 @@
   }
 
   async function jobsList() {
-    if (!job) return { ok: true, jobs: [] };
+    if (!job) {
+      // No live mock job. Sprint 6 fixtures synthesize a job purely so the
+      // UI can exercise recovery paths that depend on jobsList returning
+      // something from before the popup opened.
+      if (MOCK_FORCE_RECOVERY_RUNNING) return { ok: true, jobs: [_fixtureRunningJob()] };
+      if (MOCK_FORCE_RECOVERY_COMPLETED) return { ok: true, jobs: [_fixtureCompletedJob()] };
+      return { ok: true, jobs: [] };
+    }
     return { ok: true, jobs: [_publicJob()] };
+  }
+
+  // --- Sprint 6 recovery fixtures ---------------------------------------
+  // _fixtureRunningJob: a frozen running playlist job. Paired with
+  // MOCK_FORCE_RECOVERY_RUNNING, lets the popup boot into the recovery
+  // path (auto-switch to playlist mode + progress panel) without going
+  // through playlistStart. jobStatus(fixture_running_job) keeps serving
+  // the same frozen state on every poll tick so the running UI + pill
+  // remain interactive; the fixture does not progress on its own.
+  // Click cancel to exit the fixture; the cancel handler will fail
+  // because the cancel path doesn't recognize fixture ids — for QA
+  // purposes, reload the popup with the flag flipped off instead.
+  function _fixtureRunningJob() {
+    const now = new Date().toISOString();
+    return {
+      id: "fixture_running_job",
+      kind: "playlist",
+      state: "running",
+      source_url: "https://www.youtube.com/playlist?list=PLfixture",
+      playlist_title: MOCK_PLAYLIST_TITLE,
+      session_folder: MOCK_SESSION_FOLDER,
+      videos_total: MOCK_TOTAL_VIDEOS,
+      videos_done: 4,
+      videos_failed: 0,
+      current_video: { index: 5, title: MOCK_VIDEOS[4].title,
+                       url: `https://www.youtube.com/watch?v=${MOCK_VIDEOS[4].id}` },
+      current_video_phase: "screenshots",
+      started_at: now,
+      updated_at: now,
+      completed_at: null,
+      error: null,
+      result: null,
+      warnings: ["playlist exceeds cap"],
+      message: "Yoinking video 5 of 10.",
+    };
+  }
+
+  // _fixtureCompletedJob: a recently-finished playlist job. Pairing with
+  // MOCK_FORCE_RECOVERY_COMPLETED exercises the "Last yoink: ..." affordance
+  // on the playlist input panel. completed_at is 5 minutes ago so it
+  // falls inside the popup's 30-minute "recent" window.
+  function _fixtureCompletedJob() {
+    const completedAt = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    return {
+      id: "fixture_completed_job",
+      kind: "playlist",
+      state: "completed",
+      source_url: "https://www.youtube.com/playlist?list=PLfixturedone",
+      playlist_title: MOCK_PLAYLIST_TITLE,
+      session_folder: MOCK_SESSION_FOLDER,
+      videos_total: MOCK_TOTAL_VIDEOS,
+      videos_done: 9,
+      videos_failed: 1,
+      current_video: null,
+      current_video_phase: null,
+      started_at: completedAt,
+      updated_at: completedAt,
+      completed_at: completedAt,
+      error: null,
+      result: null, // result is null in jobsList — only /jobs/<id> returns the full result
+      warnings: ["playlist exceeds cap"],
+      message: "Playlist complete.",
+    };
   }
 
   // ---- Settings endpoints (docs/v2-comment-intelligence.md) -------------

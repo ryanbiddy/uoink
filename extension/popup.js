@@ -662,7 +662,10 @@ window.addEventListener("unload", () => {
   })();
 
   // ---- mode switching --------------------------------------------------
+  let currentMode = "single"; // tracked for the active-playlist pill (item 4)
+
   function setMode(mode) {
+    currentMode = mode;
     for (const b of modeBtns) {
       const isActive = b.dataset.mode === mode;
       b.classList.toggle("active", isActive);
@@ -675,11 +678,61 @@ window.addEventListener("unload", () => {
       modePlaylistEl.classList.add("hidden");
       modeSingleEl.classList.remove("hidden");
     }
+    // Sprint 6 (item 4): the pill is only visible while user is in
+    // single-video mode AND a playlist job is non-terminal. Reconcile
+    // after every mode change.
+    _renderActivePlaylistPill();
   }
   for (const b of modeBtns) {
     b.addEventListener("click", () => {
       if (b.disabled) return;
       setMode(b.dataset.mode);
+    });
+  }
+
+  // ---- Sprint 6 (item 4): active-playlist pill -------------------------
+  // Shown when user is in single-video mode AND lastJob is non-terminal
+  // (queued or running). Clicking returns to playlist mode + progress
+  // panel. On terminal state we just hide the pill — the next-popup-open
+  // "Last yoink completed" affordance (item 3) is what surfaces the
+  // result on the playlist input panel.
+  const activePlaylistPillEl = document.getElementById("active-playlist-pill");
+  const activePlaylistPillLabelEl = document.getElementById("active-playlist-pill-label");
+
+  function _isJobNonTerminal(job) {
+    return !!(job && (job.state === "queued" || job.state === "running"));
+  }
+
+  function _renderActivePlaylistPill() {
+    if (!activePlaylistPillEl) return;
+    const showPill = currentMode === "single" && _isJobNonTerminal(lastJob);
+    if (!showPill) {
+      activePlaylistPillEl.classList.add("hidden");
+      return;
+    }
+    // Label uses textContent to keep XSS-discipline — playlist_title
+    // could in principle be attacker-shaped via a malicious playlist
+    // title (yt-dlp would surface it). Safe via textContent.
+    const total = lastJob.videos_total || 0;
+    const done = (lastJob.videos_done || 0) + (lastJob.videos_failed || 0);
+    const title = lastJob.playlist_title || "Playlist";
+    const state = lastJob.state === "queued" ? "Queued" : `${done}/${total}`;
+    activePlaylistPillLabelEl.textContent = `${title} · ${state}`;
+    activePlaylistPillEl.classList.remove("hidden");
+  }
+
+  function _onPillActivate() {
+    if (!_isJobNonTerminal(lastJob)) return;
+    setMode("playlist");
+    showOnly(progressPanel);
+  }
+  if (activePlaylistPillEl) {
+    activePlaylistPillEl.addEventListener("click", _onPillActivate);
+    activePlaylistPillEl.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" || ev.key === " ") {
+        ev.preventDefault();
+        _onPillActivate();
+      }
     });
   }
 
@@ -737,6 +790,7 @@ window.addEventListener("unload", () => {
     activeJobId = null;
     resultPayload = null;
     lastJob = null;
+    _renderActivePlaylistPill();
     previewedUrl = null;
     previewedPlaylist = null;
     urlInput.value = "";
@@ -759,7 +813,7 @@ window.addEventListener("unload", () => {
     progressText.textContent = "Queued…";
     progressCiEl.classList.add("hidden");
     progressDisconnectEl.classList.add("hidden");
-    progressDisconnectEl.textContent = "";
+    progressDisconnectEl.replaceChildren();
     doneCiEl.classList.add("hidden");
     doneCiEl.textContent = "";
     for (const chip of phaseRow.querySelectorAll(".pl-phase-chip")) {
@@ -925,17 +979,34 @@ window.addEventListener("unload", () => {
   // and the poll cadence downshifts to SLOW_POLL_MS so a recovered helper
   // auto-reconnects without burning the user's network. A single successful
   // poll resets both the counter and the cadence.
+  //
+  // Sprint 6: the banner now includes an inline "Open setup guide" link
+  // (item 1) and, after AUTO_OPEN_SETUP_MS of continuous disconnect, the
+  // popup auto-opens the setup guide once per episode (item 2).
   const STALL_THRESHOLD = 5;     // consecutive failures before banner shows
   const SLOW_POLL_MS = 10_000;   // recovery cadence once stalled
+  const AUTO_OPEN_SETUP_MS = 30_000; // total disconnect before auto-opening setup
   let pollFailures = 0;
   let pollCadence = POLL_MS;     // current interval between pollOnce ticks
+  let bannerPainted = false;     // banner DOM built this stall episode
+  // _disconnectStartTs is set on the FIRST failure (not the threshold cross)
+  // so the 30s auto-open timer measures actual disconnect duration, not
+  // banner-visibility duration. Threshold-cross would make the auto-open
+  // fire at ~35s of disconnect, which is harder to reason about.
+  let disconnectStartTs = 0;
+  let setupAutoOpened = false;
+
+  const SETUP_OFFLINE_URL = chrome.runtime.getURL("setup.html?source=offline");
 
   function startPolling() {
     stopPolling();
     pollFailures = 0;
     pollCadence = POLL_MS;
+    bannerPainted = false;
+    disconnectStartTs = 0;
+    setupAutoOpened = false;
     progressDisconnectEl.classList.add("hidden");
-    progressDisconnectEl.textContent = "";
+    progressDisconnectEl.replaceChildren();
     pollOnce();
     pollTimer = setInterval(pollOnce, pollCadence);
   }
@@ -952,24 +1023,72 @@ window.addEventListener("unload", () => {
     }
   }
 
+  // Build the banner DOM once per stall episode. createElement-only
+  // (no innerHTML interpolation) per the XSS discipline established in
+  // Sprint 5 — even though the strings here are static, keeping the
+  // pattern consistent avoids future-PR regressions.
+  function _paintDisconnectBanner() {
+    progressDisconnectEl.replaceChildren();
+    const text = document.createElement("span");
+    text.textContent =
+      "Yoink helper disconnected — check that the helper is running. ";
+    progressDisconnectEl.appendChild(text);
+    const link = document.createElement("a");
+    link.textContent = "Open setup guide";
+    link.href = "#";
+    link.style.color = "#ffd9d9";
+    link.style.textDecoration = "underline";
+    link.style.cursor = "pointer";
+    link.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      chrome.tabs.create({ url: SETUP_OFFLINE_URL, active: true });
+    });
+    progressDisconnectEl.appendChild(link);
+    progressDisconnectEl.classList.remove("hidden");
+  }
+
   function _onPollSuccess() {
-    if (pollFailures === 0 && pollCadence === POLL_MS) return;
+    if (pollFailures === 0 && pollCadence === POLL_MS && !bannerPainted) return;
     pollFailures = 0;
+    bannerPainted = false;
+    disconnectStartTs = 0;
+    setupAutoOpened = false;
     progressDisconnectEl.classList.add("hidden");
-    progressDisconnectEl.textContent = "";
+    progressDisconnectEl.replaceChildren();
     _setPollCadence(POLL_MS);
   }
 
   function _onPollFailure(reason) {
     pollFailures++;
+    // Track the start of the disconnect episode on the very first failure,
+    // not the threshold cross — see comment above on disconnectStartTs.
+    if (disconnectStartTs === 0) disconnectStartTs = Date.now();
     if (pollFailures < STALL_THRESHOLD) return;
-    // First time we cross the threshold, paint the banner and downshift.
-    // Keep painting on subsequent failures so the message reason stays fresh.
-    progressDisconnectEl.textContent =
-      "Yoink helper disconnected — check that the helper is running. " +
-      "Retrying in the background…";
-    progressDisconnectEl.classList.remove("hidden");
-    _setPollCadence(SLOW_POLL_MS);
+
+    // Paint the banner once on threshold cross; don't repaint per tick.
+    // Repainting would re-attach the click handler unnecessarily and
+    // (subtly) reset any text-selection the user had on the banner.
+    if (!bannerPainted) {
+      _paintDisconnectBanner();
+      bannerPainted = true;
+      _setPollCadence(SLOW_POLL_MS);
+    }
+
+    // Item 2: after AUTO_OPEN_SETUP_MS of continuous disconnect, open the
+    // setup guide once per episode. _onPollSuccess clears the flag so a
+    // recovered-then-relapsed connection can trigger the auto-open again
+    // (treat each reconnect-then-disconnect as a fresh episode).
+    if (!setupAutoOpened &&
+        disconnectStartTs > 0 &&
+        Date.now() - disconnectStartTs >= AUTO_OPEN_SETUP_MS) {
+      try {
+        chrome.tabs.create({ url: SETUP_OFFLINE_URL, active: true });
+      } catch (e) {
+        console.warn("[playlist] auto-open setup failed", e);
+      }
+      setupAutoOpened = true;
+    }
+
     if (reason) console.warn("[playlist] poll stalled:", reason);
   }
 
@@ -1065,6 +1184,11 @@ window.addEventListener("unload", () => {
       if (idx < activeIdx) chip.classList.add("done");
       else if (idx === activeIdx) chip.classList.add("active");
     }
+
+    // Sprint 6 (item 4): keep the single-video pill in sync with progress.
+    // Cheap to call every tick; the function short-circuits when the pill
+    // is already in the right state.
+    _renderActivePlaylistPill();
   }
 
   // ---- cancel ----------------------------------------------------------
@@ -1080,6 +1204,7 @@ window.addEventListener("unload", () => {
       if (res && res.ok && res.job) {
         stopPolling();
         lastJob = res.job;
+        _renderActivePlaylistPill();
         onCancelled(res.job);
       }
       // If res.ok is false (e.g. "job is already finished"), let the next
@@ -1223,6 +1348,66 @@ window.addEventListener("unload", () => {
     showOnly(failedPanel);
   }
 
+  // ---- Sprint 6 (item 3): last-yoink completed affordance --------------
+  // 30-minute window picked over 60 or 15: shorter than 60 keeps the popup
+  // honest about "recent" (a yoink from 45 min ago is probably out of mind
+  // and clutters the surface), longer than 15 covers the case where the
+  // user starts a yoink, walks away, and comes back to finish reading.
+  // No dismissal × yet — auto-expiry covers most of the value, and adding
+  // a per-job dismissal-storage was deemed not worth the complexity for
+  // first ship. Document if we hit user pushback.
+  const LAST_YOINK_WINDOW_MS = 30 * 60 * 1000;
+  const lastYoinkEl = document.getElementById("pl-last-yoink");
+  const lastYoinkTitleEl = document.getElementById("pl-last-yoink-title");
+  const lastYoinkBtn = document.getElementById("pl-last-yoink-btn");
+
+  function _hideLastYoink() {
+    if (lastYoinkEl) lastYoinkEl.classList.add("hidden");
+    if (lastYoinkBtn) lastYoinkBtn.onclick = null;
+  }
+
+  function _renderLastYoink(job) {
+    if (!lastYoinkEl || !lastYoinkTitleEl || !lastYoinkBtn) return;
+    if (!job) { _hideLastYoink(); return; }
+    // Label: prefer playlist_title; fall back to source_url for jobs that
+    // somehow lack a title. Both go through textContent so a hostile
+    // playlist title can't inject markup. The contract today only emits
+    // kind="playlist" jobs; if Codex later adds kind="single" to /jobs,
+    // this branch handles it with a sensible fallback label.
+    let label;
+    if (job.kind === "single") {
+      label = job.playlist_title || job.source_url || "Single video";
+    } else {
+      label = job.playlist_title || "Playlist";
+    }
+    lastYoinkTitleEl.textContent = label;
+    lastYoinkBtn.onclick = async () => {
+      const path = job.session_folder;
+      if (!path) {
+        showToast("No folder path available.");
+        return;
+      }
+      try {
+        const res = await STC.openFolder(path);
+        if (!res || res.ok === false) {
+          showToast("Couldn't open folder — server may be offline.");
+        }
+      } catch {
+        showToast("Couldn't open folder — server may be offline.");
+      }
+    };
+    lastYoinkEl.classList.remove("hidden");
+  }
+
+  function _isRecentCompleted(job) {
+    if (!job || job.state !== "completed") return false;
+    if (typeof job.videos_done !== "number" || job.videos_done <= 0) return false;
+    if (!job.completed_at) return false;
+    const t = Date.parse(job.completed_at);
+    if (Number.isNaN(t)) return false;
+    return (Date.now() - t) < LAST_YOINK_WINDOW_MS;
+  }
+
   // ---- boot ------------------------------------------------------------
   // Sprint 5: try to recover an in-flight playlist job before settling into
   // the default input view. If the user closed the popup mid-job, the helper
@@ -1230,6 +1415,9 @@ window.addEventListener("unload", () => {
   // When we find a non-terminal job we flip into playlist mode, repaint the
   // progress panel from the snapshot, and resume polling. If none found,
   // default to the input panel as before.
+  // Sprint 6 (item 3): if no in-flight job is found, look for a recently
+  // completed job (within LAST_YOINK_WINDOW_MS) and surface an "Open folder"
+  // affordance on the playlist input panel.
   showOnly(inputPanel);
   (async function recoverActiveJob() {
     let res;
@@ -1237,20 +1425,32 @@ window.addEventListener("unload", () => {
       res = await STC.jobsList();
     } catch { return; }
     if (!res || !res.ok || !Array.isArray(res.jobs)) return;
-    const active = res.jobs
-      .filter((j) => j && (j.state === "queued" || j.state === "running"))
-      .sort((a, b) => String(b.updated_at || "").localeCompare(String(a.updated_at || "")))[0];
-    if (!active || !active.id) return;
-    activeJobId = active.id;
-    lastJob = active;
-    progressFill.style.width = "0%";
-    for (const chip of phaseRow.querySelectorAll(".pl-phase-chip")) {
-      chip.classList.remove("active", "done");
+    const sortedByUpdated = [...res.jobs]
+      .filter((j) => j && j.id)
+      .sort((a, b) => String(b.updated_at || "").localeCompare(String(a.updated_at || "")));
+    const active = sortedByUpdated.find(
+      (j) => j.state === "queued" || j.state === "running"
+    );
+    if (active) {
+      activeJobId = active.id;
+      lastJob = active;
+      progressFill.style.width = "0%";
+      for (const chip of phaseRow.querySelectorAll(".pl-phase-chip")) {
+        chip.classList.remove("active", "done");
+      }
+      renderProgress(active);
+      showOnly(progressPanel);
+      setMode("playlist");
+      startPolling();
+      return;
     }
-    renderProgress(active);
-    showOnly(progressPanel);
-    setMode("playlist");
-    startPolling();
+    // No in-flight job — look for a recently completed one. Sort by
+    // completed_at desc (falling back to updated_at if completed_at is
+    // missing) and pick the freshest.
+    const recent = res.jobs
+      .filter(_isRecentCompleted)
+      .sort((a, b) => String(b.completed_at || "").localeCompare(String(a.completed_at || "")))[0];
+    if (recent) _renderLastYoink(recent);
   })();
 })();
 
