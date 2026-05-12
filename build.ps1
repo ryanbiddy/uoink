@@ -55,6 +55,9 @@ $PILLOW_VERSION = '10.4.0'
 # Official Model Context Protocol Python SDK for the stdio MCP server.
 # Also pinned in requirements.txt for dev installs and docs.
 $MCP_VERSION    = '1.27.1'
+# Windows Credential Manager wrapper for Anthropic API key storage.
+# Also pinned in requirements.txt for dev installs and docs.
+$KEYRING_VERSION = '25.7.0'
 
 # ---- Hash verification --------------------------------------------------
 # Lock in known-good SHA256s so a compromised mirror or silent upstream
@@ -184,17 +187,18 @@ $embedPython = "$StagingDir\python\python.exe"
 & $embedPython $getPipPy --no-warn-script-location
 if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 
-# 2d. Install yt-dlp + Pillow + MCP at pinned versions. Pip's hash-locking would
+# 2d. Install yt-dlp + Pillow + MCP + keyring at pinned versions. Pip's hash-locking would
 #     require a requirements file with --require-hashes; for v1 we accept
 #     the trust-pip-itself model since the version pins are the
 #     load-bearing part (a compromised release on PyPI affects everyone,
 #     not just us). Pillow drives the multimodal paste-corpus generator
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
-#     MCP powers yoink_mcp.py for stdio agent integrations.
-Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION..."
+#     MCP powers yoink_mcp.py for stdio agent integrations. keyring stores
+#     the user's Anthropic API key in Windows Credential Manager.
+Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION..."
 & $embedPython -m pip install --no-warn-script-location --no-compile `
-    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION"
-if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP) failed' }
+    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION"
+if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring) failed' }
 
 # 2e. Trim dev-only and build-time files we don't need at runtime.
 # distutils-precedence.pth is dropped by setuptools and tries to import

@@ -274,9 +274,13 @@ Return shape:
 {
   "ok": true,
   "corpus_md": "# Video title\n...",
-  "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Topic\\video-slug"
+  "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Topic\\video-slug",
+  "video_id": "abc123DEF45",
+  "video_url": "https://www.youtube.com/watch?v=abc123DEF45"
 }
 ```
+
+`video_id` and `video_url` are additive v2.1 fields. They are populated from the per-video JSON sidecar when available and are `null` for legacy/malformed yoinks without sidecar metadata.
 
 Errors:
 

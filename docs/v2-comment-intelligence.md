@@ -1,6 +1,6 @@
 # Yoink v2 Comment Intelligence contract
 
-Status: implemented in `codex/v2-sprint2`; settings extended in `codex/v2-sprint3`
+Status: implemented in `codex/v2-sprint2`; settings extended in `codex/v2-sprint3`; key storage moved to OS keyring in v2.1 Sprint 7
 
 ## Overview
 
@@ -52,7 +52,8 @@ Field rules:
 - `anthropic_key` is optional. If omitted, the existing saved key is preserved.
 - `anthropic_key` as a non-empty string replaces the saved key.
 - `anthropic_key` as `null` or an empty string clears the saved key.
-- The key is stored plaintext in `%LOCALAPPDATA%\Yoink\settings.json` on Windows. This is a v2 product decision; encryption is deferred to v2.1+.
+- Starting in v2.1, the key is stored in the OS keyring. On Windows this is Windows Credential Manager via the Python `keyring` package, using service `Yoink` and username `anthropic_key`. `settings.json` stores only booleans plus `anthropic_key_invalid`.
+- Legacy plaintext `anthropic_key` values in `%LOCALAPPDATA%\Yoink\settings.json` are migrated to keyring on helper startup and removed from `settings.json`.
 
 Response body matches `GET /settings`:
 
@@ -185,7 +186,7 @@ Comment Intelligence: analysis failed - <short reason>
 
 Anthropic 401:
 
-- Mark the saved key invalid by clearing it from `settings.json`.
+- Mark the saved key invalid by clearing it from the OS keyring.
 - Subsequent `GET /settings` returns `anthropic_key_set: false`.
 - Future Comment Intelligence calls skip until the user saves a key again.
 
@@ -261,5 +262,4 @@ After analysis:
 
 ## Open questions
 
-- Should v2.1 encrypt `settings.json` with Windows DPAPI, or is OS account isolation enough for this solo-local tool?
 - Should invalid-key detection surface a browser notification, or is setup.html status enough?

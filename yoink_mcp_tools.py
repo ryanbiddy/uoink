@@ -179,6 +179,7 @@ def _hook_context_for_folder(folder: Path) -> dict[str, Any]:
     if comments and isinstance(comments[0], dict):
         top_comment = str(comments[0].get("text") or "")
     return {
+        "video_id": sidecar.get("video_id") or metadata.get("id") or "",
         "title": sidecar.get("title") or metadata.get("title") or "",
         "description": metadata.get("description") or "",
         "channel": sidecar.get("channel") or metadata.get("channel") or metadata.get("uploader") or "",
@@ -324,7 +325,17 @@ def get_yoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
         md = corpus.read_text(encoding="utf-8")
     except OSError as e:
         return _err(f"corpus read failed: {e}")
-    return _ok(corpus_md=md, folder=str(folder))
+    sidecar = _read_sidecar(folder)
+    video_id = sidecar.get("video_id")
+    if not isinstance(video_id, str) or not video_id.strip():
+        video_id = None
+    video_url = f"https://www.youtube.com/watch?v={video_id}" if video_id else None
+    return _ok(
+        corpus_md=md,
+        folder=str(folder),
+        video_id=video_id,
+        video_url=video_url,
+    )
 
 
 def analyze_comments_tool(args: dict[str, Any]) -> dict[str, Any]:
@@ -366,7 +377,8 @@ def classify_hook(args: dict[str, Any]) -> dict[str, Any]:
     if not folder or not corpus:
         return _err("yoink not found")
     try:
-        analysis = b.analyze_hook_type(_hook_context_for_folder(folder), api_key=key)
+        context = _hook_context_for_folder(folder)
+        analysis = b.analyze_hook_type(context, api_key=key)
         b._replace_hook_analysis_section(corpus, b._render_hook_analysis(analysis))
         b._update_sidecar_hook_type(
             folder,
@@ -374,6 +386,7 @@ def classify_hook(args: dict[str, Any]) -> dict[str, Any]:
             hook_type=analysis.get("hook_type"),
             hook_explanation=analysis.get("hook_explanation"),
         )
+        b._append_hook_taxonomy(context, analysis)
         return _ok(
             hook_type=analysis.get("hook_type"),
             hook_explanation=analysis.get("hook_explanation"),
