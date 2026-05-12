@@ -138,7 +138,3 @@ Anthropic 401:
 ## Smart Screenshot Picker setting
 
 `smart_screenshot_picker_enabled` is a backend-persisted UI preference for Claude Code's popup work. The backend does not implement the picker UI in Sprint 3. Playlists remain text-only in the clipboard regardless of this flag.
-
-## Open questions
-
-None.

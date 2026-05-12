@@ -416,6 +416,7 @@ _session_lock = threading.Lock()
 # playlist jobs become long enough that restart recovery matters.
 _jobs: dict[str, dict] = {}
 _jobs_lock = threading.Lock()
+_JOB_TERMINAL_STATES = {"completed", "cancelled", "failed"}
 _settings_lock = threading.Lock()
 _corpus_update_lock = threading.Lock()
 
@@ -1147,6 +1148,7 @@ def _hook_type_worker(output_folder: Path, yoink_path: Path,
     except AnthropicAPIError as e:
         reason = _short_reason(e.reason)
         if e.status == 401:
+            _mark_anthropic_key_invalid()
             log.warning("Hook Type skipped: Anthropic API key invalid")
         else:
             log.warning("Hook Type failed: %s", reason)
@@ -1290,6 +1292,7 @@ def _comment_intelligence_worker(output_folder: Path, yoink_path: Path,
     except AnthropicAPIError as e:
         reason = _short_reason(e.reason)
         if e.status == 401:
+            _mark_anthropic_key_invalid()
             log.warning("Comment Intelligence skipped: Anthropic API key invalid")
         else:
             log.warning("Comment Intelligence failed: %s", reason)
@@ -2501,6 +2504,8 @@ def _update_job(job_id: str, **updates) -> dict | None:
         job = _jobs.get(job_id)
         if not job:
             return None
+        if job.get("state") in _JOB_TERMINAL_STATES:
+            return _public_job(job)
         job.update(updates)
         job["updated_at"] = _now_iso()
         return _public_job(job)
@@ -2577,7 +2582,7 @@ def _cancel_playlist_job(job_id: str) -> tuple[dict | None, str | None, int]:
         job = _jobs.get(job_id)
         if not job:
             return None, "job not found", 404
-        if job.get("state") in ("completed", "cancelled", "failed"):
+        if job.get("state") in _JOB_TERMINAL_STATES:
             return None, "job is already finished", 200
         event = job.get("_cancel_event")
         if not isinstance(event, threading.Event):
@@ -3449,6 +3454,8 @@ class Handler(BaseHTTPRequestHandler):
         try:
             subprocess.Popen(
                 ["explorer", f"/select,{prompts_path}"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
                 **SUBPROCESS_KW,
             )
         except Exception as e:
