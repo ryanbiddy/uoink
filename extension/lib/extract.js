@@ -337,7 +337,10 @@
   // retain their base64-embedded form.
   async function stashPickerCorpus(data) {
     const payload = {
-      created_at: new Date().toISOString(),
+      // yoinked_at marks when the corpus finished extracting (effectively
+      // now, since we stash immediately after STC.postExtract resolves).
+      // Popup uses this for the picker source-meta relative-time line.
+      yoinked_at: new Date().toISOString(),
       title: (data && data.title) || "",
       folder: (data && data.folder) || "",
       corpus_md_paste: (data && data.corpus_md_paste) || "",

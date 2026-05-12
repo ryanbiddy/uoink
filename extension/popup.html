@@ -465,7 +465,15 @@
       font-size: 13px;
       color: #e6e6e6;
       font-weight: 600;
-      margin: 0 0 4px;
+      margin: 0 0 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .picker-source-meta {
+      font-size: 11px;
+      color: #888;
+      margin: 0 0 6px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -582,8 +590,9 @@
        hide so the picker owns the popup surface.
        ============================================================ -->
   <div id="picker-mode" class="hidden">
-    <div class="picker-header">Pick the screenshots to include in this paste:</div>
+    <div class="picker-header">Pick screenshots for:</div>
     <div id="picker-title" class="picker-title">—</div>
+    <div id="picker-source-meta" class="picker-source-meta">—</div>
     <div class="picker-toolbar">
       <span id="picker-count">0 selected</span>
       <a id="picker-select-all" class="picker-toggle">Deselect all</a>
@@ -791,7 +800,10 @@
         Click <b>Yoink</b> under any video, or right-click a YouTube
         link/thumbnail.
       </div>
-      <a id="open-settings" class="edit-prompts-link" style="flex-shrink:0;white-space:nowrap" title="Open Yoink settings">⚙ Settings</a>
+      <div style="flex-shrink:0;white-space:nowrap;display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+        <a id="open-settings" class="edit-prompts-link" title="Open Yoink settings">⚙ Settings</a>
+        <a id="open-mcp-setup" class="edit-prompts-link" title="Use Yoink with Claude Desktop / Cursor / ChatGPT Desktop">Use with AI agents →</a>
+      </div>
     </div>
   </div>
 

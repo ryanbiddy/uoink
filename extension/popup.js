@@ -520,6 +520,22 @@ if (openSettingsLink) {
   });
 }
 
+// ---- MCP setup link (Sprint 4) --------------------------------------------
+// Deep-links to the MCP section of setup.html. Setup.html ships an id
+// "mcp-settings" anchor; the section content (Claude Desktop / Cursor /
+// generic HTTP config snippets) is rendered by Codex's setup.js.
+const openMcpLink = document.getElementById("open-mcp-setup");
+if (openMcpLink) {
+  openMcpLink.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    chrome.tabs.create({
+      url: chrome.runtime.getURL("setup.html?source=popup#mcp-settings"),
+      active: true,
+    });
+    window.close();
+  });
+}
+
 // ---- Boot -----------------------------------------------------------------
 ping();
 loadInterval();
@@ -1165,6 +1181,7 @@ window.addEventListener("unload", () => {
   const modeSingleEl = document.getElementById("mode-single");
   const modePlaylistEl = document.getElementById("mode-playlist");
   const pickerTitleEl = document.getElementById("picker-title");
+  const pickerSourceMetaEl = document.getElementById("picker-source-meta");
   const pickerCountEl = document.getElementById("picker-count");
   const pickerSelectAllLink = document.getElementById("picker-select-all");
   const pickerGridEl = document.getElementById("picker-grid");
@@ -1315,6 +1332,21 @@ window.addEventListener("unload", () => {
     return src;
   }
 
+  // Sprint 4 (1c): real-mode thumbnails come back as blob: URLs from
+  // URL.createObjectURL(). Revoke them on picker exit so they don't sit
+  // in memory until popup unload. Mock-mode entries are data: URLs — no
+  // revocation needed (and revoking a data URL is a no-op anyway, but
+  // skipping the call keeps the loop cheap on large grids).
+  function _revokeThumbBlobs() {
+    for (const src of thumbCache.values()) {
+      if (typeof src === "string" && src.startsWith("blob:")) {
+        try { URL.revokeObjectURL(src); }
+        catch (e) { console.warn("[picker] revoke failed", e); }
+      }
+    }
+    thumbCache.clear();
+  }
+
   function toggleIndex(i) {
     if (selectedSet.has(i)) selectedSet.delete(i);
     else selectedSet.add(i);
@@ -1342,14 +1374,39 @@ window.addEventListener("unload", () => {
     pickerErrorEl.classList.toggle("hidden", !msg);
   }
 
+  // Sprint 4 (1b): relative-time helper for the picker source meta line.
+  // Two-yoinks-back-to-back disambiguation: when pending_picker gets
+  // overwritten, the user sees "just now" vs "3m ago" so they know which
+  // yoink they're looking at. Falls back to ISO date for older stashes
+  // (shouldn't happen in practice — pending_picker is cleared on copy).
+  function formatRelativeTime(iso) {
+    if (!iso) return "";
+    const t = Date.parse(iso);
+    if (Number.isNaN(t)) return "";
+    const diffSec = Math.max(0, Math.round((Date.now() - t) / 1000));
+    if (diffSec < 10) return "just now";
+    if (diffSec < 60) return `${diffSec}s ago`;
+    if (diffSec < 3600) {
+      const m = Math.round(diffSec / 60);
+      return `${m}m ago`;
+    }
+    if (diffSec < 86400) {
+      const h = Math.round(diffSec / 3600);
+      return `${h}h ago`;
+    }
+    return iso.slice(0, 10); // YYYY-MM-DD fallback
+  }
+
   function activate(payload) {
     pendingPicker = payload || null;
     if (!pendingPicker) { hidePicker(); return; }
     showError("");
     pickerTitleEl.textContent = pendingPicker.title || "Untitled video";
+    const rel = formatRelativeTime(pendingPicker.yoinked_at);
+    pickerSourceMetaEl.textContent = rel ? `Yoinked ${rel}` : "";
     screenshots = parseScreenshots(pendingPicker.yoink_md);
     selectedSet = new Set(screenshots.map((_, i) => i)); // default all selected
-    thumbCache.clear();
+    _revokeThumbBlobs(); // release any prior-payload blobs before reusing
     renderGrid();
     updateCount();
 
@@ -1410,6 +1467,7 @@ window.addEventListener("unload", () => {
 
     const copied = await _writeClipboard(clipboardText);
     await _clearPending();
+    _revokeThumbBlobs(); // Sprint 4 (1c): release blob URLs from getScreenshotThumbnail
 
     // Open Claude tab to match the v1 auto-copy flow, then close popup.
     try {
@@ -1418,17 +1476,30 @@ window.addEventListener("unload", () => {
       console.warn("[picker] tab create failed", e);
     }
 
+    // Sprint 4 (1a): route through STC.buildYoinkedMessage so the picker
+    // path gets the same first-yoink CTA treatment as v1 auto-copy. The
+    // helper atomically flips has_completed_first_yoink on first success
+    // and returns either the first-yoink CTA copy or the topic-aware
+    // subsequent copy. We pass a minimal data-shape (only `.topic` is
+    // consumed by the helper) reconstituted from the stashed payload.
     try {
+      const data = { topic: pendingPicker && pendingPicker.topic };
+      const message = await STC.buildYoinkedMessage(data, copied);
+      // Title surfaces the picker-specific detail (how many screenshots
+      // were kept) so the user-visible signal isn't lost when the message
+      // body becomes the standard CTA/topic copy.
+      const titleSuffix = kind === "copy"
+        ? ` (${selectedSet.size} of ${screenshots.length} screenshots)`
+        : "";
       await chrome.runtime.sendMessage({
         type: "notify",
-        title: copied ? "Yoinked!" : "Yoink ready (clipboard blocked)",
-        message: copied
-          ? (kind === "copy"
-              ? `Pasted-ready: ${selectedSet.size} of ${screenshots.length} screenshots kept.`
-              : "Full corpus copied. Paste with Ctrl+V in Claude.")
-          : `Open the saved file in the yoink folder.`,
+        title: copied ? `Yoinked!${titleSuffix}` : "Yoink ready (clipboard blocked)",
+        message,
       });
-    } catch { /* notify is fire-and-forget */ }
+    } catch (e) {
+      // notify is fire-and-forget; log but don't surface to user
+      console.warn("[picker] notify failed", e);
+    }
 
     window.close();
   }
@@ -1458,6 +1529,6 @@ window.addEventListener("unload", () => {
     if (area !== "local" || !changes.pending_picker) return;
     const next = changes.pending_picker.newValue;
     if (next) activate(next);
-    else hidePicker();
+    else { _revokeThumbBlobs(); hidePicker(); }
   });
 })();
