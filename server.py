@@ -207,6 +207,20 @@ def _write_settings(data: dict) -> None:
             pass
 
 
+def _atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8") -> None:
+    """Write text via temp file + replace so crashy exits don't leave partial files."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
+    try:
+        tmp.write_text(text, encoding=encoding)
+        tmp.replace(path)
+    finally:
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
 def _credential_store_error() -> CredentialStoreError | None:
     if _keyring is None:
         detail = (
@@ -1865,7 +1879,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
     # outside its folder.
     yoink_path = _corpus_path(output_folder)
-    yoink_path.write_text(yoink_md, encoding="utf-8")
+    _atomic_write_text(yoink_path, yoink_md)
     hook_type_pending = _should_start_hook_type(metadata)
 
     # Structured JSON sidecar (STRAT). Same data the markdown carries but
@@ -1920,10 +1934,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "comment_intelligence_error": None,
         }
         sidecar_path = output_folder / f"{output_folder.name}.json"
-        sidecar_path.write_text(
-            json.dumps(sidecar, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
+        _atomic_write_text(sidecar_path, json.dumps(sidecar, ensure_ascii=False, indent=2))
     except (OSError, TypeError) as e:
         # Non-fatal: the markdown is the user-facing artifact. Sidecar is
         # for future tooling.
@@ -2532,6 +2543,36 @@ def _strip_image_refs(md: str) -> str:
     return _IMAGE_REF_LINE_RE.sub("", md)
 
 
+def _strip_paste_header(md: str) -> str:
+    """Remove the multimodal clipboard-only notice from persisted job text."""
+    lines = md.splitlines()
+    if not lines or not lines[0].startswith("> This corpus includes embedded images."):
+        return md
+    i = 0
+    while i < len(lines) and (lines[i].startswith(">") or not lines[i].strip()):
+        i += 1
+    return "\n".join(lines[i:]).lstrip("\n")
+
+
+def _job_text_only_corpus(md: str) -> str:
+    """Small `/jobs` payload: no base64/data URI or local image references."""
+    if not isinstance(md, str):
+        return ""
+    return _strip_image_refs(_strip_paste_header(md)).strip()
+
+
+def _sanitize_single_job_result(result):
+    """Strip legacy multimodal payloads from single-video job records."""
+    if not isinstance(result, dict):
+        return result
+    clean = dict(result)
+    clean.pop("corpus_md_paste", None)
+    text = clean.get("combined_md_text")
+    if isinstance(text, str):
+        clean["combined_md_text"] = _job_text_only_corpus(text)
+    return clean
+
+
 def _coerce_nullable_int(v):
     if isinstance(v, bool) or v is None:
         return None
@@ -2624,9 +2665,13 @@ def _make_job_id() -> str:
 
 
 def _public_job(job: dict) -> dict:
+    kind = job.get("kind") or "playlist"
+    result = job.get("result")
+    if kind == "single":
+        result = _sanitize_single_job_result(result)
     return {
         "id": job.get("id"),
-        "kind": job.get("kind") or "playlist",
+        "kind": kind,
         "state": job.get("state") or "failed",
         "source_url": job.get("source_url"),
         "title": job.get("title"),
@@ -2641,7 +2686,7 @@ def _public_job(job: dict) -> dict:
         "updated_at": job.get("updated_at"),
         "completed_at": job.get("completed_at"),
         "error": job.get("error"),
-        "result": job.get("result"),
+        "result": result,
         "warnings": list(job.get("warnings") or []),
         "message": job.get("message"),
     }
@@ -2747,7 +2792,7 @@ def _record_single_extract_job(url: str, started_at: str, *,
     corpus_path = _resolve_corpus_path(folder_path) if folder_path else None
     corpus_text = None
     if result:
-        corpus_text = result.get("corpus_md_paste") or result.get("yoink_md")
+        corpus_text = _job_text_only_corpus(result.get("yoink_md") or "")
     job = {
         "id": _make_job_id(),
         "kind": "single",
@@ -3233,7 +3278,7 @@ def _playlist_worker(job_id: str):
         disk_md = _build_playlist_corpus(job, text_only=False)
         clipboard_md = _build_playlist_corpus(job, text_only=True)
         corpus_path = folder / "corpus.md"
-        corpus_path.write_text(disk_md, encoding="utf-8")
+        _atomic_write_text(corpus_path, disk_md)
         _raise_if_cancelled(cancel_event)
         result = {
             "combined_md_path": str(corpus_path),
@@ -3362,6 +3407,12 @@ class Handler(BaseHTTPRequestHandler):
         self._send_cors(self._cors_origin())
         self.end_headers()
         self.wfile.write(body)
+
+    def _send_empty(self, status: int = 202):
+        self.send_response(status)
+        self.send_header("Content-Length", "0")
+        self._send_cors(self._cors_origin())
+        self.end_headers()
 
     def _send_file(self, path: Path, mime: str):
         try:
@@ -3635,7 +3686,9 @@ class Handler(BaseHTTPRequestHandler):
         if bare == "/mcp/v1/initialize" or (bare == "/mcp/v1" and method == "initialize"):
             return self._send_mcp_result(request_id, _mcp_initialize_result(body))
         if method == "notifications/initialized":
-            return self._send_json(202, {"ok": True})
+            # JSON-RPC notifications have no response id/body. Return an
+            # empty 202 so strict clients don't see a non-MCP `{ok:true}`.
+            return self._send_empty(202)
         if method == "ping":
             return self._send_mcp_result(request_id, {})
         if bare == "/mcp/v1/tools/list" or (bare == "/mcp/v1" and method == "tools/list"):
@@ -4073,7 +4126,7 @@ class Handler(BaseHTTPRequestHandler):
 
             corpus_md = _build_corpus(session)
             corpus_path = _session_folder(session_id) / "corpus.md"
-            corpus_path.write_text(corpus_md, encoding="utf-8")
+            _atomic_write_text(corpus_path, corpus_md)
 
             session["status"] = "closed"
             session["closed_at"] = _now_iso()

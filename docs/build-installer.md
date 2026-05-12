@@ -81,29 +81,28 @@ All three are cached under `build\cache\` after the first download. Delete the c
 
 | Component | Version | SHA256 | Notes |
 |---|---|---|---|
-| Python embeddable | 3.11.9 (amd64) | **TODO: lock pre-launch** | Acceptance: 3.11.9 is the last 3.11.x with binary installers from python.org. Later 3.11.x are source-only security releases that we'd have to build ourselves. v1 ships 3.11.9 knowing the gap; v1.5 plan: move to the latest 3.12 embeddable. |
-| ffmpeg | 7.1 essentials build | **TODO: lock pre-launch** | Pulled from `github.com/GyanD/codexffmpeg/releases` (gyan.dev's GitHub mirror) for stable URLs. |
+| Python embeddable | 3.11.9 (amd64) | Locked in `build.ps1` | Acceptance: 3.11.9 is the last 3.11.x with binary installers from python.org. Later 3.11.x are source-only security releases that we'd have to build ourselves. v1 ships 3.11.9 knowing the gap; v1.5 plan: move to the latest 3.12 embeddable. |
+| ffmpeg | 7.1 essentials build | Locked in `build.ps1` | Pulled from `github.com/GyanD/codexffmpeg/releases` (gyan.dev's GitHub mirror) for stable URLs. |
 | yt-dlp | 2026.03.17 | (pip) | Pinned via `pip install yt-dlp==2026.03.17`. Bump after compatibility-testing a new release. |
 | Pillow | 10.4.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==10.4.0`. |
 | MCP Python SDK | 1.27.1 | (pip) | Official Model Context Protocol Python SDK. Powers the stdio MCP server. Pinned via `pip install mcp==1.27.1` and `requirements.txt`. |
 | keyring | 25.7.0 | (pip) | Stores the BYO Anthropic API key in Windows Credential Manager. Pinned via `pip install keyring==25.7.0` and `requirements.txt`. |
 
-### SHA256 hashes are NOT yet locked
+### SHA256 hashes
 
-The `Confirm-Hash` helper in `build.ps1` verifies SHA256 for the directly-downloaded artifacts (Python embeddable + ffmpeg + get-pip.py). The `$..._SHA256` constants currently ship **empty**, which means:
+The `Confirm-Hash` helper in `build.ps1` verifies SHA256 for the directly-downloaded artifacts (Python embeddable + ffmpeg + get-pip.py). The `$..._SHA256` constants are locked in source, which means:
 
-- The build runs but prints `WARNING: <component> has no locked SHA256. Computed: <hash>` for each unlocked artifact.
-- A compromised mirror or silent upstream change would slip through unnoticed.
+- A normal build prints `<component> hash OK`.
+- A compromised mirror or silent upstream change fails the build with `SHA256 mismatch`.
+- `Confirm-Hash` deletes the bad cached file so a re-run pulls fresh after you intentionally update the hash.
 
-**Lock these before launch.** Procedure:
+When bumping a directly-downloaded component:
 
 1. Run `.\build.ps1` once on a network-connected machine.
-2. Copy each `Computed: <hash>` value from the warning lines.
+2. If the version changed, copy the computed hash from the warning/error output after verifying the artifact source.
 3. Paste them into the matching `$PYTHON_SHA256`, `$FFMPEG_SHA256`, `$GETPIP_SHA256` constants in `build.ps1`.
 4. Re-run `.\build.ps1` -- it should now print `<component> hash OK` instead of the warnings.
-5. Commit the locked hashes. Subsequent builds fail with `SHA256 mismatch` if anything changes (and `Confirm-Hash` deletes the bad cached file so a re-run pulls fresh).
-
-This is the last item to land before launch; do not ship the installer to users with these still empty.
+5. Commit the version bump and matching hash update together.
 
 Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`) are version-pinned but not hash-locked yet. Full pip hash-locking would require a `requirements.txt` with `--require-hashes`; for now the installer accepts the trust-pip-itself model while keeping exact package versions stable.
 

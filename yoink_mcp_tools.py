@@ -199,6 +199,9 @@ def yoink_video(args: dict[str, Any]) -> dict[str, Any]:
     interval = _limit_int(args.get("interval"), default=30, low=5, high=300)
 
     b.DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
+    started_at = b._now_iso()
+    title = None
+    folder = None
     with b._extract_lock:
         try:
             metadata = b._fetch_metadata(url)
@@ -211,9 +214,18 @@ def yoink_video(args: dict[str, Any]) -> dict[str, Any]:
             )
             result = b._run_extraction(url, interval, folder, metadata=metadata, topic=topic)
         except BaseException as e:
-            return _err(b.friendly_error(e))
+            msg = b.friendly_error(e)
+            b._record_single_extract_job(
+                url,
+                started_at,
+                error=msg,
+                title=title,
+                folder=folder,
+            )
+            return _err(msg)
 
     folder_path = Path(result["folder"])
+    b._record_single_extract_job(url, started_at, result=result)
     screenshots = [
         str(p) for p in sorted((folder_path / "screenshots").glob("shot_*.jpg"))
     ]

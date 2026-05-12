@@ -580,7 +580,7 @@
         <h2>Comment Intelligence</h2>
       </div>
       <p>Optionally analyze the top YouTube comments with your own Anthropic API key. Normal Yoink works without this.</p>
-      <p class="sub">Your key is stored locally on your machine. Treat it like any other credential - protect your system.</p>
+      <p class="sub">Your key is stored locally in your operating system credential store. Yoink never returns it to the extension or logs it.</p>
 
       <div class="settings-grid">
         <label class="toggle-row">
@@ -639,8 +639,8 @@
         <div class="step-num"><span class="step-num-text">MCP</span></div>
         <h2>Agent Integration</h2>
       </div>
-      <p>MCP lets your AI agent - Claude, ChatGPT, Cursor, and others - yoink YouTube content as a local tool, the same way it calls any other tool.</p>
-      <p class="sub">Yoink does not edit your agent configs automatically. Copy the snippet for your client and paste it into that client's MCP settings.</p>
+      <p>MCP lets Claude Desktop, Cursor, and other AI agents call Yoink as a local tool: yoink a video, search saved corpora, inspect a transcript, or run comment and hook analysis.</p>
+      <p class="sub">Yoink does not edit your agent configs automatically. Copy the snippet for your client and paste it into that client's MCP settings. Stdio is the supported launch path; local HTTP JSON-RPC is experimental.</p>
 
       <div class="mcp-path">
         <div><b>Stdio entry point</b></div>
@@ -648,7 +648,7 @@
       </div>
 
       <div class="mcp-path">
-        <div><b>HTTP MCP</b></div>
+        <div><b>Experimental local HTTP JSON-RPC</b></div>
         <div id="mcp-http-url">Start Yoink to load the HTTP URL.</div>
         <div id="mcp-http-token" style="margin-top:6px;">Token appears after Yoink is running.</div>
       </div>

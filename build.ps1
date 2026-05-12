@@ -60,21 +60,11 @@ $MCP_VERSION    = '1.27.1'
 $KEYRING_VERSION = '25.7.0'
 
 # ---- Hash verification --------------------------------------------------
-# Lock in known-good SHA256s so a compromised mirror or silent upstream
-# change can't slip into the install.
-#
-# TODO(launch): lock these by running build.ps1 once on a network-connected
-# machine, copying the hashes from the "no locked SHA256" warnings the
-# Confirm-Hash helper prints, and pasting them below. Until that's done,
-# the build runs unverified -- a compromised mirror would slip through
-# silently. This is the last item to land before launch; do not ship the
-# installer to users with these still empty.
-#
-# Procedure once locked:
-#   1. Build succeeds with locked hashes -> commit the values.
-#   2. Subsequent builds fail with "SHA256 mismatch" if anything changes,
-#      and Confirm-Hash deletes the bad cached file so a re-run pulls
-#      fresh.
+# Direct-download SHA256s are locked as of v2.0. When bumping Python,
+# ffmpeg, or get-pip.py, run build.ps1 once, verify the new artifact source,
+# paste the new hash here, and rebuild. Subsequent builds fail with
+# "SHA256 mismatch" if anything changes; Confirm-Hash deletes the bad cached
+# file so a re-run pulls fresh.
 $PYTHON_SHA256 = "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b"
 $FFMPEG_SHA256 = "6f58ce889f59c311410f7d2b18895b33c03456463486f3b1ebc93d97a0f54541"
 $GETPIP_SHA256 = "66904bccb878e363db6236ea900e6935e507dcb887e9f178f6212edfe7f46a76"

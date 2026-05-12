@@ -2,11 +2,11 @@
 
 Status: Sprint 4 backend implemented  
 SDK: official Model Context Protocol Python SDK, `mcp==1.27.1`  
-Transports: stdio and authenticated local HTTP JSON-RPC
+Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 ## Overview
 
-Yoink exposes its existing extraction, playlist, search, corpus, Comment Intelligence, and Hook Type functionality as MCP tools. The tool implementation lives in `yoink_mcp_tools.py`; stdio (`yoink_mcp.py`) and HTTP (`server.py` under `/mcp/v1`) both wrap the same registry so behavior stays consistent.
+Yoink exposes its existing extraction, playlist, search, corpus, Comment Intelligence, and Hook Type functionality as MCP tools. The tool implementation lives in `yoink_mcp_tools.py`; stdio (`yoink_mcp.py`) is the officially supported MCP transport, and the local HTTP JSON-RPC helper (`server.py` under `/mcp/v1`) wraps the same registry for clients that can use direct POST calls.
 
 ## Compatibility matrix
 
@@ -20,6 +20,8 @@ This is the launch-facing compatibility claim. Keep it honest: only clients Ryan
 | Continue | Should work, community-reported | stdio | Standard stdio MCP; not smoke-tested by Ryan. |
 | Cline | Should work, community-reported | stdio | Standard stdio MCP; not smoke-tested by Ryan. |
 | Other MCP-compatible clients | Generic stdio fallback | stdio | Use the generic stdio snippet; not individually certified. |
+
+HTTP JSON-RPC is available for local clients that prefer HTTP, but it is experimental and not counted as an officially tested launch transport.
 
 ## Transport model
 
@@ -55,15 +57,15 @@ Dev command:
 
 Auth: none. The MCP client launched the subprocess, so the local process boundary is the trust boundary. The tools still validate URLs, slugs, and job IDs before touching disk or the network.
 
-### HTTP JSON-RPC
+### Experimental HTTP JSON-RPC
 
-HTTP MCP is served by the existing helper server:
+The existing helper server also exposes an experimental local HTTP JSON-RPC helper:
 
 ```text
 http://127.0.0.1:5179/mcp/v1
 ```
 
-Auth: `X-Yoink-Token: <token>` required on every HTTP MCP request. `GET /mcp/v1/config` returns config metadata for setup.html; it is also token-gated.
+Auth: `X-Yoink-Token: <token>` required on every HTTP JSON-RPC request. `GET /mcp/v1/config` returns config metadata for setup.html; it is also token-gated.
 
 HTTP endpoints:
 
@@ -71,9 +73,9 @@ HTTP endpoints:
 - `POST /mcp/v1/tools/list`
 - `POST /mcp/v1/tools/call`
 - `POST /mcp/v1` with JSON-RPC `method` set to `initialize`, `tools/list`, `tools/call`, or `ping`
-- `GET /mcp/v1/sse` emits a lightweight `endpoint` event pointing clients at `/mcp/v1`
+- `GET /mcp/v1/sse` emits a lightweight one-shot `endpoint` event pointing clients at `/mcp/v1`
 
-The HTTP wrapper returns MCP-style JSON-RPC envelopes. Tool call results include both text content and `structuredContent` for clients that support it.
+The HTTP wrapper covers the JSON-RPC POST surface and returns MCP-style JSON-RPC envelopes. Tool call results include both text content and `structuredContent` for clients that support it. It is not a spec-complete SSE or Streamable HTTP implementation; strict HTTP MCP clients may require future transport work. For launch, stdio is the supported path.
 
 ## Client config snippets
 
@@ -359,11 +361,11 @@ Rate-limit errors return friendly tool payloads, for example:
 { "ok": false, "error": "rate limit exceeded: max 5/minute" }
 ```
 
-HTTP MCP remains protected by `X-Yoink-Token`; stdio MCP relies on the spawning client trust boundary. All tools keep v1/v2 URL, slug, and job validation.
+HTTP JSON-RPC remains protected by `X-Yoink-Token`; stdio MCP relies on the spawning client trust boundary. All tools keep v1/v2 URL, slug, and job validation.
 
 ## Compatibility notes
 
-The launch-facing compatibility matrix is near the top of this document. HTTP JSON-RPC is route-smoked and available for clients that prefer HTTP, but the first launch story should emphasize stdio because that is the path Ryan will certify for Claude Desktop and Cursor.
+The launch-facing compatibility matrix is near the top of this document. HTTP JSON-RPC is route-smoked and available for local clients that prefer HTTP, but it is experimental. The first launch story should emphasize stdio because that is the path Ryan will certify for Claude Desktop and Cursor.
 
 ## Client-side helpers needed from Claude Code
 

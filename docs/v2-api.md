@@ -471,7 +471,7 @@ Query params:
 
 Request body: none.
 
-Persistence: jobs persist across helper restarts via `%LOCALAPPDATA%\Yoink\jobs.json` on Windows. In-flight jobs from a previous helper process are restored as records with `state: "failed"` and `error: "server restarted"`; users restart them manually. Jobs are returned sorted by `updated_at` descending.
+Persistence: jobs persist across helper restarts via `%LOCALAPPDATA%\Yoink\jobs.json` on Windows. In-flight jobs from a previous helper process are restored as records with `state: "failed"` and `error: "server restarted"`; users restart them manually. Jobs are returned sorted by `updated_at` descending. Single-video job records store a text-only corpus snapshot so `/jobs` stays small; the full multimodal clipboard payload is never persisted in `jobs.json`.
 
 Success response: HTTP 200
 
@@ -639,11 +639,11 @@ Error responses:
 | 404 | `file not found` | File is missing or not a regular file. |
 | 415 | `unsupported file type` | Extension or magic bytes are not an allowed image type. |
 
-### MCP HTTP endpoints
+### MCP HTTP JSON-RPC helper endpoints
 
-Yoink v2 Sprint 4 adds MCP over stdio and local HTTP. Stdio clients launch `yoink_mcp.py`; HTTP clients use the existing helper server under `/mcp/v1`.
+Yoink v2 Sprint 4 adds MCP over stdio plus an experimental local HTTP JSON-RPC helper. Stdio clients launch `yoink_mcp.py` and are the officially supported MCP transport for launch. HTTP clients can use the existing helper server under `/mcp/v1` for direct JSON-RPC POST calls, but this is not a spec-complete SSE or Streamable HTTP implementation.
 
-Auth: `X-Yoink-Token` required for every HTTP MCP endpoint, including config and SSE discovery.
+Auth: `X-Yoink-Token` required for every HTTP JSON-RPC helper endpoint, including config and SSE discovery.
 
 #### GET /mcp/v1/config
 
@@ -832,7 +832,7 @@ Protocol errors use JSON-RPC error envelopes:
 
 #### GET /mcp/v1/sse
 
-Lightweight SSE compatibility endpoint for HTTP/SSE clients. It emits an `endpoint` event pointing to `/mcp/v1`.
+Experimental one-shot SSE compatibility endpoint. It emits an `endpoint` event pointing to `/mcp/v1` and then closes. It is useful for lightweight discovery, but it is not a long-lived spec-complete MCP SSE transport.
 
 Headers:
 
@@ -955,6 +955,8 @@ Completed single-video `result` shape:
   "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research"
 }
 ```
+
+Single-video `combined_md_text` is text-only. It is derived from the on-disk markdown corpus with local image references stripped. The full multimodal clipboard payload with base64 screenshots is intentionally not stored in `jobs.json` or returned by `/jobs`; clients that need the full saved corpus should open `combined_md_path` or call `get_yoink_corpus`.
 
 ## Combined corpus delivery
 
