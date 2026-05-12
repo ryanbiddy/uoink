@@ -8,6 +8,19 @@ Transports: stdio and authenticated local HTTP JSON-RPC
 
 Yoink exposes its existing extraction, playlist, search, corpus, Comment Intelligence, and Hook Type functionality as MCP tools. The tool implementation lives in `yoink_mcp_tools.py`; stdio (`yoink_mcp.py`) and HTTP (`server.py` under `/mcp/v1`) both wrap the same registry so behavior stays consistent.
 
+## Compatibility matrix
+
+This is the launch-facing compatibility claim. Keep it honest: only clients Ryan smoke-tests before v2 launch are marked officially tested.
+
+| Client | Status | Transport | Notes |
+|---|---|---|---|
+| Claude Desktop | Officially tested | stdio | Smoke-tested by Ryan before v2 launch. |
+| Cursor | Officially tested | stdio | Smoke-tested by Ryan before v2 launch. |
+| ChatGPT Desktop | Should work, community-reported | stdio | Standard stdio MCP; not smoke-tested by Ryan. |
+| Continue | Should work, community-reported | stdio | Standard stdio MCP; not smoke-tested by Ryan. |
+| Cline | Should work, community-reported | stdio | Standard stdio MCP; not smoke-tested by Ryan. |
+| Other MCP-compatible clients | Generic stdio fallback | stdio | Use the generic stdio snippet; not individually certified. |
+
 ## Transport model
 
 ### Stdio
@@ -344,15 +357,9 @@ Rate-limit errors return friendly tool payloads, for example:
 
 HTTP MCP remains protected by `X-Yoink-Token`; stdio MCP relies on the spawning client trust boundary. All tools keep v1/v2 URL, slug, and job validation.
 
-## Compatibility matrix
+## Compatibility notes
 
-| Client | Transport | Status |
-|---|---|---|
-| Claude Desktop | stdio | Config documented; live client test pending. |
-| ChatGPT Desktop | stdio | Config documented; live client test pending. |
-| Cursor | stdio | Config documented; live client test pending. |
-| Continue / Cline / generic MCP clients | stdio | Generic config documented; live client test pending. |
-| HTTP MCP clients | HTTP JSON-RPC | Route smoke-tested; live third-party client test pending. |
+The launch-facing compatibility matrix is near the top of this document. HTTP JSON-RPC is route-smoked and available for clients that prefer HTTP, but the first launch story should emphasize stdio because that is the path Ryan will certify for Claude Desktop and Cursor.
 
 ## Client-side helpers needed from Claude Code
 
@@ -360,6 +367,4 @@ None for Sprint 4. `extension/lib/extract.js` does not need new helpers to surfa
 
 ## Open questions
 
-- Which desktop clients will Ryan personally certify before the v2 public note? The backend is protocol-shaped, but the config UX should only claim "tested" after live client runs.
 - Should v2.1 persist MCP call logs or agent activity indicators in the popup? Out of scope for Sprint 4.
-
