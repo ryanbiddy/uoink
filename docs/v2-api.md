@@ -832,7 +832,7 @@ States:
 | `running` | Job is actively extracting one playlist video. | `started_at`, `updated_at`, `current_video`, `current_video_phase`. `result` is null. |
 | `completed` | Job finished and produced a combined corpus. | `completed_at`, `result`, `videos_done`. `current_video`, `current_video_phase`, and `error` are null. |
 | `cancelled` | User requested cancellation. Current subprocess was aborted if one was active. Partial outputs remain on disk. | `completed_at`, `videos_done`, `videos_failed`, `message`. `result` is null. |
-| `failed` | Job cannot produce a useful playlist corpus. This happens for fatal playlist-level/worker-level errors, or when every selected video failed. Individual per-video failures do not fail the job if at least one video succeeds. | `completed_at`, `error`. `result` is null unless an implementation later chooses to expose partial results. |
+| `failed` | Job cannot produce a useful playlist corpus. This happens when playlist preview/start fails before useful work begins, when a fatal worker-level error occurs, or when zero selected videos succeed. Individual per-video failures increment `videos_failed` and do not fail the job if at least one video succeeds. | `completed_at`, `error`. `result` is null unless an implementation later chooses to expose partial results. |
 
 Allowed transitions:
 
@@ -988,13 +988,9 @@ Handled application errors and warnings:
 | `job is already finished` | error | Cancel button should stop showing after terminal states. |
 | `job cancel failed` | error | Show failure; keep polling job state. |
 
-## Open questions
-
-None for Sprint 1 after Ryan sign-off.
-
-Resolved decisions:
+## Known limitations and resolved decisions
 
 - Per-video failures continue. The job completes if at least one video succeeds and fails only when zero selected videos succeed or the playlist itself cannot preview/start.
-- Job state is in-memory only.
+- Job state is in-memory only for v2 GA. `/jobs` can recover state after popup close/reopen while the helper is still running, but there is no recovery after the Yoink helper restarts.
 - Comments remain background/fire-and-forget.
 - Preview `channel` and `duration_seconds` fields are nullable.

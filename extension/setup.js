@@ -46,6 +46,8 @@ const AUTO_YOINK_TTL_MS = 60_000;
 // ---- DOM handles ---------------------------------------------------------
 const params = new URLSearchParams(location.search);
 const source = params.get("source") || "install";
+const requestedHash = location.hash || "";
+const isSettingsMode = source === "popup" || requestedHash === "#mcp-settings";
 
 const step1 = document.getElementById("step-1");
 const step2 = document.getElementById("step-2");
@@ -126,15 +128,20 @@ function applySource() {
 // status block flipped green, so the page contradicted itself.
 function updateHeader(status) {
   if (status === "running") {
-    pageTitle.textContent = "Yoink is ready.";
-    pageLede.textContent =
-      "The local helper is running. Yoink any YouTube video to begin.";
+    pageTitle.textContent = isSettingsMode ? "Yoink settings." : "Yoink is ready.";
+    pageLede.textContent = isSettingsMode
+      ? "Manage local AI features and agent integration."
+      : "The local helper is running. Yoink any YouTube video to begin.";
     return;
   }
   if (source === "offline") {
     pageTitle.textContent = "Yoink isn't running yet.";
     pageLede.textContent =
       "Start the Yoink helper and this page will detect it automatically.";
+  } else if (isSettingsMode) {
+    pageTitle.textContent = "Yoink settings.";
+    pageLede.textContent =
+      "Start the local helper to manage settings and agent integration.";
   } else {
     pageTitle.textContent = "Let's get you set up.";
     pageLede.textContent =
@@ -238,6 +245,7 @@ function onServerUp() {
   loadCISettings();
   loadMCPConfig();
   markDone(step3);
+  if (isSettingsMode) return;
   if (step4.classList.contains("hidden")) {
     step4.classList.remove("hidden");
     markCurrent(step4);
@@ -460,19 +468,37 @@ function renderMcpConfig(config, token) {
   }
 }
 
+function scrollToRequestedAnchor() {
+  if (!requestedHash) return;
+  const target = document.getElementById(requestedHash.replace(/^#/, ""));
+  if (!target) return;
+  requestAnimationFrame(() => {
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
+async function fetchMcpConfigWithToken(token) {
+  return fetch(`${SERVER}/mcp/v1/config`, {
+    method: "GET",
+    mode: "cors",
+    cache: "no-store",
+    headers: token ? { "X-Yoink-Token": token } : {},
+  });
+}
+
 async function loadMCPConfig() {
   if (!window.STC || !STC.getToken) return;
   try {
-    const token = await STC.getToken();
-    const res = await fetch(`${SERVER}/mcp/v1/config`, {
-      method: "GET",
-      mode: "cors",
-      cache: "no-store",
-      headers: token ? { "X-Yoink-Token": token } : {},
-    });
+    let token = await STC.getToken();
+    let res = await fetchMcpConfigWithToken(token);
+    if (res.status === 403) {
+      token = await STC.getToken({ refresh: true });
+      res = await fetchMcpConfigWithToken(token);
+    }
     const config = await res.json();
     if (!res.ok || !config || !config.ok) throw new Error("MCP config unavailable");
     renderMcpConfig(config, token);
+    scrollToRequestedAnchor();
   } catch {
     const msg = "MCP config unavailable. Make sure Yoink Server is running.";
     if (mcpStdioPath) mcpStdioPath.textContent = msg;
