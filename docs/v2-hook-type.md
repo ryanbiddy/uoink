@@ -1,6 +1,6 @@
 # Yoink v2 Hook Type contract
 
-Status: draft implemented in `codex/v2-sprint3`
+Status: implemented in `codex/v2-sprint3`; taxonomy capture added in v2.1 Sprint 7
 
 ## Overview
 
@@ -35,7 +35,7 @@ Field rules:
 
 - `hook_type_enabled` defaults to `false`.
 - `smart_screenshot_picker_enabled` defaults to `false`.
-- Hook Type uses the existing `anthropic_key` stored in `%LOCALAPPDATA%\Yoink\settings.json`.
+- Hook Type uses the existing Anthropic API key stored in the OS keyring.
 - The key is never returned by `GET /settings`.
 
 ## Invocation flow
@@ -138,3 +138,20 @@ Anthropic 401:
 ## Smart Screenshot Picker setting
 
 `smart_screenshot_picker_enabled` is a backend-persisted UI preference for Claude Code's popup work. The backend does not implement the picker UI in Sprint 3. Playlists remain text-only in the clipboard regardless of this flag.
+
+## Aggregation
+
+Starting in v2.1, every successful Hook Type classification is captured in `%LOCALAPPDATA%\Yoink\taxonomy.json` on Windows. The file is a JSON array of records:
+
+```json
+{
+  "video_id": "abc123DEF45",
+  "hook_type": "curiosity_gap",
+  "hook_explanation": "The opening creates anticipation by promising a counter-intuitive answer.",
+  "channel": "Example Channel",
+  "title": "A practical guide to creator research",
+  "classified_at": "2026-05-11T09:30:00"
+}
+```
+
+Records dedupe by `video_id`: re-classifying the same video updates the existing record instead of appending a duplicate. Corrupt `taxonomy.json` is logged and replaced with a fresh array. There is no backfill from existing yoinks; the taxonomy starts collecting from this version forward. No v2.1 endpoint exposes the file yet.

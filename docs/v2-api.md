@@ -1,12 +1,12 @@
 # Yoink v2 API contract
 
-Status: implemented through v2 Sprint 4
+Status: implemented through v2.1 Sprint 7
 Scope: Playlist Mode, settings, file serving, and MCP HTTP backend contract
 Non-goal: UI design, Channel Decoder, Niche Corpus, or Mac installer work
 
 ## Overview
 
-Yoink v2 adds an async job model for playlist extraction while preserving the v1 single-video flow exactly as-is. `/extract` and `/session/add` remain synchronous and keep their current request and response shapes for backward compatibility. Playlist Mode uses new `/playlist/*` and `/jobs/*` endpoints: the client previews a playlist, starts a job, polls progress, and can cancel mid-flight. This job model is the foundation for later Channel Decoder and Niche Corpus work, but those endpoints are intentionally out of scope for this contract.
+Yoink v2 adds an async job model for playlist extraction while preserving the v1 single-video flow exactly as-is. `/extract` and `/session/add` remain synchronous and keep their current request and response shapes for backward compatibility; as of v2.1, `/extract` also writes a side-effect `kind: "single"` job record for recent-activity UI. Playlist Mode uses new `/playlist/*` and `/jobs/*` endpoints: the client previews a playlist, starts a job, polls progress, and can cancel mid-flight. This job model is the foundation for later Channel Decoder and Niche Corpus work, but those endpoints are intentionally out of scope for this contract.
 
 ## Auth and protocol baseline
 
@@ -459,13 +459,19 @@ Example response:
 
 ### GET /jobs
 
-List recent async jobs so the popup can recover state after close/reopen.
+List recent jobs so the popup can recover playlist state after close/reopen and show recent single-video yoinks.
 
 Auth: `X-Yoink-Token` required.
 
+Query params:
+
+| Field | Type | Required | Notes |
+|---|---:|---:|---|
+| `kind` | string | no | Optional filter: `playlist` or `single`. Omit to return both. |
+
 Request body: none.
 
-Persistence: jobs are in-memory only for the first v2 ship. `/jobs` recovers state after popup close/reopen while the helper process is alive, but all job state evaporates when the Yoink helper restarts.
+Persistence: jobs persist across helper restarts via `%LOCALAPPDATA%\Yoink\jobs.json` on Windows. In-flight jobs from a previous helper process are restored as records with `state: "failed"` and `error: "server restarted"`; users restart them manually. Jobs are returned sorted by `updated_at` descending.
 
 Success response: HTTP 200
 
@@ -478,6 +484,7 @@ Success response: HTTP 200
       "kind": "playlist",
       "state": "running",
       "source_url": "https://www.youtube.com/playlist?list=PLexample123",
+      "title": null,
       "playlist_title": "Creator Strategy Interviews",
       "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews",
       "videos_total": 10,
@@ -496,6 +503,31 @@ Success response: HTTP 200
       "result": null,
       "warnings": ["playlist exceeds cap"],
       "message": "Yoinking video 4 of 10."
+    },
+    {
+      "id": "job_20260510_151010_d4e5f6",
+      "kind": "single",
+      "state": "completed",
+      "source_url": "https://www.youtube.com/watch?v=abc123DEF45",
+      "title": "A practical guide to creator research",
+      "playlist_title": null,
+      "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research",
+      "videos_total": 1,
+      "videos_done": 1,
+      "videos_failed": 0,
+      "current_video": null,
+      "current_video_phase": null,
+      "started_at": "2026-05-10T15:10:10",
+      "updated_at": "2026-05-10T15:11:04",
+      "completed_at": "2026-05-10T15:11:04",
+      "error": null,
+      "result": {
+        "combined_md_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research\\a-practical-guide-to-creator-research.md",
+        "combined_md_text": "# A practical guide to creator research\n\n...",
+        "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research"
+      },
+      "warnings": [],
+      "message": "Single-video yoink complete."
     }
   ]
 }
@@ -504,6 +536,7 @@ Success response: HTTP 200
 Error responses:
 
 - HTTP 403: missing or invalid token.
+- HTTP 400: invalid `kind` filter.
 
 ```json
 { "ok": false, "error": "missing or invalid token" }
@@ -512,7 +545,7 @@ Error responses:
 Example request:
 
 ```http
-GET /jobs HTTP/1.1
+GET /jobs?kind=playlist HTTP/1.1
 X-Yoink-Token: <token>
 ```
 
@@ -527,6 +560,7 @@ Example response:
       "kind": "playlist",
       "state": "completed",
       "source_url": "https://www.youtube.com/playlist?list=PLexample123",
+      "title": null,
       "playlist_title": "Creator Strategy Interviews",
       "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews",
       "videos_total": 10,
@@ -846,7 +880,7 @@ No terminal state transitions back to `queued` or `running`.
 
 ## Progress reporting shape
 
-Every job object returned by `/playlist/start`, `/jobs/<id>`, `/jobs/<id>/cancel`, and `/jobs` uses this shape:
+Every job object returned by `/playlist/start`, `/jobs/<id>`, `/jobs/<id>/cancel`, and `/jobs` uses this shape. Playlist jobs populate `playlist_title`; single-video jobs populate `title`.
 
 ```json
 {
@@ -854,6 +888,7 @@ Every job object returned by `/playlist/start`, `/jobs/<id>`, `/jobs/<id>/cancel
   "kind": "playlist",
   "state": "queued|running|completed|cancelled|failed",
   "source_url": "https://www.youtube.com/playlist?list=PLexample123",
+  "title": null,
   "playlist_title": "Creator Strategy Interviews",
   "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews",
   "videos_total": 10,
@@ -878,15 +913,17 @@ Every job object returned by `/playlist/start`, `/jobs/<id>`, `/jobs/<id>/cancel
 Field rules:
 
 - `state` is always one of `queued`, `running`, `completed`, `cancelled`, `failed`.
-- `session_folder` is the absolute path to the playlist session folder on disk. Populated from `queued` onwards. Stays populated through every state including `cancelled` and `failed`.
-- `videos_total` is the number of videos selected for processing after the 10-video cap.
+- `kind` is `playlist` for async playlist jobs and `single` for synchronous `/extract` side-effect records.
+- `title` is populated for `single` jobs; `playlist_title` is populated for `playlist` jobs.
+- `session_folder` is the absolute path to the output folder on disk. Playlist jobs populate it from `queued` onwards; single jobs populate it when a folder is known.
+- `videos_total` is the number of videos selected for processing after the 10-video cap for playlists, or `1` for single jobs.
 - `videos_done` counts successful per-video extractions.
-- `videos_failed` counts per-video failures. Playlist jobs continue after private, age-restricted, geoblocked, deleted, or otherwise failed individual videos.
+- `videos_failed` counts per-video failures. Playlist jobs continue after private, age-restricted, geoblocked, deleted, or otherwise failed individual videos. Single-video failures set `videos_failed` to `1`.
 - `current_video` is `{ "title": string, "index": number, "url": string }` while running, otherwise null.
 - `current_video_phase` is one of `metadata`, `download`, `screenshots`, `comments`, `done`, or null.
 - `started_at`, `updated_at`, `completed_at` are ISO timestamps, null when not applicable.
 - `error` is a string only when `state` is `failed`; otherwise null.
-- `result` is populated only when `state` is `completed`.
+- `result` is populated only when `state` is `completed`. Playlist results include `per_video`; single-video results include `folder` and no `per_video` list.
 
 Completed `result` shape:
 
@@ -906,6 +943,16 @@ Completed `result` shape:
       "error": null
     }
   ]
+}
+```
+
+Completed single-video `result` shape:
+
+```json
+{
+  "combined_md_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research\\a-practical-guide-to-creator-research.md",
+  "combined_md_text": "# A practical guide to creator research\n\n...",
+  "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research"
 }
 ```
 
@@ -991,6 +1038,6 @@ Handled application errors and warnings:
 ## Known limitations and resolved decisions
 
 - Per-video failures continue. The job completes if at least one video succeeds and fails only when zero selected videos succeed or the playlist itself cannot preview/start.
-- Job state is in-memory only for v2 GA. `/jobs` can recover state after popup close/reopen while the helper is still running, but there is no recovery after the Yoink helper restarts.
+- Job state persists across helper restarts via `jobs.json`. In-flight jobs are marked failed on restart; users restart them manually.
 - Comments remain background/fire-and-forget.
 - Preview `channel` and `duration_seconds` fields are nullable.

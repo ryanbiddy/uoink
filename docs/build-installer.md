@@ -46,12 +46,12 @@ The 120 MB install footprint is acceptable; the extension already implies users 
 The installer lays out `%LOCALAPPDATA%\Yoink\`:
 
 ```
-python\           Python 3.11 embeddable + Lib\site-packages with yt-dlp/Pillow/MCP
+python\           Python 3.11 embeddable + Lib\site-packages with yt-dlp/Pillow/MCP/keyring
 bin\              ffmpeg.exe, ffprobe.exe (PATH-prepended by server.py)
 server.py         The local HTTP helper
 yoink_mcp.py      MCP stdio entry point for agent clients
 yoink_mcp_tools.py Shared MCP tool registry
-requirements.txt  Dev/runtime MCP SDK pin
+requirements.txt  Dev/runtime MCP SDK + keyring pins
 yt_extract.py     Imported by server.py (parse_srt, slugify, fmt_time)
 topics.json       Topic-folder routing rules
 stop-server.bat   Reads server.pid and kills the helper
@@ -71,7 +71,7 @@ The helper runs under `pythonw.exe`, so there's no console window. `server.py` w
 ## Where dependencies come from
 
 - **Python embeddable** — `https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip`. Update the `$PYTHON_VERSION` constant in `build.ps1` to bump.
-- **yt-dlp** — installed via `pip install yt-dlp` into the embeddable's `site-packages`. Picks up the latest release at build time. Pin a version by changing the `pip install` invocation in `build.ps1` if a future yt-dlp release breaks us.
+- **yt-dlp** — installed via `pip install yt-dlp==$YTDLP_VERSION` into the embeddable's `site-packages`. Bump `$YTDLP_VERSION` in `build.ps1` after compatibility-testing a new release.
 - **ffmpeg** — gyan.dev "release essentials" build (Windows static, GPL): `https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip`. The build script extracts only `ffmpeg.exe` and `ffprobe.exe`; the rest of the archive is discarded.
 - **get-pip.py** — `https://bootstrap.pypa.io/get-pip.py`. Used once during the build to bootstrap pip into the embeddable.
 
@@ -86,6 +86,7 @@ All three are cached under `build\cache\` after the first download. Delete the c
 | yt-dlp | 2026.03.17 | (pip) | Pinned via `pip install yt-dlp==2026.03.17`. Bump after compatibility-testing a new release. |
 | Pillow | 10.4.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==10.4.0`. |
 | MCP Python SDK | 1.27.1 | (pip) | Official Model Context Protocol Python SDK. Powers the stdio MCP server. Pinned via `pip install mcp==1.27.1` and `requirements.txt`. |
+| keyring | 25.7.0 | (pip) | Stores the BYO Anthropic API key in Windows Credential Manager. Pinned via `pip install keyring==25.7.0` and `requirements.txt`. |
 
 ### SHA256 hashes are NOT yet locked
 
@@ -104,15 +105,16 @@ The `Confirm-Hash` helper in `build.ps1` verifies SHA256 for the directly-downlo
 
 This is the last item to land before launch; do not ship the installer to users with these still empty.
 
-yt-dlp's hash isn't pinned because pip's hash-locking requires a `requirements.txt` with `--require-hashes`, and we accept the trust-pip-itself model for v1 -- a compromised release of yt-dlp on PyPI affects the entire Python ecosystem, not just us.
+Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`) are version-pinned but not hash-locked yet. Full pip hash-locking would require a `requirements.txt` with `--require-hashes`; for now the installer accepts the trust-pip-itself model while keeping exact package versions stable.
 
 ## Updating versions
 
 | Component | Where to change |
 |---|---|
 | Python | `$PYTHON_VERSION` in `build.ps1`, and the `python*._pth` glob in stage step 2b — Python 3.12 would be `python312._pth` (no other code change needed). |
-| yt-dlp | Edit the `pip install yt-dlp` line in `build.ps1` to pin a version (`yt-dlp==2025.10.01`, etc). |
+| yt-dlp | Update `$YTDLP_VERSION` in `build.ps1`. |
 | MCP Python SDK | Update `$MCP_VERSION` in `build.ps1` and the matching `mcp==...` pin in `requirements.txt`. |
+| keyring | Update `$KEYRING_VERSION` in `build.ps1` and the matching `keyring==...` pin in `requirements.txt`. |
 | ffmpeg | gyan.dev rolls the static "release essentials" build forward; the URL stays the same. To pin, swap to a versioned URL from the same site. |
 | Yoink itself | Update `$VERSION` in `build.ps1`, `AppVersion` in `installer\yoink.iss`, and `VERSION` in `server.py`. The output filename and the registry/Start Menu names will follow. |
 
@@ -144,7 +146,7 @@ Add signing to `build.ps1` after step 3 (compile) — see `signtool sign /fd SHA
 
 ### Pip bootstrap pulls files we don't ship
 
-`get-pip.py` installs pip + setuptools + wheel into the embeddable. We strip those after `yt-dlp` is installed (see step 2e in `build.ps1`) so the shipped install only contains what the server actually imports. If a future yt-dlp adds a transitive dep, it'll land in `site-packages` automatically and get included.
+`get-pip.py` installs pip + setuptools + wheel into the embeddable. We strip those after runtime packages are installed (see step 2e in `build.ps1`) so the shipped install only contains what the server actually imports. If a future package adds a transitive dependency, it'll land in `site-packages` automatically and get included.
 
 ### Prompts library is read-only in v1
 

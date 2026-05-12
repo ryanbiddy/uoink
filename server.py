@@ -31,6 +31,14 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
+try:
+    import keyring as _keyring
+except Exception as _keyring_error:  # pragma: no cover - env-specific
+    _keyring = None
+    _KEYRING_IMPORT_ERROR = str(_keyring_error)
+else:
+    _KEYRING_IMPORT_ERROR = None
+
 # --- Import helpers from the existing CLI script ---------------------------
 HERE = Path(__file__).parent.resolve()
 sys.path.insert(0, str(HERE))
@@ -75,10 +83,15 @@ FFMPEG_TIMEOUT_SEC = 15 * 60
 # this via /token (gated by chrome-extension:// origin) on first launch
 # and includes it in X-Yoink-Token on every subsequent request.
 TOKEN_PATH = HERE / "token.txt"
-SETTINGS_PATH = (
-    Path(os.environ.get("LOCALAPPDATA", str(HERE))) / "Yoink" / "settings.json"
-    if sys.platform == "win32" else HERE / "settings.json"
+DATA_ROOT = (
+    Path(os.environ.get("LOCALAPPDATA", str(HERE))) / "Yoink"
+    if sys.platform == "win32" else HERE
 )
+SETTINGS_PATH = DATA_ROOT / "settings.json"
+JOBS_PATH = DATA_ROOT / "jobs.json"
+TAXONOMY_PATH = DATA_ROOT / "taxonomy.json"
+KEYRING_SERVICE = "Yoink"
+KEYRING_ANTHROPIC_USERNAME = "anthropic_key"
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
 ANTHROPIC_VERSION = "2023-06-01"
@@ -137,48 +150,56 @@ def _check_token_rate_limit() -> bool:
     return True
 
 
-# ---- Settings (v2 BYO Anthropic key) --------------------------------------
+# ---- Settings (v2.1 BYO Anthropic key) ------------------------------------
+class CredentialStoreError(RuntimeError):
+    """Raised when the OS credential store cannot read/write a saved key."""
+
+
 def _default_settings() -> dict:
     return {
         "comment_intelligence_enabled": False,
         "hook_type_enabled": False,
         "smart_screenshot_picker_enabled": False,
-        # Plaintext by product decision for v2. Treat settings.json like any
-        # other local credential store; encryption is v2.1+.
-        "anthropic_key": "",
         "anthropic_key_invalid": False,
         "updated_at": None,
     }
 
 
+def _normalize_settings(data: dict) -> dict:
+    clean = _default_settings()
+    if isinstance(data, dict):
+        clean.update(data)
+    clean.pop("anthropic_key", None)
+    clean["comment_intelligence_enabled"] = bool(
+        clean.get("comment_intelligence_enabled")
+    )
+    clean["hook_type_enabled"] = bool(clean.get("hook_type_enabled"))
+    clean["smart_screenshot_picker_enabled"] = bool(
+        clean.get("smart_screenshot_picker_enabled")
+    )
+    clean["anthropic_key_invalid"] = bool(clean.get("anthropic_key_invalid"))
+    return clean
+
+
 def _read_settings() -> dict:
     with _settings_lock:
-        data = _default_settings()
+        data: dict = {}
         if SETTINGS_PATH.exists():
             try:
                 raw = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
                 if isinstance(raw, dict):
-                    data.update(raw)
+                    data = raw
             except (OSError, json.JSONDecodeError) as e:
                 log.warning("settings read failed: %s", e)
-        data["comment_intelligence_enabled"] = bool(
-            data.get("comment_intelligence_enabled")
-        )
-        data["hook_type_enabled"] = bool(data.get("hook_type_enabled"))
-        data["smart_screenshot_picker_enabled"] = bool(
-            data.get("smart_screenshot_picker_enabled")
-        )
-        if not isinstance(data.get("anthropic_key"), str):
-            data["anthropic_key"] = ""
-        data["anthropic_key_invalid"] = bool(data.get("anthropic_key_invalid"))
-        return data
+        return _normalize_settings(data)
 
 
 def _write_settings(data: dict) -> None:
     with _settings_lock:
         SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        clean = _normalize_settings(data)
         tmp = SETTINGS_PATH.with_suffix(".json.tmp")
-        tmp.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        tmp.write_text(json.dumps(clean, indent=2), encoding="utf-8")
         tmp.replace(SETTINGS_PATH)
         try:
             os.chmod(SETTINGS_PATH, 0o600)
@@ -186,9 +207,95 @@ def _write_settings(data: dict) -> None:
             pass
 
 
+def _credential_store_error() -> CredentialStoreError | None:
+    if _keyring is None:
+        detail = (
+            f"keyring import failed: {_KEYRING_IMPORT_ERROR}"
+            if _KEYRING_IMPORT_ERROR else
+            "keyring is not installed"
+        )
+        return CredentialStoreError(
+            "Anthropic API key storage unavailable. Install keyring or run the "
+            f"Windows installer. Details: {detail}"
+        )
+    return None
+
+
+def _get_saved_anthropic_key() -> str:
+    err = _credential_store_error()
+    if err:
+        log.debug("%s", err)
+        return ""
+    try:
+        return (
+            _keyring.get_password(KEYRING_SERVICE, KEYRING_ANTHROPIC_USERNAME)
+            or ""
+        )
+    except Exception as e:
+        log.warning("credential read failed: %s", e)
+        return ""
+
+
+def _store_saved_anthropic_key(key: str) -> None:
+    key = (key or "").strip()
+    err = _credential_store_error()
+    if err:
+        if key:
+            raise err
+        return
+    try:
+        if key:
+            _keyring.set_password(
+                KEYRING_SERVICE,
+                KEYRING_ANTHROPIC_USERNAME,
+                key,
+            )
+        else:
+            try:
+                _keyring.delete_password(
+                    KEYRING_SERVICE,
+                    KEYRING_ANTHROPIC_USERNAME,
+                )
+            except Exception:
+                # Missing entries and unavailable delete backends both mean
+                # the credential is no longer retrievable by Yoink.
+                pass
+    except Exception as e:
+        raise CredentialStoreError(f"credential write failed: {e}") from e
+
+
+def _migrate_plaintext_anthropic_key() -> None:
+    """Move legacy settings.json anthropic_key into the OS credential store."""
+    if not SETTINGS_PATH.exists():
+        return
+    try:
+        raw = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        log.warning("settings migration skipped: read failed (%s)", e)
+        return
+    if not isinstance(raw, dict) or "anthropic_key" not in raw:
+        return
+
+    legacy_key = raw.get("anthropic_key")
+    clean = _normalize_settings(raw)
+    if isinstance(legacy_key, str) and legacy_key.strip():
+        try:
+            _store_saved_anthropic_key(legacy_key.strip())
+            clean["anthropic_key_invalid"] = False
+            log.info("Migrated Anthropic API key from settings.json to keyring")
+        except CredentialStoreError as e:
+            log.error("settings migration failed: %s", e)
+            return
+    clean["updated_at"] = _now_iso()
+    try:
+        _write_settings(clean)
+    except OSError as e:
+        log.warning("settings migration cleanup failed: %s", e)
+
+
 def _public_settings(data: dict | None = None) -> dict:
     data = data or _read_settings()
-    key = data.get("anthropic_key") if isinstance(data.get("anthropic_key"), str) else ""
+    key = _get_saved_anthropic_key()
     return {
         "comment_intelligence_enabled": bool(data.get("comment_intelligence_enabled")),
         "hook_type_enabled": bool(data.get("hook_type_enabled")),
@@ -201,7 +308,10 @@ def _public_settings(data: dict | None = None) -> dict:
 
 def _mark_anthropic_key_invalid() -> None:
     data = _read_settings()
-    data["anthropic_key"] = ""
+    try:
+        _store_saved_anthropic_key("")
+    except CredentialStoreError as e:
+        log.warning("credential invalid-key clear failed: %s", e)
     data["anthropic_key_invalid"] = True
     data["updated_at"] = _now_iso()
     try:
@@ -212,7 +322,7 @@ def _mark_anthropic_key_invalid() -> None:
 
 def _anthropic_key_for_feature(feature_flag: str) -> str | None:
     data = _read_settings()
-    key = data.get("anthropic_key") or ""
+    key = _get_saved_anthropic_key()
     if not data.get(feature_flag):
         return None
     if data.get("anthropic_key_invalid"):
@@ -228,7 +338,7 @@ def _saved_anthropic_key() -> str | None:
     key exists, not that the background feature toggle is enabled.
     """
     data = _read_settings()
-    key = data.get("anthropic_key") or ""
+    key = _get_saved_anthropic_key()
     if data.get("anthropic_key_invalid"):
         return None
     return key.strip() or None
@@ -410,15 +520,15 @@ _extract_lock = threading.Lock()
 # Serialize session.json mutations to keep the on-disk state consistent.
 _session_lock = threading.Lock()
 
-# v2 async jobs are intentionally in-memory for Sprint 1. They survive popup
-# close/reopen, but evaporate when the local helper process restarts. This is
-# the agreed v2 first-ship tradeoff; durable job recovery can come later if
-# playlist jobs become long enough that restart recovery matters.
+# v2.1 persists public job snapshots to jobs.json. Worker internals stay
+# process-local; on restart, non-terminal jobs are marked failed so users have
+# an audit trail but must restart the extraction manually.
 _jobs: dict[str, dict] = {}
 _jobs_lock = threading.Lock()
 _JOB_TERMINAL_STATES = {"completed", "cancelled", "failed"}
 _settings_lock = threading.Lock()
 _corpus_update_lock = threading.Lock()
+_taxonomy_lock = threading.Lock()
 
 # Markers in yoink.md so the comments section can be replaced after the
 # background fetch finishes. HTML comments are invisible in rendered markdown.
@@ -1115,9 +1225,51 @@ def _update_sidecar_hook_type(output_folder: Path, *, status: str,
         log.warning("sidecar Hook Type update: write failed (%s)", e)
 
 
+def _append_hook_taxonomy(context: dict, analysis: dict) -> None:
+    video_id = (context.get("video_id") or "").strip()
+    if not video_id:
+        return
+    record = {
+        "video_id": video_id,
+        "hook_type": analysis.get("hook_type"),
+        "hook_explanation": analysis.get("hook_explanation"),
+        "channel": context.get("channel") or None,
+        "title": context.get("title") or None,
+        "classified_at": _now_iso(),
+    }
+    with _taxonomy_lock:
+        rows: list[dict] = []
+        if TAXONOMY_PATH.exists():
+            try:
+                raw = json.loads(TAXONOMY_PATH.read_text(encoding="utf-8"))
+                if isinstance(raw, list):
+                    rows = [r for r in raw if isinstance(r, dict)]
+                else:
+                    log.warning("taxonomy.json schema invalid; starting fresh")
+            except (OSError, json.JSONDecodeError) as e:
+                log.warning("taxonomy.json read failed; starting fresh: %s", e)
+        rows = [r for r in rows if r.get("video_id") != video_id]
+        rows.append(record)
+        try:
+            TAXONOMY_PATH.parent.mkdir(parents=True, exist_ok=True)
+            tmp = TAXONOMY_PATH.with_suffix(".json.tmp")
+            tmp.write_text(
+                json.dumps(rows, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            tmp.replace(TAXONOMY_PATH)
+            try:
+                os.chmod(TAXONOMY_PATH, 0o600)
+            except OSError:
+                pass
+        except OSError as e:
+            log.warning("taxonomy.json write failed: %s", e)
+
+
 def _hook_type_context(metadata: dict, entries: list, top_comment: str | None = None) -> dict:
     transcript = " ".join(t for _s, _e, t in entries)
     return {
+        "video_id": metadata.get("id") or "",
         "title": metadata.get("title") or "",
         "description": metadata.get("description") or "",
         "channel": metadata.get("channel") or metadata.get("uploader") or "",
@@ -1144,6 +1296,7 @@ def _hook_type_worker(output_folder: Path, yoink_path: Path,
             hook_type=analysis.get("hook_type"),
             hook_explanation=analysis.get("hook_explanation"),
         )
+        _append_hook_taxonomy(context, analysis)
         log.info("Hook Type appended to %s", yoink_path)
     except AnthropicAPIError as e:
         reason = _short_reason(e.reason)
@@ -2472,15 +2625,16 @@ def _make_job_id() -> str:
 
 def _public_job(job: dict) -> dict:
     return {
-        "id": job["id"],
-        "kind": job["kind"],
-        "state": job["state"],
-        "source_url": job["source_url"],
+        "id": job.get("id"),
+        "kind": job.get("kind") or "playlist",
+        "state": job.get("state") or "failed",
+        "source_url": job.get("source_url"),
+        "title": job.get("title"),
         "playlist_title": job.get("playlist_title"),
         "session_folder": job.get("session_folder"),
-        "videos_total": job["videos_total"],
-        "videos_done": job["videos_done"],
-        "videos_failed": job["videos_failed"],
+        "videos_total": int(job.get("videos_total") or 0),
+        "videos_done": int(job.get("videos_done") or 0),
+        "videos_failed": int(job.get("videos_failed") or 0),
         "current_video": job.get("current_video"),
         "current_video_phase": job.get("current_video_phase"),
         "started_at": job.get("started_at"),
@@ -2491,6 +2645,135 @@ def _public_job(job: dict) -> dict:
         "warnings": list(job.get("warnings") or []),
         "message": job.get("message"),
     }
+
+
+def _persist_jobs_locked() -> None:
+    """Write public job snapshots to jobs.json. Caller must hold _jobs_lock."""
+    try:
+        JOBS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        jobs = [_public_job(j) for j in _jobs.values()]
+        payload = {"version": 1, "jobs": jobs}
+        tmp = JOBS_PATH.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp.replace(JOBS_PATH)
+        try:
+            os.chmod(JOBS_PATH, 0o600)
+        except OSError:
+            pass
+    except OSError as e:
+        log.warning("jobs persistence write failed: %s", e)
+
+
+def _validate_persisted_job(raw: dict) -> dict | None:
+    if not isinstance(raw, dict):
+        return None
+    job_id = raw.get("id")
+    kind = raw.get("kind")
+    state = raw.get("state")
+    if not isinstance(job_id, str) or not job_id:
+        return None
+    if kind not in ("playlist", "single"):
+        return None
+    if state not in ("queued", "running", "completed", "cancelled", "failed"):
+        return None
+
+    job = _public_job(raw)
+    if job["state"] not in _JOB_TERMINAL_STATES:
+        now = _now_iso()
+        job.update({
+            "state": "failed",
+            "current_video": None,
+            "current_video_phase": None,
+            "completed_at": now,
+            "updated_at": now,
+            "error": "server restarted",
+            "result": None,
+            "message": "Job failed because the Yoink helper restarted.",
+        })
+    return job
+
+
+def _start_fresh_jobs(reason: str) -> None:
+    log.warning("%s; starting fresh", reason)
+    with _jobs_lock:
+        _jobs.clear()
+        _persist_jobs_locked()
+
+
+def _restore_jobs_from_disk() -> None:
+    if not JOBS_PATH.exists():
+        return
+    try:
+        raw = json.loads(JOBS_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        _start_fresh_jobs(f"jobs persistence read failed: {e}")
+        return
+
+    jobs_raw = raw.get("jobs") if isinstance(raw, dict) else None
+    if not isinstance(jobs_raw, list):
+        _start_fresh_jobs("jobs persistence schema invalid")
+        return
+
+    restored: dict[str, dict] = {}
+    for item in jobs_raw:
+        job = _validate_persisted_job(item)
+        if job is None:
+            _start_fresh_jobs("jobs persistence schema invalid")
+            return
+        restored[job["id"]] = job
+
+    with _jobs_lock:
+        _jobs.clear()
+        _jobs.update(restored)
+        _persist_jobs_locked()
+    log.info("Restored %d job record(s) from %s", len(restored), JOBS_PATH)
+
+
+def _add_job_record(job: dict) -> dict:
+    with _jobs_lock:
+        _jobs[job["id"]] = job
+        _persist_jobs_locked()
+        return _public_job(job)
+
+
+def _record_single_extract_job(url: str, started_at: str, *,
+                               result: dict | None = None,
+                               error: str | None = None,
+                               title: str | None = None,
+                               folder: Path | None = None) -> dict:
+    now = _now_iso()
+    ok = result is not None and not error
+    folder_path = Path(result["folder"]) if result and result.get("folder") else folder
+    corpus_path = _resolve_corpus_path(folder_path) if folder_path else None
+    corpus_text = None
+    if result:
+        corpus_text = result.get("corpus_md_paste") or result.get("yoink_md")
+    job = {
+        "id": _make_job_id(),
+        "kind": "single",
+        "state": "completed" if ok else "failed",
+        "source_url": url,
+        "title": (result or {}).get("title") or title,
+        "playlist_title": None,
+        "session_folder": str(folder_path) if folder_path else None,
+        "videos_total": 1,
+        "videos_done": 1 if ok else 0,
+        "videos_failed": 0 if ok else 1,
+        "current_video": None,
+        "current_video_phase": None,
+        "started_at": started_at,
+        "updated_at": now,
+        "completed_at": now,
+        "error": None if ok else (error or "single-video extraction failed"),
+        "result": {
+            "combined_md_path": str(corpus_path) if corpus_path else None,
+            "combined_md_text": corpus_text or "",
+            "folder": str(folder_path) if folder_path else None,
+        } if ok else None,
+        "warnings": [],
+        "message": "Single-video yoink complete." if ok else "Single-video yoink failed.",
+    }
+    return _add_job_record(job)
 
 
 def _get_public_job(job_id: str) -> dict | None:
@@ -2508,6 +2791,7 @@ def _update_job(job_id: str, **updates) -> dict | None:
             return _public_job(job)
         job.update(updates)
         job["updated_at"] = _now_iso()
+        _persist_jobs_locked()
         return _public_job(job)
 
 
@@ -2517,9 +2801,13 @@ def _job_cancel_event(job_id: str) -> threading.Event | None:
         return job.get("_cancel_event") if job else None
 
 
-def _list_public_jobs() -> list[dict]:
+def _list_public_jobs(kind: str | None = None) -> list[dict]:
     with _jobs_lock:
-        jobs = [_public_job(j) for j in _jobs.values()]
+        jobs = [
+            _public_job(j)
+            for j in _jobs.values()
+            if kind is None or j.get("kind") == kind
+        ]
     return sorted(jobs, key=lambda j: j.get("updated_at") or "", reverse=True)
 
 
@@ -2571,6 +2859,7 @@ def _create_playlist_job(playlist: dict, interval: int) -> tuple[str, dict]:
     job["_thread"] = worker
     with _jobs_lock:
         _jobs[job_id] = job
+        _persist_jobs_locked()
         public = _public_job(job)
     worker.start()
     return job_id, public
@@ -2599,6 +2888,7 @@ def _cancel_playlist_job(job_id: str) -> tuple[dict | None, str | None, int]:
             "message": "Playlist job cancelled. Partial outputs were left on disk.",
             "updated_at": now,
         })
+        _persist_jobs_locked()
         return _public_job(job), None, 200
 
 
@@ -2922,6 +3212,7 @@ def _playlist_worker(job_id: str):
                 job["per_video"] = per_video
                 job["videos_done"] = videos_done
                 job["videos_failed"] = videos_failed
+                _persist_jobs_locked()
 
         _raise_if_cancelled(cancel_event)
         if videos_done == 0:
@@ -3238,10 +3529,15 @@ class Handler(BaseHTTPRequestHandler):
                 data[field] = body[field]
         if "anthropic_key" in body:
             raw_key = body.get("anthropic_key")
-            if raw_key is None or raw_key.strip() == "":
-                data["anthropic_key"] = ""
-            else:
-                data["anthropic_key"] = raw_key.strip()
+            key = "" if raw_key is None else raw_key.strip()
+            try:
+                _store_saved_anthropic_key(key)
+            except CredentialStoreError as e:
+                log.warning("settings credential write failed: %s", e)
+                return self._send_json(200, {
+                    "ok": False,
+                    "error": "credential store unavailable",
+                })
             data["anthropic_key_invalid"] = False
         data["updated_at"] = _now_iso()
         try:
@@ -3264,7 +3560,7 @@ class Handler(BaseHTTPRequestHandler):
             using_stored_key = False
         else:
             data = _read_settings()
-            key = (data.get("anthropic_key") or "").strip()
+            key = _get_saved_anthropic_key().strip()
             using_stored_key = True
 
         ok, reason, status = _test_anthropic_key(key)
@@ -3607,7 +3903,17 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- /jobs ----
     def _handle_jobs_list(self):
-        self._send_json(200, {"ok": True, "jobs": _list_public_jobs()})
+        qs = parse_qs(urlparse(self.path).query)
+        kind = (qs.get("kind") or [None])[0]
+        if kind not in (None, "", "playlist", "single"):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "kind must be playlist or single",
+            })
+        self._send_json(200, {
+            "ok": True,
+            "jobs": _list_public_jobs(kind or None),
+        })
 
     def _handle_extract(self, body: dict):
         url, interval, err = self._validate_url_interval(body)
@@ -3617,6 +3923,9 @@ class Handler(BaseHTTPRequestHandler):
 
         log.info("POST /extract url=%s interval=%d -> running", url, interval)
         DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
+        started_at = _now_iso()
+        title = None
+        folder = None
         with _extract_lock:
             try:
                 # One metadata fetch up front — used both to derive the folder
@@ -3630,8 +3939,16 @@ class Handler(BaseHTTPRequestHandler):
             except BaseException as e:
                 msg = friendly_error(e)
                 log.error("POST /extract -> error: %s", msg)
+                _record_single_extract_job(
+                    url,
+                    started_at,
+                    error=msg,
+                    title=title,
+                    folder=folder,
+                )
                 return self._send_json(200, {"ok": False, "error": msg})
 
+        _record_single_extract_job(url, started_at, result=result)
         log.info("POST /extract -> ok (%d shots, %s)",
                  result["screenshot_count"], result["folder"])
         self._send_json(200, result)
@@ -3935,6 +4252,9 @@ def main():
         # mechanism doesn't surface an error dialog to the user.
         log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
         sys.exit(0)
+
+    _migrate_plaintext_anthropic_key()
+    _restore_jobs_from_disk()
 
     # Bind succeeded -- now safe to claim the PID file.
     pid_file = HERE / "server.pid"
