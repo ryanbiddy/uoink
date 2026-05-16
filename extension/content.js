@@ -20,12 +20,14 @@
     "#actions-inner",
     "#actions",
   ];
-  const SHORTS_ANCHOR_SELECTORS = [
-    "ytd-reel-video-renderer[is-active] #actions",
-    "ytd-reel-video-renderer[is-active] ytd-reel-player-overlay-renderer #actions",
-    "ytd-shorts #actions",
-    "#shorts-container #actions",
-  ];
+  // Class marking the button as the free-floating Shorts variant. On
+  // /shorts/<id> pages YouTube's like/dislike/share column has no stable
+  // insertion slot: its DOM is rebuilt per-reel as the user scrolls, and the
+  // markup has churned across YouTube revisions (Sprint 10's `#actions`-based
+  // anchor never rendered in Ryan's smoke test). So Shorts gets a
+  // fixed-position button parented to <body> — it survives Shorts-to-Shorts
+  // transitions and needs no anchor element at all.
+  const SHORTS_FLOATING_CLASS = "stc-yt-shorts-floating";
 
   // ---- Styles (scoped via the unique class prefix) ----------------------
   const STYLE_ID = "stc-yt-styles";
@@ -53,6 +55,27 @@
         cursor: pointer;
         white-space: nowrap;
         transition: background-color 0.12s ease, box-shadow 0.18s ease;
+      }
+      /* Shorts variant — a fixed-position pill in the lower-right, sitting
+         below the like/dislike/share column. Parented to <body> so YouTube
+         rebuilding the reel DOM on Shorts-to-Shorts scroll cannot remove it.
+         Declared before the error/success rules below so those still win
+         the background color when the button flips state. */
+      .${BTN_CLASS}.${SHORTS_FLOATING_CLASS} {
+        position: fixed;
+        right: 24px;
+        bottom: 84px;
+        margin: 0;
+        z-index: 2000;
+        height: 40px;
+        border-radius: 20px;
+        background: rgba(15,15,15,0.92);
+        color: #fff;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      }
+      .${BTN_CLASS}.${SHORTS_FLOATING_CLASS}:hover {
+        background: rgba(40,40,40,0.96);
+        box-shadow: 0 2px 14px rgba(0,0,0,0.6);
       }
       .${BTN_CLASS}:hover { background: rgba(255,255,255,0.2); }
       .${BTN_CLASS}:active { background: rgba(255,255,255,0.28); }
@@ -109,12 +132,6 @@
         animation: stc-yt-spin 0.7s linear infinite;
       }
       @keyframes stc-yt-spin { to { transform: rotate(360deg); } }
-      .${BTN_CLASS}.stc-yt-shorts {
-        margin: 8px 0 0 0;
-        width: 72px;
-        justify-content: center;
-        padding: 0 10px;
-      }
     `;
     document.head.appendChild(style);
   }
@@ -477,11 +494,10 @@
   }
 
   // ---- Inject -----------------------------------------------------------
+  // Anchor lookup for /watch pages only. Shorts deliberately bypasses this —
+  // see SHORTS_FLOATING_CLASS for why no Shorts DOM anchor is trusted.
   function findAnchor() {
-    const selectors = isShortsPage()
-      ? SHORTS_ANCHOR_SELECTORS.concat(ANCHOR_SELECTORS)
-      : ANCHOR_SELECTORS;
-    for (const sel of selectors) {
+    for (const sel of ANCHOR_SELECTORS) {
       const el = document.querySelector(sel);
       if (el) return el;
     }
@@ -489,22 +505,46 @@
   }
 
   function injectButton() {
-    if (!isSupportedVideoPage()) return false;
-    const anchor = findAnchor();
+    if (!isSupportedVideoPage()) {
+      // Navigated off every video/Shorts page — tear down a lingering
+      // floating Shorts button. The /watch button lives inside DOM that
+      // YouTube discards on navigation, so it needs no explicit cleanup.
+      const stale = document.getElementById(BTN_ID);
+      if (stale && stale.classList.contains(SHORTS_FLOATING_CLASS)) stale.remove();
+      return false;
+    }
+
+    const shorts = isShortsPage();
     const existing = document.getElementById(BTN_ID);
     if (existing) {
-      existing.classList.toggle("stc-yt-shorts", isShortsPage());
-      if (anchor && existing.parentElement !== anchor) anchor.appendChild(existing);
-      return true;
+      const isFloating = existing.classList.contains(SHORTS_FLOATING_CLASS);
+      if (isFloating === shorts) {
+        // Button already matches the current page type. The floating Shorts
+        // button (parented to <body>) needs nothing further; the /watch
+        // button is re-homed if YouTube re-rendered the metadata row.
+        if (!shorts) {
+          const watchAnchor = findAnchor();
+          if (watchAnchor && existing.parentElement !== watchAnchor) {
+            watchAnchor.appendChild(existing);
+          }
+        }
+        return true;
+      }
+      // Crossed between /watch and /shorts — discard and rebuild for the
+      // new layout (anchored pill vs. floating pill).
+      existing.remove();
     }
-    if (!anchor) return false;
+
+    // /watch needs an anchor element to live in; Shorts floats on <body>.
+    const anchor = shorts ? null : findAnchor();
+    if (!shorts && !anchor) return false;
 
     injectStyles();
 
     const btn = document.createElement("button");
     btn.id = BTN_ID;
     btn.className = BTN_CLASS;
-    if (isShortsPage()) btn.classList.add("stc-yt-shorts");
+    if (shorts) btn.classList.add(SHORTS_FLOATING_CLASS);
     btn.type = "button";
     setButtonState(btn, "default", defaultLabel());
     applyStatusToButton(btn);
@@ -514,7 +554,7 @@
       onClick(btn);
     });
 
-    anchor.appendChild(btn);
+    (shorts ? document.body : anchor).appendChild(btn);
     // Now that the button exists, fetch the latest active-session state and
     // re-label if needed.
     getActiveFromStorage().then((s) => {
@@ -577,7 +617,18 @@
   });
 
   const observer = new MutationObserver(() => {
-    if (!document.getElementById(BTN_ID)) injectButton();
+    const btn = document.getElementById(BTN_ID);
+    if (!btn) {
+      injectButton();
+      return;
+    }
+    // Survive /watch <-> /shorts transitions: if the button's variant no
+    // longer matches the current page type, rebuild it. Shorts-to-Shorts
+    // scrolls need no action here — the floating button is parented to
+    // <body>, which YouTube never tears down between reels.
+    if (btn.classList.contains(SHORTS_FLOATING_CLASS) !== isShortsPage()) {
+      injectButton();
+    }
   });
   observer.observe(document.body, { childList: true, subtree: true });
 
