@@ -38,3 +38,11 @@ _all-yoinks-index.md
 docs/launch/
 
 .claude/
+
+# Dev-mode parallel-AI worktrees. These belong as sibling directories
+# (..\Yoink-claude-v2 and ..\Yoink-codex-v2) so git worktree commands
+# work correctly. If they end up nested inside the main repo (as can
+# happen when moved by hand), keep them out of commits. Recreate them
+# as siblings with `git worktree add` when needed for a new sprint.
+/Yoink-claude-v2/
+/Yoink-codex-v2/
