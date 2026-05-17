@@ -32,7 +32,10 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/watch*"],
+      "matches": [
+        "https://www.youtube.com/watch*",
+        "https://www.youtube.com/shorts/*"
+      ],
       "js": ["lib/extract.js", "content.js"],
       "run_at": "document_idle"
     }
