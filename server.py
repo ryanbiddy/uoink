@@ -248,7 +248,20 @@ def _atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8") -> Non
     tmp = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
     try:
         tmp.write_text(text, encoding=encoding)
-        tmp.replace(path)
+        # Path.replace() can raise PermissionError when the destination file
+        # is momentarily held open by OneDrive sync -- and the default
+        # DESKTOP_ROOT lives under OneDrive. Retry with short backoff before
+        # giving up so a transient sync lock doesn't lose the write.
+        for delay in (0.05, 0.2, 0.5, None):
+            try:
+                tmp.replace(path)
+                break
+            except PermissionError:
+                if delay is None:
+                    log.warning("atomic write to %s failed after retries "
+                                "(destination locked?)", path)
+                    raise
+                time.sleep(delay)
     finally:
         try:
             tmp.unlink(missing_ok=True)
@@ -541,6 +554,12 @@ def _test_anthropic_key(api_key: str) -> tuple[bool, str | None, int | None]:
 # isn't on PATH by default on Windows, so a bare "yt-dlp" call fails.
 YTDLP_CMD = [sys.executable, "-m", "yt_dlp"]
 
+# Hard cap on the video file yt-dlp downloads before ffmpeg runs. yt-dlp
+# pulls the whole file to disk first; on a small disk a few livestream-length
+# pulls could fill it. 2 GB is comfortably above a 4-hour 1080p video but
+# bails out on multi-hour livestream VODs.
+YTDLP_MAX_FILESIZE_BYTES = 2 * 1024 * 1024 * 1024
+
 def _get_desktop_dir() -> Path:
     """Resolve the user's actual Desktop, honoring OneDrive Desktop
     redirection. Naive %USERPROFILE%\\Desktop misses users whose Desktop is
@@ -656,6 +675,11 @@ _jobs_lock = threading.Lock()
 _JOB_TERMINAL_STATES = {"completed", "cancelled", "failed"}
 _settings_lock = threading.Lock()
 _corpus_update_lock = threading.Lock()
+# Serializes read-modify-write of the per-video <slug>.json sidecar. The
+# comments / hook-type / comment-intelligence workers run concurrently for the
+# same video; without this lock two of them can interleave read->read->write
+# ->write and silently drop one worker's fields.
+_sidecar_update_lock = threading.Lock()
 _taxonomy_lock = threading.Lock()
 
 # Markers in yoink.md so the comments section can be replaced after the
@@ -1096,24 +1120,25 @@ def _update_sidecar_comments(output_folder: Path, comments: list | None,
     Best-effort: a missing or unwritable sidecar is logged and ignored
     (the markdown is still the user-facing artifact)."""
     sidecar_path = output_folder / f"{output_folder.name}.json"
-    if not sidecar_path.exists():
-        return
-    try:
-        data = json.loads(sidecar_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as e:
-        log.warning("sidecar comments update: read failed (%s)", e)
-        return
-    data["comments"] = comments
-    data["comments_status"] = status
-    tmp = sidecar_path.with_suffix(".json.tmp")
-    try:
-        tmp.write_text(
-            json.dumps(data, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
-        tmp.replace(sidecar_path)
-    except OSError as e:
-        log.warning("sidecar comments update: write failed (%s)", e)
+    with _sidecar_update_lock:
+        if not sidecar_path.exists():
+            return
+        try:
+            data = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            log.warning("sidecar comments update: read failed (%s)", e)
+            return
+        data["comments"] = comments
+        data["comments_status"] = status
+        tmp = sidecar_path.with_suffix(".json.tmp")
+        try:
+            tmp.write_text(
+                json.dumps(data, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            tmp.replace(sidecar_path)
+        except OSError as e:
+            log.warning("sidecar comments update: write failed (%s)", e)
 
 
 def _extract_json_object(text: str, *, label: str = "AI response") -> dict:
@@ -1378,24 +1403,25 @@ def _update_sidecar_hook_type(output_folder: Path, *, status: str,
                               hook_explanation: str | None = None,
                               error: str | None = None) -> None:
     sidecar_path = output_folder / f"{output_folder.name}.json"
-    if not sidecar_path.exists():
-        return
-    try:
-        data = json.loads(sidecar_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as e:
-        log.warning("sidecar Hook Type update: read failed (%s)", e)
-        return
-    data["hook_type_status"] = status
-    data["hook_type"] = hook_type
-    data["hook_explanation"] = hook_explanation
-    data["hook_type_error"] = error
-    data["hook_type_updated_at"] = _now_iso()
-    tmp = sidecar_path.with_suffix(".json.tmp")
-    try:
-        tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-        tmp.replace(sidecar_path)
-    except OSError as e:
-        log.warning("sidecar Hook Type update: write failed (%s)", e)
+    with _sidecar_update_lock:
+        if not sidecar_path.exists():
+            return
+        try:
+            data = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            log.warning("sidecar Hook Type update: read failed (%s)", e)
+            return
+        data["hook_type_status"] = status
+        data["hook_type"] = hook_type
+        data["hook_explanation"] = hook_explanation
+        data["hook_type_error"] = error
+        data["hook_type_updated_at"] = _now_iso()
+        tmp = sidecar_path.with_suffix(".json.tmp")
+        try:
+            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+            tmp.replace(sidecar_path)
+        except OSError as e:
+            log.warning("sidecar Hook Type update: write failed (%s)", e)
 
 
 def _append_hook_taxonomy(context: dict, analysis: dict) -> None:
@@ -1622,23 +1648,24 @@ def _update_sidecar_comment_intelligence(output_folder: Path, *,
                                          analysis: dict | None = None,
                                          error: str | None = None) -> None:
     sidecar_path = output_folder / f"{output_folder.name}.json"
-    if not sidecar_path.exists():
-        return
-    try:
-        data = json.loads(sidecar_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as e:
-        log.warning("sidecar CI update: read failed (%s)", e)
-        return
-    data["comment_intelligence_status"] = status
-    data["comment_intelligence"] = analysis
-    data["comment_intelligence_error"] = error
-    data["comment_intelligence_updated_at"] = _now_iso()
-    tmp = sidecar_path.with_suffix(".json.tmp")
-    try:
-        tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-        tmp.replace(sidecar_path)
-    except OSError as e:
-        log.warning("sidecar CI update: write failed (%s)", e)
+    with _sidecar_update_lock:
+        if not sidecar_path.exists():
+            return
+        try:
+            data = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            log.warning("sidecar CI update: read failed (%s)", e)
+            return
+        data["comment_intelligence_status"] = status
+        data["comment_intelligence"] = analysis
+        data["comment_intelligence_error"] = error
+        data["comment_intelligence_updated_at"] = _now_iso()
+        tmp = sidecar_path.with_suffix(".json.tmp")
+        try:
+            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+            tmp.replace(sidecar_path)
+        except OSError as e:
+            log.warning("sidecar CI update: write failed (%s)", e)
 
 
 def _comment_intelligence_worker(output_folder: Path, yoink_path: Path,
@@ -2012,6 +2039,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 # on some Shorts, which makes ffmpeg screenshot extraction
                 # fail with "no packets" even though yt-dlp succeeded.
                 "-f", "worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst",
+                # Bail before downloading a multi-GB file (livestream VODs).
+                "--max-filesize", str(YTDLP_MAX_FILESIZE_BYTES),
                 "-o", str(output_folder / "video.%(ext)s"),
                 url,
             ],
@@ -2031,7 +2060,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                    if f.suffix in (".mp4", ".webm", ".mkv")]
     srt_files = list(output_folder.glob("video*.srt"))
     if not video_files:
-        raise RuntimeError("yt-dlp finished but no video file was produced.")
+        raise RuntimeError(
+            "yt-dlp produced no video file. The video may exceed the 2 GB "
+            "download cap (set in helper config), or it may be unavailable, "
+            "private, or region-locked."
+        )
     video_file = video_files[0]
 
     shots_dir = output_folder / "screenshots"
@@ -3012,9 +3045,6 @@ def _record_single_extract_job(url: str, started_at: str, *,
     ok = result is not None and not error
     folder_path = Path(result["folder"]) if result and result.get("folder") else folder
     corpus_path = _resolve_corpus_path(folder_path) if folder_path else None
-    corpus_text = None
-    if result:
-        corpus_text = _job_text_only_corpus(result.get("yoink_md") or "")
     job = {
         "id": _make_job_id(),
         "kind": "single",
@@ -3034,7 +3064,12 @@ def _record_single_extract_job(url: str, started_at: str, *,
         "error": None if ok else (error or "single-video extraction failed"),
         "result": {
             "combined_md_path": str(corpus_path) if corpus_path else None,
-            "combined_md_text": corpus_text or "",
+            # Full corpus text is intentionally NOT persisted into the
+            # jobs.json record. jobs.json is re-serialized in full on every
+            # job mutation, so storing per-extract corpus text grew the file
+            # linearly with lifetime yoink count. Consumers read the corpus
+            # from combined_md_path / folder on demand.
+            "combined_md_text": "",
             "folder": str(folder_path) if folder_path else None,
         } if ok else None,
         "warnings": [],
@@ -3597,6 +3632,12 @@ def _playlist_worker(job_id: str):
 # ---------------------------------------------------------------------------
 class Handler(BaseHTTPRequestHandler):
     server_version = f"Yoink/{VERSION}"
+    # Per-request socket timeout. BaseHTTPRequestHandler.setup() applies this
+    # to the connection, so a client that opens a socket (or sends a
+    # Content-Length header) and then stalls cannot pin a worker thread
+    # indefinitely. Each socket read is bounded to 30s; legitimate requests
+    # -- including the largest allowed body -- complete well within that.
+    timeout = 30
 
     def log_message(self, fmt, *args):
         return
@@ -4640,9 +4681,20 @@ def _existing_server_responds() -> bool:
         return False
 
 
+class _YoinkHTTPServer(ThreadingHTTPServer):
+    """ThreadingHTTPServer with a bounded listen() backlog so a burst of
+    connections is refused at the OS layer instead of piling up unbounded
+    accept()s. Worker threads stay daemonic (inherited from ThreadingHTTPServer)
+    so Ctrl+C still exits promptly."""
+    request_queue_size = 16
+
+
 def main():
-    DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
-    SESSIONS_ROOT.mkdir(parents=True, exist_ok=True)
+    # Output directories are created lazily by the write paths themselves
+    # (_run_extraction, _atomic_write_text, and the jobs/taxonomy/settings
+    # writers all mkdir(parents=True, exist_ok=True) their own parents).
+    # Creating them here would touch a possibly-locked OneDrive Desktop
+    # before the server can even bind and answer /health.
 
     # Single-instance guard. The Start Menu shortcut + the HKCU\Run autostart
     # entry can both fire on a fresh login, and a user clicking the shortcut
@@ -4656,7 +4708,7 @@ def main():
     # files when another instance still owns the port (and would also have
     # the wrong PID -- ours, not the live one).
     try:
-        server = ThreadingHTTPServer((HOST, PORT), Handler)
+        server = _YoinkHTTPServer((HOST, PORT), Handler)
     except OSError as e:
         # Port held by something we couldn't probe via /health (different
         # app, half-open socket, etc). Exit 0 so the Windows autostart

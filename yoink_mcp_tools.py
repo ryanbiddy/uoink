@@ -497,6 +497,9 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20},
         }),
         handler=list_recent_yoinks,
+        # Read-only but walks the whole corpus tree on every call; cap so an
+        # agent loop can't melt the disk. Cheaper than search, so higher cap.
+        rate_limiter=_RateLimiter(60),
     ),
     "search_yoinks": ToolSpec(
         name="search_yoinks",
@@ -506,6 +509,9 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 10},
         }, ["query"]),
         handler=search_yoinks,
+        # Reads every corpus file fully on every call; rate-limit so an agent
+        # calling it in a tight loop can't pin the disk.
+        rate_limiter=_RateLimiter(30),
     ),
     "get_yoink_corpus": ToolSpec(
         name="get_yoink_corpus",
