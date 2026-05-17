@@ -28,8 +28,11 @@ These do not require `X-Yoink-Token`:
 - `GET /health`
 - `GET /ping`
 - `GET /token`
+- `GET /index/backfill-status`
 
 `/health` and `/ping` are intentionally public because the extension, setup page, and YouTube button need to detect whether the helper is running before auth/token refresh completes.
+
+`/index/backfill-status` is intentionally public for the same UI bootstrapping reason. It exposes only `state`, `current`, and `total` counts, not corpus content or file paths.
 
 `/token` returns the per-install helper token and is guarded by:
 
@@ -44,7 +47,7 @@ The empty-Origin allowance is deliberate. Some Chromium service-worker fetches o
 All other helper endpoints require `X-Yoink-Token`:
 
 - Single-video extraction: `POST /extract`
-- Playlist jobs: `POST /playlist/preview`, `POST /playlist/start`, `GET /jobs`, `GET /jobs/<id>`, `POST /jobs/<id>/cancel`
+- Playlist jobs and index progress control: `POST /playlist/preview`, `POST /playlist/start`, `GET /jobs`, `GET /jobs/<id>`, `POST /jobs/<id>/cancel`, `POST /index/backfill-cancel`
 - Sessions: `POST /session/start`, `POST /session/add`, `POST /session/close`, `POST /session/cancel`, `POST /session/open`, `GET /session/list`, `GET /session/active`
 - Settings, AI key testing, and local cost estimates: `GET /settings`, `GET /settings/pricing`, `POST /settings`, `POST /settings/test-key`
 - Local files, folders, Skill prompt, and hook taxonomy: `GET /file`, `GET /skill/system-prompt`, `GET /taxonomy`, `GET /recent`, `GET /open-folder`, `GET /open-index`, `GET /open-prompts`
@@ -131,13 +134,14 @@ Anthropic 401 responses destructively clear the saved key from keyring and mark 
 Installed Windows builds store helper state under `%LOCALAPPDATA%\Yoink\`:
 
 - `settings.json` - feature toggles and public key status only; no API key.
-- `jobs.json` - recent playlist and single-video job records. In-flight jobs from a previous helper process are restored as failed with `error="server restarted"`.
-- `taxonomy.json` - local Hook Type classification records, deduped by `video_id`.
+- `index.db` - local SQLite library index for yoink metadata, FTS5 search text, jobs, taxonomy rows, citation maps, and health scores. Contains no API keys, calls no remote endpoints, and never leaves the user's machine.
+- `jobs.json.migrated` - legacy job records after first Sprint 15 migration into `index.db`.
+- `taxonomy.json.migrated` - legacy Hook Type records after first Sprint 15 migration into `index.db`.
 - `token.txt` - random helper token generated with `secrets.token_urlsafe(32)`.
 - `server.pid` - best-effort helper process id for Stop Yoink Server.
 - `server.log` - local diagnostic log.
 
-Corpus, sidecar, settings, jobs, and taxonomy writes use temp-file-and-replace patterns. Corrupt `jobs.json` or `taxonomy.json` is logged and replaced with a fresh structure rather than crashing the helper.
+Corpus, sidecar, settings, and migration writes use temp-file-and-replace patterns where practical. Corrupt `index.db` is quarantined as `index.db.corrupt-<timestamp>` and rebuilt from on-disk corpora through a local backfill scan. Legacy corrupt `jobs.json` or `taxonomy.json` migration input is logged and left in place rather than crashing the helper.
 
 ## MCP security model
 
