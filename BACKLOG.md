@@ -52,9 +52,9 @@ This is the canonical list of what's shipped, what's planned, and what's been ru
 - YouTube Shorts support (`/shorts/` URLs normalize correctly, UI and extraction handle them seamlessly)
 
 **v2 reliability + UX polish**
-- Job persistence across helper restarts via `%LOCALAPPDATA%\Yoink\jobs.json` (in-flight jobs marked failed on restart with `error="server restarted"`)
+- Job persistence across helper restarts via `%LOCALAPPDATA%\Yoink\index.db` (in-flight jobs marked failed on restart with `error="server restarted"`)
 - Single-video job records persist text-safe content only (no base64 clipboard payload bloat)
-- Atomic tmp-then-rename writes for corpus, sidecar, settings, jobs, and taxonomy files
+- Atomic tmp-then-rename writes for corpus, sidecar, settings, and migration files; jobs/taxonomy now persist in SQLite
 - Job recovery on popup reopen via `GET /jobs`
 - Polling resilience: disconnect banner after 5s, auto-open setup tab after 30s (rate-limited to once per 5 minutes across popup sessions), slow-poll cadence with auto-recovery
 - Active-playlist pill (mode-switch override; click to return to playlist view)
@@ -70,7 +70,7 @@ This is the canonical list of what's shipped, what's planned, and what's been ru
 - HTTP MCP transport marked experimental (stdio is the officially supported path)
 
 **v2 backend hardening (Hook taxonomy capture)**
-- Every successful Hook Type classification appends to `%LOCALAPPDATA%\Yoink\taxonomy.json` with dedupe by `video_id`. Foundation for v2.1+ Hook taxonomy query surface.
+- Every successful Hook Type classification upserts into `%LOCALAPPDATA%\Yoink\index.db` with dedupe by `video_id`. HTTP and MCP query surfaces shipped in v2.0.
 
 **Strategic positioning shift**
 - v2 ships as "the YouTube layer for any AI agent" with two adoption funnels (Chrome extension for creators, MCP for developers). Originally scoped v2 was Channel Decoder + Niche Corpus + CI + Hook taxonomy; the actual shipped v2 is Playlist + CI + Hook Type + Picker + MCP.
@@ -142,7 +142,7 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 
 ### Installer update/migration smoke matrix
 - **Destination:** v1.1 (new entry per Codex's review)
-- **Rationale:** Keyring migration, jobs.json restore, Start Menu entries, and auto-start behavior need testing across three install paths: upgrade-from-v1, uninstall-then-reinstall, and clean-install. Not a feature — a test discipline. Captured here so it doesn't get skipped.
+- **Rationale:** Keyring migration, legacy jobs/taxonomy import into `index.db`, Start Menu entries, and auto-start behavior need testing across three install paths: upgrade-from-v1, uninstall-then-reinstall, and clean-install. Not a feature — a test discipline. Captured here so it doesn't get skipped.
 - **Trigger:** v1.1 cycle
 
 ### Mac installer
@@ -162,23 +162,19 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 
 ## v2.1 punch list (post-v2 polish, post-launch)
 
-### Hook taxonomy query surface
-- **Destination:** v2.1 (moved up from v2.5 per Codex's review — capture mechanism already shipped in Sprint 7)
-- **Rationale:** v2 GA captures every successful Hook Type classification to `taxonomy.json`. Now the dataset exists; v2.1 surfaces it. Three options:
-  - (a) New `/taxonomy` HTTP endpoint (read-only listing with optional filters)
-  - (b) New `get_taxonomy(channel?, hook_type?)` MCP tool (agent-callable)
-  - (c) Both — same backend, different transports
-  Recommend (c) for v2.1; small backend addition that becomes the Hook autopsy launchpad.
-- **Trigger:** v2.1 cycle
+### Semantic embeddings on top of FTS5
+- **Destination:** v2.1
+- **Rationale:** Sprint 15 ships keyword FTS5; embeddings (sentence-transformers or hosted) ride on top of the same `yoinks` table as a sibling vector index.
+- **Trigger:** traction signal + user feedback that keyword search is insufficient.
 
-### Taxonomy retention / export / query (UX surface)
-- **Destination:** v2.1 (new entry per Codex's review)
-- **Rationale:** Capture exists, but there's no endpoint, MCP tool, CSV export, or UI surface for using the captured taxonomy data. The query surface entry above covers the MCP/HTTP tool. This entry covers the UX side: setup.html taxonomy viewer, CSV export button, retention policy controls.
-- **Trigger:** v2.1 cycle, after the query tool ships
+### Cross-corpus citation linking
+- **Destination:** Sprint 16.5
+- **Rationale:** Given citations and entity graph (Sprint 16), the next step is "this point also appears in video Y at [12:34]."
+- **Trigger:** Sprint 16 ships and find_mentions sees real use.
 
-### jobs.json compaction / retention policy
+### Taxonomy retention / export (UX surface)
 - **Destination:** v2.1 (new entry per Codex's review)
-- **Rationale:** Persistent jobs are useful, but without pruning the file grows forever. v2.0 strips `corpus_md_paste` from single-video records to prevent the worst bloat, but completed jobs still accumulate. Decide: cap at N most-recent terminal jobs? Cap by age? Background cleanup task? User-triggered "clear history" button in setup.html?
+- **Rationale:** HTTP `/taxonomy` and MCP `get_taxonomy` now exist and are backed by SQLite. This remaining item covers the UX side: setup.html taxonomy viewer, CSV export button, and retention controls.
 - **Trigger:** v2.1 cycle
 
 ### Chrome Web Store extension ID pinning
@@ -231,7 +227,7 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 - **Trigger:** Land before Channel Decoder / Niche Corpus
 
 ### Hook taxonomy labeled dataset
-- **Destination:** v2.5 (capture shipped in v2.0; query surface in v2.1; full labeled-dataset story here)
+- **Destination:** v2.5 (capture and basic query surfaces shipped in v2.0; full labeled-dataset story here)
 - **Rationale:** Aggregate Hook Type classifications across all yoinks into a queryable taxonomy with patterns over time. Compounds with use. Local-first means each user has their own taxonomy unless they opt to contribute.
 - **Trigger:** v2.5 cycle AND opt-in user-contribution mechanism designed
 
@@ -423,6 +419,6 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 
 - This file last reorganized: 2026-05-12 (post-Sprint 9, post-launch-audit)
 - Items moved out of "candidates" because shipped in v2.0: ~14 (full v2 shipped list above)
-- Items added based on Codex's pre-launch audit review: 7 (MCP skill/prompt package, jobs.json retention, extension ID pinning, taxonomy retention/export, corpus schema migration, installer migration smoke matrix, security docs refresh — last one already shipped in Sprint 9)
-- Items reordered based on Codex's review: 6 (Hook taxonomy query → v2.1, Cost estimator → v2.1, Shorts audit → pre-launch/v2.1, System tray reframed as mini-sprint, keyboard shortcut + right-click reordered earlier in v1.1, Diagnostic export earlier in v1.1)
+- Items added based on Codex's pre-launch audit review: 7 (MCP skill/prompt package, extension ID pinning, taxonomy retention/export, corpus schema migration, installer migration smoke matrix, semantic embeddings, cross-corpus citation linking)
+- Items reordered based on Codex's review: 6 (Cost estimator → v2.1, Shorts audit → pre-launch/v2.1, System tray reframed as mini-sprint, keyboard shortcut + right-click reordered earlier in v1.1, Diagnostic export earlier in v1.1, taxonomy UX moved after shipped query surfaces)
 - Scope questions resolved: topics.json storage (option a recommended), Niche Corpus source (option c recommended), Trend detection index (Hook Type + upload date recommended), Custom output folder (Desktop not Documents — corrected)

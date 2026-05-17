@@ -10,7 +10,11 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 
 ### Added
 
-- **MCP server** with 10 tools (`yoink_video`, `yoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_yoinks`, `search_yoinks`, `get_yoink_corpus`, `analyze_comments`, `classify_hook`, `get_taxonomy`). Stdio transport officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport available, marked experimental.
+- **MCP server** with 12 tools (`yoink_video`, `yoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_yoinks`, `search_yoinks`, `get_yoink_corpus`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `get_yoink_health`). Stdio transport officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport available, marked experimental.
+- **Library Index (SQLite FTS5).** `%LOCALAPPDATA%\Yoink\index.db` replaces scan-based search/recent/get-taxonomy code paths where indexed consumers need fast library access. First boot backfills existing corpora; subsequent yoinks update incrementally.
+- **Migration framework.** `schema_version` table plus numbered `migrations/NNNN_*.sql` scripts for future schema changes.
+- **Citation map.** Pre-computed at extraction/index time; new MCP tool `get_citation_map(slug)` returns transcript and screenshot citations with YouTube deep links.
+- **Health score.** Sidecar/index health snapshot for transcript, screenshots, comments, Hook Type, and Comment Intelligence; new MCP tool `get_yoink_health(slug)` returns the dict used by popup Recent health icons.
 - **Yoink Operator Skill** - drop-in `SKILL.md` (agentskills.io open standard) covering identity, default chat, hook-autopsy tweet mode, and citation discipline. Distributed via Claude Code plugin, OpenClaw ClawHub, Hermes URL install, and copyable system prompt for everywhere else.
 - **Playlist Mode.** Paste a YouTube playlist URL, yoink up to 10 videos per job. Async job system with live progress, cancellation, and partial-failure tolerance. Combined corpus (text-only) to clipboard; per-video corpora with screenshots on disk.
 - **Comment Intelligence.** Optional Anthropic-powered analysis of comment threads. Three structured sections appended per video: top themes, mentioned products/tools, notable disagreements.
@@ -18,8 +22,9 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 - **Smart Screenshot Picker.** Opt-in post-extraction grid for selecting which screenshots make the clipboard.
 - **Setup page** (`setup.html`) with BYO Anthropic API key flow, feature toggles, and MCP config snippet generator for Claude Desktop, Cursor, and generic stdio clients.
 - **Anthropic API key encryption.** Keys stored via Windows Credential Manager (`keyring` library), never plaintext. Migrates any plaintext anthropic_key from settings.json into Windows Credential Manager on first run.
-- **Job persistence across helper restarts.** `/jobs` state survives helper restart via `%LOCALAPPDATA%\Yoink\jobs.json`. In-flight jobs are marked failed with `error="server restarted"`; users restart them manually.
-- **Hook Type taxonomy capture.** Every successful classification appends to `%LOCALAPPDATA%\Yoink\taxonomy.json` (deduplicated by video ID) for v2.0 dataset queries via `GET /taxonomy` and the `get_taxonomy` MCP tool.
+- **Job persistence across helper restarts.** `/jobs` state survives helper restart via `%LOCALAPPDATA%\Yoink\index.db`. In-flight jobs are marked failed with `error="server restarted"`; users restart them manually.
+- **Hook Type taxonomy capture.** Every successful classification upserts into the local `taxonomy` table in `index.db` (deduplicated by video ID) for v2.0 dataset queries via `GET /taxonomy` and the `get_taxonomy` MCP tool.
+- **jobs.json / taxonomy.json migration.** Existing file-based persistence is imported into `index.db` on first boot and the old files are renamed with `.migrated` suffixes.
 - **Job recovery on popup reopen.** If you close the popup mid-playlist, reopening it resumes from the running job state via `GET /jobs`.
 - **Polling resilience.** Helper-disconnect banner appears after 5 seconds of failed polls. After 30 seconds, the setup guide auto-opens in a new tab (rate-limited to once per 5 minutes across popup sessions). Recovery is automatic when the helper comes back.
 - **Active-playlist pill.** When a playlist is running and the user switches to single-video mode, a persistent pill shows playlist progress. Click to return to the playlist view.
@@ -27,8 +32,8 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 - **`GET /jobs` API** with `?kind=playlist|single` filtering and `updated_at` desc sorting.
 - **`/file` endpoint** for sandboxed thumbnail serving to the popup.
 - **MCP `yoink_video` job logging.** Agent-triggered single-video yoinks now appear in `/jobs` and the recent-yoinks surface, matching the extension flow.
-- **`docs/security.md`** rewritten to cover v2 reality: keyring, token-gated endpoints, `/file` sandbox, MCP HTTP, `jobs.json` and `taxonomy.json` persistence, and the v2 threat model.
-- **`docs/v2-smoke-test.md`** — 84-checkpoint pre-launch smoke checklist.
+- **`docs/security.md`** rewritten to cover v2 reality: keyring, token-gated endpoints, `/file` sandbox, MCP HTTP, `index.db` persistence, and the v2 threat model.
+- **`docs/v2-smoke-test.md`** - 91-checkpoint pre-launch smoke checklist.
 - **Banner-link accessibility.** Disconnect-banner setup link announces "Opens setup guide in a new tab" to screen readers.
 
 ### Changed
@@ -36,7 +41,7 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 - **Anthropic API key storage moved from plaintext `settings.json` to Windows Credential Manager.** Existing keys are migrated automatically on first v2.0 startup.
 - **`get_yoink_corpus` MCP tool** now returns `video_id` and `video_url` alongside `corpus_md` and `folder` for downstream tool composition.
 - **HTTP MCP transport reframed as experimental.** Stdio remains the officially tested and supported transport. Setup page and docs updated accordingly.
-- **Single-video job records in `/jobs`** no longer persist the multimodal clipboard payload (`corpus_md_paste`), preventing `jobs.json` bloat. Full corpus remains available via `get_yoink_corpus` and the on-disk session folder. Legacy bloated records are automatically cleaned on first v2.0 restart.
+- **Single-video job records in `/jobs`** no longer persist the multimodal clipboard payload (`corpus_md_paste`), preventing job-table bloat. Full corpus remains available via `get_yoink_corpus` and the on-disk session folder. Legacy bloated records are stripped during migration.
 - **Corpus and sidecar writes** now use atomic tmp-then-rename pattern (already used for settings, jobs, taxonomy), eliminating partial-file risk on crash.
 - **JSON-RPC `notifications/initialized`** now returns 202 with no body, aligning with HTTP semantics for fire-and-forget notifications.
 - **`build.ps1`** SHA256 hash constants are locked. Comments and build-installer.md narrative updated to reflect locked state.
