@@ -110,7 +110,12 @@ yoink@replayryan.com
 ## Privacy policy URL
 https://ryanbiddy.com/yoink/privacy
 
-> **Note:** This URL must resolve before submission. The Web Store reviewer will fetch it. v2 privacy policy must state:
+> **Note:** This URL must resolve before submission. The Web Store reviewer will fetch it.
+>
+> The v2 privacy policy is **drafted** at `docs/privacy-policy.md` in
+> this repo. To go live, publish that file's content (rendered as a web
+> page) at `https://ryanbiddy.com/yoink/privacy`. It already covers the
+> required points:
 > 1. Core extraction is fully local. Yoink itself collects nothing.
 > 2. Optional AI features (Comment Intelligence, Hook Type, Smart Screenshot Picker) call the Anthropic API with the user's own API key when enabled by the user.
 > 3. The user's API key is stored in Windows Credential Manager and never transmitted anywhere except to Anthropic in the headers of those API calls.
