@@ -1952,6 +1952,174 @@ def _start_comment_intelligence_thread(output_folder: Path, yoink_path: Path,
     return t
 
 
+# ===========================================================================
+# Entity extraction (Sprint 16) -- A2 minimal.
+# ===========================================================================
+# Transcript words sent to the model, ~3000 tokens, capped for cost control.
+_ENTITY_TRANSCRIPT_WORD_CAP = 2200
+
+
+def _entity_transcript_text(sidecar: dict) -> str:
+    """Flatten the sidecar transcript into timestamped lines for the entity
+    extractor. Each chunk is prefixed with its start time in seconds so the
+    model can attribute a real timestamp to every mention. Capped at
+    _ENTITY_TRANSCRIPT_WORD_CAP words."""
+    lines: list[str] = []
+    for seg in sidecar.get("transcript") or []:
+        if not isinstance(seg, dict):
+            continue
+        text = str(seg.get("text") or "").strip()
+        if not text:
+            continue
+        ts = _as_float(seg.get("start"))
+        lines.append(f"[{ts:.1f}] {text}" if ts is not None else text)
+    return _first_words("\n".join(lines), _ENTITY_TRANSCRIPT_WORD_CAP)
+
+
+def _update_sidecar_entity_extraction(output_folder: Path, *, status: str,
+                                      error: str | None = None) -> None:
+    """Patch the sidecar's entity_extraction_status / _error fields. Mirrors
+    _update_sidecar_hook_type; serialised through _sidecar_update_lock so it
+    cannot clobber a concurrent comments / hook / CI sidecar write."""
+    sidecar_path = output_folder / f"{output_folder.name}.json"
+    with _sidecar_update_lock:
+        if not sidecar_path.exists():
+            return
+        try:
+            data = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as e:
+            log.warning("sidecar entity update: read failed (%s)", e)
+            return
+        data["entity_extraction_status"] = status
+        data["entity_extraction_error"] = error
+        data["entity_extraction_updated_at"] = _now_iso()
+        tmp = sidecar_path.with_suffix(".json.tmp")
+        try:
+            tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2),
+                           encoding="utf-8")
+            tmp.replace(sidecar_path)
+        except OSError as e:
+            log.warning("sidecar entity update: write failed (%s)", e)
+
+
+def extract_entities(transcript: str, *, title: str = "", channel: str = "",
+                     api_key: str | None = None) -> list[dict]:
+    """Vendor-neutral entity extraction over a video transcript.
+
+    Returns a list of ``{name, type, mentions: [{timestamp, context}]}``
+    dicts. Kept as a small Anthropic-free interface, mirroring
+    analyze_comments / analyze_hook_type, so a future MCP surface can wrap
+    it directly.
+    """
+    key = (api_key or _saved_anthropic_key() or "").strip()
+    if not key:
+        raise AnthropicAPIError(None, "Anthropic API key not configured")
+    transcript = (transcript or "").strip()
+    if not transcript:
+        raise AnthropicAPIError(None, "no transcript to extract entities from")
+
+    system = (
+        "You extract named entities from a YouTube video transcript for a "
+        "creator-operator's research library. Return valid JSON only, no "
+        "markdown. Only include entities explicitly named in the transcript."
+    )
+    user = (
+        "Extract the named entities from this video. Return this exact JSON "
+        "shape:\n"
+        "{\n"
+        '  "entities": [\n'
+        '    {"name": string, "type": string, '
+        '"mentions": [{"timestamp": number, "context": string}]}\n'
+        "  ]\n"
+        "}\n\n"
+        "Allowed type values: person, tool, product, company, topic, other.\n"
+        "Each transcript chunk is prefixed with its start time in seconds "
+        "like [12.5]; use the nearest one for each mention's timestamp. "
+        "context is a short quote (<=200 chars) of where the entity comes "
+        "up. Merge repeated references to the same entity into one "
+        "entities[] item with multiple mentions. Return an empty array if "
+        "the transcript names no clear entities.\n\n"
+        f"Title: {title}\nChannel: {channel}\n\nTranscript:\n{transcript}"
+    )
+    try:
+        resp = _anthropic_messages(key, system=system, user=user, max_tokens=2500)
+        data = _extract_json_object(_anthropic_text(resp), label="Entity extraction")
+    except AnthropicAPIError as e:
+        if e.status == 401:
+            _mark_anthropic_key_invalid()
+        raise
+    entities = data.get("entities") if isinstance(data, dict) else None
+    return [e for e in (entities or []) if isinstance(e, dict)]
+
+
+def _extract_entities(output_folder: Path, video_id: str, sidecar: dict) -> None:
+    """Entity extraction worker body (Sprint 16). Best-effort background
+    thread: pulls named entities off the transcript via Claude Haiku and
+    writes them into the library index. Never raises -- a failure just
+    records entity_extraction_status="failed" on the sidecar, with no
+    retry. Skipped silently when no Anthropic key is configured.
+
+    Note: the brief sketched this as _extract_entities(video_id, corpus_md,
+    sidecar). It takes output_folder instead of corpus_md -- the transcript
+    is read from the structured sidecar (which carries per-chunk
+    timestamps the markdown corpus would force a re-parse of), and the
+    folder is needed to write the sidecar status the brief itself requires.
+    """
+    video_id = (video_id or "").strip()
+    if not video_id:
+        return
+    transcript = _entity_transcript_text(sidecar)
+    if not transcript:
+        # No transcript (e.g. a video with no captions) -- nothing to do.
+        _update_sidecar_entity_extraction(output_folder, status="skipped")
+        return
+    try:
+        entities = extract_entities(
+            transcript,
+            title=_clean_text(sidecar.get("title"), limit=220),
+            channel=_clean_text(sidecar.get("channel"), limit=160),
+        )
+        written = _get_index().record_entities(
+            video_id, entities, source="transcript"
+        )
+        _update_sidecar_entity_extraction(output_folder, status="completed")
+        log.info("entity extraction: %s -> %d entities, %d mentions",
+                 output_folder.name, len(entities), written)
+    except AnthropicAPIError as e:
+        reason = _short_reason(e.reason)
+        if e.status == 401:
+            log.warning("entity extraction skipped: Anthropic API key invalid")
+        else:
+            log.warning("entity extraction failed: %s", reason)
+        _update_sidecar_entity_extraction(
+            output_folder, status="failed", error=reason
+        )
+    except Exception as e:
+        reason = _short_reason(str(e))
+        log.warning("entity extraction crashed: %s", reason)
+        _update_sidecar_entity_extraction(
+            output_folder, status="failed", error=reason
+        )
+
+
+def _start_entity_extraction_thread(output_folder: Path,
+                                    video_id: str | None,
+                                    sidecar: dict) -> threading.Thread | None:
+    """Spawn the entity extraction worker. Returns None (skips silently) when
+    no Anthropic key is configured or the video has no id -- mirrors the
+    Hook Type / Comment Intelligence skip pattern."""
+    if not _saved_anthropic_key() or not (video_id or "").strip():
+        return None
+    t = threading.Thread(
+        target=_extract_entities,
+        args=(output_folder, video_id, sidecar),
+        name=f"entity-extraction-{output_folder.name}",
+        daemon=True,
+    )
+    t.start()
+    return t
+
+
 def _comments_worker(url: str, output_folder: Path, yoink_path: Path,
                      metadata: dict | None = None, entries: list | None = None,
                      max_comments: int = 100, top_n: int = 50) -> None:
