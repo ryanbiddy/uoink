@@ -1664,86 +1664,64 @@ def _update_sidecar_hook_type(output_folder: Path, *, status: str,
 
 
 def _append_hook_taxonomy(context: dict, analysis: dict) -> None:
+    """Record a Hook Type classification in the library index, deduplicated
+    by video_id (INSERT OR REPLACE). Best-effort -- a failure here must not
+    fail the classification it accompanies."""
     video_id = (context.get("video_id") or "").strip()
     if not video_id:
         return
-    record = {
-        "video_id": video_id,
-        "hook_type": analysis.get("hook_type"),
-        "hook_explanation": analysis.get("hook_explanation"),
-        "channel": context.get("channel") or None,
-        "title": context.get("title") or None,
-        "classified_at": _now_iso(),
-    }
-    with _taxonomy_lock:
-        rows: list[dict] = []
-        if TAXONOMY_PATH.exists():
-            try:
-                raw = json.loads(TAXONOMY_PATH.read_text(encoding="utf-8"))
-                if isinstance(raw, list):
-                    rows = [r for r in raw if isinstance(r, dict)]
-                else:
-                    log.warning("taxonomy.json schema invalid; starting fresh")
-            except (OSError, json.JSONDecodeError) as e:
-                log.warning("taxonomy.json read failed; starting fresh: %s", e)
-        rows = [r for r in rows if r.get("video_id") != video_id]
-        rows.append(record)
-        try:
-            TAXONOMY_PATH.parent.mkdir(parents=True, exist_ok=True)
-            tmp = TAXONOMY_PATH.with_suffix(".json.tmp")
-            tmp.write_text(
-                json.dumps(rows, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-            tmp.replace(TAXONOMY_PATH)
-            try:
-                os.chmod(TAXONOMY_PATH, 0o600)
-            except OSError:
-                pass
-        except OSError as e:
-            log.warning("taxonomy.json write failed: %s", e)
+    try:
+        _get_index().upsert_taxonomy({
+            "video_id": video_id,
+            "hook_type": analysis.get("hook_type"),
+            "hook_explanation": analysis.get("hook_explanation"),
+            "channel": context.get("channel") or None,
+            "title": context.get("title") or None,
+            "classified_at": _now_iso(),
+        })
+    except Exception as e:
+        log.warning("hook taxonomy index write failed: %s", e)
 
 
-def _read_taxonomy_rows() -> list[dict]:
-    with _taxonomy_lock:
-        if not TAXONOMY_PATH.exists():
-            return []
-        try:
-            raw = json.loads(TAXONOMY_PATH.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as e:
-            log.warning("taxonomy.json read failed; returning empty taxonomy: %s", e)
-            return []
-        if not isinstance(raw, list):
-            log.warning("taxonomy.json schema invalid; returning empty taxonomy")
-            return []
-        return [r for r in raw if isinstance(r, dict)]
+def _migrate_taxonomy_json_to_index() -> None:
+    """One-time: import a pre-Sprint-15 taxonomy.json into the index
+    `taxonomy` table, then rename it to taxonomy.json.migrated. A no-op once
+    the file is gone. On any error the source is left intact and the helper
+    still boots."""
+    if not TAXONOMY_PATH.exists():
+        return
+    try:
+        raw = json.loads(TAXONOMY_PATH.read_text(encoding="utf-8"))
+        rows = raw if isinstance(raw, list) else []
+        idx = _get_index()
+        imported = 0
+        for row in rows:
+            if isinstance(row, dict) and (row.get("video_id") or "").strip():
+                idx.upsert_taxonomy(row)
+                imported += 1
+        TAXONOMY_PATH.replace(
+            TAXONOMY_PATH.with_name(TAXONOMY_PATH.name + ".migrated"))
+        log.info("Migrated %d taxonomy record(s) into the index", imported)
+    except Exception:
+        log.exception("taxonomy.json migration failed; leaving the file in place")
 
 
 def _query_taxonomy(*, channel: str | None = None,
                     hook_type: str | None = None,
                     limit: int = 50) -> list[dict]:
-    channel_filter = (channel or "").strip().lower()
-    hook_filter = (hook_type or "").strip().lower()
-    rows = []
-    for i, row in enumerate(_read_taxonomy_rows()):
-        if hook_filter and row.get("hook_type") != hook_filter:
-            continue
-        if channel_filter and (row.get("channel") or "").strip().lower() != channel_filter:
-            continue
-        rows.append({
-            "_index": i,
-            "video_id": row.get("video_id") or None,
-            "hook_type": row.get("hook_type") or None,
-            "hook_explanation": row.get("hook_explanation") or None,
-            "channel": row.get("channel") or None,
-            "title": row.get("title") or None,
-            "classified_at": row.get("classified_at") or None,
-        })
-    rows.sort(key=lambda r: (r.get("classified_at") or "", r.get("_index") or 0),
-              reverse=True)
-    for row in rows:
-        row.pop("_index", None)
-    return rows[:limit]
+    """Hook taxonomy rows from the library index, newest classification
+    first, with optional channel / hook_type filters. Return shape matches
+    the pre-index file-backed version (video_id, hook_type,
+    hook_explanation, channel, title, classified_at)."""
+    hook_filter = (hook_type or "").strip().lower() or None
+    channel_filter = (channel or "").strip() or None
+    try:
+        return _get_index().query_taxonomy(
+            channel=channel_filter, hook_type=hook_filter, limit=limit,
+        )
+    except Exception as e:
+        log.warning("taxonomy query failed: %s", e)
+        return []
 
 
 def _hook_type_context(metadata: dict, entries: list, top_comment: str | None = None) -> dict:
@@ -3198,21 +3176,44 @@ def _public_job(job: dict) -> dict:
     }
 
 
-def _persist_jobs_locked() -> None:
-    """Write public job snapshots to jobs.json. Caller must hold _jobs_lock."""
+def _index_job_row(job: dict) -> dict:
+    """Map an in-memory job dict (or an already-public job dict) to an index
+    `jobs` table row. The full public projection is stored in metadata_json
+    minus any corpus text -- jobs.metadata_json must never carry
+    combined_md_text (the architectural bloat the Sprint 14b audit flagged)."""
+    public = _public_job(job)
+    result = public.get("result")
+    if isinstance(result, dict) and "combined_md_text" in result:
+        result = {k: v for k, v in result.items() if k != "combined_md_text"}
+        public = {**public, "result": result}
+    folder = job.get("session_folder")
+    return {
+        "job_id": job.get("id"),
+        "kind": job.get("kind") or "playlist",
+        "status": job.get("state") or "failed",
+        "slug": Path(folder).name if folder else None,
+        "title": job.get("title") or job.get("playlist_title"),
+        "error": job.get("error"),
+        "started_at": job.get("started_at"),
+        "updated_at": job.get("updated_at") or _now_iso(),
+        "metadata_json": json.dumps(public, ensure_ascii=False),
+    }
+
+
+def _persist_jobs_locked(changed_job: dict | None = None) -> None:
+    """Persist job state into the library index. Caller must hold _jobs_lock.
+
+    With `changed_job`, upserts just that one row -- the hot path: a single
+    per-row SQLite write, replacing the old rewrite-the-entire-jobs.json-file
+    pattern. With no argument, upserts every in-memory job (used once at
+    restore, after non-terminal jobs are flipped to failed)."""
     try:
-        JOBS_PATH.parent.mkdir(parents=True, exist_ok=True)
-        jobs = [_public_job(j) for j in _jobs.values()]
-        payload = {"version": 1, "jobs": jobs}
-        tmp = JOBS_PATH.with_suffix(".json.tmp")
-        tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-        tmp.replace(JOBS_PATH)
-        try:
-            os.chmod(JOBS_PATH, 0o600)
-        except OSError:
-            pass
-    except OSError as e:
-        log.warning("jobs persistence write failed: %s", e)
+        idx = _get_index()
+        jobs = [changed_job] if changed_job is not None else list(_jobs.values())
+        for job in jobs:
+            idx.upsert_job(_index_job_row(job))
+    except Exception as e:
+        log.warning("job persistence write failed: %s", e)
 
 
 def _validate_persisted_job(raw: dict) -> dict | None:
@@ -3252,38 +3253,66 @@ def _start_fresh_jobs(reason: str) -> None:
 
 
 def _restore_jobs_from_disk() -> None:
+    """Hydrate the in-memory _jobs dict from the library index at startup.
+    Non-terminal jobs are flipped to failed (their worker thread did not
+    survive the restart) and the corrected state is written back.
+
+    Named for historical continuity; the source is now index.db, not
+    jobs.json (which _migrate_jobs_json_to_index folds in once)."""
+    try:
+        rows = _get_index().list_jobs(limit=1000)
+    except Exception as e:
+        log.warning("job restore from the index failed: %s", e)
+        return
+    restored: dict[str, dict] = {}
+    for row in rows:
+        meta = row.get("metadata_json")
+        try:
+            public = json.loads(meta) if meta else None
+        except (json.JSONDecodeError, TypeError):
+            public = None
+        if not isinstance(public, dict):
+            continue
+        job = _validate_persisted_job(public)
+        if job is not None:
+            restored[job["id"]] = job
+    with _jobs_lock:
+        _jobs.clear()
+        _jobs.update(restored)
+        # _validate_persisted_job flipped non-terminal jobs to failed; write
+        # those corrected states back so the index matches memory.
+        _persist_jobs_locked()
+    log.info("Restored %d job record(s) from the library index", len(restored))
+
+
+def _migrate_jobs_json_to_index() -> None:
+    """One-time: import a pre-Sprint-15 jobs.json into the index `jobs`
+    table, then rename it to jobs.json.migrated. A no-op once the file is
+    gone. combined_md_text is dropped by _index_job_row. On any error the
+    source file is left intact and the helper still boots."""
     if not JOBS_PATH.exists():
         return
     try:
         raw = json.loads(JOBS_PATH.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as e:
-        _start_fresh_jobs(f"jobs persistence read failed: {e}")
-        return
-
-    jobs_raw = raw.get("jobs") if isinstance(raw, dict) else None
-    if not isinstance(jobs_raw, list):
-        _start_fresh_jobs("jobs persistence schema invalid")
-        return
-
-    restored: dict[str, dict] = {}
-    for item in jobs_raw:
-        job = _validate_persisted_job(item)
-        if job is None:
-            _start_fresh_jobs("jobs persistence schema invalid")
-            return
-        restored[job["id"]] = job
-
-    with _jobs_lock:
-        _jobs.clear()
-        _jobs.update(restored)
-        _persist_jobs_locked()
-    log.info("Restored %d job record(s) from %s", len(restored), JOBS_PATH)
+        jobs_raw = raw.get("jobs") if isinstance(raw, dict) else None
+        if not isinstance(jobs_raw, list):
+            jobs_raw = []
+        idx = _get_index()
+        imported = 0
+        for item in jobs_raw:
+            if isinstance(item, dict) and item.get("id"):
+                idx.upsert_job(_index_job_row(item))
+                imported += 1
+        JOBS_PATH.replace(JOBS_PATH.with_name(JOBS_PATH.name + ".migrated"))
+        log.info("Migrated %d job(s) from jobs.json into the index", imported)
+    except Exception:
+        log.exception("jobs.json migration failed; leaving the file in place")
 
 
 def _add_job_record(job: dict) -> dict:
     with _jobs_lock:
         _jobs[job["id"]] = job
-        _persist_jobs_locked()
+        _persist_jobs_locked(job)
         return _public_job(job)
 
 
@@ -3344,7 +3373,7 @@ def _update_job(job_id: str, **updates) -> dict | None:
             return _public_job(job)
         job.update(updates)
         job["updated_at"] = _now_iso()
-        _persist_jobs_locked()
+        _persist_jobs_locked(job)
         return _public_job(job)
 
 
@@ -3412,7 +3441,7 @@ def _create_playlist_job(playlist: dict, interval: int) -> tuple[str, dict]:
     job["_thread"] = worker
     with _jobs_lock:
         _jobs[job_id] = job
-        _persist_jobs_locked()
+        _persist_jobs_locked(job)
         public = _public_job(job)
     worker.start()
     return job_id, public
@@ -3441,7 +3470,7 @@ def _cancel_playlist_job(job_id: str) -> tuple[dict | None, str | None, int]:
             "message": "Playlist job cancelled. Partial outputs were left on disk.",
             "updated_at": now,
         })
-        _persist_jobs_locked()
+        _persist_jobs_locked(job)
         return _public_job(job), None, 200
 
 
@@ -3822,7 +3851,7 @@ def _playlist_worker(job_id: str):
                 job["per_video"] = per_video
                 job["videos_done"] = videos_done
                 job["videos_failed"] = videos_failed
-                _persist_jobs_locked()
+                _persist_jobs_locked(job)
 
         _raise_if_cancelled(cancel_event)
         if videos_done == 0:
@@ -4982,11 +5011,16 @@ def main():
         sys.exit(0)
 
     _migrate_plaintext_anthropic_key()
-    _restore_jobs_from_disk()
     # Sprint 15: open the library index (quarantining + rebuilding a corrupt
-    # index.db if needed) and backfill it from disk in the background so a
-    # missing index never delays the bind or /health.
+    # index.db if needed) before anything reads from or migrates into it.
     _get_index()
+    # One-time: fold any pre-index jobs.json / taxonomy.json into index.db.
+    _migrate_jobs_json_to_index()
+    _migrate_taxonomy_json_to_index()
+    # Hydrate the in-memory job dict from the index.
+    _restore_jobs_from_disk()
+    # Backfill the index from disk in the background so a missing index
+    # never delays the bind or /health.
     _start_backfill_thread()
 
     # Bind succeeded -- now safe to claim the PID file.
