@@ -37,7 +37,26 @@ $TemplatesDir = Join-Path $InstallerDir 'templates'
 $IconSrc      = Join-Path $InstallerDir 'yoink.ico'
 
 # ---- Versions (pinned for v2 ship) --------------------------------------
-$VERSION        = '2.0.0'
+$VersionFile    = Join-Path $RepoRoot 'VERSION'
+if (-not (Test-Path $VersionFile)) {
+    throw "Missing VERSION file at repo root"
+}
+$VERSION = (Get-Content -Raw $VersionFile).Trim()
+if ($VERSION -notmatch '^\d+\.\d+\.\d+$') {
+    throw "VERSION must be semver-like x.y.z, got '$VERSION'"
+}
+Write-Host "Building Yoink version $VERSION" -ForegroundColor Cyan
+
+$ManifestPath = Join-Path $RepoRoot 'extension\manifest.json'
+if (-not (Test-Path $ManifestPath)) {
+    throw "Missing extension\manifest.json"
+}
+$ManifestJson = Get-Content -Raw $ManifestPath | ConvertFrom-Json
+$ManifestVersion = [string]$ManifestJson.version
+if ($ManifestVersion -ne $VERSION) {
+    throw "VERSION file ($VERSION) does not match extension\manifest.json version ($ManifestVersion). Update both before building."
+}
+
 # Python 3.11.9 is the last 3.11.x with binary installers; later 3.11 are
 # source-only security releases. v2 accepts this; v2.1 plan: move to 3.12.
 $PYTHON_VERSION = '3.11.9'
@@ -132,7 +151,7 @@ New-Item -ItemType Directory -Force -Path $CacheDir, $BuildDir | Out-Null
 if (-not (Test-Path $IconSrc)) {
     throw "Missing $IconSrc -- regenerate from extension\icons\icon-128-light.png"
 }
-foreach ($f in @('server.py','yt_extract.py','topics.json')) {
+foreach ($f in @('VERSION','server.py','yt_extract.py','topics.json')) {
     if (-not (Test-Path (Join-Path $RepoRoot $f))) {
         throw "Missing $f at repo root"
     }
@@ -238,6 +257,7 @@ Copy-Item (Join-Path $RepoRoot 'yoink_mcp_tools.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'requirements.txt') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'yt_extract.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'topics.json')    $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'VERSION')        $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.bat') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.ps1') $StagingDir -Force
 Copy-Item $IconSrc (Join-Path $StagingDir 'yoink.ico') -Force
@@ -247,8 +267,18 @@ Copy-Item (Join-Path $RepoRoot 'skills') (Join-Path $StagingDir 'skills') -Recur
 Write-Step 'Compiling installer'
 $iscc = Find-Iscc
 Write-Host "    using $iscc"
-& $iscc /Q (Join-Path $InstallerDir 'yoink.iss')
-if ($LASTEXITCODE -ne 0) { throw 'ISCC compilation failed' }
+$issTemplate = Join-Path $InstallerDir 'yoink.iss'
+$issGenerated = Join-Path $InstallerDir 'yoink.generated.iss'
+$issText = Get-Content -Raw $issTemplate
+$issText = $issText -replace '(?m)^#define\s+AppVersion\s+".*"$', "#define AppVersion    `"$VERSION`""
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($issGenerated, $issText, $utf8NoBom)
+try {
+    & $iscc /Q $issGenerated
+    if ($LASTEXITCODE -ne 0) { throw 'ISCC compilation failed' }
+} finally {
+    Remove-Item -Force -ErrorAction SilentlyContinue $issGenerated
+}
 
 $exe = Join-Path $BuildDir "Yoink-Setup-$VERSION.exe"
 if (-not (Test-Path $exe)) { throw "ISCC reported success but $exe is missing" }
