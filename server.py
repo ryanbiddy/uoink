@@ -2561,6 +2561,13 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "comment_intelligence": None,
             "comment_intelligence_status": "not_run",
             "comment_intelligence_error": None,
+            # Sprint 16: entity extraction runs in the background once the
+            # row is indexed. "pending" when a key is set, "skipped"
+            # otherwise; the worker flips it to completed / failed.
+            "entity_extraction_status": (
+                "pending" if _saved_anthropic_key() else "skipped"
+            ),
+            "entity_extraction_error": None,
         }
         # A5: extraction-time health snapshot, stored on the sidecar.
         sidecar["health"] = compute_health(sidecar)
@@ -2587,6 +2594,15 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         _index_yoink(output_folder, sidecar, yoink_path, sidecar_path)
     except Exception as e:
         log.warning("library index update failed for %s: %s", output_folder, e)
+
+    # Sprint 16 (A2): extract named entities off the transcript in the
+    # background, in parallel with the comments / Comment Intelligence
+    # pipeline (it does not wait on either). Started after _index_yoink so
+    # the yoinks row exists for the entity_mentions foreign key. Best-effort
+    # -- a failure never fails an otherwise-successful extraction.
+    _start_entity_extraction_thread(
+        output_folder, sidecar.get("video_id"), sidecar
+    )
 
     # Build the clipboard / paste version once we know the on-disk md is
     # final. Session adds skip this -- the session corpus is built at
