@@ -34,10 +34,10 @@ This is the canonical list of what's shipped, what's planned, and what's been ru
 ### v2.0 — built (awaiting smoke test then public launch)
 
 **Core v2 product**
-- **MCP server** with 9 tools (`yoink_video`, `yoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_yoinks`, `search_yoinks`, `get_yoink_corpus`, `analyze_comments`, `classify_hook`). Stdio transport officially tested with Claude Desktop and Cursor; community-reported support for ChatGPT Desktop, Continue, Cline; generic stdio fallback for any MCP-compatible client.
+- **MCP server** with 13 tools (`yoink_video`, `yoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_yoinks`, `search_yoinks`, `get_yoink_corpus`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `get_yoink_health`, `find_mentions`). Stdio transport officially tested with Claude Desktop and Cursor; community-reported support for ChatGPT Desktop, Continue, Cline; generic stdio fallback for any MCP-compatible client.
 - **Playlist Mode** — yoink up to 10 videos per job, async with live progress, cancel mid-flight, partial-failure tolerance, combined corpus to clipboard (text-only)
 - **Comment Intelligence** — Anthropic-powered theme clustering, mentioned-product extraction, disagreement flagging (BYO key)
-- **Hook Type classification** — 9-category per-video classifier with brief explanation
+- **Hook Type classification** — 9-category per-video classifier with brief explanation, confidence score, and self-calibrating user corrections
 - **Smart Screenshot Picker** — opt-in post-extraction grid for selecting which screenshots make the clipboard
 - **Setup page** — BYO Anthropic key flow (test, save, clear), feature toggles, MCP config snippet generator, deep-link from popup
 
@@ -71,6 +71,7 @@ This is the canonical list of what's shipped, what's planned, and what's been ru
 
 **v2 backend hardening (Hook taxonomy capture)**
 - Every successful Hook Type classification upserts into `%LOCALAPPDATA%\Yoink\index.db` with dedupe by `video_id`. HTTP and MCP query surfaces shipped in v2.0.
+- Sprint 17 A3 self-calibration ships correction capture in `taxonomy_corrections`, popup correction affordance, setup calibration list, and few-shot prompt injection from similar past corrections.
 
 **Strategic positioning shift**
 - v2 ships as "the YouTube layer for any AI agent" with two adoption funnels (Chrome extension for creators, MCP for developers). Originally scoped v2 was Channel Decoder + Niche Corpus + CI + Hook taxonomy; the actual shipped v2 is Playlist + CI + Hook Type + Picker + MCP.
@@ -192,6 +193,11 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 - **Rationale:** Automatic clustering will miss edge cases ("Claude" the AI vs "Claude" the person; "React" the framework vs the verb). A3's hook-type correction affordance is the template for entity corrections.
 - **Trigger:** Sprint 17 ships and exposes the correction-UI pattern.
 
+### Free-text reason field for hook corrections
+- **Destination:** Sprint 17.5 / v2.1
+- **Rationale:** Sprint 17 popup keeps correction fast: choose the right Hook Type and move on. The backend already accepts `user_reason`; a setup or expanded popup affordance can capture "why" later for better few-shot anchors.
+- **Trigger:** Users make enough corrections that knowing the reason would improve calibration quality.
+
 ### Taxonomy retention / export (UX surface)
 - **Destination:** v2.1 (new entry per Codex's review)
 - **Rationale:** HTTP `/taxonomy` and MCP `get_taxonomy` now exist and are backed by SQLite. This remaining item covers the UX side: setup.html taxonomy viewer, CSV export button, and retention controls.
@@ -250,6 +256,11 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 - **Destination:** v2.5 (capture and basic query surfaces shipped in v2.0; full labeled-dataset story here)
 - **Rationale:** Aggregate Hook Type classifications across all yoinks into a queryable taxonomy with patterns over time. Compounds with use. Local-first means each user has their own taxonomy unless they opt to contribute.
 - **Trigger:** v2.5 cycle AND opt-in user-contribution mechanism designed
+
+### Generalize correction pattern to other classifications
+- **Destination:** v2.5
+- **Rationale:** A3 proves the correction loop for Hook Type only. The same "wrong? choose correct label" pattern could later apply to entity type, topic classification, screenshot quality labels, or future taxonomies, but only if Hook Type corrections see meaningful adoption.
+- **Trigger:** A3 correction usage shows users are willing to calibrate Yoink and the stored corrections measurably improve outputs.
 
 ### Per-video quality preset (fast / standard / thorough)
 - **Destination:** v2.5
