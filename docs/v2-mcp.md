@@ -333,7 +333,7 @@ Rate limit: 10 calls/minute per process.
 
 ### classify_hook
 
-Run Hook Type classification on an existing yoink and return the category and explanation. Requires a configured Anthropic API key.
+Run Hook Type classification on an existing yoink and return the category, explanation, confidence, and calibration count. Requires a configured Anthropic API key.
 
 Parameters:
 
@@ -347,9 +347,15 @@ Return shape:
 {
   "ok": true,
   "hook_type": "curiosity_gap",
-  "hook_explanation": "The opening withholds the answer while promising a counter-intuitive payoff."
+  "hook_explanation": "The opening withholds the answer while promising a counter-intuitive payoff.",
+  "confidence": 4,
+  "similar_corrections_used": 2
 }
 ```
+
+`confidence` is the classifier's self-score from 1-5. `similar_corrections_used` is `0` when no past corrections were found, or the number of same-channel, same-topic, or recent correction anchors injected into the prompt.
+
+After the user corrects a classification through `POST /taxonomy/correct`, future calls to `classify_hook` on similar videos receive those corrections as few-shot calibration anchors. The classifier becomes more aligned with the user's judgment over time.
 
 Errors:
 

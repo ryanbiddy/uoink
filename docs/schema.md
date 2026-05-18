@@ -150,12 +150,53 @@ Hook Type taxonomy capture table.
 | `channel` | TEXT | nullable | Channel/uploader name. |
 | `title` | TEXT | nullable | Video title. |
 | `classified_at` | TEXT | required | Timestamp of the classification. |
+| `confidence` | INTEGER | nullable | Sprint 17 classifier self-confidence, `1-5`. NULL for pre-Sprint-17 rows or unparseable model output. |
 
 Behavior:
 
 - `INSERT OR REPLACE` dedupes by `video_id`.
 - Re-classifying the same video updates the row instead of appending a duplicate.
 - `/taxonomy` and MCP `get_taxonomy` sort by `classified_at DESC` and support optional `channel`, `hook_type`, and `limit` filtering.
+- Sprint 17 corrections update `taxonomy.hook_type` to the corrected value, making the correction canonical for taxonomy queries.
+
+### Sprint 17 - `taxonomy_corrections` table
+
+Migration `0003_taxonomy_corrections.sql` adds the self-calibrating Hook Type correction dataset. Corrections are append-only per video: if a user corrects the same video more than once, Yoink stores each correction event and promotes the most recent corrected category to `taxonomy.hook_type`.
+
+Channel and topic are denormalized into this table so the Hook Type prompt can quickly retrieve similarity-matched few-shot examples without joining the full corpus on every classification.
+
+```sql
+CREATE TABLE taxonomy_corrections (
+    correction_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    video_id TEXT NOT NULL,
+    original_hook_type TEXT NOT NULL,
+    corrected_hook_type TEXT NOT NULL,
+    user_reason TEXT,
+    corrected_at TEXT NOT NULL,
+    channel TEXT,
+    topic TEXT,
+    FOREIGN KEY (video_id) REFERENCES yoinks(video_id) ON DELETE CASCADE
+);
+```
+
+| Column | Type | Nullability | Stores |
+|---|---|---|---|
+| `correction_id` | INTEGER PRIMARY KEY AUTOINCREMENT | required | Internal correction row ID returned by `POST /taxonomy/correct`. |
+| `video_id` | TEXT | required | YouTube video ID; foreign key to `yoinks.video_id`. |
+| `original_hook_type` | TEXT | required | Classifier category before the user corrected it. |
+| `corrected_hook_type` | TEXT | required | User-selected category; one of the 9 Hook Type categories. |
+| `user_reason` | TEXT | nullable | Optional short reason. Sprint 17 popup sends an empty reason; richer reason capture is deferred. |
+| `corrected_at` | TEXT | required | Timestamp when the correction was recorded. |
+| `channel` | TEXT | nullable | Denormalized channel/uploader name for same-channel few-shot matching. |
+| `topic` | TEXT | nullable | Denormalized topic/category for same-topic few-shot matching. |
+
+Behavior:
+
+- `taxonomy_corrections` preserves the labeled dataset; it does not replace historical correction rows.
+- The current canonical classification lives in `taxonomy.hook_type`.
+- Similarity matching reads corrections in three passes: same channel first, same topic second, most-recent fallback third.
+- Few-shot prompt injection is capped at 8 corrections.
+- `taxonomy.confidence` stores the classifier's 1-5 self-score and is NULL for older rows.
 
 ### `citations`
 
@@ -280,6 +321,10 @@ Query behavior:
 | `idx_entities_type` | `entities(type)` | Future filters by entity type. |
 | `idx_entity_mentions_entity` | `entity_mentions(entity_id)` | Mentions lookup for one entity. |
 | `idx_entity_mentions_video` | `entity_mentions(video_id)` | Cleanup/join lookup for one video. |
+| `idx_taxonomy_corrections_video` | `taxonomy_corrections(video_id)` | Lookup correction history for one video. |
+| `idx_taxonomy_corrections_channel` | `taxonomy_corrections(channel)` | Same-channel calibration anchors. |
+| `idx_taxonomy_corrections_topic` | `taxonomy_corrections(topic)` | Same-topic calibration anchors. |
+| `idx_taxonomy_corrections_corrected_at` | `taxonomy_corrections(corrected_at DESC)` | Most-recent fallback anchors and setup history list. |
 
 The FTS5 table maintains its own search index internally.
 

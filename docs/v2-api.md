@@ -839,7 +839,8 @@ Success response: HTTP 200
       "hook_explanation": "The opening withholds the payoff while promising a counter-intuitive reveal.",
       "channel": "Example Channel",
       "title": "How creators build durable content systems",
-      "classified_at": "2026-05-12T10:30:00"
+      "classified_at": "2026-05-12T10:30:00",
+      "confidence": 4
     }
   ]
 }
@@ -854,6 +855,97 @@ Error responses:
 | 400 | `hook_type invalid` | `hook_type` is not one of the allowed categories. |
 | 400 | `limit invalid` | `limit` cannot be parsed as an integer. |
 | 403 | `missing or invalid token` | `X-Yoink-Token` missing or stale. |
+
+### POST /taxonomy/correct
+
+Record a user correction for a Hook Type classification. This powers the popup's "wrong?" affordance and feeds future Hook Type classifications with similarity-matched few-shot examples.
+
+Auth: `X-Yoink-Token` required.
+
+Rate limit: 30 calls/minute per helper process. Corrections are user-initiated, so hitting this limit usually indicates an extension loop or automation bug.
+
+Request body:
+
+```json
+{
+  "video_id": "abc123DEF45",
+  "corrected_hook_type": "story_open",
+  "user_reason": ""
+}
+```
+
+Fields:
+
+| Field | Type | Required | Notes |
+|---|---:|---:|---|
+| `video_id` | string | yes | YouTube video ID whose classification is being corrected. |
+| `corrected_hook_type` | string | yes | One of the 9 Hook Type categories. |
+| `user_reason` | string | no | Optional free-text reason. Sprint 17 popup sends `""`; richer reason capture is deferred. |
+
+Success response: HTTP 200
+
+```json
+{
+  "ok": true,
+  "correction_id": 42
+}
+```
+
+Behavior:
+
+- Inserts one append-only row into `taxonomy_corrections`.
+- Updates `taxonomy.hook_type` for the same `video_id` so the corrected category is canonical.
+- Stores denormalized channel/topic when available so future classifications can retrieve same-channel and same-topic calibration anchors quickly.
+
+Error responses:
+
+| HTTP status | Error string | Meaning |
+|---:|---|---|
+| 400 | `video_id required` | Missing or empty video ID. |
+| 400 | `corrected_hook_type invalid` | Category is not one of the 9 Hook Type values. |
+| 403 | `missing or invalid token` | `X-Yoink-Token` missing or stale. |
+| 404 | `taxonomy row not found` | The video has not been classified/indexed yet. |
+| 429 | `rate limit exceeded` | More than 30 corrections/minute. |
+
+### GET /taxonomy/corrections
+
+Return recent Hook Type correction rows for setup.html's "Hook Type calibration" review list. This endpoint is the read companion to `POST /taxonomy/correct`; if it is not exposed in a given Sprint 17 build, the setup page should show a non-blocking "history unavailable" state and the endpoint can land in Sprint 17.5.
+
+Auth: `X-Yoink-Token` required.
+
+Request body: none.
+
+Query parameters:
+
+| Field | Type | Required | Notes |
+|---|---:|---:|---|
+| `limit` | integer | no | Defaults to 20 for setup history. Clamp recommended to 1-100. |
+| `channel` | string | no | Optional exact channel filter. |
+| `topic` | string | no | Optional exact topic filter. |
+
+Success response: HTTP 200
+
+```json
+{
+  "ok": true,
+  "total": 12,
+  "corrections": [
+    {
+      "correction_id": 42,
+      "video_id": "abc123DEF45",
+      "title": "How creators build durable content systems",
+      "original_hook_type": "promise_list",
+      "corrected_hook_type": "story_open",
+      "user_reason": "",
+      "corrected_at": "2026-05-17T10:30:00",
+      "channel": "Example Channel",
+      "topic": "Creator Research"
+    }
+  ]
+}
+```
+
+Rows sort by `corrected_at` descending.
 
 ### GET /skill/system-prompt
 
@@ -1309,3 +1401,4 @@ Handled application errors and warnings:
 - `jobs.json` and `taxonomy.json` are legacy migration inputs only. After successful Sprint 15 migration they are renamed with `.migrated` suffixes and the SQLite index is authoritative.
 - Comments remain background/fire-and-forget.
 - Preview `channel` and `duration_seconds` fields are nullable.
+- Sprint 17 Hook Type corrections are append-only in `taxonomy_corrections`; the corrected category is also promoted to `taxonomy.hook_type`.
