@@ -1584,6 +1584,31 @@ def _hook_fewshot_block(similar: list[dict]) -> str:
     return "\n".join(lines)
 
 
+# Appended to the hook-type system prompt -- elicits an explicit 1-5
+# self-confidence score on a line after the JSON (Sprint 17 / A3).
+_HOOK_CONFIDENCE_GUIDE = (
+    "\n\nAfter the JSON, on a separate line, output your confidence as "
+    "exactly `Confidence: N`, where N is an integer from 1 to 5:\n"
+    "- 5 = very confident, hook clearly fits exactly one category\n"
+    "- 4 = confident, mild ambiguity\n"
+    "- 3 = moderate, hook could fit one of two categories\n"
+    "- 2 = uncertain, hook fits 'other' or is borderline\n"
+    "- 1 = guessing, no clear pattern"
+)
+
+
+def _parse_hook_confidence(text: str) -> int | None:
+    """Pull the 1-5 confidence integer from a hook-type model response.
+    Returns None when the model emitted no parseable score."""
+    text = text or ""
+    m = re.search(r"confidence\s*[:=]\s*([1-5])\b", text, re.IGNORECASE)
+    if m:
+        return int(m.group(1))
+    # Looser fallback: "confidence" followed shortly by a 1-5 digit.
+    m = re.search(r"confidence\D{0,12}([1-5])\b", text, re.IGNORECASE)
+    return int(m.group(1)) if m else None
+
+
 def analyze_hook_type(context: dict, *, api_key: str | None = None) -> dict:
     """Classify one video's opening style.
 
@@ -1631,6 +1656,7 @@ def analyze_hook_type(context: dict, *, api_key: str | None = None) -> dict:
         "hook_type must be exactly one of the categories above. "
         "hook_explanation is one or two sentences on what makes the opening "
         "fit that type."
+        + _HOOK_CONFIDENCE_GUIDE
     )
     user = (
         "Classify this video's hook style.\n\n"
@@ -1638,13 +1664,17 @@ def analyze_hook_type(context: dict, *, api_key: str | None = None) -> dict:
     )
     try:
         resp = _anthropic_messages(key, system=system, user=user, max_tokens=400)
+        text = _anthropic_text(resp)
         analysis = _normalize_hook_analysis(
-            _extract_json_object(_anthropic_text(resp), label="Hook Type")
+            _extract_json_object(text, label="Hook Type")
         )
     except AnthropicAPIError as e:
         if e.status == 401:
             _mark_anthropic_key_invalid()
         raise
+    # Confidence rides on a separate line after the JSON; parse it off the
+    # raw text. None when the model didn't emit a parseable score.
+    analysis["confidence"] = _parse_hook_confidence(text)
     analysis["similar_corrections_used"] = len(similar)
     return analysis
 
@@ -1706,6 +1736,7 @@ def _replace_hook_analysis_section(yoink_path: Path, body: str) -> None:
 def _update_sidecar_hook_type(output_folder: Path, *, status: str,
                               hook_type: str | None = None,
                               hook_explanation: str | None = None,
+                              confidence: int | None = None,
                               error: str | None = None) -> None:
     sidecar_path = output_folder / f"{output_folder.name}.json"
     with _sidecar_update_lock:
@@ -1719,6 +1750,7 @@ def _update_sidecar_hook_type(output_folder: Path, *, status: str,
         data["hook_type_status"] = status
         data["hook_type"] = hook_type
         data["hook_explanation"] = hook_explanation
+        data["hook_type_confidence"] = confidence
         data["hook_type_error"] = error
         data["hook_type_updated_at"] = _now_iso()
         tmp = sidecar_path.with_suffix(".json.tmp")
@@ -1744,6 +1776,7 @@ def _append_hook_taxonomy(context: dict, analysis: dict) -> None:
             "channel": context.get("channel") or None,
             "title": context.get("title") or None,
             "classified_at": _now_iso(),
+            "confidence": analysis.get("confidence"),
         })
     except Exception as e:
         log.warning("hook taxonomy index write failed: %s", e)
@@ -1819,6 +1852,7 @@ def _hook_type_worker(output_folder: Path, yoink_path: Path,
             status="completed",
             hook_type=analysis.get("hook_type"),
             hook_explanation=analysis.get("hook_explanation"),
+            confidence=analysis.get("confidence"),
         )
         _append_hook_taxonomy(context, analysis)
         log.info("Hook Type appended to %s", yoink_path)
@@ -2616,6 +2650,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "hook_type_status": "pending" if hook_type_pending else "skipped",
             "hook_type": None,
             "hook_explanation": None,
+            "hook_type_confidence": None,
             "hook_type_error": None,
             "comment_intelligence": None,
             "comment_intelligence_status": "not_run",
