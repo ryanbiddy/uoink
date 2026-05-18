@@ -507,6 +507,17 @@ const HEALTH_FIELDS = [
   "hook",
   "comment_intelligence",
 ];
+const HOOK_TYPE_CATEGORIES = [
+  "curiosity_gap",
+  "question",
+  "contrarian",
+  "story_open",
+  "promise_list",
+  "demo",
+  "authority",
+  "stakes",
+  "other",
+];
 
 function loadRecentFailures() {
   return new Promise((resolve) => {
@@ -822,6 +833,78 @@ function renderEntityIndicator(row) {
   return indicator;
 }
 
+function hookDisplayName(hookType) {
+  const raw = String(hookType || "").trim();
+  if (!raw) return "";
+  return raw
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+}
+
+function numberOrNull(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function hookInfo(row) {
+  if (!row || typeof row !== "object") return null;
+  const hook = row.hook_analysis || row.hook || row.taxonomy || {};
+  const hookType = row.hook_type
+    || row.corrected_hook_type
+    || hook.hook_type
+    || hook.corrected_hook_type
+    || hook.type
+    || hook.category;
+  if (!hookType) return null;
+
+  return {
+    hookType: String(hookType).trim().toLowerCase(),
+    confidence: numberOrNull(
+      row.hook_confidence
+      ?? row.confidence
+      ?? hook.confidence
+      ?? hook.hook_confidence
+    ),
+    similarCorrectionsUsed: numberOrNull(
+      row.similar_corrections_used
+      ?? hook.similar_corrections_used
+      ?? hook.corrections_used
+    ) || 0,
+    videoId: row.video_id || hook.video_id || null,
+  };
+}
+
+function renderHookCalibration(row) {
+  const info = hookInfo(row);
+  if (!info) return null;
+
+  const wrap = document.createElement("div");
+  wrap.className = "recent-item-hook";
+  wrap.addEventListener("click", (ev) => ev.stopPropagation());
+
+  const chip = document.createElement("span");
+  chip.className = "hook-chip";
+  if (info.confidence != null && info.confidence <= 2) {
+    chip.classList.add("warning");
+  }
+
+  const confidenceText = info.confidence == null
+    ? ""
+    : ` · confidence ${info.confidence}/5`;
+  chip.textContent = `${hookDisplayName(info.hookType)}${confidenceText}`;
+
+  wrap.appendChild(chip);
+
+  if (info.similarCorrectionsUsed > 0) {
+    const suffix = document.createElement("span");
+    suffix.className = "hook-muted";
+    suffix.textContent = `(calibrated from ${info.similarCorrectionsUsed} past corrections)`;
+    wrap.appendChild(suffix);
+  }
+
+  return wrap;
+}
+
 async function loadRecentYoinks() {
   if (!recentYoinksEl) return;
   let recent = [];
@@ -862,9 +945,11 @@ async function loadRecentYoinks() {
 
     const healthRow = renderHealthRow(r.health);
     const entityIndicator = renderEntityIndicator(r);
+    const hookRow = renderHookCalibration(r);
     if (entityIndicator) main.appendChild(entityIndicator);
     if (healthRow) main.appendChild(healthRow);
     item.appendChild(main);
+    if (hookRow) item.appendChild(hookRow);
     item.addEventListener("click", () => {
       if (r.folder) STC.openFolder(r.folder);
     });
