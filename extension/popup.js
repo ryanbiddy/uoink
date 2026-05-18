@@ -507,6 +507,17 @@ const HEALTH_FIELDS = [
   "hook",
   "comment_intelligence",
 ];
+const HOOK_TYPE_CATEGORIES = [
+  "curiosity_gap",
+  "question",
+  "contrarian",
+  "story_open",
+  "promise_list",
+  "demo",
+  "authority",
+  "stakes",
+  "other",
+];
 
 function loadRecentFailures() {
   return new Promise((resolve) => {
@@ -822,6 +833,171 @@ function renderEntityIndicator(row) {
   return indicator;
 }
 
+function hookDisplayName(hookType) {
+  const raw = String(hookType || "").trim();
+  if (!raw) return "";
+  return raw
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+}
+
+function numberOrNull(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function hookInfo(row) {
+  if (!row || typeof row !== "object") return null;
+  const hook = row.hook_analysis || row.hook || row.taxonomy || {};
+  const hookType = row.hook_type
+    || row.corrected_hook_type
+    || hook.hook_type
+    || hook.corrected_hook_type
+    || hook.type
+    || hook.category;
+  if (!hookType) return null;
+
+  return {
+    hookType: String(hookType).trim().toLowerCase(),
+    confidence: numberOrNull(
+      row.hook_confidence
+      ?? row.confidence
+      ?? hook.confidence
+      ?? hook.hook_confidence
+    ),
+    similarCorrectionsUsed: numberOrNull(
+      row.similar_corrections_used
+      ?? hook.similar_corrections_used
+      ?? hook.corrections_used
+    ) || 0,
+    videoId: row.video_id
+      || hook.video_id
+      || (row.url && STC.extractVideoId(row.url))
+      || (row.source_url && STC.extractVideoId(row.source_url))
+      || null,
+  };
+}
+
+async function postHookCorrection(videoId, correctedHookType) {
+  return popupAuthedJson("/taxonomy/correct", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      video_id: videoId,
+      corrected_hook_type: correctedHookType,
+      user_reason: "",
+    }),
+  });
+}
+
+function renderHookCalibration(row) {
+  const info = hookInfo(row);
+  if (!info) return null;
+
+  const wrap = document.createElement("div");
+  wrap.className = "recent-item-hook";
+  wrap.addEventListener("click", (ev) => ev.stopPropagation());
+
+  const chip = document.createElement("span");
+  chip.className = "hook-chip";
+  if (info.confidence != null && info.confidence <= 2) {
+    chip.classList.add("warning");
+  }
+
+  const confidenceText = info.confidence == null
+    ? ""
+    : ` · confidence ${info.confidence}/5`;
+  chip.textContent = `${hookDisplayName(info.hookType)}${confidenceText}`;
+
+  wrap.appendChild(chip);
+
+  const suffix = document.createElement("span");
+  suffix.className = "hook-muted";
+  if (info.similarCorrectionsUsed > 0) {
+    suffix.textContent = `(calibrated from ${info.similarCorrectionsUsed} past corrections)`;
+    wrap.appendChild(suffix);
+  }
+
+  const message = document.createElement("span");
+  message.className = "hook-correction-message";
+
+  if (info.videoId) {
+    const correctionLink = document.createElement("span");
+    correctionLink.className = "hook-correction-link";
+    correctionLink.setAttribute("role", "button");
+    correctionLink.tabIndex = 0;
+    correctionLink.textContent = "wrong?";
+
+    const hideTimer = setTimeout(() => {
+      if (correctionLink.isConnected) correctionLink.remove();
+    }, 60_000);
+
+    const openCorrectionPicker = () => {
+      clearTimeout(hideTimer);
+      correctionLink.remove();
+      message.textContent = "";
+      message.className = "hook-correction-message";
+
+      const select = document.createElement("select");
+      select.className = "hook-correction-select";
+      select.setAttribute("aria-label", "Correct hook type");
+
+      for (const category of HOOK_TYPE_CATEGORIES) {
+        const option = document.createElement("option");
+        option.value = category;
+        option.textContent = hookDisplayName(category);
+        option.selected = category === info.hookType;
+        select.appendChild(option);
+      }
+
+      select.addEventListener("change", async () => {
+        const corrected = select.value;
+        if (!corrected || corrected === info.hookType) return;
+        select.disabled = true;
+        message.textContent = "Updating...";
+        message.className = "hook-correction-message";
+        try {
+          const res = await postHookCorrection(info.videoId, corrected);
+          if (!res || res.ok === false) {
+            throw new Error((res && res.error) || "Correction failed");
+          }
+          info.hookType = corrected;
+          chip.classList.remove("warning");
+          chip.textContent = hookDisplayName(corrected);
+          suffix.textContent = "+1 calibration";
+          if (!suffix.isConnected) wrap.appendChild(suffix);
+          message.textContent =
+            "Updated - thank you, future classifications will use this calibration.";
+          select.remove();
+        } catch (e) {
+          message.className = "hook-correction-error";
+          message.textContent = (e && e.message) || "Correction failed";
+          select.disabled = false;
+        }
+      });
+
+      wrap.appendChild(select);
+      if (!message.isConnected) wrap.appendChild(message);
+      select.focus();
+    };
+
+    correctionLink.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      openCorrectionPicker();
+    });
+    correctionLink.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" || ev.key === " ") {
+        ev.preventDefault();
+        ev.stopPropagation();
+        openCorrectionPicker();
+      }
+    });
+    wrap.appendChild(correctionLink);
+  }
+
+  return wrap;
+}
+
 async function loadRecentYoinks() {
   if (!recentYoinksEl) return;
   let recent = [];
@@ -862,9 +1038,11 @@ async function loadRecentYoinks() {
 
     const healthRow = renderHealthRow(r.health);
     const entityIndicator = renderEntityIndicator(r);
+    const hookRow = renderHookCalibration(r);
     if (entityIndicator) main.appendChild(entityIndicator);
     if (healthRow) main.appendChild(healthRow);
     item.appendChild(main);
+    if (hookRow) item.appendChild(hookRow);
     item.addEventListener("click", () => {
       if (r.folder) STC.openFolder(r.folder);
     });
