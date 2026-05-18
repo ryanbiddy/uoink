@@ -4466,6 +4466,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_job_get(bare)
         if bare == "/taxonomy":
             return self._handle_taxonomy()
+        if bare == "/taxonomy/corrections":
+            return self._handle_taxonomy_corrections()
         log.info("GET %s -> 404", self.path)
         self._send_json(404, {"ok": False, "error": "not found"})
 
@@ -4999,6 +5001,39 @@ class Handler(BaseHTTPRequestHandler):
                 hook_type=hook_type,
                 limit=limit,
             ),
+        })
+
+    # ---- /taxonomy/corrections ----
+    def _handle_taxonomy_corrections(self):
+        """List recent Hook Type corrections (Sprint 17 / A3 follow-up).
+        Feeds the setup.html "Hook Type calibration" review surface.
+        Read-only sibling of POST /taxonomy/correct."""
+        qs = parse_qs(urlparse(self.path).query)
+        channel = (qs.get("channel") or [None])[0]
+        topic = (qs.get("topic") or [None])[0]
+        limit_raw = (qs.get("limit") or ["50"])[0]
+        try:
+            limit = int(limit_raw)
+        except (TypeError, ValueError):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "limit invalid",
+            })
+        limit = max(1, min(200, limit))
+        idx = _get_index()
+        try:
+            corrections = idx.list_corrections(
+                limit=limit,
+                channel=channel,
+                topic=topic,
+            )
+        except Exception as e:
+            log.warning("taxonomy corrections: index read failed: %s", e)
+            return self._send_json(
+                500, {"ok": False, "error": "index unavailable"})
+        self._send_json(200, {
+            "ok": True,
+            "corrections": corrections,
         })
 
     # ---- /taxonomy/correct ----
