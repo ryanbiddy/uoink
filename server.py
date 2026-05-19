@@ -4689,36 +4689,97 @@ class Handler(BaseHTTPRequestHandler):
     # folders. A folder counts as a yoink if it has a yoink.md inside it.
     # Sessions root (_sessions/) is excluded.
     def _handle_recent(self):
+        """Recent yoinks for the popup. Sprint 15.1 follow-up:
+        replaces the disk-walk with an Index.list_recent read and enriches
+        each row with the index data (Sprint 15 health, Sprint 16 entity
+        counts, Sprint 17 hook confidence) the popup needs to render its
+        chips. Falls back to an empty list if the index is unavailable."""
+        idx = _get_index()
+        try:
+            rows = idx.list_recent(limit=10)
+        except Exception as e:
+            log.warning("recent: index unavailable: %s", e)
+            rows = []
+
         results = []
-        if DESKTOP_ROOT.exists():
-            candidates = []
-            for topic_dir in DESKTOP_ROOT.iterdir():
-                if not topic_dir.is_dir() or topic_dir.name.startswith("_"):
-                    continue
-                for video_dir in topic_dir.iterdir():
-                    if not video_dir.is_dir():
-                        continue
-                    if _resolve_corpus_path(video_dir) is None:
-                        continue
-                    candidates.append((video_dir.stat().st_mtime,
-                                       topic_dir.name, video_dir))
-            candidates.sort(key=lambda c: c[0], reverse=True)
-            for _mtime, topic_name, video_dir in candidates[:3]:
-                title = video_dir.name
-                # Prefer the title from metadata.json if available — it's the
-                # readable form, not the slugified folder name.
-                meta_path = video_dir / "metadata.json"
-                if meta_path.exists():
-                    try:
-                        m = json.loads(meta_path.read_text(encoding="utf-8"))
-                        title = m.get("title") or title
-                    except (OSError, json.JSONDecodeError):
-                        pass
-                results.append({
-                    "title": title,
-                    "topic": topic_name,
-                    "folder": str(video_dir),
-                })
+        for r in rows:
+            video_id = r.get("video_id")
+            sidecar_path = r.get("sidecar_path") or ""
+            corpus_path = r.get("corpus_path") or ""
+            if not video_id or not corpus_path:
+                continue
+            folder = str(Path(corpus_path).parent)
+
+            # Fresh health from the live sidecar — the stored snapshot is
+            # captured at extraction time, before the AI workers finish,
+            # so re-computing from the current sidecar reflects the latest
+            # hook / CI / entity status.
+            health = None
+            if sidecar_path and Path(sidecar_path).exists():
+                try:
+                    live = json.loads(
+                        Path(sidecar_path).read_text(encoding="utf-8"))
+                    health = compute_health(live)
+                except (OSError, json.JSONDecodeError):
+                    pass
+            if health is None and r.get("health_score_json"):
+                try:
+                    health = json.loads(r["health_score_json"])
+                except (json.JSONDecodeError, TypeError):
+                    pass
+
+            # Hook Type confidence (Sprint 17). Lives on the taxonomy row,
+            # joined back to yoinks by video_id.
+            confidence = None
+            try:
+                with idx._lock:
+                    tr = idx._conn.execute(
+                        "SELECT confidence FROM taxonomy WHERE video_id=?",
+                        (video_id,),
+                    ).fetchone()
+                if tr and tr["confidence"] is not None:
+                    confidence = int(tr["confidence"])
+            except Exception:
+                pass
+
+            # Entity stats (Sprint 16). Distinct entity count + top 5 by
+            # mention count for this video.
+            entity_count = 0
+            top_entities: list[str] = []
+            try:
+                with idx._lock:
+                    ec = idx._conn.execute(
+                        "SELECT COUNT(DISTINCT entity_id) AS c "
+                        "FROM entity_mentions WHERE video_id=?",
+                        (video_id,),
+                    ).fetchone()
+                    if ec:
+                        entity_count = int(ec["c"] or 0)
+                    es = idx._conn.execute(
+                        "SELECT e.name FROM entity_mentions em "
+                        "JOIN entities e ON e.entity_id = em.entity_id "
+                        "WHERE em.video_id = ? "
+                        "GROUP BY em.entity_id "
+                        "ORDER BY COUNT(*) DESC LIMIT 5",
+                        (video_id,),
+                    ).fetchall()
+                    top_entities = [row["name"] for row in es]
+            except Exception:
+                pass
+
+            results.append({
+                "title": r.get("title") or "",
+                "topic": r.get("topic") or "",
+                "folder": folder,
+                "video_id": video_id,
+                "channel": r.get("channel"),
+                "yoinked_at": r.get("yoinked_at"),
+                "hook_type": r.get("hook_type"),
+                "hook_type_confidence": confidence,
+                "health": health,
+                "entity_count": entity_count,
+                "top_entities": top_entities,
+            })
         self._send_json(200, {"ok": True, "recent": results})
 
     # ---- /open-folder?path=... ----
