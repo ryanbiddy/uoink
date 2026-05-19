@@ -4304,6 +4304,53 @@ def _trash_folder_for(row: dict) -> Path:
     return _trash_root() / topic_folder / f"{slug}__deleted-{ts}"
 
 
+# Trash purge cadence: a pass at startup, then once a day.
+_TRASH_PURGE_INTERVAL_SEC = 24 * 60 * 60
+
+
+def _purge_trash() -> int:
+    """One trash-purge pass: hard-delete every soft-deleted yoink past the
+    30-day retention window -- both its _yoink-trash/ folder and its index
+    row (the FK cascade then clears its citations, entity_mentions, and
+    taxonomy_corrections). Returns the number purged."""
+    try:
+        idx = _get_index()
+        stale = idx.prune_trash(datetime.now())
+    except Exception as e:
+        log.warning("trash purge: could not query the index: %s", e)
+        return 0
+    purged = 0
+    for video_id in stale:
+        row = idx.get_yoink(video_id)
+        if not row:
+            continue
+        try:
+            trash = _trash_folder_for(row)
+            if trash.exists():
+                shutil.rmtree(trash, ignore_errors=True)
+            idx.delete_yoink(video_id)
+            purged += 1
+        except Exception:
+            log.exception("trash purge: failed to purge %s", video_id)
+    if purged:
+        log.info("trash purge: hard-removed %d expired yoink(s)", purged)
+    return purged
+
+
+def _start_trash_purge_thread() -> None:
+    """Run the trash purge once at startup, then every 24h. Daemon thread
+    so it never delays the bind or blocks shutdown."""
+    def _runner():
+        while True:
+            try:
+                _purge_trash()
+            except Exception:
+                log.exception("trash purge pass crashed")
+            time.sleep(_TRASH_PURGE_INTERVAL_SEC)
+
+    threading.Thread(target=_runner, name="trash-purge", daemon=True).start()
+
+
 def _enrich_yoink_row(idx, r: dict) -> dict | None:
     """Shape one index `yoinks` row into the enriched result the popup's
     /recent list and the memory page both consume: fresh health (Sprint
@@ -5720,6 +5767,9 @@ def main():
     # Backfill the index from disk in the background so a missing index
     # never delays the bind or /health.
     _start_backfill_thread()
+    # Sprint 18: hard-delete _yoink-trash/ entries past the 30-day window,
+    # once at startup and every 24h after.
+    _start_trash_purge_thread()
 
     # Bind succeeded -- now safe to claim the PID file.
     pid_file = HERE / "server.pid"
