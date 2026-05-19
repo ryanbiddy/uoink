@@ -4728,17 +4728,26 @@ class Handler(BaseHTTPRequestHandler):
                 except (json.JSONDecodeError, TypeError):
                     pass
 
-            # Hook Type confidence (Sprint 17). Lives on the taxonomy row,
-            # joined back to yoinks by video_id.
+            # Hook Type + confidence (Sprint 17). Both live on the
+            # taxonomy row (the hook worker updates the taxonomy table,
+            # not the yoinks table, when classification completes).
+            # yoinks.hook_type can be stale-null for newly-yoinked videos
+            # whose hook worker has since finished, so taxonomy is the
+            # authoritative read.
+            hook_type = r.get("hook_type")
             confidence = None
             try:
                 with idx._lock:
                     tr = idx._conn.execute(
-                        "SELECT confidence FROM taxonomy WHERE video_id=?",
+                        "SELECT hook_type, confidence FROM taxonomy "
+                        "WHERE video_id=?",
                         (video_id,),
                     ).fetchone()
-                if tr and tr["confidence"] is not None:
-                    confidence = int(tr["confidence"])
+                if tr:
+                    if tr["hook_type"]:
+                        hook_type = tr["hook_type"]
+                    if tr["confidence"] is not None:
+                        confidence = int(tr["confidence"])
             except Exception:
                 pass
 
@@ -4774,7 +4783,7 @@ class Handler(BaseHTTPRequestHandler):
                 "video_id": video_id,
                 "channel": r.get("channel"),
                 "yoinked_at": r.get("yoinked_at"),
-                "hook_type": r.get("hook_type"),
+                "hook_type": hook_type,
                 "hook_type_confidence": confidence,
                 "health": health,
                 "entity_count": entity_count,
