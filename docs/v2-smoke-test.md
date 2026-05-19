@@ -2,7 +2,7 @@
 
 Use this as the one pre-launch checklist. Run on a clean Windows user profile if possible, then repeat the core extraction subset on the normal dev machine.
 
-Total checkpoints: 108.
+Total checkpoints: 120.
 
 ## 1. Core extraction - single-video v1 regression
 
@@ -147,3 +147,18 @@ Total checkpoints: 108.
 106. [ ] Clean Windows VM install - success: unsigned SmartScreen path is understandable, installer runs without admin, helper starts hidden.
 107. [ ] Chrome Web Store package uses production domain/copy - success: footer, setup, README, store listing, and landing links point at `ryanbiddy.com/yoink` or the chosen canonical URL.
 108. [ ] Final docs pass - success: README, security, build-installer, v2 docs, and store listing no longer describe pre-Sprint-7 behavior.
+
+## 13. Sprint 19 - Rate-limit queue, failure diagnosis, and UI polish
+
+109. [ ] Burst-yoink to trigger YouTube rate limit - success: `/extract` returns `queued: true`, `pending_id`, and `retry_after`, and popup banner shows queued count.
+110. [ ] Wait 60s+ - success: queued yoink runs automatically without user action, and the queue banner clears.
+111. [ ] Manually cancel a queued yoink via `POST /queue/cancel` - success: queue row is marked cancelled, and the banner updates.
+112. [ ] Manually retry-now via `POST /queue/retry-now` - success: worker picks it up immediately on the next 30s poll.
+113. [ ] After 3 failed retries - success: queue row is marked failed, and popup banner shows red error with retry and dismiss actions.
+114. [ ] Check `GET /diagnose` - success: returns structured checks with statuses (`ok`/`warning`/`error`/`skipped`).
+115. [ ] Open setup page - success: "Helper status" panel shows all checks with context-specific action buttons per failure mode.
+116. [ ] Yoink with no Anthropic key - success: `/diagnose` reports `anthropic_key_set: warning`, and setup page shows "Add key" action.
+117. [ ] Make `DESKTOP_ROOT` unwritable (read-only flag) - success: first write falls back to `LOCALAPPDATA`, and `/health` reports `output_root_fallback: true`.
+118. [ ] Clipboard budget preview - success: popup shows "N screenshots · ~Nk tokens" next to the Send buttons after a yoink.
+119. [ ] First-load popup (with cleared `chrome.storage.local`) - success: shows only the URL preview and "Yoink" button, with a "More options" expander revealing secondary panels.
+120. [ ] Hook chip in popup - success: displays "Contrarian · confidence 5/5" instead of just the category name.
