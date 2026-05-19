@@ -2835,6 +2835,26 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 INSTALL_HELP_URL = "https://ryanbiddy.com/yoink/install"
 
 
+def _is_youtube_rate_limit(e: BaseException) -> bool:
+    """True when an exception thrown out of _run_extraction is yt-dlp
+    surfacing a YouTube HTTP 429. Drives the rate-limit queue (Sprint 19):
+    the extract handler enqueues for retry instead of returning the
+    pre-Sprint-19 friendly_error string, and the retry worker uses the
+    same predicate to decide between exponential backoff and immediate
+    terminal failure."""
+    if not isinstance(e, subprocess.CalledProcessError):
+        return False
+    stderr = (e.stderr.decode("utf-8", errors="ignore")
+              if isinstance(e.stderr, bytes) else (e.stderr or ""))
+    return "HTTP Error 429" in stderr
+
+
+# How long the /extract handler asks the user to wait before the first
+# retry of a rate-limited URL. The retry worker's exponential backoff
+# (60s * 2^attempts, capped at 15 minutes) takes over after that.
+_RATE_LIMIT_INITIAL_BACKOFF_SEC = 60
+
+
 def friendly_error(e: BaseException) -> str:
     """Translate raw exceptions into copy the user can act on."""
     if isinstance(e, FileNotFoundError):
@@ -5433,6 +5453,31 @@ class Handler(BaseHTTPRequestHandler):
                 result = _run_extraction(url, interval, folder,
                                           metadata=metadata, topic=topic)
             except BaseException as e:
+                # Sprint 19 / C4: YouTube 429 -> queue for retry instead of
+                # surfacing an error. The retry worker takes over from here.
+                if _is_youtube_rate_limit(e):
+                    retry_after = (datetime.now() + timedelta(
+                        seconds=_RATE_LIMIT_INITIAL_BACKOFF_SEC
+                    )).strftime("%Y-%m-%dT%H:%M:%S")
+                    try:
+                        pending_id = _get_index().enqueue_pending(
+                            url, interval, retry_after)
+                    except Exception as enqueue_err:
+                        # Index unavailable; fall through to the pre-Sprint-19
+                        # error path so the user still gets a useful message.
+                        log.warning("POST /extract -> could not enqueue "
+                                    "rate-limited URL: %s", enqueue_err)
+                    else:
+                        log.info(
+                            "POST /extract -> queued (rate-limit) pending_id=%d",
+                            pending_id)
+                        return self._send_json(200, {
+                            "ok": True,
+                            "queued": True,
+                            "pending_id": pending_id,
+                            "retry_after": retry_after,
+                            "reason": "youtube_rate_limit",
+                        })
                 msg = friendly_error(e)
                 log.error("POST /extract -> error: %s", msg)
                 _record_single_extract_job(
