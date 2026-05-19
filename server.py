@@ -4376,6 +4376,116 @@ def _start_trash_purge_thread() -> None:
     threading.Thread(target=_runner, name="trash-purge", daemon=True).start()
 
 
+# ---------------------------------------------------------------------------
+# Rate-limit retry worker (Sprint 19 / C4)
+# ---------------------------------------------------------------------------
+# Poll the queue this often. The retry_after column is the real gate -- this
+# is just how soon the worker notices a row that becomes eligible.
+_RETRY_POLL_INTERVAL_SEC = 30
+# Exponential backoff base; doubled on each strike, capped at the max.
+_RETRY_INITIAL_BACKOFF_SEC = 60
+_RETRY_MAX_BACKOFF_SEC = 15 * 60
+
+
+def _retry_pending_one() -> bool:
+    """One pass of the retry worker: pick the oldest pending row whose
+    retry_after has arrived, attempt the extract, and update the queue
+    accordingly. Returns True when a row was processed (regardless of
+    outcome) so the caller can loop / log."""
+    idx = _get_index()
+    try:
+        row = idx.next_pending(_now_iso())
+    except Exception as e:
+        log.warning("retry worker: next_pending failed: %s", e)
+        return False
+    if not row:
+        return False
+    pending_id = row["pending_id"]
+    url = row["url"]
+    interval = row["interval_seconds"] or 30
+    attempts_before = row["attempt_count"] or 0
+
+    try:
+        idx.mark_pending_running(pending_id)
+    except Exception:
+        log.exception("retry worker: mark_pending_running failed")
+        return False
+
+    log.info("retry worker: attempting pending #%d (attempt %d): %s",
+             pending_id, attempts_before + 1, url)
+    started_at = _now_iso()
+    title = None
+    folder = None
+    with _extract_lock:
+        try:
+            metadata = _fetch_metadata(url)
+            title = metadata.get("title") or "Untitled"
+            topic = _classify_topic(metadata)
+            folder = (DESKTOP_ROOT / _topic_folder_name(topic)
+                      / (slugify(title) or "video"))
+            result = _run_extraction(url, interval, folder,
+                                     metadata=metadata, topic=topic)
+        except BaseException as e:
+            if _is_youtube_rate_limit(e):
+                # Still rate-limited: back off exponentially and re-queue
+                # (mark_pending_failed handles the strike-out at the cap).
+                attempts = attempts_before + 1
+                delay = min(
+                    _RETRY_INITIAL_BACKOFF_SEC * (2 ** attempts),
+                    _RETRY_MAX_BACKOFF_SEC,
+                )
+                retry_at = (datetime.now() + timedelta(seconds=delay)).strftime(
+                    "%Y-%m-%dT%H:%M:%S")
+                try:
+                    idx.mark_pending_failed(
+                        pending_id, "youtube_rate_limit", retry_at)
+                except Exception:
+                    log.exception("retry worker: mark_pending_failed failed")
+                log.info(
+                    "retry worker: pending #%d still rate-limited; "
+                    "retry at %s (backoff %ds)",
+                    pending_id, retry_at, delay)
+                return True
+            # Non-recoverable error -- jump straight to terminal failure.
+            msg = friendly_error(e)
+            try:
+                idx.mark_pending_failed(
+                    pending_id, msg, _now_iso(), force_final=True)
+            except Exception:
+                log.exception("retry worker: mark_pending_failed failed")
+            _record_single_extract_job(
+                url, started_at, error=msg, title=title, folder=folder)
+            log.warning(
+                "retry worker: pending #%d non-recoverable: %s",
+                pending_id, msg)
+            return True
+
+    job = _record_single_extract_job(url, started_at, result=result)
+    job_id = (job or {}).get("id") or ""
+    try:
+        idx.mark_pending_succeeded(pending_id, job_id)
+    except Exception:
+        log.exception("retry worker: mark_pending_succeeded failed")
+    log.info("retry worker: pending #%d succeeded -> %s", pending_id, job_id)
+    return True
+
+
+def _start_retry_pending_thread() -> None:
+    """Daemon thread: every 30s, process at most one pending URL. One row
+    per pass keeps the lock window short and gives breathing room between
+    attempts so we don't ourselves drive YouTube into a deeper rate-limit."""
+    def _runner():
+        while True:
+            try:
+                _retry_pending_one()
+            except Exception:
+                log.exception("retry worker pass crashed")
+            time.sleep(_RETRY_POLL_INTERVAL_SEC)
+
+    threading.Thread(
+        target=_runner, name="retry-pending", daemon=True).start()
+
+
 def _enrich_yoink_row(idx, r: dict) -> dict | None:
     """Shape one index `yoinks` row into the enriched result the popup's
     /recent list and the memory page both consume: fresh health (Sprint
@@ -5820,6 +5930,17 @@ def main():
     # Sprint 18: hard-delete _yoink-trash/ entries past the 30-day window,
     # once at startup and every 24h after.
     _start_trash_purge_thread()
+    # Sprint 19 (C4): rate-limit retry queue. Reset any rows stuck 'running'
+    # from a previous crash before starting the worker, so a mid-retry
+    # crash doesn't strand them.
+    try:
+        reset = _get_index().reset_running_pending()
+        if reset:
+            log.info("retry worker: reset %d stale 'running' row(s) at boot",
+                     reset)
+    except Exception as e:
+        log.warning("retry worker: reset_running_pending failed: %s", e)
+    _start_retry_pending_thread()
 
     # Bind succeeded -- now safe to claim the PID file.
     pid_file = HERE / "server.pid"
