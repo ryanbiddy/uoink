@@ -19,6 +19,7 @@ import logging
 import os
 import re
 import secrets
+import shutil
 import subprocess
 import sys
 import threading
@@ -26,7 +27,7 @@ import time
 import urllib.error
 import urllib.request
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -4276,6 +4277,33 @@ def _playlist_worker(job_id: str):
         )
 
 
+# ---------------------------------------------------------------------------
+# Soft delete -- _yoink-trash/ (Sprint 18 / B1)
+# ---------------------------------------------------------------------------
+def _trash_root() -> Path:
+    """The trash folder soft-deleted yoinks are moved into."""
+    return DESKTOP_ROOT / "_yoink-trash"
+
+
+def _fs_safe_ts(iso: str) -> str:
+    """A filesystem-safe rendering of an ISO timestamp -- drops the colons
+    Windows forbids in path names. Deterministic, so a trash folder name
+    can be recomputed from the stored deleted_at."""
+    return (iso or "").replace(":", "")
+
+
+def _trash_folder_for(row: dict) -> Path:
+    """The trash destination for a soft-deleted yoink row:
+    _yoink-trash/<topic-folder>/<slug>__deleted-<deleted_at>. Derived from
+    corpus_path so it mirrors the on-disk topic folder exactly, and from
+    deleted_at so delete / restore / purge all agree on the same path."""
+    original = Path(row["corpus_path"]).parent
+    topic_folder = original.parent.name
+    slug = original.name
+    ts = _fs_safe_ts(row.get("deleted_at") or "")
+    return _trash_root() / topic_folder / f"{slug}__deleted-{ts}"
+
+
 def _enrich_yoink_row(idx, r: dict) -> dict | None:
     """Shape one index `yoinks` row into the enriched result the popup's
     /recent list and the memory page both consume: fresh health (Sprint
@@ -4999,6 +5027,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(200, {"ok": True, "cancelled": True})
         if bare == "/taxonomy/correct":
             return self._handle_taxonomy_correct(body)
+        if bare == "/memory/delete":
+            return self._handle_memory_delete(body)
+        if bare == "/memory/restore":
+            return self._handle_memory_restore(body)
         if bare == "/session/start":
             return self._handle_session_start(body)
         if bare == "/session/add":
@@ -5254,6 +5286,78 @@ class Handler(BaseHTTPRequestHandler):
         log.info("taxonomy correction: %s %s -> %s (#%s)",
                  video_id, original, corrected, correction_id)
         self._send_json(200, {"ok": True, "correction_id": correction_id})
+
+    # ---- /memory/delete ----
+    def _handle_memory_delete(self, body: dict):
+        """Soft-delete a yoink: move its folder into _yoink-trash/ and set
+        the index row's deleted_at. Reversible via /memory/restore until the
+        30-day purge runs."""
+        video_id = (body.get("video_id") or "").strip()
+        if not video_id:
+            return self._send_json(400, {"ok": False, "error": "video_id required"})
+        idx = _get_index()
+        row = idx.get_yoink(video_id)
+        if not row:
+            return self._send_json(404, {"ok": False, "error": "yoink not found"})
+        if row.get("deleted_at"):
+            return self._send_json(409, {"ok": False, "error": "already deleted"})
+
+        src = Path(row.get("corpus_path") or "").parent
+        if not src.exists() or not src.is_dir():
+            return self._send_json(
+                409, {"ok": False, "error": "yoink folder missing on disk"})
+
+        # Mark deleted first so the trash folder name derives from the same
+        # deleted_at the index stores; roll the row back if the move fails.
+        updated = idx.soft_delete_yoink(video_id)
+        dst = _trash_folder_for(updated)
+        try:
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(src), str(dst))
+        except (OSError, shutil.Error) as e:
+            idx.restore_yoink(video_id)
+            log.warning("memory delete: move to trash failed: %s", e)
+            return self._send_json(
+                500, {"ok": False, "error": "could not move folder to trash"})
+        log.info("memory delete: %s -> %s", video_id, dst)
+        self._send_json(200, {
+            "ok": True,
+            "restored_at": None,
+            "deleted_at": updated.get("deleted_at"),
+        })
+
+    # ---- /memory/restore ----
+    def _handle_memory_restore(self, body: dict):
+        """Restore a soft-deleted yoink: move its folder back from
+        _yoink-trash/ and clear the index row's deleted_at."""
+        video_id = (body.get("video_id") or "").strip()
+        if not video_id:
+            return self._send_json(400, {"ok": False, "error": "video_id required"})
+        idx = _get_index()
+        row = idx.get_yoink(video_id)
+        if not row:
+            return self._send_json(404, {"ok": False, "error": "yoink not found"})
+        if not row.get("deleted_at"):
+            return self._send_json(409, {"ok": False, "error": "yoink is not deleted"})
+
+        trash = _trash_folder_for(row)
+        dst = Path(row.get("corpus_path") or "").parent
+        if not trash.exists():
+            return self._send_json(
+                409, {"ok": False, "error": "trash folder not found"})
+        if dst.exists():
+            return self._send_json(
+                409, {"ok": False, "error": "original location is occupied"})
+        try:
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(trash), str(dst))
+        except (OSError, shutil.Error) as e:
+            log.warning("memory restore: move from trash failed: %s", e)
+            return self._send_json(
+                500, {"ok": False, "error": "could not restore folder"})
+        idx.restore_yoink(video_id)
+        log.info("memory restore: %s <- %s", video_id, trash)
+        self._send_json(200, {"ok": True, "restored_at": _now_iso()})
 
     def _handle_extract(self, body: dict):
         url, interval, err = self._validate_url_interval(body)
