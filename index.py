@@ -23,11 +23,16 @@ import logging
 import sqlite3
 import threading
 import time
+from datetime import datetime, timedelta
 from pathlib import Path
 
 log = logging.getLogger("yoink.index")
 
 _MIGRATIONS_DIR = Path(__file__).parent.resolve() / "migrations"
+
+# Soft-deleted yoinks live in _yoink-trash/ for this many days before the
+# scheduled purge hard-removes them.
+_TRASH_RETENTION_DAYS = 30
 
 # Columns of the `yoinks` table, in declaration order. video_id is the
 # primary key and is handled separately in the upsert.
@@ -370,6 +375,129 @@ class Index:
             return json.loads(row["health_score_json"])
         except (json.JSONDecodeError, TypeError):
             return None
+
+    # ---- memory / soft delete (Sprint 18) -------------------------------
+    def search_yoinks_for_memory(self, *, q: str | None = None,
+                                 channel: str | None = None,
+                                 topic: str | None = None,
+                                 hook_type: str | None = None,
+                                 date_from: str | None = None,
+                                 date_to: str | None = None,
+                                 limit: int = 50,
+                                 offset: int = 0) -> dict:
+        """Filtered query backing the memory page. All filters are optional
+        and combinable. Returns ``{total, results}`` where ``total`` is the
+        match count before limit/offset (for pagination). Soft-deleted rows
+        (deleted_at IS NOT NULL) are excluded.
+
+        With ``q`` the rows are ranked by FTS5 bm25; without it they are
+        ordered newest-first. ``date_from`` / ``date_to`` are inclusive
+        YYYY-MM-DD bounds on yoinked_at."""
+        limit = max(1, min(200, int(limit)))
+        offset = max(0, int(offset))
+
+        clauses = ["y.deleted_at IS NULL"]
+        params: list = []
+        if channel:
+            clauses.append("y.channel = ?")
+            params.append(channel)
+        if topic:
+            clauses.append("y.topic = ?")
+            params.append(topic)
+        if hook_type:
+            clauses.append("y.hook_type = ?")
+            params.append(hook_type)
+        if date_from:
+            clauses.append("y.yoinked_at >= ?")
+            params.append(date_from)
+        if date_to:
+            # Inclusive upper bound on a YYYY-MM-DD date: yoinked_at carries
+            # a time component, so match anything strictly before the next
+            # day rather than <= the bare date string.
+            try:
+                nxt = (datetime.strptime(date_to, "%Y-%m-%d")
+                       + timedelta(days=1)).strftime("%Y-%m-%d")
+                clauses.append("y.yoinked_at < ?")
+                params.append(nxt)
+            except ValueError:
+                log.warning("memory search: bad date_to %r ignored", date_to)
+        where = " AND ".join(clauses)
+
+        match = _fts_query(q) if q else ""
+        with self._lock:
+            try:
+                if match:
+                    tail = ("FROM yoinks_fts f "
+                            "JOIN yoinks y ON y.video_id = f.video_id "
+                            "WHERE yoinks_fts MATCH ? AND " + where)
+                    cnt = self._conn.execute(
+                        "SELECT COUNT(*) AS n " + tail, [match] + params
+                    ).fetchone()
+                    total = int(cnt["n"]) if cnt else 0
+                    rows = self._conn.execute(
+                        "SELECT y.* " + tail
+                        + " ORDER BY bm25(yoinks_fts) LIMIT ? OFFSET ?",
+                        [match] + params + [limit, offset],
+                    ).fetchall()
+                elif q:
+                    # q was given but yielded no usable FTS terms.
+                    return {"total": 0, "results": []}
+                else:
+                    cnt = self._conn.execute(
+                        "SELECT COUNT(*) AS n FROM yoinks y WHERE " + where,
+                        params,
+                    ).fetchone()
+                    total = int(cnt["n"]) if cnt else 0
+                    rows = self._conn.execute(
+                        "SELECT y.* FROM yoinks y WHERE " + where
+                        + " ORDER BY y.yoinked_at DESC LIMIT ? OFFSET ?",
+                        params + [limit, offset],
+                    ).fetchall()
+            except sqlite3.OperationalError:
+                # Defensive: a MATCH expression FTS5 still rejects.
+                log.warning("memory search rejected query %r", q)
+                return {"total": 0, "results": []}
+        return {"total": total, "results": [dict(r) for r in rows]}
+
+    def soft_delete_yoink(self, video_id: str) -> dict | None:
+        """Mark a yoink soft-deleted (deleted_at = now). Returns the updated
+        row, or None if there is no such yoink."""
+        with self._lock:
+            self._conn.execute(
+                "UPDATE yoinks SET deleted_at=? WHERE video_id=?",
+                (_now_iso(), video_id),
+            )
+            self._conn.commit()
+            row = self._conn.execute(
+                "SELECT * FROM yoinks WHERE video_id=?", (video_id,)
+            ).fetchone()
+        return dict(row) if row else None
+
+    def restore_yoink(self, video_id: str) -> dict | None:
+        """Clear a yoink's deleted_at. Returns the updated row, or None."""
+        with self._lock:
+            self._conn.execute(
+                "UPDATE yoinks SET deleted_at=NULL WHERE video_id=?",
+                (video_id,),
+            )
+            self._conn.commit()
+            row = self._conn.execute(
+                "SELECT * FROM yoinks WHERE video_id=?", (video_id,)
+            ).fetchone()
+        return dict(row) if row else None
+
+    def prune_trash(self, now: datetime) -> list[str]:
+        """Return the video_ids whose deleted_at is older than the 30-day
+        trash-retention window. The caller (server.py) hard-removes each
+        trash folder and then the index row via delete_yoink."""
+        cutoff = (now - timedelta(days=_TRASH_RETENTION_DAYS)).strftime(
+            "%Y-%m-%dT%H:%M:%S")
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT video_id FROM yoinks "
+                "WHERE deleted_at IS NOT NULL AND deleted_at < ?", (cutoff,)
+            ).fetchall()
+        return [r["video_id"] for r in rows]
 
     # ---- citations -------------------------------------------------------
     def insert_citations(self, video_id: str, citations: list[dict]) -> int:
