@@ -19,6 +19,7 @@ import logging
 import os
 import re
 import secrets
+import shutil
 import subprocess
 import sys
 import threading
@@ -26,7 +27,7 @@ import time
 import urllib.error
 import urllib.request
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -204,6 +205,37 @@ def _check_taxonomy_correct_rate_limit() -> bool:
         kept.append(now)
         _taxonomy_correct_request_times[:] = kept
     return True
+
+
+# GET /memory/search rate limit (Sprint 18). Heavier than /recent because
+# it runs an FTS5 query; 60/min is generous for a human paging the memory
+# page and still caps a runaway client.
+_MEMORY_SEARCH_RATE_LIMIT = 60
+_MEMORY_SEARCH_RATE_WINDOW_SEC = 60.0
+_memory_search_request_times: list[float] = []
+_memory_search_rate_lock = threading.Lock()
+
+
+def _check_memory_search_rate_limit() -> bool:
+    now = time.monotonic()
+    with _memory_search_rate_lock:
+        cutoff = now - _MEMORY_SEARCH_RATE_WINDOW_SEC
+        kept = [t for t in _memory_search_request_times if t > cutoff]
+        if len(kept) >= _MEMORY_SEARCH_RATE_LIMIT:
+            _memory_search_request_times[:] = kept
+            return False
+        kept.append(now)
+        _memory_search_request_times[:] = kept
+    return True
+
+
+def _valid_iso_date(value: str) -> bool:
+    """True if value is a well-formed YYYY-MM-DD date."""
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+        return True
+    except (TypeError, ValueError):
+        return False
 
 
 # ---- Settings (v2.1 BYO Anthropic key) ------------------------------------
@@ -880,11 +912,16 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
 
 
 def _iter_corpus_folders():
-    """Yield (folder, corpus_path) for every yoink folder under DESKTOP_ROOT."""
+    """Yield (folder, corpus_path) for every live yoink folder under
+    DESKTOP_ROOT. Soft-deleted yoinks parked under _yoink-trash/ are
+    skipped so the backfill never re-indexes a trashed video."""
     if not DESKTOP_ROOT.exists():
         return
+    trash = _trash_root()
     for folder in DESKTOP_ROOT.rglob("*"):
         if not folder.is_dir():
+            continue
+        if folder == trash or trash in folder.parents:
             continue
         corpus = _resolve_corpus_path(folder)
         if corpus is not None:
@@ -4246,6 +4283,171 @@ def _playlist_worker(job_id: str):
 
 
 # ---------------------------------------------------------------------------
+# Soft delete -- _yoink-trash/ (Sprint 18 / B1)
+# ---------------------------------------------------------------------------
+def _trash_root() -> Path:
+    """The trash folder soft-deleted yoinks are moved into."""
+    return DESKTOP_ROOT / "_yoink-trash"
+
+
+def _fs_safe_ts(iso: str) -> str:
+    """A filesystem-safe rendering of an ISO timestamp -- drops the colons
+    Windows forbids in path names. Deterministic, so a trash folder name
+    can be recomputed from the stored deleted_at."""
+    return (iso or "").replace(":", "")
+
+
+def _trash_folder_for(row: dict) -> Path:
+    """The trash destination for a soft-deleted yoink row:
+    _yoink-trash/<topic-folder>/<slug>__deleted-<deleted_at>. Derived from
+    corpus_path so it mirrors the on-disk topic folder exactly, and from
+    deleted_at so delete / restore / purge all agree on the same path."""
+    original = Path(row["corpus_path"]).parent
+    topic_folder = original.parent.name
+    slug = original.name
+    ts = _fs_safe_ts(row.get("deleted_at") or "")
+    return _trash_root() / topic_folder / f"{slug}__deleted-{ts}"
+
+
+# Trash purge cadence: a pass at startup, then once a day.
+_TRASH_PURGE_INTERVAL_SEC = 24 * 60 * 60
+
+
+def _purge_trash() -> int:
+    """One trash-purge pass: hard-delete every soft-deleted yoink past the
+    30-day retention window -- both its _yoink-trash/ folder and its index
+    row (the FK cascade then clears its citations, entity_mentions, and
+    taxonomy_corrections). Returns the number purged."""
+    try:
+        idx = _get_index()
+        stale = idx.prune_trash(datetime.now())
+    except Exception as e:
+        log.warning("trash purge: could not query the index: %s", e)
+        return 0
+    purged = 0
+    for video_id in stale:
+        row = idx.get_yoink(video_id)
+        if not row:
+            continue
+        try:
+            trash = _trash_folder_for(row)
+            if trash.exists():
+                shutil.rmtree(trash, ignore_errors=True)
+            idx.delete_yoink(video_id)
+            purged += 1
+        except Exception:
+            log.exception("trash purge: failed to purge %s", video_id)
+    if purged:
+        log.info("trash purge: hard-removed %d expired yoink(s)", purged)
+    return purged
+
+
+def _start_trash_purge_thread() -> None:
+    """Run the trash purge once at startup, then every 24h. Daemon thread
+    so it never delays the bind or blocks shutdown."""
+    def _runner():
+        while True:
+            try:
+                _purge_trash()
+            except Exception:
+                log.exception("trash purge pass crashed")
+            time.sleep(_TRASH_PURGE_INTERVAL_SEC)
+
+    threading.Thread(target=_runner, name="trash-purge", daemon=True).start()
+
+
+def _enrich_yoink_row(idx, r: dict) -> dict | None:
+    """Shape one index `yoinks` row into the enriched result the popup's
+    /recent list and the memory page both consume: fresh health (Sprint
+    15), entity stats (Sprint 16), hook type + confidence (Sprint 17), and
+    the thumbnail path (Sprint 18). Returns None when the row lacks the
+    video_id / corpus_path needed to render it."""
+    video_id = r.get("video_id")
+    corpus_path = r.get("corpus_path") or ""
+    if not video_id or not corpus_path:
+        return None
+    folder = Path(corpus_path).parent
+    sidecar_path = r.get("sidecar_path") or ""
+
+    # Fresh health from the live sidecar -- the stored snapshot is captured
+    # at extraction time, before the AI workers finish, so re-computing from
+    # the current sidecar reflects the latest hook / CI / entity status.
+    health = None
+    if sidecar_path and Path(sidecar_path).exists():
+        try:
+            live = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
+            health = compute_health(live)
+        except (OSError, json.JSONDecodeError):
+            pass
+    if health is None and r.get("health_score_json"):
+        try:
+            health = json.loads(r["health_score_json"])
+        except (json.JSONDecodeError, TypeError):
+            pass
+
+    # Hook Type + confidence (Sprint 17). Both live on the taxonomy row --
+    # the hook worker updates the taxonomy table, not yoinks, when
+    # classification completes, so taxonomy is the authoritative read.
+    hook_type = r.get("hook_type")
+    confidence = None
+    try:
+        with idx._lock:
+            tr = idx._conn.execute(
+                "SELECT hook_type, confidence FROM taxonomy WHERE video_id=?",
+                (video_id,),
+            ).fetchone()
+        if tr:
+            if tr["hook_type"]:
+                hook_type = tr["hook_type"]
+            if tr["confidence"] is not None:
+                confidence = int(tr["confidence"])
+    except Exception:
+        pass
+
+    # Entity stats (Sprint 16): distinct entity count + top 5 by mentions.
+    entity_count = 0
+    top_entities: list[str] = []
+    try:
+        with idx._lock:
+            ec = idx._conn.execute(
+                "SELECT COUNT(DISTINCT entity_id) AS c "
+                "FROM entity_mentions WHERE video_id=?", (video_id,),
+            ).fetchone()
+            if ec:
+                entity_count = int(ec["c"] or 0)
+            es = idx._conn.execute(
+                "SELECT e.name FROM entity_mentions em "
+                "JOIN entities e ON e.entity_id = em.entity_id "
+                "WHERE em.video_id = ? "
+                "GROUP BY em.entity_id ORDER BY COUNT(*) DESC LIMIT 5",
+                (video_id,),
+            ).fetchall()
+            top_entities = [row["name"] for row in es]
+    except Exception:
+        pass
+
+    # Thumbnail (Sprint 18): absolute path when thumbnail.jpg is on disk so
+    # the memory page can fetch it via the token-gated /file endpoint.
+    thumb = folder / "thumbnail.jpg"
+    thumbnail_path = str(thumb) if thumb.exists() else None
+
+    return {
+        "title": r.get("title") or "",
+        "topic": r.get("topic") or "",
+        "folder": str(folder),
+        "video_id": video_id,
+        "channel": r.get("channel"),
+        "yoinked_at": r.get("yoinked_at"),
+        "hook_type": hook_type,
+        "hook_type_confidence": confidence,
+        "health": health,
+        "entity_count": entity_count,
+        "top_entities": top_entities,
+        "thumbnail_path": thumbnail_path,
+    }
+
+
+# ---------------------------------------------------------------------------
 # HTTP handler
 # ---------------------------------------------------------------------------
 class Handler(BaseHTTPRequestHandler):
@@ -4468,6 +4670,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_taxonomy()
         if bare == "/taxonomy/corrections":
             return self._handle_taxonomy_corrections()
+        if bare == "/memory/search":
+            return self._handle_memory_search()
         log.info("GET %s -> 404", self.path)
         self._send_json(404, {"ok": False, "error": "not found"})
 
@@ -4691,105 +4895,67 @@ class Handler(BaseHTTPRequestHandler):
     def _handle_recent(self):
         """Recent yoinks for the popup. Sprint 15.1 follow-up:
         replaces the disk-walk with an Index.list_recent read and enriches
-        each row with the index data (Sprint 15 health, Sprint 16 entity
-        counts, Sprint 17 hook confidence) the popup needs to render its
-        chips. Falls back to an empty list if the index is unavailable."""
+        each row via _enrich_yoink_row (the same helper the memory page
+        uses). Falls back to an empty list if the index is unavailable."""
         idx = _get_index()
         try:
             rows = idx.list_recent(limit=10)
         except Exception as e:
             log.warning("recent: index unavailable: %s", e)
             rows = []
-
-        results = []
-        for r in rows:
-            video_id = r.get("video_id")
-            sidecar_path = r.get("sidecar_path") or ""
-            corpus_path = r.get("corpus_path") or ""
-            if not video_id or not corpus_path:
-                continue
-            folder = str(Path(corpus_path).parent)
-
-            # Fresh health from the live sidecar — the stored snapshot is
-            # captured at extraction time, before the AI workers finish,
-            # so re-computing from the current sidecar reflects the latest
-            # hook / CI / entity status.
-            health = None
-            if sidecar_path and Path(sidecar_path).exists():
-                try:
-                    live = json.loads(
-                        Path(sidecar_path).read_text(encoding="utf-8"))
-                    health = compute_health(live)
-                except (OSError, json.JSONDecodeError):
-                    pass
-            if health is None and r.get("health_score_json"):
-                try:
-                    health = json.loads(r["health_score_json"])
-                except (json.JSONDecodeError, TypeError):
-                    pass
-
-            # Hook Type + confidence (Sprint 17). Both live on the
-            # taxonomy row (the hook worker updates the taxonomy table,
-            # not the yoinks table, when classification completes).
-            # yoinks.hook_type can be stale-null for newly-yoinked videos
-            # whose hook worker has since finished, so taxonomy is the
-            # authoritative read.
-            hook_type = r.get("hook_type")
-            confidence = None
-            try:
-                with idx._lock:
-                    tr = idx._conn.execute(
-                        "SELECT hook_type, confidence FROM taxonomy "
-                        "WHERE video_id=?",
-                        (video_id,),
-                    ).fetchone()
-                if tr:
-                    if tr["hook_type"]:
-                        hook_type = tr["hook_type"]
-                    if tr["confidence"] is not None:
-                        confidence = int(tr["confidence"])
-            except Exception:
-                pass
-
-            # Entity stats (Sprint 16). Distinct entity count + top 5 by
-            # mention count for this video.
-            entity_count = 0
-            top_entities: list[str] = []
-            try:
-                with idx._lock:
-                    ec = idx._conn.execute(
-                        "SELECT COUNT(DISTINCT entity_id) AS c "
-                        "FROM entity_mentions WHERE video_id=?",
-                        (video_id,),
-                    ).fetchone()
-                    if ec:
-                        entity_count = int(ec["c"] or 0)
-                    es = idx._conn.execute(
-                        "SELECT e.name FROM entity_mentions em "
-                        "JOIN entities e ON e.entity_id = em.entity_id "
-                        "WHERE em.video_id = ? "
-                        "GROUP BY em.entity_id "
-                        "ORDER BY COUNT(*) DESC LIMIT 5",
-                        (video_id,),
-                    ).fetchall()
-                    top_entities = [row["name"] for row in es]
-            except Exception:
-                pass
-
-            results.append({
-                "title": r.get("title") or "",
-                "topic": r.get("topic") or "",
-                "folder": folder,
-                "video_id": video_id,
-                "channel": r.get("channel"),
-                "yoinked_at": r.get("yoinked_at"),
-                "hook_type": hook_type,
-                "hook_type_confidence": confidence,
-                "health": health,
-                "entity_count": entity_count,
-                "top_entities": top_entities,
-            })
+        results = [er for er in (_enrich_yoink_row(idx, r) for r in rows) if er]
         self._send_json(200, {"ok": True, "recent": results})
+
+    # ---- /memory/search ----
+    def _handle_memory_search(self):
+        """Filtered/paginated yoink search behind the memory page (B1).
+        Token-gated, rate-limited (heavier than /recent due to FTS)."""
+        if not _check_memory_search_rate_limit():
+            return self._send_json(429, {"ok": False, "error": "too many requests"})
+        qs = parse_qs(urlparse(self.path).query)
+
+        def _one(name: str) -> str | None:
+            value = (qs.get(name) or [""])[0].strip()
+            return value or None
+
+        hook_type = _one("hook_type")
+        if hook_type:
+            hook_type = hook_type.lower()
+            if hook_type not in HOOK_TYPES:
+                return self._send_json(
+                    400, {"ok": False, "error": "hook_type invalid"})
+        date_from = _one("date_from")
+        date_to = _one("date_to")
+        for label, value in (("date_from", date_from), ("date_to", date_to)):
+            if value and not _valid_iso_date(value):
+                return self._send_json(
+                    400, {"ok": False, "error": f"{label} must be YYYY-MM-DD"})
+        try:
+            limit = max(1, min(200, int(_one("limit") or "50")))
+            offset = max(0, int(_one("offset") or "0"))
+        except (TypeError, ValueError):
+            return self._send_json(
+                400, {"ok": False, "error": "limit/offset must be integers"})
+
+        idx = _get_index()
+        try:
+            res = idx.search_yoinks_for_memory(
+                q=_one("q"), channel=_one("channel"), topic=_one("topic"),
+                hook_type=hook_type, date_from=date_from, date_to=date_to,
+                limit=limit, offset=offset,
+            )
+        except Exception as e:
+            log.warning("memory search: index error: %s", e)
+            return self._send_json(500, {"ok": False, "error": "search failed"})
+        results = [er for er in (_enrich_yoink_row(idx, r)
+                                 for r in res["results"]) if er]
+        self._send_json(200, {
+            "ok": True,
+            "total": res["total"],
+            "limit": limit,
+            "offset": offset,
+            "results": results,
+        })
 
     # ---- /open-folder?path=... ----
     # Pop Explorer at an arbitrary folder. Used by the "Recent yoinks" list
@@ -4913,6 +5079,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(200, {"ok": True, "cancelled": True})
         if bare == "/taxonomy/correct":
             return self._handle_taxonomy_correct(body)
+        if bare == "/memory/delete":
+            return self._handle_memory_delete(body)
+        if bare == "/memory/restore":
+            return self._handle_memory_restore(body)
         if bare == "/session/start":
             return self._handle_session_start(body)
         if bare == "/session/add":
@@ -5168,6 +5338,78 @@ class Handler(BaseHTTPRequestHandler):
         log.info("taxonomy correction: %s %s -> %s (#%s)",
                  video_id, original, corrected, correction_id)
         self._send_json(200, {"ok": True, "correction_id": correction_id})
+
+    # ---- /memory/delete ----
+    def _handle_memory_delete(self, body: dict):
+        """Soft-delete a yoink: move its folder into _yoink-trash/ and set
+        the index row's deleted_at. Reversible via /memory/restore until the
+        30-day purge runs."""
+        video_id = (body.get("video_id") or "").strip()
+        if not video_id:
+            return self._send_json(400, {"ok": False, "error": "video_id required"})
+        idx = _get_index()
+        row = idx.get_yoink(video_id)
+        if not row:
+            return self._send_json(404, {"ok": False, "error": "yoink not found"})
+        if row.get("deleted_at"):
+            return self._send_json(409, {"ok": False, "error": "already deleted"})
+
+        src = Path(row.get("corpus_path") or "").parent
+        if not src.exists() or not src.is_dir():
+            return self._send_json(
+                409, {"ok": False, "error": "yoink folder missing on disk"})
+
+        # Mark deleted first so the trash folder name derives from the same
+        # deleted_at the index stores; roll the row back if the move fails.
+        updated = idx.soft_delete_yoink(video_id)
+        dst = _trash_folder_for(updated)
+        try:
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(src), str(dst))
+        except (OSError, shutil.Error) as e:
+            idx.restore_yoink(video_id)
+            log.warning("memory delete: move to trash failed: %s", e)
+            return self._send_json(
+                500, {"ok": False, "error": "could not move folder to trash"})
+        log.info("memory delete: %s -> %s", video_id, dst)
+        self._send_json(200, {
+            "ok": True,
+            "restored_at": None,
+            "deleted_at": updated.get("deleted_at"),
+        })
+
+    # ---- /memory/restore ----
+    def _handle_memory_restore(self, body: dict):
+        """Restore a soft-deleted yoink: move its folder back from
+        _yoink-trash/ and clear the index row's deleted_at."""
+        video_id = (body.get("video_id") or "").strip()
+        if not video_id:
+            return self._send_json(400, {"ok": False, "error": "video_id required"})
+        idx = _get_index()
+        row = idx.get_yoink(video_id)
+        if not row:
+            return self._send_json(404, {"ok": False, "error": "yoink not found"})
+        if not row.get("deleted_at"):
+            return self._send_json(409, {"ok": False, "error": "yoink is not deleted"})
+
+        trash = _trash_folder_for(row)
+        dst = Path(row.get("corpus_path") or "").parent
+        if not trash.exists():
+            return self._send_json(
+                409, {"ok": False, "error": "trash folder not found"})
+        if dst.exists():
+            return self._send_json(
+                409, {"ok": False, "error": "original location is occupied"})
+        try:
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(trash), str(dst))
+        except (OSError, shutil.Error) as e:
+            log.warning("memory restore: move from trash failed: %s", e)
+            return self._send_json(
+                500, {"ok": False, "error": "could not restore folder"})
+        idx.restore_yoink(video_id)
+        log.info("memory restore: %s <- %s", video_id, trash)
+        self._send_json(200, {"ok": True, "restored_at": _now_iso()})
 
     def _handle_extract(self, body: dict):
         url, interval, err = self._validate_url_interval(body)
@@ -5530,6 +5772,9 @@ def main():
     # Backfill the index from disk in the background so a missing index
     # never delays the bind or /health.
     _start_backfill_thread()
+    # Sprint 18: hard-delete _yoink-trash/ entries past the 30-day window,
+    # once at startup and every 24h after.
+    _start_trash_purge_thread()
 
     # Bind succeeded -- now safe to claim the PID file.
     pid_file = HERE / "server.pid"
