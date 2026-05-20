@@ -40,6 +40,12 @@ _TRASH_RETENTION_DAYS = 30
 # The retry worker (server.py) decides backoff timing.
 _PENDING_MAX_ATTEMPTS = 3
 _PENDING_TERMINAL_STATES = ("succeeded", "failed", "cancelled")
+# Sprint 19.6 / Fix 7: enqueue_pending opportunistically deletes the
+# oldest terminal rows when the table grows past this cap, so a noisy
+# client (or a creator who hits YouTube's 429 wall a lot) can't grow
+# pending_yoinks without bound. Live (pending / running) rows are never
+# evicted -- they're load-bearing for the retry worker.
+_PENDING_TABLE_CAP = 1000
 
 # Columns of the `yoinks` table, in declaration order. video_id is the
 # primary key and is handled separately in the upsert.
@@ -657,8 +663,33 @@ class Index:
     def enqueue_pending(self, url: str, interval: int,
                         retry_after: str) -> int:
         """Add a rate-limited URL to the queue with status='pending' and
-        attempt_count=0. Returns the new pending_id."""
+        attempt_count=0. Returns the new pending_id.
+
+        Sprint 19.6 / Fix 7: before the insert, drop the oldest terminal
+        rows when the table is at or above the cap. Live rows (pending /
+        running) are never evicted; only succeeded / failed / cancelled
+        rows past the retention window. Typical users have <10 pending at
+        a time, so the cap (1000) only kicks in for noisy clients or a
+        rough YouTube rate-limit day."""
+        terminal_placeholders = ", ".join("?" * len(_PENDING_TERMINAL_STATES))
         with self._lock:
+            total = self._conn.execute(
+                "SELECT COUNT(*) FROM pending_yoinks"
+            ).fetchone()[0]
+            over = total - _PENDING_TABLE_CAP + 1  # +1 for the row we're about to add
+            if over > 0:
+                # Delete the oldest `over` terminal rows by queued_at. The
+                # subquery has to materialise the id list first because
+                # SQLite doesn't allow modifying a table inside a self-
+                # selecting DELETE on the same table.
+                self._conn.execute(
+                    f"DELETE FROM pending_yoinks WHERE pending_id IN ("
+                    f"  SELECT pending_id FROM pending_yoinks "
+                    f"  WHERE status IN ({terminal_placeholders}) "
+                    f"  ORDER BY queued_at ASC LIMIT ?"
+                    f")",
+                    (*_PENDING_TERMINAL_STATES, over),
+                )
             cur = self._conn.execute(
                 "INSERT INTO pending_yoinks "
                 "(url, interval_seconds, queued_at, retry_after, "
