@@ -738,7 +738,10 @@ def _get_output_root() -> Path:
     Dev mode can set YOINK_OUTPUT_DIR to keep personal yoinks out of a repo
     that happens to live on the Desktop. The override must already exist and
     be writable; otherwise Yoink falls back to the Desktop\\Yoink folder.
-    """
+
+    A second fallback, _LOCALAPPDATA_OUTPUT, kicks in at startup if even
+    the Desktop path turns out to be unwritable -- see
+    _apply_output_root_fallback (Sprint 19, Wave 1 Fix 4 carryover)."""
     override = (os.environ.get("YOINK_OUTPUT_DIR") or "").strip()
     if override:
         try:
@@ -750,8 +753,75 @@ def _get_output_root() -> Path:
     return _get_desktop_dir() / "Yoink"
 
 
+# Last-resort output root used when DESKTOP_ROOT turns out to be unwritable
+# at startup. Lives inside %LOCALAPPDATA%\Yoink (same place as index.db),
+# which is reliably writable since DATA_ROOT itself is required to work.
+_LOCALAPPDATA_OUTPUT = DATA_ROOT / "output"
+
 DESKTOP_ROOT = _get_output_root()
 SESSIONS_ROOT = DESKTOP_ROOT / "_sessions"
+# Set True by _apply_output_root_fallback when the active root has been
+# moved to _LOCALAPPDATA_OUTPUT. Surfaced in /health and /diagnose so the
+# popup can warn the user their yoinks are no longer on the Desktop.
+_OUTPUT_ROOT_FALLBACK = False
+
+
+def _apply_output_root_fallback() -> None:
+    """If DESKTOP_ROOT can't be written to at startup, swap it (and
+    SESSIONS_ROOT) over to _LOCALAPPDATA_OUTPUT. Sets _OUTPUT_ROOT_FALLBACK
+    so /health and /diagnose can warn. /file accepts both candidates
+    either way, so legacy yoinks still on the Desktop remain readable."""
+    global DESKTOP_ROOT, SESSIONS_ROOT, _OUTPUT_ROOT_FALLBACK
+    try:
+        DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        log.warning("output root: cannot create %s -- %s", DESKTOP_ROOT, e)
+    if _is_writable_dir(DESKTOP_ROOT):
+        return
+    fallback = _LOCALAPPDATA_OUTPUT
+    try:
+        fallback.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        log.error(
+            "output root fallback: cannot create %s either -- %s; staying on %s",
+            fallback, e, DESKTOP_ROOT)
+        return
+    if not _is_writable_dir(fallback):
+        log.error(
+            "output root fallback: %s exists but is not writable -- "
+            "staying on %s", fallback, DESKTOP_ROOT)
+        return
+    log.warning(
+        "OUTPUT ROOT FALLBACK: '%s' is not writable; switching to '%s'",
+        DESKTOP_ROOT, fallback)
+    DESKTOP_ROOT = fallback
+    SESSIONS_ROOT = fallback / "_sessions"
+    _OUTPUT_ROOT_FALLBACK = True
+
+
+def _allowed_roots() -> set[Path]:
+    """All filesystem roots /file is permitted to serve from. The active
+    output root plus both fallback candidates -- after a fallback the user
+    may still have legacy yoinks under Desktop\\Yoink whose thumbnails the
+    Memory page needs to render."""
+    roots: set[Path] = set()
+    for candidate in (DESKTOP_ROOT, _get_desktop_dir() / "Yoink",
+                      _LOCALAPPDATA_OUTPUT):
+        try:
+            roots.add(candidate.resolve())
+        except OSError:
+            pass
+    return roots
+
+
+def _path_under_any(resolved: Path, roots: set[Path]) -> bool:
+    for root in roots:
+        try:
+            resolved.relative_to(root)
+            return True
+        except ValueError:
+            continue
+    return False
 
 # --- Logging ---------------------------------------------------------------
 LOG_PATH = HERE / "server.log"
@@ -4005,10 +4075,10 @@ def _resolve_served_file(raw_path: str) -> tuple[Path | None, str | None, int, s
         resolved = p.resolve()
         if any(part == ".." for part in resolved.parts):
             return None, None, 400, "path invalid"
-        yoink_root = DESKTOP_ROOT.resolve()
-        try:
-            resolved.relative_to(yoink_root)
-        except ValueError:
+        # Sprint 19 / Wave 1 Fix 4: accept any allowed root, not just the
+        # active DESKTOP_ROOT, so a yoink saved under Desktop\Yoink stays
+        # readable after a switch to the LOCALAPPDATA fallback.
+        if not _path_under_any(resolved, _allowed_roots()):
             return None, None, 403, "path escapes Yoink root"
     except (OSError, ValueError):
         return None, None, 400, "path invalid"
@@ -4634,9 +4704,15 @@ def _diagnose_payload() -> dict:
         warnings.append(
             "ffmpeg is missing or broken. Screenshot extraction will fail.")
 
+    if _OUTPUT_ROOT_FALLBACK:
+        warnings.append(
+            f"Output folder fallback in effect: yoinks are being saved to "
+            f"{DESKTOP_ROOT} because Desktop\\Yoink was not writable. The "
+            "extension's /file sandbox still serves both locations.")
     return {
         "ok": True,
         "version": VERSION,
+        "output_root_fallback": _OUTPUT_ROOT_FALLBACK,
         "checks": checks,
         "warnings": warnings,
     }
@@ -4912,6 +4988,10 @@ class Handler(BaseHTTPRequestHandler):
                 "version": VERSION,
                 # True while a corrupt index.db is being rebuilt from disk.
                 "index_recovering": _index_recovering,
+                # True when the active output root has been swapped from
+                # Desktop\Yoink to %LOCALAPPDATA%\Yoink\output because the
+                # Desktop path was not writable at startup.
+                "output_root_fallback": _OUTPUT_ROOT_FALLBACK,
             })
         if bare == "/index/backfill-status":
             # Public, read-only progress counts (same posture as /health) so
@@ -6152,6 +6232,11 @@ def main():
     if _existing_server_responds():
         log.info("Yoink server already running on http://%s:%d -- exiting", HOST, PORT)
         sys.exit(0)
+
+    # Sprint 19 / Wave 1 Fix 4: if Desktop\Yoink isn't writable, swap the
+    # active output root to %LOCALAPPDATA%\Yoink\output before the first
+    # /extract would try to write to it.
+    _apply_output_root_fallback()
 
     # Bind FIRST. Writing the PID file before the bind would create stale
     # files when another instance still owns the port (and would also have
