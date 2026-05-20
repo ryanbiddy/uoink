@@ -572,6 +572,38 @@ def _short_reason(reason: str, *, api_key: str | None = None) -> str:
     return msg[:180] if len(msg) > 180 else msg
 
 
+# Strip filesystem paths (Windows or Unix) before persisting an error
+# string. Windows: ``X:\...`` (one literal backslash per separator). Unix:
+# ``/...``. The URL pattern runs first below so a userinfo-bearing URL
+# is replaced as a unit rather than slashed-up piece by piece.
+_PATH_SANITIZE_RE = re.compile(r"[A-Za-z]:\\[^\s]+|/[^\s]+")
+# Strip URLs that carry HTTP basic-auth userinfo (rare but possible: e.g.
+# yt-dlp surfacing the request URL in an error). Match scheme://user@host
+# and replace the whole URL with a placeholder.
+_USERINFO_URL_RE = re.compile(r"https?://[^@\s/]+@[^\s]+")
+
+
+def _sanitize_error(msg: str, *, max_len: int = 200) -> str:
+    """Strip filesystem paths and userinfo-bearing URLs from an error
+    string before persisting it (Sprint 19.6 / Fix 8 / audit F3).
+
+    The rate-limit retry queue persists last_error across helper restarts;
+    a raw friendly_error string can include yt-dlp's last stderr line,
+    which sometimes echoes the install path or the request URL with
+    embedded credentials. Sanitise to ``<path>`` / ``<url>`` and cap
+    length so the queue stays free of PII even if the upstream tool
+    leaks it."""
+    if not msg:
+        return ""
+    # URL pass first so a userinfo URL is replaced as a unit -- otherwise
+    # the path regex would only catch the trailing /-prefixed portion and
+    # leave the credentials visible.
+    cleaned = _USERINFO_URL_RE.sub("<url>", str(msg))
+    cleaned = _PATH_SANITIZE_RE.sub("<path>", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned[:max_len]
+
+
 def _anthropic_error_reason(status: int, body: str) -> str:
     try:
         parsed = json.loads(body or "{}")
@@ -4700,17 +4732,22 @@ def _retry_pending_one() -> bool:
                     pending_id, retry_at, delay)
                 return True
             # Non-recoverable error -- jump straight to terminal failure.
+            # The user-facing job (in jobs.json / popup) gets the full
+            # friendly_error string; the queue row's persisted last_error
+            # goes through _sanitize_error so paths / credentials don't
+            # leak into a long-lived store (Sprint 19.6 / Fix 8).
             msg = friendly_error(e)
+            persisted = _sanitize_error(msg)
             try:
                 idx.mark_pending_failed(
-                    pending_id, msg, _now_iso(), force_final=True)
+                    pending_id, persisted, _now_iso(), force_final=True)
             except Exception:
                 log.exception("retry worker: mark_pending_failed failed")
             _record_single_extract_job(
                 url, started_at, error=msg, title=title, folder=folder)
             log.warning(
                 "retry worker: pending #%d non-recoverable: %s",
-                pending_id, msg)
+                pending_id, persisted)
             return True
 
     job = _record_single_extract_job(url, started_at, result=result)
