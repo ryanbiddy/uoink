@@ -4,7 +4,7 @@ This is the canonical list of what's shipped, what's planned, and what's been ru
 
 ## Format
 - **Idea:** one line
-- **Destination:** v1.1 / v2.1 / v2.5 / v3 / v4 / never / undecided
+- **Destination:** v2.1 / v2.5 / v3 / v4 / never / undecided
 - **Rationale:** why it's not currently shipped
 - **Trigger:** what has to happen for this to move forward
 
@@ -86,86 +86,86 @@ This is the canonical list of what's shipped, what's planned, and what's been ru
 
 ---
 
-## v1.1 punch list (post-launch, 2-4 weeks after v1+v2 GA)
+## v2.1 punch list (post-launch, 2-4 weeks after v2.0 GA)
 
 Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). Larger items (Mac, system tray) sit below.
 
 ### Right-click "Yoink this video" context menu (video links)
-- **Destination:** v1.1
-- **Rationale:** Manifest already has `contextMenus` permission. Right-clicking any link to a YouTube video shouldn't require opening the video first. v1 has the right-click-thumbnail flow; this extends it to any YouTube video URL anywhere on the web. Catches users who never open the popup.
-- **Trigger:** v1.1 cycle
+- **Destination:** v2.1
+- **Rationale:** Manifest already has `contextMenus` permission. Right-clicking any link to a YouTube video shouldn't require opening the video first. v2 has the right-click-thumbnail flow; this extends it to any YouTube video URL anywhere on the web. Catches users who never open the popup.
+- **Trigger:** v2.1 cycle
 
 ### Keyboard shortcut (Ctrl+Shift+Y)
-- **Destination:** v1.1
-- **Rationale:** Six-line `manifest.commands` add. Power-user catnip. Triggers Yoink on the active YouTube tab. Lower backend risk than tray app or Mac installer — quick visible v1.1 win.
-- **Trigger:** v1.1 cycle
+- **Destination:** v2.1
+- **Rationale:** Six-line `manifest.commands` add. Power-user catnip. Triggers Yoink on the active YouTube tab. Lower backend risk than tray app or Mac installer — quick visible v2.1 win.
+- **Trigger:** v2.1 cycle
 
 ### Diagnostic export button
-- **Destination:** v1.1 (moved up per Codex's review — cheap, more valuable with v2 surface area)
+- **Destination:** v2.1 (moved up per Codex's review — cheap, more valuable with v2 surface area)
 - **Rationale:** In setup.html. "Copy diagnostic info" bundles version + platform + (sanitized) settings + keyring state (present/absent only) + recent error log + MCP config status + AI feature toggle state → clipboard. Cuts support friction. With v2's settings/keyring/jobs/MCP/feature toggles, the value of a one-click diagnostic dump went up.
-- **Trigger:** v1.1 cycle
+- **Trigger:** v2.1 cycle
 
 ### Crash report opt-in
-- **Destination:** v1.1
+- **Destination:** v2.1
 - **Rationale:** When `server.py` hits an unhandled exception, write a local crash file + offer "send to ryanbiddy via mailto" link. No server infra needed. Real ops signal as install base grows.
-- **Trigger:** v1.1 cycle
+- **Trigger:** v2.1 cycle
 
 ### Opt-in install-success telemetry
-- **Destination:** v1.1
-- **Rationale:** Single binary signal — "did install complete." Most important data point for activation funnel diagnosis. Anonymous, opt-in, no per-user data. Foundation for the broader v1.2 telemetry plans.
-- **Trigger:** v1.1 cycle
+- **Destination:** v2.1
+- **Rationale:** Single binary signal — "did install complete." Most important data point for activation funnel diagnosis. Anonymous, opt-in, no per-user data. Foundation for the broader v2.2 telemetry plans.
+- **Trigger:** v2.1 cycle
 
 ### "What's new" toast on extension version change
-- **Destination:** v1.1
-- **Rationale:** First popup open after extension update shows a one-liner. `chrome.storage` check on previous-version vs current-version. Particularly valuable for the v1.0 → v1.1 → v2.0 transitions if those land separately.
-- **Trigger:** v1.1 cycle
+- **Destination:** v2.1
+- **Rationale:** First popup open after extension update shows a one-liner. `chrome.storage` check on previous-version vs current-version. Particularly valuable for the v2.0 → v2.1 → v2.2 transitions if those land separately.
+- **Trigger:** v2.1 cycle
 
 ### Auto-update check for installer
-- **Destination:** v1.1
+- **Destination:** v2.1
 - **Rationale:** Extension polls GitHub releases monthly, surfaces "update available" pill in popup. Closes the "is my Yoink current" gap that otherwise needs the tray app to surface. Single fetch, tiny UI.
-- **Trigger:** v1.1 cycle
+- **Trigger:** v2.1 cycle
 
 ### Editable prompts library
-- **Destination:** v1.1
-- **Rationale:** v1 ships with 11 read-only starter prompts in `extension/prompts.json`. Installed users have no `extension/` folder, so the original "Edit prompts" link was removed. Need an inline popup editor that persists user prompts via `chrome.storage.local` so they're portable across installs and editable without touching the filesystem.
-- **Trigger:** v1.1 cycle
+- **Destination:** v2.1
+- **Rationale:** v2 ships with 11 read-only starter prompts in `extension/prompts.json`. Installed users have no `extension/` folder, so the original "Edit prompts" link was removed. Need an inline popup editor that persists user prompts via `chrome.storage.local` so they're portable across installs and editable without touching the filesystem.
+- **Trigger:** v2.1 cycle
 
 ### Editable topics.json
-- **Destination:** v1.1
+- **Destination:** v2.1
 - **Storage decision required (Codex flagged):** edits must persist outside the install folder so they survive reinstall. Three options:
   - (a) User data file at `%APPDATA%\Yoink\topics.json` with the installer's copy as fallback default
   - (b) Server-managed setting (POST /topics, stored in settings.json)
   - (c) Extension-side storage (`chrome.storage.sync` for cross-device sync)
-  Recommend (a) for v1.1 — file-level edits match the current power-user mental model; the popup adds a UI editor later if usage suggests demand.
-- **Trigger:** v1.1 cycle
+  Recommend (a) for v2.1 — file-level edits match the current power-user mental model; the popup adds a UI editor later if usage suggests demand.
+- **Trigger:** v2.1 cycle
 
 ### Open .md in default markdown editor
-- **Destination:** v1.1
+- **Destination:** v2.1
 - **Rationale:** Currently Open Folder always opens Explorer. Adding "Open .md" that opens in the user's default markdown editor adds value for Obsidian/Typora workflows. One-line addition to existing `/open-folder` pattern.
-- **Trigger:** v1.1 cycle
+- **Trigger:** v2.1 cycle
 
 ### Browser support test matrix beyond Chrome
-- **Destination:** v1.1
+- **Destination:** v2.1
 - **Rationale:** Chrome works; Edge works (manifest V3). Comet (Perplexity's Chromium fork) bit Yoink in v1 — fixed with fallback patterns but other Chromium forks untested. Untested: Brave, Opera GX, Vivaldi, Arc.
-- **Trigger:** v1.1 cycle (just expand the testing matrix in `docs/build-installer.md` and run smoke test on each)
+- **Trigger:** v2.1 cycle (just expand the testing matrix in `docs/build-installer.md` and run smoke test on each)
 
 ### Installer update/migration smoke matrix
-- **Destination:** v1.1 (new entry per Codex's review)
+- **Destination:** v2.1 (new entry per Codex's review)
 - **Rationale:** Keyring migration, legacy jobs/taxonomy import into `index.db`, Start Menu entries, and auto-start behavior need testing across three install paths: upgrade-from-v1, uninstall-then-reinstall, and clean-install. Not a feature — a test discipline. Captured here so it doesn't get skipped.
-- **Trigger:** v1.1 cycle
+- **Trigger:** v2.1 cycle
 
 ### Mac installer
-- **Destination:** v1.1 (larger item, sequenced after the small wins above)
+- **Destination:** v2.1 (larger item, sequenced after the small wins above)
 - **Rationale:** doubles QA load; ship Windows first
-- **Trigger:** v1+v2 launch ships and runs clean for 2 weeks
+- **Trigger:** v2.0 launch ships and runs clean for 2 weeks
 - **Notes:** Resend waitlist on landing page is already collecting interest
 
 ### System tray status app (treat as headline mini-sprint, not punch-list polish)
-- **Destination:** v1.1 (sequenced last in v1.1 — larger than other items)
+- **Destination:** v2.1 (sequenced last in v2.1 — larger than other items)
 - **What:** Persistent system tray icon (bottom-right of Windows near clock) showing live server status. Right-click menu shows: server status (green/red), recent yoinks (last 5 with click-to-open), in-progress yoinks with progress, "Open Yoink folder," "Stop server."
 - **Rationale:** Per Codex's review — this is NOT a small punch-list item. It creates a new packaged runtime surface, tray icon lifecycle, Windows notification quirks, and future Mac divergence. Real new component with new failure modes (tray icon visibility, AV conflicts, Windows icon caching). Sequence it as a dedicated mini-sprint with its own smoke test, not as a polish bullet.
 - **Implementation notes:** Use pystray (Python tray icon library) plus a small background thread that polls server state. Server already exposes `/health` and `/recent` endpoints — tray would consume them.
-- **Trigger:** Ship after other v1.1 small wins land and stabilize
+- **Trigger:** Ship after other v2.1 small wins land and stabilize
 
 ---
 
@@ -216,10 +216,6 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 - **Rationale:** Currently the backend accepts any `chrome-extension://` origin for the /token endpoint. Once the Web Store publishes Yoink, the extension gets a stable ID that can be pinned in /token and CORS allowlists. Closes the "any installed extension can call our local helper" trust gap.
 - **Trigger:** Web Store listing live with stable published ID
 
-### MCP Skill / prompt package
-- **Destination:** v2.1 (new entry per Codex's review — but actually we're building this NOW for v2.0 per the Skill design discussion)
-- **Rationale:** MCP server exposes tools; the Skill turns Claude into a YouTube research operator that knows how to use them. Distribution via SKILL.md packaged with the installer + Claude Code plugin manifest + copyable system prompt for non-Claude-Code clients. Decision 1 in the strategy chat: ship minimal Skill v1 (4 modes: identity + citation + default + tweet) with v2.0 launch; expanded Skill v1.2 ships modes 5-7 (thread, comments, research, compare, intel) post-launch.
-- **Trigger:** Skill v1 → v2.0 launch; Skill v1.2 → post-launch refinement with real calibration anchors
 
 ### MOCK_FORCE_RECOVERY_* mutual exclusion enforcement
 - **Destination:** v2.1 (CC's Sprint 7 deferred)
@@ -261,15 +257,22 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 - **Rationale:** Currently, `upsert_yoink` does not modify or clear the `deleted_at` field, so re-yoinking a previously soft-deleted video keeps it hidden.
 - **Trigger:** v2.1 cycle (either clear `deleted_at` during upsert or show a "this yoink is in trash" warning/hint in the popup)
 
-### Queue retention policy
+### pending_yoinks retention
 - **Destination:** v2.1
-- **Rationale:** Succeeded rows in `pending_yoinks` accumulate indefinitely. To prevent database growth, we need a retention cap or age-based pruning mechanism.
-- **Trigger:** v2.1 cycle (e.g., cap at 100 terminal items or prune older than 7 days)
+- **Rationale:** Succeeded rows in `pending_yoinks` are currently capped at 1000 rows; consider age-based purge (e.g., 30 days terminal status) for cleaner long-term state.
+- **Trigger:** v2.1 cycle
 
 ### Per-channel rate limit awareness
 - **Destination:** v2.1
 - **Rationale:** YouTube rate-limits tend to occur per-channel after a burst of extractions. If the helper tracks per-channel cooldowns, it can pace itself better and avoid unnecessary rate-limit triggers.
 - **Trigger:** v2.1 cycle
+
+### Sprint 21 — server.py god module split (post-launch)
+
+- **Destination:** v2.1, dedicated sprint
+- **Rationale:** server.py is ~5000+ lines bundling HTTP routes, extraction pipeline, background workers, file I/O, and queue. `_run_extraction` alone is ~300 lines. Codex's pre-launch audit flagged this as the largest single maintainability concern. A launch-pressure refactor produces worse code than thoughtful work with real user signal.
+- **Approach:** decompose into `yoink_core/extraction.py` (`run_single_extraction`, `build_sidecar`, `build_markdown`), `yoink_core/workers.py` (comments, CI, hook, entities, retry queue), `yoink_core/http.py` (route table + auth/body wrappers), `yoink_core/storage.py` (paths, atomic writes, sidecar helpers). HTTP contract + MCP tool signatures stable throughout.
+- **Trigger:** v2.1 cycle, after real user feedback identifies the highest-friction code paths.
 
 ---
 
