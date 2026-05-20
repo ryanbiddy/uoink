@@ -380,6 +380,19 @@ class Index:
             ).fetchone()
         return row is not None
 
+    def get_by_slug(self, slug: str) -> dict | None:
+        """Look up a live yoink by its folder slug (Sprint 19.6 / Fix 5).
+        Excludes soft-deleted rows -- a slug parked in _yoink-trash/ must
+        not resolve here, otherwise MCP tools would happily return content
+        the user just deleted. Used by yoink_mcp_tools._find_yoink to skip
+        the O(disk) rglob walk that pre-Sprint-19.6 MCP calls did."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM yoinks WHERE slug=? AND deleted_at IS NULL",
+                (slug,),
+            ).fetchone()
+        return dict(row) if row else None
+
     def all_video_ids(self) -> set[str]:
         with self._lock:
             rows = self._conn.execute("SELECT video_id FROM yoinks").fetchall()
