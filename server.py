@@ -229,6 +229,47 @@ def _check_memory_search_rate_limit() -> bool:
     return True
 
 
+# /queue/* rate limits (Sprint 19 / C4). /queue/status is poll-friendly
+# (60/min) so the popup can refresh a queue banner; the mutating endpoints
+# are 30/min, matching /taxonomy/correct.
+_QUEUE_STATUS_RATE_LIMIT = 60
+_QUEUE_STATUS_RATE_WINDOW_SEC = 60.0
+_queue_status_request_times: list[float] = []
+_queue_status_rate_lock = threading.Lock()
+
+_QUEUE_MUTATE_RATE_LIMIT = 30
+_QUEUE_MUTATE_RATE_WINDOW_SEC = 60.0
+_queue_mutate_request_times: list[float] = []
+_queue_mutate_rate_lock = threading.Lock()
+
+
+def _check_queue_status_rate_limit() -> bool:
+    now = time.monotonic()
+    with _queue_status_rate_lock:
+        cutoff = now - _QUEUE_STATUS_RATE_WINDOW_SEC
+        kept = [t for t in _queue_status_request_times if t > cutoff]
+        if len(kept) >= _QUEUE_STATUS_RATE_LIMIT:
+            _queue_status_request_times[:] = kept
+            return False
+        kept.append(now)
+        _queue_status_request_times[:] = kept
+    return True
+
+
+def _check_queue_mutate_rate_limit() -> bool:
+    """Shared limiter for /queue/cancel and /queue/retry-now."""
+    now = time.monotonic()
+    with _queue_mutate_rate_lock:
+        cutoff = now - _QUEUE_MUTATE_RATE_WINDOW_SEC
+        kept = [t for t in _queue_mutate_request_times if t > cutoff]
+        if len(kept) >= _QUEUE_MUTATE_RATE_LIMIT:
+            _queue_mutate_request_times[:] = kept
+            return False
+        kept.append(now)
+        _queue_mutate_request_times[:] = kept
+    return True
+
+
 def _valid_iso_date(value: str) -> bool:
     """True if value is a well-formed YYYY-MM-DD date."""
     try:
@@ -4802,6 +4843,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_taxonomy_corrections()
         if bare == "/memory/search":
             return self._handle_memory_search()
+        if bare == "/queue/status":
+            return self._handle_queue_status()
         log.info("GET %s -> 404", self.path)
         self._send_json(404, {"ok": False, "error": "not found"})
 
@@ -5213,6 +5256,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_memory_delete(body)
         if bare == "/memory/restore":
             return self._handle_memory_restore(body)
+        if bare == "/queue/cancel":
+            return self._handle_queue_cancel(body)
+        if bare == "/queue/retry-now":
+            return self._handle_queue_retry_now(body)
         if bare == "/session/start":
             return self._handle_session_start(body)
         if bare == "/session/add":
@@ -5540,6 +5587,89 @@ class Handler(BaseHTTPRequestHandler):
         idx.restore_yoink(video_id)
         log.info("memory restore: %s <- %s", video_id, trash)
         self._send_json(200, {"ok": True, "restored_at": _now_iso()})
+
+    # ---- /queue/status ----
+    def _handle_queue_status(self):
+        """Snapshot of the rate-limit retry queue (Sprint 19 / C4):
+        per-status counts, the earliest retry_after, and the live
+        (non-terminal) rows for a status banner. Token-gated, 60/min."""
+        if not _check_queue_status_rate_limit():
+            return self._send_json(429, {"ok": False, "error": "too many requests"})
+        idx = _get_index()
+        try:
+            overview = idx.pending_counts()
+            pending = idx.list_pending(limit=50, include_terminal=False)
+        except Exception as e:
+            log.warning("queue status: index error: %s", e)
+            return self._send_json(
+                500, {"ok": False, "error": "queue unavailable"})
+        counts = overview.get("counts", {})
+        self._send_json(200, {
+            "ok": True,
+            "pending_count": int(counts.get("pending", 0)),
+            "running_count": int(counts.get("running", 0)),
+            "failed_count": int(counts.get("failed", 0)),
+            "succeeded_count": int(counts.get("succeeded", 0)),
+            "cancelled_count": int(counts.get("cancelled", 0)),
+            "next_retry_at": overview.get("next_retry_at"),
+            "pending": pending,
+        })
+
+    def _validate_pending_id(self, body: dict):
+        raw = body.get("pending_id")
+        try:
+            pending_id = int(raw)
+        except (TypeError, ValueError):
+            return None, "pending_id required"
+        if pending_id <= 0:
+            return None, "pending_id invalid"
+        return pending_id, None
+
+    # ---- /queue/cancel ----
+    def _handle_queue_cancel(self, body: dict):
+        """Cancel a queued URL. 30/min."""
+        if not _check_queue_mutate_rate_limit():
+            return self._send_json(429, {"ok": False, "error": "too many requests"})
+        pending_id, err = self._validate_pending_id(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        try:
+            changed = _get_index().cancel_pending(pending_id)
+        except Exception as e:
+            log.warning("queue cancel: index error: %s", e)
+            return self._send_json(
+                500, {"ok": False, "error": "queue unavailable"})
+        if not changed:
+            return self._send_json(404, {
+                "ok": False,
+                "error": "pending row not found or already terminal",
+            })
+        log.info("queue cancel: pending_id=%d", pending_id)
+        self._send_json(200, {"ok": True})
+
+    # ---- /queue/retry-now ----
+    def _handle_queue_retry_now(self, body: dict):
+        """Bump a queued URL's retry_after to now so the worker picks it up
+        on the next poll. Resurrects 'failed' rows too; no-op for
+        'succeeded' or 'cancelled'. 30/min."""
+        if not _check_queue_mutate_rate_limit():
+            return self._send_json(429, {"ok": False, "error": "too many requests"})
+        pending_id, err = self._validate_pending_id(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        try:
+            changed = _get_index().retry_pending_now(pending_id)
+        except Exception as e:
+            log.warning("queue retry-now: index error: %s", e)
+            return self._send_json(
+                500, {"ok": False, "error": "queue unavailable"})
+        if not changed:
+            return self._send_json(404, {
+                "ok": False,
+                "error": "pending row not found or already terminal",
+            })
+        log.info("queue retry-now: pending_id=%d", pending_id)
+        self._send_json(200, {"ok": True})
 
     def _handle_extract(self, body: dict):
         url, interval, err = self._validate_url_interval(body)
