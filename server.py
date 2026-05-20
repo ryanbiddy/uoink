@@ -2901,10 +2901,24 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
     video_file.unlink(missing_ok=True)
 
-    # Refresh the master _all-yoinks-index.md after every successful yoink.
-    # Cheap (one stat per video folder), and re-scanning means a folder the
-    # user manually deleted simply drops out of the index next time.
-    _regenerate_index()
+    # Sprint 19.6 / Fix 6: refresh _all-yoinks-index.md INCREMENTALLY
+    # instead of the pre-Sprint-19.6 full-tree rescan that became O(N) on
+    # large libraries. _incremental_index_update parses the existing file
+    # and prepends one new entry; first-launch / parse failure spawn a
+    # background full regen so the foreground yoink stays fast either way.
+    try:
+        rel_path = (f"{output_folder.parent.name}/"
+                    f"{output_folder.name}/{yoink_path.name}")
+        _incremental_index_update({
+            "title": title,
+            "topic": output_folder.parent.name or "uncategorised",
+            "channel": (metadata.get("channel")
+                        or metadata.get("uploader") or ""),
+            "yoinked_at": datetime.now().date().isoformat(),
+            "rel_path": rel_path,
+        })
+    except Exception as e:
+        log.warning("incremental index call site failed: %s", e)
 
     # Sprint 15 (A1/A4/A5): incrementally index this yoink + its citation
     # map + health score in index.db. Best-effort -- a library-index failure
@@ -3413,15 +3427,117 @@ def _regenerate_index() -> None:
     """Rebuild _all-yoinks-index.md from a fresh scan of DESKTOP_ROOT.
 
     Best-effort: failures here shouldn't fail the yoink that triggered the
-    regeneration, so we log + swallow rather than raise. Runs synchronously
-    after each successful extraction; the scan is small (one stat per
-    video folder) and dwarfed by the actual extraction cost."""
+    regeneration, so we log + swallow rather than raise. Sprint 19.6 /
+    Fix 6 removed this from the per-yoink hot path -- it now runs on
+    demand from /open-index (and as a fallback from
+    _incremental_index_update for first-launch / parse failure). The scan
+    is O(N) in the library size; the incremental path is the steady state."""
     try:
         entries = _scan_yoinks()
         DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
         _index_path().write_text(_render_index(entries), encoding="utf-8")
     except Exception as e:
         log.warning("index regeneration failed: %s", e)
+
+
+def _start_full_index_regen_thread() -> None:
+    """Background-thread shim for _regenerate_index, so the fallback paths
+    in _incremental_index_update don't make the foreground yoink wait on
+    a full-tree rescan."""
+    threading.Thread(
+        target=_regenerate_index, name="index-md-regen", daemon=True
+    ).start()
+
+
+def _patch_index_md(text: str, entry: dict) -> str | None:
+    """Apply one new yoink to the rendered _all-yoinks-index.md, in place.
+
+    Returns the updated markdown, or None when the file's structure isn't
+    recognised (caller falls back to a full regen). Three edits:
+
+    * Bump the header's total count and timestamp.
+    * Prepend the entry to its topic subsection (creating the subsection
+      if it doesn't yet exist).
+    * Prepend the entry to the Recent section, capped at 20.
+    """
+    total_re = re.compile(r"_Total yoinks:\s*(\d+)_")
+    if not total_re.search(text):
+        return None
+    text = total_re.sub(
+        lambda m: f"_Total yoinks: {int(m.group(1)) + 1}_", text, count=1)
+    text = re.sub(
+        r"_Last updated:[^_\n]*_",
+        f"_Last updated: {_now_iso()}_  ", text, count=1)
+
+    topic = entry.get("topic") or "uncategorised"
+    byline = f" -- {entry['channel']}" if entry.get("channel") else ""
+    topic_line = (
+        f"- [{entry['title']}]({_md_link_path(entry['rel_path'])}) "
+        f"-- Yoinked {entry['yoinked_at']}{byline}"
+    )
+    topic_header_re = re.compile(
+        rf"^### {re.escape(topic)} \((\d+) yoinks?\)\n", re.MULTILINE)
+    m = topic_header_re.search(text)
+    if m:
+        new_count = int(m.group(1)) + 1
+        plural = "" if new_count == 1 else "s"
+        new_header = f"### {topic} ({new_count} yoink{plural})\n"
+        text = text[:m.start()] + new_header + topic_line + "\n" + text[m.end():]
+    else:
+        # New topic -- insert a fresh subsection just before "## Recent".
+        recent_anchor = text.find("\n## Recent ")
+        if recent_anchor == -1:
+            return None
+        new_block = f"### {topic} (1 yoink)\n{topic_line}\n\n"
+        text = text[:recent_anchor + 1] + new_block + text[recent_anchor + 1:]
+
+    recent_header_re = re.compile(
+        r"^## Recent \(last 20\)\n\n", re.MULTILINE)
+    rm = recent_header_re.search(text)
+    if not rm:
+        return None
+    recent_start = rm.end()
+    rest = text[recent_start:]
+    nxt = re.search(r"^##\s", rest, re.MULTILINE)
+    recent_end = recent_start + (nxt.start() if nxt else len(rest))
+    block = text[recent_start:recent_end]
+    item_lines = [ln for ln in block.splitlines() if ln.startswith("- ")]
+    new_item = (
+        f"- [{entry['title']}]({_md_link_path(entry['rel_path'])}) "
+        f"-- {entry['yoinked_at']}"
+    )
+    capped = [new_item] + item_lines[:19]
+    new_recent_block = "\n".join(capped) + "\n\n"
+    text = text[:recent_start] + new_recent_block + text[recent_end:]
+    return text
+
+
+def _incremental_index_update(entry: dict) -> None:
+    """Sprint 19.6 / Fix 6: append one new yoink to _all-yoinks-index.md
+    without re-walking the whole library. Falls back to a background
+    full-regen on first-launch / unreadable file / structural-parse
+    failure so the foreground yoink never pays the O(N) scan cost.
+    Best-effort -- an update failure here never fails the underlying
+    yoink."""
+    try:
+        path = _index_path()
+        if not path.exists():
+            _start_full_index_regen_thread()
+            return
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as e:
+            log.warning("index file unreadable, scheduling full regen: %s", e)
+            _start_full_index_regen_thread()
+            return
+        new_text = _patch_index_md(text, entry)
+        if new_text is None:
+            log.info("index file structure unrecognised, scheduling full regen")
+            _start_full_index_regen_thread()
+            return
+        _atomic_write_text(path, new_text)
+    except Exception as e:
+        log.warning("incremental index update failed: %s", e)
 
 
 def _is_valid_session_id(s: str) -> bool:
