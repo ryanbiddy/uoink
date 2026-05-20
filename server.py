@@ -61,6 +61,7 @@ if _BIN_DIR.is_dir():
 
 from yt_extract import parse_srt, slugify, fmt_time  # noqa: E402
 import index  # noqa: E402  -- local SQLite library-index module
+import _platform  # noqa: E402  -- cross-platform path / OS helpers
 
 # --- Constants -------------------------------------------------------------
 HOST = "127.0.0.1"
@@ -104,16 +105,16 @@ PLAYLIST_RATE_LIMIT_BACKOFF_BASE_SEC = 30.0
 PLAYLIST_RATE_LIMIT_BACKOFF_MAX_SEC = 5 * 60.0
 
 # ---- Auth token (P0-1) ----------------------------------------------------
-# Per-install random token. Persisted next to server.py (which lives in
-# %LOCALAPPDATA%\Yoink in the installed product, or in the dev repo
-# directory in dev mode -- gitignored either way). The extension fetches
+# Per-install random token. Persisted next to server.py (which lives in the
+# install root -- %LOCALAPPDATA%\Yoink on Windows, ~/Library/Application
+# Support/Yoink on macOS -- in the shipped product, or in the dev repo
+# directory in dev mode; gitignored either way). The extension fetches
 # this via /token (gated by chrome-extension:// origin) on first launch
 # and includes it in X-Yoink-Token on every subsequent request.
 TOKEN_PATH = HERE / "token.txt"
-DATA_ROOT = (
-    Path(os.environ.get("LOCALAPPDATA", str(HERE))) / "Yoink"
-    if sys.platform == "win32" else HERE
-)
+# Sprint 19.5 Stage 1: DATA_ROOT is now resolved by _platform.user_data_dir
+# so the same helper runs on Windows + macOS without per-call branches.
+DATA_ROOT = _platform.user_data_dir()
 SETTINGS_PATH = DATA_ROOT / "settings.json"
 JOBS_PATH = DATA_ROOT / "jobs.json"
 TAXONOMY_PATH = DATA_ROOT / "taxonomy.json"
@@ -696,56 +697,13 @@ YTDLP_CMD = [sys.executable, "-m", "yt_dlp"]
 YTDLP_MAX_FILESIZE_BYTES = 2 * 1024 * 1024 * 1024
 
 def _get_desktop_dir() -> Path:
-    """Resolve the user's actual Desktop, honoring OneDrive Desktop
-    redirection. Naive %USERPROFILE%\\Desktop misses users whose Desktop is
-    redirected to OneDrive (Documents and Desktop opt-in by default in
-    consumer OneDrive setups), and the yoinks would land in a directory the
-    user can't see in Explorer."""
-    fallback = Path(os.environ.get("USERPROFILE", str(Path.home()))) / "Desktop"
-    if sys.platform != "win32":
-        return fallback
-    try:
-        import ctypes
-        from ctypes import wintypes
-
-        class _GUID(ctypes.Structure):
-            _fields_ = [
-                ("Data1", ctypes.c_uint32),
-                ("Data2", ctypes.c_uint16),
-                ("Data3", ctypes.c_uint16),
-                ("Data4", ctypes.c_ubyte * 8),
-            ]
-
-        # FOLDERID_Desktop = {B4BFCC3A-DB2C-424C-B029-7FE99A87C641}
-        FOLDERID_Desktop = _GUID(
-            0xB4BFCC3A, 0xDB2C, 0x424C,
-            (ctypes.c_ubyte * 8)(0xB0, 0x29, 0x7F, 0xE9, 0x9A, 0x87, 0xC6, 0x41),
-        )
-        SHGetKnownFolderPath = ctypes.windll.shell32.SHGetKnownFolderPath
-        SHGetKnownFolderPath.argtypes = [
-            ctypes.POINTER(_GUID),
-            wintypes.DWORD,
-            wintypes.HANDLE,
-            ctypes.POINTER(ctypes.c_wchar_p),
-        ]
-        SHGetKnownFolderPath.restype = ctypes.c_long  # HRESULT
-
-        out = ctypes.c_wchar_p()
-        hr = SHGetKnownFolderPath(
-            ctypes.byref(FOLDERID_Desktop), 0, None, ctypes.byref(out)
-        )
-        if hr == 0 and out.value:
-            try:
-                return Path(out.value)
-            finally:
-                ctypes.windll.ole32.CoTaskMemFree(out)
-    except Exception:
-        # Module loads before logging is configured and pythonw.exe has no
-        # stderr, so we silently fall back. Users will still see their files
-        # under %USERPROFILE%\\Desktop -- not optimal for OneDrive users,
-        # but workable as a degraded mode.
-        pass
-    return fallback
+    """Cross-platform Desktop folder. Sprint 19.5 Stage 1 moved the actual
+    resolution into _platform.desktop_dir (Windows known-folder API on
+    Windows so OneDrive Desktop redirection is followed; ~/Desktop on
+    macOS + Linux); this thin wrapper stays so callers don't all need
+    updating in the same commit, and so the function name still reads
+    naturally at the call site."""
+    return _platform.desktop_dir()
 
 
 def _is_writable_dir(path: Path) -> bool:
@@ -786,8 +744,11 @@ def _get_output_root() -> Path:
 
 
 # Last-resort output root used when DESKTOP_ROOT turns out to be unwritable
-# at startup. Lives inside %LOCALAPPDATA%\Yoink (same place as index.db),
-# which is reliably writable since DATA_ROOT itself is required to work.
+# at startup. Lives inside DATA_ROOT (%LOCALAPPDATA%\Yoink on Windows /
+# ~/Library/Application Support/Yoink on macOS), which is reliably
+# writable since DATA_ROOT itself is required for the helper to work.
+# Sprint 19.5 Stage 1 kept the historical _LOCALAPPDATA_OUTPUT name --
+# the underlying value is cross-platform via _platform.user_data_dir.
 _LOCALAPPDATA_OUTPUT = DATA_ROOT / "output"
 
 DESKTOP_ROOT = _get_output_root()
@@ -2994,7 +2955,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
     if open_explorer:
         try:
-            os.startfile(str(output_folder))  # type: ignore[attr-defined]
+            _platform.open_in_os(output_folder)
         except Exception as e:
             log.warning("startfile failed: %s", e)
 
@@ -4780,11 +4741,9 @@ def _start_retry_pending_thread() -> None:
 # /diagnose -- structured self-check (Sprint 19 / C3)
 # ---------------------------------------------------------------------------
 def _keyring_display_name() -> str:
-    if sys.platform == "win32":
-        return "Windows Credential Manager"
-    if sys.platform == "darwin":
-        return "macOS Keychain"
-    return "Secret Service"
+    # Sprint 19.5 Stage 1: delegated to _platform so the per-platform
+    # label table lives in one place.
+    return _platform.keyring_display_name()
 
 
 def _probe_command(cmd: list[str]) -> tuple[str, str | None]:
@@ -5509,7 +5468,7 @@ class Handler(BaseHTTPRequestHandler):
         if not p.exists() or not p.is_dir():
             return self._send_json(404, {"ok": False, "error": "folder not found"})
         try:
-            os.startfile(str(p))  # type: ignore[attr-defined]
+            _platform.open_in_os(p)
         except Exception as e:
             return self._send_json(200, {"ok": False, "error": str(e)})
         self._send_json(200, {"ok": True, "folder": str(p)})
@@ -5528,7 +5487,7 @@ class Handler(BaseHTTPRequestHandler):
                     "ok": False,
                     "error": "Index file couldn't be created.",
                 })
-            os.startfile(str(target))  # type: ignore[attr-defined]
+            _platform.open_in_os(target)
         except Exception as e:
             return self._send_json(200, {"ok": False, "error": str(e)})
         log.info("GET /open-index -> %s", target)
@@ -5546,12 +5505,7 @@ class Handler(BaseHTTPRequestHandler):
                 "error": f"prompts.json not found at {prompts_path}",
             })
         try:
-            subprocess.Popen(
-                ["explorer", f"/select,{prompts_path}"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-                **SUBPROCESS_KW,
-            )
+            _platform.reveal_in_file_manager(prompts_path)
         except Exception as e:
             return self._send_json(200, {"ok": False, "error": str(e)})
         log.info("GET /open-prompts -> %s", prompts_path)
@@ -6219,7 +6173,7 @@ class Handler(BaseHTTPRequestHandler):
 
         sess_folder = _session_folder(session_id)
         try:
-            os.startfile(str(sess_folder))  # type: ignore[attr-defined]
+            _platform.open_in_os(sess_folder)
         except Exception as e:
             log.warning("startfile failed: %s", e)
 
@@ -6267,7 +6221,7 @@ class Handler(BaseHTTPRequestHandler):
         if not folder.exists():
             return self._send_json(404, {"ok": False, "error": f"session '{session_id}' not found"})
         try:
-            os.startfile(str(folder))  # type: ignore[attr-defined]
+            _platform.open_in_os(folder)
         except Exception as e:
             return self._send_json(200, {"ok": False, "error": str(e)})
         log.info("POST /session/open -> %s", folder)
@@ -6313,45 +6267,14 @@ class Handler(BaseHTTPRequestHandler):
 # Startup
 # ---------------------------------------------------------------------------
 def maybe_toast(title: str, body: str):
-    """Show a transient balloon-style notification on Windows so the user
-    knows the server actually started. Uses System.Windows.Forms.NotifyIcon
-    via PowerShell -- works on Win10/11 with no pip dependencies, lives in
-    the user session, auto-dismisses after the system's balloon timeout,
-    and is suppressed gracefully by Focus Assist instead of throwing.
+    """Best-effort transient notification when the helper finishes booting.
 
-    Fire-and-forget: we Popen the PowerShell process and return. It exits
-    on its own ~6s later after disposing the tray icon. Quietly no-ops on
-    non-Windows or when PowerShell isn't on PATH."""
-    if sys.platform != "win32":
-        return
-    # Single-quote escape for PowerShell single-quoted strings.
-    t = title.replace("'", "''")
-    b = body.replace("'", "''")
-    ps = (
-        "Add-Type -AssemblyName System.Windows.Forms;"
-        "Add-Type -AssemblyName System.Drawing;"
-        "$n = New-Object System.Windows.Forms.NotifyIcon;"
-        "$n.Icon = [System.Drawing.SystemIcons]::Information;"
-        "$n.BalloonTipIcon = 'Info';"
-        f"$n.BalloonTipTitle = '{t}';"
-        f"$n.BalloonTipText = '{b}';"
-        "$n.Visible = $true;"
-        "$n.ShowBalloonTip(5000);"
-        # Keep the tray icon alive long enough for Windows to render the
-        # balloon (the timeout arg is advisory; Windows uses a fixed ~5s).
-        "Start-Sleep -Seconds 6;"
-        "$n.Dispose()"
-    )
-    try:
-        subprocess.Popen(
-            ["powershell.exe", "-NoProfile", "-WindowStyle", "Hidden",
-             "-Command", ps],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            **SUBPROCESS_KW,
-        )
-    except Exception as e:
-        log.debug("toast spawn failed: %s", e)
+    Sprint 19.5 Stage 1: now delegated to _platform.show_toast. Windows
+    uses System.Windows.Forms.NotifyIcon via PowerShell, macOS uses
+    osascript ``display notification``, Linux uses notify-send. All
+    fire-and-forget; failures are debug-logged and swallowed so a
+    missing tray icon never blocks startup."""
+    _platform.show_toast(title, body)
 
 
 def _existing_server_responds() -> bool:
