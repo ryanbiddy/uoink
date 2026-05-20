@@ -34,6 +34,12 @@ _MIGRATIONS_DIR = Path(__file__).parent.resolve() / "migrations"
 # scheduled purge hard-removes them.
 _TRASH_RETENTION_DAYS = 30
 
+# Rate-limit retry queue (Sprint 19 / C4). _PENDING_MAX_ATTEMPTS is the
+# strike cap: after this many failures a pending row is marked terminal.
+# The retry worker (server.py) decides backoff timing.
+_PENDING_MAX_ATTEMPTS = 3
+_PENDING_TERMINAL_STATES = ("succeeded", "failed", "cancelled")
+
 # Columns of the `yoinks` table, in declaration order. video_id is the
 # primary key and is handled separately in the upsert.
 _YOINK_COLUMNS = (
@@ -500,6 +506,167 @@ class Index:
                 "WHERE deleted_at IS NOT NULL AND deleted_at < ?", (cutoff,)
             ).fetchall()
         return [r["video_id"] for r in rows]
+
+    # ---- rate-limit retry queue (Sprint 19 / C4) ------------------------
+    def enqueue_pending(self, url: str, interval: int,
+                        retry_after: str) -> int:
+        """Add a rate-limited URL to the queue with status='pending' and
+        attempt_count=0. Returns the new pending_id."""
+        with self._lock:
+            cur = self._conn.execute(
+                "INSERT INTO pending_yoinks "
+                "(url, interval_seconds, queued_at, retry_after, "
+                " attempt_count, status) "
+                "VALUES (?, ?, ?, ?, 0, 'pending')",
+                (url, int(interval or 30), _now_iso(), retry_after),
+            )
+            self._conn.commit()
+            return cur.lastrowid
+
+    def next_pending(self, now: str) -> dict | None:
+        """The next pending row whose retry_after has arrived (oldest
+        queued_at first), or None when the queue is empty / not yet
+        eligible."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM pending_yoinks "
+                "WHERE status='pending' AND retry_after <= ? "
+                "ORDER BY queued_at LIMIT 1",
+                (now,),
+            ).fetchone()
+        return dict(row) if row else None
+
+    def mark_pending_running(self, pending_id: int) -> None:
+        """Mark a pending row in flight. The retry worker calls this before
+        the actual extract so a parallel call to next_pending won't pick the
+        same row twice."""
+        with self._lock:
+            self._conn.execute(
+                "UPDATE pending_yoinks SET status='running' WHERE pending_id=?",
+                (pending_id,),
+            )
+            self._conn.commit()
+
+    def mark_pending_succeeded(self, pending_id: int,
+                                succeeded_job_id: str) -> None:
+        """Mark a pending row terminally succeeded and record the resulting
+        single-extract job_id (so the UI can deep-link to the result)."""
+        with self._lock:
+            self._conn.execute(
+                "UPDATE pending_yoinks "
+                "SET status='succeeded', succeeded_job_id=? "
+                "WHERE pending_id=?",
+                (succeeded_job_id, pending_id),
+            )
+            self._conn.commit()
+
+    def mark_pending_failed(self, pending_id: int, error: str,
+                             retry_after: str, *,
+                             force_final: bool = False) -> None:
+        """Record one failed attempt. Increments attempt_count, then either
+        re-queues with the supplied retry_after (status='pending') if under
+        the strike cap, or marks the row terminally 'failed' (when the cap
+        is reached, or when force_final=True for non-recoverable errors).
+        No-op for an unknown pending_id."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT attempt_count FROM pending_yoinks WHERE pending_id=?",
+                (pending_id,),
+            ).fetchone()
+            if row is None:
+                return
+            attempts = (row["attempt_count"] or 0) + 1
+            if force_final or attempts >= _PENDING_MAX_ATTEMPTS:
+                self._conn.execute(
+                    "UPDATE pending_yoinks "
+                    "SET status='failed', attempt_count=?, last_error=? "
+                    "WHERE pending_id=?",
+                    (attempts, error, pending_id),
+                )
+            else:
+                self._conn.execute(
+                    "UPDATE pending_yoinks "
+                    "SET status='pending', attempt_count=?, last_error=?, "
+                    "    retry_after=? "
+                    "WHERE pending_id=?",
+                    (attempts, error, retry_after, pending_id),
+                )
+            self._conn.commit()
+
+    def cancel_pending(self, pending_id: int) -> bool:
+        """Mark a pending row terminally cancelled. Returns True when a row
+        actually changed (False for unknown / already-terminal rows)."""
+        with self._lock:
+            cur = self._conn.execute(
+                "UPDATE pending_yoinks SET status='cancelled' "
+                "WHERE pending_id=? AND status NOT IN ('succeeded','failed','cancelled')",
+                (pending_id,),
+            )
+            self._conn.commit()
+            return cur.rowcount > 0
+
+    def retry_pending_now(self, pending_id: int) -> bool:
+        """User-initiated 'try this one now': bumps retry_after to now and,
+        for a 'failed' row, flips it back to 'pending'. No-op for
+        'succeeded' / 'cancelled' rows. Returns True when a row changed."""
+        with self._lock:
+            cur = self._conn.execute(
+                "UPDATE pending_yoinks "
+                "SET status='pending', retry_after=? "
+                "WHERE pending_id=? AND status IN ('pending','failed','running')",
+                (_now_iso(), pending_id),
+            )
+            self._conn.commit()
+            return cur.rowcount > 0
+
+    def list_pending(self, limit: int = 50, *,
+                     include_terminal: bool = False) -> list[dict]:
+        """Recent queue rows, newest queued first. By default hides
+        succeeded / failed / cancelled rows."""
+        if include_terminal:
+            sql = ("SELECT * FROM pending_yoinks "
+                   "ORDER BY queued_at DESC LIMIT ?")
+            params: list = [max(1, int(limit))]
+        else:
+            placeholders = ", ".join("?" * len(_PENDING_TERMINAL_STATES))
+            sql = (f"SELECT * FROM pending_yoinks "
+                   f"WHERE status NOT IN ({placeholders}) "
+                   f"ORDER BY queued_at DESC LIMIT ?")
+            params = [*_PENDING_TERMINAL_STATES, max(1, int(limit))]
+        with self._lock:
+            rows = self._conn.execute(sql, params).fetchall()
+        return [dict(r) for r in rows]
+
+    def pending_counts(self) -> dict:
+        """Counts grouped by status plus the earliest retry_after among
+        'pending' rows -- feeds /queue/status without paging the table."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT status, COUNT(*) AS n FROM pending_yoinks "
+                "GROUP BY status"
+            ).fetchall()
+            next_row = self._conn.execute(
+                "SELECT MIN(retry_after) AS m FROM pending_yoinks "
+                "WHERE status='pending'"
+            ).fetchone()
+        counts = {r["status"]: int(r["n"]) for r in rows}
+        return {
+            "counts": counts,
+            "next_retry_at": next_row["m"] if next_row else None,
+        }
+
+    def reset_running_pending(self) -> int:
+        """Crash recovery at startup: any row stuck in 'running' (the helper
+        died mid-retry) is flipped back to 'pending' with retry_after=now so
+        the retry worker picks it up again. Returns the count reset."""
+        with self._lock:
+            cur = self._conn.execute(
+                "UPDATE pending_yoinks SET status='pending', retry_after=? "
+                "WHERE status='running'",
+                (_now_iso(),),
+            )
+            self._conn.commit()
+            return cur.rowcount
 
     # ---- citations -------------------------------------------------------
     def insert_citations(self, video_id: str, citations: list[dict]) -> int:

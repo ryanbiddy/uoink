@@ -229,6 +229,47 @@ def _check_memory_search_rate_limit() -> bool:
     return True
 
 
+# /queue/* rate limits (Sprint 19 / C4). /queue/status is poll-friendly
+# (60/min) so the popup can refresh a queue banner; the mutating endpoints
+# are 30/min, matching /taxonomy/correct.
+_QUEUE_STATUS_RATE_LIMIT = 60
+_QUEUE_STATUS_RATE_WINDOW_SEC = 60.0
+_queue_status_request_times: list[float] = []
+_queue_status_rate_lock = threading.Lock()
+
+_QUEUE_MUTATE_RATE_LIMIT = 30
+_QUEUE_MUTATE_RATE_WINDOW_SEC = 60.0
+_queue_mutate_request_times: list[float] = []
+_queue_mutate_rate_lock = threading.Lock()
+
+
+def _check_queue_status_rate_limit() -> bool:
+    now = time.monotonic()
+    with _queue_status_rate_lock:
+        cutoff = now - _QUEUE_STATUS_RATE_WINDOW_SEC
+        kept = [t for t in _queue_status_request_times if t > cutoff]
+        if len(kept) >= _QUEUE_STATUS_RATE_LIMIT:
+            _queue_status_request_times[:] = kept
+            return False
+        kept.append(now)
+        _queue_status_request_times[:] = kept
+    return True
+
+
+def _check_queue_mutate_rate_limit() -> bool:
+    """Shared limiter for /queue/cancel and /queue/retry-now."""
+    now = time.monotonic()
+    with _queue_mutate_rate_lock:
+        cutoff = now - _QUEUE_MUTATE_RATE_WINDOW_SEC
+        kept = [t for t in _queue_mutate_request_times if t > cutoff]
+        if len(kept) >= _QUEUE_MUTATE_RATE_LIMIT:
+            _queue_mutate_request_times[:] = kept
+            return False
+        kept.append(now)
+        _queue_mutate_request_times[:] = kept
+    return True
+
+
 def _valid_iso_date(value: str) -> bool:
     """True if value is a well-formed YYYY-MM-DD date."""
     try:
@@ -697,7 +738,10 @@ def _get_output_root() -> Path:
     Dev mode can set YOINK_OUTPUT_DIR to keep personal yoinks out of a repo
     that happens to live on the Desktop. The override must already exist and
     be writable; otherwise Yoink falls back to the Desktop\\Yoink folder.
-    """
+
+    A second fallback, _LOCALAPPDATA_OUTPUT, kicks in at startup if even
+    the Desktop path turns out to be unwritable -- see
+    _apply_output_root_fallback (Sprint 19, Wave 1 Fix 4 carryover)."""
     override = (os.environ.get("YOINK_OUTPUT_DIR") or "").strip()
     if override:
         try:
@@ -709,8 +753,75 @@ def _get_output_root() -> Path:
     return _get_desktop_dir() / "Yoink"
 
 
+# Last-resort output root used when DESKTOP_ROOT turns out to be unwritable
+# at startup. Lives inside %LOCALAPPDATA%\Yoink (same place as index.db),
+# which is reliably writable since DATA_ROOT itself is required to work.
+_LOCALAPPDATA_OUTPUT = DATA_ROOT / "output"
+
 DESKTOP_ROOT = _get_output_root()
 SESSIONS_ROOT = DESKTOP_ROOT / "_sessions"
+# Set True by _apply_output_root_fallback when the active root has been
+# moved to _LOCALAPPDATA_OUTPUT. Surfaced in /health and /diagnose so the
+# popup can warn the user their yoinks are no longer on the Desktop.
+_OUTPUT_ROOT_FALLBACK = False
+
+
+def _apply_output_root_fallback() -> None:
+    """If DESKTOP_ROOT can't be written to at startup, swap it (and
+    SESSIONS_ROOT) over to _LOCALAPPDATA_OUTPUT. Sets _OUTPUT_ROOT_FALLBACK
+    so /health and /diagnose can warn. /file accepts both candidates
+    either way, so legacy yoinks still on the Desktop remain readable."""
+    global DESKTOP_ROOT, SESSIONS_ROOT, _OUTPUT_ROOT_FALLBACK
+    try:
+        DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        log.warning("output root: cannot create %s -- %s", DESKTOP_ROOT, e)
+    if _is_writable_dir(DESKTOP_ROOT):
+        return
+    fallback = _LOCALAPPDATA_OUTPUT
+    try:
+        fallback.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        log.error(
+            "output root fallback: cannot create %s either -- %s; staying on %s",
+            fallback, e, DESKTOP_ROOT)
+        return
+    if not _is_writable_dir(fallback):
+        log.error(
+            "output root fallback: %s exists but is not writable -- "
+            "staying on %s", fallback, DESKTOP_ROOT)
+        return
+    log.warning(
+        "OUTPUT ROOT FALLBACK: '%s' is not writable; switching to '%s'",
+        DESKTOP_ROOT, fallback)
+    DESKTOP_ROOT = fallback
+    SESSIONS_ROOT = fallback / "_sessions"
+    _OUTPUT_ROOT_FALLBACK = True
+
+
+def _allowed_roots() -> set[Path]:
+    """All filesystem roots /file is permitted to serve from. The active
+    output root plus both fallback candidates -- after a fallback the user
+    may still have legacy yoinks under Desktop\\Yoink whose thumbnails the
+    Memory page needs to render."""
+    roots: set[Path] = set()
+    for candidate in (DESKTOP_ROOT, _get_desktop_dir() / "Yoink",
+                      _LOCALAPPDATA_OUTPUT):
+        try:
+            roots.add(candidate.resolve())
+        except OSError:
+            pass
+    return roots
+
+
+def _path_under_any(resolved: Path, roots: set[Path]) -> bool:
+    for root in roots:
+        try:
+            resolved.relative_to(root)
+            return True
+        except ValueError:
+            continue
+    return False
 
 # --- Logging ---------------------------------------------------------------
 LOG_PATH = HERE / "server.log"
@@ -2835,6 +2946,26 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 INSTALL_HELP_URL = "https://ryanbiddy.com/yoink/install"
 
 
+def _is_youtube_rate_limit(e: BaseException) -> bool:
+    """True when an exception thrown out of _run_extraction is yt-dlp
+    surfacing a YouTube HTTP 429. Drives the rate-limit queue (Sprint 19):
+    the extract handler enqueues for retry instead of returning the
+    pre-Sprint-19 friendly_error string, and the retry worker uses the
+    same predicate to decide between exponential backoff and immediate
+    terminal failure."""
+    if not isinstance(e, subprocess.CalledProcessError):
+        return False
+    stderr = (e.stderr.decode("utf-8", errors="ignore")
+              if isinstance(e.stderr, bytes) else (e.stderr or ""))
+    return "HTTP Error 429" in stderr
+
+
+# How long the /extract handler asks the user to wait before the first
+# retry of a rate-limited URL. The retry worker's exponential backoff
+# (60s * 2^attempts, capped at 15 minutes) takes over after that.
+_RATE_LIMIT_INITIAL_BACKOFF_SEC = 60
+
+
 def friendly_error(e: BaseException) -> str:
     """Translate raw exceptions into copy the user can act on."""
     if isinstance(e, FileNotFoundError):
@@ -3944,10 +4075,10 @@ def _resolve_served_file(raw_path: str) -> tuple[Path | None, str | None, int, s
         resolved = p.resolve()
         if any(part == ".." for part in resolved.parts):
             return None, None, 400, "path invalid"
-        yoink_root = DESKTOP_ROOT.resolve()
-        try:
-            resolved.relative_to(yoink_root)
-        except ValueError:
+        # Sprint 19 / Wave 1 Fix 4: accept any allowed root, not just the
+        # active DESKTOP_ROOT, so a yoink saved under Desktop\Yoink stays
+        # readable after a switch to the LOCALAPPDATA fallback.
+        if not _path_under_any(resolved, _allowed_roots()):
             return None, None, 403, "path escapes Yoink root"
     except (OSError, ValueError):
         return None, None, 400, "path invalid"
@@ -4356,6 +4487,237 @@ def _start_trash_purge_thread() -> None:
     threading.Thread(target=_runner, name="trash-purge", daemon=True).start()
 
 
+# ---------------------------------------------------------------------------
+# Rate-limit retry worker (Sprint 19 / C4)
+# ---------------------------------------------------------------------------
+# Poll the queue this often. The retry_after column is the real gate -- this
+# is just how soon the worker notices a row that becomes eligible.
+_RETRY_POLL_INTERVAL_SEC = 30
+# Exponential backoff base; doubled on each strike, capped at the max.
+_RETRY_INITIAL_BACKOFF_SEC = 60
+_RETRY_MAX_BACKOFF_SEC = 15 * 60
+
+
+def _retry_pending_one() -> bool:
+    """One pass of the retry worker: pick the oldest pending row whose
+    retry_after has arrived, attempt the extract, and update the queue
+    accordingly. Returns True when a row was processed (regardless of
+    outcome) so the caller can loop / log."""
+    idx = _get_index()
+    try:
+        row = idx.next_pending(_now_iso())
+    except Exception as e:
+        log.warning("retry worker: next_pending failed: %s", e)
+        return False
+    if not row:
+        return False
+    pending_id = row["pending_id"]
+    url = row["url"]
+    interval = row["interval_seconds"] or 30
+    attempts_before = row["attempt_count"] or 0
+
+    try:
+        idx.mark_pending_running(pending_id)
+    except Exception:
+        log.exception("retry worker: mark_pending_running failed")
+        return False
+
+    log.info("retry worker: attempting pending #%d (attempt %d): %s",
+             pending_id, attempts_before + 1, url)
+    started_at = _now_iso()
+    title = None
+    folder = None
+    with _extract_lock:
+        try:
+            metadata = _fetch_metadata(url)
+            title = metadata.get("title") or "Untitled"
+            topic = _classify_topic(metadata)
+            folder = (DESKTOP_ROOT / _topic_folder_name(topic)
+                      / (slugify(title) or "video"))
+            result = _run_extraction(url, interval, folder,
+                                     metadata=metadata, topic=topic)
+        except BaseException as e:
+            if _is_youtube_rate_limit(e):
+                # Still rate-limited: back off exponentially and re-queue
+                # (mark_pending_failed handles the strike-out at the cap).
+                attempts = attempts_before + 1
+                delay = min(
+                    _RETRY_INITIAL_BACKOFF_SEC * (2 ** attempts),
+                    _RETRY_MAX_BACKOFF_SEC,
+                )
+                retry_at = (datetime.now() + timedelta(seconds=delay)).strftime(
+                    "%Y-%m-%dT%H:%M:%S")
+                try:
+                    idx.mark_pending_failed(
+                        pending_id, "youtube_rate_limit", retry_at)
+                except Exception:
+                    log.exception("retry worker: mark_pending_failed failed")
+                log.info(
+                    "retry worker: pending #%d still rate-limited; "
+                    "retry at %s (backoff %ds)",
+                    pending_id, retry_at, delay)
+                return True
+            # Non-recoverable error -- jump straight to terminal failure.
+            msg = friendly_error(e)
+            try:
+                idx.mark_pending_failed(
+                    pending_id, msg, _now_iso(), force_final=True)
+            except Exception:
+                log.exception("retry worker: mark_pending_failed failed")
+            _record_single_extract_job(
+                url, started_at, error=msg, title=title, folder=folder)
+            log.warning(
+                "retry worker: pending #%d non-recoverable: %s",
+                pending_id, msg)
+            return True
+
+    job = _record_single_extract_job(url, started_at, result=result)
+    job_id = (job or {}).get("id") or ""
+    try:
+        idx.mark_pending_succeeded(pending_id, job_id)
+    except Exception:
+        log.exception("retry worker: mark_pending_succeeded failed")
+    log.info("retry worker: pending #%d succeeded -> %s", pending_id, job_id)
+    return True
+
+
+def _start_retry_pending_thread() -> None:
+    """Daemon thread: every 30s, process at most one pending URL. One row
+    per pass keeps the lock window short and gives breathing room between
+    attempts so we don't ourselves drive YouTube into a deeper rate-limit."""
+    def _runner():
+        while True:
+            try:
+                _retry_pending_one()
+            except Exception:
+                log.exception("retry worker pass crashed")
+            time.sleep(_RETRY_POLL_INTERVAL_SEC)
+
+    threading.Thread(
+        target=_runner, name="retry-pending", daemon=True).start()
+
+
+# ---------------------------------------------------------------------------
+# /diagnose -- structured self-check (Sprint 19 / C3)
+# ---------------------------------------------------------------------------
+def _keyring_display_name() -> str:
+    if sys.platform == "win32":
+        return "Windows Credential Manager"
+    if sys.platform == "darwin":
+        return "macOS Keychain"
+    return "Secret Service"
+
+
+def _probe_command(cmd: list[str]) -> tuple[str, str | None]:
+    """Run a short version-probe subprocess. Returns (status, detail) where
+    status is 'ok' / 'error' and detail is a one-line message."""
+    try:
+        out = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=10, **SUBPROCESS_KW,
+        )
+    except FileNotFoundError:
+        return "error", "not installed or not on PATH"
+    except (subprocess.TimeoutExpired, OSError) as e:
+        return "error", f"probe failed: {e}"
+    if out.returncode != 0:
+        first_err = (out.stderr or "").strip().splitlines()
+        return "error", first_err[0] if first_err else f"exit code {out.returncode}"
+    first_line = (out.stdout or "").strip().splitlines()
+    return "ok", first_line[0] if first_line else "ok"
+
+
+def _diagnose_payload() -> dict:
+    """Structured self-check (Sprint 19 / C3). Public, no-auth -- the popup
+    polls this when the helper looks unhealthy to surface a specific
+    recovery hint rather than a generic 'helper offline'."""
+    checks: list[dict] = []
+    warnings: list[str] = []
+
+    def add(name: str, status: str, detail: str | None = None) -> None:
+        checks.append({"name": name, "status": status, "detail": detail})
+
+    # 1. helper_responsive -- we are answering this request.
+    add("helper_responsive", "ok", None)
+
+    # 2. output_root_writable
+    if _is_writable_dir(DESKTOP_ROOT):
+        add("output_root_writable", "ok", str(DESKTOP_ROOT))
+    else:
+        add("output_root_writable", "error",
+            f"{DESKTOP_ROOT} is not writable")
+        warnings.append(
+            f"Yoink can't write to {DESKTOP_ROOT}. Check folder "
+            "permissions, or set the YOINK_OUTPUT_DIR environment variable.")
+
+    # 3. anthropic_key_set + 4. anthropic_key_valid
+    try:
+        key = (_get_saved_anthropic_key() or "").strip()
+    except Exception:
+        key = ""
+    if key:
+        add("anthropic_key_set", "ok", None)
+    else:
+        add("anthropic_key_set", "warning", "no key configured")
+        warnings.append(
+            "Anthropic API key not configured. Open setup to add one if you "
+            "want Comment Intelligence, Hook Type, or entity extraction "
+            "(everything else still works without it).")
+    add("anthropic_key_valid", "skipped",
+        "Run POST /settings/test-key to verify")
+
+    # 5. index_db_writable
+    if _is_writable_dir(INDEX_PATH.parent):
+        add("index_db_writable", "ok", str(INDEX_PATH))
+    else:
+        add("index_db_writable", "error",
+            f"{INDEX_PATH.parent} is not writable")
+        warnings.append(
+            f"Index database is not writable at {INDEX_PATH}. Search, the "
+            "Memory page, and the rate-limit queue will fail.")
+
+    # 6. yt_dlp_available
+    status, detail = _probe_command([*YTDLP_CMD, "--version"])
+    if status == "ok":
+        add("yt_dlp_available", "ok", f"yt-dlp {detail}")
+    else:
+        add("yt_dlp_available", "error", detail)
+        warnings.append(
+            "yt-dlp is missing or broken. Reinstall with "
+            "`python -m pip install -U yt-dlp`.")
+
+    # 7. keyring_available
+    err = _credential_store_error()
+    if err is None:
+        add("keyring_available", "ok", _keyring_display_name())
+    else:
+        add("keyring_available", "warning", str(err))
+        warnings.append(
+            "OS credential store is unreachable -- the Anthropic API key "
+            "cannot be saved between sessions.")
+
+    # 8. ffmpeg_available
+    status, detail = _probe_command(["ffmpeg", "-version"])
+    if status == "ok":
+        add("ffmpeg_available", "ok", detail)
+    else:
+        add("ffmpeg_available", "error", detail)
+        warnings.append(
+            "ffmpeg is missing or broken. Screenshot extraction will fail.")
+
+    if _OUTPUT_ROOT_FALLBACK:
+        warnings.append(
+            f"Output folder fallback in effect: yoinks are being saved to "
+            f"{DESKTOP_ROOT} because Desktop\\Yoink was not writable. The "
+            "extension's /file sandbox still serves both locations.")
+    return {
+        "ok": True,
+        "version": VERSION,
+        "output_root_fallback": _OUTPUT_ROOT_FALLBACK,
+        "checks": checks,
+        "warnings": warnings,
+    }
+
+
 def _enrich_yoink_row(idx, r: dict) -> dict | None:
     """Shape one index `yoinks` row into the enriched result the popup's
     /recent list and the memory page both consume: fresh health (Sprint
@@ -4626,6 +4988,10 @@ class Handler(BaseHTTPRequestHandler):
                 "version": VERSION,
                 # True while a corrupt index.db is being rebuilt from disk.
                 "index_recovering": _index_recovering,
+                # True when the active output root has been swapped from
+                # Desktop\Yoink to %LOCALAPPDATA%\Yoink\output because the
+                # Desktop path was not writable at startup.
+                "output_root_fallback": _OUTPUT_ROOT_FALLBACK,
             })
         if bare == "/index/backfill-status":
             # Public, read-only progress counts (same posture as /health) so
@@ -4633,6 +4999,11 @@ class Handler(BaseHTTPRequestHandler):
             with _backfill_lock:
                 snapshot = dict(_backfill_state)
             return self._send_json(200, {"ok": True, **snapshot})
+        if bare == "/diagnose":
+            # Public, no-auth (same posture as /health). Sprint 19 / C3:
+            # structured self-check the popup uses to surface a specific
+            # recovery hint instead of a generic "helper offline".
+            return self._send_json(200, _diagnose_payload())
         if bare == "/token":
             return self._handle_token()
         # Everything below mutates state or reveals user data -- token-gated.
@@ -4672,6 +5043,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_taxonomy_corrections()
         if bare == "/memory/search":
             return self._handle_memory_search()
+        if bare == "/queue/status":
+            return self._handle_queue_status()
         log.info("GET %s -> 404", self.path)
         self._send_json(404, {"ok": False, "error": "not found"})
 
@@ -5083,6 +5456,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_memory_delete(body)
         if bare == "/memory/restore":
             return self._handle_memory_restore(body)
+        if bare == "/queue/cancel":
+            return self._handle_queue_cancel(body)
+        if bare == "/queue/retry-now":
+            return self._handle_queue_retry_now(body)
         if bare == "/session/start":
             return self._handle_session_start(body)
         if bare == "/session/add":
@@ -5411,6 +5788,89 @@ class Handler(BaseHTTPRequestHandler):
         log.info("memory restore: %s <- %s", video_id, trash)
         self._send_json(200, {"ok": True, "restored_at": _now_iso()})
 
+    # ---- /queue/status ----
+    def _handle_queue_status(self):
+        """Snapshot of the rate-limit retry queue (Sprint 19 / C4):
+        per-status counts, the earliest retry_after, and the live
+        (non-terminal) rows for a status banner. Token-gated, 60/min."""
+        if not _check_queue_status_rate_limit():
+            return self._send_json(429, {"ok": False, "error": "too many requests"})
+        idx = _get_index()
+        try:
+            overview = idx.pending_counts()
+            pending = idx.list_pending(limit=50, include_terminal=False)
+        except Exception as e:
+            log.warning("queue status: index error: %s", e)
+            return self._send_json(
+                500, {"ok": False, "error": "queue unavailable"})
+        counts = overview.get("counts", {})
+        self._send_json(200, {
+            "ok": True,
+            "pending_count": int(counts.get("pending", 0)),
+            "running_count": int(counts.get("running", 0)),
+            "failed_count": int(counts.get("failed", 0)),
+            "succeeded_count": int(counts.get("succeeded", 0)),
+            "cancelled_count": int(counts.get("cancelled", 0)),
+            "next_retry_at": overview.get("next_retry_at"),
+            "pending": pending,
+        })
+
+    def _validate_pending_id(self, body: dict):
+        raw = body.get("pending_id")
+        try:
+            pending_id = int(raw)
+        except (TypeError, ValueError):
+            return None, "pending_id required"
+        if pending_id <= 0:
+            return None, "pending_id invalid"
+        return pending_id, None
+
+    # ---- /queue/cancel ----
+    def _handle_queue_cancel(self, body: dict):
+        """Cancel a queued URL. 30/min."""
+        if not _check_queue_mutate_rate_limit():
+            return self._send_json(429, {"ok": False, "error": "too many requests"})
+        pending_id, err = self._validate_pending_id(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        try:
+            changed = _get_index().cancel_pending(pending_id)
+        except Exception as e:
+            log.warning("queue cancel: index error: %s", e)
+            return self._send_json(
+                500, {"ok": False, "error": "queue unavailable"})
+        if not changed:
+            return self._send_json(404, {
+                "ok": False,
+                "error": "pending row not found or already terminal",
+            })
+        log.info("queue cancel: pending_id=%d", pending_id)
+        self._send_json(200, {"ok": True})
+
+    # ---- /queue/retry-now ----
+    def _handle_queue_retry_now(self, body: dict):
+        """Bump a queued URL's retry_after to now so the worker picks it up
+        on the next poll. Resurrects 'failed' rows too; no-op for
+        'succeeded' or 'cancelled'. 30/min."""
+        if not _check_queue_mutate_rate_limit():
+            return self._send_json(429, {"ok": False, "error": "too many requests"})
+        pending_id, err = self._validate_pending_id(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        try:
+            changed = _get_index().retry_pending_now(pending_id)
+        except Exception as e:
+            log.warning("queue retry-now: index error: %s", e)
+            return self._send_json(
+                500, {"ok": False, "error": "queue unavailable"})
+        if not changed:
+            return self._send_json(404, {
+                "ok": False,
+                "error": "pending row not found or already terminal",
+            })
+        log.info("queue retry-now: pending_id=%d", pending_id)
+        self._send_json(200, {"ok": True})
+
     def _handle_extract(self, body: dict):
         url, interval, err = self._validate_url_interval(body)
         if err:
@@ -5433,6 +5893,31 @@ class Handler(BaseHTTPRequestHandler):
                 result = _run_extraction(url, interval, folder,
                                           metadata=metadata, topic=topic)
             except BaseException as e:
+                # Sprint 19 / C4: YouTube 429 -> queue for retry instead of
+                # surfacing an error. The retry worker takes over from here.
+                if _is_youtube_rate_limit(e):
+                    retry_after = (datetime.now() + timedelta(
+                        seconds=_RATE_LIMIT_INITIAL_BACKOFF_SEC
+                    )).strftime("%Y-%m-%dT%H:%M:%S")
+                    try:
+                        pending_id = _get_index().enqueue_pending(
+                            url, interval, retry_after)
+                    except Exception as enqueue_err:
+                        # Index unavailable; fall through to the pre-Sprint-19
+                        # error path so the user still gets a useful message.
+                        log.warning("POST /extract -> could not enqueue "
+                                    "rate-limited URL: %s", enqueue_err)
+                    else:
+                        log.info(
+                            "POST /extract -> queued (rate-limit) pending_id=%d",
+                            pending_id)
+                        return self._send_json(200, {
+                            "ok": True,
+                            "queued": True,
+                            "pending_id": pending_id,
+                            "retry_after": retry_after,
+                            "reason": "youtube_rate_limit",
+                        })
                 msg = friendly_error(e)
                 log.error("POST /extract -> error: %s", msg)
                 _record_single_extract_job(
@@ -5748,6 +6233,11 @@ def main():
         log.info("Yoink server already running on http://%s:%d -- exiting", HOST, PORT)
         sys.exit(0)
 
+    # Sprint 19 / Wave 1 Fix 4: if Desktop\Yoink isn't writable, swap the
+    # active output root to %LOCALAPPDATA%\Yoink\output before the first
+    # /extract would try to write to it.
+    _apply_output_root_fallback()
+
     # Bind FIRST. Writing the PID file before the bind would create stale
     # files when another instance still owns the port (and would also have
     # the wrong PID -- ours, not the live one).
@@ -5775,6 +6265,17 @@ def main():
     # Sprint 18: hard-delete _yoink-trash/ entries past the 30-day window,
     # once at startup and every 24h after.
     _start_trash_purge_thread()
+    # Sprint 19 (C4): rate-limit retry queue. Reset any rows stuck 'running'
+    # from a previous crash before starting the worker, so a mid-retry
+    # crash doesn't strand them.
+    try:
+        reset = _get_index().reset_running_pending()
+        if reset:
+            log.info("retry worker: reset %d stale 'running' row(s) at boot",
+                     reset)
+    except Exception as e:
+        log.warning("retry worker: reset_running_pending failed: %s", e)
+    _start_retry_pending_thread()
 
     # Bind succeeded -- now safe to claim the PID file.
     pid_file = HERE / "server.pid"
