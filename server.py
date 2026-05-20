@@ -4744,95 +4744,73 @@ def _diagnose_payload() -> dict:
     }
 
 
-def _enrich_yoink_row(idx, r: dict) -> dict | None:
-    """Shape one index `yoinks` row into the enriched result the popup's
-    /recent list and the memory page both consume: fresh health (Sprint
-    15), entity stats (Sprint 16), hook type + confidence (Sprint 17), and
-    the thumbnail path (Sprint 18). Returns None when the row lacks the
-    video_id / corpus_path needed to render it."""
-    video_id = r.get("video_id")
-    corpus_path = r.get("corpus_path") or ""
-    if not video_id or not corpus_path:
-        return None
-    folder = Path(corpus_path).parent
-    sidecar_path = r.get("sidecar_path") or ""
+def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
+    """Shape a page of index yoink rows into the enriched result the popup's
+    /recent list and the Memory page both consume: fresh health (Sprint
+    15), entity stats (Sprint 16), hook type + confidence (Sprint 17),
+    and the thumbnail path (Sprint 18). Rows missing video_id or
+    corpus_path are dropped.
 
-    # Fresh health from the live sidecar -- the stored snapshot is captured
-    # at extraction time, before the AI workers finish, so re-computing from
-    # the current sidecar reflects the latest hook / CI / entity status.
-    health = None
-    if sidecar_path and Path(sidecar_path).exists():
-        try:
-            live = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
-            health = compute_health(live)
-        except (OSError, json.JSONDecodeError):
-            pass
-    if health is None and r.get("health_score_json"):
-        try:
-            health = json.loads(r["health_score_json"])
-        except (json.JSONDecodeError, TypeError):
-            pass
-
-    # Hook Type + confidence (Sprint 17). Both live on the taxonomy row --
-    # the hook worker updates the taxonomy table, not yoinks, when
-    # classification completes, so taxonomy is the authoritative read.
-    hook_type = r.get("hook_type")
-    confidence = None
+    Sprint 19.6 / Fix 4: the index-side enrichment (taxonomy + entity
+    aggregates) is batched into Index.enrich_yoinks, so a 50-row page
+    is three IN-list queries instead of 150 per-row lookups. The
+    sidecar-fresh health and the filesystem-derived thumbnail check stay
+    per-row -- fs I/O dominates anyway, and pushing them down into the
+    Index would couple it to server-side helpers."""
+    if not rows:
+        return []
     try:
-        with idx._lock:
-            tr = idx._conn.execute(
-                "SELECT hook_type, confidence FROM taxonomy WHERE video_id=?",
-                (video_id,),
-            ).fetchone()
-        if tr:
-            if tr["hook_type"]:
-                hook_type = tr["hook_type"]
-            if tr["confidence"] is not None:
-                confidence = int(tr["confidence"])
+        rows = idx.enrich_yoinks(rows)
     except Exception:
-        pass
+        # Fail open: if the batch enrich raises, fall back to raw rows
+        # without crashing the whole render.
+        log.exception("enrich_yoinks failed; rendering bare rows")
+    out: list[dict] = []
+    for r in rows:
+        video_id = r.get("video_id")
+        corpus_path = r.get("corpus_path") or ""
+        if not video_id or not corpus_path:
+            continue
+        folder = Path(corpus_path).parent
+        sidecar_path = r.get("sidecar_path") or ""
 
-    # Entity stats (Sprint 16): distinct entity count + top 5 by mentions.
-    entity_count = 0
-    top_entities: list[str] = []
-    try:
-        with idx._lock:
-            ec = idx._conn.execute(
-                "SELECT COUNT(DISTINCT entity_id) AS c "
-                "FROM entity_mentions WHERE video_id=?", (video_id,),
-            ).fetchone()
-            if ec:
-                entity_count = int(ec["c"] or 0)
-            es = idx._conn.execute(
-                "SELECT e.name FROM entity_mentions em "
-                "JOIN entities e ON e.entity_id = em.entity_id "
-                "WHERE em.video_id = ? "
-                "GROUP BY em.entity_id ORDER BY COUNT(*) DESC LIMIT 5",
-                (video_id,),
-            ).fetchall()
-            top_entities = [row["name"] for row in es]
-    except Exception:
-        pass
+        # Fresh health from the live sidecar -- the stored snapshot is
+        # captured at extraction time, before the AI workers finish, so
+        # re-computing reflects the latest hook / CI / entity status.
+        health = None
+        if sidecar_path and Path(sidecar_path).exists():
+            try:
+                live = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
+                health = compute_health(live)
+            except (OSError, json.JSONDecodeError):
+                pass
+        if health is None and r.get("health_score_json"):
+            try:
+                health = json.loads(r["health_score_json"])
+            except (json.JSONDecodeError, TypeError):
+                pass
 
-    # Thumbnail (Sprint 18): absolute path when thumbnail.jpg is on disk so
-    # the memory page can fetch it via the token-gated /file endpoint.
-    thumb = folder / "thumbnail.jpg"
-    thumbnail_path = str(thumb) if thumb.exists() else None
+        # Thumbnail (Sprint 18): absolute path when thumbnail.jpg is on
+        # disk so the Memory page can fetch it via the token-gated /file
+        # endpoint.
+        thumb = folder / "thumbnail.jpg"
+        thumbnail_path = str(thumb) if thumb.exists() else None
 
-    return {
-        "title": r.get("title") or "",
-        "topic": r.get("topic") or "",
-        "folder": str(folder),
-        "video_id": video_id,
-        "channel": r.get("channel"),
-        "yoinked_at": r.get("yoinked_at"),
-        "hook_type": hook_type,
-        "hook_type_confidence": confidence,
-        "health": health,
-        "entity_count": entity_count,
-        "top_entities": top_entities,
-        "thumbnail_path": thumbnail_path,
-    }
+        out.append({
+            "title": r.get("title") or "",
+            "topic": r.get("topic") or "",
+            "folder": str(folder),
+            "video_id": video_id,
+            "channel": r.get("channel"),
+            "yoinked_at": r.get("yoinked_at"),
+            "hook_type": r.get("hook_type"),
+            "hook_type_confidence": r.get("hook_type_confidence"),
+            "health": health,
+            "entity_count": r.get("entity_count", 0),
+            "top_entities": r.get("top_entities", []),
+            "thumbnail_path": thumbnail_path,
+        })
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -5292,17 +5270,18 @@ class Handler(BaseHTTPRequestHandler):
     # folders. A folder counts as a yoink if it has a yoink.md inside it.
     # Sessions root (_sessions/) is excluded.
     def _handle_recent(self):
-        """Recent yoinks for the popup. Sprint 15.1 follow-up:
-        replaces the disk-walk with an Index.list_recent read and enriches
-        each row via _enrich_yoink_row (the same helper the memory page
-        uses). Falls back to an empty list if the index is unavailable."""
+        """Recent yoinks for the popup. Sprint 15.1 followups read from the
+        Index instead of walking disk; Sprint 19.6 / Fix 4 enrichment is
+        batched into Index.enrich_yoinks (taxonomy + entity_count +
+        top_entities all in three IN-list queries) instead of the
+        pre-fix N+1 per-row pattern."""
         idx = _get_index()
         try:
             rows = idx.list_recent(limit=10)
         except Exception as e:
             log.warning("recent: index unavailable: %s", e)
             rows = []
-        results = [er for er in (_enrich_yoink_row(idx, r) for r in rows) if er]
+        results = _enrich_yoink_rows(idx, rows)
         self._send_json(200, {"ok": True, "recent": results})
 
     # ---- /memory/search ----
@@ -5346,8 +5325,7 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             log.warning("memory search: index error: %s", e)
             return self._send_json(500, {"ok": False, "error": "search failed"})
-        results = [er for er in (_enrich_yoink_row(idx, r)
-                                 for r in res["results"]) if er]
+        results = _enrich_yoink_rows(idx, res["results"])
         self._send_json(200, {
             "ok": True,
             "total": res["total"],

@@ -432,6 +432,77 @@ class Index:
             ).fetchall()
         return [dict(r) for r in rows]
 
+    def enrich_yoinks(self, rows: list[dict]) -> list[dict]:
+        """Batch-annotate a page of yoink rows with index-side enrichment
+        (Sprint 19.6 / Fix 4). Adds, in place:
+
+        * ``hook_type`` -- resolved from the taxonomy table (authoritative;
+          the hook worker updates taxonomy, not yoinks, when it finishes)
+          falling back to the yoinks row's own value.
+        * ``hook_type_confidence`` -- int or None.
+        * ``entity_count`` -- distinct entities mentioned in the video.
+        * ``top_entities`` -- up to five entity names, most-mentioned first.
+
+        Runs exactly three IN-list queries regardless of page size, in
+        place of the per-row reach-into-self._conn pattern that used to
+        be N+1 from the popup / Memory page. Callers that also want
+        sidecar-fresh ``health`` or filesystem-derived fields like the
+        thumbnail path layer those on outside the index."""
+        if not rows:
+            return rows
+        video_ids = [r.get("video_id") for r in rows if r.get("video_id")]
+        if not video_ids:
+            return rows
+        placeholders = ", ".join("?" * len(video_ids))
+        with self._lock:
+            # 1. Hook Type + confidence from the taxonomy table.
+            tax_rows = self._conn.execute(
+                f"SELECT video_id, hook_type, confidence FROM taxonomy "
+                f"WHERE video_id IN ({placeholders})",
+                video_ids,
+            ).fetchall()
+            tax_map = {t["video_id"]: t for t in tax_rows}
+            # 2. Entity count -- distinct entity_id per video.
+            ec_rows = self._conn.execute(
+                f"SELECT video_id, COUNT(DISTINCT entity_id) AS c "
+                f"FROM entity_mentions WHERE video_id IN ({placeholders}) "
+                f"GROUP BY video_id",
+                video_ids,
+            ).fetchall()
+            ec_map = {r["video_id"]: int(r["c"] or 0) for r in ec_rows}
+            # 3. Top entities -- per-video name list, ordered by mention
+            # count. Pull every (video_id, entity, count) once and
+            # partition in Python so we don't fire one query per video.
+            te_rows = self._conn.execute(
+                f"SELECT em.video_id AS video_id, e.name AS name, "
+                f"       COUNT(*) AS n "
+                f"FROM entity_mentions em "
+                f"JOIN entities e ON e.entity_id = em.entity_id "
+                f"WHERE em.video_id IN ({placeholders}) "
+                f"GROUP BY em.video_id, em.entity_id "
+                f"ORDER BY em.video_id, n DESC",
+                video_ids,
+            ).fetchall()
+        te_map: dict[str, list[str]] = {}
+        for r in te_rows:
+            bucket = te_map.setdefault(r["video_id"], [])
+            if len(bucket) < 5:
+                bucket.append(r["name"])
+
+        for r in rows:
+            vid = r.get("video_id")
+            tax = tax_map.get(vid)
+            confidence = None
+            if tax:
+                if tax["hook_type"]:
+                    r["hook_type"] = tax["hook_type"]
+                if tax["confidence"] is not None:
+                    confidence = int(tax["confidence"])
+            r["hook_type_confidence"] = confidence
+            r["entity_count"] = ec_map.get(vid, 0)
+            r["top_entities"] = te_map.get(vid, [])
+        return rows
+
     def get_health(self, video_id: str) -> dict | None:
         """Return the parsed health-score dict for a video, or None."""
         with self._lock:
