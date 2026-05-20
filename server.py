@@ -1580,6 +1580,23 @@ def _clean_text(value, *, limit: int = 500) -> str:
     return text[:limit]
 
 
+def _clean_for_prompt(value, *, limit: int = 500) -> str:
+    """Tighter version of _clean_text used when the cleaned string is
+    interpolated into an LLM prompt (Sprint 19.6 / Fix 3 / audit M2).
+    Strips characters that could break out of quoted prompt context --
+    double-quotes, backticks, and line breaks the model could mistake for
+    an instruction boundary -- and the cleaned-then-collapsed string is
+    safe to drop straight into a `"{value}"`-style template."""
+    cleaned = _clean_text(value, limit=limit)
+    if not cleaned:
+        return ""
+    return (cleaned
+            .replace('"', "'")
+            .replace("`", "'")
+            .replace("\n", " ")
+            .replace("\r", " "))
+
+
 def _as_int(value, default: int = 0) -> int:
     if isinstance(value, bool):
         return default
@@ -1736,18 +1753,27 @@ _HOOK_TYPE_GUIDE = (
 
 def _hook_fewshot_block(similar: list[dict]) -> str:
     """Format past user corrections as few-shot calibration anchors for the
-    hook-type system prompt (A3). Empty string when there are none."""
+    hook-type system prompt (A3). Empty string when there are none.
+
+    Sprint 19.6 / Fix 3 / audit M2: every interpolated field is passed
+    through _clean_for_prompt, which strips quotes / backticks / line
+    breaks so an attacker-crafted title / channel / user_reason can't
+    break out of the f-string quote context. Today single-user, so the
+    attack is self-injection -- but the moment BACKLOG v2.5 publishes the
+    corrections dataset, a malicious entry would otherwise rewrite every
+    downstream classifier prompt that consumed it as a few-shot."""
     if not similar:
         return ""
     lines = ["", "",
              "Past corrections from this user (use as calibration anchors):"]
     for c in similar:
-        title = _clean_text(c.get("title"), limit=160) or "(untitled)"
-        channel = _clean_text(c.get("channel"), limit=120) or "(unknown channel)"
+        title = _clean_for_prompt(c.get("title"), limit=160) or "(untitled)"
+        channel = _clean_for_prompt(c.get("channel"), limit=120) or "(unknown channel)"
+        original = _clean_for_prompt(c.get("original_hook_type"), limit=40)
+        corrected = _clean_for_prompt(c.get("corrected_hook_type"), limit=40)
         line = (f'- Video "{title}" on channel "{channel}": classifier said '
-                f'"{c.get("original_hook_type")}", user corrected to '
-                f'"{c.get("corrected_hook_type")}".')
-        reason = _clean_text(c.get("user_reason"), limit=300)
+                f'"{original}", user corrected to "{corrected}".')
+        reason = _clean_for_prompt(c.get("user_reason"), limit=300)
         if reason:
             line += f' Reason: "{reason}"'
         lines.append(line)
