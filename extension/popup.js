@@ -143,36 +143,15 @@ function updateDestButtons() {
 }
 
 function formatTokenEstimate(tokens) {
-  const n = Number(tokens);
-  if (!Number.isFinite(n) || n < 0) return null;
-  if (n >= 1000) return `${Math.round(n / 1000)}k`;
-  return `${Math.round(n)}`;
+  return globalThis.YoinkUI.formatTokenEstimate(tokens);
 }
 
 function screenshotCountFromData(data, text) {
-  const direct = Number(
-    data && (
-      data.clipboard_screenshot_count
-      ?? data.screenshots_in_clipboard
-      ?? data.included_screenshot_count
-    )
-  );
-  if (Number.isFinite(direct) && direct >= 0) return Math.round(direct);
-  if (Array.isArray(data && data.clipboard_screenshots)) return data.clipboard_screenshots.length;
-  const body = String(text || data && (data.corpus_md_paste || data.yoink_md) || "");
-  const matches = body.match(/!\[[^\]]*]\([^)]*\)/g);
-  return matches ? matches.length : 0;
+  return globalThis.YoinkUI.screenshotCountFromData(data, text);
 }
 
 function clipboardBudgetFromData(data, clipboardText) {
-  if (!data || typeof data !== "object") return null;
-  const text = String(clipboardText || data.corpus_md_paste || data.yoink_md || "");
-  const tokens = Number(data.token_estimate ?? data.clipboard_token_estimate);
-  return {
-    screenshotCount: screenshotCountFromData(data, text),
-    tokenEstimate: Number.isFinite(tokens) ? Math.max(0, Math.round(tokens)) : Math.round(text.length / 4),
-    updatedAt: Date.now(),
-  };
+  return globalThis.YoinkUI.clipboardBudgetFromData(data, clipboardText);
 }
 
 function renderClipboardBudget() {
@@ -793,22 +772,7 @@ function writeDismissedBackfill(signature) {
 }
 
 async function popupAuthedJson(path, init = {}) {
-  const doFetch = async (token) => {
-    const headers = Object.assign({}, init.headers || {});
-    if (token) headers["X-Yoink-Token"] = token;
-    return fetch(`${STC.SERVER}${path}`, Object.assign({}, init, {
-      headers,
-      mode: "cors",
-      credentials: "omit",
-    }));
-  };
-  let token = STC.getToken ? await STC.getToken() : null;
-  let res = await doFetch(token);
-  if (res.status === 403 && STC.getToken) {
-    token = await STC.getToken({ refresh: true });
-    res = await doFetch(token);
-  }
-  return res.json().catch(() => ({ ok: false, error: "Bad JSON" }));
+  return globalThis.YoinkUI.authedJson(path, init);
 }
 
 function hideBackfillBanner() {
@@ -929,15 +893,7 @@ function shortQueueLabel(item) {
 }
 
 function minutesUntil(value) {
-  if (!value) return null;
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value > 10_000
-      ? Math.max(0, Math.ceil((value - Date.now()) / 60000))
-      : Math.max(0, Math.ceil(value / 60));
-  }
-  const when = Date.parse(value);
-  if (!Number.isNaN(when)) return Math.max(0, Math.ceil((when - Date.now()) / 60000));
-  return null;
+  return globalThis.YoinkUI.minutesUntil(value);
 }
 
 function nextRetryLabel(status) {
@@ -998,7 +954,7 @@ function renderQueueDetails(status) {
     row.className = "queue-row";
     const title = document.createElement("div");
     title.className = "queue-row-title";
-    const state = item.state || item.status || (item === running ? "running" : "queued");
+    const state = item.state || item.status || "queued";
     title.textContent = `${state}: ${shortQueueLabel(item)}`;
     title.title = shortQueueLabel(item);
 
@@ -1210,78 +1166,8 @@ if (yoinkCurrentBtn) {
   yoinkCurrentBtn.addEventListener("click", runPopupYoinkCurrent);
 }
 
-function healthLabel(key) {
-  return String(key || "")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (ch) => ch.toUpperCase());
-}
-
-function normalizeHealthValue(value) {
-  if (value == null) return { status: "skipped", reason: "" };
-  if (typeof value === "string") return { status: value, reason: "" };
-  if (typeof value === "boolean") {
-    return { status: value ? "ok" : "missing", reason: "" };
-  }
-  if (typeof value === "object") {
-    return {
-      status: String(value.status || value.state || value.result || (value.ok ? "ok" : "skipped")),
-      reason: String(value.reason || value.error || value.message || ""),
-    };
-  }
-  return { status: String(value), reason: "" };
-}
-
-function healthDotClass(status) {
-  const s = String(status || "").toLowerCase();
-  if (["ok", "success", "complete", "completed", "available", "present", "pass"].includes(s)) {
-    return "ok";
-  }
-  if (["missing", "failed", "error", "warning", "warn", "blocked", "unavailable"].includes(s)) {
-    return "missing";
-  }
-  return "skipped";
-}
-
-function healthEntries(health) {
-  if (!health || typeof health !== "object") return [];
-  const keys = [];
-  for (const key of HEALTH_FIELDS) {
-    if (Object.prototype.hasOwnProperty.call(health, key)) keys.push(key);
-  }
-  for (const key of Object.keys(health)) {
-    if (!keys.includes(key)) keys.push(key);
-  }
-  return keys.slice(0, 5).map((key) => {
-    const normalized = normalizeHealthValue(health[key]);
-    return { key, label: healthLabel(key), ...normalized };
-  });
-}
-
-function healthTooltip(entries) {
-  return entries.map((entry) => {
-    const reason = entry.reason ? ` - ${entry.reason}` : "";
-    return `${entry.label}: ${entry.status || "skipped"}${reason}`;
-  }).join("\n");
-}
-
 function renderHealthRow(health) {
-  const entries = healthEntries(health);
-  if (!entries.length) return null;
-
-  const row = document.createElement("span");
-  row.className = "health-row";
-  row.title = healthTooltip(entries);
-  row.setAttribute("aria-label", row.title);
-
-  for (const entry of entries) {
-    const dot = document.createElement("span");
-    const cls = healthDotClass(entry.status);
-    dot.className = `health-dot ${cls}`;
-    const reason = entry.reason ? ` - ${entry.reason}` : "";
-    dot.title = `${entry.label}: ${entry.status || "skipped"}${reason}`;
-    row.appendChild(dot);
-  }
-  return row;
+  return globalThis.YoinkUI.renderHealthDots(health, { fields: HEALTH_FIELDS });
 }
 
 function topEntityNames(row) {
@@ -1317,11 +1203,7 @@ function renderEntityIndicator(row) {
 }
 
 function hookDisplayName(hookType) {
-  const raw = String(hookType || "").trim();
-  if (!raw) return "";
-  return raw
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+  return globalThis.YoinkUI.prettyHookType(String(hookType || "").trim());
 }
 
 function numberOrNull(value) {

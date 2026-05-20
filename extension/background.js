@@ -10,7 +10,7 @@
 // Network logic is shared with content.js via lib/extract.js (importScripts;
 // exposes globalThis.STC).
 
-importScripts("lib/extract.js");
+importScripts("lib/extract.js", "lib/ui.js");
 
 const MENU_LINK = "stc-extract-link";
 const MENU_PAGE = "stc-extract-page";
@@ -296,49 +296,22 @@ async function markClipboardYoinkNow() {
 }
 
 function screenshotCountFromData(data, text) {
-  const direct = Number(
-    data && (
-      data.clipboard_screenshot_count
-      ?? data.screenshots_in_clipboard
-      ?? data.included_screenshot_count
-    )
-  );
-  if (Number.isFinite(direct) && direct >= 0) return Math.round(direct);
-  if (Array.isArray(data && data.clipboard_screenshots)) return data.clipboard_screenshots.length;
-  const body = String(text || data && (data.corpus_md_paste || data.yoink_md) || "");
-  const matches = body.match(/!\[[^\]]*]\([^)]*\)/g);
-  return matches ? matches.length : 0;
+  return globalThis.YoinkUI.screenshotCountFromData(data, text);
 }
 
 async function rememberClipboardBudget(data, clipboardText) {
-  const text = String(clipboardText || data && (data.corpus_md_paste || data.yoink_md) || "");
-  const tokens = Number(data && (data.token_estimate ?? data.clipboard_token_estimate));
-  const budget = {
-    screenshotCount: screenshotCountFromData(data, text),
-    tokenEstimate: Number.isFinite(tokens) ? Math.max(0, Math.round(tokens)) : Math.round(text.length / 4),
-    updatedAt: Date.now(),
-  };
+  const budget = globalThis.YoinkUI.clipboardBudgetFromData(data, clipboardText);
   try {
     await chrome.storage.local.set({ [LAST_CLIPBOARD_BUDGET_KEY]: budget });
   } catch { /* ignore */ }
 }
 
 function minutesUntil(value) {
-  if (!value) return null;
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value > 10_000
-      ? Math.max(0, Math.ceil((value - Date.now()) / 60000))
-      : Math.max(0, Math.ceil(value / 60));
-  }
-  const when = Date.parse(value);
-  if (!Number.isNaN(when)) return Math.max(0, Math.ceil((when - Date.now()) / 60000));
-  return null;
+  return globalThis.YoinkUI.minutesUntil(value);
 }
 
 function queuedMessage(data) {
-  const mins = minutesUntil(data && (data.next_retry_in_seconds ?? data.retry_in_seconds ?? data.next_retry_at));
-  const retry = mins == null ? "soon" : (mins <= 0 ? "now" : `in ${mins} min`);
-  return `Queued - will retry ${retry}.`;
+  return globalThis.YoinkUI.queuedMessage(data);
 }
 
 async function getServerQueueStatus() {

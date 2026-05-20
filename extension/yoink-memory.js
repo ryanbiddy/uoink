@@ -1,8 +1,17 @@
 // Yoink Memory page. Runs as an extension page and talks to the local helper.
 
+// Frame-buster: prevent any future regression that re-introduces WAR from
+// silently re-opening the clickjacking vector audited as CC S2 (Sprint 19.6).
+if (window.top !== window.self) {
+  document.body.innerHTML = "";
+  try { window.top.location.href = "about:blank"; } catch (_) { /* ignore */ }
+  throw new Error("yoink-memory.html cannot be iframed");
+}
+
 const LIMIT = 50;
 const FILTER_STORAGE_KEY = "yoink_memory_filters";
 const SERVER = (globalThis.STC && STC.SERVER) || "http://127.0.0.1:5179";
+const THUMBNAIL_CACHE_MAX = 200;
 const HEALTH_FIELDS = [
   "transcript",
   "screenshots",
@@ -47,6 +56,31 @@ const state = {
 };
 const thumbnailCache = new Map();
 
+function cacheThumb(path, url) {
+  if (thumbnailCache.has(path)) {
+    const oldUrl = thumbnailCache.get(path);
+    thumbnailCache.delete(path);
+    if (oldUrl && oldUrl !== url) {
+      try { URL.revokeObjectURL(oldUrl); } catch (_) { /* ignore */ }
+    }
+  }
+  thumbnailCache.set(path, url);
+  while (thumbnailCache.size > THUMBNAIL_CACHE_MAX) {
+    const oldest = thumbnailCache.entries().next().value;
+    if (!oldest) break;
+    const [oldestPath, oldestUrl] = oldest;
+    try { URL.revokeObjectURL(oldestUrl); } catch (_) { /* ignore */ }
+    thumbnailCache.delete(oldestPath);
+  }
+}
+
+window.addEventListener("beforeunload", () => {
+  for (const url of thumbnailCache.values()) {
+    try { URL.revokeObjectURL(url); } catch (_) { /* ignore */ }
+  }
+  thumbnailCache.clear();
+});
+
 function debounce(fn, ms) {
   let timer = null;
   return (...args) => {
@@ -73,37 +107,14 @@ function storageSet(items) {
 }
 
 async function authedFetch(path, init = {}) {
-  const doFetch = async (token) => {
-    const headers = Object.assign({}, init.headers || {});
-    if (token) headers["X-Yoink-Token"] = token;
-    return fetch(`${SERVER}${path}`, Object.assign({}, init, {
-      headers,
-      mode: "cors",
-      credentials: "omit",
-      cache: init.cache || "no-store",
-    }));
-  };
-
-  let token = STC.getToken ? await STC.getToken() : null;
-  let res = await doFetch(token);
-  if (res.status === 403 && STC.getToken) {
-    token = await STC.getToken({ refresh: true });
-    res = await doFetch(token);
-  }
-  return { res, token };
+  return globalThis.YoinkUI.authedFetch(path, init, { server: SERVER });
 }
 
 async function authedJson(path, init = {}) {
-  const { res } = await authedFetch(path, init);
-  let body = null;
-  try { body = await res.json(); } catch { /* empty or non-JSON body */ }
-  if (!res.ok || !body) {
-    const detail = body && body.error ? body.error : `HTTP ${res.status}`;
-    const err = new Error(detail);
-    err.status = res.status;
-    throw err;
-  }
-  return body;
+  return globalThis.YoinkUI.authedJson(path, init, {
+    server: SERVER,
+    throwOnHttp: true,
+  });
 }
 
 function readFiltersFromInputs() {
@@ -194,9 +205,7 @@ function rowThumbnailPath(row) {
 }
 
 function formatHookType(value) {
-  return String(value || "")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+  return globalThis.YoinkUI.prettyHookType(value);
 }
 
 function formatDate(value) {
@@ -224,71 +233,8 @@ function topEntityNames(row) {
     .slice(0, 5);
 }
 
-function healthLabel(key) {
-  return String(key || "")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (ch) => ch.toUpperCase());
-}
-
-function normalizeHealthValue(value) {
-  if (value == null) return { status: "skipped", reason: "" };
-  if (typeof value === "string") return { status: value, reason: "" };
-  if (typeof value === "boolean") {
-    return { status: value ? "ok" : "missing", reason: "" };
-  }
-  if (typeof value === "object") {
-    return {
-      status: String(value.status || value.state || value.result || (value.ok ? "ok" : "skipped")),
-      reason: String(value.reason || value.error || value.message || ""),
-    };
-  }
-  return { status: String(value), reason: "" };
-}
-
-function healthDotClass(status) {
-  const s = String(status || "").toLowerCase();
-  if (["ok", "success", "complete", "completed", "available", "present", "pass"].includes(s)) {
-    return "ok";
-  }
-  if (["missing", "failed", "error", "warning", "warn", "blocked", "unavailable"].includes(s)) {
-    return "missing";
-  }
-  return "skipped";
-}
-
-function healthEntries(health) {
-  if (!health || typeof health !== "object") return [];
-  const keys = [];
-  for (const key of HEALTH_FIELDS) {
-    if (Object.prototype.hasOwnProperty.call(health, key)) keys.push(key);
-  }
-  for (const key of Object.keys(health)) {
-    if (!keys.includes(key)) keys.push(key);
-  }
-  return keys.slice(0, 5).map((key) => {
-    const normalized = normalizeHealthValue(health[key]);
-    return { key, label: healthLabel(key), ...normalized };
-  });
-}
-
 function renderHealth(health) {
-  const entries = healthEntries(health);
-  if (!entries.length) return null;
-
-  const row = document.createElement("span");
-  row.className = "health-row";
-  row.title = entries.map((entry) => {
-    const reason = entry.reason ? ` - ${entry.reason}` : "";
-    return `${entry.label}: ${entry.status || "skipped"}${reason}`;
-  }).join("\n");
-  row.setAttribute("aria-label", row.title);
-
-  for (const entry of entries) {
-    const dot = document.createElement("span");
-    dot.className = `health-dot ${healthDotClass(entry.status)}`;
-    row.appendChild(dot);
-  }
-  return row;
+  return globalThis.YoinkUI.renderHealthDots(health, { fields: HEALTH_FIELDS });
 }
 
 async function thumbnailUrl(row) {
@@ -301,7 +247,7 @@ async function thumbnailUrl(row) {
   if (!res.ok) return "";
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
-  thumbnailCache.set(path, url);
+  cacheThumb(path, url);
   return url;
 }
 
@@ -428,6 +374,12 @@ async function deleteRow(row) {
     showToast("Video ID unavailable.");
     return;
   }
+  const confirmed = window.confirm(
+    "Move this yoink to trash?\n\n"
+    + "The yoink folder will move to Yoink/_yoink-trash/ and stay there for 30 days "
+    + "before being permanently deleted. You can restore it from trash within that window."
+  );
+  if (!confirmed) return;
   try {
     const res = await authedJson("/memory/delete", {
       method: "POST",
@@ -438,7 +390,7 @@ async function deleteRow(row) {
     state.rows = state.rows.filter((r) => rowVideoId(r) !== videoId);
     state.total = Math.max(0, state.total - 1);
     renderResults();
-    showToast("Deleted - undo within 30 days from trash", {
+    showToast("Moved to trash - undo within 30 days.", {
       label: "Undo",
       onClick: () => restoreRow(videoId),
     });
@@ -469,7 +421,7 @@ function renderMenu(row, host) {
   menu.appendChild(menuButton("Open folder", () => openFolder(row)));
   menu.appendChild(menuButton("Open on YouTube", () => openYouTube(row)));
   menu.appendChild(menuButton("Re-yoink", () => reYoink(row)));
-  menu.appendChild(menuButton("Delete", () => deleteRow(row), "danger"));
+  menu.appendChild(menuButton("Move to trash", () => deleteRow(row), "danger"));
   host.appendChild(menu);
   state.menu = menu;
 }
