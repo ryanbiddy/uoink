@@ -1,6 +1,6 @@
-# Yoink Windows installer — build guide
+# Yoink Installers — Build Guide
 
-## Quick start
+## Quick start (Windows)
 
 ```powershell
 # From the repo root, on Windows with PowerShell 5.1 or later:
@@ -15,14 +15,53 @@ To wipe everything and rebuild from scratch:
 .\build.ps1 -Clean
 ```
 
-## Prerequisites
+## Quick start (macOS)
 
-You need both of these installed on the build machine:
+```bash
+# From the repo root, on macOS with bash/zsh:
+# (Note: full build script implementation is sequenced in Stage 2)
+./build.sh
+```
+
+## Windows build prerequisites
+
+You need both of these installed on the Windows build machine:
 
 - **Inno Setup 6** — <https://jrsoftware.org/isdl.php>. The default install path (`C:\Program Files (x86)\Inno Setup 6`) is auto-detected, otherwise put `ISCC.exe` on `PATH`.
 - **PowerShell 5.1+** — ships with Windows 10/11.
 
 You do *not* need a system Python installed; the build downloads and uses an embeddable Python distribution exclusively.
+
+## macOS build prerequisites
+
+You need the following installed on the macOS build machine:
+
+- **Xcode Command Line Tools** — run `xcode-select --install` to install.
+- **create-dmg** — Homebrew utility (`brew install create-dmg`) or npm package.
+- **Apple Developer ID Application Certificate** — installed in your macOS Keychain for app signing.
+
+## macOS build sequence (Stage 1 — expected workflow)
+
+The build script `build.sh` (to be fully implemented in Stage 2) automates the macOS packaging process:
+
+1. **Clean and Prepare:**
+   - Cleans the build directory.
+   - Downloads/embeds Python (macOS universal binary release).
+   - Installs runtime dependencies (`yt-dlp`, `Pillow`, `mcp`, `keyring`, etc.) into `site-packages`.
+   - Embeds native `ffmpeg` and `ffprobe` binaries for macOS.
+
+2. **Package Application:**
+   - Packages the Python server code and dependencies into a standard `Yoink.app` bundle layout.
+   - Configures the LaunchAgent plist (`com.ryanbiddy.yoink.plist`) for login auto-start behavior.
+
+3. **Code Sign and Notarize:**
+   - Signs the `Yoink.app` bundle and all internal binaries (`ffmpeg`, `python`, etc.) using `codesign` with your Developer ID Application identity.
+   - Archives the application into `Yoink-Setup-2.0.0.dmg` using `create-dmg`.
+   - Code-signs the `.dmg` container.
+   - Submits the `.dmg` to Apple's Notarization Service using `xcrun notarytool`.
+   - Staples the notarization ticket to the `.dmg` using `xcrun stapler staple`.
+
+The resulting artifact is output as `build/Yoink-Setup-2.0.0.dmg`.
 
 ## Architecture: why Python embeddable + Inno Setup
 
