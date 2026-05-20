@@ -572,6 +572,38 @@ def _short_reason(reason: str, *, api_key: str | None = None) -> str:
     return msg[:180] if len(msg) > 180 else msg
 
 
+# Strip filesystem paths (Windows or Unix) before persisting an error
+# string. Windows: ``X:\...`` (one literal backslash per separator). Unix:
+# ``/...``. The URL pattern runs first below so a userinfo-bearing URL
+# is replaced as a unit rather than slashed-up piece by piece.
+_PATH_SANITIZE_RE = re.compile(r"[A-Za-z]:\\[^\s]+|/[^\s]+")
+# Strip URLs that carry HTTP basic-auth userinfo (rare but possible: e.g.
+# yt-dlp surfacing the request URL in an error). Match scheme://user@host
+# and replace the whole URL with a placeholder.
+_USERINFO_URL_RE = re.compile(r"https?://[^@\s/]+@[^\s]+")
+
+
+def _sanitize_error(msg: str, *, max_len: int = 200) -> str:
+    """Strip filesystem paths and userinfo-bearing URLs from an error
+    string before persisting it (Sprint 19.6 / Fix 8 / audit F3).
+
+    The rate-limit retry queue persists last_error across helper restarts;
+    a raw friendly_error string can include yt-dlp's last stderr line,
+    which sometimes echoes the install path or the request URL with
+    embedded credentials. Sanitise to ``<path>`` / ``<url>`` and cap
+    length so the queue stays free of PII even if the upstream tool
+    leaks it."""
+    if not msg:
+        return ""
+    # URL pass first so a userinfo URL is replaced as a unit -- otherwise
+    # the path regex would only catch the trailing /-prefixed portion and
+    # leave the credentials visible.
+    cleaned = _USERINFO_URL_RE.sub("<url>", str(msg))
+    cleaned = _PATH_SANITIZE_RE.sub("<path>", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned[:max_len]
+
+
 def _anthropic_error_reason(status: int, body: str) -> str:
     try:
         parsed = json.loads(body or "{}")
@@ -1580,6 +1612,23 @@ def _clean_text(value, *, limit: int = 500) -> str:
     return text[:limit]
 
 
+def _clean_for_prompt(value, *, limit: int = 500) -> str:
+    """Tighter version of _clean_text used when the cleaned string is
+    interpolated into an LLM prompt (Sprint 19.6 / Fix 3 / audit M2).
+    Strips characters that could break out of quoted prompt context --
+    double-quotes, backticks, and line breaks the model could mistake for
+    an instruction boundary -- and the cleaned-then-collapsed string is
+    safe to drop straight into a `"{value}"`-style template."""
+    cleaned = _clean_text(value, limit=limit)
+    if not cleaned:
+        return ""
+    return (cleaned
+            .replace('"', "'")
+            .replace("`", "'")
+            .replace("\n", " ")
+            .replace("\r", " "))
+
+
 def _as_int(value, default: int = 0) -> int:
     if isinstance(value, bool):
         return default
@@ -1736,18 +1785,27 @@ _HOOK_TYPE_GUIDE = (
 
 def _hook_fewshot_block(similar: list[dict]) -> str:
     """Format past user corrections as few-shot calibration anchors for the
-    hook-type system prompt (A3). Empty string when there are none."""
+    hook-type system prompt (A3). Empty string when there are none.
+
+    Sprint 19.6 / Fix 3 / audit M2: every interpolated field is passed
+    through _clean_for_prompt, which strips quotes / backticks / line
+    breaks so an attacker-crafted title / channel / user_reason can't
+    break out of the f-string quote context. Today single-user, so the
+    attack is self-injection -- but the moment BACKLOG v2.5 publishes the
+    corrections dataset, a malicious entry would otherwise rewrite every
+    downstream classifier prompt that consumed it as a few-shot."""
     if not similar:
         return ""
     lines = ["", "",
              "Past corrections from this user (use as calibration anchors):"]
     for c in similar:
-        title = _clean_text(c.get("title"), limit=160) or "(untitled)"
-        channel = _clean_text(c.get("channel"), limit=120) or "(unknown channel)"
+        title = _clean_for_prompt(c.get("title"), limit=160) or "(untitled)"
+        channel = _clean_for_prompt(c.get("channel"), limit=120) or "(unknown channel)"
+        original = _clean_for_prompt(c.get("original_hook_type"), limit=40)
+        corrected = _clean_for_prompt(c.get("corrected_hook_type"), limit=40)
         line = (f'- Video "{title}" on channel "{channel}": classifier said '
-                f'"{c.get("original_hook_type")}", user corrected to '
-                f'"{c.get("corrected_hook_type")}".')
-        reason = _clean_text(c.get("user_reason"), limit=300)
+                f'"{original}", user corrected to "{corrected}".')
+        reason = _clean_for_prompt(c.get("user_reason"), limit=300)
         if reason:
             line += f' Reason: "{reason}"'
         lines.append(line)
@@ -2875,10 +2933,24 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
     video_file.unlink(missing_ok=True)
 
-    # Refresh the master _all-yoinks-index.md after every successful yoink.
-    # Cheap (one stat per video folder), and re-scanning means a folder the
-    # user manually deleted simply drops out of the index next time.
-    _regenerate_index()
+    # Sprint 19.6 / Fix 6: refresh _all-yoinks-index.md INCREMENTALLY
+    # instead of the pre-Sprint-19.6 full-tree rescan that became O(N) on
+    # large libraries. _incremental_index_update parses the existing file
+    # and prepends one new entry; first-launch / parse failure spawn a
+    # background full regen so the foreground yoink stays fast either way.
+    try:
+        rel_path = (f"{output_folder.parent.name}/"
+                    f"{output_folder.name}/{yoink_path.name}")
+        _incremental_index_update({
+            "title": title,
+            "topic": output_folder.parent.name or "uncategorised",
+            "channel": (metadata.get("channel")
+                        or metadata.get("uploader") or ""),
+            "yoinked_at": datetime.now().date().isoformat(),
+            "rel_path": rel_path,
+        })
+    except Exception as e:
+        log.warning("incremental index call site failed: %s", e)
 
     # Sprint 15 (A1/A4/A5): incrementally index this yoink + its citation
     # map + health score in index.db. Best-effort -- a library-index failure
@@ -3387,15 +3459,117 @@ def _regenerate_index() -> None:
     """Rebuild _all-yoinks-index.md from a fresh scan of DESKTOP_ROOT.
 
     Best-effort: failures here shouldn't fail the yoink that triggered the
-    regeneration, so we log + swallow rather than raise. Runs synchronously
-    after each successful extraction; the scan is small (one stat per
-    video folder) and dwarfed by the actual extraction cost."""
+    regeneration, so we log + swallow rather than raise. Sprint 19.6 /
+    Fix 6 removed this from the per-yoink hot path -- it now runs on
+    demand from /open-index (and as a fallback from
+    _incremental_index_update for first-launch / parse failure). The scan
+    is O(N) in the library size; the incremental path is the steady state."""
     try:
         entries = _scan_yoinks()
         DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
         _index_path().write_text(_render_index(entries), encoding="utf-8")
     except Exception as e:
         log.warning("index regeneration failed: %s", e)
+
+
+def _start_full_index_regen_thread() -> None:
+    """Background-thread shim for _regenerate_index, so the fallback paths
+    in _incremental_index_update don't make the foreground yoink wait on
+    a full-tree rescan."""
+    threading.Thread(
+        target=_regenerate_index, name="index-md-regen", daemon=True
+    ).start()
+
+
+def _patch_index_md(text: str, entry: dict) -> str | None:
+    """Apply one new yoink to the rendered _all-yoinks-index.md, in place.
+
+    Returns the updated markdown, or None when the file's structure isn't
+    recognised (caller falls back to a full regen). Three edits:
+
+    * Bump the header's total count and timestamp.
+    * Prepend the entry to its topic subsection (creating the subsection
+      if it doesn't yet exist).
+    * Prepend the entry to the Recent section, capped at 20.
+    """
+    total_re = re.compile(r"_Total yoinks:\s*(\d+)_")
+    if not total_re.search(text):
+        return None
+    text = total_re.sub(
+        lambda m: f"_Total yoinks: {int(m.group(1)) + 1}_", text, count=1)
+    text = re.sub(
+        r"_Last updated:[^_\n]*_",
+        f"_Last updated: {_now_iso()}_  ", text, count=1)
+
+    topic = entry.get("topic") or "uncategorised"
+    byline = f" -- {entry['channel']}" if entry.get("channel") else ""
+    topic_line = (
+        f"- [{entry['title']}]({_md_link_path(entry['rel_path'])}) "
+        f"-- Yoinked {entry['yoinked_at']}{byline}"
+    )
+    topic_header_re = re.compile(
+        rf"^### {re.escape(topic)} \((\d+) yoinks?\)\n", re.MULTILINE)
+    m = topic_header_re.search(text)
+    if m:
+        new_count = int(m.group(1)) + 1
+        plural = "" if new_count == 1 else "s"
+        new_header = f"### {topic} ({new_count} yoink{plural})\n"
+        text = text[:m.start()] + new_header + topic_line + "\n" + text[m.end():]
+    else:
+        # New topic -- insert a fresh subsection just before "## Recent".
+        recent_anchor = text.find("\n## Recent ")
+        if recent_anchor == -1:
+            return None
+        new_block = f"### {topic} (1 yoink)\n{topic_line}\n\n"
+        text = text[:recent_anchor + 1] + new_block + text[recent_anchor + 1:]
+
+    recent_header_re = re.compile(
+        r"^## Recent \(last 20\)\n\n", re.MULTILINE)
+    rm = recent_header_re.search(text)
+    if not rm:
+        return None
+    recent_start = rm.end()
+    rest = text[recent_start:]
+    nxt = re.search(r"^##\s", rest, re.MULTILINE)
+    recent_end = recent_start + (nxt.start() if nxt else len(rest))
+    block = text[recent_start:recent_end]
+    item_lines = [ln for ln in block.splitlines() if ln.startswith("- ")]
+    new_item = (
+        f"- [{entry['title']}]({_md_link_path(entry['rel_path'])}) "
+        f"-- {entry['yoinked_at']}"
+    )
+    capped = [new_item] + item_lines[:19]
+    new_recent_block = "\n".join(capped) + "\n\n"
+    text = text[:recent_start] + new_recent_block + text[recent_end:]
+    return text
+
+
+def _incremental_index_update(entry: dict) -> None:
+    """Sprint 19.6 / Fix 6: append one new yoink to _all-yoinks-index.md
+    without re-walking the whole library. Falls back to a background
+    full-regen on first-launch / unreadable file / structural-parse
+    failure so the foreground yoink never pays the O(N) scan cost.
+    Best-effort -- an update failure here never fails the underlying
+    yoink."""
+    try:
+        path = _index_path()
+        if not path.exists():
+            _start_full_index_regen_thread()
+            return
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as e:
+            log.warning("index file unreadable, scheduling full regen: %s", e)
+            _start_full_index_regen_thread()
+            return
+        new_text = _patch_index_md(text, entry)
+        if new_text is None:
+            log.info("index file structure unrecognised, scheduling full regen")
+            _start_full_index_regen_thread()
+            return
+        _atomic_write_text(path, new_text)
+    except Exception as e:
+        log.warning("incremental index update failed: %s", e)
 
 
 def _is_valid_session_id(s: str) -> bool:
@@ -4558,17 +4732,22 @@ def _retry_pending_one() -> bool:
                     pending_id, retry_at, delay)
                 return True
             # Non-recoverable error -- jump straight to terminal failure.
+            # The user-facing job (in jobs.json / popup) gets the full
+            # friendly_error string; the queue row's persisted last_error
+            # goes through _sanitize_error so paths / credentials don't
+            # leak into a long-lived store (Sprint 19.6 / Fix 8).
             msg = friendly_error(e)
+            persisted = _sanitize_error(msg)
             try:
                 idx.mark_pending_failed(
-                    pending_id, msg, _now_iso(), force_final=True)
+                    pending_id, persisted, _now_iso(), force_final=True)
             except Exception:
                 log.exception("retry worker: mark_pending_failed failed")
             _record_single_extract_job(
                 url, started_at, error=msg, title=title, folder=folder)
             log.warning(
                 "retry worker: pending #%d non-recoverable: %s",
-                pending_id, msg)
+                pending_id, persisted)
             return True
 
     job = _record_single_extract_job(url, started_at, result=result)
@@ -4718,95 +4897,73 @@ def _diagnose_payload() -> dict:
     }
 
 
-def _enrich_yoink_row(idx, r: dict) -> dict | None:
-    """Shape one index `yoinks` row into the enriched result the popup's
-    /recent list and the memory page both consume: fresh health (Sprint
-    15), entity stats (Sprint 16), hook type + confidence (Sprint 17), and
-    the thumbnail path (Sprint 18). Returns None when the row lacks the
-    video_id / corpus_path needed to render it."""
-    video_id = r.get("video_id")
-    corpus_path = r.get("corpus_path") or ""
-    if not video_id or not corpus_path:
-        return None
-    folder = Path(corpus_path).parent
-    sidecar_path = r.get("sidecar_path") or ""
+def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
+    """Shape a page of index yoink rows into the enriched result the popup's
+    /recent list and the Memory page both consume: fresh health (Sprint
+    15), entity stats (Sprint 16), hook type + confidence (Sprint 17),
+    and the thumbnail path (Sprint 18). Rows missing video_id or
+    corpus_path are dropped.
 
-    # Fresh health from the live sidecar -- the stored snapshot is captured
-    # at extraction time, before the AI workers finish, so re-computing from
-    # the current sidecar reflects the latest hook / CI / entity status.
-    health = None
-    if sidecar_path and Path(sidecar_path).exists():
-        try:
-            live = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
-            health = compute_health(live)
-        except (OSError, json.JSONDecodeError):
-            pass
-    if health is None and r.get("health_score_json"):
-        try:
-            health = json.loads(r["health_score_json"])
-        except (json.JSONDecodeError, TypeError):
-            pass
-
-    # Hook Type + confidence (Sprint 17). Both live on the taxonomy row --
-    # the hook worker updates the taxonomy table, not yoinks, when
-    # classification completes, so taxonomy is the authoritative read.
-    hook_type = r.get("hook_type")
-    confidence = None
+    Sprint 19.6 / Fix 4: the index-side enrichment (taxonomy + entity
+    aggregates) is batched into Index.enrich_yoinks, so a 50-row page
+    is three IN-list queries instead of 150 per-row lookups. The
+    sidecar-fresh health and the filesystem-derived thumbnail check stay
+    per-row -- fs I/O dominates anyway, and pushing them down into the
+    Index would couple it to server-side helpers."""
+    if not rows:
+        return []
     try:
-        with idx._lock:
-            tr = idx._conn.execute(
-                "SELECT hook_type, confidence FROM taxonomy WHERE video_id=?",
-                (video_id,),
-            ).fetchone()
-        if tr:
-            if tr["hook_type"]:
-                hook_type = tr["hook_type"]
-            if tr["confidence"] is not None:
-                confidence = int(tr["confidence"])
+        rows = idx.enrich_yoinks(rows)
     except Exception:
-        pass
+        # Fail open: if the batch enrich raises, fall back to raw rows
+        # without crashing the whole render.
+        log.exception("enrich_yoinks failed; rendering bare rows")
+    out: list[dict] = []
+    for r in rows:
+        video_id = r.get("video_id")
+        corpus_path = r.get("corpus_path") or ""
+        if not video_id or not corpus_path:
+            continue
+        folder = Path(corpus_path).parent
+        sidecar_path = r.get("sidecar_path") or ""
 
-    # Entity stats (Sprint 16): distinct entity count + top 5 by mentions.
-    entity_count = 0
-    top_entities: list[str] = []
-    try:
-        with idx._lock:
-            ec = idx._conn.execute(
-                "SELECT COUNT(DISTINCT entity_id) AS c "
-                "FROM entity_mentions WHERE video_id=?", (video_id,),
-            ).fetchone()
-            if ec:
-                entity_count = int(ec["c"] or 0)
-            es = idx._conn.execute(
-                "SELECT e.name FROM entity_mentions em "
-                "JOIN entities e ON e.entity_id = em.entity_id "
-                "WHERE em.video_id = ? "
-                "GROUP BY em.entity_id ORDER BY COUNT(*) DESC LIMIT 5",
-                (video_id,),
-            ).fetchall()
-            top_entities = [row["name"] for row in es]
-    except Exception:
-        pass
+        # Fresh health from the live sidecar -- the stored snapshot is
+        # captured at extraction time, before the AI workers finish, so
+        # re-computing reflects the latest hook / CI / entity status.
+        health = None
+        if sidecar_path and Path(sidecar_path).exists():
+            try:
+                live = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
+                health = compute_health(live)
+            except (OSError, json.JSONDecodeError):
+                pass
+        if health is None and r.get("health_score_json"):
+            try:
+                health = json.loads(r["health_score_json"])
+            except (json.JSONDecodeError, TypeError):
+                pass
 
-    # Thumbnail (Sprint 18): absolute path when thumbnail.jpg is on disk so
-    # the memory page can fetch it via the token-gated /file endpoint.
-    thumb = folder / "thumbnail.jpg"
-    thumbnail_path = str(thumb) if thumb.exists() else None
+        # Thumbnail (Sprint 18): absolute path when thumbnail.jpg is on
+        # disk so the Memory page can fetch it via the token-gated /file
+        # endpoint.
+        thumb = folder / "thumbnail.jpg"
+        thumbnail_path = str(thumb) if thumb.exists() else None
 
-    return {
-        "title": r.get("title") or "",
-        "topic": r.get("topic") or "",
-        "folder": str(folder),
-        "video_id": video_id,
-        "channel": r.get("channel"),
-        "yoinked_at": r.get("yoinked_at"),
-        "hook_type": hook_type,
-        "hook_type_confidence": confidence,
-        "health": health,
-        "entity_count": entity_count,
-        "top_entities": top_entities,
-        "thumbnail_path": thumbnail_path,
-    }
+        out.append({
+            "title": r.get("title") or "",
+            "topic": r.get("topic") or "",
+            "folder": str(folder),
+            "video_id": video_id,
+            "channel": r.get("channel"),
+            "yoinked_at": r.get("yoinked_at"),
+            "hook_type": r.get("hook_type"),
+            "hook_type_confidence": r.get("hook_type_confidence"),
+            "health": health,
+            "entity_count": r.get("entity_count", 0),
+            "top_entities": r.get("top_entities", []),
+            "thumbnail_path": thumbnail_path,
+        })
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -5266,17 +5423,18 @@ class Handler(BaseHTTPRequestHandler):
     # folders. A folder counts as a yoink if it has a yoink.md inside it.
     # Sessions root (_sessions/) is excluded.
     def _handle_recent(self):
-        """Recent yoinks for the popup. Sprint 15.1 follow-up:
-        replaces the disk-walk with an Index.list_recent read and enriches
-        each row via _enrich_yoink_row (the same helper the memory page
-        uses). Falls back to an empty list if the index is unavailable."""
+        """Recent yoinks for the popup. Sprint 15.1 followups read from the
+        Index instead of walking disk; Sprint 19.6 / Fix 4 enrichment is
+        batched into Index.enrich_yoinks (taxonomy + entity_count +
+        top_entities all in three IN-list queries) instead of the
+        pre-fix N+1 per-row pattern."""
         idx = _get_index()
         try:
             rows = idx.list_recent(limit=10)
         except Exception as e:
             log.warning("recent: index unavailable: %s", e)
             rows = []
-        results = [er for er in (_enrich_yoink_row(idx, r) for r in rows) if er]
+        results = _enrich_yoink_rows(idx, rows)
         self._send_json(200, {"ok": True, "recent": results})
 
     # ---- /memory/search ----
@@ -5320,8 +5478,7 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             log.warning("memory search: index error: %s", e)
             return self._send_json(500, {"ok": False, "error": "search failed"})
-        results = [er for er in (_enrich_yoink_row(idx, r)
-                                 for r in res["results"]) if er]
+        results = _enrich_yoink_rows(idx, res["results"])
         self._send_json(200, {
             "ok": True,
             "total": res["total"],

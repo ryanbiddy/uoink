@@ -1,13 +1,18 @@
 -- Yoink library index -- initial schema (v1).
 -- Applied by index._run_migrations(). Each migration file is named
 -- NNNN_description.sql; the leading integer is its schema version.
+--
+-- Sprint 19.6 / Fix 2: every CREATE statement gates on IF NOT EXISTS so a
+-- migration re-run after a half-applied crash is a clean no-op. The runner
+-- in index.py wraps the whole script + the schema_version bump in one
+-- BEGIN IMMEDIATE / COMMIT transaction.
 
-CREATE TABLE schema_version (
+CREATE TABLE IF NOT EXISTS schema_version (
     version    INTEGER PRIMARY KEY,
     applied_at TEXT NOT NULL
 );
 
-CREATE TABLE yoinks (
+CREATE TABLE IF NOT EXISTS yoinks (
     video_id          TEXT PRIMARY KEY,
     slug              TEXT NOT NULL UNIQUE,
     channel           TEXT,
@@ -27,7 +32,7 @@ CREATE TABLE yoinks (
 -- invalid. A standalone table stores its own text; `video_id` is UNINDEXED
 -- so a MATCH result maps straight back to the yoinks row by primary key
 -- with no rowid bookkeeping. See index.py upsert_yoink / search.
-CREATE VIRTUAL TABLE yoinks_fts USING fts5(
+CREATE VIRTUAL TABLE IF NOT EXISTS yoinks_fts USING fts5(
     video_id UNINDEXED,
     slug,
     channel,
@@ -37,7 +42,7 @@ CREATE VIRTUAL TABLE yoinks_fts USING fts5(
     content
 );
 
-CREATE TABLE jobs (
+CREATE TABLE IF NOT EXISTS jobs (
     job_id        TEXT PRIMARY KEY,
     kind          TEXT NOT NULL,            -- 'single' | 'playlist'
     status        TEXT NOT NULL,            -- pending|running|completed|failed|cancelled
@@ -49,7 +54,7 @@ CREATE TABLE jobs (
     metadata_json TEXT                      -- per-job payload; never combined_md_text
 );
 
-CREATE TABLE taxonomy (
+CREATE TABLE IF NOT EXISTS taxonomy (
     video_id         TEXT PRIMARY KEY,
     hook_type        TEXT NOT NULL,
     hook_explanation TEXT,
@@ -58,7 +63,7 @@ CREATE TABLE taxonomy (
     classified_at    TEXT NOT NULL
 );
 
-CREATE TABLE citations (
+CREATE TABLE IF NOT EXISTS citations (
     citation_id       INTEGER PRIMARY KEY AUTOINCREMENT,
     video_id          TEXT NOT NULL,
     kind              TEXT NOT NULL,        -- 'transcript_chunk' | 'screenshot'
@@ -71,14 +76,15 @@ CREATE TABLE citations (
     FOREIGN KEY (video_id) REFERENCES yoinks(video_id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_yoinks_yoinked_at ON yoinks(yoinked_at DESC);
-CREATE INDEX idx_yoinks_channel    ON yoinks(channel);
-CREATE INDEX idx_yoinks_hook_type  ON yoinks(hook_type);
-CREATE INDEX idx_jobs_updated_at   ON jobs(updated_at DESC);
-CREATE INDEX idx_jobs_status       ON jobs(status);
-CREATE INDEX idx_taxonomy_hook_type ON taxonomy(hook_type);
-CREATE INDEX idx_citations_video_id ON citations(video_id, seq);
+CREATE INDEX IF NOT EXISTS idx_yoinks_yoinked_at ON yoinks(yoinked_at DESC);
+CREATE INDEX IF NOT EXISTS idx_yoinks_channel    ON yoinks(channel);
+CREATE INDEX IF NOT EXISTS idx_yoinks_hook_type  ON yoinks(hook_type);
+CREATE INDEX IF NOT EXISTS idx_jobs_updated_at   ON jobs(updated_at DESC);
+CREATE INDEX IF NOT EXISTS idx_jobs_status       ON jobs(status);
+CREATE INDEX IF NOT EXISTS idx_taxonomy_hook_type ON taxonomy(hook_type);
+CREATE INDEX IF NOT EXISTS idx_citations_video_id ON citations(video_id, seq);
 
 -- Idempotent citation regeneration: a re-yoink rewrites the same
 -- (video_id, kind, seq) rows via INSERT OR REPLACE rather than duplicating.
-CREATE UNIQUE INDEX idx_citations_unique ON citations(video_id, kind, seq);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_citations_unique
+    ON citations(video_id, kind, seq);

@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import sqlite3
 import threading
 import time
@@ -39,6 +40,12 @@ _TRASH_RETENTION_DAYS = 30
 # The retry worker (server.py) decides backoff timing.
 _PENDING_MAX_ATTEMPTS = 3
 _PENDING_TERMINAL_STATES = ("succeeded", "failed", "cancelled")
+# Sprint 19.6 / Fix 7: enqueue_pending opportunistically deletes the
+# oldest terminal rows when the table grows past this cap, so a noisy
+# client (or a creator who hits YouTube's 429 wall a lot) can't grow
+# pending_yoinks without bound. Live (pending / running) rows are never
+# evicted -- they're load-bearing for the retry worker.
+_PENDING_TABLE_CAP = 1000
 
 # Columns of the `yoinks` table, in declaration order. video_id is the
 # primary key and is handled separately in the upsert.
@@ -92,41 +99,102 @@ def _current_schema_version(conn: sqlite3.Connection) -> int:
     return int(row["v"]) if row and row["v"] is not None else 0
 
 
-def _run_migrations(conn: sqlite3.Connection) -> int:
-    """Apply every pending migration in numeric order. Idempotent: re-running
-    against an up-to-date database is a no-op. Returns the resulting version.
+# ``ALTER TABLE ... ADD COLUMN`` has no IF NOT EXISTS form, so the runner
+# routes any ALTER statement in a migration through _safe_alter_add_column,
+# which gates on PRAGMA table_info. Matched against complete statements as
+# yielded by _iter_sql_statements (trailing ';' optional).
+_ALTER_ADD_COLUMN_RE = re.compile(
+    r"\s*ALTER\s+TABLE\s+(?P<table>\w+)\s+ADD\s+(?:COLUMN\s+)?"
+    r"(?P<column>\w+)\s+(?P<type>.+?);?\s*$",
+    re.IGNORECASE | re.DOTALL,
+)
 
-    Each migration file is applied as one script followed by a
-    schema_version row insert and a commit, so a successfully applied
-    migration is never re-run."""
+
+def _safe_alter_add_column(conn: sqlite3.Connection, table: str,
+                            column: str, type_sql: str) -> None:
+    """Idempotent ALTER TABLE ADD COLUMN. SQLite has no IF NOT EXISTS for
+    ALTER syntax, so we gate the statement on PRAGMA table_info first --
+    a half-applied migration re-running on the next boot is a no-op."""
+    cols = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+    if column in cols:
+        return
+    conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {type_sql.strip()}")
+
+
+def _iter_sql_statements(sql: str):
+    """Yield complete SQL statements from a script. Uses
+    sqlite3.complete_statement so a statement that spans multiple lines is
+    reassembled correctly; line-only ``--`` comments at statement boundaries
+    are dropped so they don't accidentally glue onto the next statement."""
+    buf = ""
+    for line in sql.splitlines(keepends=True):
+        if not buf.strip() and line.lstrip().startswith("--"):
+            continue
+        buf += line
+        if sqlite3.complete_statement(buf):
+            stmt = buf.strip()
+            if stmt:
+                yield stmt
+            buf = ""
+    tail = buf.strip()
+    if tail:
+        yield tail
+
+
+def _run_migrations(conn: sqlite3.Connection) -> int:
+    """Apply every pending migration in numeric order. Idempotent + atomic:
+    each migration runs inside a single explicit transaction, with every
+    CREATE statement using IF NOT EXISTS and every ALTER routed through
+    _safe_alter_add_column, so a crash between the DDL and the
+    schema_version bump is recoverable on the next boot (the re-run sees
+    the existing schema and only adds the schema_version row).
+
+    Returns the highest applied version after the pass."""
     current = _current_schema_version(conn)
     applied = current
-    for version, path in _discover_migrations():
-        if version <= current:
-            continue
-        log.info("applying index migration %04d (%s)", version, path.name)
-        sql = path.read_text(encoding="utf-8")
-        try:
-            conn.executescript(sql)
-            conn.execute(
-                "INSERT INTO schema_version (version, applied_at) VALUES (?, ?)",
-                (version, _now_iso()),
-            )
-            conn.commit()
-        except sqlite3.Error:
-            conn.rollback()
-            log.exception("index migration %04d failed", version)
-            raise
-        applied = version
+    # Take manual control of transactions for the duration of the run;
+    # restored in `finally` so the Index's existing methods keep using
+    # Python's default deferred-isolation semantics afterward.
+    saved_level = conn.isolation_level
+    try:
+        conn.isolation_level = None
+        for version, path in _discover_migrations():
+            if version <= current:
+                continue
+            log.info("applying index migration %04d (%s)", version, path.name)
+            sql = path.read_text(encoding="utf-8")
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+                for stmt in _iter_sql_statements(sql):
+                    m = _ALTER_ADD_COLUMN_RE.match(stmt)
+                    if m:
+                        _safe_alter_add_column(
+                            conn, m.group("table"),
+                            m.group("column"), m.group("type"))
+                    else:
+                        conn.execute(stmt)
+                conn.execute(
+                    "INSERT INTO schema_version (version, applied_at) "
+                    "VALUES (?, ?)", (version, _now_iso()),
+                )
+                conn.execute("COMMIT")
+            except sqlite3.Error:
+                try:
+                    conn.execute("ROLLBACK")
+                except sqlite3.Error:
+                    pass
+                log.exception("index migration %04d failed", version)
+                raise
+            applied = version
+    finally:
+        conn.isolation_level = saved_level
     return applied
 
 
 # --------------------------------------------------------------------------
 # FTS query sanitisation
 # --------------------------------------------------------------------------
-import re as _re
-
-_FTS_TERM_RE = _re.compile(r"[A-Za-z0-9_]+")
+_FTS_TERM_RE = re.compile(r"[A-Za-z0-9_]+")
 
 
 def _fts_query(raw: str) -> str:
@@ -318,6 +386,19 @@ class Index:
             ).fetchone()
         return row is not None
 
+    def get_by_slug(self, slug: str) -> dict | None:
+        """Look up a live yoink by its folder slug (Sprint 19.6 / Fix 5).
+        Excludes soft-deleted rows -- a slug parked in _yoink-trash/ must
+        not resolve here, otherwise MCP tools would happily return content
+        the user just deleted. Used by yoink_mcp_tools._find_yoink to skip
+        the O(disk) rglob walk that pre-Sprint-19.6 MCP calls did."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM yoinks WHERE slug=? AND deleted_at IS NULL",
+                (slug,),
+            ).fetchone()
+        return dict(row) if row else None
+
     def all_video_ids(self) -> set[str]:
         with self._lock:
             rows = self._conn.execute("SELECT video_id FROM yoinks").fetchall()
@@ -369,6 +450,77 @@ class Index:
                 (max(1, int(limit)),),
             ).fetchall()
         return [dict(r) for r in rows]
+
+    def enrich_yoinks(self, rows: list[dict]) -> list[dict]:
+        """Batch-annotate a page of yoink rows with index-side enrichment
+        (Sprint 19.6 / Fix 4). Adds, in place:
+
+        * ``hook_type`` -- resolved from the taxonomy table (authoritative;
+          the hook worker updates taxonomy, not yoinks, when it finishes)
+          falling back to the yoinks row's own value.
+        * ``hook_type_confidence`` -- int or None.
+        * ``entity_count`` -- distinct entities mentioned in the video.
+        * ``top_entities`` -- up to five entity names, most-mentioned first.
+
+        Runs exactly three IN-list queries regardless of page size, in
+        place of the per-row reach-into-self._conn pattern that used to
+        be N+1 from the popup / Memory page. Callers that also want
+        sidecar-fresh ``health`` or filesystem-derived fields like the
+        thumbnail path layer those on outside the index."""
+        if not rows:
+            return rows
+        video_ids = [r.get("video_id") for r in rows if r.get("video_id")]
+        if not video_ids:
+            return rows
+        placeholders = ", ".join("?" * len(video_ids))
+        with self._lock:
+            # 1. Hook Type + confidence from the taxonomy table.
+            tax_rows = self._conn.execute(
+                f"SELECT video_id, hook_type, confidence FROM taxonomy "
+                f"WHERE video_id IN ({placeholders})",
+                video_ids,
+            ).fetchall()
+            tax_map = {t["video_id"]: t for t in tax_rows}
+            # 2. Entity count -- distinct entity_id per video.
+            ec_rows = self._conn.execute(
+                f"SELECT video_id, COUNT(DISTINCT entity_id) AS c "
+                f"FROM entity_mentions WHERE video_id IN ({placeholders}) "
+                f"GROUP BY video_id",
+                video_ids,
+            ).fetchall()
+            ec_map = {r["video_id"]: int(r["c"] or 0) for r in ec_rows}
+            # 3. Top entities -- per-video name list, ordered by mention
+            # count. Pull every (video_id, entity, count) once and
+            # partition in Python so we don't fire one query per video.
+            te_rows = self._conn.execute(
+                f"SELECT em.video_id AS video_id, e.name AS name, "
+                f"       COUNT(*) AS n "
+                f"FROM entity_mentions em "
+                f"JOIN entities e ON e.entity_id = em.entity_id "
+                f"WHERE em.video_id IN ({placeholders}) "
+                f"GROUP BY em.video_id, em.entity_id "
+                f"ORDER BY em.video_id, n DESC",
+                video_ids,
+            ).fetchall()
+        te_map: dict[str, list[str]] = {}
+        for r in te_rows:
+            bucket = te_map.setdefault(r["video_id"], [])
+            if len(bucket) < 5:
+                bucket.append(r["name"])
+
+        for r in rows:
+            vid = r.get("video_id")
+            tax = tax_map.get(vid)
+            confidence = None
+            if tax:
+                if tax["hook_type"]:
+                    r["hook_type"] = tax["hook_type"]
+                if tax["confidence"] is not None:
+                    confidence = int(tax["confidence"])
+            r["hook_type_confidence"] = confidence
+            r["entity_count"] = ec_map.get(vid, 0)
+            r["top_entities"] = te_map.get(vid, [])
+        return rows
 
     def get_health(self, video_id: str) -> dict | None:
         """Return the parsed health-score dict for a video, or None."""
@@ -511,8 +663,33 @@ class Index:
     def enqueue_pending(self, url: str, interval: int,
                         retry_after: str) -> int:
         """Add a rate-limited URL to the queue with status='pending' and
-        attempt_count=0. Returns the new pending_id."""
+        attempt_count=0. Returns the new pending_id.
+
+        Sprint 19.6 / Fix 7: before the insert, drop the oldest terminal
+        rows when the table is at or above the cap. Live rows (pending /
+        running) are never evicted; only succeeded / failed / cancelled
+        rows past the retention window. Typical users have <10 pending at
+        a time, so the cap (1000) only kicks in for noisy clients or a
+        rough YouTube rate-limit day."""
+        terminal_placeholders = ", ".join("?" * len(_PENDING_TERMINAL_STATES))
         with self._lock:
+            total = self._conn.execute(
+                "SELECT COUNT(*) FROM pending_yoinks"
+            ).fetchone()[0]
+            over = total - _PENDING_TABLE_CAP + 1  # +1 for the row we're about to add
+            if over > 0:
+                # Delete the oldest `over` terminal rows by queued_at. The
+                # subquery has to materialise the id list first because
+                # SQLite doesn't allow modifying a table inside a self-
+                # selecting DELETE on the same table.
+                self._conn.execute(
+                    f"DELETE FROM pending_yoinks WHERE pending_id IN ("
+                    f"  SELECT pending_id FROM pending_yoinks "
+                    f"  WHERE status IN ({terminal_placeholders}) "
+                    f"  ORDER BY queued_at ASC LIMIT ?"
+                    f")",
+                    (*_PENDING_TERMINAL_STATES, over),
+                )
             cur = self._conn.execute(
                 "INSERT INTO pending_yoinks "
                 "(url, interval_seconds, queued_at, retry_after, "

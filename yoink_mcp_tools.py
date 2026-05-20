@@ -109,12 +109,19 @@ def _read_metadata(folder: Path) -> dict[str, Any]:
 
 
 def _iter_yoink_folders():
+    """Walk DESKTOP_ROOT for yoink folders. Sprint 19.6 / Fix 5: skip the
+    _yoink-trash/ subtree so a slug whose folder was just moved to trash
+    does not resolve via the disk fallback in _find_yoink. Parity with
+    server.py's _iter_corpus_folders, which had this guard already."""
     b = _b()
     root = b.DESKTOP_ROOT
     if not root.exists():
         return
+    trash = root / "_yoink-trash"
     for folder in root.rglob("*"):
         if not folder.is_dir():
+            continue
+        if folder == trash or trash in folder.parents:
             continue
         corpus = b._resolve_corpus_path(folder)
         if corpus is not None:
@@ -145,8 +152,31 @@ def _yoink_summary(folder: Path, corpus: Path) -> dict[str, Any]:
 
 
 def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
+    """Resolve a yoink slug to (folder, corpus_path).
+
+    Sprint 19.6 / Fix 5: the index is queried first (O(1) seek by slug),
+    then -- only on a miss -- the pre-Sprint-19.6 disk-walk fallback runs
+    so a corpus that exists on disk but has not been backfilled yet
+    (or a folder dropped in by hand) still resolves. Every MCP tool that
+    takes a slug benefits: get_yoink_corpus, get_citation_map,
+    get_yoink_health, analyze_comments, classify_hook."""
     if not isinstance(slug, str) or not re.match(r"^[A-Za-z0-9_-]{1,160}$", slug):
         return None, None
+    # Fast path: index lookup. get_by_slug filters deleted_at IS NULL so a
+    # trashed yoink won't resolve here.
+    try:
+        row = _b()._get_index().get_by_slug(slug)
+    except Exception:
+        row = None
+    if row:
+        corpus_path = row.get("corpus_path") or ""
+        if corpus_path:
+            corpus = Path(corpus_path)
+            if corpus.is_file():
+                return corpus.parent, corpus
+        # Indexed row missing on disk (folder moved/deleted outside the
+        # extension) -- fall through to the walk so we don't return a
+        # broken pointer.
     matches = []
     for folder, corpus in _iter_yoink_folders() or []:
         if folder.name == slug:

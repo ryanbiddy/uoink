@@ -4,7 +4,7 @@
 -- here instead of erroring, and a background worker retries with
 -- exponential backoff up to 3 attempts.
 
-CREATE TABLE pending_yoinks (
+CREATE TABLE IF NOT EXISTS pending_yoinks (
     pending_id INTEGER PRIMARY KEY AUTOINCREMENT,
     url TEXT NOT NULL,
     interval_seconds INTEGER DEFAULT 30,
@@ -16,7 +16,7 @@ CREATE TABLE pending_yoinks (
     succeeded_job_id TEXT              -- single-extract job_id on success
 );
 
-CREATE INDEX idx_pending_yoinks_status_retry
+CREATE INDEX IF NOT EXISTS idx_pending_yoinks_status_retry
     ON pending_yoinks(status, retry_after);
-CREATE INDEX idx_pending_yoinks_queued_at
+CREATE INDEX IF NOT EXISTS idx_pending_yoinks_queued_at
     ON pending_yoinks(queued_at DESC);
