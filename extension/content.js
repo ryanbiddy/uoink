@@ -29,6 +29,7 @@
   // transitions and needs no anchor element at all.
   const SHORTS_FLOATING_CLASS = "stc-yt-shorts-floating";
   const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
+  const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
   const RECENT_FAILURES_KEY = "yoink_recent_failures";
 
   // ---- Styles (scoped via the unique class prefix) ----------------------
@@ -374,6 +375,52 @@
     } catch { /* ignore */ }
   }
 
+  function screenshotCountFromData(data, text) {
+    const direct = Number(
+      data && (
+        data.clipboard_screenshot_count
+        ?? data.screenshots_in_clipboard
+        ?? data.included_screenshot_count
+      )
+    );
+    if (Number.isFinite(direct) && direct >= 0) return Math.round(direct);
+    if (Array.isArray(data && data.clipboard_screenshots)) return data.clipboard_screenshots.length;
+    const body = String(text || data && (data.corpus_md_paste || data.yoink_md) || "");
+    const matches = body.match(/!\[[^\]]*]\([^)]*\)/g);
+    return matches ? matches.length : 0;
+  }
+
+  function rememberClipboardBudget(data, clipboardText) {
+    const text = String(clipboardText || data && (data.corpus_md_paste || data.yoink_md) || "");
+    const tokens = Number(data && (data.token_estimate ?? data.clipboard_token_estimate));
+    const budget = {
+      screenshotCount: screenshotCountFromData(data, text),
+      tokenEstimate: Number.isFinite(tokens) ? Math.max(0, Math.round(tokens)) : Math.round(text.length / 4),
+      updatedAt: Date.now(),
+    };
+    try {
+      chrome.storage.local.set({ [LAST_CLIPBOARD_BUDGET_KEY]: budget });
+    } catch { /* ignore */ }
+  }
+
+  function minutesUntil(value) {
+    if (!value) return null;
+    if (typeof value === "number" && Number.isFinite(value)) {
+      return value > 10_000
+        ? Math.max(0, Math.ceil((value - Date.now()) / 60000))
+        : Math.max(0, Math.ceil(value / 60));
+    }
+    const when = Date.parse(value);
+    if (!Number.isNaN(when)) return Math.max(0, Math.ceil((when - Date.now()) / 60000));
+    return null;
+  }
+
+  function queuedMessage(data) {
+    const mins = minutesUntil(data && (data.next_retry_in_seconds ?? data.retry_in_seconds ?? data.next_retry_at));
+    const retry = mins == null ? "soon" : (mins <= 0 ? "now" : `in ${mins} min`);
+    return `Queued - will retry ${retry}. Open the Yoink popup for status.`;
+  }
+
   function rememberFailure(url, error) {
     const videoId = STC.extractVideoId(url);
     const entry = {
@@ -436,6 +483,13 @@
 
     if (!data || !data.ok) {
       const msg = STC.friendlyError(data && data.error);
+      if (/queue full/i.test(msg)) {
+        setButtonState(btn, "error", "Queue full");
+        btn.title = "Queue full, wait a few minutes.";
+        notify("Yoink queue full", "Queue full, wait a few minutes.");
+        resetButtonAfter(btn, 5000);
+        return;
+      }
       rememberFailure(url, msg);
       setButtonState(btn, "error", "Yoink failed");
       btn.title = msg;
@@ -444,10 +498,19 @@
       return;
     }
 
+    if (data.queued) {
+      setButtonState(btn, "success", "Queued");
+      btn.title = queuedMessage(data);
+      notify("Yoink queued", queuedMessage(data));
+      resetButtonAfter(btn, 5000);
+      return;
+    }
+
     // Sprint 3: Smart Screenshot Picker intercept. Default off keeps v1
     // behavior byte-identical. When enabled, we hand the corpus off to the
     // popup via chrome.storage.local instead of clipboard + Claude tab.
     if (await _useScreenshotPicker()) {
+      rememberClipboardBudget(data, data.corpus_md_paste || data.yoink_md);
       await STC.stashPickerCorpus(data);
       notify("Yoink ready",
              "Click the Yoink icon to pick which screenshots to include.");
@@ -462,6 +525,7 @@
     // The file version (yoink_md) is the dev-mode fallback when Pillow
     // wasn't bundled or paste generation failed.
     const clipboardText = data.corpus_md_paste || data.yoink_md;
+    rememberClipboardBudget(data, clipboardText);
     let copied = false;
     try {
       await navigator.clipboard.writeText(clipboardText);

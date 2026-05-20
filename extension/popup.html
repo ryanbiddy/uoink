@@ -198,6 +198,123 @@
       cursor: pointer;
     }
     .backfill-banner a:hover { color: #fff1df; }
+    .queue-banner {
+      margin: 0 0 10px;
+      border: 1px solid #3a5f43;
+      border-radius: 4px;
+      background: #203425;
+      color: #d9ffe7;
+      font-size: 11px;
+      overflow: hidden;
+    }
+    .queue-banner.warn {
+      background: #3a2f1f;
+      border-color: #6a5a3a;
+      color: #ffe6c9;
+    }
+    .queue-banner.error {
+      background: #3a241f;
+      border-color: #6a3a2a;
+      color: #ffd9c9;
+    }
+    .queue-banner-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 8px;
+      cursor: pointer;
+    }
+    .queue-banner-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .queue-banner-toggle {
+      color: inherit;
+      opacity: 0.85;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .queue-banner-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .queue-banner-actions button {
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08);
+      color: inherit;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .queue-details {
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding: 6px 8px 8px;
+      display: grid;
+      gap: 6px;
+    }
+    .queue-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 6px;
+      align-items: center;
+    }
+    .queue-row-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .queue-row-actions {
+      display: flex;
+      gap: 4px;
+    }
+    .queue-row-actions button {
+      padding: 3px 6px;
+      border-radius: 3px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.08);
+      color: inherit;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .first-yoink-panel {
+      border-color: #4a6a52;
+      background: #203025;
+    }
+    .first-yoink-title {
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .url-preview {
+      margin-top: 8px;
+      padding: 7px 8px;
+      border: 1px solid #3a3a3f;
+      border-radius: 4px;
+      background: #242428;
+      color: #cfcfcf;
+      font-size: 11px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+    .budget-preview {
+      margin-top: 6px;
+      color: #9f9fa6;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .budget-preview.warn { color: #ffe3a3; }
+    details.more-options { margin-top: 12px; }
+    details.more-options > summary {
+      padding: 6px 0;
+      color: #cfcfcf;
+      font-weight: 600;
+    }
     .recent {
       margin-top: 6px;
       max-height: 110px;
@@ -829,6 +946,15 @@
     </span>
   </div>
 
+  <div id="queue-status-banner" class="queue-banner hidden">
+    <div id="queue-banner-main" class="queue-banner-main" role="button" tabindex="0">
+      <span id="queue-banner-text" class="queue-banner-text">Queue idle.</span>
+      <span id="queue-banner-actions" class="queue-banner-actions"></span>
+      <a id="queue-banner-toggle" class="queue-banner-toggle" role="button" tabindex="0">Details</a>
+    </div>
+    <div id="queue-details" class="queue-details hidden"></div>
+  </div>
+
   <div class="row">
     <span id="dot" class="dot"></span>
     <span id="status">Checking Yoink...</span>
@@ -881,18 +1007,26 @@
     <span class="pill-arrow">→</span>
   </div>
 
+  <div class="panel first-yoink-panel hidden" id="first-yoink-panel">
+    <div class="first-yoink-title">Yoink this video</div>
+    <div class="hint">Start with the YouTube tab you already have open.</div>
+    <div id="current-video-preview" class="url-preview">Checking current tab...</div>
+    <button id="yoink-current-btn" class="primary" type="button" disabled>Yoink this video</button>
+  </div>
+
   <!-- Destination -->
-  <div class="panel">
+  <div class="panel" id="destination-panel">
     <div class="panel-title">Send to</div>
     <div class="button-row">
       <button id="send-claude" class="dest">Claude</button>
       <button id="send-chatgpt" class="dest chatgpt">ChatGPT</button>
     </div>
+    <div id="clipboard-budget" class="budget-preview hidden"></div>
     <div id="dest-hint" class="hint">Yoink loads your clipboard. Pick a destination and paste with Ctrl+V.</div>
   </div>
 
   <!-- Quick prompts -->
-  <div class="panel">
+  <div class="panel" id="quick-prompts-panel">
     <div class="panel-title">After pasting, copy a starter prompt:</div>
     <div id="quick-prompts" class="quick-prompts"></div>
     <!-- Edit prompts ▸ link is hidden in v1: the on-disk path it opened
@@ -911,10 +1045,15 @@
     </div>
   </div>
 
+  <details id="more-options" class="more-options">
+    <summary>More options</summary>
+
+  <div class="panel">
   <label for="interval">Screenshot interval (seconds)</label>
   <input id="interval" type="number" min="5" max="300" step="1" value="30">
   <div class="hint">Range 5–300. Saved automatically.</div>
   <div id="saved" class="saved">Saved.</div>
+  </div>
 
   <!-- Research Session: inactive state -->
   <div id="session-inactive" class="panel">
@@ -967,6 +1106,8 @@
     <div id="queue-depth" class="panel-line panel-muted">0 videos queued.</div>
     <button id="clear-queue" class="secondary" disabled>Clear queue</button>
   </div>
+
+  </details>
 
   </div><!-- /#mode-single -->
 
