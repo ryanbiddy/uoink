@@ -337,12 +337,17 @@ function renderHook(row) {
     ?? row.confidence
     ?? (row.hook && row.hook.confidence)
   );
+  const similar = Number(
+    row.similar_corrections_used
+    ?? (row.hook && (row.hook.similar_corrections_used || row.hook.corrections_used))
+  );
   const chip = document.createElement("span");
   chip.className = "hook-chip";
   if (Number.isFinite(confidence) && confidence <= 2) chip.classList.add("warning");
+  const suffix = Number.isFinite(similar) && similar > 0 ? " (calibrated)" : "";
   chip.textContent = Number.isFinite(confidence)
-    ? `${formatHookType(hookType)} · confidence ${confidence}/5`
-    : formatHookType(hookType);
+    ? `${formatHookType(hookType)} \u00b7 confidence ${confidence}/5${suffix}`
+    : `${formatHookType(hookType)}${suffix}`;
   return chip;
 }
 

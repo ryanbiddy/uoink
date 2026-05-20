@@ -64,6 +64,7 @@ const downloadBtn = document.getElementById("download-btn");
 const statusBlock = document.getElementById("status-block");
 const statusText = document.getElementById("status-text");
 const statusInstructions = document.getElementById("status-instructions");
+const diagnoseList = document.getElementById("diagnose-list");
 
 const pageTitle = document.getElementById("page-title");
 const pageLede = document.getElementById("page-lede");
@@ -225,7 +226,167 @@ async function pingOnce() {
   }
 }
 
+function normalizeDiagnoseChecks(body) {
+  if (!body || typeof body !== "object") return [];
+  const raw = Array.isArray(body.checks)
+    ? body.checks
+    : (Array.isArray(body.results) ? body.results : null);
+  if (raw) return raw;
+  return Object.entries(body)
+    .filter(([key, value]) => key !== "ok" && value && typeof value === "object")
+    .map(([key, value]) => Object.assign({ name: key }, value));
+}
+
+function diagnoseStatusClass(status) {
+  const s = String(status || "").toLowerCase();
+  if (["ok", "pass", "passed", "running", "available", "healthy"].includes(s)) return "ok";
+  if (["warn", "warning", "skipped", "missing", "degraded"].includes(s)) return "warn";
+  return "error";
+}
+
+function diagnoseIcon(status) {
+  const cls = diagnoseStatusClass(status);
+  if (cls === "ok") return "ok";
+  if (cls === "warn") return "!";
+  return "x";
+}
+
+function diagnoseName(check) {
+  return String(check.label || check.name || check.id || "Check")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (ch) => ch.toUpperCase());
+}
+
+function diagnoseAction(check) {
+  const id = String(check.id || check.name || check.check || "").toLowerCase();
+  const detail = String(check.detail || check.message || check.error || "").toLowerCase();
+  const action = String(check.action || check.recommended_action || "").toLowerCase();
+  const haystack = `${id} ${detail} ${action}`;
+  if (/helper|server|running|start/.test(haystack) && !/anthropic/.test(haystack)) {
+    return {
+      label: "Start helper",
+      run: () => {
+        statusInstructions.classList.remove("hidden");
+        statusInstructions.scrollIntoView({ behavior: "smooth", block: "start" });
+      },
+    };
+  }
+  if (/output|folder|writable|write/.test(haystack)) {
+    return {
+      label: "Open output folder",
+      run: async () => {
+        const path = check.path || check.folder || check.output_folder || check.output_dir || check.fallback_path;
+        if (path && window.STC && STC.openFolder) {
+          try { await STC.openFolder(path); } catch { /* best effort */ }
+        }
+      },
+    };
+  }
+  if (/anthropic|api key|key/.test(haystack)) {
+    return {
+      label: /401|invalid/.test(haystack) ? "Update key" : "Add key",
+      run: () => {
+        const target = document.getElementById("comment-intelligence");
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (ciKeyInput) ciKeyInput.focus();
+      },
+    };
+  }
+  return null;
+}
+
+function renderDiagnose(body) {
+  if (!diagnoseList) return;
+  const checks = normalizeDiagnoseChecks(body);
+  diagnoseList.innerHTML = "";
+  if (!checks.length) {
+    const empty = document.createElement("p");
+    empty.className = "sub";
+    empty.textContent = "No diagnostic checks returned yet.";
+    diagnoseList.appendChild(empty);
+    return;
+  }
+  for (const check of checks) {
+    const status = check.status || check.state || check.result || (check.ok ? "ok" : "error");
+    const row = document.createElement("div");
+    row.className = "diagnose-row";
+
+    const icon = document.createElement("div");
+    icon.className = `diagnose-icon ${diagnoseStatusClass(status)}`;
+    icon.textContent = diagnoseIcon(status);
+
+    const text = document.createElement("div");
+    const name = document.createElement("div");
+    name.className = "diagnose-name";
+    name.textContent = diagnoseName(check);
+    const detail = document.createElement("div");
+    detail.className = "diagnose-detail";
+    detail.textContent = check.detail || check.message || check.error || String(status);
+    text.appendChild(name);
+    text.appendChild(detail);
+
+    row.appendChild(icon);
+    row.appendChild(text);
+
+    const action = diagnoseAction(check);
+    if (action) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "button ghost diagnose-action";
+      btn.textContent = action.label;
+      btn.addEventListener("click", action.run);
+      row.appendChild(btn);
+    } else {
+      row.appendChild(document.createElement("span"));
+    }
+    diagnoseList.appendChild(row);
+  }
+}
+
+async function loadDiagnose() {
+  if (!diagnoseList) return;
+  try {
+    const res = await fetch(`${SERVER}/diagnose`, {
+      method: "GET",
+      mode: "cors",
+      cache: "no-store",
+    });
+    const body = await res.json();
+    if (!res.ok || !body || body.ok === false) throw new Error((body && body.error) || `HTTP ${res.status}`);
+    renderDiagnose(body);
+  } catch (e) {
+    diagnoseList.innerHTML = "";
+    const row = document.createElement("div");
+    row.className = "diagnose-row";
+    const icon = document.createElement("div");
+    icon.className = "diagnose-icon error";
+    icon.textContent = "x";
+    const text = document.createElement("div");
+    const name = document.createElement("div");
+    name.className = "diagnose-name";
+    name.textContent = "Helper offline";
+    const detail = document.createElement("div");
+    detail.className = "diagnose-detail";
+    detail.textContent = "Start Yoink Server from the Windows Start Menu, then this panel will refresh.";
+    text.appendChild(name);
+    text.appendChild(detail);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "button ghost diagnose-action";
+    btn.textContent = "Start helper";
+    btn.addEventListener("click", () => {
+      statusInstructions.classList.remove("hidden");
+      statusInstructions.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    row.appendChild(icon);
+    row.appendChild(text);
+    row.appendChild(btn);
+    diagnoseList.appendChild(row);
+  }
+}
+
 async function tickPoll() {
+  loadDiagnose();
   const up = await pingOnce();
   if (up) {
     onServerUp();
@@ -270,6 +431,7 @@ function onServerUp() {
   loadHookCorrections();
   loadMCPConfig();
   loadSkillSystemPrompt();
+  loadDiagnose();
   markDone(step3);
   if (isSettingsMode) return;
   if (step4.classList.contains("hidden")) {

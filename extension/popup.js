@@ -21,19 +21,19 @@ function buildBackgroundAiIndicator(settings) {
   if (!settings) return "";
   const ci = !!settings.comment_intelligence_enabled;
   const hook = !!settings.hook_type_enabled;
-  // Skip the indicator entirely if no key is set — the features won't run.
+  // Skip the indicator entirely if no key is set â€” the features won't run.
   if ((ci || hook) && settings.anthropic_key_set === false) return "";
   if (ci && hook) {
     return "Comment Intelligence and Hook Type are still running in the " +
-      "background — re-open per-video .md files in a few minutes for the " +
+      "background â€” re-open per-video .md files in a few minutes for the " +
       "full analysis.";
   }
   if (ci) {
-    return "Comment Intelligence is still running in the background — " +
+    return "Comment Intelligence is still running in the background â€” " +
       "re-open per-video .md files in a few minutes for analysis.";
   }
   if (hook) {
-    return "Hook Type analysis is still running in the background — " +
+    return "Hook Type analysis is still running in the background â€” " +
       "re-open per-video .md files in a few minutes.";
   }
   return "";
@@ -67,20 +67,42 @@ const backfillBanner = document.getElementById("backfill-banner");
 const backfillText = document.getElementById("backfill-text");
 const backfillDismiss = document.getElementById("backfill-dismiss");
 const backfillCancel = document.getElementById("backfill-cancel");
+const queueStatusBanner = document.getElementById("queue-status-banner");
+const queueBannerMain = document.getElementById("queue-banner-main");
+const queueBannerText = document.getElementById("queue-banner-text");
+const queueBannerToggle = document.getElementById("queue-banner-toggle");
+const queueBannerActions = document.getElementById("queue-banner-actions");
+const queueDetails = document.getElementById("queue-details");
+const firstYoinkPanel = document.getElementById("first-yoink-panel");
+const currentVideoPreview = document.getElementById("current-video-preview");
+const yoinkCurrentBtn = document.getElementById("yoink-current-btn");
+const destinationPanel = document.getElementById("destination-panel");
+const quickPromptsPanel = document.getElementById("quick-prompts-panel");
+const recentPanel = document.getElementById("recent-panel");
+const moreOptions = document.getElementById("more-options");
+const modeSelectorWrap = document.getElementById("mode-selector-wrap");
 
 // ---- Server status --------------------------------------------------------
 const statusHelp = document.getElementById("status-help");
 const sendClaudeBtn = document.getElementById("send-claude");
 const sendChatgptBtn = document.getElementById("send-chatgpt");
 const destHint = document.getElementById("dest-hint");
+const clipboardBudgetEl = document.getElementById("clipboard-budget");
 const DEST_HINT_DEFAULT = destHint ? destHint.textContent : "";
 const DEST_DISABLED_TIP = "Yoink a video first";
 const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
+const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
 const LAST_YOINK_WINDOW_MS = 5 * 60 * 1000;
 const RECENT_FAILURES_KEY = "yoink_recent_failures";
 const BACKFILL_DISMISSED_KEY = "yoink_backfill_dismissed_signature";
+const MORE_OPTIONS_OPEN_KEY = "yoink_popup_more_options_open";
+const QUEUE_EXPANDED_KEY = "yoink_popup_queue_expanded";
 let serverOnline = false;
 let lastYoinkAt = 0;
+let lastClipboardBudget = null;
+let currentVideoUrl = null;
+let queueExpanded = false;
+let knownRecentYoinkCount = 0;
 
 // Make a link-styled control (an <a role="button">) keyboard-operable:
 // Enter or Space fires the element's existing click handler. Mirrors the
@@ -120,18 +142,91 @@ function updateDestButtons() {
   }
 }
 
+function formatTokenEstimate(tokens) {
+  const n = Number(tokens);
+  if (!Number.isFinite(n) || n < 0) return null;
+  if (n >= 1000) return `${Math.round(n / 1000)}k`;
+  return `${Math.round(n)}`;
+}
+
+function screenshotCountFromData(data, text) {
+  const direct = Number(
+    data && (
+      data.clipboard_screenshot_count
+      ?? data.screenshots_in_clipboard
+      ?? data.included_screenshot_count
+    )
+  );
+  if (Number.isFinite(direct) && direct >= 0) return Math.round(direct);
+  if (Array.isArray(data && data.clipboard_screenshots)) return data.clipboard_screenshots.length;
+  const body = String(text || data && (data.corpus_md_paste || data.yoink_md) || "");
+  const matches = body.match(/!\[[^\]]*]\([^)]*\)/g);
+  return matches ? matches.length : 0;
+}
+
+function clipboardBudgetFromData(data, clipboardText) {
+  if (!data || typeof data !== "object") return null;
+  const text = String(clipboardText || data.corpus_md_paste || data.yoink_md || "");
+  const tokens = Number(data.token_estimate ?? data.clipboard_token_estimate);
+  return {
+    screenshotCount: screenshotCountFromData(data, text),
+    tokenEstimate: Number.isFinite(tokens) ? Math.max(0, Math.round(tokens)) : Math.round(text.length / 4),
+    updatedAt: Date.now(),
+  };
+}
+
+function renderClipboardBudget() {
+  if (!clipboardBudgetEl) return;
+  if (!lastClipboardBudget || !hasRecentClipboardYoink()) {
+    clipboardBudgetEl.classList.add("hidden");
+    clipboardBudgetEl.textContent = "";
+    clipboardBudgetEl.classList.remove("warn");
+    return;
+  }
+  const screenshots = Number(lastClipboardBudget.screenshotCount) || 0;
+  const tokens = Number(lastClipboardBudget.tokenEstimate) || 0;
+  const tokenText = formatTokenEstimate(tokens) || "unknown";
+  const shotLabel = `${screenshots} screenshot${screenshots === 1 ? "" : "s"}`;
+  clipboardBudgetEl.textContent = `${shotLabel} \u00b7 ~${tokenText} tokens`;
+  if (tokens > 50_000) {
+    clipboardBudgetEl.textContent += " \u00b7 Large paste - Claude may truncate.";
+    clipboardBudgetEl.classList.add("warn");
+  } else {
+    clipboardBudgetEl.classList.remove("warn");
+  }
+  clipboardBudgetEl.classList.remove("hidden");
+}
+
+function saveClipboardBudget(data, clipboardText) {
+  const budget = clipboardBudgetFromData(data, clipboardText);
+  if (!budget) return;
+  lastClipboardBudget = budget;
+  renderClipboardBudget();
+  try {
+    chrome.storage.local.set({ [LAST_CLIPBOARD_BUDGET_KEY]: budget });
+  } catch { /* ignore */ }
+}
+
 function markClipboardYoinkNow() {
   lastYoinkAt = Date.now();
   updateDestButtons();
+  renderClipboardBudget();
+  updateFocalMode();
   try {
     chrome.storage.local.set({ [LAST_YOINK_CLIPBOARD_KEY]: lastYoinkAt });
   } catch { /* ignore */ }
 }
 
 try {
-  chrome.storage.local.get({ [LAST_YOINK_CLIPBOARD_KEY]: 0 }, (items) => {
+  chrome.storage.local.get({
+    [LAST_YOINK_CLIPBOARD_KEY]: 0,
+    [LAST_CLIPBOARD_BUDGET_KEY]: null,
+  }, (items) => {
     lastYoinkAt = Number(items && items[LAST_YOINK_CLIPBOARD_KEY]) || 0;
+    lastClipboardBudget = (items && items[LAST_CLIPBOARD_BUDGET_KEY]) || null;
     updateDestButtons();
+    renderClipboardBudget();
+    updateFocalMode();
   });
 } catch { /* ignore */ }
 
@@ -143,12 +238,14 @@ async function ping() {
     status.textContent = "Yoink is running.";
     if (statusHelp) statusHelp.classList.add("hidden");
     updateDestButtons();
+    if (yoinkCurrentBtn && currentVideoUrl) yoinkCurrentBtn.disabled = false;
   } else {
     serverOnline = false;
     dot.classList.remove("up"); dot.classList.add("down");
-    status.textContent = "Yoink server offline";
+    status.textContent = "Helper offline. Open setup -> Helper status to diagnose.";
     if (statusHelp) statusHelp.classList.remove("hidden");
     updateDestButtons();
+    if (yoinkCurrentBtn) yoinkCurrentBtn.disabled = true;
   }
 }
 
@@ -162,6 +259,57 @@ if (statusHelp) {
     window.close();
   });
   wireKeyActivation(statusHelp);
+}
+
+function isFirstLoadUser() {
+  return knownRecentYoinkCount <= 0 && !hasRecentClipboardYoink();
+}
+
+function updateFocalMode() {
+  const firstLoad = isFirstLoadUser();
+  if (firstYoinkPanel) firstYoinkPanel.classList.toggle("hidden", !firstLoad);
+  if (destinationPanel) destinationPanel.classList.toggle("hidden", firstLoad);
+  if (quickPromptsPanel) quickPromptsPanel.classList.toggle("hidden", firstLoad);
+  if (recentPanel) recentPanel.classList.toggle("hidden", firstLoad);
+  if (modeSelectorWrap) modeSelectorWrap.classList.toggle("hidden", firstLoad);
+}
+
+function readMoreOptionsState() {
+  if (!moreOptions) return;
+  try {
+    chrome.storage.local.get({ [MORE_OPTIONS_OPEN_KEY]: false }, (items) => {
+      moreOptions.open = !!(items && items[MORE_OPTIONS_OPEN_KEY]);
+    });
+  } catch { /* ignore */ }
+}
+
+if (moreOptions) {
+  moreOptions.addEventListener("toggle", () => {
+    try {
+      chrome.storage.local.set({ [MORE_OPTIONS_OPEN_KEY]: !!moreOptions.open });
+    } catch { /* ignore */ }
+  });
+}
+
+async function loadCurrentVideoPreview() {
+  if (!currentVideoPreview || !yoinkCurrentBtn) return;
+  try {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tab = tabs && tabs[0];
+    const url = tab && tab.url;
+    const normalized = STC.normalizeYouTubeUrl(url || "");
+    currentVideoUrl = normalized;
+    if (!normalized) {
+      currentVideoPreview.textContent = "Open a YouTube video tab, then reopen this popup.";
+      yoinkCurrentBtn.disabled = true;
+      return;
+    }
+    currentVideoPreview.textContent = (tab.title || "YouTube video").replace(/\s+-\s+YouTube\s*$/i, "");
+    yoinkCurrentBtn.disabled = !serverOnline;
+  } catch {
+    currentVideoPreview.textContent = "Couldn't read the current tab.";
+    yoinkCurrentBtn.disabled = true;
+  }
 }
 
 // ---- Interval setting -----------------------------------------------------
@@ -237,7 +385,7 @@ async function refreshActiveFromServer() {
   // Background also fires the storage.onChanged event; we just need to read it.
   try {
     await chrome.runtime.sendMessage({ type: "refreshActiveSession" });
-  } catch { /* ignore — fall back to local storage */ }
+  } catch { /* ignore â€” fall back to local storage */ }
   const s = await readActiveFromStorage();
   renderActive(s);
 }
@@ -253,6 +401,16 @@ function readActiveFromStorage() {
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes.active_session) {
     renderActive(changes.active_session.newValue || null);
+  }
+  if (area === "local" && changes[LAST_YOINK_CLIPBOARD_KEY]) {
+    lastYoinkAt = Number(changes[LAST_YOINK_CLIPBOARD_KEY].newValue) || 0;
+    updateDestButtons();
+    renderClipboardBudget();
+    updateFocalMode();
+  }
+  if (area === "local" && changes[LAST_CLIPBOARD_BUDGET_KEY]) {
+    lastClipboardBudget = changes[LAST_CLIPBOARD_BUDGET_KEY].newValue || null;
+    renderClipboardBudget();
   }
 });
 
@@ -319,7 +477,7 @@ endBtn.addEventListener("click", async () => {
   }
 
   // Copy via background (offscreen). Popups can call navigator.clipboard
-  // directly too — try that first for the fast path, then fall back.
+  // directly too â€” try that first for the fast path, then fall back.
   let copied = false;
   try {
     await navigator.clipboard.writeText(res.corpus_md);
@@ -332,11 +490,11 @@ endBtn.addEventListener("click", async () => {
   }
 
   // Notify. The destination buttons up top let the user pick where to paste,
-  // so we don't auto-open a tab here — that would force Claude.
+  // so we don't auto-open a tab here â€” that would force Claude.
   const lines = `${fmtCount(res.video_count, "video")}, ${fmtCount(res.caption_count || 0, "caption line")}`;
   const note = copied
     ? `Session yoinked! ${lines}. Pick a destination above and paste.`
-    : `Session closed. ${lines}. Clipboard failed — corpus.md is in the session folder (already open in Explorer).`;
+    : `Session closed. ${lines}. Clipboard failed â€” corpus.md is in the session folder (already open in Explorer).`;
   await chrome.runtime.sendMessage({ type: "notify", title: "Research session yoinked", message: note });
   if (copied) {
     markClipboardYoinkNow();
@@ -347,7 +505,7 @@ endBtn.addEventListener("click", async () => {
   if ((res.corpus_md || "").length > CORPUS_WARN_CHARS) {
     sessionWarn.classList.remove("hidden");
     sessionWarn.innerHTML =
-      `Corpus is ${(res.corpus_md.length / 1000).toFixed(0)}K characters — may exceed the ` +
+      `Corpus is ${(res.corpus_md.length / 1000).toFixed(0)}K characters â€” may exceed the ` +
       `paste-friendly size. Drag <code>corpus.md</code> into Claude or ChatGPT instead.<br>` +
       `<button id="open-folder" class="secondary" style="margin-top:6px">Open session folder</button>`;
     document.getElementById("open-folder").addEventListener("click", () => {
@@ -381,7 +539,7 @@ async function loadRecentSessions() {
     item.className = "recent-item";
     const date = (s.created_at || "").slice(0, 10);
     item.innerHTML = `<span>${escapeHtml(s.name || s.session_id)}</span>` +
-                     `<span class="meta">${s.video_count} · ${s.status} · ${date}</span>`;
+                     `<span class="meta">${s.video_count} Â· ${s.status} Â· ${date}</span>`;
     item.title = s.folder || "";
     item.addEventListener("click", () => STC.openSession(s.session_id));
     recentSessionsEl.appendChild(item);
@@ -569,7 +727,7 @@ function renderFailureRow(failure) {
     ev.stopPropagation();
     const videoId = failure.videoId || (failure.url && STC.extractVideoId(failure.url));
     if (!videoId) {
-      showToast("Can't retry — missing video URL.");
+      showToast("Can't retry â€” missing video URL.");
       return;
     }
     await removeRecentFailure(failure.id);
@@ -727,6 +885,331 @@ if (backfillCancel) {
   wireKeyActivation(backfillCancel);
 }
 
+// ---- Rate-limit queue status ---------------------------------------------
+let queueStatusTimer = null;
+let lastQueueStatus = null;
+let dismissedQueueFailureSignature = "";
+
+function stopQueueStatusPolling() {
+  if (queueStatusTimer) clearInterval(queueStatusTimer);
+  queueStatusTimer = null;
+}
+
+function queueRows(status) {
+  if (!status || typeof status !== "object") return [];
+  const buckets = [
+    status.items,
+    status.queue,
+    status.pending,
+    status.failed,
+    status.failures,
+    status.failed_items,
+    status.jobs,
+  ].filter(Array.isArray);
+  const rows = [];
+  const seen = new Set();
+  for (const bucket of buckets) {
+    for (const item of bucket) {
+      const key = queueItemId(item) || JSON.stringify(item);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      rows.push(item);
+    }
+  }
+  return rows;
+}
+
+function queueItemId(item) {
+  return item && (item.pending_id || item.id || item.job_id || item.queue_id || item.video_id);
+}
+
+function shortQueueLabel(item) {
+  if (!item) return "Queued yoink";
+  return item.title || item.url || item.source_url || item.video_url || item.video_id || "Queued yoink";
+}
+
+function minutesUntil(value) {
+  if (!value) return null;
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value > 10_000
+      ? Math.max(0, Math.ceil((value - Date.now()) / 60000))
+      : Math.max(0, Math.ceil(value / 60));
+  }
+  const when = Date.parse(value);
+  if (!Number.isNaN(when)) return Math.max(0, Math.ceil((when - Date.now()) / 60000));
+  return null;
+}
+
+function nextRetryLabel(status) {
+  const mins = minutesUntil(status && (status.next_retry_in_seconds ?? status.retry_in_seconds ?? status.next_retry_at));
+  if (mins == null) return "";
+  if (mins <= 0) return "now";
+  return `${mins} min`;
+}
+
+async function queueAction(path, id) {
+  const body = id ? { pending_id: id, id } : {};
+  return popupAuthedJson(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+function makeQueueButton(label, onClick) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.textContent = label;
+  btn.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    onClick(btn);
+  });
+  return btn;
+}
+
+function setQueueExpanded(expanded) {
+  queueExpanded = !!expanded;
+  if (queueDetails) queueDetails.classList.toggle("hidden", !queueExpanded);
+  if (queueBannerToggle) queueBannerToggle.textContent = queueExpanded ? "Hide" : "Details";
+  try {
+    chrome.storage.local.set({ [QUEUE_EXPANDED_KEY]: queueExpanded });
+  } catch { /* ignore */ }
+}
+
+function renderQueueDetails(status) {
+  if (!queueDetails) return;
+  queueDetails.innerHTML = "";
+  const rows = queueRows(status);
+  const runningRaw = status && (status.current || status.running || status.running_item);
+  const runningRows = Array.isArray(runningRaw) ? runningRaw : (runningRaw ? [runningRaw] : []);
+  const all = runningRows.map((item) => Object.assign({ state: "running" }, item)).concat(rows);
+
+  if (!all.length) {
+    const empty = document.createElement("div");
+    empty.className = "panel-muted";
+    empty.textContent = "No queued yoinks.";
+    queueDetails.appendChild(empty);
+    return;
+  }
+
+  for (const item of all) {
+    const row = document.createElement("div");
+    row.className = "queue-row";
+    const title = document.createElement("div");
+    title.className = "queue-row-title";
+    const state = item.state || item.status || (item === running ? "running" : "queued");
+    title.textContent = `${state}: ${shortQueueLabel(item)}`;
+    title.title = shortQueueLabel(item);
+
+    const actions = document.createElement("div");
+    actions.className = "queue-row-actions";
+    const id = queueItemId(item);
+    if (id && state !== "running") {
+      actions.appendChild(makeQueueButton("Retry", async (btn) => {
+        btn.disabled = true;
+        await queueAction("/queue/retry-now", id);
+        pollQueueStatus();
+      }));
+    }
+    if (id) {
+      actions.appendChild(makeQueueButton("Cancel", async (btn) => {
+        btn.disabled = true;
+        await queueAction("/queue/cancel", id);
+        pollQueueStatus();
+      }));
+    }
+
+    row.appendChild(title);
+    row.appendChild(actions);
+    queueDetails.appendChild(row);
+  }
+}
+
+function renderQueueBanner(status) {
+  if (!queueStatusBanner || !queueBannerText) return;
+  lastQueueStatus = status || null;
+  const pending = Number(status && (status.pending_count ?? status.queued_count)) || 0;
+  const running = Number(status && status.running_count) || (status && status.running ? 1 : 0);
+  const failed = Number(status && status.failed_count) || 0;
+
+  queueStatusBanner.classList.remove("warn", "error");
+  if (queueBannerActions) queueBannerActions.innerHTML = "";
+
+  if (!pending && !running && !failed) {
+    queueStatusBanner.classList.add("hidden");
+    return;
+  }
+
+  if (failed > 0) {
+    const failSig = `failed:${failed}`;
+    if (dismissedQueueFailureSignature === failSig) {
+      queueStatusBanner.classList.add("hidden");
+      return;
+    }
+    queueStatusBanner.classList.add("error");
+    queueBannerText.textContent = `${failed} yoink${failed === 1 ? "" : "s"} failed after 3 retries.`;
+    if (queueBannerActions) {
+      queueBannerActions.appendChild(makeQueueButton("Retry now", async (btn) => {
+        btn.disabled = true;
+        await queueAction("/queue/retry-now");
+        pollQueueStatus();
+      }));
+      queueBannerActions.appendChild(makeQueueButton("Dismiss", () => {
+        dismissedQueueFailureSignature = failSig;
+        queueStatusBanner.classList.add("hidden");
+      }));
+    }
+  } else if (running > 0) {
+    dismissedQueueFailureSignature = "";
+    const runningRaw = status.current || status.running || status.running_item;
+    const current = Array.isArray(runningRaw) ? runningRaw[0] : (runningRaw || {});
+    queueBannerText.textContent = `Yoinking now: ${shortQueueLabel(current)}`;
+  } else {
+    dismissedQueueFailureSignature = "";
+    queueStatusBanner.classList.add("warn");
+    const retry = nextRetryLabel(status);
+    queueBannerText.textContent = retry
+      ? `${pending} yoink${pending === 1 ? "" : "s"} queued \u00b7 next retry ${retry}`
+      : `${pending} yoink${pending === 1 ? "" : "s"} queued`;
+  }
+
+  renderQueueDetails(status);
+  queueStatusBanner.classList.remove("hidden");
+  if (queueDetails) queueDetails.classList.toggle("hidden", !queueExpanded);
+  if (queueBannerToggle) queueBannerToggle.textContent = queueExpanded ? "Hide" : "Details";
+}
+
+async function pollQueueStatus() {
+  if (document.hidden) return;
+  try {
+    const status = await popupAuthedJson("/queue/status", { method: "GET" });
+    if (!status || status.ok === false) return;
+    renderQueueBanner(status);
+  } catch {
+    // Queue is polish-only; don't turn the popup red when an older helper
+    // does not have Sprint 19 endpoints yet.
+  }
+}
+
+function startQueueStatusPolling() {
+  stopQueueStatusPolling();
+  pollQueueStatus();
+  queueStatusTimer = setInterval(pollQueueStatus, 5000);
+}
+
+if (queueBannerMain) {
+  queueBannerMain.addEventListener("click", () => setQueueExpanded(!queueExpanded));
+  wireKeyActivation(queueBannerMain);
+}
+if (queueBannerToggle) {
+  queueBannerToggle.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    setQueueExpanded(!queueExpanded);
+  });
+  wireKeyActivation(queueBannerToggle);
+}
+
+try {
+  chrome.storage.local.get({ [QUEUE_EXPANDED_KEY]: false }, (items) => {
+    queueExpanded = !!(items && items[QUEUE_EXPANDED_KEY]);
+    setQueueExpanded(queueExpanded);
+  });
+} catch { /* ignore */ }
+
+async function serverQueuePendingCount() {
+  try {
+    const status = await popupAuthedJson("/queue/status", { method: "GET" });
+    if (!status || status.ok === false) return 0;
+    lastQueueStatus = status;
+    return Number(status.pending_count ?? status.queued_count) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+function queuedToastMessage(data) {
+  const mins = minutesUntil(data && (data.next_retry_in_seconds ?? data.retry_in_seconds ?? data.next_retry_at));
+  const retry = mins == null ? "soon" : (mins <= 0 ? "now" : `in ${mins} min`);
+  return `Queued - will retry ${retry}. Open the popup to view queue.`;
+}
+
+async function shouldUseScreenshotPicker() {
+  try {
+    const res = await STC.getSettings();
+    return !!(res && res.ok && res.settings &&
+      res.settings.smart_screenshot_picker_enabled === true);
+  } catch {
+    return false;
+  }
+}
+
+async function writeClipboardText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    try {
+      const r = await chrome.runtime.sendMessage({ type: "copyToClipboard", text });
+      return !!(r && r.ok);
+    } catch {
+      return false;
+    }
+  }
+}
+
+async function runPopupYoinkCurrent() {
+  if (!yoinkCurrentBtn || !currentVideoUrl) return;
+  if ((await serverQueuePendingCount()) >= 5) {
+    showToast("Queue full, wait a few minutes.");
+    pollQueueStatus();
+    return;
+  }
+  const old = yoinkCurrentBtn.textContent;
+  yoinkCurrentBtn.disabled = true;
+  yoinkCurrentBtn.textContent = "Yoinking...";
+  try {
+    const interval = await STC.getInterval();
+    const data = await STC.postExtract(currentVideoUrl, interval);
+    if (data && data.ok && data.queued) {
+      showToast(queuedToastMessage(data));
+      pollQueueStatus();
+      return;
+    }
+    if (!data || !data.ok) {
+      showToast(STC.friendlyError(data && data.error));
+      return;
+    }
+    const clipboardText = data.corpus_md_paste || data.yoink_md || "";
+    saveClipboardBudget(data, clipboardText);
+    if (await shouldUseScreenshotPicker()) {
+      await STC.stashPickerCorpus(data);
+      showToast("Yoink ready - pick screenshots in the popup.");
+      return;
+    }
+    const copied = await writeClipboardText(clipboardText);
+    if (!copied) {
+      await chrome.runtime.sendMessage({ type: "clipboardRetry", text: clipboardText });
+      showToast("Couldn't copy. Use the Try again notification.");
+      return;
+    }
+    markClipboardYoinkNow();
+    await chrome.tabs.create({ url: CLAUDE_URL, active: true });
+    showToast("Yoinked! Paste in Claude.");
+    loadRecentYoinks();
+  } catch (e) {
+    showToast(`Yoink failed: ${e && e.message || e}`);
+  } finally {
+    yoinkCurrentBtn.disabled = !serverOnline || !currentVideoUrl;
+    yoinkCurrentBtn.textContent = old;
+  }
+}
+
+if (yoinkCurrentBtn) {
+  yoinkCurrentBtn.addEventListener("click", runPopupYoinkCurrent);
+}
+
 function healthLabel(key) {
   return String(key || "")
     .replace(/_/g, " ")
@@ -860,9 +1343,11 @@ function hookInfo(row) {
   return {
     hookType: String(hookType).trim().toLowerCase(),
     confidence: numberOrNull(
-      row.hook_confidence
+      row.hook_type_confidence
+      ?? row.hook_confidence
       ?? row.confidence
       ?? hook.confidence
+      ?? hook.hook_type_confidence
       ?? hook.hook_confidence
     ),
     similarCorrectionsUsed: numberOrNull(
@@ -906,7 +1391,7 @@ function renderHookCalibration(row) {
 
   const confidenceText = info.confidence == null
     ? ""
-    : ` · confidence ${info.confidence}/5`;
+    : ` \u00b7 confidence ${info.confidence}/5`;
   chip.textContent = `${hookDisplayName(info.hookType)}${confidenceText}`;
 
   wrap.appendChild(chip);
@@ -963,7 +1448,10 @@ function renderHookCalibration(row) {
           }
           info.hookType = corrected;
           chip.classList.remove("warning");
-          chip.textContent = hookDisplayName(corrected);
+          const confidenceText = info.confidence == null
+            ? ""
+            : ` \u00b7 confidence ${info.confidence}/5`;
+          chip.textContent = `${hookDisplayName(corrected)}${confidenceText}`;
           suffix.textContent = "+1 calibration";
           if (!suffix.isConnected) wrap.appendChild(suffix);
           message.textContent =
@@ -1005,7 +1493,9 @@ async function loadRecentYoinks() {
   try {
     const res = await STC.listRecent();
     recent = (res && res.recent) || [];
-  } catch { /* server may be down — leave the placeholder */ }
+  } catch { /* server may be down â€” leave the placeholder */ }
+  knownRecentYoinkCount = recent.length + failures.length;
+  updateFocalMode();
   recentYoinksEl.innerHTML = "";
   for (const failure of failures) {
     recentYoinksEl.appendChild(renderFailureRow(failure));
@@ -1031,7 +1521,7 @@ async function loadRecentYoinks() {
     title.textContent = r.title || "(untitled)";
     const meta = document.createElement("span");
     meta.className = "meta";
-    meta.textContent = r.topic || "—";
+    meta.textContent = r.topic || "â€”";
     text.appendChild(title);
     text.appendChild(meta);
     main.appendChild(text);
@@ -1056,7 +1546,7 @@ const CHATGPT_URL = "https://chatgpt.com/";
 
 function openDestination(url, label) {
   chrome.tabs.create({ url, active: true });
-  showToast(`Opened ${label} — paste your most recent yoink.`);
+  showToast(`Opened ${label} - paste your most recent yoink.`);
 }
 
 document.getElementById("send-claude").addEventListener("click", () => {
@@ -1081,10 +1571,10 @@ document.getElementById("open-index").addEventListener("click", async (ev) => {
   try {
     const res = await STC.openIndex();
     if (!res || res.ok === false) {
-      showToast("Couldn't open the yoinks index — server may be down.");
+      showToast("Couldn't open the yoinks index â€” server may be down.");
     }
   } catch {
-    showToast("Couldn't open the yoinks index — server may be down.");
+    showToast("Couldn't open the yoinks index â€” server may be down.");
   }
 });
 wireKeyActivation(document.getElementById("open-index"));
@@ -1092,7 +1582,7 @@ wireKeyActivation(document.getElementById("open-index"));
 // ---- Settings link (Sprint 2) ---------------------------------------------
 // Lives in the popup footer so it's visible in both single-video and playlist
 // modes. setup.html is the canonical settings surface (Codex's lane), so we
-// just open it in a new tab — never duplicate the form inside the popup.
+// just open it in a new tab â€” never duplicate the form inside the popup.
 const openSettingsLink = document.getElementById("open-settings");
 if (openSettingsLink) {
   openSettingsLink.addEventListener("click", (ev) => {
@@ -1127,11 +1617,14 @@ if (openMcpLink) {
 ping();
 loadInterval();
 loadPrompts();
+readMoreOptionsState();
+loadCurrentVideoPreview();
 refreshQueue();
 refreshActiveFromServer();
 loadRecentSessions();
 loadRecentYoinks();
 readDismissedBackfill().then(startBackfillPolling);
+startQueueStatusPolling();
 
 const queueTimer = setInterval(refreshQueue, 1000);
 const pingTimer = setInterval(ping, 3000);
@@ -1146,6 +1639,7 @@ window.addEventListener("unload", () => {
   clearInterval(pingTimer);
   clearInterval(sessionTimer);
   stopBackfillPolling();
+  stopQueueStatusPolling();
 });
 
 document.addEventListener("visibilitychange", () => {
@@ -1153,11 +1647,12 @@ document.addEventListener("visibilitychange", () => {
     stopBackfillPolling();
   } else {
     startBackfillPolling();
+    pollQueueStatus();
   }
 });
 
 // =====================================================================
-// v2 — Playlist mode
+// v2 â€” Playlist mode
 // =====================================================================
 // Self-contained: only touches its own DOM (#mode-playlist + .mode-btn) and
 // the #mode-single wrapper visibility. The single-video flow above runs
@@ -1290,7 +1785,7 @@ document.addEventListener("visibilitychange", () => {
   // ---- Sprint 6 (item 4): active-playlist pill -------------------------
   // Shown when user is in single-video mode AND lastJob is non-terminal
   // (queued or running). Clicking returns to playlist mode + progress
-  // panel. On terminal state we just hide the pill — the next-popup-open
+  // panel. On terminal state we just hide the pill â€” the next-popup-open
   // "Last yoink completed" affordance (item 3) is what surfaces the
   // result on the playlist input panel.
   const activePlaylistPillEl = document.getElementById("active-playlist-pill");
@@ -1307,14 +1802,14 @@ document.addEventListener("visibilitychange", () => {
       activePlaylistPillEl.classList.add("hidden");
       return;
     }
-    // Label uses textContent to keep XSS-discipline — playlist_title
+    // Label uses textContent to keep XSS-discipline â€” playlist_title
     // could in principle be attacker-shaped via a malicious playlist
     // title (yt-dlp would surface it). Safe via textContent.
     const total = lastJob.videos_total || 0;
     const done = (lastJob.videos_done || 0) + (lastJob.videos_failed || 0);
     const title = lastJob.playlist_title || "Playlist";
     const state = lastJob.state === "queued" ? "Queued" : `${done}/${total}`;
-    activePlaylistPillLabelEl.textContent = `${title} · ${state}`;
+    activePlaylistPillLabelEl.textContent = `${title} Â· ${state}`;
     activePlaylistPillEl.classList.remove("hidden");
   }
 
@@ -1335,14 +1830,14 @@ document.addEventListener("visibilitychange", () => {
 
   // ---- helpers ---------------------------------------------------------
   function fmtDuration(seconds) {
-    if (seconds == null) return "—";
+    if (seconds == null) return "â€”";
     const s = Math.max(0, parseInt(seconds, 10) || 0);
     const m = Math.floor(s / 60);
     const r = s % 60;
     return `${m}:${String(r).padStart(2, "0")}`;
   }
 
-  function fmtNullable(v) { return (v == null || v === "") ? "—" : v; }
+  function fmtNullable(v) { return (v == null || v === "") ? "â€”" : v; }
 
   function showOnly(panel) {
     for (const el of [inputPanel, previewPanel, progressPanel, donePanel, cancelledPanel, failedPanel]) {
@@ -1370,9 +1865,9 @@ document.addEventListener("visibilitychange", () => {
       stripEl.classList.add("hidden");
       return;
     }
-    // Multi-warning support: join with " · ". The contract only specifies
-    // "playlist exceeds cap" today but the shape is an array — handle N.
-    stripEl.textContent = list.join(" · ");
+    // Multi-warning support: join with " Â· ". The contract only specifies
+    // "playlist exceeds cap" today but the shape is an array â€” handle N.
+    stripEl.textContent = list.join(" Â· ");
     stripEl.classList.remove("hidden");
   }
 
@@ -1407,7 +1902,7 @@ document.addEventListener("visibilitychange", () => {
     doneFailedListEl.innerHTML = "";
     doneFailedListEl.classList.add("hidden");
     progressFill.style.width = "0%";
-    progressText.textContent = "Queued…";
+    progressText.textContent = "Queuedâ€¦";
     progressCiEl.classList.add("hidden");
     progressDisconnectEl.classList.add("hidden");
     progressDisconnectEl.replaceChildren();
@@ -1421,7 +1916,7 @@ document.addEventListener("visibilitychange", () => {
 
   // ---- preview ---------------------------------------------------------
   function isLikelyPlaylistUrl(s) {
-    // Light client-side guard — the backend is authoritative. Just enough to
+    // Light client-side guard â€” the backend is authoritative. Just enough to
     // catch an obvious mis-paste so we don't 500ms-spin on garbage.
     if (!s) return false;
     try {
@@ -1441,7 +1936,7 @@ document.addEventListener("visibilitychange", () => {
       return;
     }
     previewBtn.disabled = true;
-    previewBtn.textContent = "Previewing…";
+    previewBtn.textContent = "Previewingâ€¦";
     try {
       const res = await STC.playlistPreview(raw);
       if (!res || !res.ok || !res.playlist) {
@@ -1466,11 +1961,11 @@ document.addEventListener("visibilitychange", () => {
     const uploader = fmtNullable(playlist.uploader);
     const vc = playlist.video_count != null ? playlist.video_count : (playlist.videos || []).length;
     const willProc = playlist.will_process_count != null ? playlist.will_process_count : (playlist.videos || []).length;
-    previewSubtitleEl.textContent = `${uploader} · ${willProc} of ${vc} videos`;
+    previewSubtitleEl.textContent = `${uploader} Â· ${willProc} of ${vc} videos`;
 
     // Message (e.g., "Playlist has 12 videos -- yoinking the first 10.")
     // is displayed as the warnings strip when present alongside warnings,
-    // otherwise we surface it inside the warnings strip too — it carries
+    // otherwise we surface it inside the warnings strip too â€” it carries
     // the same "be aware of the cap" signal as the warnings list.
     // Per the contract, prefer `message` (human copy) when both exist;
     // fall back to the raw warnings list when only warnings are present.
@@ -1481,7 +1976,7 @@ document.addEventListener("visibilitychange", () => {
       renderWarnings(previewWarningsEl, warnings);
     }
 
-    // Video list — contract shape: {index, id, url, title, channel, duration_seconds}
+    // Video list â€” contract shape: {index, id, url, title, channel, duration_seconds}
     previewListEl.innerHTML = "";
     for (const v of (playlist.videos || [])) {
       const row = document.createElement("div");
@@ -1510,7 +2005,7 @@ document.addEventListener("visibilitychange", () => {
       // Use the nullable-format helper instead of erroring.
       const channelLabel = fmtNullable(v.channel);
       const durationLabel = fmtDuration(v.duration_seconds);
-      sub.textContent = `${channelLabel} · ${durationLabel}`;
+      sub.textContent = `${channelLabel} Â· ${durationLabel}`;
       meta.appendChild(title);
       meta.appendChild(sub);
       row.appendChild(meta);
@@ -1525,7 +2020,7 @@ document.addEventListener("visibilitychange", () => {
   startBtn.addEventListener("click", async () => {
     if (!previewedUrl) return;
     startBtn.disabled = true;
-    startBtn.textContent = "Starting…";
+    startBtn.textContent = "Startingâ€¦";
     try {
       // Sprint 5: source interval from the same chrome.storage.sync setting
       // single-video uses, so the popup's interval slider actually applies
@@ -1547,7 +2042,7 @@ document.addEventListener("visibilitychange", () => {
       const total = (res.job && res.job.videos_total) ||
         (previewedPlaylist && previewedPlaylist.will_process_count) ||
         PLAYLIST_CAP;
-      progressText.textContent = `Queued — ${total} videos`;
+      progressText.textContent = `Queued â€” ${total} videos`;
       progressPlaylistTitleEl.textContent =
         (res.job && res.job.playlist_title) ||
         (previewedPlaylist && previewedPlaylist.title) || "";
@@ -1660,19 +2155,19 @@ document.addEventListener("visibilitychange", () => {
 
   // Build the banner DOM once per stall episode. createElement-only
   // (no innerHTML interpolation) per the XSS discipline established in
-  // Sprint 5 — even though the strings here are static, keeping the
+  // Sprint 5 â€” even though the strings here are static, keeping the
   // pattern consistent avoids future-PR regressions.
   function _paintDisconnectBanner() {
     progressDisconnectEl.replaceChildren();
     const text = document.createElement("span");
     text.textContent =
-      "Yoink helper disconnected — check that the helper is running. ";
+      "Helper offline. Open setup -> Helper status to diagnose. ";
     progressDisconnectEl.appendChild(text);
     const link = document.createElement("a");
     link.textContent = "Open setup guide";
     link.href = "#";
     // Sprint 9: aria-label tells screen readers what the link does AND
-    // that activation opens a new tab — a11y polish deferred from Sprint 6.
+    // that activation opens a new tab â€” a11y polish deferred from Sprint 6.
     link.setAttribute("aria-label", "Opens setup guide in a new tab");
     link.style.color = "#ffd9d9";
     link.style.textDecoration = "underline";
@@ -1699,7 +2194,7 @@ document.addEventListener("visibilitychange", () => {
   function _onPollFailure(reason) {
     pollFailures++;
     // Track the start of the disconnect episode on the very first failure,
-    // not the threshold cross — see comment above on disconnectStartTs.
+    // not the threshold cross â€” see comment above on disconnectStartTs.
     if (disconnectStartTs === 0) disconnectStartTs = Date.now();
     if (pollFailures < STALL_THRESHOLD) return;
 
@@ -1747,7 +2242,7 @@ document.addEventListener("visibilitychange", () => {
       // ok:false with a non-recoverable error -> fail the job. But a
       // transient {ok: false} without a recognisable error string is also
       // treated as a poll failure (helper restarted mid-call, body parse
-      // failed, etc) — give it the stall budget before declaring failure.
+      // failed, etc) â€” give it the stall budget before declaring failure.
       const err = res && res.error;
       if (err && /not found|invalid/i.test(String(err))) {
         stopPolling();
@@ -1792,7 +2287,7 @@ document.addEventListener("visibilitychange", () => {
     progressFill.style.width = `${pct}%`;
 
     if (job.state === "queued") {
-      progressText.textContent = `Queued — ${total} videos`;
+      progressText.textContent = `Queued â€” ${total} videos`;
     } else if (job.current_video) {
       const title = job.current_video.title || "(untitled)";
       const idx = job.current_video.index || (advanced + 1);
@@ -1837,12 +2332,12 @@ document.addEventListener("visibilitychange", () => {
   cancelBtnEl.addEventListener("click", async () => {
     if (!activeJobId) return;
     cancelBtnEl.disabled = true;
-    cancelBtnEl.textContent = "Cancelling…";
+    cancelBtnEl.textContent = "Cancellingâ€¦";
     try {
       const res = await STC.jobCancel(activeJobId);
       // Contract: cancel returns the full updated job. If we got it, render
       // the cancelled view immediately instead of waiting for the next poll
-      // tick — same data, faster transition.
+      // tick â€” same data, faster transition.
       if (res && res.ok && res.job) {
         stopPolling();
         lastJob = res.job;
@@ -1867,7 +2362,7 @@ document.addEventListener("visibilitychange", () => {
     const failed = job.videos_failed || 0;
     const total = job.videos_total || PLAYLIST_CAP;
     cancelledSummaryEl.textContent = "Cancelled.";
-    setText(cancelledMetaEl, `${done} of ${total} videos completed${failed ? ` · ${failed} failed` : ""}`);
+    setText(cancelledMetaEl, `${done} of ${total} videos completed${failed ? ` Â· ${failed} failed` : ""}`);
     setText(cancelledMessageEl, job.message || "");
     renderWarnings(cancelledWarningsEl, job.warnings || []);
     showOnly(cancelledPanel);
@@ -1899,13 +2394,13 @@ document.addEventListener("visibilitychange", () => {
     const kb = corpusText ? (corpusText.length / 1024).toFixed(1) : "0";
 
     doneSummary.textContent = copied
-      ? "Done — corpus copied to clipboard"
-      : "Done — clipboard blocked, open the folder";
+      ? "Done â€” corpus copied to clipboard"
+      : "Done â€” clipboard blocked, open the folder";
 
     const totalProcessed = perVideo.length || job.videos_total || 0;
     const metaBits = [`${successCount} of ${totalProcessed} videos`, `${kb} KB combined`];
     if (failedVideos.length) metaBits.splice(1, 0, `${failedVideos.length} failed`);
-    doneMeta.textContent = metaBits.join(" · ");
+    doneMeta.textContent = metaBits.join(" Â· ");
 
     setText(doneMessageEl, job.message || "");
     renderWarnings(doneWarningsEl, job.warnings || []);
@@ -1939,7 +2434,7 @@ document.addEventListener("visibilitychange", () => {
       const titleLine = document.createElement("div");
       const icon = document.createElement("span");
       icon.className = "pl-failed-icon";
-      icon.textContent = "⚠";
+      icon.textContent = "âš ";
       const titleSpan = document.createElement("span");
       titleSpan.className = "pl-failed-title";
       titleSpan.textContent = `#${f.index} ${f.title || "(untitled)"}`;
@@ -1971,13 +2466,13 @@ document.addEventListener("visibilitychange", () => {
       return;
     }
     try {
-      // openFolder is the existing v1 server endpoint — in mock mode the
+      // openFolder is the existing v1 server endpoint â€” in mock mode the
       // server may not be running, in which case the toast below is the
       // recovery.
       const res = await STC.openFolder(path);
-      if (!res || res.ok === false) showToast("Couldn't open folder — server may be offline.");
+      if (!res || res.ok === false) showToast("Couldn't open folder â€” server may be offline.");
     } catch {
-      showToast("Couldn't open folder — server may be offline.");
+      showToast("Couldn't open folder â€” server may be offline.");
     }
   }
   openFolderBtn.addEventListener("click", openSessionFolder);
@@ -1998,7 +2493,7 @@ document.addEventListener("visibilitychange", () => {
   // honest about "recent" (a yoink from 45 min ago is probably out of mind
   // and clutters the surface), longer than 15 covers the case where the
   // user starts a yoink, walks away, and comes back to finish reading.
-  // No dismissal × yet — auto-expiry covers most of the value, and adding
+  // No dismissal Ã— yet â€” auto-expiry covers most of the value, and adding
   // a per-job dismissal-storage was deemed not worth the complexity for
   // first ship. Document if we hit user pushback.
   const LAST_YOINK_WINDOW_MS = 30 * 60 * 1000;
@@ -2044,10 +2539,10 @@ document.addEventListener("visibilitychange", () => {
       try {
         const res = await STC.openFolder(path);
         if (!res || res.ok === false) {
-          showToast("Couldn't open folder — server may be offline.");
+          showToast("Couldn't open folder â€” server may be offline.");
         }
       } catch {
-        showToast("Couldn't open folder — server may be offline.");
+        showToast("Couldn't open folder â€” server may be offline.");
       }
     };
     lastYoinkEl.classList.remove("hidden");
@@ -2098,7 +2593,7 @@ document.addEventListener("visibilitychange", () => {
       startPolling();
       return;
     }
-    // No in-flight job — look for a recently completed one. Sort by
+    // No in-flight job â€” look for a recently completed one. Sort by
     // completed_at desc (falling back to updated_at if completed_at is
     // missing) and pick the freshest.
     const recent = res.jobs
@@ -2109,13 +2604,13 @@ document.addEventListener("visibilitychange", () => {
 })();
 
 // =====================================================================
-// v3 — Smart Screenshot Picker
+// v3 â€” Smart Screenshot Picker
 // =====================================================================
 // Activates when chrome.storage.local.pending_picker is set by the
 // background or content-script intercept. When active, the picker view
 // owns the popup surface (mode selector and both mode panels hide). On
 // Copy/Cancel: writes the chosen corpus to clipboard, clears the pending
-// state, opens Claude, and closes the popup — same end behavior as v1
+// state, opens Claude, and closes the popup â€” same end behavior as v1
 // auto-copy, just user-mediated.
 // ---------------------------------------------------------------------
 
@@ -2143,7 +2638,7 @@ document.addEventListener("visibilitychange", () => {
 
   // One-time settings snapshot for the CI/Hook done indicator. Same
   // pattern as the playlist controller (its own fetch is isolated from
-  // this one — cheap enough that the duplication is worth the
+  // this one â€” cheap enough that the duplication is worth the
   // encapsulation).
   (async function loadSettings() {
     try {
@@ -2163,7 +2658,7 @@ document.addEventListener("visibilitychange", () => {
     pickerMode.classList.add("hidden");
     modeSelectorWrap.classList.remove("hidden");
     // Whichever mode the user was in before the picker activated isn't
-    // tracked — restoring to single-video matches the v1 boot default.
+    // tracked â€” restoring to single-video matches the v1 boot default.
     modeSingleEl.classList.remove("hidden");
     modePlaylistEl.classList.add("hidden");
   }
@@ -2187,7 +2682,7 @@ document.addEventListener("visibilitychange", () => {
 
   // Build a filtered corpus by removing image lines at the given drop
   // indices. Operates on whichever corpus the user wants to send to
-  // clipboard — for the multimodal-paste case (corpus_md_paste) this
+  // clipboard â€” for the multimodal-paste case (corpus_md_paste) this
   // preserves the base64-embedded form for KEPT screenshots while
   // dropping unselected ones. Image lines are matched in source order
   // and aligned to the yoink_md parse positionally.
@@ -2261,7 +2756,7 @@ document.addEventListener("visibilitychange", () => {
 
       const check = document.createElement("div");
       check.className = "picker-thumb-check";
-      check.textContent = "✓";
+      check.textContent = "âœ“";
       tile.appendChild(check);
 
       tile.addEventListener("click", () => toggleIndex(i));
@@ -2278,7 +2773,7 @@ document.addEventListener("visibilitychange", () => {
 
   // Sprint 4 (1c): real-mode thumbnails come back as blob: URLs from
   // URL.createObjectURL(). Revoke them on picker exit so they don't sit
-  // in memory until popup unload. Mock-mode entries are data: URLs — no
+  // in memory until popup unload. Mock-mode entries are data: URLs â€” no
   // revocation needed (and revoking a data URL is a no-op anyway, but
   // skipping the call keeps the loop cheap on large grids).
   function _revokeThumbBlobs() {
@@ -2323,7 +2818,7 @@ document.addEventListener("visibilitychange", () => {
   // Two-yoinks-back-to-back disambiguation: when pending_picker gets
   // overwritten, the user sees "just now" vs "3m ago" so they know which
   // yoink they're looking at. Falls back to ISO date for older stashes
-  // (shouldn't happen in practice — pending_picker is cleared on copy).
+  // (shouldn't happen in practice â€” pending_picker is cleared on copy).
   function formatRelativeTime(iso) {
     if (!iso) return "";
     const t = Date.parse(iso);
@@ -2390,7 +2885,7 @@ document.addEventListener("visibilitychange", () => {
     if (!pendingPicker) { hidePicker(); return; }
     pickerCopyBtn.disabled = true;
     pickerCancelBtn.disabled = true;
-    pickerCopyBtn.textContent = kind === "copy" ? "Copying…" : "Cancelling…";
+    pickerCopyBtn.textContent = kind === "copy" ? "Copyingâ€¦" : "Cancellingâ€¦";
 
     // Source corpus: prefer multimodal paste so KEPT screenshots stay
     // base64-embedded. Falls back to yoink_md when corpus_md_paste isn't

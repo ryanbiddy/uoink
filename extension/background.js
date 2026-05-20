@@ -21,7 +21,9 @@ const OFFSCREEN_URL = "offscreen.html";
 // alive so it can push prefers-color-scheme change events back here.
 const OFFSCREEN_REASONS = ["CLIPBOARD", "MATCH_MEDIA"];
 const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
+const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
 const _clipboardRetryPayloads = new Map();
+const _queueViewNotificationIds = new Set();
 
 const LINK_PATTERNS = [
   "https://www.youtube.com/watch*",
@@ -158,6 +160,10 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     job.session_id = active.id;
     job.session_name = active.name;
   }
+  if (kind === "extract" && !(await serverQueueHasRoom())) {
+    notify("Yoink queue full", "Queue full, wait a few minutes before adding another yoink.");
+    return;
+  }
   await enqueue(job);
 });
 
@@ -220,6 +226,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === "stcExtract" && msg.url) {
     (async () => {
       try {
+        if (!(await serverQueueHasRoom())) {
+          sendResponse({ data: { ok: false, error: "Queue full, wait a few minutes" } });
+          return;
+        }
         const data = await STC.postExtract(msg.url, msg.interval);
         sendResponse({ data });
         if (data && data.ok) tryOpenPopup();
@@ -285,6 +295,85 @@ async function markClipboardYoinkNow() {
   } catch { /* ignore */ }
 }
 
+function screenshotCountFromData(data, text) {
+  const direct = Number(
+    data && (
+      data.clipboard_screenshot_count
+      ?? data.screenshots_in_clipboard
+      ?? data.included_screenshot_count
+    )
+  );
+  if (Number.isFinite(direct) && direct >= 0) return Math.round(direct);
+  if (Array.isArray(data && data.clipboard_screenshots)) return data.clipboard_screenshots.length;
+  const body = String(text || data && (data.corpus_md_paste || data.yoink_md) || "");
+  const matches = body.match(/!\[[^\]]*]\([^)]*\)/g);
+  return matches ? matches.length : 0;
+}
+
+async function rememberClipboardBudget(data, clipboardText) {
+  const text = String(clipboardText || data && (data.corpus_md_paste || data.yoink_md) || "");
+  const tokens = Number(data && (data.token_estimate ?? data.clipboard_token_estimate));
+  const budget = {
+    screenshotCount: screenshotCountFromData(data, text),
+    tokenEstimate: Number.isFinite(tokens) ? Math.max(0, Math.round(tokens)) : Math.round(text.length / 4),
+    updatedAt: Date.now(),
+  };
+  try {
+    await chrome.storage.local.set({ [LAST_CLIPBOARD_BUDGET_KEY]: budget });
+  } catch { /* ignore */ }
+}
+
+function minutesUntil(value) {
+  if (!value) return null;
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value > 10_000
+      ? Math.max(0, Math.ceil((value - Date.now()) / 60000))
+      : Math.max(0, Math.ceil(value / 60));
+  }
+  const when = Date.parse(value);
+  if (!Number.isNaN(when)) return Math.max(0, Math.ceil((when - Date.now()) / 60000));
+  return null;
+}
+
+function queuedMessage(data) {
+  const mins = minutesUntil(data && (data.next_retry_in_seconds ?? data.retry_in_seconds ?? data.next_retry_at));
+  const retry = mins == null ? "soon" : (mins <= 0 ? "now" : `in ${mins} min`);
+  return `Queued - will retry ${retry}.`;
+}
+
+async function getServerQueueStatus() {
+  try {
+    const token = STC.getToken ? await STC.getToken() : null;
+    let res = await fetch(`${STC.SERVER}/queue/status`, {
+      method: "GET",
+      mode: "cors",
+      credentials: "omit",
+      cache: "no-store",
+      headers: token ? { "X-Yoink-Token": token } : {},
+    });
+    if (res.status === 403 && STC.getToken) {
+      const fresh = await STC.getToken({ refresh: true });
+      res = await fetch(`${STC.SERVER}/queue/status`, {
+        method: "GET",
+        mode: "cors",
+        credentials: "omit",
+        cache: "no-store",
+        headers: fresh ? { "X-Yoink-Token": fresh } : {},
+      });
+    }
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+async function serverQueueHasRoom() {
+  const status = await getServerQueueStatus();
+  const pending = Number(status && (status.pending_count ?? status.queued_count)) || 0;
+  return pending < 5;
+}
+
 async function notifyClipboardRetry(text) {
   const id = await notify("Couldn't copy to clipboard", "Click Try again to retry the copy without opening a new tab.", {
     buttons: [{ title: "Try again" }],
@@ -295,6 +384,11 @@ async function notifyClipboardRetry(text) {
 
 try {
   chrome.notifications.onButtonClicked.addListener((id, buttonIndex) => {
+    if (_queueViewNotificationIds.has(id)) {
+      _queueViewNotificationIds.delete(id);
+      tryOpenPopup();
+      return;
+    }
     if (buttonIndex !== 0 || !_clipboardRetryPayloads.has(id)) return;
     const text = _clipboardRetryPayloads.get(id);
     _clipboardRetryPayloads.delete(id);
@@ -309,6 +403,7 @@ try {
   });
   chrome.notifications.onClosed.addListener((id) => {
     _clipboardRetryPayloads.delete(id);
+    _queueViewNotificationIds.delete(id);
   });
 } catch { /* notifications unavailable in some test contexts */ }
 
@@ -539,6 +634,13 @@ async function runExtractJob(job) {
     notify("Yoink failed", STC.friendlyError(data && data.error));
     return;
   }
+  if (data.queued) {
+    const id = await notify("Yoink queued", `${queuedMessage(data)} Click View queue for status.`, {
+      buttons: [{ title: "View queue" }],
+    });
+    if (id) _queueViewNotificationIds.add(id);
+    return;
+  }
 
   await setState({ current: { ...job, startedAt: Date.now(), title: data.title || null } });
 
@@ -546,6 +648,7 @@ async function runExtractJob(job) {
   // picker setting enabled, we hand the corpus off to the popup instead of
   // auto-copying. Default off keeps v1 behavior byte-identical.
   if (await _useScreenshotPicker()) {
+    await rememberClipboardBudget(data, data.corpus_md_paste || data.yoink_md);
     await STC.stashPickerCorpus(data);
     notify("Yoink ready",
            "Click the Yoink icon to pick which screenshots to include.");
@@ -557,6 +660,7 @@ async function runExtractJob(job) {
   // Fall back to the file version if the server didn't generate one
   // (Pillow missing in dev, generation failure, etc).
   const clipboardText = data.corpus_md_paste || data.yoink_md;
+  await rememberClipboardBudget(data, clipboardText);
   const copied = await copyToClipboard(clipboardText);
   if (!copied) {
     await notifyClipboardRetry(clipboardText);

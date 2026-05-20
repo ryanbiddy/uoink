@@ -395,6 +395,44 @@
       text-decoration: none;
     }
     .settings-link:hover { text-decoration: underline; }
+    .diagnose-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .diagnose-row {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      background: var(--bg-inset);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .diagnose-icon {
+      font-weight: 800;
+      text-align: center;
+    }
+    .diagnose-icon.ok { color: var(--ok); }
+    .diagnose-icon.warn { color: var(--warn); }
+    .diagnose-icon.error { color: #f87171; }
+    .diagnose-name {
+      color: var(--yoink-white);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .diagnose-detail {
+      color: var(--text-mute);
+      font-size: 12px;
+      line-height: 1.35;
+      margin-top: 2px;
+    }
+    .diagnose-action {
+      white-space: nowrap;
+      padding: 7px 9px;
+      font-size: 12px;
+    }
     .calibration-summary {
       color: var(--yoink-white);
       font-size: 13px;
@@ -536,6 +574,17 @@
 
     <h1 id="page-title">Let's get you set up.</h1>
     <p class="lede" id="page-lede">Two minutes. Then you'll be yoinking videos straight into Claude.</p>
+
+    <section id="helper-status-section" class="step">
+      <div class="step-head">
+        <div class="step-num"><span class="step-num-text">Status</span></div>
+        <h2>Helper status</h2>
+      </div>
+      <p>Yoink checks the local helper and shows the next action if something needs attention.</p>
+      <div id="diagnose-list" class="diagnose-list" aria-live="polite">
+        <p class="sub">Checking helper status...</p>
+      </div>
+    </section>
 
     <!-- Step 1: Welcome (install path only) -->
     <section id="step-1" class="step">
