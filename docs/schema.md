@@ -1,7 +1,7 @@
 # Yoink Library Index Schema
 
-Status: implemented through Sprint 18
-Database: `%LOCALAPPDATA%\Yoink\index.db`
+Status: implemented through Sprint 19.5 (Stage 1 macOS)
+Database: `%LOCALAPPDATA%\Yoink\index.db` (Windows) / `~/Library/Application Support/Yoink/index.db` (macOS)
 Scope: SQLite library index, FTS5 search, job/taxonomy migration, citations, health scores, entity graph, soft delete, and backfill.
 
 ## Overview
@@ -17,6 +17,18 @@ The index replaces or absorbs these older persistence patterns:
 - Ad hoc entity lookup across markdown when an agent needs "where did people mention X?" results.
 
 The corpus markdown, sidecar JSON, screenshots, transcript files, and thumbnails still remain on disk in the Yoink output root. `index.db` points at those files; it does not replace the user-visible corpus folders.
+
+## Where files live
+
+The helper resolves paths dynamically based on the active operating system:
+
+| Asset | Windows | macOS |
+|---|---|---|
+| `index.db` | `%LOCALAPPDATA%\Yoink\index.db` | `~/Library/Application Support/Yoink/index.db` |
+| `token.txt` | same dir | same dir |
+| `server.log` | same dir | same dir |
+| `jobs.json.migrated` | same dir | same dir |
+| Yoinked corpora | `~/Desktop/Yoink/` | `~/Desktop/Yoink/` |
 
 ## Schema Version And Migrations
 
