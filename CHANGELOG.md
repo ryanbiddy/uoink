@@ -10,6 +10,12 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 
 ### Added
 
+- **Rate-limit queue + retry (C4).** YouTube rate limits no longer cause terminal failures. Single-video yoinks queue automatically in a SQLite queue and retry with exponential backoff (60s, scaling up to a 15-minute cap, up to 3 attempts). A popup banner displays active queue counts and offers manual cancel or retry-now actions.
+- **Queue management API.** Token-gated endpoints `/queue/status`, `/queue/cancel`, and `/queue/retry-now` power the queue UI.
+- **Helper failure diagnosis (C3).** A new public `/diagnose` API endpoint plus a "Helper status" panel in `setup.html` that runs checks (Anthropic key, FFmpeg, yt-dlp, and output path) with context-specific recovery buttons for each failure mode.
+- **`LOCALAPPDATA` output fallback.** The helper automatically falls back to writing outputs to `%LOCALAPPDATA%\Yoink\output` if `DESKTOP_ROOT` is read-only or unwritable.
+- **`pending_yoinks` schema (migration 0005).** Adds a new table in `index.db` to track rate-limited yoinks, attempts, and errors.
+
 - **MCP server** with 13 tools (`yoink_video`, `yoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_yoinks`, `search_yoinks`, `get_yoink_corpus`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `get_yoink_health`, `find_mentions`). Stdio transport officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport available, marked experimental.
 - **Library Index (SQLite FTS5).** `%LOCALAPPDATA%\Yoink\index.db` replaces scan-based search/recent/get-taxonomy code paths where indexed consumers need fast library access. First boot backfills existing corpora; subsequent yoinks update incrementally.
 - **Migration framework.** `schema_version` table plus numbered `migrations/NNNN_*.sql` scripts for future schema changes.
@@ -50,6 +56,13 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 - **Banner-link accessibility.** Disconnect-banner setup link announces "Opens setup guide in a new tab" to screen readers.
 
 ### Changed
+
+- **Clipboard budget preview in popup (C1).** Shows a dynamic token and screenshot count preview ("N screenshots · ~Nk tokens") adjacent to the Send buttons to help users estimate context window consumption before pasting.
+- **Popup progressive disclosure (C2).** Optimizes first-run UI by collapsing advanced settings and secondary panels under a "More options" expander. First-day users see a single clear URL input and Yoink CTA.
+- **Confidence display in popup chips.** Hook chips now display the category alongside the model's confidence rating (e.g., "Contrarian · confidence 5/5") rather than just the category name.
+- **POST `/extract` response.** Returns `queued: true` along with a `pending_id` and a `retry_after` timestamp when YouTube rate limits are hit instead of returning an application error.
+- **`/health` response.** Adds `output_root_fallback: bool` indicating whether the helper has fallen back to writing in `%LOCALAPPDATA%`.
+- **MCP tool count remains 13.** (Unchanged — Sprint 19 is HTTP and UI only).
 
 - **Anthropic API key storage moved from plaintext `settings.json` to Windows Credential Manager.** Existing keys are migrated automatically on first v2.0 startup.
 - **`get_yoink_corpus` MCP tool** now returns `video_id` and `video_url` alongside `corpus_md` and `folder` for downstream tool composition.

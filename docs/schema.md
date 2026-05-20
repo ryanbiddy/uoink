@@ -351,6 +351,58 @@ Purge behavior:
 - The helper removes the trash folder and calls `index.delete_yoink(video_id)`.
 - Foreign-key cascades clear `citations`, `entity_mentions`, and `taxonomy_corrections`; the helper also removes the standalone `yoinks_fts` row.
 
+### Sprint 19 - Rate-limit queue (migration 0005)
+
+Migration `0005_pending_yoinks.sql` adds the rate-limit queue table `pending_yoinks` to handle YouTube rate limits gracefully. When a synchronous `/extract` call is rate-limited, it enqueues the request in this table for automatic background retry rather than failing immediately.
+
+```sql
+CREATE TABLE pending_yoinks (
+    pending_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    url TEXT NOT NULL,
+    interval_seconds INTEGER NOT NULL,
+    queued_at TEXT NOT NULL,
+    retry_after TEXT,
+    attempt_count INTEGER DEFAULT 0,
+    status TEXT NOT NULL,
+    last_error TEXT,
+    succeeded_job_id TEXT,
+    FOREIGN KEY (succeeded_job_id) REFERENCES jobs(job_id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_pending_yoinks_status ON pending_yoinks(status);
+CREATE INDEX IF NOT EXISTS idx_pending_yoinks_retry_after ON pending_yoinks(retry_after) WHERE status = 'pending';
+```
+
+| Column | Type | Nullability | Stores |
+|---|---|---|---|
+| `pending_id` | INTEGER PRIMARY KEY AUTOINCREMENT | required | Unique identifier for each queued extraction request. |
+| `url` | TEXT | required | The YouTube video URL to extract. |
+| `interval_seconds` | INTEGER | required | The screenshot interval requested by the user. |
+| `queued_at` | TEXT | required | ISO timestamp when the video was enqueued. |
+| `retry_after` | TEXT | nullable | ISO timestamp after which the helper can attempt the next retry. |
+| `attempt_count` | INTEGER | required | Current retry count. Starts at 0, increments on each failure, caps at 3 attempts. |
+| `status` | TEXT | required | State of the queued yoink: `pending`, `running`, `succeeded`, `failed`, or `cancelled`. |
+| `last_error` | TEXT | nullable | Last error string returned by yt-dlp or extraction worker. |
+| `succeeded_job_id` | TEXT | nullable | Foreign key to `jobs(job_id)` indicating the job that successfully processed the yoink. |
+
+#### Status State Machine
+
+```text
+pending -> running -> succeeded
+                   -> failed
+                   -> cancelled
+```
+
+- **`pending`**: Queued and waiting for the retry time (`retry_after`) to elapse.
+- **`running`**: Currently being processed by the background queue worker.
+- **`succeeded`**: Successfully extracted. `succeeded_job_id` points to the completed job.
+- **`failed`**: Reached the limit of 3 retry attempts and failed terminally.
+- **`cancelled`**: Manually cancelled by the user via the queue status UI.
+
+#### Retention Behavior
+
+- Queued yoink rows persist in `pending_yoinks` for auditing and historical log display in the extension.
+- Succeeded and failed rows are not automatically purged in Sprint 19 (future hardening in v2.1 will add capped/age-based pruning).
+
 ## Indexes
 
 | Index | Table | Supports |
@@ -372,6 +424,8 @@ Purge behavior:
 | `idx_taxonomy_corrections_channel` | `taxonomy_corrections(channel)` | Same-channel calibration anchors. |
 | `idx_taxonomy_corrections_topic` | `taxonomy_corrections(topic)` | Same-topic calibration anchors. |
 | `idx_taxonomy_corrections_corrected_at` | `taxonomy_corrections(corrected_at DESC)` | Most-recent fallback anchors and setup history list. |
+| `idx_pending_yoinks_status` | `pending_yoinks(status)` | Queue processing and status queries. |
+| `idx_pending_yoinks_retry_after` | `pending_yoinks(retry_after) WHERE status = 'pending'` | Finding pending retries due for execution. |
 
 The FTS5 table maintains its own search index internally.
 

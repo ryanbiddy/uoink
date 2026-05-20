@@ -64,6 +64,14 @@ This is the canonical list of what's shipped, what's planned, and what's been ru
 - 401 destructive key clearing
 - Banner-link aria-label for accessibility
 
+**Sprint 19 (Queue + Failure Diagnosis + UI Polish)**
+- **C1 — Clipboard budget preview** in popup ("N screenshots · ~Nk tokens" near Send buttons).
+- **C2 — Popup progressive disclosure** — first-day users see one clear action; secondary panels collapse until expanded.
+- **C3 — Helper failure diagnosis** — new `/diagnose` endpoint + setup.html "Helper status" panel with per-failure-mode recovery actions.
+- **C4 — Rate-limit queue + retry** — YouTube rate-limits no longer error; yoinks queue automatically, retry with exponential backoff (60s → 5min → 15min cap, 3 attempts). Popup banner shows queue status + cancel/retry-now actions.
+- **LOCALAPPDATA fallback** — helper falls back to `%LOCALAPPDATA%\Yoink\output\` when DESKTOP_ROOT is unwritable (e.g., locked Desktop on managed Windows).
+- **Confidence inline in popup chips** — hook chips now render "Contrarian · confidence 5/5" instead of just the category.
+
 **v2 security**
 - API key encryption via Windows Credential Manager (`keyring`), automatic migration from plaintext settings.json on first v2.0 startup
 - `docs/security.md` rewritten to cover v2 threat model (keyring, all token-gated endpoints, `/file` sandbox, MCP HTTP, persistence files)
@@ -242,6 +250,26 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 - **Destination:** v2.5
 - **Rationale:** The strategy brief's timeline idea fits naturally on top of the Memory page and `index.db`: yoink frequency over time, topics over time, Hook Type mix over time. It should wait until the basic gallery proves useful.
 - **Trigger:** v2.5 cycle or evidence that users want library analytics, not just library retrieval.
+
+### Orphaned taxonomy row on hard-purge
+- **Destination:** v2.1
+- **Rationale:** The taxonomy table has no foreign key cascade or association with the main yoinks table, so when the 30-day trash purge hard-deletes a yoink, the corresponding taxonomy row remains as a stale orphan.
+- **Trigger:** v2.1 cycle (add FK cascade or explicit cleanup in `prune_trash`)
+
+### Re-yoinking a soft-deleted video doesn't auto-undelete
+- **Destination:** v2.1
+- **Rationale:** Currently, `upsert_yoink` does not modify or clear the `deleted_at` field, so re-yoinking a previously soft-deleted video keeps it hidden.
+- **Trigger:** v2.1 cycle (either clear `deleted_at` during upsert or show a "this yoink is in trash" warning/hint in the popup)
+
+### Queue retention policy
+- **Destination:** v2.1
+- **Rationale:** Succeeded rows in `pending_yoinks` accumulate indefinitely. To prevent database growth, we need a retention cap or age-based pruning mechanism.
+- **Trigger:** v2.1 cycle (e.g., cap at 100 terminal items or prune older than 7 days)
+
+### Per-channel rate limit awareness
+- **Destination:** v2.1
+- **Rationale:** YouTube rate-limits tend to occur per-channel after a burst of extractions. If the helper tracks per-channel cooldowns, it can pace itself better and avoid unnecessary rate-limit triggers.
+- **Trigger:** v2.1 cycle
 
 ---
 

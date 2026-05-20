@@ -63,7 +63,8 @@ Success response: HTTP 200
 {
   "ok": true,
   "version": "2.0.0",
-  "index_recovering": false
+  "index_recovering": false,
+  "output_root_fallback": false
 }
 ```
 
@@ -74,6 +75,7 @@ Fields:
 | `ok` | boolean | Always `true` for a healthy helper. |
 | `version` | string | Helper version from the top-level `VERSION` file. |
 | `index_recovering` | boolean | `true` while a corrupt `index.db` has been quarantined and the replacement database is being backfilled from disk. |
+| `output_root_fallback` | boolean | `true` if the helper fell back to writing outputs to `%LOCALAPPDATA%\Yoink\output` because the primary `DESKTOP_ROOT` was unwritable. |
 
 ### GET /index/backfill-status
 
@@ -1367,6 +1369,227 @@ Event:
 event: endpoint
 data: /mcp/v1
 ```
+
+### POST /extract
+
+Extract a single YouTube video.
+
+Auth: `X-Yoink-Token` required (or unauthenticated in v1 backward-compatible mode, but generally token-gated).
+
+Request body:
+
+```json
+{
+  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "interval": 10
+}
+```
+
+Success response (immediate): HTTP 200
+
+```json
+{
+  "ok": true,
+  "folder": "C:\\Users\\hello\\Desktop\\Yoink\\Music\\rick-astley-never-gonna-give-you-up",
+  "slug": "rick-astley-never-gonna-give-you-up"
+}
+```
+
+Success response (queued due to rate limiting): HTTP 200
+
+If YouTube rate limits the helper during extraction, the helper automatically enqueues the request in a local queue to be retried in the background instead of returning a terminal error.
+
+```json
+{
+  "ok": true,
+  "queued": true,
+  "pending_id": 5,
+  "retry_after": "2026-05-19T23:55:00Z",
+  "reason": "youtube_rate_limit"
+}
+```
+
+Fields:
+
+| Field | Type | Notes |
+|---|---:|---|
+| `ok` | boolean | Always `true` for a successful request. |
+| `queued` | boolean | `true` if the request was enqueued due to YouTube rate limiting; omitted or `false` otherwise. |
+| `pending_id` | integer | The ID of the queued request in `pending_yoinks` if `queued` is `true`. |
+| `retry_after` | string | ISO timestamp indicating when the next retry will occur if `queued` is `true`. |
+| `reason` | string | The reason for enqueuing, e.g., `"youtube_rate_limit"`. |
+
+### GET /diagnose
+
+Public endpoint for diagnosing helper installation, credentials, dependencies, and environment status. Used by the extension setup page to guide users through troubleshooting.
+
+Auth: None.
+
+Request body: None.
+
+Success response: HTTP 200
+
+```json
+{
+  "ok": true,
+  "status": "warning",
+  "checks": [
+    {
+      "name": "anthropic_key_set",
+      "status": "warning",
+      "message": "Anthropic API key is missing. AI features will be disabled.",
+      "action": "Add key"
+    },
+    {
+      "name": "ffmpeg_installed",
+      "status": "ok",
+      "message": "FFmpeg is installed and accessible.",
+      "action": null
+    },
+    {
+      "name": "yt_dlp_installed",
+      "status": "ok",
+      "message": "yt-dlp is installed and accessible.",
+      "action": null
+    },
+    {
+      "name": "desktop_root_writable",
+      "status": "ok",
+      "message": "Desktop root directory is writable.",
+      "action": null
+    }
+  ],
+  "warnings": [
+    "No Anthropic API key found. Comment Intelligence and Hook Type classification will be skipped."
+  ]
+}
+```
+
+Fields:
+
+| Field | Type | Notes |
+|---|---:|---|
+| `ok` | boolean | `true` if the diagnostic check itself succeeded. |
+| `status` | string | Overall health status: `"ok"` (all checks pass), `"warning"` (non-critical checks fail), or `"error"` (critical dependencies or writable checks fail). |
+| `checks` | array | List of individual diagnostic check objects. |
+| `warnings` | array | List of friendly warning strings derived from failed check status. |
+
+Each check object in the `checks` array contains:
+
+| Field | Type | Notes |
+|---|---:|---|
+| `name` | string | The identifier of the check: `"anthropic_key_set"`, `"ffmpeg_installed"`, `"yt_dlp_installed"`, or `"desktop_root_writable"`. |
+| `status` | string | The result of the check: `"ok"`, `"warning"`, `"error"`, or `"skipped"`. |
+| `message` | string | A human-readable description of the status or error. |
+| `action` | string | Action name to show in the UI for recovery (e.g., `"Add key"`, `"Install FFmpeg"`, `"Install yt-dlp"`, `"Check permissions"`), or `null`. |
+
+### GET /queue/status
+
+Retrieve the list of all queued, running, and recently completed or failed pending yoinks.
+
+Auth: `X-Yoink-Token` required.
+
+Rate limit: 60 requests/minute.
+
+Request body: None.
+
+Success response: HTTP 200
+
+```json
+{
+  "ok": true,
+  "queue": [
+    {
+      "pending_id": 5,
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "interval_seconds": 30,
+      "queued_at": "2026-05-19T23:51:00Z",
+      "retry_after": "2026-05-19T23:52:00Z",
+      "attempt_count": 1,
+      "status": "pending",
+      "last_error": "youtube_rate_limit",
+      "succeeded_job_id": null
+    }
+  ]
+}
+```
+
+Fields:
+
+| Field | Type | Notes |
+|---|---:|---|
+| `ok` | boolean | `true` if the query succeeded. |
+| `queue` | array | List of pending yoink queue rows. |
+
+### POST /queue/cancel
+
+Cancel a pending queued yoink. If the yoink is currently running, the background job will be cancelled.
+
+Auth: `X-Yoink-Token` required.
+
+Rate limit: 60 requests/minute.
+
+Request body:
+
+```json
+{
+  "pending_id": 5
+}
+```
+
+Success response: HTTP 200
+
+```json
+{
+  "ok": true,
+  "pending_id": 5,
+  "status": "cancelled"
+}
+```
+
+Fields:
+
+| Field | Type | Notes |
+|---|---:|---|
+| `ok` | boolean | `true` if the cancellation succeeded. |
+| `pending_id` | integer | The ID of the cancelled yoink. |
+| `status` | string | Set to `"cancelled"`. |
+
+### POST /queue/retry-now
+
+Force an immediate retry of a queued pending yoink that is in a `pending` or `failed` state. This bypasses the exponential backoff timer and sets `retry_after` to the current time, making it eligible for immediate processing by the next queue poll.
+
+Auth: `X-Yoink-Token` required.
+
+Rate limit: 30 requests/minute.
+
+Request body:
+
+```json
+{
+  "pending_id": 5
+}
+```
+
+Success response: HTTP 200
+
+```json
+{
+  "ok": true,
+  "pending_id": 5,
+  "status": "pending",
+  "message": "Scheduled for immediate retry."
+}
+```
+
+Fields:
+
+| Field | Type | Notes |
+|---|---:|---|
+| `ok` | boolean | `true` if the request succeeded. |
+| `pending_id` | integer | The ID of the yoink. |
+| `status` | string | Reset status to `"pending"`. |
+| `message` | string | Confirmation message. |
 
 ## Job state machine
 
