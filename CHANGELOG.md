@@ -10,6 +10,9 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 
 ### Added
 
+- **macOS native — Stage 1 (cross-platform Python).** Helper code now runs identically on Windows and macOS via cross-platform path resolution. Sprint 19.5 Stage 2 ships the actual `.dmg` build pipeline.
+- **/diagnose adds `platform` field** — UIs can render platform-appropriate hints and status checks.
+- **Platform-aware extension setup page** — install instructions dynamically adjust based on `chrome.runtime.getPlatformInfo` to show Windows- or macOS-specific commands and files.
 - **Entity Extraction disclosures (store listing + README).** Added clear disclosures detailing opt-in Entity Extraction calling the Anthropic API via user-provided API key stored securely in Credential Manager. Touched `docs/store-listing.md` and `README.md`.
 
 - **Rate-limit queue + retry (C4).** YouTube rate limits no longer cause terminal failures. Single-video yoinks queue automatically in a SQLite queue and retry with exponential backoff (60s, scaling up to a 15-minute cap, up to 3 attempts). A popup banner displays active queue counts and offers manual cancel or retry-now actions.
