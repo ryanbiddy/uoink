@@ -4,7 +4,7 @@
 -- find_mentions MCP tool. Sentiment / temporal / co-occurrence columns are
 -- intentionally omitted -- those ride Sprint 16.5.
 
-CREATE TABLE entities (
+CREATE TABLE IF NOT EXISTS entities (
     entity_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     name_normalized TEXT NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE entities (
     UNIQUE (name_normalized, type)
 );
 
-CREATE TABLE entity_mentions (
+CREATE TABLE IF NOT EXISTS entity_mentions (
     mention_id INTEGER PRIMARY KEY AUTOINCREMENT,
     entity_id INTEGER NOT NULL,
     video_id TEXT NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE entity_mentions (
     FOREIGN KEY (video_id) REFERENCES yoinks(video_id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_entities_normalized ON entities(name_normalized);
-CREATE INDEX idx_entities_type ON entities(type);
-CREATE INDEX idx_entity_mentions_entity ON entity_mentions(entity_id);
-CREATE INDEX idx_entity_mentions_video ON entity_mentions(video_id);
+CREATE INDEX IF NOT EXISTS idx_entities_normalized ON entities(name_normalized);
+CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(type);
+CREATE INDEX IF NOT EXISTS idx_entity_mentions_entity ON entity_mentions(entity_id);
+CREATE INDEX IF NOT EXISTS idx_entity_mentions_video ON entity_mentions(video_id);

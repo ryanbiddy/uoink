@@ -5,7 +5,7 @@
 -- dataset asset, BACKLOG v2.5), and the taxonomy table gains a confidence
 -- score from the classifier.
 
-CREATE TABLE taxonomy_corrections (
+CREATE TABLE IF NOT EXISTS taxonomy_corrections (
     correction_id INTEGER PRIMARY KEY AUTOINCREMENT,
     video_id TEXT NOT NULL,
     original_hook_type TEXT NOT NULL,
@@ -17,12 +17,18 @@ CREATE TABLE taxonomy_corrections (
     FOREIGN KEY (video_id) REFERENCES yoinks(video_id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_taxonomy_corrections_video ON taxonomy_corrections(video_id);
-CREATE INDEX idx_taxonomy_corrections_channel ON taxonomy_corrections(channel);
-CREATE INDEX idx_taxonomy_corrections_topic ON taxonomy_corrections(topic);
-CREATE INDEX idx_taxonomy_corrections_corrected_at
+CREATE INDEX IF NOT EXISTS idx_taxonomy_corrections_video
+    ON taxonomy_corrections(video_id);
+CREATE INDEX IF NOT EXISTS idx_taxonomy_corrections_channel
+    ON taxonomy_corrections(channel);
+CREATE INDEX IF NOT EXISTS idx_taxonomy_corrections_topic
+    ON taxonomy_corrections(topic);
+CREATE INDEX IF NOT EXISTS idx_taxonomy_corrections_corrected_at
     ON taxonomy_corrections(corrected_at DESC);
 
 -- Classifier confidence (1-5). Nullable: pre-Sprint-17 taxonomy rows keep
 -- NULL until the video is re-classified.
+-- Sprint 19.6 / Fix 2: index._run_migrations routes ALTER TABLE ADD COLUMN
+-- through _safe_alter_add_column, which gates on PRAGMA table_info, so
+-- this is idempotent on a re-run of a half-applied migration.
 ALTER TABLE taxonomy ADD COLUMN confidence INTEGER;

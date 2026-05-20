@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import sqlite3
 import threading
 import time
@@ -92,41 +93,102 @@ def _current_schema_version(conn: sqlite3.Connection) -> int:
     return int(row["v"]) if row and row["v"] is not None else 0
 
 
-def _run_migrations(conn: sqlite3.Connection) -> int:
-    """Apply every pending migration in numeric order. Idempotent: re-running
-    against an up-to-date database is a no-op. Returns the resulting version.
+# ``ALTER TABLE ... ADD COLUMN`` has no IF NOT EXISTS form, so the runner
+# routes any ALTER statement in a migration through _safe_alter_add_column,
+# which gates on PRAGMA table_info. Matched against complete statements as
+# yielded by _iter_sql_statements (trailing ';' optional).
+_ALTER_ADD_COLUMN_RE = re.compile(
+    r"\s*ALTER\s+TABLE\s+(?P<table>\w+)\s+ADD\s+(?:COLUMN\s+)?"
+    r"(?P<column>\w+)\s+(?P<type>.+?);?\s*$",
+    re.IGNORECASE | re.DOTALL,
+)
 
-    Each migration file is applied as one script followed by a
-    schema_version row insert and a commit, so a successfully applied
-    migration is never re-run."""
+
+def _safe_alter_add_column(conn: sqlite3.Connection, table: str,
+                            column: str, type_sql: str) -> None:
+    """Idempotent ALTER TABLE ADD COLUMN. SQLite has no IF NOT EXISTS for
+    ALTER syntax, so we gate the statement on PRAGMA table_info first --
+    a half-applied migration re-running on the next boot is a no-op."""
+    cols = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+    if column in cols:
+        return
+    conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {type_sql.strip()}")
+
+
+def _iter_sql_statements(sql: str):
+    """Yield complete SQL statements from a script. Uses
+    sqlite3.complete_statement so a statement that spans multiple lines is
+    reassembled correctly; line-only ``--`` comments at statement boundaries
+    are dropped so they don't accidentally glue onto the next statement."""
+    buf = ""
+    for line in sql.splitlines(keepends=True):
+        if not buf.strip() and line.lstrip().startswith("--"):
+            continue
+        buf += line
+        if sqlite3.complete_statement(buf):
+            stmt = buf.strip()
+            if stmt:
+                yield stmt
+            buf = ""
+    tail = buf.strip()
+    if tail:
+        yield tail
+
+
+def _run_migrations(conn: sqlite3.Connection) -> int:
+    """Apply every pending migration in numeric order. Idempotent + atomic:
+    each migration runs inside a single explicit transaction, with every
+    CREATE statement using IF NOT EXISTS and every ALTER routed through
+    _safe_alter_add_column, so a crash between the DDL and the
+    schema_version bump is recoverable on the next boot (the re-run sees
+    the existing schema and only adds the schema_version row).
+
+    Returns the highest applied version after the pass."""
     current = _current_schema_version(conn)
     applied = current
-    for version, path in _discover_migrations():
-        if version <= current:
-            continue
-        log.info("applying index migration %04d (%s)", version, path.name)
-        sql = path.read_text(encoding="utf-8")
-        try:
-            conn.executescript(sql)
-            conn.execute(
-                "INSERT INTO schema_version (version, applied_at) VALUES (?, ?)",
-                (version, _now_iso()),
-            )
-            conn.commit()
-        except sqlite3.Error:
-            conn.rollback()
-            log.exception("index migration %04d failed", version)
-            raise
-        applied = version
+    # Take manual control of transactions for the duration of the run;
+    # restored in `finally` so the Index's existing methods keep using
+    # Python's default deferred-isolation semantics afterward.
+    saved_level = conn.isolation_level
+    try:
+        conn.isolation_level = None
+        for version, path in _discover_migrations():
+            if version <= current:
+                continue
+            log.info("applying index migration %04d (%s)", version, path.name)
+            sql = path.read_text(encoding="utf-8")
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+                for stmt in _iter_sql_statements(sql):
+                    m = _ALTER_ADD_COLUMN_RE.match(stmt)
+                    if m:
+                        _safe_alter_add_column(
+                            conn, m.group("table"),
+                            m.group("column"), m.group("type"))
+                    else:
+                        conn.execute(stmt)
+                conn.execute(
+                    "INSERT INTO schema_version (version, applied_at) "
+                    "VALUES (?, ?)", (version, _now_iso()),
+                )
+                conn.execute("COMMIT")
+            except sqlite3.Error:
+                try:
+                    conn.execute("ROLLBACK")
+                except sqlite3.Error:
+                    pass
+                log.exception("index migration %04d failed", version)
+                raise
+            applied = version
+    finally:
+        conn.isolation_level = saved_level
     return applied
 
 
 # --------------------------------------------------------------------------
 # FTS query sanitisation
 # --------------------------------------------------------------------------
-import re as _re
-
-_FTS_TERM_RE = _re.compile(r"[A-Za-z0-9_]+")
+_FTS_TERM_RE = re.compile(r"[A-Za-z0-9_]+")
 
 
 def _fts_query(raw: str) -> str:
