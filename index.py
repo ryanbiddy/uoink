@@ -4,9 +4,13 @@ Replaces the O(n) full-disk-scan code paths (search_yoinks, list_recent, the
 post-extraction `_all-yoinks-index.md` rebuild) with an incremental SQLite
 index, and absorbs jobs.json / taxonomy.json into queryable tables.
 
-The database lives at ``%LOCALAPPDATA%\\Yoink\\index.db``. Both ``sqlite3``
-and the FTS5 extension ship in the Python standard library, so this adds no
-new dependency.
+The database lives under server.py's DATA_ROOT -- ``%LOCALAPPDATA%\\Yoink``
+on Windows, ``~/Library/Application Support/Yoink`` on macOS,
+``$XDG_DATA_HOME/Yoink`` (else ``~/.local/share/Yoink``) on Linux -- with
+the file named ``index.db``. The cross-platform resolution lives in
+``_platform.user_data_dir`` (Sprint 19.5 Stage 1). Both ``sqlite3`` and
+the FTS5 extension ship in the Python standard library, so this module
+adds no new dependency.
 
 This module is self-contained: it owns the schema, the migration runner, and
 all query helpers. server.py and yoink_mcp_tools.py call into ``Index`` and
