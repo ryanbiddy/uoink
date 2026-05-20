@@ -151,13 +151,20 @@ New-Item -ItemType Directory -Force -Path $CacheDir, $BuildDir | Out-Null
 if (-not (Test-Path $IconSrc)) {
     throw "Missing $IconSrc -- regenerate from extension\icons\icon-128-light.png"
 }
-foreach ($f in @('VERSION','server.py','yt_extract.py','topics.json')) {
+foreach ($f in @('VERSION','server.py','index.py','yt_extract.py','topics.json')) {
     if (-not (Test-Path (Join-Path $RepoRoot $f))) {
         throw "Missing $f at repo root"
     }
 }
 if (-not (Test-Path (Join-Path $RepoRoot 'skills\yoink\SKILL.md'))) {
     throw "Missing skills\yoink\SKILL.md at repo root"
+}
+# Sprint 19.6 / Fix 1: every migrations\NNNN_*.sql ships with the helper --
+# missing them silently breaks index.py's _run_migrations at first boot.
+$migrationFiles = Get-ChildItem -Path (Join-Path $RepoRoot 'migrations') `
+    -Filter '*.sql' -ErrorAction SilentlyContinue
+if (-not $migrationFiles -or $migrationFiles.Count -eq 0) {
+    throw "Missing migrations\*.sql at repo root"
 }
 
 # ---- 1. Download dependencies ------------------------------------------
@@ -252,6 +259,7 @@ Remove-Item -Recurse -Force $ffmpegTmp
 # 2g. Server source + helpers + icon
 Write-Host '    copying server source + templates...'
 Copy-Item (Join-Path $RepoRoot 'server.py')      $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'index.py')       $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'yoink_mcp.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'yoink_mcp_tools.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'requirements.txt') $StagingDir -Force
@@ -262,6 +270,46 @@ Copy-Item (Join-Path $TemplatesDir 'stop-server.bat') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.ps1') $StagingDir -Force
 Copy-Item $IconSrc (Join-Path $StagingDir 'yoink.ico') -Force
 Copy-Item (Join-Path $RepoRoot 'skills') (Join-Path $StagingDir 'skills') -Recurse -Force
+# Sprint 19.6 / Fix 1: migrations\*.sql is required at runtime by
+# index._run_migrations; if it's missing the helper crashes at first boot
+# with "no such table: schema_version". Pre-Sprint-19.6 installers shipped
+# without it -- C1 launch blocker.
+Copy-Item (Join-Path $RepoRoot 'migrations') (Join-Path $StagingDir 'migrations') -Recurse -Force
+
+# ---- 2h. Staged smoke (Sprint 19.6 / Fix 1) -----------------------------
+# Verifies the staged tree is actually runnable BEFORE ISCC packages it,
+# so the works-in-repo-breaks-in-installer drift class is caught here
+# rather than at first launch on a user's machine.
+Write-Step 'Staged smoke'
+Push-Location $StagingDir
+try {
+    & '.\python\python.exe' -m py_compile `
+        server.py index.py yoink_mcp.py yoink_mcp_tools.py yt_extract.py
+    if ($LASTEXITCODE -ne 0) {
+        throw 'staged smoke: py_compile of staged Python files failed'
+    }
+    # Verifies index.py can import AND that migrations\*.sql is discoverable
+    # from the staged layout. _run_migrations walks the migrations directory
+    # at Path(__file__).parent.resolve() / "migrations", so a missing folder
+    # means schema_version is never created and Index.open returns version 0.
+    & '.\python\python.exe' -c @'
+import index, tempfile, pathlib
+p = pathlib.Path(tempfile.mkdtemp()) / "test.db"
+idx = index.Index.open(p)
+v = idx._conn.execute("SELECT MAX(version) FROM schema_version").fetchone()[0]
+idx.close()
+if not v:
+    raise SystemExit(f"smoke: Index.open ran but schema_version is empty (v={v}); "
+                     "migrations\\*.sql likely missing from staging")
+print(f"smoke: Index.open OK, schema_version={v}")
+'@
+    if ($LASTEXITCODE -ne 0) {
+        throw 'staged smoke: Index.open against a temp DB failed (missing migrations or import?)'
+    }
+    Write-Host '    Staged smoke OK' -ForegroundColor Green
+} finally {
+    Pop-Location
+}
 
 # ---- 3. Compile installer ----------------------------------------------
 Write-Step 'Compiling installer'
