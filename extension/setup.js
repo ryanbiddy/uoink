@@ -692,42 +692,14 @@ if (ciClearBtn) {
 
 // ---- Hook Type calibration history --------------------------------------
 async function fetchSetupJsonWithToken(path, init = {}) {
-  if (!window.STC || !STC.getToken) {
+  if (!window.STC || !STC.getToken || !globalThis.YoinkUI) {
     return { ok: false, error: "Yoink helper unavailable" };
   }
-  const doFetch = async (token) => {
-    const headers = Object.assign({}, init.headers || {});
-    if (token) headers["X-Yoink-Token"] = token;
-    const res = await fetch(`${SERVER}${path}`, Object.assign({}, init, {
-      headers,
-      mode: "cors",
-      credentials: "omit",
-      cache: init.cache || "no-store",
-    }));
-    let body = null;
-    try { body = await res.json(); } catch { /* empty or non-JSON body */ }
-    return { res, body };
-  };
-
-  let token = await STC.getToken();
-  let out = await doFetch(token);
-  if (out.res.status === 403) {
-    token = await STC.getToken({ refresh: true });
-    out = await doFetch(token);
-  }
-  if (!out.res.ok || !out.body) {
-    return {
-      ok: false,
-      error: (out.body && out.body.error) || `HTTP ${out.res.status}`,
-    };
-  }
-  return out.body;
+  return globalThis.YoinkUI.authedJson(path, init, { server: SERVER });
 }
 
 function hookTypeLabel(value) {
-  return String(value || "")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (ch) => ch.toUpperCase()) || "Unknown";
+  return globalThis.YoinkUI.prettyHookType(value) || "Unknown";
 }
 
 function correctionDateLabel(value) {

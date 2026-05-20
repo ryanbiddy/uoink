@@ -7,7 +7,7 @@
 #   - USE_MOCK_API = false           (extension/popup.js:8)
 #   - INSTALLER_PUBLISHED = true     (extension/setup.js:37)
 #   - All MOCK_FORCE_* flags = false (extension/lib/mock-api.js)
-#   - manifest.json version = 2.0.0  (extension/manifest.json)
+#   - manifest.json version = VERSION file  (extension/manifest.json)
 #   - No console.log("[Yoink]"...)   (extension/lib/extract.js, Sprint 14 S1)
 #   - No obvious dev artifacts       (extension/ tree)
 #
@@ -89,18 +89,22 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 4. manifest.json version = 2.0.0
+# 4. manifest.json version matches VERSION
 # ---------------------------------------------------------------------------
 if [[ ! -f extension/manifest.json ]]; then
   bad "manifest.json: file not found at extension/manifest.json"
+elif [[ ! -f VERSION ]]; then
+  bad "VERSION: file not found at repo root"
 else
+  EXPECTED_VERSION="$(tr -d '[:space:]' < VERSION)"
+  EXPECTED_VERSION_RE="$(printf '%s' "$EXPECTED_VERSION" | sed 's/[][\\.^$*+?{}|()]/\\&/g')"
   VERSION_LINE="$(grep -nE '"version"\s*:\s*"' extension/manifest.json | head -1)"
   if [[ -z "$VERSION_LINE" ]]; then
     bad "manifest.json: version field not found"
-  elif echo "$VERSION_LINE" | grep -qE '"version"\s*:\s*"2\.0\.0"'; then
-    ok "manifest.json: version = 2.0.0  ($VERSION_LINE)"
+  elif echo "$VERSION_LINE" | grep -qE '"version"\s*:\s*"'"$EXPECTED_VERSION_RE"'"'; then
+    ok "manifest.json: version = VERSION ($EXPECTED_VERSION)  ($VERSION_LINE)"
   else
-    bad "manifest.json: version is NOT 2.0.0  ($VERSION_LINE)"
+    bad "manifest.json: version does NOT match VERSION ($EXPECTED_VERSION)  ($VERSION_LINE)"
   fi
 fi
 

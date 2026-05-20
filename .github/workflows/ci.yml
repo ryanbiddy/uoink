@@ -24,6 +24,15 @@ jobs:
         run: |
           find extension -name '*.js' -print0 | xargs -0 -n1 node --check
 
+      - name: Lint extension JavaScript for undefined globals
+        run: |
+          npx --yes eslint@8 --no-eslintrc \
+            --env browser,worker,webextensions,es2022 \
+            --rule 'no-undef: error' \
+            --rule 'no-unused-vars: off' \
+            --global STC --global YoinkUI \
+            $(find extension -name '*.js' -print)
+
       - name: Validate JSON files
         run: |
           python -m json.tool extension/manifest.json >/dev/null
