@@ -43,6 +43,18 @@ def platform_label() -> str:
     }.get(sys.platform, sys.platform)
 
 
+def platform_detail() -> str:
+    """Human-readable ``<os> <arch>`` for /diagnose -- e.g. ``windows
+    AMD64``, ``macos arm64``, ``linux x86_64``. The arch comes from
+    ``platform.machine()`` (stdlib) which is the machine the Python
+    interpreter is running on, not the build target -- so an x86_64
+    Python launched under Rosetta on Apple Silicon returns ``x86_64``,
+    which is the right answer for "can this install run native binaries"."""
+    import platform as _stdlib_platform
+    arch = _stdlib_platform.machine() or "unknown"
+    return f"{platform_label()} {arch}"
+
+
 def keyring_display_name() -> str:
     """Human-readable name of the OS credential store the keyring package
     binds to. Used in /diagnose."""

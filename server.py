@@ -4777,7 +4777,12 @@ def _diagnose_payload() -> dict:
     # 1. helper_responsive -- we are answering this request.
     add("helper_responsive", "ok", None)
 
-    # 2. output_root_writable
+    # 2. platform (Sprint 19.5 Stage 1). The popup uses this to surface
+    # platform-appropriate install / recovery hints rather than the
+    # generic Windows-shaped copy the pre-Stage-1 UI showed everyone.
+    add("platform", "ok", _platform.platform_detail())
+
+    # 3. output_root_writable
     if _is_writable_dir(DESKTOP_ROOT):
         add("output_root_writable", "ok", str(DESKTOP_ROOT))
     else:
@@ -4787,7 +4792,7 @@ def _diagnose_payload() -> dict:
             f"Yoink can't write to {DESKTOP_ROOT}. Check folder "
             "permissions, or set the YOINK_OUTPUT_DIR environment variable.")
 
-    # 3. anthropic_key_set + 4. anthropic_key_valid
+    # 4. anthropic_key_set + 5. anthropic_key_valid
     try:
         key = (_get_saved_anthropic_key() or "").strip()
     except Exception:
@@ -4803,7 +4808,7 @@ def _diagnose_payload() -> dict:
     add("anthropic_key_valid", "skipped",
         "Run POST /settings/test-key to verify")
 
-    # 5. index_db_writable
+    # 6. index_db_writable
     if _is_writable_dir(INDEX_PATH.parent):
         add("index_db_writable", "ok", str(INDEX_PATH))
     else:
@@ -4813,7 +4818,7 @@ def _diagnose_payload() -> dict:
             f"Index database is not writable at {INDEX_PATH}. Search, the "
             "Memory page, and the rate-limit queue will fail.")
 
-    # 6. yt_dlp_available
+    # 7. yt_dlp_available
     status, detail = _probe_command([*YTDLP_CMD, "--version"])
     if status == "ok":
         add("yt_dlp_available", "ok", f"yt-dlp {detail}")
@@ -4823,7 +4828,7 @@ def _diagnose_payload() -> dict:
             "yt-dlp is missing or broken. Reinstall with "
             "`python -m pip install -U yt-dlp`.")
 
-    # 7. keyring_available
+    # 8. keyring_available
     err = _credential_store_error()
     if err is None:
         add("keyring_available", "ok", _keyring_display_name())
@@ -4833,7 +4838,7 @@ def _diagnose_payload() -> dict:
             "OS credential store is unreachable -- the Anthropic API key "
             "cannot be saved between sessions.")
 
-    # 8. ffmpeg_available
+    # 9. ffmpeg_available
     status, detail = _probe_command(["ffmpeg", "-version"])
     if status == "ok":
         add("ffmpeg_available", "ok", detail)
