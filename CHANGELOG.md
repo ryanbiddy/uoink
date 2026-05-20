@@ -4,11 +4,13 @@ All notable changes to Yoink are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). This project follows [semantic versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0] — TBD (launch pending)
+## [2.0.0] - 2026-05-20
 
 The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome extension for creators, MCP server for developers and agents, and the Yoink Operator Skill for clients that support portable skills or system prompts.
 
 ### Added
+
+- **Entity Extraction disclosures (store listing + README).** Added clear disclosures detailing opt-in Entity Extraction calling the Anthropic API via user-provided API key stored securely in Credential Manager. Touched `docs/store-listing.md` and `README.md`.
 
 - **Rate-limit queue + retry (C4).** YouTube rate limits no longer cause terminal failures. Single-video yoinks queue automatically in a SQLite queue and retry with exponential backoff (60s, scaling up to a 15-minute cap, up to 3 attempts). A popup banner displays active queue counts and offers manual cancel or retry-now actions.
 - **Queue management API.** Token-gated endpoints `/queue/status`, `/queue/cancel`, and `/queue/retry-now` power the queue UI.
@@ -55,8 +57,25 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 - **`docs/v2-smoke-test.md`** - 108-checkpoint pre-launch smoke checklist.
 - **Banner-link accessibility.** Disconnect-banner setup link announces "Opens setup guide in a new tab" to screen readers.
 
+### Fixed
+
+- **Windows installer packaging (CC).** Staged `index.py` and `migrations/*` in the Inno Setup script to support fresh database creation and migrations on clean installs. Touched `installer/yoink.iss` and `build.ps1`.
+- **Migration atomicity (CC).** Wrapped database migration logic in a transaction block to ensure partial migration failures roll back cleanly. Touched `server.py`.
+- **Memory page clickjacking protection (Codex).** Set `Content-Security-Policy: frame-ancestors 'none'` headers to prevent the Yoink Memory tab from being embedded in unauthorized frames. Touched `server.py` and `extension/manifest.json`.
+- **Hook Type few-shot prompt injection (CC).** Sanitized corrected Hook Type category strings used in few-shot templates to prevent prompt injection. Touched `server.py`.
+- **Privacy policy storage and Mac Keychain disclosures.** Disclosed local SQLite persistence (`index.db`), soft-delete folder retention (`_yoink-trash/`), and Python `keyring` storage on macOS. Touched `docs/privacy-policy.md` and `docs/store-listing.md`.
+- **Memory page thumbnail blob URL leak (Codex).** Implemented LRU eviction for generated blob URLs to prevent browser memory leaks during extensive search/scroll sessions. Touched `extension/lib/ui.js` and `extension/yoink-memory.js`.
+- **Delete confirm dialog rename (Codex).** Renamed "Delete" confirmation action to "Move to trash" in the delete confirmation dialog to align with the 30-day retention behavior. Touched `extension/yoink-memory.html`.
+- **Version verification in build validation.** Fixed script `verify-launch-readiness.py` to correctly parse model version numbers. Touched `scripts/verify-launch-readiness.py`.
+- **Popup queue rendering exception.** Fixed reference error in queue status rendering within the extension popup when queue state is empty. Touched `extension/popup.js`.
+- **Index batch enrichment optimization.** Optimized `Index.enrich_yoinks(rows)` to fetch taxonomy and health status in batches rather than per-row queries. Touched `server.py`.
+- **MCP index lookup path traversal guard.** Ensured `Index.get_by_slug` resolves paths safely and rejects parent directory references. Touched `server.py`.
+- **Legacy index regeneration overhead.** Offloaded legacy `_all-yoinks-index.md` regeneration from the hot path to a background worker to prevent server blocking. Touched `server.py`.
+
 ### Changed
 
+- **Consolidated extension helpers (Codex).** Unified duplicate storage and formatting helper functions across popup, setup, and memory scripts into `extension/lib/ui.js` to improve maintainability and ensure ESLint compliance. Touched `extension/lib/ui.js`, `extension/popup.js`, `extension/setup.js`, and `extension/yoink-memory.js`.
+- **Changelog and backlog version alignment.** Updated roadmap and backlog items to consistently reference minor version `v2.1` instead of legacy `v1.1`. Touched `README.md` and `BACKLOG.md`.
 - **Clipboard budget preview in popup (C1).** Shows a dynamic token and screenshot count preview ("N screenshots · ~Nk tokens") adjacent to the Send buttons to help users estimate context window consumption before pasting.
 - **Popup progressive disclosure (C2).** Optimizes first-run UI by collapsing advanced settings and secondary panels under a "More options" expander. First-day users see a single clear URL input and Yoink CTA.
 - **Confidence display in popup chips.** Hook chips now display the category alongside the model's confidence rating (e.g., "Contrarian · confidence 5/5") rather than just the category name.

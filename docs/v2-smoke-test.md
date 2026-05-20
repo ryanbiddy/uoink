@@ -162,3 +162,40 @@ Total checkpoints: 120.
 118. [ ] Clipboard budget preview - success: popup shows "N screenshots · ~Nk tokens" next to the Send buttons after a yoink.
 119. [ ] First-load popup (with cleared `chrome.storage.local`) - success: shows only the URL preview and "Yoink" button, with a "More options" expander revealing secondary panels.
 120. [ ] Hook chip in popup - success: displays "Contrarian · confidence 5/5" instead of just the category name.
+
+### 5. Sprint 19 Polish and Diagnostics (C3 + C4 + A3)
+
+#### Helper failure diagnosis (C3)
+1. Stop the helper server via Start Menu → **Stop Yoink Server**.
+2. Open the extension popup. Verify the indicator goes orange within 5 seconds and shows the offline banner.
+3. Click **Settings** to open `setup.html`. Scroll to the "Helper status" panel.
+4. Verify the panel shows the helper is offline and lists recovery steps (e.g., Start Menu search, verify port 5179 is free).
+5. Start the helper server via Start Menu → **Yoink Server**.
+6. Refresh `setup.html` or wait 5 seconds. Verify the panel updates to "Online" and shows the helper version and port.
+
+#### Rate-limit queue + retry (C4)
+1. Trigger a rate-limit queue state:
+   - Propose/simulate a rate limit (or add a dummy queue item via `/jobs` payload manually if testing via Postman).
+   - Verify the popup banner shows the active queue status ("1 item in queue, retrying in 60s").
+   - Click the **Retry Now** button. Verify it attempts immediate extraction.
+   - Click the **Cancel** button on the queue item. Verify the job transitions to `failed` with `error="cancelled by user"`.
+2. Burst-yoink 5 long videos to trigger the 1000-row `pending_yoinks` cap → verify the oldest terminal rows prune automatically without errors.
+
+#### Soft-delete confirmation dialog
+1. Open the Memory tab (`setup.html#memory`).
+2. Click the delete icon (trash can) next to any yoink.
+3. Verify the confirmation dialog reads **"Move to trash"** instead of "Delete" to match the 30-day retention behavior.
+4. Confirm deletion. Verify the yoinked folder is moved to `~/Desktop/Yoink/_yoink-trash/` with the suffix `__deleted-<timestamp>`.
+5. Verify the folder remains readable on disk.
+
+#### FTS5 Search and Calibration (A3)
+1. In the Memory tab, type a unique keyword from a recently yoinked transcript.
+2. Verify the search filters the library list instantly using SQLite FTS5.
+3. Verify search works via the MCP tool `search_yoinks(query="...")`.
+4. In the popup, change a Hook Type classification (e.g., change "Curiosity Gap" to "Stakes").
+5. Verify the correction is saved.
+6. Open the setup page and scroll to the **Hook Calibration** section. Verify your correction is listed.
+
+#### Installation Paths
+1. **Clean install:** Run the installer on a machine without Yoink. Verify the helper starts, writes `index.db` in `%LOCALAPPDATA%\Yoink\`, and the extension indicator goes green.
+2. **Upgrade install:** Install Yoink v1.0, run it, then run the v2.0 installer. Verify the helper migrates `settings.json` and legacy `jobs.json` / `taxonomy.json` records into `index.db` atomically, renaming the source files to `.migrated`.

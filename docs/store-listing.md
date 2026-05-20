@@ -54,8 +54,9 @@ Yoink stays free and local-only by default. Two optional analysis features call 
 
 - **Comment Intelligence** — clusters comment themes, extracts mentioned products, flags notable disagreements
 - **Hook Type classification** — classifies each video's opening style across 9 hook categories
+- **Entity Extraction** — automatically pulls people, tools, products, companies, and topics from every yoinked video's transcript. Powers cross-corpus search across your library via the `find_mentions(entity)` MCP tool.
 
-Both are off by default. Enable per feature on the setup page. Your API key never leaves your machine except for the Comment Intelligence and Hook Type calls made to Anthropic on your behalf. Yoink itself collects nothing.
+Both are off by default. Enable per feature on the setup page. Your API key never leaves your machine except for the Comment Intelligence, Hook Type, and Entity Extraction calls made to Anthropic on your behalf. Yoink itself collects nothing.
 
 ### Optional local feature: Smart Screenshot Picker
 
@@ -120,7 +121,7 @@ https://ryanbiddy.com/yoink/privacy
 > page) at `https://ryanbiddy.com/yoink/privacy`. It already covers the
 > required points:
 > 1. Core extraction is fully local. Yoink itself collects nothing.
-> 2. Optional AI features (Comment Intelligence, Hook Type) call the Anthropic API with the user's own API key when enabled by the user. Smart Screenshot Picker is opt-in but stays fully local — it does not call Anthropic.
+> 2. Optional AI features (Comment Intelligence, Hook Type, Entity Extraction) call the Anthropic API with the user's own API key when enabled by the user. Smart Screenshot Picker is opt-in but stays fully local — it does not call Anthropic.
 > 3. The user's API key is stored in Windows Credential Manager and never transmitted anywhere except to Anthropic in the headers of those API calls.
 > 4. No analytics, telemetry, or remote logging.
 

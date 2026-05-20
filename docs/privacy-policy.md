@@ -43,6 +43,18 @@ Nothing else leaves your machine. No analytics. No telemetry. No usage
 tracking. No crash reporting. The extracted corpus, screenshots, and
 files are written only to folders on your own computer.
 
+### Local data persistence
+
+Yoink stores the following on your machine:
+
+- **Yoinked corpora** — `~/Desktop/Yoink/<topic>/<slug>/` on both Windows and macOS. Plain markdown + JSON + screenshots. Yours to read, edit, delete.
+- **Library index** — `%LOCALAPPDATA%\Yoink\index.db` (Windows) or `~/Library/Application Support/Yoink/index.db` (macOS). SQLite database with FTS5 search index, taxonomy classifications, entity graph, queue, and corrections. Local-only; never transmitted.
+- **Anthropic API key** — Windows Credential Manager (Windows) or Keychain (macOS), via Python `keyring`. Service `Yoink`, username `anthropic_key`. Never stored in plaintext in any settings file.
+- **Soft-deleted yoinks** — when you delete a yoink from the Memory page, the folder moves to `~/Desktop/Yoink/_yoink-trash/<topic>/<slug>__deleted-<timestamp>/`. The content remains readable on disk for 30 days, then is automatically purged by the helper on startup or every 24 hours thereafter. To delete immediately, manually remove the folder from `_yoink-trash/`.
+- **Helper state** — `server.log`, `token.txt`, `server.pid`, and migrated legacy files (`jobs.json.migrated`, `taxonomy.json.migrated`) live alongside `index.db` in the same Application Support / LOCALAPPDATA directory.
+
+None of this data leaves your machine unless you explicitly enable an optional AI feature that calls the Anthropic API with your key.
+
 ## 3. Your Anthropic API key
 
 If you use the optional AI features, you supply your own Anthropic API
@@ -62,7 +74,11 @@ any server — there is no Yoink server to receive it.
   clears it automatically.
 - **Disable any AI feature at any time** from the setup page. With them
   off, Yoink makes no Anthropic calls at all.
-- **Uninstall Yoink at any time.** Remove the extension from chrome://extensions/ and uninstall the Yoink helper from Windows Settings → Apps; this also removes its auto-start entry. Files Yoink already saved to your Desktop remain yours to keep or delete.
+- **Uninstall Yoink at any time.**
+  To fully remove Yoink and its data:
+  1. Remove the extension from `chrome://extensions/`.
+  2. Uninstall the helper from Windows Settings → Apps (Windows) or drag Yoink.app to Trash (macOS).
+  3. Optionally delete `%LOCALAPPDATA%\Yoink\` (Windows) or `~/Library/Application Support/Yoink/` (macOS) and `~/Desktop/Yoink/` to remove all Yoink-managed data including the index, trash, and yoinked corpora.
 
 ## 5. Third parties
 

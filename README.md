@@ -43,6 +43,7 @@ Yoink v2 bundles a portable Skill at `skills/yoink/SKILL.md` and installs it to 
 **AI-powered analysis (v2, BYO Anthropic key)**
 - **Comment Intelligence** — clusters comment themes, extracts mentioned products/tools, flags notable disagreements. Three structured sections appended per video.
 - **Hook Type classification** — classifies each video's opening style across 9 hook categories (curiosity gap, question, contrarian, story open, promise/list, demo, authority, stakes, other) with brief explanation.
+- **Entity Extraction** — pulls entities from each video's transcript into a local queryable graph. Agents call `find_mentions(entity)` to find every video that mentioned a specific person, tool, product, or topic across the user's library.
 
 ### Local feature: Smart Screenshot Picker
 
@@ -61,7 +62,7 @@ Opt-in grid that shows the screenshots embedded in your clipboard paste so you c
 
 ## Install
 
-1. **Download the installer** — grab `Yoink-Setup-2.0.0.exe` from the [latest release](https://github.com/ryanbiddy/yoink/releases/latest). Windows only for v1/v2; macOS in v1.1.
+1. **Download the installer** — grab `Yoink-Setup-2.0.0.exe` from the [latest release](https://github.com/ryanbiddy/yoink/releases/latest). Windows only for v1/v2; macOS in v2.1.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Yoink\` (no admin required). The "Launch Yoink Server now" checkbox on the finish page starts the helper immediately, and an autostart entry runs it on every Windows login.
 3. **Install the extension** from the Chrome Web Store. The first time you launch the popup it'll detect the helper and the indicator will go green within a couple of seconds.
 
@@ -91,7 +92,7 @@ Comment Intelligence, Hook Type classification, and the agent-callable `analyze_
 
 ## Prompt library
 
-The Yoink popup ships with 11 starter prompts ("Decode the hook", "Outline the structure", "Format as Twitter thread", and so on). For v1/v2 the prompts are baked into the extension package and aren't user-editable from the UI — a v1.1 task adds an inline editor that persists user prompts via `chrome.storage.local`.
+The Yoink popup ships with 11 starter prompts ("Decode the hook", "Outline the structure", "Format as Twitter thread", and so on). For v1/v2 the prompts are baked into the extension package and aren't user-editable from the UI — a v2.1 task adds an inline editor that persists user prompts via `chrome.storage.local`.
 
 If you're running from source, the file lives at `extension/prompts.json` and changes take effect the next time you open the popup:
 
@@ -103,14 +104,13 @@ If you're running from source, the file lives at `extension/prompts.json` and ch
 
 ## Topic folders
 
-Videos are auto-sorted into topic folders under `Desktop\Yoink\` based on keyword matches in an internal `topics.json` config that ships with the install. The topic list is fixed in v1/v2; user-editable topics with persistence are on the v1.1 backlog so user edits won't get overwritten by the next installer release.
+Videos are auto-sorted into topic folders under `Desktop\Yoink\` based on keyword matches in an internal `topics.json` config that ships with the install. The topic list is fixed in v1/v2; user-editable topics with persistence are on the v2.1 backlog so user edits won't get overwritten by the next installer release.
 
 ## Roadmap
 
-See [BACKLOG.md](./BACKLOG.md) for v1.1 / v2.1 / v2.5 / v3 plans. Highlights:
+See [BACKLOG.md](./BACKLOG.md) for v2.1 / v2.5 / v3 plans. Highlights:
 
-- **v1.1** (post-launch polish): Mac installer, system tray status, keyboard shortcut, auto-update check, editable prompts library, crash report opt-in
-- **v2.1**: Hook taxonomy query surface, jobs.json compaction
+- **v2.1** (post-launch polish): Mac installer, system tray status, keyboard shortcut, auto-update check, editable prompts library, crash report opt-in, Hook taxonomy query surface, jobs.json compaction
 - **v2.5**: Channel Decoder mode, Niche Corpus mode, Critique-against-corpus
 - **v3**: Send to Project, Podcast extraction, multi-platform video support
 - **v4+**: Hosted version, public HTTPS API, most-yoinked leaderboard
