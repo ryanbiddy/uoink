@@ -142,6 +142,13 @@
     }
     .skip-link:hover { color: var(--text-dim); text-decoration: underline; }
     .platform-note { color: var(--text-mute); font-size: 12px; }
+    [data-win-only],
+    [data-mac-only],
+    [data-linux-only] { display: none !important; }
+    body[data-platform="win"] [data-win-only],
+    body:not([data-platform]) [data-win-only],
+    body[data-platform="mac"] [data-mac-only],
+    body[data-platform="linux"] [data-linux-only] { display: revert !important; }
 
     /* Installer mockup */
     .installer-mock {
@@ -565,7 +572,7 @@
     }
   </style>
 </head>
-<body>
+<body data-platform="win">
   <div class="wrap">
     <div class="brand">
       <img src="icons/icon-128-dark.png" alt="Yoink">
@@ -607,10 +614,16 @@
       </div>
       <p>Yoink runs a tiny program on your computer that does the heavy lifting locally — that's why your data stays private. Nothing leaves your machine except the YouTube transcript request.</p>
 
+      <p class="sub">Yoink starts automatically when you log in, and saves corpora to your Desktop's Yoink folder.</p>
+
       <div class="installer-mock" aria-hidden="true">
         <div class="icon">Y</div>
         <div>
-          <div class="filename">Yoink-Setup-2.0.0.exe</div>
+          <div class="filename">
+            <span data-win-only>Yoink-Setup-2.0.0.exe</span>
+            <span data-mac-only>Yoink-Setup-2.0.0.dmg</span>
+            <span data-linux-only>Yoink helper package</span>
+          </div>
           <div class="caption">Double-click to install. Takes about 30 seconds.</div>
         </div>
       </div>
@@ -618,8 +631,14 @@
       <div class="button-row">
         <a id="download-btn" class="button"
            href="https://github.com/ryanbiddy/yoink/releases/latest"
-           target="_blank" rel="noopener">Download Yoink Setup for Windows</a>
-        <span class="platform-note">Mac coming soon</span>
+           target="_blank" rel="noopener">
+          <span data-win-only>Download Yoink Setup for Windows</span>
+          <span data-mac-only>Download Yoink Setup for Mac</span>
+          <span data-linux-only>Download Yoink helper</span>
+        </a>
+        <span class="platform-note" data-win-only>Windows 10 or later.</span>
+        <span class="platform-note" data-mac-only>macOS 12 Monterey or later, Intel or Apple Silicon.</span>
+        <span class="platform-note" data-linux-only>Linux helper support is for development builds.</span>
       </div>
       <div class="button-row" style="margin-top: 12px;">
         <a id="skip-install" class="skip-link">Skip — I already installed it</a>
@@ -640,14 +659,25 @@
       </div>
 
       <div id="status-instructions" class="hidden">
-        <p>Looks like Yoink isn't running yet. Start it from your Start Menu:</p>
-        <ol class="instructions">
+        <p data-win-only>Looks like Yoink isn't running yet. Start it from your Start Menu:</p>
+        <p data-mac-only>Looks like Yoink isn't running yet. Start it from Applications, or run <code>yoink-helper</code> from Terminal:</p>
+        <p data-linux-only>Looks like Yoink isn't running yet. Start the local helper from your terminal:</p>
+        <ol class="instructions" data-win-only>
           <li>Press the <b>Windows key</b> and type <code>Yoink</code></li>
           <li>Click <b>Yoink Server</b></li>
           <li>Come back here — this page will detect it automatically</li>
         </ol>
+        <ol class="instructions" data-mac-only>
+          <li>Open <b>Applications</b> and launch <b>Yoink</b></li>
+          <li>Or open Terminal and run <code>yoink-helper</code></li>
+          <li>Come back here -- this page will detect it automatically</li>
+        </ol>
+        <ol class="instructions" data-linux-only>
+          <li>Open Terminal and run <code>yoink-helper</code></li>
+          <li>Come back here -- this page will detect it automatically</li>
+        </ol>
 
-        <div class="startmenu-mock" aria-hidden="true">
+        <div class="startmenu-mock" aria-hidden="true" data-win-only>
           <div class="search">
             <span class="search-icon">🔍</span>
             <span class="search-text">Yoink</span>
@@ -667,7 +697,7 @@
             </div>
           </div>
         </div>
-        <p class="startmenu-caption">Your Start Menu should look like this.</p>
+        <p class="startmenu-caption" data-win-only>Your Start Menu should look like this.</p>
       </div>
     </section>
 
