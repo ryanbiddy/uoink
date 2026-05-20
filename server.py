@@ -4527,6 +4527,121 @@ def _start_retry_pending_thread() -> None:
         target=_runner, name="retry-pending", daemon=True).start()
 
 
+# ---------------------------------------------------------------------------
+# /diagnose -- structured self-check (Sprint 19 / C3)
+# ---------------------------------------------------------------------------
+def _keyring_display_name() -> str:
+    if sys.platform == "win32":
+        return "Windows Credential Manager"
+    if sys.platform == "darwin":
+        return "macOS Keychain"
+    return "Secret Service"
+
+
+def _probe_command(cmd: list[str]) -> tuple[str, str | None]:
+    """Run a short version-probe subprocess. Returns (status, detail) where
+    status is 'ok' / 'error' and detail is a one-line message."""
+    try:
+        out = subprocess.run(
+            cmd, capture_output=True, text=True, timeout=10, **SUBPROCESS_KW,
+        )
+    except FileNotFoundError:
+        return "error", "not installed or not on PATH"
+    except (subprocess.TimeoutExpired, OSError) as e:
+        return "error", f"probe failed: {e}"
+    if out.returncode != 0:
+        first_err = (out.stderr or "").strip().splitlines()
+        return "error", first_err[0] if first_err else f"exit code {out.returncode}"
+    first_line = (out.stdout or "").strip().splitlines()
+    return "ok", first_line[0] if first_line else "ok"
+
+
+def _diagnose_payload() -> dict:
+    """Structured self-check (Sprint 19 / C3). Public, no-auth -- the popup
+    polls this when the helper looks unhealthy to surface a specific
+    recovery hint rather than a generic 'helper offline'."""
+    checks: list[dict] = []
+    warnings: list[str] = []
+
+    def add(name: str, status: str, detail: str | None = None) -> None:
+        checks.append({"name": name, "status": status, "detail": detail})
+
+    # 1. helper_responsive -- we are answering this request.
+    add("helper_responsive", "ok", None)
+
+    # 2. output_root_writable
+    if _is_writable_dir(DESKTOP_ROOT):
+        add("output_root_writable", "ok", str(DESKTOP_ROOT))
+    else:
+        add("output_root_writable", "error",
+            f"{DESKTOP_ROOT} is not writable")
+        warnings.append(
+            f"Yoink can't write to {DESKTOP_ROOT}. Check folder "
+            "permissions, or set the YOINK_OUTPUT_DIR environment variable.")
+
+    # 3. anthropic_key_set + 4. anthropic_key_valid
+    try:
+        key = (_get_saved_anthropic_key() or "").strip()
+    except Exception:
+        key = ""
+    if key:
+        add("anthropic_key_set", "ok", None)
+    else:
+        add("anthropic_key_set", "warning", "no key configured")
+        warnings.append(
+            "Anthropic API key not configured. Open setup to add one if you "
+            "want Comment Intelligence, Hook Type, or entity extraction "
+            "(everything else still works without it).")
+    add("anthropic_key_valid", "skipped",
+        "Run POST /settings/test-key to verify")
+
+    # 5. index_db_writable
+    if _is_writable_dir(INDEX_PATH.parent):
+        add("index_db_writable", "ok", str(INDEX_PATH))
+    else:
+        add("index_db_writable", "error",
+            f"{INDEX_PATH.parent} is not writable")
+        warnings.append(
+            f"Index database is not writable at {INDEX_PATH}. Search, the "
+            "Memory page, and the rate-limit queue will fail.")
+
+    # 6. yt_dlp_available
+    status, detail = _probe_command([*YTDLP_CMD, "--version"])
+    if status == "ok":
+        add("yt_dlp_available", "ok", f"yt-dlp {detail}")
+    else:
+        add("yt_dlp_available", "error", detail)
+        warnings.append(
+            "yt-dlp is missing or broken. Reinstall with "
+            "`python -m pip install -U yt-dlp`.")
+
+    # 7. keyring_available
+    err = _credential_store_error()
+    if err is None:
+        add("keyring_available", "ok", _keyring_display_name())
+    else:
+        add("keyring_available", "warning", str(err))
+        warnings.append(
+            "OS credential store is unreachable -- the Anthropic API key "
+            "cannot be saved between sessions.")
+
+    # 8. ffmpeg_available
+    status, detail = _probe_command(["ffmpeg", "-version"])
+    if status == "ok":
+        add("ffmpeg_available", "ok", detail)
+    else:
+        add("ffmpeg_available", "error", detail)
+        warnings.append(
+            "ffmpeg is missing or broken. Screenshot extraction will fail.")
+
+    return {
+        "ok": True,
+        "version": VERSION,
+        "checks": checks,
+        "warnings": warnings,
+    }
+
+
 def _enrich_yoink_row(idx, r: dict) -> dict | None:
     """Shape one index `yoinks` row into the enriched result the popup's
     /recent list and the memory page both consume: fresh health (Sprint
@@ -4804,6 +4919,11 @@ class Handler(BaseHTTPRequestHandler):
             with _backfill_lock:
                 snapshot = dict(_backfill_state)
             return self._send_json(200, {"ok": True, **snapshot})
+        if bare == "/diagnose":
+            # Public, no-auth (same posture as /health). Sprint 19 / C3:
+            # structured self-check the popup uses to surface a specific
+            # recovery hint instead of a generic "helper offline".
+            return self._send_json(200, _diagnose_payload())
         if bare == "/token":
             return self._handle_token()
         # Everything below mutates state or reveals user data -- token-gated.
