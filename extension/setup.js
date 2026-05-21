@@ -42,6 +42,7 @@ const SERVER = "http://127.0.0.1:5179";
 const PING_PATH = "/health";
 const POLL_MS = 2000;
 const AUTO_YOINK_TTL_MS = 60_000;
+let platformOs = "win";
 
 // ---- DOM handles ---------------------------------------------------------
 const params = new URLSearchParams(location.search);
@@ -97,6 +98,57 @@ const mcpConfigEls = {
 const mcpCopyButtons = Array.from(document.querySelectorAll("[data-copy-client]"));
 const skillSystemPrompt = document.getElementById("skill-system-prompt");
 const skillPromptCopyBtn = document.getElementById("skill-prompt-copy");
+
+// ---- Platform detection ---------------------------------------------------
+function normalizePlatform(os) {
+  const value = String(os || "").toLowerCase();
+  if (value === "mac" || value === "darwin" || value === "macos") return "mac";
+  if (value === "win" || value.startsWith("win")) return "win";
+  if (value === "linux" || value === "cros" || value === "openbsd") return "linux";
+  return "win";
+}
+
+function setPlatform(os) {
+  platformOs = normalizePlatform(os);
+  document.body.dataset.platform = platformOs;
+}
+
+function currentPlatform() {
+  return normalizePlatform(document.body.dataset.platform || platformOs);
+}
+
+function startHelperLabel() {
+  if (currentPlatform() === "mac") return "Show Mac start steps";
+  if (currentPlatform() === "linux") return "Show terminal steps";
+  return "Start helper";
+}
+
+function helperOfflineDetail() {
+  if (currentPlatform() === "mac") {
+    return "Open Yoink from Applications, or run yoink-helper from Terminal, then this panel will refresh.";
+  }
+  if (currentPlatform() === "linux") {
+    return "Run yoink-helper from Terminal, then this panel will refresh.";
+  }
+  return "Start Yoink Server from the Windows Start Menu, then this panel will refresh.";
+}
+
+function outputFolderActionLabel() {
+  return currentPlatform() === "mac" ? "Open in Finder" : "Open output folder";
+}
+
+function initPlatformInfo() {
+  setPlatform(document.body.dataset.platform || "win");
+  try {
+    if (chrome && chrome.runtime && chrome.runtime.getPlatformInfo) {
+      chrome.runtime.getPlatformInfo((info) => {
+        setPlatform(info && info.os);
+      });
+    }
+  } catch { /* keep default Windows rendering */ }
+}
+
+initPlatformInfo();
 
 // ---- Suggested-video population -----------------------------------------
 function videoIdFromUrl(url) {
@@ -264,7 +316,7 @@ function diagnoseAction(check) {
   const haystack = `${id} ${detail} ${action}`;
   if (/helper|server|running|start/.test(haystack) && !/anthropic/.test(haystack)) {
     return {
-      label: "Start helper",
+      label: startHelperLabel(),
       run: () => {
         statusInstructions.classList.remove("hidden");
         statusInstructions.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -273,7 +325,7 @@ function diagnoseAction(check) {
   }
   if (/output|folder|writable|write/.test(haystack)) {
     return {
-      label: "Open output folder",
+      label: outputFolderActionLabel(),
       run: async () => {
         const path = check.path || check.folder || check.output_folder || check.output_dir || check.fallback_path;
         if (path && window.STC && STC.openFolder) {
@@ -353,6 +405,7 @@ async function loadDiagnose() {
     });
     const body = await res.json();
     if (!res.ok || !body || body.ok === false) throw new Error((body && body.error) || `HTTP ${res.status}`);
+    if (body.platform || body.os) setPlatform(body.platform || body.os);
     renderDiagnose(body);
   } catch (e) {
     diagnoseList.innerHTML = "";
@@ -367,13 +420,13 @@ async function loadDiagnose() {
     name.textContent = "Helper offline";
     const detail = document.createElement("div");
     detail.className = "diagnose-detail";
-    detail.textContent = "Start Yoink Server from the Windows Start Menu, then this panel will refresh.";
+    detail.textContent = helperOfflineDetail();
     text.appendChild(name);
     text.appendChild(detail);
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "button ghost diagnose-action";
-    btn.textContent = "Start helper";
+    btn.textContent = startHelperLabel();
     btn.addEventListener("click", () => {
       statusInstructions.classList.remove("hidden");
       statusInstructions.scrollIntoView({ behavior: "smooth", block: "start" });
