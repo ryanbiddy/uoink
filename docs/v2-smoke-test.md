@@ -2,7 +2,7 @@
 
 Use this as the one pre-launch checklist. Run on a clean Windows user profile if possible, then repeat the core extraction subset on the normal dev machine.
 
-Total checkpoints: 120.
+Total checkpoints: 127.
 
 ## 1. Core extraction - single-video v1 regression
 
@@ -199,3 +199,14 @@ Total checkpoints: 120.
 #### Installation Paths
 1. **Clean install:** Run the installer on a machine without Yoink. Verify the helper starts, writes `index.db` in `%LOCALAPPDATA%\Yoink\`, and the extension indicator goes green.
 2. **Upgrade install:** Install Yoink v1.0, run it, then run the v2.0 installer. Verify the helper migrates `settings.json` and legacy `jobs.json` / `taxonomy.json` records into `index.db` atomically, renaming the source files to `.migrated`.
+
+### 14. macOS-specific checkpoints (Sprint 19.5)
+
+121. [ ] Install Yoink.dmg → Yoink.app appears in Applications, Gatekeeper passes (notarized).
+122. [ ] First launch → LaunchAgent installed, helper auto-starts at next login.
+123. [ ] /diagnose returns platform: macos arm64 or macos x64.
+124. [ ] Anthropic key saved on Mac → Keychain entry exists (check Keychain Access app: Yoink / anthropic_key).
+125. [ ] Yoink any video → corpus written to ~/Desktop/Yoink/<topic>/<slug>/.
+126. [ ] Memory page action "Open folder" launches Finder at the yoink folder.
+127. [ ] Uninstall → Yoink.app gone, LaunchAgent removed (manual cleanup of Application Support optional).
+

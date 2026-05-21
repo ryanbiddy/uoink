@@ -111,13 +111,14 @@ Protocol validation failures return `4xx` JSON errors. Handled application failu
 
 ## Anthropic API key storage
 
-Comment Intelligence and Hook Type are optional BYO-key features. Normal Yoink extraction works without an Anthropic key.
+Comment Intelligence, Hook Type, and Entity Extraction are optional BYO-key features. Normal Yoink extraction works without an Anthropic key.
 
 Starting in v2.0, the key is stored through Python `keyring`:
 
 - Service: `Yoink`
 - Username: `anthropic_key`
 - Windows backend: Windows Credential Manager
+- macOS backend: macOS Keychain
 
 `settings.json` stores only public booleans and key status flags. `GET /settings` returns `anthropic_key_set: true|false`, never the key itself.
 
@@ -163,6 +164,13 @@ MCP tools reuse the same backend validation for URLs, slugs, job IDs, file paths
 Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`) are version-pinned but not hash-locked yet. Full pip `--require-hashes` is a future hardening item.
 
 The installer is unsigned for launch unless a code-signing certificate is added. Windows SmartScreen warnings are expected for unsigned builds.
+
+## macOS-specific security posture
+
+- **Keychain Storage:** The Anthropic API key is stored securely in the macOS Keychain under the service name `Yoink` (username `anthropic_key`), mirroring the security posture of Windows Credential Manager.
+- **Gatekeeper & Notarization:** The `.dmg` packaging pipeline codesigns `Yoink.app` and notarizes the installer with Apple's developer notarization service to prevent Gatekeeper warnings and protect against tampered downloads.
+- **LaunchAgent Isolation:** Auto-start behavior is handled by a standard LaunchAgent running in user-space (`~/Library/LaunchAgents/com.ryanbiddy.yoink.plist`). The helper runs under the active user's standard permissions, requiring no root or administrator privilege escalation.
+- **Cross-Platform Sandbox:** The `/file` sandbox boundary behaves identically on macOS, resolving paths cross-platform via Python `Path` and restricting file access exclusively to the configured `~/Desktop/Yoink/` output root directory.
 
 ## What Yoink does not collect
 

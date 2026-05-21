@@ -40,6 +40,7 @@ This is the canonical list of what's shipped, what's planned, and what's been ru
 - **Hook Type classification** — 9-category per-video classifier with brief explanation, confidence score, and self-calibrating user corrections
 - **Smart Screenshot Picker** — opt-in post-extraction grid for selecting which screenshots make the clipboard
 - **Setup page** — BYO Anthropic key flow (test, save, clear), feature toggles, MCP config snippet generator, deep-link from popup
+- **macOS helper app (Stage 1)** — cross-platform Python helper code runs natively on macOS, automatically configures LaunchAgent plist auto-start at login, and integrates with the macOS Keychain for Anthropic API key security.
 
 **v2 platform infrastructure**
 - `/jobs`, `/jobs/<id>`, `/jobs/<id>/cancel`, `/jobs?kind=playlist|single` async job API
@@ -154,11 +155,15 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 - **Rationale:** Keyring migration, legacy jobs/taxonomy import into `index.db`, Start Menu entries, and auto-start behavior need testing across three install paths: upgrade-from-v1, uninstall-then-reinstall, and clean-install. Not a feature — a test discipline. Captured here so it doesn't get skipped.
 - **Trigger:** v2.1 cycle
 
-### Mac installer
-- **Destination:** v2.1 (larger item, sequenced after the small wins above)
-- **Rationale:** doubles QA load; ship Windows first
-- **Trigger:** v2.0 launch ships and runs clean for 2 weeks
-- **Notes:** Resend waitlist on landing page is already collecting interest
+### Linux support
+- **Destination:** v2.1 (reconsidered from never)
+- **Rationale:** Same cross-platform helper code already supports Linux; needs a `build-linux.sh` to package `.deb` / `.rpm` / `.AppImage`.
+- **Trigger:** Linux user demand signal.
+
+### Mac auto-update channel
+- **Destination:** v2.2
+- **Rationale:** Current Mac install is a one-shot `.dmg`. Auto-update via Sparkle or similar is a v2.2+ ask.
+- **Trigger:** v2.2+ planning cycle.
 
 ### System tray status app (treat as headline mini-sprint, not punch-list polish)
 - **Destination:** v2.1 (sequenced last in v2.1 — larger than other items)
