@@ -1,4 +1,4 @@
-// Shared Yoink UI/client helpers.
+// Shared Uoink UI/client helpers.
 //
 // Loaded as a classic script so popup/setup/Memory pages, content scripts,
 // and the background service worker can all consume the same small helper
@@ -82,14 +82,14 @@
     if (Array.isArray(data && data.clipboard_screenshots)) {
       return data.clipboard_screenshots.length;
     }
-    const body = String(text || data && (data.corpus_md_paste || data.yoink_md) || "");
+    const body = String(text || data && (data.corpus_md_paste || data.uoink_md || data.yoink_md) || "");
     const matches = body.match(/!\[[^\]]*]\([^)]*\)/g);
     return matches ? matches.length : 0;
   }
 
   function clipboardBudgetFromData(data, clipboardText) {
     if (!data || typeof data !== "object") return null;
-    const text = String(clipboardText || data.corpus_md_paste || data.yoink_md || "");
+    const text = String(clipboardText || data.corpus_md_paste || data.uoink_md || data.yoink_md || "");
     const tokens = Number(data.token_estimate ?? data.clipboard_token_estimate);
     return {
       screenshotCount: screenshotCountFromData(data, text),
@@ -207,7 +207,7 @@
     return row;
   }
 
-  global.YoinkUI = {
+  global.UoinkUI = {
     authedFetch,
     authedJson,
     screenshotCountFromData,
@@ -220,4 +220,65 @@
     healthTooltip,
     renderHealthDots,
   };
+  global.YoinkUI = global.UoinkUI;
+
+  if (typeof customElements !== "undefined") {
+    class UoinkMark extends HTMLElement {
+      connectedCallback() {
+        if (!this.shadowRoot) {
+          this.attachShadow({ mode: "open" });
+          this.render();
+        }
+        this._observer = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            const width = entry.contentRect.width || this.getBoundingClientRect().width;
+            this.updateTips(width);
+          }
+        });
+        this._observer.observe(this);
+      }
+      disconnectedCallback() {
+        if (this._observer) {
+          this._observer.disconnect();
+        }
+      }
+      render() {
+        this.shadowRoot.innerHTML = `
+          <style>
+            :host {
+              display: inline-block;
+              vertical-align: middle;
+            }
+            svg {
+              display: block;
+              width: 100%;
+              height: 100%;
+            }
+          </style>
+          <svg id="svg" viewBox="0 0 100 100">
+            <path d="M 0 0 L 32 0 L 32 60 L 68 60 L 68 0 L 100 0 L 100 80 Q 100 100 80 100 L 20 100 Q 0 100 0 80 Z" fill="currentColor"/>
+            <rect id="tip-left" x="0" y="0" width="32" height="20" fill="#FFF4EC"/>
+            <rect id="tip-right" x="68" y="0" width="32" height="20" fill="#FFF4EC"/>
+          </svg>
+        `;
+      }
+      updateTips(width) {
+        const left = this.shadowRoot.getElementById("tip-left");
+        const right = this.shadowRoot.getElementById("tip-right");
+        if (!left || !right) return;
+        if (width <= 32) {
+          left.setAttribute("height", "20");
+          left.setAttribute("fill", "#FFF4EC");
+          right.setAttribute("height", "20");
+          right.setAttribute("fill", "#FFF4EC");
+        } else {
+          left.setAttribute("height", "14");
+          left.setAttribute("fill", "#FFD23F");
+          right.setAttribute("height", "14");
+          right.setAttribute("fill", "#FFD23F");
+        }
+      }
+    }
+    customElements.define("uoink-mark", UoinkMark);
+  }
 })(typeof self !== "undefined" ? self : globalThis);

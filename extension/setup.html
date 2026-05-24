@@ -3,28 +3,42 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Set up Yoink</title>
+  <title>Set up Uoink</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --yoink-accent: #EA580C;
-      --yoink-accent-soft: rgba(234, 88, 12, 0.15);
-      --yoink-black: #0A0A0A;
-      --yoink-white: #FFFFFF;
-      --bg-card: #161616;
-      --bg-inset: #0f0f0f;
-      --border: #2a2a2a;
-      --border-soft: #232323;
-      --text-dim: #b8b8b8;
-      --text-mute: #888;
-      --ok: #57d983;
-      --warn: #f59e0b;
+      --rust: #C2410C;
+      --vermillion: #FF3D00;
+      --ink: #0A0A0A;
+      --ink-warm: #15110D;
+      --cream: #FFF4EC;
+      --border: #2C2621;
+      --border-soft: #38302A;
+      --uoink-accent: var(--rust);
+      --uoink-accent-soft: rgba(194, 65, 12, 0.15);
+      --uoink-black: var(--ink);
+      --uoink-white: var(--cream);
+      --bg-card: var(--ink-warm);
+      --bg-inset: var(--ink);
+      --text-dim: #C8B19F;
+      --text-mute: #8F7B6E;
+      --ok: #00C853;
+      --warn: #FFD23F;
+      --r-card: 12px;
+      --r-pill: 9999px;
+      --r-corpus: 8px;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --font-display: 'Bungee', sans-serif;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: var(--yoink-black);
-      color: var(--yoink-white);
+      font-family: var(--font-sans);
+      background: var(--uoink-black);
+      color: var(--uoink-white);
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
@@ -40,16 +54,17 @@
       gap: 12px;
       margin-bottom: 32px;
     }
-    .brand img {
+    .brand uoink-mark {
       width: 40px;
       height: 40px;
-      border-radius: 8px;
-      background: var(--yoink-accent);
+      color: var(--cream);
     }
     .brand-name {
+      font-family: var(--font-display);
       font-size: 18px;
       font-weight: 700;
       letter-spacing: -0.01em;
+      color: var(--rust);
     }
     h1 {
       font-size: 30px;
@@ -70,7 +85,7 @@
       margin-bottom: 18px;
       scroll-margin-top: 24px;
     }
-    .step.is-current { border-color: var(--yoink-accent); box-shadow: 0 0 0 3px var(--yoink-accent-soft); }
+    .step.is-current { border-color: var(--uoink-accent); box-shadow: 0 0 0 3px var(--uoink-accent-soft); }
     .step-head {
       display: flex;
       align-items: center;
@@ -91,7 +106,7 @@
       font-weight: 700;
     }
     .step.is-current .step-num,
-    .step.is-done .step-num { background: var(--yoink-accent); color: var(--yoink-black); }
+    .step.is-done .step-num { background: var(--uoink-accent); color: var(--uoink-black); }
     .step.is-done .step-num::before { content: "✓"; }
     .step.is-done .step-num-text { display: none; }
     h2 {
@@ -105,26 +120,28 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: var(--yoink-accent);
-      color: var(--yoink-black);
+      background: var(--uoink-accent);
+      color: var(--uoink-white);
       font-weight: 700;
       font-size: 14px;
       padding: 11px 20px;
-      border-radius: 7px;
+      border-radius: var(--r-pill);
       text-decoration: none;
       border: none;
       cursor: pointer;
       font-family: inherit;
+      transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
     }
-    .button:hover { filter: brightness(1.08); }
-    .button:focus-visible { outline: 2px solid var(--yoink-white); outline-offset: 2px; }
+    .button:hover { background: var(--vermillion); color: var(--uoink-black); }
+    .button:active { transform: translateY(1px) scale(0.97); }
+    .button:focus-visible { outline: 2px solid var(--vermillion); outline-offset: 2px; }
     .button.ghost {
       background: transparent;
-      color: var(--yoink-white);
-      border: 1px solid #3a3a3a;
+      color: var(--uoink-white);
+      border: 1px solid var(--border);
       font-weight: 500;
     }
-    .button.ghost:hover { background: #1a1a1a; }
+    .button.ghost:hover { background: var(--vermillion); color: var(--uoink-black); border-color: var(--vermillion); }
     .button.disabled,
     .button[disabled] { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
     .button-row {
@@ -165,9 +182,9 @@
       width: 56px;
       height: 56px;
       flex-shrink: 0;
-      background: linear-gradient(135deg, var(--yoink-accent), #c2410c);
+      background: linear-gradient(135deg, var(--uoink-accent), #c2410c);
       border-radius: 10px;
-      color: var(--yoink-white);
+      color: var(--uoink-white);
       font-weight: 800;
       font-size: 30px;
       display: flex;
@@ -178,7 +195,7 @@
     .installer-mock .filename {
       font-family: "SF Mono", "Consolas", monospace;
       font-size: 13px;
-      color: var(--yoink-white);
+      color: var(--uoink-white);
     }
     .installer-mock .caption {
       color: var(--text-mute);
@@ -244,12 +261,12 @@
       border-radius: 4px;
       margin-bottom: 10px;
       font-size: 13px;
-      color: var(--yoink-white);
+      color: var(--uoink-white);
     }
     .startmenu-mock .search-icon { color: var(--text-mute); }
     .startmenu-mock .search-text {
       flex: 1;
-      color: var(--yoink-white);
+      color: var(--uoink-white);
     }
     .startmenu-mock .result {
       display: flex;
@@ -261,17 +278,17 @@
       color: var(--text-dim);
     }
     .startmenu-mock .result.highlight {
-      background: var(--yoink-accent-soft);
-      color: var(--yoink-white);
-      border-left: 3px solid var(--yoink-accent);
+      background: var(--uoink-accent-soft);
+      color: var(--uoink-white);
+      border-left: 3px solid var(--uoink-accent);
       padding-left: 7px;
     }
     .startmenu-mock .result-icon {
       width: 22px;
       height: 22px;
       border-radius: 4px;
-      background: var(--yoink-accent);
-      color: var(--yoink-black);
+      background: var(--uoink-accent);
+      color: var(--uoink-black);
       font-weight: 800;
       font-size: 14px;
       display: flex;
@@ -322,7 +339,7 @@
     .video-title {
       font-weight: 600;
       font-size: 14px;
-      color: var(--yoink-white);
+      color: var(--uoink-white);
       margin-bottom: 4px;
       overflow: hidden;
       display: -webkit-box;
@@ -344,14 +361,14 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      color: var(--yoink-white);
+      color: var(--uoink-white);
       font-size: 14px;
       font-weight: 600;
     }
     .toggle-row input {
       width: 18px;
       height: 18px;
-      accent-color: var(--yoink-accent);
+      accent-color: var(--uoink-accent);
     }
     .field-label {
       display: block;
@@ -362,17 +379,17 @@
     .input {
       width: 100%;
       padding: 11px 12px;
-      border-radius: 7px;
+      border-radius: var(--r-corpus);
       border: 1px solid var(--border);
       background: var(--bg-inset);
-      color: var(--yoink-white);
-      font-family: inherit;
+      color: var(--uoink-white);
+      font-family: var(--font-mono);
       font-size: 14px;
     }
     .input:focus {
       outline: none;
-      border-color: var(--yoink-accent);
-      box-shadow: 0 0 0 3px var(--yoink-accent-soft);
+      border-color: var(--vermillion);
+      box-shadow: 0 0 0 3px rgba(255, 61, 0, 0.15);
     }
     .settings-status {
       color: var(--text-mute);
@@ -383,10 +400,10 @@
     .settings-status.warn { color: var(--warn); }
     .cost-estimate {
       padding: 10px 12px;
-      border-radius: 7px;
-      border: 1px solid rgba(234, 88, 12, 0.25);
-      background: rgba(234, 88, 12, 0.08);
-      color: var(--yoink-white);
+      border-radius: var(--r-corpus);
+      border: 1px solid rgba(194, 65, 12, 0.25);
+      background: rgba(194, 65, 12, 0.08);
+      color: var(--uoink-white);
       font-size: 13px;
       line-height: 1.45;
     }
@@ -397,7 +414,7 @@
       margin-top: 3px;
     }
     .settings-link {
-      color: var(--yoink-accent);
+      color: var(--uoink-accent);
       font-size: 13px;
       text-decoration: none;
     }
@@ -425,7 +442,7 @@
     .diagnose-icon.warn { color: var(--warn); }
     .diagnose-icon.error { color: #f87171; }
     .diagnose-name {
-      color: var(--yoink-white);
+      color: var(--uoink-white);
       font-size: 13px;
       font-weight: 700;
     }
@@ -441,7 +458,7 @@
       font-size: 12px;
     }
     .calibration-summary {
-      color: var(--yoink-white);
+      color: var(--uoink-white);
       font-size: 13px;
       line-height: 1.45;
       margin: 0 0 10px;
@@ -464,7 +481,7 @@
       border-radius: 8px;
     }
     .correction-title {
-      color: var(--yoink-white);
+      color: var(--uoink-white);
       font-weight: 600;
       font-size: 13px;
       overflow: hidden;
@@ -480,7 +497,7 @@
       text-align: left;
       cursor: pointer;
     }
-    button.correction-title:hover { color: var(--yoink-accent); }
+    button.correction-title:hover { color: var(--uoink-accent); }
     .correction-types {
       color: var(--text-dim);
       font-size: 12px;
@@ -511,7 +528,7 @@
     .mcp-card-title {
       font-size: 14px;
       font-weight: 700;
-      color: var(--yoink-white);
+      color: var(--uoink-white);
     }
     .mcp-copy {
       padding: 7px 10px;
@@ -554,7 +571,7 @@
       color: var(--text-mute);
       text-align: center;
     }
-    .footer a { color: var(--yoink-accent); text-decoration: none; }
+    .footer a { color: var(--uoink-accent); text-decoration: none; }
     .footer a:hover { text-decoration: underline; }
 
     .hidden { display: none !important; }
@@ -575,21 +592,31 @@
 <body data-platform="win">
   <div class="wrap">
     <div class="brand">
-      <img src="icons/icon-128-dark.png" alt="Yoink">
-      <div class="brand-name">Yoink</div>
+      <uoink-mark></uoink-mark>
+      <div class="brand-name">UOINK</div>
     </div>
 
     <h1 id="page-title">Let's get you set up.</h1>
-    <p class="lede" id="page-lede">Two minutes. Then you'll be yoinking videos straight into Claude.</p>
+    <p class="lede" id="page-lede">Two minutes. Then you'll be uoinking videos straight into Claude.</p>
 
     <section id="helper-status-section" class="step">
       <div class="step-head">
         <div class="step-num"><span class="step-num-text">Status</span></div>
         <h2>Helper status</h2>
       </div>
-      <p>Yoink checks the local helper and shows the next action if something needs attention.</p>
+      <p>Uoink checks the local helper and shows the next action if something needs attention.</p>
       <div id="diagnose-list" class="diagnose-list" aria-live="polite">
         <p class="sub">Checking helper status...</p>
+      </div>
+      <div class="diagnose-list" style="margin-top: 12px;">
+        <div class="diagnose-row">
+          <div class="diagnose-icon ok" style="color: var(--ok);">📁</div>
+          <div>
+            <div class="diagnose-name">Installation folder</div>
+            <div class="diagnose-detail" id="install-folder-path">%LOCALAPPDATA%\Uoink</div>
+          </div>
+          <button id="open-install-folder-btn" class="button ghost diagnose-action" type="button">Open folder</button>
+        </div>
       </div>
     </section>
 
@@ -597,9 +624,9 @@
     <section id="step-1" class="step">
       <div class="step-head">
         <div class="step-num"><span class="step-num-text">1</span></div>
-        <h2>What is Yoink?</h2>
+        <h2>What is Uoink?</h2>
       </div>
-      <p>Yoink turns YouTube videos into structured input for Claude or ChatGPT — full transcript, screenshots at any interval, comments, and channel context, packaged into one paste-ready document.</p>
+      <p>Uoink turns YouTube videos into structured input for Claude or ChatGPT — full transcript, screenshots at any interval, comments, and channel context, packaged into one paste-ready document.</p>
       <p class="sub">Skip the "summarize this for me" routine. Hand the model the whole video and ask it anything.</p>
       <div class="button-row">
         <button id="get-started-btn" class="button" type="button">Get started →</button>
@@ -610,19 +637,19 @@
     <section id="step-2" class="step">
       <div class="step-head">
         <div class="step-num"><span class="step-num-text">2</span></div>
-        <h2>Install the Yoink helper</h2>
+        <h2>Install the Uoink helper</h2>
       </div>
-      <p>Yoink runs a tiny program on your computer that does the heavy lifting locally — that's why your data stays private. Nothing leaves your machine except the YouTube transcript request.</p>
+      <p>Uoink runs a tiny program on your computer that does the heavy lifting locally — that's why your data stays private. Nothing leaves your machine except the YouTube transcript request.</p>
 
-      <p class="sub">Yoink starts automatically when you log in, and saves corpora to your Desktop's Yoink folder.</p>
+      <p class="sub">Uoink starts automatically when you log in, and saves corpora to your Desktop's Uoink folder.</p>
 
       <div class="installer-mock" aria-hidden="true">
-        <div class="icon">Y</div>
+        <div class="icon">U</div>
         <div>
           <div class="filename">
-            <span data-win-only>Yoink-Setup-2.0.0.exe</span>
-            <span data-mac-only>Yoink-Setup-2.0.0.dmg</span>
-            <span data-linux-only>Yoink helper package</span>
+            <span data-win-only>Uoink-Setup-2.1.0.exe</span>
+            <span data-mac-only>Uoink-Setup-2.1.0.dmg</span>
+            <span data-linux-only>Uoink helper package</span>
           </div>
           <div class="caption">Double-click to install. Takes about 30 seconds.</div>
         </div>
@@ -630,11 +657,11 @@
 
       <div class="button-row">
         <a id="download-btn" class="button"
-           href="https://github.com/ryanbiddy/yoink/releases/latest"
+           href="https://github.com/ryanbiddy/uoink/releases/latest"
            target="_blank" rel="noopener">
-          <span data-win-only>Download Yoink Setup for Windows</span>
-          <span data-mac-only>Download Yoink Setup for Mac</span>
-          <span data-linux-only>Download Yoink helper</span>
+           <span data-win-only>Download Uoink Setup for Windows</span>
+           <span data-mac-only>Download Uoink Setup for Mac</span>
+           <span data-linux-only>Download Uoink helper</span>
         </a>
         <span class="platform-note" data-win-only>Windows 10 or later.</span>
         <span class="platform-note" data-mac-only>macOS 12 Monterey or later, Intel or Apple Silicon.</span>
@@ -649,19 +676,19 @@
     <section id="step-3" class="step">
       <div class="step-head">
         <div class="step-num"><span class="step-num-text">3</span></div>
-        <h2>Verify Yoink is running</h2>
+        <h2>Verify Uoink is running</h2>
       </div>
-      <p>This page will detect Yoink the moment it comes online.</p>
+      <p>This page will detect Uoink the moment it comes online.</p>
 
       <div id="status-block" class="status-block is-checking" role="status" aria-live="polite">
         <span class="status-dot"></span>
-        <span id="status-text" class="status-text">Checking for Yoink...</span>
+        <span id="status-text" class="status-text">Checking for Uoink...</span>
       </div>
 
       <div id="status-instructions" class="hidden">
-        <p data-win-only>Looks like Yoink isn't running yet. Start it from your Start Menu:</p>
-        <p data-mac-only>Looks like Yoink isn't running yet. Start it from Applications, or run <code>yoink-helper</code> from Terminal:</p>
-        <p data-linux-only>Looks like Yoink isn't running yet. Start the local helper from your terminal:</p>
+        <p data-win-only>Your tray app is called 'Yoink' (to keep your local files safe and compatible), but the extension is Uoink. Press Win key, type 'Yoink', and click 'Yoink Server' to spin it up.</p>
+        <p data-mac-only>Looks like Uoink isn't running yet. Start it from Applications, or run <code>uoink-helper</code> from Terminal:</p>
+        <p data-linux-only>Looks like Uoink isn't running yet. Start the local helper from your terminal:</p>
         <ol class="instructions" data-win-only>
           <li>Press the <b>Windows key</b> and type <code>Yoink</code></li>
           <li>Click <b>Yoink Server</b></li>
@@ -669,11 +696,11 @@
         </ol>
         <ol class="instructions" data-mac-only>
           <li>Open <b>Applications</b> and launch <b>Yoink</b></li>
-          <li>Or open Terminal and run <code>yoink-helper</code></li>
+          <li>Or open Terminal and run <code>uoink-helper</code></li>
           <li>Come back here -- this page will detect it automatically</li>
         </ol>
         <ol class="instructions" data-linux-only>
-          <li>Open Terminal and run <code>yoink-helper</code></li>
+          <li>Open Terminal and run <code>uoink-helper</code></li>
           <li>Come back here -- this page will detect it automatically</li>
         </ol>
 
@@ -701,11 +728,11 @@
       </div>
     </section>
 
-    <!-- Step 4: First yoink -->
+    <!-- Step 4: First uoink -->
     <section id="step-4" class="step hidden">
       <div class="step-head">
         <div class="step-num"><span class="step-num-text">4</span></div>
-        <h2>You're all set! Try your first yoink.</h2>
+        <h2>You're all set! Try your first uoink.</h2>
       </div>
       <p>Here's a fresh one to test with — pick this one or any YouTube video you've been meaning to dig into.</p>
 
@@ -715,12 +742,12 @@
           <div id="suggested-title" class="video-title">—</div>
           <div id="suggested-byline" class="video-byline">—</div>
           <div class="button-row">
-            <button id="yoink-suggested-btn" class="button" type="button">Yoink this video →</button>
+            <button id="uoink-suggested-btn" class="button" type="button">Uoink this video →</button>
           </div>
         </div>
       </div>
 
-      <p class="sub">Or click the orange <b>Yoink</b> button under any YouTube video.</p>
+      <p class="sub">Or click the rust <b>Uoink</b> button under any YouTube video.</p>
     </section>
 
     <section id="comment-intelligence" class="step">
@@ -728,8 +755,8 @@
         <div class="step-num"><span class="step-num-text">AI</span></div>
         <h2>Comment Intelligence</h2>
       </div>
-      <p>Optionally analyze the top YouTube comments with your own Anthropic API key. Normal Yoink works without this.</p>
-      <p class="sub">Your key is stored locally in your operating system credential store. Yoink never returns it to the extension or logs it.</p>
+      <p>Optionally analyze the top YouTube comments with your own Anthropic API key. Normal Uoink works without this.</p>
+      <p class="sub">Your key is stored locally in your operating system credential store. Uoink never returns it to the extension or logs it.</p>
       <div id="ai-cost-estimate" class="cost-estimate hidden"></div>
 
       <div class="settings-grid">
@@ -743,7 +770,7 @@
           <input id="anthropic-key" class="input" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-...">
         </label>
 
-        <div id="ci-status" class="settings-status">Start Yoink to manage settings.</div>
+        <div id="ci-status" class="settings-status">Start Uoink to manage settings.</div>
 
         <div class="button-row">
           <button id="ci-save-btn" class="button" type="button">Save settings</button>
@@ -774,8 +801,8 @@
         <div class="step-num"><span class="step-num-text">HC</span></div>
         <h2>Hook Type calibration</h2>
       </div>
-      <p>Review recent corrections you've made when Yoink picked the wrong hook category.</p>
-      <div id="hook-calibration-summary" class="calibration-summary">Start Yoink to load calibration history.</div>
+      <p>Review recent corrections you've made when Uoink picked the wrong hook category.</p>
+      <div id="hook-calibration-summary" class="calibration-summary">Start Uoink to load calibration history.</div>
       <div id="hook-corrections-list" class="corrections-list" aria-live="polite"></div>
     </section>
 
@@ -784,7 +811,7 @@
         <div class="step-num"><span class="step-num-text">SS</span></div>
         <h2>Smart Screenshot Picker</h2>
       </div>
-      <p>When enabled, the popup shows a thumbnail grid of the screenshots embedded in your clipboard paste (count set below) so you can pick which to keep. Single-video yoinks only - playlists are always text-only in clipboard.</p>
+      <p>When enabled, the popup shows a thumbnail grid of the screenshots embedded in your clipboard paste (count set below) so you can pick which to keep. Single-video uoinks only - playlists are always text-only in clipboard.</p>
 
       <div class="settings-grid">
         <label class="toggle-row">
@@ -796,7 +823,7 @@
           <span class="field-label">Screenshots included in clipboard paste</span>
           <input id="clipboard-screenshot-cap" class="input" type="number" min="0" max="12" step="1" value="4">
         </label>
-        <p class="sub">Default 4. Yoink still saves the full screenshot set on disk; this only controls embedded images in the AI paste.</p>
+        <p class="sub">Default 4. Uoink still saves the full screenshot set on disk; this only controls embedded images in the AI paste.</p>
       </div>
     </section>
 
@@ -805,18 +832,18 @@
         <div class="step-num"><span class="step-num-text">MCP</span></div>
         <h2>Agent Integration</h2>
       </div>
-      <p>MCP lets Claude Desktop, Cursor, and other AI agents call Yoink as a local tool: yoink a video, search saved corpora, inspect a transcript, or run comment and hook analysis.</p>
-      <p class="sub">Yoink does not edit your agent configs automatically. Copy the snippet for your client and paste it into that client's MCP settings. Stdio is the supported launch path; local HTTP JSON-RPC is experimental.</p>
+      <p>MCP lets Claude Desktop, Cursor, and other AI agents call Uoink as a local tool: uoink a video, search saved corpora, inspect a transcript, or run comment and hook analysis.</p>
+      <p class="sub">Uoink does not edit your agent configs automatically. Copy the snippet for your client and paste it into that client's MCP settings. Stdio is the supported launch path; local HTTP JSON-RPC is experimental.</p>
 
       <div class="mcp-path">
         <div><b>Stdio entry point</b></div>
-        <div id="mcp-stdio-path">Start Yoink to load the MCP path.</div>
+        <div id="mcp-stdio-path">Start Uoink to load the MCP path.</div>
       </div>
 
       <div class="mcp-path">
         <div><b>Experimental local HTTP JSON-RPC</b></div>
-        <div id="mcp-http-url">Start Yoink to load the HTTP URL.</div>
-        <div id="mcp-http-token" style="margin-top:6px;">Token appears after Yoink is running.</div>
+        <div id="mcp-http-url">Start Uoink to load the HTTP URL.</div>
+        <div id="mcp-http-token" style="margin-top:6px;">Token appears after Uoink is running.</div>
       </div>
 
       <div class="mcp-grid">
@@ -825,28 +852,28 @@
             <div class="mcp-card-title">Claude Desktop</div>
             <button class="button ghost mcp-copy" type="button" data-copy-client="claude">Copy config</button>
           </div>
-          <pre id="mcp-config-claude" class="mcp-config">Start Yoink to generate this config.</pre>
+          <pre id="mcp-config-claude" class="mcp-config">Start Uoink to generate this config.</pre>
         </div>
         <div class="mcp-card">
           <div class="mcp-card-head">
             <div class="mcp-card-title">ChatGPT Desktop</div>
             <button class="button ghost mcp-copy" type="button" data-copy-client="chatgpt">Copy config</button>
           </div>
-          <pre id="mcp-config-chatgpt" class="mcp-config">Start Yoink to generate this config.</pre>
+          <pre id="mcp-config-chatgpt" class="mcp-config">Start Uoink to generate this config.</pre>
         </div>
         <div class="mcp-card">
           <div class="mcp-card-head">
             <div class="mcp-card-title">Cursor</div>
             <button class="button ghost mcp-copy" type="button" data-copy-client="cursor">Copy config</button>
           </div>
-          <pre id="mcp-config-cursor" class="mcp-config">Start Yoink to generate this config.</pre>
+          <pre id="mcp-config-cursor" class="mcp-config">Start Uoink to generate this config.</pre>
         </div>
         <div class="mcp-card">
           <div class="mcp-card-head">
             <div class="mcp-card-title">Generic stdio</div>
             <button class="button ghost mcp-copy" type="button" data-copy-client="generic">Copy config</button>
           </div>
-          <pre id="mcp-config-generic" class="mcp-config">Start Yoink to generate this config.</pre>
+          <pre id="mcp-config-generic" class="mcp-config">Start Uoink to generate this config.</pre>
         </div>
       </div>
     </section>
@@ -854,30 +881,30 @@
     <section id="skill-settings" class="step">
       <div class="step-head">
         <div class="step-num"><span class="step-num-text">Skill</span></div>
-        <h2>Yoink Operator Skill (recommended for Claude users)</h2>
+        <h2>Uoink Operator Skill (recommended for Claude users)</h2>
       </div>
-      <p>The Skill turns your AI client into a YouTube creator research analyst when it works with Yoink corpora. It adds citation discipline, operator-grade analysis, tweet-mode hook autopsies, and the Yoink Hook Type taxonomy.</p>
+      <p>The Skill turns your AI client into a YouTube creator research analyst when it works with Uoink corpora. It adds citation discipline, operator-grade analysis, tweet-mode hook autopsies, and the Uoink Hook Type taxonomy.</p>
       <p class="sub">Use the one-liner for clients that support skills natively. For everything else, copy the system prompt below.</p>
 
       <div class="mcp-grid">
         <div class="mcp-card">
           <div class="mcp-card-title">Claude Code</div>
-          <div class="mcp-path">claude plugin install github.com/ryanbiddy/yoink</div>
+          <div class="mcp-path">claude plugin install github.com/ryanbiddy/uoink</div>
         </div>
 
         <div class="mcp-card">
           <div class="mcp-card-title">OpenClaw (after ClawHub publication)</div>
-          <div class="mcp-path">openclaw skills install ryanbiddy/yoink</div>
+          <div class="mcp-path">openclaw skills install ryanbiddy/uoink</div>
         </div>
 
         <div class="mcp-card">
           <div class="mcp-card-title">Hermes Agent</div>
-          <div class="mcp-path">hermes skills install https://raw.githubusercontent.com/ryanbiddy/yoink/main/skills/yoink/SKILL.md</div>
+          <div class="mcp-path">hermes skills install https://raw.githubusercontent.com/ryanbiddy/uoink/main/skills/uoink/SKILL.md</div>
         </div>
 
         <div class="mcp-card">
           <div class="mcp-card-title">Cursor / Codex CLI / Gemini CLI / Windsurf</div>
-          <p class="sub">Manual drop: copy SKILL.md from your install at <code>%LOCALAPPDATA%\Yoink\skills\yoink\SKILL.md</code> into your client's skills directory.</p>
+          <p class="sub">Manual drop: copy SKILL.md from your install at <code>%LOCALAPPDATA%\Uoink\skills\uoink\SKILL.md</code> into your client's skills directory.</p>
         </div>
 
         <div class="mcp-card">
@@ -885,13 +912,13 @@
             <div class="mcp-card-title">Any other client</div>
             <button id="skill-prompt-copy" class="button ghost mcp-copy" type="button">Copy system prompt</button>
           </div>
-          <textarea id="skill-system-prompt" class="mcp-config" readonly>Start Yoink to load the system prompt.</textarea>
+          <textarea id="skill-system-prompt" class="mcp-config" readonly>Start Uoink to load the system prompt.</textarea>
         </div>
       </div>
     </section>
 
     <div class="footer">
-      Made by ReplayRyan · <a href="https://ryanbiddy.com/yoink" target="_blank" rel="noopener">ryanbiddy.com/yoink</a>
+      Made by ReplayRyan · <a href="https://uoink.video" target="_blank" rel="noopener">uoink.video</a> · <a href="mailto:hi@uoink.video">hi@uoink.video</a> · <a href="https://uoink.video/privacy" target="_blank" rel="noopener">Privacy</a>
     </div>
   </div>
 
