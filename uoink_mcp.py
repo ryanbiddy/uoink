@@ -235,4 +235,10 @@ for _fn, _alias_name, _alias_desc in _DEPRECATED_ALIASES:
 
 
 if __name__ == "__main__":
+    # `uoink doctor` / dry-run support: `python uoink_mcp.py --doctor` and
+    # `--migrate-dry-run` delegate to the server CLI (server is already
+    # imported above) instead of starting the stdio transport.
+    _argv = sys.argv[1:]
+    if "--doctor" in _argv or "--migrate-dry-run" in _argv:
+        raise SystemExit(server.run_cli(_argv))
     mcp.run(transport="stdio")

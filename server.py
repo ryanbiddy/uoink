@@ -62,6 +62,7 @@ if _BIN_DIR.is_dir():
 from yt_extract import parse_srt, slugify, fmt_time  # noqa: E402
 import index  # noqa: E402  -- local SQLite library-index module
 import _platform  # noqa: E402  -- cross-platform path / OS helpers
+import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
 
 # --- Constants -------------------------------------------------------------
 HOST = "127.0.0.1"
@@ -4907,10 +4908,25 @@ def _diagnose_payload() -> dict:
             f"Output folder fallback in effect: uoinks are being saved to "
             f"{DESKTOP_ROOT} because the Desktop folder was not writable. The "
             "extension's /file sandbox still serves both locations.")
+    # v2.1 migration signal. The extension popup polls /diagnose to decide
+    # whether to offer the opt-in "Move your saved uoinks to Desktop\Uoink\?"
+    # prompt (the Desktop-corpus move is user-confirmed, never automatic).
+    # Also flags a failed keyring migration so the user is told to re-enter
+    # their Anthropic key rather than hitting a silent empty key (design Q4 A).
+    try:
+        migration = migrate_install.migration_status()
+    except Exception as e:
+        migration = {"error": str(e)}
+    if migration.get("keyring_legacy_present") and not key:
+        warnings.append(
+            "Your Anthropic key didn't carry over from the Yoink install. "
+            "Re-enter it on the setup page to restore Comment Intelligence, "
+            "Hook Type, and entity extraction.")
     return {
         "ok": True,
         "version": VERSION,
         "output_root_fallback": _OUTPUT_ROOT_FALLBACK,
+        "migration": migration,
         "checks": checks,
         "warnings": warnings,
     }
@@ -5589,7 +5605,14 @@ class Handler(BaseHTTPRequestHandler):
     # that do not load SKILL.md natively. Token-gated because it reveals the
     # local install layout and should follow the rest of setup's private API.
     def _handle_skill_system_prompt(self):
-        prompt_path = HERE / "skills" / "yoink" / "system-prompt.md"
+        # The skill folder is renamed skills/yoink -> skills/uoink by the
+        # extension/skill agent (out of this PR's scope). Resolve the new
+        # location first and fall back to the legacy one so this endpoint
+        # works whether or not that rename has merged yet.
+        skill_dir = HERE / "skills" / "uoink"
+        if not skill_dir.is_dir():
+            skill_dir = HERE / "skills" / "yoink"
+        prompt_path = skill_dir / "system-prompt.md"
         try:
             body = prompt_path.read_text(encoding="utf-8").encode("utf-8")
         except OSError:
@@ -5654,9 +5677,30 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_cancel(body)
         if bare == "/session/open":
             return self._handle_session_open(body)
+        if bare == "/migration/move-desktop-corpus":
+            return self._handle_move_desktop_corpus(body)
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})
+
+    def _handle_move_desktop_corpus(self, body: dict):
+        """v2.1 opt-in Desktop-corpus migration (design Q5 A). The extension
+        popup offers "Move your saved uoinks to Desktop\\Uoink\\? [Move] [Keep
+        both]"; [Move] posts mode="move", [Keep both] posts mode="copy". The
+        helper performs the file operation and returns the outcome. Never runs
+        automatically -- this endpoint is the user-confirmed trigger."""
+        mode = body.get("mode") if isinstance(body, dict) else None
+        if mode not in ("move", "copy"):
+            return self._send_json(
+                400, {"ok": False, "error": "mode must be 'move' or 'copy'"})
+        try:
+            result = migrate_install.migrate_desktop_corpus(mode=mode)
+        except Exception as e:
+            log.exception("desktop corpus migration failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        outcome = result.get("outcome", "")
+        ok = outcome in ("moved", "copied", "no_legacy_corpus")
+        return self._send_json(200 if ok else 500, {"ok": ok, **result})
 
     def _validate_session_id(self, body: dict):
         """Pull and validate session_id from a request body. Returns
@@ -6436,6 +6480,16 @@ def main():
         log.info("Uoink server already running on http://%s:%d -- exiting", HOST, PORT)
         sys.exit(0)
 
+    # v2.1: one-time Yoink->Uoink install migration. Copy-not-move and fully
+    # idempotent, so this is a near-no-op on every boot after the first. Runs
+    # before _get_index() so the copied index.db / settings are in place under
+    # the new \Uoink\ DATA_ROOT before anything reads them. Never fatal.
+    try:
+        _mig = migrate_install.run_migration(app_dir=HERE)
+        log.info("install migration: %s", _mig.get("outcome"))
+    except Exception as e:
+        log.warning("install migration raised (non-fatal): %s", e)
+
     # Sprint 19 / Wave 1 Fix 4: if Desktop\Yoink isn't writable, swap the
     # active output root to %LOCALAPPDATA%\Yoink\output before the first
     # /extract would try to write to it.
@@ -6511,5 +6565,37 @@ def main():
         server.server_close()
 
 
-if __name__ == "__main__":
+def _print_json(payload: dict) -> None:
+    print(json.dumps(payload, indent=2, default=str))
+
+
+def doctor_payload() -> dict:
+    """`uoink doctor`: the /diagnose self-check plus the install-migration
+    status, for support triage from the console without the popup."""
+    return {
+        "diagnose": _diagnose_payload(),
+        "migration": migrate_install.migration_status(),
+    }
+
+
+def run_cli(argv: list[str]) -> int:
+    """Tiny CLI dispatcher for the helper. Returns a process exit code.
+
+    - --migrate-dry-run : print exactly what the Yoink->Uoink migration would
+      copy / move / delete and the keyring entry it'd rewrite, changing
+      nothing. De-risks the clean-VM upgrade test.
+    - --doctor          : print the /diagnose payload + migration status.
+    (no flag)           : run the server.
+    """
+    if "--migrate-dry-run" in argv:
+        _print_json(migrate_install.run_migration(dry_run=True, app_dir=HERE))
+        return 0
+    if "--doctor" in argv:
+        _print_json(doctor_payload())
+        return 0
     main()
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(run_cli(sys.argv[1:]))
