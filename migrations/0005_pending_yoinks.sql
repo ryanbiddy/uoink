@@ -1,4 +1,4 @@
--- Yoink library index -- rate-limit retry queue (v5, Sprint 19 / C4).
+-- Uoink library index -- rate-limit retry queue (v5, Sprint 19 / C4).
 -- Applied by index._run_migrations() on top of 0004. Backs the
 -- queue+retry flow that absorbs YouTube 429s: /extract enqueues the URL
 -- here instead of erroring, and a background worker retries with
