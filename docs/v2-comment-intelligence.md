@@ -1,10 +1,10 @@
-# Yoink v2 Comment Intelligence contract
+# Uoink v2 Comment Intelligence contract
 
 Status: implemented in `codex/v2-sprint2`; settings extended in `codex/v2-sprint3`; key storage moved to OS keyring in v2.1 Sprint 7
 
 ## Overview
 
-Comment Intelligence is an optional BYO Anthropic-key feature. Normal Yoink extraction works without a key. When enabled, Yoink fetches the top YouTube comments as it already does in v1, then starts a separate background analysis pass that appends structured comment insight sections to the per-video corpus file.
+Comment Intelligence is an optional BYO Anthropic-key feature. Normal Uoink extraction works without a key. When enabled, Uoink fetches the top YouTube comments as it already does in v1, then starts a separate background analysis pass that appends structured comment insight sections to the per-video corpus file.
 
 The internal tool-facing function is named `analyze_comments(comments)`. It intentionally returns vendor-neutral structured data so Sprint 4 can expose it as an MCP tool without coupling the tool name to Anthropic.
 
@@ -13,7 +13,7 @@ The internal tool-facing function is named `analyze_comments(comments)`. It inte
 Both settings endpoints require the v1 auth header:
 
 ```http
-X-Yoink-Token: <token>
+X-Uoink-Token: <token>
 Content-Type: application/json
 ```
 
@@ -55,8 +55,8 @@ Field rules:
 - `anthropic_key` is optional. If omitted, the existing saved key is preserved.
 - `anthropic_key` as a non-empty string replaces the saved key.
 - `anthropic_key` as `null` or an empty string clears the saved key.
-- Starting in v2.1, the key is stored in the OS keyring. On Windows this is Windows Credential Manager via the Python `keyring` package, using service `Yoink` and username `anthropic_key`. `settings.json` stores only booleans plus `anthropic_key_invalid`.
-- Legacy plaintext `anthropic_key` values in `%LOCALAPPDATA%\Yoink\settings.json` are migrated to keyring on helper startup and removed from `settings.json`.
+- Starting in v2.1, the key is stored in the OS keyring. On Windows this is Windows Credential Manager via the Python `keyring` package, using service `Uoink` and username `anthropic_key`. `settings.json` stores only booleans plus `anthropic_key_invalid`.
+- Legacy plaintext `anthropic_key` values in `%LOCALAPPDATA%\Uoink\settings.json` are migrated to keyring on helper startup and removed from `settings.json`.
 
 Response body matches `GET /settings`:
 
@@ -161,9 +161,9 @@ The first implementation uses `claude-haiku-4-5-20251001` through Anthropic's Me
 1. `_run_extraction()` writes the normal per-video corpus with the Top Comments placeholder.
 2. `_start_comments_thread()` starts the existing comments fetch in the background.
 3. When comments are fetched, the comments worker rewrites the Top Comments section and updates the JSON sidecar.
-4. If Comment Intelligence is enabled, a key is set, and at least 5 comments exist, Yoink starts a second background thread for analysis.
+4. If Comment Intelligence is enabled, a key is set, and at least 5 comments exist, Uoink starts a second background thread for analysis.
 5. The analysis thread calls `analyze_comments()` with the top 50 comments.
-6. When analysis finishes, Yoink inserts/replaces the Comment Intelligence block in the per-video `.md` and updates the JSON sidecar.
+6. When analysis finishes, Uoink inserts/replaces the Comment Intelligence block in the per-video `.md` and updates the JSON sidecar.
 
 Playlist jobs do not wait for Comment Intelligence. The combined playlist corpus snapshots whatever sections exist when `/jobs/<id>` transitions to `completed`.
 

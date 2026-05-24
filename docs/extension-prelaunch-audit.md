@@ -1,4 +1,4 @@
-# Yoink extension pre-launch audit
+# Uoink extension pre-launch audit
 
 **Date:** 2026-05-16
 **Branch audited:** `claude/v2-sprint13` (off `v2-integration` @ `4087486`)
@@ -55,7 +55,7 @@ shipped fix, and a clean checkout of `v2-integration` builds broken.
 
 ### S1 — Unconditional console.log of every extraction request
 - **Ref:** `extension/lib/extract.js:167`
-- **Summary:** `console.log("[Yoink] POST", targetUrl, requestBody)` runs
+- **Summary:** `console.log("[Uoink] POST", targetUrl, requestBody)` runs
   on every single extraction (happy path, not an error path), printing
   the request URL and body to the console of every YouTube page and the
   service worker — noisy and unprofessional for a public ship.
@@ -154,7 +154,7 @@ assessed and fixed (if needed) in Codex's `setup.html` lane.
 ## Out-of-scope observations (FYI, not findings)
 
 - `setup.html:509` and `setup.js:22-30` carry `1.0.0` strings
-  (`Yoink-Setup-1.0.0.exe`, version comments). These are in Codex's lane
+  (`Uoink-Setup-1.0.0.exe`, version comments). These are in Codex's lane
   and were not audited; flagged only so Codex/Ryan can confirm whether
   the installer keeps its own `1.0.0` versioning independent of the
   extension's `2.0.0`.

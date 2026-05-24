@@ -1,11 +1,11 @@
-# Yoink Progress Log
+# Uoink Progress Log
 
-> **Domain note:** This historical log references `yoink.video`. The current production URL is `ryanbiddy.com/yoink` (the `yoink.video` domain belongs to a different product).
+> **Domain note:** This historical log references `yoink.video`. The current production URL is `uoink.video` (the `yoink.video` domain belongs to a different product).
 
 ## Weekend 1 — v1 build (this weekend)
 
 ### Done
-- Rebrand from yt-extractor to Yoink
+- Rebrand from yt-extractor to Uoink
 - Full v1 corpus format (metadata, thumbnail, description, tags, transcript, screenshots, comments, channel context)
 - Two destination buttons (Claude + ChatGPT)
 - Prompt library with 8 starter prompts
@@ -34,5 +34,5 @@
 - **Theme-aware toolbar icon.** `manifest.action.theme_icons` is wired with light/dark variants, but both currently resolve to the white Y (because most users are dark-mode and the black Y disappeared in their toolbars). Light-mode users will see a white Y on a light toolbar — also invisible. Re-cut the black variant before ship and restore proper theme split.
 - **Topic classifier scores ties poorly.** Substring scoring with no tie-breaker means a video that hits one keyword in two categories lands in whichever was defined first. Fine for v1 but produces surprises on edge content. v2: per-keyword weights or simple TF-IDF.
 - **Session-end no longer auto-opens Claude.** This is intentional (the destination buttons let the user pick), but the popup-end notification toast may not be obvious enough. Watch for confused user reports.
-- **`/open-folder` sandbox is path-based.** Resolves the requested folder against `Desktop\Yoink\` via `relative_to`. Works on Windows but is brittle if the user moves the output root via a future setting. Tighten to a configurable allowlist when that setting lands.
+- **`/open-folder` sandbox is path-based.** Resolves the requested folder against `Desktop\Uoink\` via `relative_to`. Works on Windows but is brittle if the user moves the output root via a future setting. Tighten to a configurable allowlist when that setting lands.
 - **`combined.md` references in archived sessions.** `_build_corpus` was updated to read `yoink.md`, but any session created before this build still has per-video `combined.md` files. The corpus build silently shows "yoink.md not found" for those entries. v1.0.1 patch: fall back to combined.md for legacy sessions.

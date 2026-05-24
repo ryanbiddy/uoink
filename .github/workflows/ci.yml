@@ -105,12 +105,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Guard security doc version drift
-        run: |
-          if grep -nE 'v2\.1' docs/security.md; then
-            echo "docs/security.md still references v2.1"
-            exit 1
-          fi
+      # Removed in v2.1: the "guard security doc version drift" step (which
+      # failed the build if "v2.1" appeared in docs/security.md) is dropped
+      # per the approved decision -- security.md is now the v2.1 launch-facing
+      # security model and legitimately references v2.1. See the §9 commit.
 
       - name: Compare VERSION and manifest
         run: |

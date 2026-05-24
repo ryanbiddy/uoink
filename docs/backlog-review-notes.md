@@ -1,6 +1,6 @@
 # Backlog draft review notes from build lens
 
-Source reviewed: `C:\Users\hello\OneDrive\Desktop\Yoink\BACKLOG-draft.md` because `BACKLOG-draft.md` is not present in this worktree at `c6bfbe5`. `BACKLOG.md` in this worktree is older than the draft and still describes pre-v2 planning.
+Source reviewed: `C:\Users\hello\OneDrive\Desktop\Uoink\BACKLOG-draft.md` because `BACKLOG-draft.md` is not present in this worktree at `c6bfbe5`. `BACKLOG.md` in this worktree is older than the draft and still describes pre-v2 planning.
 
 - SCOPE-QUESTION: `BACKLOG-draft.md` is not committed on `v2-integration` in this worktree. If it is intended to be the canonical backlog, commit it or rename it to `BACKLOG.md` before using it as planning input.
 - REORDER: API key encryption, job persistence across server restart, and single-video job logging are listed under v2.1 but shipped in Sprint 7. Move them to Shipped or a "v2.1 built, awaiting integration smoke" section.
@@ -13,7 +13,7 @@ Source reviewed: `C:\Users\hello\OneDrive\Desktop\Yoink\BACKLOG-draft.md` becaus
 - REORDER: YouTube Shorts support audit should be pre-launch or immediate v2.1, not v2.5. The backend normalizes `/shorts/`, but content-script UI and screenshot density still need confirmation.
 - SCOPE-QUESTION: System tray status app is probably not a small v1.1 polish item. It creates a new packaged runtime surface, tray icon lifecycle, Windows notification quirks, and future Mac divergence. Keep it, but treat as a headline mini-sprint.
 - REORDER: Keyboard shortcut and right-click video-link context menu are lower backend risk than Mac installer/system tray. If v1.1 needs quick visible wins, these are likely safer earlier picks.
-- SCOPE-QUESTION: Editable topics.json should specify storage. Current installer ships `topics.json` read-only under `%LOCALAPPDATA%\Yoink`; decide whether edits live in server-managed settings, a user data file, or extension storage.
+- SCOPE-QUESTION: Editable topics.json should specify storage. Current installer ships `topics.json` read-only under `%LOCALAPPDATA%\Uoink`; decide whether edits live in server-managed settings, a user data file, or extension storage.
 - MISSING: Add "corpus schema/version migration" before Channel Decoder and Niche Corpus. Multi-video features will rely on sidecar JSON stability; the schema needs a version and migration story.
 - SCOPE-QUESTION: Niche Corpus mode is underspecified enough that build cannot start. It needs source strategy: YouTube search scraping via yt-dlp, YouTube Data API, user-provided playlist/search URL, or MCP-agent-assisted search.
 - SCOPE-QUESTION: Trend detection within saved niches requires a time-series index, not just folders. Decide whether it uses upload date, yoink date, Hook Type taxonomy, topic tags, or channel metadata.
@@ -21,4 +21,4 @@ Source reviewed: `C:\Users\hello\OneDrive\Desktop\Yoink\BACKLOG-draft.md` becaus
 - SCOPE-QUESTION: Linux support may not be "likely never" if MCP-led positioning works. You do not need a full tray/installer first; a documented dev/stdio path could satisfy technical users cheaply.
 - MISSING: Add "installer update/migration smoke matrix." Keyring migration, jobs.json restore, Start Menu entries, and auto-start should be tested across upgrade, uninstall/reinstall, and clean install.
 - REORDER: Diagnostic export button should probably move up. It is cheap and becomes more valuable now that there are settings, keyring state, jobs, MCP config, and AI feature toggles to debug.
-- SCOPE-QUESTION: Custom output folder picker says "Currently fixed to `Documents\Yoink`" in the draft, but current code resolves the Desktop known folder and writes `Desktop\Yoink`. Correct the premise before scoping.
+- SCOPE-QUESTION: Custom output folder picker says "Currently fixed to `Documents\Uoink`" in the draft, but current code resolves the Desktop known folder and writes `Desktop\Uoink`. Correct the premise before scoping.

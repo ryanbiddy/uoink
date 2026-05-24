@@ -1,4 +1,4 @@
-# Yoink Installers — Build Guide
+# Uoink Installers — Build Guide
 
 ## Quick start (Windows)
 
@@ -7,7 +7,7 @@
 .\build.ps1
 ```
 
-The script downloads dependencies on first run (~80 MB cached under `build\cache\`), stages the install layout, and compiles `build\Yoink-Setup-2.0.0.exe`.
+The script downloads dependencies on first run (~80 MB cached under `build\cache\`), stages the install layout, and compiles `build\Uoink-Setup-2.1.0.exe`.
 
 To wipe everything and rebuild from scratch:
 
@@ -51,17 +51,17 @@ The build script `build.sh` (to be fully implemented in Stage 2) automates the m
    - Embeds native `ffmpeg` and `ffprobe` binaries for macOS.
 
 2. **Package Application:**
-   - Packages the Python server code and dependencies into a standard `Yoink.app` bundle layout.
-   - Configures the LaunchAgent plist (`com.ryanbiddy.yoink.plist`) for login auto-start behavior.
+   - Packages the Python server code and dependencies into a standard `Uoink.app` bundle layout.
+   - Configures the LaunchAgent plist (`com.ryanbiddy.uoink.plist`) for login auto-start behavior.
 
 3. **Code Sign and Notarize:**
-   - Signs the `Yoink.app` bundle and all internal binaries (`ffmpeg`, `python`, etc.) using `codesign` with your Developer ID Application identity.
-   - Archives the application into `Yoink-Setup-2.0.0.dmg` using `create-dmg`.
+   - Signs the `Uoink.app` bundle and all internal binaries (`ffmpeg`, `python`, etc.) using `codesign` with your Developer ID Application identity.
+   - Archives the application into `Uoink-Setup-2.1.0.dmg` using `create-dmg`.
    - Code-signs the `.dmg` container.
    - Submits the `.dmg` to Apple's Notarization Service using `xcrun notarytool`.
    - Staples the notarization ticket to the `.dmg` using `xcrun stapler staple`.
 
-The resulting artifact is output as `build/Yoink-Setup-2.0.0.dmg`.
+The resulting artifact is output as `build/Uoink-Setup-2.1.0.dmg`.
 
 ## Architecture: why Python embeddable + Inno Setup
 
@@ -82,29 +82,29 @@ The 120 MB install footprint is acceptable; the extension already implies users 
 
 ## What gets bundled
 
-The installer lays out `%LOCALAPPDATA%\Yoink\`:
+The installer lays out `%LOCALAPPDATA%\Uoink\`:
 
 ```
 python\           Python 3.11 embeddable + Lib\site-packages with yt-dlp/Pillow/MCP/keyring
 bin\              ffmpeg.exe, ffprobe.exe (PATH-prepended by server.py)
 server.py         The local HTTP helper
-yoink_mcp.py      MCP stdio entry point for agent clients
-yoink_mcp_tools.py Shared MCP tool registry
+uoink_mcp.py      MCP stdio entry point for agent clients
+uoink_mcp_tools.py Shared MCP tool registry
 requirements.txt  Dev/runtime MCP SDK + keyring pins
 yt_extract.py     Imported by server.py (parse_srt, slugify, fmt_time)
 topics.json       Topic-folder routing rules
 stop-server.bat   Reads server.pid and kills the helper
 stop-server.ps1   PowerShell variant + defensive command-line sweep
-skills\yoink\     Yoink Operator Skill, plugin manifest, and system prompt
-yoink.ico         Used for shortcuts and the uninstaller chrome
+skills\uoink\     Uoink Operator Skill, plugin manifest, and system prompt
+uoink.ico         Used for shortcuts and the uninstaller chrome
 unins000.exe      Inno Setup writes this; runs the uninstaller
 ```
 
 Plus, Windows-side:
 
-- Start Menu group `Yoink` with **Yoink Server** (start), **Stop Yoink Server**, **Yoink folder**, **Uninstall Yoink**.
-- `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Yoink` value pointing at `pythonw.exe server.py` so the helper auto-starts on login. Removed cleanly on uninstall (`uninsdeletevalue`).
-- Optional **Launch Yoink Server now** checkbox on the finish page (default checked).
+- Start Menu group `Uoink` with **Uoink Server** (start), **Stop Uoink Server**, **Uoink folder**, **Uninstall Uoink**.
+- `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\Uoink` value pointing at `pythonw.exe server.py` so the helper auto-starts on login. Removed cleanly on uninstall (`uninsdeletevalue`).
+- Optional **Launch Uoink Server now** checkbox on the finish page (default checked).
 
 The helper runs under `pythonw.exe`, so there's no console window. `server.py` writes `server.pid` on startup and removes it on graceful exit; `stop-server.bat` reads it.
 
@@ -155,7 +155,7 @@ Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`) are version-pinned
 | MCP Python SDK | Update `$MCP_VERSION` in `build.ps1` and the matching `mcp==...` pin in `requirements.txt`. |
 | keyring | Update `$KEYRING_VERSION` in `build.ps1` and the matching `keyring==...` pin in `requirements.txt`. |
 | ffmpeg | gyan.dev rolls the static "release essentials" build forward; the URL stays the same. To pin, swap to a versioned URL from the same site. |
-| Yoink itself | Update `$VERSION` in `build.ps1`, `AppVersion` in `installer\yoink.iss`, `VERSION` in `server.py`, and `version` in `extension\manifest.json`. The output filename and the registry/Start Menu names will follow. |
+| Uoink itself | Update `$VERSION` in `build.ps1`, `AppVersion` in `installer\uoink.iss`, `VERSION` in `server.py`, and `version` in `extension\manifest.json`. The output filename and the registry/Start Menu names will follow. |
 
 ## How `server.py` finds bundled binaries
 
@@ -173,23 +173,23 @@ yt-dlp is invoked as `[sys.executable, "-m", "yt_dlp"]`, so the right interprete
 
 ### Dev mode output root override
 
-By default, Yoink writes extracted videos under the user's Desktop output root (`Desktop\Yoink`, honoring Windows known-folder / OneDrive Desktop redirection). In dev mode, that can be awkward if the repo itself lives on the Desktop: personal yoinks may appear inside or next to the worktree.
+By default, Uoink writes extracted videos under the user's Desktop output root (`Desktop\Uoink`, honoring Windows known-folder / OneDrive Desktop redirection). In dev mode, that can be awkward if the repo itself lives on the Desktop: personal yoinks may appear inside or next to the worktree.
 
-Set `YOINK_OUTPUT_DIR` to an existing writable directory before starting `server.py` to override the output root:
+Set `UOINK_OUTPUT_DIR` to an existing writable directory before starting `server.py` to override the output root:
 
 ```powershell
 New-Item -ItemType Directory -Force C:\TestYoinkOut | Out-Null
-$env:YOINK_OUTPUT_DIR = 'C:\TestYoinkOut'
+$env:UOINK_OUTPUT_DIR = 'C:\TestYoinkOut'
 python server.py
 ```
 
-If the env var is missing, points at a non-existent path, or is not writable, Yoink falls back to the normal Desktop root. The installed Start Menu shortcut does not set this variable; it is intended for local development and support smoke tests.
+If the env var is missing, points at a non-existent path, or is not writable, Uoink falls back to the normal Desktop root. The installed Start Menu shortcut does not set this variable; it is intended for local development and support smoke tests.
 
 ## Known issues
 
 ### Antivirus warnings on unsigned builds
 
-`Yoink-Setup-2.0.0.exe` is unsigned. SmartScreen will show "Windows protected your PC" the first time a user runs it, and some AV products may quarantine it. There are three mitigations, in order of cost:
+`Uoink-Setup-2.1.0.exe` is unsigned. SmartScreen will show "Windows protected your PC" the first time a user runs it, and some AV products may quarantine it. There are three mitigations, in order of cost:
 
 1. **None** — accept the SmartScreen click-through ("More info" → "Run anyway"). Document it on `setup.html` so users know what to expect. Acceptable for v2 if launch volume is small.
 2. **Code signing** — buy an OV cert (~$70/yr from one of the few remaining issuers) and sign the installer + `pythonw.exe` with `signtool.exe`. Removes most AV friction but doesn't fully clear SmartScreen until reputation builds.
@@ -209,24 +209,24 @@ Tracked as a v1.1 task: store user-overridden prompts in `chrome.storage.local` 
 
 ### `topics.json` is read-only after install
 
-`topics.json` ships with the installer and lives in `%LOCALAPPDATA%\Yoink\`. Users can edit it (the path is user-writable) but there's no UI for it; today this is a power-user knob. Treat it as configuration that the next installer version will overwrite.
+`topics.json` ships with the installer and lives in `%LOCALAPPDATA%\Uoink\`. Users can edit it (the path is user-writable) but there's no UI for it; today this is a power-user knob. Treat it as configuration that the next installer version will overwrite.
 
 ## Launch checklist
 
 Before flipping the extension's download button live:
 
-1. **Build a release artifact:** `.\build.ps1` → produces `build\Yoink-Setup-2.0.0.exe`.
+1. **Build a release artifact:** `.\build.ps1` → produces `build\Uoink-Setup-2.1.0.exe`.
 2. **Smoke-test on a clean Windows VM** (see Testing matrix below).
 3. **Tag the release in git:** `git tag v2.0.0 && git push --tags`.
 4. **Publish to GitHub releases:**
-   - Create a new release at `https://github.com/ryanbiddy/yoink/releases/new`.
-   - Tag: `v2.0.0`. Title: `Yoink 2.0.0`.
-   - Attach `build\Yoink-Setup-2.0.0.exe` as the release asset.
+   - Create a new release at `https://github.com/ryanbiddy/uoink/releases/new`.
+   - Tag: `v2.0.0`. Title: `Uoink 2.0.0`.
+   - Attach `build\Uoink-Setup-2.1.0.exe` as the release asset.
    - Publish (not draft).
-   - Verify `https://github.com/ryanbiddy/yoink/releases/latest/download/Yoink-Setup-2.0.0.exe` resolves to the file.
+   - Verify `https://github.com/ryanbiddy/uoink/releases/latest/download/Uoink-Setup-2.1.0.exe` resolves to the file.
 5. **Flip the extension's `INSTALLER_PUBLISHED` flag:**
    - Edit `extension/setup.js` and set `const INSTALLER_PUBLISHED = true;`.
-   - Reload the extension and visit `setup.html` -- the **Download Yoink Setup for Windows** button should now be active and link to the latest release.
+   - Reload the extension and visit `setup.html` -- the **Download Uoink Setup for Windows** button should now be active and link to the latest release.
    - Commit + push: `git commit -am "Enable installer download button (release published)"`.
 6. **Publish the extension** to the Chrome Web Store with the updated `setup.js`.
 
@@ -236,14 +236,14 @@ The flag exists so the extension can ship to early users *before* the installer 
 
 After `build.ps1` finishes, smoke-test by:
 
-1. **Fresh install** — run `Yoink-Setup-2.0.0.exe` on a Windows VM that doesn't have Yoink. Confirm:
-   - Default install path is `%LOCALAPPDATA%\Yoink`.
-   - "Launch Yoink Server now" is checked by default on the finish page.
+1. **Fresh install** — run `Uoink-Setup-2.1.0.exe` on a Windows VM that doesn't have Uoink. Confirm:
+   - Default install path is `%LOCALAPPDATA%\Uoink`.
+   - "Launch Uoink Server now" is checked by default on the finish page.
    - After finish, `Get-Process pythonw` shows a process whose path is inside the install dir.
    - The browser extension's popup turns green within ~3 seconds.
 2. **Auto-start** — restart Windows (or sign out and back in). Confirm the helper is running again from the registry Run key.
-3. **Stop and restart** — Start Menu → Yoink → Stop Yoink Server. Extension popup goes orange. Start Menu → Yoink → Yoink Server. Goes green again.
-4. **Uninstall** — Settings → Apps → Yoink → Uninstall. After completion verify:
-   - `%LOCALAPPDATA%\Yoink` is gone (or close to gone — log files may remain if the server was hard-killed).
-   - The HKCU `Run\Yoink` value is gone (`reg query HKCU\Software\Microsoft\Windows\CurrentVersion\Run`).
+3. **Stop and restart** — Start Menu → Uoink → Stop Uoink Server. Extension popup goes orange. Start Menu → Uoink → Uoink Server. Goes green again.
+4. **Uninstall** — Settings → Apps → Uoink → Uninstall. After completion verify:
+   - `%LOCALAPPDATA%\Uoink` is gone (or close to gone — log files may remain if the server was hard-killed).
+   - The HKCU `Run\Uoink` value is gone (`reg query HKCU\Software\Microsoft\Windows\CurrentVersion\Run`).
    - The Start Menu group is gone.
