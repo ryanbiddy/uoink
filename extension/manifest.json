@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Yoink",
-  "short_name": "Yoink",
-  "version": "2.0.0",
-  "description": "Yoink any YouTube video into Claude or ChatGPT — full transcript, screenshots, and metadata in one structured doc.",
+  "name": "Uoink",
+  "short_name": "Uoink",
+  "version": "2.1.0",
+  "description": "The YouTube layer for any AI. Transcripts, screenshots, and comments in one paste.",
+  "homepage_url": "https://uoink.video",
   "permissions": ["clipboardWrite", "notifications", "storage", "contextMenus", "activeTab", "offscreen"],
   "host_permissions": [
     "https://www.youtube.com/*",
@@ -15,17 +16,17 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "icons/icon-16-light.png",
-      "32": "icons/icon-32-light.png",
-      "48": "icons/icon-48-light.png",
-      "128": "icons/icon-128-light.png"
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
     }
   },
   "icons": {
-    "16": "icons/icon-16-light.png",
-    "32": "icons/icon-32-light.png",
-    "48": "icons/icon-48-light.png",
-    "128": "icons/icon-128-light.png"
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "background": {
     "service_worker": "background.js"
@@ -41,5 +42,13 @@
       "js": ["lib/extract.js", "lib/ui.js", "content.js"],
       "run_at": "document_idle"
     }
-  ]
+  ],
+  "commands": {
+    "uoink-video": {
+      "suggested_key": {
+        "default": "Alt+U"
+      },
+      "description": "Uoink the current YouTube video"
+    }
+  }
 }
