@@ -1,5 +1,5 @@
 # run-build.ps1
-# Orchestrator for the Yoink v1 weekend build.
+# Orchestrator for the Uoink v1 weekend build.
 
 $ErrorActionPreference = "Stop"
 
@@ -33,17 +33,17 @@ $prompts = @(
 )
 
 $smokeTests = @{
-    1 = "Refresh extension. Click button on a YouTube video. Confirm Desktop\Yoink\ is created. Confirm git push succeeded."
-    2 = "Restart server. Reload extension. Yoink a video with comments. Open yoink.md and verify ALL sections (metadata, thumbnail, description, tags, transcript, screenshots, comments, channel context). Verify clipboard has yoink.md content."
-    3 = "Reload extension. Yoink a video. Confirm Send to Claude AND Send to ChatGPT both work. Click a prompt button, confirm clipboard gets the prompt. Edit prompts.json, reopen popup, confirm new prompt shows."
-    4 = "Reload extension. Yoink works. Stop server, try to yoink, confirm clean error message. Restart server, confirm popup health indicator updates."
+    1 = "Refresh extension. Click button on a YouTube video. Confirm Desktop\Uoink\ is created. Confirm git push succeeded."
+    2 = "Restart server. Reload extension. Uoink a video with comments. Open the corpus .md and verify ALL sections (metadata, thumbnail, description, tags, transcript, screenshots, comments, channel context). Verify clipboard has the corpus content."
+    3 = "Reload extension. Uoink a video. Confirm Send to Claude AND Send to ChatGPT both work. Click a prompt button, confirm clipboard gets the prompt. Edit prompts.json, reopen popup, confirm new prompt shows."
+    4 = "Reload extension. Uoink works. Stop server, try to uoink, confirm clean error message. Restart server, confirm popup health indicator updates."
     5 = "Check extension/icons/ has all 4 sizes. Check assets/store/ has promo placeholders. Check docs/store-listing.md and docs/screenshot-list.md exist. Reload extension, confirm new icon shows."
-    6 = "Yoink a real video, confirm full v1 spec is met. Verify git push succeeded. Confirm docs/progress.md exists."
+    6 = "Uoink a real video, confirm full v1 spec is met. Verify git push succeeded. Confirm docs/progress.md exists."
 }
 
 Write-Host ""
 Write-Host "==============================================" -ForegroundColor Cyan
-Write-Host "  Yoink v1 weekend build orchestrator"          -ForegroundColor Cyan
+Write-Host "  Uoink v1 weekend build orchestrator"          -ForegroundColor Cyan
 Write-Host "==============================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Project folder: $projectRoot"
@@ -121,11 +121,11 @@ Write-Host ""
 
 $parentFolder = Split-Path $projectRoot -Parent
 $currentFolderName = Split-Path $projectRoot -Leaf
-$newFolderName = "Yoink"
+$newFolderName = "Uoink"
 $newPath = Join-Path $parentFolder $newFolderName
 
 if ($currentFolderName -eq $newFolderName) {
-    Write-Host "Folder is already named 'Yoink'. No rename needed." -ForegroundColor Green
+    Write-Host "Folder is already named 'Uoink'. No rename needed." -ForegroundColor Green
     Write-Host ""
     Write-Host "v1 weekend build complete." -ForegroundColor Green
     exit 0
@@ -137,7 +137,7 @@ Write-Host "  To:   $newPath"
 Write-Host ""
 Write-Host "Before renaming, close ALL of:" -ForegroundColor Yellow
 Write-Host "  - Text editors with files from this folder open"
-Write-Host "  - The Yoink server (close start_server.bat or kill pythonw.exe)"
+Write-Host "  - The Uoink server (close start_server.bat or kill pythonw.exe)"
 Write-Host "  - File Explorer windows showing this folder"
 Write-Host ""
 Write-Host "The rename will happen in a NEW PowerShell process so this terminal"
@@ -146,7 +146,7 @@ Write-Host ""
 Write-Host "Press Enter to attempt the rename, or Ctrl+C to skip."
 Read-Host
 
-$renameCmd = "Start-Sleep -Seconds 3; Set-Location '$parentFolder'; try { Rename-Item -Path '$currentFolderName' -NewName '$newFolderName' -ErrorAction Stop; Write-Host 'Folder renamed to Yoink at $newPath' -ForegroundColor Green } catch { Write-Host 'Rename failed:' -ForegroundColor Red; Write-Host $_.Exception.Message -ForegroundColor Red; Write-Host 'Close any programs using this folder, then run manually: cd ''$parentFolder''; Rename-Item ''$currentFolderName'' ''$newFolderName''' -ForegroundColor Yellow }; Write-Host ''; Write-Host 'Press Enter to close.'; Read-Host"
+$renameCmd = "Start-Sleep -Seconds 3; Set-Location '$parentFolder'; try { Rename-Item -Path '$currentFolderName' -NewName '$newFolderName' -ErrorAction Stop; Write-Host 'Folder renamed to Uoink at $newPath' -ForegroundColor Green } catch { Write-Host 'Rename failed:' -ForegroundColor Red; Write-Host $_.Exception.Message -ForegroundColor Red; Write-Host 'Close any programs using this folder, then run manually: cd ''$parentFolder''; Rename-Item ''$currentFolderName'' ''$newFolderName''' -ForegroundColor Yellow }; Write-Host ''; Write-Host 'Press Enter to close.'; Read-Host"
 
 Start-Process powershell -ArgumentList "-NoProfile", "-Command", $renameCmd
 

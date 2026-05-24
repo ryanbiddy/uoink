@@ -1,4 +1,4 @@
-# Stops the Yoink helper server. The .bat wrapper is what the Start Menu
+# Stops the Uoink helper server. The .bat wrapper is what the Start Menu
 # shortcut points at; this PS script is the canonical implementation.
 #
 # Two-stage shutdown:
@@ -50,10 +50,18 @@ if ($stoppedAny) {
         Add-Type -AssemblyName System.Windows.Forms
         Add-Type -AssemblyName System.Drawing
         $n = New-Object System.Windows.Forms.NotifyIcon
-        $n.Icon = [System.Drawing.SystemIcons]::Information
+        # Brand the balloon with the bundled uoink.ico when present; fall back
+        # to the generic OS info icon if it's missing or can't be loaded.
+        $icoPath = Join-Path $installDir 'uoink.ico'
+        if (Test-Path $icoPath) {
+            try { $n.Icon = New-Object System.Drawing.Icon($icoPath) }
+            catch { $n.Icon = [System.Drawing.SystemIcons]::Information }
+        } else {
+            $n.Icon = [System.Drawing.SystemIcons]::Information
+        }
         $n.BalloonTipIcon = 'Info'
-        $n.BalloonTipTitle = 'Yoink server stopped'
-        $n.BalloonTipText = "Start it again from your Start Menu when you're ready to yoink."
+        $n.BalloonTipTitle = 'Uoink stopped'
+        $n.BalloonTipText = "Start it again from your Start Menu when you're ready to uoink."
         $n.Visible = $true
         $n.ShowBalloonTip(5000)
         Start-Sleep -Seconds 6
