@@ -1,26 +1,77 @@
-"""Shared Yoink MCP tool registry.
+"""Shared Uoink MCP tool registry.
 
 Both transports use this module:
 
-- yoink_mcp.py wraps it with the official MCP Python SDK over stdio.
+- uoink_mcp.py wraps it with the official MCP Python SDK over stdio.
 - server.py wraps it with authenticated JSON-RPC HTTP endpoints.
 
 The registry intentionally owns no extraction business logic. It binds to the
-loaded server module and calls the same helpers used by Yoink's v1/v2 HTTP API.
+loaded server module and calls the same helpers used by Uoink's v1/v2 HTTP API.
+
+v2.1 rename: the six brand-carrying tools were renamed yoink_* -> uoink_*.
+``call_tool`` accepts the legacy names as deprecated aliases (resolved to the
+canonical name + a one-shot DeprecationWarning to stderr) through Uoink v2.5;
+they are removed in v3. See ``MCP_TOOL_ALIASES`` / ``_warn_deprecated_tool``.
 """
 
 from __future__ import annotations
 
 import json
 import re
+import sys
 import threading
 import time
+import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
 
 _backend = None
+
+# Deprecated (Yoink-era) tool name -> canonical (Uoink) name. Old names keep
+# working through Uoink v2.5 and are removed in v3. The 7 brand-neutral tools
+# (get_job_status, cancel_job, analyze_comments, classify_hook, get_taxonomy,
+# get_citation_map, find_mentions) are unchanged and absent here.
+MCP_TOOL_ALIASES: dict[str, str] = {
+    "yoink_video": "uoink_video",
+    "yoink_playlist": "uoink_playlist",
+    "list_recent_yoinks": "list_recent_uoinks",
+    "search_yoinks": "search_uoinks",
+    "get_yoink_corpus": "get_uoink_corpus",
+    "get_yoink_health": "get_uoink_health",
+}
+
+# Dedupe so an agent calling a deprecated tool in a loop emits the warning
+# once per process per tool rather than spamming stderr.
+_warned_aliases: set[str] = set()
+_warned_lock = threading.Lock()
+
+
+def _warn_deprecated_tool(old_name: str, new_name: str) -> None:
+    """Emit a one-shot DeprecationWarning to stderr when a legacy tool name is
+    called. stdout is the JSON-RPC transport for the stdio MCP server, so the
+    warning must go to stderr only."""
+    with _warned_lock:
+        if old_name in _warned_aliases:
+            return
+        _warned_aliases.add(old_name)
+    message = (
+        f"DeprecationWarning: MCP tool `{old_name}` is renamed to `{new_name}`.\n"
+        f"The old name still works through Uoink v2.5 and is removed in v3.\n"
+        f"Update your agent config to `{new_name}`. "
+        f"Details: https://uoink.video/docs/v2-mcp"
+    )
+    # Raise a real DeprecationWarning (for programmatic warning filters) and
+    # also write the message to stderr unconditionally, since DeprecationWarning
+    # is hidden by Python's default filters outside __main__.
+    warnings.warn(
+        f"MCP tool `{old_name}` is renamed to `{new_name}`; "
+        f"use `{new_name}` (removed in Uoink v3).",
+        DeprecationWarning,
+        stacklevel=3,
+    )
+    print(message, file=sys.stderr, flush=True)
 
 
 def bind_backend(backend_module) -> None:
@@ -30,7 +81,7 @@ def bind_backend(backend_module) -> None:
 
 def _b():
     if _backend is None:
-        raise RuntimeError("Yoink MCP backend is not bound")
+        raise RuntimeError("Uoink MCP backend is not bound")
     return _backend
 
 
@@ -218,7 +269,7 @@ def _hook_context_for_folder(folder: Path) -> dict[str, Any]:
     }
 
 
-def yoink_video(args: dict[str, Any]) -> dict[str, Any]:
+def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
     b = _b()
     raw_url = args.get("url")
     if not isinstance(raw_url, str):
@@ -267,7 +318,7 @@ def yoink_video(args: dict[str, Any]) -> dict[str, Any]:
     )
 
 
-def yoink_playlist(args: dict[str, Any]) -> dict[str, Any]:
+def uoink_playlist(args: dict[str, Any]) -> dict[str, Any]:
     b = _b()
     raw_url = args.get("url")
     if not isinstance(raw_url, str):
@@ -305,7 +356,7 @@ def cancel_job(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(job=job)
 
 
-def list_recent_yoinks(args: dict[str, Any]) -> dict[str, Any]:
+def list_recent_uoinks(args: dict[str, Any]) -> dict[str, Any]:
     # Sprint 15: reads the SQLite library index instead of walking the
     # whole corpus tree on disk. Return shape unchanged.
     limit = _limit_int(args.get("limit"), default=20, low=1, high=100)
@@ -321,7 +372,7 @@ def list_recent_yoinks(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(yoinks=yoinks)
 
 
-def search_yoinks(args: dict[str, Any]) -> dict[str, Any]:
+def search_uoinks(args: dict[str, Any]) -> dict[str, Any]:
     # Sprint 15: FTS5 keyword search via the library index instead of
     # read_text()-ing every corpus file. Return shape unchanged
     # ({slug, title, snippet, score}); optional channel / hook_type filters.
@@ -348,7 +399,7 @@ def search_yoinks(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(results=results)
 
 
-def get_yoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
+def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
@@ -414,8 +465,8 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
     )
 
 
-def get_yoink_health(args: dict[str, Any]) -> dict[str, Any]:
-    """Return the per-section extraction health score for a saved yoink."""
+def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
+    """Return the per-section extraction health score for a saved uoink."""
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
@@ -545,10 +596,10 @@ def _schema(properties: dict[str, Any], required: list[str] | None = None) -> di
 
 
 TOOL_REGISTRY: dict[str, ToolSpec] = {
-    "yoink_video": ToolSpec(
-        name="yoink_video",
+    "uoink_video": ToolSpec(
+        name="uoink_video",
         description=(
-            "Extract a single YouTube video into a Yoink corpus. Returns the "
+            "Extract a single YouTube video into a Uoink corpus. Returns the "
             "saved folder, markdown corpus, and screenshot paths."
         ),
         input_schema=_schema({
@@ -561,11 +612,11 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
                 "default": 30,
             },
         }, ["url"]),
-        handler=yoink_video,
+        handler=uoink_video,
         rate_limiter=_RateLimiter(5),
     ),
-    "yoink_playlist": ToolSpec(
-        name="yoink_playlist",
+    "uoink_playlist": ToolSpec(
+        name="uoink_playlist",
         description="Start asynchronous extraction for a YouTube playlist.",
         input_schema=_schema({
             "url": {"type": "string", "description": "YouTube playlist URL."},
@@ -577,39 +628,39 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
                 "default": 30,
             },
         }, ["url"]),
-        handler=yoink_playlist,
+        handler=uoink_playlist,
         rate_limiter=_RateLimiter(5),
     ),
     "get_job_status": ToolSpec(
         name="get_job_status",
-        description="Return the full status object for an async Yoink job.",
+        description="Return the full status object for an async Uoink job.",
         input_schema=_schema({
-            "job_id": {"type": "string", "description": "Job ID from yoink_playlist."},
+            "job_id": {"type": "string", "description": "Job ID from uoink_playlist."},
         }, ["job_id"]),
         handler=get_job_status,
     ),
     "cancel_job": ToolSpec(
         name="cancel_job",
-        description="Cancel an async Yoink job and leave partial outputs on disk.",
+        description="Cancel an async Uoink job and leave partial outputs on disk.",
         input_schema=_schema({
             "job_id": {"type": "string", "description": "Job ID to cancel."},
         }, ["job_id"]),
         handler=cancel_job,
     ),
-    "list_recent_yoinks": ToolSpec(
-        name="list_recent_yoinks",
-        description="List recent saved Yoink corpora.",
+    "list_recent_uoinks": ToolSpec(
+        name="list_recent_uoinks",
+        description="List recent saved Uoink corpora.",
         input_schema=_schema({
             "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 20},
         }),
-        handler=list_recent_yoinks,
+        handler=list_recent_uoinks,
         # Read-only but walks the whole corpus tree on every call; cap so an
         # agent loop can't melt the disk. Cheaper than search, so higher cap.
         rate_limiter=_RateLimiter(60),
     ),
-    "search_yoinks": ToolSpec(
-        name="search_yoinks",
-        description="Full-text search across saved Yoink corpora.",
+    "search_uoinks": ToolSpec(
+        name="search_uoinks",
+        description="Full-text search across saved Uoink corpora.",
         input_schema=_schema({
             "query": {"type": "string"},
             "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 10},
@@ -622,36 +673,36 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
                 "description": "Filter results to one hook type. Optional.",
             },
         }, ["query"]),
-        handler=search_yoinks,
+        handler=search_uoinks,
         # Backed by the SQLite FTS5 index; rate-limited anyway so an agent
         # loop can't hammer it.
         rate_limiter=_RateLimiter(30),
     ),
-    "get_yoink_corpus": ToolSpec(
-        name="get_yoink_corpus",
-        description="Return the full markdown corpus for a saved yoink by slug.",
+    "get_uoink_corpus": ToolSpec(
+        name="get_uoink_corpus",
+        description="Return the full markdown corpus for a saved uoink by slug.",
         input_schema=_schema({
-            "slug": {"type": "string", "description": "Folder slug of the saved yoink."},
+            "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
         }, ["slug"]),
-        handler=get_yoink_corpus,
+        handler=get_uoink_corpus,
     ),
     "analyze_comments": ToolSpec(
         name="analyze_comments",
         description=(
-            "Run Comment Intelligence on an existing yoink and return themes, "
+            "Run Comment Intelligence on an existing uoink and return themes, "
             "mentioned products/tools, and disagreements."
         ),
         input_schema=_schema({
-            "slug": {"type": "string", "description": "Folder slug of the saved yoink."},
+            "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
         }, ["slug"]),
         handler=analyze_comments_tool,
         rate_limiter=_RateLimiter(10),
     ),
     "classify_hook": ToolSpec(
         name="classify_hook",
-        description="Classify the hook type for an existing yoink.",
+        description="Classify the hook type for an existing uoink.",
         input_schema=_schema({
-            "slug": {"type": "string", "description": "Folder slug of the saved yoink."},
+            "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
         }, ["slug"]),
         handler=classify_hook,
         rate_limiter=_RateLimiter(10),
@@ -695,28 +746,28 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         name="get_citation_map",
         description=(
             "Return the transcript + screenshot citation map for a saved "
-            "yoink, each entry with a timestamped YouTube deep link."
+            "uoink, each entry with a timestamped YouTube deep link."
         ),
         input_schema=_schema({
-            "slug": {"type": "string", "description": "Folder slug of the saved yoink."},
+            "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
         }, ["slug"]),
         handler=get_citation_map,
         rate_limiter=_RateLimiter(60),
     ),
-    "get_yoink_health": ToolSpec(
-        name="get_yoink_health",
-        description="Return the per-section extraction health score for a saved yoink.",
+    "get_uoink_health": ToolSpec(
+        name="get_uoink_health",
+        description="Return the per-section extraction health score for a saved uoink.",
         input_schema=_schema({
-            "slug": {"type": "string", "description": "Folder slug of the saved yoink."},
+            "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
         }, ["slug"]),
-        handler=get_yoink_health,
+        handler=get_uoink_health,
         rate_limiter=_RateLimiter(60),
     ),
     "find_mentions": ToolSpec(
         name="find_mentions",
         description=(
             "Find every place an entity (person, tool, product, company, "
-            "or topic) is mentioned across saved yoinks, newest first, each "
+            "or topic) is mentioned across saved uoinks, newest first, each "
             "with a timestamped YouTube deep link."
         ),
         input_schema=_schema({
@@ -751,6 +802,14 @@ def list_tools() -> list[dict[str, Any]]:
 
 
 def call_tool(name: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
+    # v2.1 alias window: map a legacy yoink_* name onto its canonical uoink_*
+    # name and emit a one-shot deprecation warning to stderr. Both transports
+    # (stdio MCP and HTTP JSON-RPC) route through here, so this is the single
+    # place the deprecation is surfaced.
+    canonical = MCP_TOOL_ALIASES.get(name)
+    if canonical:
+        _warn_deprecated_tool(name, canonical)
+        name = canonical
     spec = TOOL_REGISTRY.get(name)
     if not spec:
         return _err("tool not found")

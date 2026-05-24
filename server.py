@@ -4300,10 +4300,10 @@ MCP_SUPPORTED_PROTOCOL_VERSIONS = {
 
 
 def _mcp_tools_module():
-    import yoink_mcp_tools
+    import uoink_mcp_tools
 
-    yoink_mcp_tools.bind_backend(sys.modules[__name__])
-    return yoink_mcp_tools
+    uoink_mcp_tools.bind_backend(sys.modules[__name__])
+    return uoink_mcp_tools
 
 
 def _mcp_request_id(body: dict):
@@ -4342,7 +4342,7 @@ def _mcp_stdio_command() -> tuple[str, list[str]]:
     """
     bundled = HERE / "python" / "python.exe"
     command = bundled if bundled.exists() else Path(sys.executable)
-    return str(command), [str(HERE / "yoink_mcp.py")]
+    return str(command), [str(HERE / "uoink_mcp.py")]
 
 
 def _mcp_config_payload() -> dict:

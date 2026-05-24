@@ -1,12 +1,38 @@
-# Yoink v2 MCP server
+# Uoink v2 MCP server
 
 Status: Sprint 4 backend implemented  
+Schema version: 2.1.0  
 SDK: official Model Context Protocol Python SDK, `mcp==1.27.1`  
 Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 ## Overview
 
-Yoink exposes 13 MCP tools covering extraction, playlist jobs, search, corpus retrieval, citation maps, health scores, Comment Intelligence, Hook Type, hook taxonomy, and entity mentions. The tool implementation lives in `yoink_mcp_tools.py`; stdio (`yoink_mcp.py`) is the officially supported MCP transport, and the local HTTP JSON-RPC helper (`server.py` under `/mcp/v1`) wraps the same registry for clients that can use direct POST calls.
+Uoink exposes 13 MCP tools covering extraction, playlist jobs, search, corpus retrieval, citation maps, health scores, Comment Intelligence, Hook Type, hook taxonomy, and entity mentions. The tool implementation lives in `uoink_mcp_tools.py`; stdio (`uoink_mcp.py`) is the officially supported MCP transport, and the local HTTP JSON-RPC helper (`server.py` under `/mcp/v1`) wraps the same registry for clients that can use direct POST calls.
+
+## Tool naming & deprecation (v2.1 rename)
+
+In v2.1 the six brand-carrying tools were renamed `yoink_*` → `uoink_*`. The old names still work as **deprecated aliases** through Uoink **v2.5** and are **removed in v3** (a ~6-month soft-alias window). Calling a legacy name returns the same result as the canonical name and emits a one-shot `DeprecationWarning` to **stderr** (never stdout — stdout is the JSON-RPC transport), deduplicated to once per process per tool. The deprecated tool's description carries an inline `[DEPRECATED — use <new_name>]` prefix so it is flagged in client tool lists.
+
+| Old (deprecated alias) | New (canonical) |
+|---|---|
+| `yoink_video` | `uoink_video` |
+| `yoink_playlist` | `uoink_playlist` |
+| `list_recent_yoinks` | `list_recent_uoinks` |
+| `search_yoinks` | `search_uoinks` |
+| `get_yoink_corpus` | `get_uoink_corpus` |
+| `get_yoink_health` | `get_uoink_health` |
+
+The seven brand-neutral tools are unchanged: `get_job_status`, `cancel_job`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `find_mentions`.
+
+Verbatim deprecation warning (tool name interpolated, written to stderr):
+
+```text
+DeprecationWarning: MCP tool `yoink_video` is renamed to `uoink_video`.
+The old name still works through Uoink v2.5 and is removed in v3.
+Update your agent config to `uoink_video`. Details: https://uoink.video/docs/v2-mcp
+```
+
+**HTTP auth header:** the canonical header is `X-Uoink-Token`. The legacy `X-Yoink-Token` header is still accepted on the experimental HTTP JSON-RPC transport for the same v2.5→v3 alias window, so existing community HTTP clients keep working without an immediate config change.
 
 ## Compatibility matrix
 
@@ -34,9 +60,9 @@ Installed Windows command:
 ```json
 {
   "mcpServers": {
-    "yoink": {
-      "command": "C:\\Users\\<you>\\AppData\\Local\\Yoink\\python\\python.exe",
-      "args": ["C:\\Users\\<you>\\AppData\\Local\\Yoink\\yoink_mcp.py"]
+    "uoink": {
+      "command": "C:\\Users\\<you>\\AppData\\Local\\Uoink\\python\\python.exe",
+      "args": ["C:\\Users\\<you>\\AppData\\Local\\Uoink\\uoink_mcp.py"]
     }
   }
 }
@@ -47,9 +73,9 @@ Dev command:
 ```json
 {
   "mcpServers": {
-    "yoink": {
+    "uoink": {
       "command": "python",
-      "args": ["C:\\Users\\hello\\OneDrive\\Desktop\\Yoink-codex-v2\\yoink_mcp.py"]
+      "args": ["C:\\Users\\hello\\OneDrive\\Desktop\\Yoink-codex-v2\\uoink_mcp.py"]
     }
   }
 }
@@ -65,7 +91,7 @@ The existing helper server also exposes an experimental local HTTP JSON-RPC help
 http://127.0.0.1:5179/mcp/v1
 ```
 
-Auth: `X-Yoink-Token: <token>` required on every HTTP JSON-RPC request. `GET /mcp/v1/config` returns config metadata for setup.html; it is also token-gated.
+Auth: `X-Uoink-Token: <token>` (legacy `X-Yoink-Token` accepted through the v2.5→v3 alias window) required on every HTTP JSON-RPC request. `GET /mcp/v1/config` returns config metadata for setup.html; it is also token-gated.
 
 HTTP endpoints:
 
@@ -86,9 +112,9 @@ Claude Desktop / Cursor:
 ```json
 {
   "mcpServers": {
-    "yoink": {
-      "command": "C:\\Users\\<you>\\AppData\\Local\\Yoink\\python\\python.exe",
-      "args": ["C:\\Users\\<you>\\AppData\\Local\\Yoink\\yoink_mcp.py"]
+    "uoink": {
+      "command": "C:\\Users\\<you>\\AppData\\Local\\Uoink\\python\\python.exe",
+      "args": ["C:\\Users\\<you>\\AppData\\Local\\Uoink\\uoink_mcp.py"]
     }
   }
 }
@@ -100,7 +126,7 @@ Generic HTTP:
 {
   "url": "http://127.0.0.1:5179/mcp/v1",
   "headers": {
-    "X-Yoink-Token": "<token from setup.html>"
+    "X-Uoink-Token": "<token from setup.html>"
   }
 }
 ```
@@ -109,9 +135,9 @@ Generic HTTP:
 
 All tool names are vendor-neutral, snake_case, and action-first.
 
-### yoink_video
+### uoink_video
 
-Extract a single YouTube video into a Yoink corpus.
+Extract a single YouTube video into a Uoink corpus.
 
 Parameters:
 
@@ -128,9 +154,9 @@ Return shape:
 {
   "ok": true,
   "slug": "video-slug",
-  "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Topic\\video-slug",
+  "folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\Topic\\video-slug",
   "corpus_md": "# Video title\n...",
-  "screenshots": ["C:\\Users\\Ryan\\Desktop\\Yoink\\Topic\\video-slug\\screenshots\\shot_0001.jpg"]
+  "screenshots": ["C:\\Users\\Ryan\\Desktop\\Uoink\\Topic\\video-slug\\screenshots\\shot_0001.jpg"]
 }
 ```
 
@@ -142,7 +168,7 @@ Errors:
 
 Rate limit: 5 calls/minute per process.
 
-### yoink_playlist
+### uoink_playlist
 
 Start async extraction for a YouTube playlist.
 
@@ -204,9 +230,9 @@ Errors:
 - `{ "ok": false, "error": "job is already finished" }`
 - `{ "ok": false, "error": "job cancel failed" }`
 
-### list_recent_yoinks
+### list_recent_uoinks
 
-List recent saved Yoink corpora.
+List recent saved Uoink corpora.
 
 Parameters:
 
@@ -223,16 +249,16 @@ Return shape:
     {
       "slug": "video-slug",
       "title": "Video title",
-      "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Topic\\video-slug",
+      "folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\Topic\\video-slug",
       "yoinked_at": "2026-05-11T10:15:00"
     }
   ]
 }
 ```
 
-### search_yoinks
+### search_uoinks
 
-Keyword search across saved Yoink markdown corpora.
+Keyword search across saved Uoink markdown corpora.
 
 Parameters:
 
@@ -260,9 +286,9 @@ Errors:
 
 - `{ "ok": false, "error": "query required" }`
 
-### get_yoink_corpus
+### get_uoink_corpus
 
-Return the full markdown corpus for a saved yoink.
+Return the full markdown corpus for a saved uoink.
 
 Parameters:
 
@@ -276,7 +302,7 @@ Return shape:
 {
   "ok": true,
   "corpus_md": "# Video title\n...",
-  "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Topic\\video-slug",
+  "folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\Topic\\video-slug",
   "video_id": "abc123DEF45",
   "video_url": "https://www.youtube.com/watch?v=abc123DEF45",
   "citations": [
@@ -294,7 +320,7 @@ Return shape:
 }
 ```
 
-`video_id`, `video_url`, and `citations` are additive fields. `video_id` and `video_url` are populated from the per-video JSON sidecar when available and are `null` for legacy/malformed yoinks without sidecar metadata. `citations` is best-effort and may be empty if the yoink has not been indexed yet.
+`video_id`, `video_url`, and `citations` are additive fields. `video_id` and `video_url` are populated from the per-video JSON sidecar when available and are `null` for legacy/malformed uoinks without sidecar metadata. `citations` is best-effort and may be empty if the uoink has not been indexed yet.
 
 Errors:
 
@@ -303,7 +329,7 @@ Errors:
 
 ### analyze_comments
 
-Run Comment Intelligence on an existing yoink and return structured results. Requires a configured Anthropic API key.
+Run Comment Intelligence on an existing uoink and return structured results. Requires a configured Anthropic API key.
 
 Parameters:
 
@@ -333,7 +359,7 @@ Rate limit: 10 calls/minute per process.
 
 ### classify_hook
 
-Run Hook Type classification on an existing yoink and return the category, explanation, confidence, and calibration count. Requires a configured Anthropic API key.
+Run Hook Type classification on an existing uoink and return the category, explanation, confidence, and calibration count. Requires a configured Anthropic API key.
 
 Parameters:
 
@@ -409,7 +435,7 @@ Errors:
 
 ### get_citation_map
 
-Return pre-computed transcript and screenshot citations for a saved yoink. Each citation includes a timestamped YouTube deep link so agents can cite the source without reparsing markdown.
+Return pre-computed transcript and screenshot citations for a saved uoink. Each citation includes a timestamped YouTube deep link so agents can cite the source without reparsing markdown.
 
 Parameters:
 
@@ -436,7 +462,7 @@ Return shape:
     {
       "seq": 0,
       "timestamp": 30.0,
-      "file_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\Topic\\video-slug\\screenshots\\shot_0001.jpg",
+      "file_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\Topic\\video-slug\\screenshots\\shot_0001.jpg",
       "deep_link": "https://youtube.com/watch?v=abc123DEF45&t=30s"
     }
   ]
@@ -458,9 +484,9 @@ Errors:
 
 Rate limit: 60 calls/minute per process.
 
-### get_yoink_health
+### get_uoink_health
 
-Return the extraction health score for a saved yoink. This is the same five-field health dict the popup renders in Recent yoinks.
+Return the extraction health score for a saved uoink. This is the same five-field health dict the popup renders in Recent uoinks.
 
 Parameters:
 
@@ -506,7 +532,7 @@ Rate limit: 60 calls/minute per process.
 
 ### find_mentions
 
-Find every yoink in your corpus that mentions a specific entity: person, tool, product, topic, company, or other named thing.
+Find every uoink in your corpus that mentions a specific entity: person, tool, product, topic, company, or other named thing.
 
 Parameters:
 
@@ -539,7 +565,7 @@ Return shape:
 }
 ```
 
-Entities are extracted automatically from each yoink's transcript using the configured Anthropic API key. Matching is case-insensitive and punctuation-tolerant through the normalized entity key. If no Anthropic key is set, entity extraction is skipped at yoink time; older yoinks without entity rows will not appear in results until re-yoinked.
+Entities are extracted automatically from each uoink's transcript using the configured Anthropic API key. Matching is case-insensitive and punctuation-tolerant through the normalized entity key. If no Anthropic key is set, entity extraction is skipped at uoink time; older uoinks without entity rows will not appear in results until re-uoinked.
 
 Errors:
 
@@ -550,16 +576,16 @@ Rate limit: 60 calls/minute per process.
 
 ## Rate limits and abuse mitigations
 
-- `yoink_video`: 5 calls/minute per process.
-- `yoink_playlist`: 5 calls/minute per process.
+- `uoink_video`: 5 calls/minute per process.
+- `uoink_playlist`: 5 calls/minute per process.
 - `analyze_comments`: 10 calls/minute per process.
 - `classify_hook`: 10 calls/minute per process.
-- `list_recent_yoinks`: 60 calls/minute per process.
-- `search_yoinks`: 30 calls/minute per process.
+- `list_recent_uoinks`: 60 calls/minute per process.
+- `search_uoinks`: 30 calls/minute per process.
 - `get_citation_map`: 60 calls/minute per process.
-- `get_yoink_health`: 60 calls/minute per process.
+- `get_uoink_health`: 60 calls/minute per process.
 - `find_mentions`: 60 calls/minute per process.
-- Other read-only tools (`get_yoink_corpus`, `get_job_status`, `get_taxonomy`) are not rate-limited.
+- Other read-only tools (`get_uoink_corpus`, `get_job_status`, `get_taxonomy`) are not rate-limited.
 
 Rate-limit errors return friendly tool payloads, for example:
 
@@ -567,7 +593,7 @@ Rate-limit errors return friendly tool payloads, for example:
 { "ok": false, "error": "rate limit exceeded: max 5/minute" }
 ```
 
-HTTP JSON-RPC remains protected by `X-Yoink-Token`; stdio MCP relies on the spawning client trust boundary. All tools keep v1/v2 URL, slug, and job validation.
+HTTP JSON-RPC remains protected by `X-Uoink-Token` (legacy `X-Yoink-Token` accepted through the alias window); stdio MCP relies on the spawning client trust boundary. All tools keep v1/v2 URL, slug, and job validation.
 
 ## Compatibility notes
 

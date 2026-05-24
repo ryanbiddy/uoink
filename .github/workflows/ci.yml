@@ -73,14 +73,18 @@ jobs:
 
       - name: Compile backend Python files
         run: |
-          files=(server.py yoink_mcp.py yoink_mcp_tools.py)
+          # v2.1 rename: canonical MCP modules are uoink_mcp*.py; yoink_mcp.py
+          # is a back-compat shim that re-exports from uoink_mcp.
+          files=(server.py uoink_mcp.py uoink_mcp_tools.py yoink_mcp.py)
           if [ -f index.py ]; then files+=(index.py); fi
           python -m py_compile "${files[@]}"
 
       - name: Check MCP tool floor
         run: |
           # Bump to 12 when Sprint 15 merges, 13 when Sprint 16 merges.
-          count="$(grep -c '@mcp\.tool' yoink_mcp.py)"
+          # v2.1: canonical @mcp.tool decorators live in uoink_mcp.py (the 6
+          # deprecated yoink_* aliases use mcp.add_tool, not the decorator).
+          count="$(grep -c '@mcp\.tool' uoink_mcp.py)"
           if [ "$count" -lt 10 ]; then
             echo "Expected at least 10 MCP tools, found $count"
             exit 1
@@ -119,7 +123,7 @@ jobs:
           import re
           from pathlib import Path
 
-          mcp_py = Path("yoink_mcp.py").read_text(encoding="utf-8")
+          mcp_py = Path("uoink_mcp.py").read_text(encoding="utf-8")
           code_count = len(re.findall(r"^\s*@mcp\.tool\b", mcp_py, re.M))
 
           mcp_doc = Path("docs/v2-mcp.md").read_text(encoding="utf-8")
