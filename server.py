@@ -1,11 +1,11 @@
-r"""Local HTTP server for the Yoink browser extension.
+r"""Local HTTP server for the Uoink browser extension.
 
 Runs on http://127.0.0.1:5179. Pure stdlib — no fastapi/flask required.
 Reuses parse_srt/slugify/fmt_time from yt_extract.py.
 
 Endpoints:
     GET  /ping
-    POST /extract           single-video, drops in Desktop\Yoink\
+    POST /extract           single-video, drops in Desktop\Uoink\
     POST /session/start
     POST /session/add       runs extraction into the session folder
     POST /session/close     concatenates per-video yoink.md files into corpus.md
@@ -106,11 +106,12 @@ PLAYLIST_RATE_LIMIT_BACKOFF_MAX_SEC = 5 * 60.0
 
 # ---- Auth token (P0-1) ----------------------------------------------------
 # Per-install random token. Persisted next to server.py (which lives in the
-# install root -- %LOCALAPPDATA%\Yoink on Windows, ~/Library/Application
-# Support/Yoink on macOS -- in the shipped product, or in the dev repo
+# install root -- %LOCALAPPDATA%\Uoink on Windows, ~/Library/Application
+# Support/Uoink on macOS -- in the shipped product, or in the dev repo
 # directory in dev mode; gitignored either way). The extension fetches
 # this via /token (gated by chrome-extension:// origin) on first launch
-# and includes it in X-Yoink-Token on every subsequent request.
+# and includes it in X-Uoink-Token on every subsequent request. The legacy
+# X-Yoink-Token header is still accepted through the v2.x alias window.
 TOKEN_PATH = HERE / "token.txt"
 # Sprint 19.5 Stage 1: DATA_ROOT is now resolved by _platform.user_data_dir
 # so the same helper runs on Windows + macOS without per-call branches.
@@ -118,7 +119,12 @@ DATA_ROOT = _platform.user_data_dir()
 SETTINGS_PATH = DATA_ROOT / "settings.json"
 JOBS_PATH = DATA_ROOT / "jobs.json"
 TAXONOMY_PATH = DATA_ROOT / "taxonomy.json"
-KEYRING_SERVICE = "Yoink"
+KEYRING_SERVICE = "Uoink"
+# Legacy Credential Manager service name from the Yoink era. The first-run
+# install migration (migrate_install.py) copies the saved Anthropic key from
+# this service to KEYRING_SERVICE; kept here so both the migration and any
+# fallback read can reference one source of truth.
+KEYRING_SERVICE_LEGACY = "Yoink"
 KEYRING_ANTHROPIC_USERNAME = "anthropic_key"
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
@@ -168,6 +174,10 @@ _TOKEN_RATE_LIMIT = 10
 _TOKEN_RATE_WINDOW_SEC = 60.0
 _token_request_times: list[float] = []
 _token_rate_lock = threading.Lock()
+# Canonical client-identification header value. The legacy "yoink-extension"
+# value is still accepted through the v2.x alias window so a not-yet-updated
+# extension build keeps passing the /token gate.
+_UOINK_CLIENT_HEADER_VALUE = "uoink-extension"
 _YOINK_CLIENT_HEADER_VALUE = "yoink-extension"
 
 
@@ -292,6 +302,9 @@ def _default_settings() -> dict:
         "smart_screenshot_picker_enabled": False,
         "clipboard_screenshot_cap": CLIPBOARD_SCREENSHOT_CAP_DEFAULT,
         "anthropic_key_invalid": False,
+        # v2.1 rename: set True after the one-time "Yoink is now Uoink"
+        # post-migration toast has fired, so it never repeats.
+        "post_migration_toast_shown": False,
         "updated_at": None,
     }
 
@@ -317,6 +330,9 @@ def _normalize_settings(data: dict) -> dict:
         min(CLIPBOARD_SCREENSHOT_CAP_MAX, cap),
     )
     clean["anthropic_key_invalid"] = bool(clean.get("anthropic_key_invalid"))
+    clean["post_migration_toast_shown"] = bool(
+        clean.get("post_migration_toast_shown")
+    )
     return clean
 
 
@@ -393,10 +409,18 @@ def _get_saved_anthropic_key() -> str:
         log.debug("%s", err)
         return ""
     try:
-        return (
-            _keyring.get_password(KEYRING_SERVICE, KEYRING_ANTHROPIC_USERNAME)
-            or ""
+        key = _keyring.get_password(KEYRING_SERVICE, KEYRING_ANTHROPIC_USERNAME)
+        if key:
+            return key
+        # Alias window: if the install migration hasn't yet copied the key
+        # from the legacy "Yoink" service (e.g. keyring was briefly
+        # unavailable at first boot), still honour the old entry so AI
+        # features don't silently break. migrate_install.py performs the
+        # one-time copy; this is the read-time safety net.
+        legacy = _keyring.get_password(
+            KEYRING_SERVICE_LEGACY, KEYRING_ANTHROPIC_USERNAME
         )
+        return legacy or ""
     except Exception as e:
         log.warning("credential read failed: %s", e)
         return ""
@@ -723,16 +747,27 @@ def _is_writable_dir(path: Path) -> bool:
 
 
 def _get_output_root() -> Path:
-    """Return the Yoink output root.
+    """Return the Uoink output root.
 
-    Dev mode can set YOINK_OUTPUT_DIR to keep personal yoinks out of a repo
-    that happens to live on the Desktop. The override must already exist and
-    be writable; otherwise Yoink falls back to the Desktop\\Yoink folder.
+    Dev mode can set UOINK_OUTPUT_DIR (legacy: YOINK_OUTPUT_DIR) to keep
+    personal uoinks out of a repo that happens to live on the Desktop. The
+    override must already exist and be writable; otherwise Uoink falls back
+    to the Desktop\\Uoink folder.
+
+    v2.1 rename behaviour: a fresh install saves to Desktop\\Uoink. An
+    upgraded install keeps saving to the existing Desktop\\Yoink folder
+    until the user opts in to move it (the Desktop-corpus move is a separate,
+    user-confirmed step surfaced in the extension popup -- see
+    migrate_install.py). Once Desktop\\Uoink exists it always wins, so the
+    flip happens automatically after the opt-in move completes. This avoids
+    splitting a user's corpus across two folders before they've chosen to
+    migrate it.
 
     A second fallback, _LOCALAPPDATA_OUTPUT, kicks in at startup if even
     the Desktop path turns out to be unwritable -- see
     _apply_output_root_fallback (Sprint 19, Wave 1 Fix 4 carryover)."""
-    override = (os.environ.get("YOINK_OUTPUT_DIR") or "").strip()
+    override = (os.environ.get("UOINK_OUTPUT_DIR")
+                or os.environ.get("YOINK_OUTPUT_DIR") or "").strip()
     if override:
         try:
             candidate = Path(override).expanduser().resolve()
@@ -740,12 +775,19 @@ def _get_output_root() -> Path:
                 return candidate
         except OSError:
             pass
-    return _get_desktop_dir() / "Yoink"
+    desktop = _get_desktop_dir()
+    new_root = desktop / "Uoink"
+    legacy_root = desktop / "Yoink"
+    if new_root.exists():
+        return new_root
+    if legacy_root.exists():
+        return legacy_root
+    return new_root
 
 
 # Last-resort output root used when DESKTOP_ROOT turns out to be unwritable
-# at startup. Lives inside DATA_ROOT (%LOCALAPPDATA%\Yoink on Windows /
-# ~/Library/Application Support/Yoink on macOS), which is reliably
+# at startup. Lives inside DATA_ROOT (%LOCALAPPDATA%\Uoink on Windows /
+# ~/Library/Application Support/Uoink on macOS), which is reliably
 # writable since DATA_ROOT itself is required for the helper to work.
 # Sprint 19.5 Stage 1 kept the historical _LOCALAPPDATA_OUTPUT name --
 # the underlying value is cross-platform via _platform.user_data_dir.
@@ -794,11 +836,13 @@ def _apply_output_root_fallback() -> None:
 
 def _allowed_roots() -> set[Path]:
     """All filesystem roots /file is permitted to serve from. The active
-    output root plus both fallback candidates -- after a fallback the user
-    may still have legacy yoinks under Desktop\\Yoink whose thumbnails the
-    Memory page needs to render."""
+    output root plus every fallback candidate -- after a fallback, or before
+    the user opts in to move their Desktop corpus, they may still have
+    uoinks under Desktop\\Uoink OR legacy yoinks under Desktop\\Yoink whose
+    thumbnails the Memory page needs to render."""
     roots: set[Path] = set()
-    for candidate in (DESKTOP_ROOT, _get_desktop_dir() / "Yoink",
+    desktop = _get_desktop_dir()
+    for candidate in (DESKTOP_ROOT, desktop / "Uoink", desktop / "Yoink",
                       _LOCALAPPDATA_OUTPUT):
         try:
             roots.add(candidate.resolve())
@@ -826,7 +870,7 @@ logging.basicConfig(
         logging.StreamHandler(sys.stdout),
     ],
 )
-log = logging.getLogger("yoink")
+log = logging.getLogger("uoink")
 
 # Serialize extractions — yt-dlp + ffmpeg are I/O heavy.
 _extract_lock = threading.Lock()
@@ -2553,7 +2597,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
         f"**Views:** {views} | **Likes:** {likes}"
     )
     parts.append(f"**URL:** {url}")
-    parts.append(f"**Yoinked:** {yoinked_at}")
+    parts.append(f"**Uoinked:** {yoinked_at}")
     parts.append(f"**Topic:** {topic}")
     if cap_warning:
         parts.append(f"**Note:** {cap_warning}")
@@ -2653,7 +2697,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts.append("")
     parts.append("---")
     parts.append("")
-    parts.append("*[Yoinked with Yoink by ReplayRyan](https://ryanbiddy.com/yoink)*")
+    parts.append("*[Uoinked with Uoink by ReplayRyan](https://uoink.video)*")
     parts.append("")
 
     return "\n".join(parts)
@@ -2694,7 +2738,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
     title = metadata.get("title") or "Untitled"
     video_slug = slugify(title) or "video"
-    log.info("Yoinking '%s' -> %s (topic=%s)", title, output_folder, topic)
+    log.info("Uoinking '%s' -> %s (topic=%s)", title, output_folder, topic)
 
     # P1-4: bound screenshot count so a 4-hour video at 5s interval doesn't
     # produce thousands of jpgs. Recompute interval upward when needed and
@@ -2758,7 +2802,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     except subprocess.TimeoutExpired:
         raise RuntimeError(
             "Video too long for current settings -- try again with a longer "
-            "screenshot interval, or this video may be too long for Yoink."
+            "screenshot interval, or this video may be too long for Uoink."
         )
 
     video_files = [f for f in output_folder.glob("video.*")
@@ -2976,7 +3020,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     }
 
 
-INSTALL_HELP_URL = "https://ryanbiddy.com/yoink/install"
+INSTALL_HELP_URL = "https://uoink.video/install"
 
 
 def _is_youtube_rate_limit(e: BaseException) -> bool:
@@ -3002,7 +3046,7 @@ _RATE_LIMIT_INITIAL_BACKOFF_SEC = 60
 def friendly_error(e: BaseException) -> str:
     """Translate raw exceptions into copy the user can act on."""
     if isinstance(e, FileNotFoundError):
-        return ("Yoink can't find yt-dlp or ffmpeg on this machine. "
+        return ("Uoink can't find yt-dlp or ffmpeg on this machine. "
                 f"Install both, then try again. See {INSTALL_HELP_URL}")
 
     if isinstance(e, subprocess.CalledProcessError):
@@ -3015,9 +3059,9 @@ def friendly_error(e: BaseException) -> str:
         if "Video unavailable" in stderr or "This video is private" in stderr:
             return "This video isn't available (private, deleted, or region-locked)."
         if "Members-only" in stderr or "members only" in stderr.lower():
-            return "Members-only video — Yoink can't reach it without an account."
+            return "Members-only video — Uoink can't reach it without an account."
         if "is live" in stderr.lower() or "premiere" in stderr.lower():
-            return "Yoink can't grab livestreams or premieres yet. Try again after the broadcast ends."
+            return "Uoink can't grab livestreams or premieres yet. Try again after the broadcast ends."
         if "HTTP Error 429" in stderr:
             return "YouTube is rate-limiting. Wait a minute, then try again."
 
@@ -3025,12 +3069,12 @@ def friendly_error(e: BaseException) -> str:
         tool = Path(e.cmd[0]).name if e.cmd else "subprocess"
         # Strip yt-dlp's "ERROR:" prefix if present so the message doesn't shout.
         last = re.sub(r"^ERROR:\s*", "", last)
-        return f"Yoink hit an error from {tool}: {last}"
+        return f"Uoink hit an error from {tool}: {last}"
 
     if isinstance(e, RuntimeError):
-        return f"Yoink couldn't finish this video: {e}"
+        return f"Uoink couldn't finish this video: {e}"
 
-    return f"Yoink hit an unexpected error: {e}"
+    return f"Uoink hit an unexpected error: {e}"
 
 
 # ---------------------------------------------------------------------------
@@ -3115,11 +3159,14 @@ def _is_valid_job_id(s: str) -> bool:
     return bool(s) and bool(_JOB_ID_RE.match(s))
 
 
-INDEX_FILENAME = "_all-yoinks-index.md"
+INDEX_FILENAME = "_all-uoinks-index.md"
+# Pre-rename master-index filename. Still read so the incremental updater can
+# pick up (and supersede) a Yoink-era index that hasn't been regenerated yet.
+INDEX_FILENAME_LEGACY = "_all-yoinks-index.md"
 
 
 def _index_path() -> Path:
-    """Master index location -- DESKTOP_ROOT/_all-yoinks-index.md. Leading
+    """Master index location -- DESKTOP_ROOT/_all-uoinks-index.md. Leading
     underscore keeps it sorted to the top in Explorer."""
     return DESKTOP_ROOT / INDEX_FILENAME
 
@@ -3363,18 +3410,18 @@ def _scan_yoinks() -> list[dict]:
 
 
 def _render_index(entries: list[dict]) -> str:
-    """Markdown for _all-yoinks-index.md. Topic sections sorted A-Z; videos
+    """Markdown for _all-uoinks-index.md. Topic sections sorted A-Z; videos
     within each topic sorted most-recent first. 'Recent (last 20)' section
     at the bottom for a quick chronological view."""
     parts = [
-        "# All Yoinks",
+        "# All Uoinks",
         f"_Last updated: {_now_iso()}_  ",
-        f"_Total yoinks: {len(entries)}_",
+        f"_Total uoinks: {len(entries)}_",
         "",
     ]
 
     if not entries:
-        parts.append("_No yoinks yet. Click the orange Y on any YouTube video to start._")
+        parts.append("_No uoinks yet. Click the rust U under any YouTube video to start._")
         parts.append("")
         return "\n".join(parts)
 
@@ -3387,12 +3434,12 @@ def _render_index(entries: list[dict]) -> str:
     for topic in sorted(by_topic.keys(), key=str.lower):
         items = sorted(by_topic[topic], key=lambda x: x["yoinked_at_ts"], reverse=True)
         plural = "" if len(items) == 1 else "s"
-        parts.append(f"### {topic} ({len(items)} yoink{plural})")
+        parts.append(f"### {topic} ({len(items)} uoink{plural})")
         for e in items:
             byline = f" -- {e['channel']}" if e["channel"] else ""
             parts.append(
                 f"- [{e['title']}]({_md_link_path(e['rel_path'])}) "
-                f"-- Yoinked {e['yoinked_at']}{byline}"
+                f"-- Uoinked {e['yoinked_at']}{byline}"
             )
         parts.append("")
 
@@ -3417,11 +3464,11 @@ def _md_link_path(rel: str) -> str:
 
 
 def _regenerate_index() -> None:
-    """Rebuild _all-yoinks-index.md from a fresh scan of DESKTOP_ROOT.
+    """Rebuild _all-uoinks-index.md from a fresh scan of DESKTOP_ROOT.
 
-    Best-effort: failures here shouldn't fail the yoink that triggered the
+    Best-effort: failures here shouldn't fail the uoink that triggered the
     regeneration, so we log + swallow rather than raise. Sprint 19.6 /
-    Fix 6 removed this from the per-yoink hot path -- it now runs on
+    Fix 6 removed this from the per-uoink hot path -- it now runs on
     demand from /open-index (and as a fallback from
     _incremental_index_update for first-launch / parse failure). The scan
     is O(N) in the library size; the incremental path is the steady state."""
@@ -3429,6 +3476,11 @@ def _regenerate_index() -> None:
         entries = _scan_yoinks()
         DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
         _index_path().write_text(_render_index(entries), encoding="utf-8")
+        # v2.1 rename: supersede a leftover Yoink-era index so the Desktop
+        # folder doesn't show two near-identical index files.
+        legacy_index = DESKTOP_ROOT / INDEX_FILENAME_LEGACY
+        if legacy_index != _index_path() and legacy_index.exists():
+            legacy_index.unlink(missing_ok=True)
     except Exception as e:
         log.warning("index regeneration failed: %s", e)
 
@@ -3443,7 +3495,7 @@ def _start_full_index_regen_thread() -> None:
 
 
 def _patch_index_md(text: str, entry: dict) -> str | None:
-    """Apply one new yoink to the rendered _all-yoinks-index.md, in place.
+    """Apply one new uoink to the rendered _all-uoinks-index.md, in place.
 
     Returns the updated markdown, or None when the file's structure isn't
     recognised (caller falls back to a full regen). Three edits:
@@ -3453,11 +3505,14 @@ def _patch_index_md(text: str, entry: dict) -> str | None:
       if it doesn't yet exist).
     * Prepend the entry to the Recent section, capped at 20.
     """
-    total_re = re.compile(r"_Total yoinks:\s*(\d+)_")
+    total_re = re.compile(r"_Total uoinks:\s*(\d+)_")
     if not total_re.search(text):
+        # A Yoink-era index (with "_Total yoinks:_") won't match; returning
+        # None makes the caller fall back to a full regen, which rewrites
+        # the file in the new format under the new filename.
         return None
     text = total_re.sub(
-        lambda m: f"_Total yoinks: {int(m.group(1)) + 1}_", text, count=1)
+        lambda m: f"_Total uoinks: {int(m.group(1)) + 1}_", text, count=1)
     text = re.sub(
         r"_Last updated:[^_\n]*_",
         f"_Last updated: {_now_iso()}_  ", text, count=1)
@@ -3466,22 +3521,22 @@ def _patch_index_md(text: str, entry: dict) -> str | None:
     byline = f" -- {entry['channel']}" if entry.get("channel") else ""
     topic_line = (
         f"- [{entry['title']}]({_md_link_path(entry['rel_path'])}) "
-        f"-- Yoinked {entry['yoinked_at']}{byline}"
+        f"-- Uoinked {entry['yoinked_at']}{byline}"
     )
     topic_header_re = re.compile(
-        rf"^### {re.escape(topic)} \((\d+) yoinks?\)\n", re.MULTILINE)
+        rf"^### {re.escape(topic)} \((\d+) uoinks?\)\n", re.MULTILINE)
     m = topic_header_re.search(text)
     if m:
         new_count = int(m.group(1)) + 1
         plural = "" if new_count == 1 else "s"
-        new_header = f"### {topic} ({new_count} yoink{plural})\n"
+        new_header = f"### {topic} ({new_count} uoink{plural})\n"
         text = text[:m.start()] + new_header + topic_line + "\n" + text[m.end():]
     else:
         # New topic -- insert a fresh subsection just before "## Recent".
         recent_anchor = text.find("\n## Recent ")
         if recent_anchor == -1:
             return None
-        new_block = f"### {topic} (1 yoink)\n{topic_line}\n\n"
+        new_block = f"### {topic} (1 uoink)\n{topic_line}\n\n"
         text = text[:recent_anchor + 1] + new_block + text[recent_anchor + 1:]
 
     recent_header_re = re.compile(
@@ -3642,7 +3697,7 @@ def _build_corpus(session: dict) -> str:
                 body = yoink_path.read_text(encoding="utf-8")
                 # Strip the per-video H1 (the title) -- we already emitted Video N: title.
                 body = re.sub(r"^# .+\n", "", body, count=1)
-                # Strip the leading metadata lines we'd duplicate (URL/Yoinked/etc.).
+                # Strip the leading metadata lines we'd duplicate (URL/Uoinked/etc.).
                 # The bold-prefixed lines come right after the title block.
                 body = re.sub(r"^(\*\*[^*]+:\*\*[^\n]*\n)+", "", body)
                 parts.append(_demote_headings(body.strip()))
@@ -3881,7 +3936,7 @@ def _validate_persisted_job(raw: dict) -> dict | None:
             "updated_at": now,
             "error": "server restarted",
             "result": None,
-            "message": "Job failed because the Yoink helper restarted.",
+            "message": "Job failed because the Uoink helper restarted.",
         })
     return job
 
@@ -4131,7 +4186,7 @@ def _build_playlist_corpus(job: dict, *, text_only: bool) -> str:
     parts = [
         f"# Playlist Corpus: {title}",
         f"**Source:** {job.get('source_url')}",
-        f"**Yoinked:** {_now_iso()}",
+        f"**Uoinked:** {_now_iso()}",
         f"**Videos:** {job.get('videos_done', 0)} succeeded, {job.get('videos_failed', 0)} failed",
         "",
         "---",
@@ -4269,12 +4324,12 @@ def _mcp_initialize_result(body: dict) -> dict:
             "tools": {"listChanged": False},
         },
         "serverInfo": {
-            "name": "yoink",
+            "name": "uoink",
             "version": VERSION,
         },
         "instructions": (
-            "Yoink exposes local YouTube extraction tools. Outputs are stored "
-            "under the user's Yoink output folder on this machine."
+            "Uoink exposes local YouTube extraction tools. Outputs are stored "
+            "under the user's Uoink output folder on this machine."
         ),
     }
 
@@ -4301,7 +4356,7 @@ def _mcp_config_payload() -> dict:
         "http": {
             "url": f"http://{HOST}:{PORT}/mcp/v1",
             "sse_url": f"http://{HOST}:{PORT}/mcp/v1/sse",
-            "auth_header": "X-Yoink-Token",
+            "auth_header": "X-Uoink-Token",
         },
     }
 
@@ -4322,7 +4377,7 @@ def _finish_job_cancelled(job_id: str):
 def _write_failed_marker(folder: Path, *, url: str | None,
                          index: int | None, reason: str) -> None:
     lines = [
-        "Yoink playlist item failed",
+        "Uoink playlist item failed",
         "",
         f"Timestamp: {_now_iso()}",
     ]
@@ -4360,7 +4415,7 @@ def _playlist_worker(job_id: str):
         job_id,
         state="running",
         started_at=_now_iso(),
-        message=f"Yoinking video 1 of {len(videos)}." if videos else "Starting playlist job.",
+        message=f"Uoinking video 1 of {len(videos)}." if videos else "Starting playlist job.",
     )
 
     per_video = []
@@ -4391,7 +4446,7 @@ def _playlist_worker(job_id: str):
                 job_id,
                 current_video=current,
                 current_video_phase="metadata",
-                message=f"Yoinking video {idx} of {len(videos)}.",
+                message=f"Uoinking video {idx} of {len(videos)}.",
             )
 
             try:
@@ -4789,8 +4844,8 @@ def _diagnose_payload() -> dict:
         add("output_root_writable", "error",
             f"{DESKTOP_ROOT} is not writable")
         warnings.append(
-            f"Yoink can't write to {DESKTOP_ROOT}. Check folder "
-            "permissions, or set the YOINK_OUTPUT_DIR environment variable.")
+            f"Uoink can't write to {DESKTOP_ROOT}. Check folder "
+            "permissions, or set the UOINK_OUTPUT_DIR environment variable.")
 
     # 4. anthropic_key_set + 5. anthropic_key_valid
     try:
@@ -4849,8 +4904,8 @@ def _diagnose_payload() -> dict:
 
     if _OUTPUT_ROOT_FALLBACK:
         warnings.append(
-            f"Output folder fallback in effect: yoinks are being saved to "
-            f"{DESKTOP_ROOT} because Desktop\\Yoink was not writable. The "
+            f"Output folder fallback in effect: uoinks are being saved to "
+            f"{DESKTOP_ROOT} because the Desktop folder was not writable. The "
             "extension's /file sandbox still serves both locations.")
     return {
         "ok": True,
@@ -4934,7 +4989,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
 # HTTP handler
 # ---------------------------------------------------------------------------
 class Handler(BaseHTTPRequestHandler):
-    server_version = f"Yoink/{VERSION}"
+    server_version = f"Uoink/{VERSION}"
     # Per-request socket timeout. BaseHTTPRequestHandler.setup() applies this
     # to the connection, so a client that opens a socket (or sends a
     # Content-Length header) and then stalls cannot pin a worker thread
@@ -4963,12 +5018,15 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", origin)
             self.send_header("Vary", "Origin")
             self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-            # X-Yoink-Token is the auth header the extension sends on every
-            # mutating request. X-Yoink-Client is the /token gate header.
+            # X-Uoink-Token is the auth header the extension sends on every
+            # mutating request. X-Uoink-Client is the /token gate header.
             # Browsers won't send custom headers without the OPTIONS
-            # preflight allowing them explicitly.
+            # preflight allowing them explicitly. The legacy X-Yoink-* names
+            # stay in the allow-list through the v2.x alias window so a
+            # not-yet-updated extension build keeps working.
             self.send_header("Access-Control-Allow-Headers",
-                             "Content-Type, X-Yoink-Token, X-Yoink-Client")
+                             "Content-Type, X-Uoink-Token, X-Uoink-Client, "
+                             "X-Yoink-Token, X-Yoink-Client")
             self.send_header("Access-Control-Max-Age", "600")
             # Private Network Access: Chrome requires this header when a public
             # HTTPS origin (youtube.com) fetches a loopback resource. Without
@@ -4978,14 +5036,16 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- Auth helpers ----
     def _request_token(self) -> str:
-        """Pull the auth token from the X-Yoink-Token header.
+        """Pull the auth token from the X-Uoink-Token header (legacy
+        X-Yoink-Token accepted through the v2.x alias window).
 
         Header-only by design: the previous ?token= query-param fallback
         was unused (the extension always set the header) and would have
         leaked the token into the user's browser history, the server's
         own access logs, and any HTTP debugging tooling that captures
         URLs but redacts headers."""
-        return (self.headers.get("X-Yoink-Token") or "").strip()
+        return (self.headers.get("X-Uoink-Token")
+                or self.headers.get("X-Yoink-Token") or "").strip()
 
     def _check_token(self) -> bool:
         return secrets.compare_digest(self._request_token(), TOKEN)
@@ -4995,7 +5055,7 @@ class Handler(BaseHTTPRequestHandler):
         Some Chromium forks (Comet, observed in v1 testing) issue
         same-process service-worker fetches with no Origin header at all,
         so a strict allowlist locks them out. Browser-side CSRF defense
-        moves to the X-Yoink-Client header gate + the existing CORS ACAO
+        moves to the X-Uoink-Client header gate + the existing CORS ACAO
         allowlist; see docs/security.md."""
         origin = (self.headers.get("Origin", "") or "")
         if not origin:
@@ -5009,8 +5069,14 @@ class Handler(BaseHTTPRequestHandler):
         triggering a CORS preflight, and our preflight only echoes ACAO
         for chrome-extension://* + the YouTube allowlist -- so the actual
         request from a malicious origin is blocked by the browser before
-        it even runs the GET."""
-        return self.headers.get("X-Yoink-Client", "").strip() == _YOINK_CLIENT_HEADER_VALUE
+        it even runs the GET.
+
+        v2.1 alias window: accept the new X-Uoink-Client/"uoink-extension"
+        pair AND the legacy X-Yoink-Client/"yoink-extension" pair so the
+        gate keeps passing whether or not the extension has been updated."""
+        value = (self.headers.get("X-Uoink-Client")
+                 or self.headers.get("X-Yoink-Client") or "").strip()
+        return value in (_UOINK_CLIENT_HEADER_VALUE, _YOINK_CLIENT_HEADER_VALUE)
 
     def _require_token(self) -> bool:
         """Returns True if request authenticates. Otherwise sends a 403 and
@@ -5171,7 +5237,8 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- /token ----
     # Returns the per-install auth token. CSRF defense layered as:
-    #   1. X-Yoink-Client header must equal "yoink-extension". A drive-by
+    #   1. X-Uoink-Client header must equal "uoink-extension" (legacy
+    #      X-Yoink-Client/"yoink-extension" still accepted). A drive-by
     #      browser request from a random site can't set this without a
     #      CORS preflight, and our preflight refuses ACAO for any origin
     #      outside the youtube + chrome-extension allowlist.
@@ -5186,7 +5253,7 @@ class Handler(BaseHTTPRequestHandler):
     # local-attacker defense.
     def _handle_token(self):
         if not self._has_yoink_client_header():
-            log.info("GET /token rejected (missing X-Yoink-Client)")
+            log.info("GET /token rejected (missing X-Uoink-Client)")
             return self._send_json(403, {"ok": False, "error": "forbidden"})
         if not self._is_extension_origin():
             log.info("GET /token rejected (origin=%r)", self.headers.get("Origin"))
@@ -5315,8 +5382,9 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- MCP HTTP transport ----
     # This is a small JSON-RPC HTTP wrapper over the same tool registry used
-    # by yoink_mcp.py's stdio server. It intentionally keeps state out of the
-    # transport; auth remains the v1 X-Yoink-Token gate.
+    # by uoink_mcp.py's stdio server. It intentionally keeps state out of the
+    # transport; auth remains the v1 X-Uoink-Token gate (legacy X-Yoink-Token
+    # still accepted through the alias window).
     def _send_mcp_result(self, request_id, result: dict):
         return self._send_json(200, {
             "jsonrpc": "2.0",
@@ -6271,15 +6339,65 @@ class Handler(BaseHTTPRequestHandler):
 # ---------------------------------------------------------------------------
 # Startup
 # ---------------------------------------------------------------------------
-def maybe_toast(title: str, body: str):
+def _bundled_icon_path() -> str | None:
+    """Path to the bundled uoink.ico if it ships next to server.py (it does
+    in the installed product; absent in the dev repo). Used to brand the
+    Windows startup / migration toast with the rust U instead of the generic
+    blue OS information icon."""
+    candidate = HERE / "uoink.ico"
+    return str(candidate) if candidate.is_file() else None
+
+
+def maybe_toast(title: str, body: str, icon_path: str | None = None):
     """Best-effort transient notification when the helper finishes booting.
 
     Sprint 19.5 Stage 1: now delegated to _platform.show_toast. Windows
     uses System.Windows.Forms.NotifyIcon via PowerShell, macOS uses
     osascript ``display notification``, Linux uses notify-send. All
     fire-and-forget; failures are debug-logged and swallowed so a
-    missing tray icon never blocks startup."""
-    _platform.show_toast(title, body)
+    missing tray icon never blocks startup.
+
+    v2.1: ``icon_path`` (Windows only) points the balloon at the bundled
+    uoink.ico so the notification carries the brand mark; defaults to the
+    bundled icon when one is present."""
+    if icon_path is None:
+        icon_path = _bundled_icon_path()
+    _platform.show_toast(title, body, icon_path=icon_path)
+
+
+def _maybe_post_migration_toast() -> bool:
+    """Fire the one-time "Yoink is now Uoink" toast if a Yoink->Uoink install
+    migration just ran and the toast hasn't been shown yet. Returns True if
+    it fired (so the caller skips the regular ready toast this boot).
+
+    Gated on the ``post_migration_toast_shown`` settings flag AND the
+    migrate_install ``.migrated-from-yoink`` marker, so a fresh install (no
+    migration) never sees it and an upgraded install sees it exactly once."""
+    try:
+        settings = _read_settings()
+    except Exception:
+        return False
+    if settings.get("post_migration_toast_shown"):
+        return False
+    try:
+        import migrate_install
+        if not migrate_install.migration_marker_present(DATA_ROOT):
+            return False
+    except Exception:
+        return False
+    maybe_toast(
+        "Yoink is now Uoink",
+        "Your videos, settings, and API key moved to the new Uoink folder. "
+        "Nothing lost — the magnet was always a U. uoink.video",
+        icon_path=_bundled_icon_path(),
+    )
+    try:
+        settings["post_migration_toast_shown"] = True
+        settings["updated_at"] = _now_iso()
+        _write_settings(settings)
+    except Exception as e:
+        log.warning("could not persist post_migration_toast_shown flag: %s", e)
+    return True
 
 
 def _existing_server_responds() -> bool:
@@ -6315,7 +6433,7 @@ def main():
     # twice would otherwise spawn parallel pythonw.exe processes that all
     # try to bind 5179. Probe the canonical /health endpoint first.
     if _existing_server_responds():
-        log.info("Yoink server already running on http://%s:%d -- exiting", HOST, PORT)
+        log.info("Uoink server already running on http://%s:%d -- exiting", HOST, PORT)
         sys.exit(0)
 
     # Sprint 19 / Wave 1 Fix 4: if Desktop\Yoink isn't writable, swap the
@@ -6371,18 +6489,21 @@ def main():
     import atexit
     atexit.register(lambda: pid_file.unlink(missing_ok=True))
 
-    log.info("Yoink server v%s running on http://%s:%d", VERSION, HOST, PORT)
-    log.info("Ready to yoink. Click any YouTube video's Yoink button.")
+    log.info("Uoink server v%s running on http://%s:%d", VERSION, HOST, PORT)
+    log.info("Ready to uoink. Click any YouTube video's Uoink button.")
     log.info("Output: %s", DESKTOP_ROOT)
     log.info("Log file: %s", LOG_PATH)
     # Only fires here -- the single-instance / bind-failure paths above
     # exit() before reaching this line, so a duplicate launch doesn't
-    # double-notify.
-    maybe_toast(
-        "Yoink is running",
-        "Click the orange Y on any YouTube video to yoink. "
-        "To stop, find 'Stop Yoink Server' in your Start Menu.",
-    )
+    # double-notify. If the install migration just ran, fire the one-time
+    # "Yoink is now Uoink" toast instead of the regular ready toast, gated on
+    # a settings flag so it never repeats.
+    if not _maybe_post_migration_toast():
+        maybe_toast(
+            "Uoink is running",
+            "Click the rust U under any YouTube video to uoink. "
+            "To stop, find 'Stop Uoink' in your Start Menu.",
+        )
     try:
         server.serve_forever()
     except KeyboardInterrupt:

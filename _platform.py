@@ -1,4 +1,4 @@
-"""Cross-platform path + OS-integration helpers for the Yoink helper.
+"""Cross-platform path + OS-integration helpers for the Uoink helper.
 
 Sprint 19.5 Stage 1: every per-platform branch that used to live inline in
 server.py (Windows known-folder API, ``%LOCALAPPDATA%``, ``os.startfile``,
@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 from typing import Iterable
 
-log = logging.getLogger("yoink.platform")
+log = logging.getLogger("uoink.platform")
 
 # When we shell out (open / xdg-open / osascript / explorer / notify-send),
 # detach stdio so the child never blocks on a pipe and the parent doesn't
@@ -69,17 +69,35 @@ def keyring_display_name() -> str:
 # Path resolution
 # --------------------------------------------------------------------------
 def user_data_dir() -> Path:
-    """Where Yoink stores index.db, settings.json, server.log, the auth
+    """Where Uoink stores index.db, settings.json, server.log, the auth
     token, and the migrated jobs.json / taxonomy.json files.
 
-    Windows: ``%LOCALAPPDATA%\\Yoink`` (falls back to
-             ``~\\AppData\\Local\\Yoink`` if LOCALAPPDATA is unset, which
+    Windows: ``%LOCALAPPDATA%\\Uoink`` (falls back to
+             ``~\\AppData\\Local\\Uoink`` if LOCALAPPDATA is unset, which
              happens in some headless test setups).
-    macOS:   ``~/Library/Application Support/Yoink`` (the standard
+    macOS:   ``~/Library/Application Support/Uoink`` (the standard
              container per Apple's File System Programming Guide).
-    Linux:   ``$XDG_DATA_HOME/Yoink``, else ``~/.local/share/Yoink``
+    Linux:   ``$XDG_DATA_HOME/Uoink``, else ``~/.local/share/Uoink``
              (XDG Base Directory Specification).
+
+    v2.1 rename: the Yoink-era equivalents (``%LOCALAPPDATA%\\Yoink`` etc.)
+    are migrated into these locations by migrate_install.py on first run.
     """
+    if sys.platform == "win32":
+        base = os.environ.get("LOCALAPPDATA") or str(
+            Path.home() / "AppData" / "Local"
+        )
+        return Path(base) / "Uoink"
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support" / "Uoink"
+    xdg = os.environ.get("XDG_DATA_HOME")
+    base = Path(xdg) if xdg else Path.home() / ".local" / "share"
+    return base / "Uoink"
+
+
+def legacy_user_data_dir() -> Path:
+    """The pre-rename (Yoink) user-data directory, used only by the one-time
+    install migration. Mirrors user_data_dir() with the old brand folder."""
     if sys.platform == "win32":
         base = os.environ.get("LOCALAPPDATA") or str(
             Path.home() / "AppData" / "Local"
@@ -98,7 +116,7 @@ def desktop_dir() -> Path:
     Windows uses the known-folder API (``SHGetKnownFolderPath`` with
     ``FOLDERID_Desktop``) so a Desktop redirected to OneDrive is followed
     correctly -- consumer OneDrive opts Desktop in by default, and naive
-    ``%USERPROFILE%\\Desktop`` would land yoinks in a folder the user
+    ``%USERPROFILE%\\Desktop`` would land uoinks in a folder the user
     can't see in Explorer.
 
     macOS / Linux assume the standard ``~/Desktop`` location. Linux users
@@ -155,7 +173,7 @@ def reveal_in_file_manager(path: Path | str) -> None:
     subprocess.Popen(["xdg-open", str(p.parent)], **_DETACHED_IO)
 
 
-def show_toast(title: str, body: str) -> None:
+def show_toast(title: str, body: str, icon_path: str | None = None) -> None:
     """Best-effort transient notification when the helper finishes booting.
 
     Windows: PowerShell + ``System.Windows.Forms.NotifyIcon`` balloon
@@ -163,11 +181,16 @@ def show_toast(title: str, body: str) -> None:
     macOS:   ``osascript -e 'display notification ...'``.
     Linux:   ``notify-send`` (libnotify) -- silently skipped if missing.
 
+    ``icon_path`` (Windows only) brands the balloon with the bundled
+    uoink.ico; falls back to the generic OS information icon when None or
+    the file is missing. macOS/Linux notification icons are owned by the OS
+    notification centre, so the argument is ignored there.
+
     Fire-and-forget. Any failure is debug-logged and swallowed -- a
     missing tray icon should never block startup."""
     try:
         if sys.platform == "win32":
-            _windows_toast(title, body)
+            _windows_toast(title, body, icon_path)
         elif sys.platform == "darwin":
             _macos_toast(title, body)
         else:
@@ -226,21 +249,34 @@ def _windows_desktop_dir() -> Path:
     except Exception:
         # Module loads before logging is configured and pythonw.exe has no
         # stderr, so we silently fall back. Users with redirected Desktops
-        # will see yoinks under %USERPROFILE%\\Desktop -- not optimal, but
+        # will see uoinks under %USERPROFILE%\\Desktop -- not optimal, but
         # workable as a degraded mode.
         pass
     return fallback
 
 
-def _windows_toast(title: str, body: str) -> None:
+def _windows_toast(title: str, body: str, icon_path: str | None = None) -> None:
     # Single-quote escape for PowerShell single-quoted strings.
     t = title.replace("'", "''")
     b = body.replace("'", "''")
+    # v2.1: brand the balloon with the bundled uoink.ico when it's available,
+    # so the notification carries the rust U rather than the generic blue
+    # OS information icon. Fall back to SystemIcons::Information if the icon
+    # is missing or can't be loaded (e.g. a corrupt file) -- a failed icon
+    # load must never suppress the notification itself.
+    if icon_path and os.path.isfile(icon_path):
+        ip = icon_path.replace("'", "''")
+        icon_line = (
+            "try { $n.Icon = New-Object System.Drawing.Icon('" + ip + "') } "
+            "catch { $n.Icon = [System.Drawing.SystemIcons]::Information };"
+        )
+    else:
+        icon_line = "$n.Icon = [System.Drawing.SystemIcons]::Information;"
     ps = (
         "Add-Type -AssemblyName System.Windows.Forms;"
         "Add-Type -AssemblyName System.Drawing;"
         "$n = New-Object System.Windows.Forms.NotifyIcon;"
-        "$n.Icon = [System.Drawing.SystemIcons]::Information;"
+        + icon_line +
         "$n.BalloonTipIcon = 'Info';"
         f"$n.BalloonTipTitle = '{t}';"
         f"$n.BalloonTipText = '{b}';"
