@@ -26,11 +26,15 @@ jobs:
 
       - name: Lint extension JavaScript for undefined globals
         run: |
+          # v2.1 rename: the extension UI global is renamed YoinkUI -> UoinkUI
+          # by the extension agent's PR. Declare BOTH so this guard stays green
+          # whether or not that rename has merged yet (a not-yet-defined global
+          # is harmless to eslint; an undefined-USE is what no-undef catches).
           npx --yes eslint@8 --no-eslintrc \
             --env browser,worker,webextensions,es2022 \
             --rule 'no-undef: error' \
             --rule 'no-unused-vars: off' \
-            --global STC --global YoinkUI \
+            --global STC --global YoinkUI --global UoinkUI \
             $(find extension -name '*.js' -print)
 
       - name: Validate JSON files
@@ -57,8 +61,10 @@ jobs:
 
       - name: Guard against noisy extension logs
         run: |
-          if grep -nE 'console\.log\([[:space:]]*"\[Yoink\]' extension/lib/extract.js; then
-            echo 'Unexpected console.log("[Yoink]"...) in extension/lib/extract.js'
+          # Catches the legacy [Yoink] prefix and the renamed [Uoink] one so
+          # the no-noisy-logs guard stays meaningful across the rename.
+          if grep -nE 'console\.log\([[:space:]]*"\[(Yoink|Uoink)\]' extension/lib/extract.js; then
+            echo 'Unexpected console.log("[Yoink|Uoink]"...) in extension/lib/extract.js'
             exit 1
           fi
 
