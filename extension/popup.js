@@ -93,6 +93,7 @@ const DEST_DISABLED_TIP = "Uoink a video first";
 const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
 const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
 const LAST_UOINK_WINDOW_MS = 5 * 60 * 1000;
+let currentMode = "single";
 const RECENT_FAILURES_KEY = "yoink_recent_failures";
 const BACKFILL_DISMISSED_KEY = "yoink_backfill_dismissed_signature";
 const MORE_OPTIONS_OPEN_KEY = "yoink_popup_more_options_open";
@@ -1782,7 +1783,8 @@ document.addEventListener("visibilitychange", () => {
   })();
 
   // ---- mode switching --------------------------------------------------
-  let currentMode = "single"; // tracked for the active-playlist pill (item 4)
+  // currentMode is shared with the top-level ping() handler so reconnects
+  // can restore whichever panel the user already had selected.
 
   function setMode(mode) {
     currentMode = mode;
