@@ -1,4 +1,4 @@
-# Rename the parent folder from yt-extractor to Yoink
+# Rename the parent folder from yt-extractor to Uoink
 
 After Claude Code exits and the orchestrator script finishes, the parent folder will be auto-renamed by the orchestrator script.
 
@@ -10,14 +10,14 @@ If for any reason that fails, you can rename manually:
 
    ```
    cd C:\Users\hello\OneDrive\Desktop
-   Rename-Item -Path "yt-extractor" -NewName "Yoink"
+   Rename-Item -Path "yt-extractor" -NewName "Uoink"
    ```
 
 3. Update any shortcuts, batch files, or environment variables that reference the old path.
 
-4. Restart the Yoink server from the new location:
+4. Restart the Uoink server from the new location:
    ```
-   cd C:\Users\hello\OneDrive\Desktop\Yoink
+   cd C:\Users\hello\OneDrive\Desktop\Uoink
    .\start_server.bat
    ```
 

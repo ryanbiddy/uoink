@@ -1,15 +1,15 @@
-# Contributing to Yoink
+# Contributing to Uoink
 
 ## Local development
 
-Yoink's server writes user data to the user's Desktop in production. In dev mode (running `python server.py` from the repo root), `_get_desktop_dir()` resolves to your actual Desktop -- so your test yoinks land in `~/Desktop/Yoink/`, not inside the repo. That's the right behavior; please don't change it.
+Uoink's server writes user data to the user's Desktop in production. In dev mode (running `python server.py` from the repo root), `_get_desktop_dir()` resolves to your actual Desktop -- so your test uoinks land in `~/Desktop/Uoink/` (a pre-rename install may still have `~/Desktop/Yoink/` until you opt in to move it), not inside the repo. That's the right behavior; please don't change it.
 
 ## What's gitignored (and why)
 
-The repo's `.gitignore` excludes any user-facing yoink output that could land at the repo root if `_get_desktop_dir()` ever returns the wrong path:
+The repo's `.gitignore` excludes any user-facing uoink output that could land at the repo root if `_get_desktop_dir()` ever returns the wrong path:
 
 - `_sessions/` -- session-bound corpora.
-- `_all-yoinks-index.md` -- the master index file.
+- `_all-uoinks-index.md` -- the master index file.
 - `/[A-Z]*/` -- capital-letter top-level directories (the topic folders the server creates: `AI/`, `Marketing/`, etc.). Repo source directories use lowercase (`extension/`, `installer/`, `docs/`).
 
 Plus the build artifacts and runtime state:
@@ -22,11 +22,11 @@ If you ever see a topic folder or a transcript in `git status`, **don't `git add
 
 ## Test data
 
-Real yoinks contain real video transcripts and comments, which can include personal info from commenters. Don't commit them. If you need test fixtures, build minimal hand-edited corpora that don't reference real channels or users.
+Real uoinks contain real video transcripts and comments, which can include personal info from commenters. Don't commit them. If you need test fixtures, build minimal hand-edited corpora that don't reference real channels or users.
 
 ## Building the installer
 
-See `docs/build-installer.md` for the full build pipeline. Short version: `./build.ps1` from a clean checkout produces `build/Yoink-Setup-2.0.0.exe`.
+See `docs/build-installer.md` for the full build pipeline. Short version: `./build.ps1` from a clean checkout produces `build/Uoink-Setup-2.1.0.exe`.
 
 ## Security
 
