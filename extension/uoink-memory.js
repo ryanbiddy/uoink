@@ -506,13 +506,14 @@ function renderState(kind) {
   button.className = "ghost-button";
 
   if (kind === "empty-filtered") {
-    title.textContent = "No uoinks match your filters.";
+    const query = (state.filters.q || "").trim();
+    title.textContent = query ? `No uoinks found for ${query}` : "No uoinks found for your filters.";
     body.textContent = "Try broadening the search or clearing filters.";
     button.textContent = "Clear filters";
     button.addEventListener("click", clearFilters);
     inner.append(title, body, button);
   } else if (kind === "empty-all") {
-    title.textContent = "You haven't uoinked anything yet.";
+    title.textContent = "No uoinks yet - go yoink a video.";
     body.textContent = "Open the extension on YouTube and uoink your first video.";
     button.textContent = "Open the extension";
     button.addEventListener("click", () => {

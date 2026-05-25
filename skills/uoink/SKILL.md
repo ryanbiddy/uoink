@@ -7,6 +7,7 @@ description: |
   local helper server running and MCP server configured.
 version: 1.0.0
 metadata:
+  id: uoink
   openclaw:
     requires:
       env:

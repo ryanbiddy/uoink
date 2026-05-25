@@ -61,9 +61,11 @@ button {
 
 h1 {
   margin: 0;
+  font-family: "Bungee", Inter, ui-sans-serif, system-ui, sans-serif;
   font-size: 32px;
   line-height: 1.1;
   letter-spacing: 0;
+  color: var(--text);
 }
 
 .count-label {
