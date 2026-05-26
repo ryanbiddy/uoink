@@ -73,9 +73,9 @@ const queueBannerText = document.getElementById("queue-banner-text");
 const queueBannerToggle = document.getElementById("queue-banner-toggle");
 const queueBannerActions = document.getElementById("queue-banner-actions");
 const queueDetails = document.getElementById("queue-details");
-const firstYoinkPanel = document.getElementById("first-yoink-panel");
+const firstUoinkPanel = document.getElementById("first-uoink-panel");
 const currentVideoPreview = document.getElementById("current-video-preview");
-const yoinkCurrentBtn = document.getElementById("yoink-current-btn");
+const uoinkCurrentBtn = document.getElementById("uoink-current-btn");
 const destinationPanel = document.getElementById("destination-panel");
 const quickPromptsPanel = document.getElementById("quick-prompts-panel");
 const recentPanel = document.getElementById("recent-panel");
@@ -89,20 +89,21 @@ const sendChatgptBtn = document.getElementById("send-chatgpt");
 const destHint = document.getElementById("dest-hint");
 const clipboardBudgetEl = document.getElementById("clipboard-budget");
 const DEST_HINT_DEFAULT = destHint ? destHint.textContent : "";
-const DEST_DISABLED_TIP = "Yoink a video first";
+const DEST_DISABLED_TIP = "Uoink a video first";
 const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
 const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
-const LAST_YOINK_WINDOW_MS = 5 * 60 * 1000;
+const LAST_UOINK_WINDOW_MS = 5 * 60 * 1000;
+let currentMode = "single";
 const RECENT_FAILURES_KEY = "yoink_recent_failures";
 const BACKFILL_DISMISSED_KEY = "yoink_backfill_dismissed_signature";
 const MORE_OPTIONS_OPEN_KEY = "yoink_popup_more_options_open";
 const QUEUE_EXPANDED_KEY = "yoink_popup_queue_expanded";
 let serverOnline = false;
-let lastYoinkAt = 0;
+let lastUoinkAt = 0;
 let lastClipboardBudget = null;
 let currentVideoUrl = null;
 let queueExpanded = false;
-let knownRecentYoinkCount = 0;
+let knownRecentUoinkCount = 0;
 
 // Make a link-styled control (an <a role="button">) keyboard-operable:
 // Enter or Space fires the element's existing click handler. Mirrors the
@@ -117,25 +118,25 @@ function wireKeyActivation(el) {
   });
 }
 
-function hasRecentClipboardYoink() {
-  return !!lastYoinkAt && Date.now() - lastYoinkAt <= LAST_YOINK_WINDOW_MS;
+function hasRecentClipboardUoink() {
+  return !!lastUoinkAt && Date.now() - lastUoinkAt <= LAST_UOINK_WINDOW_MS;
 }
 
 function updateDestButtons() {
-  const recent = hasRecentClipboardYoink();
+  const recent = hasRecentClipboardUoink();
   const enabled = serverOnline && recent;
   for (const b of [sendClaudeBtn, sendChatgptBtn]) {
     if (!b) continue;
     b.disabled = !enabled;
     b.title = enabled
       ? ""
-      : (serverOnline ? DEST_DISABLED_TIP : "Server must be running to yoink");
+      : (serverOnline ? DEST_DISABLED_TIP : "Server must be running to uoink");
   }
   if (destHint) {
     if (!serverOnline) {
-      destHint.textContent = "Start the Yoink helper to enable these.";
+      destHint.textContent = "Start Uoink Server to enable these.";
     } else if (!recent) {
-      destHint.textContent = "Yoink a video first. Destinations unlock for 5 minutes after a successful copy.";
+      destHint.textContent = "Uoink a video first. Destinations unlock for 5 minutes after a successful copy.";
     } else {
       destHint.textContent = DEST_HINT_DEFAULT;
     }
@@ -143,20 +144,20 @@ function updateDestButtons() {
 }
 
 function formatTokenEstimate(tokens) {
-  return globalThis.YoinkUI.formatTokenEstimate(tokens);
+  return globalThis.UoinkUI.formatTokenEstimate(tokens);
 }
 
 function screenshotCountFromData(data, text) {
-  return globalThis.YoinkUI.screenshotCountFromData(data, text);
+  return globalThis.UoinkUI.screenshotCountFromData(data, text);
 }
 
 function clipboardBudgetFromData(data, clipboardText) {
-  return globalThis.YoinkUI.clipboardBudgetFromData(data, clipboardText);
+  return globalThis.UoinkUI.clipboardBudgetFromData(data, clipboardText);
 }
 
 function renderClipboardBudget() {
   if (!clipboardBudgetEl) return;
-  if (!lastClipboardBudget || !hasRecentClipboardYoink()) {
+  if (!lastClipboardBudget || !hasRecentClipboardUoink()) {
     clipboardBudgetEl.classList.add("hidden");
     clipboardBudgetEl.textContent = "";
     clipboardBudgetEl.classList.remove("warn");
@@ -186,13 +187,13 @@ function saveClipboardBudget(data, clipboardText) {
   } catch { /* ignore */ }
 }
 
-function markClipboardYoinkNow() {
-  lastYoinkAt = Date.now();
+function markClipboardUoinkNow() {
+  lastUoinkAt = Date.now();
   updateDestButtons();
   renderClipboardBudget();
   updateFocalMode();
   try {
-    chrome.storage.local.set({ [LAST_YOINK_CLIPBOARD_KEY]: lastYoinkAt });
+    chrome.storage.local.set({ [LAST_YOINK_CLIPBOARD_KEY]: lastUoinkAt });
   } catch { /* ignore */ }
 }
 
@@ -201,7 +202,7 @@ try {
     [LAST_YOINK_CLIPBOARD_KEY]: 0,
     [LAST_CLIPBOARD_BUDGET_KEY]: null,
   }, (items) => {
-    lastYoinkAt = Number(items && items[LAST_YOINK_CLIPBOARD_KEY]) || 0;
+    lastUoinkAt = Number(items && items[LAST_YOINK_CLIPBOARD_KEY]) || 0;
     lastClipboardBudget = (items && items[LAST_CLIPBOARD_BUDGET_KEY]) || null;
     updateDestButtons();
     renderClipboardBudget();
@@ -211,20 +212,35 @@ try {
 
 async function ping() {
   const data = await STC.ping();
+  const helperDownCard = document.getElementById("helper-down-card");
+  const modeSelector = document.getElementById("mode-selector-wrap");
+  const modeSingle = document.getElementById("mode-single");
+  const modePlaylist = document.getElementById("mode-playlist");
+
   if (data && data.ok) {
     serverOnline = true;
     dot.classList.remove("down"); dot.classList.add("up");
-    status.textContent = "Yoink is running.";
-    if (statusHelp) statusHelp.classList.add("hidden");
+    status.textContent = "Uoink Helper is running.";
+    if (helperDownCard) helperDownCard.classList.add("hidden");
+    if (modeSelector) modeSelector.classList.remove("hidden");
+    if (modeSingle) {
+      if (currentMode === "single") modeSingle.classList.remove("hidden");
+    }
+    if (modePlaylist) {
+      if (currentMode === "playlist") modePlaylist.classList.remove("hidden");
+    }
     updateDestButtons();
-    if (yoinkCurrentBtn && currentVideoUrl) yoinkCurrentBtn.disabled = false;
+    if (uoinkCurrentBtn && currentVideoUrl) uoinkCurrentBtn.disabled = false;
   } else {
     serverOnline = false;
     dot.classList.remove("up"); dot.classList.add("down");
-    status.textContent = "Helper offline. Open setup -> Helper status to diagnose.";
-    if (statusHelp) statusHelp.classList.remove("hidden");
+    status.textContent = "Helper offline.";
+    if (helperDownCard) helperDownCard.classList.remove("hidden");
+    if (modeSelector) modeSelector.classList.add("hidden");
+    if (modeSingle) modeSingle.classList.add("hidden");
+    if (modePlaylist) modePlaylist.classList.add("hidden");
     updateDestButtons();
-    if (yoinkCurrentBtn) yoinkCurrentBtn.disabled = true;
+    if (uoinkCurrentBtn) uoinkCurrentBtn.disabled = true;
   }
 }
 
@@ -240,13 +256,25 @@ if (statusHelp) {
   wireKeyActivation(statusHelp);
 }
 
+const troubleshootSetupBtn = document.getElementById("troubleshoot-setup-btn");
+if (troubleshootSetupBtn) {
+  troubleshootSetupBtn.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    chrome.tabs.create({
+      url: chrome.runtime.getURL("setup.html?source=offline"),
+      active: true,
+    });
+    window.close();
+  });
+}
+
 function isFirstLoadUser() {
-  return knownRecentYoinkCount <= 0 && !hasRecentClipboardYoink();
+  return knownRecentUoinkCount <= 0 && !hasRecentClipboardUoink();
 }
 
 function updateFocalMode() {
   const firstLoad = isFirstLoadUser();
-  if (firstYoinkPanel) firstYoinkPanel.classList.toggle("hidden", !firstLoad);
+  if (firstUoinkPanel) firstUoinkPanel.classList.toggle("hidden", !firstLoad);
   if (destinationPanel) destinationPanel.classList.toggle("hidden", firstLoad);
   if (quickPromptsPanel) quickPromptsPanel.classList.toggle("hidden", firstLoad);
   if (recentPanel) recentPanel.classList.toggle("hidden", firstLoad);
@@ -271,7 +299,7 @@ if (moreOptions) {
 }
 
 async function loadCurrentVideoPreview() {
-  if (!currentVideoPreview || !yoinkCurrentBtn) return;
+  if (!currentVideoPreview || !uoinkCurrentBtn) return;
   try {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     const tab = tabs && tabs[0];
@@ -280,14 +308,14 @@ async function loadCurrentVideoPreview() {
     currentVideoUrl = normalized;
     if (!normalized) {
       currentVideoPreview.textContent = "Open a YouTube video tab, then reopen this popup.";
-      yoinkCurrentBtn.disabled = true;
+      uoinkCurrentBtn.disabled = true;
       return;
     }
     currentVideoPreview.textContent = (tab.title || "YouTube video").replace(/\s+-\s+YouTube\s*$/i, "");
-    yoinkCurrentBtn.disabled = !serverOnline;
+    uoinkCurrentBtn.disabled = !serverOnline;
   } catch {
     currentVideoPreview.textContent = "Couldn't read the current tab.";
-    yoinkCurrentBtn.disabled = true;
+    uoinkCurrentBtn.disabled = true;
   }
 }
 
@@ -382,7 +410,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
     renderActive(changes.active_session.newValue || null);
   }
   if (area === "local" && changes[LAST_YOINK_CLIPBOARD_KEY]) {
-    lastYoinkAt = Number(changes[LAST_YOINK_CLIPBOARD_KEY].newValue) || 0;
+    lastUoinkAt = Number(changes[LAST_YOINK_CLIPBOARD_KEY].newValue) || 0;
     updateDestButtons();
     renderClipboardBudget();
     updateFocalMode();
@@ -472,12 +500,12 @@ endBtn.addEventListener("click", async () => {
   // so we don't auto-open a tab here â€” that would force Claude.
   const lines = `${fmtCount(res.video_count, "video")}, ${fmtCount(res.caption_count || 0, "caption line")}`;
   const note = copied
-    ? `Session yoinked! ${lines}. Pick a destination above and paste.`
+    ? `Session uoinked! ${lines}. Pick a destination above and paste.`
     : `Session closed. ${lines}. Clipboard failed â€” corpus.md is in the session folder (already open in Explorer).`;
-  await chrome.runtime.sendMessage({ type: "notify", title: "Research session yoinked", message: note });
+  await chrome.runtime.sendMessage({ type: "notify", title: "Research session uoinked", message: note });
   if (copied) {
-    markClipboardYoinkNow();
-    showToast("Session yoinked! Pick a destination above.");
+    markClipboardUoinkNow();
+    showToast("Session uoinked! Pick a destination above.");
   }
 
   // Large-corpus warning
@@ -635,8 +663,8 @@ clearBtn.addEventListener("click", () => {
   chrome.runtime.sendMessage({ type: "clearQueue" }, () => refreshQueue());
 });
 
-// ---- Recent yoinks --------------------------------------------------------
-const recentYoinksEl = document.getElementById("recent-yoinks");
+// ---- Recent uoinks --------------------------------------------------------
+const recentUoinksEl = document.getElementById("recent-uoinks");
 const HEALTH_FIELDS = [
   "transcript",
   "screenshots",
@@ -680,7 +708,7 @@ function saveRecentFailures(failures) {
 async function removeRecentFailure(id) {
   const failures = await loadRecentFailures();
   await saveRecentFailures(failures.filter((f) => f.id !== id));
-  await loadRecentYoinks();
+  await loadRecentUoinks();
 }
 
 function renderFailureRow(failure) {
@@ -694,7 +722,7 @@ function renderFailureRow(failure) {
 
   const error = document.createElement("div");
   error.className = "recent-failure-error";
-  error.textContent = failure.error || "Yoink failed.";
+  error.textContent = failure.error || "Uoink failed.";
 
   const actions = document.createElement("div");
   actions.className = "recent-failure-actions";
@@ -772,7 +800,7 @@ function writeDismissedBackfill(signature) {
 }
 
 async function popupAuthedJson(path, init = {}) {
-  return globalThis.YoinkUI.authedJson(path, init);
+  return globalThis.UoinkUI.authedJson(path, init);
 }
 
 function hideBackfillBanner() {
@@ -798,7 +826,7 @@ function renderBackfillStatus(status) {
 
   const current = Number.isFinite(Number(status.current)) ? Number(status.current) : 0;
   const total = Number.isFinite(Number(status.total)) ? Number(status.total) : 0;
-  backfillText.textContent = `Indexing your yoinks: ${current} of ${total}...`;
+  backfillText.textContent = `Indexing your uoinks: ${current} of ${total}...`;
   backfillBanner.classList.remove("hidden");
 }
 
@@ -888,12 +916,12 @@ function queueItemId(item) {
 }
 
 function shortQueueLabel(item) {
-  if (!item) return "Queued yoink";
-  return item.title || item.url || item.source_url || item.video_url || item.video_id || "Queued yoink";
+  if (!item) return "Queued uoink";
+  return item.title || item.url || item.source_url || item.video_url || item.video_id || "Queued uoink";
 }
 
 function minutesUntil(value) {
-  return globalThis.YoinkUI.minutesUntil(value);
+  return globalThis.UoinkUI.minutesUntil(value);
 }
 
 function nextRetryLabel(status) {
@@ -944,7 +972,7 @@ function renderQueueDetails(status) {
   if (!all.length) {
     const empty = document.createElement("div");
     empty.className = "panel-muted";
-    empty.textContent = "No queued yoinks.";
+    empty.textContent = "No queued uoinks.";
     queueDetails.appendChild(empty);
     return;
   }
@@ -1004,7 +1032,7 @@ function renderQueueBanner(status) {
       return;
     }
     queueStatusBanner.classList.add("error");
-    queueBannerText.textContent = `${failed} yoink${failed === 1 ? "" : "s"} failed after 3 retries.`;
+    queueBannerText.textContent = `${failed} uoink${failed === 1 ? "" : "s"} failed after 3 retries.`;
     if (queueBannerActions) {
       queueBannerActions.appendChild(makeQueueButton("Retry now", async (btn) => {
         btn.disabled = true;
@@ -1020,14 +1048,14 @@ function renderQueueBanner(status) {
     dismissedQueueFailureSignature = "";
     const runningRaw = status.current || status.running || status.running_item;
     const current = Array.isArray(runningRaw) ? runningRaw[0] : (runningRaw || {});
-    queueBannerText.textContent = `Yoinking now: ${shortQueueLabel(current)}`;
+    queueBannerText.textContent = `Uoinking now: ${shortQueueLabel(current)}`;
   } else {
     dismissedQueueFailureSignature = "";
     queueStatusBanner.classList.add("warn");
     const retry = nextRetryLabel(status);
     queueBannerText.textContent = retry
-      ? `${pending} yoink${pending === 1 ? "" : "s"} queued \u00b7 next retry ${retry}`
-      : `${pending} yoink${pending === 1 ? "" : "s"} queued`;
+      ? `${pending} uoink${pending === 1 ? "" : "s"} queued \u00b7 next retry ${retry}`
+      : `${pending} uoink${pending === 1 ? "" : "s"} queued`;
   }
 
   renderQueueDetails(status);
@@ -1115,16 +1143,16 @@ async function writeClipboardText(text) {
   }
 }
 
-async function runPopupYoinkCurrent() {
-  if (!yoinkCurrentBtn || !currentVideoUrl) return;
+async function runPopupUoinkCurrent() {
+  if (!uoinkCurrentBtn || !currentVideoUrl) return;
   if ((await serverQueuePendingCount()) >= 5) {
     showToast("Queue full, wait a few minutes.");
     pollQueueStatus();
     return;
   }
-  const old = yoinkCurrentBtn.textContent;
-  yoinkCurrentBtn.disabled = true;
-  yoinkCurrentBtn.textContent = "Yoinking...";
+  const old = uoinkCurrentBtn.textContent;
+  uoinkCurrentBtn.disabled = true;
+  uoinkCurrentBtn.textContent = "Uoinking...";
   try {
     const interval = await STC.getInterval();
     const data = await STC.postExtract(currentVideoUrl, interval);
@@ -1141,7 +1169,7 @@ async function runPopupYoinkCurrent() {
     saveClipboardBudget(data, clipboardText);
     if (await shouldUseScreenshotPicker()) {
       await STC.stashPickerCorpus(data);
-      showToast("Yoink ready - pick screenshots in the popup.");
+      showToast("Uoink ready - pick screenshots in the popup.");
       return;
     }
     const copied = await writeClipboardText(clipboardText);
@@ -1150,24 +1178,24 @@ async function runPopupYoinkCurrent() {
       showToast("Couldn't copy. Use the Try again notification.");
       return;
     }
-    markClipboardYoinkNow();
+    markClipboardUoinkNow();
     await chrome.tabs.create({ url: CLAUDE_URL, active: true });
-    showToast("Yoinked! Paste in Claude.");
-    loadRecentYoinks();
+    showToast("Uoinked ★ Paste in Claude.");
+    loadRecentUoinks();
   } catch (e) {
-    showToast(`Yoink failed: ${e && e.message || e}`);
+    showToast(`Uoink failed: ${e && e.message || e}`);
   } finally {
-    yoinkCurrentBtn.disabled = !serverOnline || !currentVideoUrl;
-    yoinkCurrentBtn.textContent = old;
+    uoinkCurrentBtn.disabled = !serverOnline || !currentVideoUrl;
+    uoinkCurrentBtn.textContent = old;
   }
 }
 
-if (yoinkCurrentBtn) {
-  yoinkCurrentBtn.addEventListener("click", runPopupYoinkCurrent);
+if (uoinkCurrentBtn) {
+  uoinkCurrentBtn.addEventListener("click", runPopupUoinkCurrent);
 }
 
 function renderHealthRow(health) {
-  return globalThis.YoinkUI.renderHealthDots(health, { fields: HEALTH_FIELDS });
+  return globalThis.UoinkUI.renderHealthDots(health, { fields: HEALTH_FIELDS });
 }
 
 function topEntityNames(row) {
@@ -1203,7 +1231,7 @@ function renderEntityIndicator(row) {
 }
 
 function hookDisplayName(hookType) {
-  return globalThis.YoinkUI.prettyHookType(String(hookType || "").trim());
+  return globalThis.UoinkUI.prettyHookType(String(hookType || "").trim());
 }
 
 function numberOrNull(value) {
@@ -1368,26 +1396,91 @@ function renderHookCalibration(row) {
   return wrap;
 }
 
-async function loadRecentYoinks() {
-  if (!recentYoinksEl) return;
+async function loadRecentUoinks() {
+  if (!recentUoinksEl) return;
   let recent = [];
   const failures = await loadRecentFailures();
   try {
     const res = await STC.listRecent();
     recent = (res && res.recent) || [];
-  } catch { /* server may be down â€” leave the placeholder */ }
-  knownRecentYoinkCount = recent.length + failures.length;
+  } catch { /* server may be down — leave the placeholder */ }
+  knownRecentUoinkCount = recent.length + failures.length;
   updateFocalMode();
-  recentYoinksEl.innerHTML = "";
+  recentUoinksEl.innerHTML = "";
   for (const failure of failures) {
-    recentYoinksEl.appendChild(renderFailureRow(failure));
+    recentUoinksEl.appendChild(renderFailureRow(failure));
   }
+
+  // Populate active uoink card if there is at least one recent uoink
+  const activeUoinkCard = document.getElementById("active-uoink-card");
+  if (activeUoinkCard) {
+    if (recent.length > 0) {
+      activeUoinkCard.classList.remove("hidden");
+      const last = recent[0];
+      const titleEl = document.getElementById("active-uoink-title");
+      const channelEl = document.getElementById("active-uoink-channel");
+      const durationEl = document.getElementById("active-uoink-duration");
+      
+      if (titleEl) titleEl.textContent = last.title || "(Untitled)";
+      if (channelEl) channelEl.textContent = last.channel || "YouTube";
+      if (durationEl) durationEl.textContent = last.topic || "Uncategorized";
+
+      const openClaudeBtn = document.getElementById("active-uoink-open-claude");
+      if (openClaudeBtn) {
+        openClaudeBtn.onclick = (e) => {
+          e.stopPropagation();
+          chrome.tabs.create({ url: "https://claude.ai/new", active: true });
+        };
+      }
+
+      const copyMDBtn = document.getElementById("active-uoink-copy-md");
+      if (copyMDBtn) {
+        copyMDBtn.onclick = async (e) => {
+          e.stopPropagation();
+          copyMDBtn.disabled = true;
+          copyMDBtn.textContent = "Copying...";
+          
+          try {
+            let res = await STC._postJson("/mcp/v1/tools/call", {
+              name: "get_uoink_corpus",
+              arguments: { slug: last.slug }
+            });
+            if (!res || res.error) {
+              res = await STC._postJson("/mcp/v1/tools/call", {
+                name: "get_yoink_corpus",
+                arguments: { slug: last.slug }
+              });
+            }
+            const data = res && res.result && res.result.structuredContent;
+            if (data && data.ok && data.corpus_md) {
+              const copied = await writeClipboardText(data.corpus_md);
+              if (copied) {
+                showToast("Copied markdown to clipboard!");
+              } else {
+                showToast("Clipboard copy blocked.");
+              }
+            } else {
+              showToast("Failed to retrieve markdown.");
+            }
+          } catch (err) {
+            showToast("Error retrieving markdown.");
+          } finally {
+            copyMDBtn.disabled = false;
+            copyMDBtn.textContent = "Copy Markdown";
+          }
+        };
+      }
+    } else {
+      activeUoinkCard.classList.add("hidden");
+    }
+  }
+
   if (!recent.length && !failures.length) {
     const empty = document.createElement("div");
     empty.className = "panel-muted";
     empty.style.cssText = "font-size:11px;padding:4px 6px";
-    empty.textContent = "No yoinks yet.";
-    recentYoinksEl.appendChild(empty);
+    empty.textContent = "No uoinks yet.";
+    recentUoinksEl.appendChild(empty);
     return;
   }
   for (const r of recent) {
@@ -1403,7 +1496,7 @@ async function loadRecentYoinks() {
     title.textContent = r.title || "(untitled)";
     const meta = document.createElement("span");
     meta.className = "meta";
-    meta.textContent = r.topic || "â€”";
+    meta.textContent = r.topic || "—";
     text.appendChild(title);
     text.appendChild(meta);
     main.appendChild(text);
@@ -1418,7 +1511,7 @@ async function loadRecentYoinks() {
     item.addEventListener("click", () => {
       if (r.folder) STC.openFolder(r.folder);
     });
-    recentYoinksEl.appendChild(item);
+    recentUoinksEl.appendChild(item);
   }
 }
 
@@ -1428,7 +1521,7 @@ const CHATGPT_URL = "https://chatgpt.com/";
 
 function openDestination(url, label) {
   chrome.tabs.create({ url, active: true });
-  showToast(`Opened ${label} - paste your most recent yoink.`);
+  showToast(`Opened ${label} - paste your most recent uoink.`);
 }
 
 document.getElementById("send-claude").addEventListener("click", () => {
@@ -1438,13 +1531,13 @@ document.getElementById("send-chatgpt").addEventListener("click", () => {
   openDestination(CHATGPT_URL, "ChatGPT");
 });
 
-// ---- View all yoinks ------------------------------------------------------
+// ---- View all uoinks ------------------------------------------------------
 const openIndexLink = document.getElementById("open-index");
 if (openIndexLink) {
   openIndexLink.addEventListener("click", (ev) => {
     ev.preventDefault();
     ev.stopImmediatePropagation();
-    chrome.tabs.create({ url: chrome.runtime.getURL("yoink-memory.html") });
+    chrome.tabs.create({ url: chrome.runtime.getURL("uoink-memory.html") });
   });
 }
 // Legacy fallback below opens _all-yoinks-index.md if the Memory hook fails.
@@ -1453,10 +1546,10 @@ document.getElementById("open-index").addEventListener("click", async (ev) => {
   try {
     const res = await STC.openIndex();
     if (!res || res.ok === false) {
-      showToast("Couldn't open the yoinks index â€” server may be down.");
+      showToast("Couldn't open the uoinks index â€” server may be down.");
     }
   } catch {
-    showToast("Couldn't open the yoinks index â€” server may be down.");
+    showToast("Couldn't open the uoinks index â€” server may be down.");
   }
 });
 wireKeyActivation(document.getElementById("open-index"));
@@ -1504,7 +1597,7 @@ loadCurrentVideoPreview();
 refreshQueue();
 refreshActiveFromServer();
 loadRecentSessions();
-loadRecentYoinks();
+loadRecentUoinks();
 readDismissedBackfill().then(startBackfillPolling);
 startQueueStatusPolling();
 
@@ -1631,12 +1724,67 @@ document.addEventListener("visibilitychange", () => {
   (async function loadSettings() {
     try {
       const res = await STC.getSettings();
-      if (res && res.ok && res.settings) cachedSettings = res.settings;
+      if (res && res.ok && res.settings) {
+        cachedSettings = res.settings;
+
+        // Check migration banners
+        const migrationSuccessBanner = document.getElementById("migration-success-banner");
+        if (migrationSuccessBanner) {
+          if (res.settings.migration_just_happened === true) {
+            migrationSuccessBanner.classList.remove("hidden");
+            const migrationDismissBtn = document.getElementById("migration-dismiss-btn");
+            if (migrationDismissBtn) {
+              migrationDismissBtn.onclick = async () => {
+                migrationSuccessBanner.classList.add("hidden");
+                try {
+                  await STC.updateSettings({ migration_just_happened: false });
+                } catch (e) {
+                  console.warn("Failed to dismiss migration banner", e);
+                }
+              };
+            }
+          }
+        }
+
+        const desktopCorpusMigrationBanner = document.getElementById("desktop-corpus-migration-banner");
+        if (desktopCorpusMigrationBanner) {
+          if (res.settings.desktop_corpus_migration_pending === true) {
+            desktopCorpusMigrationBanner.classList.remove("hidden");
+            
+            const moveBtn = document.getElementById("desktop-corpus-move-btn");
+            if (moveBtn) {
+              moveBtn.onclick = async () => {
+                desktopCorpusMigrationBanner.classList.add("hidden");
+                showToast("Moving files...");
+                try {
+                  await STC.updateSettings({ desktop_corpus_migration_action: "move" });
+                  showToast("Migration started.");
+                } catch (e) {
+                  showToast("Failed to start migration.");
+                }
+              };
+            }
+
+            const keepBtn = document.getElementById("desktop-corpus-keep-btn");
+            if (keepBtn) {
+              keepBtn.onclick = async () => {
+                desktopCorpusMigrationBanner.classList.add("hidden");
+                try {
+                  await STC.updateSettings({ desktop_corpus_migration_action: "keep" });
+                } catch (e) {
+                  console.warn("Failed to keep both", e);
+                }
+              };
+            }
+          }
+        }
+      }
     } catch { /* settings fetch is non-fatal */ }
   })();
 
   // ---- mode switching --------------------------------------------------
-  let currentMode = "single"; // tracked for the active-playlist pill (item 4)
+  // currentMode is shared with the top-level ping() handler so reconnects
+  // can restore whichever panel the user already had selected.
 
   function setMode(mode) {
     currentMode = mode;
@@ -1668,7 +1816,7 @@ document.addEventListener("visibilitychange", () => {
   // Shown when user is in single-video mode AND lastJob is non-terminal
   // (queued or running). Clicking returns to playlist mode + progress
   // panel. On terminal state we just hide the pill â€” the next-popup-open
-  // "Last yoink completed" affordance (item 3) is what surfaces the
+  // "Last uoink completed" affordance (item 3) is what surfaces the
   // result on the playlist input panel.
   const activePlaylistPillEl = document.getElementById("active-playlist-pill");
   const activePlaylistPillLabelEl = document.getElementById("active-playlist-pill-label");
@@ -1845,7 +1993,7 @@ document.addEventListener("visibilitychange", () => {
     const willProc = playlist.will_process_count != null ? playlist.will_process_count : (playlist.videos || []).length;
     previewSubtitleEl.textContent = `${uploader} Â· ${willProc} of ${vc} videos`;
 
-    // Message (e.g., "Playlist has 12 videos -- yoinking the first 10.")
+    // Message (e.g., "Playlist has 12 videos -- uoinking the first 10.")
     // is displayed as the warnings strip when present alongside warnings,
     // otherwise we surface it inside the warnings strip too â€” it carries
     // the same "be aware of the cap" signal as the warnings list.
@@ -1911,7 +2059,7 @@ document.addEventListener("visibilitychange", () => {
       const res = await STC.playlistStart(previewedUrl, interval);
       // Contract: returns both top-level job_id and nested job.
       if (!res || !res.ok || !res.job_id) {
-        showError((res && res.error) || "Couldn't start playlist yoink.");
+        showError((res && res.error) || "Couldn't start playlist uoink.");
         showOnly(inputPanel);
         return;
       }
@@ -1942,7 +2090,7 @@ document.addEventListener("visibilitychange", () => {
       showOnly(inputPanel);
     } finally {
       startBtn.disabled = false;
-      startBtn.textContent = "Yoink playlist";
+      startBtn.textContent = "Uoink playlist";
     }
   });
 
@@ -1978,7 +2126,7 @@ document.addEventListener("visibilitychange", () => {
   // short enough that a sustained outage with multiple popup opens still
   // eventually re-surfaces the guide as a reminder.
   const AUTO_OPEN_RATE_LIMIT_MS = 5 * 60 * 1000;
-  const AUTO_OPEN_TIMESTAMP_KEY = "yoink_setup_auto_open_at";
+  const AUTO_OPEN_TIMESTAMP_KEY = "uoink_setup_auto_open_at";
 
   function _shouldSuppressAutoOpen() {
     return new Promise((resolve) => {
@@ -2152,7 +2300,7 @@ document.addEventListener("visibilitychange", () => {
       onCancelled(job);
     } else if (job.state === "failed") {
       stopPolling();
-      enterFailed(job.error || "Playlist yoink failed.");
+      enterFailed(job.error || "Playlist uoink failed.");
     }
   }
 
@@ -2298,8 +2446,8 @@ document.addEventListener("visibilitychange", () => {
     showOnly(donePanel);
 
     if (copied) {
-      markClipboardYoinkNow();
-      showToast("Playlist yoinked! Paste in Claude or ChatGPT.");
+      markClipboardUoinkNow();
+      showToast("Playlist uoinked! Paste in Claude or ChatGPT.");
     }
   }
 
@@ -2370,36 +2518,36 @@ document.addEventListener("visibilitychange", () => {
     showOnly(failedPanel);
   }
 
-  // ---- Sprint 6 (item 3): last-yoink completed affordance --------------
+  // ---- Sprint 6 (item 3): last-uoink completed affordance --------------
   // 30-minute window picked over 60 or 15: shorter than 60 keeps the popup
-  // honest about "recent" (a yoink from 45 min ago is probably out of mind
+  // honest about "recent" (a uoink from 45 min ago is probably out of mind
   // and clutters the surface), longer than 15 covers the case where the
-  // user starts a yoink, walks away, and comes back to finish reading.
+  // user starts an uoink, walks away, and comes back to finish reading.
   // No dismissal Ã— yet â€” auto-expiry covers most of the value, and adding
   // a per-job dismissal-storage was deemed not worth the complexity for
   // first ship. Document if we hit user pushback.
-  const LAST_YOINK_WINDOW_MS = 30 * 60 * 1000;
-  const lastYoinkEl = document.getElementById("pl-last-yoink");
-  const lastYoinkPrefixEl = document.getElementById("pl-last-yoink-prefix");
-  const lastYoinkTitleEl = document.getElementById("pl-last-yoink-title");
-  const lastYoinkSuffixEl = document.getElementById("pl-last-yoink-suffix");
-  const lastYoinkBtn = document.getElementById("pl-last-yoink-btn");
+  const LAST_UOINK_WINDOW_MS = 30 * 60 * 1000;
+  const lastUoinkEl = document.getElementById("pl-last-uoink");
+  const lastUoinkPrefixEl = document.getElementById("pl-last-uoink-prefix");
+  const lastUoinkTitleEl = document.getElementById("pl-last-uoink-title");
+  const lastUoinkSuffixEl = document.getElementById("pl-last-uoink-suffix");
+  const lastUoinkBtn = document.getElementById("pl-last-uoink-btn");
 
-  function _hideLastYoink() {
-    if (lastYoinkEl) lastYoinkEl.classList.add("hidden");
-    if (lastYoinkBtn) lastYoinkBtn.onclick = null;
+  function _hideLastUoink() {
+    if (lastUoinkEl) lastUoinkEl.classList.add("hidden");
+    if (lastUoinkBtn) lastUoinkBtn.onclick = null;
   }
 
-  function _renderLastYoink(job) {
-    if (!lastYoinkEl || !lastYoinkTitleEl || !lastYoinkBtn) return;
-    if (!job) { _hideLastYoink(); return; }
+  function _renderLastUoink(job) {
+    if (!lastUoinkEl || !lastUoinkTitleEl || !lastUoinkBtn) return;
+    if (!job) { _hideLastUoink(); return; }
     // Sprint 7: kind-aware label per the updated /jobs contract.
     // Single jobs populate `title`; playlist jobs populate `playlist_title`.
     // Both fields go through textContent so a hostile YouTube-side title
     // (yt-dlp surfaces it as-is) can't inject markup.
     let prefix, label, suffix = "";
     if (job.kind === "single") {
-      prefix = "Last yoink: ";
+      prefix = "Last uoink: ";
       label = job.title || job.source_url || "Single video";
     } else {
       // Default to playlist for any non-single kind (today only "playlist"
@@ -2409,10 +2557,10 @@ document.addEventListener("visibilitychange", () => {
       const count = typeof job.videos_done === "number" ? job.videos_done : 0;
       if (count > 0) suffix = ` (${count} video${count === 1 ? "" : "s"})`;
     }
-    if (lastYoinkPrefixEl) lastYoinkPrefixEl.textContent = prefix;
-    lastYoinkTitleEl.textContent = label;
-    if (lastYoinkSuffixEl) lastYoinkSuffixEl.textContent = suffix;
-    lastYoinkBtn.onclick = async () => {
+    if (lastUoinkPrefixEl) lastUoinkPrefixEl.textContent = prefix;
+    lastUoinkTitleEl.textContent = label;
+    if (lastUoinkSuffixEl) lastUoinkSuffixEl.textContent = suffix;
+    lastUoinkBtn.onclick = async () => {
       const path = job.session_folder;
       if (!path) {
         showToast("No folder path available.");
@@ -2427,7 +2575,7 @@ document.addEventListener("visibilitychange", () => {
         showToast("Couldn't open folder â€” server may be offline.");
       }
     };
-    lastYoinkEl.classList.remove("hidden");
+    lastUoinkEl.classList.remove("hidden");
   }
 
   function _isRecentCompleted(job) {
@@ -2436,7 +2584,7 @@ document.addEventListener("visibilitychange", () => {
     if (!job.completed_at) return false;
     const t = Date.parse(job.completed_at);
     if (Number.isNaN(t)) return false;
-    return (Date.now() - t) < LAST_YOINK_WINDOW_MS;
+    return (Date.now() - t) < LAST_UOINK_WINDOW_MS;
   }
 
   // ---- boot ------------------------------------------------------------
@@ -2447,7 +2595,7 @@ document.addEventListener("visibilitychange", () => {
   // progress panel from the snapshot, and resume polling. If none found,
   // default to the input panel as before.
   // Sprint 6 (item 3): if no in-flight job is found, look for a recently
-  // completed job (within LAST_YOINK_WINDOW_MS) and surface an "Open folder"
+  // completed job (within LAST_UOINK_WINDOW_MS) and surface an "Open folder"
   // affordance on the playlist input panel.
   showOnly(inputPanel);
   (async function recoverActiveJob() {
@@ -2481,7 +2629,7 @@ document.addEventListener("visibilitychange", () => {
     const recent = res.jobs
       .filter(_isRecentCompleted)
       .sort((a, b) => String(b.completed_at || "").localeCompare(String(a.completed_at || "")))[0];
-    if (recent) _renderLastYoink(recent);
+    if (recent) _renderLastUoink(recent);
   })();
 })();
 
@@ -2549,12 +2697,12 @@ document.addEventListener("visibilitychange", () => {
   // Match the file-reference markdown: ![alt](C:/.../shot_0001.jpg).
   // Tolerant of leading whitespace; rejects data: URLs (those belong to
   // the multimodal paste corpus, not the canonical screenshot list).
-  function parseScreenshots(yoinkMd) {
-    if (!yoinkMd) return [];
+  function parseScreenshots(uoinkMd) {
+    if (!uoinkMd) return [];
     const out = [];
     const re = /!\[([^\]]*)\]\(([^)]+)\)/g;
     let m;
-    while ((m = re.exec(yoinkMd)) !== null) {
+    while ((m = re.exec(uoinkMd)) !== null) {
       const src = m[2].trim();
       if (src.startsWith("data:")) continue;
       out.push({ alt: m[1] || "", path: src });
@@ -2600,7 +2748,7 @@ document.addEventListener("visibilitychange", () => {
     if (!screenshots.length) {
       const empty = document.createElement("div");
       empty.className = "picker-empty";
-      empty.textContent = "No screenshots found in this yoink.";
+      empty.textContent = "No screenshots found in this uoink.";
       pickerGridEl.appendChild(empty);
       pickerCopyBtn.disabled = false; // copy the unmodified corpus
       pickerSelectAllLink.classList.add("hidden");
@@ -2697,9 +2845,9 @@ document.addEventListener("visibilitychange", () => {
   }
 
   // Sprint 4 (1b): relative-time helper for the picker source meta line.
-  // Two-yoinks-back-to-back disambiguation: when pending_picker gets
+  // Two-uoinks-back-to-back disambiguation: when pending_picker gets
   // overwritten, the user sees "just now" vs "3m ago" so they know which
-  // yoink they're looking at. Falls back to ISO date for older stashes
+  // uoink they're looking at. Falls back to ISO date for older stashes
   // (shouldn't happen in practice â€” pending_picker is cleared on copy).
   function formatRelativeTime(iso) {
     if (!iso) return "";
@@ -2725,7 +2873,7 @@ document.addEventListener("visibilitychange", () => {
     showError("");
     pickerTitleEl.textContent = pendingPicker.title || "Untitled video";
     const rel = formatRelativeTime(pendingPicker.yoinked_at);
-    pickerSourceMetaEl.textContent = rel ? `Yoinked ${rel}` : "";
+    pickerSourceMetaEl.textContent = rel ? `Uoinked ${rel}` : "";
     screenshots = parseScreenshots(pendingPicker.yoink_md);
     selectedSet = new Set(screenshots.map((_, i) => i)); // default all selected
     _revokeThumbBlobs(); // release any prior-payload blobs before reusing
@@ -2792,7 +2940,7 @@ document.addEventListener("visibilitychange", () => {
     _revokeThumbBlobs(); // Sprint 4 (1c): release blob URLs from getScreenshotThumbnail
 
     if (copied) {
-      markClipboardYoinkNow();
+      markClipboardUoinkNow();
       // Open Claude tab to match the v1 auto-copy flow, then close popup.
       try {
         await chrome.tabs.create({ url: "https://claude.ai/new", active: true });
@@ -2807,15 +2955,15 @@ document.addEventListener("visibilitychange", () => {
       return;
     }
 
-    // Sprint 4 (1a): route through STC.buildYoinkedMessage so the picker
-    // path gets the same first-yoink CTA treatment as v1 auto-copy. The
+    // Sprint 4 (1a): route through STC.buildUoinkedMessage so the picker
+    // path gets the same first-uoink CTA treatment as v1 auto-copy. The
     // helper atomically flips has_completed_first_yoink on first success
-    // and returns either the first-yoink CTA copy or the topic-aware
+    // and returns either the first-uoink CTA copy or the topic-aware
     // subsequent copy. We pass a minimal data-shape (only `.topic` is
     // consumed by the helper) reconstituted from the stashed payload.
     try {
       const data = { topic: pendingPicker && pendingPicker.topic };
-      const message = await STC.buildYoinkedMessage(data, copied);
+      const message = await STC.buildUoinkedMessage(data, copied);
       // Title surfaces the picker-specific detail (how many screenshots
       // were kept) so the user-visible signal isn't lost when the message
       // body becomes the standard CTA/topic copy.
@@ -2824,7 +2972,7 @@ document.addEventListener("visibilitychange", () => {
         : "";
       await chrome.runtime.sendMessage({
         type: "notify",
-        title: copied ? `Yoinked!${titleSuffix}` : "Yoink ready (clipboard blocked)",
+        title: copied ? `Uoinked ★${titleSuffix}` : "Uoink ready (clipboard blocked)",
         message,
       });
     } catch (e) {
@@ -2864,11 +3012,11 @@ document.addEventListener("visibilitychange", () => {
       else { _revokeThumbBlobs(); hidePicker(); }
     }
     if (changes[LAST_YOINK_CLIPBOARD_KEY]) {
-      lastYoinkAt = Number(changes[LAST_YOINK_CLIPBOARD_KEY].newValue) || 0;
+      lastUoinkAt = Number(changes[LAST_YOINK_CLIPBOARD_KEY].newValue) || 0;
       updateDestButtons();
     }
     if (changes[RECENT_FAILURES_KEY]) {
-      loadRecentYoinks();
+      loadRecentUoinks();
     }
   });
 })();

@@ -1,15 +1,15 @@
-// Yoink Memory page. Runs as an extension page and talks to the local helper.
+// Uoink Memory page. Runs as an extension page and talks to the local helper.
 
 // Frame-buster: prevent any future regression that re-introduces WAR from
 // silently re-opening the clickjacking vector audited as CC S2 (Sprint 19.6).
 if (window.top !== window.self) {
   document.body.innerHTML = "";
   try { window.top.location.href = "about:blank"; } catch (_) { /* ignore */ }
-  throw new Error("yoink-memory.html cannot be iframed");
+  throw new Error("uoink-memory.html cannot be iframed");
 }
 
 const LIMIT = 50;
-const FILTER_STORAGE_KEY = "yoink_memory_filters";
+const FILTER_STORAGE_KEY = "uoink_memory_filters";
 const SERVER = (globalThis.STC && STC.SERVER) || "http://127.0.0.1:5179";
 const THUMBNAIL_CACHE_MAX = 200;
 const HEALTH_FIELDS = [
@@ -107,11 +107,11 @@ function storageSet(items) {
 }
 
 async function authedFetch(path, init = {}) {
-  return globalThis.YoinkUI.authedFetch(path, init, { server: SERVER });
+  return globalThis.UoinkUI.authedFetch(path, init, { server: SERVER });
 }
 
 async function authedJson(path, init = {}) {
-  return globalThis.YoinkUI.authedJson(path, init, {
+  return globalThis.UoinkUI.authedJson(path, init, {
     server: SERVER,
     throwOnHttp: true,
   });
@@ -157,8 +157,8 @@ function queryString() {
 
 function normalizeRows(body) {
   const data = body.data && typeof body.data === "object" ? body.data : {};
-  const rows = body.results || body.yoinks || body.items || body.recent
-    || data.results || data.yoinks || data.items || [];
+  const rows = body.results || body.uoinks || body.yoinks || body.items || body.recent
+    || data.results || data.uoinks || data.yoinks || data.items || [];
   return Array.isArray(rows) ? rows : [];
 }
 
@@ -205,7 +205,7 @@ function rowThumbnailPath(row) {
 }
 
 function formatHookType(value) {
-  return globalThis.YoinkUI.prettyHookType(value);
+  return globalThis.UoinkUI.prettyHookType(value);
 }
 
 function formatDate(value) {
@@ -234,7 +234,7 @@ function topEntityNames(row) {
 }
 
 function renderHealth(health) {
-  return globalThis.YoinkUI.renderHealthDots(health, { fields: HEALTH_FIELDS });
+  return globalThis.UoinkUI.renderHealthDots(health, { fields: HEALTH_FIELDS });
 }
 
 async function thumbnailUrl(row) {
@@ -351,20 +351,20 @@ function openYouTube(row) {
   chrome.tabs.create({ url, active: true });
 }
 
-async function reYoink(row) {
+async function reUoink(row) {
   const url = rowUrl(row);
   if (!url) {
     showToast("YouTube URL unavailable.");
     return;
   }
-  showToast("Re-yoinking...");
+  showToast("Re-uoinking...");
   try {
     const res = await STC.postExtract(url, STC.DEFAULT_INTERVAL || 30);
-    if (!res || res.ok === false) throw new Error((res && res.error) || "yoink failed");
-    showToast("Re-yoink complete.");
+    if (!res || res.ok === false) throw new Error((res && res.error) || "uoink failed");
+    showToast("Re-uoink complete.");
     await loadResults();
   } catch (e) {
-    showToast((e && e.message) || "Re-yoink failed.");
+    showToast((e && e.message) || "Re-uoink failed.");
   }
 }
 
@@ -375,8 +375,8 @@ async function deleteRow(row) {
     return;
   }
   const confirmed = window.confirm(
-    "Move this yoink to trash?\n\n"
-    + "The yoink folder will move to Yoink/_yoink-trash/ and stay there for 30 days "
+    "Move this uoink to trash?\n\n"
+    + "The uoink folder will move to Uoink/_yoink-trash/ and stay there for 30 days "
     + "before being permanently deleted. You can restore it from trash within that window."
   );
   if (!confirmed) return;
@@ -420,7 +420,7 @@ function renderMenu(row, host) {
   menu.className = "menu";
   menu.appendChild(menuButton("Open folder", () => openFolder(row)));
   menu.appendChild(menuButton("Open on YouTube", () => openYouTube(row)));
-  menu.appendChild(menuButton("Re-yoink", () => reYoink(row)));
+  menu.appendChild(menuButton("Re-uoink", () => reUoink(row)));
   menu.appendChild(menuButton("Move to trash", () => deleteRow(row), "danger"));
   host.appendChild(menu);
   state.menu = menu;
@@ -446,7 +446,7 @@ function renderRow(row) {
   const metaBits = [
     row.channel || "Unknown channel",
     row.topic || "Uncategorized",
-    formatDate(row.yoinked_at || row.created_at || row.classified_at),
+    formatDate(row.uoinked_at || row.yoinked_at || row.created_at || row.classified_at),
   ].filter(Boolean);
   meta.textContent = metaBits.join(" · ");
 
@@ -471,7 +471,7 @@ function renderRow(row) {
   action.type = "button";
   action.className = "action-button";
   action.textContent = "⋯";
-  action.setAttribute("aria-label", "Yoink actions");
+  action.setAttribute("aria-label", "Uoink actions");
   action.addEventListener("click", (ev) => {
     ev.stopPropagation();
     if (state.menu && actions.contains(state.menu)) closeMenu();
@@ -506,22 +506,23 @@ function renderState(kind) {
   button.className = "ghost-button";
 
   if (kind === "empty-filtered") {
-    title.textContent = "No yoinks match your filters.";
+    const query = (state.filters.q || "").trim();
+    title.textContent = query ? `No uoinks found for ${query}` : "No uoinks found for your filters.";
     body.textContent = "Try broadening the search or clearing filters.";
     button.textContent = "Clear filters";
     button.addEventListener("click", clearFilters);
     inner.append(title, body, button);
   } else if (kind === "empty-all") {
-    title.textContent = "You haven't yoinked anything yet.";
-    body.textContent = "Open the extension on YouTube and yoink your first video.";
+    title.textContent = "No uoinks yet - go yoink a video.";
+    body.textContent = "Open the extension on YouTube and uoink your first video.";
     button.textContent = "Open the extension";
     button.addEventListener("click", () => {
       if (chrome.action && chrome.action.openPopup) chrome.action.openPopup();
     });
     inner.append(title, body, button);
   } else {
-    title.textContent = "Couldn't load Yoink Memory.";
-    body.textContent = "Check that the Yoink helper is running, then try again.";
+    title.textContent = "Couldn't load Uoink Memory.";
+    body.textContent = "Check that the Uoink helper is running, then try again.";
     button.textContent = "Retry";
     button.addEventListener("click", loadResults);
     inner.append(title, body, button);
@@ -533,9 +534,9 @@ function renderState(kind) {
 
 function renderCounts() {
   if (filtersActive() && state.totalAll && state.totalAll !== state.total) {
-    els.count.textContent = `${state.total} / ${state.totalAll} yoinks`;
+    els.count.textContent = `${state.total} / ${state.totalAll} uoinks`;
   } else {
-    els.count.textContent = `${state.total} ${state.total === 1 ? "yoink" : "yoinks"}`;
+    els.count.textContent = `${state.total} ${state.total === 1 ? "uoink" : "uoinks"}`;
   }
 }
 
@@ -568,7 +569,7 @@ async function loadResults() {
   closeMenu();
   state.loading = true;
   renderPagination();
-  els.results.innerHTML = '<div class="loading-row">Loading Yoink Memory...</div>';
+  els.results.innerHTML = '<div class="loading-row">Loading Uoink Memory...</div>';
   try {
     const body = await authedJson(`/memory/search?${queryString()}`, { method: "GET" });
     const normalized = normalizeSearchResponse(body);

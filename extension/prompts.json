@@ -2,7 +2,7 @@
   {
     "id": "decode-hook",
     "label": "Decode the hook",
-    "prompt": "I just pasted a Yoink corpus from a YouTube video. Decode the hook of this video. What's the opening line, what emotional or curiosity lever does it pull, and how does the thumbnail/title/first 30 seconds work together? Be specific."
+    "prompt": "I just pasted a Uoink corpus from a YouTube video. Decode the hook of this video. What's the opening line, what emotional or curiosity lever does it pull, and how does the thumbnail/title/first 30 seconds work together? Be specific."
   },
   {
     "id": "outline-structure",

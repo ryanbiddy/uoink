@@ -1,3 +1,6 @@
+// v3 TODO: rename native messaging host to com.uoink.helper after installer
+// migration is widely deployed (target: 90 days post v2.1 release).
+
 // Background service worker.
 //
 // Responsibilities:
@@ -15,7 +18,7 @@ importScripts("lib/extract.js", "lib/ui.js");
 const MENU_LINK = "stc-extract-link";
 const MENU_PAGE = "stc-extract-page";
 const MENU_SESSION = "stc-extract-session";
-const ICON_URL = chrome.runtime.getURL("icons/icon-128.png");
+const ICON_URL = chrome.runtime.getURL("icons/icon128.png");
 const OFFSCREEN_URL = "offscreen.html";
 // CLIPBOARD covers the existing copy path; MATCH_MEDIA lets the doc stay
 // alive so it can push prefers-color-scheme change events back here.
@@ -45,6 +48,8 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   await refreshActiveSession();
   syncThemeIcon().catch((e) => console.warn("[stc] theme sync failed", e));
   restoreQueue().catch((e) => console.warn("[stc] restore failed", e));
+  chrome.alarms.create("health-check", { periodInMinutes: 0.25 });
+  checkHealthAndUpdateBadge().catch((e) => console.warn("[stc] checkHealthAndUpdateBadge failed", e));
 
   // Eager auth-token prefetch. Without this, the user's first authed
   // request blocks on a /token round-trip, and a transient failure there
@@ -82,11 +87,76 @@ chrome.runtime.onStartup.addListener(async () => {
   await refreshActiveSession();
   syncThemeIcon().catch((e) => console.warn("[stc] theme sync failed", e));
   restoreQueue().catch((e) => console.warn("[stc] restore failed", e));
+  chrome.alarms.create("health-check", { periodInMinutes: 0.25 });
+  checkHealthAndUpdateBadge().catch((e) => console.warn("[stc] checkHealthAndUpdateBadge failed", e));
 });
 
 // SW spins up on demand (notification click, message, alarm, etc) and the OS
 // theme may have flipped while it was idle. Re-sync on every wake.
 syncThemeIcon().catch((e) => console.warn("[stc] theme sync failed", e));
+chrome.alarms.create("health-check", { periodInMinutes: 0.25 });
+checkHealthAndUpdateBadge().catch((e) => console.warn("[stc] checkHealthAndUpdateBadge failed", e));
+
+// ---- Alarms and Commands --------------------------------------------------
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === "health-check") {
+    checkHealthAndUpdateBadge().catch((e) => console.warn("[stc] checkHealthAndUpdateBadge failed", e));
+  }
+});
+
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command === "uoink-video") {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.id && tab.url) {
+      chrome.tabs.sendMessage(tab.id, { type: "uoinkShortcutTriggered" }, async (response) => {
+        if (chrome.runtime.lastError || !response || !response.success) {
+          // Fallback: trigger background extract if it's a youtube url
+          const normalized = STC.normalizeYouTubeUrl(tab.url);
+          if (normalized) {
+            const active = await getActiveFromStorage();
+            const interval = await STC.getInterval();
+            const kind = active && active.id ? "session_add" : "extract";
+            const job = { kind, url: normalized, interval, addedAt: Date.now() };
+            if (kind === "session_add") {
+              job.session_id = active.id;
+              job.session_name = active.name;
+            }
+            if (kind === "extract" && !(await serverQueueHasRoom())) {
+              notify("Queue full", "Wait a few minutes");
+              return;
+            }
+            await enqueue(job);
+          }
+        }
+      });
+    }
+  }
+});
+
+async function checkHealthAndUpdateBadge() {
+  let isOnline = false;
+  try {
+    const res = await STC.ping();
+    isOnline = !!(res && res.ok);
+  } catch (e) {
+    isOnline = false;
+  }
+
+  const state = await getState();
+  const isBusy = !!(state.busy || (state.queue && state.queue.length > 0));
+
+  if (!isOnline) {
+    await chrome.action.setBadgeText({ text: "OFF" });
+    await chrome.action.setBadgeBackgroundColor({ color: "#C2410C" }); // Rust
+    await chrome.action.setBadgeTextColor({ color: "#FFF4EC" }); // Cream
+  } else if (isBusy) {
+    await chrome.action.setBadgeText({ text: "..." });
+    await chrome.action.setBadgeBackgroundColor({ color: "#FF3D00" }); // Vermillion
+    await chrome.action.setBadgeTextColor({ color: "#FFF4EC" }); // Cream
+  } else {
+    await chrome.action.setBadgeText({ text: "" });
+  }
+}
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes.active_session) {
@@ -100,13 +170,13 @@ async function rebuildContextMenus() {
 
   chrome.contextMenus.create({
     id: MENU_LINK,
-    title: "Yoink this video",
+    title: "Uoink video link",
     contexts: ["link"],
     targetUrlPatterns: LINK_PATTERNS,
   });
   chrome.contextMenus.create({
     id: MENU_PAGE,
-    title: "Yoink this page",
+    title: "Uoink video",
     contexts: ["page", "video"],
     documentUrlPatterns: PAGE_PATTERNS,
   });
@@ -116,7 +186,7 @@ async function rebuildContextMenus() {
     const name = active.name || active.id;
     chrome.contextMenus.create({
       id: MENU_SESSION,
-      title: `Yoink into session: ${name}`,
+      title: `Uoink into session: ${name}`,
       contexts: ["link", "page", "video"],
       targetUrlPatterns: LINK_PATTERNS,
       documentUrlPatterns: PAGE_PATTERNS,
@@ -144,8 +214,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   const normalized = STC.normalizeYouTubeUrl(raw || "");
   if (!normalized) {
-    notify("Yoink — invalid URL",
-           "Couldn't find a YouTube video ID in that link.");
+    notify("Invalid URL", "Couldn't find YouTube video ID");
     return;
   }
 
@@ -154,14 +223,14 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (kind === "session_add") {
     const active = await getActiveFromStorage();
     if (!active || !active.id) {
-      notify("Yoink", "No active session — start one in the popup first.");
+      notify("Uoink", "No active session — start one in the popup first.");
       return;
     }
     job.session_id = active.id;
     job.session_name = active.name;
   }
   if (kind === "extract" && !(await serverQueueHasRoom())) {
-    notify("Yoink queue full", "Queue full, wait a few minutes before adding another yoink.");
+    notify("Queue full", "Wait a few minutes");
     return;
   }
   await enqueue(job);
@@ -189,7 +258,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
 
   if (msg.type === "notify") {
-    notify(msg.title || "Yoink", msg.message || "")
+    notify(msg.title || "Uoink", msg.message || "")
       .then((id) => sendResponse({ ok: true, id }));
     return true;
   }
@@ -348,7 +417,7 @@ async function serverQueueHasRoom() {
 }
 
 async function notifyClipboardRetry(text) {
-  const id = await notify("Couldn't copy to clipboard", "Click Try again to retry the copy without opening a new tab.", {
+  const id = await notify("Clipboard copy blocked", "Click Try again to retry", {
     buttons: [{ title: "Try again" }],
   });
   if (id) _clipboardRetryPayloads.set(id, text);
@@ -368,9 +437,9 @@ try {
     copyToClipboard(text).then(async (ok) => {
       if (ok) {
         await markClipboardYoinkNow();
-        notify("Copied to clipboard", "Open Claude or ChatGPT from the Yoink popup, then paste.");
+        notify("Copied to clipboard", "Open Claude or ChatGPT from the Uoink popup, then paste.");
       } else {
-        notify("Copy still blocked", "Open the saved yoink folder and copy the markdown file manually.");
+        notify("Copy still blocked", "Open the saved uoink folder and copy the markdown file manually.");
       }
     });
   });
@@ -445,13 +514,12 @@ async function copyToClipboard(text) {
 // not by every Chromium fork (notably Comet, where the icon stays stuck on
 // the default). Drive the swap from JS instead so it works everywhere.
 async function updateIconForTheme(isDark) {
-  const variant = isDark ? "dark" : "light";
   await chrome.action.setIcon({
     path: {
-      "16": `icons/icon-16-${variant}.png`,
-      "32": `icons/icon-32-${variant}.png`,
-      "48": `icons/icon-48-${variant}.png`,
-      "128": `icons/icon-128-${variant}.png`,
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png",
     },
   });
 }
@@ -530,17 +598,16 @@ async function _doEnqueue(job) {
 
   const ahead = (state.busy ? 1 : 0) + state.queue.length - 1;
   if (state.busy || state.queue.length > 1) {
-    notify("Yoink — queued", `Queued — ${ahead} video${ahead === 1 ? "" : "s"} ahead.`);
+    notify("Uoink queued", `${ahead} video${ahead === 1 ? "" : "s"} ahead`);
   } else {
-    const verb = job.kind === "session_add" ? "Adding to session" : "Yoinking";
-    notify("Yoink — starting", `${verb}: ${shortUrl(job.url)}...`);
+    notify("Uoinking", `${shortUrl(job.url)}...`);
   }
   drain();
 }
 
 async function clearQueue() {
   await setState({ queue: [] });
-  notify("Yoink", "Queue cleared.");
+  notify("Uoink", "Queue cleared.");
 }
 
 async function restoreQueue() {
@@ -565,18 +632,20 @@ async function drain() {
       const state = await getState();
       if (!state.queue.length) {
         await setState({ busy: false, current: null });
+        checkHealthAndUpdateBadge().catch(() => {});
         return;
       }
       const job = state.queue.shift();
       const newQueue = state.queue;
       const current = { ...job, startedAt: Date.now() };
       await setState({ busy: true, current, queue: newQueue });
+      checkHealthAndUpdateBadge().catch(() => {});
 
       try {
         await runJob(job);
       } catch (e) {
-        console.error("[Yoink] job crashed", e);
-        notify("Yoink failed", String(e));
+        console.error("[Uoink] job crashed", e);
+        notify("Uoink failed", String(e));
       }
     }
   } finally {
@@ -594,21 +663,21 @@ async function runExtractJob(job) {
   try {
     data = await STC.postExtract(job.url, job.interval);
   } catch (e) {
-    console.error("[Yoink] server unreachable", e);
+    console.error("[Uoink] server unreachable", e);
     // No tab open here -- setup.html only opens from direct user actions
     // (the in-page YouTube button or the popup help link), never from
     // background-queued jobs. Keeps unrelated context-menu work from
     // surprising the user with new tabs.
-    notify("Yoink isn't running yet",
-           "Start the Yoink helper from the Start Menu, then try again.");
+    notify("Uoink Helper offline",
+           "Start Uoink from the Start Menu, then try again.");
     return;
   }
   if (!data || !data.ok) {
-    notify("Yoink failed", STC.friendlyError(data && data.error));
+    notify("Uoink failed", STC.friendlyError(data && data.error));
     return;
   }
   if (data.queued) {
-    const id = await notify("Yoink queued", `${queuedMessage(data)} Click View queue for status.`, {
+    const id = await notify("Uoink queued", `${queuedMessage(data)} Click View queue for status.`, {
       buttons: [{ title: "View queue" }],
     });
     if (id) _queueViewNotificationIds.add(id);
@@ -623,8 +692,8 @@ async function runExtractJob(job) {
   if (await _useScreenshotPicker()) {
     await rememberClipboardBudget(data, data.corpus_md_paste || data.yoink_md);
     await STC.stashPickerCorpus(data);
-    notify("Yoink ready",
-           "Click the Yoink icon to pick which screenshots to include.");
+    notify("Uoink ready",
+           "Click the Uoink icon to pick which screenshots to include.");
     return;
   }
 
@@ -645,8 +714,8 @@ async function runExtractJob(job) {
   // Shared helper handles first-yoink-vs-subsequent copy + atomically marks
   // the has_completed_first_yoink flag. Same code is called from content.js
   // so the in-page YouTube button gets the same first-time CTA.
-  const message = await STC.buildYoinkedMessage(data, copied);
-  notify("Yoinked!", message);
+  const message = await STC.buildUoinkedMessage(data, copied);
+  notify("Uoinked ★", message);
 }
 
 // Fetches /settings on demand and returns true if the picker is enabled.
@@ -658,7 +727,7 @@ async function _useScreenshotPicker() {
     return !!(res && res.ok && res.settings &&
               res.settings.smart_screenshot_picker_enabled === true);
   } catch (e) {
-    console.warn("[Yoink] settings fetch failed, picker disabled by default", e);
+    console.warn("[Uoink] settings fetch failed, picker disabled by default", e);
     return false;
   }
 }
@@ -668,13 +737,13 @@ async function runSessionAddJob(job) {
   try {
     data = await STC.addToSession(job.session_id, job.url, job.interval);
   } catch (e) {
-    console.error("[Yoink] server unreachable", e);
-    notify("Yoink isn't running yet",
-           "Start the Yoink helper from the Start Menu, then try again.");
+    console.error("[Uoink] server unreachable", e);
+    notify("Uoink Helper offline",
+           "Start Uoink from the Start Menu, then try again.");
     return;
   }
   if (!data || !data.ok) {
-    notify("Yoink failed", STC.friendlyError(data && data.error));
+    notify("Uoink failed", STC.friendlyError(data && data.error));
     return;
   }
 
@@ -683,9 +752,7 @@ async function runSessionAddJob(job) {
   });
 
   const sessionName = job.session_name || job.session_id;
-  notify("Added to session",
-         `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"} so far. ` +
-         `(${data.screenshot_count} screenshots, ${data.caption_count || 0} caption lines)`);
+  notify("Added to session", `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"}`);
 
   // Pull fresh active session state into local storage so popup + menu update.
   await refreshActiveSession();

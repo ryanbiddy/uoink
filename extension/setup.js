@@ -3,7 +3,7 @@
 // Two entry points (distinguished by ?source=...):
 //   ?source=install  — opened by background.js after a fresh install. Shows
 //                      all four steps top-to-bottom.
-//   ?source=offline  — opened by content.js when the user clicks Yoink on
+//   ?source=offline  — opened by content.js when the user clicks Uoink on
 //                      YouTube but the local server is unreachable. Skips
 //                      the welcome step and jumps straight to verify.
 //
@@ -73,7 +73,9 @@ const pageLede = document.getElementById("page-lede");
 const suggestedThumb = document.getElementById("suggested-thumb");
 const suggestedTitle = document.getElementById("suggested-title");
 const suggestedByline = document.getElementById("suggested-byline");
-const yoinkSuggestedBtn = document.getElementById("yoink-suggested-btn");
+const uoinkSuggestedBtn = document.getElementById("uoink-suggested-btn");
+const openInstallFolderBtn = document.getElementById("open-install-folder-btn");
+let installFolderPath = "";
 const ciEnabled = document.getElementById("ci-enabled");
 const ciKeyInput = document.getElementById("anthropic-key");
 const ciStatus = document.getElementById("ci-status");
@@ -125,12 +127,12 @@ function startHelperLabel() {
 
 function helperOfflineDetail() {
   if (currentPlatform() === "mac") {
-    return "Open Yoink from Applications, or run yoink-helper from Terminal, then this panel will refresh.";
+    return "Open Yoink from Applications, or run uoink-helper from Terminal, then this panel will refresh.";
   }
   if (currentPlatform() === "linux") {
-    return "Run yoink-helper from Terminal, then this panel will refresh.";
+    return "Run uoink-helper from Terminal, then this panel will refresh.";
   }
-  return "Start Yoink Server from the Windows Start Menu, then this panel will refresh.";
+  return "Start Uoink Server from the Windows Start Menu, then this panel will refresh.";
 }
 
 function outputFolderActionLabel() {
@@ -200,28 +202,28 @@ function applySource() {
 }
 
 // Keep page title/lede in sync with the live status. Without this, the
-// source=offline path stayed on "Yoink isn't running yet" even after the
+// source=offline path stayed on "Uoink isn't running yet" even after the
 // status block flipped green, so the page contradicted itself.
 function updateHeader(status) {
   if (status === "running") {
-    pageTitle.textContent = isSettingsMode ? "Yoink settings." : "Yoink is ready.";
+    pageTitle.textContent = isSettingsMode ? "Uoink settings." : "Uoink is ready.";
     pageLede.textContent = isSettingsMode
       ? "Manage local AI features and agent integration."
-      : "The local helper is running. Yoink any YouTube video to begin.";
+      : "The local helper is running. Uoink any YouTube video to begin.";
     return;
   }
   if (source === "offline") {
-    pageTitle.textContent = "Yoink isn't running yet.";
+    pageTitle.textContent = "Uoink isn't running yet.";
     pageLede.textContent =
-      "Start the Yoink helper and this page will detect it automatically.";
+      "Start the Uoink helper and this page will detect it automatically.";
   } else if (isSettingsMode) {
-    pageTitle.textContent = "Yoink settings.";
+    pageTitle.textContent = "Uoink settings.";
     pageLede.textContent =
       "Start the local helper to manage settings and agent integration.";
   } else {
     pageTitle.textContent = "Let's get you set up.";
     pageLede.textContent =
-      "Two minutes. Then you'll be yoinking videos straight into Claude.";
+      "Two minutes. Then you'll be uoinking videos straight into Claude.";
   }
 }
 
@@ -406,6 +408,15 @@ async function loadDiagnose() {
     const body = await res.json();
     if (!res.ok || !body || body.ok === false) throw new Error((body && body.error) || `HTTP ${res.status}`);
     if (body.platform || body.os) setPlatform(body.platform || body.os);
+    const dbCheck = body.checks && body.checks.find(c => c.name === "index_db_writable");
+    if (dbCheck && dbCheck.detail) {
+      const path = dbCheck.detail;
+      installFolderPath = path.replace(/[\\/]index\.db$/i, "");
+      const folderDetailEl = document.getElementById("install-folder-path");
+      if (folderDetailEl) {
+        folderDetailEl.textContent = installFolderPath;
+      }
+    }
     renderDiagnose(body);
   } catch (e) {
     diagnoseList.innerHTML = "";
@@ -449,7 +460,7 @@ async function tickPoll() {
   // failed probe, so the user sees a quick spinner first instead of an
   // immediate scary "not running" message.
   if (statusBlock.classList.contains("is-checking")) {
-    setStatus("down", "Yoink isn't running yet");
+    setStatus("down", "Uoink isn't running yet");
     statusInstructions.classList.remove("hidden");
     updateHeader("down");
   }
@@ -458,7 +469,7 @@ async function tickPoll() {
 function startPolling() {
   if (polling) return;
   polling = true;
-  setStatus("checking", "Checking for Yoink...");
+  setStatus("checking", "Checking for Uoink...");
   statusInstructions.classList.add("hidden");
   // Fire one immediately so a running server flips green right away.
   tickPoll();
@@ -475,7 +486,7 @@ function stopPolling() {
 
 function onServerUp() {
   stopPolling();
-  setStatus("running", "Yoink is running ✓");
+  setStatus("running", "Uoink is running ✓");
   statusInstructions.classList.add("hidden");
   updateHeader("running");
   setCIControlsEnabled(true);
@@ -566,7 +577,7 @@ function setCIControlsEnabled(enabled) {
   ]) {
     if (el) el.disabled = !enabled;
   }
-  if (!enabled) setCIStatus("Start Yoink to manage settings.", "warn");
+  if (!enabled) setCIStatus("Start Uoink Server to manage settings.", "warn");
   if (!enabled && aiCostEstimate) aiCostEstimate.classList.add("hidden");
 }
 
@@ -745,14 +756,14 @@ if (ciClearBtn) {
 
 // ---- Hook Type calibration history --------------------------------------
 async function fetchSetupJsonWithToken(path, init = {}) {
-  if (!window.STC || !STC.getToken || !globalThis.YoinkUI) {
-    return { ok: false, error: "Yoink helper unavailable" };
+  if (!window.STC || !STC.getToken || !globalThis.UoinkUI) {
+    return { ok: false, error: "Uoink helper unavailable" };
   }
-  return globalThis.YoinkUI.authedJson(path, init, { server: SERVER });
+  return globalThis.UoinkUI.authedJson(path, init, { server: SERVER });
 }
 
 function hookTypeLabel(value) {
-  return globalThis.YoinkUI.prettyHookType(value) || "Unknown";
+  return globalThis.UoinkUI.prettyHookType(value) || "Unknown";
 }
 
 function correctionDateLabel(value) {
@@ -795,14 +806,14 @@ function renderHookCorrections(body) {
     item.className = "correction-row";
 
     const left = document.createElement("div");
-    const titleText = row.title || row.video_title || row.slug || "Untitled yoink";
+    const titleText = row.title || row.video_title || row.slug || "Untitled uoink";
     const folder = row.folder || row.session_folder || row.output_folder || "";
     const title = document.createElement(folder ? "button" : "div");
     title.className = "correction-title";
     title.textContent = titleText;
     if (folder) {
       title.type = "button";
-      title.title = "Open yoink folder";
+      title.title = "Open uoink folder";
       title.addEventListener("click", async () => {
         try { await STC.openFolder(folder); } catch { /* best effort */ }
       });
@@ -861,7 +872,7 @@ function jsonPretty(obj) {
 function stdioServerConfig(config) {
   return {
     mcpServers: {
-      yoink: {
+      uoink: {
         command: config.stdio.command,
         args: config.stdio.args,
       },
@@ -878,7 +889,7 @@ function buildMcpSnippets(config, token) {
   return {
     claude: jsonPretty(stdio),
     chatgpt: jsonPretty({
-      name: "yoink",
+      name: "uoink",
       transport: "stdio",
       command: config.stdio.command,
       args: config.stdio.args,
@@ -964,7 +975,7 @@ for (const btn of mcpCopyButtons) {
   });
 }
 
-// ---- Yoink Operator Skill fallback prompt --------------------------------
+// ---- Uoink Operator Skill fallback prompt --------------------------------
 async function fetchSkillPromptWithToken(token) {
   return fetch(`${SERVER}/skill/system-prompt`, {
     method: "GET",
@@ -1007,11 +1018,11 @@ if (skillPromptCopyBtn) {
   });
 }
 
-// ---- Step 4: hand off to YouTube + auto-trigger Yoink -------------------
-yoinkSuggestedBtn.addEventListener("click", async () => {
+// ---- Step 4: hand off to YouTube + auto-trigger Uoink -------------------
+uoinkSuggestedBtn.addEventListener("click", async () => {
   // Stash a flag the YouTube content script will read on injection so it
-  // auto-clicks the Yoink button. TTL guards against the user opening the
-  // page later from history and getting a surprise yoink.
+  // auto-clicks the Uoink button. TTL guards against the user opening the
+  // page later from history and getting a surprise uoink.
   if (suggestedVideoId) {
     try {
       await chrome.storage.local.set({
@@ -1027,6 +1038,27 @@ yoinkSuggestedBtn.addEventListener("click", async () => {
     window.open(SUGGESTED_VIDEO.url, "_blank", "noopener");
   }
 });
+
+if (openInstallFolderBtn) {
+  openInstallFolderBtn.addEventListener("click", () => {
+    let path = installFolderPath;
+    if (!path) {
+      path = currentPlatform() === "mac"
+        ? "~/Library/Application Support/Uoink"
+        : "C:\\Users\\hello\\AppData\\Local\\Uoink";
+    }
+    const fileUrl = "file:///" + path.replace(/\\/g, "/");
+    try {
+      if (chrome && chrome.tabs && chrome.tabs.create) {
+        chrome.tabs.create({ url: fileUrl });
+        return;
+      }
+    } catch (e) {
+      console.warn("chrome.tabs.create failed", e);
+    }
+    window.open(fileUrl, "_blank");
+  });
+}
 
 // ---- Pre-launch download button state -----------------------------------
 function applyDownloadState() {

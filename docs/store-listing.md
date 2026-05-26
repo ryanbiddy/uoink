@@ -3,52 +3,98 @@
 ## Title (45 chars max)
 Uoink — any YouTube video into your AI
 
-<!-- 38 chars. Real Web Store cap is 45; the old "35 chars" target was stale. -->
+<!-- 39 chars. -->
 
 ## Short description (132 chars max)
-The YouTube layer for any AI. Uoink any video into Claude, ChatGPT, or your agent — transcript, screenshots, comments, all of it.
+The YouTube layer for any AI. Transcripts, screenshots, and comments in one paste.
 
-<!-- 127 chars. -->
+<!-- 131 chars. -->
 
 ## Long description
 
-You see a video that's clearly working. You want to know why. So you paste the link into Claude and hope it can "watch" it. It can't. It hallucinates titles, invents quotes, and gives up past the first paragraph. You give up too — and watch the whole thing on 2x while taking notes by hand.
+You see a video that's clearly working. You want to know why. So you paste the link into Claude and hope it can "watch" it. It can't. It hallucinates titles, invents quotes, and gives up on anything past the first paragraph. You give up too — and watch the whole thing on 2x speed while taking notes by hand.
 
-Uoink is the missing layer between YouTube and your AI. (The magnet logo? Always a U.)
+Uoink is the missing layer between YouTube and your AI.
 
-Click the Uoink button under any YouTube video and you get one structured markdown corpus, auto-loaded onto your clipboard:
+Click the **Uoink** button under any YouTube video and you get a single, structured markdown corpus auto-loaded onto your clipboard:
 
 - The full timestamped transcript, chapter-aware
-- Timestamped screenshots, with a paste-safe subset embedded in the clipboard
+- Timestamped screenshots throughout the video, with a paste-safe subset embedded in the clipboard
 - The top 50 comments, with author and like count
 - Full video metadata — views, likes, tags, description, upload date
 - The thumbnail
 - Channel context — subscriber count and the channel's last 5 videos
 
-Paste it into Claude or ChatGPT. Ask "Decode the hook," "Outline the structure," "What would make this 2x better." Uoink ships with an 11-prompt starter library.
+Paste it into Claude or ChatGPT. Ask "Decode the hook," "Outline the structure," "What would make this 2x better." Uoink ships with a built-in 11-prompt starter library.
 
-THREE WAYS TO USE UOINK
+### Three ways to use Uoink
 
-As a Chrome extension — one click on the in-page button, your clipboard fills, the chat opens. Paste, prompt, analyze.
+**As a Chrome extension (the one-click flow):**
+One click on the in-page button, your clipboard fills with a structured corpus, the chat opens. Paste, prompt, analyze.
 
-As an MCP server — Uoink ships a local MCP server with 13 tools your agent calls directly: uoink_video, uoink_playlist, list_recent_uoinks, search_uoinks, analyze_comments, classify_hook, get_citation_map, get_uoink_health, find_mentions, and more. Tell Claude "uoink that video and decode the hook" — it does both. Officially tested with Claude Desktop and Cursor.
+**As an MCP server (the agent flow):**
+Uoink ships a local MCP server with 13 tools your AI agent can call directly: `uoink_video`, `uoink_playlist`, `list_recent_uoinks`, `search_uoinks`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `get_uoink_health`, `find_mentions`, and more. Tell Claude "uoink that video and decode the hook" — it does both. No clipboard step. Officially tested with Claude Desktop and Cursor; community-reported support for ChatGPT Desktop, Continue, and Cline.
 
-As an operator Skill — a portable SKILL.md (agentskills.io standard) that adds citation discipline, hook-autopsy tweet mode, and the Uoink Hook Type taxonomy on top of the MCP tools.
+**As an operator Skill (Claude Code, OpenClaw, Hermes, Cursor, and more):**
+Uoink includes a portable `SKILL.md` using the agentskills.io open standard. Drop it into your agent client to add citation discipline, operator-grade YouTube analysis, hook-autopsy tweet mode, and the Uoink Hook Type taxonomy on top of the MCP tools.
 
-WHY PEOPLE USE UOINK
+### Why people use Uoink
 
-- One click in, ready to analyze. No copy-pasting transcripts.
-- The full picture, not just the words — comments, channel context, screenshots.
-- Playlist mode — up to 10 videos at a time, combined corpus + per-video files.
-- Auto-organized on disk into topic folders under Desktop\Uoink\.
-- Local-first. No accounts, no cloud, no required telemetry.
-- Free and open source. MIT-licensed.
+- **One click in, ready to analyze.** No copy-pasting transcripts. No exporting screenshots one at a time. No describing the video to your AI in your own words.
+- **The full picture, not just the words.** Comments, channel context, and screenshots ride along with the transcript so your AI has actual context.
+- **Playlist mode.** Paste a YouTube playlist URL, uoink up to 10 videos at a time. Combined corpus + per-video files on disk, ready for cross-video analysis.
+- **Auto-organized on disk.** Uoinks land in topic folders on your Desktop (Social Media Research, AI and ML, Productivity, etc.) — fully editable via `topics.json`.
+- **Two destinations.** Send to Claude or Send to ChatGPT, your call.
+- **Local-first.** No accounts, no cloud, no required telemetry. Uoink runs a tiny local helper on `127.0.0.1` to do the extraction.
+- **Free and open source.** MIT-licensed. Read the code, fork it, modify it.
 
-OPTIONAL AI FEATURES (BYO ANTHROPIC KEY)
+### Optional AI-powered features (BYO Anthropic API key)
 
-Uoink stays free and local by default. Comment Intelligence, Hook Type classification, and Entity Extraction call the Anthropic API with your own key (stored in Windows Credential Manager, never plaintext). Off by default. Uoink itself collects nothing.
+Uoink stays free and local-only by default. Two optional analysis features call the Anthropic API using your own API key (stored securely via Windows Credential Manager — never in plaintext):
 
-Windows 10/11 today; macOS in this release. Chrome or any Chromium browser. uoink.video
+- **Comment Intelligence** — clusters comment themes, extracts mentioned products, flags notable disagreements
+- **Hook Type classification** — classifies each video's opening style across 9 hook categories
+- **Entity Extraction** — automatically pulls people, tools, products, companies, and topics from every uoinked video's transcript. Powers cross-corpus search across your library via the `find_mentions(entity)` MCP tool.
+
+Both are off by default. Enable per feature on the setup page. Your API key never leaves your machine except for the Comment Intelligence, Hook Type, and Entity Extraction calls made to Anthropic on your behalf. Uoink itself collects nothing.
+
+### Optional local feature: Smart Screenshot Picker
+
+Opt-in grid that shows the screenshots embedded in your clipboard paste so you can pick which to keep. Embed count is configurable on the setup page (default 4, max 12). Stays fully local — no API key, no network calls.
+
+### Privacy summary
+
+- The core Uoink flow (extraction + clipboard) is fully local. Nothing leaves your machine except the YouTube fetch.
+- Optional AI features (Comment Intelligence, Hook Type) send video text to Anthropic with your own API key — only when you enable them.
+- No analytics, telemetry, or remote logging in v1.0 or v2.0. Opt-in install-success telemetry is on the v1.1 roadmap.
+- Full details: see the privacy policy linked below.
+
+### How it works
+
+1. Install the extension and run the local Uoink helper (a small Python server bundled with the install).
+2. Open any YouTube video. Click the **Uoink** button under the player (or right-click any thumbnail).
+3. Uoink extracts transcript, screenshots, comments, channel context, and metadata into one `<video-slug>.md` file (e.g. `karpathy-deep-dive-into-llms.md`) under `Desktop\Uoink\<topic>\<slug>\`. A structured `<slug>.json` sidecar lands beside it for programmatic use. A master `_all-uoinks-index.md` at the root tracks every uoink you've done.
+4. The clipboard version is **multimodal**: same content as the on-disk file, but with 4 screenshots inlined as base64 images by default (configurable 0-12). Paste into Claude or ChatGPT and the AI sees the transcript text **and** key screenshots in one shot — no separate uploads. The full screenshot set stays on disk.
+
+### Playlist Mode
+
+Paste any YouTube playlist URL and Uoink processes up to 10 videos in sequence. Live progress, cancel mid-flight, partial-failure tolerance (one bad video doesn't kill the playlist). Combined corpus copied to clipboard (text-only — fits Claude/ChatGPT context); per-video corpora with screenshots remain on disk.
+
+### Customization
+
+- Edit `topics.json` (in your install folder) to add or rename topic folders and tweak keyword rules. Reloaded on the next uoink — no restart needed.
+- The popup ships with 11 starter prompts. v1.1 adds an inline editor; until then the prompts are part of the extension package.
+- Toggle Comment Intelligence, Hook Type, and Smart Screenshot Picker on the setup page.
+
+### Requirements
+
+- Windows 10 / 11 (Mac on the v1.1 roadmap)
+- Chrome or Chromium-based browser (Edge, Brave, Comet, Opera GX, Vivaldi)
+- The Uoink helper server (~120 MB installed; bundles Python 3.11.9 + yt-dlp + ffmpeg 7.1 + keyring + MCP SDK)
+
+### What's next
+
+Uoink v2 ships the MCP server and AI features. The roadmap (in BACKLOG.md on GitHub) includes Channel Decoder mode, Niche Corpus mode, Critique-against-corpus, and Notion / Obsidian integrations. Open issues and PRs welcome.
 
 ---
 
@@ -63,14 +109,14 @@ English (United States)
 ## Support email
 hi@uoink.video
 
-> **Note:** This support email must be deliverable before submission. Confirm `hi@uoink.video` is receiving mail.
+> **Note:** This support email must be deliverable before submission. If `hi@uoink.video` isn't yet set up as a forwarder, swap to a working personal address until it is.
 
 ## Privacy policy URL
 https://uoink.video/privacy
 
 > **Note:** This URL must resolve before submission. The Web Store reviewer will fetch it.
 >
-> The v2.1 privacy policy is **drafted** at `docs/privacy-policy.md` in
+> The v2 privacy policy is **drafted** at `docs/privacy-policy.md` in
 > this repo. To go live, publish that file's content (rendered as a web
 > page) at `https://uoink.video/privacy`. It already covers the
 > required points:
@@ -87,7 +133,7 @@ https://uoink.video
 The Web Store will ask why each permission is requested. Pre-drafted answers:
 
 - **`clipboardWrite`** — Uoink writes the extracted markdown corpus to the user's clipboard so they can paste it into Claude or ChatGPT.
-- **`notifications`** — surfaces success and error toasts (e.g., "Uoinked ★ Saved to: Social Media Research.") so the user knows when an extraction completes.
+- **`notifications`** — surfaces success and error toasts (e.g., "Uoinked! Saved to: Social Media Research.") so the user knows when an extraction completes.
 - **`storage`** — persists user settings (screenshot interval, clipboard screenshot cap, active research session, queue state, last-uoink affordance state) across browser sessions.
 - **`contextMenus`** — adds 'Uoink this video' and 'Uoink this page' entries on YouTube right-click menus; adds a third 'Uoink into session: <name>' entry when a research session is active.
 - **`activeTab`** — reads the current YouTube URL when the user clicks the extension action.
@@ -102,11 +148,11 @@ Uoink has one purpose: extract a structured markdown corpus (transcript, screens
 ## Pre-submission checklist
 
 - [ ] All 5 screenshots captured at 1280x800 (see `docs/screenshot-list.md`)
-- [ ] Promo tiles finalized in Figma (placeholders in `assets/store/`), regenerated with the v3.1 magnet-U wordmark
-- [ ] Privacy policy live at https://uoink.video/privacy with v2.1 accurate language (covers BYO Anthropic key + keyring storage)
+- [ ] Promo tiles finalized in Figma (placeholders in `assets/store/`)
+- [ ] Privacy policy live at https://uoink.video/privacy with v2 accurate language (covers BYO Anthropic key + keyring storage)
 - [ ] Support email hi@uoink.video receiving mail
-- [ ] uoink.video landing page live (or holding page is fine)
-- [ ] Extension version in `manifest.json` matches release tag (2.1.0 for the rename release)
+- [ ] uoink.video landing page live (or holding page is fine for v2)
+- [ ] Extension version in `manifest.json` matches release tag (2.0.0 for v2 launch)
 - [ ] `USE_MOCK_API = false` in `extension/popup.js`
 - [ ] `INSTALLER_PUBLISHED = true` in `extension/setup.js`
 - [ ] Final `.zip` of the `extension/` folder produced (no dev artifacts, no `MOCK_FORCE_*` flags committed as true)

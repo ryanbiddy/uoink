@@ -3,21 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Yoink Memory</title>
-  <link rel="stylesheet" href="yoink-memory.css">
+  <title>Uoink Memory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="uoink-memory.css">
 </head>
 <body>
   <div class="shell">
     <header class="topbar">
       <div>
-        <div class="eyebrow">Local corpus gallery</div>
-        <h1>Yoink Memory</h1>
+        <div class="eyebrow">Memory</div>
+        <h1>UOINK</h1>
       </div>
       <div id="count-label" class="count-label">Loading...</div>
     </header>
 
     <div id="offline-banner" class="banner hidden" role="status">
-      Yoink helper is offline. Start it from the system tray.
+      Uoink helper is offline. Start it from the Start Menu.
     </div>
 
     <section class="filters" aria-label="Memory filters">
@@ -62,7 +65,7 @@
     </section>
 
     <main id="results" class="results" aria-live="polite">
-      <div class="loading-row">Loading Yoink Memory...</div>
+      <div class="loading-row">Loading Uoink Memory...</div>
     </main>
 
     <nav class="pagination" aria-label="Memory pagination">
@@ -76,6 +79,6 @@
 
   <script src="lib/extract.js"></script>
   <script src="lib/ui.js"></script>
-  <script src="yoink-memory.js"></script>
+  <script src="uoink-memory.js"></script>
 </body>
 </html>
