@@ -302,34 +302,44 @@ try {
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
-    # Verifies index.py can import AND that migrations\*.sql is discoverable
-    # from the staged layout. _run_migrations walks the migrations directory
-    # at Path(__file__).parent.resolve() / "migrations", so a missing folder
-    # means schema_version is never created and Index.open returns version 0.
-    & '.\python\python.exe' -c @'
-import index, tempfile, pathlib
+    # Run the smoke from a temp .py FILE, not via `-c`: PowerShell 5.1 mangles
+    # embedded double-quotes when handing a multi-line script to a native exe.
+    # Two import facts about the embeddable distribution drive the sys.path line:
+    # its python._pth lists only python\, the stdlib zip, and site-packages
+    # (never the staging root), it ignores PYTHONPATH while a ._pth is present,
+    # and it does NOT add the script's own directory either. So the smoke inserts
+    # its own dir on sys.path -- exactly what server.py does at runtime
+    # (sys.path.insert(0, HERE)) -- or neither index.py nor server.py would import.
+    #
+    # Checks: (1) index.py imports and migrations\*.sql apply (schema_version is
+    # populated from the staged layout), and (2) server.py imports. py_compile
+    # above only compiles -- it never runs server.py's top-level imports, so a
+    # dropped runtime dependency (e.g. _platform.py) or a missing data file
+    # (VERSION) would otherwise sail through and crash the helper at first launch
+    # before it binds the port. The file is removed before ISCC packages staging.
+    $smokePy = Join-Path $StagingDir '_staged_smoke.py'
+    Set-Content -Path $smokePy -Encoding ASCII -Value @'
+import os, sys, tempfile, pathlib
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import index
 p = pathlib.Path(tempfile.mkdtemp()) / "test.db"
 idx = index.Index.open(p)
 v = idx._conn.execute("SELECT MAX(version) FROM schema_version").fetchone()[0]
 idx.close()
 if not v:
-    raise SystemExit(f"smoke: Index.open ran but schema_version is empty (v={v}); "
-                     "migrations\\*.sql likely missing from staging")
-print(f"smoke: Index.open OK, schema_version={v}")
+    raise SystemExit("smoke: Index.open ran but schema_version is empty; "
+                     "migrations/*.sql likely missing from staging")
+print("smoke: Index.open OK, schema_version=%s" % v)
+import server
+print("smoke: import server OK, version=%s" % server.VERSION)
 '@
-    if ($LASTEXITCODE -ne 0) {
-        throw 'staged smoke: Index.open against a temp DB failed (missing migrations or import?)'
-    }
-    # Import the server module against the staged tree. py_compile (above) only
-    # compiles -- it never executes server.py's top-level imports, so a dropped
-    # runtime dependency (e.g. _platform.py) or a missing data file (VERSION)
-    # sails through compilation yet crashes the helper at first launch before it
-    # binds the port. Importing here exercises those top-level imports against
-    # the exact files the installer will ship, and fails the build loudly if a
-    # future commit drops another required module.
-    & '.\python\python.exe' -c "import server; print('smoke: import server OK, version=' + server.VERSION)"
-    if ($LASTEXITCODE -ne 0) {
-        throw 'staged smoke: import server failed (a required module/file is missing from staging -- e.g. _platform.py or VERSION)'
+    try {
+        & '.\python\python.exe' $smokePy
+        if ($LASTEXITCODE -ne 0) {
+            throw 'staged smoke failed: import index/server or Index.open against the staged tree (a required module/file is missing -- e.g. _platform.py, VERSION, or migrations\*.sql)'
+        }
+    } finally {
+        Remove-Item -Force -ErrorAction SilentlyContinue $smokePy
     }
     Write-Host '    Staged smoke OK' -ForegroundColor Green
 } finally {
