@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
-## [2.1.0] - 2026-XX-XX
+## [2.1.0] - 2026-XX-XX <!-- TODO: fill on tag -->
 
 ### The rename
 

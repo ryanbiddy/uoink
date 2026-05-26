@@ -202,4 +202,4 @@ Optional AI features send selected comment/hook context to Anthropic only when t
 
 ## Reporting
 
-If you find a vulnerability, please open a private GitHub Security Advisory or email the maintainer directly. Do not open a public issue with reproduction details until a fix is shipped.
+If you find a vulnerability, please open a private GitHub Security Advisory or report it to **hi@uoink.video**. Do not open a public issue with reproduction details until a fix is shipped.

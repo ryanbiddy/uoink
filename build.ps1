@@ -152,20 +152,19 @@ New-Item -ItemType Directory -Force -Path $CacheDir, $BuildDir | Out-Null
 if (-not (Test-Path $IconSrc)) {
     throw "Missing $IconSrc -- regenerate the v3.1 magnet-U .ico (16/32 cream tips, 48 transitional, 256 acid tips)"
 }
-foreach ($f in @('VERSION','server.py','index.py','yt_extract.py','topics.json')) {
+foreach ($f in @('VERSION','server.py','index.py','_platform.py','yt_extract.py','topics.json')) {
     if (-not (Test-Path (Join-Path $RepoRoot $f))) {
         throw "Missing $f at repo root"
     }
 }
 # The skill folder is renamed skills\yoink -> skills\uoink by the extension/
-# skill agent (out of this build's scope). Accept either so the build works
-# whether or not that rename has merged yet.
-$skillMd = @('skills\uoink\SKILL.md', 'skills\yoink\SKILL.md') |
-    ForEach-Object { Join-Path $RepoRoot $_ } |
-    Where-Object { Test-Path $_ } |
-    Select-Object -First 1
-if (-not $skillMd) {
-    throw "Missing skills\uoink\SKILL.md (or legacy skills\yoink\SKILL.md) at repo root"
+# skill agent (Antigravity's chore/rename-extension-to-uoink). That rename is
+# a hard prerequisite for a v2.1 build: shipping the legacy skills\yoink\ folder
+# would package a Yoink-branded Skill driving the deprecated alias tools. Require
+# the renamed skill and fail loudly if it hasn't merged yet -- no legacy fallback.
+$skillMd = Join-Path $RepoRoot 'skills\uoink\SKILL.md'
+if (-not (Test-Path $skillMd)) {
+    throw "Missing skills\uoink\SKILL.md -- Antigravity rename not merged; refusing to build"
 }
 # Sprint 19.6 / Fix 1: every migrations\NNNN_*.sql ships with the helper --
 # missing them silently breaks index.py's _run_migrations at first boot.
@@ -268,6 +267,10 @@ Remove-Item -Recurse -Force $ffmpegTmp
 Write-Host '    copying server source + templates...'
 Copy-Item (Join-Path $RepoRoot 'server.py')      $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'index.py')       $StagingDir -Force
+# Cross-platform path/OS helpers (added Sprint 19.5). server.py and
+# migrate_install.py `import _platform` at module top -- omitting it ships a
+# helper that crashes with ModuleNotFoundError before binding the port.
+Copy-Item (Join-Path $RepoRoot '_platform.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'migrate_install.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_mcp.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_mcp_tools.py') $StagingDir -Force
@@ -316,6 +319,17 @@ print(f"smoke: Index.open OK, schema_version={v}")
 '@
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: Index.open against a temp DB failed (missing migrations or import?)'
+    }
+    # Import the server module against the staged tree. py_compile (above) only
+    # compiles -- it never executes server.py's top-level imports, so a dropped
+    # runtime dependency (e.g. _platform.py) or a missing data file (VERSION)
+    # sails through compilation yet crashes the helper at first launch before it
+    # binds the port. Importing here exercises those top-level imports against
+    # the exact files the installer will ship, and fails the build loudly if a
+    # future commit drops another required module.
+    & '.\python\python.exe' -c "import server; print('smoke: import server OK, version=' + server.VERSION)"
+    if ($LASTEXITCODE -ne 0) {
+        throw 'staged smoke: import server failed (a required module/file is missing from staging -- e.g. _platform.py or VERSION)'
     }
     Write-Host '    Staged smoke OK' -ForegroundColor Green
 } finally {

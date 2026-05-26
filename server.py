@@ -46,7 +46,13 @@ sys.path.insert(0, str(HERE))
 
 
 def _read_version() -> str:
-    version = (HERE / "VERSION").read_text(encoding="utf-8").strip()
+    try:
+        version = (HERE / "VERSION").read_text(encoding="utf-8").strip()
+    except OSError:
+        # Defense in depth: a missing/unreadable VERSION file (e.g. an installer
+        # that failed to ship it) must not crash the helper at import before it
+        # can bind the port. Degrade to a sentinel instead of raising.
+        return "0.0.0-unknown"
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         raise RuntimeError(f"Invalid VERSION file value: {version!r}")
     return version
@@ -4270,7 +4276,7 @@ def _resolve_served_file(raw_path: str) -> tuple[Path | None, str | None, int, s
         # active DESKTOP_ROOT, so a yoink saved under Desktop\Yoink stays
         # readable after a switch to the LOCALAPPDATA fallback.
         if not _path_under_any(resolved, _allowed_roots()):
-            return None, None, 403, "path escapes Yoink root"
+            return None, None, 403, "path escapes Uoink root"
     except (OSError, ValueError):
         return None, None, 400, "path invalid"
 
@@ -5552,7 +5558,7 @@ class Handler(BaseHTTPRequestHandler):
             p.relative_to(DESKTOP_ROOT.resolve())
         except (ValueError, OSError):
             return self._send_json(400, {
-                "ok": False, "error": "path is outside the Yoink folder",
+                "ok": False, "error": "path is outside the Uoink folder",
             })
         if not p.exists() or not p.is_dir():
             return self._send_json(404, {"ok": False, "error": "folder not found"})
@@ -6491,7 +6497,7 @@ def main():
         log.warning("install migration raised (non-fatal): %s", e)
 
     # Sprint 19 / Wave 1 Fix 4: if Desktop\Yoink isn't writable, swap the
-    # active output root to %LOCALAPPDATA%\Yoink\output before the first
+    # active output root to %LOCALAPPDATA%\Uoink\output before the first
     # /extract would try to write to it.
     _apply_output_root_fallback()
 

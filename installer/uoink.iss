@@ -75,6 +75,9 @@ Source: "staging\bin\*"; DestDir: "{app}\bin"; Flags: recursesubdirs ignoreversi
 ; Server source.
 Source: "staging\server.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\index.py"; DestDir: "{app}"; Flags: ignoreversion
+; Cross-platform path/OS helpers -- server.py and migrate_install.py import
+; this at module top. Omitting it crashes the helper before it binds the port.
+Source: "staging\_platform.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\migrate_install.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_mcp.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_mcp_tools.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -84,6 +87,10 @@ Source: "staging\yoink_mcp.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\requirements.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\yt_extract.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\topics.json"; DestDir: "{app}"; Flags: ignoreversion
+; VERSION is read by server.py at import (_read_version). build.ps1 stages it
+; but the installer must also copy it into {app}, or the helper crashes on a
+; clean install before binding the port.
+Source: "staging\VERSION"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\skills\*"; DestDir: "{app}\skills"; Flags: recursesubdirs ignoreversion createallsubdirs
 ; Library-index migrations -- index._run_migrations applies these at boot.
 ; Sprint 19.6 / Fix 1: pre-Sprint-19.6 installers omitted these, causing
