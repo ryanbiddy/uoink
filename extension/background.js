@@ -669,7 +669,7 @@ async function runExtractJob(job) {
     // background-queued jobs. Keeps unrelated context-menu work from
     // surprising the user with new tabs.
     notify("Uoink Helper offline",
-           "Start Yoink from the Start Menu, then try again.");
+           "Start Uoink from the Start Menu, then try again.");
     return;
   }
   if (!data || !data.ok) {
@@ -739,7 +739,7 @@ async function runSessionAddJob(job) {
   } catch (e) {
     console.error("[Uoink] server unreachable", e);
     notify("Uoink Helper offline",
-           "Start Yoink from the Start Menu, then try again.");
+           "Start Uoink from the Start Menu, then try again.");
     return;
   }
   if (!data || !data.ok) {

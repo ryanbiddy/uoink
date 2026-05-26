@@ -441,7 +441,7 @@
     // disabled at the button level so this branch usually isn't reached.
     if (serverStatus === "checking") return;
     if (serverStatus === "offline") {
-      notify("Uoink Helper offline", "Start Yoink from the Start Menu");
+      notify("Uoink Helper offline", "Start Uoink from the Start Menu");
       openSetupOffline();
       return;
     }
@@ -465,7 +465,7 @@
       console.error("[Uoink] server unreachable", e);
       setButtonState(btn, "error", "Uoink Helper offline");
       btn.title = "Open the Uoink setup guide to start the helper.";
-      notify("Uoink Helper offline", "Start Yoink from the Start Menu");
+      notify("Uoink Helper offline", "Start Uoink from the Start Menu");
       openSetupOffline();
       resetButtonAfter(btn, 5000);
       return;
@@ -582,7 +582,7 @@
       console.error("[Uoink] server unreachable", e);
       setButtonState(btn, "error", "Uoink Helper offline");
       btn.title = "Open the Uoink setup guide to start the helper.";
-      notify("Uoink Helper offline", "Start Yoink from the Start Menu");
+      notify("Uoink Helper offline", "Start Uoink from the Start Menu");
       openSetupOffline();
       resetButtonAfter(btn, 5000);
       return;

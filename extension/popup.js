@@ -134,7 +134,7 @@ function updateDestButtons() {
   }
   if (destHint) {
     if (!serverOnline) {
-      destHint.textContent = "Start Yoink Server to enable these.";
+      destHint.textContent = "Start Uoink Server to enable these.";
     } else if (!recent) {
       destHint.textContent = "Uoink a video first. Destinations unlock for 5 minutes after a successful copy.";
     } else {

@@ -132,7 +132,7 @@ function helperOfflineDetail() {
   if (currentPlatform() === "linux") {
     return "Run uoink-helper from Terminal, then this panel will refresh.";
   }
-  return "Start Yoink Server from the Windows Start Menu, then this panel will refresh.";
+  return "Start Uoink Server from the Windows Start Menu, then this panel will refresh.";
 }
 
 function outputFolderActionLabel() {
@@ -577,7 +577,7 @@ function setCIControlsEnabled(enabled) {
   ]) {
     if (el) el.disabled = !enabled;
   }
-  if (!enabled) setCIStatus("Start Yoink Server to manage settings.", "warn");
+  if (!enabled) setCIStatus("Start Uoink Server to manage settings.", "warn");
   if (!enabled && aiCostEstimate) aiCostEstimate.classList.add("hidden");
 }
 
