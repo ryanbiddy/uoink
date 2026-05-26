@@ -41,7 +41,7 @@ PowerShell equivalent:
 Verify it's alive — `http://127.0.0.1:5179/ping` should return:
 
 ```json
-{"ok": true, "version": "1.0"}
+{"ok": true, "version": "2.1.0"}
 ```
 
 Logs are written to `server.log` next to `server.py`.
@@ -60,7 +60,7 @@ running the GUI's launcher and then closing it; cleaner: leave it running.
 ### `GET /ping`
 
 ```json
-{"ok": true, "version": "1.0"}
+{"ok": true, "version": "2.1.0"}
 ```
 
 ### `POST /extract`
@@ -76,7 +76,7 @@ Response on success:
 ```json
 {
   "ok": true,
-  "folder": "C:\\Users\\you\\Desktop\\Yoink\\<slug>",
+  "folder": "C:\\Users\\you\\Desktop\\Uoink\\<slug>",
   "combined_md": "# Title\n\n...",
   "screenshot_count": 12,
   "title": "Original video title"

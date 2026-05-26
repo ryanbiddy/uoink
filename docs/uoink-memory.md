@@ -1,25 +1,25 @@
-# Yoink Memory
+# Uoink Memory
 
 Status: Sprint 18 / v2.0
-Audience: Yoink users managing a growing local corpus.
+Audience: Uoink users managing a growing local corpus.
 
 ## What It Is
 
-Yoink Memory is the corpus gallery for everything you have yoinked.
+Uoink Memory is the corpus gallery for everything you have yoinked.
 
-It gives you one searchable, filterable view across your saved videos, instead of asking you to browse topic folders by hand. It is built on Yoink's local SQLite library index, so search stays fast as your library grows.
+It gives you one searchable, filterable view across your saved videos, instead of asking you to browse topic folders by hand. It is built on Uoink's local SQLite library index, so search stays fast as your library grows.
 
-Yoink Memory is local-first:
+Uoink Memory is local-first:
 
 - The page runs inside the Chrome extension.
 - Search is served by the local helper on `127.0.0.1`.
-- The index lives at `%LOCALAPPDATA%\Yoink\index.db`.
+- The index lives at `%LOCALAPPDATA%\Uoink\index.db`.
 - Your corpora, screenshots, thumbnails, and sidecars stay on disk.
-- There is no Yoink cloud service and no telemetry upload.
+- There is no Uoink cloud service and no telemetry upload.
 
 ## How To Open It
 
-Open the Yoink popup and click:
+Open the Uoink popup and click:
 
 ```text
 View all yoinks ->
@@ -28,19 +28,19 @@ View all yoinks ->
 That opens the standalone Memory page in a new browser tab:
 
 ```text
-chrome-extension://<extension-id>/yoink-memory.html
+chrome-extension://<extension-id>/uoink-memory.html
 ```
 
 ## Filters
 
-Yoink Memory supports six filters.
+Uoink Memory supports six filters.
 
 | Filter | What it does |
 |---|---|
 | Search | Full-text search across indexed corpus text, title, channel, topic, hook type, and slug. |
 | Channel | Exact channel-name filter. |
 | Topic | Exact topic-folder filter. |
-| Hook type | One of Yoink's 9 Hook Type categories, or all. |
+| Hook type | One of Uoink's 9 Hook Type categories, or all. |
 | Date from | Inclusive lower bound on `yoinked_at`. |
 | Date to | Inclusive upper bound on `yoinked_at`. |
 
@@ -58,7 +58,7 @@ Each result row is a compact summary of one yoink.
 
 It includes:
 
-- Thumbnail: `thumbnail.jpg` from the yoink folder, served through Yoink's token-gated `/file` endpoint.
+- Thumbnail: `thumbnail.jpg` from the yoink folder, served through Uoink's token-gated `/file` endpoint.
 - Title: video title from the sidecar/index.
 - Metadata line: channel, topic, and yoink date.
 - Hook chip: Hook Type classification when available.
@@ -77,13 +77,13 @@ Open the three-dot action menu on a row to use row-specific actions.
 
 Opens the yoink's folder in Windows Explorer.
 
-This uses the existing local helper `/open-folder` route. The helper only opens folders under the Yoink output root.
+This uses the existing local helper `/open-folder` route. The helper only opens folders under the Uoink output root.
 
 ### Open On YouTube
 
 Opens the original YouTube URL for the yoink when the index or sidecar has enough metadata to reconstruct it.
 
-### Re-Yoink
+### Re-Uoink
 
 Starts a fresh single-video extraction for the same YouTube URL.
 
@@ -93,7 +93,7 @@ Re-yoinking the same video updates the local index row keyed by `video_id`.
 
 Soft-deletes the yoink.
 
-The row disappears from Memory immediately, but the folder is not hard-deleted right away. Yoink moves it into the local trash folder and keeps it restorable for 30 days.
+The row disappears from Memory immediately, but the folder is not hard-deleted right away. Uoink moves it into the local trash folder and keeps it restorable for 30 days.
 
 ## Soft Delete And 30-Day Trash
 
@@ -109,7 +109,7 @@ When you click Delete:
 Trash path format:
 
 ```text
-<Yoink output root>\_yoink-trash\<topic>\<slug>__deleted-<timestamp>\
+<Uoink output root>\_yoink-trash\<topic>\<slug>__deleted-<timestamp>\
 ```
 
 The timestamp is derived from the stored deletion time with characters removed that Windows cannot use in folder names.
@@ -117,7 +117,7 @@ The timestamp is derived from the stored deletion time with characters removed t
 Example:
 
 ```text
-C:\Users\Ryan\Desktop\Yoink\_yoink-trash\AI and ML\the-new-code__deleted-2026-05-18T143022\
+C:\Users\Ryan\Desktop\Uoink\_yoink-trash\AI and ML\the-new-code__deleted-2026-05-18T143022\
 ```
 
 Deleted yoinks can be restored for 30 days through the restore API. The Memory page can call the same restore route when it exposes an undo or trash view.
@@ -149,11 +149,11 @@ Restore can fail if:
 - The original folder path is already occupied.
 - Windows blocks the move because a file is open or locked.
 
-In those cases Yoink returns a friendly error and leaves the index state unchanged.
+In those cases Uoink returns a friendly error and leaves the index state unchanged.
 
 ## Empty And Error States
 
-Yoink Memory has three common empty/error states.
+Uoink Memory has three common empty/error states.
 
 No yoinks yet:
 
@@ -170,14 +170,14 @@ No yoinks match your filters.
 Helper offline:
 
 ```text
-Yoink helper is offline. Start it from the system tray.
+Uoink helper is offline. Start it from the system tray.
 ```
 
 The helper offline state means the extension page loaded, but `127.0.0.1:5179` did not answer authenticated requests.
 
 ## Performance Notes
 
-Yoink Memory is backed by the Sprint 15 SQLite FTS5 index.
+Uoink Memory is backed by the Sprint 15 SQLite FTS5 index.
 
 Important behavior:
 
@@ -192,6 +192,6 @@ The design target is fast search across thousands of local yoinks without requir
 
 ## Privacy
 
-Yoink Memory does not add a new network service.
+Uoink Memory does not add a new network service.
 
 The page talks only to the local helper server, and the helper reads local files and `index.db`. Optional AI features still follow the existing BYO Anthropic key rules, but browsing, filtering, soft delete, restore, thumbnails, and Memory search are local-only.

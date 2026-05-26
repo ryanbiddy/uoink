@@ -1,4 +1,4 @@
-# Yoink — Backlog
+# Uoink — Backlog
 
 This is the canonical list of what's shipped, what's planned, and what's been ruled out. Every unshipped entry has a destination, rationale, and trigger condition.
 
@@ -91,6 +91,14 @@ This is the canonical list of what's shipped, what's planned, and what's been ru
 
 Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). Larger items (Mac, system tray) sit below.
 
+> **Shipped in v2.1 — the Yoink → Uoink rename.** ✅ Brand strings, install-path
+> migration (`%LOCALAPPDATA%\Yoink\` → `\Uoink\`, copy-not-move + 7-day grace),
+> keyring + autostart migration, MCP tool aliasing (`yoink_*` → `uoink_*`,
+> deprecated through v2.5), installer (`Uoink-Setup-2.1.0.exe`), and the macOS
+> universal build. The rename is the v2.1 headline; the **system tray** item
+> below is therefore **deferred to v2.2** to keep v2.1 focused on a clean
+> migration.
+
 ### Right-click "Yoink this video" context menu (video links)
 - **Destination:** v2.1
 - **Rationale:** Manifest already has `contextMenus` permission. Right-clicking any link to a YouTube video shouldn't require opening the video first. v2 has the right-click-thumbnail flow; this extends it to any YouTube video URL anywhere on the web. Catches users who never open the popup.
@@ -166,8 +174,8 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 - **Trigger:** v2.2+ planning cycle.
 
 ### System tray status app (treat as headline mini-sprint, not punch-list polish)
-- **Destination:** v2.1 (sequenced last in v2.1 — larger than other items)
-- **What:** Persistent system tray icon (bottom-right of Windows near clock) showing live server status. Right-click menu shows: server status (green/red), recent yoinks (last 5 with click-to-open), in-progress yoinks with progress, "Open Yoink folder," "Stop server."
+- **Destination:** **v2.2** (deferred from v2.1 — the Yoink → Uoink rename is the v2.1 headline; don't add a new packaged runtime surface in the same release as the migration). The transient startup/stop balloons + the size-aware magnet-U `uoink.ico` shipped in v2.1 are the groundwork.
+- **What:** Persistent system tray icon (bottom-right of Windows near clock) showing live server status. Right-click menu shows: server status (green/red), recent uoinks (last 5 with click-to-open), in-progress uoinks with progress, "Open Uoink folder," "Stop Uoink."
 - **Rationale:** Per Codex's review — this is NOT a small punch-list item. It creates a new packaged runtime surface, tray icon lifecycle, Windows notification quirks, and future Mac divergence. Real new component with new failure modes (tray icon visibility, AV conflicts, Windows icon caching). Sequence it as a dedicated mini-sprint with its own smoke test, not as a polish bullet.
 - **Implementation notes:** Use pystray (Python tray icon library) plus a small background thread that polls server state. Server already exposes `/health` and `/recent` endpoints — tray would consume them.
 - **Trigger:** Ship after other v2.1 small wins land and stabilize

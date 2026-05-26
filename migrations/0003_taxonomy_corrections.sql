@@ -1,4 +1,4 @@
--- Yoink library index -- taxonomy corrections (v3, Sprint 17 / A3).
+-- Uoink library index -- taxonomy corrections (v3, Sprint 17 / A3).
 -- Applied by index._run_migrations() on top of 0002. Backs the
 -- self-calibrating Hook Type classifier: user corrections are stored in
 -- their own table (separation of concerns -- corrections become a labeled

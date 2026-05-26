@@ -15,4 +15,4 @@ if (Test-Path $bundled) {
 }
 
 Start-Process -FilePath $py -ArgumentList "`"$here\server.py`"" -WindowStyle Hidden
-Write-Host "Yoink server launched. Logs: $here\server.log"
+Write-Host "Uoink server launched. Logs: $here\server.log"

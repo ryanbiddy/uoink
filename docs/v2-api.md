@@ -1,4 +1,4 @@
-# Yoink v2 API contract
+# Uoink v2 API contract
 
 Status: implemented through v2.0 Sprint 15
 Scope: Playlist Mode, settings, file serving, MCP HTTP backend contract, and SQLite library-index endpoints
@@ -6,15 +6,15 @@ Non-goal: UI design, Channel Decoder, Niche Corpus, or Mac installer work
 
 ## Overview
 
-Yoink v2 adds an async job model for playlist extraction while preserving the v1 single-video flow exactly as-is. `/extract` and `/session/add` remain synchronous and keep their current request and response shapes for backward compatibility; as of v2.0, `/extract` also writes a side-effect `kind: "single"` job record for recent-activity UI. Playlist Mode uses new `/playlist/*` and `/jobs/*` endpoints: the client previews a playlist, starts a job, polls progress, and can cancel mid-flight. This job model is the foundation for later Channel Decoder and Niche Corpus work, but those endpoints are intentionally out of scope for this contract.
+Uoink v2 adds an async job model for playlist extraction while preserving the v1 single-video flow exactly as-is. `/extract` and `/session/add` remain synchronous and keep their current request and response shapes for backward compatibility; as of v2.0, `/extract` also writes a side-effect `kind: "single"` job record for recent-activity UI. Playlist Mode uses new `/playlist/*` and `/jobs/*` endpoints: the client previews a playlist, starts a job, polls progress, and can cancel mid-flight. This job model is the foundation for later Channel Decoder and Niche Corpus work, but those endpoints are intentionally out of scope for this contract.
 
 ## Auth and protocol baseline
 
 All new endpoints use the same local-server auth model as v1:
 
 - `/health`, `/ping`, and `/index/backfill-status` stay public and unauthenticated.
-- `/token` stays the token-issuance endpoint and requires `X-Yoink-Client: yoink-extension`.
-- All other endpoints in this document require `X-Yoink-Token: <token>`.
+- `/token` stays the token-issuance endpoint and requires `X-Uoink-Client: yoink-extension`.
+- All other endpoints in this document require `X-Uoink-Token: <token>`.
 - POST endpoints require `Content-Type: application/json`.
 - POST request bodies must be top-level JSON objects and remain under the existing 64 KB body limit.
 
@@ -51,7 +51,7 @@ The setting is returned by `GET /settings` and accepted by `POST /settings`. Set
 
 ### GET /health and GET /ping
 
-Public liveness probes. `/health` and `/ping` return the same payload and intentionally do not require `X-Yoink-Token`, so the extension can detect whether the helper is running before it has a token.
+Public liveness probes. `/health` and `/ping` return the same payload and intentionally do not require `X-Uoink-Token`, so the extension can detect whether the helper is running before it has a token.
 
 Auth: none.
 
@@ -75,7 +75,7 @@ Fields:
 | `ok` | boolean | Always `true` for a healthy helper. |
 | `version` | string | Helper version from the top-level `VERSION` file. |
 | `index_recovering` | boolean | `true` while a corrupt `index.db` has been quarantined and the replacement database is being backfilled from disk. |
-| `output_root_fallback` | boolean | `true` if the helper fell back to writing outputs to `%LOCALAPPDATA%\Yoink\output` because the primary `DESKTOP_ROOT` was unwritable. |
+| `output_root_fallback` | boolean | `true` if the helper fell back to writing outputs to `%LOCALAPPDATA%\Uoink\output` because the primary `DESKTOP_ROOT` was unwritable. |
 
 ### GET /index/backfill-status
 
@@ -114,7 +114,7 @@ Notes:
 
 Request cancellation of the current background library-index backfill scan. Already-indexed rows stay in `index.db`; future boot/backfill runs can pick up anything left unindexed.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body: `{}` or omitted JSON object.
 
@@ -139,7 +139,7 @@ Error responses:
 
 Return the local cost-estimator constants used by setup.html for optional BYO Anthropic features. This endpoint does not call Anthropic and does not inspect the saved API key.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body: none.
 
@@ -176,9 +176,9 @@ Notes:
 
 ### POST /playlist/preview
 
-Preview a playlist without extracting anything. Used by the popup to show the user what Yoink will process before starting.
+Preview a playlist without extracting anything. Used by the popup to show the user what Uoink will process before starting.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body:
 
@@ -247,7 +247,7 @@ Example request:
 ```http
 POST /playlist/preview HTTP/1.1
 Content-Type: application/json
-X-Yoink-Token: <token>
+X-Uoink-Token: <token>
 
 {
   "url": "https://www.youtube.com/playlist?list=PLexample123"
@@ -287,7 +287,7 @@ Example response:
 
 Start playlist extraction asynchronously. Returns immediately with a `job_id`; the client polls `/jobs/<id>`.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body:
 
@@ -308,7 +308,7 @@ Success response: HTTP 200
     "state": "queued",
     "source_url": "https://www.youtube.com/playlist?list=PLexample123",
     "playlist_title": "Creator Strategy Interviews",
-    "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews",
+    "session_folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews",
     "videos_total": 10,
     "videos_done": 0,
     "videos_failed": 0,
@@ -354,7 +354,7 @@ Example request:
 ```http
 POST /playlist/start HTTP/1.1
 Content-Type: application/json
-X-Yoink-Token: <token>
+X-Uoink-Token: <token>
 
 {
   "url": "https://www.youtube.com/playlist?list=PLexample123",
@@ -374,7 +374,7 @@ Example response:
     "state": "queued",
     "source_url": "https://www.youtube.com/playlist?list=PLexample123",
     "playlist_title": "Creator Strategy Interviews",
-    "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews",
+    "session_folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews",
     "videos_total": 10,
     "videos_done": 0,
     "videos_failed": 0,
@@ -395,7 +395,7 @@ Example response:
 
 Return the latest state for one async job.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body: none.
 
@@ -410,7 +410,7 @@ Success response: HTTP 200
     "state": "running",
     "source_url": "https://www.youtube.com/playlist?list=PLexample123",
     "playlist_title": "Creator Strategy Interviews",
-    "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews",
+    "session_folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews",
     "videos_total": 10,
     "videos_done": 3,
     "videos_failed": 0,
@@ -426,7 +426,7 @@ Success response: HTTP 200
     "error": null,
     "result": null,
     "warnings": ["playlist exceeds cap"],
-    "message": "Yoinking video 4 of 10."
+    "message": "Uoinking video 4 of 10."
   }
 }
 ```
@@ -449,7 +449,7 @@ Example request:
 
 ```http
 GET /jobs/job_20260510_143012_a1b2c3 HTTP/1.1
-X-Yoink-Token: <token>
+X-Uoink-Token: <token>
 ```
 
 Example response:
@@ -463,7 +463,7 @@ Example response:
     "state": "completed",
     "source_url": "https://www.youtube.com/playlist?list=PLexample123",
     "playlist_title": "Creator Strategy Interviews",
-    "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews",
+    "session_folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews",
     "videos_total": 10,
     "videos_done": 10,
     "videos_failed": 0,
@@ -474,16 +474,16 @@ Example response:
     "completed_at": "2026-05-10T15:01:22",
     "error": null,
     "result": {
-      "combined_md_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews\\corpus.md",
+      "combined_md_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews\\corpus.md",
       "combined_md_text": "# Playlist Corpus: Creator Strategy Interviews\n\n...",
       "per_video": [
         {
           "index": 1,
           "title": "A practical guide to creator research",
           "url": "https://www.youtube.com/watch?v=abc123DEF45",
-          "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews\\video-1",
-          "md_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews\\video-1\\video-1.md",
-          "json_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews\\video-1\\video-1.json",
+          "folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews\\video-1",
+          "md_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews\\video-1\\video-1.md",
+          "json_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews\\video-1\\video-1.json",
           "ok": true,
           "error": null
         }
@@ -499,7 +499,7 @@ Example response:
 
 Cancel a queued or running async job.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body: `{}` or omitted JSON object.
 
@@ -514,7 +514,7 @@ Success response: HTTP 200
     "state": "cancelled",
     "source_url": "https://www.youtube.com/playlist?list=PLexample123",
     "playlist_title": "Creator Strategy Interviews",
-    "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews",
+    "session_folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews",
     "videos_total": 10,
     "videos_done": 3,
     "videos_failed": 0,
@@ -570,7 +570,7 @@ Example request:
 ```http
 POST /jobs/job_20260510_143012_a1b2c3/cancel HTTP/1.1
 Content-Type: application/json
-X-Yoink-Token: <token>
+X-Uoink-Token: <token>
 
 {}
 ```
@@ -586,7 +586,7 @@ Example response:
     "state": "cancelled",
     "source_url": "https://www.youtube.com/playlist?list=PLexample123",
     "playlist_title": "Creator Strategy Interviews",
-    "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews",
+    "session_folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews",
     "videos_total": 10,
     "videos_done": 3,
     "videos_failed": 0,
@@ -607,7 +607,7 @@ Example response:
 
 List recent jobs so the popup can recover playlist state after close/reopen and show recent single-video yoinks.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Query params:
 
@@ -617,7 +617,7 @@ Query params:
 
 Request body: none.
 
-Persistence: jobs persist across helper restarts via `%LOCALAPPDATA%\Yoink\index.db` on Windows. Legacy `%LOCALAPPDATA%\Yoink\jobs.json` is imported once on first Sprint 15 boot, then renamed to `jobs.json.migrated`. In-flight jobs from a previous helper process are restored as records with `state: "failed"` and `error: "server restarted"`; users restart them manually. Jobs are returned sorted by `updated_at` descending. Single-video job records keep only paths and small metadata so `/jobs` stays small; full corpus text and base64 clipboard payloads are never persisted in the index job row.
+Persistence: jobs persist across helper restarts via `%LOCALAPPDATA%\Uoink\index.db` on Windows. Legacy `%LOCALAPPDATA%\Uoink\jobs.json` is imported once on first Sprint 15 boot, then renamed to `jobs.json.migrated`. In-flight jobs from a previous helper process are restored as records with `state: "failed"` and `error: "server restarted"`; users restart them manually. Jobs are returned sorted by `updated_at` descending. Single-video job records keep only paths and small metadata so `/jobs` stays small; full corpus text and base64 clipboard payloads are never persisted in the index job row.
 
 Success response: HTTP 200
 
@@ -632,7 +632,7 @@ Success response: HTTP 200
       "source_url": "https://www.youtube.com/playlist?list=PLexample123",
       "title": null,
       "playlist_title": "Creator Strategy Interviews",
-      "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews",
+      "session_folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews",
       "videos_total": 10,
       "videos_done": 3,
       "videos_failed": 0,
@@ -648,7 +648,7 @@ Success response: HTTP 200
       "error": null,
       "result": null,
       "warnings": ["playlist exceeds cap"],
-      "message": "Yoinking video 4 of 10."
+      "message": "Uoinking video 4 of 10."
     },
     {
       "id": "job_20260510_151010_d4e5f6",
@@ -657,7 +657,7 @@ Success response: HTTP 200
       "source_url": "https://www.youtube.com/watch?v=abc123DEF45",
       "title": "A practical guide to creator research",
       "playlist_title": null,
-      "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research",
+      "session_folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\Creator Research\\a-practical-guide-to-creator-research",
       "videos_total": 1,
       "videos_done": 1,
       "videos_failed": 0,
@@ -668,9 +668,9 @@ Success response: HTTP 200
       "completed_at": "2026-05-10T15:11:04",
       "error": null,
       "result": {
-        "combined_md_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research\\a-practical-guide-to-creator-research.md",
+        "combined_md_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\Creator Research\\a-practical-guide-to-creator-research\\a-practical-guide-to-creator-research.md",
         "combined_md_text": "",
-        "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research"
+        "folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\Creator Research\\a-practical-guide-to-creator-research"
       },
       "warnings": [],
       "message": "Single-video yoink complete."
@@ -692,7 +692,7 @@ Example request:
 
 ```http
 GET /jobs?kind=playlist HTTP/1.1
-X-Yoink-Token: <token>
+X-Uoink-Token: <token>
 ```
 
 Example response:
@@ -708,7 +708,7 @@ Example response:
       "source_url": "https://www.youtube.com/playlist?list=PLexample123",
       "title": null,
       "playlist_title": "Creator Strategy Interviews",
-      "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews",
+      "session_folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews",
       "videos_total": 10,
       "videos_done": 10,
       "videos_failed": 0,
@@ -719,7 +719,7 @@ Example response:
       "completed_at": "2026-05-10T15:01:22",
       "error": null,
       "result": {
-        "combined_md_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews\\corpus.md",
+        "combined_md_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews\\corpus.md",
         "combined_md_text": "# Playlist Corpus: Creator Strategy Interviews\n\n...",
         "per_video": []
       },
@@ -732,9 +732,9 @@ Example response:
 
 ### GET /file?path=<absolute-path>
 
-Serve an image file from the Yoink output root so the MV3 extension popup can render screenshot thumbnails without relying on `file://` URLs.
+Serve an image file from the Uoink output root so the MV3 extension popup can render screenshot thumbnails without relying on `file://` URLs.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body: none.
 
@@ -742,7 +742,7 @@ Query parameters:
 
 | Field | Type | Required | Notes |
 |---|---:|---:|---|
-| `path` | string | yes | Absolute path to an image file under the Yoink output root. URL-encode the value. |
+| `path` | string | yes | Absolute path to an image file under the Uoink output root. URL-encode the value. |
 
 Success response: HTTP 200
 
@@ -759,7 +759,7 @@ Example request:
 
 ```http
 GET /file?path=C%3A%5CUsers%5CRyan%5CDesktop%5CYoink%5CMarketing%5Cvideo-1%5Cscreenshots%5Cshot_0001.jpg HTTP/1.1
-X-Yoink-Token: <token>
+X-Uoink-Token: <token>
 ```
 
 Path validation rules:
@@ -767,7 +767,7 @@ Path validation rules:
 - Resolve the absolute path before serving.
 - Reject missing, relative, malformed, or parent-directory paths.
 - Reject any raw or resolved path containing a `..` path segment.
-- Reject paths that do not resolve under the Yoink output root (`Desktop\Yoink`, resolved through the same Windows known-folder logic used for single-video and session output, or `YOINK_OUTPUT_DIR` when explicitly set in dev/support mode).
+- Reject paths that do not resolve under the Uoink output root (`Desktop\Uoink`, resolved through the same Windows known-folder logic used for single-video and session output, or `UOINK_OUTPUT_DIR` when explicitly set in dev/support mode).
 - Reject missing paths and non-regular files.
 - Reject files larger than 10 MB.
 - Allow only `.png`, `.jpg`, `.jpeg`, and `.webp`.
@@ -780,8 +780,8 @@ Error responses:
 | 400 | `path required` | Query string omitted `path`. |
 | 400 | `path invalid` | Path is relative, malformed, or contains a parent-directory segment. |
 | 400 | `file too large` | File exceeds the 10 MB cap. |
-| 403 | `missing or invalid token` | `X-Yoink-Token` missing or stale. |
-| 403 | `path escapes Yoink root` | Resolved path is outside the Yoink output root. |
+| 403 | `missing or invalid token` | `X-Uoink-Token` missing or stale. |
+| 403 | `path escapes Uoink root` | Resolved path is outside the Uoink output root. |
 | 404 | `file not found` | File is missing or not a regular file. |
 | 415 | `unsupported file type` | Extension or magic bytes are not an allowed image type. |
 
@@ -789,7 +789,7 @@ Error responses:
 
 Return the recent-yoinks list used by the popup. Sprint 15 moved this read path to `index.db`; Sprint 18 keeps the behavior compatible while enriching rows for popup health/entity/thumbnail surfaces. Soft-deleted yoinks are excluded.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body: none.
 
@@ -802,7 +802,7 @@ Success response: HTTP 200
     {
       "title": "A practical guide to creator research",
       "topic": "Creator Research",
-      "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research",
+      "folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\Creator Research\\a-practical-guide-to-creator-research",
       "video_id": "abc123DEF45",
       "channel": "Example Channel",
       "yoinked_at": "2026-05-18T14:30:22",
@@ -810,7 +810,7 @@ Success response: HTTP 200
       "hook_type_confidence": 4,
       "entity_count": 8,
       "top_entities": ["Claude", "Anthropic", "MCP"],
-      "thumbnail_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research\\thumbnail.jpg",
+      "thumbnail_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\Creator Research\\a-practical-guide-to-creator-research\\thumbnail.jpg",
       "health": {
         "transcript": "ok",
         "screenshots": "ok",
@@ -831,9 +831,9 @@ Notes:
 
 ### GET /memory/search
 
-Search and filter the local Yoink library for the standalone Yoink Memory page.
+Search and filter the local Uoink library for the standalone Uoink Memory page.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Rate limit: 60 calls/minute per helper process.
 
@@ -866,7 +866,7 @@ Success response: HTTP 200
     {
       "title": "A practical guide to creator research",
       "topic": "Creator Research",
-      "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research",
+      "folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\Creator Research\\a-practical-guide-to-creator-research",
       "video_id": "abc123DEF45",
       "channel": "Example Channel",
       "yoinked_at": "2026-05-18T14:30:22",
@@ -881,7 +881,7 @@ Success response: HTTP 200
       },
       "entity_count": 8,
       "top_entities": ["Claude", "Anthropic", "MCP"],
-      "thumbnail_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research\\thumbnail.jpg"
+      "thumbnail_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\Creator Research\\a-practical-guide-to-creator-research\\thumbnail.jpg"
     }
   ]
 }
@@ -902,15 +902,15 @@ Error responses:
 | 400 | `date_from must be YYYY-MM-DD` | Date lower bound is malformed. |
 | 400 | `date_to must be YYYY-MM-DD` | Date upper bound is malformed. |
 | 400 | `limit/offset must be integers` | Pagination values could not be parsed. |
-| 403 | `missing or invalid token` | `X-Yoink-Token` missing or stale. |
+| 403 | `missing or invalid token` | `X-Uoink-Token` missing or stale. |
 | 429 | `too many requests` | More than 60 memory searches/minute. |
 | 500 | `search failed` | SQLite/index failure. |
 
 ### POST /memory/delete
 
-Soft-delete a yoink from Yoink Memory.
+Soft-delete a yoink from Uoink Memory.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body:
 
@@ -931,7 +931,7 @@ Success response: HTTP 200
 Side effects:
 
 - Sets `yoinks.deleted_at`.
-- Moves the yoink folder to `_yoink-trash/<topic>/<slug>__deleted-<timestamp>/` under the Yoink output root.
+- Moves the yoink folder to `_yoink-trash/<topic>/<slug>__deleted-<timestamp>/` under the Uoink output root.
 - Normal read paths hide the row immediately.
 - If the folder move fails, the helper rolls back the index row by clearing `deleted_at`.
 
@@ -940,7 +940,7 @@ Error responses:
 | HTTP status | Error string | Meaning |
 |---:|---|---|
 | 400 | `video_id required` | Missing or empty video ID. |
-| 403 | `missing or invalid token` | `X-Yoink-Token` missing or stale. |
+| 403 | `missing or invalid token` | `X-Uoink-Token` missing or stale. |
 | 404 | `yoink not found` | No indexed yoink exists for that video ID. |
 | 409 | `already deleted` | The row already has `deleted_at`. |
 | 409 | `yoink folder missing on disk` | The index row exists, but its folder is missing. |
@@ -950,7 +950,7 @@ Error responses:
 
 Restore a soft-deleted yoink while it is still inside `_yoink-trash/`.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body:
 
@@ -978,7 +978,7 @@ Error responses:
 | HTTP status | Error string | Meaning |
 |---:|---|---|
 | 400 | `video_id required` | Missing or empty video ID. |
-| 403 | `missing or invalid token` | `X-Yoink-Token` missing or stale. |
+| 403 | `missing or invalid token` | `X-Uoink-Token` missing or stale. |
 | 404 | `yoink not found` | No indexed yoink exists for that video ID. |
 | 409 | `yoink is not deleted` | The row has no `deleted_at` value. |
 | 409 | `trash folder not found` | The trash folder no longer exists. |
@@ -1000,9 +1000,9 @@ There is no public "purge now" endpoint in Sprint 18.
 
 ### GET /taxonomy
 
-Return Hook Type taxonomy rows captured from successful classifications. This is the HTTP mirror of the MCP `get_taxonomy` tool and is intended as the foundation for future taxonomy viewer/export work. Sprint 15 stores these rows in the `taxonomy` table in `%LOCALAPPDATA%\Yoink\index.db`; legacy `taxonomy.json` is imported once and renamed to `taxonomy.json.migrated`.
+Return Hook Type taxonomy rows captured from successful classifications. This is the HTTP mirror of the MCP `get_taxonomy` tool and is intended as the foundation for future taxonomy viewer/export work. Sprint 15 stores these rows in the `taxonomy` table in `%LOCALAPPDATA%\Uoink\index.db`; legacy `taxonomy.json` is imported once and renamed to `taxonomy.json.migrated`.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body: none.
 
@@ -1041,13 +1041,13 @@ Error responses:
 |---:|---|---|
 | 400 | `hook_type invalid` | `hook_type` is not one of the allowed categories. |
 | 400 | `limit invalid` | `limit` cannot be parsed as an integer. |
-| 403 | `missing or invalid token` | `X-Yoink-Token` missing or stale. |
+| 403 | `missing or invalid token` | `X-Uoink-Token` missing or stale. |
 
 ### POST /taxonomy/correct
 
 Record a user correction for a Hook Type classification. This powers the popup's "wrong?" affordance and feeds future Hook Type classifications with similarity-matched few-shot examples.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Rate limit: 30 calls/minute per helper process. Corrections are user-initiated, so hitting this limit usually indicates an extension loop or automation bug.
 
@@ -1090,7 +1090,7 @@ Error responses:
 |---:|---|---|
 | 400 | `video_id required` | Missing or empty video ID. |
 | 400 | `corrected_hook_type invalid` | Category is not one of the 9 Hook Type values. |
-| 403 | `missing or invalid token` | `X-Yoink-Token` missing or stale. |
+| 403 | `missing or invalid token` | `X-Uoink-Token` missing or stale. |
 | 404 | `taxonomy row not found` | The video has not been classified/indexed yet. |
 | 429 | `rate limit exceeded` | More than 30 corrections/minute. |
 
@@ -1098,7 +1098,7 @@ Error responses:
 
 Return recent Hook Type correction rows for setup.html's "Hook Type calibration" review list. This endpoint is the read companion to `POST /taxonomy/correct`; if it is not exposed in a given Sprint 17 build, the setup page should show a non-blocking "history unavailable" state and the endpoint can land in Sprint 17.5.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body: none.
 
@@ -1136,9 +1136,9 @@ Rows sort by `corrected_at` descending.
 
 ### GET /skill/system-prompt
 
-Return the copyable Yoink Operator Skill fallback prompt for setup.html. This is for AI clients that do not load `SKILL.md` natively.
+Return the copyable Uoink Operator Skill fallback prompt for setup.html. This is for AI clients that do not load `SKILL.md` natively.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Request body: none.
 
@@ -1151,20 +1151,20 @@ Content-Type: text/markdown; charset=utf-8
 Cache-Control: private, max-age=300
 ```
 
-Body: raw markdown text from `%LOCALAPPDATA%\Yoink\skills\yoink\system-prompt.md` in installed builds, or `skills\yoink\system-prompt.md` in dev mode.
+Body: raw markdown text from `%LOCALAPPDATA%\Uoink\skills\uoink\system-prompt.md` in installed builds, or `skills\uoink\system-prompt.md` in dev mode.
 
 Error responses:
 
 | HTTP status | Error string | Meaning |
 |---:|---|---|
-| 403 | `missing or invalid token` | `X-Yoink-Token` missing or stale. |
+| 403 | `missing or invalid token` | `X-Uoink-Token` missing or stale. |
 | 404 | `skill system prompt not found` | Skill files are missing from the install layout. |
 
 ### MCP HTTP JSON-RPC helper endpoints
 
-Yoink v2 Sprint 4 adds MCP over stdio plus an experimental local HTTP JSON-RPC helper. Stdio clients launch `yoink_mcp.py` and are the officially supported MCP transport for launch. HTTP clients can use the existing helper server under `/mcp/v1` for direct JSON-RPC POST calls, but this is not a spec-complete SSE or Streamable HTTP implementation.
+Uoink v2 Sprint 4 adds MCP over stdio plus an experimental local HTTP JSON-RPC helper. Stdio clients launch `uoink_mcp.py` and are the officially supported MCP transport for launch. HTTP clients can use the existing helper server under `/mcp/v1` for direct JSON-RPC POST calls, but this is not a spec-complete SSE or Streamable HTTP implementation.
 
-Auth: `X-Yoink-Token` required for every HTTP JSON-RPC helper endpoint, including config and SSE discovery.
+Auth: `X-Uoink-Token` required for every HTTP JSON-RPC helper endpoint, including config and SSE discovery.
 
 #### GET /mcp/v1/config
 
@@ -1176,13 +1176,13 @@ Success response: HTTP 200
 {
   "ok": true,
   "stdio": {
-    "command": "C:\\Users\\Ryan\\AppData\\Local\\Yoink\\python\\python.exe",
-    "args": ["C:\\Users\\Ryan\\AppData\\Local\\Yoink\\yoink_mcp.py"]
+    "command": "C:\\Users\\Ryan\\AppData\\Local\\Uoink\\python\\python.exe",
+    "args": ["C:\\Users\\Ryan\\AppData\\Local\\Uoink\\uoink_mcp.py"]
   },
   "http": {
     "url": "http://127.0.0.1:5179/mcp/v1",
     "sse_url": "http://127.0.0.1:5179/mcp/v1/sse",
-    "auth_header": "X-Yoink-Token"
+    "auth_header": "X-Uoink-Token"
   }
 }
 ```
@@ -1221,7 +1221,7 @@ Success response:
       "name": "yoink",
       "version": "1.0.0"
     },
-    "instructions": "Yoink exposes local YouTube extraction tools. Outputs are stored under the user's Yoink output folder on this machine."
+    "instructions": "Uoink exposes local YouTube extraction tools. Outputs are stored under the user's Uoink output folder on this machine."
   }
 }
 ```
@@ -1246,7 +1246,7 @@ Success response:
     "tools": [
       {
         "name": "yoink_video",
-        "description": "Extract a single YouTube video into a Yoink corpus. Returns the saved folder, markdown corpus, and screenshot paths.",
+        "description": "Extract a single YouTube video into a Uoink corpus. Returns the saved folder, markdown corpus, and screenshot paths.",
         "inputSchema": {
           "type": "object",
           "properties": {
@@ -1374,7 +1374,7 @@ data: /mcp/v1
 
 Extract a single YouTube video.
 
-Auth: `X-Yoink-Token` required (or unauthenticated in v1 backward-compatible mode, but generally token-gated).
+Auth: `X-Uoink-Token` required (or unauthenticated in v1 backward-compatible mode, but generally token-gated).
 
 Request body:
 
@@ -1390,7 +1390,7 @@ Success response (immediate): HTTP 200
 ```json
 {
   "ok": true,
-  "folder": "C:\\Users\\hello\\Desktop\\Yoink\\Music\\rick-astley-never-gonna-give-you-up",
+  "folder": "C:\\Users\\hello\\Desktop\\Uoink\\Music\\rick-astley-never-gonna-give-you-up",
   "slug": "rick-astley-never-gonna-give-you-up"
 }
 ```
@@ -1487,7 +1487,7 @@ Each check object in the `checks` array contains:
 
 Retrieve the list of all queued, running, and recently completed or failed pending yoinks.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Rate limit: 60 requests/minute.
 
@@ -1525,7 +1525,7 @@ Fields:
 
 Cancel a pending queued yoink. If the yoink is currently running, the background job will be cancelled.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Rate limit: 60 requests/minute.
 
@@ -1559,7 +1559,7 @@ Fields:
 
 Force an immediate retry of a queued pending yoink that is in a `pending` or `failed` state. This bypasses the exponential backoff timer and sets `retry_after` to the current time, making it eligible for immediate processing by the next queue poll.
 
-Auth: `X-Yoink-Token` required.
+Auth: `X-Uoink-Token` required.
 
 Rate limit: 30 requests/minute.
 
@@ -1633,7 +1633,7 @@ Every job object returned by `/playlist/start`, `/jobs/<id>`, `/jobs/<id>/cancel
   "source_url": "https://www.youtube.com/playlist?list=PLexample123",
   "title": null,
   "playlist_title": "Creator Strategy Interviews",
-  "session_folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews",
+  "session_folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews",
   "videos_total": 10,
   "videos_done": 0,
   "videos_failed": 0,
@@ -1649,7 +1649,7 @@ Every job object returned by `/playlist/start`, `/jobs/<id>`, `/jobs/<id>/cancel
   "error": null,
   "result": null,
   "warnings": [],
-  "message": "Yoinking video 1 of 10."
+  "message": "Uoinking video 1 of 10."
 }
 ```
 
@@ -1672,16 +1672,16 @@ Completed `result` shape:
 
 ```json
 {
-  "combined_md_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews\\corpus.md",
+  "combined_md_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews\\corpus.md",
   "combined_md_text": "# Playlist Corpus: Creator Strategy Interviews\n\n...",
   "per_video": [
     {
       "index": 1,
       "title": "A practical guide to creator research",
       "url": "https://www.youtube.com/watch?v=abc123DEF45",
-      "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews\\video-1",
-      "md_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews\\video-1\\video-1.md",
-      "json_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews\\video-1\\video-1.json",
+      "folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews\\video-1",
+      "md_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews\\video-1\\video-1.md",
+      "json_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews\\video-1\\video-1.json",
       "ok": true,
       "error": null
     },
@@ -1689,10 +1689,10 @@ Completed `result` shape:
       "index": 2,
       "title": "Private or rate-limited video",
       "url": "https://www.youtube.com/watch?v=def456GHI78",
-      "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews\\private-or-rate-limited-video",
+      "folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews\\private-or-rate-limited-video",
       "md_path": null,
       "json_path": null,
-      "failed_marker_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews\\private-or-rate-limited-video\\FAILED.txt",
+      "failed_marker_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews\\private-or-rate-limited-video\\FAILED.txt",
       "ok": false,
       "error": "yt-dlp failed: sign in to confirm you're not a bot"
     }
@@ -1704,9 +1704,9 @@ Completed single-video `result` shape:
 
 ```json
 {
-  "combined_md_path": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research\\a-practical-guide-to-creator-research.md",
+  "combined_md_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\Creator Research\\a-practical-guide-to-creator-research\\a-practical-guide-to-creator-research.md",
   "combined_md_text": "",
-  "folder": "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\a-practical-guide-to-creator-research"
+  "folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\Creator Research\\a-practical-guide-to-creator-research"
 }
 ```
 
@@ -1733,7 +1733,7 @@ Playlist extraction deliberately sleeps between videos before the next yt-dlp/ff
 
 If yt-dlp returns a rate-limit-like error (`429`, `too many requests`, `rate limit`, `sign in to confirm you're not a bot`, captcha/bot checks), the worker continues the playlist after exponential backoff: 30s, 60s, 120s, 240s, then capped at 300s. Individual failures increment `videos_failed`; the job still completes if at least one selected video succeeds.
 
-When a playlist item fails after creating or reserving an output folder, Yoink writes `FAILED.txt` into that per-video folder with the URL, playlist index, timestamp, and short failure reason. This keeps the disk output honest: a user inspecting the folder can distinguish a failed partial from a successful corpus.
+When a playlist item fails after creating or reserving an output folder, Uoink writes `FAILED.txt` into that per-video folder with the URL, playlist index, timestamp, and short failure reason. This keeps the disk output honest: a user inspecting the folder can distinguish a failed partial from a successful corpus.
 
 ## Backward compatibility
 
@@ -1759,7 +1759,7 @@ No v2 playlist work may break existing single-video, session, health, token, rec
 
 Sprint 15 adds `GET /index/backfill-status` and `POST /index/backfill-cancel` without changing the existing v1 endpoint shapes.
 
-Sprint 18 adds `GET /memory/search`, `POST /memory/delete`, and `POST /memory/restore` for the standalone Yoink Memory page. These are additive and do not change the v1 extraction/session contracts.
+Sprint 18 adds `GET /memory/search`, `POST /memory/delete`, and `POST /memory/restore` for the standalone Uoink Memory page. These are additive and do not change the v1 extraction/session contracts.
 
 ## Client-side helpers needed from Claude Code
 
@@ -1788,7 +1788,7 @@ Protocol/auth/body errors:
 | 400 | `interval must be an integer` | `interval` cannot be parsed as integer. |
 | 400 | `interval must be between 5 and 300` | `interval` outside existing v1 bounds. |
 | 400 | `job id invalid` | Job ID fails validation. |
-| 403 | `missing or invalid token` | `X-Yoink-Token` missing or stale. |
+| 403 | `missing or invalid token` | `X-Uoink-Token` missing or stale. |
 | 413 | `Body too large (>65536 bytes)` | Body exceeds 64 KB cap. |
 | 415 | `Content-Type must be application/json` | POST without JSON content type. |
 | 404 | `job not found` | Job ID is valid but unknown. |

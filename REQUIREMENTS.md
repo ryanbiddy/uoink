@@ -1,4 +1,4 @@
-# Yoink — Manual Setup
+# Uoink — Manual Setup
 
 The one-click installer is shipping in v1 launch. Until then, here's the manual setup.
 
@@ -13,8 +13,8 @@ The one-click installer is shipping in v1 launch. Until then, here's the manual 
 
 1. Clone the repo:
    ```
-   git clone https://github.com/ryanbiddy/yoink.git
-   cd yoink
+   git clone https://github.com/ryanbiddy/uoink.git
+   cd uoink
    ```
 
 2. Install yt-dlp:
@@ -34,7 +34,7 @@ The one-click installer is shipping in v1 launch. Until then, here's the manual 
    ffmpeg -version
    ```
 
-5. Start the Yoink server:
+5. Start the Uoink server:
    ```
    double-click start_server.bat
    ```
@@ -55,9 +55,9 @@ The one-click installer is shipping in v1 launch. Until then, here's the manual 
    - Click "Load unpacked"
    - Select the `extension/` folder
 
-8. Pin the Yoink extension to your toolbar.
+8. Pin the Uoink extension to your toolbar.
 
-9. Open any YouTube video. Click the Yoink button under the video.
+9. Open any YouTube video. Click the Uoink button under the video.
 
 ## Known caveats
 
@@ -67,6 +67,6 @@ The one-click installer is shipping in v1 launch. Until then, here's the manual 
 
 ## Troubleshooting
 
-If the Yoink button doesn't appear, refresh the YouTube page once. YouTube is a SPA and the extension's MutationObserver sometimes loses the race on first load.
+If the Uoink button doesn't appear, refresh the YouTube page once. YouTube is a SPA and the extension's MutationObserver sometimes loses the race on first load.
 
-If clicking Yoink does nothing, open DevTools (F12), Console tab, and look for errors prefixed with `[Yoink]`.
+If clicking Uoink does nothing, open DevTools (F12), Console tab, and look for errors prefixed with `[Uoink]`.

@@ -1,4 +1,4 @@
-# Yoink installer build orchestrator.
+# Uoink installer build orchestrator.
 #
 # One-command build:  .\build.ps1
 #
@@ -9,10 +9,11 @@
 #        python\   embeddable Python with site-packages enabled and
 #                  yt-dlp installed via pip
 #        bin\      ffmpeg.exe (and ffprobe.exe if present)
-#        server.py, yt_extract.py, topics.json, skills\, stop-server.{bat,ps1},
-#        yoink.ico
-#   3. Run ISCC.exe against installer\yoink.iss to produce
-#      build\Yoink-Setup-<version>.exe
+#        server.py, migrate_install.py, uoink_mcp.py, uoink_mcp_tools.py,
+#        yoink_mcp.py (shim), yt_extract.py, topics.json, skills\,
+#        stop-server.{bat,ps1}, uoink.ico
+#   3. Run ISCC.exe against installer\uoink.iss to produce
+#      build\Uoink-Setup-<version>.exe
 #
 # See docs\build-installer.md for the architecture rationale and
 # instructions on updating Python / yt-dlp / ffmpeg versions.
@@ -34,7 +35,7 @@ $BuildDir     = Join-Path $RepoRoot 'build'
 $CacheDir     = Join-Path $BuildDir 'cache'
 $StagingDir   = Join-Path $InstallerDir 'staging'
 $TemplatesDir = Join-Path $InstallerDir 'templates'
-$IconSrc      = Join-Path $InstallerDir 'yoink.ico'
+$IconSrc      = Join-Path $InstallerDir 'uoink.ico'
 
 # ---- Versions (pinned for v2 ship) --------------------------------------
 $VersionFile    = Join-Path $RepoRoot 'VERSION'
@@ -45,7 +46,7 @@ $VERSION = (Get-Content -Raw $VersionFile).Trim()
 if ($VERSION -notmatch '^\d+\.\d+\.\d+$') {
     throw "VERSION must be semver-like x.y.z, got '$VERSION'"
 }
-Write-Host "Building Yoink version $VERSION" -ForegroundColor Cyan
+Write-Host "Building Uoink version $VERSION" -ForegroundColor Cyan
 
 $ManifestPath = Join-Path $RepoRoot 'extension\manifest.json'
 if (-not (Test-Path $ManifestPath)) {
@@ -62,8 +63,8 @@ if ($ManifestVersion -ne $VERSION) {
 $PYTHON_VERSION = '3.11.9'
 $PYTHON_URL     = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"
 $GETPIP_URL     = 'https://bootstrap.pypa.io/get-pip.py'
-# ffmpeg 7.1 essentials build from gyan.dev (mirrored on GitHub for stable URL).
-$FFMPEG_VERSION = '7.1'
+# ffmpeg 8.1.1 essentials build from gyan.dev (mirrored on GitHub for stable URL).
+$FFMPEG_VERSION = '8.1.1'
 $FFMPEG_URL     = "https://github.com/GyanD/codexffmpeg/releases/download/$FFMPEG_VERSION/ffmpeg-$FFMPEG_VERSION-essentials_build.zip"
 # yt-dlp pip pin -- bump after compatibility-testing a new release.
 $YTDLP_VERSION  = '2026.03.17'
@@ -149,15 +150,21 @@ New-Item -ItemType Directory -Force -Path $CacheDir, $BuildDir | Out-Null
 
 # ---- Sanity checks ------------------------------------------------------
 if (-not (Test-Path $IconSrc)) {
-    throw "Missing $IconSrc -- regenerate from extension\icons\icon-128-light.png"
+    throw "Missing $IconSrc -- regenerate the v3.1 magnet-U .ico (16/32 cream tips, 48 transitional, 256 acid tips)"
 }
-foreach ($f in @('VERSION','server.py','index.py','yt_extract.py','topics.json')) {
+foreach ($f in @('VERSION','server.py','index.py','_platform.py','yt_extract.py','topics.json')) {
     if (-not (Test-Path (Join-Path $RepoRoot $f))) {
         throw "Missing $f at repo root"
     }
 }
-if (-not (Test-Path (Join-Path $RepoRoot 'skills\yoink\SKILL.md'))) {
-    throw "Missing skills\yoink\SKILL.md at repo root"
+# The skill folder is renamed skills\yoink -> skills\uoink by the extension/
+# skill agent (Antigravity's chore/rename-extension-to-uoink). That rename is
+# a hard prerequisite for a v2.1 build: shipping the legacy skills\yoink\ folder
+# would package a Yoink-branded Skill driving the deprecated alias tools. Require
+# the renamed skill and fail loudly if it hasn't merged yet -- no legacy fallback.
+$skillMd = Join-Path $RepoRoot 'skills\uoink\SKILL.md'
+if (-not (Test-Path $skillMd)) {
+    throw "Missing skills\uoink\SKILL.md -- Antigravity rename not merged; refusing to build"
 }
 # Sprint 19.6 / Fix 1: every migrations\NNNN_*.sql ships with the helper --
 # missing them silently breaks index.py's _run_migrations at first boot.
@@ -212,7 +219,7 @@ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 #     load-bearing part (a compromised release on PyPI affects everyone,
 #     not just us). Pillow drives the multimodal paste-corpus generator
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
-#     MCP powers yoink_mcp.py for stdio agent integrations. keyring stores
+#     MCP powers uoink_mcp.py for stdio agent integrations. keyring stores
 #     the user's Anthropic API key in Windows Credential Manager.
 Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION..."
 & $embedPython -m pip install --no-warn-script-location --no-compile `
@@ -260,15 +267,22 @@ Remove-Item -Recurse -Force $ffmpegTmp
 Write-Host '    copying server source + templates...'
 Copy-Item (Join-Path $RepoRoot 'server.py')      $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'index.py')       $StagingDir -Force
+# Cross-platform path/OS helpers (added Sprint 19.5). server.py and
+# migrate_install.py `import _platform` at module top -- omitting it ships a
+# helper that crashes with ModuleNotFoundError before binding the port.
+Copy-Item (Join-Path $RepoRoot '_platform.py')   $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'migrate_install.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_mcp.py')   $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_mcp_tools.py') $StagingDir -Force
+# Back-compat shim (removed in v3): keeps yoink_mcp.py launchable.
 Copy-Item (Join-Path $RepoRoot 'yoink_mcp.py')   $StagingDir -Force
-Copy-Item (Join-Path $RepoRoot 'yoink_mcp_tools.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'requirements.txt') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'yt_extract.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'topics.json')    $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'VERSION')        $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.bat') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.ps1') $StagingDir -Force
-Copy-Item $IconSrc (Join-Path $StagingDir 'yoink.ico') -Force
+Copy-Item $IconSrc (Join-Path $StagingDir 'uoink.ico') -Force
 Copy-Item (Join-Path $RepoRoot 'skills') (Join-Path $StagingDir 'skills') -Recurse -Force
 # Sprint 19.6 / Fix 1: migrations\*.sql is required at runtime by
 # index._run_migrations; if it's missing the helper crashes at first boot
@@ -284,27 +298,48 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py yoink_mcp.py yoink_mcp_tools.py yt_extract.py
+        server.py index.py migrate_install.py uoink_mcp.py uoink_mcp_tools.py yoink_mcp.py yt_extract.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
-    # Verifies index.py can import AND that migrations\*.sql is discoverable
-    # from the staged layout. _run_migrations walks the migrations directory
-    # at Path(__file__).parent.resolve() / "migrations", so a missing folder
-    # means schema_version is never created and Index.open returns version 0.
-    & '.\python\python.exe' -c @'
-import index, tempfile, pathlib
+    # Run the smoke from a temp .py FILE, not via `-c`: PowerShell 5.1 mangles
+    # embedded double-quotes when handing a multi-line script to a native exe.
+    # Two import facts about the embeddable distribution drive the sys.path line:
+    # its python._pth lists only python\, the stdlib zip, and site-packages
+    # (never the staging root), it ignores PYTHONPATH while a ._pth is present,
+    # and it does NOT add the script's own directory either. So the smoke inserts
+    # its own dir on sys.path -- exactly what server.py does at runtime
+    # (sys.path.insert(0, HERE)) -- or neither index.py nor server.py would import.
+    #
+    # Checks: (1) index.py imports and migrations\*.sql apply (schema_version is
+    # populated from the staged layout), and (2) server.py imports. py_compile
+    # above only compiles -- it never runs server.py's top-level imports, so a
+    # dropped runtime dependency (e.g. _platform.py) or a missing data file
+    # (VERSION) would otherwise sail through and crash the helper at first launch
+    # before it binds the port. The file is removed before ISCC packages staging.
+    $smokePy = Join-Path $StagingDir '_staged_smoke.py'
+    Set-Content -Path $smokePy -Encoding ASCII -Value @'
+import os, sys, tempfile, pathlib
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import index
 p = pathlib.Path(tempfile.mkdtemp()) / "test.db"
 idx = index.Index.open(p)
 v = idx._conn.execute("SELECT MAX(version) FROM schema_version").fetchone()[0]
 idx.close()
 if not v:
-    raise SystemExit(f"smoke: Index.open ran but schema_version is empty (v={v}); "
-                     "migrations\\*.sql likely missing from staging")
-print(f"smoke: Index.open OK, schema_version={v}")
+    raise SystemExit("smoke: Index.open ran but schema_version is empty; "
+                     "migrations/*.sql likely missing from staging")
+print("smoke: Index.open OK, schema_version=%s" % v)
+import server
+print("smoke: import server OK, version=%s" % server.VERSION)
 '@
-    if ($LASTEXITCODE -ne 0) {
-        throw 'staged smoke: Index.open against a temp DB failed (missing migrations or import?)'
+    try {
+        & '.\python\python.exe' $smokePy
+        if ($LASTEXITCODE -ne 0) {
+            throw 'staged smoke failed: import index/server or Index.open against the staged tree (a required module/file is missing -- e.g. _platform.py, VERSION, or migrations\*.sql)'
+        }
+    } finally {
+        Remove-Item -Force -ErrorAction SilentlyContinue $smokePy
     }
     Write-Host '    Staged smoke OK' -ForegroundColor Green
 } finally {
@@ -315,8 +350,8 @@ print(f"smoke: Index.open OK, schema_version={v}")
 Write-Step 'Compiling installer'
 $iscc = Find-Iscc
 Write-Host "    using $iscc"
-$issTemplate = Join-Path $InstallerDir 'yoink.iss'
-$issGenerated = Join-Path $InstallerDir 'yoink.generated.iss'
+$issTemplate = Join-Path $InstallerDir 'uoink.iss'
+$issGenerated = Join-Path $InstallerDir 'uoink.generated.iss'
 $issText = Get-Content -Raw $issTemplate
 $issText = $issText -replace '(?m)^#define\s+AppVersion\s+".*"$', "#define AppVersion    `"$VERSION`""
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
@@ -328,7 +363,7 @@ try {
     Remove-Item -Force -ErrorAction SilentlyContinue $issGenerated
 }
 
-$exe = Join-Path $BuildDir "Yoink-Setup-$VERSION.exe"
+$exe = Join-Path $BuildDir "Uoink-Setup-$VERSION.exe"
 if (-not (Test-Path $exe)) { throw "ISCC reported success but $exe is missing" }
 
 $sizeMb = (Get-Item $exe).Length / 1MB

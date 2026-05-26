@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # verify-launch-readiness.sh
-# Pre-launch technical readiness check for Yoink v2.
+# Pre-launch technical readiness check for Uoink v2.1.
 # Run from repo root: bash scripts/verify-launch-readiness.sh
 #
 # Verifies the technical (not infra) items from docs/store-listing.md:147-158:
@@ -8,7 +8,7 @@
 #   - INSTALLER_PUBLISHED = true     (extension/setup.js:37)
 #   - All MOCK_FORCE_* flags = false (extension/lib/mock-api.js)
 #   - manifest.json version = VERSION file  (extension/manifest.json)
-#   - No console.log("[Yoink]"...)   (extension/lib/extract.js, Sprint 14 S1)
+#   - No console.log("[Yoink|Uoink]"...) (extension/lib/extract.js, Sprint 14 S1)
 #   - No obvious dev artifacts       (extension/ tree)
 #
 # Exits 0 if all checks pass, 1 otherwise.
@@ -109,16 +109,17 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 5. No noisy console.log("[Yoink]"...) in extract.js (Sprint 14 S1)
+# 5. No noisy console.log("[Yoink|Uoink]"...) in extract.js (Sprint 14 S1)
 # ---------------------------------------------------------------------------
 if [[ ! -f extension/lib/extract.js ]]; then
   bad "extract.js: file not found at extension/lib/extract.js"
 else
-  LOG_HITS="$(grep -nE 'console\.log\(\s*"\[Yoink\]' extension/lib/extract.js || true)"
+  # Catches the legacy [Yoink] prefix and the renamed [Uoink] one.
+  LOG_HITS="$(grep -nE 'console\.log\(\s*"\[(Yoink|Uoink)\]' extension/lib/extract.js || true)"
   if [[ -z "$LOG_HITS" ]]; then
-    ok "extract.js: no noisy console.log(\"[Yoink]\"...) calls"
+    ok "extract.js: no noisy console.log(\"[Yoink|Uoink]\"...) calls"
   else
-    bad "extract.js: console.log(\"[Yoink]\"...) still present (Sprint 14 S1 not landed):"
+    bad "extract.js: console.log(\"[Yoink|Uoink]\"...) still present (Sprint 14 S1 not landed):"
     while IFS= read -r line; do
       RESULTS+=("        $line")
     done <<< "$LOG_HITS"
@@ -154,7 +155,7 @@ fi
 # Summary
 # ---------------------------------------------------------------------------
 echo
-echo "=== Yoink launch-readiness check ==="
+echo "=== Uoink launch-readiness check ==="
 for line in "${RESULTS[@]}"; do
   echo "$line"
 done

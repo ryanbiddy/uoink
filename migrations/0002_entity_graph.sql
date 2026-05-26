@@ -1,4 +1,4 @@
--- Yoink library index -- entity graph (v2, Sprint 16 / A2 minimal).
+-- Uoink library index -- entity graph (v2, Sprint 16 / A2 minimal).
 -- Applied by index._run_migrations() on top of 0001. Adds the entities +
 -- entity_mentions tables that back the entity extraction worker and the
 -- find_mentions MCP tool. Sentiment / temporal / co-occurrence columns are

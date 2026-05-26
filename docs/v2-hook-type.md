@@ -1,10 +1,10 @@
-# Yoink v2 Hook Type contract
+# Uoink v2 Hook Type contract
 
 Status: implemented in v2.0. Taxonomy capture moved into `index.db` in Sprint 15; A3 self-calibrating corrections added in Sprint 17.
 
 ## Overview
 
-Hook Type is an optional BYO Anthropic-key feature that classifies a video's opening style after extraction. It uses the same saved Anthropic API key as Comment Intelligence, but has its own `hook_type_enabled` setting. Normal Yoink extraction works without it.
+Hook Type is an optional BYO Anthropic-key feature that classifies a video's opening style after extraction. It uses the same saved Anthropic API key as Comment Intelligence, but has its own `hook_type_enabled` setting. Normal Uoink extraction works without it.
 
 ## Settings shape
 
@@ -46,7 +46,7 @@ Field rules:
 1. `_run_extraction()` writes the normal per-video `.md` and JSON sidecar.
 2. `_start_comments_thread()` starts the existing comments fetch in the background.
 3. Hook Type waits for that comments worker to finish updating the Top Comments section. It runs after comments are fetched, marked disabled, or marked unavailable.
-4. If `hook_type_enabled` is true, an Anthropic key is set, and the video has a title or description, Yoink starts a Hook Type thread.
+4. If `hook_type_enabled` is true, an Anthropic key is set, and the video has a title or description, Uoink starts a Hook Type thread.
 5. The thread calls `analyze_hook_type(context)` with:
    - video title
    - channel name
@@ -142,7 +142,7 @@ Anthropic 401:
 
 ## A3: Self-calibrating classification
 
-Sprint 17 turns Hook Type into a self-calibrating classifier. The user can correct a classification in the popup, Yoink stores that correction locally, and future classifications receive relevant past corrections as few-shot calibration anchors.
+Sprint 17 turns Hook Type into a self-calibrating classifier. The user can correct a classification in the popup, Uoink stores that correction locally, and future classifications receive relevant past corrections as few-shot calibration anchors.
 
 ### Correction flow
 
@@ -168,7 +168,7 @@ Sprint 17 intentionally omits a free-text reason field in the popup. The endpoin
 
 ### Similarity-based few-shot injection
 
-Before a Hook Type call, Yoink looks up relevant corrections for the current video:
+Before a Hook Type call, Uoink looks up relevant corrections for the current video:
 
 1. Same channel corrections first.
 2. Same topic corrections second.
@@ -194,7 +194,7 @@ The backend parses this as `confidence` on MCP `classify_hook`, stores it as `ta
 
 ### Local-only dataset
 
-Corrections live in `%LOCALAPPDATA%\Yoink\index.db` inside the `taxonomy_corrections` table. They are local-first data, not uploaded to a Yoink service. The table intentionally becomes a labeled local dataset that can support v2.5 taxonomy and correction-analysis surfaces.
+Corrections live in `%LOCALAPPDATA%\Uoink\index.db` inside the `taxonomy_corrections` table. They are local-first data, not uploaded to a Uoink service. The table intentionally becomes a labeled local dataset that can support v2.5 taxonomy and correction-analysis surfaces.
 
 ## Smart Screenshot Picker setting
 
@@ -202,7 +202,7 @@ Corrections live in `%LOCALAPPDATA%\Yoink\index.db` inside the `taxonomy_correct
 
 ## Aggregation
 
-Starting in v2.0, every successful Hook Type classification is captured in `%LOCALAPPDATA%\Yoink\index.db` in the `taxonomy` table:
+Starting in v2.0, every successful Hook Type classification is captured in `%LOCALAPPDATA%\Uoink\index.db` in the `taxonomy` table:
 
 ```json
 {

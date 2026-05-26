@@ -11,9 +11,12 @@ installer/staging/
 *.zip
 video.*
 Yoink/
+Uoink/
 !skills/
 !skills/yoink/
 !skills/yoink/**
+!skills/uoink/
+!skills/uoink/**
 
 # User-facing yoink output. In dev mode the server's Desktop resolves to
 # the user's actual Desktop -- and on this machine the OneDrive Desktop
@@ -22,9 +25,11 @@ Yoink/
 # new line here. Future-proof with /Yoink-Output/ for an eventual
 # explicit-output-dir refactor.
 _sessions/
+_all-uoinks-index.md
 _all-yoinks-index.md
 _yoink-trash/
 /Yoink-Output/
+/Uoink-Output/
 
 # Topic folders (one per entry in topics.json + the Uncategorized
 # fallback). On Windows NTFS git uses core.ignorecase=true, so a generic

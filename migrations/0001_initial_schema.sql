@@ -1,4 +1,11 @@
--- Yoink library index -- initial schema (v1).
+-- Uoink library index -- initial schema (v1).
+--
+-- v2.1 rename note: table/column names (yoinks, yoinks_fts, pending_yoinks,
+-- yoinked_at, ...) are deliberately kept FROZEN across the Yoink->Uoink
+-- rename. They are a private, never-user-visible storage contract, and
+-- renaming the FTS5 virtual table on a populated library is not worth the
+-- data-loss risk -- the v2.1 story is "nothing lost." (Approved decision.)
+--
 -- Applied by index._run_migrations(). Each migration file is named
 -- NNNN_description.sql; the leading integer is its schema version.
 --

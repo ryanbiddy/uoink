@@ -1,22 +1,22 @@
-# Yoink Library Index Schema
+# Uoink Library Index Schema
 
 Status: implemented through Sprint 19.5 (Stage 1 macOS)
-Database: `%LOCALAPPDATA%\Yoink\index.db` (Windows) / `~/Library/Application Support/Yoink/index.db` (macOS)
+Database: `%LOCALAPPDATA%\Uoink\index.db` (Windows) / `~/Library/Application Support/Uoink/index.db` (macOS)
 Scope: SQLite library index, FTS5 search, job/taxonomy migration, citations, health scores, entity graph, soft delete, and backfill.
 
 ## Overview
 
-Sprint 15 adds a local SQLite library index at `%LOCALAPPDATA%\Yoink\index.db`. The index is a local-only database: it is never uploaded, synced to a Yoink cloud service, or used for telemetry. It accelerates library operations that previously depended on scanning the Yoink output tree or reading separate JSON files. In practice, it becomes the durable home for searchable yoink metadata, FTS5 content, job records, Hook Type taxonomy rows, citation maps, and extraction health snapshots.
+Sprint 15 adds a local SQLite library index at `%LOCALAPPDATA%\Uoink\index.db`. The index is a local-only database: it is never uploaded, synced to a Uoink cloud service, or used for telemetry. It accelerates library operations that previously depended on scanning the Uoink output tree or reading separate JSON files. In practice, it becomes the durable home for searchable yoink metadata, FTS5 content, job records, Hook Type taxonomy rows, citation maps, and extraction health snapshots.
 
 The index replaces or absorbs these older persistence patterns:
 
 - Scan-based search/recent code paths for indexed consumers such as MCP library tools and new popup index surfaces.
-- `%LOCALAPPDATA%\Yoink\jobs.json` for persisted job records.
-- `%LOCALAPPDATA%\Yoink\taxonomy.json` for Hook Type taxonomy capture.
+- `%LOCALAPPDATA%\Uoink\jobs.json` for persisted job records.
+- `%LOCALAPPDATA%\Uoink\taxonomy.json` for Hook Type taxonomy capture.
 - Ad hoc citation reconstruction from markdown when an agent needs timestamped deep links.
 - Ad hoc entity lookup across markdown when an agent needs "where did people mention X?" results.
 
-The corpus markdown, sidecar JSON, screenshots, transcript files, and thumbnails still remain on disk in the Yoink output root. `index.db` points at those files; it does not replace the user-visible corpus folders.
+The corpus markdown, sidecar JSON, screenshots, transcript files, and thumbnails still remain on disk in the Uoink output root. `index.db` points at those files; it does not replace the user-visible corpus folders.
 
 ## Where files live
 
@@ -24,11 +24,11 @@ The helper resolves paths dynamically based on the active operating system:
 
 | Asset | Windows | macOS |
 |---|---|---|
-| `index.db` | `%LOCALAPPDATA%\Yoink\index.db` | `~/Library/Application Support/Yoink/index.db` |
+| `index.db` | `%LOCALAPPDATA%\Uoink\index.db` | `~/Library/Application Support/Uoink/index.db` |
 | `token.txt` | same dir | same dir |
 | `server.log` | same dir | same dir |
 | `jobs.json.migrated` | same dir | same dir |
-| Yoinked corpora | `~/Desktop/Yoink/` | `~/Desktop/Yoink/` |
+| Uoinked corpora | `~/Desktop/Uoink/` | `~/Desktop/Uoink/` |
 
 ## Schema Version And Migrations
 
@@ -74,7 +74,7 @@ Primary metadata table for one saved single-video yoink.
 | `slug` | TEXT UNIQUE | required | Folder slug, usually the saved folder name. |
 | `channel` | TEXT | nullable | Channel/uploader name from the sidecar. |
 | `title` | TEXT | nullable | Video title from the sidecar. |
-| `topic` | TEXT | nullable | Yoink topic folder name. |
+| `topic` | TEXT | nullable | Uoink topic folder name. |
 | `hook_type` | TEXT | nullable | Latest Hook Type category when available. |
 | `yoinked_at` | TEXT | required | Timestamp from the sidecar, or current local timestamp during indexing. |
 | `corpus_path` | TEXT | required | Absolute path to the per-video markdown corpus. |
@@ -175,7 +175,7 @@ Behavior:
 
 ### Sprint 17 - `taxonomy_corrections` table
 
-Migration `0003_taxonomy_corrections.sql` adds the self-calibrating Hook Type correction dataset. Corrections are append-only per video: if a user corrects the same video more than once, Yoink stores each correction event and promotes the most recent corrected category to `taxonomy.hook_type`.
+Migration `0003_taxonomy_corrections.sql` adds the self-calibrating Hook Type correction dataset. Corrections are append-only per video: if a user corrects the same video more than once, Uoink stores each correction event and promotes the most recent corrected category to `taxonomy.hook_type`.
 
 Channel and topic are denormalized into this table so the Hook Type prompt can quickly retrieve similarity-matched few-shot examples without joining the full corpus on every classification.
 
@@ -337,10 +337,10 @@ The Sprint 18 backend intentionally does not add compound Memory-page indexes. T
 
 #### `_yoink-trash/` folder
 
-Soft-deleted folders move under the Yoink output root:
+Soft-deleted folders move under the Uoink output root:
 
 ```text
-<Yoink output root>\_yoink-trash\<topic-folder>\<slug>__deleted-<timestamp>\
+<Uoink output root>\_yoink-trash\<topic-folder>\<slug>__deleted-<timestamp>\
 ```
 
 The topic folder is copied from the original `corpus_path` parent. The timestamp comes from `deleted_at`, with colons removed so the folder name is valid on Windows.
@@ -348,7 +348,7 @@ The topic folder is copied from the original `corpus_path` parent. The timestamp
 Example:
 
 ```text
-C:\Users\Ryan\Desktop\Yoink\_yoink-trash\AI and ML\the-new-code__deleted-2026-05-18T143022\
+C:\Users\Ryan\Desktop\Uoink\_yoink-trash\AI and ML\the-new-code__deleted-2026-05-18T143022\
 ```
 
 Restore behavior:
@@ -447,11 +447,11 @@ Sprint 15 folds existing file-based state into `index.db` on helper startup.
 
 ### `jobs.json`
 
-Legacy path: `%LOCALAPPDATA%\Yoink\jobs.json`
+Legacy path: `%LOCALAPPDATA%\Uoink\jobs.json`
 
 Migration behavior:
 
-1. If `jobs.json` exists, Yoink parses it.
+1. If `jobs.json` exists, Uoink parses it.
 2. Each valid job object is mapped into the `jobs` table.
 3. `combined_md_text` and `corpus_md_paste` are dropped during mapping.
 4. The source file is renamed to `jobs.json.migrated`.
@@ -461,11 +461,11 @@ After migration, job persistence writes to `index.db`, not `jobs.json`.
 
 ### `taxonomy.json`
 
-Legacy path: `%LOCALAPPDATA%\Yoink\taxonomy.json`
+Legacy path: `%LOCALAPPDATA%\Uoink\taxonomy.json`
 
 Migration behavior:
 
-1. If `taxonomy.json` exists, Yoink parses it as a JSON array.
+1. If `taxonomy.json` exists, Uoink parses it as a JSON array.
 2. Rows with a non-empty `video_id` are inserted into `taxonomy`.
 3. Existing rows dedupe by `video_id`.
 4. The source file is renamed to `taxonomy.json.migrated`.
@@ -487,7 +487,7 @@ Recovery behavior:
 6. Start the backfill scan.
 7. Clear `index_recovering` when backfill finishes.
 
-If quarantine fails, Yoink attempts to delete the corrupt file and still starts fresh. Recovery should not prevent the helper from binding or answering `/health`.
+If quarantine fails, Uoink attempts to delete the corrupt file and still starts fresh. Recovery should not prevent the helper from binding or answering `/health`.
 
 ## Backfill
 
@@ -502,7 +502,7 @@ Backfill triggers:
 Backfill behavior:
 
 - Runs in a background daemon thread named `index-backfill`.
-- Scans the Yoink output root recursively for folders with a resolvable corpus markdown file, including per-video session folders when they have their own corpus.
+- Scans the Uoink output root recursively for folders with a resolvable corpus markdown file, including per-video session folders when they have their own corpus.
 - Skips non-corpus folders through the corpus resolver.
 - Reads each folder's `<slug>.json` sidecar when available.
 - Skips folders with no `video_id`, because `video_id` is the primary key.
@@ -526,7 +526,7 @@ Cancel endpoint:
 
 ```http
 POST /index/backfill-cancel
-X-Yoink-Token: <token>
+X-Uoink-Token: <token>
 ```
 
 Response shape:

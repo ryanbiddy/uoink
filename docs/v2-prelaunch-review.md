@@ -1,8 +1,8 @@
-# Yoink v2 pre-launch backend audit
+# Uoink v2 pre-launch backend audit
 
 Review branch: `codex/v2-prelaunch-audit`  
 Base reviewed: `c6bfbe5 Merge codex/v2-sprint7 into v2-integration`  
-Scope: `server.py`, `yoink_mcp_tools.py`, MCP HTTP handlers, `docs/v2-*.md`, `docs/security.md`, `docs/build-installer.md`, `build.ps1`  
+Scope: `server.py`, `uoink_mcp_tools.py`, MCP HTTP handlers, `docs/v2-*.md`, `docs/security.md`, `docs/build-installer.md`, `build.ps1`  
 Out of scope: `extension/*` except setup copy read for `docs/setup-copy-revisions.md`
 
 ## server.py
@@ -11,7 +11,7 @@ Out of scope: `extension/*` except setup copy read for `docs/setup-copy-revision
 
 - Reference: `server.py:2739`, `server.py:2750`, `server.py:2770`, `server.py:2644`, `server.py:3905`
 - What I saw: `_record_single_extract_job()` stores `result.get("corpus_md_paste")` before `yoink_md`, then `_public_job()` returns the full `result` in every `/jobs` listing. `corpus_md_paste` is the multimodal clipboard payload with base64 screenshots.
-- Why it matters: Sprint 7 made single-video jobs visible through `/jobs`. A few normal single-video yoinks can now bloat `%LOCALAPPDATA%\Yoink\jobs.json` and every popup `/jobs` response by many MB. That can make the last-yoink affordance slow or fragile, especially because `/jobs` is now a recovery/status endpoint.
+- Why it matters: Sprint 7 made single-video jobs visible through `/jobs`. A few normal single-video yoinks can now bloat `%LOCALAPPDATA%\Uoink\jobs.json` and every popup `/jobs` response by many MB. That can make the last-yoink affordance slow or fragile, especially because `/jobs` is now a recovery/status endpoint.
 - Recommended fix: For `kind="single"` job records, store text-only markdown in `combined_md_text` or omit `combined_md_text` from list responses and expose full corpus through `get_yoink_corpus` / file reads. If the UI only needs "last completed", keep a small result summary in `/jobs`.
 
 ### polish - Several output corpus writes still bypass the tmp+rename pattern
@@ -24,7 +24,7 @@ Out of scope: `extension/*` except setup copy read for `docs/setup-copy-revision
 ### no issues found - Token-gated mutating routes
 
 - Reference: `server.py:3426`, `server.py:3440`, `server.py:3762`
-- Notes: `/health`, `/ping`, and `/token` are the only unauthenticated GET paths. All other GET paths and every POST path require `X-Yoink-Token` before body parsing. This matches the v2 security model.
+- Notes: `/health`, `/ping`, and `/token` are the only unauthenticated GET paths. All other GET paths and every POST path require `X-Uoink-Token` before body parsing. This matches the v2 security model.
 
 ### no issues found - `/file` sandbox and MIME checks
 
@@ -36,23 +36,23 @@ Out of scope: `extension/*` except setup copy read for `docs/setup-copy-revision
 - Reference: `server.py:197`, `server.py:2650`, `server.py:2703`, `server.py:1228`
 - Notes: `settings.json`, `jobs.json`, and `taxonomy.json` all use tmp+replace writes. Corrupt `jobs.json` and `taxonomy.json` are logged and replaced with a fresh structure instead of crashing startup.
 
-## yoink_mcp_tools.py
+## uoink_mcp_tools.py
 
 ### serious - MCP `yoink_video` bypasses Sprint 7 single-video job logging
 
-- Reference: `yoink_mcp_tools.py:191`, `yoink_mcp_tools.py:212`
+- Reference: `uoink_mcp_tools.py:191`, `uoink_mcp_tools.py:212`
 - What I saw: The HTTP `/extract` path now records `kind="single"` jobs, but MCP `yoink_video()` calls `_run_extraction()` directly and never calls `_record_single_extract_job()` on success or failure.
 - Why it matters: v2's launch story includes "any AI agent". Agent-triggered single-video yoinks will not appear in `/jobs`, so the popup's recent/last-yoink affordance can disagree with MCP activity. It also means persisted `jobs.json` is incomplete as an audit trail.
 - Recommended fix: Mirror `/extract`: capture `started_at`, call `_record_single_extract_job()` after success/failure, and keep the MCP return shape unchanged.
 
 ### no issues found - MCP tool input validation and rate limits
 
-- Reference: `yoink_mcp_tools.py:79`, `yoink_mcp_tools.py:147`, `yoink_mcp_tools.py:519`, `yoink_mcp_tools.py:407`
+- Reference: `uoink_mcp_tools.py:79`, `uoink_mcp_tools.py:147`, `uoink_mcp_tools.py:519`, `uoink_mcp_tools.py:407`
 - Notes: URL tools canonicalize through backend validators, slugs/job IDs use strict regex paths, list/search limits are bounded, and rate limits cover extraction and Anthropic-cost tools.
 
 ### no issues found - Anthropic key handling through MCP tools
 
-- Reference: `yoink_mcp_tools.py:341`, `yoink_mcp_tools.py:370`, `server.py:1076`, `server.py:1145`
+- Reference: `uoink_mcp_tools.py:341`, `uoink_mcp_tools.py:370`, `server.py:1076`, `server.py:1145`
 - Notes: MCP tools never receive or return the key. They call backend analysis helpers, which mark 401 keys invalid and redact API-key text from short errors.
 
 ## MCP HTTP transport

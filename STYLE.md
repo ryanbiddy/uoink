@@ -1,4 +1,4 @@
-# Yoink — Style Guide
+# Uoink — Style Guide
 
 ## Voice — Canonical (polished)
 

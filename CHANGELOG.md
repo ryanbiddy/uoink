@@ -1,8 +1,55 @@
 # Changelog
 
-All notable changes to Yoink are documented in this file.
+All notable changes to Uoink are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). This project follows [semantic versioning](https://semver.org/spec/v2.0.0.html).
+
+> Releases through 2.0.0 shipped under the product's original name, **Yoink**.
+> Those historical entries are left unchanged. The product was renamed to
+> **Uoink** in 2.1.0; see below.
+
+## [2.1.0] - 2026-XX-XX <!-- TODO: fill on tag -->
+
+### The rename
+
+Yoink is Uoink. The magnet logo was always a U — the name finally matches it.
+New home: uoink.video. This release is backward-compatible: existing v2.0
+installs migrate themselves on first launch, and old MCP tool names keep working.
+
+### Added
+
+- **macOS universal build** (Apple Silicon + Intel) — the `.dmg` pipeline from
+  Sprint 19.5 Stage 2.
+- **Automatic install migration.** On first launch the helper copies
+  `%LOCALAPPDATA%\Yoink\` → `\Uoink\`, migrates the autostart entry, moves the
+  Anthropic key in Credential Manager, and leaves a `MIGRATED_TO_UOINK.txt`
+  breadcrumb. The old folder is kept for a 7-day grace period, then removed.
+- **One-time post-migration notification** confirming the rename and where your
+  files went.
+
+### Changed
+
+- **Renamed Yoink → Uoink across the product:** brand strings, install path
+  (`%LOCALAPPDATA%\Yoink\` → `\Uoink\`), Start Menu entries, autostart key,
+  keyring service name, installer (`Uoink-Setup-2.1.0.exe`), and assets.
+- **MCP tools renamed** (`yoink_video` → `uoink_video`, `list_recent_yoinks` →
+  `list_recent_uoinks`, `search_yoinks` → `search_uoinks`, `get_yoink_corpus` →
+  `get_uoink_corpus`, `get_yoink_health` → `get_uoink_health`, `yoink_playlist` →
+  `uoink_playlist`). The 6 brand-neutral tools are unchanged.
+- **Domain + support:** `ryanbiddy.com/yoink` → `uoink.video`; support email →
+  `hi@uoink.video`.
+
+### Deprecated
+
+- The `yoink_*` MCP tool names. They alias to `uoink_*` and emit a
+  `DeprecationWarning` to stderr. They work through v2.5 and are removed in v3.
+
+### Migration notes
+
+- Nothing is lost. The Desktop corpus (`Desktop\Yoink\`) migrates via a separate,
+  opt-in prompt because external tools may link to those paths.
+- If the keyring migration fails, re-enter your Anthropic key on the setup page;
+  `/diagnose` will flag it.
 
 ## [2.0.0] - 2026-05-20
 

@@ -1,20 +1,23 @@
-"""Yoink local library index -- SQLite + FTS5.
+"""Uoink local library index -- SQLite + FTS5.
 
-Replaces the O(n) full-disk-scan code paths (search_yoinks, list_recent, the
-post-extraction `_all-yoinks-index.md` rebuild) with an incremental SQLite
+Replaces the O(n) full-disk-scan code paths (search_uoinks, list_recent, the
+post-extraction `_all-uoinks-index.md` rebuild) with an incremental SQLite
 index, and absorbs jobs.json / taxonomy.json into queryable tables.
 
-The database lives under server.py's DATA_ROOT -- ``%LOCALAPPDATA%\\Yoink``
-on Windows, ``~/Library/Application Support/Yoink`` on macOS,
-``$XDG_DATA_HOME/Yoink`` (else ``~/.local/share/Yoink``) on Linux -- with
+The database lives under server.py's DATA_ROOT -- ``%LOCALAPPDATA%\\Uoink``
+on Windows, ``~/Library/Application Support/Uoink`` on macOS,
+``$XDG_DATA_HOME/Uoink`` (else ``~/.local/share/Uoink``) on Linux -- with
 the file named ``index.db``. The cross-platform resolution lives in
 ``_platform.user_data_dir`` (Sprint 19.5 Stage 1). Both ``sqlite3`` and
 the FTS5 extension ship in the Python standard library, so this module
 adds no new dependency.
 
 This module is self-contained: it owns the schema, the migration runner, and
-all query helpers. server.py and yoink_mcp_tools.py call into ``Index`` and
-never touch the database directly.
+all query helpers. server.py and uoink_mcp_tools.py call into ``Index`` and
+never touch the database directly. Internal table/column names (``yoinks``,
+``yoinks_fts``, ``yoinked_at`` ...) are kept frozen across the v2.1 rename --
+they are a private storage contract, never user-visible, and renaming the
+FTS5 virtual table on a populated library is not worth the data-loss risk.
 
 Schema / migrations: see the ``migrations/`` directory. ``_run_migrations``
 applies any pending ``NNNN_*.sql`` file in numeric order and is idempotent.
@@ -31,7 +34,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
-log = logging.getLogger("yoink.index")
+log = logging.getLogger("uoink.index")
 
 _MIGRATIONS_DIR = Path(__file__).parent.resolve() / "migrations"
 

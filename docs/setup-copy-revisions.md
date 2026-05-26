@@ -14,7 +14,7 @@ Proposed:
 
 > Set up your local YouTube layer for AI.
 >
-> In a few minutes, Yoink can turn any YouTube video into a structured corpus your AI tools can actually use.
+> In a few minutes, Uoink can turn any YouTube video into a structured corpus your AI tools can actually use.
 
 Rationale: Broadens beyond Claude while keeping the setup promise concrete.
 
@@ -22,13 +22,13 @@ Rationale: Broadens beyond Claude while keeping the setup promise concrete.
 
 Original:
 
-> Yoink settings.
+> Uoink settings.
 >
 > Manage local AI features and agent integration.
 
 Proposed:
 
-> Yoink settings.
+> Uoink settings.
 >
 > Manage local intelligence, API keys, and agent connections.
 
@@ -38,15 +38,15 @@ Rationale: Names the real jobs of this path for returning users.
 
 Original:
 
-> Yoink isn't running yet.
+> Uoink isn't running yet.
 >
-> Start the Yoink helper and this page will detect it automatically.
+> Start the Uoink helper and this page will detect it automatically.
 
 Proposed:
 
-> Start the local Yoink helper.
+> Start the local Uoink helper.
 >
-> The extension is installed. Now start the local helper so Yoink can extract and save corpora on this computer.
+> The extension is installed. Now start the local helper so Uoink can extract and save corpora on this computer.
 
 Rationale: Explains the split between extension and helper without sounding like an error state.
 
@@ -54,11 +54,11 @@ Rationale: Explains the split between extension and helper without sounding like
 
 Original:
 
-> What is Yoink?
+> What is Uoink?
 
 Proposed:
 
-> What Yoink gives your AI
+> What Uoink gives your AI
 
 Rationale: Frames the value as input quality, not just app identity.
 
@@ -66,11 +66,11 @@ Rationale: Frames the value as input quality, not just app identity.
 
 Original:
 
-> Yoink turns YouTube videos into structured input for Claude or ChatGPT - full transcript, screenshots at any interval, comments, and channel context, packaged into one paste-ready document.
+> Uoink turns YouTube videos into structured input for Claude or ChatGPT - full transcript, screenshots at any interval, comments, and channel context, packaged into one paste-ready document.
 
 Proposed:
 
-> Yoink turns YouTube videos into structured AI-ready corpora: transcript, timestamps, screenshots, comments, channel context, metadata, and a clean markdown file you can paste into Claude, ChatGPT, Cursor, or any agent workflow.
+> Uoink turns YouTube videos into structured AI-ready corpora: transcript, timestamps, screenshots, comments, channel context, metadata, and a clean markdown file you can paste into Claude, ChatGPT, Cursor, or any agent workflow.
 
 Rationale: Keeps the feature list but updates the surface to include agents and saved corpora.
 
@@ -98,7 +98,7 @@ Persona variant - marketer/operator:
 
 Original:
 
-> Install the Yoink helper
+> Install the Uoink helper
 
 Proposed:
 
@@ -110,11 +110,11 @@ Rationale: "Local helper" reinforces why a desktop installer exists.
 
 Original:
 
-> Yoink runs a tiny program on your computer that does the heavy lifting locally - that's why your data stays private. Nothing leaves your machine except the YouTube transcript request.
+> Uoink runs a tiny program on your computer that does the heavy lifting locally - that's why your data stays private. Nothing leaves your machine except the YouTube transcript request.
 
 Proposed:
 
-> Yoink runs a small helper on your computer. It downloads public YouTube data, builds the corpus locally, and saves everything to your Yoink folder. No Yoink cloud. No account.
+> Uoink runs a small helper on your computer. It downloads public YouTube data, builds the corpus locally, and saves everything to your Uoink folder. No Uoink cloud. No account.
 
 Rationale: More explicit about local-first and less hand-wavy about privacy.
 
@@ -134,7 +134,7 @@ Rationale: Sets expectations for what the installer changes on Windows.
 
 Original:
 
-> Verify Yoink is running
+> Verify Uoink is running
 
 Proposed:
 
@@ -146,11 +146,11 @@ Rationale: Distinguishes the helper from the extension.
 
 Original:
 
-> This page will detect Yoink the moment it comes online.
+> This page will detect Uoink the moment it comes online.
 
 Proposed:
 
-> Keep this page open. It checks your local helper and flips green as soon as Yoink is ready.
+> Keep this page open. It checks your local helper and flips green as soon as Uoink is ready.
 
 Rationale: Gives the user a clear action and explains the live status.
 
@@ -158,11 +158,11 @@ Rationale: Gives the user a clear action and explains the live status.
 
 Original:
 
-> Looks like Yoink isn't running yet. Start it from your Start Menu:
+> Looks like Uoink isn't running yet. Start it from your Start Menu:
 
 Proposed:
 
-> Yoink is installed, but the helper is not running yet. Start it from your Start Menu:
+> Uoink is installed, but the helper is not running yet. Start it from your Start Menu:
 
 Rationale: Reduces panic. The user learns what is missing.
 
@@ -186,7 +186,7 @@ Original:
 
 Proposed:
 
-> Try the suggested video, or open any YouTube video you want to research. Yoink will copy the structured corpus when it finishes.
+> Try the suggested video, or open any YouTube video you want to research. Uoink will copy the structured corpus when it finishes.
 
 Rationale: Sets expectation for the output and keeps choice open.
 
@@ -194,11 +194,11 @@ Rationale: Sets expectation for the output and keeps choice open.
 
 Original:
 
-> Or click the orange Yoink button under any YouTube video.
+> Or click the orange Uoink button under any YouTube video.
 
 Proposed:
 
-> After this, use the orange Yoink button under any YouTube video, playlist, or supported popup flow.
+> After this, use the orange Uoink button under any YouTube video, playlist, or supported popup flow.
 
 Rationale: Reflects v2 surface area more accurately.
 
@@ -218,11 +218,11 @@ Rationale: Keep. It is clear and product-specific.
 
 Original:
 
-> Optionally analyze the top YouTube comments with your own Anthropic API key. Normal Yoink works without this.
+> Optionally analyze the top YouTube comments with your own Anthropic API key. Normal Uoink works without this.
 
 Proposed:
 
-> Optional: use your Anthropic API key to cluster the top comments into themes, mentioned products, and real disagreements. Normal Yoink works without a key.
+> Optional: use your Anthropic API key to cluster the top comments into themes, mentioned products, and real disagreements. Normal Uoink works without a key.
 
 Rationale: Says what the feature actually produces.
 
@@ -234,7 +234,7 @@ Original:
 
 Proposed:
 
-> Your key is stored locally in your operating system credential store. Yoink never returns it to the extension or logs it.
+> Your key is stored locally in your operating system credential store. Uoink never returns it to the extension or logs it.
 
 Rationale: Updates copy for Sprint 7 keyring behavior and builds trust.
 
@@ -284,7 +284,7 @@ Rationale: Keep. It is understandable for returning users coming from popup deep
 
 Optional stronger heading:
 
-> Use Yoink from your AI agent
+> Use Uoink from your AI agent
 
 Rationale: Better for first-time MCP users, less abstract than "Agent Integration."
 
@@ -296,7 +296,7 @@ Original:
 
 Proposed:
 
-> MCP lets Claude Desktop, Cursor, and other AI agents call Yoink as a local tool: yoink a video, search saved corpora, inspect a transcript, or run comment and hook analysis.
+> MCP lets Claude Desktop, Cursor, and other AI agents call Uoink as a local tool: yoink a video, search saved corpora, inspect a transcript, or run comment and hook analysis.
 
 Rationale: Names the actual tool jobs and avoids implying every client is officially tested.
 
@@ -304,11 +304,11 @@ Rationale: Names the actual tool jobs and avoids implying every client is offici
 
 Original:
 
-> Yoink does not edit your agent configs automatically. Copy the snippet for your client and paste it into that client's MCP settings.
+> Uoink does not edit your agent configs automatically. Copy the snippet for your client and paste it into that client's MCP settings.
 
 Proposed:
 
-> Yoink does not edit app config files automatically. Copy the snippet for your client and paste it into that client's MCP settings. Claude Desktop and Cursor are the launch-tested paths.
+> Uoink does not edit app config files automatically. Copy the snippet for your client and paste it into that client's MCP settings. Claude Desktop and Cursor are the launch-tested paths.
 
 Rationale: Adds compatibility honesty from `docs/v2-mcp.md`.
 
@@ -340,7 +340,7 @@ Rationale: Avoids overclaiming generic HTTP MCP compatibility until the transpor
 
 Original:
 
-> Made by ReplayRyan - ryanbiddy.com/yoink
+> Made by ReplayRyan - uoink.video
 
 Proposed:
 
