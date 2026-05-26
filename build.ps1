@@ -63,8 +63,8 @@ if ($ManifestVersion -ne $VERSION) {
 $PYTHON_VERSION = '3.11.9'
 $PYTHON_URL     = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"
 $GETPIP_URL     = 'https://bootstrap.pypa.io/get-pip.py'
-# ffmpeg 7.1 essentials build from gyan.dev (mirrored on GitHub for stable URL).
-$FFMPEG_VERSION = '7.1'
+# ffmpeg 8.1.1 essentials build from gyan.dev (mirrored on GitHub for stable URL).
+$FFMPEG_VERSION = '8.1.1'
 $FFMPEG_URL     = "https://github.com/GyanD/codexffmpeg/releases/download/$FFMPEG_VERSION/ffmpeg-$FFMPEG_VERSION-essentials_build.zip"
 # yt-dlp pip pin -- bump after compatibility-testing a new release.
 $YTDLP_VERSION  = '2026.03.17'
