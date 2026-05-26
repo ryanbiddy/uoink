@@ -9,7 +9,7 @@
 #        python\   embeddable Python with site-packages enabled and
 #                  yt-dlp installed via pip
 #        bin\      ffmpeg.exe (and ffprobe.exe if present)
-#        server.py, yt_extract.py, topics.json, stop-server.{bat,ps1},
+#        server.py, yt_extract.py, topics.json, skills\, stop-server.{bat,ps1},
 #        yoink.ico
 #   3. Run ISCC.exe against installer\yoink.iss to produce
 #      build\Yoink-Setup-<version>.exe
@@ -36,10 +36,29 @@ $StagingDir   = Join-Path $InstallerDir 'staging'
 $TemplatesDir = Join-Path $InstallerDir 'templates'
 $IconSrc      = Join-Path $InstallerDir 'yoink.ico'
 
-# ---- Versions (pinned for v1 ship) --------------------------------------
-$VERSION        = '1.0.0'
+# ---- Versions (pinned for v2 ship) --------------------------------------
+$VersionFile    = Join-Path $RepoRoot 'VERSION'
+if (-not (Test-Path $VersionFile)) {
+    throw "Missing VERSION file at repo root"
+}
+$VERSION = (Get-Content -Raw $VersionFile).Trim()
+if ($VERSION -notmatch '^\d+\.\d+\.\d+$') {
+    throw "VERSION must be semver-like x.y.z, got '$VERSION'"
+}
+Write-Host "Building Yoink version $VERSION" -ForegroundColor Cyan
+
+$ManifestPath = Join-Path $RepoRoot 'extension\manifest.json'
+if (-not (Test-Path $ManifestPath)) {
+    throw "Missing extension\manifest.json"
+}
+$ManifestJson = Get-Content -Raw $ManifestPath | ConvertFrom-Json
+$ManifestVersion = [string]$ManifestJson.version
+if ($ManifestVersion -ne $VERSION) {
+    throw "VERSION file ($VERSION) does not match extension\manifest.json version ($ManifestVersion). Update both before building."
+}
+
 # Python 3.11.9 is the last 3.11.x with binary installers; later 3.11 are
-# source-only security releases. v1 accepts this; v1.5 plan: move to 3.12.
+# source-only security releases. v2 accepts this; v2.1 plan: move to 3.12.
 $PYTHON_VERSION = '3.11.9'
 $PYTHON_URL     = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"
 $GETPIP_URL     = 'https://bootstrap.pypa.io/get-pip.py'
@@ -52,23 +71,19 @@ $YTDLP_VERSION  = '2026.03.17'
 # JPEG-recompress + base64-encode the embedded screenshots). Pinned to
 # a recent stable; bump at release-prep time after testing.
 $PILLOW_VERSION = '10.4.0'
+# Official Model Context Protocol Python SDK for the stdio MCP server.
+# Also pinned in requirements.txt for dev installs and docs.
+$MCP_VERSION    = '1.27.1'
+# Windows Credential Manager wrapper for Anthropic API key storage.
+# Also pinned in requirements.txt for dev installs and docs.
+$KEYRING_VERSION = '25.7.0'
 
 # ---- Hash verification --------------------------------------------------
-# Lock in known-good SHA256s so a compromised mirror or silent upstream
-# change can't slip into the install.
-#
-# TODO(launch): lock these by running build.ps1 once on a network-connected
-# machine, copying the hashes from the "no locked SHA256" warnings the
-# Confirm-Hash helper prints, and pasting them below. Until that's done,
-# the build runs unverified -- a compromised mirror would slip through
-# silently. This is the last item to land before launch; do not ship the
-# installer to users with these still empty.
-#
-# Procedure once locked:
-#   1. Build succeeds with locked hashes -> commit the values.
-#   2. Subsequent builds fail with "SHA256 mismatch" if anything changes,
-#      and Confirm-Hash deletes the bad cached file so a re-run pulls
-#      fresh.
+# Direct-download SHA256s are locked as of v2.0. When bumping Python,
+# ffmpeg, or get-pip.py, run build.ps1 once, verify the new artifact source,
+# paste the new hash here, and rebuild. Subsequent builds fail with
+# "SHA256 mismatch" if anything changes; Confirm-Hash deletes the bad cached
+# file so a re-run pulls fresh.
 $PYTHON_SHA256 = "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b"
 $FFMPEG_SHA256 = "6f58ce889f59c311410f7d2b18895b33c03456463486f3b1ebc93d97a0f54541"
 $GETPIP_SHA256 = "66904bccb878e363db6236ea900e6935e507dcb887e9f178f6212edfe7f46a76"
@@ -136,10 +151,20 @@ New-Item -ItemType Directory -Force -Path $CacheDir, $BuildDir | Out-Null
 if (-not (Test-Path $IconSrc)) {
     throw "Missing $IconSrc -- regenerate from extension\icons\icon-128-light.png"
 }
-foreach ($f in @('server.py','yt_extract.py','topics.json')) {
+foreach ($f in @('VERSION','server.py','index.py','yt_extract.py','topics.json')) {
     if (-not (Test-Path (Join-Path $RepoRoot $f))) {
         throw "Missing $f at repo root"
     }
+}
+if (-not (Test-Path (Join-Path $RepoRoot 'skills\yoink\SKILL.md'))) {
+    throw "Missing skills\yoink\SKILL.md at repo root"
+}
+# Sprint 19.6 / Fix 1: every migrations\NNNN_*.sql ships with the helper --
+# missing them silently breaks index.py's _run_migrations at first boot.
+$migrationFiles = Get-ChildItem -Path (Join-Path $RepoRoot 'migrations') `
+    -Filter '*.sql' -ErrorAction SilentlyContinue
+if (-not $migrationFiles -or $migrationFiles.Count -eq 0) {
+    throw "Missing migrations\*.sql at repo root"
 }
 
 # ---- 1. Download dependencies ------------------------------------------
@@ -181,16 +206,18 @@ $embedPython = "$StagingDir\python\python.exe"
 & $embedPython $getPipPy --no-warn-script-location
 if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 
-# 2d. Install yt-dlp + Pillow at pinned versions. Pip's hash-locking would
-#     require a requirements file with --require-hashes; for v1 we accept
+# 2d. Install yt-dlp + Pillow + MCP + keyring at pinned versions. Pip's hash-locking would
+#     require a requirements file with --require-hashes; for v2 we accept
 #     the trust-pip-itself model since the version pins are the
 #     load-bearing part (a compromised release on PyPI affects everyone,
 #     not just us). Pillow drives the multimodal paste-corpus generator
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
-Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION..."
+#     MCP powers yoink_mcp.py for stdio agent integrations. keyring stores
+#     the user's Anthropic API key in Windows Credential Manager.
+Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION..."
 & $embedPython -m pip install --no-warn-script-location --no-compile `
-    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION"
-if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow) failed' }
+    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION"
+if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring) failed' }
 
 # 2e. Trim dev-only and build-time files we don't need at runtime.
 # distutils-precedence.pth is dropped by setuptools and tries to import
@@ -232,18 +259,74 @@ Remove-Item -Recurse -Force $ffmpegTmp
 # 2g. Server source + helpers + icon
 Write-Host '    copying server source + templates...'
 Copy-Item (Join-Path $RepoRoot 'server.py')      $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'index.py')       $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'yoink_mcp.py')   $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'yoink_mcp_tools.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'requirements.txt') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'yt_extract.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'topics.json')    $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'VERSION')        $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.bat') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.ps1') $StagingDir -Force
 Copy-Item $IconSrc (Join-Path $StagingDir 'yoink.ico') -Force
+Copy-Item (Join-Path $RepoRoot 'skills') (Join-Path $StagingDir 'skills') -Recurse -Force
+# Sprint 19.6 / Fix 1: migrations\*.sql is required at runtime by
+# index._run_migrations; if it's missing the helper crashes at first boot
+# with "no such table: schema_version". Pre-Sprint-19.6 installers shipped
+# without it -- C1 launch blocker.
+Copy-Item (Join-Path $RepoRoot 'migrations') (Join-Path $StagingDir 'migrations') -Recurse -Force
+
+# ---- 2h. Staged smoke (Sprint 19.6 / Fix 1) -----------------------------
+# Verifies the staged tree is actually runnable BEFORE ISCC packages it,
+# so the works-in-repo-breaks-in-installer drift class is caught here
+# rather than at first launch on a user's machine.
+Write-Step 'Staged smoke'
+Push-Location $StagingDir
+try {
+    & '.\python\python.exe' -m py_compile `
+        server.py index.py yoink_mcp.py yoink_mcp_tools.py yt_extract.py
+    if ($LASTEXITCODE -ne 0) {
+        throw 'staged smoke: py_compile of staged Python files failed'
+    }
+    # Verifies index.py can import AND that migrations\*.sql is discoverable
+    # from the staged layout. _run_migrations walks the migrations directory
+    # at Path(__file__).parent.resolve() / "migrations", so a missing folder
+    # means schema_version is never created and Index.open returns version 0.
+    & '.\python\python.exe' -c @'
+import index, tempfile, pathlib
+p = pathlib.Path(tempfile.mkdtemp()) / "test.db"
+idx = index.Index.open(p)
+v = idx._conn.execute("SELECT MAX(version) FROM schema_version").fetchone()[0]
+idx.close()
+if not v:
+    raise SystemExit(f"smoke: Index.open ran but schema_version is empty (v={v}); "
+                     "migrations\\*.sql likely missing from staging")
+print(f"smoke: Index.open OK, schema_version={v}")
+'@
+    if ($LASTEXITCODE -ne 0) {
+        throw 'staged smoke: Index.open against a temp DB failed (missing migrations or import?)'
+    }
+    Write-Host '    Staged smoke OK' -ForegroundColor Green
+} finally {
+    Pop-Location
+}
 
 # ---- 3. Compile installer ----------------------------------------------
 Write-Step 'Compiling installer'
 $iscc = Find-Iscc
 Write-Host "    using $iscc"
-& $iscc /Q (Join-Path $InstallerDir 'yoink.iss')
-if ($LASTEXITCODE -ne 0) { throw 'ISCC compilation failed' }
+$issTemplate = Join-Path $InstallerDir 'yoink.iss'
+$issGenerated = Join-Path $InstallerDir 'yoink.generated.iss'
+$issText = Get-Content -Raw $issTemplate
+$issText = $issText -replace '(?m)^#define\s+AppVersion\s+".*"$', "#define AppVersion    `"$VERSION`""
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+[System.IO.File]::WriteAllText($issGenerated, $issText, $utf8NoBom)
+try {
+    & $iscc /Q $issGenerated
+    if ($LASTEXITCODE -ne 0) { throw 'ISCC compilation failed' }
+} finally {
+    Remove-Item -Force -ErrorAction SilentlyContinue $issGenerated
+}
 
 $exe = Join-Path $BuildDir "Yoink-Setup-$VERSION.exe"
 if (-not (Test-Path $exe)) { throw "ISCC reported success but $exe is missing" }

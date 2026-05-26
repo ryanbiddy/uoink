@@ -1,0 +1,212 @@
+# Yoink v2 definitive smoke-test checklist
+
+Use this as the one pre-launch checklist. Run on a clean Windows user profile if possible, then repeat the core extraction subset on the normal dev machine.
+
+Total checkpoints: 127.
+
+## 1. Core extraction - single-video v1 regression
+
+1. [ ] Install helper and extension fresh - success: setup page detects helper green and popup status is green.
+2. [ ] Open a normal public YouTube watch URL and click the in-page Yoink button - success: extraction completes, Claude/ChatGPT opens, clipboard contains a corpus.
+3. [ ] Confirm saved files for the single video - success: topic folder contains `<slug>.md`, `<slug>.json`, `metadata.json`, transcript, screenshots, and thumbnail.
+4. [ ] Paste clipboard into Claude or ChatGPT - success: title, metadata, transcript, selected screenshots, comments, and footer render without broken markdown.
+5. [ ] Click "Send to Claude" from popup on a video page - success: same single-video flow works and first-yoink CTA still appears only once after reset.
+6. [ ] Click "Send to ChatGPT" from popup on a video page - success: same corpus lands on clipboard and ChatGPT opens.
+7. [ ] Right-click a YouTube thumbnail/video link and yoink it - success: extraction completes without opening the video page.
+8. [ ] Try 3 public Shorts URLs - success: `/shorts/<id>` canonicalizes to `watch?v=<id>`, transcript/metadata extraction works when YouTube exposes them, screenshot extraction handles the short duration, and failures are friendly rather than stack traces.
+9. [ ] Try malformed and non-YouTube URLs through server routes or UI - success: rejected with clear "youtube.com or youtu.be" copy.
+
+## 2. Playlist Mode end-to-end
+
+10. [ ] Preview a valid playlist over 10 videos - success: preview shows first 10 and warns that the playlist exceeds the cap.
+11. [ ] Start a playlist job - success: `POST /playlist/start` returns quickly and popup enters live progress.
+12. [ ] Let a 2-3 video playlist complete - success: state becomes `completed`, `videos_done` matches successes, combined clipboard corpus is text-only.
+13. [ ] Inspect playlist session folder - success: `_sessions/<playlist-slug>/corpus.md` exists and per-video folders retain screenshots on disk.
+14. [ ] Include one unavailable/private/deleted video if possible - success: job continues, increments `videos_failed`, and completes if at least one video succeeds.
+15. [ ] Run a playlist where zero videos can extract - success: final state is `failed` with a friendly zero-success error.
+16. [ ] Cancel during metadata/download/screenshots phase - success: active subprocess stops quickly, job state stays `cancelled`, partial outputs remain.
+17. [ ] Close and reopen popup during a running playlist - success: popup recovers from `/jobs` and resumes the active job view.
+18. [ ] Use `/jobs?kind=playlist` and `/jobs?kind=single` manually - success: filter returns only matching jobs, sorted newest first.
+
+## 3. AI features - CI, Hook Type, taxonomy capture
+
+19. [ ] Enable Comment Intelligence with no key - success: normal yoink still works and CI silently skips.
+20. [ ] Save a valid Anthropic key and test it - success: setup shows key set/test passed and `GET /settings` never returns the key.
+21. [ ] Yoink a video with at least 5 comments and CI enabled - success: CI section appears in the per-video `.md` after comments finish.
+22. [ ] Enable Hook Type and yoink a video - success: Hook Analysis appears after the metadata block with one allowed category and explanation.
+23. [ ] Confirm Hook Type waits for comments - success: top comment is available to the hook worker when comments exist.
+24. [ ] Force or simulate a 401 Anthropic response - success: saved key is cleared, `anthropic_key_set` becomes false, future AI work skips until re-save.
+25. [ ] Trigger Hook Type on two different videos - success: `%LOCALAPPDATA%\Yoink\index.db` `taxonomy` table contains two records with `video_id`, `hook_type`, `hook_explanation`, `channel`, `title`, `classified_at`, and `confidence`.
+26. [ ] Re-trigger Hook Type on the same video - success: `taxonomy` record is updated in place, not duplicated.
+27. [ ] Corrupt legacy `taxonomy.json` before migration - success: helper logs warning, leaves the file intact, and does not crash.
+28. [ ] Query taxonomy through HTTP and MCP - success: `/taxonomy`, MCP `get_taxonomy`, `channel`, `hook_type`, and combined filters return newest-first rows without duplicates.
+29. [ ] Yoink a video - success: popup Recent row shows hook classification with confidence `X/5` inline.
+30. [ ] Click "wrong?" on a hook classification - success: category dropdown appears, choosing a different category saves, shows success copy, and updates the badge.
+31. [ ] Re-yoink a video on the same channel where you made a correction - success: new classification reflects calibration or reports `similar_corrections_used > 0`.
+32. [ ] Open setup.html "Hook Type calibration" section - success: the correction appears in the recent corrections list.
+33. [ ] Yoink a video with Anthropic key set - success: entities populate in `index.db` (verify by `SELECT COUNT(*) FROM entities` or via `find_mentions`).
+34. [ ] Yoink a video without Anthropic key - success: worker skips silently, sidecar shows `entity_extraction_status: "skipped"`, no errors logged.
+35. [ ] Call `find_mentions("Claude")` via MCP stdio - success: returns mention rows if any prior yoink mentioned Claude.
+36. [ ] Call `find_mentions` on a non-existent entity - success: returns empty mentions list, no error.
+
+## 4. Setup / settings / key handling
+
+37. [ ] First-run install path - success: extension opens `setup.html?source=install`, shows intro/install/verify/try steps.
+38. [ ] Offline path - success: stop helper, click Yoink, setup opens at verify step and does not require user to understand Python.
+39. [ ] Installer download gate before publication - success: if `INSTALLER_PUBLISHED=false`, download button cannot send users to a 404.
+40. [ ] Installer download gate after publication - success: after flip, button downloads the exact release asset.
+41. [ ] Clear key button - success: confirmation appears, key clears from Credential Manager/keyring, input empties, status says key not set.
+42. [ ] Keyring fresh install - success: with no settings key and no credential entry, settings works and reports `anthropic_key_set=false`.
+43. [ ] Keyring migration install - success: a legacy plaintext `anthropic_key` in settings.json migrates to keyring and is removed from settings.json on startup.
+44. [ ] Missing/unavailable keyring in dev mode - success: helper starts, but saving a non-empty key fails clearly instead of falling back to plaintext.
+45. [ ] Toggle CI, Hook Type, and Smart Screenshot Picker - success: settings persist across helper restart and popup/setup reload.
+46. [ ] AI cost estimator - success: with a key present, CI/Hook toggles show the correct per-video estimate from `/settings/pricing`; with no key or no paid toggles it stays hidden.
+47. [ ] Deep link to `setup.html?source=popup#mcp-settings` - success: page scrolls to Agent Integration and is not hijacked by Step 4 auto-scroll.
+
+## 5. Smart Screenshot Picker
+
+48. [ ] Enable picker and yoink a normal video - success: popup shows thumbnail grid after extraction.
+49. [ ] Pick zero screenshots - success: clipboard corpus remains valid text and UI gives a clear empty-selection state.
+50. [ ] Pick one screenshot - success: clipboard includes exactly that screenshot.
+51. [ ] Pick many screenshots - success: UI remains responsive and clipboard respects configured max/context constraints.
+52. [ ] Serve thumbnails through `/file` - success: authenticated image URLs load; invalid token, outside-root path, non-image, bad magic bytes, and >10 MB file are rejected.
+53. [ ] Run playlist with picker enabled - success: playlist clipboard remains text-only and no picker is shown.
+
+## 6. MCP - stdio and HTTP
+
+54. [ ] Copy Claude Desktop stdio config from setup - success: command points to installed `python.exe` and `yoink_mcp.py`.
+55. [ ] Smoke-test Claude Desktop stdio - success: client lists all 13 tools and `list_recent_yoinks` works.
+56. [ ] Smoke-test Cursor stdio - success: client lists all 13 tools and `search_yoinks` works.
+57. [ ] Call `yoink_video` through MCP - success: returns `ok`, `slug`, `folder`, `corpus_md`, and screenshots.
+58. [ ] Call `yoink_playlist` then `get_job_status` - success: job appears in `/jobs` and completes/cancels consistently.
+59. [ ] Call `get_yoink_corpus` on a sidecar-backed yoink - success: returns `video_id` and `video_url`.
+60. [ ] Call `get_yoink_corpus` on legacy/missing sidecar - success: returns `video_id:null` and `video_url:null` without crashing.
+61. [ ] Call `get_taxonomy` through MCP - success: no-arg, `channel`, `hook_type`, and combined filters match `/taxonomy`.
+62. [ ] Call `get_citation_map` through MCP - success: `transcript_citations` and `screenshot_citations` are both non-empty for a yoink with screenshots.
+63. [ ] Call `get_yoink_health` through MCP - success: returns a dict with five status fields, none null.
+64. [ ] Trigger MCP rate limits - success: extraction tools fail friendly after 5/minute, AI tools after 10/minute, and citation/health tools after 60/minute.
+65. [ ] Smoke-test HTTP JSON-RPC helper - success: token-gated initialize/tools/list/tools/call return MCP-style envelopes.
+
+## 7. XSS / security
+
+66. [ ] Yoink a video with hostile title/description/comment text containing HTML/script - success: popup/setup/picker render text safely; no script executes.
+67. [ ] Try malicious `/file` paths - success: `..`, relative paths, symlink escapes, outside-root files, and wrong magic bytes are rejected.
+68. [ ] Try unauthenticated mutating requests - success: all POST routes and private GET routes return 403 before reading body.
+69. [ ] Try `/token` from a normal web origin - success: browser CORS/preflight blocks or server returns forbidden; token is not exposed.
+70. [ ] Confirm token is never in query strings - success: network history shows `X-Yoink-Token` header only.
+71. [ ] Check logs after key operations - success: no Anthropic key, token, or full auth header appears in `server.log`.
+
+## 8. Recovery + resilience
+
+72. [ ] Stop helper while popup is open - success: disconnect banner appears after grace period and buttons do not look active.
+73. [ ] Leave helper offline for the auto-open threshold - success: setup opens once, then rate-limit prevents repeated tab spam.
+74. [ ] Restart helper while popup is open - success: popup reconnects, banner clears, status dots turn green.
+75. [ ] Kill helper mid-playlist and restart - success: `/jobs` returns the job as `failed` with `error="server restarted"` from `index.db`.
+76. [ ] Confirm last-yoink affordance for playlist completion - success: popup surfaces recent completed playlist job.
+77. [ ] Confirm last-yoink affordance for single-video completion - success: popup surfaces recent single job after `/extract`.
+78. [ ] Confirm active-playlist pill while switching modes - success: pill shows status and click returns to playlist view.
+79. [ ] Cancel an active backfill - success: `/index/backfill-cancel` returns `cancelled:true`, banner clears when status becomes complete, and already-indexed yoinks remain searchable.
+
+## 9. Index foundation
+
+80. [ ] Boot helper with no `index.db` - success: backfill scan runs, `/index/backfill-status` reports complete, and all on-disk corpora appear in Recent yoinks or indexed search surfaces.
+81. [ ] Boot helper with corrupt `index.db` (truncate to 0 bytes) - success: file is renamed to `index.db.corrupt-<timestamp>`, fresh backfill runs, recovers all yoinks, and `/health` reports `index_recovering:true` during recovery.
+82. [ ] Boot helper with `jobs.json` and `taxonomy.json` present - success: both migrate into `index.db`, `.migrated` files appear, and no data is lost.
+83. [ ] Yoink three new videos - success: each appears incrementally in Recent yoinks or indexed search surfaces without a full re-scan.
+84. [ ] Search yoinks against a corpus of 50+ - success: returns in under 500ms.
+
+## 10. Yoink Memory page
+
+85. [ ] Open Yoink Memory from popup link - success: page opens in a new tab and shows all non-deleted yoinks.
+86. [ ] Filter by channel - success: results narrow to that channel only.
+87. [ ] Filter by hook_type - success: results narrow to that category only.
+88. [ ] Combine search + channel + date_from - success: results match all three filters.
+89. [ ] Click "Delete" on a yoink - success: undo toast appears and the row disappears from the list.
+90. [ ] Reload Memory page - success: deleted row stays hidden.
+91. [ ] Check filesystem after delete - success: folder is in `DESKTOP_ROOT\_yoink-trash\<topic>\<slug>__deleted-<timestamp>\`.
+92. [ ] POST `/memory/restore` with the `video_id` - success: row reappears in Memory and folder returns to its original location.
+93. [ ] Mock trash with deletion timestamp over 30 days old - success: next helper boot purges it, folder is gone, and index row is gone.
+
+## 11. Windows path handling
+
+94. [ ] OneDrive Desktop redirection - success: Yoink output root resolves to the actual known Desktop path, not a guessed `%USERPROFILE%\Desktop`.
+95. [ ] Video title is a Windows reserved name (`CON`, `AUX`, `LPT1`) - success: folder slug is safe and extraction completes.
+96. [ ] Very long video title - success: folder/file creation succeeds or fails gracefully without path traversal.
+97. [ ] Desktop on network/synced drive - success: extraction either completes or reports a clear file-write error.
+98. [ ] Start Menu shortcuts - success: Yoink Server, Stop Yoink Server, Yoink folder, and Uninstall Yoink entries work.
+99. [ ] Auto-start on Windows login - success: server starts hidden after sign-in and popup is green within 30 seconds.
+100. [ ] Uninstall - success: files, Start Menu shortcuts, Run key, and helper process are removed/cleared cleanly.
+
+## 12. Pre-launch packaging gates
+
+101. [ ] `USE_MOCK_API` / mock mode is off for production extension - success: popup talks to real helper, not fixtures.
+102. [ ] `INSTALLER_PUBLISHED` is flipped only after GitHub release asset exists - success: setup download URL resolves to `Yoink-Setup-2.0.0.exe`.
+103. [ ] Manifest version and installer version are aligned - success: Chrome Web Store package, installer, and `server.py VERSION` match launch plan.
+104. [ ] Direct-download hashes are locked - success: Python, ffmpeg, and get-pip hashes in `build.ps1` are non-empty and verified during build.
+105. [ ] Build installer from clean cache - success: `.\build.ps1 -Clean` outputs `build\Yoink-Setup-2.0.0.exe` and hash checks pass.
+106. [ ] Clean Windows VM install - success: unsigned SmartScreen path is understandable, installer runs without admin, helper starts hidden.
+107. [ ] Chrome Web Store package uses production domain/copy - success: footer, setup, README, store listing, and landing links point at `ryanbiddy.com/yoink` or the chosen canonical URL.
+108. [ ] Final docs pass - success: README, security, build-installer, v2 docs, and store listing no longer describe pre-Sprint-7 behavior.
+
+## 13. Sprint 19 - Rate-limit queue, failure diagnosis, and UI polish
+
+109. [ ] Burst-yoink to trigger YouTube rate limit - success: `/extract` returns `queued: true`, `pending_id`, and `retry_after`, and popup banner shows queued count.
+110. [ ] Wait 60s+ - success: queued yoink runs automatically without user action, and the queue banner clears.
+111. [ ] Manually cancel a queued yoink via `POST /queue/cancel` - success: queue row is marked cancelled, and the banner updates.
+112. [ ] Manually retry-now via `POST /queue/retry-now` - success: worker picks it up immediately on the next 30s poll.
+113. [ ] After 3 failed retries - success: queue row is marked failed, and popup banner shows red error with retry and dismiss actions.
+114. [ ] Check `GET /diagnose` - success: returns structured checks with statuses (`ok`/`warning`/`error`/`skipped`).
+115. [ ] Open setup page - success: "Helper status" panel shows all checks with context-specific action buttons per failure mode.
+116. [ ] Yoink with no Anthropic key - success: `/diagnose` reports `anthropic_key_set: warning`, and setup page shows "Add key" action.
+117. [ ] Make `DESKTOP_ROOT` unwritable (read-only flag) - success: first write falls back to `LOCALAPPDATA`, and `/health` reports `output_root_fallback: true`.
+118. [ ] Clipboard budget preview - success: popup shows "N screenshots · ~Nk tokens" next to the Send buttons after a yoink.
+119. [ ] First-load popup (with cleared `chrome.storage.local`) - success: shows only the URL preview and "Yoink" button, with a "More options" expander revealing secondary panels.
+120. [ ] Hook chip in popup - success: displays "Contrarian · confidence 5/5" instead of just the category name.
+
+### 5. Sprint 19 Polish and Diagnostics (C3 + C4 + A3)
+
+#### Helper failure diagnosis (C3)
+1. Stop the helper server via Start Menu → **Stop Yoink Server**.
+2. Open the extension popup. Verify the indicator goes orange within 5 seconds and shows the offline banner.
+3. Click **Settings** to open `setup.html`. Scroll to the "Helper status" panel.
+4. Verify the panel shows the helper is offline and lists recovery steps (e.g., Start Menu search, verify port 5179 is free).
+5. Start the helper server via Start Menu → **Yoink Server**.
+6. Refresh `setup.html` or wait 5 seconds. Verify the panel updates to "Online" and shows the helper version and port.
+
+#### Rate-limit queue + retry (C4)
+1. Trigger a rate-limit queue state:
+   - Propose/simulate a rate limit (or add a dummy queue item via `/jobs` payload manually if testing via Postman).
+   - Verify the popup banner shows the active queue status ("1 item in queue, retrying in 60s").
+   - Click the **Retry Now** button. Verify it attempts immediate extraction.
+   - Click the **Cancel** button on the queue item. Verify the job transitions to `failed` with `error="cancelled by user"`.
+2. Burst-yoink 5 long videos to trigger the 1000-row `pending_yoinks` cap → verify the oldest terminal rows prune automatically without errors.
+
+#### Soft-delete confirmation dialog
+1. Open the Memory tab (`setup.html#memory`).
+2. Click the delete icon (trash can) next to any yoink.
+3. Verify the confirmation dialog reads **"Move to trash"** instead of "Delete" to match the 30-day retention behavior.
+4. Confirm deletion. Verify the yoinked folder is moved to `~/Desktop/Yoink/_yoink-trash/` with the suffix `__deleted-<timestamp>`.
+5. Verify the folder remains readable on disk.
+
+#### FTS5 Search and Calibration (A3)
+1. In the Memory tab, type a unique keyword from a recently yoinked transcript.
+2. Verify the search filters the library list instantly using SQLite FTS5.
+3. Verify search works via the MCP tool `search_yoinks(query="...")`.
+4. In the popup, change a Hook Type classification (e.g., change "Curiosity Gap" to "Stakes").
+5. Verify the correction is saved.
+6. Open the setup page and scroll to the **Hook Calibration** section. Verify your correction is listed.
+
+#### Installation Paths
+1. **Clean install:** Run the installer on a machine without Yoink. Verify the helper starts, writes `index.db` in `%LOCALAPPDATA%\Yoink\`, and the extension indicator goes green.
+2. **Upgrade install:** Install Yoink v1.0, run it, then run the v2.0 installer. Verify the helper migrates `settings.json` and legacy `jobs.json` / `taxonomy.json` records into `index.db` atomically, renaming the source files to `.migrated`.
+
+### 14. macOS-specific checkpoints (Sprint 19.5)
+
+121. [ ] Install Yoink.dmg → Yoink.app appears in Applications, Gatekeeper passes (notarized).
+122. [ ] First launch → LaunchAgent installed, helper auto-starts at next login.
+123. [ ] /diagnose returns platform: macos arm64 or macos x64.
+124. [ ] Anthropic key saved on Mac → Keychain entry exists (check Keychain Access app: Yoink / anthropic_key).
+125. [ ] Yoink any video → corpus written to ~/Desktop/Yoink/<topic>/<slug>/.
+126. [ ] Memory page action "Open folder" launches Finder at the yoink folder.
+127. [ ] Uninstall → Yoink.app gone, LaunchAgent removed (manual cleanup of Application Support optional).
+

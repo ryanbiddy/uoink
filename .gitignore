@@ -11,6 +11,9 @@ installer/staging/
 *.zip
 video.*
 Yoink/
+!skills/
+!skills/yoink/
+!skills/yoink/**
 
 # User-facing yoink output. In dev mode the server's Desktop resolves to
 # the user's actual Desktop -- and on this machine the OneDrive Desktop
@@ -20,6 +23,7 @@ Yoink/
 # explicit-output-dir refactor.
 _sessions/
 _all-yoinks-index.md
+_yoink-trash/
 /Yoink-Output/
 
 # Topic folders (one per entry in topics.json + the Uncategorized
@@ -38,3 +42,11 @@ _all-yoinks-index.md
 docs/launch/
 
 .claude/
+
+# Dev-mode parallel-AI worktrees. These belong as sibling directories
+# (..\Yoink-claude-v2 and ..\Yoink-codex-v2) so git worktree commands
+# work correctly. If they end up nested inside the main repo (as can
+# happen when moved by hand), keep them out of commits. Recreate them
+# as siblings with `git worktree add` when needed for a new sprint.
+/Yoink-claude-v2/
+/Yoink-codex-v2/

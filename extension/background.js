@@ -1,3 +1,6 @@
+// v3 TODO: rename native messaging host to com.uoink.helper after installer
+// migration is widely deployed (target: 90 days post v2.1 release).
+
 // Background service worker.
 //
 // Responsibilities:
@@ -10,26 +13,33 @@
 // Network logic is shared with content.js via lib/extract.js (importScripts;
 // exposes globalThis.STC).
 
-importScripts("lib/extract.js");
+importScripts("lib/extract.js", "lib/ui.js");
 
 const MENU_LINK = "stc-extract-link";
 const MENU_PAGE = "stc-extract-page";
 const MENU_SESSION = "stc-extract-session";
-const ICON_URL = chrome.runtime.getURL("icons/icon-128.png");
+const ICON_URL = chrome.runtime.getURL("icons/icon128.png");
 const OFFSCREEN_URL = "offscreen.html";
 // CLIPBOARD covers the existing copy path; MATCH_MEDIA lets the doc stay
 // alive so it can push prefers-color-scheme change events back here.
 const OFFSCREEN_REASONS = ["CLIPBOARD", "MATCH_MEDIA"];
+const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
+const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
+const _clipboardRetryPayloads = new Map();
+const _queueViewNotificationIds = new Set();
 
 const LINK_PATTERNS = [
   "https://www.youtube.com/watch*",
   "https://youtu.be/*",
   "https://www.youtube.com/shorts/*",
   "https://m.youtube.com/watch*",
+  "https://m.youtube.com/shorts/*",
 ];
 const PAGE_PATTERNS = [
   "https://www.youtube.com/watch*",
   "https://www.youtube.com/shorts/*",
+  "https://m.youtube.com/watch*",
+  "https://m.youtube.com/shorts/*",
 ];
 
 // ---- Lifecycle ------------------------------------------------------------
@@ -38,6 +48,8 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   await refreshActiveSession();
   syncThemeIcon().catch((e) => console.warn("[stc] theme sync failed", e));
   restoreQueue().catch((e) => console.warn("[stc] restore failed", e));
+  chrome.alarms.create("health-check", { periodInMinutes: 0.25 });
+  checkHealthAndUpdateBadge().catch((e) => console.warn("[stc] checkHealthAndUpdateBadge failed", e));
 
   // Eager auth-token prefetch. Without this, the user's first authed
   // request blocks on a /token round-trip, and a transient failure there
@@ -75,11 +87,76 @@ chrome.runtime.onStartup.addListener(async () => {
   await refreshActiveSession();
   syncThemeIcon().catch((e) => console.warn("[stc] theme sync failed", e));
   restoreQueue().catch((e) => console.warn("[stc] restore failed", e));
+  chrome.alarms.create("health-check", { periodInMinutes: 0.25 });
+  checkHealthAndUpdateBadge().catch((e) => console.warn("[stc] checkHealthAndUpdateBadge failed", e));
 });
 
 // SW spins up on demand (notification click, message, alarm, etc) and the OS
 // theme may have flipped while it was idle. Re-sync on every wake.
 syncThemeIcon().catch((e) => console.warn("[stc] theme sync failed", e));
+chrome.alarms.create("health-check", { periodInMinutes: 0.25 });
+checkHealthAndUpdateBadge().catch((e) => console.warn("[stc] checkHealthAndUpdateBadge failed", e));
+
+// ---- Alarms and Commands --------------------------------------------------
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === "health-check") {
+    checkHealthAndUpdateBadge().catch((e) => console.warn("[stc] checkHealthAndUpdateBadge failed", e));
+  }
+});
+
+chrome.commands.onCommand.addListener(async (command) => {
+  if (command === "uoink-video") {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (tab && tab.id && tab.url) {
+      chrome.tabs.sendMessage(tab.id, { type: "uoinkShortcutTriggered" }, async (response) => {
+        if (chrome.runtime.lastError || !response || !response.success) {
+          // Fallback: trigger background extract if it's a youtube url
+          const normalized = STC.normalizeYouTubeUrl(tab.url);
+          if (normalized) {
+            const active = await getActiveFromStorage();
+            const interval = await STC.getInterval();
+            const kind = active && active.id ? "session_add" : "extract";
+            const job = { kind, url: normalized, interval, addedAt: Date.now() };
+            if (kind === "session_add") {
+              job.session_id = active.id;
+              job.session_name = active.name;
+            }
+            if (kind === "extract" && !(await serverQueueHasRoom())) {
+              notify("Queue full", "Wait a few minutes");
+              return;
+            }
+            await enqueue(job);
+          }
+        }
+      });
+    }
+  }
+});
+
+async function checkHealthAndUpdateBadge() {
+  let isOnline = false;
+  try {
+    const res = await STC.ping();
+    isOnline = !!(res && res.ok);
+  } catch (e) {
+    isOnline = false;
+  }
+
+  const state = await getState();
+  const isBusy = !!(state.busy || (state.queue && state.queue.length > 0));
+
+  if (!isOnline) {
+    await chrome.action.setBadgeText({ text: "OFF" });
+    await chrome.action.setBadgeBackgroundColor({ color: "#C2410C" }); // Rust
+    await chrome.action.setBadgeTextColor({ color: "#FFF4EC" }); // Cream
+  } else if (isBusy) {
+    await chrome.action.setBadgeText({ text: "..." });
+    await chrome.action.setBadgeBackgroundColor({ color: "#FF3D00" }); // Vermillion
+    await chrome.action.setBadgeTextColor({ color: "#FFF4EC" }); // Cream
+  } else {
+    await chrome.action.setBadgeText({ text: "" });
+  }
+}
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes.active_session) {
@@ -93,13 +170,13 @@ async function rebuildContextMenus() {
 
   chrome.contextMenus.create({
     id: MENU_LINK,
-    title: "Yoink this video",
+    title: "Uoink video link",
     contexts: ["link"],
     targetUrlPatterns: LINK_PATTERNS,
   });
   chrome.contextMenus.create({
     id: MENU_PAGE,
-    title: "Yoink this page",
+    title: "Uoink video",
     contexts: ["page", "video"],
     documentUrlPatterns: PAGE_PATTERNS,
   });
@@ -109,7 +186,7 @@ async function rebuildContextMenus() {
     const name = active.name || active.id;
     chrome.contextMenus.create({
       id: MENU_SESSION,
-      title: `Yoink into session: ${name}`,
+      title: `Uoink into session: ${name}`,
       contexts: ["link", "page", "video"],
       targetUrlPatterns: LINK_PATTERNS,
       documentUrlPatterns: PAGE_PATTERNS,
@@ -137,8 +214,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   const normalized = STC.normalizeYouTubeUrl(raw || "");
   if (!normalized) {
-    notify("Yoink — invalid URL",
-           "Couldn't find a YouTube video ID in that link.");
+    notify("Invalid URL", "Couldn't find YouTube video ID");
     return;
   }
 
@@ -147,11 +223,15 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (kind === "session_add") {
     const active = await getActiveFromStorage();
     if (!active || !active.id) {
-      notify("Yoink", "No active session — start one in the popup first.");
+      notify("Uoink", "No active session — start one in the popup first.");
       return;
     }
     job.session_id = active.id;
     job.session_name = active.name;
+  }
+  if (kind === "extract" && !(await serverQueueHasRoom())) {
+    notify("Queue full", "Wait a few minutes");
+    return;
   }
   await enqueue(job);
 });
@@ -178,7 +258,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
 
   if (msg.type === "notify") {
-    notify(msg.title || "Yoink", msg.message || "")
+    notify(msg.title || "Uoink", msg.message || "")
       .then((id) => sendResponse({ ok: true, id }));
     return true;
   }
@@ -198,6 +278,11 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     return true;
   }
 
+  if (msg.type === "clipboardRetry" && typeof msg.text === "string") {
+    notifyClipboardRetry(msg.text).then((id) => sendResponse({ ok: !!id, id }));
+    return true;
+  }
+
   if (msg.type === "themeChanged" && typeof msg.isDark === "boolean") {
     updateIconForTheme(msg.isDark).catch((e) => console.warn("[stc] setIcon failed", e));
     return;
@@ -210,6 +295,10 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === "stcExtract" && msg.url) {
     (async () => {
       try {
+        if (!(await serverQueueHasRoom())) {
+          sendResponse({ data: { ok: false, error: "Queue full, wait a few minutes" } });
+          return;
+        }
         const data = await STC.postExtract(msg.url, msg.interval);
         sendResponse({ data });
         if (data && data.ok) tryOpenPopup();
@@ -251,7 +340,7 @@ function tryOpenPopup() {
 }
 
 // ---- Notifications -------------------------------------------------------
-function notify(title, message) {
+function notify(title, message, extraOptions = {}) {
   return new Promise((resolve) => {
     try {
       chrome.notifications.create({
@@ -260,6 +349,7 @@ function notify(title, message) {
         title,
         message,
         priority: 1,
+        ...extraOptions,
       }, (id) => resolve(id));
     } catch (e) {
       console.warn("[stc] notification failed", e);
@@ -267,6 +357,97 @@ function notify(title, message) {
     }
   });
 }
+
+async function markClipboardYoinkNow() {
+  try {
+    await chrome.storage.local.set({ [LAST_YOINK_CLIPBOARD_KEY]: Date.now() });
+  } catch { /* ignore */ }
+}
+
+function screenshotCountFromData(data, text) {
+  return globalThis.YoinkUI.screenshotCountFromData(data, text);
+}
+
+async function rememberClipboardBudget(data, clipboardText) {
+  const budget = globalThis.YoinkUI.clipboardBudgetFromData(data, clipboardText);
+  try {
+    await chrome.storage.local.set({ [LAST_CLIPBOARD_BUDGET_KEY]: budget });
+  } catch { /* ignore */ }
+}
+
+function minutesUntil(value) {
+  return globalThis.YoinkUI.minutesUntil(value);
+}
+
+function queuedMessage(data) {
+  return globalThis.YoinkUI.queuedMessage(data);
+}
+
+async function getServerQueueStatus() {
+  try {
+    const token = STC.getToken ? await STC.getToken() : null;
+    let res = await fetch(`${STC.SERVER}/queue/status`, {
+      method: "GET",
+      mode: "cors",
+      credentials: "omit",
+      cache: "no-store",
+      headers: token ? { "X-Yoink-Token": token } : {},
+    });
+    if (res.status === 403 && STC.getToken) {
+      const fresh = await STC.getToken({ refresh: true });
+      res = await fetch(`${STC.SERVER}/queue/status`, {
+        method: "GET",
+        mode: "cors",
+        credentials: "omit",
+        cache: "no-store",
+        headers: fresh ? { "X-Yoink-Token": fresh } : {},
+      });
+    }
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+async function serverQueueHasRoom() {
+  const status = await getServerQueueStatus();
+  const pending = Number(status && (status.pending_count ?? status.queued_count)) || 0;
+  return pending < 5;
+}
+
+async function notifyClipboardRetry(text) {
+  const id = await notify("Clipboard copy blocked", "Click Try again to retry", {
+    buttons: [{ title: "Try again" }],
+  });
+  if (id) _clipboardRetryPayloads.set(id, text);
+  return id;
+}
+
+try {
+  chrome.notifications.onButtonClicked.addListener((id, buttonIndex) => {
+    if (_queueViewNotificationIds.has(id)) {
+      _queueViewNotificationIds.delete(id);
+      tryOpenPopup();
+      return;
+    }
+    if (buttonIndex !== 0 || !_clipboardRetryPayloads.has(id)) return;
+    const text = _clipboardRetryPayloads.get(id);
+    _clipboardRetryPayloads.delete(id);
+    copyToClipboard(text).then(async (ok) => {
+      if (ok) {
+        await markClipboardYoinkNow();
+        notify("Copied to clipboard", "Open Claude or ChatGPT from the Uoink popup, then paste.");
+      } else {
+        notify("Copy still blocked", "Open the saved uoink folder and copy the markdown file manually.");
+      }
+    });
+  });
+  chrome.notifications.onClosed.addListener((id) => {
+    _clipboardRetryPayloads.delete(id);
+    _queueViewNotificationIds.delete(id);
+  });
+} catch { /* notifications unavailable in some test contexts */ }
 
 // ---- Offscreen (clipboard + theme detection) -----------------------------
 // The offscreen doc is now long-lived: closing it would kill the
@@ -333,13 +514,12 @@ async function copyToClipboard(text) {
 // not by every Chromium fork (notably Comet, where the icon stays stuck on
 // the default). Drive the swap from JS instead so it works everywhere.
 async function updateIconForTheme(isDark) {
-  const variant = isDark ? "dark" : "light";
   await chrome.action.setIcon({
     path: {
-      "16": `icons/icon-16-${variant}.png`,
-      "32": `icons/icon-32-${variant}.png`,
-      "48": `icons/icon-48-${variant}.png`,
-      "128": `icons/icon-128-${variant}.png`,
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png",
     },
   });
 }
@@ -418,17 +598,16 @@ async function _doEnqueue(job) {
 
   const ahead = (state.busy ? 1 : 0) + state.queue.length - 1;
   if (state.busy || state.queue.length > 1) {
-    notify("Yoink — queued", `Queued — ${ahead} video${ahead === 1 ? "" : "s"} ahead.`);
+    notify("Uoink queued", `${ahead} video${ahead === 1 ? "" : "s"} ahead`);
   } else {
-    const verb = job.kind === "session_add" ? "Adding to session" : "Yoinking";
-    notify("Yoink — starting", `${verb}: ${shortUrl(job.url)}...`);
+    notify("Uoinking", `${shortUrl(job.url)}...`);
   }
   drain();
 }
 
 async function clearQueue() {
   await setState({ queue: [] });
-  notify("Yoink", "Queue cleared.");
+  notify("Uoink", "Queue cleared.");
 }
 
 async function restoreQueue() {
@@ -453,18 +632,20 @@ async function drain() {
       const state = await getState();
       if (!state.queue.length) {
         await setState({ busy: false, current: null });
+        checkHealthAndUpdateBadge().catch(() => {});
         return;
       }
       const job = state.queue.shift();
       const newQueue = state.queue;
       const current = { ...job, startedAt: Date.now() };
       await setState({ busy: true, current, queue: newQueue });
+      checkHealthAndUpdateBadge().catch(() => {});
 
       try {
         await runJob(job);
       } catch (e) {
-        console.error("[Yoink] job crashed", e);
-        notify("Yoink failed", String(e));
+        console.error("[Uoink] job crashed", e);
+        notify("Uoink failed", String(e));
       }
     }
   } finally {
@@ -482,35 +663,73 @@ async function runExtractJob(job) {
   try {
     data = await STC.postExtract(job.url, job.interval);
   } catch (e) {
-    console.error("[Yoink] server unreachable", e);
+    console.error("[Uoink] server unreachable", e);
     // No tab open here -- setup.html only opens from direct user actions
     // (the in-page YouTube button or the popup help link), never from
     // background-queued jobs. Keeps unrelated context-menu work from
     // surprising the user with new tabs.
-    notify("Yoink isn't running yet",
-           "Start the Yoink helper from the Start Menu, then try again.");
+    notify("Uoink Helper offline",
+           "Start Uoink from the Start Menu, then try again.");
     return;
   }
   if (!data || !data.ok) {
-    notify("Yoink failed", STC.friendlyError(data && data.error));
+    notify("Uoink failed", STC.friendlyError(data && data.error));
+    return;
+  }
+  if (data.queued) {
+    const id = await notify("Uoink queued", `${queuedMessage(data)} Click View queue for status.`, {
+      buttons: [{ title: "View queue" }],
+    });
+    if (id) _queueViewNotificationIds.add(id);
     return;
   }
 
   await setState({ current: { ...job, startedAt: Date.now(), title: data.title || null } });
+
+  // Sprint 3: Smart Screenshot Picker intercept. When the user has the
+  // picker setting enabled, we hand the corpus off to the popup instead of
+  // auto-copying. Default off keeps v1 behavior byte-identical.
+  if (await _useScreenshotPicker()) {
+    await rememberClipboardBudget(data, data.corpus_md_paste || data.yoink_md);
+    await STC.stashPickerCorpus(data);
+    notify("Uoink ready",
+           "Click the Uoink icon to pick which screenshots to include.");
+    return;
+  }
 
   // Prefer the multimodal paste version (transcript + base64-embedded
   // screenshots) so a single Ctrl+V into Claude/ChatGPT delivers both.
   // Fall back to the file version if the server didn't generate one
   // (Pillow missing in dev, generation failure, etc).
   const clipboardText = data.corpus_md_paste || data.yoink_md;
+  await rememberClipboardBudget(data, clipboardText);
   const copied = await copyToClipboard(clipboardText);
+  if (!copied) {
+    await notifyClipboardRetry(clipboardText);
+    return;
+  }
+  await markClipboardYoinkNow();
   await chrome.tabs.create({ url: "https://claude.ai/new", active: true });
 
   // Shared helper handles first-yoink-vs-subsequent copy + atomically marks
   // the has_completed_first_yoink flag. Same code is called from content.js
   // so the in-page YouTube button gets the same first-time CTA.
-  const message = await STC.buildYoinkedMessage(data, copied);
-  notify("Yoinked!", message);
+  const message = await STC.buildUoinkedMessage(data, copied);
+  notify("Uoinked ★", message);
+}
+
+// Fetches /settings on demand and returns true if the picker is enabled.
+// Cheap (local request) and called once per job, so we don't bother caching
+// here — the SW gets recycled often anyway.
+async function _useScreenshotPicker() {
+  try {
+    const res = await STC.getSettings();
+    return !!(res && res.ok && res.settings &&
+              res.settings.smart_screenshot_picker_enabled === true);
+  } catch (e) {
+    console.warn("[Uoink] settings fetch failed, picker disabled by default", e);
+    return false;
+  }
 }
 
 async function runSessionAddJob(job) {
@@ -518,13 +737,13 @@ async function runSessionAddJob(job) {
   try {
     data = await STC.addToSession(job.session_id, job.url, job.interval);
   } catch (e) {
-    console.error("[Yoink] server unreachable", e);
-    notify("Yoink isn't running yet",
-           "Start the Yoink helper from the Start Menu, then try again.");
+    console.error("[Uoink] server unreachable", e);
+    notify("Uoink Helper offline",
+           "Start Uoink from the Start Menu, then try again.");
     return;
   }
   if (!data || !data.ok) {
-    notify("Yoink failed", STC.friendlyError(data && data.error));
+    notify("Uoink failed", STC.friendlyError(data && data.error));
     return;
   }
 
@@ -533,9 +752,7 @@ async function runSessionAddJob(job) {
   });
 
   const sessionName = job.session_name || job.session_id;
-  notify("Added to session",
-         `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"} so far. ` +
-         `(${data.screenshot_count} screenshots, ${data.caption_count || 0} caption lines)`);
+  notify("Added to session", `${sessionName} · ${data.video_count} video${data.video_count === 1 ? "" : "s"}`);
 
   // Pull fresh active session state into local storage so popup + menu update.
   await refreshActiveSession();
