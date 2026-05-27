@@ -3834,6 +3834,45 @@ def _mcp_settings_snippet() -> dict:
             "raw": json.dumps(cfg, indent=2)}
 
 
+def _focus_youtube_window() -> bool:
+    """Best-effort "Open last YouTube tab": focus a visible top-level window
+    whose title contains 'YouTube' (Chromium tabs read '… - YouTube … -
+    Google Chrome' when a YouTube tab is foreground). Returns True if one was
+    focused. ctypes-only (no pywin32 dependency); Windows-only. This is the
+    'simpler heuristic' from the build plan -- it only catches a browser whose
+    active tab is already YouTube; otherwise the caller opens youtube.com."""
+    if sys.platform != "win32":
+        return False
+    try:
+        import ctypes
+        from ctypes import wintypes
+        user32 = ctypes.windll.user32
+        found: list[int] = []
+
+        @ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)
+        def _cb(hwnd, _lparam):
+            if not user32.IsWindowVisible(hwnd):
+                return True
+            n = user32.GetWindowTextLengthW(hwnd)
+            if n <= 0:
+                return True
+            buf = ctypes.create_unicode_buffer(n + 1)
+            user32.GetWindowTextW(hwnd, buf, n + 1)
+            if "YouTube" in buf.value:
+                found.append(hwnd)
+                return False  # stop enumerating
+            return True
+
+        user32.EnumWindows(_cb, 0)
+        if found:
+            user32.ShowWindow(found[0], 9)        # SW_RESTORE
+            user32.SetForegroundWindow(found[0])
+            return True
+    except Exception as e:
+        log.debug("open-last-youtube: window enum failed: %s", e)
+    return False
+
+
 def _session_folder(slug: str) -> Path:
     return SESSIONS_ROOT / slug
 
@@ -5461,6 +5500,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_update_check()
         if bare == "/settings/mcp-config":
             return self._handle_settings_mcp_config()
+        if bare == "/open-last-youtube":
+            return self._handle_open_last_youtube()
         if bare == "/file":
             return self._handle_file()
         if bare == "/mcp/v1/config":
@@ -5549,6 +5590,33 @@ class Handler(BaseHTTPRequestHandler):
         if not self._require_token():
             return
         self._send_json(200, {"ok": True, "mcp_config": _mcp_settings_snippet()})
+
+    def _handle_open_last_youtube(self):
+        """Focus an existing YouTube browser window, else open youtube.com.
+        Token-gated. CTA on the Finished/Splash screens + dashboard."""
+        if not self._require_token():
+            return
+        if _focus_youtube_window():
+            return self._send_json(200, {
+                "ok": True, "action": "focused_existing", "url": None})
+        url = "https://www.youtube.com"
+        try:
+            import webbrowser
+            webbrowser.open(url)
+        except Exception as e:
+            log.debug("open-last-youtube: webbrowser failed: %s", e)
+            return self._send_json(200, {"ok": False, "error": "could not open browser"})
+        self._send_json(200, {"ok": True, "action": "opened_new", "url": url})
+
+    def _handle_helper_quit(self):
+        """Graceful stop (dashboard 'Stop helper' + tray 'Quit'). Token-gated.
+        Replies 200 then shuts the server down on a worker thread so
+        serve_forever() unblocks and main() returns (atexit clears the PID);
+        expect the connection to drop right after this response."""
+        if not self._require_token():
+            return
+        self._send_json(200, {"ok": True, "stopping": True})
+        threading.Thread(target=self.server.shutdown, daemon=True).start()
 
     def _handle_settings_post(self, body: dict):
         boolean_fields = (
@@ -5944,6 +6012,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_settings_post(body)
         if bare == "/settings/test-key":
             return self._handle_settings_test_key(body)
+        if bare == "/helper/quit":
+            return self._handle_helper_quit()
         if bare.startswith("/mcp/v1"):
             return self._handle_mcp_post(bare, body)
         if bare == "/playlist/preview":
