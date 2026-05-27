@@ -994,18 +994,21 @@
 
             <div class="setting-block">
               <h2>Output folder</h2>
-              <input class="field" id="outputFolder" type="text" readonly value="Loading...">
+              <input class="field" id="outputFolder" type="text" value="Loading...">
               <div class="inline-row">
                 <button class="button" type="button" id="openOutput">Open folder</button>
-                <button class="button ghost" type="button" id="browseOutput">Browse</button>
+                <button class="button ghost" type="button" id="saveOutput">Save</button>
               </div>
             </div>
 
             <div class="setting-block">
               <h2>Topics</h2>
-              <p class="setting-copy">Preview of local topic routing. Editing endpoint lands in CC&apos;s helper-side Tier 2 branch.</p>
+              <p class="setting-copy">Edit topic names and comma-separated keywords. The helper uses these for local folder routing.</p>
               <div class="topic-list" id="topicList"></div>
-              <button class="button ghost" type="button" id="addTopic">+ Add topic</button>
+              <div class="inline-row">
+                <button class="button ghost" type="button" id="addTopic">+ Add topic</button>
+                <button class="button" type="button" id="saveTopics">Save topics</button>
+              </div>
             </div>
 
             <div class="setting-block">
@@ -1019,6 +1022,15 @@
               <p class="setting-copy" id="versionLine">Loading version...</p>
               <p class="setting-copy" id="updateLine">Last checked: not yet</p>
               <button class="button ghost" type="button" id="checkUpdates">Check now</button>
+            </div>
+
+            <div class="setting-block">
+              <h2>Clipboard screenshots</h2>
+              <p class="setting-copy">Controls how many screenshots are included in the multimodal clipboard paste.</p>
+              <div class="inline-row">
+                <input class="field" style="width:120px" id="screenshotCount" type="number" min="0" max="12" step="1" value="4">
+                <button class="button" type="button" id="saveScreenshotCount">Save</button>
+              </div>
             </div>
           </div>
         </section>
@@ -1119,6 +1131,8 @@
       versionLine: document.getElementById("versionLine"),
       updateLine: document.getElementById("updateLine"),
       topicList: document.getElementById("topicList"),
+      autostartToggle: document.getElementById("autostartToggle"),
+      screenshotCount: document.getElementById("screenshotCount"),
     };
 
     function markSvg() {
@@ -1136,6 +1150,19 @@
       els.toast.classList.add("show");
       clearTimeout(showToast.timer);
       showToast.timer = setTimeout(() => els.toast.classList.remove("show"), 3200);
+    }
+
+    function nativeApi() {
+      return window.pywebview && window.pywebview.api ? window.pywebview.api : null;
+    }
+
+    function openExternal(url) {
+      const native = nativeApi();
+      if (native && native.open_url) {
+        native.open_url(url);
+        return;
+      }
+      window.open(url, "_blank", "noopener");
     }
 
     function debounce(fn, ms) {
@@ -1288,7 +1315,7 @@
 
     function jobsToCards(jobs) {
       return (Array.isArray(jobs) ? jobs : [])
-        .filter((job) => String(job.state || "").toLowerCase() === "completed")
+        .filter((job) => normalizedStatus(job) === "completed")
         .map((job) => {
           const result = job.result || {};
           return {
@@ -1428,6 +1455,23 @@
       select.value = current;
     }
 
+    function rawStatus(row) {
+      return String(row && (row.state || row.status) || "").toLowerCase();
+    }
+
+    function normalizedStatus(row) {
+      const value = rawStatus(row);
+      if (value === "done") return "completed";
+      if (value === "error") return "failed";
+      if (value === "canceled") return "cancelled";
+      return value || "queued";
+    }
+
+    function countValue(value, fallback = 0) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    }
+
     async function refreshHealth() {
       try {
         const res = await fetch("/health");
@@ -1464,14 +1508,16 @@
     function renderQueue(data) {
       data = data || {};
       const pending = Array.isArray(data.pending) ? data.pending : [];
-      const queueActive = pending.filter((row) => !["failed", "succeeded", "completed", "cancelled"].includes(String(row.state || row.status || "queued").toLowerCase()));
-      const queueFailed = pending.filter((row) => String(row.state || row.status || "").toLowerCase() === "failed");
-      const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(String(job.state || "").toLowerCase()));
-      const failedJobs = state.jobs.filter((job) => ["failed", "cancelled"].includes(String(job.state || "").toLowerCase()));
+      const pendingCount = Array.isArray(data.pending) ? pending.length : countValue(data.pending, countValue(data.pending_count, 0));
+      const runningCount = countValue(data.running, countValue(data.running_count, 0));
+      const queueActive = pending.filter((row) => !["failed", "succeeded", "completed", "cancelled"].includes(normalizedStatus(row)));
+      const queueFailed = pending.filter((row) => normalizedStatus(row) === "failed");
+      const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(normalizedStatus(job)));
+      const failedJobs = state.jobs.filter((job) => ["failed", "cancelled"].includes(normalizedStatus(job)));
       const activeCount = activeJobs.length + queueActive.length;
       els.activityCount.textContent = String(activeCount);
       els.activityNavCount.textContent = String(activeCount);
-      els.queueMeta.textContent = `${data.running_count || activeJobs.filter((job) => job.state === "running").length} running | ${data.pending_count || queueActive.length} queued`;
+      els.queueMeta.textContent = `${runningCount || activeJobs.filter((job) => normalizedStatus(job) === "running").length} running | ${pendingCount || queueActive.length} queued`;
       const rows = []
         .concat(activeJobs.map(jobRowHtml))
         .concat(queueActive.map(queueRowHtml))
@@ -1483,7 +1529,7 @@
         els.queueRows.innerHTML = rows.join("");
       }
       const completed = completedTodayRows();
-      els.completedToday.textContent = String(completed.length);
+      els.completedToday.textContent = String(data.completed_today || completed.length);
       els.completedRows.innerHTML = completed.length
         ? completed.slice(0, 8).map(completedRowHtml).join("")
         : `<div class="job-row"><div class="job-title">No completed yoinks loaded yet.</div><div class="job-sub">The Library tab will populate this list.</div></div>`;
@@ -1492,7 +1538,7 @@
     function completedTodayRows() {
       const today = new Date().toDateString();
       const jobs = state.jobs
-        .filter((job) => String(job.state || "").toLowerCase() === "completed")
+        .filter((job) => normalizedStatus(job) === "completed")
         .filter((job) => {
           const date = new Date(job.completed_at || job.updated_at || job.started_at || "");
           return !Number.isNaN(date.getTime()) && date.toDateString() === today;
@@ -1529,7 +1575,7 @@
       const phases = ["fetch", "transcribe", "screenshots", "classify", "write"];
       const normalized = normalizePhase(activePhase);
       const activeIndex = phases.indexOf(normalized);
-      const terminalDone = String(stateValue || "").toLowerCase() === "completed";
+      const terminalDone = ["completed", "done"].includes(String(stateValue || "").toLowerCase());
       return phases.map((phase, index) => {
         const cls = terminalDone || (activeIndex >= 0 && index < activeIndex)
           ? "done"
@@ -1541,6 +1587,8 @@
     }
 
     function progressForJob(job, stateValue) {
+      const progress = Number(job.progress);
+      if (Number.isFinite(progress)) return progress <= 1 ? Math.round(progress * 100) : Math.round(progress);
       const total = Number(job.videos_total || 0);
       const done = Number(job.videos_done || 0);
       if (total > 0) return Math.round((done / total) * 100);
@@ -1551,16 +1599,16 @@
     }
 
     function jobRowHtml(job) {
-      const stateValue = String(job.state || "queued").toLowerCase();
+      const stateValue = normalizedStatus(job);
       const failed = ["failed", "cancelled"].includes(stateValue);
       const progress = progressForJob(job, stateValue);
       const phase = job.current_video_phase || job.phase || "";
-      const title = job.title || job.playlist_title || (job.current_video && job.current_video.title) || job.source_url || "Yoink job";
+      const title = job.title || job.playlist_title || (job.current_video && job.current_video.title) || job.url || job.source_url || "Uoink job";
       const sub = [
         job.kind || "job",
         stateValue,
         job.videos_total ? `${job.videos_done || 0}/${job.videos_total} videos` : "",
-        job.error || "",
+        job.error_code ? `${job.error_code}: ${job.error || ""}` : job.error || "",
       ].filter(Boolean).join(" | ");
       return `
         <div class="job-row ${failed ? "failed" : ""}" data-job-id="${htmlEscape(job.id || "")}">
@@ -1570,7 +1618,7 @@
               <div class="job-sub">${htmlEscape(sub)}</div>
             </div>
             <div class="inline-row">
-              ${failed ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(job.source_url || "")}">Retry with cookies</button>` : ""}
+              ${failed ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(job.url || job.source_url || "")}">Retry with cookies</button>` : ""}
               ${["queued", "running"].includes(stateValue) && job.id ? `<button class="button danger" type="button" data-cancel-job="${htmlEscape(job.id)}">Cancel</button>` : ""}
             </div>
           </div>
@@ -1581,9 +1629,10 @@
     }
 
     function queueRowHtml(row) {
-      const stateValue = String(row.state || row.status || "queued").toLowerCase();
+      const stateValue = normalizedStatus(row);
       const failed = stateValue === "failed";
-      const progress = Number(row.progress || 0);
+      const rawProgress = Number(row.progress || 0);
+      const progress = rawProgress <= 1 ? rawProgress * 100 : rawProgress;
       const activePhase = row.phase || (stateValue === "running" ? "screenshots" : "");
       return `
         <div class="job-row ${failed ? "failed" : ""}" data-pending-id="${htmlEscape(row.pending_id || "")}">
@@ -1607,27 +1656,32 @@
     async function refreshSettings() {
       try {
         const data = await authFetch("/settings");
-        state.settings = data.settings || {};
+        state.settings = data.settings || data || {};
         els.keyStatus.textContent = state.settings.anthropic_key_set
-          ? "Key set. Optional AI features can run."
+          ? `Key set${state.settings.anthropic_key_masked ? ` (${state.settings.anthropic_key_masked})` : ""}. Optional AI features can run.`
           : "Key not set. Comment Intelligence, Hook Type, and entity extraction skip silently.";
+        els.outputFolder.value = state.settings.output_dir || state.settings.output_folder || els.outputFolder.value || "";
+        els.autostartToggle.checked = Boolean(state.settings.autostart);
+        els.screenshotCount.value = String(state.settings.screenshot_count ?? 4);
       } catch (err) {
         els.keyStatus.textContent = `Settings unavailable: ${err.message}`;
       }
       try {
         const diag = await (await fetch("/diagnose")).json();
         els.helperStatus.textContent = diagnoseSummary(diag);
-        els.outputFolder.value = diag.output_root || diag.output_dir || diag.desktop_root || "Output folder unavailable";
+        if (!state.settings || !state.settings.output_dir) {
+          els.outputFolder.value = diag.output_root || diag.output_dir || diag.desktop_root || "Output folder unavailable";
+        }
       } catch (err) {
         els.helperStatus.textContent = `Diagnose unavailable: ${err.message}`;
       }
       try {
-        const cfg = await authFetch("/mcp/v1/config");
-        els.mcpConfig.value = JSON.stringify(cfg.config || cfg, null, 2);
+        const cfg = await authFetch("/settings/mcp-config");
+        els.mcpConfig.value = cfg.raw || JSON.stringify(cfg.claude_desktop || cfg, null, 2);
       } catch (err) {
         els.mcpConfig.value = `MCP config unavailable: ${err.message}`;
       }
-      renderTopics();
+      renderTopics(state.settings && Array.isArray(state.settings.topics) ? state.settings.topics : []);
     }
 
     function diagnoseSummary(diag) {
@@ -1639,14 +1693,42 @@
       return "Helper is responsive.";
     }
 
-    function renderTopics() {
-      const topics = [
-        ["AI and ML", "ai keywords, model names, claude, gpt"],
-        ["DevTools", "vercel, cursor, ide, editor"],
-        ["Career", "job, interview, salary, hiring"],
-        ["Social Media", "tiktok, instagram, x algorithm"],
+    function renderTopics(topics) {
+      const rows = topics.length ? topics : [
+        { name: "AI and ML", keywords: ["llm", "agent", "claude"] },
+        { name: "DevTools", keywords: ["vercel", "cursor", "ide", "editor"] },
       ];
-      els.topicList.innerHTML = topics.map(([name, desc]) => `<div class="topic-row"><b>${name}</b><span>${desc}</span></div>`).join("");
+      els.topicList.innerHTML = rows.map((topic, index) => `
+        <div class="topic-row">
+          <input class="field" data-topic-name="${index}" value="${htmlEscape(topic.name || "")}" aria-label="Topic name">
+          <input class="field" data-topic-keywords="${index}" value="${htmlEscape((topic.keywords || []).join(", "))}" aria-label="Topic keywords">
+        </div>
+      `).join("");
+    }
+
+    function readTopicEditor() {
+      return [...els.topicList.querySelectorAll("[data-topic-name]")].map((nameInput) => {
+        const index = nameInput.dataset.topicName;
+        const keywordsInput = els.topicList.querySelector(`[data-topic-keywords="${CSS.escape(index)}"]`);
+        return {
+          name: nameInput.value.trim(),
+          keywords: String(keywordsInput ? keywordsInput.value : "")
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean),
+        };
+      }).filter((topic) => topic.name);
+    }
+
+    async function saveSettingsPatch(patch, successMessage) {
+      try {
+        const data = await authFetch("/settings", { method: "POST", body: JSON.stringify(patch) });
+        state.settings = data.settings || data || state.settings || {};
+        showToast(successMessage);
+        refreshSettings();
+      } catch (err) {
+        showToast(`Could not save settings: ${err.message}`);
+      }
     }
 
     async function saveKey() {
@@ -1680,6 +1762,15 @@
         showToast(err.message.includes("not found")
           ? "This helper action lands in CC's Tier 2 backend branch."
           : err.message);
+      }
+    }
+
+    async function openLastYoutube() {
+      try {
+        const data = await authFetch("/open-last-youtube");
+        showToast(data.action === "focused_existing" ? "Focused your YouTube tab." : "Opened YouTube.");
+      } catch (_) {
+        openExternal("https://youtube.com");
       }
     }
 
@@ -1732,22 +1823,47 @@
         try { await navigator.clipboard.writeText(els.mcpConfig.value); showToast("MCP config copied."); }
         catch (_) { showToast("Could not copy config."); }
       });
-      document.getElementById("checkUpdates").addEventListener("click", () => {
-        els.updateLine.textContent = `Last checked: ${new Date().toLocaleTimeString()}`;
-        postHelper("/updates/check-now");
+      document.getElementById("checkUpdates").addEventListener("click", async () => {
+        try {
+          const data = await authFetch("/update/check");
+          const checked = data.checked_at ? new Date(data.checked_at).toLocaleString() : new Date().toLocaleTimeString();
+          els.updateLine.textContent = data.update_available
+            ? `Update available: ${data.latest}. Checked ${checked}.`
+            : `No update available. Checked ${checked}.`;
+          if (data.url) showToast("Update check complete. Open the About tab for release links.");
+        } catch (err) {
+          els.updateLine.textContent = `Update check unavailable: ${err.message}`;
+        }
       });
-      document.getElementById("stopHelper").addEventListener("click", () => postHelper("/helper/stop"));
-      document.getElementById("stopHelperSettings").addEventListener("click", () => postHelper("/helper/stop"));
-      document.getElementById("browseOutput").addEventListener("click", () => showToast("Output folder picker lands with CC's Tier 2 helper endpoints."));
+      document.getElementById("stopHelper").addEventListener("click", () => postHelper("/helper/quit"));
+      document.getElementById("stopHelperSettings").addEventListener("click", () => postHelper("/helper/quit"));
+      els.autostartToggle.addEventListener("change", () => saveSettingsPatch({ autostart: els.autostartToggle.checked }, "Autostart updated."));
+      document.getElementById("saveOutput").addEventListener("click", () => saveSettingsPatch({ output_dir: els.outputFolder.value.trim() }, "Output folder updated."));
+      document.getElementById("saveScreenshotCount").addEventListener("click", () => {
+        const value = Math.max(0, Math.min(12, Number(els.screenshotCount.value || 4)));
+        els.screenshotCount.value = String(value);
+        saveSettingsPatch({ screenshot_count: value }, "Clipboard screenshot count updated.");
+      });
       document.getElementById("openOutput").addEventListener("click", () => {
         const path = els.outputFolder.value;
         if (path && !path.includes("unavailable")) {
           authFetch(`/open-folder?path=${encodeURIComponent(path)}`).catch((err) => showToast(err.message));
         }
       });
-      document.getElementById("addTopic").addEventListener("click", () => showToast("Topic editing endpoint lands with CC's Tier 2 helper branch."));
-      document.getElementById("newYoink").addEventListener("click", () => window.open("https://youtube.com", "_blank", "noopener"));
-      document.querySelectorAll("[data-open-youtube]").forEach((btn) => btn.addEventListener("click", () => window.open("https://youtube.com", "_blank", "noopener")));
+      document.getElementById("addTopic").addEventListener("click", () => {
+        const topics = readTopicEditor();
+        topics.push({ name: "", keywords: [] });
+        renderTopics(topics);
+      });
+      document.getElementById("saveTopics").addEventListener("click", () => saveSettingsPatch({ topics: readTopicEditor() }, "Topics updated."));
+      document.getElementById("newYoink").addEventListener("click", openLastYoutube);
+      document.querySelectorAll("[data-open-youtube]").forEach((btn) => btn.addEventListener("click", openLastYoutube));
+      document.querySelectorAll('a[target="_blank"]').forEach((link) => {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          openExternal(link.href);
+        });
+      });
       document.addEventListener("click", (event) => {
         const card = event.target.closest("[data-folder]");
         if (card) authFetch(`/open-folder?path=${encodeURIComponent(card.dataset.folder)}`).catch((err) => showToast(err.message));
@@ -1763,23 +1879,50 @@
       window.addEventListener("beforeunload", revokeThumbs);
     }
 
-    function connectJobsStream() {
+    function upsertJob(job) {
+      if (!job) return;
+      const id = job.id || job.job_id;
+      if (!id) return;
+      const next = job.id ? job : { ...job, id };
+      const existing = state.jobs.findIndex((row) => row.id === id);
+      if (existing >= 0) state.jobs.splice(existing, 1, { ...state.jobs[existing], ...next });
+      else state.jobs.unshift(next);
+    }
+
+    async function connectJobsStream() {
       try {
-        const source = new EventSource("/jobs/stream");
+        const token = await getToken();
+        const source = new EventSource(`/jobs/stream?token=${encodeURIComponent(token)}`);
+        source.addEventListener("snapshot", (event) => {
+          try {
+            const payload = event.data ? JSON.parse(event.data) : {};
+            const active = Array.isArray(payload.active) ? payload.active : [];
+            const recent = Array.isArray(payload.recent) ? payload.recent : [];
+            state.jobs = active.concat(recent);
+            state.jobsLoaded = true;
+            state.queue = payload.queue || state.queue || {};
+            renderQueue(state.queue);
+          } catch (_) {}
+        });
+        source.addEventListener("job", (event) => {
+          try {
+            upsertJob(event.data ? JSON.parse(event.data) : null);
+            renderQueue(state.queue || {});
+          } catch (_) {}
+        });
+        source.addEventListener("queue", (event) => {
+          try {
+            state.queue = event.data ? JSON.parse(event.data) : {};
+            renderQueue(state.queue);
+          } catch (_) {}
+        });
         source.onmessage = (event) => {
           try {
             const payload = event.data ? JSON.parse(event.data) : null;
-            if (payload && payload.job) {
-              const id = payload.job.id || payload.job.job_id;
-              if (id) {
-                const next = payload.job.id ? payload.job : { ...payload.job, id };
-                const existing = state.jobs.findIndex((job) => job.id === id);
-                if (existing >= 0) state.jobs.splice(existing, 1, { ...state.jobs[existing], ...next });
-                else state.jobs.unshift(next);
-              }
-            }
+            if (payload && payload.job) upsertJob(payload.job);
+            else if (payload && (payload.id || payload.job_id)) upsertJob(payload);
+            renderQueue(state.queue || {});
           } catch (_) {}
-          refreshActivity();
         };
         source.onerror = () => source.close();
       } catch (_) {}
@@ -1794,7 +1937,6 @@
       await refreshActivity();
       connectJobsStream();
       setInterval(refreshHealth, 10000);
-      setInterval(refreshActivity, 5000);
     }
 
     init().catch((err) => {

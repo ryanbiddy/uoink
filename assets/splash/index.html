@@ -49,9 +49,6 @@
         radial-gradient(circle at 100% 0%, rgba(255, 210, 63, 0.18), transparent 13rem),
         linear-gradient(180deg, #120f0d, var(--ink));
       box-shadow: 0 30px 90px rgba(0, 0, 0, 0.48);
-      transform: translateY(34px);
-      opacity: 0;
-      animation: slide-up 420ms cubic-bezier(.2,.9,.2,1) forwards;
       cursor: pointer;
     }
 
@@ -59,10 +56,6 @@
       background:
         radial-gradient(circle at 100% 0%, rgba(255, 61, 0, 0.16), transparent 14rem),
         linear-gradient(180deg, #180d0a, var(--ink));
-    }
-
-    @keyframes slide-up {
-      to { transform: translateY(0); opacity: 1; }
     }
 
     .bar {
@@ -233,19 +226,46 @@
         <button class="button" type="button" data-dashboard>Open dashboard</button>
       </div>
     </div>
-    <div class="footnote">slides up from bottom-right · auto-dismisses after 8s</div>
+    <div class="footnote">local helper dashboard</div>
   </section>
 
   <script>
     const mark = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M14 6 H40 V62 a10 10 0 0 0 20 0 V6 H86 V62 a36 36 0 0 1 -72 0 Z" fill="#C2410C"/><rect x="14" y="6" width="26" height="14" fill="#FFD23F"/><rect x="60" y="6" width="26" height="14" fill="#FFD23F"/></svg>';
     document.querySelector(".mark").innerHTML = mark;
 
-    const params = new URLSearchParams(location.search);
-    const failed = params.get("state") === "failed" || params.get("status") === "failed";
-    const detail = params.get("detail") || "port 5179 in use";
     const splash = document.getElementById("splash");
+    let token = "";
 
-    if (failed) {
+    function nativeApi() {
+      return window.pywebview && window.pywebview.api ? window.pywebview.api : null;
+    }
+
+    function openExternal(url) {
+      const native = nativeApi();
+      if (native && native.open_url) {
+        native.open_url(url);
+        return;
+      }
+      window.open(url, "_blank", "noopener");
+    }
+
+    async function getToken() {
+      if (token) return token;
+      const res = await fetch("/token", { headers: { "X-Uoink-Client": "uoink-splash" } });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "token unavailable");
+      token = data.token;
+      return token;
+    }
+
+    async function authFetch(path) {
+      const res = await fetch(path, { headers: { "X-Uoink-Token": await getToken() } });
+      const data = await res.json();
+      if (!res.ok || data.ok === false) throw new Error(data.error || `HTTP ${res.status}`);
+      return data;
+    }
+
+    function setFailure(detail) {
       splash.classList.add("failure");
       document.getElementById("eyebrow").textContent = "Diagnostics";
       document.getElementById("pill").querySelector("span:last-child").textContent = "Uoink couldn't start";
@@ -254,20 +274,43 @@
       document.querySelector("[data-youtube]").textContent = "Open diagnostics";
     }
 
+    async function loadDiagnostics() {
+      const params = new URLSearchParams(location.search);
+      if (params.get("state") === "failed" || params.get("status") === "failed") {
+        setFailure(params.get("detail") || "port 5179 in use");
+        return;
+      }
+      try {
+        const diag = await (await fetch("/diagnose")).json();
+        const bad = Array.isArray(diag.checks) ? diag.checks.find((check) => check.status && check.status !== "ok") : null;
+        if (diag.ok === false || bad) setFailure((bad && (bad.detail || bad.name)) || diag.error || "diagnostics found an issue");
+      } catch (_) {}
+    }
+
     function openDashboard() {
-      if (window.pywebview && window.pywebview.api && window.pywebview.api.open_dashboard) {
-        window.pywebview.api.open_dashboard();
+      const native = nativeApi();
+      if (native && native.open_dashboard) {
+        native.open_dashboard();
         return;
       }
       location.href = "/dashboard";
     }
 
     function dismiss() {
-      if (window.pywebview && window.pywebview.api && window.pywebview.api.minimize_to_tray) {
-        window.pywebview.api.minimize_to_tray();
+      const native = nativeApi();
+      if (native && native.close) {
+        native.close();
         return;
       }
       splash.style.display = "none";
+    }
+
+    async function openLastYoutube() {
+      try {
+        await authFetch("/open-last-youtube");
+      } catch (_) {
+        openExternal("https://youtube.com");
+      }
     }
 
     splash.addEventListener("click", (event) => {
@@ -280,14 +323,14 @@
     document.querySelector("[data-dashboard]").addEventListener("click", openDashboard);
     document.querySelector("[data-youtube]").addEventListener("click", (event) => {
       event.stopPropagation();
-      if (failed) openDashboard();
-      else window.open("https://youtube.com", "_blank", "noopener");
+      if (splash.classList.contains("failure")) openDashboard();
+      else openLastYoutube();
     });
     document.getElementById("dismiss").addEventListener("click", (event) => {
       event.stopPropagation();
       dismiss();
     });
-    setTimeout(dismiss, 8000);
+    loadDiagnostics();
   </script>
 </body>
 </html>
