@@ -892,6 +892,20 @@ _session_lock = threading.Lock()
 _jobs: dict[str, dict] = {}
 _jobs_lock = threading.Lock()
 _JOB_TERMINAL_STATES = {"completed", "cancelled", "failed"}
+
+# ---- /jobs/stream SSE (Tier 2) -------------------------------------------
+# Live job/queue push for the dashboard Activity tab + the extension popup
+# queue (one stream, two consumers). Header-gated like every other read
+# endpoint and consumed via fetch()+stream, NOT EventSource -- so the token is
+# sent in the X-Uoink-Token header and never lands in a URL (the ?token= query
+# fallback was deliberately removed; see _request_token). Event schema lives in
+# docs/tier-2-contracts.md. Emits the same _public_job shape /jobs returns.
+_SSE_MAX_STREAMS = 8          # cap concurrent streams (local single-user helper)
+_SSE_TICK_SEC = 1.0           # poll job/queue state this often
+_SSE_HEARTBEAT_SEC = 15.0     # keepalive comment cadence
+_sse_count_lock = threading.Lock()
+_sse_active = [0]
+
 _settings_lock = threading.Lock()
 _corpus_update_lock = threading.Lock()
 # Serializes read-modify-write of the per-video <slug>.json sidecar. The
@@ -5250,6 +5264,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_recent()
         if bare == "/open-folder":
             return self._handle_open_folder()
+        if bare == "/jobs/stream":
+            return self._handle_jobs_stream()
         if bare == "/jobs":
             return self._handle_jobs_list()
         if bare.startswith("/jobs/"):
@@ -5838,6 +5854,92 @@ class Handler(BaseHTTPRequestHandler):
             "ok": True,
             "jobs": _list_public_jobs(kind or None),
         })
+
+    # ---- /jobs/stream (Tier 2 SSE) ----
+    def _queue_snapshot(self) -> dict:
+        """Rate-limit queue counts for an SSE `queue` event. Tolerant of index
+        errors (returns zeros) so a transient DB hiccup never kills the stream."""
+        try:
+            overview = _get_index().pending_counts()
+        except Exception:
+            overview = {}
+        counts = overview.get("counts", {}) if isinstance(overview, dict) else {}
+        return {
+            "pending": int(counts.get("pending", 0)),
+            "running": int(counts.get("running", 0)),
+            "failed": int(counts.get("failed", 0)),
+            "succeeded": int(counts.get("succeeded", 0)),
+            "cancelled": int(counts.get("cancelled", 0)),
+            "next_retry_at": overview.get("next_retry_at") if isinstance(overview, dict) else None,
+        }
+
+    def _jobs_map(self) -> dict:
+        """{id: _public_job} for every current job (same shape /jobs returns)."""
+        return {j["id"]: j for j in _list_public_jobs() if j.get("id")}
+
+    def _jobs_snapshot(self) -> dict:
+        jobs = _list_public_jobs()
+        active = [j for j in jobs
+                  if (j.get("state") or "").lower() not in _JOB_TERMINAL_STATES]
+        recent = [j for j in jobs
+                  if (j.get("state") or "").lower() in _JOB_TERMINAL_STATES][:10]
+        return {"active": active, "recent": recent, "queue": self._queue_snapshot()}
+
+    def _sse_emit(self, event: str, obj) -> None:
+        frame = "event: %s\ndata: %s\n\n" % (event, json.dumps(obj, default=str))
+        self.wfile.write(frame.encode("utf-8"))
+        self.wfile.flush()
+
+    def _handle_jobs_stream(self):
+        """Server-sent job/queue stream (Tier 2). Header-gated; consume via
+        fetch()+ReadableStream, NOT EventSource, so the token rides the
+        X-Uoink-Token header rather than a URL (see _request_token). Emits one
+        `snapshot`, then `job`/`queue` deltas on a 1s poll, plus a `: heartbeat`
+        comment every 15s. One thread per connection (ThreadingHTTPServer);
+        exits when the client disconnects (write raises) -- and dies with the
+        process on shutdown, since worker threads are daemonic."""
+        if not self._require_token():
+            return
+        with _sse_count_lock:
+            if _sse_active[0] >= _SSE_MAX_STREAMS:
+                return self._send_json(503, {"ok": False, "error": "too many streams"})
+            _sse_active[0] += 1
+        try:
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Connection", "keep-alive")
+            # Defeat any proxy buffering so events arrive promptly.
+            self.send_header("X-Accel-Buffering", "no")
+            self._send_cors(self._cors_origin())
+            self.end_headers()
+            self.close_connection = True  # don't reuse the socket after we return
+
+            self._sse_emit("snapshot", self._jobs_snapshot())
+            last_jobs = self._jobs_map()
+            last_queue = self._queue_snapshot()
+            last_beat = time.monotonic()
+            while True:
+                time.sleep(_SSE_TICK_SEC)
+                cur = self._jobs_map()
+                for jid, jobj in cur.items():
+                    if last_jobs.get(jid) != jobj:
+                        self._sse_emit("job", jobj)
+                last_jobs = cur
+                queue = self._queue_snapshot()
+                if queue != last_queue:
+                    self._sse_emit("queue", queue)
+                    last_queue = queue
+                now = time.monotonic()
+                if now - last_beat >= _SSE_HEARTBEAT_SEC:
+                    self.wfile.write(b": heartbeat\n\n")
+                    self.wfile.flush()
+                    last_beat = now
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            pass  # client went away -- reap this stream
+        finally:
+            with _sse_count_lock:
+                _sse_active[0] -= 1
 
     # ---- /taxonomy ----
     def _handle_taxonomy(self):
