@@ -1061,7 +1061,7 @@
               <h2>Runtime</h2>
               <p class="setting-copy" id="aboutVersion">Version: checking...</p>
               <p class="setting-copy" id="aboutPort">Loopback: localhost:5179</p>
-              <p class="setting-copy">Tier 2 contract: `/jobs/stream?token=...` with `snapshot`, `job`, and `queue` events.</p>
+              <p class="setting-copy">Tier 2 contract: `/jobs/stream` over header-auth fetch with `snapshot`, `job`, and `queue` events.</p>
             </div>
             <div class="setting-block">
               <h2>Learn</h2>
@@ -1914,43 +1914,59 @@
       else state.jobs.unshift(next);
     }
 
+    function handleJobsStreamEvent(eventName, payload) {
+      if (eventName === "snapshot") {
+        const active = Array.isArray(payload.active) ? payload.active : [];
+        const recent = Array.isArray(payload.recent) ? payload.recent : [];
+        state.jobs = active.concat(recent);
+        state.jobsLoaded = true;
+        state.queue = payload.queue || state.queue || {};
+        renderQueue(state.queue);
+        return;
+      }
+      if (eventName === "job") {
+        upsertJob(payload);
+        renderQueue(state.queue || {});
+        return;
+      }
+      if (eventName === "queue") {
+        state.queue = payload || {};
+        renderQueue(state.queue);
+      }
+    }
+
+    function handleJobsStreamFrame(frame) {
+      const clean = String(frame || "").trim();
+      if (!clean || clean.startsWith(":")) return;
+      const eventName = /^event:\s*(.*)$/m.exec(clean)?.[1];
+      const data = /^data:\s*(.*)$/m.exec(clean)?.[1];
+      if (!eventName || !data) return;
+      handleJobsStreamEvent(eventName, JSON.parse(data));
+    }
+
     async function connectJobsStream() {
       try {
         const token = await getToken();
-        const source = new EventSource(`/jobs/stream?token=${encodeURIComponent(token)}`);
-        source.addEventListener("snapshot", (event) => {
-          try {
-            const payload = event.data ? JSON.parse(event.data) : {};
-            const active = Array.isArray(payload.active) ? payload.active : [];
-            const recent = Array.isArray(payload.recent) ? payload.recent : [];
-            state.jobs = active.concat(recent);
-            state.jobsLoaded = true;
-            state.queue = payload.queue || state.queue || {};
-            renderQueue(state.queue);
-          } catch (_) {}
-        });
-        source.addEventListener("job", (event) => {
-          try {
-            upsertJob(event.data ? JSON.parse(event.data) : null);
-            renderQueue(state.queue || {});
-          } catch (_) {}
-        });
-        source.addEventListener("queue", (event) => {
-          try {
-            state.queue = event.data ? JSON.parse(event.data) : {};
-            renderQueue(state.queue);
-          } catch (_) {}
-        });
-        source.onmessage = (event) => {
-          try {
-            const payload = event.data ? JSON.parse(event.data) : null;
-            if (payload && payload.job) upsertJob(payload.job);
-            else if (payload && (payload.id || payload.job_id)) upsertJob(payload);
-            renderQueue(state.queue || {});
-          } catch (_) {}
-        };
-        source.onerror = () => source.close();
-      } catch (_) {}
+        const res = await fetch("/jobs/stream", { headers: { "X-Uoink-Token": token } });
+        if (!res.ok || !res.body) throw new Error(`stream unavailable: HTTP ${res.status}`);
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
+          let index = buffer.indexOf("\n\n");
+          while (index >= 0) {
+            const frame = buffer.slice(0, index);
+            buffer = buffer.slice(index + 2);
+            try { handleJobsStreamFrame(frame); } catch (_) {}
+            index = buffer.indexOf("\n\n");
+          }
+        }
+      } catch (_) {
+        setTimeout(refreshActivity, 5000);
+      }
     }
 
     async function init() {
