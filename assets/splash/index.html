@@ -298,6 +298,10 @@
 
     function dismiss() {
       const native = nativeApi();
+      if (native && native.minimize) {
+        native.minimize();
+        return;
+      }
       if (native && native.close) {
         native.close();
         return;
