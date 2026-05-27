@@ -505,6 +505,15 @@ def _public_settings(data: dict | None = None) -> dict:
             data.get("clipboard_screenshot_cap", CLIPBOARD_SCREENSHOT_CAP_DEFAULT)
         ),
         "anthropic_key_set": bool(key and not data.get("anthropic_key_invalid")),
+        # Tier 2 dashboard Settings tab additions:
+        "anthropic_key_masked": _mask_anthropic_key(key),
+        "output_dir": str(DESKTOP_ROOT),
+        "output_dir_pending_restart": bool(
+            data.get("output_dir")
+            and str(Path(data["output_dir"]).expanduser()) != str(DESKTOP_ROOT)
+        ),
+        "autostart": _autostart_enabled(),
+        "topics": (_load_topics() or {}).get("topics", []),
     }
 
 
@@ -780,6 +789,22 @@ def _get_output_root() -> Path:
     if override:
         try:
             candidate = Path(override).expanduser().resolve()
+            if _is_writable_dir(candidate):
+                return candidate
+        except OSError:
+            pass
+    # User-chosen output folder (dashboard Settings, Tier 2). Persisted in
+    # settings.json and honored at startup, just like the env override above
+    # (env still wins so dev/test can force a path). Applied at start rather
+    # than mutating DESKTOP_ROOT live, so in-flight extractions never see the
+    # root move under them.
+    try:
+        chosen = (_read_settings().get("output_dir") or "").strip()
+    except Exception:
+        chosen = ""
+    if chosen:
+        try:
+            candidate = Path(chosen).expanduser().resolve()
             if _is_writable_dir(candidate):
                 return candidate
         except OSError:
@@ -3695,6 +3720,120 @@ def _check_for_update(*, force: bool = False) -> dict:
         return result
 
 
+# ---- Settings extras (Tier 2 dashboard Settings tab) ---------------------
+def _mask_anthropic_key(key: str) -> str | None:
+    """'sk-ant-…abcd' for display; None when no key is stored."""
+    key = (key or "").strip()
+    if not key:
+        return None
+    return (key[:6] + "…" + key[-4:]) if len(key) >= 12 else "set"
+
+
+# Autostart Run key reuses the same HKCU value the installer writes.
+_AUTOSTART_SUBKEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
+_AUTOSTART_VALUE = "Uoink"
+
+
+def _autostart_command() -> str:
+    return f'"{HERE / "python" / "pythonw.exe"}" "{HERE / "server.py"}"'
+
+
+def _autostart_enabled() -> bool | None:
+    """True/False on Windows; None where there's no HKCU Run key (non-Windows)."""
+    if sys.platform != "win32":
+        return None
+    try:
+        import winreg
+    except Exception:
+        return None
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _AUTOSTART_SUBKEY, 0,
+                            winreg.KEY_READ) as k:
+            try:
+                winreg.QueryValueEx(k, _AUTOSTART_VALUE)
+                return True
+            except FileNotFoundError:
+                return False
+    except OSError:
+        return None
+
+
+def _set_autostart(enabled: bool) -> bool | None:
+    """Set/clear the HKCU Run\\Uoink value. Returns True on success, None when
+    unsupported (non-Windows), False on a registry error."""
+    if sys.platform != "win32":
+        return None
+    try:
+        import winreg
+    except Exception:
+        return None
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _AUTOSTART_SUBKEY, 0,
+                            winreg.KEY_READ | winreg.KEY_SET_VALUE) as k:
+            if enabled:
+                winreg.SetValueEx(k, _AUTOSTART_VALUE, 0, winreg.REG_SZ,
+                                  _autostart_command())
+            else:
+                try:
+                    winreg.DeleteValue(k, _AUTOSTART_VALUE)
+                except FileNotFoundError:
+                    pass
+        log.info("autostart %s", "enabled" if enabled else "disabled")
+        return True
+    except OSError as e:
+        log.warning("autostart toggle failed: %s", e)
+        return False
+
+
+def _validate_topics(topics) -> str | None:
+    """Validate a topics-editor payload: list of {name:str, keywords:[str]}.
+    Returns an error string, or None if valid."""
+    if not isinstance(topics, list):
+        return "topics must be a list"
+    if len(topics) > 200:
+        return "too many topics (max 200)"
+    for t in topics:
+        if not isinstance(t, dict):
+            return "each topic must be an object"
+        name = t.get("name")
+        if not isinstance(name, str) or not name.strip():
+            return "each topic needs a non-empty name"
+        kws = t.get("keywords", [])
+        if not isinstance(kws, list) or not all(isinstance(k, str) for k in kws):
+            return f"topic '{name}' keywords must be a list of strings"
+    return None
+
+
+def _write_topics(topics: list) -> None:
+    """Persist the topics editor to topics.json, preserving any other keys."""
+    try:
+        existing = json.loads(TOPICS_PATH.read_text(encoding="utf-8"))
+        if not isinstance(existing, dict):
+            existing = {}
+    except (OSError, ValueError):
+        existing = {}
+    existing["topics"] = [
+        {"name": t["name"].strip(),
+         "keywords": [k.strip() for k in t.get("keywords", []) if k.strip()]}
+        for t in topics
+    ]
+    tmp = TOPICS_PATH.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(existing, indent=2), encoding="utf-8")
+    tmp.replace(TOPICS_PATH)
+
+
+def _mcp_settings_snippet() -> dict:
+    """MCP server config snippet for the Settings tab's Copy button. Points at
+    the bundled stdio entry (uoink_mcp.py) under the install dir. (Distinct from
+    _mcp_config_payload(), which serves the /mcp/v1/config protocol endpoint.)"""
+    py = str(HERE / "python" / "python.exe")
+    script = str(HERE / "uoink_mcp.py")
+    entry = {"command": py, "args": [script]}
+    cfg = {"mcpServers": {"uoink": entry}}
+    return {"claude_desktop": cfg, "cursor": cfg,
+            "raw": json.dumps(cfg, indent=2)}
+
+
 def _session_folder(slug: str) -> Path:
     return SESSIONS_ROOT / slug
 
@@ -5320,6 +5459,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_settings_pricing()
         if bare == "/update/check":
             return self._handle_update_check()
+        if bare == "/settings/mcp-config":
+            return self._handle_settings_mcp_config()
         if bare == "/file":
             return self._handle_file()
         if bare == "/mcp/v1/config":
@@ -5403,6 +5544,12 @@ class Handler(BaseHTTPRequestHandler):
         force = (parse_qs(urlparse(self.path).query).get("force") or [""])[0] == "1"
         self._send_json(200, {"ok": True, **_check_for_update(force=force)})
 
+    def _handle_settings_mcp_config(self):
+        """MCP config snippet for the Settings tab Copy button. Token-gated."""
+        if not self._require_token():
+            return
+        self._send_json(200, {"ok": True, "mcp_config": _mcp_settings_snippet()})
+
     def _handle_settings_post(self, body: dict):
         boolean_fields = (
             "comment_intelligence_enabled",
@@ -5410,10 +5557,12 @@ class Handler(BaseHTTPRequestHandler):
             "smart_screenshot_picker_enabled",
         )
         integer_fields = ("clipboard_screenshot_cap",)
+        extra_fields = ("output_dir", "autostart", "topics")  # Tier 2
         if (
             not any(f in body for f in boolean_fields)
             and not any(f in body for f in integer_fields)
             and "anthropic_key" not in body
+            and not any(f in body for f in extra_fields)
         ):
             return self._send_json(400, {
                 "ok": False,
@@ -5467,6 +5616,40 @@ class Handler(BaseHTTPRequestHandler):
                     "error": "credential store unavailable",
                 })
             data["anthropic_key_invalid"] = False
+        # ---- Tier 2 extras ----
+        if "output_dir" in body:
+            val = body.get("output_dir")
+            if not isinstance(val, str) or not val.strip():
+                return self._send_json(400, {
+                    "ok": False, "error": "output_dir must be a non-empty string"})
+            try:
+                cand = Path(val).expanduser()
+                cand.mkdir(parents=True, exist_ok=True)
+                if not _is_writable_dir(cand):
+                    raise OSError("not writable")
+            except OSError:
+                return self._send_json(400, {
+                    "ok": False, "error": f"output_dir is not a writable folder: {val}"})
+            # Persisted; _get_output_root applies it on the next start (no live
+            # DESKTOP_ROOT mutation under in-flight extractions).
+            data["output_dir"] = str(cand.resolve())
+        if "autostart" in body:
+            if not isinstance(body.get("autostart"), bool):
+                return self._send_json(400, {
+                    "ok": False, "error": "autostart must be boolean"})
+            if _set_autostart(body["autostart"]) is False:
+                return self._send_json(200, {
+                    "ok": False, "error": "autostart toggle failed"})
+        if "topics" in body:
+            err = _validate_topics(body.get("topics"))
+            if err:
+                return self._send_json(400, {"ok": False, "error": err})
+            try:
+                _write_topics(body["topics"])
+            except OSError as e:
+                log.warning("topics write failed: %s", e)
+                return self._send_json(200, {
+                    "ok": False, "error": "topics write failed"})
         data["updated_at"] = _now_iso()
         try:
             _write_settings(data)
