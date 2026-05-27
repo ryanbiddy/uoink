@@ -6,368 +6,795 @@
   <title>Uoink Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --rust: #C2410C;
+      --rust-bright: #F97316;
       --vermillion: #FF3D00;
       --acid: #FFD23F;
       --cream: #FFF4EC;
       --ink: #0A0A0A;
-      --line: rgba(10, 10, 10, 0.13);
-      --muted: rgba(10, 10, 10, 0.62);
-      --panel: rgba(255, 255, 255, 0.64);
-      --green: #23724B;
-      --shadow: 0 20px 70px rgba(10, 10, 10, 0.10);
+      --ink-warm: #15110D;
+      --border: #2C2621;
+      --muted: #C8B19F;
+      --dim: #8F7B6E;
+      --ok: #00C853;
+      --ok-on-cream: #0F8F3F;
+      --danger-bg: #3A1F1F;
+      --danger-border: #6A3A3A;
+      --warn: #FFE3A3;
+      --card-radius: 12px;
+      --control-radius: 10px;
+      --pill-radius: 999px;
+      --shadow-soft: 0 22px 70px rgba(0, 0, 0, 0.38);
+      --font-ui: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-display: Bungee, Inter, system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", Consolas, "SFMono-Regular", monospace;
     }
 
     * { box-sizing: border-box; }
 
+    html,
     body {
+      min-height: 100%;
       margin: 0;
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at 8% 6%, rgba(255, 210, 63, 0.28), transparent 28rem),
-        linear-gradient(180deg, var(--cream), #ffe8dc 100%);
-      color: var(--ink);
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--ink);
+      color: var(--cream);
+      font-family: var(--font-ui);
+      font-size: 14px;
     }
 
-    button {
+    body {
+      overflow: hidden;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
       font: inherit;
     }
 
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255, 244, 236, 0.92);
-      backdrop-filter: blur(16px);
+    button,
+    a {
+      color: inherit;
     }
 
-    .topbar-inner,
-    .shell {
-      width: min(1120px, calc(100% - 32px));
-      margin: 0 auto;
-    }
-
-    .topbar-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-      padding: 18px 0;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-
-    .mark {
+    .app {
       display: grid;
-      place-items: center;
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: var(--rust);
-      color: var(--cream);
-      font-family: Bungee, Inter, sans-serif;
-      font-size: 24px;
-      box-shadow: 0 12px 28px rgba(194, 65, 12, 0.25);
+      grid-template-columns: 236px minmax(0, 1fr);
+      width: 100vw;
+      height: 100vh;
+      min-width: 960px;
+      min-height: 680px;
+      background:
+        radial-gradient(circle at 82% 0%, rgba(194, 65, 12, 0.17), transparent 26rem),
+        linear-gradient(180deg, #0d0a08, var(--ink) 46%);
     }
 
-    h1 {
-      margin: 0;
-      color: var(--rust);
-      font-family: Bungee, Inter, sans-serif;
-      font-size: clamp(27px, 5vw, 32px);
-      line-height: 1;
-      letter-spacing: 0;
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      min-height: 0;
+      border-right: 1px solid var(--border);
+      padding: 24px 18px;
+      background: #080706;
     }
 
-    .eyebrow {
-      margin-bottom: 3px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .status-row {
+    .wordmark {
       display: flex;
       align-items: center;
-      justify-content: flex-end;
-      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--vermillion);
+      font-family: var(--font-display);
+      font-size: 30px;
+      letter-spacing: 0;
+      line-height: 1;
+    }
+
+    .uoink-mark {
+      display: inline-flex;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+    }
+
+    .uoink-mark svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .nav {
+      display: grid;
       gap: 8px;
     }
 
-    .pill {
+    .nav-button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: var(--control-radius);
+      padding: 0 12px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 800;
+      text-align: left;
+    }
+
+    .nav-button:hover,
+    .nav-button:focus-visible {
+      outline: none;
+      border-color: var(--border);
+      background: rgba(255, 244, 236, 0.04);
+      color: var(--cream);
+    }
+
+    .nav-button.active {
+      border-color: var(--border);
+      background: var(--ink-warm);
+      color: var(--cream);
+    }
+
+    .nav-count {
+      color: var(--rust-bright, #F97316);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .sidebar-bottom {
+      display: grid;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    .running-pill {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      min-height: 32px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 7px 11px;
-      background: rgba(255, 255, 255, 0.54);
-      color: var(--ink);
-      font-family: "JetBrains Mono", monospace;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
+      gap: 8px;
+      width: fit-content;
+      max-width: 100%;
+      min-height: 34px;
+      border: 1px solid rgba(0, 200, 83, 0.34);
+      border-radius: var(--pill-radius);
+      padding: 8px 12px;
+      background: var(--ink-warm);
+      color: var(--cream);
+      font-weight: 800;
     }
 
-    .pill.status-ok {
-      border-color: rgba(35, 114, 75, 0.26);
-      background: rgba(35, 114, 75, 0.12);
-      color: var(--green);
-    }
-
-    .pill.status-offline {
-      border-color: rgba(194, 65, 12, 0.28);
-      background: rgba(194, 65, 12, 0.12);
-      color: var(--rust);
-    }
-
-    .dot {
+    .running-pill .pip {
       width: 8px;
       height: 8px;
-      border-radius: 99px;
-      background: currentColor;
+      border-radius: 999px;
+      background: var(--ok);
+      box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.58);
+      animation: pulse 1.8s ease-out infinite;
     }
 
-    .shell {
-      padding: 30px 0 34px;
+    .running-pill.offline {
+      border-color: rgba(255, 61, 0, 0.44);
     }
 
-    .hero {
+    .running-pill.offline .pip {
+      background: var(--vermillion);
+      animation: none;
+      box-shadow: none;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.58); }
+      70% { box-shadow: 0 0 0 8px rgba(0, 200, 83, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0); }
+    }
+
+    .localhost {
+      color: var(--dim);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .stop {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 36px;
+      border: 1px solid rgba(255, 61, 0, 0.38);
+      border-radius: var(--control-radius);
+      background: rgba(255, 61, 0, 0.08);
+      color: var(--vermillion);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .main {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .chrome {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      gap: 24px;
-      margin-bottom: 18px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: clamp(18px, 3vw, 26px);
-      background: var(--panel);
-      box-shadow: var(--shadow);
+      min-height: 48px;
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      background: rgba(10, 10, 10, 0.82);
+      color: var(--dim);
+      font-family: var(--font-mono);
+      font-size: 12px;
     }
 
-    .hero h2 {
-      margin: 0 0 8px;
-      font-size: clamp(26px, 5vw, 46px);
+    .window-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .window-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 99px;
+      border: 1px solid var(--dim);
+      opacity: 0.85;
+    }
+
+    .content {
+      min-width: 0;
+      min-height: 0;
+      overflow: auto;
+      padding: 28px 28px 34px;
+    }
+
+    .tab-panel {
+      display: none;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .page-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      color: var(--rust-bright, #F97316);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      margin-top: 6px;
+      color: var(--cream);
+      font-size: 36px;
       line-height: 1.04;
       letter-spacing: 0;
     }
 
-    .hero p {
-      max-width: 680px;
-      margin: 0;
+    h1 em,
+    .accent {
+      color: var(--vermillion);
+      font-family: Georgia, "Times New Roman", serif;
+      font-style: italic;
+      font-weight: 800;
+    }
+
+    .lede {
+      max-width: 56ch;
+      margin-top: 10px;
       color: var(--muted);
-      font-size: 15px;
-      line-height: 1.58;
+      line-height: 1.55;
     }
 
-    .actions {
-      display: flex;
-      align-items: flex-start;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .button {
+    .button,
+    .icon-button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 40px;
-      border: 1px solid var(--ink);
-      border-radius: 999px;
-      padding: 10px 15px;
-      background: var(--ink);
+      min-height: 38px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 0 13px;
+      background: var(--ink-warm);
       color: var(--cream);
       cursor: pointer;
-      font-size: 13px;
       font-weight: 800;
       text-decoration: none;
-      transition: transform 120ms ease, background 120ms ease, color 120ms ease, border-color 120ms ease;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
     }
 
-    .button:hover {
+    .button:hover,
+    .icon-button:hover,
+    .button:focus-visible,
+    .icon-button:focus-visible {
+      outline: none;
+      border-color: var(--rust);
+      background: rgba(194, 65, 12, 0.15);
+    }
+
+    .button.primary {
       border-color: var(--vermillion);
       background: var(--vermillion);
       color: var(--ink);
     }
 
-    .button:active {
-      transform: translateY(1px) scale(0.98);
+    .button.ghost {
+      background: transparent;
     }
 
-    .button.secondary {
-      border-color: var(--line);
-      background: rgba(255, 255, 255, 0.54);
-      color: var(--ink);
+    .button.danger {
+      border-color: rgba(255, 61, 0, 0.5);
+      background: rgba(255, 61, 0, 0.09);
+      color: var(--vermillion);
     }
 
-    .button.secondary:hover {
-      border-color: var(--vermillion);
-      background: rgba(255, 61, 0, 0.13);
+    .button:active,
+    .icon-button:active {
+      transform: translateY(1px);
     }
 
-    .button[aria-disabled="true"] {
-      cursor: not-allowed;
-      opacity: 0.55;
-    }
-
-    .section-head {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 16px;
-      margin: 28px 0 12px;
-    }
-
-    .section-head h2 {
-      margin: 0;
-      font-size: 22px;
-      letter-spacing: 0;
-    }
-
-    .count {
-      color: var(--muted);
-      font-family: "JetBrains Mono", monospace;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .cards {
+    .control-grid {
       display: grid;
-      gap: 12px;
+      grid-template-columns: minmax(240px, 2fr) repeat(6, minmax(112px, 1fr));
+      gap: 10px;
+      margin: 18px 0 18px;
     }
 
-    .card {
-      display: grid;
-      grid-template-columns: 74px 1fr auto;
-      gap: 14px;
-      align-items: center;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 12px;
-      background: rgba(255, 255, 255, 0.58);
-      box-shadow: 0 10px 30px rgba(10, 10, 10, 0.06);
-      cursor: pointer;
-      transition: border-color 120ms ease, transform 120ms ease, background 120ms ease;
-    }
-
-    .card:hover {
-      border-color: rgba(255, 61, 0, 0.42);
-      background: rgba(255, 255, 255, 0.78);
-      transform: translateY(-1px);
-    }
-
-    .thumb,
-    .initials {
-      width: 74px;
-      height: 74px;
-      border-radius: 8px;
-      object-fit: cover;
-      background: var(--ink);
+    .control,
+    .field {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 0 12px;
+      background: var(--ink-warm);
       color: var(--cream);
+      outline: none;
     }
 
-    .initials {
-      display: grid;
-      place-items: center;
-      font-family: Bungee, Inter, sans-serif;
-      font-size: 24px;
+    .control:focus,
+    .field:focus {
+      border-color: var(--rust);
     }
 
-    .card h3 {
-      margin: 0 0 7px;
-      font-size: clamp(16px, 3vw, 19px);
-      line-height: 1.25;
-      letter-spacing: 0;
+    select.control {
+      appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+      background-position: calc(100% - 18px) 18px, calc(100% - 12px) 18px;
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
     }
 
-    .meta,
-    .tagline {
+    .summary-line {
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 7px;
-      color: var(--muted);
-      font-size: 13px;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+      color: var(--dim);
+      font-family: var(--font-mono);
+      font-size: 12px;
     }
 
-    .tagline {
-      margin-top: 8px;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
     }
 
-    .chip {
+    .uoink-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 232px;
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      background: var(--ink-warm);
+      box-shadow: var(--shadow-soft);
+      cursor: pointer;
+    }
+
+    .thumb {
+      position: relative;
+      height: 124px;
+      border-bottom: 1px solid var(--border);
+      background:
+        radial-gradient(circle at 30% 20%, rgba(255, 210, 63, 0.16), transparent 7rem),
+        linear-gradient(135deg, #2c2621, #1b1714);
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .duration {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      color: var(--acid);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+    }
+
+    .hook-chip,
+    .topic-chip,
+    .phase-chip {
       display: inline-flex;
       align-items: center;
-      min-height: 24px;
-      border-radius: 999px;
-      padding: 4px 8px;
-      background: rgba(255, 210, 63, 0.35);
-      color: var(--ink);
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .open-hint {
-      color: var(--rust);
-      font-size: 12px;
+      min-height: 22px;
+      border-radius: var(--pill-radius);
+      padding: 0 10px;
+      font-size: 10px;
       font-weight: 800;
       white-space: nowrap;
     }
 
-    .state {
-      border: 1px dashed rgba(194, 65, 12, 0.35);
-      border-radius: 8px;
-      padding: 28px;
-      background: rgba(255, 255, 255, 0.42);
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.5;
+    .hook-chip {
+      position: absolute;
+      top: 36px;
+      left: 12px;
+      background: var(--rust);
+      color: var(--cream);
     }
 
-    footer {
+    .card-body {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .card-title {
+      min-height: 40px;
+      color: var(--cream);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.28;
+    }
+
+    .card-meta {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .card-foot {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 18px;
-      margin-top: 28px;
-      border-top: 1px solid var(--line);
-      padding-top: 18px;
-      color: var(--muted);
-      font-size: 13px;
+      gap: 10px;
     }
 
-    .mono {
-      font-family: "JetBrains Mono", monospace;
+    .topic-chip {
+      border: 1px solid var(--rust);
+      background: transparent;
+      color: var(--rust-bright, #F97316);
+    }
+
+    .age {
+      color: var(--dim);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .health-dots {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 12px;
+    }
+
+    .health-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 99px;
+      background: var(--dim);
+    }
+
+    .health-dot.ok { background: var(--ok); }
+    .health-dot.warn { background: var(--acid); }
+    .health-dot.fail { background: var(--vermillion); }
+
+    .empty-state {
+      display: grid;
+      place-items: center;
+      min-height: 420px;
+      border: 1px dashed var(--border);
+      border-radius: 16px;
+      background: rgba(21, 17, 13, 0.58);
+      text-align: center;
+    }
+
+    .empty-state h2 {
+      font-size: 32px;
+      line-height: 1;
+    }
+
+    .empty-state p {
+      max-width: 420px;
+      margin: 14px auto 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .tip {
+      margin-top: 18px;
+      color: var(--dim);
+      font-family: var(--font-mono);
       font-size: 12px;
+    }
+
+    .activity-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+      gap: 16px;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      background: rgba(21, 17, 13, 0.82);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+      padding: 15px 16px;
+    }
+
+    .panel-title {
+      color: var(--cream);
+      font-weight: 900;
+    }
+
+    .panel-body {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .job-row {
+      display: grid;
+      gap: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 13px;
+      background: var(--ink-warm);
+    }
+
+    .job-row.failed {
+      border-color: var(--danger-border);
+      background: var(--danger-bg);
+    }
+
+    .job-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .job-title {
+      color: var(--cream);
+      font-weight: 800;
+    }
+
+    .job-sub {
+      margin-top: 3px;
+      color: var(--dim);
+      font-size: 12px;
+    }
+
+    .phase-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .phase-chip {
+      border: 1px solid var(--border);
+      color: var(--dim);
+    }
+
+    .phase-chip.done {
+      border-color: rgba(0, 200, 83, 0.32);
+      color: var(--ok);
+    }
+
+    .phase-chip.active {
+      border-color: var(--rust);
+      background: rgba(194, 65, 12, 0.18);
+      color: var(--cream);
+    }
+
+    .progress {
+      overflow: hidden;
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: #241f1b;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: var(--vermillion);
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 0.8fr);
+      gap: 16px;
+    }
+
+    .setting-block {
+      display: grid;
+      gap: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 16px;
+      background: rgba(21, 17, 13, 0.82);
+    }
+
+    .setting-block h2 {
+      color: var(--cream);
+      font-size: 16px;
+    }
+
+    .setting-copy {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .inline-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .mono-box,
+    textarea.mono-box {
+      width: 100%;
+      min-height: 92px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 12px;
+      background: #0d0b09;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.45;
+      resize: vertical;
+    }
+
+    .topic-list {
+      display: grid;
+      gap: 8px;
+      max-height: 250px;
+      overflow: auto;
+    }
+
+    .topic-row {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      gap: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 10px;
+      background: var(--ink-warm);
+    }
+
+    .topic-row b {
+      color: var(--cream);
+    }
+
+    .topic-row span {
+      color: var(--dim);
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .about-hero {
+      display: grid;
+      place-items: center;
+      min-height: 360px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 50% 20%, rgba(255, 61, 0, 0.18), transparent 18rem),
+        var(--ink-warm);
+      text-align: center;
+    }
+
+    .about-hero .wordmark {
+      justify-content: center;
+      font-size: 56px;
+    }
+
+    .link-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .link-list a {
+      display: flex;
+      justify-content: space-between;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 10px 11px;
+      background: var(--ink-warm);
+      text-decoration: none;
+    }
+
+    .quote {
+      margin-top: 20px;
+      color: var(--muted);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 22px;
+      font-style: italic;
     }
 
     .toast {
       position: fixed;
-      right: 18px;
-      bottom: 18px;
-      max-width: min(380px, calc(100vw - 36px));
-      border: 1px solid rgba(10, 10, 10, 0.18);
-      border-radius: 8px;
-      padding: 12px 14px;
-      background: var(--ink);
+      right: 22px;
+      bottom: 22px;
+      z-index: 30;
+      max-width: 360px;
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 13px 15px;
+      background: #120f0d;
       color: var(--cream);
-      box-shadow: var(--shadow);
-      font-size: 13px;
+      box-shadow: var(--shadow-soft);
       opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 120ms ease, transform 120ms ease;
+      transform: translateY(10px);
       pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease;
     }
 
     .toast.show {
@@ -375,357 +802,810 @@
       transform: translateY(0);
     }
 
-    @media (max-width: 700px) {
-      .topbar-inner,
-      .hero,
-      footer {
-        align-items: stretch;
-        flex-direction: column;
-      }
+    .hidden {
+      display: none !important;
+    }
 
-      .status-row,
-      .actions {
-        justify-content: flex-start;
+    @media (max-width: 1080px) {
+      body { overflow: auto; }
+      .app {
+        min-width: 0;
+        height: auto;
+        min-height: 100vh;
+        grid-template-columns: 1fr;
       }
-
-      .card {
-        grid-template-columns: 58px 1fr;
+      .sidebar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        align-items: center;
       }
-
-      .thumb,
-      .initials {
-        width: 58px;
-        height: 58px;
+      .nav {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
       }
-
-      .open-hint {
-        display: none;
+      .sidebar-bottom {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+      }
+      .control-grid,
+      .activity-layout,
+      .settings-grid,
+      .about-grid {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <div class="brand">
-        <div class="mark" aria-hidden="true">U</div>
-        <div>
-          <div class="eyebrow">Local helper dashboard</div>
-          <h1>UOINK</h1>
+  <div class="app">
+    <aside class="sidebar" aria-label="Dashboard navigation">
+      <div class="wordmark">
+        <span class="uoink-mark" aria-hidden="true"></span>
+        <span>OINK</span>
+      </div>
+      <nav class="nav" aria-label="Sections">
+        <button class="nav-button active" type="button" data-tab-button="library">Library <span class="nav-count" id="libraryNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="activity">Activity <span class="nav-count" id="activityNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="settings">Settings</button>
+        <button class="nav-button" type="button" data-tab-button="about">About</button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="running-pill" id="runningPill"><span class="pip"></span><span>Uoink is running</span></div>
+        <div class="localhost" id="portLabel">localhost:5179</div>
+        <button class="stop" type="button" id="stopHelper">Stop helper</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="chrome">
+        <span>Uoink - local helper dashboard</span>
+        <div class="window-controls" aria-hidden="true">
+          <span class="window-dot"></span>
+          <span class="window-dot"></span>
+          <span class="window-dot"></span>
         </div>
       </div>
-      <div class="status-row" aria-live="polite">
-        <div id="version-pill" class="pill">v...</div>
-        <div id="status-pill" class="pill status-offline"><span class="dot"></span><span>Checking</span></div>
-      </div>
-    </div>
-  </header>
 
-  <main class="shell">
-    <section class="hero">
-      <div>
-        <h2>Your local video memory.</h2>
-        <p>Recent Uoinks, helper status, and a fast path back to the folder on disk. Everything here is served from the helper running at 127.0.0.1.</p>
-      </div>
-      <div class="actions">
-        <button id="open-root" class="button" type="button">Open Uoink folder</button>
-        <button id="stop-helper" class="button secondary" type="button" title="Stop helper lands in Tier 2.">Stop helper</button>
-      </div>
-    </section>
+      <div class="content">
+        <section class="tab-panel active" id="tab-library" data-tab-panel="library">
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">Library</div>
+              <h1><span id="libraryCount">0</span> yoinks <em>read like docs.</em></h1>
+              <p class="lede">Search titles, transcripts, comments, channels, topics, and hook types. Everything stays local in your Uoink index.</p>
+            </div>
+            <div class="inline-row">
+              <button class="button ghost" type="button" id="clearFilters">Clear filters</button>
+              <button class="button primary" type="button" id="newYoink">+ Yoink</button>
+            </div>
+          </div>
 
-    <section aria-labelledby="recent-title">
-      <div class="section-head">
-        <h2 id="recent-title">Recent yoinks</h2>
-        <div id="recent-count" class="count">Loading...</div>
-      </div>
-      <div id="cards" class="cards" aria-live="polite">
-        <div class="state">Loading recent yoinks...</div>
-      </div>
-    </section>
+          <div class="control-grid">
+            <input class="control" id="searchInput" type="search" placeholder="search transcripts, titles, comments">
+            <select class="control" id="channelFilter"><option value="">Channel: all</option></select>
+            <select class="control" id="topicFilter"><option value="">Topic: all</option></select>
+            <select class="control" id="hookFilter">
+              <option value="">Hook: any</option>
+              <option value="curiosity_gap">curiosity_gap</option>
+              <option value="question">question</option>
+              <option value="contrarian">contrarian</option>
+              <option value="story_open">story_open</option>
+              <option value="promise_list">promise_list</option>
+              <option value="demo">demo</option>
+              <option value="authority">authority</option>
+              <option value="stakes">stakes</option>
+              <option value="other">other</option>
+            </select>
+            <input class="control" id="dateFrom" type="date" aria-label="Date from">
+            <input class="control" id="dateTo" type="date" aria-label="Date to">
+            <select class="control" id="sortFilter">
+              <option value="newest">Sort: newest</option>
+              <option value="oldest">Sort: oldest</option>
+              <option value="title">Sort: title</option>
+            </select>
+          </div>
 
-    <footer>
-      <div class="actions">
-        <button id="open-root-footer" class="button secondary" type="button">Open Uoink folder</button>
-      </div>
-      <div id="footer-line" class="mono">helper at 127.0.0.1:5179</div>
-    </footer>
-  </main>
+          <div class="summary-line">
+            <span id="resultSummary">Loading library...</span>
+            <span id="activeFilters"></span>
+          </div>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+          <div id="libraryGrid" class="grid" aria-live="polite"></div>
+          <div id="libraryEmpty" class="empty-state hidden">
+            <div>
+              <h2>Nothing yoinked yet.</h2>
+              <p>Open YouTube, find a video worth reading, click the rust U under the player. It will show up here as a card in a few seconds.</p>
+              <div class="inline-row" style="justify-content:center;margin-top:20px">
+                <button class="button primary" type="button" data-open-youtube>Open YouTube</button>
+              </div>
+              <div class="tip">Tip: right-click a YouTube link anywhere -> Uoink video.</div>
+            </div>
+          </div>
+          <div class="summary-line" style="margin-top:18px">
+            <button class="button ghost" type="button" id="loadMore">Load more</button>
+            <span id="pageSummary"></span>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-activity" data-tab-panel="activity">
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">Activity</div>
+              <h1><span id="activityCount">0</span> in flight <em>uoinking...</em></h1>
+              <p class="lede">Live work, queue retries, today&apos;s completions, and failures use the same phase language as the popup: fetch, transcribe, screenshots, classify, write.</p>
+            </div>
+            <div class="inline-row">
+              <button class="button ghost" type="button" id="refreshActivity">Refresh</button>
+              <button class="button danger" type="button" id="cancelAll">Cancel all</button>
+            </div>
+          </div>
+
+          <div class="activity-layout">
+            <div class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Queue</div>
+                <div class="localhost" id="queueMeta">waiting for helper</div>
+              </div>
+              <div class="panel-body" id="queueRows"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Completed today</div>
+                <span class="nav-count" id="completedToday">0</span>
+              </div>
+              <div class="panel-body" id="completedRows"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-settings" data-tab-panel="settings">
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">Settings</div>
+              <h1>Tune the <em>helper.</em></h1>
+              <p class="lede">Key storage, output folders, topic routing, helper status, MCP config, and update checks live here.</p>
+            </div>
+            <button class="button ghost" type="button" id="reloadSettings">Reload</button>
+          </div>
+
+          <div class="settings-grid">
+            <div class="setting-block">
+              <h2>Anthropic key (BYO)</h2>
+              <p class="setting-copy" id="keyStatus">Checking key status...</p>
+              <div class="inline-row">
+                <input class="field" style="flex:1;min-width:260px" id="anthropicKey" type="password" placeholder="sk-ant-...">
+                <button class="button" type="button" id="saveKey">Replace</button>
+                <button class="button ghost" type="button" id="testKey">Test</button>
+              </div>
+              <p class="setting-copy">Stored in Windows Credential Manager. Never sent anywhere but Anthropic.</p>
+            </div>
+
+            <div class="setting-block">
+              <h2>Helper</h2>
+              <p class="setting-copy" id="helperStatus">Checking /diagnose...</p>
+              <div class="inline-row">
+                <button class="button danger" type="button" id="stopHelperSettings">Stop</button>
+                <label class="inline-row"><input id="autostartToggle" type="checkbox" checked> Autostart on login</label>
+              </div>
+            </div>
+
+            <div class="setting-block">
+              <h2>Output folder</h2>
+              <input class="field" id="outputFolder" type="text" readonly value="Loading...">
+              <div class="inline-row">
+                <button class="button" type="button" id="openOutput">Open folder</button>
+                <button class="button ghost" type="button" id="browseOutput">Browse</button>
+              </div>
+            </div>
+
+            <div class="setting-block">
+              <h2>Topics</h2>
+              <p class="setting-copy">Preview of local topic routing. Editing endpoint lands in CC&apos;s helper-side Tier 2 branch.</p>
+              <div class="topic-list" id="topicList"></div>
+              <button class="button ghost" type="button" id="addTopic">+ Add topic</button>
+            </div>
+
+            <div class="setting-block">
+              <h2>MCP config</h2>
+              <textarea class="mono-box" id="mcpConfig" readonly>Loading MCP config...</textarea>
+              <button class="button" type="button" id="copyMcp">Copy</button>
+            </div>
+
+            <div class="setting-block">
+              <h2>Updates</h2>
+              <p class="setting-copy" id="versionLine">Loading version...</p>
+              <p class="setting-copy" id="updateLine">Last checked: not yet</p>
+              <button class="button ghost" type="button" id="checkUpdates">Check now</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-about" data-tab-panel="about">
+          <div class="about-grid">
+            <div class="about-hero">
+              <div>
+                <div class="wordmark">
+                  <span class="uoink-mark" aria-hidden="true" style="width:64px;height:64px"></span>
+                  <span>OINK</span>
+                </div>
+                <p class="lede" style="margin:18px auto 0">YouTube -> AI-ready docs. Local-first. Open source.</p>
+                <div class="quote">&quot;Yo. Uoink that.&quot;</div>
+              </div>
+            </div>
+            <div class="setting-block">
+              <h2>Learn</h2>
+              <div class="link-list">
+                <a href="https://uoink.video" target="_blank" rel="noreferrer">uoink.video <span>-></span></a>
+                <a href="https://uoink.video/how" target="_blank" rel="noreferrer">Quick start guide <span>-></span></a>
+                <a href="https://uoink.video/hooks" target="_blank" rel="noreferrer">9 hook types explained <span>-></span></a>
+                <a href="https://uoink.video/agents" target="_blank" rel="noreferrer">MCP integration docs <span>-></span></a>
+              </div>
+            </div>
+            <div class="setting-block">
+              <h2>Release + support</h2>
+              <div class="link-list">
+                <a href="https://github.com/ryanbiddy/uoink/blob/main/CHANGELOG.md" target="_blank" rel="noreferrer">CHANGELOG.md <span>-></span></a>
+                <a href="https://github.com/ryanbiddy/uoink/releases" target="_blank" rel="noreferrer">GitHub releases <span>-></span></a>
+                <a href="https://github.com/ryanbiddy/uoink/issues" target="_blank" rel="noreferrer">File an issue <span>-></span></a>
+                <a href="https://uoink.video/privacy" target="_blank" rel="noreferrer">Privacy policy <span>-></span></a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-    const SERVER = location.origin;
-    const HEALTH_MS = 5000;
-    let authToken = "";
-    let outputRoot = "";
-    let lastHealth = null;
-    const objectUrls = new Set();
-
-    const els = {
-      status: document.getElementById("status-pill"),
-      version: document.getElementById("version-pill"),
-      cards: document.getElementById("cards"),
-      recentCount: document.getElementById("recent-count"),
-      footerLine: document.getElementById("footer-line"),
-      openRoot: document.getElementById("open-root"),
-      openRootFooter: document.getElementById("open-root-footer"),
-      stopHelper: document.getElementById("stop-helper"),
-      toast: document.getElementById("toast"),
+    const state = {
+      token: "",
+      library: [],
+      total: 0,
+      offset: 0,
+      limit: 24,
+      loading: false,
+      hasMore: false,
+      filters: {
+        q: "",
+        channel: "",
+        topic: "",
+        hook_type: "",
+        date_from: "",
+        date_to: "",
+        sort: "newest",
+      },
+      blobUrls: new Map(),
+      queue: null,
+      health: null,
+      settings: null,
     };
 
-    function toast(message) {
+    const els = {
+      toast: document.getElementById("toast"),
+      runningPill: document.getElementById("runningPill"),
+      portLabel: document.getElementById("portLabel"),
+      libraryGrid: document.getElementById("libraryGrid"),
+      libraryEmpty: document.getElementById("libraryEmpty"),
+      libraryCount: document.getElementById("libraryCount"),
+      libraryNavCount: document.getElementById("libraryNavCount"),
+      resultSummary: document.getElementById("resultSummary"),
+      pageSummary: document.getElementById("pageSummary"),
+      activeFilters: document.getElementById("activeFilters"),
+      loadMore: document.getElementById("loadMore"),
+      searchInput: document.getElementById("searchInput"),
+      channelFilter: document.getElementById("channelFilter"),
+      topicFilter: document.getElementById("topicFilter"),
+      hookFilter: document.getElementById("hookFilter"),
+      dateFrom: document.getElementById("dateFrom"),
+      dateTo: document.getElementById("dateTo"),
+      sortFilter: document.getElementById("sortFilter"),
+      queueRows: document.getElementById("queueRows"),
+      queueMeta: document.getElementById("queueMeta"),
+      activityCount: document.getElementById("activityCount"),
+      activityNavCount: document.getElementById("activityNavCount"),
+      completedRows: document.getElementById("completedRows"),
+      completedToday: document.getElementById("completedToday"),
+      keyStatus: document.getElementById("keyStatus"),
+      anthropicKey: document.getElementById("anthropicKey"),
+      outputFolder: document.getElementById("outputFolder"),
+      helperStatus: document.getElementById("helperStatus"),
+      mcpConfig: document.getElementById("mcpConfig"),
+      versionLine: document.getElementById("versionLine"),
+      updateLine: document.getElementById("updateLine"),
+      topicList: document.getElementById("topicList"),
+    };
+
+    function markSvg() {
+      return '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14 6 H40 V62 a10 10 0 0 0 20 0 V6 H86 V62 a36 36 0 0 1 -72 0 Z" fill="#C2410C"/><rect x="14" y="6" width="26" height="14" fill="#FFD23F"/><rect x="60" y="6" width="26" height="14" fill="#FFD23F"/></svg>';
+    }
+
+    function hydrateMarks() {
+      document.querySelectorAll(".uoink-mark").forEach((el) => {
+        el.innerHTML = markSvg();
+      });
+    }
+
+    function showToast(message) {
       els.toast.textContent = message;
       els.toast.classList.add("show");
-      clearTimeout(toast.timer);
-      toast.timer = setTimeout(() => els.toast.classList.remove("show"), 2600);
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => els.toast.classList.remove("show"), 3200);
     }
 
-    function setStatus(ok, label) {
-      els.status.classList.toggle("status-ok", !!ok);
-      els.status.classList.toggle("status-offline", !ok);
-      els.status.innerHTML = "";
-      const dot = document.createElement("span");
-      dot.className = "dot";
-      const text = document.createElement("span");
-      text.textContent = label;
-      els.status.append(dot, text);
+    function debounce(fn, ms) {
+      let timer = null;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn(...args), ms);
+      };
     }
 
-    async function fetchJson(path, options = {}) {
-      const res = await fetch(path, {
-        cache: "no-store",
-        ...options,
-        headers: {
-          ...(options.headers || {}),
-        },
-      });
-      let body = {};
-      try {
-        body = await res.json();
-      } catch {
-        body = {};
+    async function getToken() {
+      if (state.token) return state.token;
+      const res = await fetch("/token", { headers: { "X-Uoink-Client": "uoink-extension" } });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "token unavailable");
+      state.token = data.token;
+      return state.token;
+    }
+
+    async function authFetch(path, opts = {}) {
+      const token = await getToken();
+      const headers = { ...(opts.headers || {}), "X-Uoink-Token": token };
+      if (opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
+      const res = await fetch(path, { ...opts, headers });
+      const text = await res.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch (_) { data = { ok: false, error: text || "invalid JSON" }; }
+      if (!res.ok || (data && data.ok === false)) {
+        throw new Error((data && data.error) || `HTTP ${res.status}`);
       }
-      if (!res.ok || body.ok === false) {
-        throw new Error(body.error || "HTTP " + res.status);
-      }
-      return body;
+      return data;
     }
 
-    async function token() {
-      if (authToken) return authToken;
-      const body = await fetchJson("/token", {
-        headers: { "X-Uoink-Client": "uoink-extension" },
-      });
-      authToken = body.token || "";
-      if (!authToken) throw new Error("token unavailable");
-      return authToken;
+    function prettyHook(type) {
+      return String(type || "other");
     }
 
-    async function authedJson(path, options = {}) {
-      const tk = await token();
-      return fetchJson(path, {
-        ...options,
-        headers: {
-          ...(options.headers || {}),
-          "X-Uoink-Token": tk,
-        },
-      });
+    function fmtDuration(seconds) {
+      const n = Number(seconds);
+      if (!Number.isFinite(n) || n <= 0) return "--:--";
+      const h = Math.floor(n / 3600);
+      const m = Math.floor((n % 3600) / 60);
+      const s = Math.floor(n % 60);
+      if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+      return `${m}:${String(s).padStart(2, "0")}`;
     }
 
-    function outputRootFromDiagnose(body) {
-      const checks = Array.isArray(body && body.checks) ? body.checks : [];
-      const writable = checks.find((check) => check.name === "output_root_writable");
-      if (writable && writable.detail) return writable.detail;
-      const idx = checks.find((check) => check.name === "index_db_writable");
-      if (idx && idx.detail) return String(idx.detail).replace(/[\\/]+index\\.db$/i, "");
-      return "";
-    }
-
-    async function loadHealth() {
-      try {
-        const health = await fetchJson("/health");
-        lastHealth = health;
-        els.version.textContent = "v" + (health.version || "unknown");
-        els.footerLine.textContent = "v" + (health.version || "unknown") + " - helper at 127.0.0.1:5179";
-        setStatus(health.ok, health.ok ? "Running \u2713" : "Offline");
-        try {
-          const diagnose = await fetchJson("/diagnose");
-          outputRoot = outputRootFromDiagnose(diagnose) || outputRoot;
-        } catch {
-          // Health is enough for Tier 1; diagnose only improves open-folder.
-        }
-      } catch {
-        setStatus(false, "Offline");
-      }
-    }
-
-    function timeAgo(value) {
+    function fmtAge(value) {
       if (!value) return "";
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return "";
-      const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
-      if (seconds < 60) return "just now";
-      const minutes = Math.floor(seconds / 60);
-      if (minutes < 60) return minutes + "m ago";
-      const hours = Math.floor(minutes / 60);
-      if (hours < 24) return hours + "h ago";
-      const days = Math.floor(hours / 24);
-      if (days < 30) return days + "d ago";
-      return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      const t = new Date(value);
+      if (Number.isNaN(t.getTime())) return "";
+      const diff = Date.now() - t.getTime();
+      const mins = Math.max(0, Math.round(diff / 60000));
+      if (mins < 2) return "just now";
+      if (mins < 60) return `${mins}m ago`;
+      const hours = Math.round(mins / 60);
+      if (hours < 36) return `${hours}h ago`;
+      const days = Math.round(hours / 24);
+      if (days < 14) return `${days}d ago`;
+      return t.toLocaleDateString();
     }
 
-    function initials(title) {
-      const words = String(title || "U").trim().split(/\s+/).filter(Boolean);
-      return words.slice(0, 2).map((word) => word[0]).join("").toUpperCase() || "U";
+    function htmlEscape(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[c]));
     }
 
-    function prettyHook(value) {
-      if (!value) return "";
-      return String(value).split("_").map((part) => part ? part[0].toUpperCase() + part.slice(1) : "").join(" ");
+    function healthDots(health) {
+      const keys = ["transcript", "screenshots", "comments", "hook", "comment_intelligence"];
+      return keys.map((key) => {
+        const value = health && health[key] ? String(health[key]) : "skipped";
+        let cls = "health-dot";
+        if (value.startsWith("ok")) cls += " ok";
+        else if (value.includes("missing") || value.includes("failed")) cls += " fail";
+        else if (value.includes("pending")) cls += " warn";
+        return `<span class="${cls}" title="${htmlEscape(key)}: ${htmlEscape(value)}"></span>`;
+      }).join("");
     }
 
-    async function thumbnailUrl(path) {
-      if (!path) return "";
-      const tk = await token();
-      const res = await fetch("/file?path=" + encodeURIComponent(path), {
-        cache: "force-cache",
-        headers: { "X-Uoink-Token": tk },
-      });
-      if (!res.ok) return "";
-      const url = URL.createObjectURL(await res.blob());
-      objectUrls.add(url);
-      return url;
+    function paramsFromFilters(extra = {}) {
+      const params = new URLSearchParams();
+      const q = state.filters.q.trim();
+      if (q) params.set("q", q);
+      if (state.filters.channel) params.set("channel", state.filters.channel);
+      if (state.filters.topic) params.set("topic", state.filters.topic);
+      if (state.filters.hook_type) params.set("hook_type", state.filters.hook_type);
+      if (state.filters.date_from) params.set("date_from", state.filters.date_from);
+      if (state.filters.date_to) params.set("date_to", state.filters.date_to);
+      params.set("limit", String(extra.limit ?? state.limit));
+      params.set("offset", String(extra.offset ?? state.offset));
+      return params;
     }
 
-    function clearObjectUrls() {
-      for (const url of objectUrls) URL.revokeObjectURL(url);
-      objectUrls.clear();
-    }
-
-    function textEl(tag, className, text) {
-      const el = document.createElement(tag);
-      if (className) el.className = className;
-      el.textContent = text || "";
-      return el;
-    }
-
-    function renderThumb(row) {
-      const wrap = document.createElement("div");
-      const path = row.thumbnail_path || row.thumbnail || "";
-      if (!path) {
-        wrap.className = "initials";
-        wrap.textContent = initials(row.title);
-        return wrap;
+    async function loadLibrary({ reset = false } = {}) {
+      if (state.loading) return;
+      state.loading = true;
+      if (reset) {
+        state.offset = 0;
+        state.library = [];
+        revokeThumbs();
+        els.libraryGrid.innerHTML = "";
       }
-      const placeholder = document.createElement("div");
-      placeholder.className = "initials";
-      placeholder.textContent = initials(row.title);
-      thumbnailUrl(path).then((url) => {
-        if (!url) return;
-        const img = document.createElement("img");
-        img.className = "thumb";
-        img.alt = "";
-        img.src = url;
-        placeholder.replaceWith(img);
-      }).catch(() => {});
-      return placeholder;
+      els.resultSummary.textContent = "Loading library...";
+      try {
+        const params = paramsFromFilters();
+        const data = await authFetch(`/memory/search?${params.toString()}`);
+        const rows = Array.isArray(data.results) ? data.results : [];
+        state.total = Number(data.total) || 0;
+        state.library = reset ? rows : state.library.concat(rows);
+        state.offset += rows.length;
+        state.hasMore = state.offset < state.total;
+        renderLibrary();
+        populateFilterOptions(rows);
+      } catch (err) {
+        els.resultSummary.textContent = `Library unavailable: ${err.message}`;
+        els.libraryGrid.innerHTML = "";
+        els.loadMore.classList.add("hidden");
+        els.libraryEmpty.classList.remove("hidden");
+      } finally {
+        state.loading = false;
+      }
     }
 
-    function renderCard(row) {
-      const card = document.createElement("article");
-      card.className = "card";
-      card.tabIndex = 0;
-      card.setAttribute("role", "button");
-      card.setAttribute("aria-label", "Open folder for " + (row.title || "uoink"));
+    function renderLibrary() {
+      const rows = sortRows(state.library.slice());
+      els.libraryCount.textContent = String(state.total);
+      els.libraryNavCount.textContent = String(state.total);
+      els.resultSummary.textContent = state.total
+        ? `${rows.length} shown of ${state.total} local yoinks`
+        : "No yoinks found";
+      const filterBits = Object.entries(state.filters)
+        .filter(([key, value]) => value && key !== "sort")
+        .map(([key, value]) => `${key}: ${value}`);
+      els.activeFilters.textContent = filterBits.join(" | ");
+      els.pageSummary.textContent = state.hasMore ? `${state.offset} of ${state.total}` : "End of library";
+      els.loadMore.classList.toggle("hidden", !state.hasMore);
+      els.libraryEmpty.classList.toggle("hidden", rows.length > 0);
+      els.libraryGrid.innerHTML = rows.map(cardHtml).join("");
+      rows.forEach(loadThumbnail);
+    }
 
-      const title = row.title || "Untitled uoink";
-      const main = document.createElement("div");
-      main.appendChild(textEl("h3", "", title));
-
-      const meta = document.createElement("div");
-      meta.className = "meta";
-      for (const part of [row.channel || "Unknown channel", timeAgo(row.yoinked_at)]) {
-        if (part) meta.appendChild(textEl("span", "", part));
+    function sortRows(rows) {
+      if (state.filters.sort === "oldest") {
+        return rows.sort((a, b) => String(a.yoinked_at || "").localeCompare(String(b.yoinked_at || "")));
       }
-      main.appendChild(meta);
+      if (state.filters.sort === "title") {
+        return rows.sort((a, b) => String(a.title || "").localeCompare(String(b.title || "")));
+      }
+      return rows.sort((a, b) => String(b.yoinked_at || "").localeCompare(String(a.yoinked_at || "")));
+    }
 
-      const tags = document.createElement("div");
-      tags.className = "tagline";
-      if (row.topic) tags.appendChild(textEl("span", "chip", row.topic));
-      const hook = prettyHook(row.hook_type);
-      if (hook) tags.appendChild(textEl("span", "chip", hook));
+    function cardHtml(row) {
+      const id = htmlEscape(row.video_id || row.slug || "");
+      const title = htmlEscape(row.title || "Untitled yoink");
+      const channel = htmlEscape(row.channel || "Unknown channel");
+      const topic = htmlEscape(row.topic || "Uncategorized");
+      const hook = htmlEscape(prettyHook(row.hook_type));
+      const confidence = row.hook_type_confidence != null ? ` · confidence ${row.hook_type_confidence}/5` : "";
       const entities = Number(row.entity_count || 0);
-      if (entities > 0) tags.appendChild(textEl("span", "chip", entities + " entities"));
-      if (tags.children.length) main.appendChild(tags);
+      const topEntities = Array.isArray(row.top_entities) ? row.top_entities.slice(0, 5).join(", ") : "";
+      return `
+        <article class="uoink-card" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}" tabindex="0" role="button" aria-label="Open ${title}">
+          <div class="thumb">
+            <span class="duration">${htmlEscape(fmtDuration(row.duration_seconds))}</span>
+            <span class="hook-chip">${hook}${htmlEscape(confidence)}</span>
+            <img alt="" data-thumb-for="${id}" class="hidden">
+          </div>
+          <div class="card-body">
+            <div class="card-title">${title}</div>
+            <div class="card-meta">${channel}${entities ? ` · ${entities} entities` : ""}</div>
+            <div class="card-foot">
+              <span class="topic-chip">${topic}</span>
+              <span class="age">${htmlEscape(fmtAge(row.yoinked_at))}</span>
+            </div>
+            <div class="health-dots" title="${htmlEscape(topEntities)}">${healthDots(row.health)}</div>
+          </div>
+        </article>
+      `;
+    }
 
-      const hint = textEl("div", "open-hint", "Open folder");
-      const open = () => openFolder(row.folder);
-      card.addEventListener("click", open);
-      card.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter" || ev.key === " ") {
-          ev.preventDefault();
-          open();
+    async function loadThumbnail(row) {
+      if (!row.thumbnail_path || !row.video_id) return;
+      const img = document.querySelector(`img[data-thumb-for="${CSS.escape(row.video_id)}"]`);
+      if (!img) return;
+      try {
+        if (!state.blobUrls.has(row.thumbnail_path)) {
+          const token = await getToken();
+          const res = await fetch(`/file?path=${encodeURIComponent(row.thumbnail_path)}`, {
+            headers: { "X-Uoink-Token": token },
+          });
+          if (!res.ok) throw new Error("thumbnail unavailable");
+          const url = URL.createObjectURL(await res.blob());
+          state.blobUrls.set(row.thumbnail_path, url);
+        }
+        img.src = state.blobUrls.get(row.thumbnail_path);
+        img.classList.remove("hidden");
+      } catch (_) {}
+    }
+
+    function revokeThumbs() {
+      for (const url of state.blobUrls.values()) {
+        try { URL.revokeObjectURL(url); } catch (_) {}
+      }
+      state.blobUrls.clear();
+    }
+
+    function populateFilterOptions(rows) {
+      const channels = new Set();
+      const topics = new Set();
+      state.library.concat(rows).forEach((row) => {
+        if (row.channel) channels.add(row.channel);
+        if (row.topic) topics.add(row.topic);
+      });
+      syncOptions(els.channelFilter, "Channel: all", channels);
+      syncOptions(els.topicFilter, "Topic: all", topics);
+    }
+
+    function syncOptions(select, label, values) {
+      const current = select.value;
+      select.innerHTML = `<option value="">${label}</option>` + [...values].sort()
+        .map((v) => `<option value="${htmlEscape(v)}">${htmlEscape(v)}</option>`).join("");
+      select.value = current;
+    }
+
+    async function refreshHealth() {
+      try {
+        const res = await fetch("/health");
+        const data = await res.json();
+        state.health = data;
+        const ok = data && data.ok !== false;
+        els.runningPill.classList.toggle("offline", !ok);
+        els.runningPill.querySelector("span:last-child").textContent = ok ? "Uoink is running" : "Uoink is offline";
+        els.portLabel.textContent = `localhost:${data.port || 5179}`;
+        els.versionLine.textContent = `v${data.version || "unknown"} · current`;
+      } catch (_) {
+        els.runningPill.classList.add("offline");
+        els.runningPill.querySelector("span:last-child").textContent = "Uoink is offline";
+      }
+    }
+
+    async function refreshQueue() {
+      try {
+        const data = await authFetch("/queue/status");
+        state.queue = data;
+        renderQueue(data);
+      } catch (err) {
+        els.queueMeta.textContent = `queue unavailable: ${err.message}`;
+        els.queueRows.innerHTML = `<div class="job-row"><div class="job-title">Queue unavailable</div><div class="job-sub">${htmlEscape(err.message)}</div></div>`;
+      }
+    }
+
+    function renderQueue(data) {
+      const pending = Array.isArray(data.pending) ? data.pending : [];
+      const running = pending.filter((row) => (row.state || row.status) === "running");
+      const failed = pending.filter((row) => (row.state || row.status) === "failed");
+      const activeCount = Number(data.running_count || running.length) + Number(data.pending_count || 0);
+      els.activityCount.textContent = String(activeCount);
+      els.activityNavCount.textContent = String(activeCount);
+      els.queueMeta.textContent = `${data.running_count || 0} running · ${data.pending_count || 0} queued`;
+      if (!pending.length) {
+        els.queueRows.innerHTML = `<div class="job-row"><div class="job-title">Nothing running right now.</div><div class="job-sub">New yoinks and rate-limit retries will appear here.</div></div>`;
+      } else {
+        els.queueRows.innerHTML = pending.map(queueRowHtml).join("");
+      }
+      els.completedToday.textContent = String(Math.max(0, Number(data.succeeded_count || 0)));
+      const recent = state.library.slice(0, 4);
+      els.completedRows.innerHTML = recent.length
+        ? recent.map((row) => `<div class="job-row"><div class="job-title">${htmlEscape(row.title || "Untitled")}</div><div class="job-sub">${htmlEscape(row.channel || "")} · ${htmlEscape(fmtDuration(row.duration_seconds))} · ${htmlEscape(fmtAge(row.yoinked_at))}</div></div>`).join("")
+        : `<div class="job-row"><div class="job-title">No completed yoinks loaded yet.</div><div class="job-sub">The Library tab will populate this list.</div></div>`;
+      if (failed.length) {
+        els.queueRows.insertAdjacentHTML("beforeend", failed.map(queueRowHtml).join(""));
+      }
+    }
+
+    function queueRowHtml(row) {
+      const stateValue = row.state || row.status || "queued";
+      const failed = stateValue === "failed";
+      const progress = Number(row.progress || 0);
+      const phases = ["fetch", "transcribe", "screenshots", "classify", "write"];
+      const activePhase = row.phase || (stateValue === "running" ? "screenshots" : "");
+      return `
+        <div class="job-row ${failed ? "failed" : ""}" data-pending-id="${htmlEscape(row.pending_id || "")}">
+          <div class="job-top">
+            <div>
+              <div class="job-title">${htmlEscape(row.title || row.url || "Queued yoink")}</div>
+              <div class="job-sub">${htmlEscape(stateValue)}${row.retry_after ? ` · retry ${htmlEscape(fmtAge(row.retry_after))}` : ""}</div>
+            </div>
+            <div class="inline-row">
+              ${stateValue === "pending" || failed ? `<button class="button ghost" type="button" data-retry="${htmlEscape(row.pending_id || "")}">Retry now</button>` : ""}
+              ${stateValue !== "succeeded" ? `<button class="button danger" type="button" data-cancel="${htmlEscape(row.pending_id || "")}">Cancel</button>` : ""}
+            </div>
+          </div>
+          <div class="phase-row">${phases.map((p) => `<span class="phase-chip ${p === activePhase ? "active" : ""}">${p}</span>`).join("")}</div>
+          <div class="progress"><span style="width:${Math.max(0, Math.min(100, progress || (stateValue === "running" ? 62 : 0)))}%"></span></div>
+        </div>
+      `;
+    }
+
+    async function refreshSettings() {
+      try {
+        const data = await authFetch("/settings");
+        state.settings = data.settings || {};
+        els.keyStatus.textContent = state.settings.anthropic_key_set
+          ? "Key set. Optional AI features can run."
+          : "Key not set. Comment Intelligence, Hook Type, and entity extraction skip silently.";
+      } catch (err) {
+        els.keyStatus.textContent = `Settings unavailable: ${err.message}`;
+      }
+      try {
+        const diag = await (await fetch("/diagnose")).json();
+        els.helperStatus.textContent = diagnoseSummary(diag);
+        els.outputFolder.value = diag.output_root || diag.output_dir || diag.desktop_root || "Output folder unavailable";
+      } catch (err) {
+        els.helperStatus.textContent = `Diagnose unavailable: ${err.message}`;
+      }
+      try {
+        const cfg = await authFetch("/mcp/v1/config");
+        els.mcpConfig.value = JSON.stringify(cfg.config || cfg, null, 2);
+      } catch (err) {
+        els.mcpConfig.value = `MCP config unavailable: ${err.message}`;
+      }
+      renderTopics();
+    }
+
+    function diagnoseSummary(diag) {
+      if (!diag || diag.ok === false) return "Helper diagnostics reported an issue.";
+      if (Array.isArray(diag.checks)) {
+        const bad = diag.checks.filter((c) => c.status && c.status !== "ok");
+        return bad.length ? `${bad.length} check(s) need attention.` : "All helper checks green.";
+      }
+      return "Helper is responsive.";
+    }
+
+    function renderTopics() {
+      const topics = [
+        ["AI and ML", "ai keywords, model names, claude, gpt"],
+        ["DevTools", "vercel, cursor, ide, editor"],
+        ["Career", "job, interview, salary, hiring"],
+        ["Social Media", "tiktok, instagram, x algorithm"],
+      ];
+      els.topicList.innerHTML = topics.map(([name, desc]) => `<div class="topic-row"><b>${name}</b><span>${desc}</span></div>`).join("");
+    }
+
+    async function saveKey() {
+      const key = els.anthropicKey.value.trim();
+      if (!key) return showToast("Paste a key first.");
+      try {
+        await authFetch("/settings", { method: "POST", body: JSON.stringify({ anthropic_key: key }) });
+        els.anthropicKey.value = "";
+        showToast("Key saved to Credential Manager.");
+        refreshSettings();
+      } catch (err) {
+        showToast(`Could not save key: ${err.message}`);
+      }
+    }
+
+    async function testKey() {
+      try {
+        await authFetch("/settings/test-key", { method: "POST", body: JSON.stringify({}) });
+        showToast("Anthropic key test passed.");
+      } catch (err) {
+        showToast(`Key test failed: ${err.message}`);
+      }
+    }
+
+    async function postHelper(path, body = {}) {
+      try {
+        await authFetch(path, { method: "POST", body: JSON.stringify(body) });
+        showToast("Done.");
+        refreshQueue();
+      } catch (err) {
+        showToast(err.message.includes("not found")
+          ? "This helper action lands in CC's Tier 2 backend branch."
+          : err.message);
+      }
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll("[data-tab-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.tabButton === tab));
+      document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
+      if (tab === "activity") refreshQueue();
+      if (tab === "settings") refreshSettings();
+    }
+
+    function wireEvents() {
+      document.querySelectorAll("[data-tab-button]").forEach((btn) => {
+        btn.addEventListener("click", () => switchTab(btn.dataset.tabButton));
+      });
+      const reload = debounce(() => {
+        state.filters.q = els.searchInput.value;
+        state.filters.channel = els.channelFilter.value;
+        state.filters.topic = els.topicFilter.value;
+        state.filters.hook_type = els.hookFilter.value;
+        state.filters.date_from = els.dateFrom.value;
+        state.filters.date_to = els.dateTo.value;
+        state.filters.sort = els.sortFilter.value;
+        loadLibrary({ reset: true });
+      }, 260);
+      [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
+        el.addEventListener(el.tagName === "INPUT" ? "input" : "change", reload);
+      });
+      document.getElementById("clearFilters").addEventListener("click", () => {
+        [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
+        els.sortFilter.value = "newest";
+        state.filters = { q: "", channel: "", topic: "", hook_type: "", date_from: "", date_to: "", sort: "newest" };
+        loadLibrary({ reset: true });
+      });
+      els.loadMore.addEventListener("click", () => loadLibrary());
+      document.getElementById("refreshActivity").addEventListener("click", refreshQueue);
+      document.getElementById("reloadSettings").addEventListener("click", refreshSettings);
+      document.getElementById("saveKey").addEventListener("click", saveKey);
+      document.getElementById("testKey").addEventListener("click", testKey);
+      document.getElementById("copyMcp").addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(els.mcpConfig.value); showToast("MCP config copied."); }
+        catch (_) { showToast("Could not copy config."); }
+      });
+      document.getElementById("checkUpdates").addEventListener("click", () => {
+        els.updateLine.textContent = `Last checked: ${new Date().toLocaleTimeString()}`;
+        postHelper("/updates/check-now");
+      });
+      document.getElementById("stopHelper").addEventListener("click", () => postHelper("/helper/stop"));
+      document.getElementById("stopHelperSettings").addEventListener("click", () => postHelper("/helper/stop"));
+      document.getElementById("browseOutput").addEventListener("click", () => showToast("Output folder picker lands with CC's Tier 2 helper endpoints."));
+      document.getElementById("openOutput").addEventListener("click", () => {
+        const path = els.outputFolder.value;
+        if (path && !path.includes("unavailable")) {
+          authFetch(`/open-folder?path=${encodeURIComponent(path)}`).catch((err) => showToast(err.message));
         }
       });
-      card.append(renderThumb(row), main, hint);
-      return card;
-    }
-
-    function renderState(text) {
-      els.cards.innerHTML = "";
-      const state = textEl("div", "state", text);
-      els.cards.appendChild(state);
-    }
-
-    async function loadRecent() {
-      try {
-        clearObjectUrls();
-        const body = await authedJson("/recent");
-        const rows = Array.isArray(body.recent) ? body.recent : [];
-        els.recentCount.textContent = rows.length ? rows.length + " recent" : "0 recent";
-        els.cards.innerHTML = "";
-        if (!rows.length) {
-          renderState("No yoinks yet \u2014 go yoink a video.");
-          return;
-        }
-        for (const row of rows) els.cards.appendChild(renderCard(row));
-      } catch (err) {
-        els.recentCount.textContent = "Unavailable";
-        renderState("Recent yoinks are unavailable. " + (err && err.message ? err.message : ""));
-      }
-    }
-
-    async function openFolder(path) {
-      const target = path || outputRoot;
-      if (!target) {
-        toast("Folder path unavailable.");
-        return;
-      }
-      try {
-        await authedJson("/open-folder?path=" + encodeURIComponent(target), { method: "GET" });
-        toast("Opening folder...");
-      } catch (err) {
-        toast((err && err.message) || "Could not open folder.");
-      }
-    }
-
-    function wire() {
-      els.openRoot.addEventListener("click", () => openFolder(outputRoot));
-      els.openRootFooter.addEventListener("click", () => openFolder(outputRoot));
-      els.stopHelper.addEventListener("click", () => {
-        toast("Stop helper lands in Tier 2.");
+      document.getElementById("addTopic").addEventListener("click", () => showToast("Topic editing endpoint lands with CC's Tier 2 helper branch."));
+      document.getElementById("newYoink").addEventListener("click", () => window.open("https://youtube.com", "_blank", "noopener"));
+      document.querySelectorAll("[data-open-youtube]").forEach((btn) => btn.addEventListener("click", () => window.open("https://youtube.com", "_blank", "noopener")));
+      document.addEventListener("click", (event) => {
+        const card = event.target.closest("[data-folder]");
+        if (card) authFetch(`/open-folder?path=${encodeURIComponent(card.dataset.folder)}`).catch((err) => showToast(err.message));
+        const cancel = event.target.closest("[data-cancel]");
+        if (cancel) postHelper("/queue/cancel", { pending_id: cancel.dataset.cancel });
+        const retry = event.target.closest("[data-retry]");
+        if (retry) postHelper("/queue/retry-now", { pending_id: retry.dataset.retry });
       });
-      window.addEventListener("beforeunload", clearObjectUrls);
+      window.addEventListener("beforeunload", revokeThumbs);
     }
 
-    async function boot() {
-      wire();
-      await loadHealth();
-      await loadRecent();
-      setInterval(loadHealth, HEALTH_MS);
+    function connectJobsStream() {
+      try {
+        const source = new EventSource("/jobs/stream");
+        source.onmessage = () => refreshQueue();
+        source.onerror = () => source.close();
+      } catch (_) {}
     }
 
-    boot();
+    async function init() {
+      hydrateMarks();
+      wireEvents();
+      await refreshHealth();
+      await loadLibrary({ reset: true });
+      await refreshQueue();
+      connectJobsStream();
+      setInterval(refreshHealth, 10000);
+      setInterval(refreshQueue, 5000);
+    }
+
+    init().catch((err) => {
+      showToast(`Dashboard failed to boot: ${err.message}`);
+      els.resultSummary.textContent = err.message;
+      els.libraryEmpty.classList.remove("hidden");
+    });
   </script>
 </body>
 </html>

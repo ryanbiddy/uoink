@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Uoink Splash</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rust: #C2410C;
+      --rust-bright: #F97316;
+      --vermillion: #FF3D00;
+      --acid: #FFD23F;
+      --cream: #FFF4EC;
+      --ink: #0A0A0A;
+      --ink-warm: #15110D;
+      --border: #2C2621;
+      --muted: #C8B19F;
+      --dim: #8F7B6E;
+      --ok: #00C853;
+      --font-ui: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-display: Bungee, Inter, system-ui, sans-serif;
+      --font-mono: "JetBrains Mono", Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: transparent;
+      color: var(--cream);
+      font-family: var(--font-ui);
+    }
+
+    .splash {
+      position: relative;
+      width: 480px;
+      height: 320px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(255, 210, 63, 0.18), transparent 13rem),
+        linear-gradient(180deg, #120f0d, var(--ink));
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.48);
+      transform: translateY(34px);
+      opacity: 0;
+      animation: slide-up 420ms cubic-bezier(.2,.9,.2,1) forwards;
+      cursor: pointer;
+    }
+
+    .splash.failure {
+      background:
+        radial-gradient(circle at 100% 0%, rgba(255, 61, 0, 0.16), transparent 14rem),
+        linear-gradient(180deg, #180d0a, var(--ink));
+    }
+
+    @keyframes slide-up {
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 46px;
+      border-bottom: 1px solid var(--border);
+      padding: 0 16px;
+      background: var(--ink);
+    }
+
+    .wordmark {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--vermillion);
+      font-family: var(--font-display);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .mark {
+      width: 28px;
+      height: 28px;
+    }
+
+    .mark svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .close {
+      border: 0;
+      background: transparent;
+      color: var(--dim);
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .body {
+      display: grid;
+      gap: 16px;
+      padding: 28px;
+    }
+
+    .eyebrow {
+      color: var(--rust-bright, #F97316);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--cream);
+      font-size: 34px;
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    h1 em {
+      color: var(--vermillion);
+      font-family: Georgia, "Times New Roman", serif;
+      font-style: italic;
+    }
+
+    p {
+      max-width: 34ch;
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .running-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      min-height: 34px;
+      border: 1px solid rgba(0, 200, 83, 0.34);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: var(--ink-warm);
+      color: var(--cream);
+      font-weight: 800;
+    }
+
+    .running-pill .pip {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--ok);
+      box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.58);
+      animation: pulse 1.8s ease-out infinite;
+    }
+
+    .failure .running-pill {
+      border-color: rgba(255, 61, 0, 0.45);
+    }
+
+    .failure .running-pill .pip {
+      background: var(--vermillion);
+      animation: none;
+      box-shadow: none;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.58); }
+      70% { box-shadow: 0 0 0 8px rgba(0, 200, 83, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0); }
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 13px;
+      background: var(--ink-warm);
+      color: var(--cream);
+      cursor: pointer;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .button.primary {
+      border-color: var(--vermillion);
+      background: var(--vermillion);
+      color: var(--ink);
+    }
+
+    .footnote {
+      position: absolute;
+      right: 18px;
+      bottom: 14px;
+      color: var(--dim);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <section class="splash" id="splash" role="button" tabindex="0" aria-label="Open Uoink dashboard">
+    <div class="bar">
+      <div class="wordmark"><span class="mark" aria-hidden="true"></span><span>OINK</span></div>
+      <button class="close" type="button" aria-label="Dismiss" id="dismiss">x</button>
+    </div>
+    <div class="body">
+      <div class="eyebrow" id="eyebrow">You're set</div>
+      <div class="running-pill" id="pill"><span class="pip"></span><span>Uoink is running</span></div>
+      <h1 id="headline">Click the rust U <em>under any video.</em></h1>
+      <p id="copy">Open YouTube, make your first yoink, or jump into the dashboard to inspect the helper.</p>
+      <div class="actions">
+        <button class="button primary" type="button" data-youtube>Open YouTube</button>
+        <button class="button" type="button" data-dashboard>Open dashboard</button>
+      </div>
+    </div>
+    <div class="footnote">slides up from bottom-right · auto-dismisses after 8s</div>
+  </section>
+
+  <script>
+    const mark = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M14 6 H40 V62 a10 10 0 0 0 20 0 V6 H86 V62 a36 36 0 0 1 -72 0 Z" fill="#C2410C"/><rect x="14" y="6" width="26" height="14" fill="#FFD23F"/><rect x="60" y="6" width="26" height="14" fill="#FFD23F"/></svg>';
+    document.querySelector(".mark").innerHTML = mark;
+
+    const params = new URLSearchParams(location.search);
+    const failed = params.get("state") === "failed" || params.get("status") === "failed";
+    const detail = params.get("detail") || "port 5179 in use";
+    const splash = document.getElementById("splash");
+
+    if (failed) {
+      splash.classList.add("failure");
+      document.getElementById("eyebrow").textContent = "Diagnostics";
+      document.getElementById("pill").querySelector("span:last-child").textContent = "Uoink couldn't start";
+      document.getElementById("headline").innerHTML = "Uoink couldn't <em>start.</em>";
+      document.getElementById("copy").textContent = detail + ". Diagnostics will tell you exactly what to do.";
+      document.querySelector("[data-youtube]").textContent = "Open diagnostics";
+    }
+
+    function openDashboard() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.open_dashboard) {
+        window.pywebview.api.open_dashboard();
+        return;
+      }
+      location.href = "/dashboard";
+    }
+
+    function dismiss() {
+      if (window.pywebview && window.pywebview.api && window.pywebview.api.minimize_to_tray) {
+        window.pywebview.api.minimize_to_tray();
+        return;
+      }
+      splash.style.display = "none";
+    }
+
+    splash.addEventListener("click", (event) => {
+      if (event.target.closest("button")) return;
+      openDashboard();
+    });
+    splash.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") openDashboard();
+    });
+    document.querySelector("[data-dashboard]").addEventListener("click", openDashboard);
+    document.querySelector("[data-youtube]").addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (failed) openDashboard();
+      else window.open("https://youtube.com", "_blank", "noopener");
+    });
+    document.getElementById("dismiss").addEventListener("click", (event) => {
+      event.stopPropagation();
+      dismiss();
+    });
+    setTimeout(dismiss, 8000);
+  </script>
+</body>
+</html>
