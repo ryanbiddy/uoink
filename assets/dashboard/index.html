@@ -1064,6 +1064,8 @@
     const state = {
       token: "",
       library: [],
+      jobs: [],
+      jobsLoaded: false,
       total: 0,
       offset: 0,
       limit: 24,
@@ -1232,6 +1234,22 @@
       return params;
     }
 
+    async function refreshJobs({ render = false } = {}) {
+      try {
+        const data = await authFetch("/jobs");
+        state.jobs = Array.isArray(data.jobs) ? data.jobs : [];
+        state.jobsLoaded = true;
+        if (render) renderQueue(state.queue || {});
+        return state.jobs;
+      } catch (err) {
+        if (!state.jobsLoaded) state.jobs = [];
+        if (render && els.queueMeta) {
+          els.queueMeta.textContent = `jobs unavailable: ${err.message}`;
+        }
+        return state.jobs;
+      }
+    }
+
     async function loadLibrary({ reset = false } = {}) {
       if (state.loading) return;
       state.loading = true;
@@ -1243,6 +1261,7 @@
       }
       els.resultSummary.textContent = "Loading library...";
       try {
+        if (!state.jobsLoaded || reset) await refreshJobs();
         const params = paramsFromFilters();
         const data = await authFetch(`/memory/search?${params.toString()}`);
         const rows = Array.isArray(data.results) ? data.results : [];
@@ -1253,13 +1272,59 @@
         renderLibrary();
         populateFilterOptions(rows);
       } catch (err) {
-        els.resultSummary.textContent = `Library unavailable: ${err.message}`;
-        els.libraryGrid.innerHTML = "";
-        els.loadMore.classList.add("hidden");
-        els.libraryEmpty.classList.remove("hidden");
+        const fallbackRows = filterJobCards(jobsToCards(state.jobs));
+        state.total = fallbackRows.length;
+        state.library = sortRows(fallbackRows).slice(0, state.limit);
+        state.offset = state.library.length;
+        state.hasMore = false;
+        renderLibrary();
+        els.resultSummary.textContent = fallbackRows.length
+          ? `Showing ${fallbackRows.length} recent job records; Memory search unavailable: ${err.message}`
+          : `Library unavailable: ${err.message}`;
       } finally {
         state.loading = false;
       }
+    }
+
+    function jobsToCards(jobs) {
+      return (Array.isArray(jobs) ? jobs : [])
+        .filter((job) => String(job.state || "").toLowerCase() === "completed")
+        .map((job) => {
+          const result = job.result || {};
+          return {
+            slug: job.id,
+            video_id: result.video_id || job.video_id || job.id,
+            title: job.title || job.playlist_title || result.title || "Completed yoink",
+            channel: result.channel || job.channel || "",
+            topic: result.topic || job.topic || "Job record",
+            folder: job.session_folder || result.folder || "",
+            yoinked_at: job.completed_at || job.updated_at || job.started_at,
+            hook_type: result.hook_type || job.hook_type || "",
+            hook_type_confidence: result.hook_type_confidence || job.hook_type_confidence,
+            health: result.health || job.health || null,
+            entity_count: result.entity_count || job.entity_count || 0,
+            top_entities: result.top_entities || job.top_entities || [],
+            thumbnail_path: result.thumbnail_path || job.thumbnail_path || "",
+            duration_seconds: result.duration_seconds || job.duration_seconds || 0,
+          };
+        });
+    }
+
+    function filterJobCards(rows) {
+      const q = state.filters.q.trim().toLowerCase();
+      const from = state.filters.date_from ? new Date(`${state.filters.date_from}T00:00:00`) : null;
+      const to = state.filters.date_to ? new Date(`${state.filters.date_to}T23:59:59`) : null;
+      return rows.filter((row) => {
+        const text = `${row.title || ""} ${row.channel || ""} ${row.topic || ""}`.toLowerCase();
+        if (q && !text.includes(q)) return false;
+        if (state.filters.channel && row.channel !== state.filters.channel) return false;
+        if (state.filters.topic && row.topic !== state.filters.topic) return false;
+        if (state.filters.hook_type && row.hook_type !== state.filters.hook_type) return false;
+        const when = row.yoinked_at ? new Date(row.yoinked_at) : null;
+        if (from && (!when || when < from)) return false;
+        if (to && (!when || when > to)) return false;
+        return true;
+      });
     }
 
     function renderLibrary() {
@@ -1296,7 +1361,7 @@
       const channel = htmlEscape(row.channel || "Unknown channel");
       const topic = htmlEscape(row.topic || "Uncategorized");
       const hook = htmlEscape(prettyHook(row.hook_type));
-      const confidence = row.hook_type_confidence != null ? ` · confidence ${row.hook_type_confidence}/5` : "";
+      const confidence = row.hook_type_confidence != null ? ` | confidence ${row.hook_type_confidence}/5` : "";
       const entities = Number(row.entity_count || 0);
       const topEntities = Array.isArray(row.top_entities) ? row.top_entities.slice(0, 5).join(", ") : "";
       return `
@@ -1308,7 +1373,7 @@
           </div>
           <div class="card-body">
             <div class="card-title">${title}</div>
-            <div class="card-meta">${channel}${entities ? ` · ${entities} entities` : ""}</div>
+            <div class="card-meta">${channel}${entities ? ` | ${entities} entities` : ""}</div>
             <div class="card-foot">
               <span class="topic-chip">${topic}</span>
               <span class="age">${htmlEscape(fmtAge(row.yoinked_at))}</span>
@@ -1372,15 +1437,16 @@
         els.runningPill.classList.toggle("offline", !ok);
         els.runningPill.querySelector("span:last-child").textContent = ok ? "Uoink is running" : "Uoink is offline";
         els.portLabel.textContent = `localhost:${data.port || 5179}`;
-        els.versionLine.textContent = `v${data.version || "unknown"} · current`;
+        els.versionLine.textContent = `v${data.version || "unknown"} | current`;
       } catch (_) {
         els.runningPill.classList.add("offline");
         els.runningPill.querySelector("span:last-child").textContent = "Uoink is offline";
       }
     }
 
-    async function refreshQueue() {
+    async function refreshQueue({ skipJobs = false } = {}) {
       try {
+        if (!skipJobs) await refreshJobs();
         const data = await authFetch("/queue/status");
         state.queue = data;
         renderQueue(data);
@@ -1390,48 +1456,149 @@
       }
     }
 
+    async function refreshActivity() {
+      await refreshJobs();
+      await refreshQueue({ skipJobs: true });
+    }
+
     function renderQueue(data) {
+      data = data || {};
       const pending = Array.isArray(data.pending) ? data.pending : [];
-      const running = pending.filter((row) => (row.state || row.status) === "running");
-      const failed = pending.filter((row) => (row.state || row.status) === "failed");
-      const activeCount = Number(data.running_count || running.length) + Number(data.pending_count || 0);
+      const queueActive = pending.filter((row) => !["failed", "succeeded", "completed", "cancelled"].includes(String(row.state || row.status || "queued").toLowerCase()));
+      const queueFailed = pending.filter((row) => String(row.state || row.status || "").toLowerCase() === "failed");
+      const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(String(job.state || "").toLowerCase()));
+      const failedJobs = state.jobs.filter((job) => ["failed", "cancelled"].includes(String(job.state || "").toLowerCase()));
+      const activeCount = activeJobs.length + queueActive.length;
       els.activityCount.textContent = String(activeCount);
       els.activityNavCount.textContent = String(activeCount);
-      els.queueMeta.textContent = `${data.running_count || 0} running · ${data.pending_count || 0} queued`;
-      if (!pending.length) {
+      els.queueMeta.textContent = `${data.running_count || activeJobs.filter((job) => job.state === "running").length} running | ${data.pending_count || queueActive.length} queued`;
+      const rows = []
+        .concat(activeJobs.map(jobRowHtml))
+        .concat(queueActive.map(queueRowHtml))
+        .concat(failedJobs.map(jobRowHtml))
+        .concat(queueFailed.map(queueRowHtml));
+      if (!rows.length) {
         els.queueRows.innerHTML = `<div class="job-row"><div class="job-title">Nothing running right now.</div><div class="job-sub">New yoinks and rate-limit retries will appear here.</div></div>`;
       } else {
-        els.queueRows.innerHTML = pending.map(queueRowHtml).join("");
+        els.queueRows.innerHTML = rows.join("");
       }
-      els.completedToday.textContent = String(Math.max(0, Number(data.succeeded_count || 0)));
-      const recent = state.library.slice(0, 4);
-      els.completedRows.innerHTML = recent.length
-        ? recent.map((row) => `<div class="job-row"><div class="job-title">${htmlEscape(row.title || "Untitled")}</div><div class="job-sub">${htmlEscape(row.channel || "")} · ${htmlEscape(fmtDuration(row.duration_seconds))} · ${htmlEscape(fmtAge(row.yoinked_at))}</div></div>`).join("")
+      const completed = completedTodayRows();
+      els.completedToday.textContent = String(completed.length);
+      els.completedRows.innerHTML = completed.length
+        ? completed.slice(0, 8).map(completedRowHtml).join("")
         : `<div class="job-row"><div class="job-title">No completed yoinks loaded yet.</div><div class="job-sub">The Library tab will populate this list.</div></div>`;
-      if (failed.length) {
-        els.queueRows.insertAdjacentHTML("beforeend", failed.map(queueRowHtml).join(""));
+    }
+
+    function completedTodayRows() {
+      const today = new Date().toDateString();
+      const jobs = state.jobs
+        .filter((job) => String(job.state || "").toLowerCase() === "completed")
+        .filter((job) => {
+          const date = new Date(job.completed_at || job.updated_at || job.started_at || "");
+          return !Number.isNaN(date.getTime()) && date.toDateString() === today;
+        })
+        .map((job) => ({ type: "job", row: job }));
+      const cards = state.library
+        .filter((row) => {
+          const date = new Date(row.yoinked_at || "");
+          return !Number.isNaN(date.getTime()) && date.toDateString() === today;
+        })
+        .map((row) => ({ type: "card", row }));
+      return jobs.length ? jobs : cards;
+    }
+
+    function completedRowHtml(item) {
+      const row = item.row;
+      if (item.type === "job") {
+        return `<div class="job-row"><div class="job-title">${htmlEscape(row.title || row.playlist_title || "Completed yoink")}</div><div class="job-sub">${htmlEscape(row.kind || "job")} | completed ${htmlEscape(fmtAge(row.completed_at || row.updated_at))}</div></div>`;
       }
+      return `<div class="job-row"><div class="job-title">${htmlEscape(row.title || "Untitled")}</div><div class="job-sub">${htmlEscape(row.channel || "")} | ${htmlEscape(fmtDuration(row.duration_seconds))} | ${htmlEscape(fmtAge(row.yoinked_at))}</div></div>`;
+    }
+
+    function normalizePhase(value) {
+      const phase = String(value || "").toLowerCase();
+      if (phase.includes("fetch") || phase.includes("metadata") || phase.includes("download")) return "fetch";
+      if (phase.includes("transcript") || phase.includes("caption") || phase.includes("transcribe")) return "transcribe";
+      if (phase.includes("screenshot") || phase.includes("thumb")) return "screenshots";
+      if (phase.includes("class") || phase.includes("hook") || phase.includes("comment") || phase.includes("entity")) return "classify";
+      if (phase.includes("write") || phase.includes("corpus") || phase.includes("done")) return "write";
+      return "";
+    }
+
+    function phaseChips(activePhase, stateValue) {
+      const phases = ["fetch", "transcribe", "screenshots", "classify", "write"];
+      const normalized = normalizePhase(activePhase);
+      const activeIndex = phases.indexOf(normalized);
+      const terminalDone = String(stateValue || "").toLowerCase() === "completed";
+      return phases.map((phase, index) => {
+        const cls = terminalDone || (activeIndex >= 0 && index < activeIndex)
+          ? "done"
+          : phase === normalized
+            ? "active"
+            : "";
+        return `<span class="phase-chip ${cls}">${phase}</span>`;
+      }).join("");
+    }
+
+    function progressForJob(job, stateValue) {
+      const total = Number(job.videos_total || 0);
+      const done = Number(job.videos_done || 0);
+      if (total > 0) return Math.round((done / total) * 100);
+      if (stateValue === "completed") return 100;
+      if (stateValue === "queued") return 8;
+      if (stateValue === "running") return 58;
+      return 0;
+    }
+
+    function jobRowHtml(job) {
+      const stateValue = String(job.state || "queued").toLowerCase();
+      const failed = ["failed", "cancelled"].includes(stateValue);
+      const progress = progressForJob(job, stateValue);
+      const phase = job.current_video_phase || job.phase || "";
+      const title = job.title || job.playlist_title || (job.current_video && job.current_video.title) || job.source_url || "Yoink job";
+      const sub = [
+        job.kind || "job",
+        stateValue,
+        job.videos_total ? `${job.videos_done || 0}/${job.videos_total} videos` : "",
+        job.error || "",
+      ].filter(Boolean).join(" | ");
+      return `
+        <div class="job-row ${failed ? "failed" : ""}" data-job-id="${htmlEscape(job.id || "")}">
+          <div class="job-top">
+            <div>
+              <div class="job-title">${htmlEscape(title)}</div>
+              <div class="job-sub">${htmlEscape(sub)}</div>
+            </div>
+            <div class="inline-row">
+              ${failed ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(job.source_url || "")}">Retry with cookies</button>` : ""}
+              ${["queued", "running"].includes(stateValue) && job.id ? `<button class="button danger" type="button" data-cancel-job="${htmlEscape(job.id)}">Cancel</button>` : ""}
+            </div>
+          </div>
+          <div class="phase-row">${phaseChips(phase, stateValue)}</div>
+          <div class="progress"><span style="width:${Math.max(0, Math.min(100, progress))}%"></span></div>
+        </div>
+      `;
     }
 
     function queueRowHtml(row) {
-      const stateValue = row.state || row.status || "queued";
+      const stateValue = String(row.state || row.status || "queued").toLowerCase();
       const failed = stateValue === "failed";
       const progress = Number(row.progress || 0);
-      const phases = ["fetch", "transcribe", "screenshots", "classify", "write"];
       const activePhase = row.phase || (stateValue === "running" ? "screenshots" : "");
       return `
         <div class="job-row ${failed ? "failed" : ""}" data-pending-id="${htmlEscape(row.pending_id || "")}">
           <div class="job-top">
             <div>
               <div class="job-title">${htmlEscape(row.title || row.url || "Queued yoink")}</div>
-              <div class="job-sub">${htmlEscape(stateValue)}${row.retry_after ? ` · retry ${htmlEscape(fmtAge(row.retry_after))}` : ""}</div>
+              <div class="job-sub">${htmlEscape(stateValue)}${row.retry_after ? ` | retry ${htmlEscape(fmtAge(row.retry_after))}` : ""}</div>
             </div>
             <div class="inline-row">
+              ${failed ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(row.url || "")}">Retry with cookies</button>` : ""}
               ${stateValue === "pending" || failed ? `<button class="button ghost" type="button" data-retry="${htmlEscape(row.pending_id || "")}">Retry now</button>` : ""}
               ${stateValue !== "succeeded" ? `<button class="button danger" type="button" data-cancel="${htmlEscape(row.pending_id || "")}">Cancel</button>` : ""}
             </div>
           </div>
-          <div class="phase-row">${phases.map((p) => `<span class="phase-chip ${p === activePhase ? "active" : ""}">${p}</span>`).join("")}</div>
+          <div class="phase-row">${phaseChips(activePhase, stateValue)}</div>
           <div class="progress"><span style="width:${Math.max(0, Math.min(100, progress || (stateValue === "running" ? 62 : 0)))}%"></span></div>
         </div>
       `;
@@ -1519,7 +1686,7 @@
     function switchTab(tab) {
       document.querySelectorAll("[data-tab-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.tabButton === tab));
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
-      if (tab === "activity") refreshQueue();
+      if (tab === "activity") refreshActivity();
       if (tab === "settings") refreshSettings();
     }
 
@@ -1547,7 +1714,17 @@
         loadLibrary({ reset: true });
       });
       els.loadMore.addEventListener("click", () => loadLibrary());
-      document.getElementById("refreshActivity").addEventListener("click", refreshQueue);
+      document.getElementById("refreshActivity").addEventListener("click", refreshActivity);
+      document.getElementById("cancelAll").addEventListener("click", async () => {
+        const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(String(job.state || "").toLowerCase()) && job.id);
+        await Promise.all(activeJobs.map((job) => authFetch(`/jobs/${encodeURIComponent(job.id)}/cancel`, { method: "POST" }).catch(() => null)));
+        const pending = state.queue && Array.isArray(state.queue.pending) ? state.queue.pending : [];
+        await Promise.all(pending.map((row) => row.pending_id
+          ? authFetch("/queue/cancel", { method: "POST", body: JSON.stringify({ pending_id: row.pending_id }) }).catch(() => null)
+          : null));
+        showToast("Cancel requested for visible active work.");
+        refreshActivity();
+      });
       document.getElementById("reloadSettings").addEventListener("click", refreshSettings);
       document.getElementById("saveKey").addEventListener("click", saveKey);
       document.getElementById("testKey").addEventListener("click", testKey);
@@ -1576,8 +1753,12 @@
         if (card) authFetch(`/open-folder?path=${encodeURIComponent(card.dataset.folder)}`).catch((err) => showToast(err.message));
         const cancel = event.target.closest("[data-cancel]");
         if (cancel) postHelper("/queue/cancel", { pending_id: cancel.dataset.cancel });
+        const cancelJob = event.target.closest("[data-cancel-job]");
+        if (cancelJob) postHelper(`/jobs/${encodeURIComponent(cancelJob.dataset.cancelJob)}/cancel`);
         const retry = event.target.closest("[data-retry]");
         if (retry) postHelper("/queue/retry-now", { pending_id: retry.dataset.retry });
+        const retryCookies = event.target.closest("[data-retry-cookies]");
+        if (retryCookies) showToast("Retry with cookies lands with CC's Tier 2 helper queue.");
       });
       window.addEventListener("beforeunload", revokeThumbs);
     }
@@ -1585,7 +1766,21 @@
     function connectJobsStream() {
       try {
         const source = new EventSource("/jobs/stream");
-        source.onmessage = () => refreshQueue();
+        source.onmessage = (event) => {
+          try {
+            const payload = event.data ? JSON.parse(event.data) : null;
+            if (payload && payload.job) {
+              const id = payload.job.id || payload.job.job_id;
+              if (id) {
+                const next = payload.job.id ? payload.job : { ...payload.job, id };
+                const existing = state.jobs.findIndex((job) => job.id === id);
+                if (existing >= 0) state.jobs.splice(existing, 1, { ...state.jobs[existing], ...next });
+                else state.jobs.unshift(next);
+              }
+            }
+          } catch (_) {}
+          refreshActivity();
+        };
         source.onerror = () => source.close();
       } catch (_) {}
     }
@@ -1594,11 +1789,12 @@
       hydrateMarks();
       wireEvents();
       await refreshHealth();
+      await refreshJobs();
       await loadLibrary({ reset: true });
-      await refreshQueue();
+      await refreshActivity();
       connectJobsStream();
       setInterval(refreshHealth, 10000);
-      setInterval(refreshQueue, 5000);
+      setInterval(refreshActivity, 5000);
     }
 
     init().catch((err) => {
@@ -1606,6 +1802,6 @@
       els.resultSummary.textContent = err.message;
       els.libraryEmpty.classList.remove("hidden");
     });
-  </script>
+</script>
 </body>
 </html>
