@@ -1044,8 +1044,24 @@
                   <span>OINK</span>
                 </div>
                 <p class="lede" style="margin:18px auto 0">YouTube -> AI-ready docs. Local-first. Open source.</p>
+                <div class="running-pill" id="aboutStatus" style="margin-top:18px"><span class="pip"></span><span>Checking helper</span></div>
                 <div class="quote">&quot;Yo. Uoink that.&quot;</div>
               </div>
+            </div>
+            <div class="setting-block">
+              <h2>Local surfaces</h2>
+              <p class="setting-copy">The same helper serves the dashboard, splash, MCP config, and local API. No cloud account, no sync layer.</p>
+              <div class="link-list">
+                <a href="/dashboard" target="_blank" rel="noreferrer">Dashboard <span>/dashboard</span></a>
+                <a href="/splash" target="_blank" rel="noreferrer">Splash <span>/splash</span></a>
+                <a href="/settings/mcp-config" target="_blank" rel="noreferrer">MCP config <span>/settings/mcp-config</span></a>
+              </div>
+            </div>
+            <div class="setting-block">
+              <h2>Runtime</h2>
+              <p class="setting-copy" id="aboutVersion">Version: checking...</p>
+              <p class="setting-copy" id="aboutPort">Loopback: localhost:5179</p>
+              <p class="setting-copy">Tier 2 contract: `/jobs/stream?token=...` with `snapshot`, `job`, and `queue` events.</p>
             </div>
             <div class="setting-block">
               <h2>Learn</h2>
@@ -1133,6 +1149,9 @@
       topicList: document.getElementById("topicList"),
       autostartToggle: document.getElementById("autostartToggle"),
       screenshotCount: document.getElementById("screenshotCount"),
+      aboutStatus: document.getElementById("aboutStatus"),
+      aboutVersion: document.getElementById("aboutVersion"),
+      aboutPort: document.getElementById("aboutPort"),
     };
 
     function markSvg() {
@@ -1482,9 +1501,15 @@
         els.runningPill.querySelector("span:last-child").textContent = ok ? "Uoink is running" : "Uoink is offline";
         els.portLabel.textContent = `localhost:${data.port || 5179}`;
         els.versionLine.textContent = `v${data.version || "unknown"} | current`;
+        els.aboutStatus.classList.toggle("offline", !ok);
+        els.aboutStatus.querySelector("span:last-child").textContent = ok ? "Helper running" : "Helper offline";
+        els.aboutVersion.textContent = `Version: ${data.version || "unknown"}`;
+        els.aboutPort.textContent = `Loopback: localhost:${data.port || 5179}`;
       } catch (_) {
         els.runningPill.classList.add("offline");
         els.runningPill.querySelector("span:last-child").textContent = "Uoink is offline";
+        els.aboutStatus.classList.add("offline");
+        els.aboutStatus.querySelector("span:last-child").textContent = "Helper offline";
       }
     }
 
