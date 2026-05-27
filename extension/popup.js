@@ -99,6 +99,7 @@ const BACKFILL_DISMISSED_KEY = "yoink_backfill_dismissed_signature";
 const MORE_OPTIONS_OPEN_KEY = "yoink_popup_more_options_open";
 const QUEUE_EXPANDED_KEY = "yoink_popup_queue_expanded";
 let serverOnline = false;
+let isTier2 = false;
 let lastUoinkAt = 0;
 let lastClipboardBudget = null;
 let currentVideoUrl = null;
@@ -210,6 +211,19 @@ try {
   });
 } catch { /* ignore */ }
 
+function isVersionAtLeast(v1, v2) {
+  if (!v1) return false;
+  const parts1 = String(v1).split('-')[0].split('.').map(Number);
+  const parts2 = String(v2).split('-')[0].split('.').map(Number);
+  for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
+    const p1 = parts1[i] || 0;
+    const p2 = parts2[i] || 0;
+    if (p1 > p2) return true;
+    if (p1 < p2) return false;
+  }
+  return true;
+}
+
 async function ping() {
   const data = await STC.ping();
   const helperDownCard = document.getElementById("helper-down-card");
@@ -231,8 +245,24 @@ async function ping() {
     }
     updateDestButtons();
     if (uoinkCurrentBtn && currentVideoUrl) uoinkCurrentBtn.disabled = false;
+
+    // Detect Tier 2 dashboard support
+    const oldTier2 = isTier2;
+    isTier2 = (data.tier_2_dashboard === true) || 
+              (data.version && isVersionAtLeast(data.version, "2.2.0"));
+
+    const openDashboardLink = document.getElementById("open-dashboard");
+    const openIndexLink = document.getElementById("open-index");
+    if (openDashboardLink) openDashboardLink.classList.toggle("hidden", !isTier2);
+    if (openIndexLink) openIndexLink.classList.toggle("hidden", isTier2);
+
+    if (oldTier2 !== isTier2) {
+      // Re-initialize queue status polling under the new mode
+      startQueueStatusPolling();
+    }
   } else {
     serverOnline = false;
+    isTier2 = false;
     dot.classList.remove("up"); dot.classList.add("down");
     status.textContent = "Helper offline.";
     if (helperDownCard) helperDownCard.classList.remove("hidden");
@@ -241,6 +271,13 @@ async function ping() {
     if (modePlaylist) modePlaylist.classList.add("hidden");
     updateDestButtons();
     if (uoinkCurrentBtn) uoinkCurrentBtn.disabled = true;
+
+    const openDashboardLink = document.getElementById("open-dashboard");
+    const openIndexLink = document.getElementById("open-index");
+    if (openDashboardLink) openDashboardLink.classList.add("hidden");
+    if (openIndexLink) openIndexLink.classList.remove("hidden");
+    
+    stopQueueStatusPolling();
   }
 }
 
@@ -885,6 +922,7 @@ let dismissedQueueFailureSignature = "";
 function stopQueueStatusPolling() {
   if (queueStatusTimer) clearInterval(queueStatusTimer);
   queueStatusTimer = null;
+  stopSseStream();
 }
 
 function queueRows(status) {
@@ -1064,6 +1102,138 @@ function renderQueueBanner(status) {
   if (queueBannerToggle) queueBannerToggle.textContent = queueExpanded ? "Hide" : "Details";
 }
 
+let sseAbortController = null;
+let sseState = {
+  active: [],
+  recent: [],
+  queue: { pending: 0, running: 0, failed: 0, succeeded: 0, cancelled: 0, next_retry_at: null }
+};
+
+async function startSseStream() {
+  stopSseStream();
+  if (document.hidden || !serverOnline) return;
+
+  sseAbortController = new AbortController();
+  const signal = sseAbortController.signal;
+
+  try {
+    const token = await STC.getToken();
+    if (!token) return;
+
+    const res = await fetch(`${STC.SERVER}/jobs/stream`, {
+      headers: { "X-Uoink-Token": token },
+      signal
+    });
+
+    if (!res.ok) {
+      console.error("[Uoink] Failed to connect to jobs stream", res.status);
+      return;
+    }
+
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf = "";
+
+    // Reset local state on fresh connect
+    sseState = {
+      active: [],
+      recent: [],
+      queue: { pending: 0, running: 0, failed: 0, succeeded: 0, cancelled: 0, next_retry_at: null }
+    };
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (signal.aborted) break;
+
+      buf += dec.decode(value, { stream: true });
+      let i;
+      while ((i = buf.indexOf("\n\n")) >= 0) {
+        const frame = buf.slice(0, i);
+        buf = buf.slice(i + 2);
+        if (frame.startsWith(":")) continue; // heartbeat comment
+        
+        const ev = /^event:\s*(.*)$/m.exec(frame)?.[1];
+        const data = /^data:\s*(.*)$/m.exec(frame)?.[1];
+        if (ev && data) {
+          try {
+            handleSseEvent(ev, JSON.parse(data));
+          } catch (e) {
+            console.error("[Uoink] Failed to parse SSE event data", e);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    if (e.name !== 'AbortError') {
+      console.error("[Uoink] Error in SSE stream", e);
+      // Retry connection after 5 seconds if still online and visible
+      setTimeout(() => {
+        if (serverOnline && !document.hidden) {
+          startSseStream();
+        }
+      }, 5000);
+    }
+  }
+}
+
+function stopSseStream() {
+  if (sseAbortController) {
+    sseAbortController.abort();
+    sseAbortController = null;
+  }
+}
+
+function handleSseEvent(event, data) {
+  if (event === "snapshot") {
+    sseState.active = data.active || [];
+    sseState.recent = data.recent || [];
+    if (data.queue) sseState.queue = data.queue;
+  } else if (event === "job") {
+    const idx = sseState.active.findIndex(j => j.id === data.id);
+    const isTerminal = ["completed", "cancelled", "failed"].includes(data.state);
+    
+    if (isTerminal) {
+      if (idx >= 0) sseState.active.splice(idx, 1);
+      const rIdx = sseState.recent.findIndex(j => j.id === data.id);
+      if (rIdx >= 0) {
+        sseState.recent[rIdx] = data;
+      } else {
+        sseState.recent.unshift(data);
+        if (sseState.recent.length > 10) sseState.recent.pop();
+      }
+    } else {
+      if (idx >= 0) {
+        sseState.active[idx] = data;
+      } else {
+        sseState.active.push(data);
+      }
+    }
+  } else if (event === "queue") {
+    sseState.queue = data;
+  }
+
+  // Trigger UI render
+  renderQueueBanner(getStatusForRender());
+}
+
+function getStatusForRender() {
+  const runningJobs = sseState.active.filter(j => j.state === "running");
+  const queuedJobs = sseState.active.filter(j => j.state === "queued" || j.state === "idle");
+  const failedJobs = sseState.active.filter(j => j.state === "failed");
+  const recentFailures = sseState.recent.filter(j => j.state === "failed");
+
+  return {
+    pending_count: sseState.queue.pending,
+    running_count: sseState.queue.running,
+    failed_count: sseState.queue.failed,
+    next_retry_at: sseState.queue.next_retry_at,
+    current: runningJobs,
+    items: queuedJobs,
+    failed_items: failedJobs.concat(recentFailures)
+  };
+}
+
 async function pollQueueStatus() {
   if (document.hidden) return;
   try {
@@ -1078,8 +1248,26 @@ async function pollQueueStatus() {
 
 function startQueueStatusPolling() {
   stopQueueStatusPolling();
-  pollQueueStatus();
-  queueStatusTimer = setInterval(pollQueueStatus, 5000);
+  if (isTier2) {
+    startSseStream();
+  } else {
+    pollQueueStatus();
+    queueStatusTimer = setInterval(pollQueueStatus, 5000);
+  }
+}
+
+async function serverQueuePendingCount() {
+  if (sseAbortController && sseState.queue) {
+    return Number(sseState.queue.pending) || 0;
+  }
+  try {
+    const status = await popupAuthedJson("/queue/status", { method: "GET" });
+    if (!status || status.ok === false) return 0;
+    lastQueueStatus = status;
+    return Number(status.pending_count ?? status.queued_count) || 0;
+  } catch {
+    return 0;
+  }
 }
 
 if (queueBannerMain) {
@@ -1101,17 +1289,6 @@ try {
     setQueueExpanded(queueExpanded);
   });
 } catch { /* ignore */ }
-
-async function serverQueuePendingCount() {
-  try {
-    const status = await popupAuthedJson("/queue/status", { method: "GET" });
-    if (!status || status.ok === false) return 0;
-    lastQueueStatus = status;
-    return Number(status.pending_count ?? status.queued_count) || 0;
-  } catch {
-    return 0;
-  }
-}
 
 function queuedToastMessage(data) {
   const mins = minutesUntil(data && (data.next_retry_in_seconds ?? data.retry_in_seconds ?? data.next_retry_at));
@@ -1554,6 +1731,16 @@ document.getElementById("open-index").addEventListener("click", async (ev) => {
 });
 wireKeyActivation(document.getElementById("open-index"));
 
+// ---- Open dashboard (Sprint 21 / Tier 2) -----------------------------------
+const openDashboardLink = document.getElementById("open-dashboard");
+if (openDashboardLink) {
+  openDashboardLink.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    chrome.tabs.create({ url: `${STC.SERVER}/dashboard` });
+  });
+  wireKeyActivation(openDashboardLink);
+}
+
 // ---- Settings link (Sprint 2) ---------------------------------------------
 // Lives in the popup footer so it's visible in both single-video and playlist
 // modes. setup.html is the canonical settings surface (Codex's lane), so we
@@ -1620,9 +1807,10 @@ window.addEventListener("unload", () => {
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) {
     stopBackfillPolling();
+    stopQueueStatusPolling();
   } else {
     startBackfillPolling();
-    pollQueueStatus();
+    startQueueStatusPolling();
   }
 });
 
