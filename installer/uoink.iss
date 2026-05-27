@@ -47,6 +47,11 @@ OutputBaseFilename=Uoink-Setup-{#AppVersion}
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
+; Branded wizard bitmaps (Variant A magnet-U), regenerated each build by
+; ../generate_bitmaps.py into installer/assets/. Compile-time only (baked into
+; Setup.exe, not installed to {app}). 24-bit BMP per Inno's requirement.
+WizardImageFile=assets\wizard-large.bmp
+WizardSmallImageFile=assets\wizard-small.bmp
 SetupIconFile=uoink.ico
 UninstallDisplayIcon={app}\uoink.ico
 UninstallDisplayName={#AppName}
@@ -56,11 +61,17 @@ CloseApplications=force
 ChangesEnvironment=no
 
 [Messages]
-; Net-new copy to land the Uoink voice on the otherwise-stock Inno screens.
-WelcomeLabel2=Uoink turns any YouTube video into a clean, AI-ready doc on your disk.%n%nThis installs the local helper that does the work. No account, no cloud. Takes about a minute.
-ReadyLabel1=Ready to uoink. Click Install to drop everything in:
-FinishedLabelNoIcons=Uoink is installed. Open YouTube, find the rust U under any video, and click it.
-FinishedLabel=Uoink is installed. Open YouTube, find the rust U under any video, and click it.
+; Net-new copy (WIZARD-COPY-AND-BITMAPS.md s1) to land the Uoink voice on the
+; otherwise-stock Inno screens. ASCII-safe punctuation only (no em-dashes) so
+; the strings render identically regardless of the .iss code page.
+WelcomeLabel2=Uoink pulls complete YouTube context - transcripts, screenshots, and comments - straight into your clipboard for Claude or ChatGPT.%n%nThis installer places the private local helper onto your machine. No accounts, no cloud dependencies. Setup completes in under a minute.
+SelectDirDesc=Choose where to place Uoink's local files
+SelectDirLabel3=Uoink runs a lightweight program on your computer to process YouTube transcripts and screenshots locally, keeping your research private. Setup will install these tools into the folder below.
+ReadyLabel1=Uoink is ready to set up on your machine. Click Install to place the local helper and dependencies in:
+StatusExtractFiles=Placing local helper files and media dependencies...
+FinishedHeadingLabel=Uoink is Ready
+FinishedLabelNoIcons=Uoink has been successfully installed. Open YouTube in your browser, find the rust 'Uoink' button under the video player, and click it to pull content.%n%nTo configure API keys, customize screenshot intervals, or search your saved corpora, click the browser extension icon.
+FinishedLabel=Uoink has been successfully installed. Open YouTube in your browser, find the rust 'Uoink' button under the video player, and click it to pull content.%n%nTo configure API keys, customize screenshot intervals, or search your saved corpora, click the browser extension icon.
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -75,6 +86,9 @@ Source: "staging\bin\*"; DestDir: "{app}\bin"; Flags: recursesubdirs ignoreversi
 
 ; Server source.
 Source: "staging\server.py"; DestDir: "{app}"; Flags: ignoreversion
+; System-tray module (Tier 1 v2.1.1) -- imported by server.py at boot on
+; installed builds. Optional at runtime (degrades if pystray is unavailable).
+Source: "staging\uoink_tray.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\index.py"; DestDir: "{app}"; Flags: ignoreversion
 ; Cross-platform path/OS helpers -- server.py and migrate_install.py import
 ; this at module top. Omitting it crashes the helper before it binds the port.
@@ -159,3 +173,50 @@ Type: files; Name: "{app}\server.pid"
 Type: filesandordirs; Name: "{app}\python\Lib\site-packages\__pycache__"
 Type: filesandordirs; Name: "{app}\python\Lib\site-packages"
 Type: filesandordirs; Name: "{app}\python\__pycache__"
+
+[Code]
+{ Informational "Migrating Yoink Data" page (WIZARD-COPY-AND-BITMAPS.md s2).
+  Shown only when a legacy Yoink install is detected. The actual migration is
+  run by migrate_install.py on the helper's FIRST BOOT (copy-not-move, verified,
+  7-day grace), not during the wizard -- so this page sets expectations rather
+  than tracking live progress, which a [Code] page cannot do for post-wizard
+  work. The "Uoink is running" confirmation is delivered by the boot balloon +
+  tray once the helper starts. }
+var
+  MigratePage: TWizardPage;
+  MigrateText: TNewStaticText;
+
+function LegacyYoinkPresent(): Boolean;
+begin
+  Result := DirExists(ExpandConstant('{localappdata}\Yoink'));
+end;
+
+procedure InitializeWizard();
+begin
+  MigratePage := CreateCustomPage(wpReady, 'Migrating Yoink Data',
+    'Moving your saved videos, settings, and API key safely to Uoink');
+  MigrateText := TNewStaticText.Create(MigratePage);
+  MigrateText.Parent := MigratePage.Surface;
+  MigrateText.AutoSize := False;
+  MigrateText.Left := 0;
+  MigrateText.Top := 0;
+  MigrateText.Width := MigratePage.SurfaceWidth;
+  MigrateText.Height := MigratePage.SurfaceHeight;
+  MigrateText.WordWrap := True;
+  MigrateText.Caption :=
+    'A previous Yoink install was found on this PC.' + #13#10#13#10 +
+    'The first time Uoink starts, it will automatically copy your saved videos, ' +
+    'settings, and Anthropic API key from Yoink into Uoink. Nothing is moved or ' +
+    'deleted until a fully verified copy exists -- your old files stay in place ' +
+    'for 7 days as a safety net, then are removed automatically.' + #13#10#13#10 +
+    'If anything cannot be copied automatically, no data is lost: your old files ' +
+    'remain at %LOCALAPPDATA%\Yoink\, and you can re-enter your Anthropic API key ' +
+    'from the Uoink Settings menu at any time.';
+end;
+
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  Result := False;
+  if (PageID = MigratePage.ID) and (not LegacyYoinkPresent()) then
+    Result := True;
+end;

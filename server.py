@@ -6564,6 +6564,31 @@ def main():
     import atexit
     atexit.register(lambda: pid_file.unlink(missing_ok=True))
 
+    # Tier 1 (v2.1.1): ambient system-tray presence on installed Windows
+    # builds. Guarded by the installed-layout check (bundled pythonw next to
+    # server.py, same guard migrate uses) so a dev run from the repo never
+    # spawns a tray. Runs in a daemon thread; any failure (no pystray, no
+    # system tray) degrades to "no tray, server still runs" -- the boot balloon
+    # below is the fallback "it's running" affordance.
+    if (HERE / "python" / "pythonw.exe").exists():
+        try:
+            import uoink_tray
+
+            def _tray_stop():
+                # Called from the tray's daemon thread; shut the server down on
+                # a separate thread so serve_forever() unblocks and main()
+                # returns (atexit then clears the PID file).
+                threading.Thread(target=server.shutdown, daemon=True).start()
+
+            uoink_tray.start(
+                host=HOST, port=PORT, version=VERSION,
+                token_path=TOKEN_PATH, output_dir=DESKTOP_ROOT,
+                dashboard_url=f"http://{HOST}:{PORT}/dashboard",
+                stop_callback=_tray_stop,
+            )
+        except Exception as e:
+            log.warning("tray: failed to start (non-fatal): %s", e)
+
     log.info("Uoink server v%s running on http://%s:%d", VERSION, HOST, PORT)
     log.info("Ready to uoink. Click any YouTube video's Uoink button.")
     log.info("Output: %s", DESKTOP_ROOT)
@@ -6575,9 +6600,9 @@ def main():
     # a settings flag so it never repeats.
     if not _maybe_post_migration_toast():
         maybe_toast(
-            "Uoink is running",
-            "Click the rust U under any YouTube video to uoink. "
-            "To stop, find 'Stop Uoink' in your Start Menu.",
+            "Uoink is Active & Ready ✓",
+            "Click the rust U under any YouTube video to pull context. "
+            "Open the dashboard anytime from the magnet-U in your system tray.",
         )
     try:
         server.serve_forever()
