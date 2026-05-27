@@ -8,6 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [2.1.1] - 2026-05-26
+
+### Added
+
+- **Helper-served `/dashboard` endpoint** (Codex PR <TBD>) — serving a local web interface with connection health status pills and a list of recent uoinks.
+- **System tray icon via `pystray`** (CC PR <TBD>) — provides ambient status in the system tray with context menu options to Open Dashboard, Open Uoink Folder, view Recent Uoinks, and Stop Helper.
+- **Branded installer bitmaps & startup toast** (CC PR <TBD>) — adds `WizardImageFile` and `WizardSmallImageFile` assets to Inno Setup, and triggers a "Uoink is running ✓" notification balloon on first launch.
+- **Brand v3.1 contrast rules doc** (`BRAND-CONTRAST-RULES.md`) — introduces `--rust-bright #F97316` as a canonical token for standard text on dark grounds where `--rust` fails WCAG AA.
+
+### Fixed
+
+- **Orphan Yoink autostart Registry key** (CC PR <TBD>) — sweeps the legacy `Yoink` autostart value in `HKCU\...\Run` under `_is_installed_layout` guards.
+- **Stale branding & broken Windows CTA** (AG PR #3) — re-applies direct Windows CTA installer link and renames remaining user-visible "Yoink" setup references in `extension/setup.js` and `extension/setup.html`.
+
 ## [2.1.0] - 2026-XX-XX <!-- TODO: fill on tag -->
 
 ### The rename
