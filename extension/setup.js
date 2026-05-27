@@ -19,22 +19,6 @@ const SUGGESTED_VIDEO = {
   byline: "Lenny's Podcast",
 };
 
-// LAUNCH GATE -- flip to `true` only after Yoink-Setup-2.0.0.exe is live
-// at github.com/ryanbiddy/yoink/releases/latest. Procedure (also in
-// docs/build-installer.md, "Launch checklist"):
-//   1. Confirm SHA256 hashes in build.ps1 match the component versions.
-//   2. Run .\build.ps1 -- builds Yoink-Setup-2.0.0.exe.
-//   3. Smoke-test on a clean Windows VM.
-//   4. git tag v2.0.0 && git push --tags.
-//   5. Create the GitHub release, attach the .exe.
-//   6. Verify https://github.com/ryanbiddy/yoink/releases/latest/download/Yoink-Setup-2.0.0.exe
-//      resolves to the file.
-//   7. Flip this flag to `true` and commit.
-//   8. Republish the extension to the Chrome Web Store.
-//
-// Until then, the download button on setup.html shows "Coming soon" and
-// the click handler is no-op'd so first-wave users don't hit a 404.
-const INSTALLER_PUBLISHED = false;
 
 // ---- Constants -----------------------------------------------------------
 const SERVER = "http://127.0.0.1:5179";
@@ -113,6 +97,7 @@ function normalizePlatform(os) {
 function setPlatform(os) {
   platformOs = normalizePlatform(os);
   document.body.dataset.platform = platformOs;
+  applyDownloadState();
 }
 
 function currentPlatform() {
@@ -127,7 +112,7 @@ function startHelperLabel() {
 
 function helperOfflineDetail() {
   if (currentPlatform() === "mac") {
-    return "Open Yoink from Applications, or run uoink-helper from Terminal, then this panel will refresh.";
+    return "Open Uoink from Applications, or run uoink-helper from Terminal, then this panel will refresh.";
   }
   if (currentPlatform() === "linux") {
     return "Run uoink-helper from Terminal, then this panel will refresh.";
@@ -884,7 +869,7 @@ function buildMcpSnippets(config, token) {
   const stdio = stdioServerConfig(config);
   const http = {
     url: config.http.url,
-    headers: { "X-Yoink-Token": token || "<token>" },
+    headers: { "X-Uoink-Token": token || "<token>" },
   };
   return {
     claude: jsonPretty(stdio),
@@ -911,7 +896,7 @@ function renderMcpConfig(config, token) {
   if (mcpStdioPath) mcpStdioPath.textContent = stdioText;
   if (mcpHttpUrl) mcpHttpUrl.textContent = config.http.url;
   if (mcpHttpToken) {
-    mcpHttpToken.textContent = token ? `X-Yoink-Token: ${token}` : "Token unavailable.";
+    mcpHttpToken.textContent = token ? `X-Uoink-Token: ${token}` : "Token unavailable.";
   }
   mcpSnippets = buildMcpSnippets(config, token);
   for (const [client, el] of Object.entries(mcpConfigEls)) {
@@ -951,7 +936,7 @@ async function loadMCPConfig() {
     renderMcpConfig(config, token);
     scrollToRequestedAnchor();
   } catch {
-    const msg = "MCP config unavailable. Make sure Yoink Server is running.";
+    const msg = "MCP config unavailable. Make sure Uoink Server is running.";
     if (mcpStdioPath) mcpStdioPath.textContent = msg;
     if (mcpHttpUrl) mcpHttpUrl.textContent = msg;
   }
@@ -997,7 +982,7 @@ async function loadSkillSystemPrompt() {
     if (!res.ok) throw new Error("skill prompt unavailable");
     skillSystemPrompt.value = await res.text();
   } catch {
-    skillSystemPrompt.value = "System prompt unavailable. Make sure Yoink Server is running.";
+    skillSystemPrompt.value = "System prompt unavailable. Make sure Uoink Server is running.";
   }
 }
 
@@ -1061,15 +1046,29 @@ if (openInstallFolderBtn) {
 }
 
 // ---- Pre-launch download button state -----------------------------------
+function preventDefaultClick(ev) {
+  ev.preventDefault();
+}
+
 function applyDownloadState() {
-  if (INSTALLER_PUBLISHED || !downloadBtn) return;
-  downloadBtn.classList.add("disabled");
-  downloadBtn.setAttribute("aria-disabled", "true");
-  downloadBtn.textContent = "Coming soon";
-  downloadBtn.title = "Installer publishes at launch.";
-  // Stop the link from navigating to a not-yet-existing release page.
-  downloadBtn.addEventListener("click", (ev) => ev.preventDefault());
-  downloadBtn.removeAttribute("href");
+  if (!downloadBtn) return;
+  if (currentPlatform() === "win") {
+    downloadBtn.classList.remove("disabled");
+    downloadBtn.removeAttribute("aria-disabled");
+    downloadBtn.title = "";
+    downloadBtn.href = "https://github.com/ryanbiddy/uoink/releases/download/v2.1.0/Uoink-Setup-2.1.0.exe";
+    downloadBtn.removeEventListener("click", preventDefaultClick);
+  } else {
+    downloadBtn.classList.add("disabled");
+    downloadBtn.setAttribute("aria-disabled", "true");
+    const macSpan = downloadBtn.querySelector('[data-mac-only]');
+    const linuxSpan = downloadBtn.querySelector('[data-linux-only]');
+    if (macSpan) macSpan.textContent = "Coming soon";
+    if (linuxSpan) linuxSpan.textContent = "Coming soon";
+    downloadBtn.title = "Installer publishes at launch.";
+    downloadBtn.addEventListener("click", preventDefaultClick);
+    downloadBtn.removeAttribute("href");
+  }
 }
 
 // ---- Boot ----------------------------------------------------------------
