@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Uoink",
   "short_name": "Uoink",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "The YouTube layer for any AI. Transcripts, screenshots, and comments in one paste.",
   "homepage_url": "https://uoink.video",
   "permissions": ["alarms", "clipboardWrite", "notifications", "storage", "contextMenus", "activeTab", "offscreen"],
