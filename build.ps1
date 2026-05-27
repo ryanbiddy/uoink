@@ -375,7 +375,13 @@ Write-Host "    using $iscc"
 $issTemplate = Join-Path $InstallerDir 'uoink.iss'
 $issGenerated = Join-Path $InstallerDir 'uoink.generated.iss'
 $issText = Get-Content -Raw $issTemplate
-$issText = $issText -replace '(?m)^#define\s+AppVersion\s+".*"$', "#define AppVersion    `"$VERSION`""
+# NOTE: the trailing \r? is load-bearing. uoink.iss is CRLF on Windows
+# checkouts, and .NET's (?m)$ anchors *before* the \n -- with a \r still
+# sitting after the closing quote, the bare ".*"$ pattern never matches, the
+# AppVersion #define is left at its stale hardcoded value, and ISCC names the
+# output Uoink-Setup-<old>.exe (hit during the v2.1.1 build: VERSION/manifest
+# were 2.1.1 but the .exe came out 2.1.0). \r? lets $ match on CRLF lines too.
+$issText = $issText -replace '(?m)^#define\s+AppVersion\s+".*"\r?$', "#define AppVersion    `"$VERSION`""
 $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText($issGenerated, $issText, $utf8NoBom)
 try {
