@@ -3625,6 +3625,76 @@ def _now_iso() -> str:
     return datetime.now().isoformat(timespec="seconds")
 
 
+# ---- Update check (Tier 2; notify-only) ----------------------------------
+# Polls GitHub Releases, caches the result >=24h on disk so the dashboard can
+# poll freely, and NEVER downloads or self-updates -- it only reports whether a
+# newer tag exists and links out. Network/parse failures degrade silently.
+_UPDATE_RELEASES_API = "https://api.github.com/repos/ryanbiddy/uoink/releases/latest"
+_UPDATE_CACHE_PATH = DATA_ROOT / "update_check.json"
+_UPDATE_CACHE_TTL_SEC = 24 * 3600
+_update_check_lock = threading.Lock()
+
+
+def _semver_tuple(v: str) -> tuple:
+    """'v2.2.1' / '2.2.1' -> (2,2,1) for ordering. Trailing pre-release/build
+    bits are dropped; missing parts pad with 0; non-numeric parts become 0."""
+    core = (v or "").strip().lstrip("vV").split("+")[0].split("-")[0]
+    parts: list[int] = []
+    for p in core.split(".")[:3]:
+        try:
+            parts.append(int(p))
+        except ValueError:
+            parts.append(0)
+    while len(parts) < 3:
+        parts.append(0)
+    return tuple(parts)
+
+
+def _check_for_update(*, force: bool = False) -> dict:
+    """Notify-only update check. Cached >=24h; failures return
+    {'update_available': False, 'error': ...} and are not cached so the next
+    call retries. Never downloads anything."""
+    now = time.time()
+    with _update_check_lock:
+        if not force:
+            try:
+                cached = json.loads(_UPDATE_CACHE_PATH.read_text(encoding="utf-8"))
+                if now - float(cached.get("_ts", 0)) < _UPDATE_CACHE_TTL_SEC:
+                    cached.pop("_ts", None)
+                    cached["cached"] = True
+                    return cached
+            except (OSError, ValueError):
+                pass
+        req = urllib.request.Request(
+            _UPDATE_RELEASES_API,
+            headers={"User-Agent": "uoink-update-check",
+                     "Accept": "application/vnd.github+json"})
+        try:
+            with urllib.request.urlopen(req, timeout=6) as r:
+                rel = json.loads(r.read().decode("utf-8"))
+        except Exception as e:  # network down, rate-limited, malformed -- non-fatal
+            log.debug("update check: fetch failed: %s", e)
+            return {"current": VERSION, "latest": None, "update_available": False,
+                    "url": None, "error": "offline", "checked_at": _now_iso(),
+                    "cached": False}
+        latest = str(rel.get("tag_name") or "").strip().lstrip("vV")
+        result = {
+            "current": VERSION,
+            "latest": latest or None,
+            "update_available": bool(latest) and _semver_tuple(latest) > _semver_tuple(VERSION),
+            "url": rel.get("html_url"),
+            "published_at": rel.get("published_at"),
+            "checked_at": _now_iso(),
+            "cached": False,
+        }
+        try:
+            _UPDATE_CACHE_PATH.write_text(
+                json.dumps({**result, "_ts": now}), encoding="utf-8")
+        except OSError as e:
+            log.debug("update check: cache write failed: %s", e)
+        return result
+
+
 def _session_folder(slug: str) -> Path:
     return SESSIONS_ROOT / slug
 
@@ -5248,6 +5318,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_settings_get()
         if bare == "/settings/pricing":
             return self._handle_settings_pricing()
+        if bare == "/update/check":
+            return self._handle_update_check()
         if bare == "/file":
             return self._handle_file()
         if bare == "/mcp/v1/config":
@@ -5322,6 +5394,14 @@ class Handler(BaseHTTPRequestHandler):
 
     def _handle_settings_pricing(self):
         self._send_json(200, {"ok": True, "pricing": _anthropic_pricing_payload()})
+
+    def _handle_update_check(self):
+        """Notify-only update check (Tier 2). Token-gated; cached >=24h on disk.
+        `?force=1` bypasses the cache. Never downloads -- reports + links only."""
+        if not self._require_token():
+            return
+        force = (parse_qs(urlparse(self.path).query).get("force") or [""])[0] == "1"
+        self._send_json(200, {"ok": True, **_check_for_update(force=force)})
 
     def _handle_settings_post(self, body: dict):
         boolean_fields = (
