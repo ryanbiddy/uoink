@@ -22,7 +22,7 @@
 ;   uoink.ico         Used for shortcuts and the uninstaller.
 
 #define AppName       "Uoink"
-#define AppVersion    "2.1.0"
+#define AppVersion    "2.1.1"
 #define AppPublisher  "ReplayRyan"
 #define AppURL        "https://uoink.video"
 
