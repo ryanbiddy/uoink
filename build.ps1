@@ -78,6 +78,9 @@ $MCP_VERSION    = '1.27.1'
 # Windows Credential Manager wrapper for Anthropic API key storage.
 # Also pinned in requirements.txt for dev installs and docs.
 $KEYRING_VERSION = '25.7.0'
+# System-tray icon (Tier 1 v2.1.1). Pure-Python; Pillow (already pinned above)
+# renders the glyph. Optional at runtime -- server.py degrades if it's missing.
+$PYSTRAY_VERSION = '0.19.5'
 
 # ---- Hash verification --------------------------------------------------
 # Direct-download SHA256s are locked as of v2.0. When bumping Python,
@@ -225,10 +228,10 @@ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
 #     MCP powers uoink_mcp.py for stdio agent integrations. keyring stores
 #     the user's Anthropic API key in Windows Credential Manager.
-Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION..."
+Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION..."
 & $embedPython -m pip install --no-warn-script-location --no-compile `
-    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION"
-if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring) failed' }
+    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION"
+if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray) failed' }
 
 # 2e. Trim dev-only and build-time files we don't need at runtime.
 # distutils-precedence.pth is dropped by setuptools and tries to import
@@ -270,6 +273,9 @@ Remove-Item -Recurse -Force $ffmpegTmp
 # 2g. Server source + helpers + icon
 Write-Host '    copying server source + templates...'
 Copy-Item (Join-Path $RepoRoot 'server.py')      $StagingDir -Force
+# System-tray module (Tier 1 v2.1.1). Imported by server.py at boot on
+# installed builds; optional at runtime (degrades if pystray is unavailable).
+Copy-Item (Join-Path $RepoRoot 'uoink_tray.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'index.py')       $StagingDir -Force
 # Cross-platform path/OS helpers (added Sprint 19.5). server.py and
 # migrate_install.py `import _platform` at module top -- omitting it ships a
@@ -337,6 +343,8 @@ if not v:
 print("smoke: Index.open OK, schema_version=%s" % v)
 import server
 print("smoke: import server OK, version=%s" % server.VERSION)
+import uoink_tray
+print("smoke: import uoink_tray OK")
 '@
     try {
         & '.\python\python.exe' $smokePy
@@ -350,6 +358,15 @@ print("smoke: import server OK, version=%s" % server.VERSION)
 } finally {
     Pop-Location
 }
+
+# ---- 2i. Wizard bitmaps -------------------------------------------------
+# Regenerate the branded WizardImage/WizardSmallImage BMPs from source each
+# build (no committed binary churn). Uses the staged embeddable Python, which
+# has Pillow installed. ISCC reads them from installer\assets\ at compile time
+# (they are baked into Setup.exe, not installed into {app}).
+Write-Step 'Generating wizard bitmaps'
+& $embedPython (Join-Path $InstallerDir 'generate_bitmaps.py')
+if ($LASTEXITCODE -ne 0) { throw 'wizard bitmap generation failed' }
 
 # ---- 3. Compile installer ----------------------------------------------
 Write-Step 'Compiling installer'

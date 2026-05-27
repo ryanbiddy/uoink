@@ -55,3 +55,7 @@ docs/launch/
 # as siblings with `git worktree add` when needed for a new sprint.
 /Yoink-claude-v2/
 /Yoink-codex-v2/
+
+# Wizard bitmaps are regenerated from installer/generate_bitmaps.py on each
+# build (build.ps1) -- no committed binary churn.
+installer/assets/*.bmp
