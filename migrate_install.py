@@ -205,6 +205,43 @@ def _migrate_keyring(dry_run: bool) -> str:
 # --------------------------------------------------------------------------
 # Autostart Run key (Windows only)
 # --------------------------------------------------------------------------
+def _remove_legacy_run_key(dry_run: bool) -> str:
+    """Remove the orphan legacy 'Yoink' HKCU Run value, idempotently.
+
+    The autostart Run value is an independent pointer -- not tied to the data
+    folder -- so it must be swept on every boot, not only during the one-time
+    data copy. Otherwise, once the 7-day grace period deletes the old \\Yoink\\
+    folder, the surviving 'Yoink' Run value keeps pointing pythonw.exe at a
+    server.py that no longer exists (the orphan-key failure flagged in phase E).
+    Safe no-op if the value is absent (clean install) or off-Windows.
+    """
+    if sys.platform != "win32":
+        return "skipped: not Windows"
+    try:
+        import winreg
+    except Exception as e:  # pragma: no cover
+        return f"skipped: winreg unavailable ({e})"
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _RUN_SUBKEY, 0,
+                            winreg.KEY_READ | winreg.KEY_SET_VALUE) as key:
+            try:
+                winreg.QueryValueEx(key, _RUN_VALUE_OLD)
+            except FileNotFoundError:
+                return "legacy Run value absent"
+            if dry_run:
+                return f"would remove legacy Run value '{_RUN_VALUE_OLD}'"
+            try:
+                winreg.DeleteValue(key, _RUN_VALUE_OLD)
+            except FileNotFoundError:
+                # Raced away between the read and the delete -- already gone.
+                return "legacy Run value vanished before delete"
+            log.info(r"uoink.migrate: removed legacy Run key HKCU\...\Run\Yoink")
+            return f"removed legacy Run value '{_RUN_VALUE_OLD}'"
+    except OSError as e:
+        log.warning("migration: legacy Run-key cleanup failed (non-fatal): %s", e)
+        return f"failed (non-fatal): {e}"
+
+
 def _migrate_run_key(app_dir: Path, dry_run: bool) -> str:
     if sys.platform != "win32":
         return "skipped: not Windows"
@@ -215,31 +252,27 @@ def _migrate_run_key(app_dir: Path, dry_run: bool) -> str:
     pythonw = app_dir / "python" / "pythonw.exe"
     server_py = app_dir / "server.py"
     desired = f'"{pythonw}" "{server_py}"'
+    if dry_run:
+        return (f"would set Run value '{_RUN_VALUE_NEW}' -> {desired}; "
+                f"{_remove_legacy_run_key(dry_run=True)}")
     try:
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _RUN_SUBKEY, 0,
                             winreg.KEY_READ | winreg.KEY_SET_VALUE) as key:
-            old_present = False
-            try:
-                winreg.QueryValueEx(key, _RUN_VALUE_OLD)
-                old_present = True
-            except FileNotFoundError:
-                pass
-            if dry_run:
-                return (f"would drop Run value '{_RUN_VALUE_OLD}'"
-                        f"{' (present)' if old_present else ' (absent)'} and set "
-                        f"'{_RUN_VALUE_NEW}' -> {desired}")
-            if old_present:
-                try:
-                    winreg.DeleteValue(key, _RUN_VALUE_OLD)
-                    log.info("migration: removed legacy autostart Run value 'Yoink'")
-                except FileNotFoundError:
-                    pass
             winreg.SetValueEx(key, _RUN_VALUE_NEW, 0, winreg.REG_SZ, desired)
-            log.info("migration: autostart Run value 'Uoink' -> %s", desired)
-            return "migrated"
+            # Verify the new Uoink value landed BEFORE removing the legacy
+            # pointer, so a failed write never leaves the user with no autostart
+            # key at all (write-verify-then-delete, not delete-then-write).
+            written, _ = winreg.QueryValueEx(key, _RUN_VALUE_NEW)
     except OSError as e:
         log.warning("migration: Run-key migration failed (non-fatal): %s", e)
         return f"failed (non-fatal): {e}"
+    if written != desired:
+        log.warning("migration: Uoink Run value readback mismatch; keeping "
+                    "legacy 'Yoink' value as a fallback")
+        return "set Uoink (readback mismatch); kept legacy as fallback"
+    log.info("migration: autostart Run value 'Uoink' -> %s", desired)
+    # Uoink autostart confirmed -> now safe to drop the orphan legacy pointer.
+    return f"migrated; {_remove_legacy_run_key(dry_run=False)}"
 
 
 # --------------------------------------------------------------------------
@@ -276,17 +309,29 @@ def run_migration(*, dry_run: bool = False, app_dir: Path | None = None) -> dict
         log.info("migration[%s]: %s -- %s",
                  "dry-run" if dry_run else "run", name, detail)
 
-    # Already complete -> only consider the grace-period cleanup.
+    # Already complete -> only consider the grace-period cleanup. The autostart
+    # Run value is independent of the data migration, so still sweep any orphan
+    # legacy 'Yoink' value here: this path runs on every boot after the one-time
+    # migration, and is where a surviving 'Yoink' Run key would otherwise linger
+    # until the grace period deletes its target (phase-E orphan-key failure).
     if sentinel.is_file():
         step("already_complete", f"{SENTINEL_FILENAME} present")
         cleanup = _maybe_cleanup_old_root(old_root, new_root, dry_run)
         step("old_folder_cleanup", cleanup)
+        rk = _remove_legacy_run_key(dry_run) if _is_installed_layout(app_dir) \
+            else "skipped: dev layout"
+        step("legacy_run_key", rk)
         result["outcome"] = "already_migrated"
         return result
 
-    # No legacy install -> fresh install, nothing to migrate.
+    # No legacy install -> fresh install, nothing to migrate. Still sweep the
+    # legacy Run value (idempotent no-op when absent) so a stray autostart
+    # pointer left by a partial/older install can't survive.
     if not old_root.exists():
         step("no_legacy", f"{old_root} does not exist")
+        rk = _remove_legacy_run_key(dry_run) if _is_installed_layout(app_dir) \
+            else "skipped: dev layout"
+        step("legacy_run_key", rk)
         result["outcome"] = "no_legacy"
         return result
 
