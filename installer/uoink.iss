@@ -17,6 +17,7 @@
 ;   yt_extract.py     Helper module imported by server.py.
 ;   topics.json       Topic-folder routing rules.
 ;   skills\           Operator Skill + copyable system prompt.
+;   assets\dashboard\ Helper-served local dashboard HTML.
 ;   stop-server.bat   Stops the server via the PID file written at startup.
 ;   uoink.ico         Used for shortcuts and the uninstaller.
 
@@ -92,6 +93,7 @@ Source: "staging\topics.json"; DestDir: "{app}"; Flags: ignoreversion
 ; clean install before binding the port.
 Source: "staging\VERSION"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\skills\*"; DestDir: "{app}\skills"; Flags: recursesubdirs ignoreversion createallsubdirs
+Source: "staging\assets\dashboard\*"; DestDir: "{app}\assets\dashboard"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Library-index migrations -- index._run_migrations applies these at boot.
 ; Sprint 19.6 / Fix 1: pre-Sprint-19.6 installers omitted these, causing
 ; the helper to crash with "no such table: schema_version" on first launch.

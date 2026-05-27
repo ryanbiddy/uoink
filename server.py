@@ -12,6 +12,7 @@ Endpoints:
     POST /session/cancel
     GET  /session/list
     GET  /session/active
+    GET  /dashboard          helper-served local dashboard
 """
 
 import json
@@ -74,6 +75,7 @@ import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
 HOST = "127.0.0.1"
 PORT = 5179
 VERSION = _read_version()
+DASHBOARD_PATH = HERE / "assets" / "dashboard" / "index.html"
 ALLOWED_ORIGINS = {
     "https://www.youtube.com",
     "https://m.youtube.com",
@@ -5213,6 +5215,12 @@ class Handler(BaseHTTPRequestHandler):
             # structured self-check the popup uses to surface a specific
             # recovery hint instead of a generic "helper offline".
             return self._send_json(200, _diagnose_payload())
+        if bare == "/dashboard" or bare == "/dashboard/":
+            # Public local UI shell. The page itself performs the same token
+            # handshake as the extension before reading recent yoinks or
+            # opening folders, so the route can stay unauthenticated while the
+            # user-data APIs remain token-gated.
+            return self._handle_dashboard()
         if bare == "/token":
             return self._handle_token()
         # Everything below mutates state or reveals user data -- token-gated.
@@ -5284,6 +5292,13 @@ class Handler(BaseHTTPRequestHandler):
             log.info("GET /token rate-limited")
             return self._send_json(429, {"ok": False, "error": "too many requests"})
         self._send_json(200, {"ok": True, "token": TOKEN})
+
+    # ---- /dashboard ----
+    def _handle_dashboard(self):
+        return self._send_file(
+            DASHBOARD_PATH,
+            "text/html; charset=utf-8",
+        )
 
     # ---- /settings ----
     def _handle_settings_get(self):

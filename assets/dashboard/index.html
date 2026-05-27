@@ -1,0 +1,731 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Uoink Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rust: #C2410C;
+      --vermillion: #FF3D00;
+      --acid: #FFD23F;
+      --cream: #FFF4EC;
+      --ink: #0A0A0A;
+      --line: rgba(10, 10, 10, 0.13);
+      --muted: rgba(10, 10, 10, 0.62);
+      --panel: rgba(255, 255, 255, 0.64);
+      --green: #23724B;
+      --shadow: 0 20px 70px rgba(10, 10, 10, 0.10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 8% 6%, rgba(255, 210, 63, 0.28), transparent 28rem),
+        linear-gradient(180deg, var(--cream), #ffe8dc 100%);
+      color: var(--ink);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 244, 236, 0.92);
+      backdrop-filter: blur(16px);
+    }
+
+    .topbar-inner,
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 18px 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--rust);
+      color: var(--cream);
+      font-family: Bungee, Inter, sans-serif;
+      font-size: 24px;
+      box-shadow: 0 12px 28px rgba(194, 65, 12, 0.25);
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--rust);
+      font-family: Bungee, Inter, sans-serif;
+      font-size: clamp(27px, 5vw, 32px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .eyebrow {
+      margin-bottom: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 11px;
+      background: rgba(255, 255, 255, 0.54);
+      color: var(--ink);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pill.status-ok {
+      border-color: rgba(35, 114, 75, 0.26);
+      background: rgba(35, 114, 75, 0.12);
+      color: var(--green);
+    }
+
+    .pill.status-offline {
+      border-color: rgba(194, 65, 12, 0.28);
+      background: rgba(194, 65, 12, 0.12);
+      color: var(--rust);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 99px;
+      background: currentColor;
+    }
+
+    .shell {
+      padding: 30px 0 34px;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: clamp(18px, 3vw, 26px);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .hero h2 {
+      margin: 0 0 8px;
+      font-size: clamp(26px, 5vw, 46px);
+      line-height: 1.04;
+      letter-spacing: 0;
+    }
+
+    .hero p {
+      max-width: 680px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.58;
+    }
+
+    .actions {
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      padding: 10px 15px;
+      background: var(--ink);
+      color: var(--cream);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform 120ms ease, background 120ms ease, color 120ms ease, border-color 120ms ease;
+    }
+
+    .button:hover {
+      border-color: var(--vermillion);
+      background: var(--vermillion);
+      color: var(--ink);
+    }
+
+    .button:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .button.secondary {
+      border-color: var(--line);
+      background: rgba(255, 255, 255, 0.54);
+      color: var(--ink);
+    }
+
+    .button.secondary:hover {
+      border-color: var(--vermillion);
+      background: rgba(255, 61, 0, 0.13);
+    }
+
+    .button[aria-disabled="true"] {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 28px 0 12px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    .count {
+      color: var(--muted);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .cards {
+      display: grid;
+      gap: 12px;
+    }
+
+    .card {
+      display: grid;
+      grid-template-columns: 74px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.58);
+      box-shadow: 0 10px 30px rgba(10, 10, 10, 0.06);
+      cursor: pointer;
+      transition: border-color 120ms ease, transform 120ms ease, background 120ms ease;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 61, 0, 0.42);
+      background: rgba(255, 255, 255, 0.78);
+      transform: translateY(-1px);
+    }
+
+    .thumb,
+    .initials {
+      width: 74px;
+      height: 74px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--ink);
+      color: var(--cream);
+    }
+
+    .initials {
+      display: grid;
+      place-items: center;
+      font-family: Bungee, Inter, sans-serif;
+      font-size: 24px;
+    }
+
+    .card h3 {
+      margin: 0 0 7px;
+      font-size: clamp(16px, 3vw, 19px);
+      line-height: 1.25;
+      letter-spacing: 0;
+    }
+
+    .meta,
+    .tagline {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .tagline {
+      margin-top: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: rgba(255, 210, 63, 0.35);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .open-hint {
+      color: var(--rust);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .state {
+      border: 1px dashed rgba(194, 65, 12, 0.35);
+      border-radius: 8px;
+      padding: 28px;
+      background: rgba(255, 255, 255, 0.42);
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 28px;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .mono {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      max-width: min(380px, calc(100vw - 36px));
+      border: 1px solid rgba(10, 10, 10, 0.18);
+      border-radius: 8px;
+      padding: 12px 14px;
+      background: var(--ink);
+      color: var(--cream);
+      box-shadow: var(--shadow);
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 700px) {
+      .topbar-inner,
+      .hero,
+      footer {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .status-row,
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .card {
+        grid-template-columns: 58px 1fr;
+      }
+
+      .thumb,
+      .initials {
+        width: 58px;
+        height: 58px;
+      }
+
+      .open-hint {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">U</div>
+        <div>
+          <div class="eyebrow">Local helper dashboard</div>
+          <h1>UOINK</h1>
+        </div>
+      </div>
+      <div class="status-row" aria-live="polite">
+        <div id="version-pill" class="pill">v...</div>
+        <div id="status-pill" class="pill status-offline"><span class="dot"></span><span>Checking</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <h2>Your local video memory.</h2>
+        <p>Recent Uoinks, helper status, and a fast path back to the folder on disk. Everything here is served from the helper running at 127.0.0.1.</p>
+      </div>
+      <div class="actions">
+        <button id="open-root" class="button" type="button">Open Uoink folder</button>
+        <button id="stop-helper" class="button secondary" type="button" title="Stop helper lands in Tier 2.">Stop helper</button>
+      </div>
+    </section>
+
+    <section aria-labelledby="recent-title">
+      <div class="section-head">
+        <h2 id="recent-title">Recent yoinks</h2>
+        <div id="recent-count" class="count">Loading...</div>
+      </div>
+      <div id="cards" class="cards" aria-live="polite">
+        <div class="state">Loading recent yoinks...</div>
+      </div>
+    </section>
+
+    <footer>
+      <div class="actions">
+        <button id="open-root-footer" class="button secondary" type="button">Open Uoink folder</button>
+      </div>
+      <div id="footer-line" class="mono">helper at 127.0.0.1:5179</div>
+    </footer>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const SERVER = location.origin;
+    const HEALTH_MS = 5000;
+    let authToken = "";
+    let outputRoot = "";
+    let lastHealth = null;
+    const objectUrls = new Set();
+
+    const els = {
+      status: document.getElementById("status-pill"),
+      version: document.getElementById("version-pill"),
+      cards: document.getElementById("cards"),
+      recentCount: document.getElementById("recent-count"),
+      footerLine: document.getElementById("footer-line"),
+      openRoot: document.getElementById("open-root"),
+      openRootFooter: document.getElementById("open-root-footer"),
+      stopHelper: document.getElementById("stop-helper"),
+      toast: document.getElementById("toast"),
+    };
+
+    function toast(message) {
+      els.toast.textContent = message;
+      els.toast.classList.add("show");
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => els.toast.classList.remove("show"), 2600);
+    }
+
+    function setStatus(ok, label) {
+      els.status.classList.toggle("status-ok", !!ok);
+      els.status.classList.toggle("status-offline", !ok);
+      els.status.innerHTML = "";
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      const text = document.createElement("span");
+      text.textContent = label;
+      els.status.append(dot, text);
+    }
+
+    async function fetchJson(path, options = {}) {
+      const res = await fetch(path, {
+        cache: "no-store",
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+        },
+      });
+      let body = {};
+      try {
+        body = await res.json();
+      } catch {
+        body = {};
+      }
+      if (!res.ok || body.ok === false) {
+        throw new Error(body.error || "HTTP " + res.status);
+      }
+      return body;
+    }
+
+    async function token() {
+      if (authToken) return authToken;
+      const body = await fetchJson("/token", {
+        headers: { "X-Uoink-Client": "uoink-extension" },
+      });
+      authToken = body.token || "";
+      if (!authToken) throw new Error("token unavailable");
+      return authToken;
+    }
+
+    async function authedJson(path, options = {}) {
+      const tk = await token();
+      return fetchJson(path, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          "X-Uoink-Token": tk,
+        },
+      });
+    }
+
+    function outputRootFromDiagnose(body) {
+      const checks = Array.isArray(body && body.checks) ? body.checks : [];
+      const writable = checks.find((check) => check.name === "output_root_writable");
+      if (writable && writable.detail) return writable.detail;
+      const idx = checks.find((check) => check.name === "index_db_writable");
+      if (idx && idx.detail) return String(idx.detail).replace(/[\\/]+index\\.db$/i, "");
+      return "";
+    }
+
+    async function loadHealth() {
+      try {
+        const health = await fetchJson("/health");
+        lastHealth = health;
+        els.version.textContent = "v" + (health.version || "unknown");
+        els.footerLine.textContent = "v" + (health.version || "unknown") + " - helper at 127.0.0.1:5179";
+        setStatus(health.ok, health.ok ? "Running \u2713" : "Offline");
+        try {
+          const diagnose = await fetchJson("/diagnose");
+          outputRoot = outputRootFromDiagnose(diagnose) || outputRoot;
+        } catch {
+          // Health is enough for Tier 1; diagnose only improves open-folder.
+        }
+      } catch {
+        setStatus(false, "Offline");
+      }
+    }
+
+    function timeAgo(value) {
+      if (!value) return "";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+      if (seconds < 60) return "just now";
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return minutes + "m ago";
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return hours + "h ago";
+      const days = Math.floor(hours / 24);
+      if (days < 30) return days + "d ago";
+      return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    }
+
+    function initials(title) {
+      const words = String(title || "U").trim().split(/\s+/).filter(Boolean);
+      return words.slice(0, 2).map((word) => word[0]).join("").toUpperCase() || "U";
+    }
+
+    function prettyHook(value) {
+      if (!value) return "";
+      return String(value).split("_").map((part) => part ? part[0].toUpperCase() + part.slice(1) : "").join(" ");
+    }
+
+    async function thumbnailUrl(path) {
+      if (!path) return "";
+      const tk = await token();
+      const res = await fetch("/file?path=" + encodeURIComponent(path), {
+        cache: "force-cache",
+        headers: { "X-Uoink-Token": tk },
+      });
+      if (!res.ok) return "";
+      const url = URL.createObjectURL(await res.blob());
+      objectUrls.add(url);
+      return url;
+    }
+
+    function clearObjectUrls() {
+      for (const url of objectUrls) URL.revokeObjectURL(url);
+      objectUrls.clear();
+    }
+
+    function textEl(tag, className, text) {
+      const el = document.createElement(tag);
+      if (className) el.className = className;
+      el.textContent = text || "";
+      return el;
+    }
+
+    function renderThumb(row) {
+      const wrap = document.createElement("div");
+      const path = row.thumbnail_path || row.thumbnail || "";
+      if (!path) {
+        wrap.className = "initials";
+        wrap.textContent = initials(row.title);
+        return wrap;
+      }
+      const placeholder = document.createElement("div");
+      placeholder.className = "initials";
+      placeholder.textContent = initials(row.title);
+      thumbnailUrl(path).then((url) => {
+        if (!url) return;
+        const img = document.createElement("img");
+        img.className = "thumb";
+        img.alt = "";
+        img.src = url;
+        placeholder.replaceWith(img);
+      }).catch(() => {});
+      return placeholder;
+    }
+
+    function renderCard(row) {
+      const card = document.createElement("article");
+      card.className = "card";
+      card.tabIndex = 0;
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-label", "Open folder for " + (row.title || "uoink"));
+
+      const title = row.title || "Untitled uoink";
+      const main = document.createElement("div");
+      main.appendChild(textEl("h3", "", title));
+
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      for (const part of [row.channel || "Unknown channel", timeAgo(row.yoinked_at)]) {
+        if (part) meta.appendChild(textEl("span", "", part));
+      }
+      main.appendChild(meta);
+
+      const tags = document.createElement("div");
+      tags.className = "tagline";
+      if (row.topic) tags.appendChild(textEl("span", "chip", row.topic));
+      const hook = prettyHook(row.hook_type);
+      if (hook) tags.appendChild(textEl("span", "chip", hook));
+      const entities = Number(row.entity_count || 0);
+      if (entities > 0) tags.appendChild(textEl("span", "chip", entities + " entities"));
+      if (tags.children.length) main.appendChild(tags);
+
+      const hint = textEl("div", "open-hint", "Open folder");
+      const open = () => openFolder(row.folder);
+      card.addEventListener("click", open);
+      card.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") {
+          ev.preventDefault();
+          open();
+        }
+      });
+      card.append(renderThumb(row), main, hint);
+      return card;
+    }
+
+    function renderState(text) {
+      els.cards.innerHTML = "";
+      const state = textEl("div", "state", text);
+      els.cards.appendChild(state);
+    }
+
+    async function loadRecent() {
+      try {
+        clearObjectUrls();
+        const body = await authedJson("/recent");
+        const rows = Array.isArray(body.recent) ? body.recent : [];
+        els.recentCount.textContent = rows.length ? rows.length + " recent" : "0 recent";
+        els.cards.innerHTML = "";
+        if (!rows.length) {
+          renderState("No yoinks yet \u2014 go yoink a video.");
+          return;
+        }
+        for (const row of rows) els.cards.appendChild(renderCard(row));
+      } catch (err) {
+        els.recentCount.textContent = "Unavailable";
+        renderState("Recent yoinks are unavailable. " + (err && err.message ? err.message : ""));
+      }
+    }
+
+    async function openFolder(path) {
+      const target = path || outputRoot;
+      if (!target) {
+        toast("Folder path unavailable.");
+        return;
+      }
+      try {
+        await authedJson("/open-folder?path=" + encodeURIComponent(target), { method: "GET" });
+        toast("Opening folder...");
+      } catch (err) {
+        toast((err && err.message) || "Could not open folder.");
+      }
+    }
+
+    function wire() {
+      els.openRoot.addEventListener("click", () => openFolder(outputRoot));
+      els.openRootFooter.addEventListener("click", () => openFolder(outputRoot));
+      els.stopHelper.addEventListener("click", () => {
+        toast("Stop helper lands in Tier 2.");
+      });
+      window.addEventListener("beforeunload", clearObjectUrls);
+    }
+
+    async function boot() {
+      wire();
+      await loadHealth();
+      await loadRecent();
+      setInterval(loadHealth, HEALTH_MS);
+    }
+
+    boot();
+  </script>
+</body>
+</html>
