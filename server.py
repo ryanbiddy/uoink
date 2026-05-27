@@ -78,6 +78,8 @@ import uoink_reliability  # noqa: E402  -- optional local Whisper reliability ch
 from uoink_core.storage import (  # noqa: E402
     _atomic_write_text,
     _is_writable_dir,
+    _path_under_any,
+    _topic_folder_name,
 )
 
 # --- Constants -------------------------------------------------------------
@@ -985,15 +987,6 @@ def _allowed_roots() -> set[Path]:
     return roots
 
 
-def _path_under_any(resolved: Path, roots: set[Path]) -> bool:
-    for root in roots:
-        try:
-            resolved.relative_to(root)
-            return True
-        except ValueError:
-            continue
-    return False
-
 # --- Logging ---------------------------------------------------------------
 LOG_PATH = HERE / "server.log"
 logging.basicConfig(
@@ -1650,17 +1643,6 @@ def _classify_topic(metadata: dict) -> str:
             best_name = name
 
     return best_name
-
-
-# Trim and normalize a topic name into a Windows-safe folder segment without
-# stripping the spaces — we want "Social Media Research" on disk, not the
-# slugified "Social_Media_Research".
-_FORBIDDEN_PATH_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
-
-
-def _topic_folder_name(topic: str) -> str:
-    cleaned = _FORBIDDEN_PATH_CHARS.sub("", topic).strip().rstrip(".")
-    return cleaned or "Uncategorized"
 
 
 # ---------------------------------------------------------------------------

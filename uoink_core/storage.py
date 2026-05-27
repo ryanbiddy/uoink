@@ -11,12 +11,17 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import threading
 import time
 import uuid
 from pathlib import Path
 
 log = logging.getLogger("uoink.storage")
+
+# Characters Windows forbids in a path component (plus control chars); used to
+# sanitize a topic string into a safe folder name.
+_FORBIDDEN_PATH_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
 
 
 def _atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8") -> None:
@@ -60,3 +65,18 @@ def _is_writable_dir(path: Path) -> bool:
         except OSError:
             pass
         return False
+
+
+def _topic_folder_name(topic: str) -> str:
+    cleaned = _FORBIDDEN_PATH_CHARS.sub("", topic).strip().rstrip(".")
+    return cleaned or "Uncategorized"
+
+
+def _path_under_any(resolved: Path, roots: set[Path]) -> bool:
+    for root in roots:
+        try:
+            resolved.relative_to(root)
+            return True
+        except ValueError:
+            continue
+    return False
