@@ -3,82 +3,32 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Uoink Memory</title>
+  <title>Uoink Library</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="uoink-memory.css">
 </head>
 <body>
-  <div class="shell">
-    <header class="topbar">
-      <div>
-        <div class="eyebrow">Memory</div>
-        <h1>UOINK</h1>
+  <main class="redirect-shell">
+    <section class="redirect-card" aria-labelledby="memory-title">
+      <div class="wordmark" aria-label="Uoink">
+        <span class="mark" aria-hidden="true">U</span>
+        <span>OINK</span>
       </div>
-      <div id="count-label" class="count-label">Loading...</div>
-    </header>
-
-    <div id="offline-banner" class="banner hidden" role="status">
-      Uoink helper is offline. Start it from the Start Menu.
-    </div>
-
-    <section class="filters" aria-label="Memory filters">
-      <label>
-        <span>Search</span>
-        <input id="filter-search" type="search" placeholder="Search transcripts, titles, comments...">
-      </label>
-      <label>
-        <span>Channel</span>
-        <input id="filter-channel" type="text" placeholder="Any channel">
-      </label>
-      <label>
-        <span>Topic</span>
-        <input id="filter-topic" type="text" placeholder="Any topic">
-      </label>
-      <label>
-        <span>Hook type</span>
-        <select id="filter-hook">
-          <option value="">All hook types</option>
-          <option value="curiosity_gap">Curiosity Gap</option>
-          <option value="question">Question</option>
-          <option value="contrarian">Contrarian</option>
-          <option value="story_open">Story Open</option>
-          <option value="promise_list">Promise/List</option>
-          <option value="demo">Demo</option>
-          <option value="authority">Authority</option>
-          <option value="stakes">Stakes</option>
-          <option value="other">Other</option>
-        </select>
-      </label>
-      <label>
-        <span>Date from</span>
-        <input id="filter-date-from" type="date">
-      </label>
-      <label>
-        <span>Date to</span>
-        <input id="filter-date-to" type="date">
-      </label>
-      <div class="filter-actions">
-        <button id="clear-filters" class="ghost-button" type="button">Clear X</button>
+      <p class="eyebrow">Memory moved</p>
+      <h1 id="memory-title">Open your full library in the dashboard.</h1>
+      <p class="copy">
+        The dashboard Library is now the canonical Memory view: search, filters,
+        activity, settings, and local runtime state all live in one place.
+      </p>
+      <div class="actions">
+        <a class="primary" id="open-dashboard" href="http://127.0.0.1:5179/dashboard?tab=library">Open dashboard -&gt;</a>
+        <button class="ghost" id="copy-link" type="button">Copy dashboard link</button>
       </div>
+      <p class="hint" id="status">If the dashboard does not open, start the Uoink helper from the tray.</p>
     </section>
-
-    <main id="results" class="results" aria-live="polite">
-      <div class="loading-row">Loading Uoink Memory...</div>
-    </main>
-
-    <nav class="pagination" aria-label="Memory pagination">
-      <button id="prev-page" class="ghost-button" type="button">Prev</button>
-      <span id="page-label">Page 1 of 1</span>
-      <button id="next-page" class="ghost-button" type="button">Next</button>
-    </nav>
-  </div>
-
-  <div id="toast" class="toast hidden" role="status"></div>
-
-  <script src="lib/extract.js"></script>
-  <script src="lib/ui.js"></script>
+  </main>
   <script src="uoink-memory.js"></script>
 </body>
 </html>

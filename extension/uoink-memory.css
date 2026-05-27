@@ -2,451 +2,139 @@
   color-scheme: dark;
   --bg: #0A0A0A;
   --panel: #15110D;
-  --panel-2: #201C18;
-  --inset: #0F0B08;
   --border: #2C2621;
-  --text: #FFF4EC;
+  --cream: #FFF4EC;
   --muted: #C8B19F;
   --dim: #8F7B6E;
-  --accent: #C2410C;
+  --rust: #C2410C;
+  --rust-bright: #F97316;
   --vermillion: #FF3D00;
-  --accent-soft: rgba(194, 65, 12, 0.15);
-  --ok: #00C853;
-  --warn: #FFD23F;
-  --bad: #B8421A;
+  --acid: #FFD23F;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
-  margin: 0;
   min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  margin: 0;
+  background:
+    radial-gradient(circle at 80% 8%, rgba(255, 61, 0, 0.18), transparent 24rem),
+    var(--bg);
+  color: var(--cream);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 button,
-input,
-select {
+a {
   font: inherit;
 }
 
-button {
-  border: 0;
-}
-
-.shell {
-  width: min(1100px, calc(100vw - 32px));
-  margin: 0 auto;
-  padding: 28px 0 40px;
-}
-
-.topbar {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 20px;
-}
-
-.eyebrow {
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 6px;
-}
-
-h1 {
-  margin: 0;
-  font-family: "Bungee", Inter, ui-sans-serif, system-ui, sans-serif;
-  font-size: 32px;
-  line-height: 1.1;
-  letter-spacing: 0;
-  color: var(--text);
-}
-
-.count-label {
-  color: var(--muted);
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-.banner {
-  margin-bottom: 16px;
-  padding: 12px 14px;
-  border: 1px solid rgba(224, 93, 73, 0.35);
-  border-radius: 8px;
-  background: rgba(224, 93, 73, 0.1);
-  color: #ffd5ca;
-  font-size: 14px;
-}
-
-.hidden { display: none !important; }
-
-.filters {
+.redirect-shell {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 18px;
-  padding: 16px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-}
-
-.filters label {
-  display: grid;
-  gap: 6px;
-  min-width: 0;
-}
-
-.filters span {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.filters input,
-.filters select {
-  width: 100%;
-  min-height: 38px;
-  border: 1px solid var(--border);
-  border-radius: 9999px;
-  background: var(--inset);
-  color: var(--text);
-  padding: 8px 14px;
-  outline: none;
-}
-
-#filter-search {
-  font-family: "JetBrains Mono", monospace;
-}
-
-.filters input:focus,
-.filters select:focus,
-.action-button:focus-visible,
-.ghost-button:focus-visible {
-  border-color: var(--vermillion);
-  outline: 2px solid var(--vermillion);
-  outline-offset: 2px;
-}
-
-.filter-actions {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.ghost-button {
-  min-height: 34px;
-  padding: 7px 16px;
-  border-radius: 9999px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-}
-
-.ghost-button:hover:not(:disabled) {
-  background: var(--panel-2);
-}
-
-.ghost-button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.results {
-  display: grid;
-  gap: 10px;
-  min-height: 240px;
-}
-
-.memory-row {
-  position: relative;
-  display: grid;
-  grid-template-columns: 64px minmax(0, 1fr) auto;
-  gap: 14px;
-  align-items: center;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--panel);
-  cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease;
-}
-
-.memory-row:hover {
-  background: #202024;
-  border-color: #44444a;
-  /* transform removed: it created a new stacking context that trapped
-     the action-menu dropdown behind later rows. Use a shadow instead
-     so we keep the visual lift without the stacking context. */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Lift the whole row above siblings while its menu is open, so the
-   dropdown can extend below without being clipped by the next row's
-   stacking context. */
-.memory-row:focus-within {
-  z-index: 100;
-  position: relative;
-}
-
-.thumb {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
-  object-fit: cover;
-  background: #201c18;
-  border: 1px solid var(--border);
-}
-
-.thumb-placeholder {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
-  display: grid;
+  min-height: 100vh;
   place-items: center;
+  padding: 28px;
+}
+
+.redirect-card {
+  width: min(680px, 100%);
   border: 1px solid var(--border);
-  background: #201c18;
-  color: var(--dim);
-  font-size: 23px;
+  border-radius: 16px;
+  padding: 34px;
+  background: var(--panel);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
 }
 
-.row-main {
-  min-width: 0;
-  display: grid;
-  gap: 5px;
-}
-
-.row-title {
-  color: var(--text);
-  font-weight: 700;
-  font-size: 15px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.row-meta,
-.row-tags {
+.wordmark {
   display: flex;
   align-items: center;
-  gap: 8px;
-  min-width: 0;
-  color: var(--muted);
-  font-size: 12px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.row-tags {
-  flex-wrap: wrap;
-  white-space: normal;
-}
-
-.hook-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 230px;
-  padding: 3px 7px;
-  border-radius: 999px;
-  background: rgba(87, 217, 131, 0.1);
-  border: 1px solid rgba(87, 217, 131, 0.25);
-  color: #d6ffe2;
-  font-size: 11px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.hook-chip.warning {
-  background: rgba(217, 180, 87, 0.13);
-  border-color: rgba(217, 180, 87, 0.35);
-  color: #ffe3a3;
-}
-
-.entity-pill {
-  color: #c9b6ff;
-  font-size: 12px;
-}
-
-.health-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.health-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #68686d;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15);
-}
-
-.health-dot.ok {
-  background: var(--ok);
-  box-shadow: 0 0 5px rgba(87,217,131,0.45);
-}
-
-.health-dot.missing {
-  background: var(--warn);
-  box-shadow: 0 0 5px rgba(217,180,87,0.35);
-}
-
-.row-actions {
-  position: relative;
-  align-self: start;
-}
-
-.action-button {
-  width: 34px;
-  height: 34px;
-  border-radius: 9999px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-  font-size: 22px;
+  gap: 12px;
+  color: var(--vermillion);
+  font-family: Bungee, Inter, sans-serif;
+  font-size: 34px;
   line-height: 1;
 }
 
-.action-button:hover {
-  background: #2a2a2f;
-}
-
-.menu {
-  position: absolute;
-  right: 0;
-  top: 38px;
-  z-index: 1000;
-  min-width: 164px;
-  padding: 6px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: #232327;
-  box-shadow: 0 16px 36px rgba(0,0,0,0.35);
-}
-
-.menu button {
-  width: 100%;
-  display: block;
-  padding: 8px 9px;
-  border-radius: 5px;
-  background: transparent;
-  color: var(--text);
-  text-align: left;
-  cursor: pointer;
-}
-
-.menu button:hover {
-  background: #323238;
-}
-
-.menu .danger {
-  color: #ffb9aa;
-}
-
-.state-card,
-.loading-row {
-  min-height: 220px;
+.mark {
   display: grid;
+  width: 42px;
+  height: 42px;
   place-items: center;
-  padding: 28px;
-  border: 1px solid var(--border);
   border-radius: 10px;
-  background: var(--panel);
+  background: var(--rust);
+  color: var(--acid);
+}
+
+.eyebrow {
+  margin: 34px 0 8px;
+  color: var(--rust-bright);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  max-width: 12ch;
+  margin: 0;
+  color: var(--cream);
+  font-size: clamp(38px, 8vw, 72px);
+  line-height: 0.96;
+  letter-spacing: 0;
+}
+
+.copy {
+  max-width: 56ch;
+  margin: 18px 0 0;
   color: var(--muted);
-  text-align: center;
-}
-
-.state-card strong {
-  display: block;
-  color: var(--text);
   font-size: 16px;
-  margin-bottom: 8px;
+  line-height: 1.6;
 }
 
-.state-card .ghost-button {
-  margin-top: 12px;
-}
-
-.pagination {
+.actions {
   display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.primary,
+.ghost {
+  display: inline-flex;
+  min-height: 42px;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  margin-top: 18px;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: 22px;
-  transform: translateX(-50%);
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  max-width: min(640px, calc(100vw - 32px));
-  padding: 11px 12px;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  background: #252529;
-  color: var(--text);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
-  font-size: 13px;
-}
-
-.toast button {
-  padding: 5px 8px;
-  border-radius: 6px;
-  background: var(--accent);
-  color: #111;
-  font-weight: 700;
+  border-radius: 999px;
+  padding: 0 18px;
   cursor: pointer;
+  font-weight: 900;
+  text-decoration: none;
 }
 
-@media (max-width: 760px) {
-  .shell {
-    width: min(100vw - 20px, 1100px);
-    padding-top: 18px;
-  }
+.primary {
+  border: 1px solid var(--vermillion);
+  background: var(--vermillion);
+  color: var(--bg);
+}
 
-  .topbar {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
-  }
+.ghost {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--cream);
+}
 
-  .filters {
-    grid-template-columns: 1fr;
-  }
+.primary:focus-visible,
+.ghost:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
 
-  .filter-actions {
-    justify-content: stretch;
-  }
-
-  .filter-actions .ghost-button {
-    width: 100%;
-  }
-
-  .memory-row {
-    grid-template-columns: 56px minmax(0, 1fr) auto;
-    gap: 10px;
-  }
-
-  .thumb,
-  .thumb-placeholder {
-    width: 56px;
-    height: 56px;
-  }
+.hint {
+  margin: 18px 0 0;
+  color: var(--dim);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
 }
