@@ -11,7 +11,7 @@
 #        bin\      ffmpeg.exe (and ffprobe.exe if present)
 #        server.py, migrate_install.py, uoink_mcp.py, uoink_mcp_tools.py,
 #        yoink_mcp.py (shim), yt_extract.py, topics.json, skills\,
-#        stop-server.{bat,ps1}, uoink.ico
+#        assets\dashboard\, stop-server.{bat,ps1}, uoink.ico
 #   3. Run ISCC.exe against installer\uoink.iss to produce
 #      build\Uoink-Setup-<version>.exe
 #
@@ -152,6 +152,10 @@ New-Item -ItemType Directory -Force -Path $CacheDir, $BuildDir | Out-Null
 if (-not (Test-Path $IconSrc)) {
     throw "Missing $IconSrc -- regenerate the v3.1 magnet-U .ico (16/32 cream tips, 48 transitional, 256 acid tips)"
 }
+$dashboardIndex = Join-Path $RepoRoot 'assets\dashboard\index.html'
+if (-not (Test-Path $dashboardIndex)) {
+    throw "Missing assets\dashboard\index.html -- Tier 1 dashboard route would 404"
+}
 foreach ($f in @('VERSION','server.py','index.py','_platform.py','yt_extract.py','topics.json')) {
     if (-not (Test-Path (Join-Path $RepoRoot $f))) {
         throw "Missing $f at repo root"
@@ -284,6 +288,7 @@ Copy-Item (Join-Path $TemplatesDir 'stop-server.bat') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.ps1') $StagingDir -Force
 Copy-Item $IconSrc (Join-Path $StagingDir 'uoink.ico') -Force
 Copy-Item (Join-Path $RepoRoot 'skills') (Join-Path $StagingDir 'skills') -Recurse -Force
+Copy-Item (Join-Path $RepoRoot 'assets\dashboard') (Join-Path $StagingDir 'assets\dashboard') -Recurse -Force
 # Sprint 19.6 / Fix 1: migrations\*.sql is required at runtime by
 # index._run_migrations; if it's missing the helper crashes at first boot
 # with "no such table: schema_version". Pre-Sprint-19.6 installers shipped
