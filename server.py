@@ -505,6 +505,15 @@ def _public_settings(data: dict | None = None) -> dict:
             data.get("clipboard_screenshot_cap", CLIPBOARD_SCREENSHOT_CAP_DEFAULT)
         ),
         "anthropic_key_set": bool(key and not data.get("anthropic_key_invalid")),
+        # Tier 2 dashboard Settings tab additions:
+        "anthropic_key_masked": _mask_anthropic_key(key),
+        "output_dir": str(DESKTOP_ROOT),
+        "output_dir_pending_restart": bool(
+            data.get("output_dir")
+            and str(Path(data["output_dir"]).expanduser()) != str(DESKTOP_ROOT)
+        ),
+        "autostart": _autostart_enabled(),
+        "topics": (_load_topics() or {}).get("topics", []),
     }
 
 
@@ -784,6 +793,22 @@ def _get_output_root() -> Path:
                 return candidate
         except OSError:
             pass
+    # User-chosen output folder (dashboard Settings, Tier 2). Persisted in
+    # settings.json and honored at startup, just like the env override above
+    # (env still wins so dev/test can force a path). Applied at start rather
+    # than mutating DESKTOP_ROOT live, so in-flight extractions never see the
+    # root move under them.
+    try:
+        chosen = (_read_settings().get("output_dir") or "").strip()
+    except Exception:
+        chosen = ""
+    if chosen:
+        try:
+            candidate = Path(chosen).expanduser().resolve()
+            if _is_writable_dir(candidate):
+                return candidate
+        except OSError:
+            pass
     desktop = _get_desktop_dir()
     new_root = desktop / "Uoink"
     legacy_root = desktop / "Yoink"
@@ -892,6 +917,20 @@ _session_lock = threading.Lock()
 _jobs: dict[str, dict] = {}
 _jobs_lock = threading.Lock()
 _JOB_TERMINAL_STATES = {"completed", "cancelled", "failed"}
+
+# ---- /jobs/stream SSE (Tier 2) -------------------------------------------
+# Live job/queue push for the dashboard Activity tab + the extension popup
+# queue (one stream, two consumers). Header-gated like every other read
+# endpoint and consumed via fetch()+stream, NOT EventSource -- so the token is
+# sent in the X-Uoink-Token header and never lands in a URL (the ?token= query
+# fallback was deliberately removed; see _request_token). Event schema lives in
+# docs/tier-2-contracts.md. Emits the same _public_job shape /jobs returns.
+_SSE_MAX_STREAMS = 8          # cap concurrent streams (local single-user helper)
+_SSE_TICK_SEC = 1.0           # poll job/queue state this often
+_SSE_HEARTBEAT_SEC = 15.0     # keepalive comment cadence
+_sse_count_lock = threading.Lock()
+_sse_active = [0]
+
 _settings_lock = threading.Lock()
 _corpus_update_lock = threading.Lock()
 # Serializes read-modify-write of the per-video <slug>.json sidecar. The
@@ -3611,6 +3650,229 @@ def _now_iso() -> str:
     return datetime.now().isoformat(timespec="seconds")
 
 
+# ---- Update check (Tier 2; notify-only) ----------------------------------
+# Polls GitHub Releases, caches the result >=24h on disk so the dashboard can
+# poll freely, and NEVER downloads or self-updates -- it only reports whether a
+# newer tag exists and links out. Network/parse failures degrade silently.
+_UPDATE_RELEASES_API = "https://api.github.com/repos/ryanbiddy/uoink/releases/latest"
+_UPDATE_CACHE_PATH = DATA_ROOT / "update_check.json"
+_UPDATE_CACHE_TTL_SEC = 24 * 3600
+_update_check_lock = threading.Lock()
+
+
+def _semver_tuple(v: str) -> tuple:
+    """'v2.2.1' / '2.2.1' -> (2,2,1) for ordering. Trailing pre-release/build
+    bits are dropped; missing parts pad with 0; non-numeric parts become 0."""
+    core = (v or "").strip().lstrip("vV").split("+")[0].split("-")[0]
+    parts: list[int] = []
+    for p in core.split(".")[:3]:
+        try:
+            parts.append(int(p))
+        except ValueError:
+            parts.append(0)
+    while len(parts) < 3:
+        parts.append(0)
+    return tuple(parts)
+
+
+def _check_for_update(*, force: bool = False) -> dict:
+    """Notify-only update check. Cached >=24h; failures return
+    {'update_available': False, 'error': ...} and are not cached so the next
+    call retries. Never downloads anything."""
+    now = time.time()
+    with _update_check_lock:
+        if not force:
+            try:
+                cached = json.loads(_UPDATE_CACHE_PATH.read_text(encoding="utf-8"))
+                if now - float(cached.get("_ts", 0)) < _UPDATE_CACHE_TTL_SEC:
+                    cached.pop("_ts", None)
+                    cached["cached"] = True
+                    return cached
+            except (OSError, ValueError):
+                pass
+        req = urllib.request.Request(
+            _UPDATE_RELEASES_API,
+            headers={"User-Agent": "uoink-update-check",
+                     "Accept": "application/vnd.github+json"})
+        try:
+            with urllib.request.urlopen(req, timeout=6) as r:
+                rel = json.loads(r.read().decode("utf-8"))
+        except Exception as e:  # network down, rate-limited, malformed -- non-fatal
+            log.debug("update check: fetch failed: %s", e)
+            return {"current": VERSION, "latest": None, "update_available": False,
+                    "url": None, "error": "offline", "checked_at": _now_iso(),
+                    "cached": False}
+        latest = str(rel.get("tag_name") or "").strip().lstrip("vV")
+        result = {
+            "current": VERSION,
+            "latest": latest or None,
+            "update_available": bool(latest) and _semver_tuple(latest) > _semver_tuple(VERSION),
+            "url": rel.get("html_url"),
+            "published_at": rel.get("published_at"),
+            "checked_at": _now_iso(),
+            "cached": False,
+        }
+        try:
+            _UPDATE_CACHE_PATH.write_text(
+                json.dumps({**result, "_ts": now}), encoding="utf-8")
+        except OSError as e:
+            log.debug("update check: cache write failed: %s", e)
+        return result
+
+
+# ---- Settings extras (Tier 2 dashboard Settings tab) ---------------------
+def _mask_anthropic_key(key: str) -> str | None:
+    """'sk-ant-…abcd' for display; None when no key is stored."""
+    key = (key or "").strip()
+    if not key:
+        return None
+    return (key[:6] + "…" + key[-4:]) if len(key) >= 12 else "set"
+
+
+# Autostart Run key reuses the same HKCU value the installer writes.
+_AUTOSTART_SUBKEY = r"Software\Microsoft\Windows\CurrentVersion\Run"
+_AUTOSTART_VALUE = "Uoink"
+
+
+def _autostart_command() -> str:
+    return f'"{HERE / "python" / "pythonw.exe"}" "{HERE / "server.py"}"'
+
+
+def _autostart_enabled() -> bool | None:
+    """True/False on Windows; None where there's no HKCU Run key (non-Windows)."""
+    if sys.platform != "win32":
+        return None
+    try:
+        import winreg
+    except Exception:
+        return None
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _AUTOSTART_SUBKEY, 0,
+                            winreg.KEY_READ) as k:
+            try:
+                winreg.QueryValueEx(k, _AUTOSTART_VALUE)
+                return True
+            except FileNotFoundError:
+                return False
+    except OSError:
+        return None
+
+
+def _set_autostart(enabled: bool) -> bool | None:
+    """Set/clear the HKCU Run\\Uoink value. Returns True on success, None when
+    unsupported (non-Windows), False on a registry error."""
+    if sys.platform != "win32":
+        return None
+    try:
+        import winreg
+    except Exception:
+        return None
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, _AUTOSTART_SUBKEY, 0,
+                            winreg.KEY_READ | winreg.KEY_SET_VALUE) as k:
+            if enabled:
+                winreg.SetValueEx(k, _AUTOSTART_VALUE, 0, winreg.REG_SZ,
+                                  _autostart_command())
+            else:
+                try:
+                    winreg.DeleteValue(k, _AUTOSTART_VALUE)
+                except FileNotFoundError:
+                    pass
+        log.info("autostart %s", "enabled" if enabled else "disabled")
+        return True
+    except OSError as e:
+        log.warning("autostart toggle failed: %s", e)
+        return False
+
+
+def _validate_topics(topics) -> str | None:
+    """Validate a topics-editor payload: list of {name:str, keywords:[str]}.
+    Returns an error string, or None if valid."""
+    if not isinstance(topics, list):
+        return "topics must be a list"
+    if len(topics) > 200:
+        return "too many topics (max 200)"
+    for t in topics:
+        if not isinstance(t, dict):
+            return "each topic must be an object"
+        name = t.get("name")
+        if not isinstance(name, str) or not name.strip():
+            return "each topic needs a non-empty name"
+        kws = t.get("keywords", [])
+        if not isinstance(kws, list) or not all(isinstance(k, str) for k in kws):
+            return f"topic '{name}' keywords must be a list of strings"
+    return None
+
+
+def _write_topics(topics: list) -> None:
+    """Persist the topics editor to topics.json, preserving any other keys."""
+    try:
+        existing = json.loads(TOPICS_PATH.read_text(encoding="utf-8"))
+        if not isinstance(existing, dict):
+            existing = {}
+    except (OSError, ValueError):
+        existing = {}
+    existing["topics"] = [
+        {"name": t["name"].strip(),
+         "keywords": [k.strip() for k in t.get("keywords", []) if k.strip()]}
+        for t in topics
+    ]
+    tmp = TOPICS_PATH.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(existing, indent=2), encoding="utf-8")
+    tmp.replace(TOPICS_PATH)
+
+
+def _mcp_settings_snippet() -> dict:
+    """MCP server config snippet for the Settings tab's Copy button. Points at
+    the bundled stdio entry (uoink_mcp.py) under the install dir. (Distinct from
+    _mcp_config_payload(), which serves the /mcp/v1/config protocol endpoint.)"""
+    py = str(HERE / "python" / "python.exe")
+    script = str(HERE / "uoink_mcp.py")
+    entry = {"command": py, "args": [script]}
+    cfg = {"mcpServers": {"uoink": entry}}
+    return {"claude_desktop": cfg, "cursor": cfg,
+            "raw": json.dumps(cfg, indent=2)}
+
+
+def _focus_youtube_window() -> bool:
+    """Best-effort "Open last YouTube tab": focus a visible top-level window
+    whose title contains 'YouTube' (Chromium tabs read '… - YouTube … -
+    Google Chrome' when a YouTube tab is foreground). Returns True if one was
+    focused. ctypes-only (no pywin32 dependency); Windows-only. This is the
+    'simpler heuristic' from the build plan -- it only catches a browser whose
+    active tab is already YouTube; otherwise the caller opens youtube.com."""
+    if sys.platform != "win32":
+        return False
+    try:
+        import ctypes
+        from ctypes import wintypes
+        user32 = ctypes.windll.user32
+        found: list[int] = []
+
+        @ctypes.WINFUNCTYPE(ctypes.c_bool, wintypes.HWND, wintypes.LPARAM)
+        def _cb(hwnd, _lparam):
+            if not user32.IsWindowVisible(hwnd):
+                return True
+            n = user32.GetWindowTextLengthW(hwnd)
+            if n <= 0:
+                return True
+            buf = ctypes.create_unicode_buffer(n + 1)
+            user32.GetWindowTextW(hwnd, buf, n + 1)
+            if "YouTube" in buf.value:
+                found.append(hwnd)
+                return False  # stop enumerating
+            return True
+
+        user32.EnumWindows(_cb, 0)
+        if found:
+            user32.ShowWindow(found[0], 9)        # SW_RESTORE
+            user32.SetForegroundWindow(found[0])
+            return True
+    except Exception as e:
+        log.debug("open-last-youtube: window enum failed: %s", e)
+    return False
+
+
 def _session_folder(slug: str) -> Path:
     return SESSIONS_ROOT / slug
 
@@ -5234,6 +5496,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_settings_get()
         if bare == "/settings/pricing":
             return self._handle_settings_pricing()
+        if bare == "/update/check":
+            return self._handle_update_check()
+        if bare == "/settings/mcp-config":
+            return self._handle_settings_mcp_config()
+        if bare == "/open-last-youtube":
+            return self._handle_open_last_youtube()
         if bare == "/file":
             return self._handle_file()
         if bare == "/mcp/v1/config":
@@ -5250,6 +5518,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_recent()
         if bare == "/open-folder":
             return self._handle_open_folder()
+        if bare == "/jobs/stream":
+            return self._handle_jobs_stream()
         if bare == "/jobs":
             return self._handle_jobs_list()
         if bare.startswith("/jobs/"):
@@ -5307,6 +5577,47 @@ class Handler(BaseHTTPRequestHandler):
     def _handle_settings_pricing(self):
         self._send_json(200, {"ok": True, "pricing": _anthropic_pricing_payload()})
 
+    def _handle_update_check(self):
+        """Notify-only update check (Tier 2). Token-gated; cached >=24h on disk.
+        `?force=1` bypasses the cache. Never downloads -- reports + links only."""
+        if not self._require_token():
+            return
+        force = (parse_qs(urlparse(self.path).query).get("force") or [""])[0] == "1"
+        self._send_json(200, {"ok": True, **_check_for_update(force=force)})
+
+    def _handle_settings_mcp_config(self):
+        """MCP config snippet for the Settings tab Copy button. Token-gated."""
+        if not self._require_token():
+            return
+        self._send_json(200, {"ok": True, "mcp_config": _mcp_settings_snippet()})
+
+    def _handle_open_last_youtube(self):
+        """Focus an existing YouTube browser window, else open youtube.com.
+        Token-gated. CTA on the Finished/Splash screens + dashboard."""
+        if not self._require_token():
+            return
+        if _focus_youtube_window():
+            return self._send_json(200, {
+                "ok": True, "action": "focused_existing", "url": None})
+        url = "https://www.youtube.com"
+        try:
+            import webbrowser
+            webbrowser.open(url)
+        except Exception as e:
+            log.debug("open-last-youtube: webbrowser failed: %s", e)
+            return self._send_json(200, {"ok": False, "error": "could not open browser"})
+        self._send_json(200, {"ok": True, "action": "opened_new", "url": url})
+
+    def _handle_helper_quit(self):
+        """Graceful stop (dashboard 'Stop helper' + tray 'Quit'). Token-gated.
+        Replies 200 then shuts the server down on a worker thread so
+        serve_forever() unblocks and main() returns (atexit clears the PID);
+        expect the connection to drop right after this response."""
+        if not self._require_token():
+            return
+        self._send_json(200, {"ok": True, "stopping": True})
+        threading.Thread(target=self.server.shutdown, daemon=True).start()
+
     def _handle_settings_post(self, body: dict):
         boolean_fields = (
             "comment_intelligence_enabled",
@@ -5314,10 +5625,12 @@ class Handler(BaseHTTPRequestHandler):
             "smart_screenshot_picker_enabled",
         )
         integer_fields = ("clipboard_screenshot_cap",)
+        extra_fields = ("output_dir", "autostart", "topics")  # Tier 2
         if (
             not any(f in body for f in boolean_fields)
             and not any(f in body for f in integer_fields)
             and "anthropic_key" not in body
+            and not any(f in body for f in extra_fields)
         ):
             return self._send_json(400, {
                 "ok": False,
@@ -5371,6 +5684,40 @@ class Handler(BaseHTTPRequestHandler):
                     "error": "credential store unavailable",
                 })
             data["anthropic_key_invalid"] = False
+        # ---- Tier 2 extras ----
+        if "output_dir" in body:
+            val = body.get("output_dir")
+            if not isinstance(val, str) or not val.strip():
+                return self._send_json(400, {
+                    "ok": False, "error": "output_dir must be a non-empty string"})
+            try:
+                cand = Path(val).expanduser()
+                cand.mkdir(parents=True, exist_ok=True)
+                if not _is_writable_dir(cand):
+                    raise OSError("not writable")
+            except OSError:
+                return self._send_json(400, {
+                    "ok": False, "error": f"output_dir is not a writable folder: {val}"})
+            # Persisted; _get_output_root applies it on the next start (no live
+            # DESKTOP_ROOT mutation under in-flight extractions).
+            data["output_dir"] = str(cand.resolve())
+        if "autostart" in body:
+            if not isinstance(body.get("autostart"), bool):
+                return self._send_json(400, {
+                    "ok": False, "error": "autostart must be boolean"})
+            if _set_autostart(body["autostart"]) is False:
+                return self._send_json(200, {
+                    "ok": False, "error": "autostart toggle failed"})
+        if "topics" in body:
+            err = _validate_topics(body.get("topics"))
+            if err:
+                return self._send_json(400, {"ok": False, "error": err})
+            try:
+                _write_topics(body["topics"])
+            except OSError as e:
+                log.warning("topics write failed: %s", e)
+                return self._send_json(200, {
+                    "ok": False, "error": "topics write failed"})
         data["updated_at"] = _now_iso()
         try:
             _write_settings(data)
@@ -5665,6 +6012,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_settings_post(body)
         if bare == "/settings/test-key":
             return self._handle_settings_test_key(body)
+        if bare == "/helper/quit":
+            return self._handle_helper_quit()
         if bare.startswith("/mcp/v1"):
             return self._handle_mcp_post(bare, body)
         if bare == "/playlist/preview":
@@ -5838,6 +6187,92 @@ class Handler(BaseHTTPRequestHandler):
             "ok": True,
             "jobs": _list_public_jobs(kind or None),
         })
+
+    # ---- /jobs/stream (Tier 2 SSE) ----
+    def _queue_snapshot(self) -> dict:
+        """Rate-limit queue counts for an SSE `queue` event. Tolerant of index
+        errors (returns zeros) so a transient DB hiccup never kills the stream."""
+        try:
+            overview = _get_index().pending_counts()
+        except Exception:
+            overview = {}
+        counts = overview.get("counts", {}) if isinstance(overview, dict) else {}
+        return {
+            "pending": int(counts.get("pending", 0)),
+            "running": int(counts.get("running", 0)),
+            "failed": int(counts.get("failed", 0)),
+            "succeeded": int(counts.get("succeeded", 0)),
+            "cancelled": int(counts.get("cancelled", 0)),
+            "next_retry_at": overview.get("next_retry_at") if isinstance(overview, dict) else None,
+        }
+
+    def _jobs_map(self) -> dict:
+        """{id: _public_job} for every current job (same shape /jobs returns)."""
+        return {j["id"]: j for j in _list_public_jobs() if j.get("id")}
+
+    def _jobs_snapshot(self) -> dict:
+        jobs = _list_public_jobs()
+        active = [j for j in jobs
+                  if (j.get("state") or "").lower() not in _JOB_TERMINAL_STATES]
+        recent = [j for j in jobs
+                  if (j.get("state") or "").lower() in _JOB_TERMINAL_STATES][:10]
+        return {"active": active, "recent": recent, "queue": self._queue_snapshot()}
+
+    def _sse_emit(self, event: str, obj) -> None:
+        frame = "event: %s\ndata: %s\n\n" % (event, json.dumps(obj, default=str))
+        self.wfile.write(frame.encode("utf-8"))
+        self.wfile.flush()
+
+    def _handle_jobs_stream(self):
+        """Server-sent job/queue stream (Tier 2). Header-gated; consume via
+        fetch()+ReadableStream, NOT EventSource, so the token rides the
+        X-Uoink-Token header rather than a URL (see _request_token). Emits one
+        `snapshot`, then `job`/`queue` deltas on a 1s poll, plus a `: heartbeat`
+        comment every 15s. One thread per connection (ThreadingHTTPServer);
+        exits when the client disconnects (write raises) -- and dies with the
+        process on shutdown, since worker threads are daemonic."""
+        if not self._require_token():
+            return
+        with _sse_count_lock:
+            if _sse_active[0] >= _SSE_MAX_STREAMS:
+                return self._send_json(503, {"ok": False, "error": "too many streams"})
+            _sse_active[0] += 1
+        try:
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Connection", "keep-alive")
+            # Defeat any proxy buffering so events arrive promptly.
+            self.send_header("X-Accel-Buffering", "no")
+            self._send_cors(self._cors_origin())
+            self.end_headers()
+            self.close_connection = True  # don't reuse the socket after we return
+
+            self._sse_emit("snapshot", self._jobs_snapshot())
+            last_jobs = self._jobs_map()
+            last_queue = self._queue_snapshot()
+            last_beat = time.monotonic()
+            while True:
+                time.sleep(_SSE_TICK_SEC)
+                cur = self._jobs_map()
+                for jid, jobj in cur.items():
+                    if last_jobs.get(jid) != jobj:
+                        self._sse_emit("job", jobj)
+                last_jobs = cur
+                queue = self._queue_snapshot()
+                if queue != last_queue:
+                    self._sse_emit("queue", queue)
+                    last_queue = queue
+                now = time.monotonic()
+                if now - last_beat >= _SSE_HEARTBEAT_SEC:
+                    self.wfile.write(b": heartbeat\n\n")
+                    self.wfile.flush()
+                    last_beat = now
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            pass  # client went away -- reap this stream
+        finally:
+            with _sse_count_lock:
+                _sse_active[0] -= 1
 
     # ---- /taxonomy ----
     def _handle_taxonomy(self):

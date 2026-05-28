@@ -1836,6 +1836,13 @@
         }
         await saveSettingsPatch({ output_dir: outputDir }, "Output folder updated.");
       }
+      try {
+        const cfg = await authFetch("/settings/mcp-config");
+        els.mcpConfig.value = cfg.raw || JSON.stringify(cfg.claude_desktop || cfg, null, 2);
+      } catch (err) {
+        els.mcpConfig.value = `MCP config unavailable: ${err.message}`;
+      }
+      renderTopics(state.settings && Array.isArray(state.settings.topics) ? state.settings.topics : []);
     }
 
     async function retryWithCookies(url) {
@@ -1843,6 +1850,9 @@
         showToast("No source URL available for retry.");
         return;
       }
+    }
+
+    async function postHelper(path, body = {}) {
       try {
         await authFetch("/queue/retry-now", { method: "POST", body: JSON.stringify({ url, use_cookies: true }) });
         showToast("Retry with cookies queued.");
