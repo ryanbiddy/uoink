@@ -487,6 +487,78 @@ def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(video_id=video_id or None, health=health)
 
 
+def classify_facets(args: dict[str, Any]) -> dict[str, Any]:
+    """v2.5 S1: persist agent-classified facets + tags for one video. Model-
+    agnostic -- the calling agent does the LLM work; this MCP tool only
+    validates against the enums and writes to the row. The server fills in
+    performance_tier (channel-relative percentile) and length_bucket (from
+    duration metadata) if the agent didn't supply them. Zero outbound calls."""
+    video_id = (args.get("video_id") or "").strip()
+    if not video_id:
+        return _err("video_id required")
+    server = _b()
+    body = {k: args.get(k) for k in (
+        "format", "performance_tier", "production_style", "length_bucket",
+        "topic", "hook_type", "tags",
+    )}
+    clean, err = server._validate_facets(body)
+    if err:
+        return _err(err)
+    tags = clean.pop("__tags", None)
+    idx = server._get_index()
+    if "performance_tier" not in clean or "length_bucket" not in clean:
+        row = idx._conn.execute(
+            "SELECT channel, metadata_json FROM yoinks WHERE video_id=?",
+            (video_id,)).fetchone()
+        if row:
+            try:
+                meta = json.loads(row["metadata_json"] or "{}")
+            except (json.JSONDecodeError, TypeError):
+                meta = {}
+            if "performance_tier" not in clean and row["channel"]:
+                tier = server._perf_tier(
+                    idx.channel_view_counts(row["channel"]),
+                    meta.get("views") or meta.get("view_count"))
+                if tier:
+                    clean["performance_tier"] = tier
+            if "length_bucket" not in clean:
+                lb = server._length_bucket_from_seconds(
+                    meta.get("duration_seconds") or meta.get("duration"))
+                if lb:
+                    clean["length_bucket"] = lb
+    facets_set = idx.set_facets(video_id, **clean)
+    tags_added = idx.add_tags(video_id, tags or [], source="agent") if tags else 0
+    return _ok(video_id=video_id, facets_set=facets_set,
+               tags_added=tags_added, facets=clean)
+
+
+def query_by_facets(args: dict[str, Any]) -> dict[str, Any]:
+    """v2.5 S1: filter yoinks by facet values. All filters AND-combined."""
+    idx = _b()._get_index()
+    rows = idx.query_by_facets(
+        format=args.get("format"),
+        performance_tier=args.get("performance_tier"),
+        hook_type=args.get("hook_type"),
+        topic=args.get("topic"),
+        length_bucket=args.get("length_bucket"),
+        tag=args.get("tag"),
+        limit=int(args.get("limit") or 50),
+    )
+    return _ok(yoinks=rows, count=len(rows))
+
+
+def get_facet_taxonomy(_args: dict[str, Any]) -> dict[str, Any]:
+    """v2.5 S1: enum lists for filter chips and validation. Pure constants."""
+    server = _b()
+    hooks = getattr(server, "HOOK_TYPES", None)
+    return _ok(
+        format=list(server.FORMAT_ENUM),
+        performance_tier=list(server.PERF_TIER_ENUM),
+        length_bucket=list(server.LENGTH_BUCKET_ENUM),
+        hook=sorted(hooks.keys()) if isinstance(hooks, dict) else list(hooks or []),
+    )
+
+
 def get_schema_version(_args: dict[str, Any]) -> dict[str, Any]:
     """v2.5 substrate: data-shape version report (SQL migration + yoink row +
     sidecar JSON). No arguments. Used by cross-version aggregators to gate v2
@@ -818,6 +890,59 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         ),
         input_schema=_schema({}, []),
         handler=get_schema_version,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "classify_facets": ToolSpec(
+        name="classify_facets",
+        description=(
+            "Persist agent-classified facets + free-form tags for a video. "
+            "Model-agnostic: the calling agent does the LLM work using its "
+            "own model; this tool validates against bounded enums and writes "
+            "to the row. The server fills performance_tier (channel-relative) "
+            "and length_bucket (from duration) if you don't pass them."
+        ),
+        input_schema=_schema({
+            "video_id": {"type": "string"},
+            "format": {"type": "string",
+                       "enum": ["one_shot", "talking_head", "tutorial", "listicle",
+                                "narrative", "vlog", "interview",
+                                "screen_recording", "broll_heavy"]},
+            "performance_tier": {"type": "string",
+                                 "enum": ["over", "average", "under"]},
+            "length_bucket": {"type": "string",
+                              "enum": ["short", "medium", "long", "deep"]},
+            "production_style": {"type": "string", "maxLength": 64},
+            "topic": {"type": "string", "maxLength": 64},
+            "hook_type": {"type": "string", "maxLength": 64},
+            "tags": {"type": "array", "items": {"type": "string"}, "maxItems": 32},
+        }, ["video_id"]),
+        handler=classify_facets,
+        rate_limiter=_RateLimiter(120),
+    ),
+    "query_by_facets": ToolSpec(
+        name="query_by_facets",
+        description=(
+            "Filter saved yoinks by facet values (format / performance_tier / "
+            "hook_type / topic / length_bucket / tag). All filters "
+            "AND-combined; newest first."
+        ),
+        input_schema=_schema({
+            "format": {"type": "string"},
+            "performance_tier": {"type": "string"},
+            "hook_type": {"type": "string"},
+            "topic": {"type": "string"},
+            "length_bucket": {"type": "string"},
+            "tag": {"type": "string"},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 500, "default": 50},
+        }, []),
+        handler=query_by_facets,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "get_facet_taxonomy": ToolSpec(
+        name="get_facet_taxonomy",
+        description="Enum lists for the v2.5 facet axes (used for filter chips).",
+        input_schema=_schema({}, []),
+        handler=get_facet_taxonomy,
         rate_limiter=_RateLimiter(60),
     ),
 }
