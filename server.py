@@ -76,6 +76,9 @@ HOST = "127.0.0.1"
 PORT = 5179
 VERSION = _read_version()
 DASHBOARD_PATH = HERE / "assets" / "dashboard" / "index.html"
+# Tier 2 GUI: served by the /splash route and wrapped by uoink_splash.py at
+# first boot (gated by %LOCALAPPDATA%\Uoink\.first-run-done).
+SPLASH_PATH = HERE / "assets" / "splash" / "index.html"
 ALLOWED_ORIGINS = {
     "https://www.youtube.com",
     "https://m.youtube.com",
@@ -5483,6 +5486,12 @@ class Handler(BaseHTTPRequestHandler):
             # opening folders, so the route can stay unauthenticated while the
             # user-data APIs remain token-gated.
             return self._handle_dashboard()
+        if bare == "/splash" or bare == "/splash/":
+            # Public local UI shell, same posture as /dashboard. The splash JS
+            # performs the /token handshake before reading any token-gated
+            # endpoint, and the failure/success variant is decided by the page
+            # itself via fetch("/diagnose").
+            return self._handle_splash()
         if bare == "/token":
             return self._handle_token()
         # Everything below mutates state or reveals user data -- token-gated.
@@ -5567,6 +5576,12 @@ class Handler(BaseHTTPRequestHandler):
     def _handle_dashboard(self):
         return self._send_file(
             DASHBOARD_PATH,
+            "text/html; charset=utf-8",
+        )
+
+    def _handle_splash(self):
+        return self._send_file(
+            SPLASH_PATH,
             "text/html; charset=utf-8",
         )
 
@@ -7023,6 +7038,23 @@ def main():
             )
         except Exception as e:
             log.warning("tray: failed to start (non-fatal): %s", e)
+
+        # Tier 2 GUI: spawn the pywebview splash window on first boot. Gated
+        # by %LOCALAPPDATA%\Uoink\.first-run-done (which uoink_splash.py writes
+        # on dismiss or after its 8 s linger). Subprocess so pywebview's GUI
+        # loop doesn't fight serve_forever() for the main thread; pythonw.exe
+        # so the launch doesn't flash a console. Non-fatal -- if pywebview /
+        # WebView2 isn't available the boot toast is the fallback.
+        try:
+            _splash_sentinel = DATA_ROOT / ".first-run-done"
+            if not _splash_sentinel.is_file():
+                _splash_script = str(HERE / "uoink_splash.py")
+                _splash_pyw = str(HERE / "python" / "pythonw.exe")
+                subprocess.Popen([_splash_pyw, _splash_script],
+                                 creationflags=0x08000000)  # CREATE_NO_WINDOW
+                log.info("splash: spawned (first run)")
+        except Exception as e:
+            log.warning("splash: failed to spawn (non-fatal): %s", e)
 
     log.info("Uoink server v%s running on http://%s:%d", VERSION, HOST, PORT)
     log.info("Ready to uoink. Click any YouTube video's Uoink button.")
