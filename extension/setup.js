@@ -194,7 +194,7 @@ function updateHeader(status) {
     pageTitle.textContent = isSettingsMode ? "Uoink settings." : "Uoink is ready.";
     pageLede.textContent = isSettingsMode
       ? "Manage local AI features and agent integration."
-      : "The local helper is running. Uoink any YouTube video to begin.";
+      : "The local helper is running. Open the dashboard from your tray to view your full library, or uoink any YouTube video to begin.";
     return;
   }
   if (source === "offline") {
