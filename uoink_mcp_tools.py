@@ -580,6 +580,28 @@ def get_schema_version(_args: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+def analyze_self_channel(args: dict[str, Any]) -> dict[str, Any]:
+    """v2.5 P3 your-channel mode: return the aggregated self-analysis
+    payload -- hook evolution, format evolution, performance trend, top
+    performers. `handle` is optional; when present, the analysis is
+    restricted to that one channel. Pure local read."""
+    server = _b()
+    import channels as _channels_mod
+    handle = args.get("handle")
+    if handle is not None and not isinstance(handle, str):
+        return _err("handle must be a string when provided")
+    try:
+        top_n = _limit_int(args.get("limit"), default=10, low=1, high=100)
+    except Exception:
+        top_n = 10
+    try:
+        result = _channels_mod.self_analysis(
+            server._get_index(), handle=handle, top_n=top_n)
+    except Exception as e:
+        return _err(f"self_analysis failed: {e}")
+    return result
+
+
 def find_mentions(args: dict[str, Any]) -> dict[str, Any]:
     """Return every recorded mention of an entity across the library,
     newest first, each with a timestamped YouTube deep link (Sprint 16)."""
@@ -879,6 +901,32 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         # Backed by the SQLite index; rate-limited so an agent loop can't
         # hammer it.
         rate_limiter=_RateLimiter(60),
+    ),
+    "analyze_self_channel": ToolSpec(
+        name="analyze_self_channel",
+        description=(
+            "v2.5 P3 your-channel mode: aggregate the user's own saved "
+            "videos (those tagged is_self via channel-name recognition) "
+            "into hook evolution, format evolution, performance trend by "
+            "month, and a top-performers list. Pass `handle` to scope to "
+            "one of the user's registered channels; omit for the union "
+            "across every registered channel. `limit` caps the "
+            "top_performers list (default 10, max 100). Pure local read."
+        ),
+        input_schema=_schema({
+            "handle": {
+                "type": "string",
+                "description": "User channel handle (with or without @). Optional.",
+            },
+            "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100,
+                "default": 10,
+            },
+        }, []),
+        handler=analyze_self_channel,
+        rate_limiter=_RateLimiter(30),
     ),
     "get_schema_version": ToolSpec(
         name="get_schema_version",

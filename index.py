@@ -377,6 +377,17 @@ class Index:
                  record.get("title"), record.get("topic"),
                  record.get("hook_type"), content or ""),
             )
+            # v2.5 P3 your-channel recognition. Imported lazily so the
+            # index module stays standalone for callers that do not need
+            # P3 (e.g., the backfill smoke tools).
+            try:
+                from channels import tag_if_self  # noqa: WPS433
+                tag_if_self(self, video_id, record.get("channel"))
+            except Exception as e:  # pragma: no cover -- defensive
+                # Recognition failure must not block a yoink write.
+                import logging
+                logging.getLogger("uoink.index").warning(
+                    "self-channel recognition skipped: %s", e)
             self._conn.commit()
 
     def delete_yoink(self, video_id: str) -> None:
