@@ -5538,6 +5538,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_settings_pricing()
         if bare == "/update/check":
             return self._handle_update_check()
+        if bare == "/engagement/scores":
+            return self._handle_engagement_scores()
         if bare == "/settings/mcp-config":
             return self._handle_settings_mcp_config()
         if bare == "/open-last-youtube":
@@ -5630,6 +5632,53 @@ class Handler(BaseHTTPRequestHandler):
             return
         force = (parse_qs(urlparse(self.path).query).get("force") or [""])[0] == "1"
         self._send_json(200, {"ok": True, **_check_for_update(force=force)})
+
+    # ---- v2.5 S2 engagement memory -----------------------------------------
+    # Pure local instrumentation. value_score formula + decay live on the
+    # index (index.py); the helper is just a thin transport layer.
+
+    def _handle_engagement_log(self, body):
+        """POST /engagement/log -- append one engagement event. Already
+        token-gated by do_POST. Zero outbound. Body:
+            {video_id, event_type, source, ts_utc?}"""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False, "error": "json object required"})
+        video_id = (body.get("video_id") or "").strip()
+        event_type = (body.get("event_type") or "").strip()
+        source = (body.get("source") or "").strip()
+        ts_utc = body.get("ts_utc")
+        if not video_id or not event_type or not source:
+            return self._send_json(
+                400, {"ok": False,
+                      "error": "video_id, event_type, source required"})
+        try:
+            row_id = _get_index().log_engagement(
+                video_id, event_type, source, ts_utc=ts_utc)
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/engagement/log failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "id": row_id})
+
+    def _handle_engagement_scores(self):
+        """GET /engagement/scores?limit=N -- top-N videos by value_score.
+        Token-gated. Pure read; the score is computed from local events with
+        time decay (see index.py _ENGAGEMENT_WEIGHTS + half-life)."""
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        try:
+            limit = int((qs.get("limit") or ["20"])[0])
+        except ValueError:
+            limit = 20
+        try:
+            scores = _get_index().top_engaged(limit=limit)
+        except Exception as e:
+            log.exception("/engagement/scores failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "scores": scores,
+                                      "count": len(scores)})
 
     def _handle_settings_mcp_config(self):
         """MCP config snippet for the Settings tab Copy button. Token-gated."""
@@ -6095,6 +6144,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_open(body)
         if bare == "/migration/move-desktop-corpus":
             return self._handle_move_desktop_corpus(body)
+        if bare == "/engagement/log":
+            return self._handle_engagement_log(body)
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})

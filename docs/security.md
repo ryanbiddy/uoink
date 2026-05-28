@@ -200,6 +200,10 @@ Uoink has no Uoink cloud service, account system, telemetry endpoint, or hosted 
 
 Optional AI features send selected comment/hook context to Anthropic only when the user provides an API key and enables those features. YouTube downloads still contact YouTube, and yt-dlp may contact YouTube-owned endpoints as part of uoink extraction.
 
+## Engagement memory (v2.5 S2)
+
+Uoink v2.5 records local engagement events (`opened`, `search_hit`, `search_click`, `paste`, `cite`, `recent_open`) in the `engagement_events` SQLite table so the library can surface what the user actually returns to. **These events are local-only and never leave the machine.** They are not transmitted to Anthropic when BYO-key AI features run; the `value_score` formula and time-decay computation happen entirely in `index.py`. The events do not include any YouTube-side identifiers beyond the `video_id` already stored alongside the saved uoink. Deleting a saved uoink does not automatically purge its engagement rows -- delete the SQLite file under `%LOCALAPPDATA%\Uoink\` to clear the full local history.
+
 ## Reporting
 
 If you find a vulnerability, please open a private GitHub Security Advisory or report it to **hi@uoink.video**. Do not open a public issue with reproduction details until a fix is shipped.

@@ -508,6 +508,20 @@ def get_schema_version(_args: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+def get_engagement_signal(args: dict[str, Any]) -> dict[str, Any]:
+    """v2.5 S2 engagement memory: report the time-decayed value_score + event
+    counts for one video. Pure local read -- no model, no outbound."""
+    video_id = args.get("video_id")
+    if not isinstance(video_id, str) or not video_id.strip():
+        return _err("video_id (string) is required")
+    server = _b()
+    try:
+        signal = server._get_index().engagement_signal(video_id.strip())
+    except Exception as e:
+        return _err(f"engagement_signal failed: {e}")
+    return _ok(**signal)
+
+
 def find_mentions(args: dict[str, Any]) -> dict[str, Any]:
     """Return every recorded mention of an entity across the library,
     newest first, each with a timestamped YouTube deep link (Sprint 16)."""
@@ -819,6 +833,24 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         input_schema=_schema({}, []),
         handler=get_schema_version,
         rate_limiter=_RateLimiter(60),
+    ),
+    "get_engagement_signal": ToolSpec(
+        name="get_engagement_signal",
+        description=(
+            "v2.5 S2 engagement memory: return the time-decayed value_score "
+            "for one video plus per-event-type counts and last event "
+            "timestamp. Events live entirely on the local SQLite index "
+            "(zero outbound). Weights are documented in index.py "
+            "(_ENGAGEMENT_WEIGHTS); decay half-life is 30 days."
+        ),
+        input_schema=_schema({
+            "video_id": {
+                "type": "string",
+                "description": "YouTube video id (11 chars).",
+            },
+        }, ["video_id"]),
+        handler=get_engagement_signal,
+        rate_limiter=_RateLimiter(120),
     ),
 }
 
