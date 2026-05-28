@@ -89,6 +89,12 @@ Source: "staging\server.py"; DestDir: "{app}"; Flags: ignoreversion
 ; System-tray module (Tier 1 v2.1.1) -- imported by server.py at boot on
 ; installed builds. Optional at runtime (degrades if pystray is unavailable).
 Source: "staging\uoink_tray.py"; DestDir: "{app}"; Flags: ignoreversion
+; Tier 2 GUI: pywebview splash + dashboard window subprocess entrypoints. The
+; tray's left-click spawns uoink_dashboard.py; server.py spawns uoink_splash.py
+; on the first boot. Optional at runtime (graceful degradation if pywebview
+; or WebView2 Runtime is unavailable).
+Source: "staging\uoink_splash.py";    DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\uoink_dashboard.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\index.py"; DestDir: "{app}"; Flags: ignoreversion
 ; Cross-platform path/OS helpers -- server.py and migrate_install.py import
 ; this at module top. Omitting it crashes the helper before it binds the port.
@@ -108,6 +114,10 @@ Source: "staging\topics.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\VERSION"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\skills\*"; DestDir: "{app}\skills"; Flags: recursesubdirs ignoreversion createallsubdirs
 Source: "staging\assets\dashboard\*"; DestDir: "{app}\assets\dashboard"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Tier 2 GUI assets: splash HTML (served at /splash, wrapped by uoink_splash.py)
+; and the shared brand-tokens stylesheet both pages consume.
+Source: "staging\assets\splash\*"; DestDir: "{app}\assets\splash"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "staging\assets\brand\*";  DestDir: "{app}\assets\brand";  Flags: ignoreversion recursesubdirs createallsubdirs
 ; Library-index migrations -- index._run_migrations applies these at boot.
 ; Sprint 19.6 / Fix 1: pre-Sprint-19.6 installers omitted these, causing
 ; the helper to crash with "no such table: schema_version" on first launch.
@@ -175,23 +185,83 @@ Type: filesandordirs; Name: "{app}\python\Lib\site-packages"
 Type: filesandordirs; Name: "{app}\python\__pycache__"
 
 [Code]
-{ Informational "Migrating Yoink Data" page (WIZARD-COPY-AND-BITMAPS.md s2).
-  Shown only when a legacy Yoink install is detected. The actual migration is
-  run by migrate_install.py on the helper's FIRST BOOT (copy-not-move, verified,
-  7-day grace), not during the wizard -- so this page sets expectations rather
-  than tracking live progress, which a [Code] page cannot do for post-wizard
-  work. The "Uoink is running" confirmation is delivered by the boot balloon +
-  tray once the helper starts. }
+{ Tier 2 GUI wizard customization (DESIGN-MOCKS-tier-2.pdf, section 1.2). What's
+  in scope for v2.2 within Inno's modern-wizard ceiling:
+    * Branded WizardImageFile + WizardSmallImageFile (magnet-U Variant A)
+    * AG-voiced [Messages] copy on the standard Welcome/Ready/Installing/Finished
+    * A custom CreateCustomPage Welcome (the "Uoink that shit." hero from mock
+      1.2.1) which replaces the stock welcome (wpWelcome is skipped).
+    * A custom CreateCustomPage "Migrating Yoink Data" page (mock 1.2.5)
+      shown only when a legacy %LOCALAPPDATA%\Yoink\ is detected. The actual
+      migration runs on the helper's first boot (copy-not-move, 7-day grace),
+      so this page sets expectations rather than tracking live progress.
+  What is NOT in scope for v2.2 (flagged in PR for v2.3 Tauri shell):
+    * Custom title-bar chrome (Inno owns the OS chrome).
+    * Inline italic vermillion runs inside a headline (Inno labels don't do
+      mid-line style mixing; the hero renders as a single rust-on-cream label
+      that passes AA at large-text 18pt+).
+    * JetBrains-Mono live-log inset on the Installing page.
+    * "Close Yoink first" interstitial that detects a locked index.db during
+      install -- migration runs post-wizard, so the wizard can't observe it.
+  Pixel-target match for these requires a custom shell + a runnable helper to
+  observe. Human visual QA is the gate before tagging v2.2. }
+
+const
+  { Inno TColor uses BGR hex (low byte = blue). #C2410C => $0C 41 C2. }
+  C_RUST  = $000C41C2;
+  C_CREAM = $00ECF4FF;
+  C_INK   = $000A0A0A;
+
 var
-  MigratePage: TWizardPage;
-  MigrateText: TNewStaticText;
+  WelcomePage:  TWizardPage;
+  MigratePage:  TWizardPage;
+  MigrateText:  TNewStaticText;
 
 function LegacyYoinkPresent(): Boolean;
 begin
   Result := DirExists(ExpandConstant('{localappdata}\Yoink'));
 end;
 
-procedure InitializeWizard();
+procedure AddLabel(P: TWizardPage; const Caption: string;
+                   Top, Height, FontSize: Integer; FontStyle: TFontStyles;
+                   Colr: TColor);
+var L: TNewStaticText;
+begin
+  L := TNewStaticText.Create(P);
+  L.Parent := P.Surface;
+  L.AutoSize := False;
+  L.Left := 0;
+  L.Top := Top;
+  L.Width := P.SurfaceWidth;
+  L.Height := Height;
+  L.Caption := Caption;
+  L.Font.Size := FontSize;
+  L.Font.Style := FontStyle;
+  L.Font.Color := Colr;
+  L.WordWrap := True;
+end;
+
+procedure BuildWelcomePage();
+begin
+  WelcomePage := CreateCustomPage(wpWelcome,
+    'Welcome to Uoink',
+    'Pull any YouTube video into your AI workspace.');
+  { Hero (mock 1.2.1). Rust on the cream wizard ground passes AA for large
+    text (>=18pt bold); body copy below stays on the default ink-on-cream the
+    wizard uses -- never rust on ink, per the contrast rules. }
+  AddLabel(WelcomePage, 'Uoink that shit.',  20,  56, 28, [fsBold], C_RUST);
+  AddLabel(WelcomePage,
+    'Uoink turns any YouTube video into a clean, AI-ready doc on your disk.',
+                                              92,  36, 11, [], C_INK);
+  AddLabel(WelcomePage,
+    'This installs the local helper that does the work. ' +
+    'No account, no cloud. Takes about a minute.',
+                                              138, 44, 10, [], C_INK);
+  AddLabel(WelcomePage,
+    'MIT - open source - uoink.video',        210, 18,  9, [fsItalic], C_RUST);
+end;
+
+procedure BuildMigratePage();
 begin
   MigratePage := CreateCustomPage(wpReady, 'Migrating Yoink Data',
     'Moving your saved videos, settings, and API key safely to Uoink');
@@ -214,9 +284,19 @@ begin
     'from the Uoink Settings menu at any time.';
 end;
 
+procedure InitializeWizard();
+begin
+  BuildWelcomePage();
+  BuildMigratePage();
+end;
+
 function ShouldSkipPage(PageID: Integer): Boolean;
 begin
   Result := False;
+  { Hide the stock Welcome page so our custom WelcomePage takes its place as
+    the wizard's first screen (mock 1.2.1). }
+  if PageID = wpWelcome then
+    Result := True;
   if (PageID = MigratePage.ID) and (not LegacyYoinkPresent()) then
     Result := True;
 end;

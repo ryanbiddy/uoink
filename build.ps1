@@ -81,6 +81,13 @@ $KEYRING_VERSION = '25.7.0'
 # System-tray icon (Tier 1 v2.1.1). Pure-Python; Pillow (already pinned above)
 # renders the glyph. Optional at runtime -- server.py degrades if it's missing.
 $PYSTRAY_VERSION = '0.19.5'
+# Tier 2 GUI: pywebview wraps Codex's helper-served HTML in native windows
+# (splash, dashboard). On Windows it uses the Edge WebView2 backend via
+# pythonnet/.NET interop -- WebView2 Runtime (Evergreen) ships with Win10/11.
+# pythonnet is pinned explicitly so pywebview never silently falls back to the
+# legacy MSHTML renderer.
+$PYWEBVIEW_VERSION = '5.4'
+$PYTHONNET_VERSION = '3.0.5'
 
 # ---- Hash verification --------------------------------------------------
 # Direct-download SHA256s are locked as of v2.0. When bumping Python,
@@ -159,6 +166,10 @@ $dashboardIndex = Join-Path $RepoRoot 'assets\dashboard\index.html'
 if (-not (Test-Path $dashboardIndex)) {
     throw "Missing assets\dashboard\index.html -- Tier 1 dashboard route would 404"
 }
+$splashIndex = Join-Path $RepoRoot 'assets\splash\index.html'
+if (-not (Test-Path $splashIndex)) {
+    throw "Missing assets\splash\index.html -- Tier 2 /splash route would 404"
+}
 foreach ($f in @('VERSION','server.py','index.py','_platform.py','yt_extract.py','topics.json')) {
     if (-not (Test-Path (Join-Path $RepoRoot $f))) {
         throw "Missing $f at repo root"
@@ -228,9 +239,9 @@ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
 #     MCP powers uoink_mcp.py for stdio agent integrations. keyring stores
 #     the user's Anthropic API key in Windows Credential Manager.
-Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION..."
+Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION..."
 & $embedPython -m pip install --no-warn-script-location --no-compile `
-    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION"
+    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION"
 if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray) failed' }
 
 # 2e. Trim dev-only and build-time files we don't need at runtime.
@@ -276,6 +287,11 @@ Copy-Item (Join-Path $RepoRoot 'server.py')      $StagingDir -Force
 # System-tray module (Tier 1 v2.1.1). Imported by server.py at boot on
 # installed builds; optional at runtime (degrades if pystray is unavailable).
 Copy-Item (Join-Path $RepoRoot 'uoink_tray.py')  $StagingDir -Force
+# Tier 2 GUI: splash + dashboard pywebview windows. Imported as subprocess
+# entrypoints (not at server import time), but must ship or the tray's
+# left-click + the first-run splash crash silently.
+Copy-Item (Join-Path $RepoRoot 'uoink_splash.py')    $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_dashboard.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'index.py')       $StagingDir -Force
 # Cross-platform path/OS helpers (added Sprint 19.5). server.py and
 # migrate_install.py `import _platform` at module top -- omitting it ships a
@@ -295,6 +311,10 @@ Copy-Item (Join-Path $TemplatesDir 'stop-server.ps1') $StagingDir -Force
 Copy-Item $IconSrc (Join-Path $StagingDir 'uoink.ico') -Force
 Copy-Item (Join-Path $RepoRoot 'skills') (Join-Path $StagingDir 'skills') -Recurse -Force
 Copy-Item (Join-Path $RepoRoot 'assets\dashboard') (Join-Path $StagingDir 'assets\dashboard') -Recurse -Force
+# Tier 2 GUI: splash HTML (served at /splash and wrapped by uoink_splash.py)
+# and the brand tokens stylesheet used by both pages.
+Copy-Item (Join-Path $RepoRoot 'assets\splash') (Join-Path $StagingDir 'assets\splash') -Recurse -Force
+Copy-Item (Join-Path $RepoRoot 'assets\brand')  (Join-Path $StagingDir 'assets\brand')  -Recurse -Force
 # Sprint 19.6 / Fix 1: migrations\*.sql is required at runtime by
 # index._run_migrations; if it's missing the helper crashes at first boot
 # with "no such table: schema_version". Pre-Sprint-19.6 installers shipped
@@ -345,6 +365,8 @@ import server
 print("smoke: import server OK, version=%s" % server.VERSION)
 import uoink_tray
 print("smoke: import uoink_tray OK")
+import uoink_splash, uoink_dashboard
+print("smoke: import uoink_splash + uoink_dashboard OK")
 '@
     try {
         & '.\python\python.exe' $smokePy

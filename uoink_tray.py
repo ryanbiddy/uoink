@@ -30,6 +30,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import subprocess
 import sys
 import threading
 import time
@@ -153,7 +154,11 @@ class UoinkTray:
         key = self._state
         if key in self._images:
             return self._images[key]
-        size = 64
+        # Tier 2 refinement: render at 32 px so the OS-tray downscale to 16 px
+        # stays sharp, and the size-aware rule applies (<=32 px -> CREAM tips,
+        # which the magnet-U paint below already uses). Rendering at 64 px and
+        # downscaling muddied the tips at small sizes.
+        size = 32
         scale = size / 100.0
         img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
         d = ImageDraw.Draw(img)
@@ -174,8 +179,27 @@ class UoinkTray:
         self._last_interaction = time.monotonic()
 
     def _open_dashboard(self, *_):
+        """Left-click action (default=True on the menu item makes this the
+        single-click target on Windows). Tier 2 GUI: spawn the pywebview
+        dashboard window in a subprocess so the helper's main thread /
+        serve_forever isn't blocked by pywebview's GUI loop. Falls back to
+        opening the URL in the default browser if the subprocess fails -- the
+        v2.1.1 'click to see the dashboard' guarantee stays intact."""
         self._touch()
-        webbrowser.open(self.dashboard_url)
+        self._spawn_dashboard_window()
+
+    def _spawn_dashboard_window(self) -> None:
+        script = str(Path(__file__).parent / "uoink_dashboard.py")
+        try:
+            creationflags = 0x08000000 if sys.platform == "win32" else 0  # CREATE_NO_WINDOW
+            subprocess.Popen([sys.executable, script], creationflags=creationflags)
+            return
+        except Exception as e:
+            log.debug("dashboard subprocess failed (%s); falling back to browser tab", e)
+        try:
+            webbrowser.open(self.dashboard_url)
+        except Exception as e:
+            log.debug("dashboard browser fallback failed: %s", e)
 
     def _open_folder(self, *_):
         self._touch()
