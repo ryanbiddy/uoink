@@ -478,6 +478,7 @@ function onServerUp() {
   loadAIPricing();
   loadCISettings();
   loadHookCorrections();
+  loadTasteAnchors();
   loadMCPConfig();
   loadSkillSystemPrompt();
   loadDiagnose();
@@ -1071,10 +1072,307 @@ function applyDownloadState() {
   }
 }
 
+// ---- Taste Calibration Onboarding (Sprint 3) -----------------------------
+let tcAdmiredChannels = [];
+const tcHookRatings = {};
+const tcHookIndexToType = {
+  0: 'curiosity_gap',
+  1: 'contrarian',
+  2: 'demo'
+};
+
+const tcChannelsInput = document.getElementById("tc-channels-input");
+const tcAddChannelBtn = document.getElementById("tc-add-channel-btn");
+const tcChannelChips = document.getElementById("tc-channel-chips");
+const tcSaveBtn = document.getElementById("tc-save-btn");
+const tcSkipBtn = document.getElementById("tc-skip-btn");
+const tcStatus = document.getElementById("tc-status");
+const tcPendingNote = document.getElementById("tc-pending-note");
+const tcDislikesInput = document.getElementById("tc-dislikes-input");
+
+function renderTcChips() {
+  if (!tcChannelChips) return;
+  tcChannelChips.innerHTML = "";
+  tcAdmiredChannels.forEach((chan, idx) => {
+    const chip = document.createElement("span");
+    chip.className = "tc-channel-chip";
+    chip.textContent = chan;
+    
+    const remove = document.createElement("span");
+    remove.className = "remove-chip";
+    remove.textContent = " ✕";
+    remove.addEventListener("click", () => {
+      tcAdmiredChannels.splice(idx, 1);
+      renderTcChips();
+    });
+    chip.appendChild(remove);
+    tcChannelChips.appendChild(chip);
+  });
+}
+
+function addAdmiredChannel(name) {
+  name = (name || "").trim();
+  if (!name) return;
+  if (tcAdmiredChannels.includes(name)) return;
+  tcAdmiredChannels.push(name);
+  renderTcChips();
+  if (tcChannelsInput) tcChannelsInput.value = "";
+}
+
+// Wire channel suggestion clicks
+document.querySelectorAll(".tc-suggestion").forEach(el => {
+  el.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    addAdmiredChannel(el.getAttribute("data-val"));
+  });
+});
+
+if (tcAddChannelBtn && tcChannelsInput) {
+  tcAddChannelBtn.addEventListener("click", () => {
+    addAdmiredChannel(tcChannelsInput.value);
+  });
+  tcChannelsInput.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      addAdmiredChannel(tcChannelsInput.value);
+    }
+  });
+}
+
+// Wire hook rating buttons
+document.querySelectorAll(".tc-rating-buttons").forEach(container => {
+  const hookIndex = container.getAttribute("data-hook-index");
+  const hookType = tcHookIndexToType[hookIndex];
+  
+  const buttons = container.querySelectorAll(".tc-rate-btn");
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      buttons.forEach(b => b.classList.remove("active"));
+      const rating = btn.getAttribute("data-rating");
+      tcHookRatings[hookType] = rating;
+      btn.classList.add("active");
+    });
+  });
+});
+
+// Load pending taste profile from storage if any
+async function loadPendingTasteProfile() {
+  chrome.storage.local.get(["uoink_taste_pending"], (items) => {
+    const pending = items.uoink_taste_pending;
+    if (pending) {
+      tcAdmiredChannels = pending.admired_channels || [];
+      renderTcChips();
+      if (pending.dislikes && tcDislikesInput) {
+        tcDislikesInput.value = pending.dislikes;
+      }
+      // Populate ratings
+      if (pending.hook_ratings) {
+        Object.entries(pending.hook_ratings).forEach(([type, rating]) => {
+          tcHookRatings[type] = rating;
+          // Find matching button
+          const index = Object.keys(tcHookIndexToType).find(k => tcHookIndexToType[k] === type);
+          if (index !== undefined) {
+            const btn = document.querySelector(`.tc-rating-buttons[data-hook-index="${index}"] .tc-rate-btn[data-rating="${rating}"]`);
+            if (btn) btn.classList.add("active");
+          }
+        });
+      }
+      if (tcPendingNote) tcPendingNote.classList.remove("hidden");
+    }
+  });
+}
+
+// Save Taste Profile
+if (tcSaveBtn) {
+  tcSaveBtn.addEventListener("click", async () => {
+    tcSaveBtn.disabled = true;
+    tcStatus.textContent = "Saving taste profile...";
+    tcStatus.className = "settings-status";
+    
+    const profile = {
+      admired_channels: tcAdmiredChannels,
+      hook_ratings: tcHookRatings,
+      dislikes: tcDislikesInput ? tcDislikesInput.value.trim() : ""
+    };
+    
+    const scrollToNext = () => {
+      const target = document.getElementById("hook-type-settings");
+      if (target) {
+        setTimeout(() => {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 800);
+      }
+    };
+    
+    try {
+      // POST to /memory/taste
+      const res = await fetch(`${SERVER}/memory/taste`, {
+        method: "POST",
+        mode: "cors",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Yoink-Token": await STC.getToken()
+        },
+        body: JSON.stringify(profile)
+      });
+      
+      if (res.ok) {
+        // Success
+        tcStatus.textContent = "Taste profile saved successfully ✓";
+        tcStatus.className = "settings-status ok";
+        if (tcPendingNote) tcPendingNote.classList.add("hidden");
+        // Clear pending from storage
+        chrome.storage.local.remove("uoink_taste_pending");
+        scrollToNext();
+      } else {
+        throw new Error(`HTTP ${res.status}`);
+      }
+    } catch (e) {
+      // Fallback to local storage
+      console.warn("Failed to POST taste profile, falling back to local storage", e);
+      chrome.storage.local.set({ uoink_taste_pending: profile }, () => {
+        tcStatus.textContent = "Taste profile saved locally (syncs later) ✓";
+        tcStatus.className = "settings-status ok";
+        if (tcPendingNote) tcPendingNote.classList.remove("hidden");
+        scrollToNext();
+      });
+    } finally {
+      tcSaveBtn.disabled = false;
+    }
+  });
+}
+
+if (tcSkipBtn) {
+  tcSkipBtn.addEventListener("click", () => {
+    tcStatus.textContent = "Taste calibration skipped.";
+    tcStatus.className = "settings-status warn";
+    const target = document.getElementById("hook-type-settings");
+    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+}
+
+// ---- Taste Anchors Settings (Sprint 3) -----------------------------------
+const anchorsBestList = document.getElementById("anchors-best-list");
+const anchorsWorstList = document.getElementById("anchors-worst-list");
+const anchorsChannelsList = document.getElementById("anchors-channels-list");
+const taStatus = document.getElementById("ta-status");
+const taPendingNote = document.getElementById("ta-pending-note");
+
+async function loadTasteAnchors() {
+  if (!anchorsBestList || !anchorsWorstList || !anchorsChannelsList) return;
+  
+  try {
+    // Try to GET /taste/anchors
+    const res = await fetch(`${SERVER}/taste/anchors`, {
+      method: "GET",
+      mode: "cors",
+      cache: "no-store",
+      headers: {
+        "X-Yoink-Token": await STC.getToken()
+      }
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      renderTasteAnchors(data.anchors || data);
+      if (taPendingNote) taPendingNote.classList.add("hidden");
+    } else {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  } catch (e) {
+    // Fallback to chrome.storage.local
+    console.warn("Failed to fetch taste anchors from server, falling back to local storage", e);
+    chrome.storage.local.get({ uoink_taste_anchors: { best: [], worst: [], admired_channels: [] } }, (items) => {
+      const anchors = items.uoink_taste_anchors || { best: [], worst: [], admired_channels: [] };
+      renderTasteAnchors(anchors);
+      if (taPendingNote) taPendingNote.classList.remove("hidden");
+    });
+  }
+}
+
+function renderTasteAnchorsList(listEl, items, type, emptyMsg) {
+  listEl.innerHTML = "";
+  if (!items || items.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "panel-muted";
+    empty.style.cssText = "font-size:11px;padding:4px 6px";
+    empty.textContent = emptyMsg;
+    listEl.appendChild(empty);
+    return;
+  }
+  
+  items.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "correction-row";
+    
+    const titleBtn = document.createElement("button");
+    titleBtn.className = "correction-title";
+    titleBtn.type = "button";
+    titleBtn.title = "Remove from anchors";
+    titleBtn.textContent = item.title || item.name || item.video_id || item;
+    
+    const removeLabel = document.createElement("div");
+    removeLabel.className = "correction-date";
+    removeLabel.textContent = "✕ Remove";
+    removeLabel.style.cursor = "pointer";
+    
+    const removeFn = async () => {
+      row.style.opacity = 0.5;
+      row.style.pointerEvents = "none";
+      const id = item.video_id || item.id || item;
+      try {
+        const res = await fetch(`${SERVER}/taste/anchors/${encodeURIComponent(id)}`, {
+          method: "DELETE",
+          mode: "cors",
+          headers: {
+            "X-Yoink-Token": await STC.getToken()
+          }
+        });
+        if (res.ok) {
+          loadTasteAnchors();
+        } else {
+          throw new Error(`HTTP ${res.status}`);
+        }
+      } catch (err) {
+        console.warn("Failed to delete taste anchor from server, removing locally", err);
+        chrome.storage.local.get({ uoink_taste_anchors: { best: [], worst: [], admired_channels: [] } }, (stored) => {
+          const anchors = stored.uoink_taste_anchors || { best: [], worst: [], admired_channels: [] };
+          if (type === "best") {
+            anchors.best = anchors.best.filter(x => (x.video_id || x) !== id);
+          } else if (type === "worst") {
+            anchors.worst = anchors.worst.filter(x => (x.video_id || x) !== id);
+          } else {
+            anchors.admired_channels = anchors.admired_channels.filter(x => x !== id);
+          }
+          chrome.storage.local.set({ uoink_taste_anchors: anchors }, () => {
+            loadTasteAnchors();
+          });
+        });
+      }
+    };
+    
+    titleBtn.addEventListener("click", removeFn);
+    removeLabel.addEventListener("click", removeFn);
+    
+    row.appendChild(titleBtn);
+    row.appendChild(removeLabel);
+    listEl.appendChild(row);
+  });
+}
+
+function renderTasteAnchors(data) {
+  renderTasteAnchorsList(anchorsBestList, data.best || [], "best", "No best anchors set. Mark videos as 10/10 in the popup.");
+  renderTasteAnchorsList(anchorsWorstList, data.worst || [], "worst", "No worst anchors set. Mark videos as 0/10 in the popup.");
+  renderTasteAnchorsList(anchorsChannelsList, data.admired_channels || data.channels || [], "channel", "No admired channels set.");
+}
+
 // ---- Boot ----------------------------------------------------------------
 setCIControlsEnabled(false);
 applyDownloadState();
 applySource();
+loadPendingTasteProfile();
+loadTasteAnchors();
 startPolling();
 
 // If the tab gets backgrounded for a while we don't burn cycles polling,
