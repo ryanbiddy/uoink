@@ -76,6 +76,7 @@ import uoink_reliability  # noqa: E402  -- optional local Whisper reliability ch
 import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
 import claims  # noqa: E402  -- v3 A2 claim extraction + verification (Loki-inspired)
 import scripts as p5_scripts  # noqa: E402  -- v3 P5 script studio backend
+import memory_layer  # noqa: E402  -- v2.5 S4 markdown taste/user memory
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
@@ -640,6 +641,11 @@ def _public_settings(data: dict | None = None) -> dict:
         ),
         "autostart": _autostart_enabled(),
         "topics": (_load_topics() or {}).get("topics", []),
+        # v2.5 S4: optional Obsidian vault mirror for TASTE.md + USER.md.
+        # When set, every write to the markdown memory layer also drops a
+        # copy at <vault>/Uoink/. Vault picker UI is a Codex/AG follow-up
+        # PR; this field is the contract.
+        "obsidian_vault_path": (data.get("obsidian_vault_path") or "") or None,
     }
 
 
@@ -5867,6 +5873,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_script_shot_list_get(bare)
         if bare.startswith("/script/"):
             return self._handle_script_get(bare)
+        if bare == "/memory/taste":
+            return self._handle_memory_taste_get()
+        if bare == "/memory/user":
+            return self._handle_memory_user_get()
         if bare == "/settings/mcp-config":
             return self._handle_settings_mcp_config()
         if bare == "/open-last-youtube":
@@ -6530,6 +6540,87 @@ class Handler(BaseHTTPRequestHandler):
         status = 200 if result.get("ok") else 404
         return self._send_json(status, result)
 
+    # ---- v2.5 S4 markdown memory layer -------------------------------------
+    # File I/O + consolidate logic lives in memory_layer.py. These handlers
+    # are thin transport wrappers that wire DATA_ROOT + the optional vault
+    # path from settings + the SQLite index.
+
+    def _memory_vault_path(self) -> str | None:
+        try:
+            return (_read_settings().get("obsidian_vault_path") or "") or None
+        except Exception:
+            return None
+
+    def _handle_memory_taste_get(self):
+        """GET /memory/taste -- consolidated TASTE.md (lazily regenerated
+        if absent). Token-gated."""
+        if not self._require_token():
+            return
+        try:
+            result = memory_layer.read_taste(
+                _get_index(), DATA_ROOT,
+                vault_path=self._memory_vault_path())
+        except Exception as e:
+            log.exception("/memory/taste GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, result)
+
+    def _handle_memory_taste_post(self, body):
+        """POST /memory/taste -- body {section, content}. Updates the
+        anchor row in memory_layer table + re-consolidates TASTE.md. Already
+        token-gated by do_POST."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False, "error": "json object required"})
+        section = (body.get("section") or "").strip()
+        content = body.get("content")
+        if section not in memory_layer.ANCHOR_SECTIONS:
+            return self._send_json(400, {
+                "ok": False,
+                "error": f"section must be one of "
+                          f"{list(memory_layer.ANCHOR_SECTIONS)}"})
+        if not isinstance(content, str):
+            return self._send_json(400, {
+                "ok": False, "error": "content must be a string"})
+        try:
+            result = memory_layer.update_user_taste(
+                _get_index(), DATA_ROOT, section, content,
+                vault_path=self._memory_vault_path())
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/memory/taste POST failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, result)
+
+    def _handle_memory_user_get(self):
+        """GET /memory/user -- USER.md (skeleton seeded on first read).
+        Token-gated."""
+        if not self._require_token():
+            return
+        try:
+            result = memory_layer.read_user(DATA_ROOT)
+        except Exception as e:
+            log.exception("/memory/user GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, result)
+
+    def _handle_memory_user_post(self, body):
+        """POST /memory/user -- body {content}. Replaces USER.md verbatim.
+        Already token-gated by do_POST."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False, "error": "json object required"})
+        content = body.get("content")
+        if not isinstance(content, str):
+            return self._send_json(400, {
+                "ok": False, "error": "content must be a string"})
+        try:
+            result = memory_layer.write_user(
+                DATA_ROOT, content, vault_path=self._memory_vault_path())
+        except Exception as e:
+            log.exception("/memory/user POST failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, result)
+
     def _handle_settings_mcp_config(self):
         """MCP config snippet for the Settings tab Copy button. Token-gated."""
         if not self._require_token():
@@ -6632,7 +6723,8 @@ class Handler(BaseHTTPRequestHandler):
                                             # extracted on yoink only when on)
         )
         integer_fields = ("clipboard_screenshot_cap",)
-        extra_fields = ("output_dir", "autostart", "topics")  # Tier 2
+        extra_fields = ("output_dir", "autostart", "topics",
+                         "obsidian_vault_path")  # Tier 2 + v2.5 S4
         if (
             not any(f in body for f in boolean_fields)
             and not any(f in body for f in integer_fields)
@@ -6715,6 +6807,29 @@ class Handler(BaseHTTPRequestHandler):
             if _set_autostart(body["autostart"]) is False:
                 return self._send_json(200, {
                     "ok": False, "error": "autostart toggle failed"})
+        if "obsidian_vault_path" in body:
+            val = body.get("obsidian_vault_path")
+            if val is None or val == "":
+                data["obsidian_vault_path"] = ""
+            elif isinstance(val, str):
+                # Validate the path exists + is writable. The vault dir
+                # itself must exist; we create the Uoink/ subfolder lazily
+                # on first mirror write.
+                try:
+                    cand = Path(val).expanduser()
+                    if not cand.exists() or not cand.is_dir():
+                        raise OSError("vault path missing or not a directory")
+                    if not _is_writable_dir(cand):
+                        raise OSError("vault path not writable")
+                except OSError as e:
+                    return self._send_json(400, {
+                        "ok": False,
+                        "error": f"obsidian_vault_path invalid: {e}"})
+                data["obsidian_vault_path"] = str(cand.resolve())
+            else:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": "obsidian_vault_path must be a string or null"})
         if "topics" in body:
             err = _validate_topics(body.get("topics"))
             if err:
@@ -7091,6 +7206,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_script_revise(body)
         if bare == "/script/shot-list":
             return self._handle_script_shot_list_post(body)
+        if bare == "/memory/taste":
+            return self._handle_memory_taste_post(body)
+        if bare == "/memory/user":
+            return self._handle_memory_user_post(body)
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})
