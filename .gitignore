@@ -59,3 +59,7 @@ docs/launch/
 # Wizard bitmaps are regenerated from installer/generate_bitmaps.py on each
 # build (build.ps1) -- no committed binary churn.
 installer/assets/*.bmp
+
+# v2.2.0: installer/uoink.ico is regenerated each build by
+# installer/generate_icon.py from assets/logo-mark-color.png -- never commit it.
+installer/uoink.ico

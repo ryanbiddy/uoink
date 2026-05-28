@@ -159,8 +159,15 @@ if ($Clean) {
 New-Item -ItemType Directory -Force -Path $CacheDir, $BuildDir | Out-Null
 
 # ---- Sanity checks ------------------------------------------------------
-if (-not (Test-Path $IconSrc)) {
-    throw "Missing $IconSrc -- regenerate the v3.1 magnet-U .ico (16/32 cream tips, 48 transitional, 256 acid tips)"
+# v2.2.0 brand fix: $IconSrc (installer\uoink.ico) is now a BUILD ARTIFACT
+# regenerated from assets\logo-mark-color.png by installer\generate_icon.py
+# (the regen step runs after pip install, since it uses the bundled Pillow).
+# So the preflight here checks the SOURCE PNG instead of the generated .ico;
+# the .ico itself is gitignored to prevent the v2.1.x staleness regression
+# (it shipped the legacy Yoink-Y all the way through the rebrand).
+$logoSrc = Join-Path $RepoRoot 'assets\logo-mark-color.png'
+if (-not (Test-Path $logoSrc)) {
+    throw "Missing $logoSrc -- can't regenerate installer\uoink.ico"
 }
 $dashboardIndex = Join-Path $RepoRoot 'assets\dashboard\index.html'
 if (-not (Test-Path $dashboardIndex)) {
@@ -244,6 +251,14 @@ Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mc
     "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION"
 if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray) failed' }
 
+# 2d-bis. Regenerate installer\uoink.ico from assets\logo-mark-color.png. Uses
+# the embeddable Pillow (just installed). Runs BEFORE the staging copy of
+# uoink.ico and before ISCC reads SetupIconFile, so both consumers pick up the
+# fresh .ico. Single source of truth -> no more rebrand staleness.
+Write-Step 'Generating uoink.ico'
+& $embedPython (Join-Path $InstallerDir 'generate_icon.py')
+if ($LASTEXITCODE -ne 0) { throw 'uoink.ico generation failed' }
+
 # 2e. Trim dev-only and build-time files we don't need at runtime.
 # distutils-precedence.pth is dropped by setuptools and tries to import
 # `_distutils_hack` at every Python startup. We strip setuptools above, so
@@ -315,6 +330,10 @@ Copy-Item (Join-Path $RepoRoot 'assets\dashboard') (Join-Path $StagingDir 'asset
 # and the brand tokens stylesheet used by both pages.
 Copy-Item (Join-Path $RepoRoot 'assets\splash') (Join-Path $StagingDir 'assets\splash') -Recurse -Force
 Copy-Item (Join-Path $RepoRoot 'assets\brand')  (Join-Path $StagingDir 'assets\brand')  -Recurse -Force
+# v2.2.0: canonical rust-U mark used by the tray glyph loader AND by
+# installer\generate_icon.py. Shipping it makes the tray's PNG source-of-truth
+# pattern work post-install (uoink_tray loads {app}\assets\logo-mark-color.png).
+Copy-Item (Join-Path $RepoRoot 'assets\logo-mark-color.png') (Join-Path $StagingDir 'assets\logo-mark-color.png') -Force
 # Sprint 19.6 / Fix 1: migrations\*.sql is required at runtime by
 # index._run_migrations; if it's missing the helper crashes at first boot
 # with "no such table: schema_version". Pre-Sprint-19.6 installers shipped
