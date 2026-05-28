@@ -7,7 +7,7 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 ## Overview
 
-Uoink exposes 13 MCP tools covering extraction, playlist jobs, search, corpus retrieval, citation maps, health scores, Comment Intelligence, Hook Type, hook taxonomy, and entity mentions. The tool implementation lives in `uoink_mcp_tools.py`; stdio (`uoink_mcp.py`) is the officially supported MCP transport, and the local HTTP JSON-RPC helper (`server.py` under `/mcp/v1`) wraps the same registry for clients that can use direct POST calls.
+Uoink exposes 14 MCP tools covering extraction, playlist jobs, search, corpus retrieval, citation maps, health scores, transcript reliability, Comment Intelligence, Hook Type, hook taxonomy, and entity mentions. The tool implementation lives in `uoink_mcp_tools.py`; stdio (`uoink_mcp.py`) is the officially supported MCP transport, and the local HTTP JSON-RPC helper (`server.py` under `/mcp/v1`) wraps the same registry for clients that can use direct POST calls.
 
 ## Tool naming & deprecation (v2.1 rename)
 
@@ -574,6 +574,53 @@ Errors:
 
 Rate limit: 60 calls/minute per process.
 
+### get_transcript_reliability
+
+Return stored transcript reliability spans for a saved uoink by YouTube `video_id`.
+
+Parameters:
+
+```json
+{ "video_id": "abc123DEF45" }
+```
+
+Return shape:
+
+```json
+{
+  "ok": true,
+  "video_id": "abc123DEF45",
+  "reliability": {
+    "status": "completed",
+    "model": "tiny",
+    "threshold": 0.5,
+    "span_count": 2,
+    "spans": [
+      {
+        "start_word_idx": 124,
+        "end_word_idx": 126,
+        "confidence": 0.37,
+        "reason": "proper_noun_suspect",
+        "text": "example phrase",
+        "start": 42.1,
+        "end": 43.4
+      }
+    ],
+    "computed_at": "2026-05-28T12:34:56"
+  }
+}
+```
+
+`status: "not_computed"` means the yoink exists but reliability detection has not run yet. The MCP tool is read-only: it never downloads the local Whisper model. Users compute reliability from the dashboard setting or the HTTP `POST /reliability/<video_id>/compute` endpoint.
+
+Errors:
+
+- `{ "ok": false, "error": "video_id required" }`
+- `{ "ok": false, "error": "yoink not found" }`
+- `{ "ok": false, "error": "rate limit exceeded: max 60/minute" }`
+
+Rate limit: 60 calls/minute per process.
+
 ## Rate limits and abuse mitigations
 
 - `uoink_video`: 5 calls/minute per process.
@@ -585,6 +632,7 @@ Rate limit: 60 calls/minute per process.
 - `get_citation_map`: 60 calls/minute per process.
 - `get_uoink_health`: 60 calls/minute per process.
 - `find_mentions`: 60 calls/minute per process.
+- `get_transcript_reliability`: 60 calls/minute per process.
 - Other read-only tools (`get_uoink_corpus`, `get_job_status`, `get_taxonomy`) are not rate-limited.
 
 Rate-limit errors return friendly tool payloads, for example:

@@ -629,6 +629,25 @@ def find_mentions(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(mentions=rows)
 
 
+def get_transcript_reliability(args: dict[str, Any]) -> dict[str, Any]:
+    """Return stored transcript reliability spans for a video_id.
+
+    Detection is computed by the helper via POST /reliability/<video_id>/compute
+    or automatically when the user opts in. The MCP tool is read-only so an
+    agent cannot unexpectedly download a local Whisper model.
+    """
+    video_id = args.get("video_id")
+    if not isinstance(video_id, str) or not video_id.strip():
+        return _err("video_id required")
+    folder, _row = _b()._folder_for_video_id(video_id.strip())
+    if not folder:
+        return _err("yoink not found")
+    reliability = _read_sidecar(folder).get("reliability")
+    if not isinstance(reliability, dict):
+        reliability = {"status": "not_computed", "spans": [], "span_count": 0}
+    return _ok(video_id=video_id.strip(), reliability=reliability)
+
+
 def analyze_comments_tool(args: dict[str, Any]) -> dict[str, Any]:
     b = _b()
     key = _saved_key()
@@ -1023,6 +1042,22 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         description="Enum lists for the v2.5 facet axes (used for filter chips).",
         input_schema=_schema({}, []),
         handler=get_facet_taxonomy,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "get_transcript_reliability": ToolSpec(
+        name="get_transcript_reliability",
+        description=(
+            "Return stored transcript reliability spans for a saved uoink by "
+            "YouTube video_id. Read-only; computation is triggered by the "
+            "helper endpoint or the user's auto-check setting."
+        ),
+        input_schema=_schema({
+            "video_id": {
+                "type": "string",
+                "description": "YouTube video ID for the saved uoink.",
+            },
+        }, ["video_id"]),
+        handler=get_transcript_reliability,
         rate_limiter=_RateLimiter(60),
     ),
 }

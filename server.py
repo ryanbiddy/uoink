@@ -23,6 +23,7 @@ import secrets
 import shutil
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import urllib.error
@@ -71,6 +72,7 @@ import index  # noqa: E402  -- local SQLite library-index module
 import _platform  # noqa: E402  -- cross-platform path / OS helpers
 import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
 import channels  # noqa: E402  -- v2.5 P3 your-channel registry + recognition
+import uoink_reliability  # noqa: E402  -- optional local Whisper reliability checks
 
 # --- Constants -------------------------------------------------------------
 HOST = "127.0.0.1"
@@ -220,6 +222,8 @@ COMMENTS_TIMEOUT_SEC = 5 * 60
 FFMPEG_TIMEOUT_SEC = 15 * 60
 CLIPBOARD_SCREENSHOT_CAP_DEFAULT = 4
 CLIPBOARD_SCREENSHOT_CAP_MAX = 12
+RELIABILITY_MODEL_NAME = "tiny"
+RELIABILITY_DEFAULT_THRESHOLD = 0.5
 
 
 def _env_float(name: str, default: float, *, low: float, high: float) -> float:
@@ -249,6 +253,7 @@ TOKEN_PATH = HERE / "token.txt"
 # Sprint 19.5 Stage 1: DATA_ROOT is now resolved by _platform.user_data_dir
 # so the same helper runs on Windows + macOS without per-call branches.
 DATA_ROOT = _platform.user_data_dir()
+RELIABILITY_MODEL_ROOT = DATA_ROOT / "models" / "whisper"
 SETTINGS_PATH = DATA_ROOT / "settings.json"
 JOBS_PATH = DATA_ROOT / "jobs.json"
 TAXONOMY_PATH = DATA_ROOT / "taxonomy.json"
@@ -434,6 +439,7 @@ def _default_settings() -> dict:
         "hook_type_enabled": False,
         "smart_screenshot_picker_enabled": False,
         "clipboard_screenshot_cap": CLIPBOARD_SCREENSHOT_CAP_DEFAULT,
+        "transcript_reliability_auto_check": False,
         "anthropic_key_invalid": False,
         # v2.1 rename: set True after the one-time "Yoink is now Uoink"
         # post-migration toast has fired, so it never repeats.
@@ -453,6 +459,9 @@ def _normalize_settings(data: dict) -> dict:
     clean["hook_type_enabled"] = bool(clean.get("hook_type_enabled"))
     clean["smart_screenshot_picker_enabled"] = bool(
         clean.get("smart_screenshot_picker_enabled")
+    )
+    clean["transcript_reliability_auto_check"] = bool(
+        clean.get("transcript_reliability_auto_check")
     )
     try:
         cap = int(clean.get("clipboard_screenshot_cap"))
@@ -628,6 +637,10 @@ def _public_settings(data: dict | None = None) -> dict:
         "clipboard_screenshot_cap": int(
             data.get("clipboard_screenshot_cap", CLIPBOARD_SCREENSHOT_CAP_DEFAULT)
         ),
+        "transcript_reliability_auto_check": bool(
+            data.get("transcript_reliability_auto_check")
+        ),
+        "transcript_reliability_model": _reliability_model_status(),
         "anthropic_key_set": bool(key and not data.get("anthropic_key_invalid")),
         # Tier 2 dashboard Settings tab additions:
         "anthropic_key_masked": _mask_anthropic_key(key),
@@ -1150,6 +1163,232 @@ def compute_health(sidecar: dict) -> dict:
         "hook": sidecar.get("hook_type_status") or "skipped",
         "comment_intelligence": sidecar.get("comment_intelligence_status") or "skipped",
     }
+
+
+def _reliability_model_status() -> dict:
+    model_file = RELIABILITY_MODEL_ROOT / f"{RELIABILITY_MODEL_NAME}.pt"
+    cached = model_file.exists()
+    if not cached and RELIABILITY_MODEL_ROOT.exists():
+        cached = any(RELIABILITY_MODEL_ROOT.glob("*.pt"))
+    return {
+        "model": RELIABILITY_MODEL_NAME,
+        "model_root": str(RELIABILITY_MODEL_ROOT),
+        "cached": bool(cached),
+        "estimated_download_mb": 150,
+    }
+
+
+def _transcript_text_from_sidecar(sidecar: dict) -> str:
+    return "\n".join(
+        str(item.get("text") or "").strip()
+        for item in (sidecar.get("transcript") or [])
+        if isinstance(item, dict) and str(item.get("text") or "").strip()
+    )
+
+
+def _folder_for_video_id(video_id: str) -> tuple[Path | None, dict | None]:
+    vid = (video_id or "").strip()
+    if not vid:
+        return None, None
+    row = _get_index().get_yoink(vid)
+    if not row or row.get("deleted_at"):
+        return None, None
+    sidecar_path = Path(row.get("sidecar_path") or "")
+    if not sidecar_path.is_file():
+        return None, None
+    return sidecar_path.parent, row
+
+
+def _read_sidecar_for_folder(folder: Path) -> tuple[Path, dict]:
+    sidecar_path = folder / f"{folder.name}.json"
+    try:
+        data = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            data = {}
+    except (OSError, json.JSONDecodeError):
+        data = {}
+    return sidecar_path, data
+
+
+def _write_reliability_to_sidecar(folder: Path, reliability: dict) -> dict:
+    with _sidecar_update_lock:
+        sidecar_path, data = _read_sidecar_for_folder(folder)
+        data["reliability"] = reliability
+        _atomic_write_text(sidecar_path, json.dumps(data, ensure_ascii=False, indent=2))
+        return data
+
+
+def _render_reliability_summary(reliability: dict) -> str:
+    status = reliability.get("status") or "unknown"
+    if status == "completed":
+        count = int(reliability.get("span_count") or 0)
+        if count:
+            line = f"⚠️ {count} low-confidence spans flagged."
+        else:
+            line = "No low-confidence spans flagged."
+        return (
+            "## Transcript Reliability\n"
+            "<!-- RELIABILITY_START -->\n"
+            f"{line}\n\n"
+            f"- Model: `{reliability.get('model') or RELIABILITY_MODEL_NAME}`\n"
+            f"- Threshold: `{reliability.get('threshold')}`\n"
+            "<!-- RELIABILITY_END -->\n"
+        )
+    reason = _sanitize_error(str(reliability.get("error") or reliability.get("reason") or status))
+    return (
+        "## Transcript Reliability\n"
+        "<!-- RELIABILITY_START -->\n"
+        f"Transcript Reliability: {status} - {reason}\n"
+        "<!-- RELIABILITY_END -->\n"
+    )
+
+
+def _replace_reliability_section(corpus_path: Path, reliability: dict) -> None:
+    try:
+        md = corpus_path.read_text(encoding="utf-8")
+    except OSError as e:
+        log.warning("reliability md update: read failed (%s)", e)
+        return
+    block = _render_reliability_summary(reliability).strip() + "\n"
+    pattern = re.compile(
+        r"\n?## Transcript Reliability\n<!-- RELIABILITY_START -->.*?<!-- RELIABILITY_END -->\n?",
+        re.S,
+    )
+    if pattern.search(md):
+        updated = pattern.sub("\n\n" + block, md).rstrip() + "\n"
+    else:
+        updated = md.rstrip() + "\n\n" + block
+    try:
+        _atomic_write_text(corpus_path, updated)
+    except OSError as e:
+        log.warning("reliability md update: write failed (%s)", e)
+
+
+def _download_reliability_audio(url: str, tmp_dir: Path,
+                                cancel_event: threading.Event | None = None) -> Path:
+    _run_subprocess(
+        [
+            *YTDLP_CMD,
+            "-f", "bestaudio/best",
+            "-o", str(tmp_dir / "audio.%(ext)s"),
+            url,
+        ],
+        cancel_event=cancel_event,
+        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        timeout=YTDLP_TIMEOUT_SEC,
+    )
+    candidates = [p for p in tmp_dir.glob("audio.*") if p.is_file()]
+    if not candidates:
+        raise RuntimeError("yt-dlp produced no audio file")
+    return candidates[0]
+
+
+def _compute_transcript_reliability(
+    video_id: str,
+    *,
+    folder: Path | None = None,
+    audio_path: Path | None = None,
+    threshold: float = RELIABILITY_DEFAULT_THRESHOLD,
+    allow_model_download: bool = False,
+    force: bool = False,
+) -> dict:
+    """Compute/cache transcript reliability for one saved yoink.
+
+    Endpoint-triggered calls can re-download audio into a temp folder. The
+    extraction-time call passes the just-downloaded video file before it is
+    deleted, avoiding a second network request.
+    """
+    if folder is None:
+        folder, _row = _folder_for_video_id(video_id)
+    if folder is None:
+        return {"ok": False, "error": "yoink not found"}
+
+    sidecar_path, sidecar = _read_sidecar_for_folder(folder)
+    vid = (sidecar.get("video_id") or video_id or "").strip()
+    if not vid:
+        return {"ok": False, "error": "yoink has no video_id"}
+    existing = sidecar.get("reliability")
+    if isinstance(existing, dict) and existing.get("status") == "completed" and not force:
+        return {"ok": True, "reliability": existing, "cached": True}
+
+    transcript_text = _transcript_text_from_sidecar(sidecar)
+    if not transcript_text:
+        reliability = {
+            "status": "skipped",
+            "reason": "no transcript",
+            "spans": [],
+            "span_count": 0,
+            "computed_at": _now_iso(),
+        }
+        _write_reliability_to_sidecar(folder, reliability)
+        return {"ok": True, "reliability": reliability, "cached": False}
+
+    if not allow_model_download and not _reliability_model_status()["cached"]:
+        reliability = {
+            "status": "skipped",
+            "reason": "model_not_downloaded",
+            "model": RELIABILITY_MODEL_NAME,
+            "model_root": str(RELIABILITY_MODEL_ROOT),
+            "spans": [],
+            "span_count": 0,
+            "computed_at": _now_iso(),
+        }
+        _write_reliability_to_sidecar(folder, reliability)
+        return {"ok": False, "error": "Whisper model not downloaded", "reliability": reliability}
+
+    def run_detection(path: Path) -> dict:
+        spans = uoink_reliability.detect_unreliable_spans(
+            transcript_text,
+            path,
+            threshold=threshold,
+            model_name=RELIABILITY_MODEL_NAME,
+            model_root=RELIABILITY_MODEL_ROOT,
+        )
+        return {
+            "status": "completed",
+            "model": RELIABILITY_MODEL_NAME,
+            "model_root": str(RELIABILITY_MODEL_ROOT),
+            "threshold": threshold,
+            "spans": [s.to_dict() for s in spans],
+            "span_count": len(spans),
+            "computed_at": _now_iso(),
+        }
+
+    try:
+        if audio_path is not None and Path(audio_path).is_file():
+            reliability = run_detection(Path(audio_path))
+        else:
+            url = (sidecar.get("url") or "").strip()
+            if not url:
+                return {"ok": False, "error": "yoink has no source URL"}
+            with tempfile.TemporaryDirectory(prefix="uoink-reliability-") as tmp:
+                audio = _download_reliability_audio(url, Path(tmp))
+                reliability = run_detection(audio)
+    except Exception as e:
+        reliability = {
+            "status": "failed",
+            "error": _sanitize_error(str(e)),
+            "model": RELIABILITY_MODEL_NAME,
+            "threshold": threshold,
+            "spans": [],
+            "span_count": 0,
+            "computed_at": _now_iso(),
+        }
+        _write_reliability_to_sidecar(folder, reliability)
+        return {"ok": False, "error": reliability["error"], "reliability": reliability}
+
+    sidecar = _write_reliability_to_sidecar(folder, reliability)
+    corpus = _resolve_corpus_path(folder)
+    if corpus:
+        _replace_reliability_section(corpus, reliability)
+    try:
+        sidecar["health"] = compute_health(sidecar)
+        _index_yoink(folder, sidecar, corpus, sidecar_path)
+    except Exception as e:
+        log.warning("reliability index refresh failed: %s", e)
+    return {"ok": True, "reliability": reliability, "cached": False}
 
 
 def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
@@ -3111,6 +3350,26 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         # Non-fatal: the markdown is the user-facing artifact. Sidecar is
         # for future tooling.
         log.warning("could not write JSON sidecar: %s", e)
+
+    # v2.5 A1: optional local transcript reliability detection. It runs only
+    # when the user has opted in and the Whisper model is already cached; the
+    # dashboard's "Download model now" button is the explicit consent gate for
+    # the ~150 MB model download. Run before deleting the downloaded video so
+    # the automatic path does not need a second yt-dlp fetch.
+    try:
+        if _read_settings().get("transcript_reliability_auto_check"):
+            rel = _compute_transcript_reliability(
+                sidecar.get("video_id") or metadata.get("id") or "",
+                folder=output_folder,
+                audio_path=video_file,
+                threshold=RELIABILITY_DEFAULT_THRESHOLD,
+                allow_model_download=False,
+            )
+            if not rel.get("ok"):
+                log.info("transcript reliability skipped/failed: %s", rel.get("error"))
+            _sidecar_path, sidecar = _read_sidecar_for_folder(output_folder)
+    except Exception as e:
+        log.warning("transcript reliability auto-check failed: %s", e)
 
     video_file.unlink(missing_ok=True)
 
@@ -5674,6 +5933,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_taxonomy_corrections()
         if bare == "/memory/search":
             return self._handle_memory_search()
+        if bare == "/reliability/model/status":
+            return self._handle_reliability_model_status()
+        m = re.fullmatch(r"/reliability/([^/]+)", bare)
+        if m:
+            return self._handle_reliability_get(m.group(1))
         if bare == "/queue/status":
             return self._handle_queue_status()
         log.info("GET %s -> 404", self.path)
@@ -5957,6 +6221,65 @@ class Handler(BaseHTTPRequestHandler):
             return
         self._send_json(200, {"ok": True, "mcp_config": _mcp_settings_snippet()})
 
+    def _handle_reliability_model_status(self):
+        self._send_json(200, {"ok": True, "model": _reliability_model_status()})
+
+    def _handle_reliability_model_download(self):
+        try:
+            status = uoink_reliability.ensure_model(
+                RELIABILITY_MODEL_NAME,
+                RELIABILITY_MODEL_ROOT,
+            )
+        except Exception as e:
+            return self._send_json(200, {
+                "ok": False,
+                "error": _sanitize_error(str(e)),
+                "model": _reliability_model_status(),
+            })
+        self._send_json(200, {
+            "ok": True,
+            "downloaded": True,
+            "model": {**_reliability_model_status(), **status},
+        })
+
+    def _handle_reliability_get(self, video_id: str):
+        folder, _row = _folder_for_video_id(video_id)
+        if folder is None:
+            return self._send_json(404, {"ok": False, "error": "yoink not found"})
+        _sidecar_path, sidecar = _read_sidecar_for_folder(folder)
+        reliability = sidecar.get("reliability")
+        if not isinstance(reliability, dict):
+            reliability = {
+                "status": "not_computed",
+                "spans": [],
+                "span_count": 0,
+            }
+        self._send_json(200, {
+            "ok": True,
+            "video_id": video_id,
+            "reliability": reliability,
+            "model": _reliability_model_status(),
+        })
+
+    def _handle_reliability_compute(self, video_id: str, body: dict):
+        threshold = RELIABILITY_DEFAULT_THRESHOLD
+        raw_threshold = body.get("threshold") if isinstance(body, dict) else None
+        if raw_threshold is not None:
+            try:
+                threshold = max(0.05, min(0.95, float(raw_threshold)))
+            except (TypeError, ValueError):
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": "threshold must be a number",
+                })
+        result = _compute_transcript_reliability(
+            video_id,
+            threshold=threshold,
+            allow_model_download=bool(body.get("allow_model_download")),
+            force=bool(body.get("force")),
+        )
+        self._send_json(200, result)
+
     def _handle_open_last_youtube(self):
         """Focus an existing YouTube browser window, else open youtube.com.
         Token-gated. CTA on the Finished/Splash screens + dashboard."""
@@ -5989,6 +6312,7 @@ class Handler(BaseHTTPRequestHandler):
             "comment_intelligence_enabled",
             "hook_type_enabled",
             "smart_screenshot_picker_enabled",
+            "transcript_reliability_auto_check",
         )
         integer_fields = ("clipboard_screenshot_cap",)
         extra_fields = ("output_dir", "autostart", "topics")  # Tier 2
@@ -6401,6 +6725,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_memory_delete(body)
         if bare == "/memory/restore":
             return self._handle_memory_restore(body)
+        if bare == "/reliability/model/download":
+            return self._handle_reliability_model_download()
+        m = re.fullmatch(r"/reliability/([^/]+)/compute", bare)
+        if m:
+            return self._handle_reliability_compute(m.group(1), body)
         if bare == "/queue/cancel":
             return self._handle_queue_cancel(body)
         if bare == "/queue/retry-now":

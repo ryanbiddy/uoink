@@ -88,6 +88,9 @@ $PYSTRAY_VERSION = '0.19.5'
 # legacy MSHTML renderer.
 $PYWEBVIEW_VERSION = '5.4'
 $PYTHONNET_VERSION = '3.0.5'
+# v2.5 A1 transcript reliability detection. Library ships; Whisper model does
+# not. The tiny model downloads lazily to %LOCALAPPDATA%\Uoink\models\whisper.
+$WHISPER_TIMESTAMPED_VERSION = '1.15.9'
 
 # ---- Hash verification --------------------------------------------------
 # Direct-download SHA256s are locked as of v2.0. When bumping Python,
@@ -246,10 +249,10 @@ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
 #     MCP powers uoink_mcp.py for stdio agent integrations. keyring stores
 #     the user's Anthropic API key in Windows Credential Manager.
-Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION..."
+Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION + whisper-timestamped==$WHISPER_TIMESTAMPED_VERSION..."
 & $embedPython -m pip install --no-warn-script-location --no-compile `
-    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION"
-if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray) failed' }
+    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "whisper-timestamped==$WHISPER_TIMESTAMPED_VERSION"
+if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray + whisper-timestamped) failed' }
 
 # 2d-bis. Regenerate installer\uoink.ico from assets\logo-mark-color.png. Uses
 # the embeddable Pillow (just installed). Runs BEFORE the staging copy of
@@ -315,6 +318,7 @@ Copy-Item (Join-Path $RepoRoot '_platform.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'migrate_install.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_mcp.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_mcp_tools.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink_reliability.py') $StagingDir -Force
 # Back-compat shim (removed in v3): keeps yoink_mcp.py launchable.
 Copy-Item (Join-Path $RepoRoot 'yoink_mcp.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'requirements.txt') $StagingDir -Force
@@ -348,7 +352,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py migrate_install.py uoink_mcp.py uoink_mcp_tools.py yoink_mcp.py yt_extract.py
+        server.py index.py migrate_install.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }

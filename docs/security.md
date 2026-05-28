@@ -147,6 +147,7 @@ Installed Windows builds store helper state under `%LOCALAPPDATA%\Uoink\` (migra
 - `token.txt` - random helper token generated with `secrets.token_urlsafe(32)`.
 - `server.pid` - best-effort helper process id for Stop Uoink.
 - `server.log` - local diagnostic log.
+- `models\whisper\` - optional local Whisper model cache for transcript reliability detection. The model is not bundled in the installer; users download it explicitly from the dashboard before reliability checks run.
 - `.migration-complete` / `.migrated-from-yoink` - markers written by the v2.1 install migration (see below).
 
 Corpus, sidecar, settings, and migration writes use temp-file-and-replace patterns where practical. Corrupt `index.db` is quarantined as `index.db.corrupt-<timestamp>` and rebuilt from on-disk corpora through a local backfill scan. Legacy corrupt `jobs.json` or `taxonomy.json` migration input is logged and left in place rather than crashing the helper.
@@ -168,7 +169,9 @@ MCP tools reuse the same backend validation for URLs, slugs, job IDs, file paths
 - ffmpeg
 - `get-pip.py`
 
-Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`) are version-pinned but not hash-locked yet. Full pip `--require-hashes` is a future hardening item.
+Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`, `whisper-timestamped`) are version-pinned but not hash-locked yet. Full pip `--require-hashes` is a future hardening item.
+
+Transcript reliability detection is local-only. The optional `whisper-timestamped` path downloads the Whisper `tiny` model only after the user explicitly asks for it from the dashboard; it caches under `%LOCALAPPDATA%\Uoink\models\whisper` and is never uploaded. The installer bundles the Python library but not the model weights, keeping the default installer smaller.
 
 The installer is unsigned for launch unless a code-signing certificate is added. Windows SmartScreen warnings are expected for unsigned builds.
 
@@ -203,6 +206,10 @@ Optional AI features send selected comment/hook context to Anthropic only when t
 ## Engagement memory (v2.5 S2)
 
 Uoink v2.5 records local engagement events (`opened`, `search_hit`, `search_click`, `paste`, `cite`, `recent_open`) in the `engagement_events` SQLite table so the library can surface what the user actually returns to. **These events are local-only and never leave the machine.** They are not transmitted to Anthropic when BYO-key AI features run; the `value_score` formula and time-decay computation happen entirely in `index.py`. The events do not include any YouTube-side identifiers beyond the `video_id` already stored alongside the saved uoink. Deleting a saved uoink does not automatically purge its engagement rows -- delete the SQLite file under `%LOCALAPPDATA%\Uoink\` to clear the full local history.
+
+## Transcript reliability detection (v2.5 A1)
+
+Transcript reliability detection does not call Anthropic or any third-party API. It reuses the local video/audio during extraction when possible, or re-downloads audio from YouTube for a user-triggered reliability compute. Whisper inference runs on the user's machine.
 
 ## Reporting
 
