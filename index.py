@@ -56,10 +56,18 @@ _PENDING_TABLE_CAP = 1000
 
 # Columns of the `yoinks` table, in declaration order. video_id is the
 # primary key and is handled separately in the upsert.
+# v2.5: per-row data-shape version. v2.5+ writers set CURRENT_YOINK_SCHEMA via
+# the row record; v2.1.x rows default to 1 (set by migration 0006). Lets v2.5
+# readers tell "this row predates facets / engagement" without inspecting
+# every nullable column. Distinct from the SQL migration version (which is
+# tracked by the schema_version *table*).
+CURRENT_YOINK_SCHEMA = 2
+
 _YOINK_COLUMNS = (
     "video_id", "slug", "channel", "title", "topic", "hook_type",
     "yoinked_at", "corpus_path", "sidecar_path", "health_score_json",
     "metadata_json",
+    "schema_version",
 )
 
 _JOB_COLUMNS = (
@@ -341,6 +349,12 @@ class Index:
         video_id = record.get("video_id")
         if not video_id:
             raise ValueError("upsert_yoink: record requires a video_id")
+        # v2.5: stamp the per-row data-shape version on every new write. If a
+        # caller already set it (e.g., a backfill writing an older shape on
+        # purpose) honour that; otherwise default to CURRENT_YOINK_SCHEMA so
+        # the NOT NULL column always has a value.
+        if record.get("schema_version") is None:
+            record = {**record, "schema_version": CURRENT_YOINK_SCHEMA}
         values = [record.get(col) for col in _YOINK_COLUMNS]
         placeholders = ", ".join("?" * len(_YOINK_COLUMNS))
         update_set = ", ".join(

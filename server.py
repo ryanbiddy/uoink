@@ -76,6 +76,33 @@ HOST = "127.0.0.1"
 PORT = 5179
 VERSION = _read_version()
 DASHBOARD_PATH = HERE / "assets" / "dashboard" / "index.html"
+
+# v2.5: per-file sidecar data-shape version. v2.5+ writers stamp every new
+# sidecar with this; older sidecars (v2.1.x) have no field and are treated as
+# 1 by _upgrade_sidecar() on read. Distinct from the SQL migration version and
+# from index.py's CURRENT_YOINK_SCHEMA -- the on-disk JSON has its own shape
+# axis from the index row. Bump when sidecar fields the v2.5+ readers depend on
+# change shape (not just contents).
+CURRENT_SIDECAR_SCHEMA = 2
+
+
+def _upgrade_sidecar(data: dict) -> dict:
+    """Lazy v1 -> v2 up-convert on read. v1 sidecars lack `schema_version` and
+    the v2.5 fields (facet entries, engagement pointer). We don't rewrite the
+    file -- this returns a dict the caller can safely treat as v2, leaving the
+    persistent v1 sidecar untouched until a natural re-ingest stamps it. Unknown
+    extra fields pass through verbatim (forward-compat)."""
+    if not isinstance(data, dict):
+        return data
+    out = dict(data)
+    if not isinstance(out.get("schema_version"), int):
+        out["schema_version"] = 1
+    # v2 defaults -- additive, never destructive. Readers that don't need
+    # these keys ignore them; readers that do will see explicit None instead
+    # of a missing key (cleaner downstream code).
+    out.setdefault("facets", None)              # filled by S1 classification
+    out.setdefault("engagement_summary", None)  # pointer-only; events live in SQL
+    return out
 # Tier 2 GUI: served by the /splash route and wrapped by uoink_splash.py at
 # first boot (gated by %LOCALAPPDATA%\Uoink\.first-run-done).
 SPLASH_PATH = HERE / "assets" / "splash" / "index.html"
@@ -2980,6 +3007,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         }
         # A5: extraction-time health snapshot, stored on the sidecar.
         sidecar["health"] = compute_health(sidecar)
+        # v2.5: stamp the per-file data-shape version. Lets v2.5+ readers tell
+        # at a glance whether a sidecar predates facets/engagement. Missing =
+        # treat as 1 via _upgrade_sidecar() (lazy up-convert on read).
+        sidecar["schema_version"] = CURRENT_SIDECAR_SCHEMA
         sidecar_path = output_folder / f"{output_folder.name}.json"
         _atomic_write_text(sidecar_path, json.dumps(sidecar, ensure_ascii=False, indent=2))
     except (OSError, TypeError) as e:

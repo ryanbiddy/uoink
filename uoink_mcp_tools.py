@@ -487,6 +487,27 @@ def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(video_id=video_id or None, health=health)
 
 
+def get_schema_version(_args: dict[str, Any]) -> dict[str, Any]:
+    """v2.5 substrate: data-shape version report (SQL migration + yoink row +
+    sidecar JSON). No arguments. Used by cross-version aggregators to gate v2
+    field assumptions."""
+    server = _b()
+    import index as _index_mod
+    try:
+        idx = server._get_index()
+        sql_version = idx._conn.execute(
+            "SELECT MAX(version) FROM schema_version").fetchone()[0]
+    except Exception:
+        sql_version = None
+    return _ok(
+        sql_migration=sql_version,
+        yoink_schema=_index_mod.CURRENT_YOINK_SCHEMA,
+        sidecar_schema=server.CURRENT_SIDECAR_SCHEMA,
+        yoink_schema_supported=[1, _index_mod.CURRENT_YOINK_SCHEMA],
+        sidecar_schema_supported=[1, server.CURRENT_SIDECAR_SCHEMA],
+    )
+
+
 def find_mentions(args: dict[str, Any]) -> dict[str, Any]:
     """Return every recorded mention of an entity across the library,
     newest first, each with a timestamped YouTube deep link (Sprint 16)."""
@@ -785,6 +806,18 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         handler=find_mentions,
         # Backed by the SQLite index; rate-limited so an agent loop can't
         # hammer it.
+        rate_limiter=_RateLimiter(60),
+    ),
+    "get_schema_version": ToolSpec(
+        name="get_schema_version",
+        description=(
+            "Report the data-shape versions Uoink writes + the supported "
+            "read-range. v2.5 substrate: cross-version aggregators (Channel "
+            "Decoder, Niche Corpus) check this before assuming v2 fields are "
+            "present in older rows/sidecars. Read-only, no arguments."
+        ),
+        input_schema=_schema({}, []),
+        handler=get_schema_version,
         rate_limiter=_RateLimiter(60),
     ),
 }
