@@ -70,6 +70,7 @@ from yt_extract import parse_srt, slugify, fmt_time  # noqa: E402
 import index  # noqa: E402  -- local SQLite library-index module
 import _platform  # noqa: E402  -- cross-platform path / OS helpers
 import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
+import channels  # noqa: E402  -- v2.5 P3 your-channel registry + recognition
 
 # --- Constants -------------------------------------------------------------
 HOST = "127.0.0.1"
@@ -5637,6 +5638,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_facets_taxonomy()
         if bare == "/facets/backfill":
             return self._handle_facets_backfill()
+        if bare == "/channels":
+            return self._handle_channels_list()
+        if bare == "/self/analysis":
+            return self._handle_self_analysis()
         if bare == "/settings/mcp-config":
             return self._handle_settings_mcp_config()
         if bare == "/open-last-youtube":
@@ -5852,6 +5857,99 @@ class Handler(BaseHTTPRequestHandler):
             "next_steps": ("Call classify_facets(video_id) per video from your "
                            "agent. The classify path is fully wired; only the "
                            "bulk loop is deferred.")})
+
+    # ---- v2.5 P3 your-channel mode -----------------------------------------
+    # All channel CRUD + verification + recognition flows through
+    # channels.py. These handlers are thin transport wrappers; the only
+    # outbound call is verify_channel which is documented in the module.
+
+    def _handle_channels_list(self):
+        if not self._require_token():
+            return
+        try:
+            rows = channels.list_channels(_get_index())
+        except Exception as e:
+            log.exception("/channels GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "channels": rows,
+                                      "count": len(rows)})
+
+    def _handle_channels_add(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False, "error": "json object required"})
+        handle = (body.get("handle") or "").strip()
+        name = body.get("name")
+        channel_id = body.get("channel_id")
+        if not handle:
+            return self._send_json(400, {"ok": False, "error": "handle required"})
+        try:
+            row = channels.add_channel(_get_index(), handle,
+                                         name=name, channel_id=channel_id)
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/channels POST failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "channel": row})
+
+    def _handle_channels_remove(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False, "error": "json object required"})
+        handle = (body.get("handle") or "").strip()
+        if not handle:
+            return self._send_json(400, {"ok": False, "error": "handle required"})
+        try:
+            removed = channels.remove_channel(_get_index(), handle)
+        except Exception as e:
+            log.exception("/channels/remove failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "removed": removed})
+
+    def _handle_channels_verify(self, body):
+        """Hits youtube.com/@<handle>. Documented outbound call per
+        ROADMAP P3 spec (one of the explicitly-permitted external
+        endpoints in the locked compute policy)."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False, "error": "json object required"})
+        handle = (body.get("handle") or "").strip()
+        if not handle:
+            return self._send_json(400, {"ok": False, "error": "handle required"})
+        try:
+            result = channels.verify_channel(_get_index(), handle)
+        except Exception as e:
+            log.exception("/channels/verify failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, result)
+
+    def _handle_channels_recognize_now(self):
+        """POST /channels/recognize-now -- backfill self-recognition tags
+        across existing yoinks. Idempotent (yoink_tags PK is video_id+tag).
+        Already token-gated by do_POST."""
+        try:
+            result = channels.recognize_now(_get_index())
+        except Exception as e:
+            log.exception("/channels/recognize-now failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, result)
+
+    def _handle_self_analysis(self):
+        """GET /self/analysis?handle=...&limit=... -- aggregated view of
+        self-tagged yoinks. Token-gated. Read-only."""
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        handle = (qs.get("handle") or [None])[0]
+        try:
+            limit = int((qs.get("limit") or ["10"])[0])
+        except ValueError:
+            limit = 10
+        try:
+            result = channels.self_analysis(_get_index(),
+                                              handle=handle, top_n=limit)
+        except Exception as e:
+            log.exception("/self/analysis failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, result)
 
     def _handle_settings_mcp_config(self):
         """MCP config snippet for the Settings tab Copy button. Token-gated."""
@@ -6321,6 +6419,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_move_desktop_corpus(body)
         if bare == "/engagement/log":
             return self._handle_engagement_log(body)
+        if bare == "/channels":
+            return self._handle_channels_add(body)
+        if bare == "/channels/remove":
+            return self._handle_channels_remove(body)
+        if bare == "/channels/verify":
+            return self._handle_channels_verify(body)
+        if bare == "/channels/recognize-now":
+            return self._handle_channels_recognize_now()
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})
