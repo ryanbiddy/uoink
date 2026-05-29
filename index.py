@@ -377,6 +377,17 @@ class Index:
                  record.get("title"), record.get("topic"),
                  record.get("hook_type"), content or ""),
             )
+            # v2.5 P3 your-channel recognition. Imported lazily so the
+            # index module stays standalone for callers that do not need
+            # P3 (e.g., the backfill smoke tools).
+            try:
+                from channels import tag_if_self  # noqa: WPS433
+                tag_if_self(self, video_id, record.get("channel"))
+            except Exception as e:  # pragma: no cover -- defensive
+                # Recognition failure must not block a yoink write.
+                import logging
+                logging.getLogger("uoink.index").warning(
+                    "self-channel recognition skipped: %s", e)
             self._conn.commit()
 
     def delete_yoink(self, video_id: str) -> None:
@@ -651,6 +662,106 @@ class Index:
             return json.loads(row["health_score_json"])
         except (json.JSONDecodeError, TypeError):
             return None
+
+    # ---- v2.5 S1 facets / tags ---------------------------------------------
+    _FACET_COLS = ("format", "performance_tier", "production_style",
+                   "length_bucket", "topic", "hook_type")
+
+    def set_facets(self, video_id: str, **fields) -> int:
+        """Update facet columns on one yoink row. None values are skipped so
+        a partial classification doesn't blow away previously-set fields.
+        Returns the number of columns updated (0 if no changes)."""
+        pairs = [(k, v) for k, v in fields.items()
+                 if k in self._FACET_COLS and v is not None]
+        if not pairs:
+            return 0
+        set_sql = ", ".join(f"{k}=?" for k, _ in pairs)
+        params = [v for _, v in pairs] + [video_id]
+        with self._lock:
+            self._conn.execute(
+                f"UPDATE yoinks SET {set_sql} WHERE video_id=?", params)
+        return len(pairs)
+
+    def add_tags(self, video_id: str, tags, *, source: str = "agent") -> int:
+        """Append free-form tags to a yoink (idempotent via the (video_id, tag)
+        PK). Empty/whitespace tags are dropped; tags are lower-cased on store
+        so a query for 'mcp' matches 'MCP'. Returns count of new rows inserted."""
+        if isinstance(tags, str):
+            tags = [tags]
+        now = _now_iso()
+        added = 0
+        with self._lock:
+            for raw in tags or []:
+                t = (raw or "").strip().lower()
+                if not t:
+                    continue
+                try:
+                    self._conn.execute(
+                        "INSERT INTO yoink_tags (video_id, tag, source, added_at) "
+                        "VALUES (?, ?, ?, ?)", (video_id, t, source, now))
+                    added += 1
+                except sqlite3.IntegrityError:
+                    pass
+        return added
+
+    def get_tags(self, video_id: str) -> list[str]:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT tag FROM yoink_tags WHERE video_id=? ORDER BY added_at",
+                (video_id,)).fetchall()
+        return [r[0] for r in rows]
+
+    def query_by_facets(self, *, format: str | None = None,
+                        performance_tier: str | None = None,
+                        hook_type: str | None = None, topic: str | None = None,
+                        length_bucket: str | None = None,
+                        tag: str | None = None,
+                        limit: int = 50) -> list[dict]:
+        """Filter yoinks by facet values. All filters AND-combined; None =
+        ignore. Newest first; limit clamped to a sane upper bound."""
+        wheres: list[str] = []
+        params: list = []
+        for col, val in (("format", format),
+                         ("performance_tier", performance_tier),
+                         ("hook_type", hook_type),
+                         ("topic", topic),
+                         ("length_bucket", length_bucket)):
+            if val:
+                wheres.append(f"y.{col}=?")
+                params.append(val)
+        if tag:
+            wheres.append("EXISTS (SELECT 1 FROM yoink_tags t "
+                          "WHERE t.video_id=y.video_id AND t.tag=?)")
+            params.append(tag.strip().lower())
+        where_sql = (" WHERE " + " AND ".join(wheres)) if wheres else ""
+        params.append(max(1, min(int(limit), 500)))
+        cols = ("video_id", "slug", "channel", "title", "topic", "hook_type",
+                "format", "performance_tier", "production_style",
+                "length_bucket", "yoinked_at")
+        with self._lock:
+            rows = self._conn.execute(
+                f"SELECT {', '.join(cols)} FROM yoinks y{where_sql} "
+                f"ORDER BY yoinked_at DESC LIMIT ?", params).fetchall()
+        return [dict(zip(cols, r)) for r in rows]
+
+    def channel_view_counts(self, channel: str) -> list[int]:
+        """View counts for a channel pulled from metadata_json. Used by the
+        performance-tier heuristic (channel-relative percentile rank)."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT metadata_json FROM yoinks "
+                "WHERE channel=? AND metadata_json IS NOT NULL",
+                (channel,)).fetchall()
+        out: list[int] = []
+        for (raw,) in rows:
+            try:
+                d = json.loads(raw) if raw else {}
+                v = d.get("views") or d.get("view_count")
+                if isinstance(v, (int, float)):
+                    out.append(int(v))
+            except (json.JSONDecodeError, TypeError):
+                pass
+        return out
 
     # ---- memory / soft delete (Sprint 18) -------------------------------
     def search_yoinks_for_memory(self, *, q: str | None = None,

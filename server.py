@@ -70,6 +70,7 @@ from yt_extract import parse_srt, slugify, fmt_time  # noqa: E402
 import index  # noqa: E402  -- local SQLite library-index module
 import _platform  # noqa: E402  -- cross-platform path / OS helpers
 import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
+import channels  # noqa: E402  -- v2.5 P3 your-channel registry + recognition
 
 # --- Constants -------------------------------------------------------------
 HOST = "127.0.0.1"
@@ -103,6 +104,85 @@ def _upgrade_sidecar(data: dict) -> dict:
     out.setdefault("facets", None)              # filled by S1 classification
     out.setdefault("engagement_summary", None)  # pointer-only; events live in SQL
     return out
+
+
+# v2.5 S1 facet enums (model-agnostic classification). The MCP agent supplies
+# these values via classify_facets; the server validates against these lists
+# but never CALLS an LLM itself. BYO Anthropic batch is opt-in via
+# /facets/backfill?confirm=true (when an API key is set).
+FORMAT_ENUM = ("one_shot", "talking_head", "tutorial", "listicle", "narrative",
+               "vlog", "interview", "screen_recording", "broll_heavy")
+PERF_TIER_ENUM = ("over", "average", "under")
+LENGTH_BUCKET_ENUM = ("short", "medium", "long", "deep")  # <4m | 4-15 | 15-30 | >30
+
+
+def _length_bucket_from_seconds(secs) -> str | None:
+    """Bucket a video duration into one of LENGTH_BUCKET_ENUM."""
+    try:
+        s = int(secs)
+    except (TypeError, ValueError):
+        return None
+    if s <= 0:
+        return None
+    if s < 240:    return "short"
+    if s < 900:    return "medium"
+    if s < 1800:   return "long"
+    return "deep"
+
+
+def _perf_tier(channel_views: list, current_views) -> str | None:
+    """Channel-relative percentile-rank heuristic: top third = over, bottom
+    third = under, middle third = average. Returns None if the channel has
+    fewer than 3 prior yoinks (not enough signal yet) or no current view
+    count. KISS first-ship version of the S1 performance-tier axis -- agents
+    can override by passing performance_tier explicitly to classify_facets."""
+    try:
+        cv = int(current_views)
+    except (TypeError, ValueError):
+        return None
+    samples = [v for v in (channel_views or []) if isinstance(v, int) and v >= 0]
+    if len(samples) < 3:
+        return None
+    samples.sort()
+    # Percentile rank of cv within samples (>= cv count divided by N).
+    below = sum(1 for v in samples if v < cv)
+    pct = below / len(samples)
+    if pct >= 0.66:
+        return "over"
+    if pct <= 0.33:
+        return "under"
+    return "average"
+
+
+def _validate_facets(body: dict) -> tuple[dict, str | None]:
+    """Pull + validate facet fields from a request body. Unknown values for a
+    bounded enum return an error string; missing fields are OK (partial
+    classification). Returns (clean_dict, error_or_None)."""
+    out: dict = {}
+    for key, enum in (("format", FORMAT_ENUM),
+                      ("performance_tier", PERF_TIER_ENUM),
+                      ("length_bucket", LENGTH_BUCKET_ENUM)):
+        v = body.get(key)
+        if v is None or v == "":
+            continue
+        if v not in enum:
+            return {}, f"{key} must be one of {list(enum)}"
+        out[key] = v
+    # Free-form strings (no enum gate; keep them reasonable).
+    for key in ("production_style", "topic", "hook_type"):
+        v = body.get(key)
+        if v is None or v == "":
+            continue
+        if not isinstance(v, str) or len(v) > 64:
+            return {}, f"{key} must be a string <= 64 chars"
+        out[key] = v.strip()
+    # Tags -- list of short strings.
+    raw_tags = body.get("tags")
+    if raw_tags is not None:
+        if not isinstance(raw_tags, list) or not all(isinstance(t, str) for t in raw_tags):
+            return {}, "tags must be a list of strings"
+        out["__tags"] = [t.strip().lower() for t in raw_tags if t and t.strip()][:32]
+    return out, None
 # Tier 2 GUI: served by the /splash route and wrapped by uoink_splash.py at
 # first boot for each installed version (gated by
 # %LOCALAPPDATA%\Uoink\.first-run-done containing VERSION).
@@ -5554,6 +5634,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_update_check()
         if bare == "/engagement/scores":
             return self._handle_engagement_scores()
+        if bare == "/facets/taxonomy":
+            return self._handle_facets_taxonomy()
+        if bare == "/facets/backfill":
+            return self._handle_facets_backfill()
+        if bare == "/channels":
+            return self._handle_channels_list()
+        if bare == "/self/analysis":
+            return self._handle_self_analysis()
         if bare == "/settings/mcp-config":
             return self._handle_settings_mcp_config()
         if bare == "/open-last-youtube":
@@ -5693,6 +5781,175 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(500, {"ok": False, "error": str(e)})
         return self._send_json(200, {"ok": True, "scores": scores,
                                       "count": len(scores)})
+
+    # ---- v2.5 S1 facet endpoints -------------------------------------------
+    def _handle_facets_taxonomy(self):
+        """Enum lists for the dashboard filter chips. Public (read-only enums)."""
+        self._send_json(200, {
+            "ok": True,
+            "format": list(FORMAT_ENUM),
+            "performance_tier": list(PERF_TIER_ENUM),
+            "length_bucket": list(LENGTH_BUCKET_ENUM),
+            "hook": sorted(HOOK_TYPES.keys()) if isinstance(HOOK_TYPES, dict) else list(HOOK_TYPES),
+        })
+
+    def _handle_facets_classify(self, body: dict):
+        """Persist an agent-classified facet set + tags for a video. Model-
+        agnostic: the calling agent does the LLM work; this just validates +
+        writes. The server fills performance_tier (channel percentile) and
+        length_bucket (duration) if the agent didn't pass them."""
+        if not self._require_token():
+            return
+        video_id = (body.get("video_id") or "").strip()
+        if not video_id:
+            return self._send_json(400, {"ok": False, "error": "video_id required"})
+        clean, err = _validate_facets(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        tags = clean.pop("__tags", None)
+        idx = _get_index()
+        if "performance_tier" not in clean or "length_bucket" not in clean:
+            row = idx._conn.execute(
+                "SELECT channel, metadata_json FROM yoinks WHERE video_id=?",
+                (video_id,)).fetchone()
+            if row:
+                try:
+                    meta = json.loads(row["metadata_json"] or "{}")
+                except (json.JSONDecodeError, TypeError):
+                    meta = {}
+                if "performance_tier" not in clean and row["channel"]:
+                    tier = _perf_tier(
+                        idx.channel_view_counts(row["channel"]),
+                        meta.get("views") or meta.get("view_count"))
+                    if tier:
+                        clean["performance_tier"] = tier
+                if "length_bucket" not in clean:
+                    lb = _length_bucket_from_seconds(
+                        meta.get("duration_seconds") or meta.get("duration"))
+                    if lb:
+                        clean["length_bucket"] = lb
+        facets_set = idx.set_facets(video_id, **clean)
+        tags_added = idx.add_tags(video_id, tags or [], source="agent") if tags else 0
+        self._send_json(200, {
+            "ok": True, "video_id": video_id,
+            "facets_set": facets_set, "tags_added": tags_added,
+            "facets": clean,
+        })
+
+    def _handle_facets_backfill(self):
+        """Stub. v2.5.0 ships agent-driven per-video classification as the
+        primary path (see /facets/classify and the classify_facets MCP tool).
+        Server-side bulk backfill needs a BYO Anthropic worker pool + careful
+        rate-limit handling -- deferred to a v2.5.x follow-up so this PR keeps
+        the model-agnostic posture clean."""
+        if not self._require_token():
+            return
+        confirm = (parse_qs(urlparse(self.path).query).get("confirm") or [""])[0] == "true"
+        if not confirm:
+            return self._send_json(400, {
+                "ok": False,
+                "error": ("backfill is opt-in; pass ?confirm=true. Note: v2.5.0 "
+                          "substrate has the endpoint but no automated worker "
+                          "yet -- agent-driven classify_facets is the path.")})
+        self._send_json(501, {
+            "ok": False,
+            "error": "automated facet backfill not yet implemented",
+            "next_steps": ("Call classify_facets(video_id) per video from your "
+                           "agent. The classify path is fully wired; only the "
+                           "bulk loop is deferred.")})
+
+    # ---- v2.5 P3 your-channel mode -----------------------------------------
+    # All channel CRUD + verification + recognition flows through
+    # channels.py. These handlers are thin transport wrappers; the only
+    # outbound call is verify_channel which is documented in the module.
+
+    def _handle_channels_list(self):
+        if not self._require_token():
+            return
+        try:
+            rows = channels.list_channels(_get_index())
+        except Exception as e:
+            log.exception("/channels GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "channels": rows,
+                                      "count": len(rows)})
+
+    def _handle_channels_add(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False, "error": "json object required"})
+        handle = (body.get("handle") or "").strip()
+        name = body.get("name")
+        channel_id = body.get("channel_id")
+        if not handle:
+            return self._send_json(400, {"ok": False, "error": "handle required"})
+        try:
+            row = channels.add_channel(_get_index(), handle,
+                                         name=name, channel_id=channel_id)
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/channels POST failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "channel": row})
+
+    def _handle_channels_remove(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False, "error": "json object required"})
+        handle = (body.get("handle") or "").strip()
+        if not handle:
+            return self._send_json(400, {"ok": False, "error": "handle required"})
+        try:
+            removed = channels.remove_channel(_get_index(), handle)
+        except Exception as e:
+            log.exception("/channels/remove failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "removed": removed})
+
+    def _handle_channels_verify(self, body):
+        """Hits youtube.com/@<handle>. Documented outbound call per
+        ROADMAP P3 spec (one of the explicitly-permitted external
+        endpoints in the locked compute policy)."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False, "error": "json object required"})
+        handle = (body.get("handle") or "").strip()
+        if not handle:
+            return self._send_json(400, {"ok": False, "error": "handle required"})
+        try:
+            result = channels.verify_channel(_get_index(), handle)
+        except Exception as e:
+            log.exception("/channels/verify failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, result)
+
+    def _handle_channels_recognize_now(self):
+        """POST /channels/recognize-now -- backfill self-recognition tags
+        across existing yoinks. Idempotent (yoink_tags PK is video_id+tag).
+        Already token-gated by do_POST."""
+        try:
+            result = channels.recognize_now(_get_index())
+        except Exception as e:
+            log.exception("/channels/recognize-now failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, result)
+
+    def _handle_self_analysis(self):
+        """GET /self/analysis?handle=...&limit=... -- aggregated view of
+        self-tagged yoinks. Token-gated. Read-only."""
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        handle = (qs.get("handle") or [None])[0]
+        try:
+            limit = int((qs.get("limit") or ["10"])[0])
+        except ValueError:
+            limit = 10
+        try:
+            result = channels.self_analysis(_get_index(),
+                                              handle=handle, top_n=limit)
+        except Exception as e:
+            log.exception("/self/analysis failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, result)
 
     def _handle_settings_mcp_config(self):
         """MCP config snippet for the Settings tab Copy button. Token-gated."""
@@ -6123,6 +6380,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_settings_test_key(body)
         if bare == "/helper/quit":
             return self._handle_helper_quit()
+        if bare == "/facets/classify":
+            return self._handle_facets_classify(body)
         if bare.startswith("/mcp/v1"):
             return self._handle_mcp_post(bare, body)
         if bare == "/playlist/preview":
@@ -6160,6 +6419,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_move_desktop_corpus(body)
         if bare == "/engagement/log":
             return self._handle_engagement_log(body)
+        if bare == "/channels":
+            return self._handle_channels_add(body)
+        if bare == "/channels/remove":
+            return self._handle_channels_remove(body)
+        if bare == "/channels/verify":
+            return self._handle_channels_verify(body)
+        if bare == "/channels/recognize-now":
+            return self._handle_channels_recognize_now()
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})
