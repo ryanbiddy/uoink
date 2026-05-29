@@ -1,0 +1,50 @@
+{
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devPath": "http://127.0.0.1:5173",
+    "distDir": "../dist"
+  },
+  "package": {
+    "productName": "Uoink",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false,
+      "dialog": {
+        "open": true
+      },
+      "shell": {
+        "open": true
+      },
+      "window": {
+        "close": true,
+        "minimize": true
+      }
+    },
+    "bundle": {
+      "active": false,
+      "identifier": "video.uoink.shell.prototype",
+      "targets": "all",
+      "icon": [
+        "../../assets/logo-mark-color.png"
+      ]
+    },
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com"
+    },
+    "windows": [
+      {
+        "label": "installer",
+        "title": "Install Uoink",
+        "width": 1040,
+        "height": 720,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "transparent": false
+      }
+    ]
+  }
+}

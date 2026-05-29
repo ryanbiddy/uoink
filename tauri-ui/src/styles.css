@@ -1,0 +1,313 @@
+:root {
+  --rust: #C2410C;
+  --rust-bright: #F97316;
+  --vermillion: #FF3D00;
+  --acid: #FFD23F;
+  --cream: #FFF4EC;
+  --ink: #0A0A0A;
+  --ink-warm: #15110D;
+  --border: #2C2621;
+  --muted: #C8B19F;
+  --dim: #8F7B6E;
+  --ok: #00C853;
+  --font-ui: Inter, system-ui, sans-serif;
+  --font-display: Bungee, Inter, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body, #app { width: 100%; height: 100%; margin: 0; }
+body {
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 52px;
+  padding: 0 18px;
+  background: var(--ink);
+  border-bottom: 1px solid var(--border);
+}
+.titlebar.welcome {
+  background: var(--rust);
+  border-bottom: 0;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
+}
+.brand svg { width: 28px; height: 28px; }
+.window-actions { display: flex; gap: 8px; }
+.window-actions button {
+  width: 12px;
+  height: 12px;
+  border: 1px solid rgba(255, 244, 236, 0.64);
+  border-radius: 50%;
+  background: transparent;
+}
+
+main {
+  height: calc(100% - 52px);
+}
+.screen {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 28px;
+  width: 100%;
+  height: 100%;
+  padding: 30px 42px 34px;
+  background:
+    radial-gradient(circle at 83% 4%, rgba(194, 65, 12, 0.18), transparent 22rem),
+    linear-gradient(180deg, #100c09, var(--ink));
+}
+.welcome-screen {
+  place-items: center;
+  grid-template-rows: 1fr auto auto auto 1fr;
+  text-align: center;
+  background: var(--cream);
+  color: var(--ink);
+}
+.hero-mark svg,
+.big-mark svg {
+  width: 112px;
+  height: 112px;
+}
+h1, h2, p { margin: 0; }
+h1 {
+  max-width: 860px;
+  font-size: clamp(64px, 10vw, 124px);
+  line-height: 0.9;
+  letter-spacing: 0;
+}
+h2 {
+  max-width: 860px;
+  font-size: clamp(42px, 6vw, 76px);
+  line-height: 0.94;
+  letter-spacing: 0;
+}
+em {
+  color: var(--vermillion);
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 900;
+}
+.welcome-screen p,
+.lede {
+  max-width: 620px;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.welcome-screen p { color: #4d382c; }
+.eyebrow {
+  color: var(--rust-bright);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.rail {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.rail-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 14px;
+  color: var(--muted);
+  background: rgba(21, 17, 13, 0.72);
+}
+.rail-step span {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--cream);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+.rail-step.active {
+  border-color: var(--rust);
+  color: var(--cream);
+}
+.rail-step.done span {
+  background: var(--ok);
+  color: var(--ink);
+}
+.two-col {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 34px;
+  align-items: center;
+}
+.card,
+.manifest,
+.log,
+.checklist {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(21, 17, 13, 0.84);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.38);
+}
+.card {
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+}
+label {
+  color: var(--muted);
+  font-weight: 800;
+}
+.path-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+input {
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0 12px;
+  background: var(--ink);
+  color: var(--cream);
+}
+.notice {
+  border: 1px solid rgba(255, 210, 63, 0.35);
+  border-radius: 12px;
+  padding: 12px;
+  color: var(--cream);
+  background: rgba(255, 210, 63, 0.09);
+}
+.free-space {
+  color: var(--dim);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.manifest {
+  display: grid;
+  gap: 13px;
+  padding: 24px;
+  font-size: 18px;
+  font-weight: 800;
+}
+.manifest div {
+  display: flex;
+  gap: 12px;
+}
+.manifest span {
+  color: var(--vermillion);
+}
+footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.cta,
+.ghost,
+.card button,
+.cta-grid button {
+  min-height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 22px;
+  font-weight: 900;
+}
+.cta {
+  border-color: var(--vermillion);
+  background: var(--vermillion);
+  color: var(--ink);
+}
+.ghost,
+.card button {
+  background: transparent;
+  color: var(--cream);
+}
+.progress,
+.nested {
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #2C2621;
+}
+.progress span,
+.nested span {
+  display: block;
+  height: 100%;
+  background: var(--vermillion);
+}
+.log {
+  min-height: 290px;
+  padding: 18px;
+  color: var(--cream);
+  font-family: var(--font-mono);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+.checklist {
+  display: grid;
+  gap: 12px;
+  padding: 24px;
+}
+.checklist > div {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+.checklist span {
+  color: var(--ok);
+  font-family: var(--font-mono);
+  font-weight: 900;
+}
+.checklist .active span {
+  color: var(--vermillion);
+}
+.nested {
+  grid-column: 2;
+  width: 100%;
+  height: 8px;
+}
+.finish-screen {
+  place-items: center;
+  text-align: center;
+}
+.status-pill {
+  border: 1px solid rgba(0, 200, 83, 0.42);
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: rgba(0, 200, 83, 0.1);
+  color: var(--cream);
+  font-weight: 900;
+}
+.cta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  width: min(760px, 100%);
+}
+.cta-grid button {
+  min-height: 92px;
+  background: var(--ink-warm);
+  color: var(--cream);
+  text-align: left;
+}
