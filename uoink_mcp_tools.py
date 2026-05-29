@@ -633,6 +633,31 @@ def set_user_role(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(role=norm, emphasis=server._role_facet_emphasis(norm))
 
 
+def check_live_status(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1: probe a URL's live state without extracting.
+
+    Returns one of the bounded states: not_live | live | upcoming |
+    post_live | was_live. Useful before queueing so the agent can pick
+    between immediate extraction and 'wait for the broadcast to end'."""
+    server = _b()
+    url = args.get("url")
+    if not isinstance(url, str) or not url.strip():
+        return _err("url (string) is required")
+    canonical, _platform = server._normalize_video_url(url.strip())
+    if not canonical:
+        canonical, _platform = server._normalize_any_url(url.strip())
+    if not canonical:
+        return _err("url is not a valid http(s) video URL")
+    try:
+        metadata = server._fetch_metadata(canonical)
+    except Exception as e:
+        return _err(f"yt-dlp could not fetch: {e}")
+    state = server._detect_live_state(metadata)
+    return _ok(url=canonical, live_state=state,
+                title=metadata.get("title"),
+                supported_states=list(server._LIVE_STATES))
+
+
 def get_user_memory(_args: dict[str, Any]) -> dict[str, Any]:
     """v2.5 S4 user memory: return the free-form USER.md content + path.
     Skeleton is seeded on first read so an agent always gets a starting
@@ -1370,6 +1395,23 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             },
         }, ["role"]),
         handler=set_user_role,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "check_live_status": ToolSpec(
+        name="check_live_status",
+        description=(
+            "v3.1: probe a URL to find out if it is a live broadcast "
+            "without extracting. Returns one of: not_live | live | "
+            "upcoming | post_live | was_live. The agent uses this to "
+            "decide between immediate extraction and 'wait until the "
+            "broadcast ends' (the helper's live_stream_behavior "
+            "setting handles the latter for /extract; this tool is "
+            "the read-only probe path)."
+        ),
+        input_schema=_schema({
+            "url": {"type": "string"},
+        }, ["url"]),
+        handler=check_live_status,
         rate_limiter=_RateLimiter(30),
     ),
     "get_user_taste": ToolSpec(
