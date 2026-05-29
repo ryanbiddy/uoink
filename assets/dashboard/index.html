@@ -908,6 +908,69 @@
       font-weight: 800;
     }
 
+    .evidence-layout {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .claim-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .claim-row {
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      background: var(--ink-warm);
+    }
+
+    .claim-row summary {
+      display: grid;
+      gap: 8px;
+      padding: 13px;
+      color: var(--cream);
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .claim-body {
+      display: grid;
+      gap: 10px;
+      border-top: 1px solid var(--border);
+      padding: 13px;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-height: 22px;
+      border: 1px solid var(--border);
+      border-radius: var(--pill-radius);
+      padding: 0 9px;
+      color: var(--cream);
+      background: rgba(255, 244, 236, 0.05);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .status-chip.supports { border-color: rgba(0, 200, 83, 0.4); }
+    .status-chip.contradicts { border-color: rgba(255, 61, 0, 0.44); }
+    .status-chip.mixed { border-color: rgba(255, 210, 63, 0.42); }
+
+    .evidence-source {
+      display: grid;
+      gap: 7px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 11px;
+      background: rgba(10, 10, 10, 0.28);
+    }
+
     .tip {
       margin-top: 18px;
       color: var(--dim);
@@ -1213,6 +1276,7 @@
       .resurface-layout,
       .workspace-layout,
       .script-layout,
+      .evidence-layout,
       .settings-grid,
       .about-grid {
         grid-template-columns: 1fr;
@@ -1231,6 +1295,7 @@
         <button class="nav-button" type="button" data-tab-button="for-you">For You <span class="nav-count" id="forYouNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="build">Build <span class="nav-count" id="buildNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="script">Script <span class="nav-count" id="scriptNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="evidence">Evidence <span class="nav-count" id="evidenceNavCount">0</span></button>
         <button class="nav-button active" type="button" data-tab-button="library">Library <span class="nav-count" id="libraryNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="activity">Activity <span class="nav-count" id="activityNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="settings">Settings</button>
@@ -1443,6 +1508,42 @@
           </div>
         </section>
 
+        <section class="tab-panel" id="tab-evidence" data-tab-panel="evidence">
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">Evidence</div>
+              <h1>Claims worth <em>checking.</em></h1>
+              <p class="lede">Assistance only. Uoink surfaces checkable claims and evidence signals; you decide what the evidence means.</p>
+            </div>
+            <button class="button ghost" type="button" id="reloadEvidence">Reload</button>
+          </div>
+
+          <div class="evidence-layout">
+            <aside class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Selected uoink</div>
+                <span class="nav-count" id="claimCount">0</span>
+              </div>
+              <div class="panel-body" id="evidenceContext">
+                <div class="job-row">
+                  <div class="job-title">Pick a uoink card.</div>
+                  <div class="job-sub">Click any library, For You, or workspace example card to load its Claims section here.</div>
+                </div>
+              </div>
+            </aside>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Claims section</div>
+                <div class="localhost">supports / contradicts / mixed / inconclusive</div>
+              </div>
+              <div class="panel-body">
+                <div class="claim-list" id="claimList"></div>
+              </div>
+            </section>
+          </div>
+        </section>
+
         <section class="tab-panel active" id="tab-library" data-tab-panel="library">
           <div class="page-head">
             <div>
@@ -1610,6 +1711,12 @@
             </div>
 
             <div class="setting-block">
+              <h2>Claim verification</h2>
+              <p class="setting-copy">When on, every uoink's transcript is scanned for checkable factual claims. Evidence is shown for your judgment. Uoink never auto-asserts truth.</p>
+              <label class="inline-row"><input id="claimVerificationToggle" type="checkbox"> Scan new uoinks for claims worth verifying</label>
+            </div>
+
+            <div class="setting-block">
               <h2>Transcript reliability</h2>
               <p class="setting-copy" id="reliabilityStatus">Checking local Whisper model...</p>
               <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox"> Auto-check transcript reliability</label>
@@ -1710,6 +1817,9 @@
       scripts: [],
       currentScript: null,
       scriptGrounding: null,
+      selectedEvidenceVideo: null,
+      selectedEvidenceTitle: "",
+      claims: [],
     };
 
     const FALLBACK_FACETS = {
@@ -1764,6 +1874,11 @@
       scriptRevisionNotes: document.getElementById("scriptRevisionNotes"),
       scriptRevisionDraft: document.getElementById("scriptRevisionDraft"),
       scriptRevisionResult: document.getElementById("scriptRevisionResult"),
+      evidenceNavCount: document.getElementById("evidenceNavCount"),
+      claimCount: document.getElementById("claimCount"),
+      evidenceContext: document.getElementById("evidenceContext"),
+      claimList: document.getElementById("claimList"),
+      claimVerificationToggle: document.getElementById("claimVerificationToggle"),
       runningPill: document.getElementById("runningPill"),
       portLabel: document.getElementById("portLabel"),
       libraryGrid: document.getElementById("libraryGrid"),
@@ -2194,7 +2309,7 @@
 
     function miniExampleCard(row) {
       return `
-        <div class="mini-card">
+        <div class="mini-card" data-video-id="${htmlEscape(videoIdOf(row))}" data-folder="${htmlEscape(row.folder || "")}" role="button" tabindex="0">
           <div class="job-title">${htmlEscape(rowTitle(row))}</div>
           <div class="job-sub">${htmlEscape([row.channel, row.performance_tier || row.performance, prettyHook(row.hook_type)].filter(Boolean).join(" | "))}</div>
           <span class="topic-chip">${htmlEscape(row.topic || "topic")}</span>
@@ -2500,6 +2615,124 @@
         els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">Shot list</div><pre class="mono-box">${htmlEscape(JSON.stringify(data, null, 2))}</pre></div>`;
       } catch (err) {
         showToast(`Could not derive shot list: ${err.message}`);
+      }
+    }
+
+    function evidenceStatusChip(value) {
+      const status = String(value || "extracted").toLowerCase();
+      const safe = ["supports", "contradicts", "mixed", "inconclusive"].includes(status) ? status : "";
+      return `<span class="status-chip ${safe}">${htmlEscape(status)}</span>`;
+    }
+
+    async function openEvidenceFor(videoId, title = "") {
+      if (!videoId) return;
+      state.selectedEvidenceVideo = videoId;
+      state.selectedEvidenceTitle = title || videoId;
+      switchTab("evidence");
+      await loadEvidence();
+    }
+
+    async function loadEvidence() {
+      const videoId = state.selectedEvidenceVideo;
+      if (!videoId) {
+        renderEvidenceEmpty();
+        return;
+      }
+      els.evidenceContext.innerHTML = `
+        <div class="job-row">
+          <div class="job-title">${htmlEscape(state.selectedEvidenceTitle || videoId)}</div>
+          <div class="job-sub">${htmlEscape(videoId)}</div>
+        </div>
+      `;
+      try {
+        const data = await authFetch(`/claims/${encodeURIComponent(videoId)}`);
+        state.claims = Array.isArray(data.claims) ? data.claims : [];
+      } catch (err) {
+        state.claims = [];
+        els.claimList.innerHTML = emptyPanelRow("Claims unavailable.", err.message);
+        return;
+      }
+      renderClaims();
+    }
+
+    function renderEvidenceEmpty() {
+      state.claims = [];
+      els.evidenceNavCount.textContent = "0";
+      els.claimCount.textContent = "0";
+      els.evidenceContext.innerHTML = emptyPanelRow("Pick a uoink card.", "Click a saved uoink to load extracted claims and evidence signals.");
+      els.claimList.innerHTML = emptyPanelRow("No uoink selected.", "Claims appear after you select a video.");
+    }
+
+    function evidenceSourceHtml(ev) {
+      return `
+        <div class="evidence-source">
+          ${evidenceStatusChip(ev.alignment_signal)}
+          <div class="job-title">${htmlEscape(ev.source_url || "source URL missing")}</div>
+          <div class="job-sub">${htmlEscape(ev.quote || "No quote captured.")}</div>
+        </div>
+      `;
+    }
+
+    function claimRowHtml(claim) {
+      const score = claim.check_worthiness == null ? "not scored" : `${Math.round(Number(claim.check_worthiness) * 100)} check-worthiness`;
+      const evidence = Array.isArray(claim.evidence) ? claim.evidence : [];
+      return `
+        <details class="claim-row" data-claim-id="${htmlEscape(claim.id)}">
+          <summary>
+            <span>${htmlEscape(claim.claim_text || "Untitled claim")}</span>
+            <span class="job-sub">${htmlEscape(score)} | ${htmlEscape(claim.status || "extracted")}</span>
+          </summary>
+          <div class="claim-body">
+            ${evidence.length ? evidence.map(evidenceSourceHtml).join("") : `<div class="job-sub">No evidence sources recorded yet.</div>`}
+            <textarea class="field draft-box" data-evidence-json="${htmlEscape(claim.id)}" placeholder='Paste evidence JSON: [{"source_url":"https://...","quote":"...","alignment_signal":"supports"}]'></textarea>
+            <div class="inline-row">
+              <button class="button" type="button" data-verify-claim="${htmlEscape(claim.id)}">Record evidence</button>
+              <button class="button ghost" type="button" data-skip-claim="${htmlEscape(claim.id)}">Mark not attempted</button>
+            </div>
+          </div>
+        </details>
+      `;
+    }
+
+    function renderClaims() {
+      els.evidenceNavCount.textContent = String(state.claims.length);
+      els.claimCount.textContent = String(state.claims.length);
+      els.claimList.innerHTML = state.claims.length
+        ? state.claims.map(claimRowHtml).join("")
+        : emptyPanelRow("No claims extracted for this uoink.", "Turn on Claim verification for new uoinks, or ask an agent to run extract_claims for this video.");
+    }
+
+    async function recordClaimEvidence(claimId) {
+      const input = document.querySelector(`[data-evidence-json="${CSS.escape(String(claimId))}"]`);
+      if (!input || !input.value.trim()) return showToast("Paste evidence JSON first.");
+      let evidence = null;
+      try {
+        evidence = JSON.parse(input.value);
+      } catch (err) {
+        return showToast(`Evidence JSON is invalid: ${err.message}`);
+      }
+      try {
+        await authFetch(`/claims/${encodeURIComponent(claimId)}/verify`, {
+          method: "POST",
+          body: JSON.stringify({ evidence }),
+        });
+        showToast("Evidence recorded.");
+        await loadEvidence();
+      } catch (err) {
+        showToast(`Could not record evidence: ${err.message}`);
+      }
+    }
+
+    async function skipClaim(claimId) {
+      try {
+        await authFetch(`/claims/${encodeURIComponent(claimId)}/skip`, {
+          method: "POST",
+          body: JSON.stringify({}),
+        });
+        showToast("Claim marked not attempted.");
+        await loadEvidence();
+      } catch (err) {
+        showToast(`Could not update claim: ${err.message}`);
       }
     }
 
@@ -2986,6 +3219,7 @@
         els.outputFolder.value = state.settings.output_dir || state.settings.output_folder || els.outputFolder.value || "";
         els.autostartToggle.checked = Boolean(state.settings.autostart);
         els.screenshotCount.value = String(state.settings.screenshot_count ?? 4);
+        els.claimVerificationToggle.checked = Boolean(state.settings.claim_verification_enabled);
         els.reliabilityAutoCheck.checked = Boolean(state.settings.transcript_reliability_auto_check);
         const relModel = state.settings.transcript_reliability_model || {};
         els.reliabilityStatus.textContent = relModel.cached
@@ -3149,6 +3383,7 @@
       if (tab === "for-you") loadForYou();
       if (tab === "build") loadBuild();
       if (tab === "script") loadScripts();
+      if (tab === "evidence") loadEvidence();
       if (tab === "activity") refreshActivity();
       if (tab === "settings") refreshSettings();
     }
@@ -3194,6 +3429,7 @@
       document.getElementById("saveScriptRevision").addEventListener("click", () => reviseCurrentScript({ persist: Boolean(els.scriptRevisionDraft.value.trim()) }));
       document.getElementById("deriveShotList").addEventListener("click", deriveCurrentShotList);
       els.scriptForm.addEventListener("submit", persistScriptFromForm);
+      document.getElementById("reloadEvidence").addEventListener("click", loadEvidence);
       document.querySelectorAll("[data-workspace-tab]").forEach((btn) => {
         btn.addEventListener("click", () => {
           document.querySelectorAll("[data-workspace-tab]").forEach((item) => item.classList.toggle("active", item.dataset.workspaceTab === btn.dataset.workspaceTab));
@@ -3233,6 +3469,7 @@
       document.getElementById("stopHelper").addEventListener("click", () => postHelper("/helper/quit"));
       document.getElementById("stopHelperSettings").addEventListener("click", () => postHelper("/helper/quit"));
       els.autostartToggle.addEventListener("change", () => saveSettingsPatch({ autostart: els.autostartToggle.checked }, "Autostart updated."));
+      els.claimVerificationToggle.addEventListener("change", () => saveSettingsPatch({ claim_verification_enabled: els.claimVerificationToggle.checked }, "Claim verification setting updated."));
       els.reliabilityAutoCheck.addEventListener("change", () => saveSettingsPatch({ transcript_reliability_auto_check: els.reliabilityAutoCheck.checked }, "Transcript reliability setting updated."));
       els.downloadReliabilityModel.addEventListener("click", async () => {
         if (!confirm("Download the local Whisper tiny model now? It is about 150 MB and stays on this machine.")) return;
@@ -3278,7 +3515,21 @@
         });
       });
       document.addEventListener("click", (event) => {
+        const verifyClaim = event.target.closest("[data-verify-claim]");
+        if (verifyClaim) {
+          recordClaimEvidence(verifyClaim.dataset.verifyClaim);
+          return;
+        }
+        const skipClaimButton = event.target.closest("[data-skip-claim]");
+        if (skipClaimButton) {
+          skipClaim(skipClaimButton.dataset.skipClaim);
+          return;
+        }
         const card = event.target.closest("[data-folder]");
+        if (card && card.dataset.videoId) {
+          openEvidenceFor(card.dataset.videoId, card.getAttribute("aria-label") || "");
+          return;
+        }
         if (card && card.dataset.folder) authFetch(`/open-folder?path=${encodeURIComponent(card.dataset.folder)}`).catch((err) => showToast(err.message));
         const openPath = event.target.closest("[data-open-path]");
         if (openPath) authFetch(`/open-folder?path=${encodeURIComponent(openPath.dataset.openPath)}`).catch((err) => showToast(err.message));
