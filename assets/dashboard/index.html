@@ -47,6 +47,8 @@
 
     body {
       overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
     }
 
     button,
@@ -86,8 +88,8 @@
     .wordmark {
       display: flex;
       align-items: center;
-      gap: 10px;
-      color: var(--vermillion);
+      gap: 5px;
+      color: var(--cream);
       font-family: var(--font-display);
       font-size: 30px;
       letter-spacing: 0;
@@ -96,15 +98,23 @@
 
     .uoink-mark {
       display: inline-flex;
-      width: 38px;
-      height: 38px;
+      width: 34px;
+      height: 34px;
       flex: 0 0 auto;
+      filter: drop-shadow(0 0 12px rgba(255, 61, 0, 0.18));
+      transform: translateY(-1px);
     }
 
     .uoink-mark svg {
       display: block;
       width: 100%;
       height: 100%;
+    }
+
+    .wordmark-text {
+      color: var(--cream);
+      text-shadow: 0 0 22px rgba(255, 61, 0, 0.16);
+      transform: translateY(1px);
     }
 
     .nav {
@@ -230,9 +240,25 @@
       border-bottom: 1px solid var(--border);
       padding: 0 24px;
       background: rgba(10, 10, 10, 0.82);
-      color: var(--dim);
+      color: var(--muted);
       font-family: var(--font-mono);
       font-size: 12px;
+    }
+
+    .chrome-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chrome-brand b {
+      color: var(--cream);
+      font-family: var(--font-ui);
+      letter-spacing: 0.03em;
+    }
+
+    .chrome-brand span {
+      color: var(--dim);
     }
 
     .window-controls {
@@ -293,7 +319,7 @@
     h1 {
       margin-top: 6px;
       color: var(--cream);
-      font-size: 36px;
+      font-size: 35px;
       line-height: 1.04;
       letter-spacing: 0;
     }
@@ -343,6 +369,7 @@
       border-color: var(--vermillion);
       background: var(--vermillion);
       color: var(--ink);
+      box-shadow: inset 0 -1px 0 rgba(10, 10, 10, 0.28), 0 10px 26px rgba(255, 61, 0, 0.12);
     }
 
     .button.ghost {
@@ -362,7 +389,7 @@
 
     .control-grid {
       display: grid;
-      grid-template-columns: minmax(240px, 2fr) repeat(6, minmax(112px, 1fr));
+      grid-template-columns: minmax(280px, 2fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(128px, 1fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(136px, 1fr);
       gap: 10px;
       margin: 18px 0 18px;
     }
@@ -377,6 +404,12 @@
       background: var(--ink-warm);
       color: var(--cream);
       outline: none;
+      color-scheme: dark;
+    }
+
+    .control::placeholder,
+    .field::placeholder {
+      color: #9E8A7C;
     }
 
     .control:focus,
@@ -418,6 +451,15 @@
       background: var(--ink-warm);
       box-shadow: var(--shadow-soft);
       cursor: pointer;
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+    }
+
+    .uoink-card:hover,
+    .uoink-card:focus-visible {
+      outline: none;
+      transform: translateY(-1px);
+      border-color: rgba(249, 115, 22, 0.46);
+      background: #18120E;
     }
 
     .thumb {
@@ -440,6 +482,11 @@
       position: absolute;
       top: 12px;
       left: 12px;
+      min-height: 20px;
+      border: 1px solid rgba(255, 210, 63, 0.22);
+      border-radius: var(--pill-radius);
+      padding: 3px 8px;
+      background: rgba(10, 10, 10, 0.72);
       color: var(--acid);
       font-family: var(--font-mono);
       font-size: 10px;
@@ -462,10 +509,13 @@
 
     .hook-chip {
       position: absolute;
-      top: 36px;
+      bottom: 10px;
       left: 12px;
+      max-width: calc(100% - 24px);
       background: var(--rust);
       color: var(--cream);
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .card-body {
@@ -475,16 +525,16 @@
     }
 
     .card-title {
-      min-height: 40px;
+      min-height: 44px;
       color: var(--cream);
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 800;
       line-height: 1.28;
     }
 
     .card-meta {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 12px;
       line-height: 1.35;
     }
 
@@ -515,8 +565,8 @@
     }
 
     .health-dot {
-      width: 7px;
-      height: 7px;
+      width: 8px;
+      height: 8px;
       border-radius: 99px;
       background: var(--dim);
     }
@@ -753,6 +803,12 @@
     .about-hero .wordmark {
       justify-content: center;
       font-size: 56px;
+      gap: 8px;
+    }
+
+    .about-hero .uoink-mark {
+      width: 58px;
+      height: 58px;
     }
 
     .link-list {
@@ -854,7 +910,7 @@
     <aside class="sidebar" aria-label="Dashboard navigation">
       <div class="wordmark">
         <span class="uoink-mark" aria-hidden="true"></span>
-        <span>OINK</span>
+        <span class="wordmark-text">OINK</span>
       </div>
       <nav class="nav" aria-label="Sections">
         <button class="nav-button active" type="button" data-tab-button="library">Library <span class="nav-count" id="libraryNavCount">0</span></button>
@@ -871,7 +927,7 @@
 
     <main class="main">
       <div class="chrome">
-        <span>Uoink - local helper dashboard</span>
+        <span class="chrome-brand"><b>UOINK</b><span>local helper dashboard</span></span>
         <div class="window-controls" aria-hidden="true">
           <span class="window-dot"></span>
           <span class="window-dot"></span>
@@ -884,12 +940,12 @@
           <div class="page-head">
             <div>
               <div class="eyebrow">Library</div>
-              <h1><span id="libraryCount">0</span> yoinks <em>read like docs.</em></h1>
-              <p class="lede">Search titles, transcripts, comments, channels, topics, and hook types. Everything stays local in your Uoink index.</p>
+              <h1><span id="libraryCount">0</span> uoinks <em>ready to read.</em></h1>
+              <p class="lede">Search transcripts, comments, channels, topics, and hooks. Everything stays on this machine in your Uoink index.</p>
             </div>
             <div class="inline-row">
               <button class="button ghost" type="button" id="clearFilters">Clear filters</button>
-              <button class="button primary" type="button" id="newYoink">+ Yoink</button>
+              <button class="button primary" type="button" id="newYoink">+ Uoink</button>
             </div>
           </div>
 
@@ -899,11 +955,11 @@
             <select class="control" id="topicFilter"><option value="">Topic: all</option></select>
             <select class="control" id="hookFilter">
               <option value="">Hook: any</option>
-              <option value="curiosity_gap">curiosity_gap</option>
+              <option value="curiosity_gap">curiosity gap</option>
               <option value="question">question</option>
               <option value="contrarian">contrarian</option>
-              <option value="story_open">story_open</option>
-              <option value="promise_list">promise_list</option>
+              <option value="story_open">story open</option>
+              <option value="promise_list">promise/list</option>
               <option value="demo">demo</option>
               <option value="authority">authority</option>
               <option value="stakes">stakes</option>
@@ -926,7 +982,7 @@
           <div id="libraryGrid" class="grid" aria-live="polite"></div>
           <div id="libraryEmpty" class="empty-state hidden">
             <div>
-              <h2>Nothing yoinked yet.</h2>
+              <h2>No uoinks yet.</h2>
               <p>Open YouTube, find a video worth reading, click the rust U under the player. It will show up here as a card in a few seconds.</p>
               <div class="inline-row" style="justify-content:center;margin-top:20px">
                 <button class="button primary" type="button" data-open-youtube>Open YouTube</button>
@@ -1051,7 +1107,7 @@
               <div>
                 <div class="wordmark">
                   <span class="uoink-mark" aria-hidden="true" style="width:64px;height:64px"></span>
-                  <span>OINK</span>
+                  <span class="wordmark-text">OINK</span>
                 </div>
                 <p class="lede" style="margin:18px auto 0">YouTube -> AI-ready docs. Local-first. Open source.</p>
                 <div class="running-pill" id="aboutStatus" style="margin-top:18px"><span class="pip"></span><span>Checking helper</span></div>
@@ -1226,7 +1282,13 @@
     }
 
     function prettyHook(type) {
-      return String(type || "other");
+      const value = String(type || "other").trim();
+      const labels = {
+        curiosity_gap: "curiosity gap",
+        story_open: "story open",
+        promise_list: "promise/list",
+      };
+      return labels[value] || value.replace(/_/g, " ");
     }
 
     function fmtDuration(seconds) {
@@ -1350,7 +1412,7 @@
           return {
             slug: job.id,
             video_id: result.video_id || job.video_id || job.id,
-            title: job.title || job.playlist_title || result.title || "Completed yoink",
+            title: job.title || job.playlist_title || result.title || "Completed uoink",
             channel: result.channel || job.channel || "",
             topic: result.topic || job.topic || "Job record",
             folder: job.session_folder || result.folder || "",
@@ -1388,8 +1450,8 @@
       els.libraryCount.textContent = String(state.total);
       els.libraryNavCount.textContent = String(state.total);
       els.resultSummary.textContent = state.total
-        ? `${rows.length} shown of ${state.total} local yoinks`
-        : "No yoinks found";
+        ? `${rows.length} shown of ${state.total} local uoinks`
+        : "No uoinks found";
       const filterBits = Object.entries(state.filters)
         .filter(([key, value]) => value && key !== "sort")
         .map(([key, value]) => `${key}: ${value}`);
@@ -1413,11 +1475,11 @@
 
     function cardHtml(row) {
       const id = htmlEscape(row.video_id || row.slug || "");
-      const title = htmlEscape(row.title || "Untitled yoink");
+      const title = htmlEscape(row.title || "Untitled uoink");
       const channel = htmlEscape(row.channel || "Unknown channel");
       const topic = htmlEscape(row.topic || "Uncategorized");
       const hook = htmlEscape(prettyHook(row.hook_type));
-      const confidence = row.hook_type_confidence != null ? ` | confidence ${row.hook_type_confidence}/5` : "";
+      const confidence = row.hook_type_confidence != null ? ` · confidence ${row.hook_type_confidence}/5` : "";
       const entities = Number(row.entity_count || 0);
       const topEntities = Array.isArray(row.top_entities) ? row.top_entities.slice(0, 5).join(", ") : "";
       return `
@@ -1559,7 +1621,7 @@
         .concat(failedJobs.map(jobRowHtml))
         .concat(queueFailed.map(queueRowHtml));
       if (!rows.length) {
-        els.queueRows.innerHTML = `<div class="job-row"><div class="job-title">Nothing running right now.</div><div class="job-sub">New yoinks and rate-limit retries will appear here.</div></div>`;
+        els.queueRows.innerHTML = `<div class="job-row"><div class="job-title">Nothing running right now.</div><div class="job-sub">New uoinks and rate-limit retries will appear here.</div></div>`;
       } else {
         els.queueRows.innerHTML = rows.join("");
       }
@@ -1567,7 +1629,7 @@
       els.completedToday.textContent = String(data.completed_today || completed.length);
       els.completedRows.innerHTML = completed.length
         ? completed.slice(0, 8).map(completedRowHtml).join("")
-        : `<div class="job-row"><div class="job-title">No completed yoinks loaded yet.</div><div class="job-sub">The Library tab will populate this list.</div></div>`;
+        : `<div class="job-row"><div class="job-title">No completed uoinks loaded yet.</div><div class="job-sub">The Library tab will populate this list.</div></div>`;
     }
 
     function completedTodayRows() {
@@ -1595,7 +1657,7 @@
           <div class="job-row">
             <div class="job-top">
               <div>
-                <div class="job-title">${htmlEscape(row.title || row.playlist_title || "Completed yoink")}</div>
+                <div class="job-title">${htmlEscape(row.title || row.playlist_title || "Completed uoink")}</div>
                 <div class="job-sub">${htmlEscape(row.kind || "job")} | completed ${htmlEscape(fmtAge(row.completed_at || row.updated_at))}</div>
               </div>
               ${row.session_folder ? `<button class="row-link" type="button" data-open-path="${htmlEscape(row.session_folder)}">Open</button>` : ""}
@@ -1693,7 +1755,7 @@
         <div class="job-row ${failed ? "failed" : ""}" data-pending-id="${htmlEscape(row.pending_id || "")}">
           <div class="job-top">
             <div>
-              <div class="job-title">${htmlEscape(row.title || row.url || "Queued yoink")}</div>
+              <div class="job-title">${htmlEscape(row.title || row.url || "Queued uoink")}</div>
               <div class="job-sub">${htmlEscape(stateValue)}${row.retry_after ? ` | retry ${htmlEscape(fmtAge(row.retry_after))}` : ""}</div>
             </div>
             <div class="inline-row">
