@@ -1011,6 +1011,146 @@
       padding: 14px;
     }
 
+    .yoink-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+      gap: 16px;
+    }
+
+    .yoink-hero {
+      display: grid;
+      gap: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 16px;
+      background:
+        radial-gradient(circle at 82% 0%, rgba(255, 210, 63, 0.12), transparent 16rem),
+        #100d0a;
+    }
+
+    .yoink-hero.podcast {
+      background:
+        linear-gradient(135deg, rgba(194, 65, 12, 0.24), rgba(10, 10, 10, 0.22)),
+        #100d0a;
+    }
+
+    .yoink-meta-row,
+    .speaker-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .media-chip,
+    .speaker-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border: 1px solid var(--border);
+      border-radius: var(--pill-radius);
+      padding: 0 10px;
+      background: rgba(255, 244, 236, 0.04);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .media-chip.primary {
+      border-color: rgba(249, 115, 22, 0.46);
+      color: var(--cream);
+      background: rgba(194, 65, 12, 0.2);
+    }
+
+    .speaker-chip {
+      color: var(--cream);
+    }
+
+    .waveform {
+      display: grid;
+      grid-template-columns: repeat(48, minmax(2px, 1fr));
+      align-items: center;
+      gap: 3px;
+      height: 92px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 12px;
+      background: rgba(10, 10, 10, 0.36);
+    }
+
+    .waveform span {
+      display: block;
+      height: var(--bar-height, 34%);
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--acid), var(--vermillion));
+      opacity: 0.88;
+    }
+
+    .screenshot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(138px, 1fr));
+      gap: 10px;
+    }
+
+    .screenshot-tile {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      background: #0d0b09;
+    }
+
+    .screenshot-tile img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: #241f1b;
+    }
+
+    .screenshot-tile span {
+      display: block;
+      padding: 8px;
+      color: var(--dim);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .transcript-preview {
+      display: grid;
+      gap: 8px;
+      max-height: 360px;
+      overflow: auto;
+    }
+
+    .yoink-section {
+      display: grid;
+      gap: 10px;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+    }
+
+    .yoink-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .transcript-segment {
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 10px;
+      background: rgba(10, 10, 10, 0.26);
+    }
+
+    .transcript-segment b {
+      color: var(--rust-bright);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
     .job-row {
       display: grid;
       gap: 10px;
@@ -1277,6 +1417,7 @@
       .workspace-layout,
       .script-layout,
       .evidence-layout,
+      .yoink-layout,
       .settings-grid,
       .about-grid {
         grid-template-columns: 1fr;
@@ -1296,6 +1437,7 @@
         <button class="nav-button" type="button" data-tab-button="build">Build <span class="nav-count" id="buildNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="script">Script <span class="nav-count" id="scriptNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="evidence">Evidence <span class="nav-count" id="evidenceNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="yoink">Yoink</button>
         <button class="nav-button active" type="button" data-tab-button="library">Library <span class="nav-count" id="libraryNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="activity">Activity <span class="nav-count" id="activityNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="settings">Settings</button>
@@ -1607,6 +1749,37 @@
           </div>
         </section>
 
+        <section class="tab-panel" id="tab-yoink" data-tab-panel="yoink">
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">Yoink</div>
+              <h1 id="yoinkHeading">Pick a uoink <em>to inspect.</em></h1>
+              <p class="lede" id="yoinkSubhead">Podcast episodes, interviews, and regular videos share one local detail view.</p>
+            </div>
+            <div class="inline-row">
+              <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
+              <button class="button primary" type="button" id="yoinkEvidence">Evidence</button>
+            </div>
+          </div>
+
+          <div class="yoink-layout">
+            <section class="panel">
+              <div class="panel-head">
+                <div class="panel-title" id="yoinkTitle">No uoink selected</div>
+                <div class="localhost" id="yoinkMeta">library detail</div>
+              </div>
+              <div class="panel-body" id="yoinkDetail"></div>
+            </section>
+            <aside class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Local facts</div>
+                <div class="localhost" id="yoinkFactMeta">sidecar</div>
+              </div>
+              <div class="panel-body" id="yoinkFacts"></div>
+            </aside>
+          </div>
+        </section>
+
         <section class="tab-panel" id="tab-activity" data-tab-panel="activity">
           <div class="page-head">
             <div>
@@ -1820,6 +1993,9 @@
       selectedEvidenceVideo: null,
       selectedEvidenceTitle: "",
       claims: [],
+      selectedYoink: null,
+      selectedYoinkSidecar: null,
+      selectedYoinkSidecarError: "",
     };
 
     const FALLBACK_FACETS = {
@@ -1879,6 +2055,15 @@
       evidenceContext: document.getElementById("evidenceContext"),
       claimList: document.getElementById("claimList"),
       claimVerificationToggle: document.getElementById("claimVerificationToggle"),
+      yoinkHeading: document.getElementById("yoinkHeading"),
+      yoinkSubhead: document.getElementById("yoinkSubhead"),
+      yoinkTitle: document.getElementById("yoinkTitle"),
+      yoinkMeta: document.getElementById("yoinkMeta"),
+      yoinkDetail: document.getElementById("yoinkDetail"),
+      yoinkFacts: document.getElementById("yoinkFacts"),
+      yoinkFactMeta: document.getElementById("yoinkFactMeta"),
+      yoinkOpenFolder: document.getElementById("yoinkOpenFolder"),
+      yoinkEvidence: document.getElementById("yoinkEvidence"),
       runningPill: document.getElementById("runningPill"),
       portLabel: document.getElementById("portLabel"),
       libraryGrid: document.getElementById("libraryGrid"),
@@ -2005,6 +2190,11 @@
       return `${m}:${String(s).padStart(2, "0")}`;
     }
 
+    function fmtTimestamp(seconds) {
+      const n = Number(seconds);
+      return Number.isFinite(n) && n >= 0 ? fmtDuration(n) : "--:--";
+    }
+
     function fmtAge(value) {
       if (!value) return "";
       const t = new Date(value);
@@ -2076,6 +2266,344 @@
 
     function rowTitle(row) {
       return row && (row.title || row.playlist_title || row.source_url || row.url) || "Untitled uoink";
+    }
+
+    function metadataOf(row) {
+      const meta = row && row.metadata_json;
+      if (!meta) return {};
+      if (typeof meta === "object") return meta;
+      try { return JSON.parse(meta); } catch (_) { return {}; }
+    }
+
+    function firstValue(...values) {
+      for (const value of values) {
+        if (value !== undefined && value !== null && String(value).trim() !== "") return value;
+      }
+      return "";
+    }
+
+    function folderPathOf(row) {
+      return String(row && (row.folder || row.session_folder || "") || "");
+    }
+
+    function joinLocalPath(folder, child) {
+      const base = String(folder || "").replace(/[\\\/]+$/, "");
+      if (!base || !child) return "";
+      const sep = base.includes("\\") ? "\\" : "/";
+      return `${base}${sep}${String(child).replace(/^[\\\/]+/, "")}`;
+    }
+
+    function basenameOf(path) {
+      const clean = String(path || "").replace(/[\\\/]+$/, "");
+      const parts = clean.split(/[\\\/]/).filter(Boolean);
+      return parts.length ? parts[parts.length - 1] : "";
+    }
+
+    function sidecarPathForRow(row) {
+      if (!row) return "";
+      if (row.sidecar_path) return String(row.sidecar_path);
+      const folder = folderPathOf(row);
+      const slug = row.slug || basenameOf(folder);
+      return folder && slug ? joinLocalPath(folder, `${slug}.json`) : "";
+    }
+
+    function sourceUrlOf(row, sidecar = {}) {
+      const meta = metadataOf(row);
+      return firstValue(row && row.source_url, row && row.url, sidecar.url, meta.url);
+    }
+
+    function platformOf(row, sidecar = {}) {
+      const meta = metadataOf(row);
+      const raw = String(firstValue(
+        row && row.platform,
+        row && row.source_platform,
+        sidecar.platform,
+        sidecar.source_platform,
+        meta.platform,
+      ) || "").toLowerCase();
+      const url = String(sourceUrlOf(row, sidecar)).toLowerCase();
+      if (raw) return raw;
+      if (url.includes("spotify.")) return "spotify";
+      if (url.includes("podcasts.apple.") || url.includes("apple.com")) return "apple podcasts";
+      if (url.includes("x.com") || url.includes("twitter.com")) return "x";
+      if (url.includes("youtube.") || url.includes("youtu.be")) return "youtube";
+      if (url.includes(".xml") || url.includes("rss")) return "rss";
+      return "web";
+    }
+
+    function isPodcastContent(row, sidecar = {}) {
+      const meta = metadataOf(row);
+      const values = [
+        row && row.media_type,
+        row && row.content_type,
+        row && row.kind,
+        row && row.platform,
+        sidecar.media_type,
+        sidecar.content_type,
+        sidecar.kind,
+        sidecar.platform,
+        sidecar.feed_url,
+        sidecar.podcast_title,
+        sidecar.episode_title,
+        meta.media_type,
+        meta.content_type,
+        meta.feed_url,
+      ].join(" ").toLowerCase();
+      return Boolean(
+        sidecar.is_podcast ||
+        values.includes("podcast") ||
+        values.includes("rss") ||
+        values.includes("audio")
+      );
+    }
+
+    function isLiveContent(row, sidecar = {}) {
+      const meta = metadataOf(row);
+      const values = [
+        row && row.live_status,
+        row && row.kind,
+        sidecar.live_status,
+        sidecar.kind,
+        meta.live_status,
+      ].join(" ").toLowerCase();
+      return Boolean(row && row.is_live) || Boolean(sidecar.is_live) || values.includes("live");
+    }
+
+    function durationOf(row, sidecar = {}) {
+      const meta = metadataOf(row);
+      return Number(firstValue(row && row.duration_seconds, sidecar.duration_seconds, meta.duration_seconds, meta.duration));
+    }
+
+    function speakerNames(sidecar = {}) {
+      const out = new Set();
+      const rawSpeakers = sidecar.speakers || (sidecar.diarization && sidecar.diarization.speakers);
+      if (Array.isArray(rawSpeakers)) {
+        rawSpeakers.forEach((speaker, index) => {
+          const label = typeof speaker === "string"
+            ? speaker
+            : firstValue(speaker.name, speaker.label, speaker.id, `Speaker ${index + 1}`);
+          if (label) out.add(String(label));
+        });
+      } else if (rawSpeakers && typeof rawSpeakers === "object") {
+        Object.keys(rawSpeakers).forEach((label) => out.add(label));
+      }
+      transcriptSegments(sidecar).forEach((segment) => {
+        const label = firstValue(segment.speaker, segment.speaker_label, segment.speaker_id);
+        if (label) out.add(String(label));
+      });
+      return [...out].slice(0, 10);
+    }
+
+    function transcriptSegments(sidecar = {}) {
+      const raw = sidecar.transcript || sidecar.segments || (sidecar.diarization && sidecar.diarization.segments) || [];
+      if (typeof raw === "string") {
+        return raw.split(/\n+/).filter(Boolean).slice(0, 12).map((text, index) => ({ start: index * 30, text }));
+      }
+      return Array.isArray(raw) ? raw.filter(Boolean) : [];
+    }
+
+    function mediaLabelFor(row, sidecar = {}) {
+      if (isPodcastContent(row, sidecar)) return "podcast";
+      if (isLiveContent(row, sidecar)) return "live stream";
+      const platform = platformOf(row, sidecar);
+      return platform === "youtube" ? "video" : `${platform} video`;
+    }
+
+    function mediaChipsHtml(row, sidecar = {}) {
+      const channel = firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel);
+      const duration = durationOf(row, sidecar);
+      const chips = [
+        { label: mediaLabelFor(row, sidecar), primary: true },
+        { label: platformOf(row, sidecar) },
+        { label: channel },
+        { label: row && row.topic },
+        { label: Number.isFinite(duration) && duration > 0 ? fmtDuration(duration) : "" },
+      ].filter((item) => item.label);
+      return `<div class="yoink-meta-row">${chips.map((item) => `<span class="media-chip ${item.primary ? "primary" : ""}">${htmlEscape(item.label)}</span>`).join("")}</div>`;
+    }
+
+    function waveformHtml(row, sidecar = {}) {
+      const seed = rowTitle(row).length + transcriptSegments(sidecar).length * 7;
+      const bars = Array.from({ length: 48 }, (_, index) => 24 + ((seed + index * 17) % 62));
+      return `<div class="waveform" aria-hidden="true">${bars.map((height) => `<span style="--bar-height:${height}%"></span>`).join("")}</div>`;
+    }
+
+    function transcriptPreviewHtml(sidecar = {}, podcast = false) {
+      const segments = transcriptSegments(sidecar).slice(0, podcast ? 10 : 6);
+      if (!segments.length) {
+        return emptyPanelRow(
+          podcast ? "Transcript coming with backend update." : "Transcript preview unavailable.",
+          podcast ? "Expected podcast sidecar shape: transcript segments with start, end, text, and optional speaker fields." : "Open the saved markdown for the full transcript."
+        );
+      }
+      return `
+        <div class="transcript-preview">
+          ${segments.map((segment) => {
+            const speaker = firstValue(segment.speaker, segment.speaker_label, segment.speaker_id);
+            const label = [fmtTimestamp(segment.start), speaker].filter(Boolean).join(" | ");
+            return `<div class="transcript-segment"><b>${htmlEscape(label)}</b><div class="job-sub">${htmlEscape(segment.text || segment.content || "")}</div></div>`;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function screenshotPath(row, shot) {
+      if (!shot) return "";
+      if (shot.absolute_path || shot.file_path) return String(shot.absolute_path || shot.file_path);
+      const rel = shot.path || shot.filename;
+      return rel ? joinLocalPath(folderPathOf(row), rel) : "";
+    }
+
+    function screenshotGridHtml(row, sidecar = {}) {
+      const shots = Array.isArray(sidecar.screenshots) ? sidecar.screenshots.slice(0, 8) : [];
+      if (!shots.length) {
+        return emptyPanelRow("Screenshots unavailable.", "Video screenshots appear here when the sidecar includes screenshot paths.");
+      }
+      return `
+        <div class="screenshot-grid">
+          ${shots.map((shot) => {
+            const path = screenshotPath(row, shot);
+            const label = shot.timestamp || fmtTimestamp(shot.start || shot.time || 0);
+            return `<div class="screenshot-tile"><img alt="" class="hidden" data-file-img="${htmlEscape(path)}"><span>${htmlEscape(label)}</span></div>`;
+          }).join("")}
+        </div>
+      `;
+    }
+
+    function yoinkFactsHtml(row, sidecar = {}) {
+      const speakers = speakerNames(sidecar);
+      const facts = [
+        ["Platform", platformOf(row, sidecar)],
+        ["Duration", fmtDuration(durationOf(row, sidecar))],
+        ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
+        ["Topic", firstValue(row && row.topic, "Uncategorized")],
+        ["Speakers", speakers.length ? `${speakers.length}` : "pending"],
+        ["Source", sourceUrlOf(row, sidecar) || "not stored"],
+      ];
+      if (state.selectedYoinkSidecarError) {
+        facts.push(["Sidecar", state.selectedYoinkSidecarError]);
+      } else {
+        facts.push(["Sidecar", state.selectedYoinkSidecar ? "loaded" : "pending"]);
+      }
+      return facts.map(([label, value]) => `
+        <div class="job-row">
+          <div class="job-title">${htmlEscape(label)}</div>
+          <div class="job-sub">${htmlEscape(value)}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderYoinkDetail() {
+      const row = state.selectedYoink;
+      const sidecar = state.selectedYoinkSidecar || {};
+      const hasRow = Boolean(row);
+      els.yoinkOpenFolder.disabled = !hasRow || !folderPathOf(row);
+      els.yoinkEvidence.disabled = !hasRow || !videoIdOf(row);
+      if (!hasRow) {
+        els.yoinkHeading.innerHTML = "Pick a uoink <em>to inspect.</em>";
+        els.yoinkSubhead.textContent = "Podcast episodes, interviews, and regular videos share one local detail view.";
+        els.yoinkTitle.textContent = "No uoink selected";
+        els.yoinkMeta.textContent = "library detail";
+        els.yoinkFactMeta.textContent = "sidecar";
+        els.yoinkDetail.innerHTML = emptyPanelRow("No uoink selected.", "Choose a library card to open its local detail view.");
+        els.yoinkFacts.innerHTML = emptyPanelRow("No local facts loaded.", "Details are read from the library row and sidecar when present.");
+        return;
+      }
+      const podcast = isPodcastContent(row, sidecar);
+      const mediaLabel = mediaLabelFor(row, sidecar);
+      const speakers = speakerNames(sidecar);
+      const title = rowTitle({ ...row, title: firstValue(sidecar.episode_title, sidecar.title, row.title) });
+      els.yoinkHeading.innerHTML = `${htmlEscape(mediaLabel)} <em>detail.</em>`;
+      els.yoinkSubhead.textContent = title;
+      els.yoinkTitle.textContent = title;
+      els.yoinkMeta.textContent = [
+        mediaLabel,
+        firstValue(sidecar.podcast_title, sidecar.host, sidecar.channel, row.channel),
+        fmtDuration(durationOf(row, sidecar)),
+      ].filter((value) => value && value !== "--:--").join(" | ") || "local sidecar";
+      els.yoinkFactMeta.textContent = state.selectedYoinkSidecar ? "loaded" : "fallback";
+      const speakerHtml = speakers.length
+        ? `<div class="speaker-row">${speakers.map((speaker) => `<span class="speaker-chip">${htmlEscape(speaker)}</span>`).join("")}</div>`
+        : `<div class="job-sub">${podcast ? "Speaker chips are coming with the WhisperX diarization backend update." : "No speaker labels stored for this uoink."}</div>`;
+      const mediaBody = podcast
+        ? `
+          ${waveformHtml(row, sidecar)}
+          ${speakerHtml}
+        `
+        : screenshotGridHtml(row, sidecar);
+      els.yoinkDetail.innerHTML = `
+        <div class="yoink-hero ${podcast ? "podcast" : ""}">
+          ${mediaChipsHtml(row, sidecar)}
+          ${mediaBody}
+        </div>
+        <div class="yoink-section">
+          <div class="yoink-section-head">
+            <div class="panel-title">${podcast ? "Episode transcript" : "Transcript preview"}</div>
+            <div class="localhost">${htmlEscape(transcriptSegments(sidecar).length)} segments</div>
+          </div>
+          ${transcriptPreviewHtml(sidecar, podcast)}
+        </div>
+      `;
+      els.yoinkFacts.innerHTML = yoinkFactsHtml(row, sidecar);
+      loadDetailFileImages();
+    }
+
+    async function loadJsonFile(path) {
+      const token = await getToken();
+      const res = await fetch(`/file?path=${encodeURIComponent(path)}`, {
+        headers: { "X-Uoink-Token": token },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return JSON.parse(await res.text());
+    }
+
+    async function loadDetailFileImages() {
+      const images = [...document.querySelectorAll("img[data-file-img]")];
+      await Promise.all(images.map(async (img) => {
+        const path = img.dataset.fileImg;
+        if (!path) return;
+        try {
+          if (!state.blobUrls.has(path)) {
+            const token = await getToken();
+            const res = await fetch(`/file?path=${encodeURIComponent(path)}`, {
+              headers: { "X-Uoink-Token": token },
+            });
+            if (!res.ok) throw new Error("file unavailable");
+            state.blobUrls.set(path, URL.createObjectURL(await res.blob()));
+          }
+          img.src = state.blobUrls.get(path);
+          img.classList.remove("hidden");
+        } catch (_) {}
+      }));
+    }
+
+    function rowFromCard(card) {
+      const id = card && card.dataset.videoId;
+      const folder = card && card.dataset.folder;
+      const rows = state.library.concat(state.resurface && Array.isArray(state.resurface.worth_revisiting) ? state.resurface.worth_revisiting : []);
+      const found = rows.find((row) => (id && videoIdOf(row) === id) || (folder && folderPathOf(row) === folder));
+      if (found) return found;
+      return {
+        video_id: id || "",
+        folder: folder || "",
+        title: String(card && (card.getAttribute("aria-label") || card.textContent) || "").replace(/^Open\s+/i, "").trim(),
+      };
+    }
+
+    async function openYoinkDetail(row) {
+      state.selectedYoink = row || null;
+      state.selectedYoinkSidecar = null;
+      state.selectedYoinkSidecarError = "";
+      renderYoinkDetail();
+      switchTab("yoink");
+      const sidecarPath = sidecarPathForRow(row);
+      if (!sidecarPath) return;
+      try {
+        state.selectedYoinkSidecar = await loadJsonFile(sidecarPath);
+      } catch (err) {
+        state.selectedYoinkSidecarError = `coming with backend update (${err.message})`;
+      }
+      renderYoinkDetail();
     }
 
     function normalizedScore(row) {
@@ -3413,6 +3941,7 @@
       if (tab === "build") loadBuild();
       if (tab === "script") loadScripts();
       if (tab === "evidence") loadEvidence();
+      if (tab === "yoink") renderYoinkDetail();
       if (tab === "activity") refreshActivity();
       if (tab === "settings") refreshSettings();
     }
@@ -3459,6 +3988,14 @@
       document.getElementById("deriveShotList").addEventListener("click", deriveCurrentShotList);
       els.scriptForm.addEventListener("submit", persistScriptFromForm);
       document.getElementById("reloadEvidence").addEventListener("click", loadEvidence);
+      els.yoinkOpenFolder.addEventListener("click", () => {
+        const folder = folderPathOf(state.selectedYoink);
+        if (folder) authFetch(`/open-folder?path=${encodeURIComponent(folder)}`).catch((err) => showToast(err.message));
+      });
+      els.yoinkEvidence.addEventListener("click", () => {
+        if (!state.selectedYoink) return;
+        openEvidenceFor(videoIdOf(state.selectedYoink), rowTitle(state.selectedYoink));
+      });
       document.querySelectorAll("[data-workspace-tab]").forEach((btn) => {
         btn.addEventListener("click", () => {
           document.querySelectorAll("[data-workspace-tab]").forEach((item) => item.classList.toggle("active", item.dataset.workspaceTab === btn.dataset.workspaceTab));
@@ -3555,11 +4092,10 @@
           return;
         }
         const card = event.target.closest("[data-folder]");
-        if (card && card.dataset.videoId) {
-          openEvidenceFor(card.dataset.videoId, card.getAttribute("aria-label") || "");
+        if (card && (card.dataset.videoId || card.dataset.folder)) {
+          openYoinkDetail(rowFromCard(card));
           return;
         }
-        if (card && card.dataset.folder) authFetch(`/open-folder?path=${encodeURIComponent(card.dataset.folder)}`).catch((err) => showToast(err.message));
         const openPath = event.target.closest("[data-open-path]");
         if (openPath) authFetch(`/open-folder?path=${encodeURIComponent(openPath.dataset.openPath)}`).catch((err) => showToast(err.message));
         const gap = event.target.closest("[data-gap-topic]");
