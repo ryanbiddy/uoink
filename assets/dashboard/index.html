@@ -725,6 +725,109 @@
       line-height: 1.45;
     }
 
+    .workspace-layout {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .workspace-list,
+    .workspace-main {
+      display: grid;
+      gap: 12px;
+    }
+
+    .workspace-card {
+      display: grid;
+      gap: 7px;
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 13px;
+      background: var(--ink-warm);
+      color: var(--cream);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .workspace-card:hover,
+    .workspace-card:focus-visible,
+    .workspace-card.active {
+      outline: none;
+      border-color: rgba(249, 115, 22, 0.52);
+      background: #18120E;
+    }
+
+    .workspace-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .slider-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .example-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .mini-card {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 12px;
+      background: rgba(10, 10, 10, 0.32);
+    }
+
+    .workspace-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .workspace-tab {
+      min-height: 32px;
+      border: 1px solid var(--border);
+      border-radius: var(--pill-radius);
+      padding: 0 12px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .workspace-tab.active {
+      border-color: var(--rust);
+      background: rgba(194, 65, 12, 0.16);
+      color: var(--cream);
+    }
+
+    .workspace-pane {
+      display: none;
+    }
+
+    .workspace-pane.active {
+      display: grid;
+      gap: 10px;
+    }
+
+    .draft-box {
+      min-height: 160px;
+      padding: 12px;
+      resize: vertical;
+    }
+
     .tip {
       margin-top: 18px;
       color: var(--dim);
@@ -1028,6 +1131,7 @@
       .activity-layout,
       .feature-grid,
       .resurface-layout,
+      .workspace-layout,
       .settings-grid,
       .about-grid {
         grid-template-columns: 1fr;
@@ -1044,6 +1148,7 @@
       </div>
       <nav class="nav" aria-label="Sections">
         <button class="nav-button" type="button" data-tab-button="for-you">For You <span class="nav-count" id="forYouNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="build">Build <span class="nav-count" id="buildNavCount">0</span></button>
         <button class="nav-button active" type="button" data-tab-button="library">Library <span class="nav-count" id="libraryNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="activity">Activity <span class="nav-count" id="activityNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="settings">Settings</button>
@@ -1112,6 +1217,83 @@
               <div class="localhost" id="anchorMeta">rated anchors + engagement</div>
             </div>
             <div class="panel-body" id="anchorRows"></div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-build" data-tab-panel="build">
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">Build</div>
+              <h1>Plan a video <em>against your corpus.</em></h1>
+              <p class="lede">Drop a working hook, format, and topic. Uoink assembles examples, audience questions, and your own channel patterns for an agent or a manual critique pass.</p>
+            </div>
+            <button class="button ghost" type="button" id="reloadBuild">Reload</button>
+          </div>
+
+          <div class="workspace-layout">
+            <aside class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Saved workspaces</div>
+                <span class="nav-count" id="workspaceCount">0</span>
+              </div>
+              <div class="panel-body">
+                <form class="workspace-form" id="workspaceForm">
+                  <input class="field" id="workspaceHook" type="text" placeholder="working hook or angle">
+                  <select class="field" id="workspaceFormat"></select>
+                  <input class="field" id="workspaceTopic" type="text" placeholder="topic, e.g. AI agents">
+                  <input class="field" id="workspaceChannel" type="text" placeholder="your channel handle (optional)">
+                  <div class="slider-row">
+                    <input id="workspaceExamples" type="range" min="4" max="20" step="1" value="10">
+                    <span id="workspaceExamplesLabel">10 examples</span>
+                  </div>
+                  <label class="inline-row"><input id="workspaceTaste" type="checkbox" checked> Use my taste anchors</label>
+                  <label class="inline-row"><input id="workspaceSelf" type="checkbox" checked> Use my channel's overperformer patterns</label>
+                  <button class="button primary" type="submit">Assemble workspace</button>
+                </form>
+                <div class="workspace-list" id="workspaceList"></div>
+              </div>
+            </aside>
+
+            <section class="workspace-main">
+              <div class="panel">
+                <div class="panel-head">
+                  <div class="panel-title" id="workspaceTitle">Workspace</div>
+                  <button class="button" type="button" id="assembleCurrentWorkspace">Assemble</button>
+                </div>
+                <div class="panel-body" id="workspaceSummary">
+                  <div class="job-row">
+                    <div class="job-title">Planning a video?</div>
+                    <div class="job-sub">Create a workspace to assemble inspiration from your corpus.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-head">
+                  <div class="panel-title">Workspace view</div>
+                  <div class="localhost" id="workspaceMeta">no workspace selected</div>
+                </div>
+                <div class="panel-body">
+                  <div class="workspace-tabs" role="tablist" aria-label="Workspace views">
+                    <button class="workspace-tab active" type="button" data-workspace-tab="patterns">Hook patterns</button>
+                    <button class="workspace-tab" type="button" data-workspace-tab="questions">Audience questions</button>
+                    <button class="workspace-tab" type="button" data-workspace-tab="performance">Your past performance</button>
+                    <button class="workspace-tab" type="button" data-workspace-tab="critique">Critique your draft</button>
+                  </div>
+                  <div class="workspace-pane active" data-workspace-pane="patterns" id="workspacePatterns"></div>
+                  <div class="workspace-pane" data-workspace-pane="questions" id="workspaceQuestions"></div>
+                  <div class="workspace-pane" data-workspace-pane="performance" id="workspacePerformance"></div>
+                  <div class="workspace-pane" data-workspace-pane="critique">
+                    <textarea class="field draft-box" id="workspaceDraft" placeholder="Paste a draft hook, outline, or rough script."></textarea>
+                    <div class="inline-row">
+                      <button class="button primary" type="button" id="runWorkspaceCritique">Run critique</button>
+                      <span class="soft-note">Model-agnostic: stores findings when an agent posts them back.</span>
+                    </div>
+                    <div id="workspaceCritiqueResult"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
         </section>
 
@@ -1376,6 +1558,9 @@
       facets: null,
       facetsFallback: false,
       resurface: null,
+      workspaces: [],
+      currentWorkspace: null,
+      workspaceAssembly: null,
     };
 
     const FALLBACK_FACETS = {
@@ -1395,6 +1580,26 @@
       gapCount: document.getElementById("gapCount"),
       anchorRows: document.getElementById("anchorRows"),
       anchorMeta: document.getElementById("anchorMeta"),
+      buildNavCount: document.getElementById("buildNavCount"),
+      workspaceCount: document.getElementById("workspaceCount"),
+      workspaceList: document.getElementById("workspaceList"),
+      workspaceForm: document.getElementById("workspaceForm"),
+      workspaceHook: document.getElementById("workspaceHook"),
+      workspaceFormat: document.getElementById("workspaceFormat"),
+      workspaceTopic: document.getElementById("workspaceTopic"),
+      workspaceChannel: document.getElementById("workspaceChannel"),
+      workspaceExamples: document.getElementById("workspaceExamples"),
+      workspaceExamplesLabel: document.getElementById("workspaceExamplesLabel"),
+      workspaceTaste: document.getElementById("workspaceTaste"),
+      workspaceSelf: document.getElementById("workspaceSelf"),
+      workspaceTitle: document.getElementById("workspaceTitle"),
+      workspaceSummary: document.getElementById("workspaceSummary"),
+      workspaceMeta: document.getElementById("workspaceMeta"),
+      workspacePatterns: document.getElementById("workspacePatterns"),
+      workspaceQuestions: document.getElementById("workspaceQuestions"),
+      workspacePerformance: document.getElementById("workspacePerformance"),
+      workspaceDraft: document.getElementById("workspaceDraft"),
+      workspaceCritiqueResult: document.getElementById("workspaceCritiqueResult"),
       runningPill: document.getElementById("runningPill"),
       portLabel: document.getElementById("portLabel"),
       libraryGrid: document.getElementById("libraryGrid"),
@@ -1742,6 +1947,189 @@
         : emptyPanelRow("No performing anchors yet.", "Anchor cards appear after engagement events or taste memory are available.");
     }
 
+    function workspaceFormatOptions() {
+      const formats = (state.facets && state.facets.format) || FALLBACK_FACETS.format;
+      return `<option value="">Format: any</option>` + formats.map((value) => `<option value="${htmlEscape(value)}">${htmlEscape(value)}</option>`).join("");
+    }
+
+    function syncWorkspaceOptions() {
+      const current = els.workspaceFormat.value;
+      els.workspaceFormat.innerHTML = workspaceFormatOptions();
+      els.workspaceFormat.value = current;
+    }
+
+    async function loadBuild() {
+      syncWorkspaceOptions();
+      try {
+        const data = await authFetch("/workspaces?limit=50");
+        state.workspaces = Array.isArray(data.workspaces) ? data.workspaces : [];
+      } catch (err) {
+        state.workspaces = [];
+        els.workspaceList.innerHTML = emptyPanelRow("Workspaces unavailable.", err.message);
+      }
+      renderWorkspaceList();
+      if (!state.currentWorkspace && state.workspaces.length) {
+        await selectWorkspace(state.workspaces[0].id);
+      } else if (!state.workspaces.length) {
+        renderWorkspaceEmpty();
+      }
+    }
+
+    function renderWorkspaceList() {
+      els.buildNavCount.textContent = String(state.workspaces.length);
+      els.workspaceCount.textContent = String(state.workspaces.length);
+      if (!state.workspaces.length) {
+        els.workspaceList.innerHTML = `<div class="soft-note">No saved workspaces yet.</div>`;
+        return;
+      }
+      els.workspaceList.innerHTML = state.workspaces.map((ws) => `
+        <button class="workspace-card ${state.currentWorkspace && state.currentWorkspace.id === ws.id ? "active" : ""}" type="button" data-workspace-id="${htmlEscape(ws.id)}">
+          <strong>${htmlEscape(ws.hook_target || ws.topic || "Untitled workspace")}</strong>
+          <span class="job-sub">${htmlEscape([ws.format, ws.topic, ws.n_examples ? `${ws.n_examples} examples` : ""].filter(Boolean).join(" | "))}</span>
+          <span class="soft-note">${htmlEscape(fmtAge(ws.updated_at || ws.created_at))}</span>
+        </button>
+      `).join("");
+    }
+
+    function renderWorkspaceEmpty() {
+      els.workspaceTitle.textContent = "Workspace";
+      els.workspaceMeta.textContent = "no workspace selected";
+      els.workspaceSummary.innerHTML = emptyPanelRow("Planning a video?", "Drop a working hook, format, and topic to assemble inspiration from your corpus.");
+      els.workspacePatterns.innerHTML = emptyPanelRow("No assembled examples yet.", "Create a workspace, then assemble it.");
+      els.workspaceQuestions.innerHTML = emptyPanelRow("No audience questions yet.", "Audience questions appear when assembled examples include comment data.");
+      els.workspacePerformance.innerHTML = emptyPanelRow("No self-channel snapshot yet.", "Add your channel handle to compare against your own overperformers.");
+      els.workspaceCritiqueResult.innerHTML = "";
+    }
+
+    async function selectWorkspace(workspaceId) {
+      if (!workspaceId) return;
+      try {
+        const data = await authFetch(`/workspace/${encodeURIComponent(workspaceId)}`);
+        state.currentWorkspace = data.workspace;
+        state.workspaceAssembly = null;
+        renderWorkspaceList();
+        renderWorkspaceDetail(data.workspace, data.critique_log || []);
+      } catch (err) {
+        showToast(`Could not load workspace: ${err.message}`);
+      }
+    }
+
+    function renderWorkspaceDetail(ws, critiqueLog = []) {
+      if (!ws) return renderWorkspaceEmpty();
+      const assembledIds = Array.isArray(ws.assembled_yoinks) ? ws.assembled_yoinks : [];
+      els.workspaceTitle.textContent = ws.hook_target || ws.topic || "Workspace";
+      els.workspaceMeta.textContent = `${assembledIds.length} assembled | ${critiqueLog.length} critique notes`;
+      els.workspaceSummary.innerHTML = `
+        <div class="job-row">
+          <div class="job-title">${htmlEscape(ws.hook_target || "No hook target yet")}</div>
+          <div class="job-sub">${htmlEscape([ws.format, ws.topic, ws.your_channel, `${ws.n_examples || 10} examples`].filter(Boolean).join(" | "))}</div>
+        </div>
+      `;
+      renderWorkspacePanes(state.workspaceAssembly, critiqueLog);
+    }
+
+    function miniExampleCard(row) {
+      return `
+        <div class="mini-card">
+          <div class="job-title">${htmlEscape(rowTitle(row))}</div>
+          <div class="job-sub">${htmlEscape([row.channel, row.performance_tier || row.performance, prettyHook(row.hook_type)].filter(Boolean).join(" | "))}</div>
+          <span class="topic-chip">${htmlEscape(row.topic || "topic")}</span>
+        </div>
+      `;
+    }
+
+    function patternClusters(rows) {
+      const groups = new Map();
+      (Array.isArray(rows) ? rows : []).forEach((row) => {
+        const key = prettyHook(row.hook_type || "other");
+        const arr = groups.get(key) || [];
+        arr.push(row);
+        groups.set(key, arr);
+      });
+      return [...groups.entries()].map(([label, items]) => `
+        <div class="job-row">
+          <div class="job-title">${htmlEscape(label)} (${items.length})</div>
+          <div class="job-sub">${htmlEscape(items.slice(0, 3).map(rowTitle).join(" | "))}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderWorkspacePanes(assembly, critiqueLog = []) {
+      const assembled = assembly && Array.isArray(assembly.assembled) ? assembly.assembled : [];
+      els.workspacePatterns.innerHTML = assembled.length
+        ? `<div class="example-list">${assembled.slice(0, 10).map(miniExampleCard).join("")}</div>${patternClusters(assembled)}`
+        : emptyPanelRow("No assembled examples yet.", "Click Assemble to pull a ranked corpus slice.");
+      const questions = assembly && Array.isArray(assembly.audience_questions) ? assembly.audience_questions : [];
+      els.workspaceQuestions.innerHTML = questions.length
+        ? questions.slice(0, 12).map((q) => `<div class="job-row"><div class="job-title">${htmlEscape(q.question || "")}</div><div class="job-sub">${htmlEscape(q.likes || 0)} likes | ${htmlEscape(q.video_id || "")}</div></div>`).join("")
+        : emptyPanelRow("No audience questions available.", "Comment Intelligence data will make this section sharper.");
+      const selfSnapshot = assembly && assembly.self_snapshot;
+      els.workspacePerformance.innerHTML = selfSnapshot && selfSnapshot.ok !== false
+        ? `<pre class="mono-box">${htmlEscape(JSON.stringify(selfSnapshot, null, 2))}</pre>`
+        : emptyPanelRow("No self-channel performance snapshot.", "Set your channel handle in the workspace form to pull your own patterns.");
+      if (critiqueLog.length && !els.workspaceCritiqueResult.innerHTML) {
+        els.workspaceCritiqueResult.innerHTML = critiqueLog.slice(0, 3).map((row) => `<div class="job-row"><div class="job-title">Critique ${htmlEscape(fmtAge(row.ts_utc))}</div><pre class="mono-box">${htmlEscape(JSON.stringify(row.findings || {}, null, 2))}</pre></div>`).join("");
+      }
+    }
+
+    async function createWorkspaceFromForm(event) {
+      event.preventDefault();
+      const payload = {
+        hook_target: els.workspaceHook.value.trim() || null,
+        format: els.workspaceFormat.value || null,
+        topic: els.workspaceTopic.value.trim() || null,
+        your_channel: els.workspaceSelf.checked ? (els.workspaceChannel.value.trim() || null) : null,
+        n_examples: Number(els.workspaceExamples.value || 10),
+        notes: els.workspaceTaste.checked ? "use_taste_anchors=true" : "use_taste_anchors=false",
+      };
+      try {
+        const data = await authFetch("/workspaces", { method: "POST", body: JSON.stringify(payload) });
+        state.currentWorkspace = data.workspace;
+        showToast("Workspace created.");
+        await loadBuild();
+        if (data.workspace && data.workspace.id) await assembleCurrentWorkspace();
+      } catch (err) {
+        showToast(`Could not create workspace: ${err.message}`);
+      }
+    }
+
+    async function assembleCurrentWorkspace() {
+      const ws = state.currentWorkspace;
+      if (!ws || !ws.id) return showToast("Create or select a workspace first.");
+      try {
+        const body = {
+          workspace_id: ws.id,
+          format: ws.format || null,
+          topic: ws.topic || null,
+          hook_target: ws.hook_target || null,
+          your_channel: ws.your_channel || null,
+          n_examples: Number(ws.n_examples || els.workspaceExamples.value || 10),
+        };
+        const data = await authFetch("/workspace/assemble", { method: "POST", body: JSON.stringify(body) });
+        state.workspaceAssembly = data;
+        showToast("Workspace assembled.");
+        renderWorkspaceDetail(ws);
+      } catch (err) {
+        showToast(`Could not assemble: ${err.message}`);
+      }
+    }
+
+    async function runWorkspaceCritique() {
+      const ws = state.currentWorkspace;
+      const draft = els.workspaceDraft.value.trim();
+      if (!ws || !ws.id) return showToast("Select a workspace first.");
+      if (!draft) return showToast("Paste a draft before running critique.");
+      try {
+        const data = await authFetch("/workspace/critique", {
+          method: "POST",
+          body: JSON.stringify({ workspace_id: ws.id, draft_text: draft }),
+        });
+        els.workspaceCritiqueResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Critique context ready")}</div><pre class="mono-box">${htmlEscape(JSON.stringify(data, null, 2))}</pre></div>`;
+      } catch (err) {
+        showToast(`Could not run critique: ${err.message}`);
+      }
+    }
+
     function paramsFromFilters(extra = {}) {
       const params = new URLSearchParams();
       const q = state.filters.q.trim();
@@ -1965,6 +2353,7 @@
       syncOptions(els.formatFilter, "Format: all", facets.format || FALLBACK_FACETS.format);
       syncOptions(els.performanceFilter, "Performance: all", facets.performance || facets.performance_tier || FALLBACK_FACETS.performance);
       syncOptions(els.lengthFilter, "Length: all", facets.length || facets.length_bucket || FALLBACK_FACETS.length);
+      syncWorkspaceOptions();
       els.facetStatus.classList.toggle("hidden", !state.facetsFallback);
       els.facetStatus.title = state.facetsFallback
         ? "Coming with v2.5 facets. These fallback enums are scaffolded until /facets/taxonomy is available."
@@ -2385,6 +2774,7 @@
       document.querySelectorAll("[data-tab-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.tabButton === tab));
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
       if (tab === "for-you") loadForYou();
+      if (tab === "build") loadBuild();
       if (tab === "activity") refreshActivity();
       if (tab === "settings") refreshSettings();
     }
@@ -2417,6 +2807,19 @@
       });
       document.getElementById("refreshForYou").addEventListener("click", loadForYou);
       els.loadMore.addEventListener("click", () => loadLibrary());
+      document.getElementById("reloadBuild").addEventListener("click", loadBuild);
+      els.workspaceExamples.addEventListener("input", () => {
+        els.workspaceExamplesLabel.textContent = `${els.workspaceExamples.value} examples`;
+      });
+      els.workspaceForm.addEventListener("submit", createWorkspaceFromForm);
+      document.getElementById("assembleCurrentWorkspace").addEventListener("click", assembleCurrentWorkspace);
+      document.getElementById("runWorkspaceCritique").addEventListener("click", runWorkspaceCritique);
+      document.querySelectorAll("[data-workspace-tab]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-workspace-tab]").forEach((item) => item.classList.toggle("active", item.dataset.workspaceTab === btn.dataset.workspaceTab));
+          document.querySelectorAll("[data-workspace-pane]").forEach((pane) => pane.classList.toggle("active", pane.dataset.workspacePane === btn.dataset.workspaceTab));
+        });
+      });
       document.getElementById("refreshActivity").addEventListener("click", refreshActivity);
       document.getElementById("cancelAll").addEventListener("click", async () => {
         const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(String(job.state || "").toLowerCase()) && job.id);
@@ -2506,6 +2909,8 @@
           switchTab("library");
           loadLibrary({ reset: true });
         }
+        const workspaceButton = event.target.closest("[data-workspace-id]");
+        if (workspaceButton) selectWorkspace(workspaceButton.dataset.workspaceId);
         const cancel = event.target.closest("[data-cancel]");
         if (cancel) postHelper("/queue/cancel", { pending_id: cancel.dataset.cancel });
         const cancelJob = event.target.closest("[data-cancel-job]");
@@ -2597,6 +3002,7 @@
       await refreshJobs();
       await loadLibrary({ reset: true });
       await loadForYou();
+      await loadBuild();
       await refreshActivity();
       connectJobsStream();
       setInterval(refreshHealth, 10000);
