@@ -56,10 +56,18 @@ _PENDING_TABLE_CAP = 1000
 
 # Columns of the `yoinks` table, in declaration order. video_id is the
 # primary key and is handled separately in the upsert.
+# v2.5: per-row data-shape version. v2.5+ writers set CURRENT_YOINK_SCHEMA via
+# the row record; v2.1.x rows default to 1 (set by migration 0006). Lets v2.5
+# readers tell "this row predates facets / engagement" without inspecting
+# every nullable column. Distinct from the SQL migration version (which is
+# tracked by the schema_version *table*).
+CURRENT_YOINK_SCHEMA = 2
+
 _YOINK_COLUMNS = (
     "video_id", "slug", "channel", "title", "topic", "hook_type",
     "yoinked_at", "corpus_path", "sidecar_path", "health_score_json",
     "metadata_json",
+    "schema_version",
 )
 
 _JOB_COLUMNS = (
@@ -341,6 +349,12 @@ class Index:
         video_id = record.get("video_id")
         if not video_id:
             raise ValueError("upsert_yoink: record requires a video_id")
+        # v2.5: stamp the per-row data-shape version on every new write. If a
+        # caller already set it (e.g., a backfill writing an older shape on
+        # purpose) honour that; otherwise default to CURRENT_YOINK_SCHEMA so
+        # the NOT NULL column always has a value.
+        if record.get("schema_version") is None:
+            record = {**record, "schema_version": CURRENT_YOINK_SCHEMA}
         values = [record.get(col) for col in _YOINK_COLUMNS]
         placeholders = ", ".join("?" * len(_YOINK_COLUMNS))
         update_set = ", ".join(
@@ -528,6 +542,101 @@ class Index:
             r["entity_count"] = ec_map.get(vid, 0)
             r["top_entities"] = te_map.get(vid, [])
         return rows
+
+    # ---- v2.5 S2 engagement memory ----------------------------------------
+    # Pure local instrumentation. NO outbound calls. Value score is a
+    # time-decayed weighted sum:
+    #
+    #   weights:
+    #     opened       1.0    -- corpus markdown opened
+    #     search_hit   0.3    -- appeared in a search results page
+    #     search_click 1.5    -- clicked through from search
+    #     paste        3.0    -- corpus pasted somewhere (strong signal of use)
+    #     cite         4.0    -- cited by name in a user doc (strongest)
+    #     recent_open  0.5    -- opened via the Recent list
+    #
+    #   decay: half-life = 30 days. decayed = weight * exp(-ln(2) * age_days/30)
+    #
+    # Formula is decoupled from the row write -- log_engagement appends an
+    # event; engagement_signal()/top_engaged() compute the score on read so we
+    # can tune the formula without rewriting history.
+
+    _ENGAGEMENT_EVENT_TYPES = (
+        "opened", "search_hit", "search_click", "paste", "cite", "recent_open",
+    )
+    _ENGAGEMENT_SOURCES = ("popup", "dashboard", "mcp", "extension")
+    _ENGAGEMENT_WEIGHTS = {
+        "opened": 1.0, "search_hit": 0.3, "search_click": 1.5,
+        "paste": 3.0, "cite": 4.0, "recent_open": 0.5,
+    }
+    _ENGAGEMENT_HALF_LIFE_DAYS = 30.0
+
+    def log_engagement(self, video_id: str, event_type: str, source: str,
+                       *, ts_utc: str | None = None) -> int:
+        """Append an engagement event. Returns the new row id."""
+        if not video_id:
+            raise ValueError("log_engagement: video_id required")
+        if event_type not in self._ENGAGEMENT_EVENT_TYPES:
+            raise ValueError(f"event_type must be one of {self._ENGAGEMENT_EVENT_TYPES}")
+        if source not in self._ENGAGEMENT_SOURCES:
+            raise ValueError(f"source must be one of {self._ENGAGEMENT_SOURCES}")
+        ts = ts_utc or _now_iso()
+        with self._lock:
+            cur = self._conn.execute(
+                "INSERT INTO engagement_events (video_id, event_type, ts_utc, source) "
+                "VALUES (?, ?, ?, ?)",
+                (video_id, event_type, ts, source))
+            return cur.lastrowid or 0
+
+    def _decayed(self, weight: float, age_days: float) -> float:
+        import math
+        return weight * math.exp(-math.log(2.0) * max(age_days, 0.0)
+                                  / self._ENGAGEMENT_HALF_LIFE_DAYS)
+
+    def engagement_signal(self, video_id: str) -> dict:
+        """Compute the time-decayed value_score + per-type counts + last event
+        timestamp for one video. Pure read; never touches the network."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT event_type, ts_utc FROM engagement_events "
+                "WHERE video_id=? ORDER BY ts_utc",
+                (video_id,)).fetchall()
+        if not rows:
+            return {"video_id": video_id, "value_score": 0.0,
+                    "event_counts": {}, "last_event_ts": None,
+                    "total_events": 0}
+        now = datetime.now()
+        counts: dict[str, int] = {}
+        score = 0.0
+        last_ts = None
+        for r in rows:
+            etype = r["event_type"]
+            counts[etype] = counts.get(etype, 0) + 1
+            last_ts = r["ts_utc"]
+            try:
+                ts = datetime.fromisoformat(r["ts_utc"])
+                age_days = (now - ts).total_seconds() / 86400.0
+            except (ValueError, TypeError):
+                age_days = 0.0
+            score += self._decayed(self._ENGAGEMENT_WEIGHTS.get(etype, 0.0),
+                                    age_days)
+        return {"video_id": video_id,
+                "value_score": round(score, 4),
+                "event_counts": counts,
+                "last_event_ts": last_ts,
+                "total_events": len(rows)}
+
+    def top_engaged(self, limit: int = 20) -> list[dict]:
+        """Top-N videos by current value_score. Computed in Python because the
+        formula uses exp() decay -- SQLite scalar funcs would work too, but
+        Python's clarity beats SQLite math at our scale (low-thousands events
+        on a personal corpus)."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT DISTINCT video_id FROM engagement_events").fetchall()
+        scored = [self.engagement_signal(r["video_id"]) for r in rows]
+        scored.sort(key=lambda s: s["value_score"], reverse=True)
+        return scored[: max(1, min(int(limit), 500))]
 
     def get_health(self, video_id: str) -> dict | None:
         """Return the parsed health-score dict for a video, or None."""
