@@ -440,6 +440,56 @@ def _valid_iso_date(value: str) -> bool:
         return False
 
 
+# ---- v3.1 P2 role inference -----------------------------------------------
+# Bounded enum; mixed = "show me everything, don't bias the dashboard."
+ROLE_CREATOR = "creator"
+ROLE_RESEARCHER = "researcher"
+ROLE_MARKETER = "marketer"
+ROLE_MIXED = "mixed"
+_ROLE_ENUM = (ROLE_CREATOR, ROLE_RESEARCHER, ROLE_MARKETER, ROLE_MIXED)
+
+
+def _normalize_role(value) -> str:
+    """Clamp a settings.role value to the bounded enum. Unknown values
+    (including None and pre-v3.1 settings.json files that omit the field)
+    fall back to ``mixed`` so the dashboard surfaces every facet."""
+    if isinstance(value, str):
+        v = value.strip().lower()
+        if v in _ROLE_ENUM:
+            return v
+    return ROLE_MIXED
+
+
+def _role_facet_emphasis(role: str) -> dict:
+    """Return the per-role dashboard sort + filter-chip emphasis the
+    dashboard reads on load. Pure mapping; the dashboard owns the UI."""
+    role = _normalize_role(role)
+    if role == ROLE_CREATOR:
+        return {
+            "primary": ["hook_type", "format", "performance_tier"],
+            "secondary": ["length_bucket", "channel"],
+            "default_sort": "performance_tier",
+        }
+    if role == ROLE_RESEARCHER:
+        return {
+            "primary": ["topic", "entity", "channel"],
+            "secondary": ["hook_type", "yoinked_at"],
+            "default_sort": "yoinked_at",
+        }
+    if role == ROLE_MARKETER:
+        return {
+            "primary": ["channel", "audience", "hook_type"],
+            "secondary": ["performance_tier", "topic"],
+            "default_sort": "performance_tier",
+        }
+    # mixed
+    return {
+        "primary": ["topic", "hook_type", "format", "channel"],
+        "secondary": ["performance_tier", "length_bucket"],
+        "default_sort": "yoinked_at",
+    }
+
+
 # ---- Settings (v2.1 BYO Anthropic key) ------------------------------------
 class CredentialStoreError(RuntimeError):
     """Raised when the OS credential store cannot read/write a saved key."""
@@ -453,6 +503,11 @@ def _default_settings() -> dict:
         "clipboard_screenshot_cap": CLIPBOARD_SCREENSHOT_CAP_DEFAULT,
         "transcript_reliability_auto_check": False,
         "claim_verification_enabled": False,   # v3 A2 -- opt-in
+        # v3.1 P2 role inference -- one of: creator, researcher, marketer,
+        # mixed. Default "mixed" so the dashboard surfaces every facet
+        # axis until the user (or onboarding) picks. Drives Library
+        # default sort + filter-chip emphasis per ROADMAP P2.
+        "role": "mixed",
         "anthropic_key_invalid": False,
         # v2.1 rename: set True after the one-time "Yoink is now Uoink"
         # post-migration toast has fired, so it never repeats.
@@ -646,6 +701,9 @@ def _public_settings(data: dict | None = None) -> dict:
         # copy at <vault>/Uoink/. Vault picker UI is a Codex/AG follow-up
         # PR; this field is the contract.
         "obsidian_vault_path": (data.get("obsidian_vault_path") or "") or None,
+        # v3.1 P2 -- role drives dashboard default sort + filter chip
+        # emphasis. Always returned; the dashboard reads this on load.
+        "role": _normalize_role(data.get("role")),
     }
 
 
@@ -5848,6 +5906,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_settings_get()
         if bare == "/settings/pricing":
             return self._handle_settings_pricing()
+        if bare == "/role/emphasis":
+            return self._handle_role_emphasis()
         if bare == "/update/check":
             return self._handle_update_check()
         if bare == "/engagement/scores":
@@ -5966,6 +6026,20 @@ class Handler(BaseHTTPRequestHandler):
 
     def _handle_settings_pricing(self):
         self._send_json(200, {"ok": True, "pricing": _anthropic_pricing_payload()})
+
+    def _handle_role_emphasis(self):
+        """GET /role/emphasis -- dashboard reads this on load to bias
+        the Library default sort + filter-chip order. Token-gated. Pure
+        mapping from settings.role -> emphasis dict; no model, no
+        outbound."""
+        if not self._require_token():
+            return
+        role = _normalize_role((_read_settings() or {}).get("role"))
+        self._send_json(200, {
+            "ok": True, "role": role,
+            "emphasis": _role_facet_emphasis(role),
+            "supported_roles": list(_ROLE_ENUM),
+        })
 
     def _handle_update_check(self):
         """Notify-only update check (Tier 2). Token-gated; cached >=24h on disk.
@@ -6724,7 +6798,8 @@ class Handler(BaseHTTPRequestHandler):
         )
         integer_fields = ("clipboard_screenshot_cap",)
         extra_fields = ("output_dir", "autostart", "topics",
-                         "obsidian_vault_path")  # Tier 2 + v2.5 S4
+                         "obsidian_vault_path",   # Tier 2 + v2.5 S4
+                         "role")                  # v3.1 P2
         if (
             not any(f in body for f in boolean_fields)
             and not any(f in body for f in integer_fields)
@@ -6830,6 +6905,20 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(400, {
                     "ok": False,
                     "error": "obsidian_vault_path must be a string or null"})
+        if "role" in body:
+            raw_role = body.get("role")
+            if raw_role is None or raw_role == "":
+                data["role"] = ROLE_MIXED
+            elif isinstance(raw_role, str):
+                norm = raw_role.strip().lower()
+                if norm not in _ROLE_ENUM:
+                    return self._send_json(400, {
+                        "ok": False,
+                        "error": f"role must be one of {list(_ROLE_ENUM)}"})
+                data["role"] = norm
+            else:
+                return self._send_json(400, {
+                    "ok": False, "error": "role must be a string"})
         if "topics" in body:
             err = _validate_topics(body.get("topics"))
             if err:

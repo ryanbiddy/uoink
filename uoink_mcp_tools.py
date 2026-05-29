@@ -597,6 +597,42 @@ def get_user_taste(_args: dict[str, Any]) -> dict[str, Any]:
     return _ok(**res)
 
 
+def get_user_role(_args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 P2: report the user's persisted role + the resolved
+    dashboard emphasis (primary/secondary chip order + default sort).
+    Read-only; no model, no outbound."""
+    server = _b()
+    try:
+        data = server._read_settings() or {}
+        role = server._normalize_role(data.get("role"))
+        emphasis = server._role_facet_emphasis(role)
+    except Exception as e:
+        return _err(f"get_user_role failed: {e}")
+    return _ok(role=role, emphasis=emphasis,
+                supported_roles=list(server._ROLE_ENUM))
+
+
+def set_user_role(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 P2: persist the user's role choice. One of creator /
+    researcher / marketer / mixed. The dashboard reads this on load
+    via GET /role/emphasis to reshape its Library default + filter
+    chips."""
+    server = _b()
+    role = args.get("role")
+    if not isinstance(role, str):
+        return _err("role (string) is required")
+    norm = role.strip().lower()
+    if norm not in server._ROLE_ENUM:
+        return _err(f"role must be one of {list(server._ROLE_ENUM)}")
+    try:
+        data = server._read_settings() or {}
+        data["role"] = norm
+        server._write_settings(data)
+    except Exception as e:
+        return _err(f"set_user_role failed: {e}")
+    return _ok(role=norm, emphasis=server._role_facet_emphasis(norm))
+
+
 def get_user_memory(_args: dict[str, Any]) -> dict[str, Any]:
     """v2.5 S4 user memory: return the free-form USER.md content + path.
     Skeleton is seeded on first read so an agent always gets a starting
@@ -1306,6 +1342,35 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         input_schema=_schema({}, []),
         handler=get_schema_version,
         rate_limiter=_RateLimiter(60),
+    ),
+    "get_user_role": ToolSpec(
+        name="get_user_role",
+        description=(
+            "v3.1 P2: report the user's persisted role (creator | "
+            "researcher | marketer | mixed) + the dashboard emphasis "
+            "(primary/secondary chip order + default sort) the helper "
+            "computes from it. Read-only."
+        ),
+        input_schema=_schema({}, []),
+        handler=get_user_role,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "set_user_role": ToolSpec(
+        name="set_user_role",
+        description=(
+            "v3.1 P2: persist the user's role choice. Drives Library "
+            "default sort + filter-chip emphasis on the dashboard. "
+            "Bounded enum -- one of creator | researcher | marketer | "
+            "mixed."
+        ),
+        input_schema=_schema({
+            "role": {
+                "type": "string",
+                "enum": ["creator", "researcher", "marketer", "mixed"],
+            },
+        }, ["role"]),
+        handler=set_user_role,
+        rate_limiter=_RateLimiter(30),
     ),
     "get_user_taste": ToolSpec(
         name="get_user_taste",
