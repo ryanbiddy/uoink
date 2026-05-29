@@ -551,7 +551,7 @@ function renderAICostEstimate() {
 }
 
 function setCIControlsEnabled(enabled) {
-  for (const el of [
+  const els = [
     ciEnabled,
     ciKeyInput,
     ciSaveBtn,
@@ -560,8 +560,23 @@ function setCIControlsEnabled(enabled) {
     hookTypeEnabled,
     smartScreenshotPickerEnabled,
     clipboardScreenshotCap,
-  ]) {
+    ycChannelInput,
+    ycAddBtn,
+    ycRecognizeBtn,
+    ctWorkspaceFormat,
+    ctTargetLength,
+    ctObsidianPath,
+    ctObsidianMirror,
+    cvEnabled,
+    cvSources,
+  ];
+  for (const el of els) {
     if (el) el.disabled = !enabled;
+  }
+  if (ctStyleSourceRadios) {
+    for (const r of ctStyleSourceRadios) {
+      r.disabled = !enabled;
+    }
   }
   if (!enabled) setCIStatus("Start Uoink Server to manage settings.", "warn");
   if (!enabled && aiCostEstimate) aiCostEstimate.classList.add("hidden");
@@ -591,6 +606,38 @@ function renderCISettings(settings) {
   setCIStatus(settings.anthropic_key_set ? "Key set" : "Key not set.",
               settings.anthropic_key_set ? "ok" : "warn");
   renderAICostEstimate();
+
+  // Populate Your Channels
+  yourChannelsList = settings.your_channels || [];
+  renderYcList();
+  
+  // Populate Creator Tools
+  if (ctWorkspaceFormat) ctWorkspaceFormat.value = settings.default_workspace_format || "markdown";
+  if (ctTargetLength) {
+    const len = settings.default_target_length || "5m";
+    const lenToVal = { "30s": 0, "60s": 1, "5m": 2, "15m": 3, "30m": 4 };
+    ctTargetLength.value = lenToVal[len] !== undefined ? lenToVal[len] : 2;
+    updateTargetLengthDisplay(ctTargetLength.value);
+  }
+  if (ctStyleSourceRadios) {
+    const source = settings.style_anchors_source || "taste";
+    for (const r of ctStyleSourceRadios) {
+      r.checked = r.value === source;
+    }
+  }
+  if (ctObsidianPath) ctObsidianPath.value = settings.obsidian_vault_path || "";
+  if (ctObsidianMirror) ctObsidianMirror.checked = !!settings.mirror_scripts_to_obsidian;
+  
+  // Populate Claim Verification
+  if (cvEnabled) cvEnabled.checked = !!settings.claim_verification_enabled;
+  if (cvSources) {
+    const sources = Array.isArray(settings.default_evidence_sources)
+      ? settings.default_evidence_sources.join("\n")
+      : (settings.default_evidence_sources || "");
+    cvSources.value = sources;
+  }
+  
+  updateCreatorToolsVisibility();
 }
 
 async function fetchPricingWithToken(token) {
@@ -1367,11 +1414,338 @@ function renderTasteAnchors(data) {
   renderTasteAnchorsList(anchorsChannelsList, data.admired_channels || data.channels || [], "channel", "No admired channels set.");
 }
 
+// ---- v3 Setup settings additions -----------------------------------------
+const ycChannelInput = document.getElementById("yc-channel-input");
+const ycAddBtn = document.getElementById("yc-add-btn");
+const ycList = document.getElementById("yc-list");
+const ycRecognizeBtn = document.getElementById("yc-recognize-btn");
+const ycStatus = document.getElementById("yc-status");
+
+const creatorToolsSection = document.getElementById("creator-tools-settings");
+const ctWorkspaceFormat = document.getElementById("ct-workspace-format");
+const ctTargetLength = document.getElementById("ct-target-length");
+const ctLengthDisplay = document.getElementById("ct-length-display");
+const ctStyleSourceRadios = document.getElementsByName("ct-style-source");
+const ctScriptsPath = document.getElementById("ct-scripts-path");
+const ctObsidianPath = document.getElementById("ct-obsidian-path");
+const ctObsidianMirror = document.getElementById("ct-obsidian-mirror");
+
+const cvEnabled = document.getElementById("cv-enabled");
+const cvSources = document.getElementById("cv-sources");
+const cvOverrideInfo = document.getElementById("cv-override-info");
+
+const settingsPendingBanner = document.getElementById("settings-pending-banner");
+
+let yourChannelsList = [];
+
+function renderYcList() {
+  if (!ycList) return;
+  ycList.innerHTML = "";
+  if (yourChannelsList.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "sub";
+    empty.textContent = "No channels added yet.";
+    ycList.appendChild(empty);
+    return;
+  }
+  
+  yourChannelsList.forEach((chan, idx) => {
+    const row = document.createElement("div");
+    row.className = "correction-row yc-item";
+    row.style.margin = "4px 0";
+    
+    const leftWrap = document.createElement("div");
+    const nameVal = document.createElement("div");
+    nameVal.className = "correction-title";
+    nameVal.textContent = chan;
+    
+    const statusVal = document.createElement("div");
+    statusVal.className = "yc-item-status";
+    statusVal.style.cssText = "font-size: 11px; color: var(--text-mute);";
+    statusVal.textContent = "Added";
+    
+    leftWrap.appendChild(nameVal);
+    leftWrap.appendChild(statusVal);
+    
+    const rightWrap = document.createElement("div");
+    rightWrap.style.cssText = "display: flex; gap: 8px; align-items: center;";
+    
+    const verifyBtn = document.createElement("button");
+    verifyBtn.className = "button ghost yc-verify-btn";
+    verifyBtn.type = "button";
+    verifyBtn.style.cssText = "padding: 4px 8px; font-size: 11px; font-weight: 600; height: auto;";
+    verifyBtn.textContent = "Verify";
+    verifyBtn.addEventListener("click", () => {
+      verifyChannel(chan, statusVal, verifyBtn);
+    });
+    
+    const removeBtn = document.createElement("span");
+    removeBtn.className = "remove-chip yc-remove-btn";
+    removeBtn.style.cssText = "cursor: pointer; font-size: 16px; color: var(--text-mute); padding: 0 4px;";
+    removeBtn.textContent = "×";
+    removeBtn.addEventListener("click", () => {
+      yourChannelsList.splice(idx, 1);
+      renderYcList();
+      updateCreatorToolsVisibility();
+      saveV3Settings();
+    });
+    
+    rightWrap.appendChild(verifyBtn);
+    rightWrap.appendChild(removeBtn);
+    
+    row.appendChild(leftWrap);
+    row.appendChild(rightWrap);
+    
+    ycList.appendChild(row);
+  });
+}
+
+function updateCreatorToolsVisibility() {
+  if (creatorToolsSection) {
+    if (yourChannelsList.length >= 1) {
+      creatorToolsSection.classList.remove("hidden");
+    } else {
+      creatorToolsSection.classList.add("hidden");
+    }
+  }
+}
+
+function updateTargetLengthDisplay(val) {
+  if (!ctLengthDisplay) return;
+  const lenVals = { 0: "30s", 1: "60s", 2: "5m", 3: "15m", 4: "30m" };
+  ctLengthDisplay.textContent = lenVals[val] || "5m";
+}
+
+async function verifyChannel(channelName, statusEl, btnEl) {
+  statusEl.textContent = "Verifying...";
+  statusEl.style.color = "var(--text-mute)";
+  btnEl.disabled = true;
+  
+  try {
+    const token = await STC.getToken();
+    const res = await fetch(`${SERVER}/channels/verify`, {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Yoink-Token": token
+      },
+      body: JSON.stringify({ channel: channelName })
+    });
+    const data = await res.json();
+    if (res.ok && data && data.ok) {
+      statusEl.textContent = "Verified ✓";
+      statusEl.style.color = "var(--ok)";
+    } else {
+      statusEl.textContent = (data && data.error) || `Failed (HTTP ${res.status})`;
+      statusEl.style.color = "var(--vermillion)";
+    }
+  } catch (err) {
+    statusEl.textContent = "Failed (Server offline)";
+    statusEl.style.color = "var(--vermillion)";
+  } finally {
+    btnEl.disabled = false;
+  }
+}
+
+async function saveV3Settings() {
+  const lenVals = { 0: "30s", 1: "60s", 2: "5m", 3: "15m", 4: "30m" };
+  let selectedStyleSource = "taste";
+  if (ctStyleSourceRadios) {
+    for (const r of ctStyleSourceRadios) {
+      if (r.checked) selectedStyleSource = r.value;
+    }
+  }
+  
+  const sourcesText = cvSources ? cvSources.value.trim() : "";
+  const sourcesArray = sourcesText ? sourcesText.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
+
+  const body = {
+    your_channels: yourChannelsList,
+    default_workspace_format: ctWorkspaceFormat ? ctWorkspaceFormat.value : "markdown",
+    default_target_length: ctTargetLength ? (lenVals[ctTargetLength.value] || "5m") : "5m",
+    style_anchors_source: selectedStyleSource,
+    obsidian_vault_path: ctObsidianPath ? ctObsidianPath.value.trim() : "",
+    mirror_scripts_to_obsidian: ctObsidianMirror ? !!ctObsidianMirror.checked : false,
+    claim_verification_enabled: cvEnabled ? !!cvEnabled.checked : false,
+    default_evidence_sources: sourcesArray
+  };
+
+  if (aiSettings) {
+    body.comment_intelligence_enabled = !!(ciEnabled && ciEnabled.checked);
+    body.hook_type_enabled = !!(hookTypeEnabled && hookTypeEnabled.checked);
+    body.smart_screenshot_picker_enabled = !!(
+      smartScreenshotPickerEnabled && smartScreenshotPickerEnabled.checked
+    );
+    body.clipboard_screenshot_cap = readClipboardScreenshotCap();
+  }
+
+  try {
+    if (!window.STC || !STC.updateSettings) {
+      throw new Error("STC.updateSettings unavailable");
+    }
+    const res = await STC.updateSettings(body);
+    if (res && res.ok) {
+      if (settingsPendingBanner) settingsPendingBanner.classList.add("hidden");
+      chrome.storage.local.remove("uoink_settings_pending");
+      aiSettings = Object.assign({}, aiSettings || {}, res.settings || {});
+    } else {
+      throw new Error((res && res.error) || "Save settings failed");
+    }
+  } catch (err) {
+    console.warn("Failed to POST settings to server, storing in pending:", err);
+    chrome.storage.local.set({ uoink_settings_pending: body }, () => {
+      if (settingsPendingBanner) settingsPendingBanner.classList.remove("hidden");
+    });
+  }
+}
+
+async function loadPendingV3Settings() {
+  chrome.storage.local.get(["uoink_settings_pending"], (items) => {
+    const pending = items.uoink_settings_pending;
+    if (pending) {
+      if (settingsPendingBanner) settingsPendingBanner.classList.remove("hidden");
+      if (pending.your_channels !== undefined) {
+        yourChannelsList = pending.your_channels;
+        renderYcList();
+      }
+      if (pending.default_workspace_format !== undefined && ctWorkspaceFormat) {
+        ctWorkspaceFormat.value = pending.default_workspace_format;
+      }
+      if (pending.default_target_length !== undefined && ctTargetLength) {
+        const lenToVal = { "30s": 0, "60s": 1, "5m": 2, "15m": 3, "30m": 4 };
+        ctTargetLength.value = lenToVal[pending.default_target_length] !== undefined ? lenToVal[pending.default_target_length] : 2;
+        updateTargetLengthDisplay(ctTargetLength.value);
+      }
+      if (pending.style_anchors_source !== undefined && ctStyleSourceRadios) {
+        for (const r of ctStyleSourceRadios) {
+          r.checked = r.value === pending.style_anchors_source;
+        }
+      }
+      if (pending.obsidian_vault_path !== undefined && ctObsidianPath) {
+        ctObsidianPath.value = pending.obsidian_vault_path;
+      }
+      if (pending.mirror_scripts_to_obsidian !== undefined && ctObsidianMirror) {
+        ctObsidianMirror.checked = !!pending.mirror_scripts_to_obsidian;
+      }
+      if (pending.claim_verification_enabled !== undefined && cvEnabled) {
+        cvEnabled.checked = !!pending.claim_verification_enabled;
+      }
+      if (pending.default_evidence_sources !== undefined && cvSources) {
+        cvSources.value = Array.isArray(pending.default_evidence_sources)
+          ? pending.default_evidence_sources.join("\n")
+          : pending.default_evidence_sources;
+      }
+      updateCreatorToolsVisibility();
+    }
+  });
+}
+
+// Wire up events
+if (ycAddBtn && ycChannelInput) {
+  const addChannel = () => {
+    const val = ycChannelInput.value.trim();
+    if (val) {
+      if (!yourChannelsList.includes(val)) {
+        yourChannelsList.push(val);
+        renderYcList();
+        updateCreatorToolsVisibility();
+        saveV3Settings();
+      }
+      ycChannelInput.value = "";
+    }
+  };
+  ycAddBtn.addEventListener("click", addChannel);
+  ycChannelInput.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      addChannel();
+    }
+  });
+}
+
+if (ycRecognizeBtn) {
+  ycRecognizeBtn.addEventListener("click", async () => {
+    if (ycStatus) {
+      ycStatus.textContent = "Triggering backfill recognize...";
+      ycStatus.className = "settings-status";
+    }
+    ycRecognizeBtn.disabled = true;
+    try {
+      const token = await STC.getToken();
+      const res = await fetch(`${SERVER}/channels/recognize-now`, {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "X-Yoink-Token": token
+        }
+      });
+      const data = await res.json();
+      if (res.ok && data && data.ok) {
+        if (ycStatus) {
+          ycStatus.textContent = "Backfill recognition started ✓";
+          ycStatus.className = "settings-status ok";
+        }
+      } else {
+        throw new Error((data && data.error) || `HTTP ${res.status}`);
+      }
+    } catch (err) {
+      if (ycStatus) {
+        ycStatus.textContent = "Backfill failed (Server offline)";
+        ycStatus.className = "settings-status warn";
+      }
+    } finally {
+      ycRecognizeBtn.disabled = false;
+    }
+  });
+}
+
+if (ctTargetLength) {
+  ctTargetLength.addEventListener("input", (ev) => {
+    updateTargetLengthDisplay(ev.target.value);
+    saveV3Settings();
+  });
+}
+
+if (ctWorkspaceFormat) {
+  ctWorkspaceFormat.addEventListener("change", () => saveV3Settings());
+}
+
+if (ctStyleSourceRadios) {
+  for (const r of ctStyleSourceRadios) {
+    r.addEventListener("change", () => saveV3Settings());
+  }
+}
+
+if (ctObsidianPath) {
+  ctObsidianPath.addEventListener("change", () => saveV3Settings());
+}
+
+if (ctObsidianMirror) {
+  ctObsidianMirror.addEventListener("change", () => saveV3Settings());
+}
+
+if (cvEnabled) {
+  cvEnabled.addEventListener("change", () => saveV3Settings());
+}
+
+if (cvSources) {
+  cvSources.addEventListener("change", () => saveV3Settings());
+}
+
+if (cvOverrideInfo) {
+  cvOverrideInfo.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    chrome.tabs.create({ url: "http://127.0.0.1:5179/dashboard" });
+  });
+}
+
 // ---- Boot ----------------------------------------------------------------
 setCIControlsEnabled(false);
 applyDownloadState();
 applySource();
 loadPendingTasteProfile();
+loadPendingV3Settings();
 loadTasteAnchors();
 startPolling();
 

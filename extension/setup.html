@@ -651,6 +651,11 @@
     <h1 id="page-title">Let's get you set up.</h1>
     <p class="lede" id="page-lede">Two minutes. Then you'll be uoinking videos straight into Claude.</p>
 
+    <!-- Settings will sync banner -->
+    <div id="settings-pending-banner" class="cost-estimate hidden" style="margin-bottom:20px; border-color:var(--rust-bright); background:rgba(249, 115, 22, 0.08); color:var(--rust-bright); font-weight:600;">
+      ⚠️ Settings will sync once helper updates (currently stored locally).
+    </div>
+
     <section id="helper-status-section" class="step">
       <div class="step-head">
         <div class="step-num"><span class="step-num-text">Status</span></div>
@@ -991,6 +996,125 @@
           <input id="clipboard-screenshot-cap" class="input" type="number" min="0" max="12" step="1" value="4">
         </label>
         <p class="sub">Default 4. Uoink still saves the full screenshot set on disk; this only controls embedded images in the AI paste.</p>
+      </div>
+    </section>
+
+    <!-- Step 3a: Your Channels mode settings -->
+    <section id="your-channels-settings" class="step">
+      <div class="step-head">
+        <div class="step-num"><span class="step-num-text">YC</span></div>
+        <h2>Your channels</h2>
+      </div>
+      <p>Add your YouTube channel handles or URLs. You'll see your own yoinks marked differently in the dashboard.</p>
+      
+      <div class="settings-grid">
+        <label>
+          <span class="field-label">Add channel handle (e.g. @ryanbiddy) or URL</span>
+          <div style="display:flex; gap:8px;">
+            <input id="yc-channel-input" class="input" type="text" placeholder="@handle or channel URL">
+            <button id="yc-add-btn" class="button ghost" type="button" style="padding: 10px 14px; height:43px;">Add</button>
+          </div>
+        </label>
+        
+        <div id="yc-list" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+          <!-- List of channels will be generated here -->
+        </div>
+
+        <div class="button-row" style="margin-top:12px;">
+          <button id="yc-recognize-btn" class="button ghost" type="button">Recognize past yoinks now</button>
+        </div>
+        <div id="yc-status" class="settings-status" style="margin-top:8px;"></div>
+      </div>
+    </section>
+
+    <!-- Step 3b: Creator tools settings -->
+    <section id="creator-tools-settings" class="step hidden">
+      <div class="step-head">
+        <div class="step-num"><span class="step-num-text">CT</span></div>
+        <h2>Creator tools</h2>
+      </div>
+      <p>Configure workspace settings, target lengths, and style anchors source for script creation.</p>
+      
+      <div class="settings-grid">
+        <label>
+          <span class="field-label">Default workspace format</span>
+          <select id="ct-workspace-format" class="input" style="font-family: inherit;">
+            <option value="markdown">Markdown</option>
+            <option value="obsidian">Obsidian</option>
+            <option value="notion">Notion</option>
+            <option value="json">JSON</option>
+          </select>
+        </label>
+
+        <label>
+          <span class="field-label">Default target length: <span id="ct-length-display" style="color: var(--rust-bright); font-weight:600;">5min</span></span>
+          <input id="ct-target-length" type="range" min="0" max="4" step="1" value="2" style="width: 100%; accent-color: var(--uoink-accent);">
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-mute); margin-top:2px;">
+            <span>30s</span>
+            <span>60s</span>
+            <span>5m</span>
+            <span>15m</span>
+            <span>30m</span>
+          </div>
+        </label>
+
+        <div>
+          <span class="field-label">Style anchors source</span>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:4px;">
+            <label class="toggle-row" style="font-weight: 500;">
+              <input type="radio" name="ct-style-source" value="taste" checked>
+              <span>From my taste anchors</span>
+            </label>
+            <label class="toggle-row" style="font-weight: 500;">
+              <input type="radio" name="ct-style-source" value="channel">
+              <span>From my channel's overperformers</span>
+            </label>
+            <label class="toggle-row" style="font-weight: 500;">
+              <input type="radio" name="ct-style-source" value="both">
+              <span>Both</span>
+            </label>
+          </div>
+        </div>
+
+        <label>
+          <span class="field-label">Script library location (read-only)</span>
+          <input id="ct-scripts-path" class="input" type="text" readonly value="%LOCALAPPDATA%\Uoink\scripts\">
+        </label>
+
+        <label>
+          <span class="field-label">Obsidian vault path (optional, to mirror scripts)</span>
+          <input id="ct-obsidian-path" class="input" type="text" placeholder="C:\Users\...\Obsidian\Vault">
+        </label>
+
+        <label class="toggle-row" style="margin-top:6px;">
+          <input id="ct-obsidian-mirror" type="checkbox">
+          <span>Mirror scripts to Obsidian vault</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Step 3c: Claim verification settings -->
+    <section id="claim-verification-settings" class="step">
+      <div class="step-head">
+        <div class="step-num"><span class="step-num-text">CV</span></div>
+        <h2>Claim verification</h2>
+      </div>
+      <p>Scan transcripts for claims worth verifying and retrieve matching evidence.</p>
+      
+      <div class="settings-grid">
+        <label class="toggle-row">
+          <input id="cv-enabled" type="checkbox">
+          <span>Scan transcripts for checkable claims</span>
+        </label>
+        <p class="sub">When on, every yoink's transcript is scanned for checkable factual claims. Evidence is retrieved and shown for your judgment. Uoink never auto-asserts truth or labels a claim 'false.'</p>
+
+        <label>
+          <span class="field-label">Default evidence sources (one URL per line)</span>
+          <textarea id="cv-sources" class="input" style="height:80px; font-family:var(--font-mono); font-size:12px; line-height:1.4;" placeholder="e.g. https://wikipedia.org"></textarea>
+          <p class="sub">Leave empty to use general web search for evidence retrieval.</p>
+        </label>
+
+        <p class="sub"><a class="settings-link" href="#" id="cv-override-info">Per-yoink override available in dashboard ↗</a></p>
       </div>
     </section>
 
