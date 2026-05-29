@@ -73,6 +73,7 @@ import _platform  # noqa: E402  -- cross-platform path / OS helpers
 import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
 import channels  # noqa: E402  -- v2.5 P3 your-channel registry + recognition
 import uoink_reliability  # noqa: E402  -- optional local Whisper reliability checks
+import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
@@ -5846,6 +5847,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_channels_list()
         if bare == "/self/analysis":
             return self._handle_self_analysis()
+        if bare == "/workspaces":
+            return self._handle_workspaces_list()
+        if bare.startswith("/workspace/") and not bare.endswith("/assemble") \
+                and not bare.endswith("/critique"):
+            return self._handle_workspace_get(bare)
         if bare == "/settings/mcp-config":
             return self._handle_settings_mcp_config()
         if bare == "/open-last-youtube":
@@ -6157,6 +6163,125 @@ class Handler(BaseHTTPRequestHandler):
                                               handle=handle, top_n=limit)
         except Exception as e:
             log.exception("/self/analysis failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, result)
+
+    # ---- v3 P4 build workspace ---------------------------------------------
+    # Model-agnostic by default: the helper assembles a corpus slice + records
+    # critique findings; the calling agent does the LLM work. BYO-key on-server
+    # path is accepted by the schema but not implemented in this PR (deferred
+    # to a v3.x BYO worker pool, same posture as S1's /facets/backfill).
+
+    def _handle_workspaces_list(self):
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        try:
+            limit = int((qs.get("limit") or ["50"])[0])
+        except ValueError:
+            limit = 50
+        try:
+            rows = workspaces.list_workspaces(_get_index(), limit=limit)
+        except Exception as e:
+            log.exception("/workspaces GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "workspaces": rows,
+                                      "count": len(rows)})
+
+    def _handle_workspace_get(self, bare: str):
+        """GET /workspace/<id>"""
+        if not self._require_token():
+            return
+        workspace_id = bare[len("/workspace/"):].strip("/")
+        if not workspace_id:
+            return self._send_json(400, {"ok": False, "error": "id required"})
+        try:
+            ws = workspaces.get_workspace(_get_index(), workspace_id)
+        except Exception as e:
+            log.exception("/workspace/<id> failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        if ws is None:
+            return self._send_json(404, {"ok": False,
+                                          "error": "workspace not found"})
+        try:
+            crit = workspaces.critique_log_for(_get_index(), workspace_id)
+        except Exception as e:
+            log.exception("critique_log_for failed")
+            crit = []
+        return self._send_json(200, {"ok": True, "workspace": ws,
+                                      "critique_log": crit})
+
+    def _handle_workspaces_create(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        try:
+            ws = workspaces.create_workspace(
+                _get_index(),
+                format=(body.get("format") or None),
+                topic=(body.get("topic") or None),
+                hook_target=(body.get("hook_target") or None),
+                your_channel=(body.get("your_channel") or None),
+                n_examples=int(body.get("n_examples") or 10),
+                notes=(body.get("notes") or None))
+        except (ValueError, TypeError) as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/workspaces POST failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "workspace": ws})
+
+    def _handle_workspace_assemble(self, body):
+        """POST /workspace/assemble -- run the assembler. If body includes
+        a `workspace_id`, the assembled list persists to that row; else the
+        slice is just returned for inspection."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        try:
+            result = workspaces.assemble_workspace(
+                _get_index(),
+                format=(body.get("format") or None),
+                topic=(body.get("topic") or None),
+                hook_target=(body.get("hook_target") or None),
+                your_channel=(body.get("your_channel") or None),
+                n_examples=int(body.get("n_examples") or 10),
+                workspace_id=(body.get("workspace_id") or None))
+        except (ValueError, TypeError) as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/workspace/assemble failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, result)
+
+    def _handle_workspace_critique(self, body):
+        """POST /workspace/critique -- two-phase contract.
+
+        Phase 1 (no findings): returns the assembled context the agent
+        needs to produce findings.
+        Phase 2 (findings present): persists the findings to the
+        critique log. Mode defaults to 'agent' (the locked compute path)."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        workspace_id = (body.get("workspace_id") or "").strip()
+        draft_text = body.get("draft_text") or ""
+        findings = body.get("findings")
+        mode = (body.get("mode") or workspaces.COMPUTE_MODE_AGENT).strip()
+        if not workspace_id:
+            return self._send_json(400, {"ok": False,
+                                          "error": "workspace_id required"})
+        if not isinstance(draft_text, str):
+            return self._send_json(400, {"ok": False,
+                                          "error": "draft_text must be a string"})
+        try:
+            result = workspaces.critique_against_corpus(
+                _get_index(), workspace_id,
+                draft_text=draft_text, findings=findings, mode=mode)
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/workspace/critique failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
         return self._send_json(200, result)
 
@@ -6701,6 +6826,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_channels_verify(body)
         if bare == "/channels/recognize-now":
             return self._handle_channels_recognize_now()
+        if bare == "/workspaces":
+            return self._handle_workspaces_create(body)
+        if bare == "/workspace/assemble":
+            return self._handle_workspace_assemble(body)
+        if bare == "/workspace/critique":
+            return self._handle_workspace_critique(body)
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})
