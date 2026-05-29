@@ -9,7 +9,8 @@
 #        python\   embeddable Python with site-packages enabled and
 #                  yt-dlp installed via pip
 #        bin\      ffmpeg.exe (and ffprobe.exe if present)
-#        server.py, migrate_install.py, uoink_mcp.py, uoink_mcp_tools.py,
+#        server.py, migrate_install.py, channels.py, workspaces.py, claims.py,
+#        scripts.py, memory_layer.py, uoink_mcp.py, uoink_mcp_tools.py,
 #        yoink_mcp.py (shim), yt_extract.py, topics.json, skills\,
 #        assets\dashboard\, stop-server.{bat,ps1}, uoink.ico
 #   3. Run ISCC.exe against installer\uoink.iss to produce
@@ -180,7 +181,21 @@ $splashIndex = Join-Path $RepoRoot 'assets\splash\index.html'
 if (-not (Test-Path $splashIndex)) {
     throw "Missing assets\splash\index.html -- Tier 2 /splash route would 404"
 }
-foreach ($f in @('VERSION','server.py','index.py','_platform.py','yt_extract.py','topics.json','uoink_core\storage.py')) {
+foreach ($f in @(
+    'VERSION',
+    'server.py',
+    'index.py',
+    '_platform.py',
+    'migrate_install.py',
+    'channels.py',
+    'workspaces.py',
+    'claims.py',
+    'scripts.py',
+    'memory_layer.py',
+    'yt_extract.py',
+    'topics.json',
+    'uoink_core\storage.py'
+)) {
     if (-not (Test-Path (Join-Path $RepoRoot $f))) {
         throw "Missing $f at repo root"
     }
@@ -316,6 +331,11 @@ Copy-Item (Join-Path $RepoRoot 'index.py')       $StagingDir -Force
 # helper that crashes with ModuleNotFoundError before binding the port.
 Copy-Item (Join-Path $RepoRoot '_platform.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'migrate_install.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'channels.py')    $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'workspaces.py')  $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'claims.py')      $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'scripts.py')     $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'memory_layer.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_mcp.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_mcp_tools.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_reliability.py') $StagingDir -Force
@@ -356,7 +376,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py migrate_install.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py
+        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py memory_layer.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
