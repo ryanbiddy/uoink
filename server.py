@@ -78,6 +78,7 @@ import claims  # noqa: E402  -- v3 A2 claim extraction + verification (Loki-insp
 import scripts as p5_scripts  # noqa: E402  -- v3 P5 script studio backend
 import memory_layer  # noqa: E402  -- v2.5 S4 markdown taste/user memory
 import podcasts  # noqa: E402  -- v3.1 podcast RSS feed registry + polling
+import whisper_runner  # noqa: E402  -- v3.1 WhisperX transcription (lazy)
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
@@ -577,6 +578,10 @@ def _default_settings() -> dict:
         # by the A1/podcast backend; the dashboard can persist the user choice
         # ahead of that worker landing.
         "whisper_model": "base",
+        # v3.1 WhisperX diarization default. On = diarize interview-format
+        # content automatically (ROADMAP P5/track D guidance). Off = ASR
+        # only; user can still enable per-call via the endpoint body.
+        "diarization_default": False,
         "anthropic_key_invalid": False,
         # v2.1 rename: set True after the one-time "Yoink is now Uoink"
         # post-migration toast has fired, so it never repeats.
@@ -782,6 +787,11 @@ def _public_settings(data: dict | None = None) -> dict:
         "live_stream_behavior_supported": list(_LIVE_BEHAVIORS),
         "whisper_model": data.get("whisper_model") or "base",
         "whisper_models_supported": list(_WHISPER_MODELS),
+        "diarization_default": bool(data.get("diarization_default")),
+        # Helper-side runtime probe so the dashboard can show
+        # "WhisperX not installed -- install via Setup" without a
+        # separate endpoint roundtrip.
+        "whisperx_runtime_available": whisper_runner.is_whisperx_available(),
     }
 
 
@@ -6257,6 +6267,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_feeds_list()
         if bare == "/podcasts/episodes":
             return self._handle_podcasts_episodes_list()
+        if bare == "/transcribe/status":
+            return self._handle_transcribe_status_get()
         if bare == "/update/check":
             return self._handle_update_check()
         if bare == "/engagement/scores":
@@ -7208,6 +7220,118 @@ class Handler(BaseHTTPRequestHandler):
         status = 200 if result.get("ok") else 400
         return self._send_json(status, result)
 
+    # ---- v3.1 WhisperX transcription -------------------------------
+    def _handle_transcribe_status_get(self):
+        """GET /transcribe/status -- whisperx runtime + model selection.
+        Used by the Settings UI to render an "install whisperx" prompt
+        when the runtime isn't available."""
+        if not self._require_token():
+            return
+        settings = _read_settings() or {}
+        return self._send_json(200, {
+            "ok": True,
+            "whisperx_available": whisper_runner.is_whisperx_available(),
+            "selected_model": settings.get("whisper_model") or "base",
+            "supported_models": list(whisper_runner._MODELS),
+            "diarization_default": bool(settings.get("diarization_default")),
+        })
+
+    def _handle_podcasts_episode_transcribe(self, body):
+        """POST /podcasts/episodes/transcribe {episode_id, model?,
+        diarize?, consent_given?, language?}.
+
+        Synchronous. Runs WhisperX (lazy) on the downloaded MP3, writes
+        the transcript JSON next to it, persists the per-episode state.
+        Returns 503 with install hints when whisperx isn't importable.
+        Returns 412 when first-time model download needs consent."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        try:
+            episode_id = int(body.get("episode_id"))
+        except (TypeError, ValueError):
+            return self._send_json(400, {
+                "ok": False, "error": "episode_id (integer) required"})
+
+        episode = podcasts.get_episode(_get_index(), episode_id)
+        if episode is None:
+            return self._send_json(404, {"ok": False,
+                                          "error": "episode not found"})
+        if not episode.get("audio_local_path"):
+            return self._send_json(400, {
+                "ok": False,
+                "error": ("episode has no audio_local_path -- run "
+                          "/podcasts/episodes/download first")})
+        if not whisper_runner.is_whisperx_available():
+            return self._send_json(503, {
+                "ok": False,
+                "whisperx_available": False,
+                "error": ("whisperx runtime not installed. Install via "
+                          "the Setup page (consent-gated dependency; "
+                          "not bundled with the helper to keep the "
+                          "install footprint small).")})
+
+        settings = _read_settings() or {}
+        model = whisper_runner.normalize_model(
+            body.get("model") or settings.get("whisper_model"))
+        diarize = bool(body.get("diarize")
+                         if body.get("diarize") is not None
+                         else settings.get("diarization_default"))
+        consent_given = bool(body.get("consent_given"))
+        language = body.get("language")
+
+        # Flip the row state so the dashboard's Activity tab shows the
+        # transcription as in-flight while we work.
+        whisper_runner.update_episode_transcript_state(
+            _get_index(), episode_id,
+            status=whisper_runner.STATUS_RUNNING,
+            model_used=model)
+
+        from pathlib import Path as _P
+        audio_path = _P(episode["audio_local_path"])
+        try:
+            transcript = whisper_runner.transcribe_audio(
+                audio_path, data_root=DATA_ROOT,
+                model_size=model, language=language,
+                diarize=diarize, consent_given=consent_given)
+        except PermissionError as e:
+            whisper_runner.update_episode_transcript_state(
+                _get_index(), episode_id,
+                status=whisper_runner.STATUS_QUEUED,  # awaiting consent
+                error=str(e))
+            return self._send_json(412, {
+                "ok": False, "consent_required": True,
+                "model": model, "error": str(e)})
+        except RuntimeError as e:
+            whisper_runner.update_episode_transcript_state(
+                _get_index(), episode_id,
+                status=whisper_runner.STATUS_FAILED,
+                error=str(e))
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        except FileNotFoundError as e:
+            whisper_runner.update_episode_transcript_state(
+                _get_index(), episode_id,
+                status=whisper_runner.STATUS_FAILED,
+                error=str(e))
+            return self._send_json(404, {"ok": False, "error": str(e)})
+
+        out_path = whisper_runner.write_transcript(
+            transcript, audio_path=audio_path)
+        whisper_runner.update_episode_transcript_state(
+            _get_index(), episode_id,
+            status=whisper_runner.STATUS_DONE,
+            transcript_path=out_path,
+            model_used=model,
+            diarization_ran=transcript.get("diarization_ran", False))
+        return self._send_json(200, {
+            "ok": True, "episode_id": episode_id,
+            "transcript_path": str(out_path),
+            "model": transcript["model"],
+            "language": transcript["language"],
+            "segments": len(transcript["segments"]),
+            "diarization_ran": transcript["diarization_ran"],
+        })
+
     def _handle_settings_mcp_config(self):
         """MCP config snippet for the Settings tab Copy button. Token-gated."""
         if not self._require_token():
@@ -7308,6 +7432,9 @@ class Handler(BaseHTTPRequestHandler):
             "transcript_reliability_auto_check",
             "claim_verification_enabled",  # v3 A2 -- default OFF (claims
                                             # extracted on yoink only when on)
+            "diarization_default",          # v3.1 track B/D -- WhisperX
+                                            # speaker diarization on every
+                                            # interview-format transcribe
         )
         integer_fields = ("clipboard_screenshot_cap",)
         extra_fields = ("output_dir", "autostart", "topics",
@@ -7859,6 +7986,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_episode_set_status(body)
         if bare == "/podcasts/episodes/download":
             return self._handle_podcasts_episode_download(body)
+        if bare == "/podcasts/episodes/transcribe":
+            return self._handle_podcasts_episode_transcribe(body)
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})
