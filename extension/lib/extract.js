@@ -477,7 +477,6 @@
         body: JSON.stringify(payload)
       });
       if (res.status === 200 || res.status === 201 || res.ok) {
-        console.log("[Uoink] Engagement logged:", payload);
         return { ok: true };
       }
       throw new Error(`HTTP ${res.status}`);
@@ -512,7 +511,6 @@
             resolve();
             return;
           }
-          console.log(`[Uoink] Attempting to replay ${pending.length} pending engagement events...`);
           const remaining = [];
           for (const payload of pending) {
             try {
