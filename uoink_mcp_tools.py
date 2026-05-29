@@ -699,6 +699,96 @@ def get_workspace(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(workspace=ws, critique_log=crit)
 
 
+def extract_claims(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 A2 (Loki-inspired): persist agent-extracted claims for a video.
+
+    LOCKED FRAMING: the calling agent does the LLM decomposition; this tool
+    validates against bounded enums + writes the structure. Claims arrive
+    as a list of {claim_text, check_worthiness?, context?}. Status is
+    'extracted' until a /verify call lands evidence on a claim. This tool
+    NEVER returns a truth verdict -- it surfaces checkable claims so the
+    user can decide which to verify."""
+    server = _b()
+    import claims as _claims_mod
+    video_id = args.get("video_id")
+    if not isinstance(video_id, str) or not video_id.strip():
+        return _err("video_id (string) is required")
+    claims_list = args.get("claims") or []
+    if not isinstance(claims_list, list):
+        return _err("claims must be a list of objects")
+    mode = args.get("mode") or _claims_mod.COMPUTE_MODE_AGENT
+    try:
+        return _claims_mod.extract_claims(server._get_index(),
+                                            video_id.strip(),
+                                            claims=claims_list, mode=mode)
+    except Exception as e:
+        return _err(f"extract_claims failed: {e}")
+
+
+def verify_claim(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 A2 (Loki-inspired): record evidence for one extracted claim.
+
+    LOCKED FRAMING: alignment_signal MUST be one of
+    `supports | contradicts | mixed | inconclusive`. NEVER 'true' /
+    'false' / 'lie' / 'verified-as-X'. The user judges the verdict from
+    the surfaced evidence + signal."""
+    server = _b()
+    import claims as _claims_mod
+    try:
+        claim_id = int(args.get("claim_id"))
+    except (TypeError, ValueError):
+        return _err("claim_id (integer) is required")
+    evidence = args.get("evidence") or []
+    if not isinstance(evidence, list):
+        return _err("evidence must be a list")
+    mode = args.get("mode") or _claims_mod.COMPUTE_MODE_AGENT
+    try:
+        return _claims_mod.verify_claim(server._get_index(), claim_id,
+                                          evidence=evidence, mode=mode)
+    except Exception as e:
+        return _err(f"verify_claim failed: {e}")
+
+
+def list_claims(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 A2: list extracted claims, optionally filtered by video_id and
+    status (extracted | verified | not-attempted)."""
+    server = _b()
+    import claims as _claims_mod
+    video_id = args.get("video_id")
+    if video_id is not None and not isinstance(video_id, str):
+        return _err("video_id must be a string when provided")
+    status = args.get("status")
+    if status is not None and not isinstance(status, str):
+        return _err("status must be a string when provided")
+    limit = _limit_int(args.get("limit"), default=200, low=1, high=1000)
+    try:
+        rows = _claims_mod.list_claims(server._get_index(),
+                                         video_id=video_id, status=status,
+                                         limit=limit)
+    except ValueError as e:
+        return _err(str(e))
+    except Exception as e:
+        return _err(f"list_claims failed: {e}")
+    return _ok(claims=rows, count=len(rows))
+
+
+def get_claim(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 A2: fetch one claim by id, including stored evidence."""
+    server = _b()
+    import claims as _claims_mod
+    try:
+        claim_id = int(args.get("id") or args.get("claim_id"))
+    except (TypeError, ValueError):
+        return _err("claim id (integer) is required")
+    try:
+        row = _claims_mod.get_claim(server._get_index(), claim_id)
+    except Exception as e:
+        return _err(f"get_claim failed: {e}")
+    if row is None:
+        return _err("claim not found")
+    return _ok(claim=row)
+
+
 def find_mentions(args: dict[str, Any]) -> dict[str, Any]:
     """Return every recorded mention of an entity across the library,
     newest first, each with a timestamped YouTube deep link (Sprint 16)."""
@@ -1213,6 +1303,75 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "workspace_id": {"type": "string"},
         }, []),
         handler=get_workspace,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "extract_claims": ToolSpec(
+        name="extract_claims",
+        description=(
+            "v3 A2 (Loki-inspired): persist agent-extracted claims for "
+            "a video. LOCKED FRAMING -- the calling agent does the LLM "
+            "decomposition; this tool validates + writes. Each claim is "
+            "{claim_text, check_worthiness? (0.0-1.0), context?}. NEVER "
+            "auto-asserts truth verdicts -- surfaces checkable claims "
+            "so the user can decide which to verify."
+        ),
+        input_schema=_schema({
+            "video_id": {"type": "string"},
+            "claims": {"type": "array", "items": {"type": "object"}},
+            "mode": {"type": "string", "enum": ["agent", "byo_key"]},
+        }, ["video_id", "claims"]),
+        handler=extract_claims,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "verify_claim": ToolSpec(
+        name="verify_claim",
+        description=(
+            "v3 A2: record evidence for one extracted claim. "
+            "alignment_signal MUST be one of supports / contradicts / "
+            "mixed / inconclusive. NEVER 'true' / 'false' / 'lie'. The "
+            "user judges the verdict from the surfaced evidence."
+        ),
+        input_schema=_schema({
+            "claim_id": {"type": "integer"},
+            "evidence": {
+                "type": "array",
+                "items": {"type": "object"},
+                "description": (
+                    "Each: {source_url, quote, alignment_signal}. "
+                    "alignment_signal enum is locked."
+                ),
+            },
+            "mode": {"type": "string", "enum": ["agent", "byo_key"]},
+        }, ["claim_id", "evidence"]),
+        handler=verify_claim,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "list_claims": ToolSpec(
+        name="list_claims",
+        description=(
+            "v3 A2: list extracted claims. Filter by video_id and/or "
+            "status (extracted | verified | not-attempted)."
+        ),
+        input_schema=_schema({
+            "video_id": {"type": "string"},
+            "status": {
+                "type": "string",
+                "enum": ["extracted", "verified", "not-attempted"],
+            },
+            "limit": {"type": "integer", "minimum": 1, "maximum": 1000,
+                       "default": 200},
+        }, []),
+        handler=list_claims,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "get_claim": ToolSpec(
+        name="get_claim",
+        description="v3 A2: fetch one claim by id, with stored evidence.",
+        input_schema=_schema({
+            "id": {"type": "integer"},
+            "claim_id": {"type": "integer"},
+        }, []),
+        handler=get_claim,
         rate_limiter=_RateLimiter(60),
     ),
 }
