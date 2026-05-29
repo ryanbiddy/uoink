@@ -858,6 +858,108 @@ def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
                 diarization_ran=transcript["diarization_ran"])
 
 
+# ---- v3.1 mobile playlist monitor ------------------------------------
+def add_monitored_playlist(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 mobile bridge: register a YouTube playlist URL to monitor.
+    Idempotent on UNIQUE playlist_url. poll_interval_min default 5,
+    range 1-1440."""
+    server = _b()
+    import mobile_playlists as _mp
+    url = args.get("playlist_url")
+    if not isinstance(url, str) or not url.strip():
+        return _err("playlist_url (string) is required")
+    name = args.get("name")
+    interval = args.get("poll_interval_min") or 5
+    try:
+        return _ok(playlist=_mp.add_playlist(
+            server._get_index(), url.strip(),
+            name=name, poll_interval_min=int(interval),
+            normalize_playlist_url=server._normalize_playlist_url))
+    except ValueError as e:
+        return _err(str(e))
+    except Exception as e:
+        return _err(f"add_monitored_playlist failed: {e}")
+
+
+def list_monitored_playlists(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 mobile bridge: list registered playlists newest-first."""
+    server = _b()
+    import mobile_playlists as _mp
+    enabled_only = bool(args.get("enabled_only"))
+    try:
+        rows = _mp.list_playlists(server._get_index(),
+                                     enabled_only=enabled_only)
+    except Exception as e:
+        return _err(f"list_monitored_playlists failed: {e}")
+    return _ok(playlists=rows, count=len(rows))
+
+
+def remove_monitored_playlist(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 mobile bridge: delete a playlist + cascade its discovery
+    events."""
+    server = _b()
+    import mobile_playlists as _mp
+    try:
+        playlist_id = int(args.get("playlist_id"))
+    except (TypeError, ValueError):
+        return _err("playlist_id (integer) is required")
+    try:
+        removed = _mp.remove_playlist(server._get_index(), playlist_id)
+    except Exception as e:
+        return _err(f"remove_monitored_playlist failed: {e}")
+    return _ok(removed=removed)
+
+
+def poll_monitored_playlist(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 mobile bridge: trigger one poll. yt-dlp --flat-playlist +
+    diff against last_seen_video_ids + auto-queue new videos via the
+    existing pending_yoinks retry worker. Returns the new[] discovery
+    list so the dashboard can show it under a 'from mobile playlist'
+    label."""
+    server = _b()
+    import mobile_playlists as _mp
+    try:
+        playlist_id = int(args.get("playlist_id"))
+    except (TypeError, ValueError):
+        return _err("playlist_id (integer) is required")
+    def _vid_to_url(vid: str) -> str | None:
+        if not vid:
+            return None
+        return server._normalize_youtube_url(
+            f"https://www.youtube.com/watch?v={vid}")
+    try:
+        return _mp.poll_playlist(server._get_index(), playlist_id,
+                                    normalize_video_to_canonical_url=_vid_to_url)
+    except Exception as e:
+        return _err(f"poll_monitored_playlist failed: {e}")
+
+
+def list_monitored_playlist_events(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 mobile bridge: list per-discovery events.
+    Optional filters: playlist_id, status (discovered | queued |
+    extracted | failed)."""
+    server = _b()
+    import mobile_playlists as _mp
+    playlist_id = args.get("playlist_id")
+    try:
+        pid = int(playlist_id) if playlist_id is not None else None
+    except (TypeError, ValueError):
+        return _err("playlist_id must be an integer when provided")
+    status = args.get("status")
+    if status is not None and not isinstance(status, str):
+        return _err("status must be a string when provided")
+    limit = _limit_int(args.get("limit"), default=200, low=1, high=1000)
+    try:
+        rows = _mp.list_events(server._get_index(),
+                                  playlist_id=pid, status=status,
+                                  limit=limit)
+    except ValueError as e:
+        return _err(str(e))
+    except Exception as e:
+        return _err(f"list_monitored_playlist_events failed: {e}")
+    return _ok(events=rows, count=len(rows))
+
+
 def get_user_memory(_args: dict[str, Any]) -> dict[str, Any]:
     """v2.5 S4 user memory: return the free-form USER.md content + path.
     Skeleton is seeded on first read so an agent always gets a starting
@@ -1731,6 +1833,76 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, ["episode_id"]),
         handler=transcribe_podcast_episode,
         rate_limiter=_RateLimiter(5),
+    ),
+    "add_monitored_playlist": ToolSpec(
+        name="add_monitored_playlist",
+        description=(
+            "v3.1 mobile bridge: register a YouTube playlist URL to "
+            "monitor for auto-uoinks. Idempotent on UNIQUE "
+            "playlist_url. poll_interval_min default 5, range 1-1440."
+        ),
+        input_schema=_schema({
+            "playlist_url": {"type": "string"},
+            "name": {"type": "string"},
+            "poll_interval_min": {"type": "integer", "minimum": 1,
+                                    "maximum": 1440, "default": 5},
+        }, ["playlist_url"]),
+        handler=add_monitored_playlist,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "list_monitored_playlists": ToolSpec(
+        name="list_monitored_playlists",
+        description=("v3.1 mobile bridge: list registered playlists "
+                      "newest-first."),
+        input_schema=_schema({
+            "enabled_only": {"type": "boolean", "default": False},
+        }, []),
+        handler=list_monitored_playlists,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "remove_monitored_playlist": ToolSpec(
+        name="remove_monitored_playlist",
+        description=("v3.1 mobile bridge: delete a playlist + cascade "
+                      "its discovery events."),
+        input_schema=_schema({
+            "playlist_id": {"type": "integer"},
+        }, ["playlist_id"]),
+        handler=remove_monitored_playlist,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "poll_monitored_playlist": ToolSpec(
+        name="poll_monitored_playlist",
+        description=(
+            "v3.1 mobile bridge: poll one playlist (yt-dlp "
+            "--flat-playlist) + diff against last_seen_video_ids + "
+            "auto-queue new videos via the existing pending_yoinks "
+            "retry worker. Returns the new[] discovery list so the "
+            "dashboard can show it under a 'from mobile playlist' "
+            "label distinct from rate-limit retries."
+        ),
+        input_schema=_schema({
+            "playlist_id": {"type": "integer"},
+        }, ["playlist_id"]),
+        handler=poll_monitored_playlist,
+        rate_limiter=_RateLimiter(20),
+    ),
+    "list_monitored_playlist_events": ToolSpec(
+        name="list_monitored_playlist_events",
+        description=(
+            "v3.1 mobile bridge: list per-discovery events. Optional "
+            "filters: playlist_id, status (discovered | queued | "
+            "extracted | failed). Newest first."
+        ),
+        input_schema=_schema({
+            "playlist_id": {"type": "integer"},
+            "status": {"type": "string",
+                        "enum": ["discovered", "queued",
+                                 "extracted", "failed"]},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 1000,
+                       "default": 200},
+        }, []),
+        handler=list_monitored_playlist_events,
+        rate_limiter=_RateLimiter(60),
     ),
     "get_user_taste": ToolSpec(
         name="get_user_taste",
