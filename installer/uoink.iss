@@ -417,4 +417,19 @@ begin
     WizardForm.NextButton.Caption := 'Let''s go ' + Chr($2192);
     WizardForm.BackButton.Visible := False;
   end;
+  (* v2.2.1 fix: the ReadyLabel1 message ends with "...dependencies in:"
+     but Inno does NOT interpolate {app} into [Messages] strings, so the
+     wpReady page rendered as a dangling colon followed by the empty
+     ReadyMemo region. Append the expanded install path onto the caption
+     at page-show time. ExpandConstant resolves {app} to the user-chosen
+     install location (DefaultDirName = {localappdata}\Uoink, but the
+     user can change it on wpSelectDir, so we evaluate at render time
+     rather than baking it into the message string). *)
+  if CurPageID = wpReady then
+  begin
+    WizardForm.ReadyLabel1.Caption :=
+      'Uoink is ready to set up on your machine. Click Install to '
+      + 'place the local helper and dependencies in:' + #13#10#13#10
+      + ExpandConstant('{app}');
+  end;
 end;
