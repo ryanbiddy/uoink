@@ -1875,6 +1875,7 @@
             </div>
             <div class="inline-row">
               <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
+              <button class="button ghost" type="button" id="yoinkRetranscribe">Re-transcribe</button>
               <button class="button primary" type="button" id="yoinkEvidence">Evidence</button>
             </div>
           </div>
@@ -2143,6 +2144,8 @@
       selectedYoink: null,
       selectedYoinkSidecar: null,
       selectedYoinkSidecarError: "",
+      retranscribeStatus: "",
+      retranscribing: false,
       mobilePlaylists: [],
       podcastFeeds: [],
     };
@@ -2221,6 +2224,7 @@
       yoinkFacts: document.getElementById("yoinkFacts"),
       yoinkFactMeta: document.getElementById("yoinkFactMeta"),
       yoinkOpenFolder: document.getElementById("yoinkOpenFolder"),
+      yoinkRetranscribe: document.getElementById("yoinkRetranscribe"),
       yoinkEvidence: document.getElementById("yoinkEvidence"),
       runningPill: document.getElementById("runningPill"),
       portLabel: document.getElementById("portLabel"),
@@ -2672,6 +2676,8 @@
         ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
         ["Topic", firstValue(row && row.topic, "Uncategorized")],
         ["Speakers", speakers.length ? `${speakers.length}` : "pending"],
+        ["Whisper model", firstValue(state.settings && state.settings.whisper_model, "base")],
+        ["Re-transcription", state.retranscribeStatus || "ready"],
         ["Source", sourceUrlOf(row, sidecar) || "not stored"],
       ];
       if (state.selectedYoinkSidecarError) {
@@ -2693,6 +2699,8 @@
       const hasRow = Boolean(row);
       els.yoinkOpenFolder.disabled = !hasRow || !folderPathOf(row);
       els.yoinkEvidence.disabled = !hasRow || !videoIdOf(row);
+      els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing;
+      els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
       if (!hasRow) {
         els.yoinkHeading.innerHTML = "Pick a uoink <em>to inspect.</em>";
         els.yoinkSubhead.textContent = "Podcast episodes, interviews, and regular videos share one local detail view.";
@@ -2788,6 +2796,8 @@
       state.selectedYoink = row || null;
       state.selectedYoinkSidecar = null;
       state.selectedYoinkSidecarError = "";
+      state.retranscribeStatus = "";
+      state.retranscribing = false;
       renderYoinkDetail();
       switchTab("yoink");
       const sidecarPath = sidecarPathForRow(row);
@@ -2798,6 +2808,45 @@
         state.selectedYoinkSidecarError = `coming with backend update (${err.message})`;
       }
       renderYoinkDetail();
+    }
+
+    async function requestRetranscription() {
+      const row = state.selectedYoink;
+      const videoId = videoIdOf(row);
+      if (!row || !videoId) return showToast("Select a uoink first.");
+      const sidecar = state.selectedYoinkSidecar || {};
+      const model = firstValue(state.settings && state.settings.whisper_model, "base");
+      if (!confirm(`Queue local Whisper re-transcription with the ${model} model?`)) return;
+      state.retranscribing = true;
+      state.retranscribeStatus = "queueing local Whisper job";
+      renderYoinkDetail();
+      try {
+        const data = await authFetch("/transcription/retranscribe", {
+          method: "POST",
+          body: JSON.stringify({
+            video_id: videoId,
+            model,
+            diarize: true,
+            source_url: sourceUrlOf(row, sidecar) || null,
+          }),
+        });
+        state.retranscribeStatus = data.job_id
+          ? `queued ${data.job_id}`
+          : "queued";
+        showToast("Re-transcription queued.");
+        refreshActivity();
+      } catch (err) {
+        const missing = err.message.includes("not found") || err.message.includes("404");
+        state.retranscribeStatus = missing
+          ? "coming with backend update"
+          : `failed: ${err.message}`;
+        showToast(missing
+          ? "Re-transcription arrives with the WhisperX backend update."
+          : `Could not queue re-transcription: ${err.message}`);
+      } finally {
+        state.retranscribing = false;
+        renderYoinkDetail();
+      }
     }
 
     function normalizedScore(row) {
@@ -4384,6 +4433,7 @@
         const folder = folderPathOf(state.selectedYoink);
         if (folder) authFetch(`/open-folder?path=${encodeURIComponent(folder)}`).catch((err) => showToast(err.message));
       });
+      els.yoinkRetranscribe.addEventListener("click", requestRetranscription);
       els.yoinkEvidence.addEventListener("click", () => {
         if (!state.selectedYoink) return;
         openEvidenceFor(videoIdOf(state.selectedYoink), rowTitle(state.selectedYoink));
