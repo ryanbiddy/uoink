@@ -130,6 +130,11 @@ Source: "staging\stop-server.bat"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\stop-server.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink.ico"; DestDir: "{app}"; Flags: ignoreversion
 
+; v2.2.0 upgrade-prep PowerShell. Flags: dontcopy keeps it out of {app} --
+; ExtractTemporaryFile() drops it into {tmp} during PrepareToInstall, runs
+; it once, and the wizard's normal {tmp} cleanup deletes it after.
+Source: "upgrade_prep.ps1"; Flags: dontcopy
+
 [Icons]
 ; The launcher entry is plain "Uoink" (not "Uoink Server") -- users don't
 ; think in servers, and this matches the README + finish-page wording.
@@ -303,4 +308,82 @@ begin
     Result := True;
   if (PageID = MigratePage.ID) and (not LegacyYoinkPresent()) then
     Result := True;
+end;
+
+(* v2.2.0 must-fix: stop the old helper + clear the splash sentinel BEFORE
+   files are copied. Two related bugs both rooted in stale state across an
+   upgrade:
+
+     Bug 1 -- prior pythonw.exe still holds 127.0.0.1:5179 when the new
+     helper's [Run] entry fires, so the new helper exits silently into a
+     bound port (hit on 2.1.0->2.1.1 and 2.1.1->2.2.0).
+
+     Bug 2 -- the .first-run-done sentinel from the prior install lives at
+     %LOCALAPPDATA%\Uoink\.first-run-done, suppressing the splash for
+     upgraders.
+
+   The heavy lifting is in upgrade_prep.ps1 (graceful POST /helper/quit
+   with the stored token, fallback Stop-Process under Yoink/Uoink roots,
+   wait-for-port-free, sentinel delete, full logging to
+   %TEMP%\uoink-upgrade-prep.log). Pascal also calls DeleteFile() on the
+   sentinel directly as belt-and-suspenders -- if PowerShell itself
+   failed to launch (locked down policy, missing pwsh, etc.) the upgrader
+   still gets their splash. The script is non-fatal on any failure -- the
+   worst case is the previously-shipping behaviour, which is what we have
+   today, so a prep failure should never abort the install.
+
+   Note: this block + the ones below use Pascal's other comment delimiter
+   instead of the house brace style because Inno's Pascal Script does NOT
+   nest comments, and the bodies below need to reference literal Inno
+   constants whose names embed brace characters. *)
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  ScriptPath: string;
+  SentinelPath: string;
+  ResultCode: Integer;
+  Executed: Boolean;
+begin
+  Result := '';
+  NeedsRestart := False;
+  SentinelPath := ExpandConstant('{localappdata}\Uoink\.first-run-done');
+
+  (* dontcopy file -- ExtractTemporaryFile pulls it into {tmp} the first
+     time we call it. ScriptPath then resolves to that {tmp} location. *)
+  try
+    ExtractTemporaryFile('upgrade_prep.ps1');
+  except
+    (* ExtractTemporaryFile raised. Skip the PS script + fall through to
+       the direct sentinel delete below. *)
+    Log('PrepareToInstall: ExtractTemporaryFile(upgrade_prep.ps1) failed');
+  end;
+
+  ScriptPath := ExpandConstant('{tmp}\upgrade_prep.ps1');
+  if FileExists(ScriptPath) then
+  begin
+    Executed := Exec(
+      'powershell.exe',
+      '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + ScriptPath + '"',
+      ExpandConstant('{tmp}'),
+      SW_HIDE,
+      ewWaitUntilTerminated,
+      ResultCode);
+    if Executed then
+      Log('PrepareToInstall: upgrade_prep.ps1 exited with code ' + IntToStr(ResultCode))
+    else
+      Log('PrepareToInstall: powershell.exe Exec() failed; falling through');
+  end else
+    Log('PrepareToInstall: upgrade_prep.ps1 missing under tmp; falling through');
+
+  (* Belt-and-suspenders: directly remove the splash sentinel so even if
+     the PS script never ran (PowerShell missing, ExecutionPolicy locked
+     by a domain policy, ExtractTemporaryFile raised), the upgrader still
+     sees the splash on first launch. DeleteFile is a no-op if the file
+     is absent (clean install). *)
+  if FileExists(SentinelPath) then
+  begin
+    if DeleteFile(SentinelPath) then
+      Log('PrepareToInstall: removed splash sentinel ' + SentinelPath)
+    else
+      Log('PrepareToInstall: DeleteFile(' + SentinelPath + ') returned false');
+  end;
 end;
