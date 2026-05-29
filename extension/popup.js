@@ -1462,6 +1462,42 @@ async function postHookCorrection(videoId, correctedHookType) {
   });
 }
 
+async function postTasteAnchor(videoId, anchorType, title) {
+  const body = {
+    video_id: videoId,
+    anchor_type: anchorType,
+    title: title || ""
+  };
+  
+  try {
+    const res = await fetch(`${STC.SERVER}/taste/anchors`, {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Yoink-Token": await STC.getToken()
+      },
+      body: JSON.stringify(body)
+    });
+    
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+  } catch (e) {
+    console.warn("Failed to POST taste anchor, saving locally", e);
+    chrome.storage.local.get({ uoink_taste_anchors: { best: [], worst: [], admired_channels: [] } }, (stored) => {
+      const anchors = stored.uoink_taste_anchors || { best: [], worst: [], admired_channels: [] };
+      const list = anchorType === "best" ? anchors.best : anchors.worst;
+      
+      if (!list.some(x => (x.video_id || x) === videoId)) {
+        list.push({ video_id: videoId, title: title || videoId });
+      }
+      
+      chrome.storage.local.set({ uoink_taste_anchors: anchors });
+    });
+  }
+}
+
 function renderHookCalibration(row) {
   const info = hookInfo(row);
   if (!info) return null;
@@ -1568,9 +1604,215 @@ function renderHookCalibration(row) {
       }
     });
     wrap.appendChild(correctionLink);
+
+    // Anchor best/worst buttons (Sprint 3)
+    const star = document.createElement("span");
+    star.className = "hook-correction-link";
+    star.style.marginLeft = "8px";
+    star.textContent = "⭐";
+    star.title = "Mark as 10/10 Best Anchor";
+    star.tabIndex = 0;
+    star.setAttribute("role", "button");
+    const markBest = async (ev) => {
+      ev.stopPropagation();
+      star.style.opacity = 0.5;
+      await postTasteAnchor(info.videoId, "best", row.title);
+      star.style.opacity = 1;
+      showToast("Marked as Best Anchor! ✓");
+    };
+    star.addEventListener("click", markBest);
+    star.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); markBest(e); } });
+
+    const cross = document.createElement("span");
+    cross.className = "hook-correction-link";
+    cross.style.marginLeft = "8px";
+    cross.textContent = "❌";
+    cross.title = "Mark as 0/10 Worst Anchor";
+    cross.tabIndex = 0;
+    cross.setAttribute("role", "button");
+    const markWorst = async (ev) => {
+      ev.stopPropagation();
+      cross.style.opacity = 0.5;
+      await postTasteAnchor(info.videoId, "worst", row.title);
+      cross.style.opacity = 1;
+      showToast("Marked as Worst Anchor! ✓");
+    };
+    cross.addEventListener("click", markWorst);
+    cross.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); markWorst(e); } });
+
+    wrap.appendChild(star);
+    wrap.appendChild(cross);
   }
 
   return wrap;
+}
+
+// ---- Pairwise Hook Calibration (Sprint 3) --------------------------------
+async function fetchHookText(slug) {
+  if (!slug) return null;
+  try {
+    let res = await globalThis.UoinkUI.authedJson("/mcp/v1/tools/call", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "get_uoink_corpus",
+        arguments: { slug }
+      })
+    });
+    if (!res || res.error) {
+      res = await globalThis.UoinkUI.authedJson("/mcp/v1/tools/call", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "get_yoink_corpus",
+          arguments: { slug }
+        })
+      });
+    }
+    const data = res && res.result && res.result.structuredContent;
+    const md = data && data.corpus_md;
+    if (md) {
+      const startIdx = md.indexOf("<!-- HOOK_START -->");
+      const endIdx = md.indexOf("<!-- HOOK_END -->");
+      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+        let hookText = md.substring(startIdx + "<!-- HOOK_START -->".length, endIdx).trim();
+        // Clean up formatting
+        hookText = hookText.replace(/^## Hook Analysis\s*/i, "");
+        hookText = hookText.replace(/^\*\*Hook Type:\*\*\s*[^\n]*\s*/i, "");
+        hookText = hookText.replace(/^\*\*Analysis:\*\*\s*/i, "");
+        hookText = hookText.trim();
+        if (hookText) {
+          if (hookText.length > 150) {
+            return hookText.substring(0, 147) + "...";
+          }
+          return hookText;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("fetchHookText failed for", slug, e);
+  }
+  return null;
+}
+
+let tcPairwiseCurrentPair = null;
+
+async function initPairwiseCalibration(recentYoinks) {
+  const card = document.getElementById("pairwise-calibration-card");
+  if (!card) return;
+
+  // 1. Check condition: 5+ yoinks
+  if (!recentYoinks || recentYoinks.length < 5) {
+    card.classList.add("hidden");
+    return;
+  }
+
+  // 2. Check dismiss: 24h limit
+  const dismissedAt = await new Promise((r) => {
+    chrome.storage.local.get(["uoink_pairwise_dismissed_at"], (items) => {
+      r(Number(items.uoink_pairwise_dismissed_at) || 0);
+    });
+  });
+
+  if (Date.now() - dismissedAt < 24 * 60 * 60 * 1000) {
+    card.classList.add("hidden");
+    return;
+  }
+
+  // Wire dismiss button
+  const dismissBtn = document.getElementById("pairwise-dismiss-btn");
+  if (dismissBtn) {
+    dismissBtn.onclick = () => {
+      chrome.storage.local.set({ uoink_pairwise_dismissed_at: Date.now() }, () => {
+        card.classList.add("hidden");
+      });
+    };
+  }
+
+  // Select two random yoinks
+  const idxA = Math.floor(Math.random() * recentYoinks.length);
+  let idxB = Math.floor(Math.random() * recentYoinks.length);
+  while (idxB === idxA) {
+    idxB = Math.floor(Math.random() * recentYoinks.length);
+  }
+
+  const yoinkA = recentYoinks[idxA];
+  const yoinkB = recentYoinks[idxB];
+  tcPairwiseCurrentPair = { a: yoinkA, b: yoinkB };
+
+  const btnA = document.getElementById("pairwise-option-a");
+  const btnB = document.getElementById("pairwise-option-b");
+  const skipBtn = document.getElementById("pairwise-skip-btn");
+  const syncNote = document.getElementById("pairwise-sync-note");
+
+  if (!btnA || !btnB || !skipBtn) return;
+
+  btnA.disabled = true;
+  btnB.disabled = true;
+  btnA.textContent = "Loading hook A...";
+  btnB.textContent = "Loading hook B...";
+
+  card.classList.remove("hidden");
+
+  // Fetch hook texts
+  const [hookA, hookB] = await Promise.all([
+    fetchHookText(yoinkA.folder ? yoinkA.folder.split(/[\\/]/).pop() : null),
+    fetchHookText(yoinkB.folder ? yoinkB.folder.split(/[\\/]/).pop() : null)
+  ]);
+
+  btnA.disabled = false;
+  btnB.disabled = false;
+
+  btnA.textContent = hookA ? `👈 ${hookA}` : `👈 ${yoinkA.title} (${hookDisplayName(yoinkA.hook_type)})`;
+  btnB.textContent = hookB ? `👉 ${hookB}` : `👉 ${yoinkB.title} (${hookDisplayName(yoinkB.hook_type)})`;
+
+  const submitChoice = async (choice) => {
+    btnA.disabled = true;
+    btnB.disabled = true;
+    skipBtn.disabled = true;
+
+    const answer = {
+      pair_a: yoinkA.video_id,
+      pair_b: yoinkB.video_id,
+      choice: choice
+    };
+
+    try {
+      const res = await fetch(`${STC.SERVER}/taste/answer`, {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Yoink-Token": await STC.getToken()
+        },
+        body: JSON.stringify(answer)
+      });
+      if (res.ok) {
+        if (syncNote) syncNote.classList.add("hidden");
+      } else {
+        throw new Error(`HTTP ${res.status}`);
+      }
+    } catch (e) {
+      console.warn("Failed to POST taste answer, saving locally", e);
+      chrome.storage.local.get({ uoink_pairwise_pending: [] }, (stored) => {
+        const pending = stored.uoink_pairwise_pending || [];
+        pending.push(answer);
+        chrome.storage.local.set({ uoink_pairwise_pending: pending }, () => {
+          if (syncNote) syncNote.classList.remove("hidden");
+        });
+      });
+    }
+
+    // Advance to next pair
+    btnA.disabled = false;
+    btnB.disabled = false;
+    skipBtn.disabled = false;
+    initPairwiseCalibration(recentYoinks);
+  };
+
+  btnA.onclick = () => submitChoice("a");
+  btnB.onclick = () => submitChoice("b");
+  skipBtn.onclick = () => submitChoice("skip");
 }
 
 async function loadRecentUoinks() {
@@ -1583,6 +1825,7 @@ async function loadRecentUoinks() {
   } catch { /* server may be down — leave the placeholder */ }
   knownRecentUoinkCount = recent.length + failures.length;
   updateFocalMode();
+  initPairwiseCalibration(recent);
   recentUoinksEl.innerHTML = "";
   for (const failure of failures) {
     recentUoinksEl.appendChild(renderFailureRow(failure));
@@ -1601,6 +1844,20 @@ async function loadRecentUoinks() {
       if (titleEl) titleEl.textContent = last.title || "(Untitled)";
       if (channelEl) channelEl.textContent = last.channel || "YouTube";
       if (durationEl) durationEl.textContent = last.topic || "Uncategorized";
+
+      const hookContainer = document.getElementById("active-uoink-hook-container");
+      if (hookContainer) {
+        hookContainer.innerHTML = "";
+        const hookRow = renderHookCalibration(last);
+        if (hookRow) {
+          const wrongLink = hookRow.querySelector(".hook-correction-link");
+          if (wrongLink) {
+            wrongLink.textContent = "✏️";
+            wrongLink.title = "Correct Hook Type";
+          }
+          hookContainer.appendChild(hookRow);
+        }
+      }
 
       const openClaudeBtn = document.getElementById("active-uoink-open-claude");
       if (openClaudeBtn) {

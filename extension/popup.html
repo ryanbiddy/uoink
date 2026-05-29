@@ -6,6 +6,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="brand/tokens.css">
   <style>
     :root {
       --rust: #C2410C;
@@ -1138,15 +1139,37 @@
   </div>
 
   <!-- Highlighted Last Uoink active card -->
-  <div id="active-uoink-card" class="panel hidden" style="border: 1px solid var(--rust); background: var(--ink-warm); border-radius: var(--r-card); padding: 12px; margin-bottom: 12px;">
-    <div style="font-size: 11px; color: var(--rust); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 6px;">Last Uoinked Video</div>
+  <div id="active-uoink-card" class="panel hidden" style="border: 1px solid var(--rust-bright); background: var(--ink-warm); border-radius: var(--r-card); padding: 12px; margin-bottom: 12px;">
+    <div style="font-size: 11px; color: var(--rust-bright); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 6px;">Last Uoinked Video</div>
     <div id="active-uoink-title" style="font-size: 13px; font-weight: 600; color: var(--cream); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">—</div>
     <div style="font-size: 11px; color: #888; margin-bottom: 8px;">
       <span id="active-uoink-channel">—</span> &nbsp;&middot;&nbsp; <span id="active-uoink-duration">—</span>
     </div>
+    <!-- Hook classification chip & rating anchors -->
+    <div id="active-uoink-hook-container" style="margin-bottom: 8px;"></div>
     <div class="button-row" style="margin-top: 8px; gap: 8px;">
       <button id="active-uoink-open-claude" class="primary" style="margin:0; flex:1; border-radius:var(--r-pill); font-weight:600;">Open Claude</button>
       <button id="active-uoink-copy-md" class="secondary" style="margin:0; flex:1; border-radius:var(--r-pill); font-weight:600;">Copy Markdown</button>
+    </div>
+  </div>
+
+  <!-- Pairwise Hook Calibration Card (Sprint 3) -->
+  <div id="pairwise-calibration-card" class="panel hidden" style="border: 1px solid var(--rust-bright); background: var(--ink-warm); padding: 12px; margin-bottom: 12px; position: relative;">
+    <button id="pairwise-dismiss-btn" style="position: absolute; top: 6px; right: 8px; background: transparent; border: none; color: #888; cursor: pointer; font-size: 12px;" type="button">✕</button>
+    <div style="font-size: 11px; color: var(--rust-bright); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 8px;">Refine your taste</div>
+    <div style="font-size: 12px; margin-bottom: 10px; color: var(--cream);">Which works better for you?</div>
+    
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
+      <button id="pairwise-option-a" class="secondary" style="text-align: left; padding: 10px; border-radius: 8px; white-space: normal; line-height: 1.4; font-size: 12px; margin-top: 0;" type="button">
+        Option A: —
+      </button>
+      <button id="pairwise-option-b" class="secondary" style="text-align: left; padding: 10px; border-radius: 8px; white-space: normal; line-height: 1.4; font-size: 12px; margin-top: 0;" type="button">
+        Option B: —
+      </button>
+    </div>
+    <div style="display: flex; gap: 6px; align-items: center; justify-content: space-between;">
+      <button id="pairwise-skip-btn" class="secondary" style="flex: 1; padding: 6px; font-size: 11px; margin-top: 0;" type="button">🤷 Skip / Neither</button>
+      <span id="pairwise-sync-note" class="hidden" style="font-size: 10px; color: var(--rust-bright); font-weight: 600;">Will sync later</span>
     </div>
   </div>
 

@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="brand/tokens.css">
   <style>
     :root {
       --rust: #C2410C;
@@ -576,6 +577,57 @@
 
     .hidden { display: none !important; }
 
+    /* Taste calibration custom styles */
+    .tc-channel-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-inset);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: var(--r-pill);
+      font-size: 13px;
+      color: var(--uoink-white);
+    }
+    .tc-channel-chip .remove-chip {
+      cursor: pointer;
+      color: var(--text-mute);
+      font-weight: 700;
+    }
+    .tc-channel-chip .remove-chip:hover {
+      color: var(--vermillion);
+    }
+    .tc-hook-rate-card {
+      background: var(--bg-inset);
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      transition: border-color 0.15s ease;
+    }
+    .tc-hook-rate-card:hover {
+      border-color: var(--border-soft);
+    }
+    .tc-rate-btn {
+      background: transparent;
+      color: var(--text-mute);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: var(--r-pill);
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s ease;
+    }
+    .tc-rate-btn:hover {
+      border-color: var(--rust-bright);
+      color: var(--cream);
+    }
+    .tc-rate-btn.active {
+      background: var(--rust);
+      border-color: var(--rust);
+      color: var(--cream);
+    }
+
     /* Mobile */
     @media (max-width: 560px) {
       .wrap { padding: 32px 16px 48px; }
@@ -782,6 +834,90 @@
       </div>
     </section>
 
+    <!-- Taste calibration onboarding step (Sprint 3) -->
+    <section id="taste-calibration-onboarding" class="step">
+      <div class="step-head">
+        <div class="step-num"><span class="step-num-text">TC</span></div>
+        <h2>60-second Taste Calibration</h2>
+      </div>
+      <p>Help Uoink calibrate your recommendations. You can skip this step at any time.</p>
+      
+      <div class="settings-grid">
+        <label>
+          <span class="field-label" style="font-weight:600; color:var(--rust-bright);">1. Which channels do you admire? (pick 2-5)</span>
+          <div style="display:flex; gap:8px;">
+            <input id="tc-channels-input" class="input" type="text" placeholder="Type channel name or paste URL...">
+            <button id="tc-add-channel-btn" class="button ghost" type="button" style="padding: 10px 14px; height:43px;">Add</button>
+          </div>
+        </label>
+        <div id="tc-channel-chips" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;"></div>
+        <div style="font-size:12px; color:var(--text-mute); margin-top:4px;">
+          Suggestions (click to add): 
+          <a href="#" class="tc-suggestion" data-val="Lenny's Podcast" style="color:var(--rust-bright); text-decoration:none; margin-right:8px; font-weight:500;">Lenny's Podcast</a>
+          <a href="#" class="tc-suggestion" data-val="Andrej Karpathy" style="color:var(--rust-bright); text-decoration:none; margin-right:8px; font-weight:500;">Andrej Karpathy</a>
+          <a href="#" class="tc-suggestion" data-val="3Blue1Brown" style="color:var(--rust-bright); text-decoration:none; margin-right:8px; font-weight:500;">3Blue1Brown</a>
+          <a href="#" class="tc-suggestion" data-val="Veritasium" style="color:var(--rust-bright); text-decoration:none; font-weight:500;">Veritasium</a>
+        </div>
+      </div>
+
+      <div class="settings-grid" style="margin-top:24px;">
+        <span class="field-label" style="font-weight:600; color:var(--rust-bright);">2. Rate these hook openers</span>
+        
+        <div class="tc-hook-rate-card">
+          <div style="font-style:italic; margin-bottom:8px; color:var(--cream);">"I spent 100 days building a search engine from scratch, and what I discovered about Google's algorithm changes everything..."</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; color:var(--text-mute);">Type: Curiosity Gap</span>
+            <div class="tc-rating-buttons" data-hook-index="0" style="display:flex; gap:6px;">
+              <button class="tc-rate-btn" data-rating="up" type="button">👍</button>
+              <button class="tc-rate-btn" data-rating="neutral" type="button">😐</button>
+              <button class="tc-rate-btn" data-rating="down" type="button">👎</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tc-hook-rate-card">
+          <div style="font-style:italic; margin-bottom:8px; color:var(--cream);">"Most productivity advice is actually making you less productive. Here is why your 5 AM routine is ruining your focus..."</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; color:var(--text-mute);">Type: Contrarian</span>
+            <div class="tc-rating-buttons" data-hook-index="1" style="display:flex; gap:6px;">
+              <button class="tc-rate-btn" data-rating="up" type="button">👍</button>
+              <button class="tc-rate-btn" data-rating="neutral" type="button">😐</button>
+              <button class="tc-rate-btn" data-rating="down" type="button">👎</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tc-hook-rate-card">
+          <div style="font-style:italic; margin-bottom:8px; color:var(--cream);">"Watch this robot hand solve a Rubik's cube in under 3 seconds using only local reinforcement learning..."</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; color:var(--text-mute);">Type: Demo</span>
+            <div class="tc-rating-buttons" data-hook-index="2" style="display:flex; gap:6px;">
+              <button class="tc-rate-btn" data-rating="up" type="button">👍</button>
+              <button class="tc-rate-btn" data-rating="neutral" type="button">😐</button>
+              <button class="tc-rate-btn" data-rating="down" type="button">👎</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-grid" style="margin-top:24px;">
+        <label>
+          <span class="field-label" style="font-weight:600; color:var(--rust-bright);">3. Anything you DON'T want to see in recommendations? (optional)</span>
+          <textarea id="tc-dislikes-input" class="input" style="height:64px; font-family:inherit; font-size:13px; line-height:1.4;" placeholder="e.g. clickbait, crypto talk, superficial summaries..."></textarea>
+        </label>
+      </div>
+
+      <div id="tc-status" class="settings-status" style="margin-top:14px; min-height:20px; font-weight:600;"></div>
+      <div id="tc-pending-note" class="cost-estimate hidden" style="margin-top:12px; border-color:var(--rust-bright); background:rgba(249, 115, 22, 0.08); color:var(--rust-bright); font-weight:600;">
+        Will sync to your helper after v2.5 lands
+      </div>
+
+      <div class="button-row" style="margin-top:16px;">
+        <button id="tc-save-btn" class="button" type="button">Save Taste Profile</button>
+        <button id="tc-skip-btn" class="button ghost" type="button">Skip Taste Calibration</button>
+      </div>
+    </section>
+
     <section id="hook-type-settings" class="step">
       <div class="step-head">
         <div class="step-num"><span class="step-num-text">H</span></div>
@@ -805,6 +941,36 @@
       <p>Review recent corrections you've made when Uoink picked the wrong hook category.</p>
       <div id="hook-calibration-summary" class="calibration-summary">Start Uoink to load calibration history.</div>
       <div id="hook-corrections-list" class="corrections-list" aria-live="polite"></div>
+    </section>
+
+    <!-- Taste anchors settings section (Sprint 3) -->
+    <section id="taste-anchors-settings" class="step">
+      <div class="step-head">
+        <div class="step-num"><span class="step-num-text">TA</span></div>
+        <h2>Taste anchors</h2>
+      </div>
+      <p>Manage the videos and channels that anchor your taste model. Click any item to remove it.</p>
+      
+      <div class="settings-grid">
+        <span class="field-label" style="font-weight:600; color:var(--rust-bright); margin-bottom: 2px;">Best you've yoinked (10/10 Anchors)</span>
+        <div id="anchors-best-list" class="corrections-list" style="max-height: 180px; margin-bottom: 16px;">
+          <div class="panel-muted" style="font-size:11px;padding:4px 6px">No best anchors set. Mark videos as 10/10 in the popup.</div>
+        </div>
+
+        <span class="field-label" style="font-weight:600; color:var(--rust-bright); margin-bottom: 2px;">Worst you've yoinked (0/10 Anchors)</span>
+        <div id="anchors-worst-list" class="corrections-list" style="max-height: 180px; margin-bottom: 16px;">
+          <div class="panel-muted" style="font-size:11px;padding:4px 6px">No worst anchors set. Mark videos as 0/10 in the popup.</div>
+        </div>
+
+        <span class="field-label" style="font-weight:600; color:var(--rust-bright); margin-bottom: 2px;">Admired channels</span>
+        <div id="anchors-channels-list" class="corrections-list" style="max-height: 180px;">
+          <div class="panel-muted" style="font-size:11px;padding:4px 6px">No admired channels set.</div>
+        </div>
+      </div>
+      <div id="ta-status" class="settings-status" style="margin-top:14px; min-height:20px; font-weight:600;"></div>
+      <div id="ta-pending-note" class="cost-estimate hidden" style="margin-top:12px; border-color:var(--rust-bright); background:rgba(249, 115, 22, 0.08); color:var(--rust-bright); font-weight:600;">
+        Will sync to your helper after v2.5 lands
+      </div>
     </section>
 
     <section id="smart-screenshot-settings" class="step">
