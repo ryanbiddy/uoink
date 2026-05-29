@@ -75,6 +75,7 @@ import channels  # noqa: E402  -- v2.5 P3 your-channel registry + recognition
 import uoink_reliability  # noqa: E402  -- optional local Whisper reliability checks
 import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
 import claims  # noqa: E402  -- v3 A2 claim extraction + verification (Loki-inspired)
+import scripts as p5_scripts  # noqa: E402  -- v3 P5 script studio backend
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
@@ -5860,6 +5861,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_workspace_get(bare)
         if bare.startswith("/claims/"):
             return self._handle_claims_get(bare)
+        if bare == "/scripts":
+            return self._handle_scripts_list()
+        if bare.startswith("/script/") and bare.endswith("/shot-list"):
+            return self._handle_script_shot_list_get(bare)
+        if bare.startswith("/script/"):
+            return self._handle_script_get(bare)
         if bare == "/settings/mcp-config":
             return self._handle_settings_mcp_config()
         if bare == "/open-last-youtube":
@@ -6383,6 +6390,145 @@ class Handler(BaseHTTPRequestHandler):
                                           "error": "claim not found"})
         return self._send_json(200, {"ok": True, "claim_id": claim_id,
                                       "status": claims.STATUS_NOT_ATTEMPTED})
+
+    # ---- v3 P5 script studio -----------------------------------------------
+    # Two-phase generator + revisor (mirror of P4 critique): without
+    # `script` payload the helper returns grounding context for the agent
+    # to write against; with `script` payload it persists. Compute is
+    # model-agnostic per the locked policy.
+
+    def _handle_scripts_list(self):
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        workspace_id = (qs.get("workspace_id") or [None])[0]
+        try:
+            limit = int((qs.get("limit") or ["50"])[0])
+        except ValueError:
+            limit = 50
+        try:
+            rows = p5_scripts.list_scripts(
+                _get_index(), workspace_id=workspace_id, limit=limit)
+        except Exception as e:
+            log.exception("/scripts GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "scripts": rows,
+                                      "count": len(rows)})
+
+    def _handle_script_get(self, bare: str):
+        if not self._require_token():
+            return
+        try:
+            script_id = int(bare[len("/script/"):].strip("/"))
+        except (TypeError, ValueError):
+            return self._send_json(400, {"ok": False,
+                                          "error": "script_id must be an integer"})
+        try:
+            row = p5_scripts.get_script(_get_index(), script_id)
+        except Exception as e:
+            log.exception("/script/<id> failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        if row is None:
+            return self._send_json(404, {"ok": False,
+                                          "error": "script not found"})
+        return self._send_json(200, {"ok": True, "script": row})
+
+    def _handle_script_shot_list_get(self, bare: str):
+        if not self._require_token():
+            return
+        try:
+            script_id = int(
+                bare[len("/script/"):-len("/shot-list")].strip("/"))
+        except (TypeError, ValueError):
+            return self._send_json(400, {"ok": False,
+                                          "error": "script_id must be an integer"})
+        try:
+            result = p5_scripts.get_shot_list(_get_index(), script_id)
+        except Exception as e:
+            log.exception("/script/<id>/shot-list failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        status = 200 if result.get("ok") else 404
+        return self._send_json(status, result)
+
+    def _handle_script_generate(self, body):
+        """POST /script/generate -- two-phase generator.
+
+        body: {workspace_id, script?, mode?, parent_script_id?}
+
+        Phase 1 (no `script`): returns grounding context.
+        Phase 2 (`script` present): persists the agent-produced script."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        workspace_id = (body.get("workspace_id") or "").strip()
+        if not workspace_id:
+            return self._send_json(400, {"ok": False,
+                                          "error": "workspace_id required"})
+        script = body.get("script")
+        mode = (body.get("mode") or p5_scripts.COMPUTE_MODE_AGENT).strip()
+        parent = body.get("parent_script_id")
+        try:
+            parent_id = int(parent) if parent is not None else None
+        except (TypeError, ValueError):
+            return self._send_json(400, {"ok": False,
+                                          "error": "parent_script_id must be an integer"})
+        try:
+            result = p5_scripts.generate_script(
+                _get_index(), workspace_id, script=script, mode=mode,
+                parent_script_id=parent_id)
+        except Exception as e:
+            log.exception("/script/generate failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        status = 200 if result.get("ok") else 400
+        return self._send_json(status, result)
+
+    def _handle_script_revise(self, body):
+        """POST /script/revise -- two-phase revisor grounded in critique
+        findings. body: {script_id, critique_findings?, revision_target?,
+        revised_script?, mode?}"""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        try:
+            script_id = int(body.get("script_id"))
+        except (TypeError, ValueError):
+            return self._send_json(400, {"ok": False,
+                                          "error": "script_id (integer) required"})
+        crit = body.get("critique_findings")
+        target = body.get("revision_target")
+        revised = body.get("revised_script")
+        mode = (body.get("mode") or p5_scripts.COMPUTE_MODE_AGENT).strip()
+        try:
+            result = p5_scripts.revise_script(
+                _get_index(), script_id,
+                critique_findings=crit,
+                revision_target=target,
+                revised_script=revised,
+                mode=mode)
+        except Exception as e:
+            log.exception("/script/revise failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        status = 200 if result.get("ok") else 400
+        return self._send_json(status, result)
+
+    def _handle_script_shot_list_post(self, body):
+        """POST /script/shot-list -- derive a default shot list from a
+        script's beats + format. body: {script_id}"""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        try:
+            script_id = int(body.get("script_id"))
+        except (TypeError, ValueError):
+            return self._send_json(400, {"ok": False,
+                                          "error": "script_id (integer) required"})
+        try:
+            result = p5_scripts.derive_shot_list(_get_index(), script_id)
+        except Exception as e:
+            log.exception("/script/shot-list POST failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        status = 200 if result.get("ok") else 404
+        return self._send_json(status, result)
 
     def _handle_settings_mcp_config(self):
         """MCP config snippet for the Settings tab Copy button. Token-gated."""
@@ -6939,6 +7085,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_claims_verify(bare, body)
         if bare.startswith("/claims/") and bare.endswith("/skip"):
             return self._handle_claims_skip(bare, body)
+        if bare == "/script/generate":
+            return self._handle_script_generate(body)
+        if bare == "/script/revise":
+            return self._handle_script_revise(body)
+        if bare == "/script/shot-list":
+            return self._handle_script_shot_list_post(body)
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})

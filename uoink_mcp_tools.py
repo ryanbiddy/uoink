@@ -789,6 +789,110 @@ def get_claim(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(claim=row)
 
 
+def generate_script(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 P5 script studio: two-phase generator.
+
+    Phase 1 (no `script`): return grounding context (workspace +
+    assembled corpus + taste anchors). Calling agent writes the script
+    using its own model -- locked compute policy.
+
+    Phase 2 (`script` is a structured object): persist it. Returns the
+    new script row id + version."""
+    server = _b()
+    import scripts as _scripts_mod
+    workspace_id = args.get("workspace_id")
+    if not isinstance(workspace_id, str) or not workspace_id.strip():
+        return _err("workspace_id (string) is required")
+    script = args.get("script")
+    mode = args.get("mode") or _scripts_mod.COMPUTE_MODE_AGENT
+    parent = args.get("parent_script_id")
+    try:
+        parent_id = int(parent) if parent is not None else None
+    except (TypeError, ValueError):
+        return _err("parent_script_id must be an integer")
+    try:
+        return _scripts_mod.generate_script(
+            server._get_index(), workspace_id.strip(),
+            script=script, mode=mode, parent_script_id=parent_id)
+    except Exception as e:
+        return _err(f"generate_script failed: {e}")
+
+
+def revise_script(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 P5: revise an existing script grounded in critique findings.
+    Two-phase like generate_script -- without `revised_script` payload
+    returns the previous script + grounding context; with payload it
+    persists as a new version (parent_script_id chained)."""
+    server = _b()
+    import scripts as _scripts_mod
+    try:
+        script_id = int(args.get("script_id"))
+    except (TypeError, ValueError):
+        return _err("script_id (integer) is required")
+    crit = args.get("critique_findings")
+    target = args.get("revision_target")
+    revised = args.get("revised_script")
+    mode = args.get("mode") or _scripts_mod.COMPUTE_MODE_AGENT
+    try:
+        return _scripts_mod.revise_script(
+            server._get_index(), script_id,
+            critique_findings=crit, revision_target=target,
+            revised_script=revised, mode=mode)
+    except Exception as e:
+        return _err(f"revise_script failed: {e}")
+
+
+def get_shot_list(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 P5: derive (and persist) a default shot list for a script
+    based on its beats + the parent workspace's format. Overwrites any
+    prior shot_list on the row -- the calling agent can also supply
+    shot_list directly in generate_script to bypass this heuristic."""
+    server = _b()
+    import scripts as _scripts_mod
+    try:
+        script_id = int(args.get("script_id"))
+    except (TypeError, ValueError):
+        return _err("script_id (integer) is required")
+    try:
+        return _scripts_mod.derive_shot_list(server._get_index(), script_id)
+    except Exception as e:
+        return _err(f"get_shot_list failed: {e}")
+
+
+def list_scripts(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 P5: list scripts newest-first. Filter by workspace_id."""
+    server = _b()
+    import scripts as _scripts_mod
+    workspace_id = args.get("workspace_id")
+    if workspace_id is not None and not isinstance(workspace_id, str):
+        return _err("workspace_id must be a string when provided")
+    limit = _limit_int(args.get("limit"), default=50, low=1, high=500)
+    try:
+        rows = _scripts_mod.list_scripts(
+            server._get_index(), workspace_id=workspace_id, limit=limit)
+    except Exception as e:
+        return _err(f"list_scripts failed: {e}")
+    return _ok(scripts=rows, count=len(rows))
+
+
+def get_script(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 P5: fetch one script by id including beats + shot_list +
+    source_yoinks citations."""
+    server = _b()
+    import scripts as _scripts_mod
+    try:
+        script_id = int(args.get("id") or args.get("script_id"))
+    except (TypeError, ValueError):
+        return _err("script id (integer) is required")
+    try:
+        row = _scripts_mod.get_script(server._get_index(), script_id)
+    except Exception as e:
+        return _err(f"get_script failed: {e}")
+    if row is None:
+        return _err("script not found")
+    return _ok(script=row)
+
+
 def find_mentions(args: dict[str, Any]) -> dict[str, Any]:
     """Return every recorded mention of an entity across the library,
     newest first, each with a timestamped YouTube deep link (Sprint 16)."""
@@ -1372,6 +1476,85 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "claim_id": {"type": "integer"},
         }, []),
         handler=get_claim,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "generate_script": ToolSpec(
+        name="generate_script",
+        description=(
+            "v3 P5 script studio: two-phase generator. Call WITHOUT "
+            "`script` payload to retrieve grounding context (workspace "
+            "metadata + assembled corpus slice + audience questions + "
+            "optional taste anchors + optional self-channel snapshot). "
+            "The calling agent does the writing using its own model. "
+            "Call WITH `script` (a structured object with hook + beats "
+            "+ body + cta + source_yoinks citations) to persist as a "
+            "new versioned row. parent_script_id chains revisions."
+        ),
+        input_schema=_schema({
+            "workspace_id": {"type": "string"},
+            "script": {"type": "object"},
+            "mode": {"type": "string", "enum": ["agent", "byo_key"]},
+            "parent_script_id": {"type": "integer"},
+        }, ["workspace_id"]),
+        handler=generate_script,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "revise_script": ToolSpec(
+        name="revise_script",
+        description=(
+            "v3 P5: revise an existing script grounded in critique "
+            "findings. Two-phase like generate_script -- without "
+            "`revised_script` returns previous + grounding for the "
+            "agent to act on; with `revised_script` persists as a new "
+            "version (parent_script_id auto-set to the prior id)."
+        ),
+        input_schema=_schema({
+            "script_id": {"type": "integer"},
+            "critique_findings": {"type": "object"},
+            "revision_target": {"type": "string"},
+            "revised_script": {"type": "object"},
+            "mode": {"type": "string", "enum": ["agent", "byo_key"]},
+        }, ["script_id"]),
+        handler=revise_script,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "get_shot_list": ToolSpec(
+        name="get_shot_list",
+        description=(
+            "v3 P5: derive (and persist) a default shot list from a "
+            "script's beats + the parent workspace's S1 format facet. "
+            "Per-beat row with format-specific cue suggestions. The "
+            "calling agent can override by supplying shot_list directly "
+            "in generate_script."
+        ),
+        input_schema=_schema({
+            "script_id": {"type": "integer"},
+        }, ["script_id"]),
+        handler=get_shot_list,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "list_scripts": ToolSpec(
+        name="list_scripts",
+        description=(
+            "v3 P5: list scripts newest-first. Optional workspace_id "
+            "filter scopes to one workspace's history."
+        ),
+        input_schema=_schema({
+            "workspace_id": {"type": "string"},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 500,
+                       "default": 50},
+        }, []),
+        handler=list_scripts,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "get_script": ToolSpec(
+        name="get_script",
+        description="v3 P5: fetch one script by id.",
+        input_schema=_schema({
+            "id": {"type": "integer"},
+            "script_id": {"type": "integer"},
+        }, []),
+        handler=get_script,
         rate_limiter=_RateLimiter(60),
     ),
 }
