@@ -113,6 +113,9 @@ Source: "staging\topics.json"; DestDir: "{app}"; Flags: ignoreversion
 ; but the installer must also copy it into {app}, or the helper crashes on a
 ; clean install before binding the port.
 Source: "staging\VERSION"; DestDir: "{app}"; Flags: ignoreversion
+; Sprint 21: uoink_core/ package (modules split out of server.py). server.py
+; imports it at module top -- must ship or the helper crashes before binding.
+Source: "staging\uoink_core\*"; DestDir: "{app}\uoink_core"; Flags: recursesubdirs ignoreversion createallsubdirs
 Source: "staging\skills\*"; DestDir: "{app}\skills"; Flags: recursesubdirs ignoreversion createallsubdirs
 Source: "staging\assets\dashboard\*"; DestDir: "{app}\assets\dashboard"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Tier 2 GUI assets: splash HTML (served at /splash, wrapped by uoink_splash.py)

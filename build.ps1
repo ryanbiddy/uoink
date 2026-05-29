@@ -180,7 +180,7 @@ $splashIndex = Join-Path $RepoRoot 'assets\splash\index.html'
 if (-not (Test-Path $splashIndex)) {
     throw "Missing assets\splash\index.html -- Tier 2 /splash route would 404"
 }
-foreach ($f in @('VERSION','server.py','index.py','_platform.py','yt_extract.py','topics.json')) {
+foreach ($f in @('VERSION','server.py','index.py','_platform.py','yt_extract.py','topics.json','uoink_core\storage.py')) {
     if (-not (Test-Path (Join-Path $RepoRoot $f))) {
         throw "Missing $f at repo root"
     }
@@ -328,6 +328,10 @@ Copy-Item (Join-Path $RepoRoot 'VERSION')        $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.bat') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.ps1') $StagingDir -Force
 Copy-Item $IconSrc (Join-Path $StagingDir 'uoink.ico') -Force
+# Sprint 21: the uoink_core/ package holds modules split out of server.py.
+# server.py imports it at module top, so it must ship or the helper crashes
+# with ModuleNotFoundError before binding the port (cf. _platform.py).
+Copy-Item (Join-Path $RepoRoot 'uoink_core') (Join-Path $StagingDir 'uoink_core') -Recurse -Force
 Copy-Item (Join-Path $RepoRoot 'skills') (Join-Path $StagingDir 'skills') -Recurse -Force
 Copy-Item (Join-Path $RepoRoot 'assets\dashboard') (Join-Path $StagingDir 'assets\dashboard') -Recurse -Force
 # Tier 2 GUI: splash HTML (served at /splash and wrapped by uoink_splash.py)

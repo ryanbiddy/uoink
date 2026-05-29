@@ -73,6 +73,14 @@ import _platform  # noqa: E402  -- cross-platform path / OS helpers
 import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
 import channels  # noqa: E402  -- v2.5 P3 your-channel registry + recognition
 import uoink_reliability  # noqa: E402  -- optional local Whisper reliability checks
+# Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
+# are re-exported here so existing call sites are unchanged.
+from uoink_core.storage import (  # noqa: E402
+    _atomic_write_text,
+    _is_writable_dir,
+    _path_under_any,
+    _topic_folder_name,
+)
 
 # --- Constants -------------------------------------------------------------
 HOST = "127.0.0.1"
@@ -504,33 +512,6 @@ def _write_settings(data: dict) -> None:
             pass
 
 
-def _atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8") -> None:
-    """Write text via temp file + replace so crashy exits don't leave partial files."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
-    try:
-        tmp.write_text(text, encoding=encoding)
-        # Path.replace() can raise PermissionError when the destination file
-        # is momentarily held open by OneDrive sync -- and the default
-        # DESKTOP_ROOT lives under OneDrive. Retry with short backoff before
-        # giving up so a transient sync lock doesn't lose the write.
-        for delay in (0.05, 0.2, 0.5, None):
-            try:
-                tmp.replace(path)
-                break
-            except PermissionError:
-                if delay is None:
-                    log.warning("atomic write to %s failed after retries "
-                                "(destination locked?)", path)
-                    raise
-                time.sleep(delay)
-    finally:
-        try:
-            tmp.unlink(missing_ok=True)
-        except OSError:
-            pass
-
-
 def _credential_store_error() -> CredentialStoreError | None:
     if _keyring is None:
         detail = (
@@ -885,22 +866,6 @@ def _get_desktop_dir() -> Path:
     return _platform.desktop_dir()
 
 
-def _is_writable_dir(path: Path) -> bool:
-    if not path.exists() or not path.is_dir():
-        return False
-    probe = path / f".yoink-write-test-{os.getpid()}-{uuid.uuid4().hex}.tmp"
-    try:
-        probe.write_text("ok", encoding="utf-8")
-        probe.unlink(missing_ok=True)
-        return True
-    except OSError:
-        try:
-            probe.unlink(missing_ok=True)
-        except OSError:
-            pass
-        return False
-
-
 def _get_output_root() -> Path:
     """Return the Uoink output root.
 
@@ -1021,15 +986,6 @@ def _allowed_roots() -> set[Path]:
             pass
     return roots
 
-
-def _path_under_any(resolved: Path, roots: set[Path]) -> bool:
-    for root in roots:
-        try:
-            resolved.relative_to(root)
-            return True
-        except ValueError:
-            continue
-    return False
 
 # --- Logging ---------------------------------------------------------------
 LOG_PATH = HERE / "server.log"
@@ -1687,17 +1643,6 @@ def _classify_topic(metadata: dict) -> str:
             best_name = name
 
     return best_name
-
-
-# Trim and normalize a topic name into a Windows-safe folder segment without
-# stripping the spaces — we want "Social Media Research" on disk, not the
-# slugified "Social_Media_Research".
-_FORBIDDEN_PATH_CHARS = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
-
-
-def _topic_folder_name(topic: str) -> str:
-    cleaned = _FORBIDDEN_PATH_CHARS.sub("", topic).strip().rstrip(".")
-    return cleaned or "Uncategorized"
 
 
 # ---------------------------------------------------------------------------
