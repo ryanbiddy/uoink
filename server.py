@@ -77,6 +77,7 @@ import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
 import claims  # noqa: E402  -- v3 A2 claim extraction + verification (Loki-inspired)
 import scripts as p5_scripts  # noqa: E402  -- v3 P5 script studio backend
 import memory_layer  # noqa: E402  -- v2.5 S4 markdown taste/user memory
+import podcasts  # noqa: E402  -- v3.1 podcast RSS feed registry + polling
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
@@ -6252,6 +6253,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_role_emphasis()
         if bare == "/live/status":
             return self._handle_live_status_get()
+        if bare == "/podcasts/feeds":
+            return self._handle_podcasts_feeds_list()
+        if bare == "/podcasts/episodes":
+            return self._handle_podcasts_episodes_list()
         if bare == "/update/check":
             return self._handle_update_check()
         if bare == "/engagement/scores":
@@ -7039,6 +7044,148 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(500, {"ok": False, "error": str(e)})
         return self._send_json(200, result)
 
+    # ---- v3.1 podcast RSS feeds ---------------------------------------
+    # Feed registry + polling. Episode rows materialise as metadata-only
+    # rows when a feed is polled; the audio download + WhisperX
+    # transcription pipelines land in subsequent PRs (CC's queue track B
+    # step 2 + step 3). User opts in to download per-episode by moving
+    # the row from 'new' -> 'queued' via /podcasts/episodes/set-status.
+
+    def _parse_feed_id(self, body):
+        try:
+            return int(body.get("feed_id")), None
+        except (TypeError, ValueError):
+            return None, "feed_id (integer) required"
+
+    def _handle_podcasts_feeds_list(self):
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        enabled_only = (qs.get("enabled_only") or [""])[0] == "1"
+        try:
+            rows = podcasts.list_feeds(_get_index(),
+                                          enabled_only=enabled_only)
+        except Exception as e:
+            log.exception("/podcasts/feeds GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "feeds": rows,
+                                      "count": len(rows)})
+
+    def _handle_podcasts_feed_add(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        feed_url = (body.get("feed_url") or "").strip()
+        interval = body.get("poll_interval_min") or 60
+        try:
+            row = podcasts.add_feed(_get_index(), feed_url,
+                                       poll_interval_min=int(interval))
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/podcasts/feeds POST failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "feed": row})
+
+    def _handle_podcasts_feed_remove(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        feed_id, err = self._parse_feed_id(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        try:
+            removed = podcasts.remove_feed(_get_index(), feed_id)
+        except Exception as e:
+            log.exception("/podcasts/feeds/remove failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "removed": removed})
+
+    def _handle_podcasts_feed_set_enabled(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        feed_id, err = self._parse_feed_id(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        enabled = body.get("enabled")
+        if not isinstance(enabled, bool):
+            return self._send_json(400, {"ok": False,
+                                          "error": "enabled (boolean) required"})
+        try:
+            changed = podcasts.set_feed_enabled(_get_index(),
+                                                  feed_id, enabled)
+        except Exception as e:
+            log.exception("/podcasts/feeds/set-enabled failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "changed": changed,
+                                      "enabled": enabled})
+
+    def _handle_podcasts_feed_poll(self, body):
+        """Manual poll. Body: {feed_id}. Returns the structured
+        per-feed result -- used by the dashboard's "refresh" button +
+        the future background poller can call the same function."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        feed_id, err = self._parse_feed_id(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        try:
+            result = podcasts.poll_feed(_get_index(), feed_id)
+        except Exception as e:
+            log.exception("/podcasts/feeds/poll failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        status = 200 if result.get("ok") else 400
+        return self._send_json(status, result)
+
+    def _handle_podcasts_episodes_list(self):
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        feed_id = qs.get("feed_id")
+        try:
+            feed_id_i = int(feed_id[0]) if feed_id else None
+        except (TypeError, ValueError):
+            feed_id_i = None
+        status = (qs.get("status") or [None])[0]
+        try:
+            limit = int((qs.get("limit") or ["100"])[0])
+        except ValueError:
+            limit = 100
+        try:
+            rows = podcasts.list_episodes(_get_index(),
+                                             feed_id=feed_id_i,
+                                             status=status, limit=limit)
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/podcasts/episodes GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "episodes": rows,
+                                      "count": len(rows)})
+
+    def _handle_podcasts_episode_set_status(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        try:
+            episode_id = int(body.get("episode_id"))
+        except (TypeError, ValueError):
+            return self._send_json(400, {"ok": False,
+                                          "error": "episode_id (integer) required"})
+        status = (body.get("status") or "").strip()
+        try:
+            changed = podcasts.set_episode_status(_get_index(),
+                                                     episode_id, status)
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/podcasts/episodes/set-status failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "changed": changed,
+                                      "status": status})
+
     def _handle_settings_mcp_config(self):
         """MCP config snippet for the Settings tab Copy button. Token-gated."""
         if not self._require_token():
@@ -7678,6 +7825,16 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_memory_taste_post(body)
         if bare == "/memory/user":
             return self._handle_memory_user_post(body)
+        if bare == "/podcasts/feeds":
+            return self._handle_podcasts_feed_add(body)
+        if bare == "/podcasts/feeds/remove":
+            return self._handle_podcasts_feed_remove(body)
+        if bare == "/podcasts/feeds/poll":
+            return self._handle_podcasts_feed_poll(body)
+        if bare == "/podcasts/feeds/set-enabled":
+            return self._handle_podcasts_feed_set_enabled(body)
+        if bare == "/podcasts/episodes/set-status":
+            return self._handle_podcasts_episode_set_status(body)
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})
