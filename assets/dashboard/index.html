@@ -1315,6 +1315,45 @@
       flex-wrap: wrap;
     }
 
+    .choice-grid,
+    .settings-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .choice-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .choice-row,
+    .settings-list-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 10px;
+      background: var(--ink-warm);
+    }
+
+    .choice-row {
+      justify-content: flex-start;
+      cursor: pointer;
+    }
+
+    .choice-row input {
+      flex: 0 0 auto;
+    }
+
+    .settings-list-row strong,
+    .settings-list-row span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .mono-box,
     textarea.mono-box {
       width: 100%;
@@ -1906,6 +1945,32 @@
             </div>
 
             <div class="setting-block">
+              <h2>Your role</h2>
+              <p class="setting-copy">This shapes Library emphasis and default dashboard views.</p>
+              <div class="choice-grid" id="rolePicker"></div>
+            </div>
+
+            <div class="setting-block">
+              <h2>Auto-uoink playlists</h2>
+              <p class="setting-copy" id="playlistStatus">Checking playlist monitor...</p>
+              <div class="settings-list" id="playlistList"></div>
+              <div class="inline-row">
+                <input class="field" style="flex:1;min-width:240px" id="playlistUrl" type="url" placeholder="YouTube playlist URL">
+                <button class="button" type="button" id="addPlaylist">Add</button>
+              </div>
+            </div>
+
+            <div class="setting-block">
+              <h2>Podcast feeds</h2>
+              <p class="setting-copy" id="podcastFeedStatus">Checking podcast feeds...</p>
+              <div class="settings-list" id="podcastFeedList"></div>
+              <div class="inline-row">
+                <input class="field" style="flex:1;min-width:240px" id="podcastFeedUrl" type="url" placeholder="RSS feed URL">
+                <button class="button" type="button" id="addPodcastFeed">Add</button>
+              </div>
+            </div>
+
+            <div class="setting-block">
               <h2>Output folder</h2>
               <input class="field" id="outputFolder" type="text" value="Loading...">
               <div class="inline-row">
@@ -1956,6 +2021,10 @@
               <h2>Transcript reliability</h2>
               <p class="setting-copy" id="reliabilityStatus">Checking local Whisper model...</p>
               <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox"> Auto-check transcript reliability</label>
+              <div class="inline-row">
+                <select class="field" id="whisperModel"></select>
+                <button class="button ghost" type="button" id="saveWhisperModel">Save model</button>
+              </div>
               <div class="inline-row">
                 <button class="button" type="button" id="downloadReliabilityModel">Download Whisper model now</button>
               </div>
@@ -2059,6 +2128,8 @@
       selectedYoink: null,
       selectedYoinkSidecar: null,
       selectedYoinkSidecarError: "",
+      mobilePlaylists: [],
+      podcastFeeds: [],
     };
 
     const FALLBACK_FACETS = {
@@ -2066,6 +2137,15 @@
       performance: ["over", "average", "under"],
       length: ["short", "medium", "long", "deep"],
     };
+
+    const ROLE_OPTIONS = [
+      ["creator", "Creator"],
+      ["researcher", "Researcher"],
+      ["marketer", "Marketer"],
+      ["mixed", "Mixed"],
+    ];
+
+    const FALLBACK_WHISPER_MODELS = ["tiny", "base", "small", "medium", "large"];
 
     const els = {
       toast: document.getElementById("toast"),
@@ -2164,6 +2244,15 @@
       topicList: document.getElementById("topicList"),
       autostartToggle: document.getElementById("autostartToggle"),
       screenshotCount: document.getElementById("screenshotCount"),
+      rolePicker: document.getElementById("rolePicker"),
+      playlistStatus: document.getElementById("playlistStatus"),
+      playlistList: document.getElementById("playlistList"),
+      playlistUrl: document.getElementById("playlistUrl"),
+      podcastFeedStatus: document.getElementById("podcastFeedStatus"),
+      podcastFeedList: document.getElementById("podcastFeedList"),
+      podcastFeedUrl: document.getElementById("podcastFeedUrl"),
+      whisperModel: document.getElementById("whisperModel"),
+      saveWhisperModel: document.getElementById("saveWhisperModel"),
       reliabilityStatus: document.getElementById("reliabilityStatus"),
       reliabilityAutoCheck: document.getElementById("reliabilityAutoCheck"),
       downloadReliabilityModel: document.getElementById("downloadReliabilityModel"),
@@ -3888,12 +3977,16 @@
         els.screenshotCount.value = String(state.settings.screenshot_count ?? 4);
         els.claimVerificationToggle.checked = Boolean(state.settings.claim_verification_enabled);
         els.reliabilityAutoCheck.checked = Boolean(state.settings.transcript_reliability_auto_check);
+        renderRolePicker(state.settings.role || "mixed");
+        syncWhisperModelOptions();
         const relModel = state.settings.transcript_reliability_model || {};
         els.reliabilityStatus.textContent = relModel.cached
           ? `Local Whisper ${relModel.model || "tiny"} model ready.`
           : `Local Whisper model not downloaded yet (~${relModel.estimated_download_mb || 150} MB).`;
       } catch (err) {
         els.keyStatus.textContent = `Settings unavailable: ${err.message}`;
+        renderRolePicker("mixed");
+        syncWhisperModelOptions();
       }
       try {
         const diag = await (await fetch("/diagnose")).json();
@@ -3911,6 +4004,7 @@
         els.mcpConfig.value = `MCP config unavailable: ${err.message}`;
       }
       renderTopics(state.settings && Array.isArray(state.settings.topics) ? state.settings.topics : []);
+      await Promise.all([loadPlaylistSettings(), loadPodcastFeedSettings()]);
     }
 
     function diagnoseSummary(diag) {
@@ -3934,6 +4028,134 @@
           <button class="icon-button" type="button" data-remove-topic="${index}" aria-label="Remove topic">x</button>
         </div>
       `).join("");
+    }
+
+    function renderRolePicker(role = "mixed") {
+      const current = String(role || "mixed").toLowerCase();
+      els.rolePicker.innerHTML = ROLE_OPTIONS.map(([value, label]) => `
+        <label class="choice-row">
+          <input type="radio" name="role" value="${htmlEscape(value)}" ${value === current ? "checked" : ""}>
+          <span>${htmlEscape(label)}</span>
+        </label>
+      `).join("");
+    }
+
+    function syncWhisperModelOptions() {
+      const models = Array.isArray(state.settings && state.settings.whisper_models_supported)
+        ? state.settings.whisper_models_supported
+        : FALLBACK_WHISPER_MODELS;
+      const current = state.settings && state.settings.whisper_model
+        ? state.settings.whisper_model
+        : "base";
+      els.whisperModel.innerHTML = models.map((model) => (
+        `<option value="${htmlEscape(model)}">${htmlEscape(model)}</option>`
+      )).join("");
+      els.whisperModel.value = models.includes(current) ? current : "base";
+    }
+
+    function settingsListRow(row, titleKeys, metaKeys) {
+      const title = firstValue(...titleKeys.map((key) => row && row[key]), "Untitled");
+      const meta = metaKeys.map((key) => row && row[key]).filter(Boolean).join(" | ");
+      const status = firstValue(row && row.status, row && row.state, "");
+      return `
+        <div class="settings-list-row">
+          <div style="min-width:0">
+            <strong>${htmlEscape(title)}</strong>
+            <div class="job-sub">${htmlEscape(meta || "waiting for first poll")}</div>
+          </div>
+          ${status ? `<span class="phase-chip">${htmlEscape(status)}</span>` : ""}
+        </div>
+      `;
+    }
+
+    function renderPlaylistList(rows) {
+      if (!rows.length) {
+        els.playlistList.innerHTML = emptyPanelRow(
+          "Coming with backend update.",
+          "Expected GET /mobile/playlists to return monitored playlist rows."
+        );
+        return;
+      }
+      els.playlistList.innerHTML = rows.map((row) => settingsListRow(
+        row,
+        ["name", "title", "playlist_title", "url"],
+        ["polling_interval_minutes", "last_polled_at", "queued_count"]
+      )).join("");
+    }
+
+    function renderPodcastFeedList(rows) {
+      if (!rows.length) {
+        els.podcastFeedList.innerHTML = emptyPanelRow(
+          "Coming with backend update.",
+          "Expected GET /podcast/feeds to return configured RSS feeds."
+        );
+        return;
+      }
+      els.podcastFeedList.innerHTML = rows.map((row) => settingsListRow(
+        row,
+        ["title", "podcast_title", "feed_url", "url"],
+        ["episode_count", "last_checked_at", "last_episode_title"]
+      )).join("");
+    }
+
+    async function loadPlaylistSettings() {
+      try {
+        const data = await authFetch("/mobile/playlists");
+        state.mobilePlaylists = data.playlists || data.auto_uoink_playlists || [];
+        els.playlistStatus.textContent = `${state.mobilePlaylists.length} monitored playlist${state.mobilePlaylists.length === 1 ? "" : "s"}`;
+      } catch (err) {
+        state.mobilePlaylists = [];
+        els.playlistStatus.textContent = `Playlist monitor coming with backend update: ${err.message}`;
+      }
+      renderPlaylistList(state.mobilePlaylists);
+    }
+
+    async function loadPodcastFeedSettings() {
+      try {
+        const data = await authFetch("/podcast/feeds");
+        state.podcastFeeds = data.feeds || data.podcast_feeds || [];
+        els.podcastFeedStatus.textContent = `${state.podcastFeeds.length} configured feed${state.podcastFeeds.length === 1 ? "" : "s"}`;
+      } catch (err) {
+        state.podcastFeeds = [];
+        els.podcastFeedStatus.textContent = `Podcast feeds coming with backend update: ${err.message}`;
+      }
+      renderPodcastFeedList(state.podcastFeeds);
+    }
+
+    async function addMobilePlaylist() {
+      const url = els.playlistUrl.value.trim();
+      if (!url) return showToast("Paste a playlist URL first.");
+      try {
+        await authFetch("/mobile/playlists", {
+          method: "POST",
+          body: JSON.stringify({ playlist_url: url, polling_interval_minutes: 5 }),
+        });
+        els.playlistUrl.value = "";
+        showToast("Playlist monitor added.");
+        loadPlaylistSettings();
+      } catch (err) {
+        showToast(err.message.includes("not found") || err.message.includes("404")
+          ? "Auto-uoink playlists are coming with the backend update."
+          : `Could not add playlist: ${err.message}`);
+      }
+    }
+
+    async function addPodcastFeed() {
+      const feedUrl = els.podcastFeedUrl.value.trim();
+      if (!feedUrl) return showToast("Paste an RSS feed URL first.");
+      try {
+        await authFetch("/podcast/feeds", {
+          method: "POST",
+          body: JSON.stringify({ feed_url: feedUrl }),
+        });
+        els.podcastFeedUrl.value = "";
+        showToast("Podcast feed added.");
+        loadPodcastFeedSettings();
+      } catch (err) {
+        showToast(err.message.includes("not found") || err.message.includes("404")
+          ? "Podcast feeds are coming with the backend update."
+          : `Could not add feed: ${err.message}`);
+      }
     }
 
     function readTopicEditor() {
@@ -4145,6 +4367,15 @@
       document.getElementById("stopHelper").addEventListener("click", () => postHelper("/helper/quit"));
       document.getElementById("stopHelperSettings").addEventListener("click", () => postHelper("/helper/quit"));
       els.autostartToggle.addEventListener("change", () => saveSettingsPatch({ autostart: els.autostartToggle.checked }, "Autostart updated."));
+      els.rolePicker.addEventListener("change", (event) => {
+        const input = event.target.closest('input[name="role"]');
+        if (input) saveSettingsPatch({ role: input.value }, "Role updated.");
+      });
+      document.getElementById("addPlaylist").addEventListener("click", addMobilePlaylist);
+      document.getElementById("addPodcastFeed").addEventListener("click", addPodcastFeed);
+      els.saveWhisperModel.addEventListener("click", () => {
+        saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Whisper model preference updated.");
+      });
       els.claimVerificationToggle.addEventListener("change", () => saveSettingsPatch({ claim_verification_enabled: els.claimVerificationToggle.checked }, "Claim verification setting updated."));
       els.reliabilityAutoCheck.addEventListener("change", () => saveSettingsPatch({ transcript_reliability_auto_check: els.reliabilityAutoCheck.checked }, "Transcript reliability setting updated."));
       els.downloadReliabilityModel.addEventListener("click", async () => {
