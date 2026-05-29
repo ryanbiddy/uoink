@@ -19,3 +19,24 @@ copyLink.addEventListener("click", async () => {
     statusLine.textContent = DASHBOARD_LIBRARY_URL;
   }
 });
+
+// Log memory_opened engagement event on load
+if (typeof STC !== "undefined" && typeof STC.logEngagement === "function") {
+  STC.logEngagement("memory_opened", "memory_page").catch((err) => {
+    console.warn("[Memory] Failed to log memory_opened:", err);
+  });
+}
+
+// Stubs for search query engagement tracking if page is extended
+async function logSearchHit(query, videoId) {
+  if (typeof STC !== "undefined" && typeof STC.logEngagement === "function") {
+    return STC.logEngagement("search_hit", "memory_page", { query, video_id: videoId });
+  }
+}
+
+async function logSearchClick(query, videoId) {
+  if (typeof STC !== "undefined" && typeof STC.logEngagement === "function") {
+    return STC.logEngagement("search_click", "memory_page", { query, video_id: videoId });
+  }
+}
+

@@ -145,6 +145,10 @@ async function checkHealthAndUpdateBadge() {
   const state = await getState();
   const isBusy = !!(state.busy || (state.queue && state.queue.length > 0));
 
+  if (isOnline) {
+    STC.replayPendingEngagementEvents().catch((e) => console.warn("[stc] replay failed", e));
+  }
+
   if (!isOnline) {
     await chrome.action.setBadgeText({ text: "OFF" });
     await chrome.action.setBadgeBackgroundColor({ color: "#C2410C" }); // Rust
