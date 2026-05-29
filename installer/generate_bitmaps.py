@@ -26,6 +26,7 @@ INK = (10, 10, 10)
 RUST = (194, 65, 12)        # #C2410C -- large glyph shape only
 CREAM = (255, 244, 236)     # #FFF4EC
 VERMILLION = (255, 61, 0)   # #FF3D00 -- glow only
+ACID = (255, 210, 63)       # #FFD23F -- magnet tips (brand v3.1)
 
 ASSETS = Path(__file__).resolve().parent / "assets"
 
@@ -57,10 +58,21 @@ def _draw_magnet_u(target: Image.Image, ox: int, oy: int, side: int,
 
     layer = Image.new("RGBA", target.size, (0, 0, 0, 0))
     ld = ImageDraw.Draw(layer)
+    # Finding 1.2 (creative review v2.2, AG): the brand spec calls for a
+    # cream interior inside the horseshoe loop. Without this fill the gap
+    # between the prongs shows through to the INK background, leaving the
+    # mark hollowed out. Drawn before the polygon so the RUST outline
+    # paints over any spill outside the inner rectangle; the polygon path
+    # routes around (32..68, 0..60) anyway so cream stays visible there.
+    ld.rectangle([ox + 32 * s, oy + 0 * s, ox + 68 * s, oy + 60 * s],
+                 fill=CREAM + (255,))
     ld.polygon(pts(_U_OUTLINE), fill=RUST + (255,))
+    # Finding 1.1 (creative review v2.2, AG): tips are ACID (#FFD23F),
+    # not CREAM. Brand v3.1 spec -- "acid tips at 14% glyph height, rust
+    # body, cream interior."
     for x0, y0, x1, y1 in _U_TIPS:
         ld.rectangle([ox + x0 * s, oy + y0 * s, ox + x1 * s, oy + y1 * s],
-                     fill=CREAM + (255,))
+                     fill=ACID + (255,))
     target.alpha_composite(layer)
 
 

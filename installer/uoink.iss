@@ -255,6 +255,10 @@ begin
   WelcomePage := CreateCustomPage(wpWelcome,
     'Welcome to Uoink',
     'Pull any YouTube video into your AI workspace.');
+  { Finding 2.1 (creative review v2.2, AG): step tracker above the hero.
+    Sits at the top of the surface (y=15, height=18) so it reads as a
+    breadcrumb above the wordmark hero, matching mock 1.2.1's layout. }
+  AddLabel(WelcomePage, 'STEP 1 OF 4',       15,  18,  9, [fsBold], C_RUST);
   { Hero (mock 1.2.1). Rust on the cream wizard ground passes AA for large
     text (>=18pt bold); body copy below stays on the default ink-on-cream the
     wizard uses -- never rust on ink, per the contrast rules. }
@@ -385,5 +389,28 @@ begin
       Log('PrepareToInstall: removed splash sentinel ' + SentinelPath)
     else
       Log('PrepareToInstall: DeleteFile(' + SentinelPath + ') returned false');
+  end;
+end;
+
+{ Finding 2.2 (creative review v2.2, AG): override Next/Back chrome on
+  Welcome so the primary CTA reads as a landing-page call to action ("Let's
+  go ->") and the Back button is hidden (there is no Back from the first
+  page). Inno resets button state on page transitions, so the customization
+  is scoped to wpWelcome's custom-page id only; subsequent pages keep
+  Inno's stock chrome with no else branch needed.
+
+  Arrow note: the U+2192 right-arrow is built via Chr($2192) rather than
+  embedded as a literal byte sequence because build.ps1 writes the
+  generated .iss without a BOM, and Inno Setup 6 reads BOM-less sources
+  as the system ANSI code page (cp1252 on en-US Windows). A literal `arrow`
+  encoded as UTF-8 would land as three garbage glyphs. Chr() builds the
+  string at runtime from a numeric code point and dodges the entire
+  source-encoding question. }
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if CurPageID = WelcomePage.ID then
+  begin
+    WizardForm.NextButton.Caption := 'Let''s go ' + Chr($2192);
+    WizardForm.BackButton.Visible := False;
   end;
 end;
