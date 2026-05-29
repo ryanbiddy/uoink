@@ -658,6 +658,96 @@ def check_live_status(args: dict[str, Any]) -> dict[str, Any]:
                 supported_states=list(server._LIVE_STATES))
 
 
+# ---- v3.1 podcast feeds + episodes ----------------------------------
+def add_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 podcast: register an RSS feed URL. Idempotent -- existing
+    URL returns the same row. Default poll interval 60 min, range
+    15-1440."""
+    server = _b()
+    import podcasts as _pod
+    feed_url = args.get("feed_url")
+    if not isinstance(feed_url, str) or not feed_url.strip():
+        return _err("feed_url (string) is required")
+    interval = args.get("poll_interval_min") or 60
+    try:
+        return _ok(feed=_pod.add_feed(server._get_index(),
+                                        feed_url.strip(),
+                                        poll_interval_min=int(interval)))
+    except ValueError as e:
+        return _err(str(e))
+    except Exception as e:
+        return _err(f"add_podcast_feed failed: {e}")
+
+
+def list_podcast_feeds(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 podcast: list registered RSS feeds newest-first."""
+    server = _b()
+    import podcasts as _pod
+    enabled_only = bool(args.get("enabled_only"))
+    try:
+        rows = _pod.list_feeds(server._get_index(),
+                                  enabled_only=enabled_only)
+    except Exception as e:
+        return _err(f"list_podcast_feeds failed: {e}")
+    return _ok(feeds=rows, count=len(rows))
+
+
+def remove_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 podcast: delete a feed + cascade its episodes."""
+    server = _b()
+    import podcasts as _pod
+    try:
+        feed_id = int(args.get("feed_id"))
+    except (TypeError, ValueError):
+        return _err("feed_id (integer) is required")
+    try:
+        removed = _pod.remove_feed(server._get_index(), feed_id)
+    except Exception as e:
+        return _err(f"remove_podcast_feed failed: {e}")
+    return _ok(removed=removed)
+
+
+def poll_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 podcast: trigger one feed poll. Returns the parsed result.
+
+    This is the on-demand path; a background poller would call the same
+    function on a schedule (left for a follow-up that needs a thread)."""
+    server = _b()
+    import podcasts as _pod
+    try:
+        feed_id = int(args.get("feed_id"))
+    except (TypeError, ValueError):
+        return _err("feed_id (integer) is required")
+    try:
+        return _pod.poll_feed(server._get_index(), feed_id)
+    except Exception as e:
+        return _err(f"poll_podcast_feed failed: {e}")
+
+
+def list_podcast_episodes(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 podcast: list episodes. Optional feed_id + status filters."""
+    server = _b()
+    import podcasts as _pod
+    feed_id = args.get("feed_id")
+    try:
+        feed_id_i = int(feed_id) if feed_id is not None else None
+    except (TypeError, ValueError):
+        return _err("feed_id must be an integer when provided")
+    status = args.get("status")
+    if status is not None and not isinstance(status, str):
+        return _err("status must be a string when provided")
+    limit = _limit_int(args.get("limit"), default=100, low=1, high=1000)
+    try:
+        rows = _pod.list_episodes(server._get_index(),
+                                     feed_id=feed_id_i,
+                                     status=status, limit=limit)
+    except ValueError as e:
+        return _err(str(e))
+    except Exception as e:
+        return _err(f"list_podcast_episodes failed: {e}")
+    return _ok(episodes=rows, count=len(rows))
+
+
 def get_user_memory(_args: dict[str, Any]) -> dict[str, Any]:
     """v2.5 S4 user memory: return the free-form USER.md content + path.
     Skeleton is seeded on first read so an agent always gets a starting
@@ -1413,6 +1503,74 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, ["url"]),
         handler=check_live_status,
         rate_limiter=_RateLimiter(30),
+    ),
+    "add_podcast_feed": ToolSpec(
+        name="add_podcast_feed",
+        description=(
+            "v3.1 podcast: register an RSS feed URL. Idempotent -- "
+            "existing URL returns the same row. poll_interval_min "
+            "default 60, range 15-1440."
+        ),
+        input_schema=_schema({
+            "feed_url": {"type": "string"},
+            "poll_interval_min": {"type": "integer",
+                                    "minimum": 15, "maximum": 1440,
+                                    "default": 60},
+        }, ["feed_url"]),
+        handler=add_podcast_feed,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "list_podcast_feeds": ToolSpec(
+        name="list_podcast_feeds",
+        description="v3.1 podcast: list registered RSS feeds newest-first.",
+        input_schema=_schema({
+            "enabled_only": {"type": "boolean", "default": False},
+        }, []),
+        handler=list_podcast_feeds,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "remove_podcast_feed": ToolSpec(
+        name="remove_podcast_feed",
+        description=(
+            "v3.1 podcast: delete a feed + cascade its episodes."
+        ),
+        input_schema=_schema({
+            "feed_id": {"type": "integer"},
+        }, ["feed_id"]),
+        handler=remove_podcast_feed,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "poll_podcast_feed": ToolSpec(
+        name="poll_podcast_feed",
+        description=(
+            "v3.1 podcast: trigger one feed poll (HTTP GET + RSS/Atom "
+            "parse + upsert episodes). Conditional GET via ETag/"
+            "If-Modified-Since on subsequent polls so daily-news "
+            "podcasts don't re-download an unchanged feed body."
+        ),
+        input_schema=_schema({
+            "feed_id": {"type": "integer"},
+        }, ["feed_id"]),
+        handler=poll_podcast_feed,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "list_podcast_episodes": ToolSpec(
+        name="list_podcast_episodes",
+        description=(
+            "v3.1 podcast: list episodes. Optional feed_id + status "
+            "filters (new | queued | downloaded | transcribed | "
+            "ignored). Newest published first."
+        ),
+        input_schema=_schema({
+            "feed_id": {"type": "integer"},
+            "status": {"type": "string",
+                        "enum": ["new", "queued", "downloaded",
+                                 "transcribed", "ignored"]},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 1000,
+                       "default": 100},
+        }, []),
+        handler=list_podcast_episodes,
+        rate_limiter=_RateLimiter(60),
     ),
     "get_user_taste": ToolSpec(
         name="get_user_taste",
