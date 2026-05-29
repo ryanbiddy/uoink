@@ -1,0 +1,17 @@
+[package]
+name = "uoink_tauri_shell"
+version = "0.1.0"
+description = "Uoink v2.3 Tauri shell prototype"
+authors = ["Ryan Biddy"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+tauri = { version = "1.6", features = ["dialog-open", "shell-open", "window-close", "window-minimize"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
