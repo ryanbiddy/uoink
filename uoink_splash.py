@@ -1,8 +1,9 @@
 r"""uoink_splash.py -- pywebview splash window (Tier 2 GUI).
 
-Subprocess entrypoint launched by server.py on the first boot (sentinel absent)
-via subprocess.Popen([pythonw, this_script]). Runs pywebview's main loop in
-its OWN process so the helper's main thread (HTTP serve_forever) is untouched.
+Subprocess entrypoint launched by server.py on the first boot for each installed
+version (sentinel absent or containing an older version) via
+subprocess.Popen([pythonw, this_script]). Runs pywebview's main loop in its OWN
+process so the helper's main thread (HTTP serve_forever) is untouched.
 
 Loads Codex's HTML at http://127.0.0.1:5179/splash. The splash JS itself
 fetches /diagnose to choose the success vs. failure variant, so this wrapper
@@ -12,8 +13,9 @@ Window: 480x320 frameless, on top, positioned bottom-right of primary monitor.
 Slide-up over ~400ms via window.move() in a background thread (pywebview
 windows don't natively animate). After an 8s linger the splash dismisses
 (minimize -- so the user can still re-summon via the tray) and writes the
-%LOCALAPPDATA%\Uoink\.first-run-done sentinel. JsApi method names mirror what
-the shipped splash HTML calls (snake_case: open_dashboard / minimize / close).
+current version to the %LOCALAPPDATA%\Uoink\.first-run-done sentinel. JsApi
+method names mirror what the shipped splash HTML calls (snake_case:
+open_dashboard / minimize / close).
 
 Graceful degradation: pywebview unavailable -> log a debug line and exit 0;
 the boot balloon (server.maybe_toast) remains the fallback "it's running"
@@ -39,6 +41,17 @@ ANIM_MS = 400         # slide-up duration
 ANIM_STEPS = 24
 
 
+def _read_version() -> str:
+    try:
+        version = (HERE / "VERSION").read_text(encoding="utf-8").strip()
+    except OSError:
+        return "0.0.0-unknown"
+    return version or "0.0.0-unknown"
+
+
+VERSION = _read_version()
+
+
 def _sentinel_path() -> Path:
     """Resolve %LOCALAPPDATA%\\Uoink\\.first-run-done via _platform."""
     try:
@@ -52,9 +65,16 @@ def _sentinel_path() -> Path:
 def _write_sentinel(path: Path) -> None:
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("first run shown\n", encoding="utf-8")
+        path.write_text(f"{VERSION}\n", encoding="utf-8")
     except OSError as e:
         log.debug("sentinel write failed: %s", e)
+
+
+def _sentinel_current(path: Path) -> bool:
+    try:
+        return path.read_text(encoding="utf-8").strip() == VERSION
+    except OSError:
+        return False
 
 
 def _spawn_dashboard() -> None:
@@ -128,9 +148,10 @@ def _slide_up(window, final_x: int, sh: int) -> None:
 
 def main() -> int:
     sentinel = _sentinel_path()
-    # Belt-and-suspenders: if the sentinel already exists, do nothing. Server
-    # also gates the spawn on this, but a double-spawn race is harmless this way.
-    if sentinel.is_file():
+    # Belt-and-suspenders: if this version already showed the splash, do
+    # nothing. Server also gates the spawn on this, but a double-spawn race is
+    # harmless this way.
+    if _sentinel_current(sentinel):
         return 0
     try:
         import webview  # pywebview

@@ -77,7 +77,8 @@ PORT = 5179
 VERSION = _read_version()
 DASHBOARD_PATH = HERE / "assets" / "dashboard" / "index.html"
 # Tier 2 GUI: served by the /splash route and wrapped by uoink_splash.py at
-# first boot (gated by %LOCALAPPDATA%\Uoink\.first-run-done).
+# first boot for each installed version (gated by
+# %LOCALAPPDATA%\Uoink\.first-run-done containing VERSION).
 SPLASH_PATH = HERE / "assets" / "splash" / "index.html"
 ALLOWED_ORIGINS = {
     "https://www.youtube.com",
@@ -87,6 +88,19 @@ ALLOWED_ORIGINS = {
 
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 SUBPROCESS_KW = {"creationflags": CREATE_NO_WINDOW} if sys.platform == "win32" else {}
+
+
+def _splash_should_spawn(sentinel: Path) -> bool:
+    """Show the splash once per installed version.
+
+    v2.2 visual smoke caught that a plain "file exists" sentinel suppresses the
+    splash on upgrades. Keep the same file path for compatibility, but treat its
+    contents as the last version that showed the splash.
+    """
+    try:
+        return sentinel.read_text(encoding="utf-8").strip() != VERSION
+    except OSError:
+        return True
 
 # ---- Hardening limits (P1-3 / P1-4) ---------------------------------------
 MAX_BODY_BYTES = 64 * 1024            # 64KB POST body cap
@@ -7039,20 +7053,21 @@ def main():
         except Exception as e:
             log.warning("tray: failed to start (non-fatal): %s", e)
 
-        # Tier 2 GUI: spawn the pywebview splash window on first boot. Gated
-        # by %LOCALAPPDATA%\Uoink\.first-run-done (which uoink_splash.py writes
-        # on dismiss or after its 8 s linger). Subprocess so pywebview's GUI
-        # loop doesn't fight serve_forever() for the main thread; pythonw.exe
-        # so the launch doesn't flash a console. Non-fatal -- if pywebview /
-        # WebView2 isn't available the boot toast is the fallback.
+        # Tier 2 GUI: spawn the pywebview splash window once per installed
+        # version. %LOCALAPPDATA%\Uoink\.first-run-done stores the last version
+        # shown (uoink_splash.py writes it on dismiss / after its 8 s linger).
+        # Subprocess so pywebview's GUI loop doesn't fight serve_forever() for
+        # the main thread; pythonw.exe so the launch doesn't flash a console.
+        # Non-fatal -- if pywebview / WebView2 isn't available the boot toast is
+        # the fallback.
         try:
             _splash_sentinel = DATA_ROOT / ".first-run-done"
-            if not _splash_sentinel.is_file():
+            if _splash_should_spawn(_splash_sentinel):
                 _splash_script = str(HERE / "uoink_splash.py")
                 _splash_pyw = str(HERE / "python" / "pythonw.exe")
                 subprocess.Popen([_splash_pyw, _splash_script],
                                  creationflags=0x08000000)  # CREATE_NO_WINDOW
-                log.info("splash: spawned (first run)")
+                log.info("splash: spawned (version %s)", VERSION)
         except Exception as e:
             log.warning("splash: failed to spawn (non-fatal): %s", e)
 
