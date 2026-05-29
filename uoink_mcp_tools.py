@@ -580,6 +580,63 @@ def get_schema_version(_args: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+def get_user_taste(_args: dict[str, Any]) -> dict[str, Any]:
+    """v2.5 S4 taste memory: return the consolidated TASTE.md content +
+    path. Lazily regenerated if absent. No model, no outbound."""
+    server = _b()
+    import memory_layer as _ml
+    try:
+        vault = (server._read_settings().get("obsidian_vault_path") or "") or None
+    except Exception:
+        vault = None
+    try:
+        res = _ml.read_taste(server._get_index(), server.DATA_ROOT,
+                              vault_path=vault)
+    except Exception as e:
+        return _err(f"read_taste failed: {e}")
+    return _ok(**res)
+
+
+def get_user_memory(_args: dict[str, Any]) -> dict[str, Any]:
+    """v2.5 S4 user memory: return the free-form USER.md content + path.
+    Skeleton is seeded on first read so an agent always gets a starting
+    point. No model, no outbound."""
+    server = _b()
+    import memory_layer as _ml
+    try:
+        res = _ml.read_user(server.DATA_ROOT)
+    except Exception as e:
+        return _err(f"read_user failed: {e}")
+    return _ok(**res)
+
+
+def update_user_taste(args: dict[str, Any]) -> dict[str, Any]:
+    """v2.5 S4 taste anchors: replace one TASTE anchor section
+    (preferred_hooks | preferred_formats | avoid) and re-consolidate
+    TASTE.md. Anchors persist in the memory_layer SQLite table so the
+    consolidator can fold them on every regenerate."""
+    section = args.get("section")
+    content = args.get("content")
+    server = _b()
+    import memory_layer as _ml
+    if section not in _ml.ANCHOR_SECTIONS:
+        return _err(f"section must be one of {list(_ml.ANCHOR_SECTIONS)}")
+    if not isinstance(content, str):
+        return _err("content (string) is required")
+    try:
+        vault = (server._read_settings().get("obsidian_vault_path") or "") or None
+    except Exception:
+        vault = None
+    try:
+        res = _ml.update_user_taste(server._get_index(), server.DATA_ROOT,
+                                     section, content, vault_path=vault)
+    except ValueError as e:
+        return _err(str(e))
+    except Exception as e:
+        return _err(f"update_user_taste failed: {e}")
+    return _ok(**res)
+
+
 def get_engagement_signal(args: dict[str, Any]) -> dict[str, Any]:
     """v2.5 S2 engagement memory: report the time-decayed value_score + event
     counts for one video. Pure local read -- no model, no outbound."""
@@ -1249,6 +1306,48 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         input_schema=_schema({}, []),
         handler=get_schema_version,
         rate_limiter=_RateLimiter(60),
+    ),
+    "get_user_taste": ToolSpec(
+        name="get_user_taste",
+        description=(
+            "v2.5 S4 taste memory: return the consolidated TASTE.md "
+            "(preferred hooks/formats, avoid list, top performance "
+            "anchors). Generated from engagement events + persisted "
+            "taste anchors. Read-only, no arguments."
+        ),
+        input_schema=_schema({}, []),
+        handler=get_user_taste,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "get_user_memory": ToolSpec(
+        name="get_user_memory",
+        description=(
+            "v2.5 S4 user memory: return the user's free-form USER.md "
+            "notes (Channels I admire, My channel(s), Topics, Workflow "
+            "notes). Hand-edited markdown -- the consolidator never "
+            "overwrites this file. No arguments."
+        ),
+        input_schema=_schema({}, []),
+        handler=get_user_memory,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "update_user_taste": ToolSpec(
+        name="update_user_taste",
+        description=(
+            "v2.5 S4 taste anchors: set one taste anchor section "
+            "(preferred_hooks | preferred_formats | avoid) and "
+            "re-consolidate TASTE.md. `content` is markdown that "
+            "replaces the section body verbatim -- bullets recommended."
+        ),
+        input_schema=_schema({
+            "section": {
+                "type": "string",
+                "enum": ["preferred_hooks", "preferred_formats", "avoid"],
+            },
+            "content": {"type": "string"},
+        }, ["section", "content"]),
+        handler=update_user_taste,
+        rate_limiter=_RateLimiter(30),
     ),
     "get_engagement_signal": ToolSpec(
         name="get_engagement_signal",

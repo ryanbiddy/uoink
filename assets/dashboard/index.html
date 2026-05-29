@@ -2046,6 +2046,27 @@
       return String(row && (row.video_id || row.id || row.slug) || "");
     }
 
+    // v2.2.1 fix: failed yoinks were showing duplicate rows in the Activity
+    // tab because the same video can appear in BOTH `state.jobs` (failed
+    // jobs, with job.id = job_xxx) AND `pending_yoinks` (failed queue rows,
+    // with row.video_id). `videoIdOf()` above falls back to `id` -- the
+    // job id, NOT the video id -- so it doesn't cross-match the two
+    // sources. `failureKey()` normalises to the YouTube video_id when
+    // available (jobs carry it in current_video.video_id; queue rows
+    // carry it as row.video_id; URL parse as last resort), so the
+    // dedupe in renderQueue can drop the queue row when there's already
+    // a failed job for the same video.
+    function failureKey(row) {
+      if (!row) return "";
+      if (row.video_id) return String(row.video_id);
+      const cv = row.current_video;
+      if (cv && cv.video_id) return String(cv.video_id);
+      const url = String(row.url || row.source_url || "");
+      const m = url.match(/[?&]v=([A-Za-z0-9_-]{6,})|youtu\.be\/([A-Za-z0-9_-]{6,})|\/shorts\/([A-Za-z0-9_-]{6,})/);
+      if (m) return m[1] || m[2] || m[3] || "";
+      return "";
+    }
+
     function daysSince(value) {
       if (!value) return 9999;
       const t = new Date(value);
@@ -3054,11 +3075,19 @@
       els.activityCount.textContent = String(activeCount);
       els.activityNavCount.textContent = String(activeCount);
       els.queueMeta.textContent = `${runningCount || activeJobs.filter((job) => normalizedStatus(job) === "running").length} running | ${pendingCount || queueActive.length} queued`;
+      // v2.2.1 fix: dedupe failed queue rows whose video already has a
+      // failed job row, so the same yoink doesn't render twice. Jobs win
+      // because they carry richer state (phase, error_code, retry button).
+      const failedJobKeys = new Set(failedJobs.map(failureKey).filter(Boolean));
+      const queueFailedDeduped = queueFailed.filter((row) => {
+        const key = failureKey(row);
+        return !key || !failedJobKeys.has(key);
+      });
       const rows = []
         .concat(activeJobs.map(jobRowHtml))
         .concat(queueActive.map(queueRowHtml))
         .concat(failedJobs.map(jobRowHtml))
-        .concat(queueFailed.map(queueRowHtml));
+        .concat(queueFailedDeduped.map(queueRowHtml));
       if (!rows.length) {
         els.queueRows.innerHTML = `<div class="job-row"><div class="job-title">Nothing running right now.</div><div class="job-sub">New uoinks and rate-limit retries will appear here.</div></div>`;
       } else {
