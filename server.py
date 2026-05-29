@@ -3310,6 +3310,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         sidecar = {
             "schema_version": 2,  # bumped: structured screenshots + comments
             "url": url,
+            # v3.1: platform indicator chip in dashboard. Inferred from the
+            # canonical URL produced by _normalize_video_url; default
+            # 'youtube' so existing rows that pre-date this field render
+            # as YouTube without a migration.
+            "platform": _detect_platform_from_url(url),
             "title": title,
             "topic": topic,
             "yoinked_at": _now_iso(),
@@ -3533,6 +3538,24 @@ def friendly_error(e: BaseException) -> str:
 # Input validation
 # ---------------------------------------------------------------------------
 _YOUTUBE_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"}
+# v3.1: Twitter/X video extractor (yt-dlp supports it). Hosts accepted both
+# pre- and post-rename so the user can paste a link from before or after the
+# x.com switch. mobile.twitter.com kept for old shares.
+_TWITTER_HOSTS = {"twitter.com", "www.twitter.com", "mobile.twitter.com",
+                   "x.com", "www.x.com"}
+# Twitter status id is a 15-19 digit snowflake. Strict so we can't accept
+# attacker-shaped paths like /status/junk.
+_TWITTER_STATUS_RE = re.compile(r"^\d{15,19}$")
+# Twitter usernames: 1-15 chars, A-Z 0-9 underscore (no dot, no hyphen).
+_TWITTER_HANDLE_RE = re.compile(r"^[A-Za-z0-9_]{1,15}$")
+
+# Platform tag persisted on the sidecar + yoink row so the dashboard can
+# render a per-platform indicator chip. youtube is the default for backward
+# compat with existing rows that pre-date this field.
+PLATFORM_YOUTUBE = "youtube"
+PLATFORM_TWITTER = "twitter"
+_KNOWN_PLATFORMS = (PLATFORM_YOUTUBE, PLATFORM_TWITTER)
+
 # ASCII-explicit so non-ASCII unicode word chars can't sneak through \w.
 _VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{6,}$")
 _SESSION_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
@@ -3579,6 +3602,71 @@ def _normalize_youtube_url(raw: str) -> str | None:
     if not video_id:
         return None
     return f"https://www.youtube.com/watch?v={video_id}"
+
+
+def _normalize_twitter_url(raw: str) -> str | None:
+    """Parse the URL, verify the hostname is in the Twitter/X allowlist,
+    pull (handle, status_id) and return the canonical
+    https://x.com/<handle>/status/<status_id> form. Returns None for
+    anything that isn't a real tweet video URL.
+
+    Path shape (Twitter + X are identical):
+      /<handle>/status/<status_id>          -- canonical
+      /<handle>/status/<status_id>/video/N  -- the video sub-page that
+                                                yt-dlp also accepts
+      /i/status/<status_id>                 -- the bare-status fallback
+                                                (no handle in the URL)"""
+    if not raw:
+        return None
+    try:
+        u = urlparse(raw if "://" in raw else "https://" + raw)
+    except ValueError:
+        return None
+    host = (u.hostname or "").lower()
+    if host not in _TWITTER_HOSTS:
+        return None
+    parts = (u.path or "").strip("/").split("/")
+    if not parts:
+        return None
+    if parts[0].lower() == "i" and len(parts) >= 3 and parts[1] == "status":
+        if _TWITTER_STATUS_RE.match(parts[2]):
+            return f"https://x.com/i/status/{parts[2]}"
+        return None
+    if len(parts) >= 3 and parts[1] == "status":
+        handle = parts[0]
+        status_id = parts[2]
+        if (_TWITTER_HANDLE_RE.match(handle)
+                and _TWITTER_STATUS_RE.match(status_id)):
+            return f"https://x.com/{handle}/status/{status_id}"
+    return None
+
+
+def _detect_platform_from_url(url: str) -> str:
+    """Return the platform tag for a canonical URL. Used by the sidecar
+    writer + the dashboard chip. Defaults to PLATFORM_YOUTUBE so existing
+    yoinks render with the original chip when read by post-v3.1 code."""
+    if not url:
+        return PLATFORM_YOUTUBE
+    try:
+        host = (urlparse(url).hostname or "").lower()
+    except Exception:
+        return PLATFORM_YOUTUBE
+    if host in _TWITTER_HOSTS:
+        return PLATFORM_TWITTER
+    return PLATFORM_YOUTUBE
+
+
+def _normalize_video_url(raw: str) -> tuple[str | None, str | None]:
+    """v3.1: dispatch a raw URL to the appropriate platform validator and
+    return (canonical_url, platform). Tries YouTube first, then Twitter/X.
+    Returns (None, None) for unsupported / attacker-shaped inputs."""
+    yt = _normalize_youtube_url(raw)
+    if yt:
+        return yt, PLATFORM_YOUTUBE
+    tw = _normalize_twitter_url(raw)
+    if tw:
+        return tw, PLATFORM_TWITTER
+    return None, None
 
 
 def _normalize_playlist_url(raw: str) -> str | None:
@@ -7347,9 +7435,18 @@ class Handler(BaseHTTPRequestHandler):
         # Strict hostname allowlist. Substring checks ("youtube.com" in url)
         # accept attacker-shaped URLs like https://evil.com/youtube.com/foo,
         # which yt-dlp would happily fetch as an arbitrary URL.
-        normalized = _normalize_youtube_url(url)
+        # v3.1: dispatcher accepts YouTube OR Twitter/X. Platform is
+        # carried forward separately so the extraction pipeline can flag
+        # it on the sidecar without re-parsing the URL.
+        normalized, platform = _normalize_video_url(url)
         if not normalized:
-            return None, None, "URL must be a youtube.com or youtu.be video link"
+            return None, None, ("URL must be a youtube.com, youtu.be, or "
+                                  "twitter.com/x.com video link")
+        # Stash the platform on the body so the downstream handler can
+        # pull it without re-parsing. Backward-compatible: callers that
+        # don't read body["platform"] still get the normalized URL.
+        if isinstance(body, dict):
+            body["__platform"] = platform
         return normalized, interval, None
 
     def _validate_playlist_body(self, body: dict, *, require_interval: bool = False):
