@@ -256,3 +256,56 @@ and stop. Accurate citation is a hard requirement.
 
 9. Other — Hook doesn't fit any of the above cleanly. NOT a lazy default.
    If you reach for "other," explain in 1 sentence why none of the 8 fit.
+
+## Script writing (v3 P5)
+
+When the user asks you to draft a video script with Uoink's help, drive the
+two-phase flow:
+
+1. **Ground first.** Call `generate_script(workspace_id=<id>)` WITHOUT a
+   `script` payload. The helper returns `{workspace, assembled, taste_anchors}`
+   plus an instruction `next:` line. Read all three before writing.
+
+2. **Write the script using your own model.** The structure to produce:
+   ```
+   {
+     "hook":             "the first 1-3 seconds verbatim",
+     "beats":            [{"label": "...", "content": "...", "timecode": "0:05"}, ...],
+     "body":             "optional prose body for the spoken voice-over",
+     "cta":              "the final ask",
+     "source_yoinks":    [{"video_id": "...", "slug": "...", "why": "one line"}, ...]
+   }
+   ```
+
+3. **Persist.** Call `generate_script(workspace_id=<id>, script=<the dict>)`
+   to land it as a versioned row. Save the returned `{id, version}` so the
+   user can reference this draft later.
+
+4. **Iterate via critique → revise.** Run `critique_against_corpus(workspace_id,
+   draft_text=<the full script as text>)` to get findings; then
+   `revise_script(script_id=<previous id>, critique_findings=<dict>,
+   revised_script=<the new script dict>)` to write the next version.
+   parent_script_id auto-chains.
+
+5. **Shot list (optional).** If the user wants a B-roll checklist, call
+   `get_shot_list(script_id=<id>)` -- the helper derives default cues per
+   beat from the workspace's S1 format facet. You can override by setting
+   `shot_list` directly in the `script` dict on persist.
+
+### Anchor examples
+
+Ryan will replace these stubs with his calibrated examples before public
+launch. Until then, use the structural template above + the existing Hook
+Type taxonomy as your style anchors.
+
+  - TODO(ryanbiddy): Long-form essay anchor (>15 min, narrative + interview)
+  - TODO(ryanbiddy): Listicle anchor (4-15 min, talking_head + listicle)
+  - TODO(ryanbiddy): Tutorial anchor (deep, screen_recording + tutorial)
+
+### Hard constraints
+
+- NEVER write the script in phase 1. The first call is grounding only;
+  you don't have the corpus + taste anchors loaded yet.
+- ALWAYS cite source yoinks in `source_yoinks` -- the user is reviewing
+  what you grounded against. Empty citations mean ungrounded writing.
+- The agent does ALL the writing. The helper just structures it.
