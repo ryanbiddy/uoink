@@ -79,6 +79,7 @@ import scripts as p5_scripts  # noqa: E402  -- v3 P5 script studio backend
 import memory_layer  # noqa: E402  -- v2.5 S4 markdown taste/user memory
 import podcasts  # noqa: E402  -- v3.1 podcast RSS feed registry + polling
 import whisper_runner  # noqa: E402  -- v3.1 WhisperX transcription (lazy)
+import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
@@ -6269,6 +6270,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_episodes_list()
         if bare == "/transcribe/status":
             return self._handle_transcribe_status_get()
+        if bare == "/playlists/monitored":
+            return self._handle_monitored_playlists_list()
+        if bare == "/playlists/monitored/events":
+            return self._handle_monitored_playlist_events_list()
         if bare == "/update/check":
             return self._handle_update_check()
         if bare == "/engagement/scores":
@@ -7332,6 +7337,146 @@ class Handler(BaseHTTPRequestHandler):
             "diarization_ran": transcript["diarization_ran"],
         })
 
+    # ---- v3.1 mobile playlist monitor --------------------------------
+    # Track C from the v3.1 build plan. User maintains a YouTube
+    # playlist on mobile; helper polls + diffs + auto-queues new videos
+    # via the existing pending_yoinks retry worker. No new threadpool;
+    # decoupled from the regular /extract path so the dashboard's
+    # Activity tab can label mobile-queued jobs distinctly.
+
+    def _parse_monitored_playlist_id(self, body):
+        try:
+            return int(body.get("playlist_id")), None
+        except (TypeError, ValueError):
+            return None, "playlist_id (integer) required"
+
+    def _handle_monitored_playlists_list(self):
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        enabled_only = (qs.get("enabled_only") or [""])[0] == "1"
+        try:
+            rows = mobile_playlists.list_playlists(
+                _get_index(), enabled_only=enabled_only)
+        except Exception as e:
+            log.exception("/playlists/monitored GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "playlists": rows,
+                                      "count": len(rows)})
+
+    def _handle_monitored_playlist_add(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        playlist_url = (body.get("playlist_url") or "").strip()
+        name = body.get("name")
+        try:
+            interval = int(body.get("poll_interval_min") or 5)
+        except (TypeError, ValueError):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "poll_interval_min must be an integer"})
+        try:
+            row = mobile_playlists.add_playlist(
+                _get_index(), playlist_url, name=name,
+                poll_interval_min=interval,
+                normalize_playlist_url=_normalize_playlist_url)
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/playlists/monitored POST failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "playlist": row})
+
+    def _handle_monitored_playlist_remove(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        playlist_id, err = self._parse_monitored_playlist_id(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        try:
+            removed = mobile_playlists.remove_playlist(
+                _get_index(), playlist_id)
+        except Exception as e:
+            log.exception("/playlists/monitored/remove failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "removed": removed})
+
+    def _handle_monitored_playlist_set_enabled(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        playlist_id, err = self._parse_monitored_playlist_id(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        enabled = body.get("enabled")
+        if not isinstance(enabled, bool):
+            return self._send_json(400, {
+                "ok": False, "error": "enabled (boolean) required"})
+        try:
+            changed = mobile_playlists.set_playlist_enabled(
+                _get_index(), playlist_id, enabled)
+        except Exception as e:
+            log.exception("/playlists/monitored/set-enabled failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "changed": changed,
+                                      "enabled": enabled})
+
+    def _handle_monitored_playlist_poll(self, body):
+        """POST /playlists/monitored/poll {playlist_id} -- yt-dlp
+        --flat-playlist + diff + auto-queue. Returns the structured
+        result; the dashboard surfaces the new[] list in the Activity
+        tab under a 'from mobile playlist' label."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        playlist_id, err = self._parse_monitored_playlist_id(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        # Map video_id -> canonical https://www.youtube.com/watch?v=ID
+        # so the existing extract pipeline (which expects a canonical
+        # URL, not a bare id) can consume the row directly.
+        def _vid_to_url(vid: str) -> str | None:
+            if not vid:
+                return None
+            return _normalize_youtube_url(f"https://www.youtube.com/watch?v={vid}")
+        try:
+            result = mobile_playlists.poll_playlist(
+                _get_index(), playlist_id,
+                normalize_video_to_canonical_url=_vid_to_url)
+        except Exception as e:
+            log.exception("/playlists/monitored/poll failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        status = 200 if result.get("ok") else 400
+        return self._send_json(status, result)
+
+    def _handle_monitored_playlist_events_list(self):
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        try:
+            playlist_id = (int((qs.get("playlist_id") or [None])[0])
+                            if qs.get("playlist_id") else None)
+        except (TypeError, ValueError):
+            playlist_id = None
+        status_filter = (qs.get("status") or [None])[0]
+        try:
+            limit = int((qs.get("limit") or ["200"])[0])
+        except ValueError:
+            limit = 200
+        try:
+            rows = mobile_playlists.list_events(
+                _get_index(), playlist_id=playlist_id,
+                status=status_filter, limit=limit)
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/playlists/monitored/events failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "events": rows,
+                                      "count": len(rows)})
+
     def _handle_settings_mcp_config(self):
         """MCP config snippet for the Settings tab Copy button. Token-gated."""
         if not self._require_token():
@@ -7988,6 +8133,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_episode_download(body)
         if bare == "/podcasts/episodes/transcribe":
             return self._handle_podcasts_episode_transcribe(body)
+        if bare == "/playlists/monitored":
+            return self._handle_monitored_playlist_add(body)
+        if bare == "/playlists/monitored/remove":
+            return self._handle_monitored_playlist_remove(body)
+        if bare == "/playlists/monitored/set-enabled":
+            return self._handle_monitored_playlist_set_enabled(body)
+        if bare == "/playlists/monitored/poll":
+            return self._handle_monitored_playlist_poll(body)
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})
