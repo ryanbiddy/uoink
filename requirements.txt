@@ -4,3 +4,4 @@ Pillow==10.4.0
 pystray==0.19.5
 pywebview==5.4
 pythonnet==3.0.5
+whisper-timestamped==1.15.9

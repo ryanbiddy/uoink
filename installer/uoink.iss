@@ -102,6 +102,7 @@ Source: "staging\_platform.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\migrate_install.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_mcp.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_mcp_tools.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\uoink_reliability.py"; DestDir: "{app}"; Flags: ignoreversion
 ; Back-compat shim so existing MCP client configs that still launch
 ; yoink_mcp.py keep working through the v2.x alias window (removed in v3).
 Source: "staging\yoink_mcp.py"; DestDir: "{app}"; Flags: ignoreversion

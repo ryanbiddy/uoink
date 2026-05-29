@@ -38,7 +38,7 @@ v2 ships three adoption paths:
 - **Chrome extension** (the creator path): one-click uoinks, plus Playlist Mode,
   Hook Type classification, Comment Intelligence (AI-powered, BYO key), and Smart
   Screenshot Picker (local).
-- **MCP server** (the agent path): 13 tools your AI can call directly. Officially
+- **MCP server** (the agent path): 14 tools your AI can call directly. Officially
   tested with Claude Desktop and Cursor; works with most MCP-compatible clients.
 - **Operator Skill**: drop-in `SKILL.md` that turns Claude / OpenClaw / Hermes /
   Cursor / etc into a YouTube research analyst. Works across 8+ clients via the
@@ -74,11 +74,14 @@ Uoink v2 bundles a portable Skill at `skills/uoink/SKILL.md` and installs it to 
 - **Hook Type classification** — classifies each video's opening style across 9 hook categories (curiosity gap, question, contrarian, story open, promise/list, demo, authority, stakes, other) with brief explanation.
 - **Entity Extraction** — pulls entities from each video's transcript into a local queryable graph. Agents call `find_mentions(entity)` to find every video that mentioned a specific person, tool, product, or topic across the user's library.
 
+**Local transcript reliability (v2.5)**
+- **Transcript Reliability** — optional local Whisper check that flags low-confidence transcript spans, especially around proper nouns, homophones, accents, and technical terms. The `whisper-timestamped` library ships with the helper; the Whisper `tiny` model is not bundled and downloads only after user consent (~150 MB) into `%LOCALAPPDATA%\Uoink\models\whisper`.
+
 ### Local feature: Smart Screenshot Picker
 
 Opt-in grid that shows the screenshots embedded in your clipboard paste so you can pick which to keep. Embed count is configurable on the setup page (default 4, max 12). Fully local — no API key, no network calls.
 **For agent developers (v2)**
-- **MCP server** with 13 tools: `uoink_video`, `uoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `get_uoink_health`, `find_mentions`. The old `yoink_*` names keep working as deprecated aliases through v2.5.
+- **MCP server** with 14 tools: `uoink_video`, `uoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `get_uoink_health`, `find_mentions`, `get_transcript_reliability`. The old `yoink_*` names keep working as deprecated aliases through v2.5.
 - Stdio transport (officially tested with Claude Desktop + Cursor).
 - Local HTTP JSON-RPC transport (experimental).
 - Setup page generates copy-pasteable config snippets for each major client.

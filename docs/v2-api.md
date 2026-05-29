@@ -168,6 +168,102 @@ Success response: HTTP 200
 }
 ```
 
+### GET /reliability/model/status
+
+Return the local Whisper model cache status for transcript reliability detection.
+
+Auth: `X-Uoink-Token` required.
+
+Success response: HTTP 200
+
+```json
+{
+  "ok": true,
+  "model": {
+    "model": "tiny",
+    "model_root": "C:\\Users\\hello\\AppData\\Local\\Uoink\\models\\whisper",
+    "cached": false,
+    "estimated_download_mb": 150
+  }
+}
+```
+
+### POST /reliability/model/download
+
+Download/cache the local Whisper `tiny` model used by `whisper-timestamped`. This is user-triggered from the dashboard; the installer does not bundle model weights.
+
+Auth: `X-Uoink-Token` required.
+
+Request body: `{}`.
+
+Success response: HTTP 200
+
+```json
+{
+  "ok": true,
+  "downloaded": true,
+  "model": {
+    "model": "tiny",
+    "model_root": "C:\\Users\\hello\\AppData\\Local\\Uoink\\models\\whisper",
+    "cached": true,
+    "estimated_download_mb": 150
+  }
+}
+```
+
+### GET /reliability/<video_id>
+
+Return cached transcript reliability data for a saved uoink. Does not compute or download anything.
+
+Auth: `X-Uoink-Token` required.
+
+Success response: HTTP 200
+
+```json
+{
+  "ok": true,
+  "video_id": "abc123DEF45",
+  "reliability": {
+    "status": "completed",
+    "model": "tiny",
+    "threshold": 0.5,
+    "span_count": 2,
+    "spans": [
+      {
+        "start_word_idx": 124,
+        "end_word_idx": 126,
+        "confidence": 0.37,
+        "reason": "proper_noun_suspect",
+        "text": "example phrase",
+        "start": 42.1,
+        "end": 43.4
+      }
+    ],
+    "computed_at": "2026-05-28T12:34:56"
+  }
+}
+```
+
+`status: "not_computed"` means the yoink exists but reliability detection has not run.
+
+### POST /reliability/<video_id>/compute
+
+Compute transcript reliability for a saved uoink, cache it in the sidecar JSON, and append/update the `## Transcript Reliability` section in the per-video markdown. If the model is not cached, callers must pass `allow_model_download: true`; otherwise the helper refuses rather than silently downloading ~150 MB.
+
+Auth: `X-Uoink-Token` required.
+
+Request body:
+
+```json
+{
+  "threshold": 0.5,
+  "allow_model_download": false,
+  "force": false
+}
+```
+
+Success response: HTTP 200 with the same `reliability` shape as `GET /reliability/<video_id>`.
+
 Notes:
 
 - Estimates are deliberately conservative approximations for trust/UX, not billing guarantees.

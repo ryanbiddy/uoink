@@ -1120,6 +1120,16 @@
                 <button class="button" type="button" id="saveScreenshotCount">Save</button>
               </div>
             </div>
+
+            <div class="setting-block">
+              <h2>Transcript reliability</h2>
+              <p class="setting-copy" id="reliabilityStatus">Checking local Whisper model...</p>
+              <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox"> Auto-check transcript reliability</label>
+              <div class="inline-row">
+                <button class="button" type="button" id="downloadReliabilityModel">Download Whisper model now</button>
+              </div>
+              <p class="setting-copy">Uses whisper-timestamped locally to flag low-confidence transcript spans. The tiny model downloads only after you ask for it (~150 MB) and is cached under your Uoink data folder.</p>
+            </div>
           </div>
         </section>
 
@@ -1252,6 +1262,9 @@
       topicList: document.getElementById("topicList"),
       autostartToggle: document.getElementById("autostartToggle"),
       screenshotCount: document.getElementById("screenshotCount"),
+      reliabilityStatus: document.getElementById("reliabilityStatus"),
+      reliabilityAutoCheck: document.getElementById("reliabilityAutoCheck"),
+      downloadReliabilityModel: document.getElementById("downloadReliabilityModel"),
       aboutStatus: document.getElementById("aboutStatus"),
       aboutVersion: document.getElementById("aboutVersion"),
       aboutPort: document.getElementById("aboutPort"),
@@ -1857,6 +1870,11 @@
         els.outputFolder.value = state.settings.output_dir || state.settings.output_folder || els.outputFolder.value || "";
         els.autostartToggle.checked = Boolean(state.settings.autostart);
         els.screenshotCount.value = String(state.settings.screenshot_count ?? 4);
+        els.reliabilityAutoCheck.checked = Boolean(state.settings.transcript_reliability_auto_check);
+        const relModel = state.settings.transcript_reliability_model || {};
+        els.reliabilityStatus.textContent = relModel.cached
+          ? `Local Whisper ${relModel.model || "tiny"} model ready.`
+          : `Local Whisper model not downloaded yet (~${relModel.estimated_download_mb || 150} MB).`;
       } catch (err) {
         els.keyStatus.textContent = `Settings unavailable: ${err.message}`;
       }
@@ -2079,6 +2097,23 @@
       document.getElementById("stopHelper").addEventListener("click", () => postHelper("/helper/quit"));
       document.getElementById("stopHelperSettings").addEventListener("click", () => postHelper("/helper/quit"));
       els.autostartToggle.addEventListener("change", () => saveSettingsPatch({ autostart: els.autostartToggle.checked }, "Autostart updated."));
+      els.reliabilityAutoCheck.addEventListener("change", () => saveSettingsPatch({ transcript_reliability_auto_check: els.reliabilityAutoCheck.checked }, "Transcript reliability setting updated."));
+      els.downloadReliabilityModel.addEventListener("click", async () => {
+        if (!confirm("Download the local Whisper tiny model now? It is about 150 MB and stays on this machine.")) return;
+        els.downloadReliabilityModel.disabled = true;
+        els.reliabilityStatus.textContent = "Downloading local Whisper model...";
+        try {
+          const data = await authFetch("/reliability/model/download", { method: "POST", body: JSON.stringify({}) });
+          if (!data.ok) throw new Error(data.error || "download failed");
+          showToast("Whisper model downloaded.");
+          refreshSettings();
+        } catch (err) {
+          els.reliabilityStatus.textContent = `Model download failed: ${err.message}`;
+          showToast(`Could not download model: ${err.message}`);
+        } finally {
+          els.downloadReliabilityModel.disabled = false;
+        }
+      });
       document.getElementById("saveOutput").addEventListener("click", saveOutputFolder);
       document.getElementById("saveScreenshotCount").addEventListener("click", () => {
         const value = Math.max(0, Math.min(12, Number(els.screenshotCount.value || 4)));

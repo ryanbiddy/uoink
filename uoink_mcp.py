@@ -56,7 +56,7 @@ mcp = FastMCP(
 
 
 # --------------------------------------------------------------------------
-# Canonical tools (13). The CI doc-accuracy + backend-static jobs count these
+# Canonical tools (14). The CI doc-accuracy + backend-static jobs count these
 # @mcp.tool decorators against the ### headings in docs/v2-mcp.md, so keep the
 # decorator count and the documented tool count in lock-step.
 # --------------------------------------------------------------------------
@@ -180,6 +180,16 @@ def get_uoink_health(slug: str) -> dict:
 def find_mentions(entity: str, limit: int = 50) -> dict:
     return uoink_mcp_tools.call_tool(
         "find_mentions", {"entity": entity, "limit": limit}
+    )
+
+
+@mcp.tool(
+    name="get_transcript_reliability",
+    description="Return stored transcript reliability spans for a saved uoink.",
+)
+def get_transcript_reliability(video_id: str) -> dict:
+    return uoink_mcp_tools.call_tool(
+        "get_transcript_reliability", {"video_id": video_id}
     )
 
 
