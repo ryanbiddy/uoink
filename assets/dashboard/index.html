@@ -490,6 +490,24 @@
         linear-gradient(135deg, #2c2621, #1b1714);
     }
 
+    .uoink-card.podcast .thumb {
+      background:
+        linear-gradient(135deg, rgba(255, 210, 63, 0.2), rgba(194, 65, 12, 0.24)),
+        #15110d;
+    }
+
+    .uoink-card.live .thumb {
+      background:
+        radial-gradient(circle at 18% 20%, rgba(255, 61, 0, 0.34), transparent 8rem),
+        linear-gradient(135deg, #2c1511, #15110d);
+    }
+
+    .uoink-card.non-youtube .thumb {
+      background:
+        radial-gradient(circle at 78% 18%, rgba(0, 200, 83, 0.14), transparent 8rem),
+        linear-gradient(135deg, #1c211b, #15110d);
+    }
+
     .thumb img {
       width: 100%;
       height: 100%;
@@ -515,6 +533,8 @@
 
     .hook-chip,
     .topic-chip,
+    .platform-chip,
+    .speaker-count-chip,
     .phase-chip {
       display: inline-flex;
       align-items: center;
@@ -535,6 +555,49 @@
       color: var(--cream);
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .platform-chip {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      max-width: calc(100% - 88px);
+      border: 1px solid rgba(255, 244, 236, 0.18);
+      background: rgba(10, 10, 10, 0.72);
+      color: var(--cream);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .platform-chip.live {
+      border-color: rgba(255, 61, 0, 0.56);
+      color: var(--vermillion);
+    }
+
+    .speaker-count-chip {
+      position: absolute;
+      bottom: 10px;
+      left: 12px;
+      border: 1px solid rgba(255, 210, 63, 0.36);
+      background: rgba(10, 10, 10, 0.64);
+      color: var(--acid);
+    }
+
+    .card-waveform {
+      position: absolute;
+      inset: 42px 14px 36px;
+      display: grid;
+      grid-template-columns: repeat(24, minmax(2px, 1fr));
+      align-items: center;
+      gap: 3px;
+      opacity: 0.94;
+    }
+
+    .card-waveform span {
+      display: block;
+      height: var(--bar-height, 42%);
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--acid), var(--vermillion));
     }
 
     .card-body {
@@ -2409,6 +2472,33 @@
       return platform === "youtube" ? "video" : `${platform} video`;
     }
 
+    function platformChipLabel(platform) {
+      const value = String(platform || "web").toLowerCase();
+      const labels = {
+        youtube: "YouTube",
+        twitter: "X/Twitter",
+        x: "X",
+        generic: "Web",
+        rss: "RSS",
+        spotify: "Spotify",
+        "apple podcasts": "Apple",
+      };
+      return labels[value] || value.replace(/_/g, " ");
+    }
+
+    function cardVariantClass(row) {
+      const platform = platformOf(row);
+      if (isPodcastContent(row)) return "podcast";
+      if (isLiveContent(row)) return "live";
+      return platform && platform !== "youtube" ? "non-youtube" : "youtube";
+    }
+
+    function cardWaveformHtml(row) {
+      const seed = rowTitle(row).length + String(row && row.channel || "").length;
+      const bars = Array.from({ length: 24 }, (_, index) => 24 + ((seed + index * 19) % 62));
+      return `<div class="card-waveform" aria-hidden="true">${bars.map((height) => `<span style="--bar-height:${height}%"></span>`).join("")}</div>`;
+    }
+
     function mediaChipsHtml(row, sidecar = {}) {
       const channel = firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel);
       const duration = durationOf(row, sidecar);
@@ -3377,6 +3467,15 @@
             top_entities: result.top_entities || job.top_entities || [],
             thumbnail_path: result.thumbnail_path || job.thumbnail_path || "",
             duration_seconds: result.duration_seconds || job.duration_seconds || 0,
+            platform: result.platform || job.platform || "",
+            media_type: result.media_type || job.media_type || "",
+            content_type: result.content_type || job.content_type || "",
+            is_live: Boolean(result.is_live || job.is_live),
+            live_status: result.live_status || job.live_status || "",
+            podcast_title: result.podcast_title || job.podcast_title || "",
+            episode_title: result.episode_title || job.episode_title || "",
+            host: result.host || job.host || "",
+            speaker_count: result.speaker_count || job.speaker_count || 0,
           };
         });
     }
@@ -3439,23 +3538,34 @@
 
     function cardHtml(row) {
       const id = htmlEscape(row.video_id || row.slug || "");
-      const title = htmlEscape(row.title || "Untitled uoink");
-      const channel = htmlEscape(row.channel || "Unknown channel");
+      const podcast = isPodcastContent(row);
+      const live = isLiveContent(row);
+      const platform = platformOf(row);
+      const variant = cardVariantClass(row);
+      const title = htmlEscape(firstValue(row.episode_title, row.title, "Untitled uoink"));
+      const channel = htmlEscape(firstValue(row.host, row.channel, podcast ? row.podcast_title : "", "Unknown channel"));
       const topic = htmlEscape(row.topic || "Uncategorized");
       const hook = htmlEscape(prettyHook(row.hook_type));
       const confidence = row.hook_type_confidence != null ? ` - confidence ${row.hook_type_confidence}/5` : "";
       const entities = Number(row.entity_count || 0);
+      const speakers = Number(row.speaker_count || 0);
       const topEntities = Array.isArray(row.top_entities) ? row.top_entities.slice(0, 5).join(", ") : "";
+      const bottomChip = podcast
+        ? `<span class="speaker-count-chip">${htmlEscape(speakers ? `${speakers} speaker${speakers === 1 ? "" : "s"}` : "speakers pending")}</span>`
+        : `<span class="hook-chip">${hook}${htmlEscape(confidence)}</span>`;
+      const platformChip = live ? "live" : platformChipLabel(platform);
       return `
-        <article class="uoink-card" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}" tabindex="0" role="button" aria-label="Open ${title}">
+        <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}" tabindex="0" role="button" aria-label="Open ${title}">
           <div class="thumb">
-            <span class="duration">${htmlEscape(fmtDuration(row.duration_seconds))}</span>
-            <span class="hook-chip">${hook}${htmlEscape(confidence)}</span>
+            <span class="duration">${htmlEscape(fmtDuration(durationOf(row)))}</span>
+            <span class="platform-chip ${live ? "live" : ""}">${htmlEscape(platformChip)}</span>
+            ${podcast ? cardWaveformHtml(row) : ""}
+            ${bottomChip}
             <img alt="" data-thumb-for="${id}" class="hidden">
           </div>
           <div class="card-body">
             <div class="card-title">${title}</div>
-            <div class="card-meta">${channel}${entities ? ` | ${entities} entities` : ""}</div>
+            <div class="card-meta">${channel}${podcast && row.podcast_title ? ` | ${htmlEscape(row.podcast_title)}` : ""}${entities && !podcast ? ` | ${entities} entities` : ""}${live ? " | stream" : ""}</div>
             <div class="card-foot">
               <span class="topic-chip">${topic}</span>
               <span class="age">${htmlEscape(fmtAge(row.yoinked_at))}</span>

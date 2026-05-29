@@ -1486,6 +1486,12 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
         ),
         "metadata_json": json.dumps({
             "url": sidecar.get("url"),
+            "platform": sidecar.get("platform") or _detect_platform_from_url(
+                sidecar.get("url") or ""),
+            "media_type": sidecar.get("media_type"),
+            "content_type": sidecar.get("content_type"),
+            "is_live": sidecar.get("is_live"),
+            "live_status": sidecar.get("live_status"),
             "duration_seconds": sidecar.get("duration_seconds"),
             "view_count": sidecar.get("view_count"),
             "like_count": sidecar.get("like_count"),
@@ -5848,6 +5854,7 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
         # captured at extraction time, before the AI workers finish, so
         # re-computing reflects the latest hook / CI / entity status.
         health = None
+        live = {}
         if sidecar_path and Path(sidecar_path).exists():
             try:
                 live = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
@@ -5865,13 +5872,51 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
         # endpoint.
         thumb = folder / "thumbnail.jpg"
         thumbnail_path = str(thumb) if thumb.exists() else None
+        metadata = {}
+        if r.get("metadata_json"):
+            try:
+                metadata = json.loads(r["metadata_json"] or "{}")
+            except (json.JSONDecodeError, TypeError):
+                metadata = {}
+
+        platform = (
+            live.get("platform")
+            or metadata.get("platform")
+            or _detect_platform_from_url(live.get("url") or metadata.get("url") or "")
+        )
+        duration_seconds = (
+            live.get("duration_seconds")
+            or metadata.get("duration_seconds")
+            or metadata.get("duration")
+        )
+        speakers = live.get("speakers") or live.get("speaker_labels") or []
+        transcript = live.get("transcript") or []
+        speaker_names: set[str] = set()
+        if isinstance(speakers, list):
+            for i, speaker in enumerate(speakers):
+                if isinstance(speaker, str):
+                    speaker_names.add(speaker)
+                elif isinstance(speaker, dict):
+                    speaker_names.add(str(
+                        speaker.get("name")
+                        or speaker.get("label")
+                        or speaker.get("id")
+                        or f"Speaker {i + 1}"
+                    ))
+        if isinstance(transcript, list):
+            for seg in transcript:
+                if isinstance(seg, dict):
+                    label = (seg.get("speaker") or seg.get("speaker_label")
+                             or seg.get("speaker_id"))
+                    if label:
+                        speaker_names.add(str(label))
 
         out.append({
-            "title": r.get("title") or "",
+            "title": live.get("episode_title") or live.get("title") or r.get("title") or "",
             "topic": r.get("topic") or "",
             "folder": str(folder),
             "video_id": video_id,
-            "channel": r.get("channel"),
+            "channel": live.get("host") or live.get("channel") or r.get("channel"),
             "yoinked_at": r.get("yoinked_at"),
             "hook_type": r.get("hook_type"),
             "hook_type_confidence": r.get("hook_type_confidence"),
@@ -5879,6 +5924,18 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "entity_count": r.get("entity_count", 0),
             "top_entities": r.get("top_entities", []),
             "thumbnail_path": thumbnail_path,
+            "sidecar_path": sidecar_path,
+            "source_url": live.get("url") or metadata.get("url"),
+            "platform": platform,
+            "media_type": live.get("media_type") or metadata.get("media_type"),
+            "content_type": live.get("content_type") or metadata.get("content_type"),
+            "is_live": bool(live.get("is_live") or metadata.get("is_live")),
+            "live_status": live.get("live_status") or metadata.get("live_status"),
+            "duration_seconds": duration_seconds,
+            "podcast_title": live.get("podcast_title") or metadata.get("podcast_title"),
+            "episode_title": live.get("episode_title") or metadata.get("episode_title"),
+            "host": live.get("host") or metadata.get("host"),
+            "speaker_count": len([s for s in speaker_names if s]),
         })
     return out
 
