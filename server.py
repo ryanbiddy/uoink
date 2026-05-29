@@ -490,6 +490,63 @@ def _role_facet_emphasis(role: str) -> dict:
     }
 
 
+# ---- v3.1 live stream detection -------------------------------------------
+# yt-dlp exposes ``is_live`` (bool) and the more granular ``live_status``
+# enum: is_upcoming | is_live | post_live | was_live | not_live. We map
+# everything to a bounded internal enum so the rest of the helper +
+# the dashboard chip stay decoupled from yt-dlp's exact strings.
+LIVE_STATE_NOT_LIVE = "not_live"
+LIVE_STATE_LIVE = "live"          # currently broadcasting
+LIVE_STATE_UPCOMING = "upcoming"  # scheduled, not started
+LIVE_STATE_POST_LIVE = "post_live"  # broadcast ended; recording may not be exposed yet
+LIVE_STATE_WAS_LIVE = "was_live"    # ended + recording available
+_LIVE_STATES = (
+    LIVE_STATE_NOT_LIVE, LIVE_STATE_LIVE, LIVE_STATE_UPCOMING,
+    LIVE_STATE_POST_LIVE, LIVE_STATE_WAS_LIVE,
+)
+
+LIVE_BEHAVIOR_WAIT = "wait_for_end"
+LIVE_BEHAVIOR_NOW = "extract_when_recorded"
+_LIVE_BEHAVIORS = (LIVE_BEHAVIOR_WAIT, LIVE_BEHAVIOR_NOW)
+
+# How long to wait between live-stream retry attempts. Conservative -- a
+# 2-hour broadcast doesn't need a 1-minute poll. Lined up with the
+# existing rate-limit backoff so the retry worker doesn't need new code.
+_LIVE_RETRY_INTERVAL_SEC = 600   # 10 minutes
+
+
+def _detect_live_state(metadata: dict | None) -> str:
+    """Map a yt-dlp metadata dict to our bounded enum. Returns
+    LIVE_STATE_NOT_LIVE for anything that doesn't look live (which is the
+    vast majority of yoinked content)."""
+    if not isinstance(metadata, dict):
+        return LIVE_STATE_NOT_LIVE
+    raw = (metadata.get("live_status") or "").strip().lower()
+    if raw == "is_live":
+        return LIVE_STATE_LIVE
+    if raw == "is_upcoming":
+        return LIVE_STATE_UPCOMING
+    if raw == "post_live":
+        return LIVE_STATE_POST_LIVE
+    if raw == "was_live":
+        return LIVE_STATE_WAS_LIVE
+    # Fallback: the older ``is_live`` boolean. Treat True as currently
+    # broadcasting (it's the dominant case when live_status is missing).
+    if metadata.get("is_live") is True:
+        return LIVE_STATE_LIVE
+    return LIVE_STATE_NOT_LIVE
+
+
+def _normalize_live_behavior(value) -> str:
+    """Clamp settings.live_stream_behavior to the bounded enum. Unknown /
+    None falls back to wait_for_end (the gentler default)."""
+    if isinstance(value, str):
+        v = value.strip().lower()
+        if v in _LIVE_BEHAVIORS:
+            return v
+    return LIVE_BEHAVIOR_WAIT
+
+
 # ---- Settings (v2.1 BYO Anthropic key) ------------------------------------
 class CredentialStoreError(RuntimeError):
     """Raised when the OS credential store cannot read/write a saved key."""
@@ -508,6 +565,12 @@ def _default_settings() -> dict:
         # axis until the user (or onboarding) picks. Drives Library
         # default sort + filter-chip emphasis per ROADMAP P2.
         "role": "mixed",
+        # v3.1 live stream behavior. wait_for_end (default) -> we queue the
+        # URL and re-attempt periodically until the broadcast ends and a
+        # recording is available. extract_when_recorded -> we attempt
+        # immediately and fail with a "still live" message if no recording
+        # is exposed yet (user picks when to retry).
+        "live_stream_behavior": "wait_for_end",
         "anthropic_key_invalid": False,
         # v2.1 rename: set True after the one-time "Yoink is now Uoink"
         # post-migration toast has fired, so it never repeats.
@@ -704,6 +767,11 @@ def _public_settings(data: dict | None = None) -> dict:
         # v3.1 P2 -- role drives dashboard default sort + filter chip
         # emphasis. Always returned; the dashboard reads this on load.
         "role": _normalize_role(data.get("role")),
+        # v3.1: live stream behavior + the bounded supported list so the
+        # Settings UI can render the radio without hard-coding enum strings.
+        "live_stream_behavior": _normalize_live_behavior(
+            data.get("live_stream_behavior")),
+        "live_stream_behavior_supported": list(_LIVE_BEHAVIORS),
     }
 
 
@@ -6116,6 +6184,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_settings_pricing()
         if bare == "/role/emphasis":
             return self._handle_role_emphasis()
+        if bare == "/live/status":
+            return self._handle_live_status_get()
         if bare == "/update/check":
             return self._handle_update_check()
         if bare == "/engagement/scores":
@@ -7007,7 +7077,8 @@ class Handler(BaseHTTPRequestHandler):
         integer_fields = ("clipboard_screenshot_cap",)
         extra_fields = ("output_dir", "autostart", "topics",
                          "obsidian_vault_path",   # Tier 2 + v2.5 S4
-                         "role")                  # v3.1 P2
+                         "role",                  # v3.1 P2
+                         "live_stream_behavior")  # v3.1 live
         if (
             not any(f in body for f in boolean_fields)
             and not any(f in body for f in integer_fields)
@@ -7127,6 +7198,22 @@ class Handler(BaseHTTPRequestHandler):
             else:
                 return self._send_json(400, {
                     "ok": False, "error": "role must be a string"})
+        if "live_stream_behavior" in body:
+            raw_lsb = body.get("live_stream_behavior")
+            if raw_lsb is None or raw_lsb == "":
+                data["live_stream_behavior"] = LIVE_BEHAVIOR_WAIT
+            elif isinstance(raw_lsb, str):
+                norm = raw_lsb.strip().lower()
+                if norm not in _LIVE_BEHAVIORS:
+                    return self._send_json(400, {
+                        "ok": False,
+                        "error": (f"live_stream_behavior must be one of "
+                                   f"{list(_LIVE_BEHAVIORS)}")})
+                data["live_stream_behavior"] = norm
+            else:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": "live_stream_behavior must be a string"})
         if "topics" in body:
             err = _validate_topics(body.get("topics"))
             if err:
@@ -8186,6 +8273,109 @@ class Handler(BaseHTTPRequestHandler):
             "has_thumbnail": bool(sidecar["thumbnail_url"]),
         })
 
+    def _handle_live_extract_dispatch(self, url, interval, live_state,
+                                        metadata):
+        """v3.1 live stream branch. Returns a Response dict (and the
+        caller short-circuits) when we want to defer the extraction;
+        returns None when the caller should proceed with the normal
+        download (post_live with a recording exposed).
+
+        Wait-for-end mode: enqueue into pending_yoinks with a future
+        retry_after so the existing rate-limit retry worker (which polls
+        on schedule) re-attempts when the broadcast ends. We piggyback
+        on the existing infra rather than spinning a dedicated live
+        worker -- the worker doesn't care WHY a row is pending, only
+        whether retry_after has passed.
+
+        extract_when_recorded mode: for is_live + upcoming we 409 with
+        a useful message. For post_live we try anyway (yt-dlp will
+        return a recording when one is exposed).
+
+        Returns None iff the caller should fall through to the normal
+        _run_extraction pipeline."""
+        settings = (_read_settings() or {})
+        behavior = _normalize_live_behavior(
+            settings.get("live_stream_behavior"))
+        live_title = (metadata or {}).get("title") or url
+
+        # When mode == NOW + state == POST_LIVE we let the extraction
+        # proceed (the recording may already be downloadable).
+        if (behavior == LIVE_BEHAVIOR_NOW
+                and live_state == LIVE_STATE_POST_LIVE):
+            return None  # fall through
+
+        # When mode == NOW + state in (LIVE, UPCOMING) we surface the
+        # live status as a 409. The dashboard can offer a "retry now"
+        # button later.
+        if behavior == LIVE_BEHAVIOR_NOW and live_state in (
+                LIVE_STATE_LIVE, LIVE_STATE_UPCOMING):
+            return self._send_json(409, {
+                "ok": False,
+                "live_state": live_state,
+                "behavior": behavior,
+                "title": live_title,
+                "error": ("URL is currently a live broadcast; "
+                           "your setting requests immediate extraction "
+                           "only when a recording is exposed. Try "
+                           "again after the broadcast ends, or change "
+                           "the setting to wait_for_end to enqueue "
+                           "automatically."),
+            })
+
+        # Default (wait_for_end + any live-ish state): enqueue. The
+        # retry worker will re-fetch metadata; once live_state moves to
+        # was_live, the existing extraction pipeline proceeds.
+        retry_after = (datetime.now() + timedelta(
+            seconds=_LIVE_RETRY_INTERVAL_SEC
+        )).strftime("%Y-%m-%dT%H:%M:%S")
+        try:
+            pending_id = _get_index().enqueue_pending(
+                url, interval, retry_after)
+        except Exception as e:
+            log.warning("live: enqueue failed (%s); proceeding inline", e)
+            return None  # fall through -- best-effort
+        log.info("POST /extract -> queued (live state=%s) pending_id=%d",
+                  live_state, pending_id)
+        return self._send_json(200, {
+            "ok": True,
+            "queued": True,
+            "pending_id": pending_id,
+            "retry_after": retry_after,
+            "reason": "live_stream",
+            "live_state": live_state,
+            "behavior": behavior,
+            "title": live_title,
+        })
+
+    def _handle_live_status_get(self):
+        """GET /live/status?url=... -- check whether a URL is currently
+        a live broadcast without extracting. Used by the dashboard +
+        the popup to render a 'live' chip before queueing."""
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        raw = (qs.get("url") or [""])[0]
+        canonical, _platform = _normalize_video_url(raw)
+        if not canonical:
+            # /extract/any landed; fall back to the relaxed validator so
+            # we can probe live state on generic URLs too.
+            canonical, _platform = _normalize_any_url(raw)
+        if not canonical:
+            return self._send_json(400, {
+                "ok": False, "error": "url query param required"})
+        try:
+            metadata = _fetch_metadata(canonical)
+        except Exception as e:
+            return self._send_json(400, {
+                "ok": False, "error": f"yt-dlp could not fetch: {e}",
+                "url": canonical})
+        state = _detect_live_state(metadata)
+        return self._send_json(200, {
+            "ok": True, "url": canonical, "live_state": state,
+            "title": metadata.get("title"),
+            "supported_states": list(_LIVE_STATES),
+        })
+
     def _handle_extract(self, body: dict):
         url, interval, err = self._validate_url_interval(body)
         if err:
@@ -8202,6 +8392,16 @@ class Handler(BaseHTTPRequestHandler):
                 # One metadata fetch up front — used both to derive the folder
                 # slug here and re-used by _run_extraction (avoids a 2nd call).
                 metadata = _fetch_metadata(url)
+                # v3.1 live stream handoff: route currently-broadcasting
+                # / scheduled URLs through the live branch BEFORE
+                # _run_extraction tries to download a half-stream.
+                live_state = _detect_live_state(metadata)
+                if live_state in (LIVE_STATE_LIVE, LIVE_STATE_UPCOMING,
+                                    LIVE_STATE_POST_LIVE):
+                    response = self._handle_live_extract_dispatch(
+                        url, interval, live_state, metadata)
+                    if response is not None:
+                        return response
                 title = metadata.get("title") or "Untitled"
                 topic = _classify_topic(metadata)
                 folder = DESKTOP_ROOT / _topic_folder_name(topic) / (slugify(title) or "video")
