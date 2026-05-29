@@ -508,6 +508,7 @@ _LIVE_STATES = (
 LIVE_BEHAVIOR_WAIT = "wait_for_end"
 LIVE_BEHAVIOR_NOW = "extract_when_recorded"
 _LIVE_BEHAVIORS = (LIVE_BEHAVIOR_WAIT, LIVE_BEHAVIOR_NOW)
+_WHISPER_MODELS = ("tiny", "base", "small", "medium", "large")
 
 # How long to wait between live-stream retry attempts. Conservative -- a
 # 2-hour broadcast doesn't need a 1-minute poll. Lined up with the
@@ -571,6 +572,10 @@ def _default_settings() -> dict:
         # immediately and fail with a "still live" message if no recording
         # is exposed yet (user picks when to retry).
         "live_stream_behavior": "wait_for_end",
+        # v3.1 WhisperX preference. Actual model download/execution is handled
+        # by the A1/podcast backend; the dashboard can persist the user choice
+        # ahead of that worker landing.
+        "whisper_model": "base",
         "anthropic_key_invalid": False,
         # v2.1 rename: set True after the one-time "Yoink is now Uoink"
         # post-migration toast has fired, so it never repeats.
@@ -606,6 +611,8 @@ def _normalize_settings(data: dict) -> dict:
     clean["post_migration_toast_shown"] = bool(
         clean.get("post_migration_toast_shown")
     )
+    model = str(clean.get("whisper_model") or "base").strip().lower()
+    clean["whisper_model"] = model if model in _WHISPER_MODELS else "base"
     return clean
 
 
@@ -772,6 +779,8 @@ def _public_settings(data: dict | None = None) -> dict:
         "live_stream_behavior": _normalize_live_behavior(
             data.get("live_stream_behavior")),
         "live_stream_behavior_supported": list(_LIVE_BEHAVIORS),
+        "whisper_model": data.get("whisper_model") or "base",
+        "whisper_models_supported": list(_WHISPER_MODELS),
     }
 
 
@@ -7135,7 +7144,8 @@ class Handler(BaseHTTPRequestHandler):
         extra_fields = ("output_dir", "autostart", "topics",
                          "obsidian_vault_path",   # Tier 2 + v2.5 S4
                          "role",                  # v3.1 P2
-                         "live_stream_behavior")  # v3.1 live
+                         "live_stream_behavior",  # v3.1 live
+                         "whisper_model")         # v3.1 A1/podcast
         if (
             not any(f in body for f in boolean_fields)
             and not any(f in body for f in integer_fields)
@@ -7271,6 +7281,21 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(400, {
                     "ok": False,
                     "error": "live_stream_behavior must be a string"})
+        if "whisper_model" in body:
+            raw_model = body.get("whisper_model")
+            if raw_model is None or raw_model == "":
+                data["whisper_model"] = "base"
+            elif isinstance(raw_model, str):
+                norm = raw_model.strip().lower()
+                if norm not in _WHISPER_MODELS:
+                    return self._send_json(400, {
+                        "ok": False,
+                        "error": f"whisper_model must be one of {list(_WHISPER_MODELS)}"})
+                data["whisper_model"] = norm
+            else:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": "whisper_model must be a string"})
         if "topics" in body:
             err = _validate_topics(body.get("topics"))
             if err:
