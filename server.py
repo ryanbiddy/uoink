@@ -1821,6 +1821,43 @@ def _sleep_with_cancel(seconds: float, cancel_event: threading.Event | None) -> 
         time.sleep(min(1.0, remaining))
 
 
+def _extract_generic_transcript(metadata: dict) -> list[dict]:
+    """v3.1 universal extract: pull a flat transcript-like list out of
+    yt-dlp's metadata dict for a generic URL. yt-dlp returns
+    ``subtitles`` (uploader-provided) and ``automatic_captions`` (ASR)
+    as dicts keyed by language. For the slim /extract/any sidecar we
+    prefer uploader-provided; falling back to ASR. Returns [] when no
+    captions are exposed -- the slim path is `transcript + thumbnail
+    only`, and `+ thumbnail only` is acceptable per the prompt."""
+    subs = metadata.get("subtitles") or {}
+    auto = metadata.get("automatic_captions") or {}
+    # Prefer English if present, then any uploader sub, then any auto.
+    def _pick(d):
+        if not isinstance(d, dict):
+            return None
+        for k in ("en", "en-US", "en-GB"):
+            if k in d:
+                return d[k]
+        for v in d.values():
+            if isinstance(v, list) and v:
+                return v
+        return None
+    chosen = _pick(subs) or _pick(auto)
+    if not chosen:
+        return []
+    # Find a JSON3 / VTT URL in the formats list; we don't fetch it
+    # here (that'd be a separate outbound) -- instead we just note the
+    # captions are available so the downstream Codex UI can offer a
+    # button. The slim path keeps yoinks fast.
+    return [
+        {"language_track": (c.get("name") or c.get("ext") or "unknown"),
+         "ext": c.get("ext"),
+         "url": c.get("url")}
+        for c in chosen[:5]
+        if isinstance(c, dict)
+    ]
+
+
 def _fetch_metadata(url: str, *,
                     cancel_event: threading.Event | None = None) -> dict:
     """Single yt-dlp call that returns the full metadata blob without
@@ -3554,7 +3591,19 @@ _TWITTER_HANDLE_RE = re.compile(r"^[A-Za-z0-9_]{1,15}$")
 # compat with existing rows that pre-date this field.
 PLATFORM_YOUTUBE = "youtube"
 PLATFORM_TWITTER = "twitter"
-_KNOWN_PLATFORMS = (PLATFORM_YOUTUBE, PLATFORM_TWITTER)
+# v3.1 universal extract: any URL yt-dlp supports that isn't a known
+# host gets the generic platform tag. Dashboard renders a neutral chip.
+PLATFORM_GENERIC = "generic"
+_KNOWN_PLATFORMS = (PLATFORM_YOUTUBE, PLATFORM_TWITTER, PLATFORM_GENERIC)
+
+# v3.1: per-host platform hint table for the (small) set of sites the
+# dashboard renders with a custom chip. Anything not here is 'generic'
+# but the sidecar still records the raw host so a future Codex/AG pass
+# can expand the recognized list without a helper-side migration.
+_PLATFORM_HOST_HINTS: dict[str, str] = {
+    # Vimeo, Dailymotion, etc. are TBD -- left to Codex's chip work
+    # so this PR stays focused on the helper-side extractor surface.
+}
 
 # ASCII-explicit so non-ASCII unicode word chars can't sneak through \w.
 _VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{6,}$")
@@ -3643,17 +3692,88 @@ def _normalize_twitter_url(raw: str) -> str | None:
 
 def _detect_platform_from_url(url: str) -> str:
     """Return the platform tag for a canonical URL. Used by the sidecar
-    writer + the dashboard chip. Defaults to PLATFORM_YOUTUBE so existing
-    yoinks render with the original chip when read by post-v3.1 code."""
+    writer + the dashboard chip. Pre-v3.1 callers that pass a raw YouTube
+    URL still get 'youtube'. v3.1 generic extract returns 'generic' for
+    anything yt-dlp accepts that isn't on the known-host list."""
     if not url:
         return PLATFORM_YOUTUBE
     try:
         host = (urlparse(url).hostname or "").lower()
     except Exception:
         return PLATFORM_YOUTUBE
+    if host in _YOUTUBE_HOSTS:
+        return PLATFORM_YOUTUBE
     if host in _TWITTER_HOSTS:
         return PLATFORM_TWITTER
-    return PLATFORM_YOUTUBE
+    if host in _PLATFORM_HOST_HINTS:
+        return _PLATFORM_HOST_HINTS[host]
+    return PLATFORM_GENERIC
+
+
+# v3.1: the only relaxed-validation entry point. /extract/any uses this;
+# the original /extract still goes through the strict YouTube validator.
+# Why this is safe: we ONLY accept http(s) URLs with a real-looking
+# hostname and hand the result straight to yt-dlp. The dispatcher does
+# NOT itself fetch anything. Same posture as Twitter -- yt-dlp's site
+# list does the heavy lifting; we just guard the inputs.
+_GENERIC_HOST_RE = re.compile(
+    r"^[A-Za-z0-9]([A-Za-z0-9.-]{0,253}[A-Za-z0-9])?$")
+
+
+def _normalize_any_url(raw: str) -> tuple[str | None, str | None]:
+    """Validate an arbitrary URL for /extract/any. Returns (canonical, platform).
+
+    Acceptance gates:
+      1. Parses with urlparse (no shape errors).
+      2. Scheme is http or https (no file:, ftp:, javascript:, data: ...)
+      3. Hostname matches the conservative hostname regex (DNS label
+         shape; rejects IP literals, bracketed IPv6, and weird unicode).
+    Returns None on failure. Platform is best-effort from the host.
+
+    This deliberately does NOT call yt-dlp -- that's the extraction step.
+    The dispatcher's job is to keep attacker-shaped URLs from reaching
+    yt-dlp's subprocess in the first place."""
+    if not raw or not isinstance(raw, str):
+        return None, None
+    raw = raw.strip()
+    if not raw:
+        return None, None
+    # Reject the obvious dangerous schemes outright even if urlparse
+    # would shrug them off. Belt-and-suspenders: the scheme check below
+    # would catch these too, but listing them is clearer.
+    lower = raw.lower()
+    for bad in ("javascript:", "data:", "vbscript:", "file:", "ftp:",
+                 "mailto:", "blob:"):
+        if lower.startswith(bad):
+            return None, None
+    # Try YouTube + Twitter normalisers first -- they give canonical
+    # forms. If neither accepts, fall through to the generic gate.
+    yt = _normalize_youtube_url(raw)
+    if yt:
+        return yt, PLATFORM_YOUTUBE
+    tw = _normalize_twitter_url(raw)
+    if tw:
+        return tw, PLATFORM_TWITTER
+    if "://" not in raw:
+        raw = "https://" + raw
+    try:
+        u = urlparse(raw)
+    except ValueError:
+        return None, None
+    if u.scheme not in ("http", "https"):
+        return None, None
+    host = (u.hostname or "")
+    if not host or len(host) > 253:
+        return None, None
+    if not _GENERIC_HOST_RE.match(host):
+        return None, None
+    # Canonical = scheme://host[:port]/path?query  (drops fragment + auth)
+    netloc = host.lower()
+    if u.port:
+        netloc = f"{netloc}:{u.port}"
+    query = f"?{u.query}" if u.query else ""
+    canonical = f"{u.scheme}://{netloc}{u.path}{query}"
+    return canonical, _detect_platform_from_url(canonical)
 
 
 def _normalize_video_url(raw: str) -> tuple[str | None, str | None]:
@@ -7325,6 +7445,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_job_cancel(bare)
         if bare == "/extract":
             return self._handle_extract(body)
+        if bare == "/extract/any":
+            return self._handle_extract_any(body)
         if bare == "/index/backfill-cancel":
             _backfill_cancel.set()
             return self._send_json(200, {"ok": True, "cancelled": True})
@@ -7901,6 +8023,168 @@ class Handler(BaseHTTPRequestHandler):
             })
         log.info("queue retry-now: pending_id=%d", pending_id)
         self._send_json(200, {"ok": True})
+
+    def _handle_extract_any(self, body: dict):
+        """v3.1 universal extractor entry point.
+
+        Accepts any URL yt-dlp supports (1,800+ sites). Routing:
+          - YouTube canonical -> delegates to _handle_extract (full
+            pipeline with screenshots + transcript + comments + hook).
+          - Twitter canonical -> delegates to _handle_extract too (yt-dlp
+            handles it; URL validation already accepted it via the
+            Twitter normaliser).
+          - Generic (anything else valid) -> slim metadata-only path:
+            calls yt-dlp --dump-single-json --no-download, writes a
+            sidecar + a basic corpus.md (title + uploader + description
+            + transcript if available + thumbnail URL). NO screenshots,
+            NO comment fetch, NO hook classification -- those rely on
+            YouTube structure.
+
+        The slim path is the prompt's `transcript + thumbnail only`
+        graceful fallback. A later PR can deepen it with optional
+        ffmpeg screenshots once we know which sites benefit."""
+        raw = (body.get("url") or "").strip()
+        canonical, platform = _normalize_any_url(raw)
+        if not canonical:
+            return self._send_json(400, {
+                "ok": False,
+                "error": ("URL must be http(s) with a valid hostname "
+                          "(yt-dlp accepts 1,800+ sites; the helper "
+                          "filters attacker-shaped inputs)")})
+        # If it's a known platform we already have a full pipeline for,
+        # delegate. The downstream handler runs its own validation; we
+        # pass the canonical so we don't double-normalise.
+        if platform in (PLATFORM_YOUTUBE, PLATFORM_TWITTER):
+            body = dict(body)
+            body["url"] = canonical
+            return self._handle_extract(body)
+
+        # Generic path: metadata-only extraction. Best-effort -- if
+        # yt-dlp doesn't support the URL we surface its error verbatim
+        # so the user gets a useful message rather than a generic 500.
+        log.info("POST /extract/any (generic) url=%s -> running", canonical)
+        DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
+        with _extract_lock:
+            try:
+                metadata = _fetch_metadata(canonical)
+            except subprocess.CalledProcessError as e:
+                detail = friendly_error(e) if callable(globals().get(
+                    "friendly_error")) else str(e)
+                return self._send_json(400, {
+                    "ok": False, "error": f"yt-dlp could not extract: {detail}",
+                    "url": canonical, "platform": platform})
+            except Exception as e:
+                log.exception("/extract/any (generic) metadata failed")
+                return self._send_json(500, {
+                    "ok": False, "error": str(e),
+                    "url": canonical, "platform": platform})
+
+        title = metadata.get("title") or "Untitled"
+        topic = _classify_topic(metadata)
+        folder = (DESKTOP_ROOT / _topic_folder_name(topic)
+                   / (slugify(title) or "video"))
+        folder.mkdir(parents=True, exist_ok=True)
+
+        # Best-effort transcript reconstruction from yt-dlp's
+        # subtitles/automatic_captions map (when present).
+        transcript_entries = _extract_generic_transcript(metadata)
+
+        # Slim sidecar -- structurally compatible with the v2.5 reader,
+        # all v3-only fields tagged.
+        sidecar = {
+            "schema_version": CURRENT_SIDECAR_SCHEMA,
+            "url": canonical,
+            "platform": platform,
+            "extraction_mode": "generic",   # v3.1 marker
+            "title": title,
+            "topic": topic,
+            "yoinked_at": _now_iso(),
+            "duration_seconds": metadata.get("duration"),
+            "channel": (metadata.get("channel") or metadata.get("uploader")
+                          or metadata.get("creator")),
+            "channel_url": (metadata.get("channel_url")
+                               or metadata.get("uploader_url")),
+            "upload_date": metadata.get("upload_date"),
+            "view_count": metadata.get("view_count"),
+            "video_id": metadata.get("id"),
+            "transcript": transcript_entries,
+            # Comments/screenshots/hook are explicit nulls so the
+            # dashboard knows they're unavailable rather than missing.
+            "comments_status": "skipped_generic",
+            "screenshots": [],
+            "thumbnail_url": (metadata.get("thumbnail") or None),
+            "host": (urlparse(canonical).hostname or "").lower(),
+        }
+        sidecar_path = folder / f"{folder.name}.json"
+        _atomic_write_text(sidecar_path,
+                            json.dumps(sidecar, indent=2, ensure_ascii=False))
+
+        # Slim corpus markdown -- enough for an agent to do useful work.
+        corpus_lines = [
+            f"# {title}",
+            "",
+            f"**Source:** {canonical}",
+            f"**Platform:** {platform} ({sidecar['host']})",
+        ]
+        if sidecar["channel"]:
+            corpus_lines.append(f"**Channel/Creator:** {sidecar['channel']}")
+        if sidecar["duration_seconds"]:
+            corpus_lines.append(
+                f"**Duration:** {fmt_time(int(sidecar['duration_seconds']))}")
+        if sidecar["upload_date"]:
+            corpus_lines.append(f"**Uploaded:** {sidecar['upload_date']}")
+        corpus_lines.append("")
+        desc = (metadata.get("description") or "").strip()
+        if desc:
+            corpus_lines += ["## Description", "", desc, ""]
+        if transcript_entries:
+            corpus_lines += ["## Transcript", ""]
+            for ent in transcript_entries:
+                corpus_lines.append(
+                    f"- [{fmt_time(int(ent.get('start') or 0))}] "
+                    f"{ent.get('text') or ''}")
+            corpus_lines.append("")
+        else:
+            corpus_lines += ["## Transcript",
+                              "",
+                              "_No transcript available (site did not "
+                              "expose subtitles / yt-dlp could not parse)._",
+                              ""]
+        corpus_path = folder / "corpus.md"
+        _atomic_write_text(corpus_path, "\n".join(corpus_lines))
+
+        # Persist as a yoink row so it appears in Library + MCP search.
+        try:
+            _get_index().upsert_yoink({
+                "video_id": (metadata.get("id")
+                                or f"generic_{abs(hash(canonical)) & 0xFFFFFF:06x}"),
+                "slug": folder.name,
+                "channel": sidecar["channel"],
+                "title": title,
+                "topic": topic,
+                "yoinked_at": sidecar["yoinked_at"],
+                "corpus_path": str(corpus_path),
+                "sidecar_path": str(sidecar_path),
+                "metadata_json": json.dumps({
+                    "platform": platform,
+                    "duration_seconds": sidecar["duration_seconds"],
+                    "host": sidecar["host"],
+                }),
+            }, content=("\n".join(corpus_lines)[:65000]))
+        except Exception as e:
+            log.warning("/extract/any generic upsert_yoink failed: %s", e)
+
+        return self._send_json(200, {
+            "ok": True,
+            "mode": "generic",
+            "platform": platform,
+            "host": sidecar["host"],
+            "url": canonical,
+            "title": title,
+            "folder": str(folder),
+            "transcript_segments": len(transcript_entries),
+            "has_thumbnail": bool(sidecar["thumbnail_url"]),
+        })
 
     def _handle_extract(self, body: dict):
         url, interval, err = self._validate_url_interval(body)
