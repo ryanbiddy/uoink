@@ -211,6 +211,18 @@ Uoink v2.5 records local engagement events (`opened`, `search_hit`, `search_clic
 
 Transcript reliability detection does not call Anthropic or any third-party API. It reuses the local video/audio during extraction when possible, or re-downloads audio from YouTube for a user-triggered reliability compute. Whisper inference runs on the user's machine.
 
+## Claim extraction + verification (v3 A2, Loki-inspired)
+
+Uoink v3 ships **claim extraction + verification assistance** inspired by [Libr-AI/OpenFactVerification](https://github.com/Libr-AI/OpenFactVerification) ("Loki"). See `vendor/loki/VENDOR.md` for the pinned-commit design reference + license attribution.
+
+**Posture: assistance only.** Uoink never auto-asserts a truth verdict on a claim. The MCP tools and SQLite layer enforce this -- the `alignment_signal` enum on each evidence row is restricted to `supports | contradicts | mixed | inconclusive`. There is no `true` / `false` / `lie` value. The user judges the verdict from the surfaced evidence.
+
+**Compute path.** Per the locked compute policy, the calling agent does the LLM decomposition + verification-query work using its own model via MCP (`extract_claims` + `verify_claim` tools). The helper validates the structure and persists. BYO-key on-server compute is scaffolded by the `mode` enum but not implemented in this PR -- same posture as S1's `/facets/backfill`.
+
+**Outbound surface.** The verification step (step 4 of the Loki pipeline) is the *first new outbound surface* in A2: when an agent retrieves evidence for a claim, it uses its own web-search tooling under the user's direction. The helper records the resulting source URLs + quotes verbatim. The helper itself does not initiate any web requests for claim verification.
+
+**Opt-in by default.** A new settings flag `claim_verification_enabled` (default `false`) gates batch / auto-extract flows. Single-claim verification through the endpoint is always available because a single explicit verification is consent enough.
+
 ## Reporting
 
 If you find a vulnerability, please open a private GitHub Security Advisory or report it to **hi@uoink.video**. Do not open a public issue with reproduction details until a fix is shipped.

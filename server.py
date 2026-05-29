@@ -74,6 +74,7 @@ import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
 import channels  # noqa: E402  -- v2.5 P3 your-channel registry + recognition
 import uoink_reliability  # noqa: E402  -- optional local Whisper reliability checks
 import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
+import claims  # noqa: E402  -- v3 A2 claim extraction + verification (Loki-inspired)
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
@@ -449,6 +450,7 @@ def _default_settings() -> dict:
         "smart_screenshot_picker_enabled": False,
         "clipboard_screenshot_cap": CLIPBOARD_SCREENSHOT_CAP_DEFAULT,
         "transcript_reliability_auto_check": False,
+        "claim_verification_enabled": False,   # v3 A2 -- opt-in
         "anthropic_key_invalid": False,
         # v2.1 rename: set True after the one-time "Yoink is now Uoink"
         # post-migration toast has fired, so it never repeats.
@@ -623,6 +625,10 @@ def _public_settings(data: dict | None = None) -> dict:
             data.get("transcript_reliability_auto_check")
         ),
         "transcript_reliability_model": _reliability_model_status(),
+        # v3 A2: default OFF -- claims are extracted on every yoink only when
+        # ON; otherwise extraction is per-claim, user-triggered.
+        "claim_verification_enabled": bool(
+            data.get("claim_verification_enabled")),
         "anthropic_key_set": bool(key and not data.get("anthropic_key_invalid")),
         # Tier 2 dashboard Settings tab additions:
         "anthropic_key_masked": _mask_anthropic_key(key),
@@ -5852,6 +5858,8 @@ class Handler(BaseHTTPRequestHandler):
         if bare.startswith("/workspace/") and not bare.endswith("/assemble") \
                 and not bare.endswith("/critique"):
             return self._handle_workspace_get(bare)
+        if bare.startswith("/claims/"):
+            return self._handle_claims_get(bare)
         if bare == "/settings/mcp-config":
             return self._handle_settings_mcp_config()
         if bare == "/open-last-youtube":
@@ -6285,6 +6293,97 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(500, {"ok": False, "error": str(e)})
         return self._send_json(200, result)
 
+    # ---- v3 A2 claim extraction + verification -----------------------------
+    # LOCKED FRAMING (ROADMAP A2): assistance only. The endpoints + MCP tools
+    # surface checkable claims with evidence + sources. NEVER auto-assert
+    # truth verdicts; alignment_signal is restricted to supports / contradicts
+    # / mixed / inconclusive at the claims.py layer.
+
+    def _handle_claims_get(self, bare: str):
+        """GET /claims/<video_id>  -- list claims for one video."""
+        if not self._require_token():
+            return
+        video_id = bare[len("/claims/"):].strip("/")
+        if not video_id:
+            return self._send_json(400, {"ok": False,
+                                          "error": "video_id required"})
+        try:
+            rows = claims.get_claims_for_video(_get_index(), video_id)
+        except Exception as e:
+            log.exception("/claims/<video_id> GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "video_id": video_id,
+                                      "claims": rows, "count": len(rows)})
+
+    def _handle_claims_extract(self, body):
+        """POST /claims/extract -- persist agent-extracted claims for a
+        video. Locked compute policy: the calling agent does the LLM
+        decomposition; this endpoint validates + writes the structure."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        video_id = (body.get("video_id") or "").strip()
+        claims_list = body.get("claims") or []
+        mode = (body.get("mode") or claims.COMPUTE_MODE_AGENT).strip()
+        if not video_id:
+            return self._send_json(400, {"ok": False,
+                                          "error": "video_id required"})
+        try:
+            result = claims.extract_claims(_get_index(), video_id,
+                                             claims=claims_list, mode=mode)
+        except Exception as e:
+            log.exception("/claims/extract failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        status = 200 if result.get("ok") else 400
+        return self._send_json(status, result)
+
+    def _handle_claims_verify(self, bare: str, body):
+        """POST /claims/<id>/verify  -- record evidence for one claim.
+
+        Opt-in per claim: the user (or the agent acting on the user's
+        behalf) explicitly verifies a claim. The /settings flag
+        `claim_verification_enabled` gates batch / auto-verify flows
+        upstream of this endpoint, but the endpoint itself is always
+        available -- a single explicit verification is consent enough."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        # Parse /claims/<id>/verify
+        try:
+            claim_id = int(bare[len("/claims/"):-len("/verify")].strip("/"))
+        except (ValueError, TypeError):
+            return self._send_json(400, {"ok": False,
+                                          "error": "claim_id must be an integer"})
+        evidence = body.get("evidence") or []
+        mode = (body.get("mode") or claims.COMPUTE_MODE_AGENT).strip()
+        try:
+            result = claims.verify_claim(_get_index(), claim_id,
+                                           evidence=evidence, mode=mode)
+        except Exception as e:
+            log.exception("/claims/<id>/verify failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        status = 200 if result.get("ok") else 400
+        return self._send_json(status, result)
+
+    def _handle_claims_skip(self, bare: str, body):
+        """POST /claims/<id>/skip  -- user marks a claim as not-attempted
+        (per ROADMAP A2 status enum). No evidence written."""
+        try:
+            claim_id = int(bare[len("/claims/"):-len("/skip")].strip("/"))
+        except (ValueError, TypeError):
+            return self._send_json(400, {"ok": False,
+                                          "error": "claim_id must be an integer"})
+        try:
+            ok = claims.mark_not_attempted(_get_index(), claim_id)
+        except Exception as e:
+            log.exception("/claims/<id>/skip failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        if not ok:
+            return self._send_json(404, {"ok": False,
+                                          "error": "claim not found"})
+        return self._send_json(200, {"ok": True, "claim_id": claim_id,
+                                      "status": claims.STATUS_NOT_ATTEMPTED})
+
     def _handle_settings_mcp_config(self):
         """MCP config snippet for the Settings tab Copy button. Token-gated."""
         if not self._require_token():
@@ -6383,6 +6482,8 @@ class Handler(BaseHTTPRequestHandler):
             "hook_type_enabled",
             "smart_screenshot_picker_enabled",
             "transcript_reliability_auto_check",
+            "claim_verification_enabled",  # v3 A2 -- default OFF (claims
+                                            # extracted on yoink only when on)
         )
         integer_fields = ("clipboard_screenshot_cap",)
         extra_fields = ("output_dir", "autostart", "topics")  # Tier 2
@@ -6832,6 +6933,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_workspace_assemble(body)
         if bare == "/workspace/critique":
             return self._handle_workspace_critique(body)
+        if bare == "/claims/extract":
+            return self._handle_claims_extract(body)
+        if bare.startswith("/claims/") and bare.endswith("/verify"):
+            return self._handle_claims_verify(bare, body)
+        if bare.startswith("/claims/") and bare.endswith("/skip"):
+            return self._handle_claims_skip(bare, body)
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})
