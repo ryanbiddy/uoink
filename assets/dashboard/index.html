@@ -1201,6 +1201,59 @@
       gap: 12px;
     }
 
+    .speaker-timeline {
+      display: grid;
+      gap: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 12px;
+      background: rgba(10, 10, 10, 0.28);
+    }
+
+    .speaker-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .speaker-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .speaker-legend i {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--speaker-color, var(--rust-bright));
+    }
+
+    .speaker-bars {
+      position: relative;
+      min-height: var(--timeline-height, 88px);
+      border: 1px solid rgba(255, 244, 236, 0.08);
+      border-radius: var(--control-radius);
+      background:
+        linear-gradient(90deg, rgba(255, 244, 236, 0.05) 1px, transparent 1px) 0 0 / 25% 100%,
+        rgba(21, 17, 13, 0.72);
+    }
+
+    .speaker-segment {
+      position: absolute;
+      top: var(--segment-top, 12px);
+      left: var(--segment-left, 0%);
+      width: max(var(--segment-width, 1%), 4px);
+      height: 18px;
+      border-radius: 999px;
+      background: var(--speaker-color, var(--rust-bright));
+      box-shadow: 0 0 0 1px rgba(10, 10, 10, 0.36);
+    }
+
     .transcript-segment {
       border: 1px solid var(--border);
       border-radius: var(--control-radius);
@@ -2573,6 +2626,81 @@
       return Array.isArray(raw) ? raw.filter(Boolean) : [];
     }
 
+    function diarizationSegments(sidecar = {}) {
+      return transcriptSegments(sidecar)
+        .map((segment, index) => {
+          const speaker = firstValue(segment.speaker, segment.speaker_label, segment.speaker_id);
+          const start = Number(firstValue(segment.start, segment.start_seconds, index * 30));
+          const end = Number(firstValue(segment.end, segment.end_seconds, start + 20));
+          return {
+            speaker,
+            start: Number.isFinite(start) ? Math.max(0, start) : index * 30,
+            end: Number.isFinite(end) && end > start ? end : start + 20,
+          };
+        })
+        .filter((segment) => segment.speaker);
+    }
+
+    function shouldShowDiarization(row, sidecar = {}) {
+      const values = [
+        row && row.format,
+        row && row.format_type,
+        row && row.content_type,
+        row && row.media_type,
+        sidecar.format,
+        sidecar.content_type,
+        sidecar.media_type,
+        sidecar.kind,
+      ].join(" ").toLowerCase();
+      return isPodcastContent(row, sidecar) || values.includes("interview") || diarizationSegments(sidecar).length > 0;
+    }
+
+    function speakerColor(index) {
+      const colors = ["#F97316", "#FFD23F", "#00C853", "#FF3D00", "#C8B19F", "#FFF4EC"];
+      return colors[index % colors.length];
+    }
+
+    function diarizationTimelineHtml(row, sidecar = {}) {
+      if (!shouldShowDiarization(row, sidecar)) return "";
+      const segments = diarizationSegments(sidecar);
+      if (!segments.length) {
+        return `
+          <div class="yoink-section">
+            <div class="yoink-section-head">
+              <div class="panel-title">Speaker timeline</div>
+              <div class="localhost">diarization</div>
+            </div>
+            ${emptyPanelRow("Speaker timeline coming with backend update.", "Expected sidecar fields: transcript or diarization segments with start, end, speaker, and text.")}
+          </div>
+        `;
+      }
+      const speakers = [...new Set(segments.map((segment) => segment.speaker))].slice(0, 8);
+      const speakerIndex = new Map(speakers.map((speaker, index) => [speaker, index]));
+      const maxEnd = Math.max(durationOf(row, sidecar) || 0, ...segments.map((segment) => segment.end), 1);
+      const timelineHeight = Math.max(58, speakers.length * 28 + 20);
+      return `
+        <div class="yoink-section">
+          <div class="yoink-section-head">
+            <div class="panel-title">Speaker timeline</div>
+            <div class="localhost">${htmlEscape(speakers.length)} speaker${speakers.length === 1 ? "" : "s"}</div>
+          </div>
+          <div class="speaker-timeline">
+            <div class="speaker-legend">
+              ${speakers.map((speaker, index) => `<span><i style="--speaker-color:${speakerColor(index)}"></i>${htmlEscape(speaker)}</span>`).join("")}
+            </div>
+            <div class="speaker-bars" style="--timeline-height:${timelineHeight}px">
+              ${segments.slice(0, 120).map((segment) => {
+                const index = speakerIndex.get(segment.speaker) || 0;
+                const left = Math.max(0, Math.min(100, (segment.start / maxEnd) * 100));
+                const width = Math.max(0.8, Math.min(100 - left, ((segment.end - segment.start) / maxEnd) * 100));
+                return `<span class="speaker-segment" title="${htmlEscape(`${segment.speaker} ${fmtTimestamp(segment.start)}-${fmtTimestamp(segment.end)}`)}" style="--speaker-color:${speakerColor(index)};--segment-top:${12 + index * 28}px;--segment-left:${left}%;--segment-width:${width}%"></span>`;
+              }).join("")}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function mediaLabelFor(row, sidecar = {}) {
       if (isPodcastContent(row, sidecar)) return "podcast";
       if (isLiveContent(row, sidecar)) return "live stream";
@@ -2738,6 +2866,7 @@
           ${mediaChipsHtml(row, sidecar)}
           ${mediaBody}
         </div>
+        ${diarizationTimelineHtml(row, sidecar)}
         <div class="yoink-section">
           <div class="yoink-section-head">
             <div class="panel-title">${podcast ? "Episode transcript" : "Transcript preview"}</div>
