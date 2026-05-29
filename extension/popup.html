@@ -1017,6 +1017,43 @@
       padding: 6px 10px;
       font-size: 10.5px;
     }
+    /* ---- resurface card ---- */
+    .resurface-item {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: var(--r-corpus);
+      border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .resurface-item:hover {
+      background: var(--ink);
+      border-color: var(--border);
+    }
+    .resurface-thumb {
+      width: 48px;
+      height: 27px;
+      object-fit: cover;
+      border-radius: 4px;
+      background: var(--ink);
+      flex-shrink: 0;
+    }
+    .resurface-meta {
+      font-size: 10px;
+      color: #888;
+      margin-top: 1px;
+    }
+    .resurface-score-chip {
+      display: inline-block;
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: rgba(249, 115, 22, 0.15);
+      color: var(--rust-bright);
+      font-weight: 600;
+      font-size: 9.5px;
+    }
   </style>
 </head>
 <body>
@@ -1188,6 +1225,16 @@
   <div class="panel" id="quick-prompts-panel">
     <div class="panel-title">After pasting, copy a starter prompt:</div>
     <div id="quick-prompts" class="quick-prompts"></div>
+  </div>
+
+  <!-- Resurface card -->
+  <div id="resurface-card" class="panel hidden" style="border: 1px solid var(--rust-bright); background: var(--ink-warm); border-radius: var(--r-card); padding: 12px; margin-bottom: 12px; position: relative;">
+    <button id="resurface-dismiss-btn" style="position: absolute; top: 6px; right: 8px; background: transparent; border: none; color: #888; cursor: pointer; font-size: 12px;" type="button">✕</button>
+    <div style="font-size: 11px; color: var(--rust-bright); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; margin-bottom: 8px;">Worth revisiting today</div>
+    <div id="resurface-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px;"></div>
+    <div style="text-align: right;">
+      <a id="resurface-view-all" class="edit-prompts-link" href="http://127.0.0.1:5179/dashboard?tab=foryou" style="font-size: 10.5px;">View all in dashboard ↗</a>
+    </div>
   </div>
 
   <!-- Recent uoinks -->

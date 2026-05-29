@@ -1829,6 +1829,7 @@ async function loadRecentUoinks() {
     const res = await STC.listRecent();
     recent = (res && res.recent) || [];
   } catch { /* server may be down — leave the placeholder */ }
+  loadResurfaceCard(recent).catch(() => {});
   knownRecentUoinkCount = recent.length + failures.length;
   updateFocalMode();
   initPairwiseCalibration(recent);
@@ -1954,6 +1955,192 @@ async function loadRecentUoinks() {
     });
     recentUoinksEl.appendChild(item);
   }
+}
+
+async function loadResurfaceCard(recent) {
+  const card = document.getElementById("resurface-card");
+  const listEl = document.getElementById("resurface-list");
+  if (!card || !listEl) return;
+
+  const dismissKey = "uoink_resurface_dismissed_at";
+  let dismissedAt = 0;
+  try {
+    const items = await new Promise((r) => chrome.storage.local.get({ [dismissKey]: 0 }, r));
+    dismissedAt = items[dismissKey] || 0;
+  } catch (e) {
+    console.warn("Storage error reading resurface dismiss:", e);
+  }
+
+  if (Date.now() - dismissedAt < 24 * 60 * 60 * 1000) {
+    card.classList.add("hidden");
+    return;
+  }
+
+  let resurfaceItems = [];
+  let isFromFallback = false;
+
+  try {
+    const res = await STC.getResurfaceToday();
+    if (res && res.ok && Array.isArray(res.items)) {
+      resurfaceItems = res.items;
+    } else {
+      isFromFallback = true;
+    }
+  } catch (e) {
+    isFromFallback = true;
+  }
+
+  if (isFromFallback) {
+    let scoresMap = {};
+    try {
+      const scoresRes = await STC.getEngagementScores();
+      if (scoresRes && scoresRes.ok) {
+        scoresMap = scoresRes.scores || scoresRes.engagement_scores || {};
+      }
+    } catch (e) {
+      console.warn("Failed to fetch engagement scores:", e);
+    }
+
+    const hasEngagementData = Object.keys(scoresMap).length > 0;
+    if (!hasEngagementData) {
+      card.classList.add("hidden");
+      return;
+    }
+
+    let allYoinks = [];
+    try {
+      const searchRes = await STC.memorySearch({ sort: "engagement" });
+      if (searchRes && searchRes.ok && Array.isArray(searchRes.results)) {
+        allYoinks = searchRes.results;
+      } else if (searchRes && Array.isArray(searchRes)) {
+        allYoinks = searchRes;
+      }
+    } catch (e) {
+      console.warn("Failed to search memory:", e);
+    }
+
+    if (allYoinks.length === 0 && Array.isArray(recent)) {
+      allYoinks = recent;
+    }
+
+    if (allYoinks.length < 10) {
+      card.classList.add("hidden");
+      return;
+    }
+
+    const fourteenDaysAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+    const eligible = allYoinks.filter(y => {
+      if (!y.video_id) return false;
+      const lastOpened = y.last_opened_at || y.opened_at || y.yoinked_at || y.created_at;
+      if (!lastOpened) return true;
+      const lastOpenedTs = Date.parse(lastOpened);
+      return isNaN(lastOpenedTs) || lastOpenedTs < fourteenDaysAgo;
+    });
+
+    if (eligible.length === 0) {
+      card.classList.add("hidden");
+      return;
+    }
+
+    eligible.forEach(y => {
+      y.engagement_score = scoresMap[y.video_id] || 0;
+    });
+    const scoredEligible = eligible.filter(y => y.engagement_score > 0);
+    if (scoredEligible.length === 0) {
+      card.classList.add("hidden");
+      return;
+    }
+
+    scoredEligible.sort((a, b) => b.engagement_score - a.engagement_score);
+    resurfaceItems = scoredEligible.slice(0, 3);
+  } else {
+    if (resurfaceItems.length === 0) {
+      card.classList.add("hidden");
+      return;
+    }
+  }
+
+  if (resurfaceItems.length === 0) {
+    card.classList.add("hidden");
+    return;
+  }
+
+  listEl.innerHTML = "";
+  for (const item of resurfaceItems.slice(0, 3)) {
+    const itemEl = document.createElement("div");
+    itemEl.className = "resurface-item";
+
+    const thumb = document.createElement("img");
+    thumb.className = "resurface-thumb";
+    thumb.src = item.thumbnail_url || `https://i.ytimg.com/vi/${item.video_id}/mqdefault.jpg`;
+    thumb.alt = "";
+
+    const contentWrap = document.createElement("div");
+    contentWrap.style.cssText = "flex: 1; min-width: 0;";
+
+    const title = document.createElement("div");
+    title.className = "resurface-item-title";
+    title.style.cssText = "font-size: 11px; font-weight: 600; color: var(--cream); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;";
+    title.textContent = item.title || "(Untitled)";
+
+    const meta = document.createElement("div");
+    meta.className = "resurface-meta";
+    
+    const age = formatAgeString(item.yoinked_at || item.created_at);
+    const ageStr = age ? `${age} &middot; ` : "";
+    const score = item.value_score || item.engagement_score || 1.0;
+    
+    meta.innerHTML = `${ageStr}<span class="resurface-score-chip">Score: ${score.toFixed(1)}</span>`;
+
+    contentWrap.appendChild(title);
+    contentWrap.appendChild(meta);
+    itemEl.appendChild(thumb);
+    itemEl.appendChild(contentWrap);
+
+    itemEl.addEventListener("click", () => {
+      STC.logEngagement("opened", "popup", { video_id: item.video_id, title: item.title, folder: item.folder, resurfaced: true }).catch(() => {});
+      if (item.folder) STC.openFolder(item.folder);
+    });
+
+    listEl.appendChild(itemEl);
+  }
+
+  card.classList.remove("hidden");
+
+  const dismissBtn = document.getElementById("resurface-dismiss-btn");
+  if (dismissBtn) {
+    dismissBtn.onclick = async () => {
+      card.classList.add("hidden");
+      try {
+        await new Promise((r) => chrome.storage.local.set({ [dismissKey]: Date.now() }, r));
+      } catch (e) {
+        console.warn("Storage error writing resurface dismiss:", e);
+      }
+    };
+  }
+
+  const viewAllLink = document.getElementById("resurface-view-all");
+  if (viewAllLink) {
+    viewAllLink.onclick = (ev) => {
+      ev.preventDefault();
+      chrome.tabs.create({ url: "http://127.0.0.1:5179/dashboard?tab=foryou" });
+      window.close();
+    };
+  }
+}
+
+function formatAgeString(dateStr) {
+  if (!dateStr) return "";
+  const t = Date.parse(dateStr);
+  if (isNaN(t)) return "";
+  const diffDays = Math.floor((Date.now() - t) / (24 * 60 * 60 * 1000));
+  if (diffDays <= 0) return "today";
+  if (diffDays === 1) return "yesterday";
+  if (diffDays < 7) return `${diffDays}d ago`;
+  const diffWeeks = Math.floor(diffDays / 7);
+  if (diffWeeks < 4) return `${diffWeeks}w ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  return `${diffMonths}mo ago`;
 }
 
 // ---- Destination buttons --------------------------------------------------
