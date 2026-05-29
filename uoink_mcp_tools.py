@@ -770,6 +770,94 @@ def download_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
         return _err(f"download_podcast_episode failed: {e}")
 
 
+def get_whisperx_status(_args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1: report whether the WhisperX runtime is importable + the
+    currently-selected model. Used by agents to decide whether to
+    surface a 'still need to install whisperx' affordance before
+    queueing a transcribe call."""
+    server = _b()
+    import whisper_runner as _wr
+    settings = server._read_settings() or {}
+    return _ok(
+        whisperx_available=_wr.is_whisperx_available(),
+        selected_model=settings.get("whisper_model") or "base",
+        supported_models=list(_wr._MODELS),
+        diarization_default=bool(settings.get("diarization_default")),
+    )
+
+
+def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 podcast: run WhisperX on a downloaded podcast episode.
+
+    Synchronous. The audio at episode.audio_local_path is the input;
+    transcript JSON lands next to it. Returns the structured
+    transcript metadata or:
+      - 'whisperx runtime not installed' err when the runtime isn't
+        importable.
+      - consent_required=True when the user hasn't agreed to the
+        first-time model download yet (200 MB - 2 GB). Re-issue with
+        consent_given=True after the dashboard prompt records the
+        opt-in."""
+    server = _b()
+    import whisper_runner as _wr
+    import podcasts as _pod
+    try:
+        episode_id = int(args.get("episode_id"))
+    except (TypeError, ValueError):
+        return _err("episode_id (integer) is required")
+    episode = _pod.get_episode(server._get_index(), episode_id)
+    if episode is None:
+        return _err("episode not found")
+    if not episode.get("audio_local_path"):
+        return _err("episode has no audio_local_path -- "
+                     "download_podcast_episode first")
+    if not _wr.is_whisperx_available():
+        return _err("whisperx runtime not installed; "
+                     "use the Setup page to install (consent-gated dep).")
+    settings = server._read_settings() or {}
+    model = _wr.normalize_model(
+        args.get("model") or settings.get("whisper_model"))
+    diarize = bool(args.get("diarize")
+                     if args.get("diarize") is not None
+                     else settings.get("diarization_default"))
+    consent_given = bool(args.get("consent_given"))
+    language = args.get("language")
+    _wr.update_episode_transcript_state(
+        server._get_index(), episode_id,
+        status=_wr.STATUS_RUNNING, model_used=model)
+    from pathlib import Path as _P
+    try:
+        transcript = _wr.transcribe_audio(
+            _P(episode["audio_local_path"]),
+            data_root=server.DATA_ROOT,
+            model_size=model, language=language,
+            diarize=diarize, consent_given=consent_given)
+    except PermissionError as e:
+        _wr.update_episode_transcript_state(
+            server._get_index(), episode_id,
+            status=_wr.STATUS_QUEUED, error=str(e))
+        return {"ok": False, "consent_required": True,
+                "model": model, "error": str(e)}
+    except Exception as e:
+        _wr.update_episode_transcript_state(
+            server._get_index(), episode_id,
+            status=_wr.STATUS_FAILED, error=str(e))
+        return _err(f"transcribe failed: {e}")
+    out_path = _wr.write_transcript(
+        transcript, audio_path=_P(episode["audio_local_path"]))
+    _wr.update_episode_transcript_state(
+        server._get_index(), episode_id,
+        status=_wr.STATUS_DONE, transcript_path=out_path,
+        model_used=model,
+        diarization_ran=transcript.get("diarization_ran", False))
+    return _ok(episode_id=episode_id,
+                transcript_path=str(out_path),
+                model=transcript["model"],
+                language=transcript["language"],
+                segments=len(transcript["segments"]),
+                diarization_ran=transcript["diarization_ran"])
+
+
 def get_user_memory(_args: dict[str, Any]) -> dict[str, Any]:
     """v2.5 S4 user memory: return the free-form USER.md content + path.
     Skeleton is seeded on first read so an agent always gets a starting
@@ -1608,6 +1696,41 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, ["episode_id"]),
         handler=download_podcast_episode,
         rate_limiter=_RateLimiter(10),
+    ),
+    "get_whisperx_status": ToolSpec(
+        name="get_whisperx_status",
+        description=(
+            "v3.1: report whether the WhisperX runtime is importable + "
+            "the currently-selected model size + the diarization "
+            "default. Agents call this before transcribe to decide "
+            "whether to surface an install prompt to the user."
+        ),
+        input_schema=_schema({}, []),
+        handler=get_whisperx_status,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "transcribe_podcast_episode": ToolSpec(
+        name="transcribe_podcast_episode",
+        description=(
+            "v3.1 podcast: run WhisperX on a downloaded episode. "
+            "Synchronous. Reads audio_local_path; writes the JSON "
+            "transcript next to the MP3. Returns the structured "
+            "transcript metadata, OR consent_required=True when the "
+            "first-time model download (200 MB - 2 GB) needs the user "
+            "to opt in (re-issue with consent_given=True after the "
+            "dashboard prompt records the opt-in), OR a runtime-not-"
+            "installed error when whisperx isn't importable."
+        ),
+        input_schema=_schema({
+            "episode_id": {"type": "integer"},
+            "model": {"type": "string",
+                       "enum": ["tiny", "base", "small", "medium", "large"]},
+            "language": {"type": "string"},
+            "diarize": {"type": "boolean"},
+            "consent_given": {"type": "boolean"},
+        }, ["episode_id"]),
+        handler=transcribe_podcast_episode,
+        rate_limiter=_RateLimiter(5),
     ),
     "get_user_taste": ToolSpec(
         name="get_user_taste",
