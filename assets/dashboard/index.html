@@ -828,6 +828,86 @@
       resize: vertical;
     }
 
+    .script-layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .script-list,
+    .script-form,
+    .script-view {
+      display: grid;
+      gap: 12px;
+    }
+
+    .script-card,
+    .script-block {
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      background: var(--ink-warm);
+    }
+
+    .script-card {
+      display: grid;
+      gap: 7px;
+      width: 100%;
+      padding: 13px;
+      color: var(--cream);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .script-card:hover,
+    .script-card:focus-visible,
+    .script-card.active {
+      outline: none;
+      border-color: rgba(249, 115, 22, 0.52);
+      background: #18120E;
+    }
+
+    .script-block summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 44px;
+      padding: 12px 14px;
+      color: var(--cream);
+      cursor: pointer;
+      font-weight: 900;
+    }
+
+    .script-block-body {
+      display: grid;
+      gap: 10px;
+      border-top: 1px solid var(--border);
+      padding: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .source-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .source-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border: 1px solid rgba(249, 115, 22, 0.42);
+      border-radius: var(--pill-radius);
+      padding: 0 10px;
+      color: var(--cream);
+      background: rgba(194, 65, 12, 0.14);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
     .tip {
       margin-top: 18px;
       color: var(--dim);
@@ -1132,6 +1212,7 @@
       .feature-grid,
       .resurface-layout,
       .workspace-layout,
+      .script-layout,
       .settings-grid,
       .about-grid {
         grid-template-columns: 1fr;
@@ -1149,6 +1230,7 @@
       <nav class="nav" aria-label="Sections">
         <button class="nav-button" type="button" data-tab-button="for-you">For You <span class="nav-count" id="forYouNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="build">Build <span class="nav-count" id="buildNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="script">Script <span class="nav-count" id="scriptNavCount">0</span></button>
         <button class="nav-button active" type="button" data-tab-button="library">Library <span class="nav-count" id="libraryNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="activity">Activity <span class="nav-count" id="activityNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="settings">Settings</button>
@@ -1291,6 +1373,70 @@
                     </div>
                     <div id="workspaceCritiqueResult"></div>
                   </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-script" data-tab-panel="script">
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">Script Studio</div>
+              <h1>Draft from evidence, <em>not vibes.</em></h1>
+              <p class="lede">Start from a Build workspace, ask an agent for a grounded script, persist versions, revise against critique findings, and derive a shot list.</p>
+            </div>
+            <button class="button ghost" type="button" id="reloadScripts">Reload</button>
+          </div>
+
+          <div class="script-layout">
+            <aside class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Script library</div>
+                <span class="nav-count" id="scriptCount">0</span>
+              </div>
+              <div class="panel-body">
+                <form class="script-form" id="scriptForm">
+                  <select class="field" id="scriptWorkspace"></select>
+                  <input class="field" id="scriptTargetLength" type="number" min="15" step="15" value="120" placeholder="target length seconds">
+                  <input class="field" id="scriptHookStyle" type="text" placeholder="hook style / taste anchor">
+                  <input class="field" id="scriptCta" type="text" placeholder="CTA target">
+                  <button class="button" type="button" id="getScriptGrounding">Get grounding context</button>
+                  <textarea class="field draft-box" id="scriptDraftHook" placeholder="Paste or write the final hook to persist."></textarea>
+                  <textarea class="field draft-box" id="scriptDraftBody" placeholder="Body or outline. One line per beat works."></textarea>
+                  <button class="button primary" type="submit">Persist script</button>
+                </form>
+                <div class="script-list" id="scriptList"></div>
+              </div>
+            </aside>
+
+            <section class="script-view">
+              <div class="panel">
+                <div class="panel-head">
+                  <div class="panel-title" id="scriptTitle">Script</div>
+                  <div class="inline-row">
+                    <button class="button ghost" type="button" id="reviseScript">Revise</button>
+                    <button class="button" type="button" id="deriveShotList">Generate shot list</button>
+                  </div>
+                </div>
+                <div class="panel-body" id="scriptDetail">
+                  <div class="job-row">
+                    <div class="job-title">No script selected.</div>
+                    <div class="job-sub">Pick a workspace, get grounding context, then persist a script version.</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-head">
+                  <div class="panel-title">Revision loop</div>
+                  <div class="localhost">grounded in critique findings</div>
+                </div>
+                <div class="panel-body">
+                  <textarea class="field draft-box" id="scriptRevisionNotes" placeholder="Paste critique findings or revision target."></textarea>
+                  <textarea class="field draft-box" id="scriptRevisionDraft" placeholder="Optional revised script body to persist as the next version."></textarea>
+                  <button class="button primary" type="button" id="saveScriptRevision">Run revision / save version</button>
+                  <div id="scriptRevisionResult"></div>
                 </div>
               </div>
             </section>
@@ -1561,6 +1707,9 @@
       workspaces: [],
       currentWorkspace: null,
       workspaceAssembly: null,
+      scripts: [],
+      currentScript: null,
+      scriptGrounding: null,
     };
 
     const FALLBACK_FACETS = {
@@ -1600,6 +1749,21 @@
       workspacePerformance: document.getElementById("workspacePerformance"),
       workspaceDraft: document.getElementById("workspaceDraft"),
       workspaceCritiqueResult: document.getElementById("workspaceCritiqueResult"),
+      scriptNavCount: document.getElementById("scriptNavCount"),
+      scriptCount: document.getElementById("scriptCount"),
+      scriptList: document.getElementById("scriptList"),
+      scriptForm: document.getElementById("scriptForm"),
+      scriptWorkspace: document.getElementById("scriptWorkspace"),
+      scriptTargetLength: document.getElementById("scriptTargetLength"),
+      scriptHookStyle: document.getElementById("scriptHookStyle"),
+      scriptCta: document.getElementById("scriptCta"),
+      scriptDraftHook: document.getElementById("scriptDraftHook"),
+      scriptDraftBody: document.getElementById("scriptDraftBody"),
+      scriptTitle: document.getElementById("scriptTitle"),
+      scriptDetail: document.getElementById("scriptDetail"),
+      scriptRevisionNotes: document.getElementById("scriptRevisionNotes"),
+      scriptRevisionDraft: document.getElementById("scriptRevisionDraft"),
+      scriptRevisionResult: document.getElementById("scriptRevisionResult"),
       runningPill: document.getElementById("runningPill"),
       portLabel: document.getElementById("portLabel"),
       libraryGrid: document.getElementById("libraryGrid"),
@@ -2127,6 +2291,215 @@
         els.workspaceCritiqueResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Critique context ready")}</div><pre class="mono-box">${htmlEscape(JSON.stringify(data, null, 2))}</pre></div>`;
       } catch (err) {
         showToast(`Could not run critique: ${err.message}`);
+      }
+    }
+
+    async function loadScripts() {
+      await loadBuild();
+      syncScriptWorkspaceOptions();
+      try {
+        const data = await authFetch("/scripts?limit=50");
+        state.scripts = Array.isArray(data.scripts) ? data.scripts : [];
+      } catch (err) {
+        state.scripts = [];
+        els.scriptList.innerHTML = emptyPanelRow("Scripts unavailable.", err.message);
+      }
+      renderScriptList();
+      if (!state.currentScript && state.scripts.length) {
+        selectScript(state.scripts[0].id);
+      } else if (!state.scripts.length) {
+        renderScriptEmpty();
+      }
+    }
+
+    function syncScriptWorkspaceOptions() {
+      const current = els.scriptWorkspace.value;
+      els.scriptWorkspace.innerHTML = `<option value="">Workspace: choose one</option>` + state.workspaces.map((ws) => (
+        `<option value="${htmlEscape(ws.id)}">${htmlEscape(ws.hook_target || ws.topic || ws.id)}</option>`
+      )).join("");
+      if (current) els.scriptWorkspace.value = current;
+      if (!els.scriptWorkspace.value && state.currentWorkspace && state.currentWorkspace.id) {
+        els.scriptWorkspace.value = state.currentWorkspace.id;
+      }
+    }
+
+    function renderScriptList() {
+      els.scriptNavCount.textContent = String(state.scripts.length);
+      els.scriptCount.textContent = String(state.scripts.length);
+      if (!state.scripts.length) {
+        els.scriptList.innerHTML = `<div class="soft-note">No scripts saved yet.</div>`;
+        return;
+      }
+      els.scriptList.innerHTML = state.scripts.map((script) => `
+        <button class="script-card ${state.currentScript && Number(state.currentScript.id) === Number(script.id) ? "active" : ""}" type="button" data-script-id="${htmlEscape(script.id)}">
+          <strong>v${htmlEscape(script.version || 1)} ${htmlEscape(script.hook || "Untitled script")}</strong>
+          <span class="job-sub">${htmlEscape([script.format, script.target_length_sec ? `${script.target_length_sec}s` : "", script.mode].filter(Boolean).join(" | "))}</span>
+          <span class="soft-note">${htmlEscape(fmtAge(script.generated_at))}</span>
+        </button>
+      `).join("");
+    }
+
+    function renderScriptEmpty() {
+      state.currentScript = null;
+      els.scriptTitle.textContent = "Script";
+      els.scriptDetail.innerHTML = emptyPanelRow("No script selected.", "Choose a workspace, get grounding context, then persist a script version.");
+      els.scriptRevisionResult.innerHTML = "";
+    }
+
+    async function selectScript(scriptId) {
+      if (!scriptId) return;
+      try {
+        const data = await authFetch(`/script/${encodeURIComponent(scriptId)}`);
+        state.currentScript = data.script;
+        renderScriptList();
+        renderScriptDetail(data.script);
+      } catch (err) {
+        showToast(`Could not load script: ${err.message}`);
+      }
+    }
+
+    function scriptBeats(script) {
+      if (Array.isArray(script && script.beats)) return script.beats;
+      const body = String(script && script.body || "");
+      return body.split(/\n+/).filter(Boolean).slice(0, 12).map((line, index) => ({
+        label: `beat ${index + 1}`,
+        content: line,
+      }));
+    }
+
+    function sourceChips(sources) {
+      const rows = Array.isArray(sources) ? sources : [];
+      if (!rows.length) return `<span class="soft-note">No source citations stored on this script.</span>`;
+      return `<div class="source-row">${rows.slice(0, 12).map((src) => `<span class="source-chip" title="${htmlEscape(src.why || src.reason || "")}">${htmlEscape(src.slug || src.video_id || "source")}</span>`).join("")}</div>`;
+    }
+
+    function renderScriptDetail(script) {
+      if (!script) return renderScriptEmpty();
+      els.scriptTitle.textContent = `Script v${script.version || 1}`;
+      const beats = scriptBeats(script);
+      els.scriptDetail.innerHTML = `
+        <details class="script-block" open>
+          <summary>Hook <span class="soft-note">${htmlEscape(script.format || "format unset")}</span></summary>
+          <div class="script-block-body">${htmlEscape(script.hook || "No hook saved.")}</div>
+        </details>
+        <details class="script-block" open>
+          <summary>Beats <span class="soft-note">${beats.length}</span></summary>
+          <div class="script-block-body">${beats.map((beat) => `${htmlEscape(beat.label || "beat")}: ${htmlEscape(beat.content || beat.text || "")}`).join("\n") || "No beats saved."}</div>
+        </details>
+        <details class="script-block">
+          <summary>Body <span class="soft-note">${htmlEscape(script.target_length_sec || "")}${script.target_length_sec ? "s" : ""}</span></summary>
+          <div class="script-block-body">${htmlEscape(script.body || "No body saved.")}</div>
+        </details>
+        <details class="script-block">
+          <summary>CTA</summary>
+          <div class="script-block-body">${htmlEscape(script.cta || "No CTA saved.")}</div>
+        </details>
+        <details class="script-block" open>
+          <summary>Source uoinks</summary>
+          <div class="script-block-body">${sourceChips(script.source_yoinks)}</div>
+        </details>
+        <details class="script-block">
+          <summary>Shot list</summary>
+          <div class="script-block-body">${Array.isArray(script.shot_list) && script.shot_list.length ? htmlEscape(JSON.stringify(script.shot_list, null, 2)) : "No shot list generated yet."}</div>
+        </details>
+      `;
+    }
+
+    function draftBeatsFromBody(body) {
+      return String(body || "").split(/\n+/).map((line) => line.trim()).filter(Boolean).map((line, index) => ({
+        label: `beat ${index + 1}`,
+        content: line,
+      }));
+    }
+
+    async function getScriptGrounding() {
+      const workspaceId = els.scriptWorkspace.value;
+      if (!workspaceId) return showToast("Choose a workspace first.");
+      try {
+        const data = await authFetch("/script/generate", {
+          method: "POST",
+          body: JSON.stringify({ workspace_id: workspaceId }),
+        });
+        state.scriptGrounding = data;
+        els.scriptDetail.innerHTML = `<div class="job-row"><div class="job-title">Grounding context ready</div><pre class="mono-box">${htmlEscape(JSON.stringify(data, null, 2))}</pre></div>`;
+      } catch (err) {
+        showToast(`Could not get grounding: ${err.message}`);
+      }
+    }
+
+    async function persistScriptFromForm(event) {
+      event.preventDefault();
+      const workspaceId = els.scriptWorkspace.value;
+      const hook = els.scriptDraftHook.value.trim();
+      const body = els.scriptDraftBody.value.trim();
+      if (!workspaceId) return showToast("Choose a workspace first.");
+      if (!hook) return showToast("Paste or write a hook before saving.");
+      const script = {
+        format: els.scriptHookStyle.value.trim() || undefined,
+        target_length_sec: Number(els.scriptTargetLength.value || 0) || undefined,
+        hook,
+        beats: draftBeatsFromBody(body),
+        body,
+        cta: els.scriptCta.value.trim() || undefined,
+        source_yoinks: [],
+      };
+      try {
+        const data = await authFetch("/script/generate", {
+          method: "POST",
+          body: JSON.stringify({ workspace_id: workspaceId, script }),
+        });
+        showToast(`Script v${data.version || ""} saved.`);
+        await loadScripts();
+        if (data.id) await selectScript(data.id);
+      } catch (err) {
+        showToast(`Could not save script: ${err.message}`);
+      }
+    }
+
+    async function reviseCurrentScript({ persist = false } = {}) {
+      const script = state.currentScript;
+      if (!script || !script.id) return showToast("Select a script first.");
+      const notes = els.scriptRevisionNotes.value.trim();
+      const revisedBody = els.scriptRevisionDraft.value.trim();
+      const payload = {
+        script_id: Number(script.id),
+        critique_findings: notes ? { notes } : {},
+        revision_target: notes || null,
+      };
+      if (persist && revisedBody) {
+        payload.revised_script = {
+          hook: script.hook || "Revised hook",
+          beats: draftBeatsFromBody(revisedBody),
+          body: revisedBody,
+          cta: script.cta,
+          source_yoinks: script.source_yoinks || [],
+        };
+      }
+      try {
+        const data = await authFetch("/script/revise", { method: "POST", body: JSON.stringify(payload) });
+        els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Revision response")}</div><pre class="mono-box">${htmlEscape(JSON.stringify(data, null, 2))}</pre></div>`;
+        if (data.id) {
+          await loadScripts();
+          await selectScript(data.id);
+        }
+      } catch (err) {
+        showToast(`Could not revise script: ${err.message}`);
+      }
+    }
+
+    async function deriveCurrentShotList() {
+      const script = state.currentScript;
+      if (!script || !script.id) return showToast("Select a script first.");
+      try {
+        const data = await authFetch("/script/shot-list", {
+          method: "POST",
+          body: JSON.stringify({ script_id: Number(script.id) }),
+        });
+        showToast("Shot list generated.");
+        await selectScript(script.id);
+        els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">Shot list</div><pre class="mono-box">${htmlEscape(JSON.stringify(data, null, 2))}</pre></div>`;
+      } catch (err) {
+        showToast(`Could not derive shot list: ${err.message}`);
       }
     }
 
@@ -2775,6 +3148,7 @@
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
       if (tab === "for-you") loadForYou();
       if (tab === "build") loadBuild();
+      if (tab === "script") loadScripts();
       if (tab === "activity") refreshActivity();
       if (tab === "settings") refreshSettings();
     }
@@ -2814,6 +3188,12 @@
       els.workspaceForm.addEventListener("submit", createWorkspaceFromForm);
       document.getElementById("assembleCurrentWorkspace").addEventListener("click", assembleCurrentWorkspace);
       document.getElementById("runWorkspaceCritique").addEventListener("click", runWorkspaceCritique);
+      document.getElementById("reloadScripts").addEventListener("click", loadScripts);
+      document.getElementById("getScriptGrounding").addEventListener("click", getScriptGrounding);
+      document.getElementById("reviseScript").addEventListener("click", () => reviseCurrentScript({ persist: false }));
+      document.getElementById("saveScriptRevision").addEventListener("click", () => reviseCurrentScript({ persist: Boolean(els.scriptRevisionDraft.value.trim()) }));
+      document.getElementById("deriveShotList").addEventListener("click", deriveCurrentShotList);
+      els.scriptForm.addEventListener("submit", persistScriptFromForm);
       document.querySelectorAll("[data-workspace-tab]").forEach((btn) => {
         btn.addEventListener("click", () => {
           document.querySelectorAll("[data-workspace-tab]").forEach((item) => item.classList.toggle("active", item.dataset.workspaceTab === btn.dataset.workspaceTab));
@@ -2911,6 +3291,8 @@
         }
         const workspaceButton = event.target.closest("[data-workspace-id]");
         if (workspaceButton) selectWorkspace(workspaceButton.dataset.workspaceId);
+        const scriptButton = event.target.closest("[data-script-id]");
+        if (scriptButton) selectScript(scriptButton.dataset.scriptId);
         const cancel = event.target.closest("[data-cancel]");
         if (cancel) postHelper("/queue/cancel", { pending_id: cancel.dataset.cancel });
         const cancelJob = event.target.closest("[data-cancel-job]");
@@ -3003,6 +3385,7 @@
       await loadLibrary({ reset: true });
       await loadForYou();
       await loadBuild();
+      await loadScripts();
       await refreshActivity();
       connectJobsStream();
       setInterval(refreshHealth, 10000);
