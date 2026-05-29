@@ -3,7 +3,7 @@ r"""Uoink system-tray icon -- Tier 1 install experience (v2.1.1).
 Runs *inside* the helper process (server.py) on installed Windows builds and
 gives the otherwise-headless helper an ambient, clickable presence: a magnet-U
 glyph in the system tray whose status dot reflects health, plus a right-click
-menu that opens the dashboard, the output folder, recent yoinks, and stops the
+menu that opens the dashboard, the output folder, recent uoinks, and stops the
 helper.
 
 Design (per SCOPE-CC-install.md, Tier 1):
@@ -45,7 +45,7 @@ _INK = (10, 10, 10)            # #0A0A0A
 _RUST = (194, 65, 12)          # #C2410C  -- large glyph shape only
 _CREAM = (255, 244, 236)       # #FFF4EC
 _DOT_GREEN = (46, 160, 67)     # running
-_DOT_AMBER = (255, 210, 63)    # yoinking (acid #FFD23F-ish)
+_DOT_AMBER = (255, 210, 63)    # uoinking (acid #FFD23F-ish)
 _DOT_GREY = (122, 117, 105)    # offline / degraded
 
 # ---- Poll cadences (SCOPE-CC-install.md) ----------------------------------
@@ -76,7 +76,7 @@ class UoinkTray:
         self._stop_callback = stop_callback
         self._base = f"http://{host}:{port}"
         self._icon = None
-        self._state = "offline"          # offline | running | yoinking | degraded
+        self._state = "offline"          # offline | running | uoinking | degraded
         self._recent: list[dict] = []
         self._last_interaction = time.monotonic()
         self._stopping = threading.Event()
@@ -123,7 +123,7 @@ class UoinkTray:
         if not ok:
             self._state = "degraded"
         elif active:
-            self._state = "yoinking"
+            self._state = "uoinking"
         else:
             self._state = "running"
 
@@ -136,7 +136,7 @@ class UoinkTray:
     def _status_text(self) -> str:
         return {
             "running": "Uoink: Running ✓",
-            "yoinking": "Uoink: Yoinking…",
+            "uoinking": "Uoink: Uoinking…",
             "degraded": "Uoink: Degraded health!",
             "offline": "Uoink: Offline",
         }[self._state]
@@ -144,7 +144,7 @@ class UoinkTray:
     def _dot_color(self):
         return {
             "running": _DOT_GREEN,
-            "yoinking": _DOT_AMBER,
+            "uoinking": _DOT_AMBER,
             "degraded": _DOT_GREY,
             "offline": _DOT_GREY,
         }[self._state]
@@ -265,7 +265,7 @@ class UoinkTray:
                     self._open_path(Path(folder))
             items.append(MenuItem(title, _open))
         if not items:
-            items.append(MenuItem("No recent yoinks yet", None, enabled=False))
+            items.append(MenuItem("No recent uoinks yet", None, enabled=False))
         return items
 
     def _build_menu(self):

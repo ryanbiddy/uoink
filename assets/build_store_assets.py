@@ -1,8 +1,8 @@
-"""Regenerate Yoink Chrome Web Store assets from the source brand files.
+"""Regenerate Uoink Chrome Web Store assets from the source brand files.
 
 Inputs (must exist in assets/):
     logo-mark.png     - square brand mark (used for all extension icon sizes)
-    wordmark.png      - "Yoink" wordmark (placeholder promo tiles)
+    wordmark.png      - "Uoink" wordmark (placeholder promo tiles)
 
 Outputs:
     extension/icons/icon-16.png, icon-32.png, icon-48.png, icon-128.png
@@ -94,9 +94,9 @@ def render_icons() -> None:
             out.save(ICONS_OUT / f"icon-{size}{suffix}.png", optimize=True)
 
 
-# ---------- mock YouTube "Yoink" button --------------------------------------
+# ---------- mock YouTube "Uoink" button --------------------------------------
 def render_mock_button(width: int, height: int) -> Image.Image:
-    """A pill-shaped button mimicking the in-page Yoink button on YouTube."""
+    """A pill-shaped button mimicking the in-page Uoink button on YouTube."""
     btn = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     d = ImageDraw.Draw(btn)
     radius = height // 2
@@ -115,7 +115,7 @@ def render_mock_button(width: int, height: int) -> Image.Image:
     d.polygon(pts, fill=BTN_ACCENT)
 
     # Label.
-    label = "Yoink"
+    label = "Uoink"
     font = _load_font(int(height * 0.45))
     bbox = d.textbbox((0, 0), label, font=font)
     text_w = bbox[2] - bbox[0]
@@ -142,7 +142,7 @@ def render_promo_tile(out_path: Path, width: int, height: int) -> None:
     glow = glow.filter(ImageFilter.GaussianBlur(radius=width // 18))
     canvas.alpha_composite(glow)
 
-    # --- right side first: mock Yoink pill anchored top-right ---
+    # --- right side first: mock Uoink pill anchored top-right ---
     # Cap the button so it stays a tasteful chip on the bigger tiles instead
     # of dominating the canvas. Anchored upper-right so it doesn't collide
     # with the tagline below the wordmark.
@@ -181,7 +181,7 @@ def render_promo_tile(out_path: Path, width: int, height: int) -> None:
         _paste_resized(canvas, wordmark, max_wm_w, max_wm_h, (wm_x, wm_y))
     else:
         font = _load_font(max_wm_h)
-        ImageDraw.Draw(canvas).text((wm_x, wm_y), "Yoink", font=font,
+        ImageDraw.Draw(canvas).text((wm_x, wm_y), "Uoink", font=font,
                                      fill=(245, 245, 245, 255))
 
     # Tagline below the wordmark, capped so it never runs into the button area.

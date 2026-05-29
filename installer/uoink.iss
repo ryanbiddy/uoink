@@ -9,7 +9,7 @@
 ;   bin\              ffmpeg.exe + ffprobe.exe (PATH-prepended by server.py)
 ;   server.py         The local helper server. pythonw.exe runs it (no console).
 ;   index.py          SQLite library-index module imported by server.py.
-;   migrate_install.py  One-time Yoink->Uoink first-run install migration.
+;   migrate_install.py  One-time legacy-to-Uoink first-run install migration.
 ;   migrations\       NNNN_*.sql files applied by index._run_migrations at boot.
 ;   uoink_mcp.py      MCP stdio entry point for agent clients.
 ;   uoink_mcp_tools.py  Shared MCP tool registry.
@@ -28,8 +28,8 @@
 
 [Setup]
 ; v2.1 rename: a NEW AppId is generated so the Uoink product installs as its
-; own entry rather than upgrading the old Yoink AppId in place -- the first-run
-; helper (migrate_install.py) migrates the user's data, and the old Yoink
+; own entry rather than upgrading the old AppId in place -- the first-run
+; helper (migrate_install.py) migrates the user's data, and the old
 ; install is left for its 7-day grace cleanup. Keep this fixed from v2.1 on.
 AppId={{1CCDA47D-2347-43D1-99F4-BD6E7C231288}
 AppName={#AppName}
@@ -157,7 +157,7 @@ Name: "{group}\Uninstall Uoink"; \
 [Registry]
 ; Auto-start the helper on every Windows login. uninsdeletevalue removes the
 ; entry on uninstall so we don't leave dead Run keys behind. The first-run
-; helper (migrate_install.py) drops any legacy "Yoink" Run value.
+; helper (migrate_install.py) drops any legacy Run value.
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; \
   ValueType: string; ValueName: "Uoink"; \
   ValueData: """{app}\python\pythonw.exe"" ""{app}\server.py"""; \
@@ -195,8 +195,8 @@ Type: filesandordirs; Name: "{app}\python\__pycache__"
     * AG-voiced [Messages] copy on the standard Welcome/Ready/Installing/Finished
     * A custom CreateCustomPage Welcome (the "Uoink that shit." hero from mock
       1.2.1) which replaces the stock welcome (wpWelcome is skipped).
-    * A custom CreateCustomPage "Migrating Yoink Data" page (mock 1.2.5)
-      shown only when a legacy %LOCALAPPDATA%\Yoink\ is detected. The actual
+    * A custom CreateCustomPage "Migrating Legacy Data" page (mock 1.2.5)
+      shown only when a legacy local app-data folder is detected. The actual
       migration runs on the helper's first boot (copy-not-move, 7-day grace),
       so this page sets expectations rather than tracking live progress.
   What is NOT in scope for v2.2 (flagged in PR for v2.3 Tauri shell):
@@ -205,7 +205,7 @@ Type: filesandordirs; Name: "{app}\python\__pycache__"
       mid-line style mixing; the hero renders as a single rust-on-cream label
       that passes AA at large-text 18pt+).
     * JetBrains-Mono live-log inset on the Installing page.
-    * "Close Yoink first" interstitial that detects a locked index.db during
+    * "Close the old helper first" interstitial that detects a locked index.db during
       install -- migration runs post-wizard, so the wizard can't observe it.
   Pixel-target match for these requires a custom shell + a runnable helper to
   observe. Human visual QA is the gate before tagging v2.2. }
@@ -221,7 +221,7 @@ var
   MigratePage:  TWizardPage;
   MigrateText:  TNewStaticText;
 
-function LegacyYoinkPresent(): Boolean;
+function LegacyInstallPresent(): Boolean;
 begin
   Result := DirExists(ExpandConstant('{localappdata}\Yoink'));
 end;
@@ -267,7 +267,7 @@ end;
 
 procedure BuildMigratePage();
 begin
-  MigratePage := CreateCustomPage(wpReady, 'Migrating Yoink Data',
+  MigratePage := CreateCustomPage(wpReady, 'Migrating Legacy Data',
     'Moving your saved videos, settings, and API key safely to Uoink');
   MigrateText := TNewStaticText.Create(MigratePage);
   MigrateText.Parent := MigratePage.Surface;
@@ -278,13 +278,13 @@ begin
   MigrateText.Height := MigratePage.SurfaceHeight;
   MigrateText.WordWrap := True;
   MigrateText.Caption :=
-    'A previous Yoink install was found on this PC.' + #13#10#13#10 +
+    'A previous install was found on this PC.' + #13#10#13#10 +
     'The first time Uoink starts, it will automatically copy your saved videos, ' +
-    'settings, and Anthropic API key from Yoink into Uoink. Nothing is moved or ' +
+    'settings, and Anthropic API key into Uoink. Nothing is moved or ' +
     'deleted until a fully verified copy exists -- your old files stay in place ' +
     'for 7 days as a safety net, then are removed automatically.' + #13#10#13#10 +
     'If anything cannot be copied automatically, no data is lost: your old files ' +
-    'remain at %LOCALAPPDATA%\Yoink\, and you can re-enter your Anthropic API key ' +
+    'remain in the previous install folder, and you can re-enter your Anthropic API key ' +
     'from the Uoink Settings menu at any time.';
 end;
 
@@ -301,6 +301,6 @@ begin
     the wizard's first screen (mock 1.2.1). }
   if PageID = wpWelcome then
     Result := True;
-  if (PageID = MigratePage.ID) and (not LegacyYoinkPresent()) then
+  if (PageID = MigratePage.ID) and (not LegacyInstallPresent()) then
     Result := True;
 end;

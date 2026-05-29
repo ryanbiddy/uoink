@@ -1,4 +1,4 @@
-"""Yoink — GUI wrapper around yt-dlp + ffmpeg."""
+"""Uoink — GUI wrapper around yt-dlp + ffmpeg."""
 
 import os
 import queue
@@ -72,7 +72,7 @@ def extract(url: str, interval: int, status_q: queue.Queue, result_q: queue.Queu
     """Run the full extraction. Push string updates to status_q.
     On completion, push ('ok', folder_path) or ('err', message) to result_q."""
     try:
-        out_root = Path(os.environ["USERPROFILE"]) / "Desktop" / "Yoink"
+        out_root = Path(os.environ["USERPROFILE"]) / "Desktop" / "Uoink"
         out_root.mkdir(parents=True, exist_ok=True)
 
         status_q.put("Fetching video title...")
@@ -183,7 +183,7 @@ class App:
 
     def __init__(self, root: tk.Tk):
         self.root = root
-        self.root.title("Yoink")
+        self.root.title("Uoink")
         self.root.geometry("600x500")
         self.root.minsize(500, 400)
 
@@ -312,10 +312,10 @@ class App:
                 self.last_folder = payload
                 self.open_btn.config(state="normal")
                 self._log(f"Saved to: {payload}")
-                self._notify("Yoink", f"Done — saved to {payload.name}")
+                self._notify("Uoink", f"Done — saved to {payload.name}")
             else:
                 self._log(f"ERROR: {payload}")
-                self._notify("Yoink", f"Failed: {payload}")
+                self._notify("Uoink", f"Failed: {payload}")
         except queue.Empty:
             pass
 

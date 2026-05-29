@@ -17,7 +17,7 @@
   // refresh once (handles the server-reinstall-regenerated-token case).
   // /token is gated server-side by the chrome-extension:// origin, so a
   // webpage attempting CSRF can't grab it.
-  const TOKEN_STORAGE_KEY = "yoink_token";
+  const TOKEN_STORAGE_KEY = "uoink_token";
   let _cachedToken = null;
   let _tokenFetchPromise = null;
 
@@ -38,7 +38,7 @@
   }
   async function _fetchFreshToken() {
     try {
-      // X-Yoink-Client is the gate header on /token. Random websites
+      // X-Uoink-Client is the gate header on /token. Random websites
       // can't set custom headers cross-origin without a CORS preflight,
       // which our server only ACAO-echoes for the extension/youtube
       // allowlist -- so a drive-by attacker is blocked at the browser
@@ -48,7 +48,7 @@
         mode: "cors",
         credentials: "omit",
         cache: "no-store",
-        headers: { "X-Yoink-Client": "yoink-extension" },
+        headers: { "X-Uoink-Client": "uoink-extension" },
       });
       if (!res.ok) return null;
       const data = await res.json();
@@ -81,7 +81,7 @@
     init = init || {};
     const doFetch = async (tk) => {
       const headers = Object.assign({}, init.headers || {});
-      if (tk) headers["X-Yoink-Token"] = tk;
+      if (tk) headers["X-Uoink-Token"] = tk;
       return fetch(`${SERVER}${path}`, Object.assign({}, init, {
         headers, mode: "cors", credentials: "omit",
       }));
@@ -243,11 +243,11 @@
 
   // ---- Playlist / job API (v2) ----------------------------------------
   // These four endpoints belong to the v2 playlist flow. Popup sets
-  // globalThis.YOINK_USE_MOCK_API = true while the real backend is being
+  // globalThis.UOINK_USE_MOCK_API = true while the real backend is being
   // built on `codex/v2-backend-playlist`; flip it off (in popup.js) once the
   // server lands and reconcile the wire shapes here against docs/v2-api.md.
   function _useMock() {
-    return !!(global.YOINK_USE_MOCK_API && global.MOCK_API);
+    return !!(global.UOINK_USE_MOCK_API && global.MOCK_API);
   }
   function playlistPreview(url) {
     if (_useMock()) return global.MOCK_API.playlistPreview(url);
@@ -430,7 +430,7 @@
   //
   // Returns the message string to pass to chrome.notifications.create (each
   // caller fires it via its own context-appropriate path). Atomically marks
-  // has_completed_first_yoink on the first successful + copied uoink.
+  // has_completed_first_uoink on the first successful + copied uoink.
   async function buildUoinkedMessage(data, copied) {
     const FIRST_UOINK_MSG =
       "Your first corpus is in your clipboard. Paste in Claude to see what it can do →";
@@ -438,14 +438,14 @@
     try {
       const stored = await new Promise((r) => {
         try {
-          chrome.storage.local.get({ has_completed_first_yoink: false }, (i) => r(i));
-        } catch { r({ has_completed_first_yoink: false }); }
+          chrome.storage.local.get({ has_completed_first_uoink: false }, (i) => r(i));
+        } catch { r({ has_completed_first_uoink: false }); }
       });
-      firstTime = !stored.has_completed_first_yoink;
+      firstTime = !stored.has_completed_first_uoink;
       if (firstTime && copied) {
         await new Promise((r) => {
           try {
-            chrome.storage.local.set({ has_completed_first_yoink: true }, () => r());
+            chrome.storage.local.set({ has_completed_first_uoink: true }, () => r());
           } catch { r(); }
         });
       }
@@ -486,7 +486,6 @@
     listRecent,
     openFolder,
     buildUoinkedMessage,
-    buildYoinkedMessage: buildUoinkedMessage,
     getToken,
     friendlyError,
     playlistPreview,

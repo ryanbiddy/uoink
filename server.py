@@ -69,7 +69,7 @@ if _BIN_DIR.is_dir():
 from yt_extract import parse_srt, slugify, fmt_time  # noqa: E402
 import index  # noqa: E402  -- local SQLite library-index module
 import _platform  # noqa: E402  -- cross-platform path / OS helpers
-import migrate_install  # noqa: E402  -- one-time Yoink->Uoink install migration
+import migrate_install  # noqa: E402  -- one-time legacy-to-Uoink install migration
 
 # --- Constants -------------------------------------------------------------
 HOST = "127.0.0.1"
@@ -328,7 +328,7 @@ def _default_settings() -> dict:
         "smart_screenshot_picker_enabled": False,
         "clipboard_screenshot_cap": CLIPBOARD_SCREENSHOT_CAP_DEFAULT,
         "anthropic_key_invalid": False,
-        # v2.1 rename: set True after the one-time "Yoink is now Uoink"
+        # v2.1 rename: set True after the one-time migration-complete
         # post-migration toast has fired, so it never repeats.
         "post_migration_toast_shown": False,
         "updated_at": None,
@@ -474,7 +474,7 @@ def _store_saved_anthropic_key(key: str) -> None:
                 )
             except Exception:
                 # Missing entries and unavailable delete backends both mean
-                # the credential is no longer retrievable by Yoink.
+                # the credential is no longer retrievable by the legacy name.
                 pass
     except Exception as e:
         raise CredentialStoreError(f"credential write failed: {e}") from e
@@ -790,7 +790,7 @@ def _get_output_root() -> Path:
     to the Desktop\\Uoink folder.
 
     v2.1 rename behaviour: a fresh install saves to Desktop\\Uoink. An
-    upgraded install keeps saving to the existing Desktop\\Yoink folder
+    upgraded install keeps saving to the existing legacy Desktop folder
     until the user opts in to move it (the Desktop-corpus move is a separate,
     user-confirmed step surfaced in the extension popup -- see
     migrate_install.py). Once Desktop\\Uoink exists it always wins, so the
@@ -889,7 +889,7 @@ def _allowed_roots() -> set[Path]:
     """All filesystem roots /file is permitted to serve from. The active
     output root plus every fallback candidate -- after a fallback, or before
     the user opts in to move their Desktop corpus, they may still have
-    uoinks under Desktop\\Uoink OR legacy yoinks under Desktop\\Yoink whose
+    uoinks under Desktop\\Uoink OR legacy desktop corpora whose
     thumbnails the Memory page needs to render."""
     roots: set[Path] = set()
     desktop = _get_desktop_dir()
@@ -2778,7 +2778,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     generate_paste: bool = True,
                     cancel_event: threading.Event | None = None,
                     phase_callback=None) -> dict:
-    """Yoink a single video into output_folder.
+    """Uoink a single video into output_folder.
 
     Steps:
       1. Fetch full metadata (cached as metadata.json) — already done if the
@@ -3226,7 +3226,7 @@ def _is_valid_job_id(s: str) -> bool:
 
 INDEX_FILENAME = "_all-uoinks-index.md"
 # Pre-rename master-index filename. Still read so the incremental updater can
-# pick up (and supersede) a Yoink-era index that hasn't been regenerated yet.
+# pick up (and supersede) a legacy index that hasn't been regenerated yet.
 INDEX_FILENAME_LEGACY = "_all-yoinks-index.md"
 
 
@@ -3541,7 +3541,7 @@ def _regenerate_index() -> None:
         entries = _scan_yoinks()
         DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
         _index_path().write_text(_render_index(entries), encoding="utf-8")
-        # v2.1 rename: supersede a leftover Yoink-era index so the Desktop
+        # v2.1 rename: supersede a leftover legacy index so the Desktop
         # folder doesn't show two near-identical index files.
         legacy_index = DESKTOP_ROOT / INDEX_FILENAME_LEGACY
         if legacy_index != _index_path() and legacy_index.exists():
@@ -3572,7 +3572,7 @@ def _patch_index_md(text: str, entry: dict) -> str | None:
     """
     total_re = re.compile(r"_Total uoinks:\s*(\d+)_")
     if not total_re.search(text):
-        # A Yoink-era index (with "_Total yoinks:_") won't match; returning
+        # A legacy index (with "_Total yoinks:_") won't match; returning
         # None makes the caller fall back to a full regen, which rewrites
         # the file in the new format under the new filename.
         return None
@@ -4109,7 +4109,7 @@ def _fetch_playlist_preview(url: str) -> tuple[dict | None, str | None, int]:
         v["index"] = i
     warnings = ["playlist exceeds cap"] if truncated else []
     message = (
-        f"Playlist has {video_count} videos -- yoinking the first {PLAYLIST_VIDEO_CAP}."
+        f"Playlist has {video_count} videos -- uoinking the first {PLAYLIST_VIDEO_CAP}."
         if truncated else
         f"Playlist has {len(capped)} video{'s' if len(capped) != 1 else ''}."
     )
@@ -4337,7 +4337,7 @@ def _record_single_extract_job(url: str, started_at: str, *,
             "folder": str(folder_path) if folder_path else None,
         } if ok else None,
         "warnings": [],
-        "message": "Single-video yoink complete." if ok else "Single-video yoink failed.",
+        "message": "Single-video uoink complete." if ok else "Single-video uoink failed.",
     }
     return _add_job_record(job)
 
@@ -4554,7 +4554,7 @@ def _resolve_served_file(raw_path: str) -> tuple[Path | None, str | None, int, s
         if any(part == ".." for part in resolved.parts):
             return None, None, 400, "path invalid"
         # Sprint 19 / Wave 1 Fix 4: accept any allowed root, not just the
-        # active DESKTOP_ROOT, so a yoink saved under Desktop\Yoink stays
+        # active DESKTOP_ROOT, so a legacy Desktop save stays
         # readable after a switch to the LOCALAPPDATA fallback.
         if not _path_under_any(resolved, _allowed_roots()):
             return None, None, 403, "path escapes Uoink root"
@@ -5206,7 +5206,7 @@ def _diagnose_payload() -> dict:
         migration = {"error": str(e)}
     if migration.get("keyring_legacy_present") and not key:
         warnings.append(
-            "Your Anthropic key didn't carry over from the Yoink install. "
+            "Your Anthropic key didn't carry over from the previous install. "
             "Re-enter it on the setup page to restore Comment Intelligence, "
             "Hook Type, and entity extraction.")
     return {
@@ -5784,7 +5784,7 @@ class Handler(BaseHTTPRequestHandler):
     # ---- /file?path=... ----
     # Authenticated thumbnail serving for extension UI. MV3 popups cannot
     # reliably render file:// paths, so the helper exposes a very narrow
-    # image-only, Yoink-output-root-only file endpoint.
+    # image-only, Uoink-output-root-only file endpoint.
     def _handle_file(self):
         qs = parse_qs(urlparse(self.path).query)
         raw_path = (qs.get("path") or [""])[0]
@@ -6440,14 +6440,14 @@ class Handler(BaseHTTPRequestHandler):
         idx = _get_index()
         row = idx.get_yoink(video_id)
         if not row:
-            return self._send_json(404, {"ok": False, "error": "yoink not found"})
+            return self._send_json(404, {"ok": False, "error": "uoink not found"})
         if row.get("deleted_at"):
             return self._send_json(409, {"ok": False, "error": "already deleted"})
 
         src = Path(row.get("corpus_path") or "").parent
         if not src.exists() or not src.is_dir():
             return self._send_json(
-                409, {"ok": False, "error": "yoink folder missing on disk"})
+                409, {"ok": False, "error": "uoink folder missing on disk"})
 
         # Mark deleted first so the trash folder name derives from the same
         # deleted_at the index stores; roll the row back if the move fails.
@@ -6478,9 +6478,9 @@ class Handler(BaseHTTPRequestHandler):
         idx = _get_index()
         row = idx.get_yoink(video_id)
         if not row:
-            return self._send_json(404, {"ok": False, "error": "yoink not found"})
+            return self._send_json(404, {"ok": False, "error": "uoink not found"})
         if not row.get("deleted_at"):
-            return self._send_json(409, {"ok": False, "error": "yoink is not deleted"})
+            return self._send_json(409, {"ok": False, "error": "uoink is not deleted"})
 
         trash = _trash_folder_for(row)
         dst = Path(row.get("corpus_path") or "").parent
@@ -6895,7 +6895,7 @@ def maybe_toast(title: str, body: str, icon_path: str | None = None):
 
 
 def _maybe_post_migration_toast() -> bool:
-    """Fire the one-time "Yoink is now Uoink" toast if a Yoink->Uoink install
+    """Fire the one-time migration toast if a legacy-to-Uoink install
     migration just ran and the toast hasn't been shown yet. Returns True if
     it fired (so the caller skips the regular ready toast this boot).
 
@@ -6915,7 +6915,7 @@ def _maybe_post_migration_toast() -> bool:
     except Exception:
         return False
     maybe_toast(
-        "Yoink is now Uoink",
+        "Uoink migration complete",
         "Your videos, settings, and API key moved to the new Uoink folder. "
         "Nothing lost — the magnet was always a U. uoink.video",
         icon_path=_bundled_icon_path(),
@@ -6930,7 +6930,7 @@ def _maybe_post_migration_toast() -> bool:
 
 
 def _existing_server_responds() -> bool:
-    """Probe /health on the loopback port. True if another Yoink is already
+    """Probe /health on the loopback port. True if another helper is already
     running here -- used to short-circuit a duplicate launch from the
     Start Menu / autostart key without writing a stale PID file."""
     try:
@@ -6942,7 +6942,7 @@ def _existing_server_responds() -> bool:
         return False
 
 
-class _YoinkHTTPServer(ThreadingHTTPServer):
+class _UoinkHTTPServer(ThreadingHTTPServer):
     """ThreadingHTTPServer with a bounded listen() backlog so a burst of
     connections is refused at the OS layer instead of piling up unbounded
     accept()s. Worker threads stay daemonic (inherited from ThreadingHTTPServer)
@@ -6965,7 +6965,7 @@ def main():
         log.info("Uoink server already running on http://%s:%d -- exiting", HOST, PORT)
         sys.exit(0)
 
-    # v2.1: one-time Yoink->Uoink install migration. Copy-not-move and fully
+    # v2.1: one-time legacy-to-Uoink install migration. Copy-not-move and fully
     # idempotent, so this is a near-no-op on every boot after the first. Runs
     # before _get_index() so the copied index.db / settings are in place under
     # the new \Uoink\ DATA_ROOT before anything reads them. Never fatal.
@@ -6984,7 +6984,7 @@ def main():
     # files when another instance still owns the port (and would also have
     # the wrong PID -- ours, not the live one).
     try:
-        server = _YoinkHTTPServer((HOST, PORT), Handler)
+        server = _UoinkHTTPServer((HOST, PORT), Handler)
     except OSError as e:
         # Port held by something we couldn't probe via /health (different
         # app, half-open socket, etc). Exit 0 so the Windows autostart
@@ -7078,7 +7078,7 @@ def main():
     # Only fires here -- the single-instance / bind-failure paths above
     # exit() before reaching this line, so a duplicate launch doesn't
     # double-notify. If the install migration just ran, fire the one-time
-    # "Yoink is now Uoink" toast instead of the regular ready toast, gated on
+    # migration-complete toast instead of the regular ready toast, gated on
     # a settings flag so it never repeats.
     if not _maybe_post_migration_toast():
         maybe_toast(
@@ -7109,7 +7109,7 @@ def doctor_payload() -> dict:
 def run_cli(argv: list[str]) -> int:
     """Tiny CLI dispatcher for the helper. Returns a process exit code.
 
-    - --migrate-dry-run : print exactly what the Yoink->Uoink migration would
+    - --migrate-dry-run : print exactly what the legacy-to-Uoink migration would
       copy / move / delete and the keyring entry it'd rewrite, changing
       nothing. De-risks the clean-VM upgrade test.
     - --doctor          : print the /diagnose payload + migration status.

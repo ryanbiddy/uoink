@@ -945,7 +945,7 @@
             </div>
             <div class="inline-row">
               <button class="button ghost" type="button" id="clearFilters">Clear filters</button>
-              <button class="button primary" type="button" id="newYoink">+ Uoink</button>
+              <button class="button primary" type="button" id="newUoink">+ Uoink</button>
             </div>
           </div>
 
@@ -2017,7 +2017,7 @@
         renderTopics(topics);
       });
       document.getElementById("saveTopics").addEventListener("click", () => saveSettingsPatch({ topics: readTopicEditor() }, "Topics updated."));
-      document.getElementById("newYoink").addEventListener("click", openLastYoutube);
+      document.getElementById("newUoink").addEventListener("click", openLastYoutube);
       document.querySelectorAll("[data-open-youtube]").forEach((btn) => btn.addEventListener("click", openLastYoutube));
       document.querySelectorAll('a[target="_blank"]').forEach((link) => {
         link.addEventListener("click", (event) => {

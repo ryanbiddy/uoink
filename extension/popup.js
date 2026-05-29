@@ -6,7 +6,7 @@
 // layer (lib/mock-api.js) instead of the real server. See docs/v2-api.md
 // (lands on codex/v2-backend-playlist) for the contract these mocks shadow.
 const USE_MOCK_API = false;
-globalThis.YOINK_USE_MOCK_API = USE_MOCK_API;
+globalThis.UOINK_USE_MOCK_API = USE_MOCK_API;
 
 const DEFAULT_INTERVAL = 30;
 const CORPUS_WARN_CHARS = 500_000;
@@ -90,14 +90,14 @@ const destHint = document.getElementById("dest-hint");
 const clipboardBudgetEl = document.getElementById("clipboard-budget");
 const DEST_HINT_DEFAULT = destHint ? destHint.textContent : "";
 const DEST_DISABLED_TIP = "Uoink a video first";
-const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
-const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
+const LAST_UOINK_CLIPBOARD_KEY = "uoink_last_clipboard_at";
+const LAST_CLIPBOARD_BUDGET_KEY = "uoink_last_clipboard_budget";
 const LAST_UOINK_WINDOW_MS = 5 * 60 * 1000;
 let currentMode = "single";
-const RECENT_FAILURES_KEY = "yoink_recent_failures";
-const BACKFILL_DISMISSED_KEY = "yoink_backfill_dismissed_signature";
-const MORE_OPTIONS_OPEN_KEY = "yoink_popup_more_options_open";
-const QUEUE_EXPANDED_KEY = "yoink_popup_queue_expanded";
+const RECENT_FAILURES_KEY = "uoink_recent_failures";
+const BACKFILL_DISMISSED_KEY = "uoink_backfill_dismissed_signature";
+const MORE_OPTIONS_OPEN_KEY = "uoink_popup_more_options_open";
+const QUEUE_EXPANDED_KEY = "uoink_popup_queue_expanded";
 let serverOnline = false;
 let isTier2 = false;
 let lastUoinkAt = 0;
@@ -194,16 +194,16 @@ function markClipboardUoinkNow() {
   renderClipboardBudget();
   updateFocalMode();
   try {
-    chrome.storage.local.set({ [LAST_YOINK_CLIPBOARD_KEY]: lastUoinkAt });
+    chrome.storage.local.set({ [LAST_UOINK_CLIPBOARD_KEY]: lastUoinkAt });
   } catch { /* ignore */ }
 }
 
 try {
   chrome.storage.local.get({
-    [LAST_YOINK_CLIPBOARD_KEY]: 0,
+    [LAST_UOINK_CLIPBOARD_KEY]: 0,
     [LAST_CLIPBOARD_BUDGET_KEY]: null,
   }, (items) => {
-    lastUoinkAt = Number(items && items[LAST_YOINK_CLIPBOARD_KEY]) || 0;
+    lastUoinkAt = Number(items && items[LAST_UOINK_CLIPBOARD_KEY]) || 0;
     lastClipboardBudget = (items && items[LAST_CLIPBOARD_BUDGET_KEY]) || null;
     updateDestButtons();
     renderClipboardBudget();
@@ -446,8 +446,8 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes.active_session) {
     renderActive(changes.active_session.newValue || null);
   }
-  if (area === "local" && changes[LAST_YOINK_CLIPBOARD_KEY]) {
-    lastUoinkAt = Number(changes[LAST_YOINK_CLIPBOARD_KEY].newValue) || 0;
+  if (area === "local" && changes[LAST_UOINK_CLIPBOARD_KEY]) {
+    lastUoinkAt = Number(changes[LAST_UOINK_CLIPBOARD_KEY].newValue) || 0;
     updateDestButtons();
     renderClipboardBudget();
     updateFocalMode();
@@ -775,7 +775,7 @@ function renderFailureRow(failure) {
       return;
     }
     await removeRecentFailure(failure.id);
-    chrome.storage.local.set({ auto_yoink: { videoId, ts: Date.now() } }, () => {
+    chrome.storage.local.set({ auto_uoink: { videoId, ts: Date.now() } }, () => {
       chrome.tabs.create({
         url: failure.url || `https://www.youtube.com/watch?v=${videoId}`,
         active: true,
@@ -1475,7 +1475,7 @@ async function postTasteAnchor(videoId, anchorType, title) {
       mode: "cors",
       headers: {
         "Content-Type": "application/json",
-        "X-Yoink-Token": await STC.getToken()
+        "X-Uoink-Token": await STC.getToken()
       },
       body: JSON.stringify(body)
     });
@@ -1697,12 +1697,12 @@ async function fetchHookText(slug) {
 
 let tcPairwiseCurrentPair = null;
 
-async function initPairwiseCalibration(recentYoinks) {
+async function initPairwiseCalibration(recentUoinks) {
   const card = document.getElementById("pairwise-calibration-card");
   if (!card) return;
 
-  // 1. Check condition: 5+ yoinks
-  if (!recentYoinks || recentYoinks.length < 5) {
+  // 1. Check condition: 5+ uoinks
+  if (!recentUoinks || recentUoinks.length < 5) {
     card.classList.add("hidden");
     return;
   }
@@ -1729,16 +1729,16 @@ async function initPairwiseCalibration(recentYoinks) {
     };
   }
 
-  // Select two random yoinks
-  const idxA = Math.floor(Math.random() * recentYoinks.length);
-  let idxB = Math.floor(Math.random() * recentYoinks.length);
+  // Select two random uoinks
+  const idxA = Math.floor(Math.random() * recentUoinks.length);
+  let idxB = Math.floor(Math.random() * recentUoinks.length);
   while (idxB === idxA) {
-    idxB = Math.floor(Math.random() * recentYoinks.length);
+    idxB = Math.floor(Math.random() * recentUoinks.length);
   }
 
-  const yoinkA = recentYoinks[idxA];
-  const yoinkB = recentYoinks[idxB];
-  tcPairwiseCurrentPair = { a: yoinkA, b: yoinkB };
+  const uoinkA = recentUoinks[idxA];
+  const uoinkB = recentUoinks[idxB];
+  tcPairwiseCurrentPair = { a: uoinkA, b: uoinkB };
 
   const btnA = document.getElementById("pairwise-option-a");
   const btnB = document.getElementById("pairwise-option-b");
@@ -1756,15 +1756,15 @@ async function initPairwiseCalibration(recentYoinks) {
 
   // Fetch hook texts
   const [hookA, hookB] = await Promise.all([
-    fetchHookText(yoinkA.folder ? yoinkA.folder.split(/[\\/]/).pop() : null),
-    fetchHookText(yoinkB.folder ? yoinkB.folder.split(/[\\/]/).pop() : null)
+    fetchHookText(uoinkA.folder ? uoinkA.folder.split(/[\\/]/).pop() : null),
+    fetchHookText(uoinkB.folder ? uoinkB.folder.split(/[\\/]/).pop() : null)
   ]);
 
   btnA.disabled = false;
   btnB.disabled = false;
 
-  btnA.textContent = hookA ? `👈 ${hookA}` : `👈 ${yoinkA.title} (${hookDisplayName(yoinkA.hook_type)})`;
-  btnB.textContent = hookB ? `👉 ${hookB}` : `👉 ${yoinkB.title} (${hookDisplayName(yoinkB.hook_type)})`;
+  btnA.textContent = hookA ? `👈 ${hookA}` : `👈 ${uoinkA.title} (${hookDisplayName(uoinkA.hook_type)})`;
+  btnB.textContent = hookB ? `👉 ${hookB}` : `👉 ${uoinkB.title} (${hookDisplayName(uoinkB.hook_type)})`;
 
   const submitChoice = async (choice) => {
     btnA.disabled = true;
@@ -1772,8 +1772,8 @@ async function initPairwiseCalibration(recentYoinks) {
     skipBtn.disabled = true;
 
     const answer = {
-      pair_a: yoinkA.video_id,
-      pair_b: yoinkB.video_id,
+      pair_a: uoinkA.video_id,
+      pair_b: uoinkB.video_id,
       choice: choice
     };
 
@@ -1783,7 +1783,7 @@ async function initPairwiseCalibration(recentYoinks) {
         mode: "cors",
         headers: {
           "Content-Type": "application/json",
-          "X-Yoink-Token": await STC.getToken()
+          "X-Uoink-Token": await STC.getToken()
         },
         body: JSON.stringify(answer)
       });
@@ -1807,7 +1807,7 @@ async function initPairwiseCalibration(recentYoinks) {
     btnA.disabled = false;
     btnB.disabled = false;
     skipBtn.disabled = false;
-    initPairwiseCalibration(recentYoinks);
+    initPairwiseCalibration(recentUoinks);
   };
 
   btnA.onclick = () => submitChoice("a");
@@ -1974,7 +1974,7 @@ if (openIndexLink) {
     chrome.tabs.create({ url: chrome.runtime.getURL("uoink-memory.html") });
   });
 }
-// Legacy fallback below opens _all-yoinks-index.md if the Memory hook fails.
+// Legacy fallback below opens the markdown library index if the Memory hook fails.
 document.getElementById("open-index").addEventListener("click", async (ev) => {
   ev.preventDefault();
   try {
@@ -3402,7 +3402,7 @@ document.addEventListener("visibilitychange", () => {
 
     // Sprint 4 (1a): route through STC.buildUoinkedMessage so the picker
     // path gets the same first-uoink CTA treatment as v1 auto-copy. The
-    // helper atomically flips has_completed_first_yoink on first success
+    // helper atomically flips has_completed_first_uoink on first success
     // and returns either the first-uoink CTA copy or the topic-aware
     // subsequent copy. We pass a minimal data-shape (only `.topic` is
     // consumed by the helper) reconstituted from the stashed payload.
@@ -3433,7 +3433,7 @@ document.addEventListener("visibilitychange", () => {
 
   // ---- Boot ----
   // On popup open, check if a picker is waiting. Also subscribe to
-  // storage changes so an open popup auto-switches if a fresh yoink
+  // storage changes so an open popup auto-switches if a fresh uoink
   // arrives mid-session.
   function _readPending() {
     return new Promise((resolve) => {
@@ -3456,8 +3456,8 @@ document.addEventListener("visibilitychange", () => {
       if (next) activate(next);
       else { _revokeThumbBlobs(); hidePicker(); }
     }
-    if (changes[LAST_YOINK_CLIPBOARD_KEY]) {
-      lastUoinkAt = Number(changes[LAST_YOINK_CLIPBOARD_KEY].newValue) || 0;
+    if (changes[LAST_UOINK_CLIPBOARD_KEY]) {
+      lastUoinkAt = Number(changes[LAST_UOINK_CLIPBOARD_KEY].newValue) || 0;
       updateDestButtons();
     }
     if (changes[RECENT_FAILURES_KEY]) {

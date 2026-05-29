@@ -1,9 +1,9 @@
-// Yoink v2 mock API layer.
+// Uoink v2 mock API layer.
 //
 // Phase 1 stand-in for the playlist endpoints Codex is implementing on
 // `codex/v2-backend-playlist`. The popup routes through STC.playlist* /
 // STC.jobStatus / STC.jobCancel / STC.jobsList, which dispatches to this
-// layer when globalThis.YOINK_USE_MOCK_API is true.
+// layer when globalThis.UOINK_USE_MOCK_API is true.
 //
 // Shapes mirror docs/v2-api.md on codex/v2-backend-playlist (Sprint 1
 // reconciliation). Top-level wrappers: { ok, playlist }, { ok, job, job_id? },
@@ -22,7 +22,7 @@
   const MOCK_PLAYLIST_TITLE = "Creator Strategy Interviews";
   const MOCK_PLAYLIST_UPLOADER = "Example Channel";
   const MOCK_SESSION_FOLDER =
-    "C:\\Users\\Ryan\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews";
+    "C:\\Users\\Ryan\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews";
 
   // Persistent mock-settings state. Survives mock job lifecycle but is reset
   // on popup close (module scope). Flip the constants below to test the
@@ -43,12 +43,12 @@
   const MOCK_FORCE_HOOK_TYPE_ENABLED = false;
   const MOCK_FORCE_SCREENSHOT_PICKER = false;
   // Sprint 6 recovery-flow fixtures. The mock job-state machine resets when
-  // the popup closes, so item-3 ("last yoink completed" affordance on boot)
+  // the popup closes, so item-3 ("last uoink completed" affordance on boot)
   // and item-4 ("playlist running" pill in single-video) are normally
   // impossible to exercise from scratch — flip these to inject fake state
   // into jobsList() at popup boot. Set at most one to true at a time.
   const MOCK_FORCE_RECOVERY_RUNNING = false;     // simulates close+reopen mid-job
-  const MOCK_FORCE_RECOVERY_COMPLETED = false;   // simulates last-yoink affordance (playlist)
+  const MOCK_FORCE_RECOVERY_COMPLETED = false;   // simulates last-uoink affordance (playlist)
   // Sprint 7: simulates a recent kind="single" record returned by /jobs.
   // Per Codex's Sprint 7 contract, /extract writes a side-effect single job
   // record that surfaces in /jobs alongside playlists.
@@ -132,7 +132,7 @@
       error: null,
       result: null,
       warnings: ["playlist exceeds cap"],
-      message: `Playlist has ${MOCK_VIDEO_COUNT} videos -- yoinking the first ${MOCK_TOTAL_VIDEOS}.`,
+      message: `Playlist has ${MOCK_VIDEO_COUNT} videos -- uoinking the first ${MOCK_TOTAL_VIDEOS}.`,
 
       // private bookkeeping (stripped before returning)
       _statusFirstCall: true,
@@ -165,7 +165,7 @@
     const willProcessCount = Math.min(videoCount, cap);
     const warnings = truncated ? ["playlist exceeds cap"] : [];
     const message = truncated
-      ? `Playlist has ${videoCount} videos -- yoinking the first ${cap}.`
+      ? `Playlist has ${videoCount} videos -- uoinking the first ${cap}.`
       : `Playlist has ${videoCount} video${videoCount === 1 ? "" : "s"}.`;
     const videos = MOCK_VIDEOS.slice(0, willProcessCount).map((v, i) => ({
       index: i + 1,
@@ -338,7 +338,7 @@
       error: null,
       result: null,
       warnings: ["playlist exceeds cap"],
-      message: "Yoinking video 5 of 10.",
+      message: "Uoinking video 5 of 10.",
     };
   }
 
@@ -373,14 +373,14 @@
 
   // _fixtureSingleCompletedJob (Sprint 7): a recently-finished kind="single"
   // job. Pairs with MOCK_FORCE_RECOVERY_SINGLE_COMPLETED to exercise the
-  // single-video branch of the "Last yoink: ..." affordance. Shape per
+  // single-video branch of the "Last uoink: ..." affordance. Shape per
   // docs/v2-api.md GET /jobs example: title populated, playlist_title null,
   // videos_total: 1, videos_done: 1. completed_at within the 30-minute
   // window.
   function _fixtureSingleCompletedJob() {
     const completedAt = new Date(Date.now() - 3 * 60 * 1000).toISOString();
     const folder =
-      "C:\\Users\\Ryan\\Desktop\\Yoink\\Creator Research\\" +
+      "C:\\Users\\Ryan\\Desktop\\Uoink\\Creator Research\\" +
       "a-practical-guide-to-creator-research";
     return {
       id: "fixture_single_completed_job",
@@ -401,7 +401,7 @@
       error: null,
       result: null, // jobsList omits result; only /jobs/<id> returns it
       warnings: [],
-      message: "Single-video yoink complete.",
+      message: "Single-video uoink complete.",
     };
   }
 
@@ -506,7 +506,7 @@
     const failedSeen = idx > (MOCK_FAILED_VIDEO_INDEX - 1) ? 1 : 0;
     job.videos_done = Math.max(0, videosDone - failedSeen);
     job.videos_failed = failedSeen;
-    job.message = `Yoinking video ${idx + 1} of ${MOCK_TOTAL_VIDEOS}.`;
+    job.message = `Uoinking video ${idx + 1} of ${MOCK_TOTAL_VIDEOS}.`;
   }
 
   function _applyCompletion(videosDone) {
@@ -530,7 +530,7 @@
 
   function _buildMockResult() {
     const baseFolder =
-      "C:\\Users\\you\\Desktop\\Yoink\\_sessions\\creator-strategy-interviews";
+      "C:\\Users\\you\\Desktop\\Uoink\\_sessions\\creator-strategy-interviews";
     const per_video = MOCK_VIDEOS.map((v, i) => {
       const idx = i + 1;
       const folder = `${baseFolder}\\video-${idx}`;

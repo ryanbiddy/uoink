@@ -25,7 +25,7 @@ const SERVER = "http://127.0.0.1:5179";
 // /health is the canonical liveness probe (added as an alias for /ping in v1).
 const PING_PATH = "/health";
 const POLL_MS = 2000;
-const AUTO_YOINK_TTL_MS = 60_000;
+const AUTO_UOINK_TTL_MS = 60_000;
 let platformOs = "win";
 
 // ---- DOM handles ---------------------------------------------------------
@@ -598,7 +598,7 @@ async function fetchPricingWithToken(token) {
     method: "GET",
     mode: "cors",
     cache: "no-store",
-    headers: token ? { "X-Yoink-Token": token } : {},
+    headers: token ? { "X-Uoink-Token": token } : {},
   });
 }
 
@@ -919,7 +919,7 @@ async function fetchMcpConfigWithToken(token) {
     method: "GET",
     mode: "cors",
     cache: "no-store",
-    headers: token ? { "X-Yoink-Token": token } : {},
+    headers: token ? { "X-Uoink-Token": token } : {},
   });
 }
 
@@ -967,7 +967,7 @@ async function fetchSkillPromptWithToken(token) {
     method: "GET",
     mode: "cors",
     cache: "no-store",
-    headers: token ? { "X-Yoink-Token": token } : {},
+    headers: token ? { "X-Uoink-Token": token } : {},
   });
 }
 
@@ -1012,10 +1012,10 @@ uoinkSuggestedBtn.addEventListener("click", async () => {
   if (suggestedVideoId) {
     try {
       await chrome.storage.local.set({
-        auto_yoink: { videoId: suggestedVideoId, ts: Date.now() },
+        auto_uoink: { videoId: suggestedVideoId, ts: Date.now() },
       });
     } catch (e) {
-      console.warn("[stc] auto_yoink set failed", e);
+      console.warn("[stc] auto_uoink set failed", e);
     }
   }
   try {
@@ -1212,7 +1212,7 @@ if (tcSaveBtn) {
         cache: "no-store",
         headers: {
           "Content-Type": "application/json",
-          "X-Yoink-Token": await STC.getToken()
+          "X-Uoink-Token": await STC.getToken()
         },
         body: JSON.stringify(profile)
       });
@@ -1269,7 +1269,7 @@ async function loadTasteAnchors() {
       mode: "cors",
       cache: "no-store",
       headers: {
-        "X-Yoink-Token": await STC.getToken()
+        "X-Uoink-Token": await STC.getToken()
       }
     });
     
@@ -1326,7 +1326,7 @@ function renderTasteAnchorsList(listEl, items, type, emptyMsg) {
           method: "DELETE",
           mode: "cors",
           headers: {
-            "X-Yoink-Token": await STC.getToken()
+            "X-Uoink-Token": await STC.getToken()
           }
         });
         if (res.ok) {

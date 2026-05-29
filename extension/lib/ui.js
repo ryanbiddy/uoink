@@ -35,7 +35,7 @@
 
     const doFetch = async (token) => {
       const headers = Object.assign({}, init.headers || {});
-      if (token) headers["X-Yoink-Token"] = token;
+      if (token) headers["X-Uoink-Token"] = token;
       return fetch(url, Object.assign({}, init, {
         headers,
         mode: init.mode || "cors",
@@ -220,7 +220,6 @@
     healthTooltip,
     renderHealthDots,
   };
-  global.YoinkUI = global.UoinkUI;
 
   if (typeof customElements !== "undefined") {
     class UoinkMark extends HTMLElement {

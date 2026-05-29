@@ -23,8 +23,8 @@ const OFFSCREEN_URL = "offscreen.html";
 // CLIPBOARD covers the existing copy path; MATCH_MEDIA lets the doc stay
 // alive so it can push prefers-color-scheme change events back here.
 const OFFSCREEN_REASONS = ["CLIPBOARD", "MATCH_MEDIA"];
-const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
-const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
+const LAST_UOINK_CLIPBOARD_KEY = "uoink_last_clipboard_at";
+const LAST_CLIPBOARD_BUDGET_KEY = "uoink_last_clipboard_budget";
 const _clipboardRetryPayloads = new Map();
 const _queueViewNotificationIds = new Set();
 
@@ -324,7 +324,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
 });
 
-// Best-effort popup auto-open after a successful yoink. Chrome MV3 only
+// Best-effort popup auto-open after a successful uoink. Chrome MV3 only
 // honors openPopup() in narrow circumstances (must be a focused window with
 // the action visible, sometimes requires a recent user gesture). Failures
 // are silently swallowed — the user can still click the extension icon.
@@ -358,29 +358,29 @@ function notify(title, message, extraOptions = {}) {
   });
 }
 
-async function markClipboardYoinkNow() {
+async function markClipboardUoinkNow() {
   try {
-    await chrome.storage.local.set({ [LAST_YOINK_CLIPBOARD_KEY]: Date.now() });
+    await chrome.storage.local.set({ [LAST_UOINK_CLIPBOARD_KEY]: Date.now() });
   } catch { /* ignore */ }
 }
 
 function screenshotCountFromData(data, text) {
-  return globalThis.YoinkUI.screenshotCountFromData(data, text);
+  return globalThis.UoinkUI.screenshotCountFromData(data, text);
 }
 
 async function rememberClipboardBudget(data, clipboardText) {
-  const budget = globalThis.YoinkUI.clipboardBudgetFromData(data, clipboardText);
+  const budget = globalThis.UoinkUI.clipboardBudgetFromData(data, clipboardText);
   try {
     await chrome.storage.local.set({ [LAST_CLIPBOARD_BUDGET_KEY]: budget });
   } catch { /* ignore */ }
 }
 
 function minutesUntil(value) {
-  return globalThis.YoinkUI.minutesUntil(value);
+  return globalThis.UoinkUI.minutesUntil(value);
 }
 
 function queuedMessage(data) {
-  return globalThis.YoinkUI.queuedMessage(data);
+  return globalThis.UoinkUI.queuedMessage(data);
 }
 
 async function getServerQueueStatus() {
@@ -391,7 +391,7 @@ async function getServerQueueStatus() {
       mode: "cors",
       credentials: "omit",
       cache: "no-store",
-      headers: token ? { "X-Yoink-Token": token } : {},
+      headers: token ? { "X-Uoink-Token": token } : {},
     });
     if (res.status === 403 && STC.getToken) {
       const fresh = await STC.getToken({ refresh: true });
@@ -400,7 +400,7 @@ async function getServerQueueStatus() {
         mode: "cors",
         credentials: "omit",
         cache: "no-store",
-        headers: fresh ? { "X-Yoink-Token": fresh } : {},
+        headers: fresh ? { "X-Uoink-Token": fresh } : {},
       });
     }
     if (!res.ok) return null;
@@ -436,7 +436,7 @@ try {
     _clipboardRetryPayloads.delete(id);
     copyToClipboard(text).then(async (ok) => {
       if (ok) {
-        await markClipboardYoinkNow();
+        await markClipboardUoinkNow();
         notify("Copied to clipboard", "Open Claude or ChatGPT from the Uoink popup, then paste.");
       } else {
         notify("Copy still blocked", "Open the saved uoink folder and copy the markdown file manually.");
@@ -708,11 +708,11 @@ async function runExtractJob(job) {
     await notifyClipboardRetry(clipboardText);
     return;
   }
-  await markClipboardYoinkNow();
+  await markClipboardUoinkNow();
   await chrome.tabs.create({ url: "https://claude.ai/new", active: true });
 
-  // Shared helper handles first-yoink-vs-subsequent copy + atomically marks
-  // the has_completed_first_yoink flag. Same code is called from content.js
+  // Shared helper handles first-uoink-vs-subsequent copy + atomically marks
+  // the has_completed_first_uoink flag. Same code is called from content.js
   // so the in-page YouTube button gets the same first-time CTA.
   const message = await STC.buildUoinkedMessage(data, copied);
   notify("Uoinked ★", message);

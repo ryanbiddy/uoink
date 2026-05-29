@@ -28,9 +28,9 @@
   // fixed-position button parented to <body> — it survives Shorts-to-Shorts
   // transitions and needs no anchor element at all.
   const SHORTS_FLOATING_CLASS = "stc-yt-shorts-floating";
-  const LAST_YOINK_CLIPBOARD_KEY = "yoink_last_clipboard_at";
-  const LAST_CLIPBOARD_BUDGET_KEY = "yoink_last_clipboard_budget";
-  const RECENT_FAILURES_KEY = "yoink_recent_failures";
+  const LAST_UOINK_CLIPBOARD_KEY = "uoink_last_clipboard_at";
+  const LAST_CLIPBOARD_BUDGET_KEY = "uoink_last_clipboard_budget";
+  const RECENT_FAILURES_KEY = "uoink_recent_failures";
 
   // ---- Styles (scoped via the unique class prefix) ----------------------
   const STYLE_ID = "stc-yt-styles";
@@ -386,7 +386,7 @@
 
   function markClipboardUoinkNow() {
     try {
-      chrome.storage.local.set({ [LAST_YOINK_CLIPBOARD_KEY]: Date.now() });
+      chrome.storage.local.set({ [LAST_UOINK_CLIPBOARD_KEY]: Date.now() });
     } catch { /* ignore */ }
   }
 
@@ -676,13 +676,13 @@
       activeSession = s;
       refreshDefaultLabel();
     });
-    // If the setup page handed us a video to auto-yoink, consume the flag.
-    maybeAutoUoink(btn).catch((e) => console.warn("[Uoink] auto_yoink failed", e));
+    // If the setup page handed us a video to auto-uoink, consume the flag.
+    maybeAutoUoink(btn).catch((e) => console.warn("[Uoink] auto_uoink failed", e));
     return true;
   }
 
   // ---- Auto-uoink handoff from setup.html -------------------------------
-  // The setup page writes {auto_yoink: {videoId, ts}} to local storage and
+  // The setup page writes {auto_uoink: {videoId, ts}} to local storage and
   // opens the YouTube URL in a new tab. We trigger the button on the first
   // injection on the matching video, then atomically clear the flag so a
   // page refresh or a different tab doesn't re-fire it.
@@ -693,12 +693,12 @@
   async function maybeAutoUoink(btn) {
     const stored = await new Promise((r) => {
       try {
-        chrome.storage.local.get({ auto_yoink: null }, (i) => r(i.auto_yoink));
+        chrome.storage.local.get({ auto_uoink: null }, (i) => r(i.auto_uoink));
       } catch { r(null); }
     });
     if (!stored || !stored.videoId) return;
     if (Date.now() - (stored.ts || 0) > AUTO_UOINK_TTL_MS) {
-      try { chrome.storage.local.remove("auto_yoink"); } catch { /* ignore */ }
+      try { chrome.storage.local.remove("auto_uoink"); } catch { /* ignore */ }
       return;
     }
     if (currentVideoId() !== stored.videoId) return;
@@ -712,7 +712,7 @@
     // Clear before clicking so a concurrent injection (mutation observer +
     // retry loop both fire) can't double-trigger.
     await new Promise((r) => {
-      try { chrome.storage.local.remove("auto_yoink", r); } catch { r(); }
+      try { chrome.storage.local.remove("auto_uoink", r); } catch { r(); }
     });
 
     btn.click();

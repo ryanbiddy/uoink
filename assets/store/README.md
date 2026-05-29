@@ -17,17 +17,17 @@ Screenshots aren't generated — they need to be captured from the live product.
 All three placeholder tiles share the same composition:
 
 - Black background (`#0F0F11`) with a subtle bottom-right glow
-- White **YOINK** wordmark on the left (from `assets/wordmark-dark.png`)
+- White **UOINK** wordmark on the left (from `assets/wordmark-dark.png`)
 - Tagline below: "The missing layer between YouTube and your AI."
 - Sub-line: "Local-first. Free. Open source."
-- Mock Yoink pill button (top-right) with sparkle accent and "Yoink" label
+- Mock Uoink pill button (top-right) with sparkle accent and "Uoink" label
 - Hint below the button: "↑ One click under any YouTube video"
 
 ## What to refine before submitting
 
-1. **Real screenshot in the right pane.** Replace the mock pill with an actual cropped screenshot of the in-page Yoink button on a real YouTube video.
+1. **Real screenshot in the right pane.** Replace the mock pill with an actual cropped screenshot of the in-page Uoink button on a real YouTube video.
 2. **Brand polish.** The mock pill uses a generic yellow `#FFD354` — swap to the canonical brand accent if it's defined elsewhere.
-3. **Marquee left whitespace.** The 1400 × 560 tile has empty mid-canvas space — Figma can fill it with a video timeline strip or sample yoink markdown preview.
+3. **Marquee left whitespace.** The 1400 × 560 tile has empty mid-canvas space — Figma can fill it with a video timeline strip or sample uoink markdown preview.
 4. **Tagline kerning.** PIL doesn't kern beautifully. The hand-set version in Figma will look noticeably better at the small (440 × 280) size.
 
 ## Regenerating the placeholders
