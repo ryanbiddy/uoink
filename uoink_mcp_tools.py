@@ -616,6 +616,89 @@ def analyze_self_channel(args: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+def assemble_workspace(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 P4 build workspace: pull a corpus slice ranked by S1 facets + S2
+    engagement + optional self-channel + optional S4 taste anchors. Pure
+    local read. If `workspace_id` is provided, the assembled video_id list
+    is persisted onto the workspace row; otherwise the slice is returned
+    standalone for inspection."""
+    server = _b()
+    import workspaces as _ws
+    try:
+        return _ws.assemble_workspace(
+            server._get_index(),
+            format=args.get("format"),
+            topic=args.get("topic"),
+            hook_target=args.get("hook_target"),
+            your_channel=args.get("your_channel"),
+            n_examples=int(args.get("n_examples") or 10),
+            workspace_id=args.get("workspace_id"))
+    except Exception as e:
+        return _err(f"assemble_workspace failed: {e}")
+
+
+def critique_against_corpus(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 P4 critique tool. Two-phase contract:
+      1. Call WITHOUT `findings` to retrieve the assembled context
+         (workspace, corpus slice, audience questions, taste anchors).
+         The calling agent does the LLM analysis on that context.
+      2. Call WITH `findings` (a structured dict) to persist the agent's
+         analysis to the workspace's critique log."""
+    server = _b()
+    import workspaces as _ws
+    workspace_id = args.get("workspace_id")
+    if not isinstance(workspace_id, str) or not workspace_id.strip():
+        return _err("workspace_id (string) is required")
+    draft_text = args.get("draft_text")
+    if not isinstance(draft_text, str):
+        return _err("draft_text (string) is required")
+    findings = args.get("findings")
+    mode = args.get("mode") or _ws.COMPUTE_MODE_AGENT
+    try:
+        return _ws.critique_against_corpus(
+            server._get_index(), workspace_id.strip(),
+            draft_text=draft_text, findings=findings, mode=mode)
+    except ValueError as e:
+        return _err(str(e))
+    except Exception as e:
+        return _err(f"critique_against_corpus failed: {e}")
+
+
+def list_workspaces(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 P4: list workspaces newest-first."""
+    server = _b()
+    import workspaces as _ws
+    try:
+        limit = _limit_int(args.get("limit"), default=50, low=1, high=500)
+    except Exception:
+        limit = 50
+    try:
+        rows = _ws.list_workspaces(server._get_index(), limit=limit)
+    except Exception as e:
+        return _err(f"list_workspaces failed: {e}")
+    return _ok(workspaces=rows, count=len(rows))
+
+
+def get_workspace(args: dict[str, Any]) -> dict[str, Any]:
+    """v3 P4: fetch one workspace + its critique log."""
+    server = _b()
+    import workspaces as _ws
+    workspace_id = args.get("id") or args.get("workspace_id")
+    if not isinstance(workspace_id, str) or not workspace_id.strip():
+        return _err("workspace id (string) is required")
+    try:
+        ws = _ws.get_workspace(server._get_index(), workspace_id.strip())
+    except Exception as e:
+        return _err(f"get_workspace failed: {e}")
+    if ws is None:
+        return _err("workspace not found")
+    try:
+        crit = _ws.critique_log_for(server._get_index(), workspace_id.strip())
+    except Exception:
+        crit = []
+    return _ok(workspace=ws, critique_log=crit)
+
+
 def find_mentions(args: dict[str, Any]) -> dict[str, Any]:
     """Return every recorded mention of an entity across the library,
     newest first, each with a timestamped YouTube deep link (Sprint 16)."""
@@ -1058,6 +1141,78 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             },
         }, ["video_id"]),
         handler=get_transcript_reliability,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "assemble_workspace": ToolSpec(
+        name="assemble_workspace",
+        description=(
+            "v3 P4 build workspace: pull a corpus slice for planning a "
+            "video. Ranks yoinks by S1 facets (format match), performance "
+            "tier (over > average > under), and S2 engagement value_score. "
+            "Returns the slice + audience questions from comments + "
+            "optional self-channel snapshot (if your_channel is set) + "
+            "optional taste anchors (if S4 memory layer is available). "
+            "Pure local read; the calling agent does any LLM analysis "
+            "downstream. If `workspace_id` is provided the slice is "
+            "persisted onto that row."
+        ),
+        input_schema=_schema({
+            "format": {"type": "string"},
+            "topic": {"type": "string"},
+            "hook_target": {"type": "string"},
+            "your_channel": {"type": "string"},
+            "n_examples": {"type": "integer", "minimum": 1, "maximum": 100,
+                             "default": 10},
+            "workspace_id": {"type": "string"},
+        }, []),
+        handler=assemble_workspace,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "critique_against_corpus": ToolSpec(
+        name="critique_against_corpus",
+        description=(
+            "v3 P4 critique tool. Two-phase: call WITHOUT `findings` to "
+            "retrieve the assembled context (corpus slice + audience "
+            "questions + taste anchors) -- the agent does the LLM "
+            "analysis on that context. Call WITH `findings` (structured "
+            "JSON object with hook_strength, structural_deviation, "
+            "pacing_issues, missing_audience_hooks per ROADMAP P4) to "
+            "persist the analysis to the workspace's critique log. "
+            "Model-agnostic default; BYO-key mode accepted but not yet "
+            "implemented on-server."
+        ),
+        input_schema=_schema({
+            "workspace_id": {"type": "string"},
+            "draft_text": {"type": "string"},
+            "findings": {"type": "object"},
+            "mode": {"type": "string", "enum": ["agent", "byo_key"]},
+        }, ["workspace_id", "draft_text"]),
+        handler=critique_against_corpus,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "list_workspaces": ToolSpec(
+        name="list_workspaces",
+        description=(
+            "v3 P4: list build workspaces newest-first. Read-only."
+        ),
+        input_schema=_schema({
+            "limit": {"type": "integer", "minimum": 1, "maximum": 500,
+                       "default": 50},
+        }, []),
+        handler=list_workspaces,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "get_workspace": ToolSpec(
+        name="get_workspace",
+        description=(
+            "v3 P4: fetch one workspace + its full critique log (every "
+            "draft + findings combination the agent has persisted)."
+        ),
+        input_schema=_schema({
+            "id": {"type": "string"},
+            "workspace_id": {"type": "string"},
+        }, []),
+        handler=get_workspace,
         rate_limiter=_RateLimiter(60),
     ),
 }
