@@ -748,6 +748,28 @@ def list_podcast_episodes(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(episodes=rows, count=len(rows))
 
 
+def download_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.1 podcast: download an episode's MP3 via yt-dlp + ffmpeg.
+
+    Synchronous. Returns when the file lands at
+    <data_root>/Podcasts/<feed-slug>/<episode-slug>.mp3 or yt-dlp
+    errors. Idempotent -- skips re-download when the canonical path
+    already has a non-zero file. The transcription pipeline (next
+    PR in CC's queue) reads audio_local_path to feed WhisperX."""
+    server = _b()
+    import podcasts as _pod
+    try:
+        episode_id = int(args.get("episode_id"))
+    except (TypeError, ValueError):
+        return _err("episode_id (integer) is required")
+    try:
+        return _pod.download_episode_audio(
+            server._get_index(), episode_id,
+            data_root=server.DATA_ROOT)
+    except Exception as e:
+        return _err(f"download_podcast_episode failed: {e}")
+
+
 def get_user_memory(_args: dict[str, Any]) -> dict[str, Any]:
     """v2.5 S4 user memory: return the free-form USER.md content + path.
     Skeleton is seeded on first read so an agent always gets a starting
@@ -1571,6 +1593,21 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, []),
         handler=list_podcast_episodes,
         rate_limiter=_RateLimiter(60),
+    ),
+    "download_podcast_episode": ToolSpec(
+        name="download_podcast_episode",
+        description=(
+            "v3.1 podcast: download an episode's MP3 via yt-dlp + "
+            "ffmpeg. Synchronous. Returns when the file lands at "
+            "<data_root>/Podcasts/<feed-slug>/<episode-slug>.mp3 or "
+            "yt-dlp errors. Idempotent -- skips re-download when the "
+            "canonical path already has a non-zero file."
+        ),
+        input_schema=_schema({
+            "episode_id": {"type": "integer"},
+        }, ["episode_id"]),
+        handler=download_podcast_episode,
+        rate_limiter=_RateLimiter(10),
     ),
     "get_user_taste": ToolSpec(
         name="get_user_taste",

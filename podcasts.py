@@ -21,10 +21,14 @@ Transport (HTTP + MCP) is owned by server.py + uoink_mcp_tools.py."""
 from __future__ import annotations
 
 import logging
+import os
+import re
+import subprocess
 import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -468,3 +472,161 @@ def set_episode_status(idx, episode_id: int, status: str) -> bool:
             "UPDATE podcast_episodes SET status=? WHERE id=?",
             (status, episode_id))
         return cur.rowcount > 0
+
+
+# ---- audio download pipeline ------------------------------------------
+# v3.1 track B step 2. yt-dlp's audio extractor handles the
+# enclosure URL + ffmpeg post-process. Output lands at
+#   <data_root>/Podcasts/<feed-slug>/<episode-slug>.mp3
+# so the user has a clear filesystem layout + Whisper has a single
+# path to feed.
+
+_SLUG_RE = re.compile(r"[^a-z0-9]+")
+# Hard cap on the audio file size to guard against feeds advertising a
+# 50 GB enclosure (rare, but happens with mis-set length tags). 2 GB
+# is generous for any reasonable podcast episode.
+_AUDIO_MAX_BYTES = 2 * 1024 * 1024 * 1024
+
+
+def _slugify(text: str | None, *, fallback: str = "untitled") -> str:
+    if not text:
+        return fallback
+    slug = _SLUG_RE.sub("-", text.strip().lower()).strip("-")
+    return slug[:80] or fallback
+
+
+def _podcast_root(data_root: Path) -> Path:
+    root = Path(data_root) / "Podcasts"
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+
+def _episode_audio_path(data_root: Path, feed_row: dict,
+                         episode_row: dict) -> Path:
+    feed_slug = _slugify(feed_row.get("title") or feed_row.get("feed_url"),
+                          fallback=f"feed-{feed_row.get('id') or 0}")
+    ep_slug = _slugify(episode_row.get("title"),
+                        fallback=f"ep-{episode_row.get('id') or 0}")
+    folder = _podcast_root(data_root) / feed_slug
+    folder.mkdir(parents=True, exist_ok=True)
+    return folder / f"{ep_slug}.mp3"
+
+
+def _record_audio_result(idx, episode_id: int, *,
+                          local_path: str | None,
+                          size_bytes: int | None,
+                          error: str | None,
+                          status: str) -> None:
+    with idx._lock:
+        idx._conn.execute(
+            "UPDATE podcast_episodes SET "
+            "  audio_local_path = COALESCE(?, audio_local_path), "
+            "  audio_downloaded_at = ?, "
+            "  audio_size_bytes = COALESCE(?, audio_size_bytes), "
+            "  audio_download_error = ?, "
+            "  status = ? "
+            "WHERE id = ?",
+            (local_path, _now_iso() if local_path else None,
+             size_bytes, error, status, episode_id))
+
+
+def download_episode_audio(idx, episode_id: int, *,
+                            data_root: Path,
+                            ytdlp_cmd: list[str] | None = None,
+                            timeout_sec: int = 600) -> dict:
+    """Download an episode's MP3 via yt-dlp + ffmpeg into the per-feed
+    folder. Idempotent -- if the file already exists at the canonical
+    path AND has non-zero size we mark status='downloaded' without
+    re-downloading. Returns a structured result the endpoint surfaces."""
+    episode = get_episode(idx, episode_id)
+    if episode is None:
+        return {"ok": False, "error": f"episode not found: {episode_id}"}
+    feed = get_feed(idx, episode["feed_id"])
+    if feed is None:
+        return {"ok": False,
+                "error": f"feed {episode['feed_id']} not found"}
+    if not episode.get("audio_url"):
+        return {"ok": False, "error": "episode has no audio_url"}
+
+    out_path = _episode_audio_path(Path(data_root), feed, episode)
+    # Idempotent -- skip re-download when the canonical path already
+    # has a non-zero file. yt-dlp writes a .mp3 extension after the
+    # ffmpeg post-process, so we check the .mp3 directly.
+    if out_path.exists() and out_path.stat().st_size > 0:
+        _record_audio_result(idx, episode_id,
+                              local_path=str(out_path),
+                              size_bytes=out_path.stat().st_size,
+                              error=None,
+                              status=EPISODE_STATUS_DOWNLOADED)
+        return {"ok": True, "episode_id": episode_id,
+                "local_path": str(out_path),
+                "size_bytes": out_path.stat().st_size,
+                "skipped_existing": True}
+
+    # Move to status='queued' if not already there. This makes the row
+    # show up in the in-flight section of the dashboard during the
+    # download (which can take several minutes for an hour-long pod).
+    if episode["status"] != EPISODE_STATUS_QUEUED:
+        with idx._lock:
+            idx._conn.execute(
+                "UPDATE podcast_episodes SET status=? WHERE id=?",
+                (EPISODE_STATUS_QUEUED, episode_id))
+
+    # Output template: drop the extension; yt-dlp adds .mp3 after
+    # ffmpeg converts. Pass the bare stem.
+    out_stem = out_path.with_suffix("")
+    cmd = list(ytdlp_cmd or [])
+    if not cmd:
+        # Lazy import to avoid a hard server.py dependency from here.
+        try:
+            import server as _server  # noqa: WPS433
+            cmd = list(getattr(_server, "YTDLP_CMD", []))
+        except Exception:
+            cmd = []
+    if not cmd:
+        return {"ok": False, "error": "yt-dlp command not configured"}
+
+    args = cmd + [
+        "--no-progress",
+        "--extract-audio",
+        "--audio-format", "mp3",
+        "--audio-quality", "0",   # use VBR best
+        "--max-filesize", str(_AUDIO_MAX_BYTES),
+        # Output template: yt-dlp will append .mp3 after the postprocess
+        "-o", str(out_stem) + ".%(ext)s",
+        episode["audio_url"],
+    ]
+    log.info("podcast download: episode_id=%d url=%s -> %s",
+              episode_id, episode["audio_url"], out_path)
+    try:
+        cp = subprocess.run(
+            args, capture_output=True, text=True,
+            timeout=timeout_sec, check=False,
+        )
+    except subprocess.TimeoutExpired:
+        _record_audio_result(idx, episode_id, local_path=None,
+                              size_bytes=None,
+                              error=f"download timed out after {timeout_sec}s",
+                              status=EPISODE_STATUS_NEW)
+        return {"ok": False, "episode_id": episode_id,
+                "error": "timeout"}
+    if cp.returncode != 0:
+        err = (cp.stderr or cp.stdout or "yt-dlp failed").strip()[-512:]
+        _record_audio_result(idx, episode_id, local_path=None,
+                              size_bytes=None, error=err,
+                              status=EPISODE_STATUS_NEW)
+        return {"ok": False, "episode_id": episode_id, "error": err}
+    if not out_path.exists() or out_path.stat().st_size == 0:
+        _record_audio_result(idx, episode_id, local_path=None,
+                              size_bytes=None,
+                              error="output file missing post-download",
+                              status=EPISODE_STATUS_NEW)
+        return {"ok": False, "episode_id": episode_id,
+                "error": "output file missing"}
+    size = out_path.stat().st_size
+    _record_audio_result(idx, episode_id, local_path=str(out_path),
+                          size_bytes=size, error=None,
+                          status=EPISODE_STATUS_DOWNLOADED)
+    return {"ok": True, "episode_id": episode_id,
+            "local_path": str(out_path), "size_bytes": size,
+            "feed_id": episode["feed_id"]}

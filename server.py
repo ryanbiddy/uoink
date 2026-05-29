@@ -7186,6 +7186,28 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {"ok": True, "changed": changed,
                                       "status": status})
 
+    def _handle_podcasts_episode_download(self, body):
+        """POST /podcasts/episodes/download {episode_id} -- download
+        the episode's MP3 via yt-dlp + ffmpeg. Synchronous: returns
+        when the file lands or yt-dlp errors. The dashboard's queue
+        view + status='queued' make the in-flight progress visible."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        try:
+            episode_id = int(body.get("episode_id"))
+        except (TypeError, ValueError):
+            return self._send_json(400, {
+                "ok": False, "error": "episode_id (integer) required"})
+        try:
+            result = podcasts.download_episode_audio(
+                _get_index(), episode_id, data_root=DATA_ROOT)
+        except Exception as e:
+            log.exception("/podcasts/episodes/download failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        status = 200 if result.get("ok") else 400
+        return self._send_json(status, result)
+
     def _handle_settings_mcp_config(self):
         """MCP config snippet for the Settings tab Copy button. Token-gated."""
         if not self._require_token():
@@ -7835,6 +7857,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_feed_set_enabled(body)
         if bare == "/podcasts/episodes/set-status":
             return self._handle_podcasts_episode_set_status(body)
+        if bare == "/podcasts/episodes/download":
+            return self._handle_podcasts_episode_download(body)
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})
