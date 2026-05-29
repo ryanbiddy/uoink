@@ -536,6 +536,26 @@
     });
   }
 
+  function getResurfaceToday() {
+    return _getJson("/resurface/today");
+  }
+
+  function getEngagementScores() {
+    return _getJson("/engagement/scores");
+  }
+
+  function memorySearch(params) {
+    let query = "";
+    if (params) {
+      const parts = [];
+      for (const [k, v] of Object.entries(params)) {
+        parts.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+      }
+      if (parts.length) query = "?" + parts.join("&");
+    }
+    return _getJson("/memory/search" + query);
+  }
+
   global.STC = {
     SERVER,
     DEFAULT_INTERVAL,
@@ -574,5 +594,8 @@
     stashPickerCorpus,
     logEngagement,
     replayPendingEngagementEvents,
+    getResurfaceToday,
+    getEngagementScores,
+    memorySearch,
   };
 })(typeof self !== "undefined" ? self : globalThis);
