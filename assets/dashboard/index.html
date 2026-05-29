@@ -1268,6 +1268,21 @@
       color: var(--cream);
     }
 
+    .activity-source-chip {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-height: 22px;
+      border: 1px solid rgba(255, 210, 63, 0.36);
+      border-radius: var(--pill-radius);
+      padding: 0 10px;
+      background: rgba(255, 210, 63, 0.1);
+      color: var(--acid);
+      font-size: 10px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
     .progress {
       overflow: hidden;
       width: 100%;
@@ -3745,6 +3760,41 @@
       return value || "queued";
     }
 
+    function isMobileQueued(row) {
+      if (!row) return false;
+      if (row.mobile_queued === true || row.from_mobile === true) return true;
+      const meta = metadataOf(row);
+      const values = [
+        row.source,
+        row.origin,
+        row.queue_source,
+        row.enqueue_source,
+        row.queued_by,
+        row.created_by,
+        row.playlist_name,
+        row.playlist_title,
+        row.kind,
+        meta.source,
+        meta.origin,
+        meta.queue_source,
+        meta.queued_by,
+        meta.playlist_name,
+      ].join(" ").toLowerCase();
+      return (
+        values.includes("mobile") ||
+        values.includes("auto_uoink") ||
+        values.includes("auto-uoink") ||
+        values.includes("monitored_playlist") ||
+        values.includes("uoink queue")
+      );
+    }
+
+    function activitySourceChip(row) {
+      return isMobileQueued(row)
+        ? `<span class="activity-source-chip">mobile queue</span>`
+        : "";
+    }
+
     function countValue(value, fallback = 0) {
       const n = Number(value);
       return Number.isFinite(n) ? n : fallback;
@@ -3799,9 +3849,11 @@
       const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(normalizedStatus(job)));
       const failedJobs = state.jobs.filter((job) => ["failed", "cancelled"].includes(normalizedStatus(job)));
       const activeCount = activeJobs.length + queueActive.length;
+      const mobileCount = activeJobs.concat(queueActive, failedJobs, queueFailed)
+        .filter(isMobileQueued).length;
       els.activityCount.textContent = String(activeCount);
       els.activityNavCount.textContent = String(activeCount);
-      els.queueMeta.textContent = `${runningCount || activeJobs.filter((job) => normalizedStatus(job) === "running").length} running | ${pendingCount || queueActive.length} queued`;
+      els.queueMeta.textContent = `${runningCount || activeJobs.filter((job) => normalizedStatus(job) === "running").length} running | ${pendingCount || queueActive.length} queued${mobileCount ? ` | ${mobileCount} mobile` : ""}`;
       // v2.2.1 fix: dedupe failed queue rows whose video already has a
       // failed job row, so the same yoink doesn't render twice. Jobs win
       // because they carry richer state (phase, error_code, retry button).
@@ -3848,24 +3900,28 @@
     function completedRowHtml(item) {
       const row = item.row;
       if (item.type === "job") {
+        const sourceChip = activitySourceChip(row);
         return `
           <div class="job-row">
             <div class="job-top">
               <div>
                 <div class="job-title">${htmlEscape(row.title || row.playlist_title || "Completed uoink")}</div>
                 <div class="job-sub">${htmlEscape(row.kind || "job")} | completed ${htmlEscape(fmtAge(row.completed_at || row.updated_at))}</div>
+                ${sourceChip}
               </div>
               ${row.session_folder ? `<button class="row-link" type="button" data-open-path="${htmlEscape(row.session_folder)}">Open</button>` : ""}
             </div>
           </div>
         `;
       }
+      const sourceChip = activitySourceChip(row);
       return `
         <div class="job-row">
           <div class="job-top">
             <div>
               <div class="job-title">${htmlEscape(row.title || "Untitled")}</div>
               <div class="job-sub">${htmlEscape(row.channel || "")} | ${htmlEscape(fmtDuration(row.duration_seconds))} | ${htmlEscape(fmtAge(row.yoinked_at))}</div>
+              ${sourceChip}
             </div>
             ${row.folder ? `<button class="row-link" type="button" data-open-path="${htmlEscape(row.folder)}">Open</button>` : ""}
           </div>
@@ -3922,12 +3978,14 @@
         job.videos_total ? `${job.videos_done || 0}/${job.videos_total} videos` : "",
         job.error_code ? `${job.error_code}: ${job.error || ""}` : job.error || "",
       ].filter(Boolean).join(" | ");
+      const sourceChip = activitySourceChip(job);
       return `
         <div class="job-row ${failed ? "failed" : ""}" data-job-id="${htmlEscape(job.id || "")}">
           <div class="job-top">
             <div>
               <div class="job-title">${htmlEscape(title)}</div>
               <div class="job-sub">${htmlEscape(sub)}</div>
+              ${sourceChip}
             </div>
             <div class="inline-row">
               ${failed ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(job.url || job.source_url || "")}">Retry with cookies</button>` : ""}
@@ -3946,12 +4004,14 @@
       const rawProgress = Number(row.progress || 0);
       const progress = rawProgress <= 1 ? rawProgress * 100 : rawProgress;
       const activePhase = row.phase || (stateValue === "running" ? "screenshots" : "");
+      const sourceChip = activitySourceChip(row);
       return `
         <div class="job-row ${failed ? "failed" : ""}" data-pending-id="${htmlEscape(row.pending_id || "")}">
           <div class="job-top">
             <div>
               <div class="job-title">${htmlEscape(row.title || row.url || "Queued uoink")}</div>
               <div class="job-sub">${htmlEscape(stateValue)}${row.retry_after ? ` | retry ${htmlEscape(fmtAge(row.retry_after))}` : ""}</div>
+              ${sourceChip}
             </div>
             <div class="inline-row">
               ${failed ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(row.url || "")}">Retry with cookies</button>` : ""}
