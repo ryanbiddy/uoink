@@ -542,6 +542,7 @@ endBtn.addEventListener("click", async () => {
   await chrome.runtime.sendMessage({ type: "notify", title: "Research session uoinked", message: note });
   if (copied) {
     markClipboardUoinkNow();
+    STC.logEngagement("paste", "popup", { length: res.corpus_md.length }).catch(() => {});
     showToast("Session uoinked! Pick a destination above.");
   }
 
@@ -1309,11 +1310,16 @@ async function shouldUseScreenshotPicker() {
 async function writeClipboardText(text) {
   try {
     await navigator.clipboard.writeText(text);
+    STC.logEngagement("paste", "popup", { length: text.length }).catch(() => {});
     return true;
   } catch {
     try {
       const r = await chrome.runtime.sendMessage({ type: "copyToClipboard", text });
-      return !!(r && r.ok);
+      const ok = !!(r && r.ok);
+      if (ok) {
+        STC.logEngagement("paste", "popup", { length: text.length }).catch(() => {});
+      }
+      return ok;
     } catch {
       return false;
     }
@@ -1943,6 +1949,7 @@ async function loadRecentUoinks() {
     item.appendChild(main);
     if (hookRow) item.appendChild(hookRow);
     item.addEventListener("click", () => {
+      STC.logEngagement("opened", "popup", { video_id: r.video_id, title: r.title, folder: r.folder }).catch(() => {});
       if (r.folder) STC.openFolder(r.folder);
     });
     recentUoinksEl.appendChild(item);
@@ -2892,6 +2899,7 @@ document.addEventListener("visibilitychange", () => {
 
     if (copied) {
       markClipboardUoinkNow();
+      STC.logEngagement("paste", "popup", { length: corpusText.length }).catch(() => {});
       showToast("Playlist uoinked! Paste in Claude or ChatGPT.");
     }
   }
@@ -3337,13 +3345,18 @@ document.addEventListener("visibilitychange", () => {
   async function _writeClipboard(text) {
     try {
       await navigator.clipboard.writeText(text);
+      STC.logEngagement("paste", "popup", { length: text.length }).catch(() => {});
       return true;
     } catch {
       try {
         const r = await chrome.runtime.sendMessage({
           type: "copyToClipboard", text,
         });
-        return !!(r && r.ok);
+        const ok = !!(r && r.ok);
+        if (ok) {
+          STC.logEngagement("paste", "popup", { length: text.length }).catch(() => {});
+        }
+        return ok;
       } catch { return false; }
     }
   }

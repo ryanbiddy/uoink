@@ -463,6 +463,81 @@
     return `${topicLine}Clipboard was blocked — open the saved file in the uoink folder.`.trim();
   }
 
+  async function logEngagement(eventType, source, metadata) {
+    const payload = {
+      event_type: eventType,
+      source: source || "unknown",
+      timestamp: new Date().toISOString(),
+      metadata: metadata || {}
+    };
+    try {
+      const res = await _authedFetch("/engagement/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (res.status === 200 || res.status === 201 || res.ok) {
+        console.log("[Uoink] Engagement logged:", payload);
+        return { ok: true };
+      }
+      throw new Error(`HTTP ${res.status}`);
+    } catch (e) {
+      console.warn("[Uoink] Engagement log failed, buffering locally:", e);
+      await _bufferEngagementEvent(payload);
+      return { ok: false, buffered: true };
+    }
+  }
+
+  function _bufferEngagementEvent(payload) {
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.get({ uoink_engagement_pending: [] }, (items) => {
+          const pending = Array.isArray(items.uoink_engagement_pending) ? items.uoink_engagement_pending : [];
+          pending.push(payload);
+          chrome.storage.local.set({ uoink_engagement_pending: pending }, () => resolve());
+        });
+      } catch (err) {
+        console.error("[Uoink] Failed to buffer event:", err);
+        resolve();
+      }
+    });
+  }
+
+  async function replayPendingEngagementEvents() {
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.get({ uoink_engagement_pending: [] }, async (items) => {
+          const pending = Array.isArray(items.uoink_engagement_pending) ? items.uoink_engagement_pending : [];
+          if (pending.length === 0) {
+            resolve();
+            return;
+          }
+          console.log(`[Uoink] Attempting to replay ${pending.length} pending engagement events...`);
+          const remaining = [];
+          for (const payload of pending) {
+            try {
+              const res = await _authedFetch("/engagement/log", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+              });
+              if (res.status === 200 || res.status === 201 || res.ok) {
+                continue;
+              }
+              remaining.push(payload);
+            } catch (err) {
+              remaining.push(payload);
+            }
+          }
+          chrome.storage.local.set({ uoink_engagement_pending: remaining }, () => resolve());
+        });
+      } catch (err) {
+        console.error("[Uoink] Failed to replay events:", err);
+        resolve();
+      }
+    });
+  }
+
   global.STC = {
     SERVER,
     DEFAULT_INTERVAL,
@@ -499,5 +574,7 @@
     testAnthropicKey,
     getScreenshotThumbnail,
     stashPickerCorpus,
+    logEngagement,
+    replayPendingEngagementEvents,
   };
 })(typeof self !== "undefined" ? self : globalThis);
