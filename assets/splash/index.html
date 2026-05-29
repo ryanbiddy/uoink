@@ -280,11 +280,27 @@
         setFailure(params.get("detail") || "port 5179 in use");
         return;
       }
-      try {
-        const diag = await (await fetch("/diagnose")).json();
-        const bad = Array.isArray(diag.checks) ? diag.checks.find((check) => check.status && check.status !== "ok") : null;
-        if (diag.ok === false || bad) setFailure((bad && (bad.detail || bad.name)) || diag.error || "diagnostics found an issue");
-      } catch (_) {}
+      // v2.2.0 bug fix: retry-with-backoff. The splash window can load and
+      // hit /diagnose before the helper has finished booting (migrations,
+      // index open, sub-checks), making /diagnose return not-yet-ready
+      // statuses that paint the failure variant -- while the boot toast
+      // simultaneously says "Uoink is Active & Ready" 1-2 s later. Three
+      // attempts at 500 ms intervals (1 s total worst case) catches the slow
+      // boot well within the splash's 8 s linger. Healthy on ANY attempt
+      // wins: we break out, no failure variant.
+      let bad = null;
+      let diag = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          diag = await (await fetch("/diagnose")).json();
+          bad = Array.isArray(diag.checks) ? diag.checks.find((check) => check.status && check.status !== "ok") : null;
+          if (diag.ok !== false && !bad) { bad = null; diag = null; break; }
+        } catch (_) { /* network not ready yet -- retry */ }
+        if (attempt < 2) await new Promise((r) => setTimeout(r, 500));
+      }
+      if (bad || (diag && diag.ok === false)) {
+        setFailure((bad && (bad.detail || bad.name)) || (diag && diag.error) || "diagnostics found an issue");
+      }
     }
 
     function openDashboard() {

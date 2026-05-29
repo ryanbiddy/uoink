@@ -154,18 +154,17 @@ class UoinkTray:
         key = self._state
         if key in self._images:
             return self._images[key]
-        # Tier 2 refinement: render at 32 px so the OS-tray downscale to 16 px
-        # stays sharp, and the size-aware rule applies (<=32 px -> CREAM tips,
-        # which the magnet-U paint below already uses). Rendering at 64 px and
-        # downscaling muddied the tips at small sizes.
+        # v2.2.0 brand fix: load the canonical rust-U PNG so the tray renders
+        # the SAME artwork as the installer .ico (both sourced from
+        # assets/logo-mark-color.png). The previous polygon-drawn glyph
+        # downscaled to a yellow-ish blob in the tray at 16 px because
+        # rust+cream alpha-blended with the transparent ground that way --
+        # Ryan's "yellow Y in the tray" screenshot. 32 px base gives the OS a
+        # clean downscale; per the size-aware rule (<=32 px) the source mark's
+        # cream tips are what we want.
         size = 32
-        scale = size / 100.0
-        img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+        img = self._load_base_glyph(size).copy()
         d = ImageDraw.Draw(img)
-        d.polygon([(x * scale, y * scale) for x, y in _U_OUTLINE], fill=_RUST + (255,))
-        for x0, y0, x1, y1 in _U_TIPS:
-            d.rectangle([x0 * scale, y0 * scale, x1 * scale, y1 * scale],
-                        fill=_CREAM + (255,))
         # status dot, bottom-right, ink-outlined for contrast on any wallpaper
         r = int(size * 0.26)
         cx, cy = size - r - 2, size - r - 2
@@ -173,6 +172,33 @@ class UoinkTray:
         d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=self._dot_color() + (255,))
         self._images[key] = img
         return img
+
+    def _load_base_glyph(self, size: int):
+        """Load assets/logo-mark-color.png (the canonical rust-U mark, same
+        source the installer .ico is generated from) and resize to `size` px
+        with Lanczos. Cached for the life of the tray. Falls back to the
+        polygon-drawn glyph if the PNG is missing or unreadable -- a broken
+        install still gets a usable tray icon rather than no icon at all."""
+        cached = getattr(self, "_base_glyph_cache", None)
+        if cached is not None and cached[0] == size:
+            return cached[1]
+        from PIL import Image, ImageDraw  # lazy
+        src = Path(__file__).parent / "assets" / "logo-mark-color.png"
+        try:
+            with Image.open(src) as im:
+                base = im.convert("RGBA").resize((size, size), Image.LANCZOS)
+        except Exception as e:
+            log.warning("tray: PNG glyph load failed (%s); using fallback polygon", e)
+            base = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+            d = ImageDraw.Draw(base)
+            scale = size / 100.0
+            d.polygon([(x * scale, y * scale) for x, y in _U_OUTLINE],
+                      fill=_RUST + (255,))
+            for x0, y0, x1, y1 in _U_TIPS:
+                d.rectangle([x0 * scale, y0 * scale, x1 * scale, y1 * scale],
+                            fill=_CREAM + (255,))
+        self._base_glyph_cache = (size, base)
+        return base
 
     # ---- menu actions ------------------------------------------------------
     def _touch(self) -> None:

@@ -118,6 +118,10 @@ Source: "staging\assets\dashboard\*"; DestDir: "{app}\assets\dashboard"; Flags: 
 ; and the shared brand-tokens stylesheet both pages consume.
 Source: "staging\assets\splash\*"; DestDir: "{app}\assets\splash"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "staging\assets\brand\*";  DestDir: "{app}\assets\brand";  Flags: ignoreversion recursesubdirs createallsubdirs
+; v2.2.0: canonical rust-U mark loaded by the tray glyph (uoink_tray._image
+; reads {app}\assets\logo-mark-color.png at start) so the tray icon and the
+; installer .ico render the same artwork from the same source PNG.
+Source: "staging\assets\logo-mark-color.png"; DestDir: "{app}\assets"; Flags: ignoreversion
 ; Library-index migrations -- index._run_migrations applies these at boot.
 ; Sprint 19.6 / Fix 1: pre-Sprint-19.6 installers omitted these, causing
 ; the helper to crash with "no such table: schema_version" on first launch.
