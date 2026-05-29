@@ -389,7 +389,7 @@
 
     .control-grid {
       display: grid;
-      grid-template-columns: minmax(280px, 2fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(128px, 1fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(136px, 1fr);
+      grid-template-columns: minmax(240px, 2fr) repeat(9, minmax(112px, 1fr));
       gap: 10px;
       margin: 18px 0 18px;
     }
@@ -434,6 +434,25 @@
       color: var(--dim);
       font-family: var(--font-mono);
       font-size: 12px;
+    }
+
+    .facet-status {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      color: var(--cream);
+      background: rgba(255, 210, 63, 0.1);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      cursor: help;
+    }
+
+    .facet-status.hidden {
+      display: none;
     }
 
     .grid {
@@ -965,6 +984,9 @@
               <option value="stakes">stakes</option>
               <option value="other">other</option>
             </select>
+            <select class="control" id="formatFilter"><option value="">Format: all</option></select>
+            <select class="control" id="performanceFilter"><option value="">Performance: all</option></select>
+            <select class="control" id="lengthFilter"><option value="">Length: all</option></select>
             <input class="control" id="dateFrom" type="date" aria-label="Date from">
             <input class="control" id="dateTo" type="date" aria-label="Date to">
             <select class="control" id="sortFilter">
@@ -976,7 +998,7 @@
 
           <div class="summary-line">
             <span id="resultSummary">Loading library...</span>
-            <span id="activeFilters"></span>
+            <span><span id="activeFilters"></span> <span id="facetStatus" class="facet-status hidden" title="">?</span></span>
           </div>
 
           <div id="libraryGrid" class="grid" aria-live="polite"></div>
@@ -1170,6 +1192,9 @@
         channel: "",
         topic: "",
         hook_type: "",
+        format: "",
+        performance: "",
+        length: "",
         date_from: "",
         date_to: "",
         sort: "newest",
@@ -1178,6 +1203,14 @@
       queue: null,
       health: null,
       settings: null,
+      facets: null,
+      facetsFallback: false,
+    };
+
+    const FALLBACK_FACETS = {
+      format: ["one-shot", "talking-head", "tutorial", "listicle", "narrative", "vlog", "interview", "screen-recording", "B-roll-heavy"],
+      performance: ["over", "average", "under"],
+      length: ["short", "medium", "long", "deep"],
     };
 
     const els = {
@@ -1196,9 +1229,13 @@
       channelFilter: document.getElementById("channelFilter"),
       topicFilter: document.getElementById("topicFilter"),
       hookFilter: document.getElementById("hookFilter"),
+      formatFilter: document.getElementById("formatFilter"),
+      performanceFilter: document.getElementById("performanceFilter"),
+      lengthFilter: document.getElementById("lengthFilter"),
       dateFrom: document.getElementById("dateFrom"),
       dateTo: document.getElementById("dateTo"),
       sortFilter: document.getElementById("sortFilter"),
+      facetStatus: document.getElementById("facetStatus"),
       queueRows: document.getElementById("queueRows"),
       queueMeta: document.getElementById("queueMeta"),
       activityCount: document.getElementById("activityCount"),
@@ -1345,6 +1382,9 @@
       if (state.filters.channel) params.set("channel", state.filters.channel);
       if (state.filters.topic) params.set("topic", state.filters.topic);
       if (state.filters.hook_type) params.set("hook_type", state.filters.hook_type);
+      if (state.filters.format) params.set("format", state.filters.format);
+      if (state.filters.performance) params.set("performance", state.filters.performance);
+      if (state.filters.length) params.set("length", state.filters.length);
       if (state.filters.date_from) params.set("date_from", state.filters.date_from);
       if (state.filters.date_to) params.set("date_to", state.filters.date_to);
       params.set("limit", String(extra.limit ?? state.limit));
@@ -1418,6 +1458,9 @@
             folder: job.session_folder || result.folder || "",
             yoinked_at: job.completed_at || job.updated_at || job.started_at,
             hook_type: result.hook_type || job.hook_type || "",
+            format: result.format || result.format_type || job.format || job.format_type || "",
+            performance: result.performance || result.performance_tier || job.performance || job.performance_tier || "",
+            length: result.length || result.length_bucket || job.length || job.length_bucket || "",
             hook_type_confidence: result.hook_type_confidence || job.hook_type_confidence,
             health: result.health || job.health || null,
             entity_count: result.entity_count || job.entity_count || 0,
@@ -1438,11 +1481,22 @@
         if (state.filters.channel && row.channel !== state.filters.channel) return false;
         if (state.filters.topic && row.topic !== state.filters.topic) return false;
         if (state.filters.hook_type && row.hook_type !== state.filters.hook_type) return false;
+        if (state.filters.format && facetValue(row, "format") !== state.filters.format) return false;
+        if (state.filters.performance && facetValue(row, "performance") !== state.filters.performance) return false;
+        if (state.filters.length && facetValue(row, "length") !== state.filters.length) return false;
         const when = row.yoinked_at ? new Date(row.yoinked_at) : null;
         if (from && (!when || when < from)) return false;
         if (to && (!when || when > to)) return false;
         return true;
       });
+    }
+
+    function facetValue(row, key) {
+      if (!row) return "";
+      if (key === "format") return row.format || row.format_type || "";
+      if (key === "performance") return row.performance || row.performance_tier || "";
+      if (key === "length") return row.length || row.length_bucket || "";
+      return "";
     }
 
     function renderLibrary() {
@@ -1537,6 +1591,29 @@
       });
       syncOptions(els.channelFilter, "Channel: all", channels);
       syncOptions(els.topicFilter, "Topic: all", topics);
+    }
+
+    function syncFacetOptions() {
+      const facets = state.facets || FALLBACK_FACETS;
+      syncOptions(els.formatFilter, "Format: all", facets.format || FALLBACK_FACETS.format);
+      syncOptions(els.performanceFilter, "Performance: all", facets.performance || facets.performance_tier || FALLBACK_FACETS.performance);
+      syncOptions(els.lengthFilter, "Length: all", facets.length || facets.length_bucket || FALLBACK_FACETS.length);
+      els.facetStatus.classList.toggle("hidden", !state.facetsFallback);
+      els.facetStatus.title = state.facetsFallback
+        ? "Coming with v2.5 facets. These fallback enums are scaffolded until /facets/taxonomy is available."
+        : "Facet taxonomy loaded from the helper.";
+    }
+
+    async function loadFacetTaxonomy() {
+      try {
+        const data = await authFetch("/facets/taxonomy");
+        state.facets = data.facets || data.taxonomy || data;
+        state.facetsFallback = false;
+      } catch (err) {
+        state.facets = FALLBACK_FACETS;
+        state.facetsFallback = true;
+      }
+      syncFacetOptions();
     }
 
     function syncOptions(select, label, values) {
@@ -1951,18 +2028,21 @@
         state.filters.channel = els.channelFilter.value;
         state.filters.topic = els.topicFilter.value;
         state.filters.hook_type = els.hookFilter.value;
+        state.filters.format = els.formatFilter.value;
+        state.filters.performance = els.performanceFilter.value;
+        state.filters.length = els.lengthFilter.value;
         state.filters.date_from = els.dateFrom.value;
         state.filters.date_to = els.dateTo.value;
         state.filters.sort = els.sortFilter.value;
         loadLibrary({ reset: true });
       }, 260);
-      [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
+      [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
         el.addEventListener(el.tagName === "INPUT" ? "input" : "change", reload);
       });
       document.getElementById("clearFilters").addEventListener("click", () => {
-        [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
+        [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
         els.sortFilter.value = "newest";
-        state.filters = { q: "", channel: "", topic: "", hook_type: "", date_from: "", date_to: "", sort: "newest" };
+        state.filters = { q: "", channel: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest" };
         loadLibrary({ reset: true });
       });
       els.loadMore.addEventListener("click", () => loadLibrary());
@@ -2117,6 +2197,7 @@
       hydrateMarks();
       wireEvents();
       await refreshHealth();
+      await loadFacetTaxonomy();
       await refreshJobs();
       await loadLibrary({ reset: true });
       await refreshActivity();
