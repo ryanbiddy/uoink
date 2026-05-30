@@ -1167,6 +1167,97 @@ def remove_style_anchor(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(removed=removed, id=anchor_id)
 
 
+# ---- v3.2 Universal Site Uoinking ------------------------------------
+def uoink_page(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.2 Universal Site Uoinking: capture an allowed page as a yoink.
+
+    Body shape: {url, render_mode?='js'|'static', include_screenshot?,
+                  follow_links_depth?}. Returns structured markdown +
+    metadata + links + images + screenshot path (when Crawl4AI is
+    available) + the resulting yoink video_id.
+
+    LOCKED LOCAL-FIRST: Crawl4AI runs on-device (lazy import); stdlib
+    fallback when Crawl4AI isn't installed. Allowlist gate enforced --
+    add the host via add_allowed_site first if it's not seeded."""
+    server = _b()
+    import page_extractor as _pe  # noqa: WPS433
+    url = args.get("url")
+    if not isinstance(url, str) or not url.strip():
+        return _err("url (string) is required")
+    render_mode = (args.get("render_mode")
+                    or _pe.RENDER_MODE_JS).strip().lower()
+    include_screenshot = bool(args.get("include_screenshot", True))
+    try:
+        follow_depth = int(args.get("follow_links_depth", 0))
+    except (TypeError, ValueError):
+        return _err("follow_links_depth must be an integer")
+    try:
+        result = _pe.extract_page(
+            server._get_index(), url.strip(),
+            render_mode=render_mode,
+            include_screenshot=include_screenshot,
+            follow_links_depth=follow_depth,
+            enforce_allowlist=True)
+    except Exception as e:
+        return _err(f"uoink_page failed: {e}")
+    if not result.get("ok"):
+        return result   # already has the error shape
+    try:
+        video_id = _pe.persist_page_yoink(
+            server._get_index(), result,
+            data_root=server.DATA_ROOT)
+        result["video_id"] = video_id
+    except Exception:
+        result["video_id"] = None
+    return result
+
+
+def list_allowed_sites(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.2 Universal Site: list the user's allowed sites. Default
+    seeds (youtube.com, youtu.be, x.com, twitter.com) are pre-added by
+    migration 0015."""
+    server = _b()
+    import page_extractor as _pe  # noqa: WPS433
+    active_only = bool(args.get("active_only"))
+    rows = _pe.list_allowed(server._get_index(),
+                                active_only=active_only)
+    return _ok(sites=rows, count=len(rows),
+                default_seeds=list(_pe.DEFAULT_ALLOW_SEEDS))
+
+
+def add_allowed_site(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.2 Universal Site: add a hostname or wildcard pattern
+    ('*.docs.example.com'). Idempotent on UNIQUE url_pattern."""
+    server = _b()
+    import page_extractor as _pe  # noqa: WPS433
+    pattern = args.get("url_pattern") or args.get("pattern")
+    if not isinstance(pattern, str) or not pattern.strip():
+        return _err("url_pattern (string) is required")
+    try:
+        return _ok(site=_pe.add_allowed(
+            server._get_index(), pattern.strip()))
+    except ValueError as e:
+        return _err(str(e))
+    except Exception as e:
+        return _err(f"add_allowed_site failed: {e}")
+
+
+def remove_allowed_site(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.2 Universal Site: remove a hostname or wildcard pattern from
+    the allowlist."""
+    server = _b()
+    import page_extractor as _pe  # noqa: WPS433
+    pattern = args.get("url_pattern") or args.get("pattern")
+    if not isinstance(pattern, str) or not pattern.strip():
+        return _err("url_pattern (string) is required")
+    try:
+        removed = _pe.remove_allowed(
+            server._get_index(), pattern.strip())
+    except Exception as e:
+        return _err(f"remove_allowed_site failed: {e}")
+    return _ok(removed=removed, url_pattern=pattern.strip().lower())
+
+
 def get_user_memory(_args: dict[str, Any]) -> dict[str, Any]:
     """v2.5 S4 user memory: return the free-form USER.md content + path.
     Skeleton is seeded on first read so an agent always gets a starting
@@ -2578,6 +2669,72 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "id": {"type": "integer"},
         }, []),
         handler=remove_style_anchor,
+        rate_limiter=_RateLimiter(30),
+    ),
+    # v3.2 Universal Site Uoinking (4 tools)
+    "uoink_page": ToolSpec(
+        name="uoink_page",
+        description=(
+            "v3.2 Universal Site Uoinking: capture an allowed page as "
+            "a yoink. Crawl4AI runs ON-DEVICE when available "
+            "(JS render + screenshot); stdlib fallback otherwise "
+            "(static HTML + markdown synthesis, no screenshot). "
+            "Allowlist-gated -- add the host via add_allowed_site "
+            "first if it's not in the defaults (youtube.com, "
+            "youtu.be, x.com, twitter.com). Result auto-persists as a "
+            "yoink with source_type='page'."
+        ),
+        input_schema=_schema({
+            "url": {"type": "string"},
+            "render_mode": {"type": "string",
+                              "enum": ["js", "static"], "default": "js"},
+            "include_screenshot": {"type": "boolean", "default": True},
+            "follow_links_depth": {"type": "integer",
+                                      "minimum": 0, "maximum": 1,
+                                      "default": 0},
+        }, ["url"]),
+        handler=uoink_page,
+        rate_limiter=_RateLimiter(15),
+    ),
+    "list_allowed_sites": ToolSpec(
+        name="list_allowed_sites",
+        description=(
+            "v3.2 Universal Site: list the user's allowed hostnames. "
+            "Default seeds (youtube.com, youtu.be, x.com, "
+            "twitter.com) are pre-added by migration 0015 and "
+            "removable like any other entry."
+        ),
+        input_schema=_schema({
+            "active_only": {"type": "boolean", "default": False},
+        }, []),
+        handler=list_allowed_sites,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "add_allowed_site": ToolSpec(
+        name="add_allowed_site",
+        description=(
+            "v3.2 Universal Site: add a hostname or wildcard pattern "
+            "(`*.docs.example.com` matches all sub.docs.example.com "
+            "subdomains). Idempotent on UNIQUE url_pattern. Plain "
+            "hostnames also match their subdomains (so 'example.com' "
+            "matches 'www.example.com')."
+        ),
+        input_schema=_schema({
+            "url_pattern": {"type": "string"},
+        }, ["url_pattern"]),
+        handler=add_allowed_site,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "remove_allowed_site": ToolSpec(
+        name="remove_allowed_site",
+        description=(
+            "v3.2 Universal Site: remove a hostname or wildcard "
+            "pattern from the allowlist."
+        ),
+        input_schema=_schema({
+            "url_pattern": {"type": "string"},
+        }, ["url_pattern"]),
+        handler=remove_allowed_site,
         rate_limiter=_RateLimiter(30),
     ),
 }

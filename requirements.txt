@@ -6,3 +6,10 @@ pywebview==5.4
 pythonnet==3.0.5
 whisper-timestamped==1.15.9
 whisperx==3.8.6
+# v3.2 Universal Site Uoinking. Lazy-imported by page_extractor.py; the
+# helper falls back to a stdlib HTML-to-markdown path when crawl4ai
+# isn't importable (broken bundle, missing playwright runtime, etc.).
+# Bundling into the embeddable Python is gated on a clean-install test
+# of the playwright transitive dep -- not in build.ps1 yet (see the
+# v3.2 universal-site PR body).
+crawl4ai==0.4.247

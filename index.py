@@ -68,6 +68,7 @@ _YOINK_COLUMNS = (
     "yoinked_at", "corpus_path", "sidecar_path", "health_score_json",
     "metadata_json",
     "schema_version",
+    "source_type",
 )
 
 _JOB_COLUMNS = (
