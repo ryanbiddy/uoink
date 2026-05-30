@@ -999,6 +999,28 @@
       </div>
     </section>
 
+    <!-- Your Role settings section -->
+    <section id="your-role-settings" class="step">
+      <div class="step-head">
+        <div class="step-num"><span class="step-num-text">R</span></div>
+        <h2>Your role</h2>
+      </div>
+      <p>Choose your primary workflow. Uoink uses this to sort and filter your library to fit your day-to-day needs.</p>
+      
+      <div class="settings-grid">
+        <label>
+          <span class="field-label" style="font-weight:600; color:var(--rust-bright);">Select your role</span>
+          <select id="role-select" class="input" style="font-family: inherit;">
+            <option value="creator">Creator</option>
+            <option value="researcher">Researcher</option>
+            <option value="marketer">Marketer</option>
+            <option value="mixed">Mixed</option>
+          </select>
+        </label>
+        <div id="role-status" class="settings-status" style="margin-top:4px;"></div>
+      </div>
+    </section>
+
     <!-- Step 3a: Your Channels mode settings -->
     <section id="your-channels-settings" class="step">
       <div class="step-head">
@@ -1024,6 +1046,37 @@
           <button id="yc-recognize-btn" class="button ghost" type="button">Recognize past yoinks now</button>
         </div>
         <div id="yc-status" class="settings-status" style="margin-top:8px;"></div>
+      </div>
+    </section>
+
+    <!-- Sites Uoink works on settings section -->
+    <section id="allowed-sites-settings" class="step">
+      <div class="step-head">
+        <div class="step-num"><span class="step-num-text">S</span></div>
+        <h2>Sites Uoink works on</h2>
+      </div>
+      <p>Uoink works on YouTube and X/Twitter by default. Add other sites here so Uoink can parse pages and download screenshots when you right-click.</p>
+      
+      <div class="settings-grid">
+        <span class="field-label" style="font-weight:600; color:var(--rust-bright); margin-bottom: 2px;">Default Allowed Sites</span>
+        <div id="default-sites-list" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
+          <span class="tc-channel-chip" style="opacity:0.8;">youtube.com (read-only)</span>
+          <span class="tc-channel-chip" style="opacity:0.8;">youtu.be (read-only)</span>
+          <span class="tc-channel-chip" style="opacity:0.8;">x.com (read-only)</span>
+          <span class="tc-channel-chip" style="opacity:0.8;">twitter.com (read-only)</span>
+        </div>
+
+        <label>
+          <span class="field-label" style="font-weight:600; color:var(--rust-bright);">Add custom site (e.g. *.github.com or example.com)</span>
+          <div style="display:flex; gap:8px;">
+            <input id="allowed-site-input" class="input" type="text" placeholder="example.com">
+            <button id="allowed-site-add-btn" class="button ghost" type="button" style="padding: 10px 14px; height:43px;">Add</button>
+          </div>
+        </label>
+        
+        <div id="custom-sites-list" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+          <!-- Custom allowed sites will be rendered here -->
+        </div>
       </div>
     </section>
 
@@ -1115,6 +1168,55 @@
         </label>
 
         <p class="sub"><a class="settings-link" href="#" id="cv-override-info">Per-yoink override available in dashboard ↗</a></p>
+      </div>
+    </section>
+
+    <!-- Podcast RSS feeds settings section -->
+    <section id="podcast-feeds-settings" class="step">
+      <div class="step-head">
+        <div class="step-num"><span class="step-num-text">PF</span></div>
+        <h2>Podcast RSS feeds</h2>
+      </div>
+      <p>Add podcast RSS feeds here. Uoink checks them for new episodes so you can download and transcribe them with WhisperX.</p>
+      
+      <div class="settings-grid">
+        <label>
+          <span class="field-label" style="font-weight:600; color:var(--rust-bright);">Add Podcast RSS URL</span>
+          <div style="display:flex; gap:8px;">
+            <input id="podcast-feed-input" class="input" type="text" placeholder="https://example.com/feed.xml">
+            <button id="podcast-feed-validate-btn" class="button ghost" type="button" style="padding: 10px 14px; height:43px;">Validate</button>
+            <button id="podcast-feed-add-btn" class="button" type="button" style="padding: 10px 14px; height:43px;">Add</button>
+          </div>
+        </label>
+        <div id="podcast-feed-status" class="settings-status" style="margin-top:4px;"></div>
+        
+        <div id="podcast-feeds-list" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+          <!-- List of podcasts will be rendered here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Auto-uoink playlists settings section -->
+    <section id="auto-uoink-playlists-settings" class="step">
+      <div class="step-head">
+        <div class="step-num"><span class="step-num-text">PL</span></div>
+        <h2>Auto-uoink playlists</h2>
+      </div>
+      <p>Watch YouTube playlists for new additions. Perfect for auto-uoinking videos you save to a watch-later list from your phone.</p>
+      
+      <div class="settings-grid">
+        <label>
+          <span class="field-label" style="font-weight:600; color:var(--rust-bright);">Add YouTube Playlist URL</span>
+          <div style="display:flex; gap:8px;">
+            <input id="playlist-url-input" class="input" type="text" placeholder="https://www.youtube.com/playlist?list=...">
+            <button id="playlist-add-btn" class="button" type="button" style="padding: 10px 14px; height:43px;">Add</button>
+          </div>
+        </label>
+        <div id="playlist-status" class="settings-status" style="margin-top:4px;"></div>
+        
+        <div id="playlists-list" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+          <!-- List of playlists will be rendered here -->
+        </div>
       </div>
     </section>
 

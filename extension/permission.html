@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Uoink Site Permission</title>
+  <style>
+    :root {
+      --rust: #C2410C;
+      --vermillion: #FF3D00;
+      --ink: #0A0A0A;
+      --ink-warm: #15110D;
+      --cream: #FFF4EC;
+      --border: #2C2621;
+      --text-dim: #C8B19F;
+      --r-pill: 9999px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--ink-warm);
+      color: var(--cream);
+      margin: 0;
+      padding: 16px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      justify-content: space-between;
+    }
+    h1 {
+      font-size: 14px;
+      margin: 0 0 8px;
+      color: var(--rust);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+    p {
+      font-size: 13px;
+      margin: 0 0 16px;
+      color: var(--text-dim);
+    }
+    .domain-highlight {
+      color: var(--cream);
+      font-weight: 600;
+      word-break: break-all;
+    }
+    .button-row {
+      display: flex;
+      gap: 8px;
+    }
+    button {
+      flex: 1;
+      padding: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--r-pill);
+      cursor: pointer;
+      font-family: inherit;
+      transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    button.primary {
+      background: var(--rust);
+      color: var(--cream);
+    }
+    button.primary:hover {
+      background: var(--vermillion);
+      color: var(--ink);
+    }
+    button.secondary {
+      background: var(--ink);
+      color: var(--cream);
+      border: 1px solid var(--border);
+    }
+    button.secondary:hover {
+      background: var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h1 id="perm-title">Grant extraction permission</h1>
+    <p>Uoink needs permission to read and extract content from <span id="perm-domain" class="domain-highlight">this site</span>.</p>
+  </div>
+  <div class="button-row">
+    <button id="cancel-btn" class="secondary">Cancel</button>
+    <button id="allow-once-btn" class="secondary">Allow once</button>
+    <button id="allow-always-btn" class="primary">Allow always</button>
+  </div>
+  <script src="lib/extract.js"></script>
+  <script src="permission.js"></script>
+</body>
+</html>

@@ -341,16 +341,41 @@ async function loadCurrentVideoPreview() {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     const tab = tabs && tabs[0];
     const url = tab && tab.url;
+    
+    const chipEl = document.getElementById("universal-allowed-chip");
+    if (chipEl) {
+      if (url) {
+        const allowlist = await STC.getAllowlist();
+        const isAllowed = STC.isUrlAllowed(url, allowlist);
+        if (isAllowed) {
+          chipEl.classList.remove("hidden");
+        } else {
+          chipEl.classList.add("hidden");
+        }
+      } else {
+        chipEl.classList.add("hidden");
+      }
+    }
+    
     const normalized = STC.normalizeYouTubeUrl(url || "");
     currentVideoUrl = normalized;
     if (!normalized) {
+      const isTwitter = STC.normalizeTwitterUrl(url || "");
+      const isAllowed = url ? STC.isUrlAllowed(url, await STC.getAllowlist()) : false;
+      if (isTwitter || isAllowed) {
+        currentVideoUrl = url;
+        currentVideoPreview.textContent = (tab.title || "Web Page").replace(/\s+-\s+YouTube\s*$/i, "");
+        uoinkCurrentBtn.disabled = !serverOnline;
+        return;
+      }
       currentVideoPreview.textContent = "Open a YouTube video tab, then reopen this popup.";
       uoinkCurrentBtn.disabled = true;
       return;
     }
     currentVideoPreview.textContent = (tab.title || "YouTube video").replace(/\s+-\s+YouTube\s*$/i, "");
     uoinkCurrentBtn.disabled = !serverOnline;
-  } catch {
+  } catch (e) {
+    console.error("loadCurrentVideoPreview failed", e);
     currentVideoPreview.textContent = "Couldn't read the current tab.";
     uoinkCurrentBtn.disabled = true;
   }
@@ -1338,7 +1363,18 @@ async function runPopupUoinkCurrent() {
   uoinkCurrentBtn.textContent = "Uoinking...";
   try {
     const interval = await STC.getInterval();
-    const data = await STC.postExtract(currentVideoUrl, interval);
+    let data;
+    let normalized = STC.normalizeYouTubeUrl(currentVideoUrl);
+    if (!normalized) {
+      normalized = STC.normalizeTwitterUrl(currentVideoUrl);
+      if (normalized) {
+        data = await STC.postExtractAny(normalized, interval);
+      } else {
+        data = await STC.postExtractPage(currentVideoUrl, interval);
+      }
+    } else {
+      data = await STC.postExtract(normalized, interval);
+    }
     if (data && data.ok && data.queued) {
       showToast(queuedToastMessage(data));
       pollQueueStatus();
@@ -2022,12 +2058,6 @@ async function loadResurfaceCard(recent) {
       console.warn("Failed to fetch engagement scores:", e);
     }
 
-    const hasEngagementData = Object.keys(scoresMap).length > 0;
-    if (!hasEngagementData) {
-      card.classList.add("hidden");
-      return;
-    }
-
     let allYoinks = [];
     try {
       const searchRes = await STC.memorySearch({ sort: "engagement" });
@@ -2044,13 +2074,13 @@ async function loadResurfaceCard(recent) {
       allYoinks = recent;
     }
 
-    if (allYoinks.length < 10) {
+    if (allYoinks.length === 0) {
       card.classList.add("hidden");
       return;
     }
 
     const fourteenDaysAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
-    const eligible = allYoinks.filter(y => {
+    let eligible = allYoinks.filter(y => {
       if (!y.video_id) return false;
       const lastOpened = y.last_opened_at || y.opened_at || y.yoinked_at || y.created_at;
       if (!lastOpened) return true;
@@ -2059,21 +2089,20 @@ async function loadResurfaceCard(recent) {
     });
 
     if (eligible.length === 0) {
+      eligible = allYoinks.filter(y => !!y.video_id);
+    }
+
+    if (eligible.length === 0) {
       card.classList.add("hidden");
       return;
     }
 
     eligible.forEach(y => {
-      y.engagement_score = scoresMap[y.video_id] || 0;
+      y.engagement_score = scoresMap[y.video_id] || 1.0;
     });
-    const scoredEligible = eligible.filter(y => y.engagement_score > 0);
-    if (scoredEligible.length === 0) {
-      card.classList.add("hidden");
-      return;
-    }
 
-    scoredEligible.sort((a, b) => b.engagement_score - a.engagement_score);
-    resurfaceItems = scoredEligible.slice(0, 3);
+    eligible.sort((a, b) => (b.engagement_score || 0) - (a.engagement_score || 0));
+    resurfaceItems = eligible.slice(0, 3);
   } else {
     if (resurfaceItems.length === 0) {
       card.classList.add("hidden");

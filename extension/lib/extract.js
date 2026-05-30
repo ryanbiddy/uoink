@@ -627,6 +627,149 @@
     return _getJson("/memory/search" + query);
   }
 
+  async function postExtractPage(url, interval) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const targetUrl = `${SERVER}/extract/page`;
+    const requestBody = { url, interval };
+    try {
+      let res;
+      try {
+        res = await _authedFetch("/extract/page", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        });
+      } catch (e) {
+        if (e instanceof TypeError) {
+          console.error("[Uoink] server unreachable at", targetUrl, e);
+        } else {
+          console.error("[Uoink] fetch aborted/failed", targetUrl, e);
+        }
+        throw e;
+      }
+
+      const text = await res.text();
+      if (!res.ok) {
+        console.error("[Uoink] HTTP", res.status, "body:", text);
+      }
+      try {
+        return JSON.parse(text);
+      } catch {
+        console.error("[Uoink] JSON parse error, raw text:", text);
+        return { ok: false, error: "Server returned a non-JSON response." };
+      }
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function getAllowlist() {
+    try {
+      const token = await getToken();
+      const res = await fetch(`${SERVER}/extract/page/allowlist`, {
+        method: "GET",
+        mode: "cors",
+        credentials: "omit",
+        headers: token ? { "X-Yoink-Token": token } : {},
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.ok && Array.isArray(data.allowlist)) {
+          return data.allowlist;
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to fetch allowlist from server, using local fallback", e);
+    }
+    return new Promise((resolve) => {
+      chrome.storage.local.get({ uoink_allowlist: ["youtube.com", "youtu.be", "x.com", "twitter.com"] }, (items) => {
+        resolve(items.uoink_allowlist);
+      });
+    });
+  }
+
+  async function addAllowedSite(pattern) {
+    try {
+      const token = await getToken();
+      const res = await fetch(`${SERVER}/extract/page/allowlist`, {
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "X-Yoink-Token": token } : {})
+        },
+        body: JSON.stringify({ pattern })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.ok) return true;
+      }
+    } catch (e) {
+      console.warn("Failed to add allowed site to server, using local fallback", e);
+    }
+    const list = await getAllowlist();
+    if (!list.includes(pattern)) {
+      list.push(pattern);
+      await new Promise(r => chrome.storage.local.set({ uoink_allowlist: list }, r));
+    }
+    return true;
+  }
+
+  async function removeAllowedSite(pattern) {
+    try {
+      const token = await getToken();
+      const res = await fetch(`${SERVER}/extract/page/allowlist/remove`, {
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { "X-Yoink-Token": token } : {})
+        },
+        body: JSON.stringify({ pattern })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.ok) return true;
+      }
+    } catch (e) {
+      console.warn("Failed to remove allowed site from server, using local fallback", e);
+    }
+    const list = await getAllowlist();
+    const idx = list.indexOf(pattern);
+    if (idx !== -1) {
+      list.splice(idx, 1);
+      await new Promise(r => chrome.storage.local.set({ uoink_allowlist: list }, r));
+    }
+    return true;
+  }
+
+  function isUrlAllowed(urlStr, allowlist) {
+    try {
+      const u = new URL(urlStr);
+      const hostname = u.hostname.toLowerCase();
+      for (const pattern of allowlist) {
+        const p = pattern.toLowerCase();
+        if (p.startsWith("*.")) {
+          const domain = p.slice(2);
+          if (hostname === domain || hostname.endsWith("." + domain)) {
+            return true;
+          }
+        } else {
+          if (hostname === p || hostname.endsWith("." + p)) {
+            return true;
+          }
+        }
+      }
+    } catch (e) {
+      return false;
+    }
+    return false;
+  }
+
   global.STC = {
     SERVER,
     DEFAULT_INTERVAL,
@@ -637,6 +780,7 @@
     getInterval,
     postExtract,
     postExtractAny,
+    postExtractPage,
     ping,
     startSession,
     addToSession,
@@ -670,5 +814,9 @@
     getResurfaceToday,
     getEngagementScores,
     memorySearch,
+    getAllowlist,
+    addAllowedSite,
+    removeAllowedSite,
+    isUrlAllowed,
   };
 })(typeof self !== "undefined" ? self : globalThis);

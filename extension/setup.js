@@ -85,6 +85,23 @@ const mcpCopyButtons = Array.from(document.querySelectorAll("[data-copy-client]"
 const skillSystemPrompt = document.getElementById("skill-system-prompt");
 const skillPromptCopyBtn = document.getElementById("skill-prompt-copy");
 
+const allowedSiteInput = document.getElementById("allowed-site-input");
+const allowedSiteAddBtn = document.getElementById("allowed-site-add-btn");
+const customSitesList = document.getElementById("custom-sites-list");
+
+const podcastFeedInput = document.getElementById("podcast-feed-input");
+const podcastFeedValidateBtn = document.getElementById("podcast-feed-validate-btn");
+const podcastFeedAddBtn = document.getElementById("podcast-feed-add-btn");
+const podcastFeedStatus = document.getElementById("podcast-feed-status");
+const podcastFeedsList = document.getElementById("podcast-feeds-list");
+
+const playlistUrlInput = document.getElementById("playlist-url-input");
+const playlistAddBtn = document.getElementById("playlist-add-btn");
+const playlistStatus = document.getElementById("playlist-status");
+const playlistsList = document.getElementById("playlists-list");
+
+const roleSelect = document.getElementById("role-select");
+
 // ---- Platform detection ---------------------------------------------------
 function normalizePlatform(os) {
   const value = String(os || "").toLowerCase();
@@ -482,6 +499,9 @@ function onServerUp() {
   loadMCPConfig();
   loadSkillSystemPrompt();
   loadDiagnose();
+  loadAllowedSites();
+  loadPodcastFeeds();
+  loadMonitoredPlaylists();
   markDone(step3);
   if (isSettingsMode) return;
   if (step4.classList.contains("hidden")) {
@@ -569,6 +589,14 @@ function setCIControlsEnabled(enabled) {
     ctObsidianMirror,
     cvEnabled,
     cvSources,
+    allowedSiteInput,
+    allowedSiteAddBtn,
+    podcastFeedInput,
+    podcastFeedValidateBtn,
+    podcastFeedAddBtn,
+    playlistUrlInput,
+    playlistAddBtn,
+    roleSelect,
   ];
   for (const el of els) {
     if (el) el.disabled = !enabled;
@@ -635,6 +663,11 @@ function renderCISettings(settings) {
       ? settings.default_evidence_sources.join("\n")
       : (settings.default_evidence_sources || "");
     cvSources.value = sources;
+  }
+  
+  // Populate Your Role
+  if (roleSelect && settings.role !== undefined) {
+    roleSelect.value = settings.role || "mixed";
   }
   
   updateCreatorToolsVisibility();
@@ -1568,7 +1601,8 @@ async function saveV3Settings() {
     obsidian_vault_path: ctObsidianPath ? ctObsidianPath.value.trim() : "",
     mirror_scripts_to_obsidian: ctObsidianMirror ? !!ctObsidianMirror.checked : false,
     claim_verification_enabled: cvEnabled ? !!cvEnabled.checked : false,
-    default_evidence_sources: sourcesArray
+    default_evidence_sources: sourcesArray,
+    role: roleSelect ? roleSelect.value : "mixed"
   };
 
   if (aiSettings) {
@@ -1635,6 +1669,9 @@ async function loadPendingV3Settings() {
         cvSources.value = Array.isArray(pending.default_evidence_sources)
           ? pending.default_evidence_sources.join("\n")
           : pending.default_evidence_sources;
+      }
+      if (pending.role !== undefined && roleSelect) {
+        roleSelect.value = pending.role;
       }
       updateCreatorToolsVisibility();
     }
@@ -1740,6 +1777,383 @@ if (cvOverrideInfo) {
   });
 }
 
+// ---- Allowed Sites ----
+async function loadAllowedSites() {
+  if (!customSitesList) return;
+  try {
+    const list = await STC.getAllowlist();
+    const defaults = ["youtube.com", "youtu.be", "x.com", "twitter.com"];
+    const customs = list.filter(item => !defaults.includes(item.toLowerCase()));
+    
+    customSitesList.innerHTML = "";
+    if (customs.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "sub";
+      empty.textContent = "No custom sites allowed yet.";
+      customSitesList.appendChild(empty);
+      return;
+    }
+    
+    customs.forEach((pattern) => {
+      const row = document.createElement("div");
+      row.className = "correction-row";
+      
+      const patternName = document.createElement("div");
+      patternName.className = "correction-title";
+      patternName.textContent = pattern;
+      
+      const removeBtn = document.createElement("div");
+      removeBtn.className = "correction-date";
+      removeBtn.style.cursor = "pointer";
+      removeBtn.textContent = "✕ Remove";
+      removeBtn.addEventListener("click", async () => {
+        row.style.opacity = 0.5;
+        row.style.pointerEvents = "none";
+        await STC.removeAllowedSite(pattern);
+        loadAllowedSites();
+      });
+      
+      row.appendChild(patternName);
+      row.appendChild(removeBtn);
+      customSitesList.appendChild(row);
+    });
+  } catch (e) {
+    console.error("loadAllowedSites failed", e);
+  }
+}
+
+if (allowedSiteAddBtn && allowedSiteInput) {
+  const addSite = async () => {
+    const val = allowedSiteInput.value.trim().toLowerCase();
+    if (val) {
+      await STC.addAllowedSite(val);
+      allowedSiteInput.value = "";
+      loadAllowedSites();
+    }
+  };
+  allowedSiteAddBtn.addEventListener("click", addSite);
+  allowedSiteInput.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      addSite();
+    }
+  });
+}
+
+// ---- Podcasts ----
+async function validatePodcastFeed(url) {
+  try {
+    const u = new URL(url);
+    if (u.protocol !== "http:" && u.protocol !== "https:") {
+      return { ok: false, error: "URL protocol must be http or https" };
+    }
+  } catch (e) {
+    return { ok: false, error: "Invalid URL format" };
+  }
+  
+  try {
+    const token = await STC.getToken();
+    const res = await fetch(`${SERVER}/podcasts/validate`, {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Yoink-Token": token
+      },
+      body: JSON.stringify({ feed_url: url })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    } else if (res.status === 404) {
+      return { ok: true, fallback: true };
+    } else {
+      const data = await res.json();
+      return { ok: false, error: (data && data.error) || `HTTP ${res.status}` };
+    }
+  } catch (err) {
+    return { ok: true, fallback: true };
+  }
+}
+
+async function loadPodcastFeeds() {
+  if (!podcastFeedsList) return;
+  try {
+    const token = await STC.getToken();
+    const res = await fetch(`${SERVER}/podcasts/feeds`, {
+      method: "GET",
+      mode: "cors",
+      headers: {
+        "X-Yoink-Token": token
+      }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const feeds = data.feeds || [];
+    
+    podcastFeedsList.innerHTML = "";
+    if (feeds.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "sub";
+      empty.textContent = "No podcast feeds added yet.";
+      podcastFeedsList.appendChild(empty);
+      return;
+    }
+    
+    feeds.forEach((feed) => {
+      const row = document.createElement("div");
+      row.className = "correction-row";
+      
+      const left = document.createElement("div");
+      const title = document.createElement("div");
+      title.className = "correction-title";
+      title.textContent = feed.title || feed.feed_url;
+      
+      const details = document.createElement("div");
+      details.className = "correction-types";
+      const count = feed.episode_count || 0;
+      details.textContent = `${count} episode${count === 1 ? "" : "s"} · ${feed.feed_url}`;
+      
+      left.appendChild(title);
+      left.appendChild(details);
+      
+      const removeBtn = document.createElement("div");
+      removeBtn.className = "correction-date";
+      removeBtn.style.cursor = "pointer";
+      removeBtn.textContent = "✕ Remove";
+      removeBtn.addEventListener("click", async () => {
+        row.style.opacity = 0.5;
+        row.style.pointerEvents = "none";
+        try {
+          await fetch(`${SERVER}/podcasts/feeds/remove`, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Yoink-Token": token
+            },
+            body: JSON.stringify({ feed_id: feed.id })
+          });
+          loadPodcastFeeds();
+        } catch (e) {
+          console.error("Failed to remove podcast feed", e);
+        }
+      });
+      
+      row.appendChild(left);
+      row.appendChild(removeBtn);
+      podcastFeedsList.appendChild(row);
+    });
+  } catch (e) {
+    console.error("loadPodcastFeeds failed", e);
+  }
+}
+
+if (podcastFeedValidateBtn && podcastFeedInput) {
+  podcastFeedValidateBtn.addEventListener("click", async () => {
+    const url = podcastFeedInput.value.trim();
+    if (!url) {
+      podcastFeedStatus.textContent = "Enter a feed URL first.";
+      podcastFeedStatus.className = "settings-status warn";
+      return;
+    }
+    podcastFeedStatus.textContent = "Validating feed...";
+    podcastFeedStatus.className = "settings-status";
+    
+    const result = await validatePodcastFeed(url);
+    if (result.ok) {
+      if (result.fallback) {
+        podcastFeedStatus.textContent = "Feed URL format is valid (server-side check skipped).";
+      } else {
+        podcastFeedStatus.textContent = `Valid feed: ${result.title || "Untitled"} (${result.episodes || 0} episodes) ✓`;
+      }
+      podcastFeedStatus.className = "settings-status ok";
+    } else {
+      podcastFeedStatus.textContent = `Validation failed: ${result.error || "unknown error"}`;
+      podcastFeedStatus.className = "settings-status warn";
+    }
+  });
+}
+
+if (podcastFeedAddBtn && podcastFeedInput) {
+  podcastFeedAddBtn.addEventListener("click", async () => {
+    const url = podcastFeedInput.value.trim();
+    if (!url) return;
+    
+    podcastFeedStatus.textContent = "Adding feed...";
+    podcastFeedStatus.className = "settings-status";
+    
+    try {
+      const token = await STC.getToken();
+      const res = await fetch(`${SERVER}/podcasts/feeds`, {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Yoink-Token": token
+        },
+        body: JSON.stringify({ feed_url: url })
+      });
+      const data = await res.json();
+      if (res.ok && data && data.ok) {
+        podcastFeedStatus.textContent = "Feed added successfully ✓";
+        podcastFeedStatus.className = "settings-status ok";
+        podcastFeedInput.value = "";
+        loadPodcastFeeds();
+      } else {
+        podcastFeedStatus.textContent = `Failed to add: ${(data && data.error) || "unknown error"}`;
+        podcastFeedStatus.className = "settings-status warn";
+      }
+    } catch (err) {
+      podcastFeedStatus.textContent = "Failed to add (helper offline)";
+      podcastFeedStatus.className = "settings-status warn";
+    }
+  });
+}
+
+// ---- Playlists ----
+async function loadMonitoredPlaylists() {
+  if (!playlistsList) return;
+  try {
+    const token = await STC.getToken();
+    const res = await fetch(`${SERVER}/playlists/monitored`, {
+      method: "GET",
+      mode: "cors",
+      headers: {
+        "X-Yoink-Token": token
+      }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const playlists = data.playlists || [];
+    
+    playlistsList.innerHTML = "";
+    if (playlists.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "sub";
+      empty.textContent = "No monitored playlists yet.";
+      playlistsList.appendChild(empty);
+      return;
+    }
+    
+    playlists.forEach((pl) => {
+      const row = document.createElement("div");
+      row.className = "correction-row";
+      
+      const left = document.createElement("div");
+      const title = document.createElement("div");
+      title.className = "correction-title";
+      title.textContent = pl.name || pl.playlist_url;
+      
+      const details = document.createElement("div");
+      details.className = "correction-types";
+      details.textContent = pl.playlist_url;
+      
+      left.appendChild(title);
+      left.appendChild(details);
+      
+      const removeBtn = document.createElement("div");
+      removeBtn.className = "correction-date";
+      removeBtn.style.cursor = "pointer";
+      removeBtn.textContent = "✕ Remove";
+      removeBtn.addEventListener("click", async () => {
+        row.style.opacity = 0.5;
+        row.style.pointerEvents = "none";
+        try {
+          await fetch(`${SERVER}/playlists/monitored/remove`, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Yoink-Token": token
+            },
+            body: JSON.stringify({ playlist_id: pl.playlist_id })
+          });
+          loadMonitoredPlaylists();
+        } catch (e) {
+          console.error("Failed to remove playlist", e);
+        }
+      });
+      
+      row.appendChild(left);
+      row.appendChild(removeBtn);
+      playlistsList.appendChild(row);
+    });
+  } catch (e) {
+    console.error("loadMonitoredPlaylists failed", e);
+  }
+}
+
+if (playlistAddBtn && playlistUrlInput) {
+  playlistAddBtn.addEventListener("click", async () => {
+    const url = playlistUrlInput.value.trim();
+    if (!url) return;
+    
+    playlistStatus.textContent = "Adding playlist...";
+    playlistStatus.className = "settings-status";
+    
+    try {
+      const token = await STC.getToken();
+      const res = await fetch(`${SERVER}/playlists/monitored`, {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Yoink-Token": token
+        },
+        body: JSON.stringify({ playlist_url: url })
+      });
+      const data = await res.json();
+      if (res.ok && data && data.ok) {
+        playlistStatus.textContent = "Playlist added successfully ✓";
+        playlistStatus.className = "settings-status ok";
+        playlistUrlInput.value = "";
+        loadMonitoredPlaylists();
+      } else {
+        playlistStatus.textContent = `Failed to add: ${(data && data.error) || "unknown error"}`;
+        playlistStatus.className = "settings-status warn";
+      }
+    } catch (err) {
+      playlistStatus.textContent = "Failed to add (helper offline)";
+      playlistStatus.className = "settings-status warn";
+    }
+  });
+}
+
+// ---- Role ----
+if (roleSelect) {
+  roleSelect.addEventListener("change", () => {
+    saveV3Settings();
+    STC.logEngagement("role-change", "setup", { role: roleSelect.value }).catch(() => {});
+  });
+}
+
+// ---- Instrumentation Logs (Open / Paste / Search-Click) ----
+STC.logEngagement("open", "setup", { source: source || "unknown" }).catch(() => {});
+
+const inputsToLogPaste = [
+  document.getElementById("yc-channel-input"),
+  document.getElementById("podcast-feed-input"),
+  document.getElementById("playlist-url-input"),
+  document.getElementById("allowed-site-input"),
+  document.getElementById("tc-channels-input")
+];
+inputsToLogPaste.forEach(input => {
+  if (input) {
+    input.addEventListener("paste", (ev) => {
+      const pastedText = (ev.clipboardData || window.clipboardData).getData('text');
+      STC.logEngagement("paste", "setup", { length: pastedText.length }).catch(() => {});
+    });
+  }
+});
+
+document.querySelectorAll(".tc-suggestion").forEach(el => {
+  el.addEventListener("click", (ev) => {
+    const val = el.getAttribute("data-val");
+    STC.logEngagement("search-click", "setup", { query: val }).catch(() => {});
+  });
+});
+
 // ---- Boot ----------------------------------------------------------------
 setCIControlsEnabled(false);
 applyDownloadState();
@@ -1747,6 +2161,9 @@ applySource();
 loadPendingTasteProfile();
 loadPendingV3Settings();
 loadTasteAnchors();
+loadAllowedSites();
+loadPodcastFeeds();
+loadMonitoredPlaylists();
 startPolling();
 
 // If the tab gets backgrounded for a while we don't burn cycles polling,

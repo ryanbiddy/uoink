@@ -180,15 +180,13 @@ async function rebuildContextMenus() {
 
   chrome.contextMenus.create({
     id: MENU_LINK,
-    title: "Uoink video link",
+    title: "Uoink link",
     contexts: ["link"],
-    targetUrlPatterns: LINK_PATTERNS,
   });
   chrome.contextMenus.create({
     id: MENU_PAGE,
-    title: "Uoink video",
+    title: "Uoink this page",
     contexts: ["page", "video"],
-    documentUrlPatterns: PAGE_PATTERNS,
   });
 
   const active = await getActiveFromStorage();
@@ -198,9 +196,23 @@ async function rebuildContextMenus() {
       id: MENU_SESSION,
       title: `Uoink into session: ${name}`,
       contexts: ["link", "page", "video"],
-      targetUrlPatterns: LINK_PATTERNS,
-      documentUrlPatterns: PAGE_PATTERNS,
     });
+  }
+}
+
+function openPermissionDialog(url, tabId, kind = "extract") {
+  try {
+    const u = new URL(url);
+    const origin = u.origin;
+    chrome.windows.create({
+      url: chrome.runtime.getURL("permission.html?origin=" + encodeURIComponent(origin) + "&tabId=" + tabId + "&url=" + encodeURIComponent(url) + "&kind=" + kind),
+      type: "popup",
+      width: 380,
+      height: 220,
+      focused: true
+    });
+  } catch (e) {
+    console.error("Failed to open permission dialog", e);
   }
 }
 
@@ -224,6 +236,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   let normalized = STC.normalizeYouTubeUrl(raw || "");
   let isTwitter = false;
+  let isUniversal = false;
   if (!normalized) {
     normalized = STC.normalizeTwitterUrl(raw || "");
     if (normalized) {
@@ -231,35 +244,99 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     }
   }
   if (!normalized) {
-    notify("Invalid URL", "Couldn't find YouTube video ID or Twitter/X status ID");
+    normalized = raw;
+    isUniversal = true;
+  }
+  if (!normalized) {
+    notify("Invalid URL", "Couldn't retrieve page URL.");
     return;
   }
 
-  const interval = await STC.getInterval();
-  const job = { kind, url: normalized, interval, addedAt: Date.now() };
-  if (isTwitter) {
-    job.useExtractAny = true;
-  }
-  if (kind === "session_add") {
-    const active = await getActiveFromStorage();
-    if (!active || !active.id) {
-      notify("Uoink", "No active session — start one in the popup first.");
+  const proceedWithJob = async () => {
+    const interval = await STC.getInterval();
+    const job = { kind, url: normalized, interval, addedAt: Date.now() };
+    if (isTwitter) {
+      job.useExtractAny = true;
+    } else if (isUniversal) {
+      job.useExtractPage = true;
+    }
+    if (kind === "session_add") {
+      const active = await getActiveFromStorage();
+      if (!active || !active.id) {
+        notify("Uoink", "No active session — start one in the popup first.");
+        return;
+      }
+      job.session_id = active.id;
+      job.session_name = active.name;
+    }
+    if (kind === "extract" && !(await serverQueueHasRoom())) {
+      notify("Queue full", "Wait a few minutes");
       return;
     }
-    job.session_id = active.id;
-    job.session_name = active.name;
+    await enqueue(job);
+  };
+
+  if (isUniversal) {
+    try {
+      const u = new URL(normalized);
+      const origin = u.origin + "/";
+      const allowlist = await STC.getAllowlist();
+      const isAllowed = STC.isUrlAllowed(normalized, allowlist);
+      chrome.permissions.contains({ origins: [origin] }, (hasPerm) => {
+        if (hasPerm && isAllowed) {
+          proceedWithJob();
+        } else {
+          openPermissionDialog(normalized, tab.id, kind);
+        }
+      });
+    } catch (e) {
+      notify("Invalid URL", "Could not parse site origin.");
+    }
+  } else {
+    proceedWithJob();
   }
-  if (kind === "extract" && !(await serverQueueHasRoom())) {
-    notify("Queue full", "Wait a few minutes");
-    return;
-  }
-  await enqueue(job);
 });
 
 // ---- Generic message handling --------------------------------------------
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (!msg || typeof msg !== "object") return;
   if (msg.target === "offscreen") return;
+
+  if (msg.type === "permissionGranted" && msg.url) {
+    (async () => {
+      const interval = await STC.getInterval();
+      const job = { kind: msg.kind || "extract", url: msg.url, interval, addedAt: Date.now() };
+      
+      let normalized = STC.normalizeYouTubeUrl(msg.url);
+      if (!normalized) {
+        normalized = STC.normalizeTwitterUrl(msg.url);
+        if (normalized) job.useExtractAny = true;
+      }
+      if (!normalized) {
+        normalized = msg.url;
+        job.useExtractPage = true;
+      }
+      job.url = normalized;
+
+      if (job.kind === "session_add") {
+        const active = await getActiveFromStorage();
+        if (!active || !active.id) {
+          notify("Uoink", "No active session — start one in the popup first.");
+          return;
+        }
+        job.session_id = active.id;
+        job.session_name = active.name;
+      } else {
+        if (!(await serverQueueHasRoom())) {
+          notify("Queue full", "Wait a few minutes");
+          return;
+        }
+      }
+      await enqueue(job);
+    })();
+    sendResponse({ ok: true });
+    return true;
+  }
 
   if (msg.type === "openTab" && msg.url) {
     chrome.tabs.create({ url: msg.url, active: true }, (tab) => {
@@ -681,7 +758,9 @@ async function runJob(job) {
 async function runExtractJob(job) {
   let data;
   try {
-    if (job.useExtractAny) {
+    if (job.useExtractPage) {
+      data = await STC.postExtractPage(job.url, job.interval);
+    } else if (job.useExtractAny) {
       data = await STC.postExtractAny(job.url, job.interval);
     } else {
       data = await STC.postExtract(job.url, job.interval);
