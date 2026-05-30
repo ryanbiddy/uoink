@@ -84,6 +84,8 @@ import memory_layer  # noqa: E402  -- v2.5 S4 markdown taste/user memory
 import podcasts  # noqa: E402  -- v3.1 podcast RSS feed registry + polling
 import whisper_runner  # noqa: E402  -- v3.1 WhisperX transcription (lazy)
 import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
+import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
+import writing_studio  # noqa: E402  -- v3.2 Writing Studio (tweet/blog)
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
@@ -587,6 +589,14 @@ def _default_settings() -> dict:
         # content automatically (ROADMAP P5/track D guidance). Off = ASR
         # only; user can still enable per-call via the endpoint body.
         "diarization_default": False,
+        # v3.2 Writing Studio -- soft-warn Voice DNA scan. When False, the
+        # scan is skipped entirely. Per Ryan's locked answer #3 the default
+        # is True (warn on slop, don't auto-block).
+        "voice_dna_warnings_enabled": True,
+        # v3.2 Writing Studio -- whether the dashboard exposes the
+        # "skip warnings this generation" affordance. Default True; users
+        # who never want the warning surface can hide it via Settings.
+        "voice_dna_show_per_generation_toggle": True,
         "anthropic_key_invalid": False,
         # v2.1 rename: set True after the one-time "Yoink is now Uoink"
         # post-migration toast has fired, so it never repeats.
@@ -797,6 +807,11 @@ def _public_settings(data: dict | None = None) -> dict:
         # "WhisperX not installed -- install via Setup" without a
         # separate endpoint roundtrip.
         "whisperx_runtime_available": whisper_runner.is_whisperx_available(),
+        # v3.2 Writing Studio settings.
+        "voice_dna_warnings_enabled": bool(
+            data.get("voice_dna_warnings_enabled", True)),
+        "voice_dna_show_per_generation_toggle": bool(
+            data.get("voice_dna_show_per_generation_toggle", True)),
     }
 
 
@@ -6310,6 +6325,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_monitored_playlists_list()
         if bare == "/playlists/monitored/events":
             return self._handle_monitored_playlist_events_list()
+        if bare == "/writing/style-anchors":
+            return self._handle_writing_style_anchors_list()
+        if bare.startswith("/writing/") and not bare.endswith("/revise") \
+                and not bare.startswith("/writing/style-anchors"):
+            return self._handle_writing_piece_get(bare)
         if bare == "/update/check":
             return self._handle_update_check()
         if bare == "/engagement/scores":
@@ -7513,6 +7533,242 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {"ok": True, "events": rows,
                                       "count": len(rows)})
 
+    # ---- v3.2 Writing Studio --------------------------------------
+    # Server is POST-only at the dispatch layer; we expose the prompt's
+    # PATCH/DELETE semantics via POST action paths so the dashboard +
+    # MCP tools call a uniform shape. Mapping:
+    #   POST /writing/style-anchors              -> add
+    #   POST /writing/style-anchors/<id>         -> patch
+    #   POST /writing/style-anchors/<id>/remove  -> delete
+
+    def _writing_url_fetcher(self):
+        """Return a callable that, given a URL, returns extracted prose.
+        Bridges Writing Studio's style anchor URL ingestion to whatever
+        page extractor is currently shipped (Universal Site PR / Crawl4AI
+        wrapper). Falls back to None when no extractor is bound -- the
+        anchor still saves, just with raw_text=NULL."""
+        fetcher = globals().get("_extract_page_to_prose")
+        return fetcher if callable(fetcher) else None
+
+    def _handle_writing_style_anchors_list(self):
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        active_only = (qs.get("active_only") or [""])[0] == "1"
+        try:
+            rows = writing_studio.list_style_anchors(
+                _get_index(), active_only=active_only)
+        except Exception as e:
+            log.exception("/writing/style-anchors GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {
+            "ok": True, "anchors": rows, "count": len(rows),
+            "cap": writing_studio.STYLE_ANCHOR_CAP,
+        })
+
+    def _handle_writing_style_anchor_add(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        name = body.get("name")
+        source_type = (body.get("source_type") or "").strip()
+        source_value = body.get("source_value")
+        try:
+            row = writing_studio.add_style_anchor(
+                _get_index(),
+                name=name, source_type=source_type,
+                source_value=source_value,
+                url_to_prose=self._writing_url_fetcher())
+        except ValueError as e:
+            status = getattr(e, "http_status", 400)
+            return self._send_json(status, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/writing/style-anchors POST add failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "anchor": row})
+
+    def _handle_writing_style_anchor_modify(self, bare: str, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        tail = bare[len("/writing/style-anchors/"):].strip("/")
+        if tail.endswith("/remove"):
+            # /writing/style-anchors/<id>/remove
+            try:
+                anchor_id = int(tail[:-len("/remove")])
+            except ValueError:
+                return self._send_json(400, {
+                    "ok": False, "error": "anchor id required"})
+            try:
+                removed = writing_studio.remove_style_anchor(
+                    _get_index(), anchor_id)
+            except Exception as e:
+                log.exception("/writing/style-anchors remove failed")
+                return self._send_json(500, {"ok": False, "error": str(e)})
+            return self._send_json(200, {"ok": True, "removed": removed,
+                                          "id": anchor_id})
+        # /writing/style-anchors/<id> -- patch (rename / toggle active)
+        try:
+            anchor_id = int(tail)
+        except ValueError:
+            return self._send_json(400, {
+                "ok": False, "error": "anchor id required"})
+        try:
+            row = writing_studio.update_style_anchor(
+                _get_index(), anchor_id,
+                name=body.get("name"),
+                active=body.get("active"))
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/writing/style-anchors PATCH failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        if row is None:
+            return self._send_json(404, {"ok": False,
+                                          "error": "anchor not found"})
+        return self._send_json(200, {"ok": True, "anchor": row})
+
+    def _handle_writing_piece_get(self, bare: str):
+        if not self._require_token():
+            return
+        tail = bare[len("/writing/"):].strip("/")
+        try:
+            piece_id = int(tail)
+        except ValueError:
+            return self._send_json(400, {
+                "ok": False, "error": "piece id required"})
+        try:
+            piece = writing_studio.get_piece(_get_index(), piece_id)
+        except Exception as e:
+            log.exception("/writing/<id> GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        if piece is None:
+            return self._send_json(404, {"ok": False,
+                                          "error": "piece not found"})
+        return self._send_json(200, {"ok": True, "piece": piece})
+
+    def _writing_two_phase(self, body: dict, *, kind: str):
+        """Shared two-phase contract for tweet/blog/revise. Phase 1: no
+        body field -> return grounding payload (source yoink + anchors +
+        voice DNA + credit lines). Phase 2: body field present + credit
+        line included -> persist + scan + return."""
+        if not isinstance(body, dict):
+            return 400, {"ok": False, "error": "json object required"}
+        yoink_id = (body.get("source_yoink_id")
+                      or body.get("yoink_id") or "").strip() or None
+        style_anchor_ids = body.get("style_anchor_ids") or []
+        if not isinstance(style_anchor_ids, list):
+            return 400, {"ok": False,
+                          "error": "style_anchor_ids must be a list"}
+        # Phase 1: no agent-produced body yet
+        agent_body = body.get("body")
+        if agent_body is None:
+            grounding = writing_studio.assemble_grounding(
+                _get_index(), yoink_id,
+                style_anchor_ids=style_anchor_ids)
+            return 200, {
+                "ok": True,
+                "mode": "grounding_only",
+                "kind": kind,
+                "context": grounding,
+                "next": ("Produce the structured " + kind +
+                          " (including the source_credit_line verbatim "
+                          "in the body) and POST again with `body` "
+                          "(and `title` + `dek` + `tags` for blogs) to "
+                          "persist."),
+            }
+        # Phase 2: persist
+        yoink_row = _get_index().get_yoink(yoink_id) if yoink_id else None
+        credit_line = body.get("source_credit_line") or \
+            writing_studio.build_credit_line(yoink_row, kind=kind)
+        settings = _read_settings() or {}
+        try:
+            piece = writing_studio.persist_piece(
+                _get_index(),
+                yoink_id=yoink_id,
+                kind=kind,
+                body=agent_body,
+                title=body.get("title"),
+                dek=body.get("dek"),
+                tags=body.get("tags") or [],
+                source_credit_line=credit_line,
+                style_anchor_ids=style_anchor_ids,
+                angle=body.get("angle"),
+                target_length=body.get("target_length"),
+                mode=(body.get("mode")
+                       or writing_studio.COMPUTE_MODE_AGENT),
+                parent_id=body.get("parent_id"),
+                voice_dna_warnings_enabled=bool(
+                    settings.get("voice_dna_warnings_enabled", True)),
+                skip_voice_dna_this_time=bool(
+                    body.get("skip_voice_dna_this_time")),
+                suppress_credit=bool(body.get("suppress_credit")),
+            )
+        except ValueError as e:
+            status = getattr(e, "http_status", 400)
+            return status, {"ok": False, "error": str(e)}
+        except Exception as e:
+            log.exception("/writing/<kind> persist failed: kind=%s", kind)
+            return 500, {"ok": False, "error": str(e)}
+        # Override the persist_piece compute-mode (agent|byo_key) with the
+        # phase indicator so the dashboard can distinguish grounding_only
+        # from persisted without re-parsing.
+        piece["mode"] = "persisted"
+        return 200, {"ok": True, **piece}
+
+    def _handle_writing_tweet(self, body):
+        status, resp = self._writing_two_phase(
+            body, kind=writing_studio.KIND_TWEET)
+        return self._send_json(status, resp)
+
+    def _handle_writing_blog(self, body):
+        status, resp = self._writing_two_phase(
+            body, kind=writing_studio.KIND_BLOG)
+        return self._send_json(status, resp)
+
+    def _handle_writing_revise(self, bare: str, body):
+        """POST /writing/<id>/revise -- two-phase revisor. Phase 1:
+        returns prior piece + grounding. Phase 2: persists revision
+        with parent_id chain."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        tail = bare[len("/writing/"):-len("/revise")].strip("/")
+        try:
+            prev_id = int(tail)
+        except ValueError:
+            return self._send_json(400, {
+                "ok": False, "error": "piece id required"})
+        prev = writing_studio.get_piece(_get_index(), prev_id)
+        if prev is None:
+            return self._send_json(404, {"ok": False,
+                                          "error": "piece not found"})
+        revision_target = body.get("revision_target")
+        agent_body = body.get("body")
+        if agent_body is None:
+            grounding = writing_studio.assemble_grounding(
+                _get_index(), prev.get("yoink_id"),
+                style_anchor_ids=prev.get("style_anchor_ids"))
+            return self._send_json(200, {
+                "ok": True,
+                "mode": "revision_context",
+                "kind": prev.get("kind"),
+                "previous": prev,
+                "revision_target": revision_target,
+                "context": grounding,
+                "next": ("Produce the revised body (with the credit "
+                          "line preserved) and POST again with `body` "
+                          "to persist as a new version."),
+            })
+        # Phase 2: persist as revision with parent chain.
+        body = {**body, "parent_id": prev_id}
+        body.setdefault("source_yoink_id", prev.get("yoink_id"))
+        body.setdefault("style_anchor_ids",
+                         prev.get("style_anchor_ids") or [])
+        status, resp = self._writing_two_phase(
+            body, kind=prev.get("kind") or writing_studio.KIND_TWEET)
+        return self._send_json(status, resp)
+
     def _handle_settings_mcp_config(self):
         """MCP config snippet for the Settings tab Copy button. Token-gated."""
         if not self._require_token():
@@ -7616,6 +7872,8 @@ class Handler(BaseHTTPRequestHandler):
             "diarization_default",          # v3.1 track B/D -- WhisperX
                                             # speaker diarization on every
                                             # interview-format transcribe
+            "voice_dna_warnings_enabled",   # v3.2 Writing Studio
+            "voice_dna_show_per_generation_toggle",  # v3.2 Writing Studio
         )
         integer_fields = ("clipboard_screenshot_cap",)
         extra_fields = ("output_dir", "autostart", "topics",
@@ -8177,6 +8435,16 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_monitored_playlist_set_enabled(body)
         if bare == "/playlists/monitored/poll":
             return self._handle_monitored_playlist_poll(body)
+        if bare == "/writing/tweet":
+            return self._handle_writing_tweet(body)
+        if bare == "/writing/blog":
+            return self._handle_writing_blog(body)
+        if bare.startswith("/writing/") and bare.endswith("/revise"):
+            return self._handle_writing_revise(bare, body)
+        if bare == "/writing/style-anchors":
+            return self._handle_writing_style_anchor_add(body)
+        if bare.startswith("/writing/style-anchors/"):
+            return self._handle_writing_style_anchor_modify(bare, body)
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})

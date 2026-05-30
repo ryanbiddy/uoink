@@ -960,6 +960,213 @@ def list_monitored_playlist_events(args: dict[str, Any]) -> dict[str, Any]:
     return _ok(events=rows, count=len(rows))
 
 
+# ---- v3.2 Writing Studio --------------------------------------------
+def _writing_grounding(yoink_id, style_anchor_ids):
+    server = _b()
+    import writing_studio as _ws  # noqa: WPS433
+    return _ws.assemble_grounding(
+        server._get_index(), yoink_id,
+        style_anchor_ids=style_anchor_ids)
+
+
+def _writing_persist(yoink_id, kind, body_text, *, title=None, dek=None,
+                       tags=None, style_anchor_ids=None, angle=None,
+                       target_length=None, parent_id=None,
+                       suppress_credit=False,
+                       skip_voice_dna_this_time=False,
+                       source_credit_line=None):
+    server = _b()
+    import writing_studio as _ws  # noqa: WPS433
+    settings = server._read_settings() or {}
+    yoink_row = (server._get_index().get_yoink(yoink_id)
+                  if yoink_id else None)
+    credit = source_credit_line or _ws.build_credit_line(yoink_row, kind=kind)
+    return _ws.persist_piece(
+        server._get_index(), yoink_id=yoink_id, kind=kind,
+        body=body_text, title=title, dek=dek, tags=tags,
+        source_credit_line=credit,
+        style_anchor_ids=style_anchor_ids,
+        angle=angle, target_length=target_length,
+        parent_id=parent_id,
+        voice_dna_warnings_enabled=bool(
+            settings.get("voice_dna_warnings_enabled", True)),
+        skip_voice_dna_this_time=skip_voice_dna_this_time,
+        suppress_credit=suppress_credit,
+    )
+
+
+def write_tweet(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.2 Writing Studio (tweet/thread): two-phase. Phase 1 -- no
+    `body` field -> returns grounding (source yoink + creator credit +
+    style anchors + Voice DNA). Agent writes the tweet/thread using
+    its own model, INCLUDING the credit line verbatim. Phase 2 --
+    `body` present -> persists + scans + returns warnings (NEVER
+    auto-blocks; see VOICE-DNA.md soft-warn policy)."""
+    import writing_studio as _ws  # noqa: WPS433
+    yoink_id = (args.get("source_yoink_id")
+                 or args.get("yoink_id"))
+    if yoink_id is not None and not isinstance(yoink_id, str):
+        return _err("source_yoink_id must be a string")
+    style_anchor_ids = args.get("style_anchor_ids") or []
+    if not isinstance(style_anchor_ids, list):
+        return _err("style_anchor_ids must be a list")
+    body_text = args.get("body")
+    if body_text is None:
+        return _ok(mode="grounding_only", kind=_ws.KIND_TWEET,
+                    context=_writing_grounding(yoink_id, style_anchor_ids),
+                    next=("Produce the tweet body (with credit line "
+                          "included verbatim) and re-call with `body`."))
+    try:
+        piece = _writing_persist(
+            yoink_id, _ws.KIND_TWEET, body_text,
+            tags=args.get("tags") or [],
+            style_anchor_ids=style_anchor_ids,
+            angle=args.get("angle"),
+            target_length=args.get("target_length_chars"),
+            parent_id=args.get("parent_id"),
+            suppress_credit=bool(args.get("suppress_credit")),
+            skip_voice_dna_this_time=bool(
+                args.get("skip_voice_dna_this_time")),
+            source_credit_line=args.get("source_credit_line"))
+    except ValueError as e:
+        return _err(str(e))
+    except Exception as e:
+        return _err(f"write_tweet failed: {e}")
+    # piece already carries 'mode' from persist_piece (compute mode:
+    # agent|byo_key). Override it to the phase indicator 'persisted'
+    # before returning so the dashboard can distinguish grounding_only
+    # from persisted without poking at the kind field.
+    piece["mode"] = "persisted"
+    return _ok(**piece)
+
+
+def write_blog(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.2 Writing Studio (blog): same two-phase contract as
+    write_tweet. Phase 2 also accepts `title`, `dek`, `tags`."""
+    import writing_studio as _ws  # noqa: WPS433
+    yoink_id = (args.get("source_yoink_id")
+                 or args.get("yoink_id"))
+    if yoink_id is not None and not isinstance(yoink_id, str):
+        return _err("source_yoink_id must be a string")
+    style_anchor_ids = args.get("style_anchor_ids") or []
+    if not isinstance(style_anchor_ids, list):
+        return _err("style_anchor_ids must be a list")
+    body_text = args.get("body")
+    if body_text is None:
+        return _ok(mode="grounding_only", kind=_ws.KIND_BLOG,
+                    context=_writing_grounding(yoink_id, style_anchor_ids),
+                    next=("Produce the blog (title, dek, body markdown, "
+                          "tags) with the Source section included and "
+                          "re-call with `body` and friends."))
+    try:
+        piece = _writing_persist(
+            yoink_id, _ws.KIND_BLOG, body_text,
+            title=args.get("title"), dek=args.get("dek"),
+            tags=args.get("tags") or [],
+            style_anchor_ids=style_anchor_ids,
+            angle=args.get("angle"),
+            target_length=args.get("target_length_words"),
+            parent_id=args.get("parent_id"),
+            suppress_credit=bool(args.get("suppress_credit")),
+            skip_voice_dna_this_time=bool(
+                args.get("skip_voice_dna_this_time")),
+            source_credit_line=args.get("source_credit_line"))
+    except ValueError as e:
+        return _err(str(e))
+    except Exception as e:
+        return _err(f"write_blog failed: {e}")
+    piece["mode"] = "persisted"
+    return _ok(**piece)
+
+
+def list_writing_pieces(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.2 Writing Studio: list pieces newest-first. Optional `kind`
+    + `yoink_id` filters."""
+    server = _b()
+    import writing_studio as _ws  # noqa: WPS433
+    kind = args.get("kind")
+    yoink_id = args.get("yoink_id")
+    limit = _limit_int(args.get("limit"), default=100, low=1, high=500)
+    try:
+        rows = _ws.list_pieces(
+            server._get_index(), kind=kind, yoink_id=yoink_id, limit=limit)
+    except ValueError as e:
+        return _err(str(e))
+    except Exception as e:
+        return _err(f"list_writing_pieces failed: {e}")
+    return _ok(pieces=rows, count=len(rows))
+
+
+def get_writing_piece(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.2 Writing Studio: fetch one piece by id."""
+    server = _b()
+    import writing_studio as _ws  # noqa: WPS433
+    try:
+        piece_id = int(args.get("id") or args.get("piece_id"))
+    except (TypeError, ValueError):
+        return _err("piece id (integer) is required")
+    piece = _ws.get_piece(server._get_index(), piece_id)
+    if piece is None:
+        return _err("piece not found")
+    return _ok(piece=piece)
+
+
+def add_style_anchor(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.2 Writing Studio: add a Substack-style voice anchor (URL or
+    raw text). Cap at 10 per Ryan's locked answer #4."""
+    server = _b()
+    import writing_studio as _ws  # noqa: WPS433
+    try:
+        url_fetcher = (server.Handler._writing_url_fetcher
+                        if False else None)  # MCP path doesn't have a Handler instance
+    except Exception:
+        url_fetcher = None
+    # The MCP call doesn't have a Handler instance, so we resolve the
+    # extractor directly. Falls back to None if Universal Site PR isn't
+    # in main yet (anchor still saves with raw_text=NULL for URLs).
+    url_fetcher = globals().get("_extract_page_to_prose_fn")
+    if url_fetcher is None:
+        url_fetcher = getattr(server, "_extract_page_to_prose", None)
+    try:
+        row = _ws.add_style_anchor(
+            server._get_index(),
+            name=args.get("name"),
+            source_type=(args.get("source_type") or "").strip(),
+            source_value=args.get("source_value"),
+            url_to_prose=url_fetcher)
+    except ValueError as e:
+        return _err(str(e))
+    except Exception as e:
+        return _err(f"add_style_anchor failed: {e}")
+    return _ok(anchor=row)
+
+
+def list_style_anchors(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.2 Writing Studio: list style anchors with their active flag."""
+    server = _b()
+    import writing_studio as _ws  # noqa: WPS433
+    active_only = bool(args.get("active_only"))
+    rows = _ws.list_style_anchors(
+        server._get_index(), active_only=active_only)
+    return _ok(anchors=rows, count=len(rows), cap=_ws.STYLE_ANCHOR_CAP)
+
+
+def remove_style_anchor(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.2 Writing Studio: delete a style anchor."""
+    server = _b()
+    import writing_studio as _ws  # noqa: WPS433
+    try:
+        anchor_id = int(args.get("anchor_id") or args.get("id"))
+    except (TypeError, ValueError):
+        return _err("anchor_id (integer) is required")
+    try:
+        removed = _ws.remove_style_anchor(
+            server._get_index(), anchor_id)
+    except Exception as e:
+        return _err(f"remove_style_anchor failed: {e}")
+    return _ok(removed=removed, id=anchor_id)
+
+
 def get_user_memory(_args: dict[str, Any]) -> dict[str, Any]:
     """v2.5 S4 user memory: return the free-form USER.md content + path.
     Skeleton is seeded on first read so an agent always gets a starting
@@ -2252,6 +2459,126 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, []),
         handler=get_script,
         rate_limiter=_RateLimiter(60),
+    ),
+    # v3.2 Writing Studio (7 tools)
+    "write_tweet": ToolSpec(
+        name="write_tweet",
+        description=(
+            "v3.2 Writing Studio: two-phase tweet/thread generator. "
+            "Phase 1 (no `body`) returns grounding (source yoink + "
+            "creator credit + style anchors + Voice DNA prompt). "
+            "Phase 2 (`body` present) persists + scans for Voice DNA "
+            "violations + returns structured warnings (soft warn -- "
+            "NEVER auto-blocks). Creator credit is required in the body."
+        ),
+        input_schema=_schema({
+            "source_yoink_id": {"type": "string"},
+            "angle": {"type": "string"},
+            "target_length_chars": {"type": "integer"},
+            "style_anchor_ids": {"type": "array",
+                                   "items": {"type": "integer"}},
+            "body": {"type": "string"},
+            "source_credit_line": {"type": "string"},
+            "skip_voice_dna_this_time": {"type": "boolean"},
+            "suppress_credit": {"type": "boolean",
+                                  "description": "Reject (400). Locked: "
+                                  "credit is non-suppressible."},
+            "tags": {"type": "array", "items": {"type": "string"}},
+            "parent_id": {"type": "integer"},
+        }, []),
+        handler=write_tweet,
+        rate_limiter=_RateLimiter(20),
+    ),
+    "write_blog": ToolSpec(
+        name="write_blog",
+        description=(
+            "v3.2 Writing Studio: two-phase blog generator. Same shape "
+            "as write_tweet but Phase 2 accepts title, dek, tags, and "
+            "expects markdown body with a Source section. Soft-warn "
+            "Voice DNA scan; creator credit non-suppressible."
+        ),
+        input_schema=_schema({
+            "source_yoink_id": {"type": "string"},
+            "angle": {"type": "string"},
+            "target_length_words": {"type": "integer"},
+            "style_anchor_ids": {"type": "array",
+                                   "items": {"type": "integer"}},
+            "body": {"type": "string"},
+            "title": {"type": "string"},
+            "dek": {"type": "string"},
+            "tags": {"type": "array", "items": {"type": "string"}},
+            "source_credit_line": {"type": "string"},
+            "skip_voice_dna_this_time": {"type": "boolean"},
+            "suppress_credit": {"type": "boolean"},
+            "parent_id": {"type": "integer"},
+        }, []),
+        handler=write_blog,
+        rate_limiter=_RateLimiter(10),
+    ),
+    "list_writing_pieces": ToolSpec(
+        name="list_writing_pieces",
+        description=(
+            "v3.2 Writing Studio: list generated pieces newest-first. "
+            "Optional `kind` (tweet|thread|blog) + `yoink_id` filters."
+        ),
+        input_schema=_schema({
+            "kind": {"type": "string",
+                      "enum": ["tweet", "thread", "blog"]},
+            "yoink_id": {"type": "string"},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 500,
+                       "default": 100},
+        }, []),
+        handler=list_writing_pieces,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "get_writing_piece": ToolSpec(
+        name="get_writing_piece",
+        description="v3.2 Writing Studio: fetch one piece by id.",
+        input_schema=_schema({
+            "id": {"type": "integer"},
+            "piece_id": {"type": "integer"},
+        }, []),
+        handler=get_writing_piece,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "add_style_anchor": ToolSpec(
+        name="add_style_anchor",
+        description=(
+            "v3.2 Writing Studio: add a Substack-style voice anchor "
+            "(URL or raw pasted text). User names each. Cap at 10 -- "
+            "returns 422-shaped error when exceeded. URL ingestion "
+            "extracts prose via the helper's page extractor (Universal "
+            "Site PR); falls back to NULL raw_text when the extractor "
+            "isn't bound yet."
+        ),
+        input_schema=_schema({
+            "name": {"type": "string"},
+            "source_type": {"type": "string",
+                              "enum": ["url", "text"]},
+            "source_value": {"type": "string"},
+        }, ["name", "source_type", "source_value"]),
+        handler=add_style_anchor,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "list_style_anchors": ToolSpec(
+        name="list_style_anchors",
+        description=("v3.2 Writing Studio: list style anchors + their "
+                      "active flag + the helper's 10-anchor cap."),
+        input_schema=_schema({
+            "active_only": {"type": "boolean", "default": False},
+        }, []),
+        handler=list_style_anchors,
+        rate_limiter=_RateLimiter(60),
+    ),
+    "remove_style_anchor": ToolSpec(
+        name="remove_style_anchor",
+        description="v3.2 Writing Studio: delete a style anchor.",
+        input_schema=_schema({
+            "anchor_id": {"type": "integer"},
+            "id": {"type": "integer"},
+        }, []),
+        handler=remove_style_anchor,
+        rate_limiter=_RateLimiter(30),
     ),
 }
 
