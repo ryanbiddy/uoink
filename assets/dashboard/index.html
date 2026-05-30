@@ -686,6 +686,29 @@
       margin: 18px 0;
     }
 
+    .learn-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 18px;
+    }
+
+    .learn-links a,
+    .small-link-button {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      border: 1px solid rgba(249, 115, 22, 0.36);
+      border-radius: var(--pill-radius);
+      padding: 0 10px;
+      background: rgba(194, 65, 12, 0.12);
+      color: var(--cream);
+      font-size: 11px;
+      font-weight: 900;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
     .insight-card,
     .connection-row,
     .gap-card {
@@ -896,6 +919,119 @@
       grid-template-columns: 320px minmax(0, 1fr);
       gap: 16px;
       align-items: start;
+    }
+
+    .features-layout,
+    .writing-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .feature-group-list,
+    .feature-row-list,
+    .anchor-list,
+    .site-list,
+    .channel-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .feature-group-card,
+    .feature-row,
+    .anchor-row,
+    .site-row,
+    .channel-row,
+    .warning-panel,
+    .writing-output {
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      background: var(--ink-warm);
+    }
+
+    .feature-group-card {
+      display: grid;
+      gap: 7px;
+      width: 100%;
+      padding: 13px;
+      color: var(--cream);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .feature-group-card.active {
+      border-color: rgba(249, 115, 22, 0.52);
+      background: #18120E;
+    }
+
+    .feature-row,
+    .anchor-row,
+    .site-row,
+    .channel-row {
+      display: grid;
+      gap: 8px;
+      padding: 13px;
+    }
+
+    .feature-row-top,
+    .anchor-row-top,
+    .site-row,
+    .channel-row-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .feature-row p,
+    .warning-panel p,
+    .writing-output p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .warning-panel {
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border-color: rgba(255, 210, 63, 0.36);
+      background: rgba(255, 210, 63, 0.08);
+    }
+
+    .writing-output {
+      min-height: 240px;
+      padding: 14px;
+      color: var(--cream);
+      white-space: pre-wrap;
+    }
+
+    .radio-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .readonly-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border: 1px solid rgba(255, 244, 236, 0.18);
+      border-radius: var(--pill-radius);
+      padding: 0 10px;
+      background: rgba(255, 244, 236, 0.05);
+      color: var(--cream);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
     }
 
     .script-list,
@@ -1583,9 +1719,11 @@
       .control-grid,
       .activity-layout,
       .feature-grid,
+      .features-layout,
       .resurface-layout,
       .workspace-layout,
       .script-layout,
+      .writing-layout,
       .evidence-layout,
       .yoink-layout,
       .settings-grid,
@@ -1606,11 +1744,13 @@
         <button class="nav-button" type="button" data-tab-button="for-you">For You <span class="nav-count" id="forYouNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="build">Build <span class="nav-count" id="buildNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="script">Script <span class="nav-count" id="scriptNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="writing">Writing <span class="nav-count" id="writingNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="evidence">Evidence <span class="nav-count" id="evidenceNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="yoink">Uoink</button>
         <button class="nav-button active" type="button" data-tab-button="library">Library <span class="nav-count" id="libraryNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="activity">Activity <span class="nav-count" id="activityNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="settings">Settings</button>
+        <button class="nav-button" type="button" data-tab-button="features">Features</button>
         <button class="nav-button" type="button" data-tab-button="about">About</button>
       </nav>
       <div class="sidebar-bottom">
@@ -1647,6 +1787,10 @@
           <div class="summary-line">
             <span id="forYouSummary">Building local recommendations...</span>
             <span class="soft-note">Engagement Memory + S1 facets</span>
+          </div>
+          <div class="learn-links" aria-label="For You walkthrough links">
+            <a href="https://uoink.app/features/resurface-for-you" target="_blank" rel="noreferrer">Learn: For You</a>
+            <a href="https://uoink.app/features/engagement-memory" target="_blank" rel="noreferrer">Learn: Engagement Memory</a>
           </div>
 
           <div class="feature-grid" id="worthCards"></div>
@@ -1687,6 +1831,10 @@
               <p class="lede">Drop a working hook, format, and topic. Uoink assembles examples, audience questions, and your own channel patterns for an agent or a manual critique pass.</p>
             </div>
             <button class="button ghost" type="button" id="reloadBuild">Reload</button>
+          </div>
+          <div class="learn-links" aria-label="Build walkthrough links">
+            <a href="https://uoink.app/features/build-workspace" target="_blank" rel="noreferrer">Learn: Build Workspace</a>
+            <a href="https://uoink.app/features/critique-corpus" target="_blank" rel="noreferrer">Learn: Critique Corpus</a>
           </div>
 
           <div class="workspace-layout">
@@ -1760,10 +1908,14 @@
           <div class="page-head">
             <div>
               <div class="eyebrow">Script Studio</div>
-              <h1>Draft from evidence, <em>not vibes.</em></h1>
+              <h1>Draft with evidence, <em>and receipts.</em></h1>
               <p class="lede">Start from a Build workspace, ask an agent for a grounded script, persist versions, revise against critique findings, and derive a shot list.</p>
             </div>
             <button class="button ghost" type="button" id="reloadScripts">Reload</button>
+          </div>
+          <div class="learn-links" aria-label="Script walkthrough links">
+            <a href="https://uoink.app/features/script-studio" target="_blank" rel="noreferrer">Learn: Script Studio</a>
+            <a href="https://uoink.app/features/style-anchors" target="_blank" rel="noreferrer">Learn: Style Anchors</a>
           </div>
 
           <div class="script-layout">
@@ -1820,6 +1972,100 @@
           </div>
         </section>
 
+        <section class="tab-panel" id="tab-writing" data-tab-panel="writing">
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">Writing Studio</div>
+              <h1>Turn a uoink into <em>a tweet or blog.</em></h1>
+              <p class="lede">Pick a source, choose the output, blend in style anchors, then let an agent write with source credit kept in the frame.</p>
+            </div>
+            <button class="button ghost" type="button" id="reloadWriting">Reload</button>
+          </div>
+          <div class="learn-links" aria-label="Writing walkthrough links">
+            <a href="https://uoink.app/features/writing-studio" target="_blank" rel="noreferrer">Learn: Writing Studio</a>
+            <a href="https://uoink.app/features/style-anchors" target="_blank" rel="noreferrer">Learn: Style Anchors</a>
+          </div>
+
+          <div class="writing-layout">
+            <aside class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Write from a source</div>
+                <span class="nav-count" id="writingAnchorCount">0</span>
+              </div>
+              <div class="panel-body">
+                <label class="soft-note" for="writingSource">Source uoink</label>
+                <select class="field" id="writingSource"></select>
+                <label class="soft-note">Output</label>
+                <div class="radio-grid" id="writingModePicker">
+                  <label class="choice-row"><input type="radio" name="writingMode" value="tweet" checked><span>Tweet</span></label>
+                  <label class="choice-row"><input type="radio" name="writingMode" value="thread"><span>Thread</span></label>
+                  <label class="choice-row"><input type="radio" name="writingMode" value="blog"><span>Blog</span></label>
+                </div>
+                <input class="field" id="writingAngle" type="text" placeholder="angle, optional">
+                <label class="soft-note">Style</label>
+                <div class="choice-grid" id="writingStyleMode">
+                  <label class="choice-row"><input type="radio" name="writingStyle" value="default" checked><span>Default voice</span></label>
+                  <label class="choice-row"><input type="radio" name="writingStyle" value="anchors"><span>From anchors</span></label>
+                  <label class="choice-row"><input type="radio" name="writingStyle" value="specific"><span>Specific anchor</span></label>
+                </div>
+                <div class="anchor-list" id="writingAnchorList"></div>
+                <label class="inline-row"><input id="writingShowWarnings" type="checkbox" checked> Show Voice DNA warnings</label>
+                <label class="inline-row"><input id="writingSkipWarnings" type="checkbox"> Skip warnings this time</label>
+                <button class="button primary" type="button" id="generateWriting">Generate</button>
+              </div>
+            </aside>
+
+            <section class="script-view">
+              <div class="panel">
+                <div class="panel-head">
+                  <div class="panel-title">Preview</div>
+                  <div class="inline-row">
+                    <button class="button ghost" type="button" id="copyWriting">Copy</button>
+                    <button class="button" type="button" id="saveWriting">Save</button>
+                    <button class="button ghost" type="button" id="reviseWriting">Revise</button>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  <div class="writing-output" id="writingOutput">Choose a source uoink, then generate a grounded draft when CC's Writing Studio endpoint is live.</div>
+                  <div class="warning-panel" id="voiceWarningPanel">
+                    <strong>Voice DNA warning panel</strong>
+                    <p id="voiceWarningCopy">If a draft starts sounding canned, Uoink shows the flagged phrases here. Regenerate, use it anyway, or change the warning setting.</p>
+                    <div class="inline-row">
+                      <button class="button ghost" type="button" id="regenerateWriting">Regenerate</button>
+                      <button class="button" type="button" id="useWritingAsIs">Use as-is</button>
+                      <button class="button ghost" type="button" id="writingSettingsLink">Settings</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-head">
+                  <div class="panel-title">Style anchors</div>
+                  <div class="localhost">cap 10</div>
+                </div>
+                <div class="panel-body">
+                  <div class="anchor-list" id="styleAnchorManager"></div>
+                  <div class="inline-row">
+                    <input class="field" style="flex:1;min-width:180px" id="styleAnchorName" type="text" placeholder="anchor name">
+                    <select class="field" style="width:140px" id="styleAnchorType">
+                      <option value="url">URL</option>
+                      <option value="text">Text</option>
+                    </select>
+                  </div>
+                  <label class="inline-row"><input id="styleAnchorActive" type="checkbox" checked> Active anchor</label>
+                  <textarea class="field draft-box" id="styleAnchorValue" placeholder="Paste a URL or writing sample."></textarea>
+                  <div class="inline-row">
+                    <button class="button ghost" type="button" id="previewStyleAnchor">Preview URL</button>
+                    <button class="button" type="button" id="addStyleAnchor">Add anchor</button>
+                  </div>
+                  <div class="mono-box" id="styleAnchorPreview">URL preview appears here after CC's crawler endpoint is live.</div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
         <section class="tab-panel" id="tab-evidence" data-tab-panel="evidence">
           <div class="page-head">
             <div>
@@ -1828,6 +2074,10 @@
               <p class="lede">Assistance only. Uoink surfaces checkable claims and evidence signals; you decide what the evidence means.</p>
             </div>
             <button class="button ghost" type="button" id="reloadEvidence">Reload</button>
+          </div>
+          <div class="learn-links" aria-label="Evidence walkthrough links">
+            <a href="https://uoink.app/features/claim-extraction" target="_blank" rel="noreferrer">Learn: Claim Extraction</a>
+            <a href="https://uoink.app/features/evidence-panel" target="_blank" rel="noreferrer">Learn: Evidence Panel</a>
           </div>
 
           <div class="evidence-layout">
@@ -1867,6 +2117,10 @@
               <button class="button ghost" type="button" id="clearFilters">Clear filters</button>
               <button class="button primary" type="button" id="newYoink">+ Uoink</button>
             </div>
+          </div>
+          <div class="learn-links" aria-label="Library walkthrough links">
+            <a href="https://uoink.app/features/memory-search" target="_blank" rel="noreferrer">Learn: Memory Search</a>
+            <a href="https://uoink.app/features/faceted-classification" target="_blank" rel="noreferrer">Learn: Facets</a>
           </div>
 
           <div class="control-grid">
@@ -1932,6 +2186,10 @@
               <button class="button primary" type="button" id="yoinkEvidence">Evidence</button>
             </div>
           </div>
+          <div class="learn-links" aria-label="Uoink detail walkthrough links">
+            <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
+            <a href="https://uoink.app/features/evidence-panel" target="_blank" rel="noreferrer">Learn: Evidence</a>
+          </div>
 
           <div class="yoink-layout">
             <section class="panel">
@@ -1963,6 +2221,14 @@
               <button class="button danger" type="button" id="cancelAll">Cancel all</button>
             </div>
           </div>
+          <div class="learn-links" aria-label="Activity walkthrough links">
+            <a href="https://uoink.app/features/playlist-mode" target="_blank" rel="noreferrer">Learn: Playlist Mode</a>
+            <a href="https://uoink.app/features/mobile-playlist-bridge" target="_blank" rel="noreferrer">Learn: Mobile Bridge</a>
+          </div>
+          <div class="summary-line">
+            <span>Mobile-origin jobs are tagged distinctly.</span>
+            <span class="activity-source-chip">from mobile playlist</span>
+          </div>
 
           <div class="activity-layout">
             <div class="panel">
@@ -1990,6 +2256,13 @@
               <p class="lede">Key storage, output folders, topic routing, helper status, MCP config, and update checks live here.</p>
             </div>
             <button class="button ghost" type="button" id="reloadSettings">Reload</button>
+          </div>
+          <div class="learn-links" aria-label="Settings walkthrough links">
+            <a href="https://uoink.app/features/byo-anthropic-key" target="_blank" rel="noreferrer">Learn: BYO Key</a>
+            <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
+            <a href="https://uoink.app/features/mobile-playlist-bridge" target="_blank" rel="noreferrer">Learn: Auto Playlists</a>
+            <a href="https://uoink.app/features/your-channel" target="_blank" rel="noreferrer">Learn: Your Channel</a>
+            <a href="https://uoink.app/features/claim-extraction" target="_blank" rel="noreferrer">Learn: Claims</a>
           </div>
 
           <div class="settings-grid">
@@ -2020,6 +2293,17 @@
             </div>
 
             <div class="setting-block">
+              <h2>Your channels</h2>
+              <p class="setting-copy" id="channelsStatus">Checking your channel registry...</p>
+              <div class="channel-list" id="channelsList"></div>
+              <div class="inline-row">
+                <input class="field" style="flex:1;min-width:220px" id="channelHandle" type="text" placeholder="@yourhandle">
+                <button class="button" type="button" id="addChannel">Add</button>
+                <button class="button ghost" type="button" id="recognizeChannels">Recognize past uoinks</button>
+              </div>
+            </div>
+
+            <div class="setting-block">
               <h2>Auto-uoink playlists</h2>
               <p class="setting-copy" id="playlistStatus">Checking playlist monitor...</p>
               <div class="settings-list" id="playlistList"></div>
@@ -2037,6 +2321,18 @@
                 <input class="field" style="flex:1;min-width:240px" id="podcastFeedUrl" type="url" placeholder="RSS feed URL">
                 <button class="button" type="button" id="addPodcastFeed">Add</button>
               </div>
+            </div>
+
+            <div class="setting-block">
+              <h2>Sites Uoink works on</h2>
+              <p class="setting-copy" id="allowedSitesStatus">Checking site permissions...</p>
+              <div class="badge-row" id="defaultSitesList"></div>
+              <div class="site-list" id="allowedSitesList"></div>
+              <div class="inline-row">
+                <input class="field" style="flex:1;min-width:220px" id="allowedSitePattern" type="text" placeholder="example.com or *.docs.example.com">
+                <button class="button" type="button" id="addAllowedSite">Add</button>
+              </div>
+              <p class="setting-copy">Uoink only works on sites you've enabled. Right-click Uoink this page anywhere; if the site needs permission, the extension asks first.</p>
             </div>
 
             <div class="setting-block">
@@ -2087,6 +2383,13 @@
             </div>
 
             <div class="setting-block">
+              <h2>Writing Studio</h2>
+              <p class="setting-copy">Voice DNA warnings stay soft. You can keep the draft, regenerate it, or turn warnings off.</p>
+              <label class="inline-row"><input id="voiceWarningsEnabled" type="checkbox" checked> Show Voice DNA warnings</label>
+              <label class="inline-row"><input id="voiceWarningsPerGeneration" type="checkbox" checked> Show the per-draft skip control</label>
+            </div>
+
+            <div class="setting-block">
               <h2>Transcript reliability</h2>
               <p class="setting-copy" id="reliabilityStatus">Checking local Whisper model...</p>
               <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox"> Auto-check transcript reliability</label>
@@ -2099,6 +2402,46 @@
               </div>
               <p class="setting-copy">Uses whisper-timestamped locally to flag low-confidence transcript spans. The tiny model downloads only after you ask for it (~150 MB) and is cached under your Uoink data folder.</p>
             </div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="tab-features" data-tab-panel="features">
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">Features</div>
+              <h1>Everything Uoink does. <em>Learn it as you need it.</em></h1>
+              <p class="lede">This mirrors the feature library on uoink.app. It keeps a local copy so the dashboard still has a map when the site is offline.</p>
+            </div>
+            <div class="inline-row">
+              <button class="button ghost" type="button" id="reloadFeatures">Reload</button>
+              <button class="button primary" type="button" id="openFeaturesIndex">Open /features</button>
+            </div>
+          </div>
+
+          <div class="summary-line">
+            <span id="featuresStatus">Loading feature manifest...</span>
+            <span class="soft-note">Capture / Library / Workspace / Verification / Distribution / Identity</span>
+          </div>
+
+          <div class="features-layout">
+            <aside class="panel">
+              <div class="panel-head">
+                <div class="panel-title">Groups</div>
+                <span class="nav-count" id="featureCount">0</span>
+              </div>
+              <div class="panel-body">
+                <div class="feature-group-list" id="featureGroups"></div>
+              </div>
+            </aside>
+            <section class="panel">
+              <div class="panel-head">
+                <div class="panel-title" id="featureGroupTitle">Feature walkthroughs</div>
+                <div class="localhost">uoink.app</div>
+              </div>
+              <div class="panel-body">
+                <div class="feature-row-list" id="featureRows"></div>
+              </div>
+            </section>
           </div>
         </section>
 
@@ -2201,6 +2544,15 @@
       retranscribing: false,
       mobilePlaylists: [],
       podcastFeeds: [],
+      channels: [],
+      allowedSites: [],
+      defaultAllowedSites: ["youtube.com", "youtu.be", "x.com", "twitter.com"],
+      features: [],
+      selectedFeatureGroup: "Capture",
+      styleAnchors: [],
+      editingStyleAnchorId: null,
+      writingPieces: [],
+      writingLastPayload: null,
     };
 
     const FALLBACK_FACETS = {
@@ -2217,6 +2569,34 @@
     ];
 
     const FALLBACK_WHISPER_MODELS = ["tiny", "base", "small", "medium", "large"];
+
+    const FEATURE_MANIFEST_URL = "https://uoink.app/api/features-manifest";
+
+    const FALLBACK_FEATURES = [
+      ["Capture", "in-page-button", "In-page button", "Save a YouTube video from the player actions row.", "https://uoink.app/features/in-page-button"],
+      ["Capture", "right-click-any-link", "Right-click any link", "Queue a video without opening it first.", "https://uoink.app/features/right-click-any-link"],
+      ["Capture", "mobile-playlist-bridge", "Mobile playlist bridge", "Save on mobile, let the desktop helper pick it up.", "https://uoink.app/features/mobile-playlist-bridge"],
+      ["Capture", "universal-page-uoink", "Universal page uoink", "Turn an allowed web page into local markdown and metadata.", "https://uoink.app/features/universal-page-uoink"],
+      ["Capture", "twitter-video", "Twitter video", "Capture X videos with creator credit kept close.", "https://uoink.app/twitter"],
+      ["Capture", "podcast-feeds", "Podcast feeds", "Watch RSS feeds and transcribe episodes locally.", "https://uoink.app/features/podcast-feeds"],
+      ["Library", "memory-search", "Memory search", "Search transcripts, comments, topics, and saved context.", "https://uoink.app/features/memory-search"],
+      ["Library", "faceted-classification", "Faceted classification", "Filter by channel, hook, topic, format, performance, and length.", "https://uoink.app/features/faceted-classification"],
+      ["Library", "your-channel", "Your Channel", "Mark your own channel and compare against your corpus.", "https://uoink.app/features/your-channel"],
+      ["Library", "resurface-for-you", "For You resurfacing", "Bring back old uoinks when the local signals line up.", "https://uoink.app/features/resurface-for-you"],
+      ["Workspace", "build-workspace", "Build Workspace", "Assemble examples and questions for a focused agent pass.", "https://uoink.app/features/build-workspace"],
+      ["Workspace", "critique-corpus", "Critique Corpus", "Check a draft against patterns already saved locally.", "https://uoink.app/features/critique-corpus"],
+      ["Workspace", "script-studio", "Script Studio", "Ask an agent for script grounding from a workspace.", "https://uoink.app/features/script-studio"],
+      ["Workspace", "writing-studio", "Writing Studio", "Turn a saved source into a credited tweet, thread, or blog.", "https://uoink.app/features/writing-studio"],
+      ["Workspace", "style-anchors", "Style anchors", "Bring named writing samples into the draft context.", "https://uoink.app/features/style-anchors"],
+      ["Verification", "claim-extraction", "Claim extraction", "Find factual claims worth checking.", "https://uoink.app/features/claim-extraction"],
+      ["Verification", "evidence-panel", "Evidence panel", "Record support, contradiction, mixed, or inconclusive signals.", "https://uoink.app/features/evidence-panel"],
+      ["Distribution", "mcp-server", "MCP server", "Let agents query and assemble your local corpus.", "https://uoink.app/features/mcp-server"],
+      ["Distribution", "claude-desktop-integration", "Claude Desktop", "Connect Claude to the local Uoink tools.", "https://uoink.app/features/claude-desktop-integration"],
+      ["Distribution", "cursor-integration", "Cursor", "Use the same local corpus from your editor.", "https://uoink.app/features/cursor-integration"],
+      ["Identity", "byo-anthropic-key", "BYO Anthropic key", "Keep optional model calls under your key.", "https://uoink.app/features/byo-anthropic-key"],
+      ["Identity", "local-first", "Local-first", "Keep the index, screenshots, and settings on this machine.", "https://uoink.app/features/local-first"],
+      ["Identity", "no-cloud", "No Uoink cloud", "Use loopback helper surfaces instead of a hosted account.", "https://uoink.app/features/no-cloud"],
+    ].map(([group, slug, name, description, url]) => ({ group, slug, name, description, url }));
 
     const els = {
       toast: document.getElementById("toast"),
@@ -2264,6 +2644,24 @@
       scriptRevisionNotes: document.getElementById("scriptRevisionNotes"),
       scriptRevisionDraft: document.getElementById("scriptRevisionDraft"),
       scriptRevisionResult: document.getElementById("scriptRevisionResult"),
+      writingNavCount: document.getElementById("writingNavCount"),
+      writingAnchorCount: document.getElementById("writingAnchorCount"),
+      writingSource: document.getElementById("writingSource"),
+      writingModePicker: document.getElementById("writingModePicker"),
+      writingAngle: document.getElementById("writingAngle"),
+      writingStyleMode: document.getElementById("writingStyleMode"),
+      writingAnchorList: document.getElementById("writingAnchorList"),
+      writingShowWarnings: document.getElementById("writingShowWarnings"),
+      writingSkipWarnings: document.getElementById("writingSkipWarnings"),
+      writingOutput: document.getElementById("writingOutput"),
+      voiceWarningPanel: document.getElementById("voiceWarningPanel"),
+      voiceWarningCopy: document.getElementById("voiceWarningCopy"),
+      styleAnchorManager: document.getElementById("styleAnchorManager"),
+      styleAnchorName: document.getElementById("styleAnchorName"),
+      styleAnchorType: document.getElementById("styleAnchorType"),
+      styleAnchorActive: document.getElementById("styleAnchorActive"),
+      styleAnchorValue: document.getElementById("styleAnchorValue"),
+      styleAnchorPreview: document.getElementById("styleAnchorPreview"),
       evidenceNavCount: document.getElementById("evidenceNavCount"),
       claimCount: document.getElementById("claimCount"),
       evidenceContext: document.getElementById("evidenceContext"),
@@ -2317,17 +2715,31 @@
       autostartToggle: document.getElementById("autostartToggle"),
       screenshotCount: document.getElementById("screenshotCount"),
       rolePicker: document.getElementById("rolePicker"),
+      channelsStatus: document.getElementById("channelsStatus"),
+      channelsList: document.getElementById("channelsList"),
+      channelHandle: document.getElementById("channelHandle"),
       playlistStatus: document.getElementById("playlistStatus"),
       playlistList: document.getElementById("playlistList"),
       playlistUrl: document.getElementById("playlistUrl"),
       podcastFeedStatus: document.getElementById("podcastFeedStatus"),
       podcastFeedList: document.getElementById("podcastFeedList"),
       podcastFeedUrl: document.getElementById("podcastFeedUrl"),
+      allowedSitesStatus: document.getElementById("allowedSitesStatus"),
+      defaultSitesList: document.getElementById("defaultSitesList"),
+      allowedSitesList: document.getElementById("allowedSitesList"),
+      allowedSitePattern: document.getElementById("allowedSitePattern"),
+      voiceWarningsEnabled: document.getElementById("voiceWarningsEnabled"),
+      voiceWarningsPerGeneration: document.getElementById("voiceWarningsPerGeneration"),
       whisperModel: document.getElementById("whisperModel"),
       saveWhisperModel: document.getElementById("saveWhisperModel"),
       reliabilityStatus: document.getElementById("reliabilityStatus"),
       reliabilityAutoCheck: document.getElementById("reliabilityAutoCheck"),
       downloadReliabilityModel: document.getElementById("downloadReliabilityModel"),
+      featuresStatus: document.getElementById("featuresStatus"),
+      featureCount: document.getElementById("featureCount"),
+      featureGroups: document.getElementById("featureGroups"),
+      featureGroupTitle: document.getElementById("featureGroupTitle"),
+      featureRows: document.getElementById("featureRows"),
       aboutStatus: document.getElementById("aboutStatus"),
       aboutVersion: document.getElementById("aboutVersion"),
       aboutPort: document.getElementById("aboutPort"),
@@ -3723,6 +4135,7 @@
           : `Library unavailable: ${err.message}`;
       } finally {
         state.loading = false;
+        syncWritingSourceOptions();
       }
     }
 
@@ -3969,7 +4382,7 @@
 
     function activitySourceChip(row) {
       return isMobileQueued(row)
-        ? `<span class="activity-source-chip">mobile queue</span>`
+        ? `<span class="activity-source-chip">from mobile playlist</span>`
         : "";
     }
 
@@ -4046,7 +4459,7 @@
         .concat(failedJobs.map(jobRowHtml))
         .concat(queueFailedDeduped.map(queueRowHtml));
       if (!rows.length) {
-        els.queueRows.innerHTML = `<div class="job-row"><div class="job-title">Nothing running right now.</div><div class="job-sub">New uoinks and rate-limit retries will appear here.</div></div>`;
+        els.queueRows.innerHTML = `<div class="job-row"><div class="job-title">Nothing running right now.</div><div class="job-sub">New uoinks and rate-limit retries will appear here. Mobile saves use this label:</div><span class="activity-source-chip">from mobile playlist</span></div>`;
       } else {
         els.queueRows.innerHTML = rows.join("");
       }
@@ -4215,6 +4628,9 @@
         els.screenshotCount.value = String(state.settings.screenshot_count ?? 4);
         els.claimVerificationToggle.checked = Boolean(state.settings.claim_verification_enabled);
         els.reliabilityAutoCheck.checked = Boolean(state.settings.transcript_reliability_auto_check);
+        els.voiceWarningsEnabled.checked = state.settings.voice_dna_warnings_enabled !== false;
+        els.voiceWarningsPerGeneration.checked = state.settings.voice_dna_show_per_generation_toggle !== false;
+        els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
         renderRolePicker(state.settings.role || "mixed");
         syncWhisperModelOptions();
         const relModel = state.settings.transcript_reliability_model || {};
@@ -4242,7 +4658,7 @@
         els.mcpConfig.value = `MCP config unavailable: ${err.message}`;
       }
       renderTopics(state.settings && Array.isArray(state.settings.topics) ? state.settings.topics : []);
-      await Promise.all([loadPlaylistSettings(), loadPodcastFeedSettings()]);
+      await Promise.all([loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites()]);
     }
 
     function diagnoseSummary(diag) {
@@ -4291,9 +4707,440 @@
       els.whisperModel.value = models.includes(current) ? current : "base";
     }
 
+    function normalizeFeatureManifest(payload) {
+      const raw = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload && payload.features)
+          ? payload.features
+          : Array.isArray(payload && payload.items)
+            ? payload.items
+            : [];
+      return raw.map((item) => ({
+        group: item.group || item.category || "Capture",
+        slug: item.slug || String(item.url || "").split("/").filter(Boolean).pop() || item.name || "feature",
+        name: item.name || item.title || item.slug || "Feature",
+        description: item.description || item.summary || item.dek || "Walk through this feature on uoink.app.",
+        url: item.url || `https://uoink.app/features/${item.slug}`,
+      })).filter((item) => item.slug && item.name);
+    }
+
+    async function loadFeatures() {
+      let features = [];
+      let source = "fallback";
+      try {
+        const res = await fetch(FEATURE_MANIFEST_URL, { cache: "no-store" });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        features = normalizeFeatureManifest(data);
+        if (!features.length) throw new Error("empty manifest");
+        localStorage.setItem("uoink.featuresManifest", JSON.stringify(features));
+        source = "uoink.app";
+      } catch (err) {
+        try {
+          features = normalizeFeatureManifest(JSON.parse(localStorage.getItem("uoink.featuresManifest") || "[]"));
+          source = features.length ? "local cache" : "fallback";
+        } catch (_) {
+          features = [];
+        }
+        if (!features.length) features = FALLBACK_FEATURES.slice();
+        els.featuresStatus.textContent = `Features list unavailable from uoink.app. Showing ${source}.`;
+      }
+      state.features = features;
+      if (!state.selectedFeatureGroup || !features.some((item) => item.group === state.selectedFeatureGroup)) {
+        state.selectedFeatureGroup = features[0] ? features[0].group : "Capture";
+      }
+      if (source === "uoink.app") els.featuresStatus.textContent = `${features.length} feature walkthroughs loaded from uoink.app.`;
+      renderFeatureGroups();
+      renderFeatureRows();
+    }
+
+    function featureGroups() {
+      return [...new Set((state.features.length ? state.features : FALLBACK_FEATURES).map((item) => item.group))];
+    }
+
+    function renderFeatureGroups() {
+      const groups = featureGroups();
+      els.featureCount.textContent = String((state.features.length ? state.features : FALLBACK_FEATURES).length);
+      els.featureGroups.innerHTML = groups.map((group) => {
+        const count = (state.features.length ? state.features : FALLBACK_FEATURES).filter((item) => item.group === group).length;
+        return `
+          <button class="feature-group-card ${group === state.selectedFeatureGroup ? "active" : ""}" type="button" data-feature-group="${htmlEscape(group)}">
+            <div class="job-title">${htmlEscape(group)}</div>
+            <div class="job-sub">${count} walkthrough${count === 1 ? "" : "s"}</div>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderFeatureRows() {
+      const rows = (state.features.length ? state.features : FALLBACK_FEATURES)
+        .filter((item) => item.group === state.selectedFeatureGroup);
+      els.featureGroupTitle.textContent = state.selectedFeatureGroup || "Feature walkthroughs";
+      els.featureRows.innerHTML = rows.length
+        ? rows.map((item) => `
+          <article class="feature-row">
+            <div class="feature-row-top">
+              <div>
+                <div class="job-title">${htmlEscape(item.name)}</div>
+                <p>${htmlEscape(item.description)}</p>
+              </div>
+              <button class="button ghost" type="button" data-open-feature="${htmlEscape(item.url)}">Open walkthrough</button>
+            </div>
+            <div class="soft-note">${htmlEscape(item.slug)}</div>
+          </article>
+        `).join("")
+        : emptyPanelRow("Features list unavailable.", "Check uoink.app/features.");
+    }
+
+    function syncWritingSourceOptions() {
+      const rows = state.library.slice(0, 80);
+      els.writingSource.innerHTML = rows.length
+        ? `<option value="">Source: choose a uoink</option>` + rows.map((row) => {
+          const id = row.id || videoIdOf(row) || row.folder || row.source_url || "";
+          return `<option value="${htmlEscape(id)}">${htmlEscape(rowTitle(row))}</option>`;
+        }).join("")
+        : `<option value="">Source: load Library first</option>`;
+    }
+
+    function selectedRadio(name, fallback) {
+      return document.querySelector(`input[name="${CSS.escape(name)}"]:checked`)?.value || fallback;
+    }
+
+    async function loadWriting() {
+      syncWritingSourceOptions();
+      await loadStyleAnchors();
+      els.writingNavCount.textContent = String(state.writingPieces.length || state.styleAnchors.length);
+    }
+
+    async function loadStyleAnchors() {
+      try {
+        const data = await authFetch("/writing/style-anchors");
+        state.styleAnchors = data.anchors || data.style_anchors || [];
+      } catch (err) {
+        state.styleAnchors = [];
+        els.styleAnchorPreview.textContent = `Style anchors are coming with CC's backend update: ${err.message}`;
+      }
+      renderStyleAnchors();
+    }
+
+    function anchorId(anchor) {
+      return anchor && (anchor.id || anchor.name || anchor.slug || anchor.source_url || anchor.added_at);
+    }
+
+    function renderStyleAnchors() {
+      els.writingAnchorCount.textContent = `${state.styleAnchors.length}/10`;
+      const rows = state.styleAnchors.length
+        ? state.styleAnchors.map((anchor) => {
+          const id = anchorId(anchor);
+          const label = anchor.name || anchor.title || "Style anchor";
+          const source = anchor.source_type || (anchor.source_url ? "url" : "text");
+          return `
+            <label class="anchor-row">
+              <div class="anchor-row-top">
+                <div>
+                  <strong>${htmlEscape(label)}</strong>
+                  <div class="job-sub">${htmlEscape(source)}${anchor.active === false ? " | inactive" : ""}</div>
+                </div>
+                <input type="checkbox" data-writing-anchor="${htmlEscape(id)}" ${anchor.active === false ? "" : "checked"}>
+              </div>
+            </label>
+          `;
+        }).join("")
+        : `<div class="job-row"><div class="job-title">No style anchors yet.</div><div class="job-sub">Add a URL or writing sample when the Writing Studio backend is live.</div></div>`;
+      els.writingAnchorList.innerHTML = rows;
+      els.styleAnchorManager.innerHTML = state.styleAnchors.length
+        ? state.styleAnchors.map((anchor) => {
+          const id = anchorId(anchor);
+          const label = anchor.name || anchor.title || "Style anchor";
+          const sourceValue = anchor.source_url || anchor.source_value || anchor.raw_text || "";
+          return `
+            <div class="anchor-row">
+              <div class="anchor-row-top">
+                <div>
+                  <strong>${htmlEscape(label)}</strong>
+                  <div class="job-sub">${htmlEscape(anchor.source_type || "anchor")}${anchor.active === false ? " | inactive" : " | active"}</div>
+                </div>
+                <div class="inline-row">
+                  <button class="button ghost" type="button" data-edit-style-anchor="${htmlEscape(id)}" data-anchor-name="${htmlEscape(label)}" data-anchor-type="${htmlEscape(anchor.source_type || (anchor.source_url ? "url" : "text"))}" data-anchor-value="${htmlEscape(sourceValue)}" data-anchor-active="${anchor.active === false ? "false" : "true"}">Edit</button>
+                  <button class="button ghost" type="button" data-remove-style-anchor="${htmlEscape(id)}">Delete</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("")
+        : `<div class="job-row"><div class="job-title">Anchor library empty.</div><div class="job-sub">Cap warning appears at 10 anchors.</div></div>`;
+      if (state.styleAnchors.length >= 10) {
+        els.styleAnchorManager.insertAdjacentHTML("afterbegin", `<div class="warning-panel"><strong>You're at 10 anchors.</strong><p>Remove one to add another.</p></div>`);
+      }
+    }
+
+    function selectedAnchorIds() {
+      const styleMode = selectedRadio("writingStyle", "default");
+      if (styleMode === "default") return [];
+      const checked = [...document.querySelectorAll("[data-writing-anchor]:checked")].map((el) => el.dataset.writingAnchor);
+      return styleMode === "specific" ? checked.slice(0, 1) : checked.slice(0, 5);
+    }
+
+    async function previewStyleAnchor() {
+      const type = els.styleAnchorType.value;
+      const value = els.styleAnchorValue.value.trim();
+      if (type !== "url") {
+        els.styleAnchorPreview.textContent = value ? value.slice(0, 700) : "Paste raw text to preview it here.";
+        return;
+      }
+      if (!value) return showToast("Paste a URL first.");
+      els.styleAnchorPreview.textContent = "Previewing URL...";
+      try {
+        const data = await authFetch("/extract/page", {
+          method: "POST",
+          body: JSON.stringify({ url: value, render_mode: "static", include_screenshot: false, follow_links_depth: 0 }),
+        });
+        els.styleAnchorPreview.textContent = (data.markdown || data.text || data.title || "No prose returned.").slice(0, 1200);
+      } catch (err) {
+        els.styleAnchorPreview.textContent = `URL preview is coming with CC's crawler endpoint: ${err.message}`;
+      }
+    }
+
+    async function addStyleAnchor() {
+      const name = els.styleAnchorName.value.trim();
+      const sourceType = els.styleAnchorType.value;
+      const sourceValue = els.styleAnchorValue.value.trim();
+      const active = Boolean(els.styleAnchorActive.checked);
+      if (!name || (!sourceValue && !state.editingStyleAnchorId)) return showToast("Name and source are required.");
+      if (!state.editingStyleAnchorId && state.styleAnchors.length >= 10) return showToast("You're at 10 anchors. Remove one first.");
+      try {
+        if (state.editingStyleAnchorId) {
+          await authFetch(`/writing/style-anchors/${encodeURIComponent(state.editingStyleAnchorId)}`, {
+            method: "PATCH",
+            body: JSON.stringify({ name, active }),
+          });
+        } else {
+          await authFetch("/writing/style-anchors", {
+            method: "POST",
+            body: JSON.stringify({ name, source_type: sourceType, source_value: sourceValue, active }),
+          });
+        }
+        state.editingStyleAnchorId = null;
+        els.styleAnchorName.value = "";
+        els.styleAnchorValue.value = "";
+        els.styleAnchorActive.checked = true;
+        document.getElementById("addStyleAnchor").textContent = "Add anchor";
+        showToast("Style anchor saved.");
+        await loadStyleAnchors();
+      } catch (err) {
+        showToast(`Style anchors are coming with CC's backend update: ${err.message}`);
+      }
+    }
+
+    function editStyleAnchor(button) {
+      state.editingStyleAnchorId = button.dataset.editStyleAnchor || null;
+      els.styleAnchorName.value = button.dataset.anchorName || "";
+      els.styleAnchorType.value = button.dataset.anchorType || "text";
+      els.styleAnchorValue.value = button.dataset.anchorValue || "";
+      els.styleAnchorActive.checked = button.dataset.anchorActive !== "false";
+      document.getElementById("addStyleAnchor").textContent = "Save anchor";
+      els.styleAnchorPreview.textContent = "Editing anchor metadata. Source replacement stays with the backend contract.";
+    }
+
+    async function removeStyleAnchor(id) {
+      if (!id) return;
+      try {
+        await authFetch(`/writing/style-anchors/${encodeURIComponent(id)}`, { method: "DELETE" });
+        showToast("Style anchor removed.");
+        await loadStyleAnchors();
+      } catch (err) {
+        showToast(`Could not remove anchor: ${err.message}`);
+      }
+    }
+
+    function renderWritingResult(data) {
+      state.writingLastPayload = data;
+      const piece = data.piece || data.result || data;
+      const body = piece.body || piece.markdown || piece.text || piece.tweet || (Array.isArray(piece.thread) ? piece.thread.join("\n\n") : "");
+      const title = piece.title ? `${piece.title}\n\n` : "";
+      const credit = piece.creator_credit || piece.source_credit_line || piece.credit || "";
+      els.writingOutput.textContent = `${title}${body || JSON.stringify(piece, null, 2)}${credit ? `\n\n${credit}` : ""}`;
+      const warnings = piece.voice_warnings || data.voice_warnings || [];
+      const warningCopy = piece.warning_copy || data.warning_copy || "Uoink found no Voice DNA warnings in the returned payload.";
+      els.voiceWarningCopy.textContent = warnings.length
+        ? `${warningCopy} ${warnings.map((w) => w.phrase || w).join(", ")}`
+        : warningCopy;
+    }
+
+    async function generateWriting() {
+      const sourceId = els.writingSource.value;
+      if (!sourceId) return showToast("Choose a source uoink first.");
+      const mode = selectedRadio("writingMode", "tweet");
+      const endpoint = mode === "blog" ? "/writing/blog" : "/writing/tweet";
+      const body = {
+        source_yoink_id: sourceId,
+        angle: els.writingAngle.value.trim() || undefined,
+        style_anchor_ids: selectedAnchorIds(),
+        thread_max: mode === "thread" ? 10 : undefined,
+        voice_dna_warnings_enabled: Boolean(els.writingShowWarnings.checked && !els.writingSkipWarnings.checked),
+      };
+      els.writingOutput.textContent = "Generating...";
+      try {
+        const data = await authFetch(endpoint, { method: "POST", body: JSON.stringify(body) });
+        renderWritingResult(data);
+        showToast("Writing draft ready.");
+      } catch (err) {
+        els.writingOutput.textContent = `Writing Studio is coming with CC's backend update.\n\nExpected ${endpoint} body:\n${JSON.stringify(body, null, 2)}\n\nCurrent helper response: ${err.message}`;
+      }
+    }
+
+    async function loadChannels() {
+      try {
+        const data = await authFetch("/channels");
+        state.channels = data.channels || [];
+        els.channelsStatus.textContent = `${state.channels.length} channel${state.channels.length === 1 ? "" : "s"} registered.`;
+      } catch (err) {
+        state.channels = [];
+        els.channelsStatus.textContent = `Channels unavailable: ${err.message}`;
+      }
+      renderChannels();
+    }
+
+    function renderChannels() {
+      els.channelsList.innerHTML = state.channels.length
+        ? state.channels.map((row) => {
+          const handle = row.handle || row.name || row.channel_id || "";
+          return `
+            <div class="channel-row">
+              <div class="channel-row-top">
+                <div>
+                  <strong>${htmlEscape(handle || "Channel")}</strong>
+                  <div class="job-sub">${htmlEscape(row.name || row.channel_id || "waiting for verification")}</div>
+                </div>
+                <div class="inline-row">
+                  <button class="button ghost" type="button" data-verify-channel="${htmlEscape(handle)}">Verify</button>
+                  <button class="button danger" type="button" data-remove-channel="${htmlEscape(handle)}">Remove</button>
+                </div>
+              </div>
+              ${row.verified_at ? `<span class="activity-source-chip">verified</span>` : ""}
+            </div>
+          `;
+        }).join("")
+        : emptyPanelRow("No channels registered.", "Add your handle to compare new uoinks against your own patterns.");
+    }
+
+    async function addChannel() {
+      const handle = els.channelHandle.value.trim();
+      if (!handle) return showToast("Paste a channel handle first.");
+      try {
+        await authFetch("/channels", { method: "POST", body: JSON.stringify({ handle }) });
+        els.channelHandle.value = "";
+        showToast("Channel added.");
+        await loadChannels();
+      } catch (err) {
+        showToast(`Could not add channel: ${err.message}`);
+      }
+    }
+
+    async function verifyChannel(handle) {
+      try {
+        await authFetch("/channels/verify", { method: "POST", body: JSON.stringify({ handle }) });
+        showToast("Channel verified.");
+        await loadChannels();
+      } catch (err) {
+        showToast(`Could not verify channel: ${err.message}`);
+      }
+    }
+
+    async function removeChannel(handle) {
+      try {
+        await authFetch("/channels/remove", { method: "POST", body: JSON.stringify({ handle }) });
+        showToast("Channel removed.");
+        await loadChannels();
+      } catch (err) {
+        showToast(`Could not remove channel: ${err.message}`);
+      }
+    }
+
+    async function recognizeChannels() {
+      try {
+        const data = await authFetch("/channels/recognize-now", { method: "POST", body: JSON.stringify({}) });
+        showToast(`Recognition updated ${data.updated || data.tagged || 0} uoinks.`);
+        await loadChannels();
+      } catch (err) {
+        showToast(`Could not recognize past uoinks: ${err.message}`);
+      }
+    }
+
+    async function loadAllowedSites() {
+      els.defaultSitesList.innerHTML = state.defaultAllowedSites.map((site) => `<span class="readonly-badge">${htmlEscape(site)}</span>`).join("");
+      try {
+        const data = await authFetch("/extract/page/allowlist");
+        state.allowedSites = data.sites || data.allowlist || data.allowed_sites || [];
+        els.allowedSitesStatus.textContent = `${state.allowedSites.length} user-added site${state.allowedSites.length === 1 ? "" : "s"}.`;
+      } catch (err) {
+        state.allowedSites = [];
+        els.allowedSitesStatus.textContent = `Universal site uoinking is coming with CC's backend update: ${err.message}`;
+      }
+      renderAllowedSites();
+    }
+
+    function sitePattern(row) {
+      return typeof row === "string" ? row : row && (row.url_pattern || row.pattern || row.domain || row.site || row.url);
+    }
+
+    function renderAllowedSites() {
+      els.allowedSitesList.innerHTML = state.allowedSites.length
+        ? state.allowedSites.map((row) => {
+          const pattern = sitePattern(row) || "";
+          return `
+            <div class="site-row">
+              <div>
+                <strong>${htmlEscape(pattern)}</strong>
+                <div class="job-sub">${htmlEscape(row.added_at || row.status || "enabled")}</div>
+              </div>
+              <button class="button ghost" type="button" data-remove-allowed-site="${htmlEscape(pattern)}">Remove</button>
+            </div>
+          `;
+        }).join("")
+        : emptyPanelRow("No extra sites yet.", "Defaults are already listed above. Add a domain when the universal-site backend lands.");
+    }
+
+    async function addAllowedSite() {
+      const urlPattern = els.allowedSitePattern.value.trim();
+      if (!urlPattern) return showToast("Enter a site pattern first.");
+      try {
+        await authFetch("/extract/page/allowlist", {
+          method: "POST",
+          body: JSON.stringify({ action: "add", url_pattern: urlPattern }),
+        });
+        els.allowedSitePattern.value = "";
+        showToast("Site enabled.");
+        await loadAllowedSites();
+      } catch (err) {
+        showToast(`Universal site uoinking is coming with CC's backend update: ${err.message}`);
+      }
+    }
+
+    async function removeAllowedSite(urlPattern) {
+      try {
+        await authFetch("/extract/page/allowlist", {
+          method: "POST",
+          body: JSON.stringify({ action: "remove", url_pattern: urlPattern }),
+        });
+        showToast("Site removed.");
+        await loadAllowedSites();
+      } catch (err) {
+        showToast(`Could not remove site: ${err.message}`);
+      }
+    }
+
     function settingsListRow(row, titleKeys, metaKeys) {
       const title = firstValue(...titleKeys.map((key) => row && row[key]), "Untitled");
-      const meta = metaKeys.map((key) => row && row[key]).filter(Boolean).join(" | ");
+      const meta = metaKeys.map((key) => {
+        const value = row && row[key];
+        if (!value) return "";
+        if (key === "poll_interval_min") return `poll every ${value} min`;
+        if (key === "episode_count") return `${value} episode${Number(value) === 1 ? "" : "s"}`;
+        if (key === "seen_count") return `${value} seen`;
+        if (key === "queued_count") return `${value} queued`;
+        return value;
+      }).filter(Boolean).join(" | ");
       const status = firstValue(row && row.status, row && row.state, "");
       return `
         <div class="settings-list-row">
@@ -4506,19 +5353,21 @@
       if (tab === "for-you") loadForYou();
       if (tab === "build") loadBuild();
       if (tab === "script") loadScripts();
+      if (tab === "writing") loadWriting();
       if (tab === "evidence") loadEvidence();
       if (tab === "yoink") renderYoinkDetail();
       if (tab === "activity") refreshActivity();
       if (tab === "settings") refreshSettings();
+      if (tab === "features") loadFeatures();
     }
 
     function applyHashRoute() {
       const route = decodeURIComponent(location.hash || "").replace(/^#\/?/, "");
       if (!route) return false;
       const [tab, anchor] = route.split("/");
-      if (tab !== "settings") return false;
-      switchTab("settings");
-      if (anchor === "byo-key") {
+      if (!document.querySelector(`[data-tab-panel="${CSS.escape(tab)}"]`)) return false;
+      switchTab(tab);
+      if (tab === "settings" && anchor === "byo-key") {
         window.setTimeout(() => {
           document.getElementById("byo-key")?.scrollIntoView({ block: "start" });
         }, 0);
@@ -4567,6 +5416,19 @@
       document.getElementById("saveScriptRevision").addEventListener("click", () => reviseCurrentScript({ persist: Boolean(els.scriptRevisionDraft.value.trim()) }));
       document.getElementById("deriveShotList").addEventListener("click", deriveCurrentShotList);
       els.scriptForm.addEventListener("submit", persistScriptFromForm);
+      document.getElementById("reloadWriting").addEventListener("click", loadWriting);
+      document.getElementById("generateWriting").addEventListener("click", generateWriting);
+      document.getElementById("regenerateWriting").addEventListener("click", generateWriting);
+      document.getElementById("copyWriting").addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(els.writingOutput.textContent || ""); showToast("Writing copied."); }
+        catch (_) { showToast("Could not copy writing."); }
+      });
+      document.getElementById("saveWriting").addEventListener("click", () => showToast("Save lands with CC's Writing Studio endpoint."));
+      document.getElementById("reviseWriting").addEventListener("click", () => showToast("Revise lands with CC's Writing Studio endpoint."));
+      document.getElementById("useWritingAsIs").addEventListener("click", () => showToast("Marked for use in this session."));
+      document.getElementById("writingSettingsLink").addEventListener("click", () => switchTab("settings"));
+      document.getElementById("previewStyleAnchor").addEventListener("click", previewStyleAnchor);
+      document.getElementById("addStyleAnchor").addEventListener("click", addStyleAnchor);
       document.getElementById("reloadEvidence").addEventListener("click", loadEvidence);
       els.yoinkOpenFolder.addEventListener("click", () => {
         const folder = folderPathOf(state.selectedYoink);
@@ -4622,6 +5484,19 @@
       });
       document.getElementById("addPlaylist").addEventListener("click", addMobilePlaylist);
       document.getElementById("addPodcastFeed").addEventListener("click", addPodcastFeed);
+      document.getElementById("addChannel").addEventListener("click", addChannel);
+      document.getElementById("recognizeChannels").addEventListener("click", recognizeChannels);
+      document.getElementById("addAllowedSite").addEventListener("click", addAllowedSite);
+      els.voiceWarningsEnabled.addEventListener("change", () => {
+        els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
+        saveSettingsPatch({ voice_dna_warnings_enabled: els.voiceWarningsEnabled.checked }, "Voice DNA warning setting updated.");
+      });
+      els.voiceWarningsPerGeneration.addEventListener("change", () => {
+        saveSettingsPatch({ voice_dna_show_per_generation_toggle: els.voiceWarningsPerGeneration.checked }, "Writing warning control updated.");
+      });
+      els.writingShowWarnings.addEventListener("change", () => {
+        if (!els.writingShowWarnings.checked) els.voiceWarningCopy.textContent = "Warnings are hidden for this session.";
+      });
       els.saveWhisperModel.addEventListener("click", () => {
         saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Whisper model preference updated.");
       });
@@ -4663,6 +5538,8 @@
       document.getElementById("saveTopics").addEventListener("click", () => saveSettingsPatch({ topics: readTopicEditor() }, "Topics updated."));
       document.getElementById("newYoink").addEventListener("click", openLastYoutube);
       document.getElementById("openYouTubeForYou").addEventListener("click", openLastYoutube);
+      document.getElementById("reloadFeatures").addEventListener("click", loadFeatures);
+      document.getElementById("openFeaturesIndex").addEventListener("click", () => openExternal("https://uoink.app/features"));
       document.querySelectorAll("[data-open-youtube]").forEach((btn) => btn.addEventListener("click", openLastYoutube));
       document.querySelectorAll('a[target="_blank"]').forEach((link) => {
         link.addEventListener("click", (event) => {
@@ -4699,6 +5576,24 @@
         if (workspaceButton) selectWorkspace(workspaceButton.dataset.workspaceId);
         const scriptButton = event.target.closest("[data-script-id]");
         if (scriptButton) selectScript(scriptButton.dataset.scriptId);
+        const featureGroup = event.target.closest("[data-feature-group]");
+        if (featureGroup) {
+          state.selectedFeatureGroup = featureGroup.dataset.featureGroup;
+          renderFeatureGroups();
+          renderFeatureRows();
+        }
+        const featureButton = event.target.closest("[data-open-feature]");
+        if (featureButton) openExternal(featureButton.dataset.openFeature);
+        const editStyle = event.target.closest("[data-edit-style-anchor]");
+        if (editStyle) editStyleAnchor(editStyle);
+        const removeStyle = event.target.closest("[data-remove-style-anchor]");
+        if (removeStyle) removeStyleAnchor(removeStyle.dataset.removeStyleAnchor);
+        const verifyChannelButton = event.target.closest("[data-verify-channel]");
+        if (verifyChannelButton) verifyChannel(verifyChannelButton.dataset.verifyChannel);
+        const removeChannelButton = event.target.closest("[data-remove-channel]");
+        if (removeChannelButton) removeChannel(removeChannelButton.dataset.removeChannel);
+        const removeAllowedSiteButton = event.target.closest("[data-remove-allowed-site]");
+        if (removeAllowedSiteButton) removeAllowedSite(removeAllowedSiteButton.dataset.removeAllowedSite);
         const cancel = event.target.closest("[data-cancel]");
         if (cancel) postHelper("/queue/cancel", { pending_id: cancel.dataset.cancel });
         const cancelJob = event.target.closest("[data-cancel-job]");
@@ -4794,6 +5689,8 @@
       await loadForYou();
       await loadBuild();
       await loadScripts();
+      await loadWriting();
+      await loadFeatures();
       await refreshActivity();
       connectJobsStream();
       setInterval(refreshHealth, 10000);
