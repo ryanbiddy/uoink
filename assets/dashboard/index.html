@@ -2026,7 +2026,7 @@
                   </div>
                 </div>
                 <div class="panel-body">
-                  <div class="writing-output" id="writingOutput">Choose a source uoink, then generate a grounded draft when CC's Writing Studio endpoint is live.</div>
+                  <div class="writing-output" id="writingOutput">Choose a source uoink, then send it through the MCP writing tool.</div>
                   <div class="warning-panel" id="voiceWarningPanel">
                     <strong>Voice DNA warning panel</strong>
                     <p id="voiceWarningCopy">If a draft starts sounding canned, Uoink shows the flagged phrases here. Regenerate, use it anyway, or change the warning setting.</p>
@@ -4911,7 +4911,7 @@
       try {
         if (state.editingStyleAnchorId) {
           await authFetch(`/writing/style-anchors/${encodeURIComponent(state.editingStyleAnchorId)}`, {
-            method: "PATCH",
+            method: "POST",
             body: JSON.stringify({ name, active }),
           });
         } else {
@@ -4945,7 +4945,7 @@
     async function removeStyleAnchor(id) {
       if (!id) return;
       try {
-        await authFetch(`/writing/style-anchors/${encodeURIComponent(id)}`, { method: "DELETE" });
+        await authFetch(`/writing/style-anchors/${encodeURIComponent(id)}/remove`, { method: "POST", body: JSON.stringify({}) });
         showToast("Style anchor removed.");
         await loadStyleAnchors();
       } catch (err) {
@@ -4953,13 +4953,89 @@
       }
     }
 
+    function unpackMcpToolPayload(data) {
+      if (data && data.error) throw new Error(data.error.message || "MCP tool failed.");
+      const result = data && data.result ? data.result : data;
+      if (!result) throw new Error("MCP tool returned an empty response.");
+      if (result.structuredContent) return result.structuredContent;
+      if (result.structured_content) return result.structured_content;
+      const textBlock = Array.isArray(result.content)
+        ? result.content.find((item) => item && item.type === "text" && typeof item.text === "string")
+        : null;
+      if (textBlock) {
+        try { return JSON.parse(textBlock.text); }
+        catch (_) { return { ok: true, body: textBlock.text }; }
+      }
+      return result;
+    }
+
+    async function callMcpTool(name, args) {
+      const id = `dashboard-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const data = await authFetch("/mcp/v1/tools/call", {
+        method: "POST",
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id,
+          method: "tools/call",
+          params: { name, arguments: args },
+        }),
+      });
+      const payload = unpackMcpToolPayload(data);
+      if (payload && payload.ok === false) throw new Error(payload.error || `${name} failed.`);
+      return payload;
+    }
+
+    function writingSourceTitle(context) {
+      const source = context && (context.source || context.yoink || context.source_yoink || context.source_uoink);
+      if (!source) return "";
+      return source.title || source.name || source.video_title || source.url || "";
+    }
+
+    function writingCreditLine(context, modeOrKind) {
+      const mode = modeOrKind === "blog" ? "blog" : modeOrKind === "thread" ? "thread" : "tweet";
+      const credits = context && context.source_credit;
+      return (context && context.source_credit_line)
+        || (credits && (credits[mode] || credits.tweet || credits.blog))
+        || "";
+    }
+
+    function renderWritingGrounding(piece) {
+      const context = piece.context || {};
+      const sourceTitle = writingSourceTitle(context);
+      const credit = writingCreditLine(context, piece.kind) || piece.source_credit_line || piece.credit || "";
+      const anchors = context.style_anchors || context.anchors || [];
+      const anchorLine = Array.isArray(anchors) && anchors.length
+        ? `${anchors.length} style anchor${anchors.length === 1 ? "" : "s"} included.`
+        : "No style anchors included.";
+      const next = piece.next || "A connected agent writes the body from this grounding, then calls the same MCP tool with body text to save it.";
+      els.writingOutput.textContent = [
+        "MCP grounding ready.",
+        sourceTitle ? `Source: ${sourceTitle}` : "",
+        credit ? `Credit: ${credit}` : "",
+        anchorLine,
+        "",
+        next,
+        "",
+        "Raw grounding",
+        JSON.stringify(context, null, 2),
+      ].filter(Boolean).join("\n");
+      els.voiceWarningCopy.textContent = "No Voice DNA scan runs until the connected agent returns a body.";
+    }
+
     function renderWritingResult(data) {
       state.writingLastPayload = data;
-      const piece = data.piece || data.result || data;
+      const piece = data.structuredContent || data.structured_content || data.piece || data.result || data;
+      if (piece && piece.mode === "grounding_only") {
+        renderWritingGrounding(piece);
+        return;
+      }
       const body = piece.body || piece.markdown || piece.text || piece.tweet || (Array.isArray(piece.thread) ? piece.thread.join("\n\n") : "");
       const title = piece.title ? `${piece.title}\n\n` : "";
+      const dek = piece.dek ? `${piece.dek}\n\n` : "";
       const credit = piece.creator_credit || piece.source_credit_line || piece.credit || "";
-      els.writingOutput.textContent = `${title}${body || JSON.stringify(piece, null, 2)}${credit ? `\n\n${credit}` : ""}`;
+      const renderedBody = body || JSON.stringify(piece, null, 2);
+      const needsCredit = credit && !String(renderedBody).includes(String(credit).trim());
+      els.writingOutput.textContent = `${title}${dek}${renderedBody}${needsCredit ? `\n\n${credit}` : ""}`;
       const warnings = piece.voice_warnings || data.voice_warnings || [];
       const warningCopy = piece.warning_copy || data.warning_copy || "Uoink found no Voice DNA warnings in the returned payload.";
       els.voiceWarningCopy.textContent = warnings.length
@@ -4967,25 +5043,59 @@
         : warningCopy;
     }
 
+    async function connectedAgentDraft(toolName, mode, groundingPayload, args) {
+      const bridge = window.uoinkWritingAgent || nativeApi()?.uoinkWritingAgent;
+      if (!bridge) return null;
+      const request = {
+        tool: toolName,
+        mode,
+        grounding: {
+          ...groundingPayload,
+          source_credit_line: writingCreditLine(groundingPayload.context || {}, mode),
+        },
+        arguments: args,
+      };
+      if (typeof bridge === "function") return bridge(request);
+      if (typeof bridge.write === "function") return bridge.write(request);
+      if (typeof bridge.generate === "function") return bridge.generate(request);
+      return null;
+    }
+
     async function generateWriting() {
       const sourceId = els.writingSource.value;
       if (!sourceId) return showToast("Choose a source uoink first.");
       const mode = selectedRadio("writingMode", "tweet");
-      const endpoint = mode === "blog" ? "/writing/blog" : "/writing/tweet";
+      const toolName = mode === "blog" ? "write_blog" : "write_tweet";
       const body = {
         source_yoink_id: sourceId,
         angle: els.writingAngle.value.trim() || undefined,
         style_anchor_ids: selectedAnchorIds(),
+        output_mode: mode,
         thread_max: mode === "thread" ? 10 : undefined,
         voice_dna_warnings_enabled: Boolean(els.writingShowWarnings.checked && !els.writingSkipWarnings.checked),
+        skip_voice_dna_this_time: Boolean(els.writingSkipWarnings.checked),
       };
-      els.writingOutput.textContent = "Generating...";
+      els.writingOutput.textContent = "Calling MCP writing tool...";
       try {
-        const data = await authFetch(endpoint, { method: "POST", body: JSON.stringify(body) });
+        const data = await callMcpTool(toolName, body);
+        if (data.mode === "grounding_only") {
+          const agentDraft = await connectedAgentDraft(toolName, mode, data, body);
+          if (agentDraft && agentDraft.body) {
+            const persisted = await callMcpTool(toolName, {
+              ...body,
+              ...agentDraft,
+              body: agentDraft.body,
+              source_credit_line: agentDraft.source_credit_line || writingCreditLine(data.context || {}, mode),
+            });
+            renderWritingResult(persisted);
+            showToast("Writing draft ready.");
+            return;
+          }
+        }
         renderWritingResult(data);
-        showToast("Writing draft ready.");
+        showToast(data.mode === "grounding_only" ? "MCP grounding ready." : "Writing draft ready.");
       } catch (err) {
-        els.writingOutput.textContent = `Writing Studio is coming with CC's backend update.\n\nExpected ${endpoint} body:\n${JSON.stringify(body, null, 2)}\n\nCurrent helper response: ${err.message}`;
+        els.writingOutput.textContent = `Writing Studio could not call ${toolName}.\n\nTool arguments:\n${JSON.stringify(body, null, 2)}\n\nCurrent helper response: ${err.message}`;
       }
     }
 
@@ -5071,7 +5181,14 @@
       els.defaultSitesList.innerHTML = state.defaultAllowedSites.map((site) => `<span class="readonly-badge">${htmlEscape(site)}</span>`).join("");
       try {
         const data = await authFetch("/extract/page/allowlist");
-        state.allowedSites = data.sites || data.allowlist || data.allowed_sites || [];
+        const defaultSites = data.default_seeds || data.default_sites || state.defaultAllowedSites;
+        state.defaultAllowedSites = Array.isArray(defaultSites) && defaultSites.length ? defaultSites : state.defaultAllowedSites;
+        const defaultSet = new Set(state.defaultAllowedSites.map((site) => String(site).toLowerCase()));
+        const rows = data.sites || data.allowlist || data.allowed_sites || [];
+        state.allowedSites = rows.filter((row) => {
+          const pattern = sitePattern(row);
+          return pattern && !defaultSet.has(String(pattern).toLowerCase());
+        });
         els.allowedSitesStatus.textContent = `${state.allowedSites.length} user-added site${state.allowedSites.length === 1 ? "" : "s"}.`;
       } catch (err) {
         state.allowedSites = [];
