@@ -79,7 +79,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 ; Python embeddable distribution (already includes pythonw.exe + python.exe
-; + the stdlib zip). After staging, Lib\site-packages contains yt_dlp.
+; + the stdlib zip). After staging, Lib\site-packages contains yt_dlp,
+; WhisperX, and their runtime dependencies.
 Source: "staging\python\*"; DestDir: "{app}\python"; Flags: recursesubdirs ignoreversion createallsubdirs
 
 ; Bundled binaries -- prepended to PATH at runtime by server.py.

@@ -104,6 +104,10 @@ $PYTHONNET_VERSION = '3.0.5'
 # v2.5 A1 transcript reliability detection. Library ships; Whisper model does
 # not. The tiny model downloads lazily to %LOCALAPPDATA%\Uoink\models\whisper.
 $WHISPER_TIMESTAMPED_VERSION = '1.15.9'
+# v3.1.2 podcast/A1 transcription runtime. This bundles WhisperX and its
+# runtime deps into the embeddable Python so podcast transcription works on a
+# fresh install; model weights still download only after user consent.
+$WHISPERX_VERSION = '3.8.6'
 
 # ---- Hash verification --------------------------------------------------
 # Direct-download SHA256s are locked as of v2.0. When bumping Python,
@@ -281,10 +285,10 @@ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
 #     MCP powers uoink_mcp.py for stdio agent integrations. keyring stores
 #     the user's Anthropic API key in Windows Credential Manager.
-Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION + whisper-timestamped==$WHISPER_TIMESTAMPED_VERSION..."
+Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION + whisper-timestamped==$WHISPER_TIMESTAMPED_VERSION + whisperx==$WHISPERX_VERSION..."
 & $embedPython -m pip install --no-warn-script-location --no-compile `
-    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "whisper-timestamped==$WHISPER_TIMESTAMPED_VERSION"
-if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray + whisper-timestamped) failed' }
+    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "whisper-timestamped==$WHISPER_TIMESTAMPED_VERSION" "whisperx==$WHISPERX_VERSION"
+if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray + whisper-timestamped + whisperx) failed' }
 
 # 2d-bis. Regenerate installer\uoink.ico from assets\logo-mark-color.png. Uses
 # the embeddable Pillow (just installed). Runs BEFORE the staging copy of
@@ -439,6 +443,8 @@ import uoink_tray
 print("smoke: import uoink_tray OK")
 import uoink_splash, uoink_dashboard
 print("smoke: import uoink_splash + uoink_dashboard OK")
+import whisperx
+print("smoke: import whisperx OK")
 '@
     try {
         & '.\python\python.exe' $smokePy
