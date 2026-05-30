@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Uoink",
   "short_name": "Uoink",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "The YouTube layer for any AI. Transcripts, screenshots, and comments in one paste.",
   "homepage_url": "https://uoink.video",
   "permissions": ["alarms", "clipboardWrite", "notifications", "storage", "contextMenus", "activeTab", "offscreen"],
@@ -10,6 +10,9 @@
     "https://www.youtube.com/*",
     "https://m.youtube.com/*",
     "https://youtu.be/*",
+    "https://x.com/*",
+    "https://twitter.com/*",
+    "https://mobile.twitter.com/*",
     "http://127.0.0.1:5179/*",
     "http://localhost:5179/*"
   ],

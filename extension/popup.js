@@ -1933,6 +1933,27 @@ async function loadRecentUoinks() {
 
     const text = document.createElement("span");
     text.className = "recent-item-text";
+
+    const pf = r.platform || "";
+    let pfText = "";
+    let pfClass = "";
+    if (pf === "youtube") {
+      pfText = "YouTube";
+      pfClass = "youtube";
+    } else if (pf === "twitter") {
+      pfText = "X";
+      pfClass = "twitter";
+    } else if (pf) {
+      pfText = pf.charAt(0).toUpperCase() + pf.slice(1);
+      pfClass = "generic";
+    }
+    if (pfText) {
+      const pfChip = document.createElement("span");
+      pfChip.className = `platform-chip ${pfClass}`;
+      pfChip.textContent = pfText;
+      text.appendChild(pfChip);
+    }
+
     const title = document.createElement("span");
     title.textContent = r.title || "(untitled)";
     const meta = document.createElement("span");

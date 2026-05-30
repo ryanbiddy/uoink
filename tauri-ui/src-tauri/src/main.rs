@@ -7,7 +7,7 @@ fn run_inno_silent(install_dir: String) -> Result<String, String> {
         .map_err(|e| e.to_string())?
         .parent()
         .ok_or("could not resolve prototype exe directory")?
-        .join("Uoink-Setup-3.1.1.exe");
+        .join("Uoink-Setup-3.1.2.exe");
 
     if !installer.exists() {
         return Ok(format!(
