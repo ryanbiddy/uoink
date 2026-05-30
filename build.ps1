@@ -356,6 +356,9 @@ Copy-Item (Join-Path $RepoRoot 'channels.py')    $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'workspaces.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'claims.py')      $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'scripts.py')     $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'voice_dna.py')   $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'writing_studio.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'page_extractor.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'memory_layer.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'podcasts.py')    $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'mobile_playlists.py') $StagingDir -Force
@@ -409,7 +412,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py page_extractor.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
