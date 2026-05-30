@@ -295,8 +295,16 @@ end;
 
 procedure BuildMigratePage();
 begin
-  MigratePage := CreateCustomPage(wpReady, 'Migrating Yoink Data',
-    'Moving your saved videos, settings, and API key safely to Uoink');
+  // v3.2 fix for v3.1.3 QA-58 (Yoink visible-text leak): neutralise the
+  // prose mentions of "Yoink" in the migration page so a strict brand
+  // audit doesn't flag the installer wizard. The literal path
+  // %LOCALAPPDATA%\Yoink\ stays because it's a real filesystem location
+  // -- users need an accurate pointer if they have to retrieve files
+  // manually. The page is only shown when LegacyYoinkPresent() returns
+  // True (i.e., users who actually had the old install), so the path is
+  // contextually expected; hiding it would harm the safety-net message.
+  MigratePage := CreateCustomPage(wpReady, 'Migrating your previous install',
+    'Moving your saved videos, settings, and API key safely into Uoink');
   MigrateText := TNewStaticText.Create(MigratePage);
   MigrateText.Parent := MigratePage.Surface;
   MigrateText.AutoSize := False;
@@ -306,10 +314,10 @@ begin
   MigrateText.Height := MigratePage.SurfaceHeight;
   MigrateText.WordWrap := True;
   MigrateText.Caption :=
-    'A previous Yoink install was found on this PC.' + #13#10#13#10 +
+    'A previous install of the helper was found on this PC.' + #13#10#13#10 +
     'The first time Uoink starts, it will automatically copy your saved videos, ' +
-    'settings, and Anthropic API key from Yoink into Uoink. Nothing is moved or ' +
-    'deleted until a fully verified copy exists -- your old files stay in place ' +
+    'settings, and Anthropic API key from the previous install. Nothing is moved ' +
+    'or deleted until a fully verified copy exists -- your old files stay in place ' +
     'for 7 days as a safety net, then are removed automatically.' + #13#10#13#10 +
     'If anything cannot be copied automatically, no data is lost: your old files ' +
     'remain at %LOCALAPPDATA%\Yoink\, and you can re-enter your Anthropic API key ' +
