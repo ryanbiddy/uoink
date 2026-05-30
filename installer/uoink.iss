@@ -128,6 +128,9 @@ Source: "staging\helper\*"; DestDir: "{app}\helper"; Flags: recursesubdirs ignor
 ; imports it at module top -- must ship or the helper crashes before binding.
 Source: "staging\uoink_core\*"; DestDir: "{app}\uoink_core"; Flags: recursesubdirs ignoreversion createallsubdirs
 Source: "staging\skills\*"; DestDir: "{app}\skills"; Flags: recursesubdirs ignoreversion createallsubdirs
+; v3.2 Writing Studio: ship the canonical Voice DNA doc so voice_dna.py
+; can load VOICE_DNA_PROMPT at boot.
+Source: "staging\voice_dna\*"; DestDir: "{app}\voice_dna"; Flags: recursesubdirs ignoreversion createallsubdirs
 Source: "staging\assets\dashboard\*"; DestDir: "{app}\assets\dashboard"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Tier 2 GUI assets: splash HTML (served at /splash, wrapped by uoink_splash.py)
 ; and the shared brand-tokens stylesheet both pages consume.

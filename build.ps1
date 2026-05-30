@@ -379,6 +379,10 @@ Copy-Item $IconSrc (Join-Path $StagingDir 'uoink.ico') -Force
 # with ModuleNotFoundError before binding the port (cf. _platform.py).
 Copy-Item (Join-Path $RepoRoot 'uoink_core') (Join-Path $StagingDir 'uoink_core') -Recurse -Force
 Copy-Item (Join-Path $RepoRoot 'skills') (Join-Path $StagingDir 'skills') -Recurse -Force
+# v3.2 Writing Studio: ship the canonical Voice DNA doc so the helper can
+# load VOICE_DNA_PROMPT at boot. voice_dna.py looks in $HERE/voice_dna/
+# first, falls back to $HERE/. Sync source is uoink-handoff/VOICE-DNA.md.
+Copy-Item (Join-Path $RepoRoot 'voice_dna') (Join-Path $StagingDir 'voice_dna') -Recurse -Force
 Copy-Item (Join-Path $RepoRoot 'assets\dashboard') (Join-Path $StagingDir 'assets\dashboard') -Recurse -Force
 # Tier 2 GUI: splash HTML (served at /splash and wrapped by uoink_splash.py)
 # and the brand tokens stylesheet used by both pages.
