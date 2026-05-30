@@ -40,15 +40,26 @@ $TemplatesDir = Join-Path $InstallerDir 'templates'
 $IconSrc      = Join-Path $InstallerDir 'uoink.ico'
 
 # ---- Versions (pinned for v2 ship) --------------------------------------
-$VersionFile    = Join-Path $RepoRoot 'VERSION'
+$VersionSourceFile = Join-Path $RepoRoot 'helper\_version.py'
+if (-not (Test-Path $VersionSourceFile)) {
+    throw "Missing helper\_version.py version source"
+}
+$VersionSourceText = Get-Content -Raw $VersionSourceFile
+$VersionMatch = [regex]::Match($VersionSourceText, '(?m)^__version__\s*=\s*["''](?<version>\d+\.\d+\.\d+)["'']')
+if (-not $VersionMatch.Success) {
+    throw "helper\_version.py must define __version__ = 'x.y.z'"
+}
+$VERSION = $VersionMatch.Groups['version'].Value
+Write-Host "Building Uoink version $VERSION" -ForegroundColor Cyan
+
+$VersionFile = Join-Path $RepoRoot 'VERSION'
 if (-not (Test-Path $VersionFile)) {
     throw "Missing VERSION file at repo root"
 }
-$VERSION = (Get-Content -Raw $VersionFile).Trim()
-if ($VERSION -notmatch '^\d+\.\d+\.\d+$') {
-    throw "VERSION must be semver-like x.y.z, got '$VERSION'"
+$VersionFileValue = (Get-Content -Raw $VersionFile).Trim()
+if ($VersionFileValue -ne $VERSION) {
+    throw "VERSION file ($VersionFileValue) does not match helper\_version.py ($VERSION). Update helper\_version.py first, then mirror it into VERSION."
 }
-Write-Host "Building Uoink version $VERSION" -ForegroundColor Cyan
 
 $ManifestPath = Join-Path $RepoRoot 'extension\manifest.json'
 if (-not (Test-Path $ManifestPath)) {
@@ -57,7 +68,7 @@ if (-not (Test-Path $ManifestPath)) {
 $ManifestJson = Get-Content -Raw $ManifestPath | ConvertFrom-Json
 $ManifestVersion = [string]$ManifestJson.version
 if ($ManifestVersion -ne $VERSION) {
-    throw "VERSION file ($VERSION) does not match extension\manifest.json version ($ManifestVersion). Update both before building."
+    throw "helper\_version.py ($VERSION) does not match extension\manifest.json version ($ManifestVersion). Update helper\_version.py first, then mirror it into the manifest."
 }
 
 # Python 3.11.9 is the last 3.11.x with binary installers; later 3.11 are
@@ -184,6 +195,7 @@ if (-not (Test-Path $splashIndex)) {
 }
 foreach ($f in @(
     'VERSION',
+    'helper\_version.py',
     'server.py',
     'index.py',
     '_platform.py',
@@ -198,6 +210,7 @@ foreach ($f in @(
     'whisper_runner.py',
     'yt_extract.py',
     'topics.json',
+    'installer\verify_install.ps1',
     'uoink_core\storage.py'
 )) {
     if (-not (Test-Path (Join-Path $RepoRoot $f))) {
@@ -351,7 +364,9 @@ Copy-Item (Join-Path $RepoRoot 'yoink_mcp.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'requirements.txt') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'yt_extract.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'topics.json')    $StagingDir -Force
-Copy-Item (Join-Path $RepoRoot 'VERSION')        $StagingDir -Force
+Set-Content -Path (Join-Path $StagingDir 'VERSION') -Value $VERSION -Encoding ASCII
+Copy-Item (Join-Path $RepoRoot 'helper') (Join-Path $StagingDir 'helper') -Recurse -Force
+Copy-Item (Join-Path $InstallerDir 'verify_install.ps1') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.bat') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.ps1') $StagingDir -Force
 Copy-Item $IconSrc (Join-Path $StagingDir 'uoink.ico') -Force
@@ -383,7 +398,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py memory_layer.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py
+        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
@@ -416,6 +431,9 @@ if not v:
                      "migrations/*.sql likely missing from staging")
 print("smoke: Index.open OK, schema_version=%s" % v)
 import server
+expected = (pathlib.Path(__file__).with_name("VERSION")).read_text(encoding="utf-8").strip()
+if server.VERSION != expected:
+    raise SystemExit("smoke: server.VERSION %s != staged VERSION %s" % (server.VERSION, expected))
 print("smoke: import server OK, version=%s" % server.VERSION)
 import uoink_tray
 print("smoke: import uoink_tray OK")

@@ -7,7 +7,7 @@
 .\build.ps1
 ```
 
-The script downloads dependencies on first run (~80 MB cached under `build\cache\`), stages the install layout, and compiles `build\Uoink-Setup-2.1.0.exe`.
+The script downloads dependencies on first run (~80 MB cached under `build\cache\`), stages the install layout, and compiles `build\Uoink-Setup-<VERSION>.exe`.
 
 To wipe everything and rebuild from scratch:
 
@@ -155,7 +155,7 @@ Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`) are version-pinned
 | MCP Python SDK | Update `$MCP_VERSION` in `build.ps1` and the matching `mcp==...` pin in `requirements.txt`. |
 | keyring | Update `$KEYRING_VERSION` in `build.ps1` and the matching `keyring==...` pin in `requirements.txt`. |
 | ffmpeg | gyan.dev rolls the static "release essentials" build forward; the URL stays the same. To pin, swap to a versioned URL from the same site. |
-| Uoink itself | Update `$VERSION` in `build.ps1`, `AppVersion` in `installer\uoink.iss`, `VERSION` in `server.py`, and `version` in `extension\manifest.json`. The output filename and the registry/Start Menu names will follow. |
+| Uoink itself | Update `helper\_version.py`, then mirror the same value into the repo-root `VERSION` file and `extension\manifest.json`. `build.ps1` rewrites `installer\uoink.generated.iss`, stages `VERSION` from the helper constant, and fails if any version value drifts. |
 
 ## How `server.py` finds bundled binaries
 
@@ -189,7 +189,7 @@ If the env var is missing, points at a non-existent path, or is not writable, Uo
 
 ### Antivirus warnings on unsigned builds
 
-`Uoink-Setup-2.1.0.exe` is unsigned. SmartScreen will show "Windows protected your PC" the first time a user runs it, and some AV products may quarantine it. There are three mitigations, in order of cost:
+`Uoink-Setup-<VERSION>.exe` is unsigned. SmartScreen will show "Windows protected your PC" the first time a user runs it, and some AV products may quarantine it. There are three mitigations, in order of cost:
 
 1. **None** — accept the SmartScreen click-through ("More info" → "Run anyway"). Document it on `setup.html` so users know what to expect. Acceptable for v2 if launch volume is small.
 2. **Code signing** — buy an OV cert (~$70/yr from one of the few remaining issuers) and sign the installer + `pythonw.exe` with `signtool.exe`. Removes most AV friction but doesn't fully clear SmartScreen until reputation builds.
@@ -215,15 +215,15 @@ Tracked as a v1.1 task: store user-overridden prompts in `chrome.storage.local` 
 
 Before flipping the extension's download button live:
 
-1. **Build a release artifact:** `.\build.ps1` → produces `build\Uoink-Setup-2.1.0.exe`.
+1. **Build a release artifact:** `.\build.ps1` → produces `build\Uoink-Setup-<VERSION>.exe`.
 2. **Smoke-test on a clean Windows VM** (see Testing matrix below).
 3. **Tag the release in git:** `git tag v2.0.0 && git push --tags`.
 4. **Publish to GitHub releases:**
    - Create a new release at `https://github.com/ryanbiddy/uoink/releases/new`.
    - Tag: `v2.0.0`. Title: `Uoink 2.0.0`.
-   - Attach `build\Uoink-Setup-2.1.0.exe` as the release asset.
+   - Attach `build\Uoink-Setup-<VERSION>.exe` as the release asset.
    - Publish (not draft).
-   - Verify `https://github.com/ryanbiddy/uoink/releases/latest/download/Uoink-Setup-2.1.0.exe` resolves to the file.
+   - Verify `https://github.com/ryanbiddy/uoink/releases/latest/download/Uoink-Setup-<VERSION>.exe` resolves to the file.
 5. **Flip the extension's `INSTALLER_PUBLISHED` flag:**
    - Edit `extension/setup.js` and set `const INSTALLER_PUBLISHED = true;`.
    - Reload the extension and visit `setup.html` -- the **Download Uoink Setup for Windows** button should now be active and link to the latest release.
@@ -236,7 +236,7 @@ The flag exists so the extension can ship to early users *before* the installer 
 
 After `build.ps1` finishes, smoke-test by:
 
-1. **Fresh install** — run `Uoink-Setup-2.1.0.exe` on a Windows VM that doesn't have Uoink. Confirm:
+1. **Fresh install** — run `Uoink-Setup-<VERSION>.exe` on a Windows VM that doesn't have Uoink. Confirm:
    - Default install path is `%LOCALAPPDATA%\Uoink`.
    - "Launch Uoink Server now" is checked by default on the finish page.
    - After finish, `Get-Process pythonw` shows a process whose path is inside the install dir.
