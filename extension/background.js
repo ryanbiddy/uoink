@@ -34,12 +34,18 @@ const LINK_PATTERNS = [
   "https://www.youtube.com/shorts/*",
   "https://m.youtube.com/watch*",
   "https://m.youtube.com/shorts/*",
+  "*://x.com/*/status/*",
+  "*://twitter.com/*/status/*",
+  "*://mobile.twitter.com/*/status/*",
+  "*://www.x.com/*/status/*",
 ];
 const PAGE_PATTERNS = [
   "https://www.youtube.com/watch*",
   "https://www.youtube.com/shorts/*",
   "https://m.youtube.com/watch*",
   "https://m.youtube.com/shorts/*",
+  "*://x.com/*/status/*",
+  "*://twitter.com/*/status/*",
 ];
 
 // ---- Lifecycle ------------------------------------------------------------
@@ -216,14 +222,24 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     return;
   }
 
-  const normalized = STC.normalizeYouTubeUrl(raw || "");
+  let normalized = STC.normalizeYouTubeUrl(raw || "");
+  let isTwitter = false;
   if (!normalized) {
-    notify("Invalid URL", "Couldn't find YouTube video ID");
+    normalized = STC.normalizeTwitterUrl(raw || "");
+    if (normalized) {
+      isTwitter = true;
+    }
+  }
+  if (!normalized) {
+    notify("Invalid URL", "Couldn't find YouTube video ID or Twitter/X status ID");
     return;
   }
 
   const interval = await STC.getInterval();
   const job = { kind, url: normalized, interval, addedAt: Date.now() };
+  if (isTwitter) {
+    job.useExtractAny = true;
+  }
   if (kind === "session_add") {
     const active = await getActiveFromStorage();
     if (!active || !active.id) {
@@ -665,7 +681,11 @@ async function runJob(job) {
 async function runExtractJob(job) {
   let data;
   try {
-    data = await STC.postExtract(job.url, job.interval);
+    if (job.useExtractAny) {
+      data = await STC.postExtractAny(job.url, job.interval);
+    } else {
+      data = await STC.postExtract(job.url, job.interval);
+    }
   } catch (e) {
     console.error("[Uoink] server unreachable", e);
     // No tab open here -- setup.html only opens from direct user actions

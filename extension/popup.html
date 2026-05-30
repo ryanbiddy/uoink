@@ -405,6 +405,34 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .platform-chip {
+      display: inline-block;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-right: 5px;
+      vertical-align: middle;
+      border: 1px solid transparent;
+      line-height: 1.1;
+      flex-shrink: 0;
+    }
+    .platform-chip.youtube {
+      background: rgba(255, 61, 0, 0.15);
+      border-color: rgba(255, 61, 0, 0.3);
+      color: #ffb399;
+    }
+    .platform-chip.twitter {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+    }
+    .platform-chip.generic {
+      background: rgba(200, 177, 159, 0.15);
+      border-color: rgba(200, 177, 159, 0.35);
+      color: #e5d5c8;
+    }
     .health-row {
       display: inline-flex;
       align-items: center;

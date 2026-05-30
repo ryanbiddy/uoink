@@ -142,6 +142,39 @@
     return normalized;
   }
 
+  const TWITTER_HOSTS = new Set(["twitter.com", "www.twitter.com", "mobile.twitter.com", "x.com", "www.x.com"]);
+
+  function normalizeTwitterUrl(raw) {
+    if (!raw) return null;
+    let u;
+    try {
+      u = new URL(raw.includes("://") ? raw : "https://" + raw);
+    } catch {
+      return null;
+    }
+    const host = u.hostname.toLowerCase();
+    if (!TWITTER_HOSTS.has(host)) {
+      return null;
+    }
+    const parts = u.pathname.replace(/^\/+|\/+$/g, "").split("/");
+    if (parts.length === 0 || parts[0] === "") return null;
+    
+    if (parts[0].toLowerCase() === "i" && parts.length >= 3 && parts[1] === "status") {
+      if (/^\d{15,19}$/.test(parts[2])) {
+        return `https://x.com/i/status/${parts[2]}`;
+      }
+      return null;
+    }
+    if (parts.length >= 3 && parts[1] === "status") {
+      const handle = parts[0];
+      const statusId = parts[2];
+      if (/^[A-Za-z0-9_]{1,15}$/.test(handle) && /^\d{15,19}$/.test(statusId)) {
+        return `https://x.com/${handle}/status/${statusId}`;
+      }
+    }
+    return null;
+  }
+
   function getInterval() {
     return new Promise((resolve) => {
       try {
@@ -168,6 +201,44 @@
       let res;
       try {
         res = await _authedFetch("/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        });
+      } catch (e) {
+        if (e instanceof TypeError) {
+          console.error("[Uoink] server unreachable at", targetUrl, e);
+        } else {
+          console.error("[Uoink] fetch aborted/failed", targetUrl, e);
+        }
+        throw e;
+      }
+
+      const text = await res.text();
+      if (!res.ok) {
+        console.error("[Uoink] HTTP", res.status, "body:", text);
+      }
+      try {
+        return JSON.parse(text);
+      } catch {
+        console.error("[Uoink] JSON parse error, raw text:", text);
+        return { ok: false, error: "Server returned a non-JSON response." };
+      }
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  async function postExtractAny(url, interval) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const targetUrl = `${SERVER}/extract/any`;
+    const requestBody = { url, interval };
+    try {
+      let res;
+      try {
+        res = await _authedFetch("/extract/any", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(requestBody),
@@ -562,8 +633,10 @@
     REQUEST_TIMEOUT_MS,
     extractVideoId,
     normalizeYouTubeUrl,
+    normalizeTwitterUrl,
     getInterval,
     postExtract,
+    postExtractAny,
     ping,
     startSession,
     addToSession,
