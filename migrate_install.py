@@ -24,7 +24,7 @@ Safety model (copy-not-move):
 - A .migration-complete sentinel in \Uoink\ gates the eventual hard-delete of
   the old folder, which only happens after a 7-day grace period.
 - A .migrated-from-yoink marker (carrying the migration timestamp) is what the
-  one-time "Yoink is now Uoink" toast keys off.
+  one-time post-migration toast keys off.
 
 Every step is logged. The module is import-safe with no side effects; callers
 invoke run_migration() / migrate_desktop_corpus() explicitly.
@@ -57,7 +57,7 @@ _RUN_VALUE_NEW = "Uoink"
 
 MIGRATED_TXT_FILENAME = "MIGRATED_TO_UOINK.txt"
 _MIGRATED_TXT_TEMPLATE = """\
-Yoink is now Uoink.
+Uoink upgrade complete.
 
 Everything in this folder was copied to:
   %LOCALAPPDATA%\\Uoink\\
