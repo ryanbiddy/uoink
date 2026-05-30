@@ -622,7 +622,7 @@ def _default_settings() -> dict:
         # who never want the warning surface can hide it via Settings.
         "voice_dna_show_per_generation_toggle": True,
         "anthropic_key_invalid": False,
-        # v2.1 rename: set True after the one-time "Yoink is now Uoink"
+        # v2.1 rename: set True after the one-time post-migration
         # post-migration toast has fired, so it never repeats.
         "post_migration_toast_shown": False,
         "updated_at": None,
@@ -5963,7 +5963,7 @@ def _diagnose_payload() -> dict:
         migration = {"error": str(e)}
     if migration.get("keyring_legacy_present") and not key:
         warnings.append(
-            "Your Anthropic key didn't carry over from the Yoink install. "
+            "Your Anthropic key didn't carry over from the previous install. "
             "Re-enter it on the setup page to restore Comment Intelligence, "
             "Hook Type, and entity extraction.")
     return {
@@ -9668,7 +9668,7 @@ def maybe_toast(title: str, body: str, icon_path: str | None = None):
 
 
 def _maybe_post_migration_toast() -> bool:
-    """Fire the one-time "Yoink is now Uoink" toast if a Yoink->Uoink install
+    """Fire the one-time post-migration toast if a legacy install
     migration just ran and the toast hasn't been shown yet. Returns True if
     it fired (so the caller skips the regular ready toast this boot).
 
@@ -9688,7 +9688,7 @@ def _maybe_post_migration_toast() -> bool:
     except Exception:
         return False
     maybe_toast(
-        "Yoink is now Uoink",
+        "Uoink upgrade complete",
         "Your videos, settings, and API key moved to the new Uoink folder. "
         "Nothing lost — the magnet was always a U. uoink.video",
         icon_path=_bundled_icon_path(),
@@ -9851,7 +9851,7 @@ def main():
     # Only fires here -- the single-instance / bind-failure paths above
     # exit() before reaching this line, so a duplicate launch doesn't
     # double-notify. If the install migration just ran, fire the one-time
-    # "Yoink is now Uoink" toast instead of the regular ready toast, gated on
+    # post-migration toast instead of the regular ready toast, gated on
     # a settings flag so it never repeats.
     if not _maybe_post_migration_toast():
         maybe_toast(

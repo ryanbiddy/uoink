@@ -108,7 +108,7 @@ function location() {
             <button type="button" data-action="browse">Browse</button>
           </div>
           <div class="free-space">Free space readout: prototype hook ready</div>
-          ${state.legacyFound ? `<div class="notice">Legacy Yoink data detected. Migration will run after install and keep a grace copy.</div>` : ""}
+          ${state.legacyFound ? `<div class="notice">Legacy local data detected. Migration will run after install and keep a grace copy.</div>` : ""}
         </div>
       </div>
       <footer><button class="ghost" type="button" data-next="welcome">Back</button><button class="cta" type="button" data-next="ready">Continue -></button></footer>
