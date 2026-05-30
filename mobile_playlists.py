@@ -117,6 +117,7 @@ def _shape_row(row: dict) -> dict:
             row.get("last_seen_video_ids") or "[]")
     except (json.JSONDecodeError, TypeError):
         row["last_seen_video_ids"] = []
+    row["seen_count"] = len(row["last_seen_video_ids"])
     row["enabled"] = bool(row.get("enabled"))
     return row
 

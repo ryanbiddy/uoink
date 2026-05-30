@@ -131,11 +131,21 @@ def get_feed(idx, feed_id: int) -> dict | None:
 
 
 def list_feeds(idx, *, enabled_only: bool = False) -> list[dict]:
-    sql = "SELECT * FROM podcast_feeds"
+    sql = (
+        "SELECT f.*, "
+        "  COUNT(e.id) AS episode_count, "
+        "  MAX(e.published_at) AS latest_episode_published_at, "
+        "  (SELECT e2.title FROM podcast_episodes e2 "
+        "   WHERE e2.feed_id = f.id "
+        "   ORDER BY e2.published_at DESC, e2.discovered_at DESC "
+        "   LIMIT 1) AS last_episode_title "
+        "FROM podcast_feeds f "
+        "LEFT JOIN podcast_episodes e ON e.feed_id = f.id"
+    )
     params: list = []
     if enabled_only:
-        sql += " WHERE enabled = 1"
-    sql += " ORDER BY added_at DESC"
+        sql += " WHERE f.enabled = 1"
+    sql += " GROUP BY f.id ORDER BY f.added_at DESC"
     rows = idx._conn.execute(sql, params).fetchall()
     return [dict(r) for r in rows]
 

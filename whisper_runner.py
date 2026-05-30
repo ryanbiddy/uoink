@@ -6,10 +6,9 @@ model + the same lazy-download UX -- one worker, two entry points.
 
 Locked compute policy (LOCAL-FIRST):
 - Whisper inference runs on the user's machine. No cloud API call.
-- WhisperX is imported LAZILY so the helper boots fine without it.
-  The /transcribe endpoints surface a structured 503 'whisperx not
-  installed' until the user installs the runtime via the setup page
-  (the install step is Codex/AG's UI work).
+- WhisperX is imported LAZILY so the helper boots fast, but the Windows
+  installer bundles the runtime. The /transcribe endpoints still surface
+  a structured 503 if an install is damaged or a dependency is missing.
 - Model files (200 MB - 2 GB) are downloaded on first use under
   <data_root>/whisper_models/<model_size>/. Consent dialog lives in
   the dashboard; this module just respects an explicit
@@ -39,6 +38,8 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import inspect
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -88,10 +89,70 @@ def is_whisperx_available() -> bool:
         return False
 
 
+def is_model_downloaded(data_root: Path, model_size: str = MODEL_BASE) -> bool:
+    """Return true once the local Whisper model cache has any payload.
+
+    The first transcription still requires explicit user consent before
+    WhisperX downloads the model. /health uses this as a read-only status
+    bit, so it must not create the model directory as a side effect.
+    """
+    model_size = normalize_model(model_size)
+    model_path = Path(data_root) / "whisper_models" / model_size
+    if not model_path.exists() or not model_path.is_dir():
+        return False
+    try:
+        return any(model_path.iterdir())
+    except OSError:
+        return False
+
+
 def _model_dir(data_root: Path, model_size: str) -> Path:
     p = Path(data_root) / "whisper_models" / model_size
     p.mkdir(parents=True, exist_ok=True)
     return p
+
+
+def _runtime_device() -> str:
+    try:
+        import torch  # type: ignore
+        return "cuda" if torch.cuda.is_available() else "cpu"
+    except Exception:
+        return "cpu"
+
+
+def _compute_type(device: str) -> str:
+    return "float16" if device == "cuda" else "int8"
+
+
+def _hf_token() -> str | None:
+    return (
+        os.environ.get("HF_TOKEN")
+        or os.environ.get("HUGGINGFACE_TOKEN")
+        or os.environ.get("HUGGING_FACE_HUB_TOKEN")
+    )
+
+
+def _diarization_pipeline(whisperx, *, device: str, data_root: Path):
+    """Create a WhisperX diarizer across old/new constructor signatures."""
+    kwargs: dict[str, Any] = {}
+    try:
+        params = inspect.signature(whisperx.DiarizationPipeline).parameters
+    except (TypeError, ValueError):
+        params = {}
+    if "model_name" in params:
+        # Current WhisperX defaults here too, but pinning it avoids falling
+        # back to older pyannote 3.1 behavior when dependency resolution drifts.
+        kwargs["model_name"] = "pyannote/speaker-diarization-community-1"
+    token = _hf_token()
+    if token:
+        if "token" in params:
+            kwargs["token"] = token
+        elif "use_auth_token" in params:
+            kwargs["use_auth_token"] = token
+    if "cache_dir" in params:
+        kwargs["cache_dir"] = str(Path(data_root) / "diarization_models")
+    kwargs["device"] = device
+    return whisperx.DiarizationPipeline(**kwargs)
 
 
 # ---- transcript helper -------------------------------------------------
@@ -143,9 +204,8 @@ def transcribe_audio(audio_path: Path, *,
         import whisperx  # type: ignore
     except ImportError as e:
         raise RuntimeError(
-            "whisperx is not installed. Install via the Setup page "
-            "(consent-gated dependency; not bundled with the helper "
-            "to keep the install footprint small)."
+            "whisperx is not installed. Reinstall Uoink so the bundled "
+            "WhisperX runtime is restored."
         ) from e
 
     model_path = _model_dir(data_root, model_size)
@@ -162,9 +222,11 @@ def transcribe_audio(audio_path: Path, *,
     # whisperx exposes a load_model + transcribe + align + diarize chain.
     # Keep the call site narrow so a future WhisperX API rev doesn't
     # require touching every caller -- just this module.
+    device = _runtime_device()
+    diarization_succeeded = False
     try:
-        model = whisperx.load_model(model_size, device="auto",
-                                      compute_type="auto",
+        model = whisperx.load_model(model_size, device=device,
+                                      compute_type=_compute_type(device),
                                       download_root=str(model_path))
         result = model.transcribe(str(audio_path),
                                     language=language)
@@ -176,16 +238,17 @@ def transcribe_audio(audio_path: Path, *,
         if diarize:
             try:
                 align_model, align_meta = whisperx.load_align_model(
-                    language_code=detected_lang, device="auto")
+                    language_code=detected_lang, device=device)
                 aligned = whisperx.align(
                     segments, align_model, align_meta,
-                    str(audio_path), device="auto")
-                diarize_pipeline = whisperx.DiarizationPipeline(
-                    use_auth_token=None, device="auto")
+                    str(audio_path), device=device)
+                diarize_pipeline = _diarization_pipeline(
+                    whisperx, device=device, data_root=data_root)
                 diarize_segments = diarize_pipeline(str(audio_path))
                 aligned = whisperx.assign_word_speakers(
                     diarize_segments, aligned)
                 segments = aligned.get("segments") or segments
+                diarization_succeeded = True
             except Exception as diar_err:
                 log.warning("diarization failed (degrading to "
                               "transcript-only): %s", diar_err)
@@ -195,7 +258,7 @@ def transcribe_audio(audio_path: Path, *,
     return {
         "model": model_size,
         "language": detected_lang,
-        "diarization_ran": bool(diarize),
+        "diarization_ran": diarization_succeeded,
         "segments": _shape_segments(segments),
         "generated_at": _now_iso(),
     }

@@ -1607,7 +1607,7 @@
         <button class="nav-button" type="button" data-tab-button="build">Build <span class="nav-count" id="buildNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="script">Script <span class="nav-count" id="scriptNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="evidence">Evidence <span class="nav-count" id="evidenceNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="yoink">Yoink</button>
+        <button class="nav-button" type="button" data-tab-button="yoink">Uoink</button>
         <button class="nav-button active" type="button" data-tab-button="library">Library <span class="nav-count" id="libraryNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="activity">Activity <span class="nav-count" id="activityNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="settings">Settings</button>
@@ -1922,7 +1922,7 @@
         <section class="tab-panel" id="tab-yoink" data-tab-panel="yoink">
           <div class="page-head">
             <div>
-              <div class="eyebrow">Yoink</div>
+              <div class="eyebrow">Uoink</div>
               <h1 id="yoinkHeading">Pick a uoink <em>to inspect.</em></h1>
               <p class="lede" id="yoinkSubhead">Podcast episodes, interviews, and regular videos share one local detail view.</p>
             </div>
@@ -2670,7 +2670,7 @@
               <div class="panel-title">Speaker timeline</div>
               <div class="localhost">diarization</div>
             </div>
-            ${emptyPanelRow("Speaker timeline coming with backend update.", "Expected sidecar fields: transcript or diarization segments with start, end, speaker, and text.")}
+            ${emptyPanelRow("No speaker timeline yet.", "Diarization appears here once transcript segments include speaker labels.")}
           </div>
         `;
       }
@@ -2758,7 +2758,7 @@
       const segments = transcriptSegments(sidecar).slice(0, podcast ? 10 : 6);
       if (!segments.length) {
         return emptyPanelRow(
-          podcast ? "Transcript coming with backend update." : "Transcript preview unavailable.",
+          "Transcript preview unavailable.",
           podcast ? "Expected podcast sidecar shape: transcript segments with start, end, text, and optional speaker fields." : "Open the saved markdown for the full transcript."
         );
       }
@@ -2854,7 +2854,7 @@
       els.yoinkFactMeta.textContent = state.selectedYoinkSidecar ? "loaded" : "fallback";
       const speakerHtml = speakers.length
         ? `<div class="speaker-row">${speakers.map((speaker) => `<span class="speaker-chip">${htmlEscape(speaker)}</span>`).join("")}</div>`
-        : `<div class="job-sub">${podcast ? "Speaker chips are coming with the WhisperX diarization backend update." : "No speaker labels stored for this uoink."}</div>`;
+        : `<div class="job-sub">${podcast ? "No speaker labels stored for this episode yet." : "No speaker labels stored for this uoink."}</div>`;
       const mediaBody = podcast
         ? `
           ${waveformHtml(row, sidecar)}
@@ -2934,7 +2934,7 @@
       try {
         state.selectedYoinkSidecar = await loadJsonFile(sidecarPath);
       } catch (err) {
-        state.selectedYoinkSidecarError = `coming with backend update (${err.message})`;
+        state.selectedYoinkSidecarError = `sidecar unavailable (${err.message})`;
       }
       renderYoinkDetail();
     }
@@ -2967,10 +2967,10 @@
       } catch (err) {
         const missing = err.message.includes("not found") || err.message.includes("404");
         state.retranscribeStatus = missing
-          ? "coming with backend update"
+          ? "helper endpoint unavailable"
           : `failed: ${err.message}`;
         showToast(missing
-          ? "Re-transcription arrives with the WhisperX backend update."
+          ? "Re-transcription is unavailable in this helper build."
           : `Could not queue re-transcription: ${err.message}`);
       } finally {
         state.retranscribing = false;
@@ -4309,53 +4309,53 @@
     function renderPlaylistList(rows) {
       if (!rows.length) {
         els.playlistList.innerHTML = emptyPanelRow(
-          "Coming with backend update.",
-          "Expected GET /mobile/playlists to return monitored playlist rows."
+          "No monitored playlists yet.",
+          "Paste a YouTube playlist URL to bridge mobile saves into Uoink."
         );
         return;
       }
       els.playlistList.innerHTML = rows.map((row) => settingsListRow(
         row,
         ["name", "title", "playlist_title", "url"],
-        ["polling_interval_minutes", "last_polled_at", "queued_count"]
+        ["poll_interval_min", "last_polled_at", "seen_count", "queued_count"]
       )).join("");
     }
 
     function renderPodcastFeedList(rows) {
       if (!rows.length) {
         els.podcastFeedList.innerHTML = emptyPanelRow(
-          "Coming with backend update.",
-          "Expected GET /podcast/feeds to return configured RSS feeds."
+          "No podcast feeds yet.",
+          "Paste an RSS feed URL to track new episodes locally."
         );
         return;
       }
       els.podcastFeedList.innerHTML = rows.map((row) => settingsListRow(
         row,
         ["title", "podcast_title", "feed_url", "url"],
-        ["episode_count", "last_checked_at", "last_episode_title"]
+        ["episode_count", "last_polled_at", "last_episode_title"]
       )).join("");
     }
 
     async function loadPlaylistSettings() {
       try {
-        const data = await authFetch("/mobile/playlists");
+        const data = await authFetch("/playlists/monitored");
         state.mobilePlaylists = data.playlists || data.auto_uoink_playlists || [];
         els.playlistStatus.textContent = `${state.mobilePlaylists.length} monitored playlist${state.mobilePlaylists.length === 1 ? "" : "s"}`;
       } catch (err) {
         state.mobilePlaylists = [];
-        els.playlistStatus.textContent = `Playlist monitor coming with backend update: ${err.message}`;
+        els.playlistStatus.textContent = `Playlist monitor unavailable: ${err.message}`;
       }
       renderPlaylistList(state.mobilePlaylists);
     }
 
     async function loadPodcastFeedSettings() {
       try {
-        const data = await authFetch("/podcast/feeds");
+        const data = await authFetch("/podcasts/feeds");
         state.podcastFeeds = data.feeds || data.podcast_feeds || [];
         els.podcastFeedStatus.textContent = `${state.podcastFeeds.length} configured feed${state.podcastFeeds.length === 1 ? "" : "s"}`;
       } catch (err) {
         state.podcastFeeds = [];
-        els.podcastFeedStatus.textContent = `Podcast feeds coming with backend update: ${err.message}`;
+        els.podcastFeedStatus.textContent = `Podcast feeds unavailable: ${err.message}`;
       }
       renderPodcastFeedList(state.podcastFeeds);
     }
@@ -4364,17 +4364,15 @@
       const url = els.playlistUrl.value.trim();
       if (!url) return showToast("Paste a playlist URL first.");
       try {
-        await authFetch("/mobile/playlists", {
+        await authFetch("/playlists/monitored", {
           method: "POST",
-          body: JSON.stringify({ playlist_url: url, polling_interval_minutes: 5 }),
+          body: JSON.stringify({ playlist_url: url, poll_interval_min: 5 }),
         });
         els.playlistUrl.value = "";
         showToast("Playlist monitor added.");
         loadPlaylistSettings();
       } catch (err) {
-        showToast(err.message.includes("not found") || err.message.includes("404")
-          ? "Auto-uoink playlists are coming with the backend update."
-          : `Could not add playlist: ${err.message}`);
+        showToast(`Could not add playlist: ${err.message}`);
       }
     }
 
@@ -4382,7 +4380,7 @@
       const feedUrl = els.podcastFeedUrl.value.trim();
       if (!feedUrl) return showToast("Paste an RSS feed URL first.");
       try {
-        await authFetch("/podcast/feeds", {
+        await authFetch("/podcasts/feeds", {
           method: "POST",
           body: JSON.stringify({ feed_url: feedUrl }),
         });
@@ -4390,9 +4388,7 @@
         showToast("Podcast feed added.");
         loadPodcastFeedSettings();
       } catch (err) {
-        showToast(err.message.includes("not found") || err.message.includes("404")
-          ? "Podcast feeds are coming with the backend update."
-          : `Could not add feed: ${err.message}`);
+        showToast(`Could not add feed: ${err.message}`);
       }
     }
 

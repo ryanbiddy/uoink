@@ -6218,9 +6218,16 @@ class Handler(BaseHTTPRequestHandler):
         if bare == "/ping" or bare == "/health":
             # Public liveness probe -- intentionally unauthenticated.
             log.info("GET %s from %s -> ok", bare, self.client_address[0])
+            settings = _read_settings() or {}
+            whisper_model = whisper_runner.normalize_model(
+                settings.get("whisper_model"))
             return self._send_json(200, {
                 "ok": True,
                 "version": VERSION,
+                "whisperx_available": whisper_runner.is_whisperx_available(),
+                "whisper_model": whisper_model,
+                "whisperx_model_loaded": whisper_runner.is_model_downloaded(
+                    DATA_ROOT, whisper_model),
                 # True while a corrupt index.db is being rebuilt from disk.
                 "index_recovering": _index_recovering,
                 # True when the active output root has been swapped from
