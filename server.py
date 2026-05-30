@@ -86,6 +86,30 @@ import whisper_runner  # noqa: E402  -- v3.1 WhisperX transcription (lazy)
 import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
 import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
 import writing_studio  # noqa: E402  -- v3.2 Writing Studio (tweet/blog)
+import page_extractor  # noqa: E402  -- v3.2 Universal Site Uoinking
+
+
+def _extract_page_to_prose(url: str) -> str | None:
+    """v3.2 synergy bridge: Writing Studio's URL anchor ingestion calls
+    this to convert a URL into prose. We wrap page_extractor.extract_page
+    with enforce_allowlist=False (user-explicit save is consent enough)
+    and return the markdown body. Returns None on failure so the anchor
+    still saves with raw_text=NULL."""
+    try:
+        result = page_extractor.extract_page(
+            _get_index(), url,
+            render_mode=page_extractor.RENDER_MODE_STATIC,
+            include_screenshot=False,
+            follow_links_depth=0,
+            enforce_allowlist=False)
+    except Exception as e:
+        log.warning("style anchor URL extraction failed: %s", e)
+        return None
+    if not result.get("ok"):
+        return None
+    return result.get("markdown") or None
+
+
 # Sprint 21 split: pure filesystem helpers now live in uoink_core.storage and
 # are re-exported here so existing call sites are unchanged.
 from uoink_core.storage import (  # noqa: E402
@@ -6330,6 +6354,8 @@ class Handler(BaseHTTPRequestHandler):
         if bare.startswith("/writing/") and not bare.endswith("/revise") \
                 and not bare.startswith("/writing/style-anchors"):
             return self._handle_writing_piece_get(bare)
+        if bare == "/extract/page/allowlist":
+            return self._handle_page_allowlist_get()
         if bare == "/update/check":
             return self._handle_update_check()
         if bare == "/engagement/scores":
@@ -7769,6 +7795,98 @@ class Handler(BaseHTTPRequestHandler):
             body, kind=prev.get("kind") or writing_studio.KIND_TWEET)
         return self._send_json(status, resp)
 
+    # ---- v3.2 Universal Site Uoinking --------------------------------
+    def _handle_page_allowlist_get(self):
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        active_only = (qs.get("active_only") or [""])[0] == "1"
+        try:
+            rows = page_extractor.list_allowed(
+                _get_index(), active_only=active_only)
+        except Exception as e:
+            log.exception("/extract/page/allowlist GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {
+            "ok": True, "sites": rows, "count": len(rows),
+            "default_seeds": list(page_extractor.DEFAULT_ALLOW_SEEDS),
+        })
+
+    def _handle_page_allowlist_modify(self, body):
+        """POST /extract/page/allowlist {action: 'add'|'remove',
+        url_pattern}. Per prompt spec."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        action = (body.get("action") or "").strip().lower()
+        pattern = (body.get("url_pattern") or "").strip()
+        if action not in ("add", "remove"):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "action must be 'add' or 'remove'"})
+        if not pattern:
+            return self._send_json(400, {
+                "ok": False, "error": "url_pattern required"})
+        try:
+            if action == "add":
+                row = page_extractor.add_allowed(_get_index(), pattern)
+                return self._send_json(200, {"ok": True, "site": row})
+            removed = page_extractor.remove_allowed(_get_index(), pattern)
+            return self._send_json(200, {"ok": True, "removed": removed,
+                                          "url_pattern": pattern.lower()})
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/extract/page/allowlist POST failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+
+    def _handle_extract_page(self, body):
+        """POST /extract/page {url, render_mode?, include_screenshot?,
+        follow_links_depth?}. Allowlist-gated by default; result lands
+        in yoinks with source_type='page' (auto-persisted)."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        url = (body.get("url") or "").strip()
+        render_mode = (body.get("render_mode")
+                         or page_extractor.RENDER_MODE_JS).strip().lower()
+        include_screenshot = bool(body.get("include_screenshot", True))
+        try:
+            follow_depth = int(body.get("follow_links_depth", 0))
+        except (TypeError, ValueError):
+            return self._send_json(400, {
+                "ok": False,
+                "error": "follow_links_depth must be an integer"})
+
+        try:
+            result = page_extractor.extract_page(
+                _get_index(), url,
+                render_mode=render_mode,
+                include_screenshot=include_screenshot,
+                follow_links_depth=follow_depth,
+                enforce_allowlist=True)
+        except Exception as e:
+            log.exception("/extract/page failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+
+        if not result.get("ok"):
+            # Allowlist denial returns 403; other validation errors 400.
+            if result.get("code") == "host_not_allowed":
+                return self._send_json(403, result)
+            return self._send_json(400, result)
+
+        # Auto-persist as a yoink row -- universal site captures land in
+        # the same Library as videos, distinguished by source_type.
+        try:
+            video_id = page_extractor.persist_page_yoink(
+                _get_index(), result, data_root=DATA_ROOT)
+            result["video_id"] = video_id
+        except Exception as e:
+            log.warning("/extract/page persist failed: %s", e)
+            result["video_id"] = None
+
+        return self._send_json(200, result)
+
     def _handle_settings_mcp_config(self):
         """MCP config snippet for the Settings tab Copy button. Token-gated."""
         if not self._require_token():
@@ -8445,6 +8563,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_writing_style_anchor_add(body)
         if bare.startswith("/writing/style-anchors/"):
             return self._handle_writing_style_anchor_modify(bare, body)
+        if bare == "/extract/page":
+            return self._handle_extract_page(body)
+        if bare == "/extract/page/allowlist":
+            return self._handle_page_allowlist_modify(body)
 
         log.info("POST %s -> 404", bare)
         self._send_json(404, {"ok": False, "error": "not found"})
