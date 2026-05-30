@@ -106,6 +106,9 @@ Source: "staging\channels.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\workspaces.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\claims.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\scripts.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\voice_dna.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\writing_studio.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\page_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\memory_layer.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\podcasts.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\mobile_playlists.py"; DestDir: "{app}"; Flags: ignoreversion
