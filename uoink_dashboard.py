@@ -33,6 +33,14 @@ ICON_PATH = HERE / "uoink.ico"
 _ICON_HANDLES = []
 
 
+def _target_url() -> str:
+    if len(sys.argv) > 1:
+        candidate = str(sys.argv[1])
+        if candidate.startswith(DASHBOARD_URL):
+            return candidate
+    return DASHBOARD_URL
+
+
 class JsApi:
     """window.pywebview.api.* surface for the dashboard window. Today the
     dashboard HTML doesn't call into native; expose open_url for future
@@ -122,15 +130,16 @@ def _brand_windows_icon_when_ready() -> None:
 
 
 def main() -> int:
+    target_url = _target_url()
     try:
         import webview
     except Exception as e:
         log.debug("pywebview unavailable; opening dashboard in default browser: %s", e)
-        webbrowser.open(DASHBOARD_URL)
+        webbrowser.open(target_url)
         return 0
     webview.create_window(
         "Uoink",
-        DASHBOARD_URL,
+        target_url,
         width=WIDTH,
         height=HEIGHT,
         resizable=True,

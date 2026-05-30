@@ -5831,19 +5831,32 @@ def _diagnose_payload() -> dict:
 
     # 4. anthropic_key_set + 5. anthropic_key_valid
     try:
+        settings_data = _read_settings()
+    except Exception:
+        settings_data = {}
+    key_invalid = bool(settings_data.get("anthropic_key_invalid"))
+    try:
         key = (_get_saved_anthropic_key() or "").strip()
     except Exception:
         key = ""
-    if key:
+    anthropic_key_valid = "skipped"
+    if key_invalid:
+        add("anthropic_key_set", "warning", "saved key failed verification")
+        add("anthropic_key_valid", "error", "Your Anthropic key isn't working.")
+        anthropic_key_valid = False
+        warnings.append("Your Anthropic key isn't working. Update it in Settings.")
+    elif key:
         add("anthropic_key_set", "ok", None)
+        add("anthropic_key_valid", "ok", "saved key present")
+        anthropic_key_valid = True
     else:
         add("anthropic_key_set", "warning", "no key configured")
+        add("anthropic_key_valid", "skipped", "no key entered")
+        anthropic_key_valid = "skipped"
         warnings.append(
             "Anthropic API key not configured. Open setup to add one if you "
             "want Comment Intelligence, Hook Type, or entity extraction "
             "(everything else still works without it).")
-    add("anthropic_key_valid", "skipped",
-        "Run POST /settings/test-key to verify")
 
     # 6. index_db_writable
     if _is_writable_dir(INDEX_PATH.parent):
@@ -5908,6 +5921,7 @@ def _diagnose_payload() -> dict:
         "version": VERSION,
         "output_root_fallback": _OUTPUT_ROOT_FALLBACK,
         "migration": migration,
+        "anthropic_key_valid": anthropic_key_valid,
         "checks": checks,
         "warnings": warnings,
     }

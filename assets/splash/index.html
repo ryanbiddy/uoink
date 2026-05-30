@@ -40,8 +40,8 @@
 
     .splash {
       position: relative;
-      width: 480px;
-      height: 320px;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
       border: 1px solid var(--border);
       border-radius: 18px;
@@ -100,8 +100,8 @@
 
     .body {
       display: grid;
-      gap: 16px;
-      padding: 28px;
+      gap: 12px;
+      padding: 24px 26px;
     }
 
     .eyebrow {
@@ -116,8 +116,8 @@
     h1 {
       margin: 0;
       color: var(--cream);
-      font-size: 34px;
-      line-height: 1.04;
+      font-size: 30px;
+      line-height: 1.08;
       letter-spacing: 0;
     }
 
@@ -128,7 +128,7 @@
     }
 
     p {
-      max-width: 34ch;
+      max-width: 58ch;
       margin: 0;
       color: var(--muted);
       line-height: 1.45;
@@ -175,6 +175,7 @@
 
     .actions {
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
       margin-top: 4px;
     }
@@ -200,6 +201,65 @@
       color: var(--ink);
     }
 
+    .button[hidden],
+    .steps[hidden],
+    .path-box[hidden],
+    .copy-status[hidden] {
+      display: none;
+    }
+
+    .splash.extension .body {
+      gap: 9px;
+      padding: 20px 24px;
+    }
+
+    .splash.extension h1 {
+      font-size: 24px;
+      line-height: 1.14;
+    }
+
+    .splash.extension .actions {
+      flex-wrap: nowrap;
+    }
+
+    .splash.extension .button {
+      min-height: 36px;
+      padding: 0 10px;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .steps {
+      display: grid;
+      gap: 4px;
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .path-box {
+      border: 1px solid rgba(255, 210, 63, 0.28);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: rgba(255, 210, 63, 0.08);
+      color: var(--cream);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+      user-select: text;
+      cursor: text;
+    }
+
+    .copy-status {
+      color: var(--acid);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      min-height: 14px;
+    }
+
     .footnote {
       position: absolute;
       right: 18px;
@@ -221,9 +281,13 @@
       <div class="running-pill" id="pill"><span class="pip"></span><span>Uoink is running</span></div>
       <h1 id="headline">Click the rust U <em>under any video.</em></h1>
       <p id="copy">Open YouTube, make your first yoink, or jump into the dashboard to inspect the helper.</p>
+      <ol class="steps" id="steps" hidden></ol>
+      <div class="path-box" id="extensionPath" hidden></div>
+      <div class="copy-status" id="copyStatus" hidden></div>
       <div class="actions">
-        <button class="button primary" type="button" data-youtube>Open YouTube</button>
-        <button class="button" type="button" data-dashboard>Open dashboard</button>
+        <button class="button primary" type="button" data-primary>Open YouTube</button>
+        <button class="button" type="button" data-secondary>Open dashboard</button>
+        <button class="button" type="button" data-tertiary hidden>Done</button>
       </div>
     </div>
     <div class="footnote">local helper dashboard</div>
@@ -234,10 +298,41 @@
     document.querySelector(".mark").innerHTML = mark;
 
     const splash = document.getElementById("splash");
+    const els = {
+      eyebrow: document.getElementById("eyebrow"),
+      pill: document.getElementById("pill"),
+      headline: document.getElementById("headline"),
+      copy: document.getElementById("copy"),
+      steps: document.getElementById("steps"),
+      extensionPath: document.getElementById("extensionPath"),
+      copyStatus: document.getElementById("copyStatus"),
+      primary: document.querySelector("[data-primary]"),
+      secondary: document.querySelector("[data-secondary]"),
+      tertiary: document.querySelector("[data-tertiary]"),
+    };
     let token = "";
+    let primaryAction = "youtube";
+    let secondaryAction = "dashboard";
+    let tertiaryAction = "";
+    let extensionPath = "";
 
     function nativeApi() {
       return window.pywebview && window.pywebview.api ? window.pywebview.api : null;
+    }
+
+    async function callNative(name, ...args) {
+      const native = nativeApi();
+      if (!native || typeof native[name] !== "function") return null;
+      return native[name](...args);
+    }
+
+    function waitForNativeApi(timeoutMs = 1500) {
+      if (nativeApi()) return Promise.resolve(nativeApi());
+      return new Promise((resolve) => {
+        const done = () => resolve(nativeApi());
+        document.addEventListener("pywebviewready", done, { once: true });
+        window.setTimeout(done, timeoutMs);
+      });
     }
 
     function openExternal(url) {
@@ -265,41 +360,161 @@
       return data;
     }
 
+    function setButton(button, text, action, visible = true) {
+      button.textContent = text;
+      button.hidden = !visible;
+      if (button === els.primary) primaryAction = action;
+      if (button === els.secondary) secondaryAction = action;
+      if (button === els.tertiary) tertiaryAction = action;
+    }
+
+    function hideExtensionExtras() {
+      els.steps.hidden = true;
+      els.extensionPath.hidden = true;
+      els.copyStatus.hidden = true;
+      els.copyStatus.textContent = "";
+    }
+
+    function setMode({ mode, eyebrow, pill, headline, copy, primary, secondary, tertiary }) {
+      splash.classList.toggle("failure", mode === "failure");
+      splash.classList.toggle("extension", mode === "extension");
+      if (mode !== "extension") hideExtensionExtras();
+      els.eyebrow.textContent = eyebrow;
+      els.pill.querySelector("span:last-child").textContent = pill;
+      els.headline.innerHTML = headline;
+      els.copy.textContent = copy;
+      setButton(els.primary, primary.text, primary.action, true);
+      setButton(els.secondary, secondary.text, secondary.action, true);
+      setButton(els.tertiary, tertiary?.text || "", tertiary?.action || "", Boolean(tertiary));
+    }
+
     function setFailure(detail) {
-      splash.classList.add("failure");
-      document.getElementById("eyebrow").textContent = "Diagnostics";
-      document.getElementById("pill").querySelector("span:last-child").textContent = "Uoink couldn't start";
-      document.getElementById("headline").innerHTML = "Uoink couldn't <em>start.</em>";
-      document.getElementById("copy").textContent = detail + ". Diagnostics will tell you exactly what to do.";
-      document.querySelector("[data-youtube]").textContent = "Open diagnostics";
+      setMode({
+        mode: "failure",
+        eyebrow: "Diagnostics",
+        pill: "Uoink failed to start",
+        headline: "Uoink couldn't <em>start.</em>",
+        copy: detail || "Uoink failed to start. Check the helper log.",
+        primary: { text: "Open diagnostics", action: "dashboard" },
+        secondary: { text: "Dismiss", action: "dismiss" },
+      });
+    }
+
+    function setKeyNeeded() {
+      setMode({
+        mode: "key-needed",
+        eyebrow: "Setup needed",
+        pill: "Anthropic key missing",
+        headline: "Add your Anthropic <em>key.</em>",
+        copy: "Add your Anthropic key to get going.",
+        primary: { text: "Open Settings", action: "settings" },
+        secondary: { text: "Open dashboard", action: "dashboard" },
+      });
+    }
+
+    function setBadKey() {
+      setMode({
+        mode: "bad-key",
+        eyebrow: "Setup needed",
+        pill: "Key needs attention",
+        headline: "Update your Anthropic <em>key.</em>",
+        copy: "Your Anthropic key isn't working.",
+        primary: { text: "Update key", action: "settings" },
+        secondary: { text: "Open dashboard", action: "dashboard" },
+      });
+    }
+
+    function setHappy() {
+      setMode({
+        mode: "happy",
+        eyebrow: "You're set",
+        pill: "Uoink is running \u2713",
+        headline: "Click the rust U <em>under any video.</em>",
+        copy: "Open YouTube, make your first uoink, or jump into the dashboard.",
+        primary: { text: "Open YouTube", action: "youtube" },
+        secondary: { text: "Open dashboard", action: "dashboard" },
+      });
+    }
+
+    function setExtensionHint(status) {
+      extensionPath = status?.path || "";
+      callNative("set_window_title", "Last step - load the extension");
+      setMode({
+        mode: "extension",
+        eyebrow: "One-time setup",
+        pill: status?.manifest_exists ? "Extension folder ready" : "Extension folder missing",
+        headline: "Uoink Extension - load into Chrome (60 sec)",
+        copy: "Chrome requires you to approve unpacked extensions manually.",
+        primary: { text: "Open Chrome to chrome://extensions/", action: "extension-open" },
+        secondary: { text: "Copy path", action: "copy-path" },
+        tertiary: { text: "I've loaded it - done", action: "extension-done" },
+      });
+      els.steps.innerHTML = `
+        <li>Open chrome://extensions/ in Chrome</li>
+        <li>Turn ON "Developer mode" (top-right toggle)</li>
+        <li>Click "Load unpacked" -> select this folder:</li>
+      `;
+      els.steps.hidden = false;
+      els.extensionPath.textContent = extensionPath || "Extension folder unavailable";
+      els.extensionPath.hidden = false;
+      els.copyStatus.hidden = false;
     }
 
     async function loadDiagnostics() {
-      const params = new URLSearchParams(location.search);
-      if (params.get("state") === "failed" || params.get("status") === "failed") {
-        setFailure(params.get("detail") || "port 5179 in use");
+      if (window.UOINK_SPLASH_BOOT_FAILED) {
+        setFailure(window.UOINK_SPLASH_BOOT_FAILED);
         return;
       }
-      // v2.2.0 bug fix: retry-with-backoff. The splash window can load and
-      // hit /diagnose before the helper has finished booting (migrations,
-      // index open, sub-checks), making /diagnose return not-yet-ready
-      // statuses that paint the failure variant -- while the boot toast
-      // simultaneously says "Uoink is Active & Ready" 1-2 s later. Three
-      // attempts at 500 ms intervals (1 s total worst case) catches the slow
-      // boot well within the splash's 8 s linger. Healthy on ANY attempt
-      // wins: we break out, no failure variant.
-      let bad = null;
+      const params = new URLSearchParams(location.search);
+      if (params.get("state") === "failed" || params.get("status") === "failed") {
+        setFailure(params.get("detail") || "Uoink failed to start. Check the helper log.");
+        return;
+      }
+
+      let health = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          health = await (await fetch("/health")).json();
+          if (health && health.ok !== false) break;
+        } catch (_) { /* helper may still be binding the port */ }
+        if (attempt < 2) await new Promise((r) => setTimeout(r, 500));
+      }
+      if (!health || health.ok === false) {
+        setFailure("Uoink failed to start. Check the helper log.");
+        return;
+      }
+
+      await waitForNativeApi();
+      try {
+        const extension = await callNative("extension_status");
+        if (extension && extension.should_show) {
+          setExtensionHint(extension);
+          return;
+        }
+      } catch (_) { /* browser fallback has no native extension helper */ }
+
       let diag = null;
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
           diag = await (await fetch("/diagnose")).json();
-          bad = Array.isArray(diag.checks) ? diag.checks.find((check) => check.status && check.status !== "ok") : null;
-          if (diag.ok !== false && !bad) { bad = null; diag = null; break; }
+          if (diag && diag.ok !== false) break;
         } catch (_) { /* network not ready yet -- retry */ }
         if (attempt < 2) await new Promise((r) => setTimeout(r, 500));
       }
-      if (bad || (diag && diag.ok === false)) {
-        setFailure((bad && (bad.detail || bad.name)) || (diag && diag.error) || "diagnostics found an issue");
+      if (!diag || diag.ok === false) {
+        setFailure("Uoink failed to start. Check the helper log.");
+        return;
+      }
+      const keyCheck = Array.isArray(diag.checks)
+        ? diag.checks.find((check) => check.name === "anthropic_key_valid")
+        : null;
+      const keyValue = diag.anthropic_key_valid;
+      if (keyValue === true || keyCheck?.status === "ok") {
+        setHappy();
+      } else if (keyValue === false || keyCheck?.status === "error") {
+        setBadKey();
+      } else {
+        setKeyNeeded();
       }
     }
 
@@ -310,6 +525,15 @@
         return;
       }
       location.href = "/dashboard";
+    }
+
+    function openSettings() {
+      const native = nativeApi();
+      if (native && native.open_settings) {
+        native.open_settings();
+        return;
+      }
+      location.href = "/dashboard#settings/byo-key";
     }
 
     function dismiss() {
@@ -333,18 +557,56 @@
       }
     }
 
+    async function copyPath() {
+      try {
+        const result = await callNative("copy_extension_path");
+        let copied = Boolean(result && result.ok !== false);
+        if (!copied && navigator.clipboard && extensionPath) {
+          await navigator.clipboard.writeText(extensionPath);
+          copied = true;
+        }
+        if (!copied) throw new Error("copy failed");
+        els.copyStatus.textContent = "Path copied.";
+      } catch (_) {
+        els.copyStatus.textContent = "Copy failed. Select the path above and copy it manually.";
+      }
+    }
+
+    async function runAction(action) {
+      if (action === "dashboard") openDashboard();
+      else if (action === "settings") openSettings();
+      else if (action === "youtube") openLastYoutube();
+      else if (action === "dismiss") dismiss();
+      else if (action === "extension-open") {
+        try { await callNative("open_chrome_extensions"); }
+        catch (_) { openExternal("chrome://extensions/"); }
+      } else if (action === "copy-path") {
+        await copyPath();
+      } else if (action === "extension-done") {
+        const native = nativeApi();
+        if (native && native.mark_extension_loaded) await native.mark_extension_loaded();
+        else dismiss();
+      }
+    }
+
     splash.addEventListener("click", (event) => {
       if (event.target.closest("button")) return;
-      openDashboard();
+      if (!splash.classList.contains("extension")) openDashboard();
     });
     splash.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") openDashboard();
+      if ((event.key === "Enter" || event.key === " ") && !splash.classList.contains("extension")) openDashboard();
     });
-    document.querySelector("[data-dashboard]").addEventListener("click", openDashboard);
-    document.querySelector("[data-youtube]").addEventListener("click", (event) => {
+    els.secondary.addEventListener("click", (event) => {
       event.stopPropagation();
-      if (splash.classList.contains("failure")) openDashboard();
-      else openLastYoutube();
+      runAction(secondaryAction);
+    });
+    els.primary.addEventListener("click", (event) => {
+      event.stopPropagation();
+      runAction(primaryAction);
+    });
+    els.tertiary.addEventListener("click", (event) => {
+      event.stopPropagation();
+      runAction(tertiaryAction);
     });
     document.getElementById("dismiss").addEventListener("click", (event) => {
       event.stopPropagation();

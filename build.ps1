@@ -384,6 +384,9 @@ Copy-Item (Join-Path $RepoRoot 'assets\dashboard') (Join-Path $StagingDir 'asset
 # and the brand tokens stylesheet used by both pages.
 Copy-Item (Join-Path $RepoRoot 'assets\splash') (Join-Path $StagingDir 'assets\splash') -Recurse -Force
 Copy-Item (Join-Path $RepoRoot 'assets\brand')  (Join-Path $StagingDir 'assets\brand')  -Recurse -Force
+# v3.1.3: ship the unpacked Chrome extension beside the helper so the
+# first-run hint can point Chrome's "Load unpacked" flow at a real folder.
+Copy-Item (Join-Path $RepoRoot 'extension') (Join-Path $StagingDir 'extension') -Recurse -Force
 # v2.2.0: canonical rust-U mark used by the tray glyph loader AND by
 # installer\generate_icon.py. Shipping it makes the tray's PNG source-of-truth
 # pattern work post-install (uoink_tray loads {app}\assets\logo-mark-color.png).
@@ -423,7 +426,7 @@ try {
     # before it binds the port. The file is removed before ISCC packages staging.
     $smokePy = Join-Path $StagingDir '_staged_smoke.py'
     Set-Content -Path $smokePy -Encoding ASCII -Value @'
-import os, sys, tempfile, pathlib
+import json, os, sys, tempfile, pathlib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import index
 p = pathlib.Path(tempfile.mkdtemp()) / "test.db"
@@ -439,6 +442,10 @@ expected = (pathlib.Path(__file__).with_name("VERSION")).read_text(encoding="utf
 if server.VERSION != expected:
     raise SystemExit("smoke: server.VERSION %s != staged VERSION %s" % (server.VERSION, expected))
 print("smoke: import server OK, version=%s" % server.VERSION)
+manifest = json.loads((pathlib.Path(__file__).parent / "extension" / "manifest.json").read_text(encoding="utf-8"))
+if manifest.get("version") != expected:
+    raise SystemExit("smoke: extension manifest %s != staged VERSION %s" % (manifest.get("version"), expected))
+print("smoke: extension manifest OK, version=%s" % manifest.get("version"))
 import uoink_tray
 print("smoke: import uoink_tray OK")
 import uoink_splash, uoink_dashboard
