@@ -10,8 +10,9 @@
 #                  yt-dlp installed via pip
 #        bin\      ffmpeg.exe (and ffprobe.exe if present)
 #        server.py, migrate_install.py, channels.py, workspaces.py, claims.py,
-#        scripts.py, memory_layer.py, uoink_mcp.py, uoink_mcp_tools.py,
-#        yoink_mcp.py (shim), yt_extract.py, topics.json, skills\,
+#        scripts.py, memory_layer.py, podcasts.py, mobile_playlists.py,
+#        whisper_runner.py, uoink_mcp.py, uoink_mcp_tools.py, yoink_mcp.py
+#        (shim), yt_extract.py, topics.json, skills\,
 #        assets\dashboard\, stop-server.{bat,ps1}, uoink.ico
 #   3. Run ISCC.exe against installer\uoink.iss to produce
 #      build\Uoink-Setup-<version>.exe
@@ -192,6 +193,9 @@ foreach ($f in @(
     'claims.py',
     'scripts.py',
     'memory_layer.py',
+    'podcasts.py',
+    'mobile_playlists.py',
+    'whisper_runner.py',
     'yt_extract.py',
     'topics.json',
     'uoink_core\storage.py'
@@ -336,6 +340,9 @@ Copy-Item (Join-Path $RepoRoot 'workspaces.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'claims.py')      $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'scripts.py')     $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'memory_layer.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'podcasts.py')    $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'mobile_playlists.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'whisper_runner.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_mcp.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_mcp_tools.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_reliability.py') $StagingDir -Force
