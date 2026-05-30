@@ -94,9 +94,9 @@ Opt-in grid that shows the screenshots embedded in your clipboard paste so you c
 
 ## Install
 
-1. **Download the installer** — grab `Uoink-Setup-3.1.2.exe` from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest). Windows is available now; the Mac `.dmg` follows the v3.1 QA gate.
+1. **Download the installer** — grab `Uoink-Setup-3.1.3.exe` from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest). Windows is available now; the Mac `.dmg` follows the v3.1 QA gate.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The "Launch Uoink now" checkbox on the finish page starts the helper immediately, and an autostart entry runs it on every Windows login.
-3. **Install the extension** from the Chrome Web Store. The first time you launch the popup it'll detect the helper and the indicator will go green within a couple of seconds.
+3. **Load the bundled extension.** On first launch, Uoink shows the installed extension folder and opens `chrome://extensions/` so you can turn on Developer mode, click **Load unpacked**, and select `%LOCALAPPDATA%\Uoink\extension`. Chrome requires this user-approved step for unpacked extensions.
 
 **For MCP users:** open the Uoink setup page from the extension popup's Settings link. Copy the stdio config snippet, paste into Claude Desktop's MCP config, restart Claude. Uoink tools appear automatically.
 

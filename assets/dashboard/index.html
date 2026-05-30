@@ -1993,7 +1993,7 @@
           </div>
 
           <div class="settings-grid">
-            <div class="setting-block">
+            <div class="setting-block" id="byo-key">
               <h2>Anthropic key (BYO)</h2>
               <p class="setting-copy" id="keyStatus">Checking key status...</p>
               <div class="inline-row">
@@ -4512,6 +4512,20 @@
       if (tab === "settings") refreshSettings();
     }
 
+    function applyHashRoute() {
+      const route = decodeURIComponent(location.hash || "").replace(/^#\/?/, "");
+      if (!route) return false;
+      const [tab, anchor] = route.split("/");
+      if (tab !== "settings") return false;
+      switchTab("settings");
+      if (anchor === "byo-key") {
+        window.setTimeout(() => {
+          document.getElementById("byo-key")?.scrollIntoView({ block: "start" });
+        }, 0);
+      }
+      return true;
+    }
+
     function wireEvents() {
       document.querySelectorAll("[data-tab-button]").forEach((btn) => {
         btn.addEventListener("click", () => switchTab(btn.dataset.tabButton));
@@ -4771,6 +4785,8 @@
     async function init() {
       hydrateMarks();
       wireEvents();
+      applyHashRoute();
+      window.addEventListener("hashchange", applyHashRoute);
       await refreshHealth();
       await loadFacetTaxonomy();
       await refreshJobs();
