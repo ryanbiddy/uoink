@@ -49,12 +49,16 @@ sys.path.insert(0, str(HERE))
 
 def _read_version() -> str:
     try:
-        version = (HERE / "VERSION").read_text(encoding="utf-8").strip()
-    except OSError:
-        # Defense in depth: a missing/unreadable VERSION file (e.g. an installer
-        # that failed to ship it) must not crash the helper at import before it
-        # can bind the port. Degrade to a sentinel instead of raising.
-        return "0.0.0-unknown"
+        from helper._version import __version__ as version
+    except Exception:
+        try:
+            version = (HERE / "VERSION").read_text(encoding="utf-8").strip()
+        except OSError:
+            # Defense in depth: a missing/unreadable version source (e.g. an
+            # installer that failed to ship it) must not crash the helper at
+            # import before it can bind the port. Degrade to a sentinel so the
+            # post-install verifier can report a concrete mismatch.
+            return "0.0.0-unknown"
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         raise RuntimeError(f"Invalid VERSION file value: {version!r}")
     return version

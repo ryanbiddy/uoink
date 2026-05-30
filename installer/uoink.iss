@@ -22,7 +22,8 @@
 ;   uoink.ico         Used for shortcuts and the uninstaller.
 
 #define AppName       "Uoink"
-#define AppVersion    "2.1.1"
+; build.ps1 rewrites AppVersion from helper/_version.py before compiling.
+#define AppVersion    "0.0.0"
 #define AppPublisher  "ReplayRyan"
 #define AppURL        "https://uoink.video"
 
@@ -100,6 +101,14 @@ Source: "staging\index.py"; DestDir: "{app}"; Flags: ignoreversion
 ; this at module top. Omitting it crashes the helper before it binds the port.
 Source: "staging\_platform.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\migrate_install.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\channels.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\workspaces.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\claims.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\scripts.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\memory_layer.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\podcasts.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\mobile_playlists.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\whisper_runner.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_mcp.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_mcp_tools.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_reliability.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -113,6 +122,7 @@ Source: "staging\topics.json"; DestDir: "{app}"; Flags: ignoreversion
 ; but the installer must also copy it into {app}, or the helper crashes on a
 ; clean install before binding the port.
 Source: "staging\VERSION"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\helper\*"; DestDir: "{app}\helper"; Flags: recursesubdirs ignoreversion createallsubdirs
 ; Sprint 21: uoink_core/ package (modules split out of server.py). server.py
 ; imports it at module top -- must ship or the helper crashes before binding.
 Source: "staging\uoink_core\*"; DestDir: "{app}\uoink_core"; Flags: recursesubdirs ignoreversion createallsubdirs
@@ -132,6 +142,7 @@ Source: "staging\assets\logo-mark-color.png"; DestDir: "{app}\assets"; Flags: ig
 Source: "staging\migrations\*"; DestDir: "{app}\migrations"; Flags: recursesubdirs ignoreversion createallsubdirs
 Source: "staging\stop-server.bat"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\stop-server.ps1"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\verify_install.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 ; v2.2.0 upgrade-prep PowerShell. Flags: dontcopy keeps it out of {app} --
@@ -394,6 +405,58 @@ begin
     else
       Log('PrepareToInstall: DeleteFile(' + SentinelPath + ') returned false');
   end;
+end;
+
+procedure VerifyInstalledHelper();
+var
+  ResultCode: Integer;
+  VerifyScript: String;
+  VerifyParams: String;
+  LaunchOk: Boolean;
+  VerifyOk: Boolean;
+begin
+  Log('Post-install verification: launching helper for /health check');
+  LaunchOk := Exec(
+    ExpandConstant('{app}\python\pythonw.exe'),
+    '"' + ExpandConstant('{app}\server.py') + '"',
+    ExpandConstant('{app}'),
+    SW_HIDE,
+    ewNoWait,
+    ResultCode);
+  if not LaunchOk then
+    Log('Post-install verification: helper launch Exec() returned false');
+
+  Sleep(1500);
+  VerifyScript := ExpandConstant('{app}\verify_install.ps1');
+  VerifyParams :=
+    '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' +
+    VerifyScript + '" -ExpectedVersion "{#AppVersion}"';
+  VerifyOk := Exec(
+    'powershell.exe',
+    VerifyParams,
+    ExpandConstant('{app}'),
+    SW_HIDE,
+    ewWaitUntilTerminated,
+    ResultCode);
+
+  if (not VerifyOk) or (ResultCode <> 0) then
+  begin
+    MsgBox(
+      'Uoink installed, but the local helper did not report version {#AppVersion} on /health.' +
+      Chr(13) + Chr(10) + Chr(13) + Chr(10) +
+      'Setup log: %TEMP%\uoink-install-verify.log',
+      mbError,
+      MB_OK);
+    RaiseException('Post-install /health verification failed with exit code ' + IntToStr(ResultCode));
+  end;
+
+  Log('Post-install verification: helper /health returned {#AppVersion}');
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+    VerifyInstalledHelper();
 end;
 
 { Finding 2.2 (creative review v2.2, AG): override Next/Back chrome on

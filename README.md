@@ -94,7 +94,7 @@ Opt-in grid that shows the screenshots embedded in your clipboard paste so you c
 
 ## Install
 
-1. **Download the installer** — grab `Uoink-Setup-2.1.0.exe` from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest). Windows + macOS (universal) as of v2.1.
+1. **Download the installer** — grab `Uoink-Setup-3.1.1.exe` from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest). Windows is available now; the Mac `.dmg` follows the v3.1 QA gate.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The "Launch Uoink now" checkbox on the finish page starts the helper immediately, and an autostart entry runs it on every Windows login.
 3. **Install the extension** from the Chrome Web Store. The first time you launch the popup it'll detect the helper and the indicator will go green within a couple of seconds.
 

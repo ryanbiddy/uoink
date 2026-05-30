@@ -43,9 +43,12 @@ ANIM_STEPS = 24
 
 def _read_version() -> str:
     try:
-        version = (HERE / "VERSION").read_text(encoding="utf-8").strip()
-    except OSError:
-        return "0.0.0-unknown"
+        from helper._version import __version__ as version
+    except Exception:
+        try:
+            version = (HERE / "VERSION").read_text(encoding="utf-8").strip()
+        except OSError:
+            return "0.0.0-unknown"
     return version or "0.0.0-unknown"
 
 

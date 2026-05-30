@@ -5,7 +5,7 @@
 #
 # Verifies the technical (not infra) items from docs/store-listing.md:147-158:
 #   - USE_MOCK_API = false           (extension/popup.js:8)
-#   - INSTALLER_PUBLISHED = true     (extension/setup.js:37)
+#   - Windows installer download URL points at the current release
 #   - All MOCK_FORCE_* flags = false (extension/lib/mock-api.js)
 #   - manifest.json version = VERSION file  (extension/manifest.json)
 #   - No console.log("[Yoink|Uoink]"...) (extension/lib/extract.js, Sprint 14 S1)
@@ -49,16 +49,20 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 2. INSTALLER_PUBLISHED = true in extension/setup.js
+# 2. Windows installer download URL points at current VERSION
 # ---------------------------------------------------------------------------
 if [[ ! -f extension/setup.js ]]; then
   bad "setup.js: file not found at extension/setup.js"
 else
   INSTALLER_LINE="$(grep -n '^const INSTALLER_PUBLISHED' extension/setup.js | head -1)"
-  if [[ -z "$INSTALLER_LINE" ]]; then
-    bad "setup.js: INSTALLER_PUBLISHED declaration not found"
-  elif echo "$INSTALLER_LINE" | grep -q 'INSTALLER_PUBLISHED = true'; then
+  VERSION_FOR_URL="$(tr -d '[:space:]' < VERSION 2>/dev/null || true)"
+  DOWNLOAD_LINE="$(grep -n "download/v${VERSION_FOR_URL}/Uoink-Setup-${VERSION_FOR_URL}\\.exe" extension/setup.js | head -1)"
+  if [[ -n "$INSTALLER_LINE" ]] && echo "$INSTALLER_LINE" | grep -q 'INSTALLER_PUBLISHED = true'; then
     ok "setup.js: INSTALLER_PUBLISHED = true  ($INSTALLER_LINE)"
+  elif [[ -n "$DOWNLOAD_LINE" ]]; then
+    ok "setup.js: Windows download URL points at v${VERSION_FOR_URL}  ($DOWNLOAD_LINE)"
+  elif [[ -z "$INSTALLER_LINE" ]]; then
+    bad "setup.js: no INSTALLER_PUBLISHED flag and no current-version download URL found"
   else
     bad "setup.js: INSTALLER_PUBLISHED is NOT true  ($INSTALLER_LINE)"
   fi
@@ -89,22 +93,32 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 4. manifest.json version matches VERSION
+# 4. manifest.json + VERSION match helper/_version.py
 # ---------------------------------------------------------------------------
 if [[ ! -f extension/manifest.json ]]; then
   bad "manifest.json: file not found at extension/manifest.json"
+elif [[ ! -f helper/_version.py ]]; then
+  bad "helper/_version.py: file not found"
 elif [[ ! -f VERSION ]]; then
   bad "VERSION: file not found at repo root"
 else
-  EXPECTED_VERSION="$(tr -d '[:space:]' < VERSION)"
+  EXPECTED_VERSION="$(sed -nE 's/^__version__[[:space:]]*=[[:space:]]*["'\'']([0-9]+\.[0-9]+\.[0-9]+)["'\''].*/\1/p' helper/_version.py | head -1)"
+  VERSION_FILE_VALUE="$(tr -d '[:space:]' < VERSION)"
+  if [[ -z "$EXPECTED_VERSION" ]]; then
+    bad "helper/_version.py: __version__ semver not found"
+  elif [[ "$VERSION_FILE_VALUE" != "$EXPECTED_VERSION" ]]; then
+    bad "VERSION: $VERSION_FILE_VALUE does NOT match helper/_version.py ($EXPECTED_VERSION)"
+  else
+    ok "VERSION: matches helper/_version.py ($EXPECTED_VERSION)"
+  fi
   EXPECTED_VERSION_RE="$(printf '%s' "$EXPECTED_VERSION" | sed 's/[][\\.^$*+?{}|()]/\\&/g')"
   VERSION_LINE="$(grep -nE '"version"\s*:\s*"' extension/manifest.json | head -1)"
   if [[ -z "$VERSION_LINE" ]]; then
     bad "manifest.json: version field not found"
   elif echo "$VERSION_LINE" | grep -qE '"version"\s*:\s*"'"$EXPECTED_VERSION_RE"'"'; then
-    ok "manifest.json: version = VERSION ($EXPECTED_VERSION)  ($VERSION_LINE)"
+    ok "manifest.json: version = helper/_version.py ($EXPECTED_VERSION)  ($VERSION_LINE)"
   else
-    bad "manifest.json: version does NOT match VERSION ($EXPECTED_VERSION)  ($VERSION_LINE)"
+    bad "manifest.json: version does NOT match helper/_version.py ($EXPECTED_VERSION)  ($VERSION_LINE)"
   fi
 fi
 

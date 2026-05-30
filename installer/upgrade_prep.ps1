@@ -104,34 +104,41 @@ if ($token) {
 $freed = Wait-PortFree 3
 Write-PrepLog ("port 5179 free after graceful wait? {0}" -f $freed)
 
-# ---- Step 3: hard-kill stale python(w).exe if the port is still bound ----
+# ---- Step 3: hard-kill stale python(w).exe under Yoink/Uoink roots --------
+# Do this even when the HTTP port is already free: GUI subprocesses such as
+# uoink_splash.py can hold pywebview DLLs open without binding 5179, causing
+# Inno to abort while replacing site-packages files.
+$roots = @(
+    (Join-Path $env:LOCALAPPDATA 'Uoink'),
+    (Join-Path $env:LOCALAPPDATA 'Yoink')
+)
 if (-not $freed) {
-    $roots = @(
-        (Join-Path $env:LOCALAPPDATA 'Uoink'),
-        (Join-Path $env:LOCALAPPDATA 'Yoink')
-    )
     Write-PrepLog 'port still bound -- escalating to Stop-Process under Yoink/Uoink roots'
+} else {
+    Write-PrepLog 'port is free -- still stopping Yoink/Uoink python processes to unlock GUI DLLs'
+}
+try {
+    $procs = Get-CimInstance Win32_Process -Filter "Name = 'python.exe' OR Name = 'pythonw.exe'" -ErrorAction Stop
+} catch {
+    Write-PrepLog ("Get-CimInstance failed (CIM service down?): {0}" -f $_.Exception.Message)
+    $procs = @()
+}
+foreach ($p in $procs) {
+    $exe = $p.ExecutablePath
+    if (-not $exe) { continue }
+    $matched = $false
+    foreach ($r in $roots) {
+        if ($exe.StartsWith($r, [StringComparison]::OrdinalIgnoreCase)) { $matched = $true; break }
+    }
+    if (-not $matched) { continue }
     try {
-        $procs = Get-CimInstance Win32_Process -Filter "Name = 'python.exe' OR Name = 'pythonw.exe'" -ErrorAction Stop
+        Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop
+        Write-PrepLog ("Stop-Process pid={0} exe={1}" -f $p.ProcessId, $exe)
     } catch {
-        Write-PrepLog ("Get-CimInstance failed (CIM service down?): {0}" -f $_.Exception.Message)
-        $procs = @()
+        Write-PrepLog ("Stop-Process pid={0} failed: {1}" -f $p.ProcessId, $_.Exception.Message)
     }
-    foreach ($p in $procs) {
-        $exe = $p.ExecutablePath
-        if (-not $exe) { continue }
-        $matched = $false
-        foreach ($r in $roots) {
-            if ($exe.StartsWith($r, [StringComparison]::OrdinalIgnoreCase)) { $matched = $true; break }
-        }
-        if (-not $matched) { continue }
-        try {
-            Stop-Process -Id $p.ProcessId -Force -ErrorAction Stop
-            Write-PrepLog ("Stop-Process pid={0} exe={1}" -f $p.ProcessId, $exe)
-        } catch {
-            Write-PrepLog ("Stop-Process pid={0} failed: {1}" -f $p.ProcessId, $_.Exception.Message)
-        }
-    }
+}
+if (-not $freed) {
     $freedAfterKill = Wait-PortFree 2
     Write-PrepLog ("port 5179 free after Stop-Process wait? {0}" -f $freedAfterKill)
     if (-not $freedAfterKill) {

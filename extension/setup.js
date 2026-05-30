@@ -1104,7 +1104,7 @@ function applyDownloadState() {
     downloadBtn.classList.remove("disabled");
     downloadBtn.removeAttribute("aria-disabled");
     downloadBtn.title = "";
-    downloadBtn.href = "https://github.com/ryanbiddy/uoink/releases/download/v2.1.0/Uoink-Setup-2.1.0.exe";
+    downloadBtn.href = "https://github.com/ryanbiddy/uoink/releases/download/v3.1.1/Uoink-Setup-3.1.1.exe";
     downloadBtn.removeEventListener("click", preventDefaultClick);
   } else {
     downloadBtn.classList.add("disabled");
