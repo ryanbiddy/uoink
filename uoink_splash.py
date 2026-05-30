@@ -242,13 +242,15 @@ class JsApi:
         extension_dir = _extension_dir()
         manifest_exists = (extension_dir / "manifest.json").is_file()
         sentinel_exists = self._extension_sentinel.is_file()
-        should_show = (not sentinel_exists) or (not manifest_exists)
+        sentinel_current = _sentinel_current(self._extension_sentinel)
+        should_show = (not sentinel_current) or (not manifest_exists)
         if should_show:
             self._hold_open = True
         return {
             "path": str(extension_dir),
             "manifest_exists": manifest_exists,
             "sentinel_exists": sentinel_exists,
+            "sentinel_current": sentinel_current,
             "should_show": should_show,
         }
 

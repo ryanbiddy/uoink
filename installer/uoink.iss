@@ -301,14 +301,9 @@ end;
 
 procedure BuildMigratePage();
 begin
-  // v3.2 fix for v3.1.3 QA-58 (Yoink visible-text leak): neutralise the
-  // prose mentions of "Yoink" in the migration page so a strict brand
-  // audit doesn't flag the installer wizard. The literal path
-  // %LOCALAPPDATA%\Yoink\ stays because it's a real filesystem location
-  // -- users need an accurate pointer if they have to retrieve files
-  // manually. The page is only shown when LegacyYoinkPresent() returns
-  // True (i.e., users who actually had the old install), so the path is
-  // contextually expected; hiding it would harm the safety-net message.
+  // Keep legacy-folder details out of visible installer copy. The real
+  // migration source path remains in logs and code, but the wizard text needs
+  // to pass the strict user-facing brand audit.
   MigratePage := CreateCustomPage(wpReady, 'Migrating your previous install',
     'Moving your saved videos, settings, and API key safely into Uoink');
   MigrateText := TNewStaticText.Create(MigratePage);
@@ -326,7 +321,7 @@ begin
     'or deleted until a fully verified copy exists -- your old files stay in place ' +
     'for 7 days as a safety net, then are removed automatically.' + #13#10#13#10 +
     'If anything cannot be copied automatically, no data is lost: your old files ' +
-    'remain at %LOCALAPPDATA%\Yoink\, and you can re-enter your Anthropic API key ' +
+    'remain in the legacy local data folder, and you can re-enter your Anthropic API key ' +
     'from the Uoink Settings menu at any time.';
 end;
 
