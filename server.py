@@ -1013,7 +1013,18 @@ def _test_anthropic_key(api_key: str) -> tuple[bool, str | None, int | None]:
 # Invoke yt-dlp via the same interpreter rather than relying on PATH. pip's
 # --user install puts yt-dlp.exe in %APPDATA%\Python\PythonXX\Scripts which
 # isn't on PATH by default on Windows, so a bare "yt-dlp" call fails.
-YTDLP_CMD = [sys.executable, "-m", "yt_dlp"]
+#
+# v3.2 fix for v3.1.3 QA-42 (X/Twitter "Bad guest token"):
+# Twitter rotated their anonymous guest-token contract. yt-dlp 2026.3.17
+# (the PyPI latest) ships a workaround that uses the syndication API
+# instead of the guest-token-gated GraphQL endpoint. We have to opt in
+# explicitly via --extractor-args. The arg is a no-op for other
+# platforms, so we bake it into the canonical command instead of
+# threading platform-detection through every yt-dlp call site.
+# Reference: yt-dlp's twitter:api extractor-arg, values are
+#   {legacy, syndication, graphql}.
+YTDLP_CMD = [sys.executable, "-m", "yt_dlp",
+              "--extractor-args", "twitter:api=syndication"]
 
 # Hard cap on the video file yt-dlp downloads before ffmpeg runs. yt-dlp
 # pulls the whole file to disk first; on a small disk a few livestream-length
