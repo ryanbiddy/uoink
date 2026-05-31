@@ -88,6 +88,7 @@ import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
 import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
 import writing_studio  # noqa: E402  -- v3.2 Writing Studio (tweet/blog)
 import page_extractor  # noqa: E402  -- v3.2 Universal Site Uoinking
+import source_manifest  # noqa: E402  -- v3.2.1 site/dashboard product manifests
 
 
 def _extract_page_to_prose(url: str) -> str | None:
@@ -6557,6 +6558,15 @@ class Handler(BaseHTTPRequestHandler):
             # structured self-check the popup uses to surface a specific
             # recovery hint instead of a generic "helper offline".
             return self._send_json(200, _diagnose_payload())
+        if bare == "/sources/manifest":
+            # Public product metadata (no user data) so the static site can
+            # bake it at build time and the dashboard Sources tab can read it
+            # live. Same posture as /mcp/v1/config.
+            return self._handle_sources_manifest()
+        if bare == "/creators/manifest":
+            return self._handle_creators_manifest()
+        if bare == "/developers/manifest":
+            return self._handle_developers_manifest()
         if bare == "/dashboard" or bare == "/dashboard/":
             # Public local UI shell. The page itself performs the same token
             # handshake as the extension before reading recent yoinks or
@@ -8716,6 +8726,27 @@ class Handler(BaseHTTPRequestHandler):
         self._send_cors(self._cors_origin())
         self.end_headers()
         self.wfile.write(body)
+
+    def _handle_sources_manifest(self):
+        return self._send_json(
+            200, {"ok": True, **source_manifest.build_sources()})
+
+    def _handle_creators_manifest(self):
+        return self._send_json(
+            200, {"ok": True, **source_manifest.build_creators()})
+
+    def _handle_developers_manifest(self):
+        try:
+            tool_count = len(_mcp_tools_module().TOOL_REGISTRY)
+        except Exception:
+            log.exception("developers manifest: tool count unavailable")
+            tool_count = 0
+        payload = source_manifest.build_developers(
+            tool_count=tool_count,
+            mcp_endpoint=f"http://{HOST}:{PORT}/mcp/v1",
+            openapi_spec_path="/openapi/v1/spec.json",
+        )
+        return self._send_json(200, {"ok": True, **payload})
 
     def _handle_yoink_screenshots(self, bare: str):
         """GET /yoinks/<id>/screenshots -- list the source's screenshots for
