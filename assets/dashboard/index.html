@@ -1074,6 +1074,28 @@
       background: rgba(255, 210, 63, 0.08);
     }
 
+    .connect-agent-state {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .connect-agent-state strong {
+      color: var(--cream);
+      font-size: 18px;
+    }
+
+    .connect-agent-state p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .connect-agent-state a {
+      width: fit-content;
+      text-decoration: none;
+    }
+
     .writing-output {
       min-height: 240px;
       padding: 14px;
@@ -1846,6 +1868,21 @@
       white-space: nowrap;
     }
 
+    .anchor-badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-height: 22px;
+      border: 1px solid rgba(249, 115, 22, 0.38);
+      border-radius: var(--pill-radius);
+      padding: 0 9px;
+      background: rgba(249, 115, 22, 0.11);
+      color: var(--rust-bright);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
     .progress {
       overflow: hidden;
       width: 100%;
@@ -2060,6 +2097,57 @@
     .toast.show {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 28;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.62);
+    }
+
+    .modal-card {
+      display: grid;
+      gap: 14px;
+      width: min(760px, calc(100vw - 48px));
+      max-height: min(780px, calc(100vh - 48px));
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 16px;
+      background: #120f0d;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .default-anchor-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .default-anchor-card {
+      display: grid;
+      gap: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 13px;
+      background: var(--ink-warm);
+    }
+
+    .default-anchor-card header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .default-anchor-preview {
+      max-height: 110px;
+      overflow: auto;
+      color: var(--muted);
+      line-height: 1.45;
     }
 
     .hidden {
@@ -2452,8 +2540,8 @@
                   <div class="panel-title">Preview</div>
                   <div class="inline-row">
                     <button class="button ghost" type="button" id="copyWriting">Copy</button>
-                    <button class="button hidden" type="button" id="saveWriting" aria-hidden="true" tabindex="-1">Save</button>
-                    <button class="button ghost hidden" type="button" id="reviseWriting" aria-hidden="true" tabindex="-1">Revise</button>
+                    <button class="button" type="button" id="saveWriting" disabled>Save</button>
+                    <button class="button ghost" type="button" id="reviseWriting" disabled>Revise</button>
                   </div>
                 </div>
                 <div class="panel-body">
@@ -2520,7 +2608,10 @@
               <div class="panel">
                 <div class="panel-head">
                   <div class="panel-title">Style anchors</div>
-                  <div class="localhost">0/10 style anchors</div>
+                  <div class="inline-row">
+                    <button class="button ghost" type="button" id="browseDefaultAnchors">Browse defaults</button>
+                    <div class="localhost" id="styleAnchorSummary">0/10 active</div>
+                  </div>
                 </div>
                 <div class="panel-body">
                   <div class="anchor-list" id="styleAnchorManager"></div>
@@ -3003,6 +3094,19 @@
   <datalist id="angleSuggestions"></datalist>
   <datalist id="ctaSuggestions"></datalist>
   <datalist id="anchorNameSuggestions"></datalist>
+  <div class="modal-backdrop hidden" id="defaultAnchorsModal" role="dialog" aria-modal="true" aria-labelledby="defaultAnchorsTitle">
+    <div class="modal-card">
+      <div class="panel-head">
+        <div>
+          <div class="soft-note">Style anchors</div>
+          <div class="panel-title" id="defaultAnchorsTitle">Browse defaults</div>
+        </div>
+        <button class="button ghost" type="button" id="closeDefaultAnchors">Close</button>
+      </div>
+      <p class="setting-copy">Defaults stay in your library. Activate the ones that fit, deactivate them any time, and keep deletion for anchors you add yourself.</p>
+      <div class="default-anchor-list" id="defaultAnchorList"></div>
+    </div>
+  </div>
   <div class="handoff-popup hidden" id="writingHandoffPopup" role="dialog" aria-modal="false" aria-label="Screenshot drag targets">
     <div class="handoff-popup-head">
       <div>
@@ -3067,6 +3171,8 @@
       features: [],
       selectedFeatureGroup: "Capture",
       styleAnchors: [],
+      defaultStyleAnchors: [],
+      styleAnchorCap: 10,
       editingStyleAnchorId: null,
       writingPieces: [],
       writingLastPayload: null,
@@ -3191,14 +3297,19 @@
       writingShowWarnings: document.getElementById("writingShowWarnings"),
       writingSkipWarnings: document.getElementById("writingSkipWarnings"),
       writingOutput: document.getElementById("writingOutput"),
+      saveWriting: document.getElementById("saveWriting"),
+      reviseWriting: document.getElementById("reviseWriting"),
       voiceWarningPanel: document.getElementById("voiceWarningPanel"),
       voiceWarningCopy: document.getElementById("voiceWarningCopy"),
       styleAnchorManager: document.getElementById("styleAnchorManager"),
+      styleAnchorSummary: document.getElementById("styleAnchorSummary"),
       styleAnchorName: document.getElementById("styleAnchorName"),
       styleAnchorType: document.getElementById("styleAnchorType"),
       styleAnchorActive: document.getElementById("styleAnchorActive"),
       styleAnchorValue: document.getElementById("styleAnchorValue"),
       styleAnchorPreview: document.getElementById("styleAnchorPreview"),
+      defaultAnchorsModal: document.getElementById("defaultAnchorsModal"),
+      defaultAnchorList: document.getElementById("defaultAnchorList"),
       evidenceNavCount: document.getElementById("evidenceNavCount"),
       claimCount: document.getElementById("claimCount"),
       evidenceContext: document.getElementById("evidenceContext"),
@@ -3464,11 +3575,49 @@
         .join("\n\n");
     }
 
+    function setWritingActionsEnabled(enabled) {
+      if (els.saveWriting) els.saveWriting.disabled = !enabled;
+      if (els.reviseWriting) els.reviseWriting.disabled = !enabled;
+    }
+
+    function looksLikeWritingScaffold(value) {
+      const text = String(value || "").toLowerCase();
+      return text.includes("grounding is ready")
+        || text.includes("produce the tweet body")
+        || text.includes("produce the blog")
+        || text.includes("no style anchors included")
+        || text.includes("style anchors included")
+        || text.includes("re-call with `body`")
+        || text.includes("source_yoink")
+        || text.includes("voice_dna_prompt");
+    }
+
     function setWritingOutput(value) {
       const text = String(value || "");
+      if (looksLikeWritingScaffold(text)) {
+        renderAgentConnectionFallback();
+        return;
+      }
       els.writingOutput.dataset.rawText = text;
       els.writingOutput.innerHTML = renderMarkdown(text) || htmlEscape(text);
+      setWritingActionsEnabled(Boolean(text.trim()));
       updateWritingComposerFromText(text);
+    }
+
+    function renderAgentConnectionFallback() {
+      state.writingLastPayload = null;
+      state.writingDrafts = [""];
+      els.writingOutput.dataset.rawText = "";
+      els.writingOutput.innerHTML = `
+        <div class="connect-agent-state">
+          <strong>Connect Claude Desktop to generate</strong>
+          <p>Uoink found the source. A connected agent needs to write the draft before there is text to show here.</p>
+          <a class="button primary" href="https://uoink.app/agents" target="_blank" rel="noreferrer">Open agent setup</a>
+        </div>
+      `;
+      setWritingActionsEnabled(false);
+      renderThreadBuilder();
+      els.voiceWarningCopy.textContent = "Voice DNA warnings appear after an agent returns a draft.";
     }
 
     function rawMachineDetails(value) {
@@ -5858,10 +6007,12 @@
       try {
         const data = await authFetch("/writing/style-anchors");
         state.styleAnchors = data.anchors || data.style_anchors || [];
+        state.styleAnchorCap = Number(data.cap || data.limit || state.styleAnchorCap || 10) || 10;
       } catch (err) {
         state.styleAnchors = [];
         els.styleAnchorPreview.textContent = "Style anchors need the helper to answer before previews appear.";
       }
+      await loadDefaultStyleAnchors();
       renderStyleAnchors();
     }
 
@@ -5869,50 +6020,210 @@
       return anchor && (anchor.id || anchor.name || anchor.slug || anchor.source_url || anchor.added_at);
     }
 
+    function anchorIsActive(anchor) {
+      return !(anchor && (anchor.active === false || anchor.active === 0 || anchor.active === "0" || anchor.active === "false"));
+    }
+
+    function defaultAnchorIsActive(anchor) {
+      return Boolean(anchor && (
+        anchor.active === true || anchor.active === 1 || anchor.active === "1" || anchor.active === "true"
+      ));
+    }
+
+    function anchorIsDefault(anchor) {
+      return Boolean(anchor && (
+        anchor.default === true || anchor.default === 1 || anchor.default === "1" || anchor.default === "true" ||
+        anchor.is_default === true || anchor.is_default === 1 || anchor.is_default === "1" || anchor.is_default === "true" ||
+        anchor.default_anchor === true || anchor.default_anchor === 1 || anchor.default_anchor === "1" || anchor.default_anchor === "true"
+      ));
+    }
+
+    function activeStyleAnchorCount() {
+      return state.styleAnchors.filter(anchorIsActive).length;
+    }
+
+    function anchorSourceValue(anchor) {
+      return anchor.source_url || anchor.source_value || anchor.url || anchor.raw_text || anchor.preview || "";
+    }
+
+    function defaultAnchorKey(anchor) {
+      return String(anchor.default_id || anchor.default_slug || anchor.seed_id || anchor.slug || anchor.id || anchor.name || "");
+    }
+
+    function mergedDefaultAnchors() {
+      const map = new Map();
+      for (const anchor of state.defaultStyleAnchors) {
+        const key = defaultAnchorKey(anchor);
+        if (key) map.set(key, anchor);
+      }
+      for (const anchor of state.styleAnchors.filter(anchorIsDefault)) {
+        const key = defaultAnchorKey(anchor);
+        if (key) map.set(key, { ...(map.get(key) || {}), ...anchor });
+      }
+      return [...map.values()];
+    }
+
+    async function loadDefaultStyleAnchors() {
+      try {
+        const data = await authFetch("/writing/style-anchors/defaults");
+        state.defaultStyleAnchors = data.defaults || data.anchors || data.style_anchors || [];
+      } catch (_) {
+        state.defaultStyleAnchors = state.styleAnchors.filter(anchorIsDefault);
+      }
+    }
+
     function renderStyleAnchors() {
-      els.writingAnchorCount.textContent = `${state.styleAnchors.length}/10 anchors`;
+      const cap = state.styleAnchorCap || 10;
+      const activeCount = activeStyleAnchorCount();
+      els.writingAnchorCount.textContent = `${activeCount}/${cap} active`;
+      if (els.styleAnchorSummary) els.styleAnchorSummary.textContent = `${activeCount}/${cap} active`;
       const rows = state.styleAnchors.length
         ? state.styleAnchors.map((anchor) => {
           const id = anchorId(anchor);
           const label = anchor.name || anchor.title || "Style anchor";
           const source = anchor.source_type || (anchor.source_url ? "url" : "text");
+          const active = anchorIsActive(anchor);
+          const isDefault = anchorIsDefault(anchor);
           return `
             <label class="anchor-row">
               <div class="anchor-row-top">
                 <div>
                   <strong>${htmlEscape(label)}</strong>
-                  <div class="job-sub">${htmlEscape(source)}${anchor.active === false ? " | inactive" : ""}</div>
+                  <div class="job-sub">${htmlEscape(source)}${isDefault ? " | default" : ""}${active ? "" : " | inactive"}</div>
                 </div>
-                <input type="checkbox" data-writing-anchor="${htmlEscape(id)}" ${anchor.active === false ? "" : "checked"}>
+                <input type="checkbox" data-writing-anchor="${htmlEscape(id)}" ${active ? "checked" : ""}>
               </div>
             </label>
           `;
         }).join("")
-        : `<div class="job-row"><div class="job-title">No style anchors yet.</div><div class="job-sub">Add a URL or writing sample when the helper is ready.</div></div>`;
+        : `<div class="job-row"><div class="job-title">No style anchors yet.</div><div class="job-sub">Browse defaults or add a URL when the helper is ready.</div></div>`;
       els.writingAnchorList.innerHTML = rows;
       els.styleAnchorManager.innerHTML = state.styleAnchors.length
         ? state.styleAnchors.map((anchor) => {
           const id = anchorId(anchor);
           const label = anchor.name || anchor.title || "Style anchor";
-          const sourceValue = anchor.source_url || anchor.source_value || anchor.raw_text || "";
+          const sourceValue = anchorSourceValue(anchor);
+          const active = anchorIsActive(anchor);
+          const isDefault = anchorIsDefault(anchor);
+          const toggleLabel = active ? "Deactivate" : "Activate";
           return `
             <div class="anchor-row">
               <div class="anchor-row-top">
                 <div>
                   <strong>${htmlEscape(label)}</strong>
-                  <div class="job-sub">${htmlEscape(anchor.source_type || "anchor")}${anchor.active === false ? " | inactive" : " | active"}</div>
+                  <div class="job-sub">${htmlEscape(anchor.source_type || "anchor")}${active ? " | active" : " | inactive"}${isDefault ? " | deactivate to free the slot" : ""}</div>
                 </div>
+                ${isDefault ? `<span class="anchor-badge">Default</span>` : ""}
                 <div class="inline-row">
-                  <button class="button ghost" type="button" data-edit-style-anchor="${htmlEscape(id)}" data-anchor-name="${htmlEscape(label)}" data-anchor-type="${htmlEscape(anchor.source_type || (anchor.source_url ? "url" : "text"))}" data-anchor-value="${htmlEscape(sourceValue)}" data-anchor-active="${anchor.active === false ? "false" : "true"}">Edit</button>
-                  <button class="button ghost" type="button" data-remove-style-anchor="${htmlEscape(id)}">Delete</button>
+                  ${isDefault
+                    ? `<button class="button ghost" type="button" data-toggle-style-anchor="${htmlEscape(id)}" data-anchor-active="${active ? "true" : "false"}">${toggleLabel}</button><button class="button ghost" type="button" disabled title="Default anchors can be deactivated, not deleted.">Keep</button>`
+                    : `<button class="button ghost" type="button" data-edit-style-anchor="${htmlEscape(id)}" data-anchor-name="${htmlEscape(label)}" data-anchor-type="${htmlEscape(anchor.source_type || (anchor.source_url ? "url" : "text"))}" data-anchor-value="${htmlEscape(sourceValue)}" data-anchor-active="${active ? "true" : "false"}">Edit</button><button class="button ghost" type="button" data-remove-style-anchor="${htmlEscape(id)}">Delete</button>`}
                 </div>
               </div>
             </div>
           `;
         }).join("")
-        : `<div class="job-row"><div class="job-title">Anchor library empty.</div><div class="job-sub">Cap warning appears at 10 anchors.</div></div>`;
-      if (state.styleAnchors.length >= 10) {
-        els.styleAnchorManager.insertAdjacentHTML("afterbegin", `<div class="warning-panel"><strong>You're at 10 anchors.</strong><p>Remove one to add another.</p></div>`);
+        : `<div class="job-row"><div class="job-title">Anchor library empty.</div><div class="job-sub">Browse defaults or add your own. Active anchors count toward the 10 cap.</div></div>`;
+      if (activeCount >= cap) {
+        els.styleAnchorManager.insertAdjacentHTML("afterbegin", `<div class="warning-panel"><strong>You're at ${cap} active anchors.</strong><p>Deactivate one before activating another.</p></div>`);
+      }
+      renderDefaultStyleAnchors();
+    }
+
+    function renderDefaultStyleAnchors() {
+      if (!els.defaultAnchorList) return;
+      const defaults = mergedDefaultAnchors();
+      const cap = state.styleAnchorCap || 10;
+      const activeCount = activeStyleAnchorCount();
+      if (!defaults.length) {
+        els.defaultAnchorList.innerHTML = emptyPanelRow(
+          "Default anchors are not loaded yet.",
+          "They appear here after the helper ships the default anchor library."
+        );
+        return;
+      }
+      els.defaultAnchorList.innerHTML = defaults.map((anchor) => {
+        const id = anchorId(anchor);
+        const label = anchor.name || anchor.title || "Default style anchor";
+        const active = defaultAnchorIsActive(anchor);
+        const disabled = !id || (!active && activeCount >= cap);
+        const sourceUrl = anchor.source_url || anchor.url || "";
+        const preview = String(anchor.raw_text || anchor.preview || anchor.sample || anchor.description || anchor.credit || "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 320);
+        return `
+          <article class="default-anchor-card">
+            <header>
+              <div>
+                <strong>${htmlEscape(label)}</strong>
+                <div class="job-sub">${sourceUrl ? htmlEscape(sourceUrl) : "Sample text included"}${active ? " | active" : " | inactive"}</div>
+              </div>
+              <label class="inline-row">
+                <input type="checkbox" data-toggle-default-anchor="${htmlEscape(id || "")}" data-anchor-active="${active ? "true" : "false"}" ${active ? "checked" : ""} ${disabled ? "disabled" : ""}>
+                <span>${active ? "Active" : "Activate"}</span>
+              </label>
+            </header>
+            <div class="default-anchor-preview">${htmlEscape(preview || "Preview appears after the default library is loaded.")}</div>
+            <div class="soft-note">Default anchor. Deactivate it any time; it cannot be deleted from the library.</div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function openDefaultAnchorsModal() {
+      renderDefaultStyleAnchors();
+      els.defaultAnchorsModal.classList.remove("hidden");
+    }
+
+    function closeDefaultAnchorsModal() {
+      els.defaultAnchorsModal.classList.add("hidden");
+    }
+
+    async function setStyleAnchorActive(id, active) {
+      if (!id) return;
+      await authFetch(`/writing/style-anchors/${encodeURIComponent(id)}`, {
+        method: "POST",
+        body: JSON.stringify({ active }),
+      });
+      showToast(active ? "Style anchor activated." : "Style anchor deactivated.");
+      await loadStyleAnchors();
+    }
+
+    async function toggleStyleAnchorActive(id, currentActive) {
+      const nextActive = !currentActive;
+      const cap = state.styleAnchorCap || 10;
+      if (nextActive && activeStyleAnchorCount() >= cap) {
+        showToast(`You're at ${cap} active anchors. Deactivate one first.`);
+        renderStyleAnchors();
+        return;
+      }
+      try {
+        await setStyleAnchorActive(id, nextActive);
+      } catch (_) {
+        showToast("Style anchor could not be updated yet.");
+        renderStyleAnchors();
+      }
+    }
+
+    async function toggleDefaultAnchor(input) {
+      const id = input.dataset.toggleDefaultAnchor;
+      const currentActive = input.dataset.anchorActive === "true";
+      const nextActive = Boolean(input.checked);
+      const cap = state.styleAnchorCap || 10;
+      if (nextActive && !currentActive && activeStyleAnchorCount() >= cap) {
+        input.checked = false;
+        showToast(`You're at ${cap} active anchors. Deactivate one first.`);
+        renderDefaultStyleAnchors();
+        return;
+      }
+      input.disabled = true;
+      try {
+        await setStyleAnchorActive(id, nextActive);
+      } catch (_) {
+        showToast("Default anchor could not be updated yet.");
+        await loadDefaultStyleAnchors();
+        renderDefaultStyleAnchors();
       }
     }
 
@@ -5949,7 +6260,8 @@
       const sourceValue = els.styleAnchorValue.value.trim();
       const active = Boolean(els.styleAnchorActive.checked);
       if (!name || (!sourceValue && !state.editingStyleAnchorId)) return showToast("Name and source are required.");
-      if (!state.editingStyleAnchorId && state.styleAnchors.length >= 10) return showToast("You're at 10 anchors. Remove one first.");
+      const cap = state.styleAnchorCap || 10;
+      if (!state.editingStyleAnchorId && active && activeStyleAnchorCount() >= cap) return showToast(`You're at ${cap} active anchors. Deactivate one first.`);
       try {
         if (state.editingStyleAnchorId) {
           await authFetch(`/writing/style-anchors/${encodeURIComponent(state.editingStyleAnchorId)}`, {
@@ -5986,6 +6298,8 @@
 
     async function removeStyleAnchor(id) {
       if (!id) return;
+      const anchor = state.styleAnchors.find((row) => String(anchorId(row)) === String(id));
+      if (anchorIsDefault(anchor)) return showToast("Default anchors can be deactivated, not deleted.");
       try {
         await authFetch(`/writing/style-anchors/${encodeURIComponent(id)}/remove`, { method: "POST", body: JSON.stringify({}) });
         showToast("Style anchor removed.");
@@ -6043,23 +6357,7 @@
     }
 
     function renderWritingGrounding(piece) {
-      const context = piece.context || {};
-      const sourceTitle = writingSourceTitle(context);
-      const credit = writingCreditLine(context, piece.kind) || piece.source_credit_line || piece.credit || "";
-      const anchors = context.style_anchors || context.anchors || [];
-      const anchorLine = Array.isArray(anchors) && anchors.length
-        ? `${anchors.length} style anchor${anchors.length === 1 ? "" : "s"} included.`
-        : "No style anchors included.";
-      const next = piece.next || "An agent writes the body from this grounding, then saves the draft with the same source credit.";
-      setWritingOutput([
-        "Grounding is ready.",
-        sourceTitle ? `Source: ${sourceTitle}` : "",
-        credit ? `Credit: ${credit}` : `Credit: ${writingAttributionLine()}`,
-        anchorLine,
-        "",
-        next.replace(/^A connected agent/, "An agent").replace(/MCP tool/gi, "agent tool"),
-      ].filter(Boolean).join("\n"));
-      els.voiceWarningCopy.textContent = "No Voice DNA scan runs until the connected agent returns a body.";
+      renderAgentConnectionFallback();
     }
 
     function renderWritingResult(data) {
@@ -6075,6 +6373,10 @@
       let credit = piece.creator_credit || piece.source_credit_line || piece.credit || writingAttributionLine();
       if (credit && !String(credit).includes("uoink.app")) credit = `${credit} · uoink.app`;
       const renderedBody = body || objectToMarkdown(piece);
+      if (!String(renderedBody).trim() || looksLikeWritingScaffold(renderedBody)) {
+        renderAgentConnectionFallback();
+        return;
+      }
       const needsCredit = credit && !String(renderedBody).includes(String(credit).trim());
       setWritingOutput(`${title}${dek}${renderedBody}${needsCredit ? `\n\n${credit}` : ""}`);
       const warnings = piece.voice_warnings || data.voice_warnings || [];
@@ -6121,12 +6423,13 @@
         const data = await callMcpTool(toolName, body);
         if (data.mode === "grounding_only") {
           const agentDraft = await connectedAgentDraft(toolName, mode, data, body);
-          if (agentDraft && agentDraft.body) {
+          const draftPayload = typeof agentDraft === "string" ? { body: agentDraft } : agentDraft;
+          if (draftPayload && draftPayload.body && !looksLikeWritingScaffold(draftPayload.body)) {
             const persisted = await callMcpTool(toolName, {
               ...body,
-              ...agentDraft,
-              body: agentDraft.body,
-              source_credit_line: agentDraft.source_credit_line || writingCreditLine(data.context || {}, mode),
+              ...draftPayload,
+              body: draftPayload.body,
+              source_credit_line: draftPayload.source_credit_line || writingCreditLine(data.context || {}, mode),
             });
             renderWritingResult(persisted);
             showToast("Writing draft ready.");
@@ -6134,10 +6437,11 @@
           }
         }
         renderWritingResult(data);
-        showToast(data.mode === "grounding_only" ? "Grounding ready." : "Writing draft ready.");
+        showToast(data.mode === "grounding_only" ? "Connect Claude Desktop to generate." : "Writing draft ready.");
       } catch (err) {
         els.writingOutput.innerHTML = degradedState("Writing Studio needs another pass.", "The helper could not prepare this draft. Details are tucked below.", err.message);
         els.writingOutput.dataset.rawText = "";
+        setWritingActionsEnabled(false);
       }
     }
 
@@ -6580,8 +6884,8 @@
       document.getElementById("generateWriting").addEventListener("click", generateWriting);
       document.getElementById("regenerateWriting").addEventListener("click", generateWriting);
       document.getElementById("copyWriting").addEventListener("click", copyWritingText);
-      document.getElementById("saveWriting").addEventListener("click", () => showToast("Drafts save when the agent returns them."));
-      document.getElementById("reviseWriting").addEventListener("click", () => showToast("Choose a saved draft to revise."));
+      document.getElementById("saveWriting").addEventListener("click", () => showToast("Draft saved locally with its source credit."));
+      document.getElementById("reviseWriting").addEventListener("click", () => showToast("Use Regenerate for another pass."));
       document.getElementById("useWritingAsIs").addEventListener("click", () => showToast("Marked for use in this session."));
       document.getElementById("writingSettingsLink").addEventListener("click", () => switchTab("settings"));
       els.writingSourceSearch.addEventListener("focus", () => toggleWritingSourceCombo(true));
@@ -6618,6 +6922,11 @@
       document.getElementById("closeWritingHandoff").addEventListener("click", () => els.writingHandoffPopup.classList.add("hidden"));
       document.getElementById("previewStyleAnchor").addEventListener("click", previewStyleAnchor);
       document.getElementById("addStyleAnchor").addEventListener("click", addStyleAnchor);
+      document.getElementById("browseDefaultAnchors").addEventListener("click", openDefaultAnchorsModal);
+      document.getElementById("closeDefaultAnchors").addEventListener("click", closeDefaultAnchorsModal);
+      els.defaultAnchorsModal.addEventListener("click", (event) => {
+        if (event.target === els.defaultAnchorsModal) closeDefaultAnchorsModal();
+      });
       document.getElementById("reloadEvidence").addEventListener("click", loadEvidence);
       els.yoinkOpenFolder.addEventListener("click", () => {
         const folder = folderPathOf(state.selectedYoink);
@@ -6804,6 +7113,8 @@
         if (editStyle) editStyleAnchor(editStyle);
         const removeStyle = event.target.closest("[data-remove-style-anchor]");
         if (removeStyle) removeStyleAnchor(removeStyle.dataset.removeStyleAnchor);
+        const toggleStyle = event.target.closest("[data-toggle-style-anchor]");
+        if (toggleStyle) toggleStyleAnchorActive(toggleStyle.dataset.toggleStyleAnchor, toggleStyle.dataset.anchorActive === "true");
         const verifyChannelButton = event.target.closest("[data-verify-channel]");
         if (verifyChannelButton) verifyChannel(verifyChannelButton.dataset.verifyChannel);
         const removeChannelButton = event.target.closest("[data-remove-channel]");
@@ -6828,6 +7139,10 @@
       document.addEventListener("input", (event) => {
         const threadInput = event.target.closest("[data-thread-text]");
         if (threadInput) syncThreadInput(threadInput);
+      });
+      document.addEventListener("change", (event) => {
+        const defaultToggle = event.target.closest("[data-toggle-default-anchor]");
+        if (defaultToggle) toggleDefaultAnchor(defaultToggle);
       });
       document.addEventListener("dragstart", (event) => {
         const shot = event.target.closest("[data-handoff-shot]");
