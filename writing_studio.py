@@ -244,6 +244,16 @@ def update_style_anchor(idx, anchor_id: int, *,
         new_name = clean
     if active is not None:
         new_active = 1 if active else 0
+        # Activating counts against the cap (same rule as add_style_anchor).
+        # Only check when flipping inactive -> active; re-saving an already
+        # active anchor (e.g. a rename) must not trip the cap.
+        if new_active and not row["active"] \
+                and active_style_anchor_count(idx) >= STYLE_ANCHOR_CAP:
+            err = ValueError(
+                f"active style anchors capped at {STYLE_ANCHOR_CAP}; "
+                "deactivate one before activating another")
+            err.http_status = 422
+            raise err
     with idx._lock:
         idx._conn.execute(
             "UPDATE style_anchors SET name=?, active=? WHERE id=?",

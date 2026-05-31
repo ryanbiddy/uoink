@@ -93,6 +93,42 @@ def test_cap_enforced_on_active():
     raise AssertionError("expected cap ValueError")
 
 
+def test_activate_respects_cap():
+    idx = FakeIndex()
+    # Fill all 10 active slots.
+    ids = [ws.add_style_anchor(idx, name=f"a{i}", source_type="text",
+                               source_value="x")["id"]
+           for i in range(ws.STYLE_ANCHOR_CAP)]
+    # Deactivate one, leaving 9 active + 1 inactive.
+    ws.update_style_anchor(idx, ids[0], active=False)
+    _assert(ws.active_style_anchor_count(idx) == 9, "should be 9 active")
+    # Seed an inactive default; activating it would make 10 -> allowed.
+    # Re-activating the deactivated one back to 10 is allowed.
+    ws.update_style_anchor(idx, ids[0], active=True)
+    _assert(ws.active_style_anchor_count(idx) == 10, "back to 10 active")
+    # Build a "10 active + 1 inactive" state without seeding (seed no-ops on a
+    # non-empty table): add 10, deactivate one, add a replacement -> 10 active
+    # plus one inactive left over. Activating the leftover must 422.
+    extra = FakeIndex()
+    eids = [ws.add_style_anchor(extra, name=f"b{i}", source_type="text",
+                                source_value="x")["id"]
+            for i in range(ws.STYLE_ANCHOR_CAP)]
+    ws.update_style_anchor(extra, eids[0], active=False)   # 9 active, eids[0] off
+    ws.add_style_anchor(extra, name="replacement", source_type="text",
+                        source_value="x")                   # back to 10 active
+    _assert(ws.active_style_anchor_count(extra) == 10, "should be 10 active")
+    try:
+        ws.update_style_anchor(extra, eids[0], active=True)
+    except ValueError as e:
+        _assert(getattr(e, "http_status", None) == 422,
+                "activate past cap should be 422")
+        # Renaming an already-active anchor must NOT trip the cap.
+        ws.update_style_anchor(extra, eids[1], name="renamed")
+        print("ok  activate respects cap (422); rename of active anchor ok")
+        return
+    raise AssertionError("expected ValueError activating past cap")
+
+
 def test_hook_lens():
     _assert(ws.normalize_hook_lens(None) is None, "None -> None")
     _assert(ws.normalize_hook_lens("") is None, "empty -> None")
@@ -124,6 +160,7 @@ def main():
     test_seed_and_defaults()
     test_cap_counts_active_not_total()
     test_cap_enforced_on_active()
+    test_activate_respects_cap()
     test_hook_lens()
     test_grounding_includes_lens()
     print("\nALL v3.2.3 ANCHOR + LENS TESTS PASSED")

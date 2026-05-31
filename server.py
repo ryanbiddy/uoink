@@ -7986,7 +7986,8 @@ class Handler(BaseHTTPRequestHandler):
                 name=body.get("name"),
                 active=body.get("active"))
         except ValueError as e:
-            return self._send_json(400, {"ok": False, "error": str(e)})
+            return self._send_json(getattr(e, "http_status", 400),
+                                   {"ok": False, "error": str(e)})
         except Exception as e:
             log.exception("/writing/style-anchors PATCH failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
