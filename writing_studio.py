@@ -142,20 +142,31 @@ def active_style_anchor_count(idx) -> int:
 
 
 def seed_default_anchors(idx, anchors: list[dict]) -> int:
-    """First-run seed: when the style_anchors table is empty, insert each
-    default with active=0 + is_default=1. Returns how many were seeded. No-op
-    once any anchor exists, so it never duplicates and never overrides a user's
-    curation. Defaults seed inactive, so they don't count against the cap until
-    the user activates one."""
-    if not anchors or style_anchor_count(idx) > 0:
+    """Seed the curated defaults idempotently, per anchor. Inserts any default
+    that is missing (matched by is_default=1 + name) and leaves existing rows
+    untouched, so it runs safely on every boot. Returns how many were newly
+    inserted.
+
+    Critically this is NOT gated on the whole table being empty: an upgrading
+    user who already has custom anchors still gets the five defaults seeded
+    alongside them (the "Browse defaults" UI needs real DB ids to toggle).
+    Defaults seed inactive (active=0), so they don't count against the cap and
+    never override a user's curation. A default the user has already activated
+    keeps its active state because we skip names that already exist as defaults.
+    """
+    if not anchors:
         return 0
     seeded = 0
     with idx._lock:
+        existing = {
+            (r["name"] or "") for r in idx._conn.execute(
+                "SELECT name FROM style_anchors WHERE is_default = 1").fetchall()
+        }
         for a in anchors:
             if not isinstance(a, dict):
                 continue
-            name = (a.get("name") or "").strip()
-            if not name:
+            name = (a.get("name") or "").strip()[:80]
+            if not name or name in existing:
                 continue
             source_type = a.get("source_type") or ANCHOR_SOURCE_TEXT
             if source_type not in _ANCHOR_SOURCES:
@@ -164,10 +175,12 @@ def seed_default_anchors(idx, anchors: list[dict]) -> int:
                 "INSERT INTO style_anchors "
                 "(name, source_type, source_url, raw_text, active, "
                 " is_default, added_at) VALUES (?, ?, ?, ?, 0, 1, ?)",
-                (name[:80], source_type, a.get("source_url"),
+                (name, source_type, a.get("source_url"),
                  a.get("raw_text"), _now_iso()))
+            existing.add(name)
             seeded += 1
-    log.info("seeded %d default style anchors", seeded)
+    if seeded:
+        log.info("seeded %d default style anchors", seeded)
     return seeded
 
 

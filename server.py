@@ -2716,11 +2716,12 @@ DEFAULT_STYLE_ANCHORS_PATH = HERE / "defaults" / "style_anchors.json"
 
 
 def _seed_default_style_anchors() -> None:
-    """First-run seed of the curated default style anchors from the bundled
-    defaults/style_anchors.json. No-op when the file is missing or the
-    style_anchors table already has rows (so it never overrides a user's
-    curation). Seeded anchors are inactive (active=0, is_default=1), so they
-    don't count against the active cap until the user activates one."""
+    """Seed the curated default style anchors from the bundled
+    defaults/style_anchors.json. Runs on every boot and inserts any default
+    that is missing (idempotent per anchor), so upgrading users who already
+    have custom anchors still get the defaults. No-op when the file is missing.
+    Seeded anchors are inactive (active=0, is_default=1), so they don't count
+    against the active cap and never override a user's curation."""
     try:
         if not DEFAULT_STYLE_ANCHORS_PATH.exists():
             log.info("default style anchors: %s not bundled; skipping seed",

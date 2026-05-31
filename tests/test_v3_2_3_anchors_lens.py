@@ -65,6 +65,27 @@ def test_seed_and_defaults():
     print("ok  seed: 5 inactive defaults, idempotent, list_default_anchors")
 
 
+def test_seed_upgrade_path():
+    # Upgrading user already has a custom anchor; defaults must still seed
+    # alongside it (regression from Codex Windows review of #90).
+    idx = FakeIndex()
+    ws.add_style_anchor(idx, name="my custom voice", source_type="text",
+                        source_value="hello")
+    seeded = ws.seed_default_anchors(idx, DEFAULTS)
+    _assert(seeded == 5, f"expected 5 defaults seeded over existing anchor, got {seeded}")
+    _assert(len(ws.list_default_anchors(idx)) == 5, "5 defaults present")
+    _assert(ws.style_anchor_count(idx) == 6, "1 custom + 5 defaults = 6 total")
+    _assert(ws.active_style_anchor_count(idx) == 1, "only the custom anchor is active")
+    # Idempotent per-default: re-seeding inserts nothing and preserves an
+    # activated default's state.
+    deflist = ws.list_default_anchors(idx)
+    ws.update_style_anchor(idx, deflist[0]["id"], active=True)
+    _assert(ws.seed_default_anchors(idx, DEFAULTS) == 0, "re-seed should no-op")
+    again = {d["id"]: d for d in ws.list_default_anchors(idx)}
+    _assert(again[deflist[0]["id"]]["active"] == 1, "activated default kept active")
+    print("ok  seed upgrade path: defaults seed over existing anchors, idempotent")
+
+
 def test_cap_counts_active_not_total():
     idx = FakeIndex()
     ws.seed_default_anchors(idx, DEFAULTS)  # 5 inactive defaults
@@ -158,6 +179,7 @@ def test_grounding_includes_lens():
 
 def main():
     test_seed_and_defaults()
+    test_seed_upgrade_path()
     test_cap_counts_active_not_total()
     test_cap_enforced_on_active()
     test_activate_respects_cap()
