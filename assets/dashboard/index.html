@@ -1081,6 +1081,307 @@
       white-space: pre-wrap;
     }
 
+    .source-map {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .source-card {
+      display: grid;
+      gap: 12px;
+      min-height: 218px;
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 15px;
+      background: rgba(21, 17, 13, 0.82);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .source-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .source-card h2 {
+      color: var(--cream);
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .source-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .source-status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border: 1px solid rgba(255, 244, 236, 0.16);
+      border-radius: var(--pill-radius);
+      padding: 0 9px;
+      color: var(--cream);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .source-status.shipped {
+      border-color: rgba(0, 200, 83, 0.36);
+      color: var(--ok);
+    }
+
+    .source-status.in-flight {
+      border-color: rgba(249, 115, 22, 0.42);
+      color: var(--rust-bright);
+    }
+
+    .source-status.planned {
+      color: var(--dim);
+    }
+
+    .combo {
+      position: relative;
+    }
+
+    .combo-list {
+      position: absolute;
+      z-index: 20;
+      top: calc(100% + 6px);
+      right: 0;
+      left: 0;
+      display: none;
+      max-height: 320px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      background: #0d0b09;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .combo.open .combo-list {
+      display: grid;
+    }
+
+    .combo-option {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr);
+      gap: 10px;
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid rgba(255, 244, 236, 0.08);
+      padding: 9px;
+      background: transparent;
+      color: var(--cream);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .combo-option:hover,
+    .combo-option:focus-visible {
+      outline: none;
+      background: rgba(194, 65, 12, 0.18);
+    }
+
+    .combo-thumb {
+      width: 58px;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: #241f1b;
+    }
+
+    .combo-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .teach-card,
+    .handoff-note,
+    .attribution-panel {
+      display: grid;
+      gap: 8px;
+      border: 1px solid rgba(249, 115, 22, 0.28);
+      border-radius: var(--control-radius);
+      padding: 13px;
+      background: rgba(194, 65, 12, 0.1);
+    }
+
+    .teach-card p,
+    .handoff-note span {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .teach-kicker {
+      color: var(--rust-bright);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .thread-builder {
+      display: grid;
+      gap: 10px;
+    }
+
+    .tweet-card {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 11px;
+      background: var(--ink-warm);
+    }
+
+    .tweet-card.over {
+      border-color: var(--danger-border);
+      background: var(--danger-bg);
+    }
+
+    .tweet-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .tweet-text {
+      min-height: 104px;
+      resize: vertical;
+    }
+
+    .char-count {
+      color: var(--muted);
+    }
+
+    .char-count.over {
+      color: var(--vermillion);
+    }
+
+    .attribution-panel {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      border-color: rgba(255, 210, 63, 0.24);
+      background: rgba(255, 210, 63, 0.07);
+    }
+
+    .screenshot-picker,
+    .handoff-shot-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
+      gap: 10px;
+    }
+
+    .screenshot-choice,
+    .handoff-shot {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      background: #0d0b09;
+    }
+
+    .screenshot-choice.selected {
+      border-color: rgba(249, 115, 22, 0.58);
+      box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.18);
+    }
+
+    .screenshot-choice img,
+    .handoff-shot img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: #241f1b;
+    }
+
+    .screenshot-choice label,
+    .handoff-shot-meta {
+      display: grid;
+      gap: 5px;
+      padding: 9px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .handoff-shot.used {
+      opacity: 0.46;
+    }
+
+    .handoff-popup {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 50;
+      width: min(520px, calc(100vw - 48px));
+      max-height: min(680px, calc(100vh - 48px));
+      overflow: auto;
+      border: 1px solid rgba(249, 115, 22, 0.46);
+      border-radius: var(--card-radius);
+      padding: 14px;
+      background: #100d0a;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .handoff-popup-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .markdown-rendered {
+      white-space: normal;
+    }
+
+    .markdown-rendered h1,
+    .markdown-rendered h2,
+    .markdown-rendered h3 {
+      margin: 0 0 10px;
+      color: var(--cream);
+      line-height: 1.2;
+    }
+
+    .markdown-rendered p,
+    .markdown-rendered ul,
+    .markdown-rendered ol {
+      margin: 0 0 10px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .markdown-rendered ul,
+    .markdown-rendered ol {
+      padding-left: 18px;
+    }
+
+    .markdown-rendered code {
+      border: 1px solid rgba(255, 244, 236, 0.12);
+      border-radius: 6px;
+      padding: 1px 5px;
+      background: rgba(10, 10, 10, 0.36);
+      color: var(--cream);
+      font-family: var(--font-mono);
+      font-size: 0.92em;
+    }
+
     .radio-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1767,6 +2068,15 @@
 
     @media (max-width: 1080px) {
       body { overflow: auto; }
+      html,
+      body,
+      .app,
+      .main,
+      .content,
+      .tab-panel {
+        max-width: 100%;
+        overflow-x: hidden;
+      }
       .app {
         min-width: 0;
         height: auto;
@@ -1774,17 +2084,60 @@
         grid-template-columns: 1fr;
       }
       .sidebar {
-        position: sticky;
-        top: 0;
+        position: static;
         z-index: 20;
         display: grid;
-        grid-template-columns: auto 1fr auto;
-        align-items: center;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 18px;
       }
       .nav {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .nav-button {
+        min-width: 0;
+        min-height: 38px;
+        padding: 0 10px;
+        font-size: 12px;
+      }
+      .nav-button .nav-count {
+        margin-left: 6px;
+      }
+      .chrome {
+        padding: 0 18px;
+      }
+      .content {
+        padding: 26px 18px 34px;
+      }
+      .page-head {
+        display: grid;
+      }
+      .page-head > *,
+      .source-card,
+      .source-card *,
+      .learn-links,
+      .learn-links a {
+        min-width: 0;
+        max-width: 100%;
+      }
+      .lede {
+        max-width: 100%;
+      }
+      .learn-links a {
+        white-space: normal;
+        text-align: center;
+      }
+      .source-map {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .source-card {
+        min-width: 0;
       }
       .sidebar-bottom {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
         margin-top: 0;
         padding-top: 0;
         border-top: 0;
@@ -1814,13 +2167,14 @@
         <span class="wordmark-text">OINK</span>
       </div>
       <nav class="nav" aria-label="Sections">
-        <button class="nav-button" type="button" data-tab-button="for-you">For You <span class="nav-count" id="forYouNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="build">Build <span class="nav-count" id="buildNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="script">Script <span class="nav-count" id="scriptNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="writing">Writing <span class="nav-count" id="writingNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="evidence">Evidence <span class="nav-count" id="evidenceNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="yoink">Uoink</button>
         <button class="nav-button active" type="button" data-tab-button="library">Library <span class="nav-count" id="libraryNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="sources">Sources <span class="nav-count" id="sourcesNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="for-you">For You <span class="nav-count" id="forYouNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="writing">Writing <span class="nav-count" id="writingNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="build">Build <span class="nav-count" id="buildNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="script">Script <span class="nav-count" id="scriptNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="evidence">Evidence <span class="nav-count" id="evidenceNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="activity">Activity <span class="nav-count" id="activityNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="settings">Settings</button>
         <button class="nav-button" type="button" data-tab-button="features">Features</button>
@@ -1918,10 +2272,10 @@
               </div>
               <div class="panel-body">
                 <form class="workspace-form" id="workspaceForm">
-                  <input class="field" id="workspaceHook" type="text" placeholder="working hook or angle">
+                  <input class="field" id="workspaceHook" type="text" list="hookSuggestions" autocomplete="off" placeholder="working hook or angle">
                   <select class="field" id="workspaceFormat"></select>
-                  <input class="field" id="workspaceTopic" type="text" placeholder="topic, e.g. AI agents">
-                  <input class="field" id="workspaceChannel" type="text" placeholder="your channel handle (optional)">
+                  <input class="field" id="workspaceTopic" type="text" list="topicSuggestions" autocomplete="off" placeholder="topic, e.g. AI agents">
+                  <input class="field" id="workspaceChannel" type="text" list="channelSuggestions" autocomplete="off" placeholder="your channel handle (optional)">
                   <div class="slider-row">
                     <input id="workspaceExamples" type="range" min="4" max="20" step="1" value="10">
                     <span id="workspaceExamplesLabel">10 examples</span>
@@ -2001,8 +2355,8 @@
                 <form class="script-form" id="scriptForm">
                   <select class="field" id="scriptWorkspace"></select>
                   <input class="field" id="scriptTargetLength" type="number" min="15" step="15" value="120" placeholder="target length seconds">
-                  <input class="field" id="scriptHookStyle" type="text" placeholder="hook style / taste anchor">
-                  <input class="field" id="scriptCta" type="text" placeholder="CTA target">
+                  <input class="field" id="scriptHookStyle" type="text" list="hookSuggestions" autocomplete="off" placeholder="hook style / taste anchor">
+                  <input class="field" id="scriptCta" type="text" list="ctaSuggestions" autocomplete="off" placeholder="CTA target">
                   <button class="button" type="button" id="getScriptGrounding">Get grounding context</button>
                   <textarea class="field draft-box" id="scriptDraftHook" placeholder="Paste or write the final hook to persist."></textarea>
                   <textarea class="field draft-box" id="scriptDraftBody" placeholder="Body or outline. One line per beat works."></textarea>
@@ -2063,18 +2417,22 @@
             <aside class="panel">
               <div class="panel-head">
                 <div class="panel-title">Write from a source</div>
-                <span class="nav-count" id="writingAnchorCount">0</span>
+                <span class="nav-count" id="writingAnchorCount">0/10 anchors</span>
               </div>
               <div class="panel-body">
-                <label class="soft-note" for="writingSource">Source uoink</label>
-                <select class="field" id="writingSource"></select>
+                <label class="soft-note" for="writingSourceSearch">Source uoink</label>
+                <div class="combo" id="writingSourceCombo">
+                  <input class="field combo-input" id="writingSourceSearch" type="search" role="combobox" autocomplete="off" aria-expanded="false" aria-controls="writingSourceOptions" placeholder="Search saved uoinks">
+                  <input id="writingSource" type="hidden">
+                  <div class="combo-list" id="writingSourceOptions" role="listbox"></div>
+                </div>
                 <label class="soft-note">Output</label>
                 <div class="radio-grid" id="writingModePicker">
                   <label class="choice-row"><input type="radio" name="writingMode" value="tweet" checked><span>Tweet</span></label>
                   <label class="choice-row"><input type="radio" name="writingMode" value="thread"><span>Thread</span></label>
                   <label class="choice-row"><input type="radio" name="writingMode" value="blog"><span>Blog</span></label>
                 </div>
-                <input class="field" id="writingAngle" type="text" placeholder="angle, optional">
+                <input class="field" id="writingAngle" type="text" list="angleSuggestions" autocomplete="off" placeholder="angle, optional">
                 <label class="soft-note">Style</label>
                 <div class="choice-grid" id="writingStyleMode">
                   <label class="choice-row"><input type="radio" name="writingStyle" value="default" checked><span>Default voice</span></label>
@@ -2099,7 +2457,12 @@
                   </div>
                 </div>
                 <div class="panel-body">
-                  <div class="writing-output" id="writingOutput">Choose a source uoink, then send it through the MCP writing tool.</div>
+                  <div class="teach-card">
+                    <div class="teach-kicker">Writing Studio</div>
+                    <strong>Choose a source. Uoink keeps creator credit beside the draft.</strong>
+                    <p>Generated drafts, manual edits, screenshot choices, and X handoff all stay visible here before anything leaves your machine.</p>
+                  </div>
+                  <div class="writing-output markdown-rendered" id="writingOutput">Choose a source, then generate or paste a draft.</div>
                   <div class="warning-panel" id="voiceWarningPanel">
                     <strong>Voice DNA warning panel</strong>
                     <p id="voiceWarningCopy">If a draft starts sounding canned, Uoink shows the flagged phrases here. Regenerate, use it anyway, or change the warning setting.</p>
@@ -2112,15 +2475,57 @@
                 </div>
               </div>
 
+              <div class="panel" id="writingComposerPanel">
+                <div class="panel-head">
+                  <div class="panel-title">X composer</div>
+                  <div class="inline-row">
+                    <button class="button ghost" type="button" id="addThreadTweet">Add tweet</button>
+                    <button class="button" type="button" id="splitWritingDraft">Split draft</button>
+                    <button class="button primary" type="button" id="openWritingInX">Open in X</button>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  <div class="handoff-note">
+                    <strong>Native media attach is still manual.</strong>
+                    <span>Uoink opens X with the text and shows selected screenshots as drag targets.</span>
+                  </div>
+                  <div class="thread-builder" id="threadBuilder"></div>
+                  <div class="attribution-panel">
+                    <div>
+                      <div class="soft-note">Native attribution</div>
+                      <div class="job-title" id="writingAttributionLine">Pick a source to build the credit line.</div>
+                    </div>
+                    <button class="button ghost" type="button" id="copyWritingAttribution">Copy credit</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="panel" id="writingScreenshotPanel">
+                <div class="panel-head">
+                  <div class="panel-title">Screenshots</div>
+                  <div class="inline-row">
+                    <button class="button ghost" type="button" id="refreshWritingScreenshots">Refresh</button>
+                    <button class="button" type="button" id="reYoinkWritingSource">Re-uoink source</button>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  <div class="summary-line">
+                    <span id="writingScreenshotSummary">Pick screenshots when posting is on.</span>
+                    <label class="inline-row"><input id="writingPickScreenshots" type="checkbox" checked> Pick screenshots when posting</label>
+                  </div>
+                  <div class="screenshot-picker" id="writingScreenshotPicker"></div>
+                </div>
+              </div>
+
               <div class="panel">
                 <div class="panel-head">
                   <div class="panel-title">Style anchors</div>
-                  <div class="localhost">cap 10</div>
+                  <div class="localhost">0/10 style anchors</div>
                 </div>
                 <div class="panel-body">
                   <div class="anchor-list" id="styleAnchorManager"></div>
                   <div class="inline-row">
-                    <input class="field" style="flex:1;min-width:180px" id="styleAnchorName" type="text" placeholder="anchor name">
+                    <input class="field" style="flex:1;min-width:180px" id="styleAnchorName" type="text" list="anchorNameSuggestions" autocomplete="off" placeholder="anchor name">
                     <select class="field" style="width:140px" id="styleAnchorType">
                       <option value="url">URL</option>
                       <option value="text">Text</option>
@@ -2132,7 +2537,7 @@
                     <button class="button ghost" type="button" id="previewStyleAnchor">Preview URL</button>
                     <button class="button" type="button" id="addStyleAnchor">Add anchor</button>
                   </div>
-                  <div class="mono-box" id="styleAnchorPreview">URL preview appears here after CC's crawler endpoint is live.</div>
+                  <div class="mono-box" id="styleAnchorPreview">URL preview appears here after the page reader answers.</div>
                 </div>
               </div>
             </section>
@@ -2251,6 +2656,23 @@
           </div>
         </section>
 
+        <section class="tab-panel" id="tab-sources" data-tab-panel="sources">
+          <div class="page-head">
+            <div>
+              <div class="eyebrow">Sources</div>
+              <h1>What Uoink can <em>read next.</em></h1>
+              <p class="lede">A plain map of capture surfaces, what lands locally, and what each source becomes inside Library, Writing, Build, Script, and Evidence.</p>
+            </div>
+            <button class="button primary" type="button" data-open-youtube>+ Uoink</button>
+          </div>
+          <div class="learn-links" aria-label="Sources walkthrough links">
+            <a href="https://uoink.app/features/universal-page-uoink" target="_blank" rel="noreferrer">Learn: Universal Page Uoink</a>
+            <a href="https://uoink.app/twitter" target="_blank" rel="noreferrer">Learn: X Video</a>
+            <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
+          </div>
+          <div class="source-map" id="sourceMap"></div>
+        </section>
+
         <section class="tab-panel" id="tab-yoink" data-tab-panel="yoink">
           <div class="page-head">
             <div>
@@ -2280,7 +2702,7 @@
             <aside class="panel">
               <div class="panel-head">
                 <div class="panel-title">Local facts</div>
-                <div class="localhost" id="yoinkFactMeta">sidecar</div>
+                <div class="localhost" id="yoinkFactMeta">local files</div>
               </div>
               <div class="panel-body" id="yoinkFacts"></div>
             </aside>
@@ -2331,7 +2753,7 @@
             <div>
               <div class="eyebrow">Settings</div>
               <h1>Tune the <em>helper.</em></h1>
-              <p class="lede">Key storage, output folders, topic routing, helper status, MCP config, and update checks live here.</p>
+              <p class="lede">Key storage, output folders, topic routing, helper status, agent config, and update checks live here.</p>
             </div>
             <button class="button ghost" type="button" id="reloadSettings">Reload</button>
           </div>
@@ -2433,8 +2855,8 @@
             </div>
 
             <div class="setting-block">
-              <h2>MCP config</h2>
-              <textarea class="mono-box" id="mcpConfig" readonly>Loading MCP config...</textarea>
+              <h2>Agent config</h2>
+              <textarea class="mono-box" id="mcpConfig" readonly>Loading agent config...</textarea>
               <button class="button" type="button" id="copyMcp">Copy</button>
             </div>
 
@@ -2462,9 +2884,11 @@
 
             <div class="setting-block">
               <h2>Writing Studio</h2>
-              <p class="setting-copy">Voice DNA warnings stay soft. You can keep the draft, regenerate it, or turn warnings off.</p>
+              <p class="setting-copy">Voice DNA warnings stay soft. Screenshot picking stays visible before the X handoff.</p>
               <label class="inline-row"><input id="voiceWarningsEnabled" type="checkbox" checked> Show Voice DNA warnings</label>
               <label class="inline-row"><input id="voiceWarningsPerGeneration" type="checkbox" checked> Show the per-draft skip control</label>
+              <label class="inline-row"><input id="writingScreenshotPickerToggle" type="checkbox" checked> Show screenshot picker in composer</label>
+              <label class="inline-row"><input id="writingDefaultAttachAll" type="checkbox"> Preselect all screenshots</label>
             </div>
 
             <div class="setting-block">
@@ -2538,11 +2962,11 @@
             </div>
             <div class="setting-block">
               <h2>Local surfaces</h2>
-              <p class="setting-copy">The same helper serves the dashboard, splash, MCP config, and local API. No cloud account, no sync layer.</p>
+              <p class="setting-copy">The same helper serves the dashboard, startup screen, and agent bridge. No cloud account, no sync layer.</p>
               <div class="link-list">
-                <a href="/dashboard" target="_blank" rel="noreferrer">Dashboard <span>/dashboard</span></a>
-                <a href="/splash" target="_blank" rel="noreferrer">Splash <span>/splash</span></a>
-                <a href="/settings/mcp-config" target="_blank" rel="noreferrer">MCP config <span>/settings/mcp-config</span></a>
+                <a href="/dashboard" target="_blank" rel="noreferrer">Dashboard <span>local view</span></a>
+                <a href="/splash" target="_blank" rel="noreferrer">Splash <span>startup screen</span></a>
+                <a href="/settings/mcp-config" target="_blank" rel="noreferrer">Agent config <span>copy/paste bridge</span></a>
               </div>
             </div>
             <div class="setting-block">
@@ -2556,7 +2980,7 @@
                 <a href="https://uoink.app" target="_blank" rel="noreferrer">uoink.app <span>-></span></a>
                 <a href="https://uoink.app/how" target="_blank" rel="noreferrer">Quick start guide <span>-></span></a>
                 <a href="https://uoink.app/hooks" target="_blank" rel="noreferrer">9 hook types explained <span>-></span></a>
-                <a href="https://uoink.app/agents" target="_blank" rel="noreferrer">MCP integration docs <span>-></span></a>
+                <a href="https://uoink.app/agents" target="_blank" rel="noreferrer">Agent integration docs <span>-></span></a>
               </div>
             </div>
             <div class="setting-block">
@@ -2572,6 +2996,22 @@
         </section>
       </div>
     </main>
+  </div>
+  <datalist id="topicSuggestions"></datalist>
+  <datalist id="channelSuggestions"></datalist>
+  <datalist id="hookSuggestions"></datalist>
+  <datalist id="angleSuggestions"></datalist>
+  <datalist id="ctaSuggestions"></datalist>
+  <datalist id="anchorNameSuggestions"></datalist>
+  <div class="handoff-popup hidden" id="writingHandoffPopup" role="dialog" aria-modal="false" aria-label="Screenshot drag targets">
+    <div class="handoff-popup-head">
+      <div>
+        <div class="soft-note">Screenshot handoff</div>
+        <strong>Drag these into X after the composer opens.</strong>
+      </div>
+      <button class="button ghost" type="button" id="closeWritingHandoff">Close</button>
+    </div>
+    <div class="handoff-shot-list" id="writingHandoffShots"></div>
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -2630,6 +3070,12 @@
       editingStyleAnchorId: null,
       writingPieces: [],
       writingLastPayload: null,
+      writingDrafts: [""],
+      writingSelectedSourceRow: null,
+      writingScreenshots: [],
+      writingSelectedScreenshots: new Set(),
+      writingUsedScreenshots: new Set(),
+      writingSourceComboOpen: false,
     };
 
     const FALLBACK_FACETS = {
@@ -2667,13 +3113,27 @@
       ["Workspace", "style-anchors", "Style anchors", "Bring named writing samples into the draft context.", "https://uoink.app/features/style-anchors"],
       ["Verification", "claim-extraction", "Claim extraction", "Find factual claims worth checking.", "https://uoink.app/features/claim-extraction"],
       ["Verification", "evidence-panel", "Evidence panel", "Record support, contradiction, mixed, or inconclusive signals.", "https://uoink.app/features/evidence-panel"],
-      ["Distribution", "mcp-server", "MCP server", "Let agents query and assemble your local corpus.", "https://uoink.app/features/mcp-server"],
+      ["Distribution", "mcp-server", "Agent bridge", "Let agents query and assemble your local corpus.", "https://uoink.app/features/mcp-server"],
       ["Distribution", "claude-desktop-integration", "Claude Desktop", "Connect Claude to the local Uoink tools.", "https://uoink.app/features/claude-desktop-integration"],
       ["Distribution", "cursor-integration", "Cursor", "Use the same local corpus from your editor.", "https://uoink.app/features/cursor-integration"],
       ["Identity", "byo-anthropic-key", "BYO Anthropic key", "Keep optional model calls under your key.", "https://uoink.app/features/byo-anthropic-key"],
       ["Identity", "local-first", "Local-first", "Keep the index, screenshots, and settings on this machine.", "https://uoink.app/features/local-first"],
       ["Identity", "no-cloud", "No Uoink cloud", "Use loopback helper surfaces instead of a hosted account.", "https://uoink.app/features/no-cloud"],
     ].map(([group, slug, name, description, url]) => ({ group, slug, name, description, url }));
+
+    const SOURCE_CAPABILITIES = [
+      ["YouTube video", "shipped", "In-page button, right-click link, playlist bridge", "Transcript, screenshots, comments, facets, hooks", "Library cards, Writing drafts, Build examples, Script shots, Evidence claims"],
+      ["X video", "shipped", "Right-click or paste supported X links", "Creator handle, media metadata, transcript when available", "Writing attribution, Library search, source credit in exports"],
+      ["Podcasts / RSS", "shipped", "Feed monitor or one-off episode URL", "Local transcript, speakers, waveform preview, episode facts", "Build research, Script evidence, long-form source memory"],
+      ["Substack", "planned", "Universal page uoink from allowed site", "Article text, author, publication URL, highlights", "Writing citations, quote bank, topic memory"],
+      ["LinkedIn videos", "planned", "Universal page uoink once enabled", "Video metadata, creator, transcript where exposed", "B2B source memory and creator attribution"],
+      ["Reddit threads", "planned", "Universal page uoink from thread URL", "Post, top comments, community, score signals", "Audience questions and Build objections"],
+      ["Bluesky", "planned", "Universal page uoink from post URL", "Thread text, author handle, linked media", "Writing references and attribution"],
+      ["Threads", "planned", "Universal page uoink from thread URL", "Post text, author handle, linked media", "Writing references and creator credit"],
+      ["Mastodon", "planned", "Universal page uoink from post URL", "Post text, instance, author handle, linked media", "Open-web references and attribution"],
+      ["Beehiiv", "planned", "Universal page uoink from newsletter URL", "Article text, author, publication metadata", "Newsletter source memory and quote bank"],
+      ["Ghost / Buttondown", "planned", "Universal page uoink from article URL", "Article text, author, canonical link", "Blog references and creator credit"],
+    ].map(([name, status, capture, corpus, output]) => ({ name, status, capture, corpus, output }));
 
     const els = {
       toast: document.getElementById("toast"),
@@ -2820,6 +3280,20 @@
       aboutStatus: document.getElementById("aboutStatus"),
       aboutVersion: document.getElementById("aboutVersion"),
       aboutPort: document.getElementById("aboutPort"),
+      sourcesNavCount: document.getElementById("sourcesNavCount"),
+      sourceMap: document.getElementById("sourceMap"),
+      writingSourceSearch: document.getElementById("writingSourceSearch"),
+      writingSourceOptions: document.getElementById("writingSourceOptions"),
+      threadBuilder: document.getElementById("threadBuilder"),
+      writingAttributionLine: document.getElementById("writingAttributionLine"),
+      writingPickScreenshots: document.getElementById("writingPickScreenshots"),
+      writingScreenshotPanel: document.getElementById("writingScreenshotPanel"),
+      writingScreenshotPicker: document.getElementById("writingScreenshotPicker"),
+      writingScreenshotSummary: document.getElementById("writingScreenshotSummary"),
+      writingScreenshotPickerToggle: document.getElementById("writingScreenshotPickerToggle"),
+      writingDefaultAttachAll: document.getElementById("writingDefaultAttachAll"),
+      writingHandoffPopup: document.getElementById("writingHandoffPopup"),
+      writingHandoffShots: document.getElementById("writingHandoffShots"),
     };
 
     function markSvg() {
@@ -2931,6 +3405,70 @@
         '"': "&quot;",
         "'": "&#39;",
       }[c]));
+    }
+
+    function renderInlineMarkdown(value) {
+      let html = htmlEscape(value);
+      html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+      html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+      return html;
+    }
+
+    function renderMarkdown(value) {
+      const text = String(value || "").trim();
+      if (!text) return "";
+      const lines = text.replace(/\r\n/g, "\n").split("\n");
+      const out = [];
+      let list = [];
+      const flushList = () => {
+        if (!list.length) return;
+        out.push(`<ul>${list.map((item) => `<li>${renderInlineMarkdown(item)}</li>`).join("")}</ul>`);
+        list = [];
+      };
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          flushList();
+          continue;
+        }
+        const bullet = /^[-*]\s+(.+)$/.exec(trimmed);
+        if (bullet) {
+          list.push(bullet[1]);
+          continue;
+        }
+        flushList();
+        const heading = /^(#{1,3})\s+(.+)$/.exec(trimmed);
+        if (heading) {
+          const level = heading[1].length;
+          out.push(`<h${level}>${renderInlineMarkdown(heading[2])}</h${level}>`);
+        } else {
+          out.push(`<p>${renderInlineMarkdown(trimmed)}</p>`);
+        }
+      }
+      flushList();
+      return out.join("");
+    }
+
+    function markdownBox(value) {
+      const html = renderMarkdown(value);
+      return html ? `<div class="markdown-rendered">${html}</div>` : "";
+    }
+
+    function objectToMarkdown(value) {
+      if (!value || typeof value !== "object") return String(value || "");
+      if (value.markdown || value.body || value.text) return value.markdown || value.body || value.text;
+      return Object.entries(value)
+        .filter(([, item]) => item !== undefined && item !== null && item !== "")
+        .map(([key, item]) => `**${key.replace(/_/g, " ")}:** ${typeof item === "object" ? JSON.stringify(item, null, 2) : item}`)
+        .join("\n\n");
+    }
+
+    function setWritingOutput(value) {
+      const text = String(value || "");
+      els.writingOutput.dataset.rawText = text;
+      els.writingOutput.innerHTML = renderMarkdown(text) || htmlEscape(text);
+      updateWritingComposerFromText(text);
     }
 
     function rawMachineDetails(value) {
@@ -3317,7 +3855,7 @@
       if (!segments.length) {
         return emptyPanelRow(
           "Transcript preview unavailable.",
-          podcast ? "Expected podcast sidecar shape: transcript segments with start, end, text, and optional speaker fields." : "Open the saved markdown for the full transcript."
+          podcast ? "Speaker labels appear here when the local transcript includes them." : "Open the saved markdown for the full transcript."
         );
       }
       return `
@@ -3341,7 +3879,7 @@
     function screenshotGridHtml(row, sidecar = {}) {
       const shots = Array.isArray(sidecar.screenshots) ? sidecar.screenshots.slice(0, 8) : [];
       if (!shots.length) {
-        return emptyPanelRow("Screenshots unavailable.", "Video screenshots appear here when the sidecar includes screenshot paths.");
+        return emptyPanelRow("Screenshots unavailable.", "Video screenshots appear here when the source folder includes local frames.");
       }
       return `
         <div class="screenshot-grid">
@@ -3367,9 +3905,9 @@
         ["Source", sourceUrlOf(row, sidecar) || "not stored"],
       ];
       if (state.selectedYoinkSidecarError) {
-        facts.push(["Sidecar", state.selectedYoinkSidecarError]);
+        facts.push(["Local detail", state.selectedYoinkSidecarError]);
       } else {
-        facts.push(["Sidecar", state.selectedYoinkSidecar ? "loaded" : "pending"]);
+        facts.push(["Local detail", state.selectedYoinkSidecar ? "ready" : "checking"]);
       }
       return facts.map(([label, value]) => `
         <div class="job-row">
@@ -3392,9 +3930,9 @@
         els.yoinkSubhead.textContent = "Podcast episodes, interviews, and regular videos share one local detail view.";
         els.yoinkTitle.textContent = "No uoink selected";
         els.yoinkMeta.textContent = "library detail";
-        els.yoinkFactMeta.textContent = "sidecar";
+        els.yoinkFactMeta.textContent = "local files";
         els.yoinkDetail.innerHTML = emptyPanelRow("No uoink selected.", "Choose a library card to open its local detail view.");
-        els.yoinkFacts.innerHTML = emptyPanelRow("No local facts loaded.", "Details are read from the library row and sidecar when present.");
+        els.yoinkFacts.innerHTML = emptyPanelRow("No local facts loaded.", "Details are read from the saved library row when present.");
         return;
       }
       const podcast = isPodcastContent(row, sidecar);
@@ -3408,8 +3946,8 @@
         mediaLabel,
         firstValue(sidecar.podcast_title, sidecar.host, sidecar.channel, row.channel),
         fmtDuration(durationOf(row, sidecar)),
-      ].filter((value) => value && value !== "--:--").join(" | ") || "local sidecar";
-      els.yoinkFactMeta.textContent = state.selectedYoinkSidecar ? "loaded" : "fallback";
+      ].filter((value) => value && value !== "--:--").join(" | ") || "local detail";
+      els.yoinkFactMeta.textContent = state.selectedYoinkSidecar ? "ready" : "reading from library";
       const speakerHtml = speakers.length
         ? `<div class="speaker-row">${speakers.map((speaker) => `<span class="speaker-chip">${htmlEscape(speaker)}</span>`).join("")}</div>`
         : `<div class="job-sub">${podcast ? "No speaker labels stored for this episode yet." : "No speaker labels stored for this uoink."}</div>`;
@@ -3492,7 +4030,7 @@
       try {
         state.selectedYoinkSidecar = await loadJsonFile(sidecarPath);
       } catch (err) {
-        state.selectedYoinkSidecarError = `sidecar unavailable (${err.message})`;
+        state.selectedYoinkSidecarError = "local detail needs another moment";
       }
       renderYoinkDetail();
     }
@@ -3525,11 +4063,11 @@
       } catch (err) {
         const missing = err.message.includes("not found") || err.message.includes("404");
         state.retranscribeStatus = missing
-          ? "helper endpoint unavailable"
-          : `failed: ${err.message}`;
+          ? "re-transcription not ready in this build"
+          : "re-transcription could not be queued";
         showToast(missing
-          ? "Re-transcription is unavailable in this helper build."
-          : `Could not queue re-transcription: ${err.message}`);
+          ? "Re-transcription is not ready in this build."
+          : "Could not queue re-transcription.");
       } finally {
         state.retranscribing = false;
         renderYoinkDetail();
@@ -3642,6 +4180,22 @@
       return `<div class="job-row"><div class="job-title">${htmlEscape(title)}</div><div class="job-sub">${htmlEscape(copy || "")}</div></div>`;
     }
 
+    function renderSources() {
+      if (!els.sourceMap) return;
+      els.sourcesNavCount.textContent = String(SOURCE_CAPABILITIES.length);
+      els.sourceMap.innerHTML = SOURCE_CAPABILITIES.map((source) => `
+        <article class="source-card">
+          <div class="source-card-head">
+            <h2>${htmlEscape(source.name)}</h2>
+            <span class="source-status ${htmlEscape(source.status.replace(/\s+/g, "-"))}">${htmlEscape(source.status)}</span>
+          </div>
+          <p><strong>Capture:</strong> ${htmlEscape(source.capture)}</p>
+          <p><strong>Corpus:</strong> ${htmlEscape(source.corpus)}</p>
+          <p><strong>Output:</strong> ${htmlEscape(source.output)}</p>
+        </article>
+      `).join("");
+    }
+
     function insightCard(row, kicker) {
       const score = normalizedScore(row);
       const age = daysSince(row.last_event_ts || row.yoinked_at);
@@ -3726,7 +4280,7 @@
         state.workspaces = Array.isArray(data.workspaces) ? data.workspaces : [];
       } catch (err) {
         state.workspaces = [];
-        els.workspaceList.innerHTML = emptyPanelRow("Workspaces unavailable.", err.message);
+        els.workspaceList.innerHTML = degradedState("Workspaces need another moment.", "The helper did not return saved workspaces yet.", err.message);
       }
       renderWorkspaceList();
       if (!state.currentWorkspace && state.workspaces.length) {
@@ -3755,11 +4309,11 @@
     function renderWorkspaceEmpty() {
       els.workspaceTitle.textContent = "Workspace";
       els.workspaceMeta.textContent = "no workspace selected";
-      els.workspaceSummary.innerHTML = emptyPanelRow("Planning a video?", "Drop a working hook, format, and topic to assemble inspiration from your corpus.");
-      els.workspacePatterns.innerHTML = emptyPanelRow("No assembled examples yet.", "Create a workspace, then assemble it.");
-      els.workspaceQuestions.innerHTML = emptyPanelRow("No audience questions yet.", "Audience questions appear when assembled examples include comment data.");
-      els.workspacePerformance.innerHTML = emptyPanelRow("No self-channel snapshot yet.", "Add your channel handle to compare against your own overperformers.");
-      els.workspaceCritiqueResult.innerHTML = "";
+      els.workspaceSummary.innerHTML = `<div class="teach-card"><div class="teach-kicker">Build</div><strong>Start with the hook you are actually considering.</strong><p>Uoink will assemble saved examples, audience questions, and your own channel patterns into a working room for the next agent pass.</p></div>`;
+      els.workspacePatterns.innerHTML = `<div class="teach-card"><div class="teach-kicker">Hook patterns</div><strong>Assembled examples land here.</strong><p>Pick a format and topic, then Assemble. The right column turns into the corpus slice you can teach from.</p></div>`;
+      els.workspaceQuestions.innerHTML = `<div class="teach-card"><div class="teach-kicker">Audience questions</div><strong>Comment-derived questions show the gaps.</strong><p>When comments are present, this pane pulls objections and questions into the brief before you write.</p></div>`;
+      els.workspacePerformance.innerHTML = `<div class="teach-card"><div class="teach-kicker">Your channel</div><strong>Your own overperformers become a guardrail.</strong><p>Add your channel handle to compare a new idea against patterns that already worked for you.</p></div>`;
+      els.workspaceCritiqueResult.innerHTML = `<div class="teach-card"><div class="teach-kicker">Critique</div><strong>Paste rough thinking here before it hardens.</strong><p>Uoink stores the critique context so the next revision can use the same source room.</p></div>`;
     }
 
     async function selectWorkspace(workspaceId) {
@@ -3771,7 +4325,7 @@
         renderWorkspaceList();
         renderWorkspaceDetail(data.workspace, data.critique_log || []);
       } catch (err) {
-        showToast(`Could not load workspace: ${err.message}`);
+        showToast("Could not load that workspace.");
       }
     }
 
@@ -3819,17 +4373,17 @@
       const assembled = assembly && Array.isArray(assembly.assembled) ? assembly.assembled : [];
       els.workspacePatterns.innerHTML = assembled.length
         ? `<div class="example-list">${assembled.slice(0, 10).map(miniExampleCard).join("")}</div>${patternClusters(assembled)}`
-        : emptyPanelRow("No assembled examples yet.", "Click Assemble to pull a ranked corpus slice.");
+        : `<div class="teach-card"><div class="teach-kicker">Hook patterns</div><strong>Assemble pulls the local examples.</strong><p>This pane becomes the ranked source set plus the recurring hooks Uoink sees across your corpus.</p></div>`;
       const questions = assembly && Array.isArray(assembly.audience_questions) ? assembly.audience_questions : [];
       els.workspaceQuestions.innerHTML = questions.length
         ? questions.slice(0, 12).map((q) => `<div class="job-row"><div class="job-title">${htmlEscape(q.question || "")}</div><div class="job-sub">${htmlEscape(q.likes || 0)} likes | ${htmlEscape(q.video_id || "")}</div></div>`).join("")
-        : emptyPanelRow("No audience questions available.", "Comment Intelligence data will make this section sharper.");
+        : `<div class="teach-card"><div class="teach-kicker">Questions</div><strong>Audience gaps show up once comments are present.</strong><p>If this stays empty, the workspace still works from transcripts and facets; comments will sharpen the objections later.</p></div>`;
       const selfSnapshot = assembly && assembly.self_snapshot;
       els.workspacePerformance.innerHTML = selfSnapshot && selfSnapshot.ok !== false
-        ? `<pre class="mono-box">${htmlEscape(JSON.stringify(selfSnapshot, null, 2))}</pre>`
-        : emptyPanelRow("No self-channel performance snapshot.", "Set your channel handle in the workspace form to pull your own patterns.");
+        ? markdownBox(objectToMarkdown(selfSnapshot))
+        : `<div class="teach-card"><div class="teach-kicker">Past performance</div><strong>Your own channel patterns are optional but powerful.</strong><p>Add your handle in the form or Settings to compare this idea against your overperformers.</p></div>`;
       if (critiqueLog.length && !els.workspaceCritiqueResult.innerHTML) {
-        els.workspaceCritiqueResult.innerHTML = critiqueLog.slice(0, 3).map((row) => `<div class="job-row"><div class="job-title">Critique ${htmlEscape(fmtAge(row.ts_utc))}</div><pre class="mono-box">${htmlEscape(JSON.stringify(row.findings || {}, null, 2))}</pre></div>`).join("");
+        els.workspaceCritiqueResult.innerHTML = critiqueLog.slice(0, 3).map((row) => `<div class="job-row"><div class="job-title">Critique ${htmlEscape(fmtAge(row.ts_utc))}</div>${markdownBox(objectToMarkdown(row.findings || {}))}</div>`).join("");
       }
     }
 
@@ -3850,7 +4404,7 @@
         await loadBuild();
         if (data.workspace && data.workspace.id) await assembleCurrentWorkspace();
       } catch (err) {
-        showToast(`Could not create workspace: ${err.message}`);
+        showToast("Could not create that workspace.");
       }
     }
 
@@ -3871,7 +4425,7 @@
         showToast("Workspace assembled.");
         renderWorkspaceDetail(ws);
       } catch (err) {
-        showToast(`Could not assemble: ${err.message}`);
+        showToast("Could not assemble that workspace.");
       }
     }
 
@@ -3885,9 +4439,9 @@
           method: "POST",
           body: JSON.stringify({ workspace_id: ws.id, draft_text: draft }),
         });
-        els.workspaceCritiqueResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Critique context ready")}</div><pre class="mono-box">${htmlEscape(JSON.stringify(data, null, 2))}</pre></div>`;
+        els.workspaceCritiqueResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Critique context ready")}</div>${markdownBox(objectToMarkdown(data))}</div>`;
       } catch (err) {
-        showToast(`Could not run critique: ${err.message}`);
+        showToast("Could not run critique yet.");
       }
     }
 
@@ -3899,7 +4453,7 @@
         state.scripts = Array.isArray(data.scripts) ? data.scripts : [];
       } catch (err) {
         state.scripts = [];
-        els.scriptList.innerHTML = emptyPanelRow("Scripts unavailable.", err.message);
+        els.scriptList.innerHTML = degradedState("Scripts need another moment.", "The helper did not return saved scripts yet.", err.message);
       }
       renderScriptList();
       if (!state.currentScript && state.scripts.length) {
@@ -3939,8 +4493,8 @@
     function renderScriptEmpty() {
       state.currentScript = null;
       els.scriptTitle.textContent = "Script";
-      els.scriptDetail.innerHTML = emptyPanelRow("No script selected.", "Choose a workspace, get grounding context, then persist a script version.");
-      els.scriptRevisionResult.innerHTML = "";
+      els.scriptDetail.innerHTML = `<div class="teach-card"><div class="teach-kicker">Script Studio</div><strong>Choose a Build workspace first.</strong><p>Grounding context, script versions, shot lists, and citations will appear here as readable sections.</p></div>`;
+      els.scriptRevisionResult.innerHTML = `<div class="teach-card"><div class="teach-kicker">Revision loop</div><strong>Paste the critique target, then run the pass.</strong><p>The response stays readable here, with the raw helper detail kept out of the main path.</p></div>`;
     }
 
     async function selectScript(scriptId) {
@@ -3951,7 +4505,7 @@
         renderScriptList();
         renderScriptDetail(data.script);
       } catch (err) {
-        showToast(`Could not load script: ${err.message}`);
+        showToast("Could not load that script.");
       }
     }
 
@@ -3977,19 +4531,19 @@
       els.scriptDetail.innerHTML = `
         <details class="script-block" open>
           <summary>Hook <span class="soft-note">${htmlEscape(script.format || "format unset")}</span></summary>
-          <div class="script-block-body">${htmlEscape(script.hook || "No hook saved.")}</div>
+          <div class="script-block-body markdown-rendered">${renderMarkdown(script.hook || "No hook saved.")}</div>
         </details>
         <details class="script-block" open>
           <summary>Beats <span class="soft-note">${beats.length}</span></summary>
-          <div class="script-block-body">${beats.map((beat) => `${htmlEscape(beat.label || "beat")}: ${htmlEscape(beat.content || beat.text || "")}`).join("\n") || "No beats saved."}</div>
+          <div class="script-block-body markdown-rendered">${renderMarkdown(beats.map((beat) => `- **${beat.label || "beat"}:** ${beat.content || beat.text || ""}`).join("\n") || "No beats saved.")}</div>
         </details>
         <details class="script-block">
           <summary>Body <span class="soft-note">${htmlEscape(script.target_length_sec || "")}${script.target_length_sec ? "s" : ""}</span></summary>
-          <div class="script-block-body">${htmlEscape(script.body || "No body saved.")}</div>
+          <div class="script-block-body markdown-rendered">${renderMarkdown(script.body || "No body saved.")}</div>
         </details>
         <details class="script-block">
           <summary>CTA</summary>
-          <div class="script-block-body">${htmlEscape(script.cta || "No CTA saved.")}</div>
+          <div class="script-block-body markdown-rendered">${renderMarkdown(script.cta || "No CTA saved.")}</div>
         </details>
         <details class="script-block" open>
           <summary>Source uoinks</summary>
@@ -3997,7 +4551,7 @@
         </details>
         <details class="script-block">
           <summary>Shot list</summary>
-          <div class="script-block-body">${Array.isArray(script.shot_list) && script.shot_list.length ? htmlEscape(JSON.stringify(script.shot_list, null, 2)) : "No shot list generated yet."}</div>
+          <div class="script-block-body markdown-rendered">${renderMarkdown(Array.isArray(script.shot_list) && script.shot_list.length ? script.shot_list.map((shot) => `- ${typeof shot === "string" ? shot : objectToMarkdown(shot)}`).join("\n") : "No shot list generated yet.")}</div>
         </details>
       `;
     }
@@ -4018,9 +4572,9 @@
           body: JSON.stringify({ workspace_id: workspaceId }),
         });
         state.scriptGrounding = data;
-        els.scriptDetail.innerHTML = `<div class="job-row"><div class="job-title">Grounding context ready</div><pre class="mono-box">${htmlEscape(JSON.stringify(data, null, 2))}</pre></div>`;
+        els.scriptDetail.innerHTML = `<div class="job-row"><div class="job-title">Grounding context ready</div>${markdownBox(objectToMarkdown(data))}</div>`;
       } catch (err) {
-        showToast(`Could not get grounding: ${err.message}`);
+        showToast("Could not prepare grounding yet.");
       }
     }
 
@@ -4049,7 +4603,7 @@
         await loadScripts();
         if (data.id) await selectScript(data.id);
       } catch (err) {
-        showToast(`Could not save script: ${err.message}`);
+        showToast("Could not save that script.");
       }
     }
 
@@ -4074,13 +4628,13 @@
       }
       try {
         const data = await authFetch("/script/revise", { method: "POST", body: JSON.stringify(payload) });
-        els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Revision response")}</div><pre class="mono-box">${htmlEscape(JSON.stringify(data, null, 2))}</pre></div>`;
+        els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Revision response")}</div>${markdownBox(objectToMarkdown(data))}</div>`;
         if (data.id) {
           await loadScripts();
           await selectScript(data.id);
         }
       } catch (err) {
-        showToast(`Could not revise script: ${err.message}`);
+        showToast("Could not revise that script.");
       }
     }
 
@@ -4094,9 +4648,9 @@
         });
         showToast("Shot list generated.");
         await selectScript(script.id);
-        els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">Shot list</div><pre class="mono-box">${htmlEscape(JSON.stringify(data, null, 2))}</pre></div>`;
+        els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">Shot list</div>${markdownBox(objectToMarkdown(data))}</div>`;
       } catch (err) {
-        showToast(`Could not derive shot list: ${err.message}`);
+        showToast("Could not create the shot list.");
       }
     }
 
@@ -4131,7 +4685,7 @@
         state.claims = Array.isArray(data.claims) ? data.claims : [];
       } catch (err) {
         state.claims = [];
-        els.claimList.innerHTML = emptyPanelRow("Claims unavailable.", err.message);
+        els.claimList.innerHTML = degradedState("Claims need another moment.", "The helper did not return claim rows yet.", err.message);
         return;
       }
       renderClaims();
@@ -4141,8 +4695,8 @@
       state.claims = [];
       els.evidenceNavCount.textContent = "0";
       els.claimCount.textContent = "0";
-      els.evidenceContext.innerHTML = emptyPanelRow("Pick a uoink card.", "Click a saved uoink to load extracted claims and evidence signals.");
-      els.claimList.innerHTML = emptyPanelRow("No uoink selected.", "Claims appear after you select a video.");
+      els.evidenceContext.innerHTML = `<div class="teach-card"><div class="teach-kicker">Evidence</div><strong>Pick a uoink to inspect claims.</strong><p>Library, For You, and workspace cards can load their extracted claims into this panel.</p></div>`;
+      els.claimList.innerHTML = `<div class="teach-card"><div class="teach-kicker">Claims</div><strong>Evidence signals appear after selection.</strong><p>Uoink surfaces support, contradiction, mixed, or inconclusive notes. You still decide what the evidence means.</p></div>`;
     }
 
     function evidenceSourceHtml(ev) {
@@ -4150,7 +4704,7 @@
         <div class="evidence-source">
           ${evidenceStatusChip(ev.alignment_signal)}
           <div class="job-title">${htmlEscape(ev.source_url || "source URL missing")}</div>
-          <div class="job-sub">${htmlEscape(ev.quote || "No quote captured.")}</div>
+          <div class="job-sub markdown-rendered">${renderMarkdown(ev.quote || "No quote captured.")}</div>
         </div>
       `;
     }
@@ -4161,7 +4715,7 @@
       return `
         <details class="claim-row" data-claim-id="${htmlEscape(claim.id)}">
           <summary>
-            <span>${htmlEscape(claim.claim_text || "Untitled claim")}</span>
+            <span>${renderInlineMarkdown(claim.claim_text || "Untitled claim")}</span>
             <span class="job-sub">${htmlEscape(score)} | ${htmlEscape(claim.status || "extracted")}</span>
           </summary>
           <div class="claim-body">
@@ -4191,7 +4745,7 @@
       try {
         evidence = JSON.parse(input.value);
       } catch (err) {
-        return showToast(`Evidence JSON is invalid: ${err.message}`);
+        return showToast("Evidence JSON is invalid.");
       }
       try {
         await authFetch(`/claims/${encodeURIComponent(claimId)}/verify`, {
@@ -4201,7 +4755,7 @@
         showToast("Evidence recorded.");
         await loadEvidence();
       } catch (err) {
-        showToast(`Could not record evidence: ${err.message}`);
+        showToast("Could not record that evidence.");
       }
     }
 
@@ -4214,7 +4768,7 @@
         showToast("Claim marked not attempted.");
         await loadEvidence();
       } catch (err) {
-        showToast(`Could not update claim: ${err.message}`);
+        showToast("Could not update that claim.");
       }
     }
 
@@ -4245,7 +4799,7 @@
       } catch (err) {
         if (!state.jobsLoaded) state.jobs = [];
         if (render && els.queueMeta) {
-          els.queueMeta.textContent = `jobs unavailable: ${err.message}`;
+          els.queueMeta.textContent = "Helper's catching its breath. Retrying...";
         }
         return state.jobs;
       }
@@ -4464,6 +5018,36 @@
       });
       syncOptions(els.channelFilter, "Channel: all", channels);
       syncOptions(els.topicFilter, "Topic: all", topics);
+      renderSuggestionDatalists();
+    }
+
+    function setDatalist(id, values) {
+      const list = document.getElementById(id);
+      if (!list) return;
+      const seen = new Set();
+      list.innerHTML = values
+        .map((value) => String(value || "").trim())
+        .filter((value) => value && !seen.has(value) && seen.add(value))
+        .slice(0, 80)
+        .map((value) => `<option value="${htmlEscape(value)}"></option>`)
+        .join("");
+    }
+
+    function renderSuggestionDatalists() {
+      const rows = state.library || [];
+      setDatalist("topicSuggestions", rows.map((row) => row.topic));
+      setDatalist("channelSuggestions", rows.map((row) => firstValue(row.channel, row.host, row.podcast_title)));
+      setDatalist("hookSuggestions", [
+        ...rows.map((row) => prettyHook(row.hook_type)),
+        ...state.styleAnchors.map((anchor) => anchor.name),
+        "contrarian", "question", "curiosity gap", "story open", "demo", "stakes",
+      ]);
+      setDatalist("angleSuggestions", [
+        ...rows.map((row) => row.topic),
+        "what changed", "why this matters now", "how to use it", "hidden tradeoff", "creator takeaway",
+      ]);
+      setDatalist("ctaSuggestions", ["reply with your source", "save this", "watch the full video", "read the blog", "try the workflow"]);
+      setDatalist("anchorNameSuggestions", state.styleAnchors.map((anchor) => anchor.name));
     }
 
     function syncFacetOptions() {
@@ -4792,12 +5376,15 @@
           : "Key not set. Comment Intelligence, Hook Type, and entity extraction skip silently.";
         els.outputFolder.value = state.settings.output_dir || state.settings.output_folder || els.outputFolder.value || "";
         els.autostartToggle.checked = Boolean(state.settings.autostart);
-        els.screenshotCount.value = String(state.settings.screenshot_count ?? 4);
+        els.screenshotCount.value = String(state.settings.screenshot_count ?? state.settings.clipboard_screenshot_cap ?? 4);
         els.claimVerificationToggle.checked = Boolean(state.settings.claim_verification_enabled);
         els.reliabilityAutoCheck.checked = Boolean(state.settings.transcript_reliability_auto_check);
         els.voiceWarningsEnabled.checked = state.settings.voice_dna_warnings_enabled !== false;
         els.voiceWarningsPerGeneration.checked = state.settings.voice_dna_show_per_generation_toggle !== false;
+        els.writingScreenshotPickerToggle.checked = state.settings.writing_show_screenshot_picker !== false;
+        els.writingDefaultAttachAll.checked = Boolean(state.settings.writing_default_attach_all_screenshots);
         els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
+        renderWritingScreenshots();
         renderRolePicker(state.settings.role || "mixed");
         syncWhisperModelOptions();
         const relModel = state.settings.transcript_reliability_model || {};
@@ -4805,7 +5392,7 @@
           ? `Local Whisper ${relModel.model || "tiny"} model ready.`
           : `Local Whisper model not downloaded yet (~${relModel.estimated_download_mb || 150} MB).`;
       } catch (err) {
-        els.keyStatus.textContent = `Settings unavailable: ${err.message}`;
+        els.keyStatus.textContent = "Settings need another moment.";
         renderRolePicker("mixed");
         syncWhisperModelOptions();
       }
@@ -4816,13 +5403,13 @@
           els.outputFolder.value = diag.output_root || diag.output_dir || diag.desktop_root || "Output folder unavailable";
         }
       } catch (err) {
-        els.helperStatus.textContent = `Diagnose unavailable: ${err.message}`;
+        els.helperStatus.textContent = "Helper status needs another moment.";
       }
       try {
         const cfg = await authFetch("/settings/mcp-config");
         els.mcpConfig.value = cfg.raw || JSON.stringify(cfg.claude_desktop || cfg, null, 2);
       } catch (err) {
-        els.mcpConfig.value = `MCP config unavailable: ${err.message}`;
+        els.mcpConfig.value = "Agent config needs another moment.";
       }
       renderTopics(state.settings && Array.isArray(state.settings.topics) ? state.settings.topics : []);
       await Promise.all([loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites()]);
@@ -4959,14 +5546,286 @@
         : emptyPanelRow("Features list unavailable.", "Check uoink.app/features.");
     }
 
+    function writingRowId(row) {
+      return String(row && (row.id || videoIdOf(row) || row.folder || sourceUrlOf(row) || row.slug) || "");
+    }
+
+    function writingSourceSubtitle(row) {
+      return [firstValue(row && row.channel, row && row.host, row && row.podcast_title), row && row.topic, fmtDuration(durationOf(row))]
+        .filter((value) => value && value !== "--:--")
+        .join(" | ");
+    }
+
+    function sourceThumbnailPath(row) {
+      return String(row && (row.thumbnail_path || row.thumbnail || row.poster_path) || "");
+    }
+
     function syncWritingSourceOptions() {
       const rows = state.library.slice(0, 80);
-      els.writingSource.innerHTML = rows.length
-        ? `<option value="">Source: choose a uoink</option>` + rows.map((row) => {
-          const id = row.id || videoIdOf(row) || row.folder || row.source_url || "";
-          return `<option value="${htmlEscape(id)}">${htmlEscape(rowTitle(row))}</option>`;
+      const current = els.writingSource.value;
+      const query = String(els.writingSourceSearch.value || "").toLowerCase();
+      const filtered = rows.filter((row) => {
+        const haystack = `${rowTitle(row)} ${writingSourceSubtitle(row)} ${sourceUrlOf(row)}`.toLowerCase();
+        return !query || haystack.includes(query);
+      });
+      els.writingSourceOptions.innerHTML = filtered.length
+        ? filtered.slice(0, 20).map((row) => {
+          const id = writingRowId(row);
+          const thumb = sourceThumbnailPath(row);
+          return `
+            <button class="combo-option" type="button" role="option" data-writing-source-id="${htmlEscape(id)}">
+              <span class="combo-thumb">${thumb ? `<img alt="" class="hidden" data-file-img="${htmlEscape(thumb)}">` : ""}</span>
+              <span>
+                <strong>${htmlEscape(rowTitle(row))}</strong>
+                <span class="job-sub">${htmlEscape(writingSourceSubtitle(row) || platformChipLabel(platformOf(row)))}</span>
+              </span>
+            </button>
+          `;
         }).join("")
-        : `<option value="">Source: load Library first</option>`;
+        : `<div class="job-row"><div class="job-title">${rows.length ? "No matching uoinks." : "Load Library first."}</div><div class="job-sub">Saved sources appear here with thumbnails.</div></div>`;
+      const selected = rows.find((row) => writingRowId(row) === current) || rows[0] || null;
+      if (!current && selected) {
+        state.writingSelectedSourceRow = selected;
+        els.writingSource.value = writingRowId(selected);
+        els.writingSourceSearch.value = rowTitle(selected);
+      } else if (current) {
+        state.writingSelectedSourceRow = rows.find((row) => writingRowId(row) === current) || state.writingSelectedSourceRow;
+      }
+      updateWritingAttribution();
+      loadDetailFileImages();
+    }
+
+    async function selectWritingSourceById(id) {
+      const row = state.library.find((item) => writingRowId(item) === id);
+      if (!row) return;
+      state.writingSelectedSourceRow = row;
+      els.writingSource.value = writingRowId(row);
+      els.writingSourceSearch.value = rowTitle(row);
+      document.getElementById("writingSourceCombo").classList.remove("open");
+      els.writingSourceSearch.setAttribute("aria-expanded", "false");
+      updateWritingAttribution();
+      await loadWritingScreenshots();
+    }
+
+    function toggleWritingSourceCombo(open) {
+      state.writingSourceComboOpen = open;
+      document.getElementById("writingSourceCombo").classList.toggle("open", open);
+      els.writingSourceSearch.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) syncWritingSourceOptions();
+    }
+
+    function writingAttributionLine(row = state.writingSelectedSourceRow) {
+      if (!row) return "Pick a source to build the credit line.";
+      const handle = firstValue(row.creator_handle, row.author_handle, row.channel_handle, row.channel, row.host, "the creator");
+      const creator = String(handle).startsWith("@") || handle === "the creator" ? handle : `@${String(handle).replace(/\s+/g, "")}`;
+      const url = sourceUrlOf(row);
+      return [`via ${creator}`, url, "uoink.app"].filter(Boolean).join(" · ");
+    }
+
+    function updateWritingAttribution() {
+      if (!els.writingAttributionLine) return;
+      els.writingAttributionLine.textContent = writingAttributionLine();
+    }
+
+    function selectedWritingMode() {
+      return selectedRadio("writingMode", "tweet");
+    }
+
+    function tweetLength(value) {
+      return Array.from(String(value || "")).length;
+    }
+
+    function splitDraftIntoTweets(value) {
+      const text = String(value || "").trim();
+      if (!text) return [writingAttributionLine()];
+      const pieces = text.split(/\n{2,}/).map((part) => part.trim()).filter(Boolean);
+      if (pieces.length > 1) return pieces.slice(0, 10);
+      const words = text.split(/\s+/);
+      const tweets = [];
+      let current = "";
+      for (const word of words) {
+        const next = current ? `${current} ${word}` : word;
+        if (tweetLength(next) > 260 && current) {
+          tweets.push(current);
+          current = word;
+        } else {
+          current = next;
+        }
+      }
+      if (current) tweets.push(current);
+      return tweets.slice(0, 10);
+    }
+
+    function updateWritingComposerFromText(text) {
+      const mode = selectedWritingMode();
+      const raw = String(text || "").trim();
+      if (mode === "blog") {
+        state.writingDrafts = [raw || writingAttributionLine()];
+      } else if (mode === "thread") {
+        state.writingDrafts = splitDraftIntoTweets(raw);
+      } else {
+        state.writingDrafts = [raw || writingAttributionLine()];
+      }
+      renderThreadBuilder();
+      updateWritingAttribution();
+    }
+
+    function renderThreadBuilder() {
+      if (!els.threadBuilder) return;
+      const mode = selectedWritingMode();
+      const drafts = state.writingDrafts.length ? state.writingDrafts : [writingAttributionLine()];
+      els.threadBuilder.innerHTML = drafts.map((draft, index) => {
+        const count = tweetLength(draft);
+        const over = mode !== "blog" && count > 280;
+        const label = mode === "blog" ? "Blog markdown" : mode === "thread" ? `Tweet ${index + 1}` : "Tweet";
+        return `
+          <div class="tweet-card ${over ? "over" : ""}" data-thread-card="${index}">
+            <div class="tweet-top">
+              <span>${htmlEscape(label)}</span>
+              <span class="char-count ${over ? "over" : ""}">${count}${mode === "blog" ? " chars" : "/280"}</span>
+            </div>
+            <textarea class="field tweet-text" data-thread-text="${index}" ${mode === "blog" ? "" : "maxlength=\"420\""}>${htmlEscape(draft)}</textarea>
+            ${over ? `<div class="job-error">This one is over 280 characters. Tighten it before opening X.</div>` : ""}
+          </div>
+        `;
+      }).join("");
+    }
+
+    function readThreadDrafts() {
+      state.writingDrafts = [...document.querySelectorAll("[data-thread-text]")]
+        .map((input) => input.value)
+        .filter((value, index) => index === 0 || String(value).trim());
+      renderThreadBuilder();
+    }
+
+    function syncThreadInput(input) {
+      const index = Number(input.dataset.threadText);
+      if (!Number.isFinite(index)) return;
+      state.writingDrafts[index] = input.value;
+      const card = input.closest(".tweet-card");
+      const countEl = card && card.querySelector(".char-count");
+      const count = tweetLength(input.value);
+      const over = selectedWritingMode() !== "blog" && count > 280;
+      if (countEl) {
+        countEl.textContent = selectedWritingMode() === "blog" ? `${count} chars` : `${count}/280`;
+        countEl.classList.toggle("over", over);
+      }
+      if (card) card.classList.toggle("over", over);
+    }
+
+    function currentWritingText() {
+      const drafts = state.writingDrafts.length ? state.writingDrafts : [els.writingOutput.dataset.rawText || ""];
+      if (selectedWritingMode() === "blog") return blogMarkdownWithScreenshots(drafts[0] || "");
+      return selectedWritingMode() === "thread" ? drafts.join("\n\n") : drafts[0] || "";
+    }
+
+    async function copyWritingText() {
+      try {
+        await navigator.clipboard.writeText(currentWritingText());
+        showToast("Writing copied.");
+      } catch (_) {
+        showToast("Could not copy writing.");
+      }
+    }
+
+    function screenshotLabel(shot) {
+      return firstValue(shot.label, shot.timestamp, fmtTimestamp(shot.start || shot.time || 0), "screenshot");
+    }
+
+    async function loadWritingScreenshots() {
+      const row = state.writingSelectedSourceRow;
+      state.writingScreenshots = [];
+      state.writingSelectedScreenshots = new Set();
+      if (!row) {
+        renderWritingScreenshots();
+        return;
+      }
+      const sidecarPath = sidecarPathForRow(row);
+      let sidecar = {};
+      if (sidecarPath) {
+        try {
+          sidecar = await loadJsonFile(sidecarPath);
+        } catch (_) {
+          sidecar = {};
+        }
+      }
+      const shots = Array.isArray(sidecar.screenshots) ? sidecar.screenshots : [];
+      state.writingScreenshots = shots.map((shot, index) => ({
+        ...shot,
+        id: `${index}:${screenshotPath(row, shot)}`,
+        path: screenshotPath(row, shot),
+        label: screenshotLabel(shot),
+      })).filter((shot) => shot.path);
+      if (state.settings && state.settings.writing_default_attach_all_screenshots) {
+        state.writingScreenshots.forEach((shot) => state.writingSelectedScreenshots.add(shot.id));
+      }
+      renderWritingScreenshots();
+    }
+
+    function renderWritingScreenshots() {
+      if (!els.writingScreenshotPanel) return;
+      const showPicker = !state.settings || state.settings.writing_show_screenshot_picker !== false;
+      els.writingScreenshotPanel.classList.toggle("hidden", !showPicker);
+      els.writingPickScreenshots.checked = showPicker;
+      if (!showPicker) return;
+      const shots = state.writingScreenshots;
+      els.writingScreenshotSummary.textContent = shots.length
+        ? `${shots.length} screenshot${shots.length === 1 ? "" : "s"} from this source. Default attach all is off.`
+        : "Screenshots appear here when the source has local frames.";
+      els.writingScreenshotPicker.innerHTML = shots.length
+        ? shots.map((shot) => {
+          const checked = state.writingSelectedScreenshots.has(shot.id);
+          return `
+            <div class="screenshot-choice ${checked ? "selected" : ""}">
+              <img alt="" class="hidden" data-file-img="${htmlEscape(shot.path)}">
+              <label>
+                <span><input type="checkbox" data-writing-shot="${htmlEscape(shot.id)}" ${checked ? "checked" : ""}> ${htmlEscape(shot.label)}</span>
+                <span>${htmlEscape(basenameOf(shot.path))}</span>
+              </label>
+            </div>
+          `;
+        }).join("")
+        : emptyPanelRow("No screenshots on this source yet.", "Use Re-uoink source if you want fresh screenshots for the post.");
+      loadDetailFileImages();
+    }
+
+    function selectedWritingScreenshots() {
+      return state.writingScreenshots.filter((shot) => state.writingSelectedScreenshots.has(shot.id));
+    }
+
+    function blogMarkdownWithScreenshots(body) {
+      const text = String(body || "").trim();
+      const embeds = selectedWritingScreenshots()
+        .map((shot) => `![${screenshotLabel(shot)}](${shot.path})`)
+        .join("\n\n");
+      return [text, embeds].filter(Boolean).join("\n\n");
+    }
+
+    function renderWritingHandoff(shots) {
+      els.writingHandoffShots.innerHTML = shots.length
+        ? shots.map((shot) => `
+          <div class="handoff-shot ${state.writingUsedScreenshots.has(shot.id) ? "used" : ""}" draggable="true" data-handoff-shot="${htmlEscape(shot.id)}">
+            <img alt="" class="hidden" data-file-img="${htmlEscape(shot.path)}">
+            <div class="handoff-shot-meta">
+              <strong>${htmlEscape(shot.label)}</strong>
+              <span>${htmlEscape(shot.path)}</span>
+              <button class="button ghost" type="button" data-mark-shot-used="${htmlEscape(shot.id)}">Mark dragged</button>
+            </div>
+          </div>
+        `).join("")
+        : emptyPanelRow("No screenshots selected.", "Open X with text only, or select screenshots first.");
+      els.writingHandoffPopup.classList.remove("hidden");
+      loadDetailFileImages();
+    }
+
+    function openWritingInX() {
+      const drafts = state.writingDrafts.length ? state.writingDrafts : [currentWritingText()];
+      const over = selectedWritingMode() !== "blog" && drafts.some((tweet) => tweetLength(tweet) > 280);
+      if (over) return showToast("Tighten the over-280 tweet before opening X.");
+      const text = selectedWritingMode() === "thread" ? drafts[0] : currentWritingText();
+      if (!String(text).trim()) return showToast("Write or generate a draft first.");
+      openExternal(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`);
+      renderWritingHandoff(selectedWritingScreenshots());
     }
 
     function selectedRadio(name, fallback) {
@@ -4977,6 +5836,10 @@
       syncWritingSourceOptions();
       await loadStyleAnchors();
       els.writingNavCount.textContent = String(state.writingPieces.length || state.styleAnchors.length);
+      renderSuggestionDatalists();
+      renderThreadBuilder();
+      updateWritingAttribution();
+      await loadWritingScreenshots();
     }
 
     async function loadStyleAnchors() {
@@ -4985,7 +5848,7 @@
         state.styleAnchors = data.anchors || data.style_anchors || [];
       } catch (err) {
         state.styleAnchors = [];
-        els.styleAnchorPreview.textContent = `Style anchors are coming with CC's backend update: ${err.message}`;
+        els.styleAnchorPreview.textContent = "Style anchors need the helper to answer before previews appear.";
       }
       renderStyleAnchors();
     }
@@ -4995,7 +5858,7 @@
     }
 
     function renderStyleAnchors() {
-      els.writingAnchorCount.textContent = `${state.styleAnchors.length}/10`;
+      els.writingAnchorCount.textContent = `${state.styleAnchors.length}/10 anchors`;
       const rows = state.styleAnchors.length
         ? state.styleAnchors.map((anchor) => {
           const id = anchorId(anchor);
@@ -5013,7 +5876,7 @@
             </label>
           `;
         }).join("")
-        : `<div class="job-row"><div class="job-title">No style anchors yet.</div><div class="job-sub">Add a URL or writing sample when the Writing Studio backend is live.</div></div>`;
+        : `<div class="job-row"><div class="job-title">No style anchors yet.</div><div class="job-sub">Add a URL or writing sample when the helper is ready.</div></div>`;
       els.writingAnchorList.innerHTML = rows;
       els.styleAnchorManager.innerHTML = state.styleAnchors.length
         ? state.styleAnchors.map((anchor) => {
@@ -5064,7 +5927,7 @@
         });
         els.styleAnchorPreview.textContent = (data.markdown || data.text || data.title || "No prose returned.").slice(0, 1200);
       } catch (err) {
-        els.styleAnchorPreview.textContent = `URL preview is coming with CC's crawler endpoint: ${err.message}`;
+        els.styleAnchorPreview.textContent = "URL preview needs the page reader to answer. Try again in a moment.";
       }
     }
 
@@ -5095,7 +5958,7 @@
         showToast("Style anchor saved.");
         await loadStyleAnchors();
       } catch (err) {
-        showToast(`Style anchors are coming with CC's backend update: ${err.message}`);
+        showToast("Style anchor could not be saved yet.");
       }
     }
 
@@ -5106,7 +5969,7 @@
       els.styleAnchorValue.value = button.dataset.anchorValue || "";
       els.styleAnchorActive.checked = button.dataset.anchorActive !== "false";
       document.getElementById("addStyleAnchor").textContent = "Save anchor";
-      els.styleAnchorPreview.textContent = "Editing anchor metadata. Source replacement stays with the backend contract.";
+      els.styleAnchorPreview.textContent = "Editing anchor name and active state.";
     }
 
     async function removeStyleAnchor(id) {
@@ -5116,14 +5979,14 @@
         showToast("Style anchor removed.");
         await loadStyleAnchors();
       } catch (err) {
-        showToast(`Could not remove anchor: ${err.message}`);
+        showToast("Style anchor could not be removed yet.");
       }
     }
 
     function unpackMcpToolPayload(data) {
-      if (data && data.error) throw new Error(data.error.message || "MCP tool failed.");
+      if (data && data.error) throw new Error(data.error.message || "agent tool failed.");
       const result = data && data.result ? data.result : data;
-      if (!result) throw new Error("MCP tool returned an empty response.");
+      if (!result) throw new Error("agent tool returned an empty response.");
       if (result.structuredContent) return result.structuredContent;
       if (result.structured_content) return result.structured_content;
       const textBlock = Array.isArray(result.content)
@@ -5161,9 +6024,10 @@
     function writingCreditLine(context, modeOrKind) {
       const mode = modeOrKind === "blog" ? "blog" : modeOrKind === "thread" ? "thread" : "tweet";
       const credits = context && context.source_credit;
-      return (context && context.source_credit_line)
+      const line = (context && context.source_credit_line)
         || (credits && (credits[mode] || credits.tweet || credits.blog))
         || "";
+      return line && !String(line).includes("uoink.app") ? `${line} · uoink.app` : line;
     }
 
     function renderWritingGrounding(piece) {
@@ -5174,18 +6038,15 @@
       const anchorLine = Array.isArray(anchors) && anchors.length
         ? `${anchors.length} style anchor${anchors.length === 1 ? "" : "s"} included.`
         : "No style anchors included.";
-      const next = piece.next || "A connected agent writes the body from this grounding, then calls the same MCP tool with body text to save it.";
-      els.writingOutput.textContent = [
-        "MCP grounding ready.",
+      const next = piece.next || "An agent writes the body from this grounding, then saves the draft with the same source credit.";
+      setWritingOutput([
+        "Grounding is ready.",
         sourceTitle ? `Source: ${sourceTitle}` : "",
-        credit ? `Credit: ${credit}` : "",
+        credit ? `Credit: ${credit}` : `Credit: ${writingAttributionLine()}`,
         anchorLine,
         "",
-        next,
-        "",
-        "Raw grounding",
-        JSON.stringify(context, null, 2),
-      ].filter(Boolean).join("\n");
+        next.replace(/^A connected agent/, "An agent").replace(/MCP tool/gi, "agent tool"),
+      ].filter(Boolean).join("\n"));
       els.voiceWarningCopy.textContent = "No Voice DNA scan runs until the connected agent returns a body.";
     }
 
@@ -5199,10 +6060,11 @@
       const body = piece.body || piece.markdown || piece.text || piece.tweet || (Array.isArray(piece.thread) ? piece.thread.join("\n\n") : "");
       const title = piece.title ? `${piece.title}\n\n` : "";
       const dek = piece.dek ? `${piece.dek}\n\n` : "";
-      const credit = piece.creator_credit || piece.source_credit_line || piece.credit || "";
-      const renderedBody = body || JSON.stringify(piece, null, 2);
+      let credit = piece.creator_credit || piece.source_credit_line || piece.credit || writingAttributionLine();
+      if (credit && !String(credit).includes("uoink.app")) credit = `${credit} · uoink.app`;
+      const renderedBody = body || objectToMarkdown(piece);
       const needsCredit = credit && !String(renderedBody).includes(String(credit).trim());
-      els.writingOutput.textContent = `${title}${dek}${renderedBody}${needsCredit ? `\n\n${credit}` : ""}`;
+      setWritingOutput(`${title}${dek}${renderedBody}${needsCredit ? `\n\n${credit}` : ""}`);
       const warnings = piece.voice_warnings || data.voice_warnings || [];
       const warningCopy = piece.warning_copy || data.warning_copy || "Uoink found no Voice DNA warnings in the returned payload.";
       els.voiceWarningCopy.textContent = warnings.length
@@ -5242,7 +6104,7 @@
         voice_dna_warnings_enabled: Boolean(els.writingShowWarnings.checked && !els.writingSkipWarnings.checked),
         skip_voice_dna_this_time: Boolean(els.writingSkipWarnings.checked),
       };
-      els.writingOutput.textContent = "Calling MCP writing tool...";
+      setWritingOutput("Writing draft is being prepared...");
       try {
         const data = await callMcpTool(toolName, body);
         if (data.mode === "grounding_only") {
@@ -5260,9 +6122,10 @@
           }
         }
         renderWritingResult(data);
-        showToast(data.mode === "grounding_only" ? "MCP grounding ready." : "Writing draft ready.");
+        showToast(data.mode === "grounding_only" ? "Grounding ready." : "Writing draft ready.");
       } catch (err) {
-        els.writingOutput.textContent = `Writing Studio could not call ${toolName}.\n\nTool arguments:\n${JSON.stringify(body, null, 2)}\n\nCurrent helper response: ${err.message}`;
+        els.writingOutput.innerHTML = degradedState("Writing Studio needs another pass.", "The helper could not prepare this draft. Details are tucked below.", err.message);
+        els.writingOutput.dataset.rawText = "";
       }
     }
 
@@ -5273,7 +6136,7 @@
         els.channelsStatus.textContent = `${state.channels.length} channel${state.channels.length === 1 ? "" : "s"} registered.`;
       } catch (err) {
         state.channels = [];
-        els.channelsStatus.textContent = `Channels unavailable: ${err.message}`;
+        els.channelsStatus.textContent = "Channels need another moment.";
       }
       renderChannels();
     }
@@ -5310,7 +6173,7 @@
         showToast("Channel added.");
         await loadChannels();
       } catch (err) {
-        showToast(`Could not add channel: ${err.message}`);
+        showToast("Could not add that channel.");
       }
     }
 
@@ -5320,7 +6183,7 @@
         showToast("Channel verified.");
         await loadChannels();
       } catch (err) {
-        showToast(`Could not verify channel: ${err.message}`);
+        showToast("Could not verify that channel.");
       }
     }
 
@@ -5330,7 +6193,7 @@
         showToast("Channel removed.");
         await loadChannels();
       } catch (err) {
-        showToast(`Could not remove channel: ${err.message}`);
+        showToast("Could not remove that channel.");
       }
     }
 
@@ -5340,7 +6203,7 @@
         showToast(`Recognition updated ${data.updated || data.tagged || 0} uoinks.`);
         await loadChannels();
       } catch (err) {
-        showToast(`Could not recognize past uoinks: ${err.message}`);
+        showToast("Could not recognize past uoinks yet.");
       }
     }
 
@@ -5359,7 +6222,7 @@
         els.allowedSitesStatus.textContent = `${state.allowedSites.length} user-added site${state.allowedSites.length === 1 ? "" : "s"}.`;
       } catch (err) {
         state.allowedSites = [];
-        els.allowedSitesStatus.textContent = `Universal site uoinking is coming with CC's backend update: ${err.message}`;
+        els.allowedSitesStatus.textContent = "Extra site permissions need the helper to answer first.";
       }
       renderAllowedSites();
     }
@@ -5382,7 +6245,7 @@
             </div>
           `;
         }).join("")
-        : emptyPanelRow("No extra sites yet.", "Defaults are already listed above. Add a domain when the universal-site backend lands.");
+        : emptyPanelRow("No extra sites yet.", "Defaults are already listed above. Add a domain when page capture is ready.");
     }
 
     async function addAllowedSite() {
@@ -5397,7 +6260,7 @@
         showToast("Site enabled.");
         await loadAllowedSites();
       } catch (err) {
-        showToast(`Universal site uoinking is coming with CC's backend update: ${err.message}`);
+        showToast("Could not add that site yet.");
       }
     }
 
@@ -5410,7 +6273,7 @@
         showToast("Site removed.");
         await loadAllowedSites();
       } catch (err) {
-        showToast(`Could not remove site: ${err.message}`);
+        showToast("Could not remove that site.");
       }
     }
 
@@ -5474,7 +6337,7 @@
         els.playlistStatus.textContent = `${state.mobilePlaylists.length} monitored playlist${state.mobilePlaylists.length === 1 ? "" : "s"}`;
       } catch (err) {
         state.mobilePlaylists = [];
-        els.playlistStatus.textContent = `Playlist monitor unavailable: ${err.message}`;
+        els.playlistStatus.textContent = "Playlist monitor needs another moment.";
       }
       renderPlaylistList(state.mobilePlaylists);
     }
@@ -5486,7 +6349,7 @@
         els.podcastFeedStatus.textContent = `${state.podcastFeeds.length} configured feed${state.podcastFeeds.length === 1 ? "" : "s"}`;
       } catch (err) {
         state.podcastFeeds = [];
-        els.podcastFeedStatus.textContent = `Podcast feeds unavailable: ${err.message}`;
+        els.podcastFeedStatus.textContent = "Podcast feeds need another moment.";
       }
       renderPodcastFeedList(state.podcastFeeds);
     }
@@ -5503,7 +6366,7 @@
         showToast("Playlist monitor added.");
         loadPlaylistSettings();
       } catch (err) {
-        showToast(`Could not add playlist: ${err.message}`);
+        showToast("Could not add that playlist.");
       }
     }
 
@@ -5519,7 +6382,7 @@
         showToast("Podcast feed added.");
         loadPodcastFeedSettings();
       } catch (err) {
-        showToast(`Could not add feed: ${err.message}`);
+        showToast("Could not add that feed.");
       }
     }
 
@@ -5544,7 +6407,7 @@
         showToast(successMessage);
         refreshSettings();
       } catch (err) {
-        showToast(`Could not save settings: ${err.message}`);
+        showToast("Could not save settings yet.");
       }
     }
 
@@ -5557,7 +6420,7 @@
         showToast("Key saved to Credential Manager.");
         refreshSettings();
       } catch (err) {
-        showToast(`Could not save key: ${err.message}`);
+        showToast("Could not save that key.");
       }
     }
 
@@ -5566,7 +6429,7 @@
         await authFetch("/settings/test-key", { method: "POST", body: JSON.stringify({}) });
         showToast("Anthropic key test passed.");
       } catch (err) {
-        showToast(`Key test failed: ${err.message}`);
+        showToast("Key test failed.");
       }
     }
 
@@ -5577,8 +6440,8 @@
         refreshQueue();
       } catch (err) {
         showToast(err.message.includes("not found")
-          ? "This helper action lands in CC's Tier 2 backend branch."
-          : err.message);
+          ? "This helper action is not ready in this build."
+          : "This helper action could not run.");
       }
     }
 
@@ -5592,7 +6455,7 @@
         refreshSettings();
       } catch (err) {
         if (!err.message.includes("not found") && !err.message.includes("404")) {
-          showToast(`Could not save output folder: ${err.message}`);
+          showToast("Could not save that output folder.");
           return;
         }
         await saveSettingsPatch({ output_dir: outputDir }, "Output folder updated.");
@@ -5601,7 +6464,7 @@
         const cfg = await authFetch("/settings/mcp-config");
         els.mcpConfig.value = cfg.raw || JSON.stringify(cfg.claude_desktop || cfg, null, 2);
       } catch (err) {
-        els.mcpConfig.value = `MCP config unavailable: ${err.message}`;
+        els.mcpConfig.value = "Agent config needs another moment.";
       }
       renderTopics(state.settings && Array.isArray(state.settings.topics) ? state.settings.topics : []);
     }
@@ -5617,8 +6480,8 @@
         refreshActivity();
       } catch (err) {
         showToast(err.message.includes("not found")
-          ? "Retry-with-cookies needs the helper retry endpoint."
-          : `Could not retry: ${err.message}`);
+          ? "Retry-with-cookies is not ready in this build."
+          : "Could not queue that retry.");
       }
     }
 
@@ -5640,6 +6503,7 @@
       if (tab === "writing") loadWriting();
       if (tab === "evidence") loadEvidence();
       if (tab === "yoink") renderYoinkDetail();
+      if (tab === "sources") renderSources();
       if (tab === "activity") refreshActivity();
       if (tab === "settings") refreshSettings();
       if (tab === "features") loadFeatures();
@@ -5703,20 +6567,49 @@
       document.getElementById("reloadWriting").addEventListener("click", loadWriting);
       document.getElementById("generateWriting").addEventListener("click", generateWriting);
       document.getElementById("regenerateWriting").addEventListener("click", generateWriting);
-      document.getElementById("copyWriting").addEventListener("click", async () => {
-        try { await navigator.clipboard.writeText(els.writingOutput.textContent || ""); showToast("Writing copied."); }
-        catch (_) { showToast("Could not copy writing."); }
-      });
-      document.getElementById("saveWriting").addEventListener("click", () => showToast("Save lands with CC's Writing Studio endpoint."));
-      document.getElementById("reviseWriting").addEventListener("click", () => showToast("Revise lands with CC's Writing Studio endpoint."));
+      document.getElementById("copyWriting").addEventListener("click", copyWritingText);
+      document.getElementById("saveWriting").addEventListener("click", () => showToast("Save is not wired in this build yet."));
+      document.getElementById("reviseWriting").addEventListener("click", () => showToast("Revise is not wired in this build yet."));
       document.getElementById("useWritingAsIs").addEventListener("click", () => showToast("Marked for use in this session."));
       document.getElementById("writingSettingsLink").addEventListener("click", () => switchTab("settings"));
+      els.writingSourceSearch.addEventListener("focus", () => toggleWritingSourceCombo(true));
+      els.writingSourceSearch.addEventListener("input", () => {
+        toggleWritingSourceCombo(true);
+        syncWritingSourceOptions();
+      });
+      els.writingModePicker.addEventListener("change", () => updateWritingComposerFromText(els.writingOutput.dataset.rawText || currentWritingText()));
+      document.getElementById("addThreadTweet").addEventListener("click", () => {
+        state.writingDrafts.push(writingAttributionLine());
+        renderThreadBuilder();
+      });
+      document.getElementById("splitWritingDraft").addEventListener("click", () => updateWritingComposerFromText(els.writingOutput.dataset.rawText || currentWritingText()));
+      document.getElementById("openWritingInX").addEventListener("click", openWritingInX);
+      document.getElementById("copyWritingAttribution").addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(writingAttributionLine()); showToast("Credit copied."); }
+        catch (_) { showToast("Could not copy credit."); }
+      });
+      document.getElementById("refreshWritingScreenshots").addEventListener("click", loadWritingScreenshots);
+      document.getElementById("reYoinkWritingSource").addEventListener("click", async () => {
+        const url = sourceUrlOf(state.writingSelectedSourceRow);
+        if (!url) return showToast("No source URL stored for this uoink.");
+        try {
+          await authFetch("/extract", { method: "POST", body: JSON.stringify({ url }) });
+          showToast("Re-uoink queued.");
+          refreshActivity();
+        } catch (err) {
+          showToast(translateMachineMessage(err.message, { url }));
+        }
+      });
+      els.writingPickScreenshots.addEventListener("change", () => {
+        saveSettingsPatch({ writing_show_screenshot_picker: els.writingPickScreenshots.checked }, "Screenshot picker setting updated.");
+      });
+      document.getElementById("closeWritingHandoff").addEventListener("click", () => els.writingHandoffPopup.classList.add("hidden"));
       document.getElementById("previewStyleAnchor").addEventListener("click", previewStyleAnchor);
       document.getElementById("addStyleAnchor").addEventListener("click", addStyleAnchor);
       document.getElementById("reloadEvidence").addEventListener("click", loadEvidence);
       els.yoinkOpenFolder.addEventListener("click", () => {
         const folder = folderPathOf(state.selectedYoink);
-        if (folder) authFetch(`/open-folder?path=${encodeURIComponent(folder)}`).catch((err) => showToast(err.message));
+        if (folder) authFetch(`/open-folder?path=${encodeURIComponent(folder)}`).catch(() => showToast("Could not open that folder."));
       });
       els.yoinkRetranscribe.addEventListener("click", requestRetranscription);
       els.yoinkEvidence.addEventListener("click", () => {
@@ -5744,7 +6637,7 @@
       document.getElementById("saveKey").addEventListener("click", saveKey);
       document.getElementById("testKey").addEventListener("click", testKey);
       document.getElementById("copyMcp").addEventListener("click", async () => {
-        try { await navigator.clipboard.writeText(els.mcpConfig.value); showToast("MCP config copied."); }
+        try { await navigator.clipboard.writeText(els.mcpConfig.value); showToast("Agent config copied."); }
         catch (_) { showToast("Could not copy config."); }
       });
       document.getElementById("checkUpdates").addEventListener("click", async () => {
@@ -5756,7 +6649,7 @@
             : `No update available. Checked ${checked}.`;
           if (data.url) showToast("Update check complete. Open the About tab for release links.");
         } catch (err) {
-          els.updateLine.textContent = `Update check unavailable: ${err.message}`;
+          els.updateLine.textContent = "Update check needs another moment.";
         }
       });
       document.getElementById("stopHelper").addEventListener("click", () => postHelper("/helper/quit"));
@@ -5778,6 +6671,12 @@
       els.voiceWarningsPerGeneration.addEventListener("change", () => {
         saveSettingsPatch({ voice_dna_show_per_generation_toggle: els.voiceWarningsPerGeneration.checked }, "Writing warning control updated.");
       });
+      els.writingScreenshotPickerToggle.addEventListener("change", () => {
+        saveSettingsPatch({ writing_show_screenshot_picker: els.writingScreenshotPickerToggle.checked }, "Screenshot picker setting updated.");
+      });
+      els.writingDefaultAttachAll.addEventListener("change", () => {
+        saveSettingsPatch({ writing_default_attach_all_screenshots: els.writingDefaultAttachAll.checked }, "Screenshot default updated.");
+      });
       els.writingShowWarnings.addEventListener("change", () => {
         if (!els.writingShowWarnings.checked) els.voiceWarningCopy.textContent = "Warnings are hidden for this session.";
       });
@@ -5796,8 +6695,8 @@
           showToast("Whisper model downloaded.");
           refreshSettings();
         } catch (err) {
-          els.reliabilityStatus.textContent = `Model download failed: ${err.message}`;
-          showToast(`Could not download model: ${err.message}`);
+          els.reliabilityStatus.textContent = "Model download failed.";
+          showToast("Could not download model.");
         } finally {
           els.downloadReliabilityModel.disabled = false;
         }
@@ -5806,12 +6705,12 @@
       document.getElementById("saveScreenshotCount").addEventListener("click", () => {
         const value = Math.max(0, Math.min(12, Number(els.screenshotCount.value || 4)));
         els.screenshotCount.value = String(value);
-        saveSettingsPatch({ screenshot_count: value }, "Clipboard screenshot count updated.");
+        saveSettingsPatch({ clipboard_screenshot_cap: value }, "Clipboard screenshot count updated.");
       });
       document.getElementById("openOutput").addEventListener("click", () => {
         const path = els.outputFolder.value;
         if (path && !path.includes("unavailable")) {
-          authFetch(`/open-folder?path=${encodeURIComponent(path)}`).catch((err) => showToast(err.message));
+          authFetch(`/open-folder?path=${encodeURIComponent(path)}`).catch(() => showToast("Could not open that folder."));
         }
       });
       document.getElementById("addTopic").addEventListener("click", () => {
@@ -5832,6 +6731,27 @@
         });
       });
       document.addEventListener("click", (event) => {
+        const sourceOption = event.target.closest("[data-writing-source-id]");
+        if (sourceOption) {
+          selectWritingSourceById(sourceOption.dataset.writingSourceId);
+          return;
+        }
+        if (!event.target.closest("#writingSourceCombo")) {
+          toggleWritingSourceCombo(false);
+        }
+        const shotToggle = event.target.closest("[data-writing-shot]");
+        if (shotToggle) {
+          if (shotToggle.checked) state.writingSelectedScreenshots.add(shotToggle.dataset.writingShot);
+          else state.writingSelectedScreenshots.delete(shotToggle.dataset.writingShot);
+          renderWritingScreenshots();
+          return;
+        }
+        const markShot = event.target.closest("[data-mark-shot-used]");
+        if (markShot) {
+          state.writingUsedScreenshots.add(markShot.dataset.markShotUsed);
+          renderWritingHandoff(selectedWritingScreenshots());
+          return;
+        }
         const verifyClaim = event.target.closest("[data-verify-claim]");
         if (verifyClaim) {
           recordClaimEvidence(verifyClaim.dataset.verifyClaim);
@@ -5848,7 +6768,7 @@
           return;
         }
         const openPath = event.target.closest("[data-open-path]");
-        if (openPath) authFetch(`/open-folder?path=${encodeURIComponent(openPath.dataset.openPath)}`).catch((err) => showToast(err.message));
+        if (openPath) authFetch(`/open-folder?path=${encodeURIComponent(openPath.dataset.openPath)}`).catch(() => showToast("Could not open that folder."));
         const gap = event.target.closest("[data-gap-topic]");
         if (gap) {
           els.topicFilter.value = gap.dataset.gapTopic || "";
@@ -5891,6 +6811,20 @@
           const topics = readTopicEditor();
           topics.splice(Number(removeTopic.dataset.removeTopic), 1);
           renderTopics(topics);
+        }
+      });
+      document.addEventListener("input", (event) => {
+        const threadInput = event.target.closest("[data-thread-text]");
+        if (threadInput) syncThreadInput(threadInput);
+      });
+      document.addEventListener("dragstart", (event) => {
+        const shot = event.target.closest("[data-handoff-shot]");
+        if (!shot) return;
+        const item = state.writingScreenshots.find((row) => row.id === shot.dataset.handoffShot);
+        if (item && event.dataTransfer) {
+          event.dataTransfer.setData("text/plain", item.path);
+          state.writingUsedScreenshots.add(item.id);
+          setTimeout(() => renderWritingHandoff(selectedWritingScreenshots()), 80);
         }
       });
       window.addEventListener("beforeunload", revokeThumbs);
@@ -5974,6 +6908,7 @@
       await loadBuild();
       await loadScripts();
       await loadWriting();
+      renderSources();
       await loadFeatures();
       await refreshActivity();
       connectJobsStream();
