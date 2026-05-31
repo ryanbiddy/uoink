@@ -1,52 +1,52 @@
 [
   {
     "id": "default-naval",
-    "name": "Naval - Aphorism Threads",
+    "name": "Naval Ravikant: Aphorism Threads",
     "source_type": "text",
     "source_url": "https://x.com/naval",
-    "raw_text": "[Default sample pending AG curation. Final curated tweets land via handoff/defaults/style_anchors.json before the v3.2.3 release build.]",
+    "raw_text": "Seek wealth, not money or status. Wealth is having assets that earn while you sleep. Money is how we transfer time and wealth. Status is your place in the social hierarchy.\n\nUnderstand that ethical wealth creation is possible. If you secretly despise wealth, it will elude you.\n\nYou’re not going to get rich renting out your time. You must own equity - a piece of a business - to gain your financial freedom.\n\nYou will get rich by giving society what it wants but does not yet know how to get. At scale.\n\nPlay long-term games with long-term people. All returns in life, whether in wealth, relationships, or knowledge, come from compound interest.\n\nArm yourself with specific knowledge, accountability, and leverage.\n\nSpecific knowledge is knowledge that you cannot be trained for. If society can train you, it can train someone else, and replace you.\n\nCode and media are permissionless leverage. They're the leverage behind the newly rich. You can create software and media that works for you while you sleep.\n\nLearn to sell. Learn to build. If you can do both, you will be unstoppable.\n\nIf you can't decide, the answer is no. If you have two choices and they're relatively equal, take the path that is more difficult in the short term.",
     "active": false,
     "default": true,
-    "credit": "Source: @naval on X. Sample curated for the default Uoink style anchor library."
+    "credit": "Source: @naval on X. Sample curated 2026-05-31 for default Uoink style anchor library."
   },
   {
-    "id": "default-pg",
-    "name": "Paul Graham - Plain Essay",
+    "id": "default-paulgraham",
+    "name": "Paul Graham: Plain Essay",
     "source_type": "text",
-    "source_url": "https://paulgraham.com",
-    "raw_text": "[Default sample pending AG curation. Final curated essay excerpt lands via handoff/defaults/style_anchors.json before the v3.2.3 release build.]",
+    "source_url": "https://paulgraham.com/simply.html",
+    "raw_text": "The main reason I write simply is that it offends me not to. When I write a sentence that seems too complicated, or that uses unnecessarily intellectual words, it doesn't seem fancy to me. It seems clumsy.\n\nI try to write using ordinary words and simple sentences. That kind of writing is easier to read, and the easier something is to read, the more deeply readers will engage with it. The less energy they expend on your prose, the more they'll have left for your ideas.\n\nOf course, fancy writing doesn't just conceal ideas. It can also conceal the lack of them. That's why some people write that way, to conceal the fact that they have nothing to say. Whereas writing simply keeps you honest. If you say nothing simply, it will be obvious to everyone, including you.\n\nPlus it's more considerate to write simply. When you write in a fancy way to impress people, you're making them do extra work just so you can seem cool. It's like trailing a long train behind you that readers have to carry.",
     "active": false,
     "default": true,
-    "credit": "Source: paulgraham.com. Sample curated for the default Uoink style anchor library."
+    "credit": "Source: Paul Graham at paulgraham.com. Sample curated 2026-05-31 for default Uoink style anchor library."
   },
   {
     "id": "default-swyx",
-    "name": "swyx - AI-Engineering Commentary",
+    "name": "swyx: AI-Engineering Commentary",
     "source_type": "text",
-    "source_url": "https://swyx.io",
-    "raw_text": "[Default sample pending AG curation. Final curated commentary lands via handoff/defaults/style_anchors.json before the v3.2.3 release build.]",
+    "source_url": "https://www.latent.space/p/rise-of-the-ai-engineer",
+    "raw_text": "Emergent capabilities are creating an emerging title: to wield them, we'll have to go beyond the Prompt Engineer and write software, and AI that writes software. We are observing a once in a generation “shift right” of applied AI, fueled by the emergent capabilities and open source/API availability of Foundation Models. A wide range of AI tasks that used to take 5 years and a research team to accomplish in 2013, now just require API docs and a spare afternoon in 2023.\n\nThe defining characteristic of this shift is that the API line is permeable. AI Engineers can go left to finetune and host models, while Research Engineers go right to build applications atop APIs. The engineering focus is not on training models from scratch, but rather on integrating them, designing systems like Retrieval-Augmented Generation, and building robust evaluation frameworks.\n\nIn the long run, the number of AI Engineers will far exceed the number of ML Engineers and researchers. This is because the barrier to entry is lower, focusing on shipping products and creating user experiences. You do not need a PhD in computer science to connect foundation models and build value. You just need to understand software engineering principles, latency, caching, and how to design a good user interface.",
     "active": false,
     "default": true,
-    "credit": "Source: @swyx (swyx.io). Sample curated for the default Uoink style anchor library."
+    "credit": "Source: @swyx on X and swyx.io. Sample curated 2026-05-31 for default Uoink style anchor library."
   },
   {
-    "id": "default-justin-welsh",
-    "name": "Justin Welsh - Solo Creator Playbook",
+    "id": "default-justinwelsh",
+    "name": "Justin Welsh: Solo Creator Playbook",
     "source_type": "text",
-    "source_url": "https://x.com/thejustinwelsh",
-    "raw_text": "[Default sample pending AG curation. Final curated posts land via handoff/defaults/style_anchors.json before the v3.2.3 release build.]",
+    "source_url": "https://www.justinwelsh.me",
+    "raw_text": "The content hamster wheel is where most creators go to die. They spend all their time chasing new ideas and publishing daily posts that disappear after 24 hours. This is a path to burnout, not a sustainable business. If you treat your content as disposable, your audience will treat it that way too.\n\nTo build a sustainable creator business, you must treat content as an asset. Shift your focus from volume to systems. My system is the Hub and Spoke model. I write one long-form newsletter once a week (the Hub). Then, I deconstruct that newsletter into 6 to 12 shorter social media posts (the Spokes) for LinkedIn and X.\n\nUse the 5-12-3 Rule for every piece of content you write:\n- 5 Seconds: Write a hook that grabs attention within five seconds.\n- 12 Months: Ensure the content is evergreen and remains valuable a year later.\n- 3 Platforms: Repurpose the content so it functions across at least three platforms.\n\nDon't be afraid to play the hits. When a post performs well, save it to a swipe file. Six months later, polish it, improve the hook, and publish it again. Your audience has grown, and most people didn't see it the first time anyway. Repurposing is not lazy; it is smart distribution. If you don't build leverage, you are just renting out your time.",
     "active": false,
     "default": true,
-    "credit": "Source: @thejustinwelsh on X / LinkedIn. Sample curated for the default Uoink style anchor library."
+    "credit": "Source: @thejustinwelsh on LinkedIn and X. Sample curated 2026-05-31 for default Uoink style anchor library."
   },
   {
-    "id": "default-george-mack",
-    "name": "George Mack - Mental Model Threads",
+    "id": "default-georgemack",
+    "name": "George Mack: Mental Model Threads",
     "source_type": "text",
     "source_url": "https://x.com/george__mack",
-    "raw_text": "[Default sample pending AG curation. Final curated threads land via handoff/defaults/style_anchors.json before the v3.2.3 release build.]",
+    "raw_text": "The Luck Razor: If stuck between two equal options, pick the one that feels like it will produce the most luck later down the line. Going for drinks with a stranger rather than watching Netflix was, in hindsight, my highest ROI decision.\n\nThe Bragging Razor: If someone brags about their success or happiness, assume it is half what they claim. If someone downplay their success or happiness, assume it is double what they claim.\n\nThe High Agency Razor: If unsure who to work with, pick the person who has the best chances of breaking you out of a third-world prison.\n\nThe Bezos Razor: If unsure what action to pick, let your 90-year-old self on their deathbed choose it. Regret minimization is the ultimate compass.\n\nThe Everyday Razor: If you go from doing a task weekly to daily, you achieve 7 years of output in 1 year. If you apply a 1% compound interest each time, you achieve 54 years of output in 1 year.\n\nThe Taxi Driver Test: If a taxi driver gives you stock advice, sell. If a taxi driver gives you cultural advice, buy. The edge is always where the experts aren't looking.\n\nDoublethink: The ability to hold two opposing views simultaneously is essential for success. Balance intense, aggressive focus with openness to complete serendipity. Maintain absolute humility while believing you are unstoppable.",
     "active": false,
     "default": true,
-    "credit": "Source: @george__mack on X. Sample curated for the default Uoink style anchor library."
+    "credit": "Source: @george__mack on X. Sample curated 2026-05-31 for default Uoink style anchor library."
   }
 ]
