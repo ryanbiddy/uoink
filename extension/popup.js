@@ -1958,7 +1958,7 @@ async function loadRecentUoinks() {
     title.textContent = r.title || "(untitled)";
     const meta = document.createElement("span");
     meta.className = "meta";
-    meta.textContent = r.topic || "—";
+    meta.textContent = r.topic || "-";
     text.appendChild(title);
     text.appendChild(meta);
     main.appendChild(text);

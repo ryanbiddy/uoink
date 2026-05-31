@@ -4,7 +4,7 @@
   "short_name": "Uoink",
   "version": "3.1.3",
   "description": "The YouTube layer for any AI. Transcripts, screenshots, and comments in one paste.",
-  "homepage_url": "https://uoink.video",
+  "homepage_url": "https://uoink.app",
   "permissions": ["alarms", "clipboardWrite", "notifications", "storage", "contextMenus", "activeTab", "offscreen"],
   "host_permissions": [
     "https://www.youtube.com/*",
