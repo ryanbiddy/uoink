@@ -8001,6 +8001,37 @@ class Handler(BaseHTTPRequestHandler):
             body, kind=writing_studio.KIND_BLOG)
         return self._send_json(status, resp)
 
+    def _handle_writing_compose_validate(self, body):
+        """POST /writing/compose/validate -- pure pre-publish computation for
+        the composer (D-19): per-tweet char counts, over-280 flags, thread
+        total, and the D-18 native-attribution footer preview. No
+        persistence, no LLM call; safe to call on every keystroke."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                         "error": "json object required"})
+        yoink_id = (body.get("source_yoink_id")
+                    or body.get("yoink_id") or "").strip() or None
+        kind = (body.get("kind") or writing_studio.KIND_TWEET).strip().lower()
+        tweets = body.get("tweets")
+        if tweets is not None and not isinstance(tweets, list):
+            return self._send_json(400, {
+                "ok": False, "error": "tweets must be a list of strings"})
+        attribution_enabled = body.get("attribution_enabled", True)
+        if not isinstance(attribution_enabled, bool):
+            return self._send_json(400, {
+                "ok": False, "error": "attribution_enabled must be boolean"})
+        try:
+            result = writing_studio.validate_composition(
+                _get_index(), yoink_id=yoink_id, kind=kind,
+                tweets=tweets, attribution_enabled=attribution_enabled)
+        except ValueError as e:
+            return self._send_json(getattr(e, "http_status", 400),
+                                   {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/writing/compose/validate failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, **result})
+
     def _handle_writing_revise(self, bare: str, body):
         """POST /writing/<id>/revise -- two-phase revisor. Phase 1:
         returns prior piece + grounding. Phase 2: persists revision
@@ -8854,6 +8885,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_monitored_playlist_set_enabled(body)
         if bare == "/playlists/monitored/poll":
             return self._handle_monitored_playlist_poll(body)
+        if bare == "/writing/compose/validate":
+            return self._handle_writing_compose_validate(body)
         if bare == "/writing/tweet":
             return self._handle_writing_tweet(body)
         if bare == "/writing/blog":
