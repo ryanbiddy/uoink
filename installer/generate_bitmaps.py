@@ -103,7 +103,7 @@ def make_large(path: Path) -> None:
     d = ImageDraw.Draw(img)
     # Cream wordmark near the bottom (cream on ink = AAA).
     _centered_text(d, W // 2, H - 70, "UOINK", _load_font(34), CREAM)
-    _centered_text(d, W // 2, H - 34, "uoink.video", _load_font(13), CREAM)
+    _centered_text(d, W // 2, H - 34, "uoink.app", _load_font(13), CREAM)
     img.convert("RGB").save(path, "BMP")
 
 

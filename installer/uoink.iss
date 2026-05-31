@@ -65,14 +65,14 @@ ChangesEnvironment=no
 ; Net-new copy (WIZARD-COPY-AND-BITMAPS.md s1) to land the Uoink voice on the
 ; otherwise-stock Inno screens. ASCII-safe punctuation only (no em-dashes) so
 ; the strings render identically regardless of the .iss code page.
-WelcomeLabel2=Uoink pulls complete YouTube context - transcripts, screenshots, and comments - straight into your clipboard for Claude or ChatGPT.%n%nThis installer places the private local helper onto your machine. No accounts, no cloud dependencies. Setup completes in under a minute.
+WelcomeLabel2=Uoink keeps videos, podcasts, and articles on your own disk, then hands them to your AI as a cited corpus you can write from.%n%nThis installer places the private local helper onto your machine. No accounts, no cloud dependencies. Setup completes in under a minute.
 SelectDirDesc=Choose where to place Uoink's local files
-SelectDirLabel3=Uoink runs a lightweight program on your computer to process YouTube transcripts and screenshots locally, keeping your research private. Setup will install these tools into the folder below.
+SelectDirLabel3=Uoink runs a lightweight program on your computer to process source transcripts, screenshots, and article text locally, keeping your research private. Setup will install these tools into the folder below.
 ReadyLabel1=Uoink is ready to set up on your machine. Click Install to place the local helper and dependencies in:
 StatusExtractFiles=Placing local helper files and media dependencies...
 FinishedHeadingLabel=Uoink is Ready
-FinishedLabelNoIcons=Uoink has been successfully installed. Open YouTube in your browser, find the rust 'Uoink' button under the video player, and click it to pull content.%n%nTo configure API keys, customize screenshot intervals, or search your saved corpora, click the browser extension icon.
-FinishedLabel=Uoink has been successfully installed. Open YouTube in your browser, find the rust 'Uoink' button under the video player, and click it to pull content.%n%nTo configure API keys, customize screenshot intervals, or search your saved corpora, click the browser extension icon.
+FinishedLabelNoIcons=Uoink has been successfully installed. Save a supported video, podcast, or article to start building your local source corpus.%n%nTo configure API keys, screenshot defaults, source permissions, or agent access, open the browser extension or dashboard.
+FinishedLabel=Uoink has been successfully installed. Save a supported video, podcast, or article to start building your local source corpus.%n%nTo configure API keys, screenshot defaults, source permissions, or agent access, open the browser extension or dashboard.
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -223,7 +223,7 @@ Type: filesandordirs; Name: "{app}\python\__pycache__"
   in scope for v2.2 within Inno's modern-wizard ceiling:
     * Branded WizardImageFile + WizardSmallImageFile (magnet-U Variant A)
     * AG-voiced [Messages] copy on the standard Welcome/Ready/Installing/Finished
-    * A custom CreateCustomPage Welcome (the "Uoink that shit." hero from mock
+    * A custom CreateCustomPage Welcome (the local-corpus hero from mock
       1.2.1) which replaces the stock welcome (wpWelcome is skipped).
     * A custom CreateCustomPage "Migrating Yoink Data" page (mock 1.2.5)
       shown only when a legacy %LOCALAPPDATA%\Yoink\ is detected. The actual
@@ -279,7 +279,7 @@ procedure BuildWelcomePage();
 begin
   WelcomePage := CreateCustomPage(wpWelcome,
     'Welcome to Uoink',
-    'Pull any YouTube video into your AI workspace.');
+    'Build a local corpus your AI can write from.');
   { Finding 2.1 (creative review v2.2, AG): step tracker above the hero.
     Sits at the top of the surface (y=15, height=18) so it reads as a
     breadcrumb above the wordmark hero, matching mock 1.2.1's layout. }
@@ -287,9 +287,9 @@ begin
   { Hero (mock 1.2.1). Rust on the cream wizard ground passes AA for large
     text (>=18pt bold); body copy below stays on the default ink-on-cream the
     wizard uses -- never rust on ink, per the contrast rules. }
-  AddLabel(WelcomePage, 'Uoink that shit.',  20,  56, 28, [fsBold], C_RUST);
+  AddLabel(WelcomePage, 'Build from receipts.',  20,  56, 28, [fsBold], C_RUST);
   AddLabel(WelcomePage,
-    'Uoink turns any YouTube video into a clean, AI-ready doc on your disk.',
+    'Save videos, podcasts, articles, and threads into a cited corpus on your disk.',
                                               92,  36, 11, [], C_INK);
   AddLabel(WelcomePage,
     'This installs the local helper that does the work. ' +

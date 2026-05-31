@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Uoink",
   "short_name": "Uoink",
-  "version": "3.2.0",
-  "description": "The YouTube layer for any AI. Transcripts, screenshots, and comments in one paste.",
+  "version": "3.2.1",
+  "description": "Save videos, podcasts, and articles to a local corpus your AI can write from.",
   "homepage_url": "https://uoink.app",
   "permissions": ["alarms", "clipboardWrite", "notifications", "storage", "contextMenus", "activeTab", "offscreen"],
   "host_permissions": [
@@ -53,7 +53,7 @@
         "default": "Alt+U",
         "mac": "Command+Shift+U"
       },
-      "description": "Uoink the current YouTube video"
+      "description": "Uoink the current source"
     }
   }
 }

@@ -2452,8 +2452,8 @@
                   <div class="panel-title">Preview</div>
                   <div class="inline-row">
                     <button class="button ghost" type="button" id="copyWriting">Copy</button>
-                    <button class="button" type="button" id="saveWriting">Save</button>
-                    <button class="button ghost" type="button" id="reviseWriting">Revise</button>
+                    <button class="button hidden" type="button" id="saveWriting" aria-hidden="true" tabindex="-1">Save</button>
+                    <button class="button ghost hidden" type="button" id="reviseWriting" aria-hidden="true" tabindex="-1">Revise</button>
                   </div>
                 </div>
                 <div class="panel-body">
@@ -2643,11 +2643,11 @@
           <div id="libraryEmpty" class="empty-state hidden">
             <div>
               <h2>No uoinks yet.</h2>
-              <p>Open YouTube, find a video worth reading, click the rust U under the player. It will show up here as a card in a few seconds.</p>
+              <p>Save a video, podcast, or article. It will show up here as a local source card with transcript, screenshots when available, and creator credit.</p>
               <div class="inline-row" style="justify-content:center;margin-top:20px">
-                <button class="button primary" type="button" data-open-youtube>Open YouTube</button>
+                <button class="button primary" type="button" data-open-youtube>Start with YouTube</button>
               </div>
-              <div class="tip">Tip: right-click a YouTube link anywhere -> Uoink video.</div>
+              <div class="tip">Tip: right-click supported links, or open Sources to see what Uoink can read.</div>
             </div>
           </div>
           <div class="summary-line" style="margin-top:18px">
@@ -2778,8 +2778,8 @@
             </div>
 
             <div class="setting-block">
-              <h2>Helper</h2>
-              <p class="setting-copy" id="helperStatus">Checking /diagnose...</p>
+              <h2>Local app</h2>
+              <p class="setting-copy" id="helperStatus">Checking local status...</p>
               <div class="inline-row">
                 <button class="button danger" type="button" id="stopHelperSettings">Stop</button>
                 <label class="inline-row"><input id="autostartToggle" type="checkbox" checked> Autostart on login</label>
@@ -3127,7 +3127,7 @@
       ["Podcasts / RSS", "shipped", "Feed monitor or one-off episode URL", "Local transcript, speakers, waveform preview, episode facts", "Build research, Script evidence, long-form source memory"],
       ["Substack", "planned", "Universal page uoink from allowed site", "Article text, author, publication URL, highlights", "Writing citations, quote bank, topic memory"],
       ["LinkedIn videos", "planned", "Universal page uoink once enabled", "Video metadata, creator, transcript where exposed", "B2B source memory and creator attribution"],
-      ["Reddit threads", "planned", "Universal page uoink from thread URL", "Post, top comments, community, score signals", "Audience questions and Build objections"],
+      ["Reddit threads", "shipped", "Paste or right-click a Reddit thread URL", "Post, top comments, community, score signals", "Audience questions and Build objections"],
       ["Bluesky", "planned", "Universal page uoink from post URL", "Thread text, author handle, linked media", "Writing references and attribution"],
       ["Threads", "planned", "Universal page uoink from thread URL", "Post text, author handle, linked media", "Writing references and creator credit"],
       ["Mastodon", "planned", "Universal page uoink from post URL", "Post text, instance, author handle, linked media", "Open-web references and attribution"],
@@ -5058,7 +5058,7 @@
       syncWorkspaceOptions();
       els.facetStatus.classList.toggle("hidden", !state.facetsFallback);
       els.facetStatus.title = state.facetsFallback
-        ? "Coming with v2.5 facets. These fallback enums are scaffolded until /facets/taxonomy is available."
+        ? "Using built-in facet defaults until the helper sends the latest taxonomy."
         : "Facet taxonomy loaded from the helper.";
     }
 
@@ -5631,8 +5631,20 @@
       return selectedRadio("writingMode", "tweet");
     }
 
+    const X_URL_WEIGHTED_LENGTH = 23;
+    const X_URL_RE = /https?:\/\/[^\s]+/gi;
+
     function tweetLength(value) {
-      return Array.from(String(value || "")).length;
+      const text = String(value || "");
+      let count = 0;
+      let lastIndex = 0;
+      text.replace(X_URL_RE, (match, offset) => {
+        count += Array.from(text.slice(lastIndex, offset)).length + X_URL_WEIGHTED_LENGTH;
+        lastIndex = offset + match.length;
+        return match;
+      });
+      count += Array.from(text.slice(lastIndex)).length;
+      return count;
     }
 
     function splitDraftIntoTweets(value) {
@@ -6568,8 +6580,8 @@
       document.getElementById("generateWriting").addEventListener("click", generateWriting);
       document.getElementById("regenerateWriting").addEventListener("click", generateWriting);
       document.getElementById("copyWriting").addEventListener("click", copyWritingText);
-      document.getElementById("saveWriting").addEventListener("click", () => showToast("Save is not wired in this build yet."));
-      document.getElementById("reviseWriting").addEventListener("click", () => showToast("Revise is not wired in this build yet."));
+      document.getElementById("saveWriting").addEventListener("click", () => showToast("Drafts save when the agent returns them."));
+      document.getElementById("reviseWriting").addEventListener("click", () => showToast("Choose a saved draft to revise."));
       document.getElementById("useWritingAsIs").addEventListener("click", () => showToast("Marked for use in this session."));
       document.getElementById("writingSettingsLink").addEventListener("click", () => switchTab("settings"));
       els.writingSourceSearch.addEventListener("focus", () => toggleWritingSourceCombo(true));
