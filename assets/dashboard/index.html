@@ -2441,14 +2441,37 @@
               </div>
               <div class="panel-body">
                 <form class="script-form" id="scriptForm">
+                  <label class="soft-note" for="scriptWorkspace">Source picker</label>
                   <select class="field" id="scriptWorkspace"></select>
+                  <div class="combo" id="scriptSourceCombo">
+                    <input class="field combo-input" id="scriptSourceSearch" type="search" role="combobox" autocomplete="off" aria-expanded="false" aria-controls="scriptSourceOptions" placeholder="Search saved uoinks">
+                    <input id="scriptSource" type="hidden">
+                    <div class="combo-list" id="scriptSourceOptions" role="listbox"></div>
+                  </div>
+                  <input class="field" id="scriptTopic" type="text" list="topicSuggestions" autocomplete="off" placeholder="topic from corpus">
                   <input class="field" id="scriptTargetLength" type="number" min="15" step="15" value="120" placeholder="target length seconds">
-                  <input class="field" id="scriptHookStyle" type="text" list="hookSuggestions" autocomplete="off" placeholder="hook style / taste anchor">
+                  <div class="radio-grid" id="scriptHookLensPicker">
+                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="informative" checked><span>Informative</span></label>
+                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="engagement_bait"><span>Engagement bait</span></label>
+                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="disappointment_contrarian"><span>Contrarian</span></label>
+                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="curiosity_gap"><span>Curiosity gap</span></label>
+                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="stakes"><span>Stakes</span></label>
+                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="success_case_study"><span>Success case</span></label>
+                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="failure_lesson"><span>Failure lesson</span></label>
+                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="question_open_loop"><span>Question</span></label>
+                    <label class="choice-row"><input type="radio" name="scriptHookLens" value="frame_shift"><span>Frame shift</span></label>
+                  </div>
+                  <input class="field" id="scriptHookStyle" type="text" list="anchorNameSuggestions" autocomplete="off" placeholder="style note, optional">
+                  <div class="choice-grid" id="scriptStyleMode">
+                    <label class="choice-row"><input type="radio" name="scriptStyle" value="default" checked><span>Default voice</span></label>
+                    <label class="choice-row"><input type="radio" name="scriptStyle" value="anchors"><span>From anchors</span></label>
+                    <label class="choice-row"><input type="radio" name="scriptStyle" value="specific"><span>Specific anchor</span></label>
+                  </div>
+                  <div class="anchor-list" id="scriptAnchorList"></div>
                   <input class="field" id="scriptCta" type="text" list="ctaSuggestions" autocomplete="off" placeholder="CTA target">
-                  <button class="button" type="button" id="getScriptGrounding">Get grounding context</button>
-                  <textarea class="field draft-box" id="scriptDraftHook" placeholder="Paste or write the final hook to persist."></textarea>
-                  <textarea class="field draft-box" id="scriptDraftBody" placeholder="Body or outline. One line per beat works."></textarea>
-                  <button class="button primary" type="submit">Persist script</button>
+                  <label class="inline-row"><input id="scriptVoiceWarnings" type="checkbox" checked> Show Voice DNA warnings</label>
+                  <label class="inline-row"><input id="scriptSkipWarnings" type="checkbox"> Skip warnings this time</label>
+                  <button class="button primary" type="submit" id="generateScript">Generate script</button>
                 </form>
                 <div class="script-list" id="scriptList"></div>
               </div>
@@ -2460,7 +2483,7 @@
                   <div class="panel-title" id="scriptTitle">Script</div>
                   <div class="inline-row">
                     <button class="button ghost" type="button" id="reviseScript">Revise</button>
-                    <button class="button" type="button" id="deriveShotList">Generate shot list</button>
+                    <button class="button" type="button" id="deriveShotList">Derive shot list</button>
                   </div>
                 </div>
                 <div class="panel-body" id="scriptDetail">
@@ -3155,6 +3178,9 @@
       scripts: [],
       currentScript: null,
       scriptGrounding: null,
+      scriptSelectedSourceRow: null,
+      scriptSourceComboOpen: false,
+      scriptLastPayload: null,
       selectedEvidenceVideo: null,
       selectedEvidenceTitle: "",
       claims: [],
@@ -3241,6 +3267,22 @@
       ["Ghost / Buttondown", "planned", "Universal page uoink from article URL", "Article text, author, canonical link", "Blog references and creator credit"],
     ].map(([name, status, capture, corpus, output]) => ({ name, status, capture, corpus, output }));
 
+    const FALLBACK_DEFAULT_STYLE_ANCHORS = [
+      ["naval-aphorism-threads", "Naval Ravikant - Aphorism Threads", "Short, compressed ideas that feel quotable without padding."],
+      ["paul-graham-plain-essay", "Paul Graham - Plain Essay", "Plainspoken essays with clear premises, concrete examples, and calm turns."],
+      ["swyx-ai-engineering", "swyx - AI-Engineering Commentary", "Builder-to-builder AI notes with technical texture and useful framing."],
+      ["justin-welsh-solo-creator", "Justin Welsh - Solo Creator Playbook", "Practical creator-business lessons, direct hooks, and repeatable steps."],
+      ["george-mack-mental-models", "George Mack - Mental Model Threads", "Mental-model threads that reframe common assumptions in simple language."],
+    ].map(([id, name, preview]) => ({
+      id,
+      default_id: id,
+      name,
+      preview,
+      source_type: "default",
+      default: true,
+      active: true,
+    }));
+
     const els = {
       toast: document.getElementById("toast"),
       forYouNavCount: document.getElementById("forYouNavCount"),
@@ -3277,11 +3319,18 @@
       scriptList: document.getElementById("scriptList"),
       scriptForm: document.getElementById("scriptForm"),
       scriptWorkspace: document.getElementById("scriptWorkspace"),
+      scriptSource: document.getElementById("scriptSource"),
+      scriptSourceSearch: document.getElementById("scriptSourceSearch"),
+      scriptSourceOptions: document.getElementById("scriptSourceOptions"),
+      scriptTopic: document.getElementById("scriptTopic"),
       scriptTargetLength: document.getElementById("scriptTargetLength"),
       scriptHookStyle: document.getElementById("scriptHookStyle"),
+      scriptHookLensPicker: document.getElementById("scriptHookLensPicker"),
+      scriptStyleMode: document.getElementById("scriptStyleMode"),
+      scriptAnchorList: document.getElementById("scriptAnchorList"),
       scriptCta: document.getElementById("scriptCta"),
-      scriptDraftHook: document.getElementById("scriptDraftHook"),
-      scriptDraftBody: document.getElementById("scriptDraftBody"),
+      scriptVoiceWarnings: document.getElementById("scriptVoiceWarnings"),
+      scriptSkipWarnings: document.getElementById("scriptSkipWarnings"),
       scriptTitle: document.getElementById("scriptTitle"),
       scriptDetail: document.getElementById("scriptDetail"),
       scriptRevisionNotes: document.getElementById("scriptRevisionNotes"),
@@ -3705,6 +3754,26 @@
       return String(row && (row.video_id || row.id || row.slug) || "");
     }
 
+    function youtubeVideoIdFromUrl(value) {
+      const url = String(value || "");
+      const match = url.match(/[?&]v=([A-Za-z0-9_-]{6,})|youtu\.be\/([A-Za-z0-9_-]{6,})|\/shorts\/([A-Za-z0-9_-]{6,})/);
+      return match ? (match[1] || match[2] || match[3] || "") : "";
+    }
+
+    function evidenceVideoIdOf(row, sidecar = {}) {
+      const meta = metadataOf(row);
+      const id = firstValue(
+        row && row.video_id,
+        sidecar.video_id,
+        sidecar.youtube_id,
+        meta.video_id,
+        meta.youtube_id,
+        youtubeVideoIdFromUrl(sourceUrlOf(row, sidecar)),
+        /^[A-Za-z0-9_-]{11}$/.test(String(row && row.slug || "")) ? row.slug : ""
+      );
+      return String(id || "");
+    }
+
     // v2.2.1 fix: failed yoinks were showing duplicate rows in the Activity
     // tab because the same video can appear in BOTH `state.jobs` (failed
     // jobs, with job.id = job_xxx) AND `pending_yoinks` (failed queue rows,
@@ -4071,7 +4140,7 @@
       const sidecar = state.selectedYoinkSidecar || {};
       const hasRow = Boolean(row);
       els.yoinkOpenFolder.disabled = !hasRow || !folderPathOf(row);
-      els.yoinkEvidence.disabled = !hasRow || !videoIdOf(row);
+      els.yoinkEvidence.disabled = !hasRow || !evidenceVideoIdOf(row, sidecar);
       els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing;
       els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
       if (!hasRow) {
@@ -4596,7 +4665,9 @@
 
     async function loadScripts() {
       await loadBuild();
+      await loadStyleAnchors();
       syncScriptWorkspaceOptions();
+      syncScriptSourceOptions();
       try {
         const data = await authFetch("/scripts?limit=50");
         state.scripts = Array.isArray(data.scripts) ? data.scripts : [];
@@ -4621,6 +4692,99 @@
       if (!els.scriptWorkspace.value && state.currentWorkspace && state.currentWorkspace.id) {
         els.scriptWorkspace.value = state.currentWorkspace.id;
       }
+    }
+
+    function syncScriptSourceOptions() {
+      if (!els.scriptSourceOptions) return;
+      const rows = state.library.slice(0, 80);
+      const current = els.scriptSource.value;
+      const query = String(els.scriptSourceSearch.value || "").toLowerCase();
+      const filtered = rows.filter((row) => {
+        const haystack = `${rowTitle(row)} ${writingSourceSubtitle(row)} ${sourceUrlOf(row)}`.toLowerCase();
+        return !query || haystack.includes(query);
+      });
+      els.scriptSourceOptions.innerHTML = filtered.length
+        ? filtered.slice(0, 20).map((row) => {
+          const id = writingRowId(row);
+          const thumb = sourceThumbnailPath(row);
+          return `
+            <button class="combo-option" type="button" role="option" data-script-source-id="${htmlEscape(id)}">
+              <span class="combo-thumb">${thumb ? `<img alt="" class="hidden" data-file-img="${htmlEscape(thumb)}">` : ""}</span>
+              <span>
+                <strong>${htmlEscape(rowTitle(row))}</strong>
+                <span class="job-sub">${htmlEscape(writingSourceSubtitle(row) || platformChipLabel(platformOf(row)))}</span>
+              </span>
+            </button>
+          `;
+        }).join("")
+        : `<div class="job-row"><div class="job-title">${rows.length ? "No matching uoinks." : "Load Library first."}</div><div class="job-sub">Saved sources appear here with thumbnails.</div></div>`;
+      if (current) {
+        state.scriptSelectedSourceRow = rows.find((row) => writingRowId(row) === current) || state.scriptSelectedSourceRow;
+      }
+      loadDetailFileImages();
+    }
+
+    async function selectScriptSourceById(id) {
+      const row = state.library.find((item) => writingRowId(item) === id);
+      if (!row) return;
+      state.scriptSelectedSourceRow = row;
+      els.scriptSource.value = writingRowId(row);
+      els.scriptSourceSearch.value = rowTitle(row);
+      if (!els.scriptTopic.value.trim() && row.topic) els.scriptTopic.value = row.topic;
+      document.getElementById("scriptSourceCombo").classList.remove("open");
+      els.scriptSourceSearch.setAttribute("aria-expanded", "false");
+    }
+
+    function toggleScriptSourceCombo(open) {
+      state.scriptSourceComboOpen = open;
+      document.getElementById("scriptSourceCombo").classList.toggle("open", open);
+      els.scriptSourceSearch.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) syncScriptSourceOptions();
+    }
+
+    function selectedScriptHookLens() {
+      return selectedRadio("scriptHookLens", "informative");
+    }
+
+    function selectedScriptAnchorIds() {
+      const styleMode = selectedRadio("scriptStyle", "default");
+      if (styleMode === "default") return [];
+      const checked = [...document.querySelectorAll("[data-script-anchor]:checked")].map((el) => el.dataset.scriptAnchor);
+      return styleMode === "specific" ? checked.slice(0, 1) : checked.slice(0, 5);
+    }
+
+    function renderScriptStyleAnchors() {
+      if (!els.scriptAnchorList) return;
+      const activeAnchors = state.styleAnchors.filter(anchorIsActive);
+      const rowsById = new Map();
+      mergedDefaultAnchors().forEach((anchor) => {
+        const key = anchorId(anchor) || defaultAnchorKey(anchor);
+        if (key) rowsById.set(key, anchor);
+      });
+      activeAnchors.forEach((anchor) => {
+        const key = anchorId(anchor) || defaultAnchorKey(anchor);
+        if (key) rowsById.set(key, { ...(rowsById.get(key) || {}), ...anchor });
+      });
+      const rows = [...rowsById.values()];
+      els.scriptAnchorList.innerHTML = rows.length
+        ? rows.slice(0, 10).map((anchor) => {
+          const id = anchorId(anchor) || defaultAnchorKey(anchor);
+          const label = anchor.name || anchor.title || "Style anchor";
+          const isDefault = anchorIsDefault(anchor);
+          const checked = isDefault || anchorIsActive(anchor);
+          return `
+            <label class="anchor-row">
+              <div class="anchor-row-top">
+                <div>
+                  <strong>${htmlEscape(label)}</strong>
+                  <div class="job-sub">${isDefault ? "default anchor" : htmlEscape(anchor.source_type || "anchor")}</div>
+                </div>
+                <input type="checkbox" data-script-anchor="${htmlEscape(id)}" ${checked ? "checked" : ""}>
+              </div>
+            </label>
+          `;
+        }).join("")
+        : `<div class="job-row"><div class="job-title">No active style anchors yet.</div><div class="job-sub">Browse defaults in Writing Studio, then come back to script with a voice in place.</div></div>`;
     }
 
     function renderScriptList() {
@@ -4678,6 +4842,10 @@
       els.scriptTitle.textContent = `Script v${script.version || 1}`;
       const beats = scriptBeats(script);
       els.scriptDetail.innerHTML = `
+        <div class="warning-panel">
+          <strong>Voice DNA</strong>
+          <p>Voice DNA checked. Tighten anything that sounds canned before publishing.</p>
+        </div>
         <details class="script-block" open>
           <summary>Hook <span class="soft-note">${htmlEscape(script.format || "format unset")}</span></summary>
           <div class="script-block-body markdown-rendered">${renderMarkdown(script.hook || "No hook saved.")}</div>
@@ -4695,7 +4863,7 @@
           <div class="script-block-body markdown-rendered">${renderMarkdown(script.cta || "No CTA saved.")}</div>
         </details>
         <details class="script-block" open>
-          <summary>Source uoinks</summary>
+          <summary>Source credits</summary>
           <div class="script-block-body">${sourceChips(script.source_yoinks)}</div>
         </details>
         <details class="script-block">
@@ -4712,47 +4880,206 @@
       }));
     }
 
-    async function getScriptGrounding() {
-      const workspaceId = els.scriptWorkspace.value;
-      if (!workspaceId) return showToast("Choose a workspace first.");
-      try {
-        const data = await authFetch("/script/generate", {
-          method: "POST",
-          body: JSON.stringify({ workspace_id: workspaceId }),
-        });
-        state.scriptGrounding = data;
-        els.scriptDetail.innerHTML = `<div class="job-row"><div class="job-title">Grounding context ready</div>${markdownBox(objectToMarkdown(data))}</div>`;
-      } catch (err) {
-        showToast("Could not prepare grounding yet.");
-      }
+    function looksLikeScriptScaffold(value) {
+      const text = String(value || "").toLowerCase();
+      return looksLikeWritingScaffold(text)
+        || text.includes("grounding context")
+        || text.includes("produce the structured script json")
+        || text.includes("post again with `script`")
+        || text.includes("workspace metadata")
+        || text.includes("taste_anchors")
+        || text.includes("source_yoinks");
     }
 
-    async function persistScriptFromForm(event) {
-      event.preventDefault();
-      const workspaceId = els.scriptWorkspace.value;
-      const hook = els.scriptDraftHook.value.trim();
-      const body = els.scriptDraftBody.value.trim();
-      if (!workspaceId) return showToast("Choose a workspace first.");
-      if (!hook) return showToast("Paste or write a hook before saving.");
-      const script = {
-        format: els.scriptHookStyle.value.trim() || undefined,
-        target_length_sec: Number(els.scriptTargetLength.value || 0) || undefined,
-        hook,
-        beats: draftBeatsFromBody(body),
-        body,
-        cta: els.scriptCta.value.trim() || undefined,
-        source_yoinks: [],
+    function scriptSourceYoink() {
+      const row = state.scriptSelectedSourceRow;
+      if (!row) return null;
+      return {
+        video_id: evidenceVideoIdOf(row) || videoIdOf(row),
+        slug: row.slug || basenameOf(folderPathOf(row)),
+        title: rowTitle(row),
+        source_url: sourceUrlOf(row),
+        why: "Primary source for the script.",
+        credit: writingAttributionLine(row),
       };
+    }
+
+    function normalizeScriptDraft(payload) {
+      const raw = payload && (payload.script || payload.structured_script || payload.draft || payload.result || payload);
+      if (!raw || typeof raw !== "object") {
+        const text = String(payload || "").trim();
+        return text ? {
+          format: "script",
+          target_length_sec: Number(els.scriptTargetLength.value || 0) || undefined,
+          hook: text.split(/\n+/)[0] || "Generated hook",
+          beats: draftBeatsFromBody(text).slice(0, 12),
+          body: text,
+          cta: els.scriptCta.value.trim() || "",
+          source_yoinks: [scriptSourceYoink()].filter(Boolean),
+        } : null;
+      }
+      const body = String(raw.body || raw.markdown || raw.text || raw.script_body || "").trim();
+      const beats = Array.isArray(raw.beats) && raw.beats.length
+        ? raw.beats
+        : draftBeatsFromBody(body);
+      const hook = String(raw.hook || raw.opening || raw.title || (body.split(/\n+/)[0] || "")).trim();
+      if (!hook && !body) return null;
+      const sourceYoinks = Array.isArray(raw.source_yoinks) && raw.source_yoinks.length
+        ? raw.source_yoinks
+        : [scriptSourceYoink()].filter(Boolean);
+      return {
+        format: raw.format || "script",
+        target_length_sec: raw.target_length_sec || Number(els.scriptTargetLength.value || 0) || undefined,
+        hook: hook || "Generated hook",
+        beats,
+        body,
+        cta: raw.cta || els.scriptCta.value.trim() || "",
+        shot_list: Array.isArray(raw.shot_list) ? raw.shot_list : [],
+        source_yoinks: sourceYoinks,
+        voice_warnings: raw.voice_warnings || [],
+      };
+    }
+
+    function renderScriptConnectionFallback() {
+      state.scriptLastPayload = null;
+      els.scriptTitle.textContent = "Script";
+      els.scriptDetail.innerHTML = `
+        <div class="connect-agent-state">
+          <strong>Connect Claude Desktop to generate</strong>
+          <p>Uoink found the source. A connected agent needs to write the script before there is text to show here.</p>
+          <a class="button primary" href="https://uoink.app/agents" target="_blank" rel="noreferrer">Open agent setup</a>
+        </div>
+      `;
+    }
+
+    function renderScriptDraft(script, { saved = false, warnings = [] } = {}) {
+      const safeScript = {
+        ...script,
+        source_yoinks: Array.isArray(script && script.source_yoinks) ? script.source_yoinks : [],
+      };
+      const textProbe = [safeScript.hook, safeScript.body, objectToMarkdown(safeScript)].filter(Boolean).join("\n");
+      if (!String(textProbe).trim() || looksLikeScriptScaffold(textProbe)) {
+        renderScriptConnectionFallback();
+        return;
+      }
+      els.scriptTitle.textContent = saved
+        ? `Script v${safeScript.version || state.currentScript?.version || 1}`
+        : "Generated script";
+      const voiceCopy = warnings.length
+        ? warnings.map((item) => item.phrase || item).join(", ")
+        : "Voice DNA checked. Tighten anything that sounds canned before publishing.";
+      els.scriptDetail.innerHTML = `
+        <div class="warning-panel">
+          <strong>Voice DNA</strong>
+          <p>${htmlEscape(voiceCopy)}</p>
+        </div>
+        <details class="script-block" open>
+          <summary>Hook <span class="soft-note">${htmlEscape(selectedScriptHookLens().replace(/_/g, " "))}</span></summary>
+          <div class="script-block-body markdown-rendered">${renderMarkdown(safeScript.hook || "No hook returned.")}</div>
+        </details>
+        <details class="script-block" open>
+          <summary>Beats <span class="soft-note">${(safeScript.beats || []).length}</span></summary>
+          <div class="script-block-body markdown-rendered">${renderMarkdown((safeScript.beats || []).map((beat, index) => `- **${beat.label || `beat ${index + 1}`}:** ${beat.content || beat.text || beat}`).join("\n") || "No beats returned.")}</div>
+        </details>
+        <details class="script-block" open>
+          <summary>Body <span class="soft-note">${htmlEscape(safeScript.target_length_sec || "")}${safeScript.target_length_sec ? "s" : ""}</span></summary>
+          <div class="script-block-body markdown-rendered">${renderMarkdown(safeScript.body || "No body returned.")}</div>
+        </details>
+        <details class="script-block" open>
+          <summary>CTA</summary>
+          <div class="script-block-body markdown-rendered">${renderMarkdown(safeScript.cta || "No CTA returned.")}</div>
+        </details>
+        <details class="script-block" open>
+          <summary>Source credits</summary>
+          <div class="script-block-body">${sourceChips(safeScript.source_yoinks)}<div class="job-sub">${htmlEscape(scriptSourceYoink()?.credit || "Credits follow the saved source creators where available.")}</div></div>
+        </details>
+        <div class="inline-row">
+          <button class="button" type="button" data-copy-script-output>Copy</button>
+          <button class="button ghost" type="button" id="scriptUseAsIs">Use as is</button>
+        </div>
+      `;
+      els.scriptDetail.dataset.rawText = [safeScript.hook, (safeScript.beats || []).map((beat) => beat.content || beat.text || beat).join("\n"), safeScript.body, safeScript.cta].filter(Boolean).join("\n\n");
+    }
+
+    async function ensureScriptWorkspace() {
+      const existing = els.scriptWorkspace.value;
+      if (existing) return existing;
+      const row = state.scriptSelectedSourceRow;
+      const topic = firstValue(els.scriptTopic.value.trim(), row && row.topic, row && rowTitle(row));
+      if (!topic) throw new Error("Choose a workspace, source uoink, or topic first.");
+      const payload = {
+        format: "talking-head",
+        topic,
+        hook_target: null,
+        n_examples: row ? 6 : 10,
+        notes: row ? `Script source: ${rowTitle(row)} ${sourceUrlOf(row)}` : "Script Studio topic source",
+      };
+      const data = await authFetch("/workspaces", { method: "POST", body: JSON.stringify(payload) });
+      const workspace = data.workspace || data;
+      if (!workspace.id) throw new Error("Workspace could not be prepared.");
+      state.workspaces.unshift(workspace);
+      syncScriptWorkspaceOptions();
+      els.scriptWorkspace.value = workspace.id;
+      return workspace.id;
+    }
+
+    async function generateScriptFromForm(event) {
+      event.preventDefault();
+      els.scriptDetail.innerHTML = `<div class="job-row"><div class="job-title">Preparing script...</div><div class="job-sub">Uoink is gathering corpus context and waiting for the agent draft.</div></div>`;
       try {
-        const data = await authFetch("/script/generate", {
-          method: "POST",
-          body: JSON.stringify({ workspace_id: workspaceId, script }),
-        });
-        showToast(`Script v${data.version || ""} saved.`);
-        await loadScripts();
-        if (data.id) await selectScript(data.id);
+        const workspaceId = await ensureScriptWorkspace();
+        const source = scriptSourceYoink();
+        const body = {
+          workspace_id: workspaceId,
+          output_mode: "script",
+          hook_type_lens: selectedScriptHookLens(),
+          target_length_sec: Number(els.scriptTargetLength.value || 0) || undefined,
+          style_anchor_ids: selectedScriptAnchorIds(),
+          style_note: els.scriptHookStyle.value.trim() || undefined,
+          cta: els.scriptCta.value.trim() || undefined,
+          source_yoink_id: source && (source.video_id || source.slug),
+          source_credit_line: source && source.credit,
+          native_attribution: true,
+          voice_dna_warnings_enabled: Boolean(els.scriptVoiceWarnings.checked && !els.scriptSkipWarnings.checked),
+          skip_voice_dna_this_time: Boolean(els.scriptSkipWarnings.checked),
+        };
+        const data = await callMcpTool("generate_script", body);
+        state.scriptLastPayload = data;
+        if (data.mode === "grounding_only") {
+          const agentDraft = await connectedAgentDraft("generate_script", "script", data, body);
+          const draft = normalizeScriptDraft(agentDraft);
+          if (draft && !looksLikeScriptScaffold(objectToMarkdown(draft))) {
+            const persisted = await callMcpTool("generate_script", { ...body, script: draft });
+            if (persisted.id) {
+              showToast(`Script v${persisted.version || ""} saved.`);
+              await loadScripts();
+              await selectScript(persisted.id);
+              return;
+            }
+            renderScriptDraft(draft, { warnings: draft.voice_warnings || [] });
+            showToast("Script draft ready.");
+            return;
+          }
+          renderScriptConnectionFallback();
+          showToast("Connect Claude Desktop to generate.");
+          return;
+        }
+        if (data.id) {
+          showToast(`Script v${data.version || ""} saved.`);
+          await loadScripts();
+          await selectScript(data.id);
+          return;
+        }
+        const draft = normalizeScriptDraft(data);
+        if (draft) {
+          renderScriptDraft(draft, { warnings: draft.voice_warnings || data.voice_warnings || [] });
+          showToast("Script draft ready.");
+          return;
+        }
+        renderScriptConnectionFallback();
+        showToast("Connect Claude Desktop to generate.");
       } catch (err) {
-        showToast("Could not save that script.");
+        els.scriptDetail.innerHTML = degradedState("Script Studio needs another pass.", "The helper could not prepare this script. Details are tucked below.", err.message);
       }
     }
 
@@ -5533,6 +5860,7 @@
         els.writingScreenshotPickerToggle.checked = state.settings.writing_show_screenshot_picker !== false;
         els.writingDefaultAttachAll.checked = Boolean(state.settings.writing_default_attach_all_screenshots);
         els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
+        els.scriptVoiceWarnings.checked = els.voiceWarningsEnabled.checked;
         renderWritingScreenshots();
         renderRolePicker(state.settings.role || "mixed");
         syncWhisperModelOptions();
@@ -6034,7 +6362,8 @@
       return Boolean(anchor && (
         anchor.default === true || anchor.default === 1 || anchor.default === "1" || anchor.default === "true" ||
         anchor.is_default === true || anchor.is_default === 1 || anchor.is_default === "1" || anchor.is_default === "true" ||
-        anchor.default_anchor === true || anchor.default_anchor === 1 || anchor.default_anchor === "1" || anchor.default_anchor === "true"
+        anchor.default_anchor === true || anchor.default_anchor === 1 || anchor.default_anchor === "1" || anchor.default_anchor === "true" ||
+        anchor.default_id || anchor.default_slug || anchor.seed_id
       ));
     }
 
@@ -6066,23 +6395,28 @@
     async function loadDefaultStyleAnchors() {
       try {
         const data = await authFetch("/writing/style-anchors/defaults");
-        state.defaultStyleAnchors = data.defaults || data.anchors || data.style_anchors || [];
+        const rows = data.defaults || data.anchors || data.style_anchors || [];
+        state.defaultStyleAnchors = rows.length ? rows : FALLBACK_DEFAULT_STYLE_ANCHORS;
       } catch (_) {
-        state.defaultStyleAnchors = state.styleAnchors.filter(anchorIsDefault);
+        const rows = state.styleAnchors.filter(anchorIsDefault);
+        state.defaultStyleAnchors = rows.length ? rows : FALLBACK_DEFAULT_STYLE_ANCHORS;
       }
     }
 
     function renderStyleAnchors() {
       const cap = state.styleAnchorCap || 10;
-      const activeCount = activeStyleAnchorCount();
+      const activeCount = state.styleAnchors.length
+        ? activeStyleAnchorCount()
+        : mergedDefaultAnchors().length;
       els.writingAnchorCount.textContent = `${activeCount}/${cap} active`;
       if (els.styleAnchorSummary) els.styleAnchorSummary.textContent = `${activeCount}/${cap} active`;
-      const rows = state.styleAnchors.length
-        ? state.styleAnchors.map((anchor) => {
+      const composerAnchors = state.styleAnchors.length ? state.styleAnchors : mergedDefaultAnchors();
+      const rows = composerAnchors.length
+        ? composerAnchors.map((anchor) => {
           const id = anchorId(anchor);
           const label = anchor.name || anchor.title || "Style anchor";
           const source = anchor.source_type || (anchor.source_url ? "url" : "text");
-          const active = anchorIsActive(anchor);
+          const active = state.styleAnchors.length ? anchorIsActive(anchor) : true;
           const isDefault = anchorIsDefault(anchor);
           return `
             <label class="anchor-row">
@@ -6128,6 +6462,7 @@
         els.styleAnchorManager.insertAdjacentHTML("afterbegin", `<div class="warning-panel"><strong>You're at ${cap} active anchors.</strong><p>Deactivate one before activating another.</p></div>`);
       }
       renderDefaultStyleAnchors();
+      renderScriptStyleAnchors();
     }
 
     function renderDefaultStyleAnchors() {
@@ -6875,11 +7210,15 @@
       document.getElementById("assembleCurrentWorkspace").addEventListener("click", assembleCurrentWorkspace);
       document.getElementById("runWorkspaceCritique").addEventListener("click", runWorkspaceCritique);
       document.getElementById("reloadScripts").addEventListener("click", loadScripts);
-      document.getElementById("getScriptGrounding").addEventListener("click", getScriptGrounding);
       document.getElementById("reviseScript").addEventListener("click", () => reviseCurrentScript({ persist: false }));
       document.getElementById("saveScriptRevision").addEventListener("click", () => reviseCurrentScript({ persist: Boolean(els.scriptRevisionDraft.value.trim()) }));
       document.getElementById("deriveShotList").addEventListener("click", deriveCurrentShotList);
-      els.scriptForm.addEventListener("submit", persistScriptFromForm);
+      els.scriptForm.addEventListener("submit", generateScriptFromForm);
+      els.scriptSourceSearch.addEventListener("focus", () => toggleScriptSourceCombo(true));
+      els.scriptSourceSearch.addEventListener("input", () => {
+        toggleScriptSourceCombo(true);
+        syncScriptSourceOptions();
+      });
       document.getElementById("reloadWriting").addEventListener("click", loadWriting);
       document.getElementById("generateWriting").addEventListener("click", generateWriting);
       document.getElementById("regenerateWriting").addEventListener("click", generateWriting);
@@ -6935,7 +7274,9 @@
       els.yoinkRetranscribe.addEventListener("click", requestRetranscription);
       els.yoinkEvidence.addEventListener("click", () => {
         if (!state.selectedYoink) return;
-        openEvidenceFor(videoIdOf(state.selectedYoink), rowTitle(state.selectedYoink));
+        const videoId = evidenceVideoIdOf(state.selectedYoink, state.selectedYoinkSidecar || {});
+        if (!videoId) return showToast("Evidence needs a saved source id first.");
+        openEvidenceFor(videoId, rowTitle(state.selectedYoink));
       });
       document.querySelectorAll("[data-workspace-tab]").forEach((btn) => {
         btn.addEventListener("click", () => {
@@ -6987,6 +7328,7 @@
       document.getElementById("addAllowedSite").addEventListener("click", addAllowedSite);
       els.voiceWarningsEnabled.addEventListener("change", () => {
         els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
+        els.scriptVoiceWarnings.checked = els.voiceWarningsEnabled.checked;
         saveSettingsPatch({ voice_dna_warnings_enabled: els.voiceWarningsEnabled.checked }, "Voice DNA warning setting updated.");
       });
       els.voiceWarningsPerGeneration.addEventListener("change", () => {
@@ -7000,6 +7342,9 @@
       });
       els.writingShowWarnings.addEventListener("change", () => {
         if (!els.writingShowWarnings.checked) els.voiceWarningCopy.textContent = "Warnings are hidden for this session.";
+      });
+      els.scriptVoiceWarnings.addEventListener("change", () => {
+        if (!els.scriptVoiceWarnings.checked) showToast("Voice DNA warnings hidden for this script.");
       });
       els.saveWhisperModel.addEventListener("click", () => {
         saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Whisper model preference updated.");
@@ -7052,6 +7397,22 @@
         });
       });
       document.addEventListener("click", (event) => {
+        const scriptSourceOption = event.target.closest("[data-script-source-id]");
+        if (scriptSourceOption) {
+          selectScriptSourceById(scriptSourceOption.dataset.scriptSourceId);
+          return;
+        }
+        if (!event.target.closest("#scriptSourceCombo")) {
+          toggleScriptSourceCombo(false);
+        }
+        const copyScript = event.target.closest("[data-copy-script-output]");
+        if (copyScript) {
+          navigator.clipboard.writeText(els.scriptDetail.dataset.rawText || "").then(
+            () => showToast("Script copied."),
+            () => showToast("Could not copy script.")
+          );
+          return;
+        }
         const sourceOption = event.target.closest("[data-writing-source-id]");
         if (sourceOption) {
           selectWritingSourceById(sourceOption.dataset.writingSourceId);
