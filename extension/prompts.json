@@ -7,7 +7,7 @@
   {
     "id": "outline-structure",
     "label": "Outline the structure",
-    "prompt": "Outline the structure of this video with timestamps. Identify intro, hook, value proposition, demonstration, social proof, and call to action — or whatever sections actually exist. Note pacing changes."
+    "prompt": "Outline the structure of this video with timestamps. Identify intro, hook, value proposition, demonstration, social proof, and call to action, or whatever sections actually exist. Note pacing changes."
   },
   {
     "id": "quotable-moments",
@@ -17,7 +17,7 @@
   {
     "id": "would-improve",
     "label": "What would make this 2x better",
-    "prompt": "What would make this video 2x better? Be specific and constructive — name what's working, what's underperforming, and what 3 changes would matter most."
+    "prompt": "What would make this video 2x better? Be specific and constructive: name what's working, what's underperforming, and what 3 changes would matter most."
   },
   {
     "id": "tactics-list",

@@ -243,7 +243,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (kind === "session_add") {
     const active = await getActiveFromStorage();
     if (!active || !active.id) {
-      notify("Uoink", "No active session — start one in the popup first.");
+      notify("Uoink", "No active session, start one in the popup first.");
       return;
     }
     job.session_id = active.id;
