@@ -57,7 +57,7 @@ def test_splash_copy_and_dismiss_order():
     _assert("Click the rust U" not in html, "old pre-positioning-lock copy remains")
     _assert("Save the source. Write in your <em>voice.</em>" in html,
             "locked splash headline missing")
-    _assert("Uoink any video or podcast to save the source on your disk" in html,
+    _assert("Uoink any video, audio, or article to save the source on your disk" in html,
             "locked splash body missing")
     dismiss_src = html.split("function dismiss()", 1)[1].split(
         "async function openLastYoutube", 1)[0]
