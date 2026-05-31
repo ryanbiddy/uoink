@@ -622,6 +622,11 @@ def _default_settings() -> dict:
         # "skip warnings this generation" affordance. Default True; users
         # who never want the warning surface can hide it via Settings.
         "voice_dna_show_per_generation_toggle": True,
+        # v3.3 D-20 -- the dashboard shows source screenshots before the X
+        # intent handoff. The picker is visible by default; preselecting every
+        # screenshot is intentionally off so the user chooses what travels.
+        "writing_show_screenshot_picker": True,
+        "writing_default_attach_all_screenshots": False,
         "anthropic_key_invalid": False,
         # v2.1 rename: set True after the one-time post-migration
         # post-migration toast has fired, so it never repeats.
@@ -644,6 +649,18 @@ def _normalize_settings(data: dict) -> dict:
     )
     clean["transcript_reliability_auto_check"] = bool(
         clean.get("transcript_reliability_auto_check")
+    )
+    clean["voice_dna_warnings_enabled"] = bool(
+        clean.get("voice_dna_warnings_enabled", True)
+    )
+    clean["voice_dna_show_per_generation_toggle"] = bool(
+        clean.get("voice_dna_show_per_generation_toggle", True)
+    )
+    clean["writing_show_screenshot_picker"] = bool(
+        clean.get("writing_show_screenshot_picker", True)
+    )
+    clean["writing_default_attach_all_screenshots"] = bool(
+        clean.get("writing_default_attach_all_screenshots", False)
     )
     try:
         cap = int(clean.get("clipboard_screenshot_cap"))
@@ -837,6 +854,10 @@ def _public_settings(data: dict | None = None) -> dict:
             data.get("voice_dna_warnings_enabled", True)),
         "voice_dna_show_per_generation_toggle": bool(
             data.get("voice_dna_show_per_generation_toggle", True)),
+        "writing_show_screenshot_picker": bool(
+            data.get("writing_show_screenshot_picker", True)),
+        "writing_default_attach_all_screenshots": bool(
+            data.get("writing_default_attach_all_screenshots", False)),
     }
 
 
@@ -3312,7 +3333,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts.append("")
     parts.append("---")
     parts.append("")
-    parts.append("*[Uoinked with Uoink by ReplayRyan](https://uoink.video)*")
+    parts.append("*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*")
     parts.append("")
 
     return "\n".join(parts)
@@ -8078,6 +8099,8 @@ class Handler(BaseHTTPRequestHandler):
                                             # interview-format transcribe
             "voice_dna_warnings_enabled",   # v3.2 Writing Studio
             "voice_dna_show_per_generation_toggle",  # v3.2 Writing Studio
+            "writing_show_screenshot_picker",  # v3.3 D-20
+            "writing_default_attach_all_screenshots",  # v3.3 D-20
         )
         integer_fields = ("clipboard_screenshot_cap",)
         extra_fields = ("output_dir", "autostart", "topics",
@@ -9788,7 +9811,7 @@ def _maybe_post_migration_toast() -> bool:
     maybe_toast(
         "Uoink upgrade complete",
         "Your videos, settings, and API key moved to the new Uoink folder. "
-        "Nothing lost — the magnet was always a U. uoink.video",
+        "Nothing lost -- the magnet was always a U. uoink.app",
         icon_path=_bundled_icon_path(),
     )
     try:

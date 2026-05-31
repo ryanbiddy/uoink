@@ -25,7 +25,7 @@
 ; build.ps1 rewrites AppVersion from helper/_version.py before compiling.
 #define AppVersion    "0.0.0"
 #define AppPublisher  "ReplayRyan"
-#define AppURL        "https://uoink.video"
+#define AppURL        "https://uoink.app"
 
 [Setup]
 ; v2.1 rename: a NEW AppId is generated so the Uoink product installs as its
@@ -196,7 +196,7 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; \
 [Run]
 ; "Launch Uoink now" checkbox on the finish page (default checked).
 Filename: "{app}\python\pythonw.exe"; \
-  Parameters: """{app}\server.py"""; \
+  Parameters: """{app}\server.py"" --show-dashboard"; \
   WorkingDir: "{app}"; \
   Description: "Launch Uoink now"; \
   Flags: postinstall nowait skipifsilent
@@ -296,7 +296,7 @@ begin
     'No account, no cloud. Takes about a minute.',
                                               138, 44, 10, [], C_INK);
   AddLabel(WelcomePage,
-    'MIT - open source - uoink.video',        210, 18,  9, [fsItalic], C_RUST);
+    'MIT - open source - uoink.app',          210, 18,  9, [fsItalic], C_RUST);
 end;
 
 procedure BuildMigratePage();
