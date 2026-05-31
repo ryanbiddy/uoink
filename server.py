@@ -29,6 +29,7 @@ import time
 import urllib.error
 import urllib.request
 import uuid
+import webbrowser
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -3663,7 +3664,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     }
 
 
-INSTALL_HELP_URL = "https://uoink.video/install"
+INSTALL_HELP_URL = "https://uoink.app/install"
 
 
 def _is_youtube_rate_limit(e: BaseException) -> bool:
@@ -3686,7 +3687,7 @@ def _is_youtube_rate_limit(e: BaseException) -> bool:
 _RATE_LIMIT_INITIAL_BACKOFF_SEC = 60
 
 
-def friendly_error(e: BaseException) -> str:
+def _legacy_friendly_error_unused(e: BaseException) -> str:
     """Translate raw exceptions into copy the user can act on."""
     if isinstance(e, FileNotFoundError):
         return ("Uoink can't find yt-dlp or ffmpeg on this machine. "
@@ -3718,6 +3719,81 @@ def friendly_error(e: BaseException) -> str:
         return f"Uoink couldn't finish this video: {e}"
 
     return f"Uoink hit an unexpected error: {e}"
+
+
+def _subprocess_output(e: subprocess.CalledProcessError) -> str:
+    stderr = (e.stderr.decode("utf-8", errors="ignore")
+              if isinstance(e.stderr, bytes) else (e.stderr or ""))
+    stdout = (e.stdout.decode("utf-8", errors="ignore")
+              if isinstance(e.stdout, bytes) else (e.stdout or ""))
+    return "\n".join(part for part in (stderr, stdout) if part).strip()
+
+
+def machine_error_detail(e: BaseException) -> str:
+    """Raw-ish diagnostic detail for dashboard disclosures, not primary UI."""
+    if isinstance(e, subprocess.CalledProcessError):
+        pieces = []
+        if e.cmd:
+            try:
+                pieces.append("Command: " + " ".join(str(part) for part in e.cmd))
+            except TypeError:
+                pieces.append(f"Command: {e.cmd}")
+        pieces.append(f"Exit code: {e.returncode}")
+        output = _subprocess_output(e)
+        if output:
+            pieces.append(output)
+        return "\n".join(pieces).strip()[:6000]
+    return re.sub(r"\s+", " ", str(e or "")).strip()[:3000]
+
+
+def _source_name_from_error(text: str) -> str:
+    lower = text.lower()
+    if "youtube" in lower or "youtu.be" in lower:
+        return "YouTube"
+    if "x.com" in lower or "twitter" in lower:
+        return "X"
+    if "vimeo" in lower:
+        return "Vimeo"
+    return "The source"
+
+
+def _plain_error_from_text(text: str) -> str:
+    lower = text.lower()
+    source = _source_name_from_error(text)
+    if ("too many requests" in lower or "http error 429" in lower
+            or "rate-limit" in lower or "rate limit" in lower):
+        return "Helper's catching its breath. Retrying..."
+    if ("sign in" in lower or "login" in lower or "cookies" in lower
+            or "captcha" in lower or "guest token" in lower):
+        return f"{source} wouldn't hand this one over without a login. Retry with cookies?"
+    if "members-only" in lower or "members only" in lower:
+        return f"{source} kept this one behind members-only access."
+    if ("video unavailable" in lower or "this video is private" in lower
+            or " private" in lower or "region" in lower):
+        return f"{source} did not expose a usable video for this source."
+    if "is live" in lower or "premiere" in lower:
+        return f"{source} is still live. Try again once the broadcast becomes a replay."
+    if "ffmpeg" in lower:
+        return "The source came down, but the local media step tripped. Details are tucked below."
+    if "whisperx" in lower or "whisper" in lower:
+        return "The local transcript step tripped. Details are tucked below."
+    if "can't find yt-dlp" in lower or "can't find ffmpeg" in lower or "no such file" in lower:
+        return "Uoink can't find a local media helper. Details are tucked below."
+    if "yt-dlp" in lower or "unable to download" in lower or "extractor error" in lower:
+        return f"{source} would not hand this one over cleanly. Details are tucked below."
+    return "Uoink couldn't finish this one. Details are tucked below."
+
+
+def friendly_error(e: BaseException) -> str:
+    """Translate raw exceptions into copy the user can act on."""
+    if isinstance(e, FileNotFoundError):
+        return ("Uoink can't find yt-dlp or ffmpeg on this machine. "
+                f"Install both from {INSTALL_HELP_URL}, then try again.")
+    if isinstance(e, subprocess.CalledProcessError):
+        return _plain_error_from_text(machine_error_detail(e))
+    if isinstance(e, RuntimeError):
+        return _plain_error_from_text(str(e))
+    return "Uoink couldn't finish this one. Details are tucked below."
 
 
 # ---------------------------------------------------------------------------
@@ -4898,6 +4974,7 @@ def _public_job(job: dict) -> dict:
         "updated_at": job.get("updated_at"),
         "completed_at": job.get("completed_at"),
         "error": job.get("error"),
+        "error_detail": job.get("error_detail"),
         "result": result,
         "warnings": list(job.get("warnings") or []),
         "message": job.get("message"),
@@ -4967,6 +5044,7 @@ def _validate_persisted_job(raw: dict) -> dict | None:
             "completed_at": now,
             "updated_at": now,
             "error": "server restarted",
+            "error_detail": None,
             "result": None,
             "message": "Job failed because the Uoink helper restarted.",
         })
@@ -5047,6 +5125,7 @@ def _add_job_record(job: dict) -> dict:
 def _record_single_extract_job(url: str, started_at: str, *,
                                result: dict | None = None,
                                error: str | None = None,
+                               error_detail: str | None = None,
                                title: str | None = None,
                                folder: Path | None = None) -> dict:
     now = _now_iso()
@@ -5070,6 +5149,7 @@ def _record_single_extract_job(url: str, started_at: str, *,
         "updated_at": now,
         "completed_at": now,
         "error": None if ok else (error or "single-video extraction failed"),
+        "error_detail": None if ok else error_detail,
         "result": {
             "combined_md_path": str(corpus_path) if corpus_path else None,
             # Full corpus text is intentionally NOT persisted into the
@@ -5528,6 +5608,7 @@ def _playlist_worker(job_id: str):
                 raise
             except BaseException as e:
                 msg = friendly_error(e)
+                detail = machine_error_detail(e)
                 log.error("playlist job %s video %d failed: %s", job_id, idx, msg)
                 if target is None:
                     target = _unique_child_folder(
@@ -5551,6 +5632,7 @@ def _playlist_worker(job_id: str):
                     "failed_marker_path": str(target / "FAILED.txt"),
                     "ok": False,
                     "error": msg,
+                    "error_detail": detail,
                 })
                 videos_failed += 1
                 _update_job(
@@ -5622,6 +5704,7 @@ def _playlist_worker(job_id: str):
         _finish_job_cancelled(job_id)
     except BaseException as e:
         msg = friendly_error(e)
+        detail = machine_error_detail(e)
         log.error("playlist job %s failed: %s", job_id, msg)
         _update_job(
             job_id,
@@ -5630,6 +5713,7 @@ def _playlist_worker(job_id: str):
             current_video_phase=None,
             completed_at=_now_iso(),
             error=msg,
+            error_detail=detail,
             result=None,
             message="Playlist failed.",
         )
@@ -5780,11 +5864,12 @@ def _retry_pending_one() -> bool:
                     pending_id, retry_at, delay)
                 return True
             # Non-recoverable error -- jump straight to terminal failure.
-            # The user-facing job (in jobs.json / popup) gets the full
-            # friendly_error string; the queue row's persisted last_error
-            # goes through _sanitize_error so paths / credentials don't
-            # leak into a long-lived store (Sprint 19.6 / Fix 8).
+            # The user-facing job gets on-brand copy plus a disclosure detail;
+            # the queue row's persisted last_error still goes through
+            # _sanitize_error so paths / credentials don't leak into a
+            # long-lived store (Sprint 19.6 / Fix 8).
             msg = friendly_error(e)
+            detail = machine_error_detail(e)
             persisted = _sanitize_error(msg)
             try:
                 idx.mark_pending_failed(
@@ -5792,7 +5877,8 @@ def _retry_pending_one() -> bool:
             except Exception:
                 log.exception("retry worker: mark_pending_failed failed")
             _record_single_extract_job(
-                url, started_at, error=msg, title=title, folder=folder)
+                url, started_at, error=msg, error_detail=detail,
+                title=title, folder=folder)
             log.warning(
                 "retry worker: pending #%d non-recoverable: %s",
                 pending_id, persisted)
@@ -9405,15 +9491,21 @@ class Handler(BaseHTTPRequestHandler):
                             "reason": "youtube_rate_limit",
                         })
                 msg = friendly_error(e)
+                detail = machine_error_detail(e)
                 log.error("POST /extract -> error: %s", msg)
                 _record_single_extract_job(
                     url,
                     started_at,
                     error=msg,
+                    error_detail=detail,
                     title=title,
                     folder=folder,
                 )
-                return self._send_json(200, {"ok": False, "error": msg})
+                return self._send_json(200, {
+                    "ok": False,
+                    "error": msg,
+                    "error_detail": detail,
+                })
 
         _record_single_extract_job(url, started_at, result=result)
         log.info("POST /extract -> ok (%d shots, %s)",
@@ -9502,8 +9594,14 @@ class Handler(BaseHTTPRequestHandler):
                                           generate_paste=False)
             except BaseException as e:
                 msg = friendly_error(e)
+                detail = machine_error_detail(e)
                 log.error("POST /session/add -> error: %s", msg)
-                return self._send_json(200, {"ok": False, "error": msg, "session_id": session_id})
+                return self._send_json(200, {
+                    "ok": False,
+                    "error": msg,
+                    "error_detail": detail,
+                    "session_id": session_id,
+                })
 
         with _session_lock:
             session = _read_session(session_id) or session
@@ -9715,6 +9813,33 @@ def _existing_server_responds() -> bool:
         return False
 
 
+def _spawn_dashboard_window(*, reason: str) -> bool:
+    """Open the local dashboard window without making the helper re-bind."""
+    try:
+        script = HERE / "uoink_dashboard.py"
+        if script.exists():
+            bundled = HERE / "python" / "pythonw.exe"
+            exe = bundled if bundled.exists() else Path(sys.executable)
+            creationflags = 0x08000000 if sys.platform == "win32" else 0
+            subprocess.Popen(
+                [str(exe), str(script)],
+                cwd=str(HERE),
+                creationflags=creationflags,
+            )
+            log.info("dashboard: spawned (%s)", reason)
+            return True
+    except Exception as e:
+        log.warning("dashboard: window spawn failed (%s): %s", reason, e)
+
+    try:
+        webbrowser.open(f"http://{HOST}:{PORT}/dashboard")
+        log.info("dashboard: opened browser fallback (%s)", reason)
+        return True
+    except Exception as e:
+        log.warning("dashboard: browser fallback failed (%s): %s", reason, e)
+        return False
+
+
 class _YoinkHTTPServer(ThreadingHTTPServer):
     """ThreadingHTTPServer with a bounded listen() backlog so a burst of
     connections is refused at the OS layer instead of piling up unbounded
@@ -9723,7 +9848,7 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
     request_queue_size = 16
 
 
-def main():
+def main(*, show_dashboard: bool = False):
     # Output directories are created lazily by the write paths themselves
     # (_run_extraction, _atomic_write_text, and the jobs/taxonomy/settings
     # writers all mkdir(parents=True, exist_ok=True) their own parents).
@@ -9735,6 +9860,8 @@ def main():
     # twice would otherwise spawn parallel pythonw.exe processes that all
     # try to bind 5179. Probe the canonical /health endpoint first.
     if _existing_server_responds():
+        if show_dashboard:
+            _spawn_dashboard_window(reason="existing-server")
         log.info("Uoink server already running on http://%s:%d -- exiting", HOST, PORT)
         sys.exit(0)
 
@@ -9844,6 +9971,9 @@ def main():
         except Exception as e:
             log.warning("splash: failed to spawn (non-fatal): %s", e)
 
+    if show_dashboard:
+        _spawn_dashboard_window(reason="launch-flag")
+
     log.info("Uoink server v%s running on http://%s:%d", VERSION, HOST, PORT)
     log.info("Ready to uoink. Click any YouTube video's Uoink button.")
     log.info("Output: %s", DESKTOP_ROOT)
@@ -9886,6 +10016,7 @@ def run_cli(argv: list[str]) -> int:
       copy / move / delete and the keyring entry it'd rewrite, changing
       nothing. De-risks the clean-VM upgrade test.
     - --doctor          : print the /diagnose payload + migration status.
+    - --show-dashboard  : run the server, then open the dashboard window.
     (no flag)           : run the server.
     """
     if "--migrate-dry-run" in argv:
@@ -9894,7 +10025,7 @@ def run_cli(argv: list[str]) -> int:
     if "--doctor" in argv:
         _print_json(doctor_payload())
         return 0
-    main()
+    main(show_dashboard="--show-dashboard" in argv)
     return 0
 
 
