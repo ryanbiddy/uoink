@@ -1327,9 +1327,9 @@ async function loadTasteAnchors() {
     } else {
       throw new Error(`HTTP ${res.status}`);
     }
-  } catch (e) {
-    // Fallback to chrome.storage.local
-    console.warn("Failed to fetch taste anchors from server, falling back to local storage", e);
+  } catch {
+    // Fallback to chrome.storage.local. Older helpers do not expose this route,
+    // and the local cache is the intended compatibility path.
     chrome.storage.local.get({ uoink_taste_anchors: { best: [], worst: [], admired_channels: [] } }, (items) => {
       const anchors = items.uoink_taste_anchors || { best: [], worst: [], admired_channels: [] };
       renderTasteAnchors(anchors);
@@ -1381,8 +1381,7 @@ function renderTasteAnchorsList(listEl, items, type, emptyMsg) {
         } else {
           throw new Error(`HTTP ${res.status}`);
         }
-      } catch (err) {
-        console.warn("Failed to delete taste anchor from server, removing locally", err);
+      } catch {
         chrome.storage.local.get({ uoink_taste_anchors: { best: [], worst: [], admired_channels: [] } }, (stored) => {
           const anchors = stored.uoink_taste_anchors || { best: [], worst: [], admired_channels: [] };
           if (type === "best") {
