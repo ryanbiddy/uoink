@@ -2708,6 +2708,38 @@ def _migrate_taxonomy_json_to_index() -> None:
         log.exception("taxonomy.json migration failed; leaving the file in place")
 
 
+# v3.2.3: curated default style anchors bundled with the install. Same
+# bundle-trap discipline as the v3.2.1 module fix -- this file MUST be listed
+# in uoink.iss [Files] and staged by build.ps1, and verify_install.ps1 asserts
+# it is present after install.
+DEFAULT_STYLE_ANCHORS_PATH = HERE / "defaults" / "style_anchors.json"
+
+
+def _seed_default_style_anchors() -> None:
+    """First-run seed of the curated default style anchors from the bundled
+    defaults/style_anchors.json. No-op when the file is missing or the
+    style_anchors table already has rows (so it never overrides a user's
+    curation). Seeded anchors are inactive (active=0, is_default=1), so they
+    don't count against the active cap until the user activates one."""
+    try:
+        if not DEFAULT_STYLE_ANCHORS_PATH.exists():
+            log.info("default style anchors: %s not bundled; skipping seed",
+                     DEFAULT_STYLE_ANCHORS_PATH)
+            return
+        data = json.loads(
+            DEFAULT_STYLE_ANCHORS_PATH.read_text(encoding="utf-8"))
+        if not isinstance(data, list):
+            log.warning("default style anchors: JSON is not a list; skipping")
+            return
+        seeded = writing_studio.seed_default_anchors(_get_index(), data)
+        if seeded:
+            log.info("default style anchors: seeded %d on first run", seeded)
+    except (OSError, json.JSONDecodeError) as e:
+        log.warning("default style anchors seed failed: %s", e)
+    except Exception:
+        log.exception("default style anchors seed: unexpected error")
+
+
 def _query_taxonomy(*, channel: str | None = None,
                     hook_type: str | None = None,
                     limit: int = 50) -> list[dict]:
@@ -6637,6 +6669,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_monitored_playlists_list()
         if bare == "/playlists/monitored/events":
             return self._handle_monitored_playlist_events_list()
+        if bare == "/writing/style-anchors/defaults":
+            return self._handle_writing_style_anchors_defaults()
         if bare == "/writing/style-anchors":
             return self._handle_writing_style_anchors_list()
         if bare.startswith("/writing/") and not bare.endswith("/revise") \
@@ -7880,6 +7914,23 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {
             "ok": True, "anchors": rows, "count": len(rows),
             "cap": writing_studio.STYLE_ANCHOR_CAP,
+            "active_count": writing_studio.active_style_anchor_count(_get_index()),
+        })
+
+    def _handle_writing_style_anchors_defaults(self):
+        """GET /writing/style-anchors/defaults -- the curated default anchors
+        (is_default=1) for the 'Browse defaults' UI. Each carries its current
+        active flag so the activate toggle reflects state. v3.2.3."""
+        if not self._require_token():
+            return
+        try:
+            anchors = writing_studio.list_default_anchors(_get_index())
+        except Exception as e:
+            log.exception("/writing/style-anchors/defaults GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {
+            "ok": True, "anchors": anchors, "count": len(anchors),
+            "cap": writing_studio.STYLE_ANCHOR_CAP,
         })
 
     def _handle_writing_style_anchor_add(self, body):
@@ -7961,7 +8012,11 @@ class Handler(BaseHTTPRequestHandler):
         if piece is None:
             return self._send_json(404, {"ok": False,
                                           "error": "piece not found"})
-        return self._send_json(200, {"ok": True, "piece": piece})
+        # v3.2.3: surface the persisted body at the top level so the dashboard
+        # can read it directly (it's also inside `piece`). This is the actual
+        # generated tweet/blog text, NOT the Path-A grounding scaffolding.
+        return self._send_json(200, {"ok": True, "piece": piece,
+                                      "body": piece.get("body")})
 
     def _writing_two_phase(self, body: dict, *, kind: str):
         """Shared two-phase contract for tweet/blog/revise. Phase 1: no
@@ -10318,6 +10373,10 @@ def main(*, show_dashboard: bool = False):
     # One-time: fold any pre-index jobs.json / taxonomy.json into index.db.
     _migrate_jobs_json_to_index()
     _migrate_taxonomy_json_to_index()
+    # v3.2.3: seed curated default style anchors on first run (no-op once the
+    # user has any anchor). Runs after the index is open (migration 0016 added
+    # the is_default column).
+    _seed_default_style_anchors()
     # Hydrate the in-memory job dict from the index.
     _restore_jobs_from_disk()
     # Backfill the index from disk in the background so a missing index

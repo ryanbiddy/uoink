@@ -69,7 +69,8 @@ def _validate_json_list(value: Any, *, field: str) -> str:
 
 # ---- grounding context ---------------------------------------------------
 def assemble_grounding(idx, workspace_id: str, *,
-                        style_anchors: bool = True) -> dict:
+                        style_anchors: bool = True,
+                        hook_type_lens: str | None = None) -> dict:
     """Pull everything the agent needs to write a script:
       - Workspace metadata (format, topic, hook_target, etc.)
       - Assembled corpus slice (re-run if empty; reuse if populated)
@@ -123,11 +124,20 @@ def assemble_grounding(idx, workspace_id: str, *,
             log.warning("taste anchors pull skipped: %s", e)
             taste = None
 
+    hook_lens = None
+    if hook_type_lens:
+        try:
+            import writing_studio as _ws
+            hook_lens = _ws.hook_lens_grounding(hook_type_lens)
+        except Exception:
+            hook_lens = None
+
     return {
         "ok": True,
         "workspace": ws,
         "assembled": assembled,
         "taste_anchors": taste,
+        "hook_lens": hook_lens,
     }
 
 
@@ -197,16 +207,19 @@ def persist_script(idx, workspace_id: str, *, script: dict,
 def generate_script(idx, workspace_id: str, *,
                      script: dict | None = None,
                      mode: str = COMPUTE_MODE_AGENT,
-                     parent_script_id: int | None = None) -> dict:
+                     parent_script_id: int | None = None,
+                     hook_type_lens: str | None = None) -> dict:
     """Two-phase entry point.
 
     Phase 1 (`script` is None): return the grounding context the agent
-    needs to write a script. NEVER persists.
+    needs to write a script, including the hook lens when set. NEVER
+    persists.
 
     Phase 2 (`script` is a dict): persist the agent-produced script.
     Returns the new script row id + version."""
     if script is None:
-        ctx = assemble_grounding(idx, workspace_id)
+        ctx = assemble_grounding(idx, workspace_id,
+                                 hook_type_lens=hook_type_lens)
         if not ctx.get("ok"):
             return ctx
         return {"ok": True, "mode": "grounding_only", "context": ctx,

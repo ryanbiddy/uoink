@@ -1,0 +1,52 @@
+[
+  {
+    "id": "default-naval",
+    "name": "Naval - Aphorism Threads",
+    "source_type": "text",
+    "source_url": "https://x.com/naval",
+    "raw_text": "[Default sample pending AG curation. Final curated tweets land via handoff/defaults/style_anchors.json before the v3.2.3 release build.]",
+    "active": false,
+    "default": true,
+    "credit": "Source: @naval on X. Sample curated for the default Uoink style anchor library."
+  },
+  {
+    "id": "default-pg",
+    "name": "Paul Graham - Plain Essay",
+    "source_type": "text",
+    "source_url": "https://paulgraham.com",
+    "raw_text": "[Default sample pending AG curation. Final curated essay excerpt lands via handoff/defaults/style_anchors.json before the v3.2.3 release build.]",
+    "active": false,
+    "default": true,
+    "credit": "Source: paulgraham.com. Sample curated for the default Uoink style anchor library."
+  },
+  {
+    "id": "default-swyx",
+    "name": "swyx - AI-Engineering Commentary",
+    "source_type": "text",
+    "source_url": "https://swyx.io",
+    "raw_text": "[Default sample pending AG curation. Final curated commentary lands via handoff/defaults/style_anchors.json before the v3.2.3 release build.]",
+    "active": false,
+    "default": true,
+    "credit": "Source: @swyx (swyx.io). Sample curated for the default Uoink style anchor library."
+  },
+  {
+    "id": "default-justin-welsh",
+    "name": "Justin Welsh - Solo Creator Playbook",
+    "source_type": "text",
+    "source_url": "https://x.com/thejustinwelsh",
+    "raw_text": "[Default sample pending AG curation. Final curated posts land via handoff/defaults/style_anchors.json before the v3.2.3 release build.]",
+    "active": false,
+    "default": true,
+    "credit": "Source: @thejustinwelsh on X / LinkedIn. Sample curated for the default Uoink style anchor library."
+  },
+  {
+    "id": "default-george-mack",
+    "name": "George Mack - Mental Model Threads",
+    "source_type": "text",
+    "source_url": "https://x.com/george__mack",
+    "raw_text": "[Default sample pending AG curation. Final curated threads land via handoff/defaults/style_anchors.json before the v3.2.3 release build.]",
+    "active": false,
+    "default": true,
+    "credit": "Source: @george__mack on X. Sample curated for the default Uoink style anchor library."
+  }
+]

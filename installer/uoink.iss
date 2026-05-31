@@ -156,6 +156,11 @@ Source: "staging\assets\logo-mark-color.png"; DestDir: "{app}\assets"; Flags: ig
 ; Sprint 19.6 / Fix 1: pre-Sprint-19.6 installers omitted these, causing
 ; the helper to crash with "no such table: schema_version" on first launch.
 Source: "staging\migrations\*"; DestDir: "{app}\migrations"; Flags: recursesubdirs ignoreversion createallsubdirs
+; v3.2.3: curated default style anchors, seeded on first run by
+; server._seed_default_style_anchors. Same bundle discipline as the v3.2.1
+; module fix -- staging coverage alone is not enough; the file must land in
+; {app}\defaults or the seed silently no-ops. verify_install.ps1 asserts it.
+Source: "staging\defaults\*"; DestDir: "{app}\defaults"; Flags: recursesubdirs ignoreversion createallsubdirs
 Source: "staging\stop-server.bat"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\stop-server.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\verify_install.ps1"; DestDir: "{app}"; Flags: ignoreversion

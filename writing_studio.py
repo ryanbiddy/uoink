@@ -46,31 +46,129 @@ _ANCHOR_SOURCES = (ANCHOR_SOURCE_URL, ANCHOR_SOURCE_TEXT)
 
 STYLE_ANCHOR_CAP = 10  # Ryan's locked answer #4
 
+# v3.2.3 hook-type lens (generation intent). The redesigned Generate tab shows
+# these 9 as quick-fill chips for tweet / thread / blog / script. This is the
+# GENERATION lens, distinct from server.HOOK_TYPES (the classification taxonomy
+# the hook detector emits); they intentionally differ. Each value maps to a
+# one-line directive folded into the grounding so the agent biases the opening
+# toward that style. Free-form `angle` still works alongside it.
+HOOK_LENS_TYPES = {
+    "informative": "Lead with the single most useful fact, stated plainly.",
+    "engagement_bait": "Open with a line built to pull a reply or a save.",
+    "disappointment_contrarian": "Open by overturning a common belief the audience holds.",
+    "curiosity_gap": "Open with a gap the reader needs the rest to close.",
+    "stakes": "Open by naming what's at risk if they get this wrong.",
+    "success_case_study": "Open on a concrete win and the result it produced.",
+    "failure_lesson": "Open on a specific failure and the lesson it taught.",
+    "question_open_loop": "Open with a question that stays unanswered until the payoff.",
+    "frame_shift": "Open by reframing the topic so it reads in a new light.",
+}
+
+
+def normalize_hook_lens(value) -> str | None:
+    """Validate a hook_type_lens value against HOOK_LENS_TYPES. Returns the
+    lens key (or None when unset/empty). Raises ValueError with `.http_status`
+    on an unrecognized non-empty value so the transport returns 400."""
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    if not isinstance(value, str) or value.strip() not in HOOK_LENS_TYPES:
+        e = ValueError(
+            "hook_type_lens must be one of " + ", ".join(sorted(HOOK_LENS_TYPES)))
+        e.http_status = 400
+        raise e
+    return value.strip()
+
+
+def hook_lens_grounding(lens: str | None) -> dict | None:
+    """Shape a hook lens into the grounding payload: {type, directive}. None
+    when no lens is set."""
+    if not lens:
+        return None
+    return {"type": lens, "directive": HOOK_LENS_TYPES[lens]}
+
 
 def _now_iso() -> str:
     return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
 
 
 # ---- style anchors -----------------------------------------------------
+def _shape_anchor(row) -> dict | None:
+    """Shape a style_anchors row for the API. Maps the `is_default` column
+    (migration 0016) to a clean `default` boolean. Tolerant of pre-0016 rows
+    that lack the column (defaults to False)."""
+    if row is None:
+        return None
+    d = dict(row)
+    d["default"] = bool(d.pop("is_default", 0))
+    return d
+
+
 def list_style_anchors(idx, *, active_only: bool = False) -> list[dict]:
     sql = "SELECT * FROM style_anchors"
     if active_only:
         sql += " WHERE active = 1"
     sql += " ORDER BY added_at DESC"
     rows = idx._conn.execute(sql).fetchall()
-    return [dict(r) for r in rows]
+    return [_shape_anchor(r) for r in rows]
+
+
+def list_default_anchors(idx) -> list[dict]:
+    """The curated default anchors (is_default=1), for the 'Browse defaults'
+    UI. Includes each one's current active flag so the toggle reflects state."""
+    rows = idx._conn.execute(
+        "SELECT * FROM style_anchors WHERE is_default = 1 ORDER BY name"
+    ).fetchall()
+    return [_shape_anchor(r) for r in rows]
 
 
 def get_style_anchor(idx, anchor_id: int) -> dict | None:
     row = idx._conn.execute(
         "SELECT * FROM style_anchors WHERE id=?", (anchor_id,)).fetchone()
-    return dict(row) if row else None
+    return _shape_anchor(row)
 
 
 def style_anchor_count(idx) -> int:
     row = idx._conn.execute(
         "SELECT COUNT(*) AS c FROM style_anchors").fetchone()
     return int(row["c"]) if row else 0
+
+
+def active_style_anchor_count(idx) -> int:
+    """The cap (STYLE_ANCHOR_CAP) counts ACTIVE anchors, not total. Inactive
+    seeded defaults don't consume a user's slots; activating one does."""
+    row = idx._conn.execute(
+        "SELECT COUNT(*) AS c FROM style_anchors WHERE active = 1").fetchone()
+    return int(row["c"]) if row else 0
+
+
+def seed_default_anchors(idx, anchors: list[dict]) -> int:
+    """First-run seed: when the style_anchors table is empty, insert each
+    default with active=0 + is_default=1. Returns how many were seeded. No-op
+    once any anchor exists, so it never duplicates and never overrides a user's
+    curation. Defaults seed inactive, so they don't count against the cap until
+    the user activates one."""
+    if not anchors or style_anchor_count(idx) > 0:
+        return 0
+    seeded = 0
+    with idx._lock:
+        for a in anchors:
+            if not isinstance(a, dict):
+                continue
+            name = (a.get("name") or "").strip()
+            if not name:
+                continue
+            source_type = a.get("source_type") or ANCHOR_SOURCE_TEXT
+            if source_type not in _ANCHOR_SOURCES:
+                source_type = ANCHOR_SOURCE_TEXT
+            idx._conn.execute(
+                "INSERT INTO style_anchors "
+                "(name, source_type, source_url, raw_text, active, "
+                " is_default, added_at) VALUES (?, ?, ?, ?, 0, 1, ?)",
+                (name[:80], source_type, a.get("source_url"),
+                 a.get("raw_text"), _now_iso()))
+            seeded += 1
+    log.info("seeded %d default style anchors", seeded)
+    return seeded
 
 
 def add_style_anchor(idx, *, name: str, source_type: str,
@@ -97,11 +195,12 @@ def add_style_anchor(idx, *, name: str, source_type: str,
     if not source_value:
         raise ValueError("source_value required")
 
-    if style_anchor_count(idx) >= STYLE_ANCHOR_CAP:
-        # 422-shaped: caller already has the maximum.
+    if active_style_anchor_count(idx) >= STYLE_ANCHOR_CAP:
+        # 422-shaped: caller already has the maximum ACTIVE anchors. The cap
+        # is on active (not total) so inactive seeded defaults don't block adds.
         e = ValueError(
-            f"style anchors capped at {STYLE_ANCHOR_CAP}; "
-            f"remove one before adding another")
+            f"active style anchors capped at {STYLE_ANCHOR_CAP}; "
+            f"deactivate one before adding another")
         e.http_status = 422  # transport reads this
         raise e
 
@@ -207,7 +306,8 @@ def _channel_handle(channel_url: str, channel_name: str) -> str | None:
 
 # ---- grounding payload (Phase 1 of two-phase generation) --------------
 def assemble_grounding(idx, yoink_id: str, *,
-                         style_anchor_ids: list[int] | None = None) -> dict:
+                         style_anchor_ids: list[int] | None = None,
+                         hook_type_lens: str | None = None) -> dict:
     """Pull the source yoink + active anchors + voice DNA + creator
     credit line into a structured payload the agent uses to write.
 
@@ -216,11 +316,13 @@ def assemble_grounding(idx, yoink_id: str, *,
           source_yoink: {...},
           source_credit: {tweet: '...', blog: '...'},
           style_anchors: [{id, name, raw_text}, ...],
+          hook_lens: {type, directive} | None,
           voice_dna_prompt: '...',
           warning_copy: '...',
         }
 
-    Pure local read."""
+    Pure local read. `hook_type_lens` is validated by the caller
+    (normalize_hook_lens); here it's just shaped into the grounding."""
     yoink = idx.get_yoink(yoink_id) if yoink_id else None
     anchors_all = list_style_anchors(idx, active_only=False)
     if style_anchor_ids:
@@ -242,6 +344,7 @@ def assemble_grounding(idx, yoink_id: str, *,
              "raw_text": a.get("raw_text") or ""}
             for a in anchors
         ],
+        "hook_lens": hook_lens_grounding(hook_type_lens),
         "voice_dna_prompt": voice_dna.VOICE_DNA_PROMPT,
         "warning_copy": voice_dna.warning_copy(),
     }

@@ -30,6 +30,24 @@ try {
     exit 21
 }
 
+# Bundle-presence guard. The v3.2.1 break shipped because new top-level modules
+# reached build.ps1 staging but never made it into uoink.iss [Files]. This
+# asserts the files that have bitten us (or would) are actually in {app}.
+$requiredFiles = @(
+    'source_manifest.py',
+    'openapi_bridge.py',
+    'reddit_extractor.py',
+    'defaults\style_anchors.json'
+)
+foreach ($rf in $requiredFiles) {
+    $rfPath = Join-Path $appDir $rf
+    if (-not (Test-Path $rfPath)) {
+        Write-VerifyLog ("MISSING bundled file: {0}" -f $rf)
+        exit 23
+    }
+}
+Write-VerifyLog ("bundled files present: {0}" -f ($requiredFiles -join ', '))
+
 $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
 $lastError = $null
 while ((Get-Date) -lt $deadline) {
