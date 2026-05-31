@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from datetime import datetime
 from typing import Any
 
@@ -425,3 +426,114 @@ def list_pieces(idx, *, kind: str | None = None,
         " ORDER BY generated_at DESC LIMIT ?",
         params).fetchall()
     return [_shape_piece(dict(r)) for r in rows]
+
+
+# ---- composer support (D-19 char count / thread builder, D-18 attribution) --
+TWEET_LIMIT = 280
+
+# X collapses every URL to a t.co link of fixed weight, so a long URL costs
+# the same 23 characters as a short one. We don't implement X's full CJK
+# weighting table (rare in this audience's drafts); plain text counts as
+# Unicode code points, which is exact for Latin copy and a slight under-count
+# for CJK. Good enough for an over-280 guard, and we never hard-block.
+URL_WEIGHTED_LEN = 23
+_URL_RE = re.compile(r"https?://\S+")
+
+# D-18 A: native attribution. The creator credit (build_credit_line) is
+# non-suppressible; this attribution fragment is REMOVABLE before publish and
+# ships on by default. AG owns the final wording -- these strings are
+# Voice-DNA-clean (no em dash, contraction-friendly) pending AG's pass.
+NATIVE_ATTRIBUTION_DOMAIN = "uoink.app"
+BLOG_ATTRIBUTION_LINE = "Captured with uoink.app. Local corpus, creator credit kept."
+
+
+def tweet_length(text: str) -> int:
+    """X-style weighted length for the composer's over-280 guard: every URL
+    counts as 23 chars (t.co), the rest as Unicode code points."""
+    if not text:
+        return 0
+    url_count = len(_URL_RE.findall(text))
+    without_urls = _URL_RE.sub("", text)
+    return len(without_urls) + url_count * URL_WEIGHTED_LEN
+
+
+def assemble_footer(credit_line: str, kind: str, *,
+                     attribution_enabled: bool = True) -> str:
+    """Compose the publish footer: the non-suppressible creator credit plus
+    the removable native attribution (D-18 A) when enabled. Tweets/threads
+    append ` · uoink.app` to the credit line; blogs get the attribution on
+    its own line under the Source credit."""
+    credit_line = credit_line or ""
+    if kind == KIND_BLOG:
+        if attribution_enabled:
+            return f"{credit_line}\n{BLOG_ATTRIBUTION_LINE}".strip()
+        return credit_line
+    suffix = f" · {NATIVE_ATTRIBUTION_DOMAIN}" if attribution_enabled else ""
+    return f"{credit_line}{suffix}"
+
+
+def validate_composition(idx, *, yoink_id: str | None, kind: str,
+                          tweets: list[str] | None = None,
+                          attribution_enabled: bool = True) -> dict:
+    """Pure pre-publish computation for the Writing Studio composer (D-19).
+
+    Returns per-tweet char counts + over-280 flags + total tweet count for
+    threads, the non-suppressible credit line, and the removable native
+    attribution footer (D-18 A). No persistence, no LLM call -- the composer
+    UI calls this on every keystroke to render counts and the attribution
+    preview. The footer appends to the LAST tweet, so that tweet also gets a
+    `*_with_footer` count the UI uses to warn before publish."""
+    if kind not in _KINDS:
+        e = ValueError(f"kind must be one of {list(_KINDS)}")
+        e.http_status = 400
+        raise e
+
+    yoink = idx.get_yoink(yoink_id) if yoink_id else None
+    credit_kind = KIND_BLOG if kind == KIND_BLOG else KIND_TWEET
+    credit_line = build_credit_line(yoink, kind=credit_kind)
+    footer = assemble_footer(credit_line, kind,
+                              attribution_enabled=attribution_enabled)
+
+    out: dict = {
+        "kind": kind,
+        "limit": TWEET_LIMIT,
+        "credit_line": credit_line,
+        "attribution_enabled": bool(attribution_enabled),
+        "footer_text": footer,
+    }
+
+    if kind == KIND_BLOG:
+        out["attribution_line"] = (BLOG_ATTRIBUTION_LINE
+                                    if attribution_enabled else "")
+        return out
+
+    tweets = [t if isinstance(t, str) else "" for t in (tweets or [])]
+    per: list[dict] = []
+    for i, text in enumerate(tweets):
+        count = tweet_length(text)
+        per.append({
+            "index": i,
+            "char_count": count,
+            "over_limit": count > TWEET_LIMIT,
+            "remaining": TWEET_LIMIT - count,
+        })
+
+    footer_target = len(per) - 1 if per else None
+    footer_count = tweet_length(footer)
+    over_with_footer = False
+    if footer_target is not None:
+        combined = (tweets[footer_target].rstrip() + "\n\n" + footer).strip()
+        combined_count = tweet_length(combined)
+        over_with_footer = combined_count > TWEET_LIMIT
+        per[footer_target]["char_count_with_footer"] = combined_count
+        per[footer_target]["remaining_with_footer"] = TWEET_LIMIT - combined_count
+        per[footer_target]["over_limit_with_footer"] = over_with_footer
+
+    out.update({
+        "total_tweets": len(per),
+        "tweets": per,
+        "footer_target_index": footer_target,
+        "footer_char_count": footer_count,
+        "over_limit_any": any(p["over_limit"] for p in per) or over_with_footer,
+    })
+    return out
