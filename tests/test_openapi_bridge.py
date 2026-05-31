@@ -146,10 +146,28 @@ def test_http_bridge():
         httpd.shutdown()
 
 
+def test_no_version_tags_in_catalog():
+    """Regression guard (Stage 4 M-B): no tool description or generated spec
+    summary may start with an internal version/sprint tag like 'v3.1 podcast:'."""
+    import re
+    import uoink_mcp_tools as m
+    tag = re.compile(r"^v\d+\.\d+")
+    desc_leaks = [n for n, s in m.TOOL_REGISTRY.items()
+                  if tag.match((s.description or "").strip())]
+    _assert(not desc_leaks, f"tool descriptions still start with a version tag: {desc_leaks}")
+    spec = ob.build_spec("http://x", tool_registry=m.TOOL_REGISTRY, version="3.2.1")
+    spec_leaks = [p for p, o in spec["paths"].items()
+                  if tag.match(o["post"]["summary"].strip())
+                  or tag.match(o["post"]["description"].strip())]
+    _assert(not spec_leaks, f"spec ops still leak a version tag: {spec_leaks}")
+    print("ok  no version/sprint tags in any tool description or spec op")
+
+
 def main():
     test_build_spec_real_registry()
     test_build_well_known()
     test_http_bridge()
+    test_no_version_tags_in_catalog()
     print("\nALL OPENAPI BRIDGE TESTS PASSED")
     return 0
 
