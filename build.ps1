@@ -216,6 +216,7 @@ foreach ($f in @(
     'source_manifest.py',
     'openapi_bridge.py',
     'reddit_extractor.py',
+    'defaults\style_anchors.json',
     'yt_extract.py',
     'topics.json',
     'installer\verify_install.ps1',
@@ -410,6 +411,11 @@ Copy-Item (Join-Path $RepoRoot 'assets\logo-mark-color.png') (Join-Path $Staging
 # with "no such table: schema_version". Pre-Sprint-19.6 installers shipped
 # without it -- C1 launch blocker.
 Copy-Item (Join-Path $RepoRoot 'migrations') (Join-Path $StagingDir 'migrations') -Recurse -Force
+# v3.2.3: curated default style anchors, seeded into style_anchors on first run
+# by server._seed_default_style_anchors. Must ship or the seed silently no-ops
+# (helper still boots, but users get an empty anchor library -- the friction
+# this release exists to remove).
+Copy-Item (Join-Path $RepoRoot 'defaults') (Join-Path $StagingDir 'defaults') -Recurse -Force
 
 # ---- 2h. Staged smoke (Sprint 19.6 / Fix 1) -----------------------------
 # Verifies the staged tree is actually runnable BEFORE ISCC packages it,

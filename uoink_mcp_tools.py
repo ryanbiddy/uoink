@@ -961,12 +961,13 @@ def list_monitored_playlist_events(args: dict[str, Any]) -> dict[str, Any]:
 
 
 # ---- v3.2 Writing Studio --------------------------------------------
-def _writing_grounding(yoink_id, style_anchor_ids):
+def _writing_grounding(yoink_id, style_anchor_ids, hook_type_lens=None):
     server = _b()
     import writing_studio as _ws  # noqa: WPS433
     return _ws.assemble_grounding(
         server._get_index(), yoink_id,
-        style_anchor_ids=style_anchor_ids)
+        style_anchor_ids=style_anchor_ids,
+        hook_type_lens=hook_type_lens)
 
 
 def _writing_persist(yoink_id, kind, body_text, *, title=None, dek=None,
@@ -1010,10 +1011,15 @@ def write_tweet(args: dict[str, Any]) -> dict[str, Any]:
     style_anchor_ids = args.get("style_anchor_ids") or []
     if not isinstance(style_anchor_ids, list):
         return _err("style_anchor_ids must be a list")
+    try:
+        hook_type_lens = _ws.normalize_hook_lens(args.get("hook_type_lens"))
+    except ValueError as e:
+        return _err(str(e))
     body_text = args.get("body")
     if body_text is None:
         return _ok(mode="grounding_only", kind=_ws.KIND_TWEET,
-                    context=_writing_grounding(yoink_id, style_anchor_ids),
+                    context=_writing_grounding(yoink_id, style_anchor_ids,
+                                               hook_type_lens),
                     next=("Produce the tweet body (with credit line "
                           "included verbatim) and re-call with `body`."))
     try:
@@ -1051,10 +1057,15 @@ def write_blog(args: dict[str, Any]) -> dict[str, Any]:
     style_anchor_ids = args.get("style_anchor_ids") or []
     if not isinstance(style_anchor_ids, list):
         return _err("style_anchor_ids must be a list")
+    try:
+        hook_type_lens = _ws.normalize_hook_lens(args.get("hook_type_lens"))
+    except ValueError as e:
+        return _err(str(e))
     body_text = args.get("body")
     if body_text is None:
         return _ok(mode="grounding_only", kind=_ws.KIND_BLOG,
-                    context=_writing_grounding(yoink_id, style_anchor_ids),
+                    context=_writing_grounding(yoink_id, style_anchor_ids,
+                                               hook_type_lens),
                     next=("Produce the blog (title, dek, body markdown, "
                           "tags) with the Source section included and "
                           "re-call with `body` and friends."))
@@ -1566,10 +1577,16 @@ def generate_script(args: dict[str, Any]) -> dict[str, Any]:
         parent_id = int(parent) if parent is not None else None
     except (TypeError, ValueError):
         return _err("parent_script_id must be an integer")
+    import writing_studio as _ws  # noqa: WPS433 -- shared hook-lens taxonomy
+    try:
+        hook_type_lens = _ws.normalize_hook_lens(args.get("hook_type_lens"))
+    except ValueError as e:
+        return _err(str(e))
     try:
         return _scripts_mod.generate_script(
             server._get_index(), workspace_id.strip(),
-            script=script, mode=mode, parent_script_id=parent_id)
+            script=script, mode=mode, parent_script_id=parent_id,
+            hook_type_lens=hook_type_lens)
     except Exception as e:
         return _err(f"generate_script failed: {e}")
 
@@ -2520,13 +2537,23 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "The calling agent does the writing using its own model. "
             "Call WITH `script` (a structured object with hook + beats "
             "+ body + cta + source_yoinks citations) to persist as a "
-            "new versioned row. parent_script_id chains revisions."
+            "new versioned row. parent_script_id chains revisions. An "
+            "optional hook_type_lens biases the opening toward one of the "
+            "9 hook styles."
         ),
         input_schema=_schema({
             "workspace_id": {"type": "string"},
             "script": {"type": "object"},
             "mode": {"type": "string", "enum": ["agent", "byo_key"]},
             "parent_script_id": {"type": "integer"},
+            "hook_type_lens": {
+                "type": "string",
+                "enum": ["informative", "engagement_bait",
+                         "disappointment_contrarian", "curiosity_gap",
+                         "stakes", "success_case_study", "failure_lesson",
+                         "question_open_loop", "frame_shift"],
+                "description": "Optional hook lens that biases the script's "
+                               "opening toward that style (generation intent)."},
         }, ["workspace_id"]),
         handler=generate_script,
         rate_limiter=_RateLimiter(30),
@@ -2604,6 +2631,14 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "source_yoink_id": {"type": "string"},
             "angle": {"type": "string"},
             "target_length_chars": {"type": "integer"},
+            "hook_type_lens": {
+                "type": "string",
+                "enum": ["informative", "engagement_bait",
+                         "disappointment_contrarian", "curiosity_gap",
+                         "stakes", "success_case_study", "failure_lesson",
+                         "question_open_loop", "frame_shift"],
+                "description": "Optional hook lens that biases the opening "
+                               "toward that style (generation intent)."},
             "style_anchor_ids": {"type": "array",
                                    "items": {"type": "integer"}},
             "body": {"type": "string"},
@@ -2630,6 +2665,14 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "source_yoink_id": {"type": "string"},
             "angle": {"type": "string"},
             "target_length_words": {"type": "integer"},
+            "hook_type_lens": {
+                "type": "string",
+                "enum": ["informative", "engagement_bait",
+                         "disappointment_contrarian", "curiosity_gap",
+                         "stakes", "success_case_study", "failure_lesson",
+                         "question_open_loop", "frame_shift"],
+                "description": "Optional hook lens that biases the opening "
+                               "toward that style (generation intent)."},
             "style_anchor_ids": {"type": "array",
                                    "items": {"type": "integer"}},
             "body": {"type": "string"},
