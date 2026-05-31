@@ -419,14 +419,21 @@ def _extract_stdlib(url: str, *, include_screenshot: bool) -> dict:
 # ---- persist as a yoink row -------------------------------------------
 def persist_page_yoink(idx, extract_result: dict, *,
                          topic: str | None = None,
-                         data_root: Path | None = None) -> str | None:
-    """Persist a successful extract_page result as a yoink row with
-    source_type='page'. Returns the synthetic video_id used (so caller
-    can link to it). When the extract result is ok=False, returns None.
+                         data_root: Path | None = None,
+                         source_type: str = SOURCE_TYPE_PAGE,
+                         subfolder: str = "Pages",
+                         slug_prefix: str = "page") -> str | None:
+    """Persist a successful extract_page-shaped result as a yoink row.
+    Returns the synthetic video_id used (so caller can link to it). When the
+    extract result is ok=False, returns None.
 
-    The page yoink has no real video_id; we synthesize one from a
-    stable hash of the canonical URL so re-extracting the same page
-    upserts cleanly."""
+    Defaults persist a universal-site page (source_type='page', under
+    <data_root>/Pages/). Other HTML->markdown sources that produce the same
+    extract_result shape reuse this by overriding source_type / subfolder /
+    slug_prefix -- e.g. Reddit threads pass source_type='reddit_thread',
+    subfolder='Reddit', slug_prefix='reddit'. The yoink has no real video_id;
+    we synthesize one from a stable hash of the canonical URL so re-capturing
+    the same source upserts cleanly."""
     if not isinstance(extract_result, dict) or not extract_result.get("ok"):
         return None
     url = extract_result.get("url") or ""
@@ -434,25 +441,25 @@ def persist_page_yoink(idx, extract_result: dict, *,
     md = extract_result.get("markdown") or ""
     metadata = extract_result.get("metadata") or {}
     digest = hashlib.sha1(url.encode("utf-8")).hexdigest()
-    video_id = f"page_{digest[:11]}"
+    video_id = f"{slug_prefix}_{digest[:11]}"
 
-    # Folder for the page corpus + sidecar. Re-use DESKTOP_ROOT semantics:
-    # if data_root is supplied, drop under <data_root>/Pages/<digest[:8]>/
+    # Folder for the corpus + sidecar. If data_root is supplied, drop under
+    # <data_root>/<subfolder>/<digest[:8]>/.
     folder = None
     corpus_path = None
     sidecar_path = None
     if data_root is not None:
-        folder = Path(data_root) / "Pages" / digest[:8]
+        folder = Path(data_root) / subfolder / digest[:8]
         folder.mkdir(parents=True, exist_ok=True)
-        corpus_path = folder / "page.md"
-        sidecar_path = folder / "page.json"
+        corpus_path = folder / f"{slug_prefix}.md"
+        sidecar_path = folder / f"{slug_prefix}.json"
         corpus_path.write_text(
             f"# {title}\n\n**Source:** {url}\n\n" + (md or ""),
             encoding="utf-8")
         import json as _json
         sidecar_path.write_text(_json.dumps({
             "schema_version": 2,
-            "source_type": SOURCE_TYPE_PAGE,
+            "source_type": source_type,
             "url": url, "title": title,
             "extraction_engine": extract_result.get("extraction_engine"),
             "metadata": metadata,
@@ -472,7 +479,7 @@ def persist_page_yoink(idx, extract_result: dict, *,
             "yoinked_at": extract_result.get("extracted_at") or _now_iso(),
             "corpus_path": str(corpus_path) if corpus_path else None,
             "sidecar_path": str(sidecar_path) if sidecar_path else None,
-            "source_type": SOURCE_TYPE_PAGE,
+            "source_type": source_type,
         }, content=md[:65000])
     except Exception as e:
         log.warning("persist_page_yoink upsert failed: %s", e)

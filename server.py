@@ -90,6 +90,7 @@ import writing_studio  # noqa: E402  -- v3.2 Writing Studio (tweet/blog)
 import page_extractor  # noqa: E402  -- v3.2 Universal Site Uoinking
 import source_manifest  # noqa: E402  -- v3.2.1 site/dashboard product manifests
 import openapi_bridge  # noqa: E402  -- v3.3 OpenAPI bridge for non-MCP AIs
+import reddit_extractor  # noqa: E402  -- v3.3 Reddit thread capture (.json)
 
 
 def _extract_page_to_prose(url: str) -> str | None:
@@ -8759,6 +8760,58 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _handle_extract_reddit(self, body: dict):
+        """POST /extract/reddit {url, depth_limit?, score_threshold?} --
+        capture a Reddit thread via its public .json as a yoink with
+        source_type='reddit_thread'. Reuses page_extractor.persist_page_yoink
+        for the corpus write + index upsert. Token gate cleared by do_POST."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                         "error": "json object required"})
+        url = (body.get("url") or "").strip()
+        if not url:
+            return self._send_json(400, {"ok": False, "error": "url required"})
+
+        def _bounded(value, default, lo, hi):
+            try:
+                return max(lo, min(int(value), hi))
+            except (TypeError, ValueError):
+                return default
+
+        depth = _bounded(body.get("depth_limit"),
+                         reddit_extractor.DEFAULT_DEPTH_LIMIT, 0, 10)
+        score = _bounded(body.get("score_threshold"),
+                         reddit_extractor.DEFAULT_SCORE_THRESHOLD, -100, 100000)
+        result = reddit_extractor.extract_reddit_thread(
+            url, depth_limit=depth, score_threshold=score)
+        if not result.get("ok"):
+            log.info("POST /extract/reddit -> %s", result.get("code"))
+            return self._send_json(200, {
+                "ok": False, "error": result.get("error"),
+                "code": result.get("code")})
+        try:
+            video_id = page_extractor.persist_page_yoink(
+                _get_index(), result, data_root=DATA_ROOT,
+                source_type=reddit_extractor.SOURCE_TYPE,
+                subfolder="Reddit", slug_prefix="reddit")
+        except Exception:
+            log.exception("/extract/reddit persist failed")
+            return self._send_json(500, {
+                "ok": False,
+                "error": "Captured the thread but couldn't save it locally."})
+        if not video_id:
+            return self._send_json(500, {
+                "ok": False, "error": "Couldn't save the Reddit thread."})
+        log.info("POST /extract/reddit -> ok (%s, %d comments)",
+                 video_id, result.get("comments_captured", 0))
+        return self._send_json(200, {
+            "ok": True,
+            "video_id": video_id,
+            "title": result["title"],
+            "comments_captured": result.get("comments_captured", 0),
+            "metadata": result.get("metadata", {}),
+        })
+
     def _handle_openapi_spec(self):
         base = f"http://{HOST}:{PORT}"
         try:
@@ -8915,6 +8968,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_extract_any(body)
         if bare.startswith("/yoinks/") and bare.endswith("/reyoink"):
             return self._handle_reyoink(bare)
+        if bare == "/extract/reddit":
+            return self._handle_extract_reddit(body)
         if bare.startswith("/tools/"):
             return self._handle_tools_call_http(bare, body)
         if bare == "/index/backfill-cancel":
