@@ -89,6 +89,7 @@ import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
 import writing_studio  # noqa: E402  -- v3.2 Writing Studio (tweet/blog)
 import page_extractor  # noqa: E402  -- v3.2 Universal Site Uoinking
 import source_manifest  # noqa: E402  -- v3.2.1 site/dashboard product manifests
+import openapi_bridge  # noqa: E402  -- v3.3 OpenAPI bridge for non-MCP AIs
 
 
 def _extract_page_to_prose(url: str) -> str | None:
@@ -6588,6 +6589,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_creators_manifest()
         if bare == "/developers/manifest":
             return self._handle_developers_manifest()
+        if bare == "/openapi/v1/spec.json":
+            # Public, like the manifests: the OpenAPI 3.1 spec for the tool
+            # bridge. Lets a non-MCP agent (Gemini/Grok/Perplexity) discover
+            # how to call the local tools over HTTP. /tools/<name> itself is
+            # token-gated; the spec is just the map.
+            return self._handle_openapi_spec()
+        if bare == "/.well-known/uoink-mcp.json":
+            return self._handle_well_known_mcp()
         if bare == "/dashboard" or bare == "/dashboard/":
             # Public local UI shell. The page itself performs the same token
             # handshake as the extension before reading recent yoinks or
@@ -8750,6 +8759,57 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _handle_openapi_spec(self):
+        base = f"http://{HOST}:{PORT}"
+        try:
+            tools = _mcp_tools_module()
+            spec = openapi_bridge.build_spec(
+                base, tool_registry=tools.TOOL_REGISTRY, version=VERSION)
+        except Exception:
+            log.exception("/openapi/v1/spec.json build failed")
+            return self._send_json(
+                500, {"ok": False, "error": "could not build the OpenAPI spec"})
+        return self._send_json(200, spec)
+
+    def _handle_well_known_mcp(self):
+        base = f"http://{HOST}:{PORT}"
+        try:
+            tool_count = len(_mcp_tools_module().TOOL_REGISTRY)
+        except Exception:
+            tool_count = 0
+        return self._send_json(200, openapi_bridge.build_well_known(
+            base, version=VERSION, tool_count=tool_count))
+
+    def _handle_tools_call_http(self, bare: str, body: dict):
+        """POST /tools/<name> -- HTTP transport for the MCP tools, so a
+        non-MCP agent can call them after reading /openapi/v1/spec.json.
+        Token gate already cleared by do_POST. Routes through the same
+        uoink_mcp_tools.call_tool the MCP transport uses (one dispatch path,
+        one rate limiter). Tool/validation errors come back as ok:false at
+        HTTP 200 (matching the rest of the helper); only an unknown tool name
+        is a 404."""
+        from urllib.parse import unquote
+        name = unquote(bare[len("/tools/"):]).strip("/")
+        if not name or "/" in name:
+            return self._send_json(400, {"ok": False,
+                                         "error": "tool name required"})
+        tools = _mcp_tools_module()
+        aliases = getattr(tools, "MCP_TOOL_ALIASES", {})
+        if name not in tools.TOOL_REGISTRY and name not in aliases:
+            return self._send_json(404, {"ok": False,
+                                         "error": "tool not found"})
+        try:
+            result = tools.call_tool(name, body if isinstance(body, dict) else {})
+        except Exception:
+            log.exception("/tools/%s failed", name)
+            return self._send_json(500, {"ok": False,
+                                         "error": "tool execution failed"})
+        # call_tool returns the handler dict on success, or {ok:false,error}
+        # on a tool/rate-limit error. Normalise to a uniform envelope.
+        if isinstance(result, dict) and result.get("ok") is False:
+            return self._send_json(200, result)
+        return self._send_json(200, {"ok": True, "result": result})
+
     def _handle_sources_manifest(self):
         return self._send_json(
             200, {"ok": True, **source_manifest.build_sources()})
@@ -8855,6 +8915,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_extract_any(body)
         if bare.startswith("/yoinks/") and bare.endswith("/reyoink"):
             return self._handle_reyoink(bare)
+        if bare.startswith("/tools/"):
+            return self._handle_tools_call_http(bare, body)
         if bare == "/index/backfill-cancel":
             _backfill_cancel.set()
             return self._send_json(200, {"ok": True, "cancelled": True})
