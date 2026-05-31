@@ -165,7 +165,7 @@ Source: "upgrade_prep.ps1"; Flags: dontcopy
 ; think in servers, and this matches the README + finish-page wording.
 Name: "{group}\Uoink"; \
   Filename: "{app}\python\pythonw.exe"; \
-  Parameters: """{app}\server.py"""; \
+  Parameters: """{app}\server.py"" --show-dashboard"; \
   WorkingDir: "{app}"; \
   IconFilename: "{app}\uoink.ico"; \
   Comment: "Start Uoink"

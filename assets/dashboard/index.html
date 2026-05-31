@@ -427,6 +427,7 @@
 
     .summary-line {
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 14px;
@@ -656,6 +657,78 @@
     .health-dot.ok { background: var(--ok); }
     .health-dot.warn { background: var(--acid); }
     .health-dot.fail { background: var(--vermillion); }
+
+    .health-legend {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      color: var(--dim);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
+    .health-legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .health-legend i {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 99px;
+      background: var(--dim);
+    }
+
+    .health-legend .ok i { background: var(--ok); }
+    .health-legend .warn i { background: var(--acid); }
+    .health-legend .fail i { background: var(--vermillion); }
+
+    .degraded-state,
+    .job-error {
+      border: 1px solid rgba(255, 210, 63, 0.24);
+      border-radius: var(--control-radius);
+      padding: 11px 12px;
+      background: rgba(255, 210, 63, 0.07);
+    }
+
+    .job-error {
+      margin-top: 10px;
+      color: var(--cream);
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .error-details {
+      margin-top: 8px;
+      color: var(--dim);
+      font-weight: 700;
+    }
+
+    .error-details summary {
+      width: fit-content;
+      cursor: pointer;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .error-details pre {
+      max-height: 180px;
+      overflow: auto;
+      margin: 8px 0 0;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 10px;
+      background: rgba(21, 17, 13, 0.82);
+      color: var(--muted);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
 
     .empty-state {
       display: grid;
@@ -2154,6 +2227,11 @@
           <div class="summary-line">
             <span id="resultSummary">Loading library...</span>
             <span><span id="activeFilters"></span> <span id="facetStatus" class="facet-status hidden" title="">?</span></span>
+            <span class="health-legend" title="Card dots show transcript, screenshots, comments, hook, and comment-analysis readiness.">
+              <span class="ok"><i></i>ready</span>
+              <span class="warn"><i></i>working</span>
+              <span class="fail"><i></i>missing</span>
+            </span>
           </div>
 
           <div id="libraryGrid" class="grid" aria-live="polite"></div>
@@ -2453,7 +2531,7 @@
                   <span class="uoink-mark" aria-hidden="true" style="width:64px;height:64px"></span>
                   <span class="wordmark-text">OINK</span>
                 </div>
-                <p class="lede" style="margin:18px auto 0">YouTube -> AI-ready docs. Local-first. Open source.</p>
+                <p class="lede" style="margin:18px auto 0">Local-first. Open source. Your machine does the work.</p>
                 <div class="running-pill" id="aboutStatus" style="margin-top:18px"><span class="pip"></span><span>Checking helper</span></div>
                 <div class="quote">&quot;Yo. Uoink that.&quot;</div>
               </div>
@@ -2471,15 +2549,14 @@
               <h2>Runtime</h2>
               <p class="setting-copy" id="aboutVersion">Version: checking...</p>
               <p class="setting-copy" id="aboutPort">Loopback: localhost:5179</p>
-              <p class="setting-copy">Tier 2 contract: `/jobs/stream` over header-auth fetch with `snapshot`, `job`, and `queue` events.</p>
             </div>
             <div class="setting-block">
               <h2>Learn</h2>
               <div class="link-list">
-                <a href="https://uoink.video" target="_blank" rel="noreferrer">uoink.video <span>-></span></a>
-                <a href="https://uoink.video/how" target="_blank" rel="noreferrer">Quick start guide <span>-></span></a>
-                <a href="https://uoink.video/hooks" target="_blank" rel="noreferrer">9 hook types explained <span>-></span></a>
-                <a href="https://uoink.video/agents" target="_blank" rel="noreferrer">MCP integration docs <span>-></span></a>
+                <a href="https://uoink.app" target="_blank" rel="noreferrer">uoink.app <span>-></span></a>
+                <a href="https://uoink.app/how" target="_blank" rel="noreferrer">Quick start guide <span>-></span></a>
+                <a href="https://uoink.app/hooks" target="_blank" rel="noreferrer">9 hook types explained <span>-></span></a>
+                <a href="https://uoink.app/agents" target="_blank" rel="noreferrer">MCP integration docs <span>-></span></a>
               </div>
             </div>
             <div class="setting-block">
@@ -2488,7 +2565,7 @@
                 <a href="https://github.com/ryanbiddy/uoink/blob/main/CHANGELOG.md" target="_blank" rel="noreferrer">CHANGELOG.md <span>-></span></a>
                 <a href="https://github.com/ryanbiddy/uoink/releases" target="_blank" rel="noreferrer">GitHub releases <span>-></span></a>
                 <a href="https://github.com/ryanbiddy/uoink/issues" target="_blank" rel="noreferrer">File an issue <span>-></span></a>
-                <a href="https://uoink.video/privacy" target="_blank" rel="noreferrer">Privacy policy <span>-></span></a>
+                <a href="https://uoink.app/privacy" target="_blank" rel="noreferrer">Privacy policy <span>-></span></a>
               </div>
             </div>
           </div>
@@ -2854,6 +2931,75 @@
         '"': "&quot;",
         "'": "&#39;",
       }[c]));
+    }
+
+    function rawMachineDetails(value) {
+      return String(value || "").trim();
+    }
+
+    function sourceNameFromUrl(value) {
+      try {
+        const host = new URL(value || "").hostname.replace(/^www\./, "");
+        if (host.includes("youtube") || host === "youtu.be") return "YouTube";
+        if (host.includes("twitter") || host.includes("x.com")) return "X";
+        if (host.includes("vimeo")) return "Vimeo";
+        if (host) return host;
+      } catch (_) {}
+      return "The source";
+    }
+
+    function translateMachineMessage(value, context = {}) {
+      const raw = rawMachineDetails(value);
+      const haystack = `${raw} ${context.code || ""}`.toLowerCase();
+      const source = sourceNameFromUrl(context.url || raw);
+      if (!raw) return "";
+      if (haystack.includes("too many requests") || haystack.includes("http error 429") || haystack.includes("rate-limit") || haystack.includes("rate limit")) {
+        return "Helper's catching its breath. Retrying...";
+      }
+      if (haystack.includes("sign in") || haystack.includes("login") || haystack.includes("cookies") || haystack.includes("captcha") || haystack.includes("guest token")) {
+        return `${source} wouldn't hand this one over without a login. Retry with cookies?`;
+      }
+      if (haystack.includes("members-only") || haystack.includes("members only")) {
+        return `${source} kept this one behind members-only access.`;
+      }
+      if (haystack.includes("private") || haystack.includes("video unavailable") || haystack.includes("region")) {
+        return `${source} did not expose a usable video for this source.`;
+      }
+      if (haystack.includes("is live") || haystack.includes("premiere")) {
+        return `${source} is still live. Try again once the broadcast becomes a replay.`;
+      }
+      if (haystack.includes("ffmpeg")) {
+        return "The source came down, but the local media step tripped. Details are tucked below.";
+      }
+      if (haystack.includes("whisperx") || haystack.includes("whisper")) {
+        return "The local transcript step tripped. Details are tucked below.";
+      }
+      if (haystack.includes("can't find yt-dlp") || haystack.includes("can't find ffmpeg") || haystack.includes("no such file")) {
+        return "Uoink can't find a local media helper. Details are tucked below.";
+      }
+      if (haystack.includes("yt-dlp") || haystack.includes("unable to download") || haystack.includes("extractor error")) {
+        return `${source} would not hand this one over cleanly. Details are tucked below.`;
+      }
+      if (haystack.includes("queue unavailable") || haystack.includes("memory search unavailable") || haystack.includes("library unavailable")) {
+        return "Helper's catching its breath. Retrying...";
+      }
+      return "Uoink couldn't finish this one. Details are tucked below.";
+    }
+
+    function renderErrorDetails(value) {
+      const raw = rawMachineDetails(value);
+      if (!raw) return "";
+      return `<details class="error-details"><summary>Details</summary><pre>${htmlEscape(raw)}</pre></details>`;
+    }
+
+    function degradedState(title, copy, detail) {
+      return `
+        <div class="degraded-state">
+          <div class="job-title">${htmlEscape(title)}</div>
+          <div class="job-sub">${htmlEscape(copy || "")}</div>
+          ${renderErrorDetails(detail)}
+        </div>
+      `;
     }
 
     function healthDots(health) {
@@ -3461,9 +3607,9 @@
         state.resurface = payload;
         renderForYou(payload);
       } catch (err) {
-        els.forYouSummary.textContent = `For You unavailable: ${err.message}`;
+        els.forYouSummary.textContent = "For You is reading straight from your disk.";
         els.worthCards.innerHTML = "";
-        els.connectionRows.innerHTML = emptyPanelRow("No local recommendation data yet.", "Uoink a few more videos or interact with existing cards to build Engagement Memory.");
+        els.connectionRows.innerHTML = degradedState("Local recommendations need a minute.", "Uoink a few more videos or interact with existing cards to build Engagement Memory.", err.message);
         els.gapRows.innerHTML = "";
         els.anchorRows.innerHTML = emptyPanelRow("No anchors yet.", "Anchor signals appear after engagement events or taste data exist locally.");
       }
@@ -3488,7 +3634,7 @@
         connections: buildConnections(state.library),
         corpus_gaps: buildGaps(state.library),
         anchors: scored.slice(0, 6),
-        source: scored.length ? "client fallback over /engagement/scores + /memory/search" : "client fallback over local library rows",
+        source: scored.length ? "engagement memory" : "local library",
       };
     }
 
@@ -3499,13 +3645,16 @@
     function insightCard(row, kicker) {
       const score = normalizedScore(row);
       const age = daysSince(row.last_event_ts || row.yoinked_at);
+      const scorePill = score > 0
+        ? `<div class="score-pill">local signal ${score.toFixed(1)}</div>`
+        : "";
       return `
         <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(videoIdOf(row))}" tabindex="0" role="button">
           <div class="insight-kicker">${htmlEscape(kicker)}</div>
           <div class="insight-title">${htmlEscape(rowTitle(row))}</div>
           <div class="insight-meta">${htmlEscape(row.channel || "Unknown channel")} ${row.topic ? `| ${htmlEscape(row.topic)}` : ""}</div>
           <div class="insight-copy">${age >= 9000 ? "No recent interaction recorded." : `${age} days since last local signal.`}</div>
-          <div class="score-pill">value ${score.toFixed(1)}</div>
+          ${scorePill}
         </article>
       `;
     }
@@ -3540,7 +3689,7 @@
       const anchors = Array.isArray(payload.anchors) ? payload.anchors : [];
       els.forYouNavCount.textContent = String(worth.length + connections.length + gaps.length + anchors.length);
       els.forYouSummary.textContent = payload.source
-        ? `Using ${payload.source}.`
+        ? "Reading straight from your disk."
         : "Using local resurface signals.";
       els.worthCards.innerHTML = worth.length
         ? worth.slice(0, 3).map((row, i) => insightCard(row, i === 0 ? "highest signal" : "worth revisiting")).join("")
@@ -4130,9 +4279,14 @@
         state.offset = state.library.length;
         state.hasMore = false;
         renderLibrary();
+        const friendly = translateMachineMessage(err.message);
         els.resultSummary.textContent = fallbackRows.length
-          ? `Showing ${fallbackRows.length} recent job records; Memory search unavailable: ${err.message}`
-          : `Library unavailable: ${err.message}`;
+          ? `Showing ${fallbackRows.length} recent job records. ${friendly}`
+          : "Helper's catching its breath. Retrying...";
+        if (!fallbackRows.length) {
+          els.libraryEmpty.classList.add("hidden");
+          els.libraryGrid.innerHTML = degradedState("Helper's catching its breath.", "Retrying from your local library. Details are tucked below.", err.message);
+        }
       } finally {
         state.loading = false;
         syncWritingSourceOptions();
@@ -4249,6 +4403,10 @@
         ? `<span class="speaker-count-chip">${htmlEscape(speakers ? `${speakers} speaker${speakers === 1 ? "" : "s"}` : "speakers pending")}</span>`
         : `<span class="hook-chip">${hook}${htmlEscape(confidence)}</span>`;
       const platformChip = live ? "live" : platformChipLabel(platform);
+      const dotTitle = [
+        "Dots: transcript, screenshots, comments, hook, comment analysis.",
+        topEntities ? `Top entities: ${topEntities}.` : "",
+      ].filter(Boolean).join(" ");
       return `
         <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}" tabindex="0" role="button" aria-label="Open ${title}">
           <div class="thumb">
@@ -4265,7 +4423,7 @@
               <span class="topic-chip">${topic}</span>
               <span class="age">${htmlEscape(fmtAge(row.yoinked_at))}</span>
             </div>
-            <div class="health-dots" title="${htmlEscape(topEntities)}">${healthDots(row.health)}</div>
+            <div class="health-dots" title="${htmlEscape(dotTitle)}" aria-label="${htmlEscape(dotTitle)}">${healthDots(row.health)}</div>
           </div>
         </article>
       `;
@@ -4420,8 +4578,8 @@
         state.queue = data;
         renderQueue(data);
       } catch (err) {
-        els.queueMeta.textContent = `queue unavailable: ${err.message}`;
-        els.queueRows.innerHTML = `<div class="job-row"><div class="job-title">Queue unavailable</div><div class="job-sub">${htmlEscape(err.message)}</div></div>`;
+        els.queueMeta.textContent = "Helper's catching its breath. Retrying...";
+        els.queueRows.innerHTML = degradedState("Helper's catching its breath.", "Queue will refresh again in a moment.", err.message);
       }
     }
 
@@ -4563,11 +4721,14 @@
       const progress = progressForJob(job, stateValue);
       const phase = job.current_video_phase || job.phase || "";
       const title = job.title || job.playlist_title || (job.current_video && job.current_video.title) || job.url || job.source_url || "Uoink job";
+      const rawError = job.error_detail || (job.error_code ? `${job.error_code}: ${job.error || ""}` : job.error || "");
+      const errorLine = failed && rawError
+        ? translateMachineMessage(rawError, { url: job.url || job.source_url || "", code: job.error_code || "" })
+        : "";
       const sub = [
         job.kind || "job",
         stateValue,
         job.videos_total ? `${job.videos_done || 0}/${job.videos_total} videos` : "",
-        job.error_code ? `${job.error_code}: ${job.error || ""}` : job.error || "",
       ].filter(Boolean).join(" | ");
       const sourceChip = activitySourceChip(job);
       return `
@@ -4583,6 +4744,7 @@
               ${["queued", "running"].includes(stateValue) && job.id ? `<button class="button danger" type="button" data-cancel-job="${htmlEscape(job.id)}">Cancel</button>` : ""}
             </div>
           </div>
+          ${errorLine ? `<div class="job-error">${htmlEscape(errorLine)}${renderErrorDetails(rawError)}</div>` : ""}
           <div class="phase-row">${phaseChips(phase, stateValue)}</div>
           <div class="progress"><span style="width:${Math.max(0, Math.min(100, progress))}%"></span></div>
         </div>
@@ -4596,6 +4758,10 @@
       const progress = rawProgress <= 1 ? rawProgress * 100 : rawProgress;
       const activePhase = row.phase || (stateValue === "running" ? "screenshots" : "");
       const sourceChip = activitySourceChip(row);
+      const rawError = row.error_detail || row.last_error || row.error || "";
+      const errorLine = failed && rawError
+        ? translateMachineMessage(rawError, { url: row.url || row.source_url || "" })
+        : "";
       return `
         <div class="job-row ${failed ? "failed" : ""}" data-pending-id="${htmlEscape(row.pending_id || "")}">
           <div class="job-top">
@@ -4610,6 +4776,7 @@
               ${stateValue !== "succeeded" ? `<button class="button danger" type="button" data-cancel="${htmlEscape(row.pending_id || "")}">Cancel</button>` : ""}
             </div>
           </div>
+          ${errorLine ? `<div class="job-error">${htmlEscape(errorLine)}${renderErrorDetails(rawError)}</div>` : ""}
           <div class="phase-row">${phaseChips(activePhase, stateValue)}</div>
           <div class="progress"><span style="width:${Math.max(0, Math.min(100, progress || (stateValue === "running" ? 62 : 0)))}%"></span></div>
         </div>
@@ -5814,9 +5981,10 @@
     }
 
     init().catch((err) => {
-      showToast(`Dashboard failed to boot: ${err.message}`);
-      els.resultSummary.textContent = err.message;
-      els.libraryEmpty.classList.remove("hidden");
+      showToast("Dashboard needed a minute. Details are in the Library panel.");
+      els.resultSummary.textContent = "Helper's catching its breath. Retrying...";
+      els.libraryEmpty.classList.add("hidden");
+      els.libraryGrid.innerHTML = degradedState("Helper's catching its breath.", "Reload the dashboard in a moment.", err.message);
     });
 </script>
 </body>
