@@ -279,8 +279,8 @@
     <div class="body">
       <div class="eyebrow" id="eyebrow">You're set</div>
       <div class="running-pill" id="pill"><span class="pip"></span><span>Uoink is running</span></div>
-      <h1 id="headline">Click the rust U <em>under any video.</em></h1>
-      <p id="copy">Open YouTube, make your first uoink, or jump into the dashboard to inspect the helper.</p>
+      <h1 id="headline">Save the source. Write in your <em>voice.</em></h1>
+      <p id="copy">Uoink any video, audio, or article to save the source on your disk, then let your AI write drafts in your voice.</p>
       <ol class="steps" id="steps" hidden></ol>
       <div class="path-box" id="extensionPath" hidden></div>
       <div class="copy-status" id="copyStatus" hidden></div>
@@ -429,8 +429,8 @@
         mode: "happy",
         eyebrow: "You're set",
         pill: "Uoink is running \u2713",
-        headline: "Click the rust U <em>under any video.</em>",
-        copy: "Open YouTube, make your first uoink, or jump into the dashboard.",
+        headline: "Save the source. Write in your <em>voice.</em>",
+        copy: "Uoink any video, audio, or article to save the source on your disk, then let your AI write drafts in your voice.",
         primary: { text: "Open YouTube", action: "youtube" },
         secondary: { text: "Open dashboard", action: "dashboard" },
       });
@@ -538,12 +538,14 @@
 
     function dismiss() {
       const native = nativeApi();
-      if (native && native.minimize) {
-        native.minimize();
-        return;
-      }
       if (native && native.close) {
         native.close();
+        splash.style.display = "none";
+        return;
+      }
+      if (native && native.minimize) {
+        native.minimize();
+        splash.style.display = "none";
         return;
       }
       splash.style.display = "none";
@@ -611,6 +613,9 @@
     document.getElementById("dismiss").addEventListener("click", (event) => {
       event.stopPropagation();
       dismiss();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") dismiss();
     });
     loadDiagnostics();
   </script>

@@ -11,9 +11,9 @@ doesn't need to inject state -- it just hosts the window.
 
 Window: 640x450 frameless, on top, positioned bottom-right of primary monitor.
 Slide-up over ~400ms via window.move() in a background thread (pywebview
-windows don't natively animate). After an 8s linger the splash dismisses
-(minimize -- so the user can still re-summon via the tray) and writes the
-current version to the %LOCALAPPDATA%\Uoink\.first-run-done sentinel. JsApi
+windows don't natively animate). After an 8s linger the splash dismisses,
+closes its own webview process, and writes the current version to the
+%LOCALAPPDATA%\Uoink\.first-run-done sentinel. JsApi
 method names mirror what the shipped splash HTML calls (snake_case:
 open_dashboard / minimize / close). First-run extension setup can hold the
 window open until the user marks the unpacked extension as loaded.
@@ -275,8 +275,8 @@ class JsApi:
         return True
 
     def close(self):
-        # Per spec: never truly close -- minimize so the user can re-summon
-        # from the tray. Idempotent.
+        # The splash is a one-shot subprocess. Closing it should end this
+        # webview process while the real helper keeps running in the tray.
         self._dismiss()
         return True
 
@@ -286,11 +286,34 @@ class JsApi:
             return
         self._dismissed = True
         _write_sentinel(self._sentinel)
-        try:
-            if self._window is not None:
-                self._window.minimize()
-        except Exception as e:
-            log.debug("window.minimize failed: %s", e)
+        self._close_window()
+
+    def _close_window(self) -> None:
+        """Best-effort close for pywebview variants.
+
+        pywebview's JS bridge may still be returning when this is called from
+        the HTML X button. Defer the native destroy by a tick so the bridge can
+        finish cleanly, then prefer destroy/close over minimize so the splash
+        subprocess exits instead of sitting around as a hidden window.
+        """
+        window = self._window
+        if window is None:
+            return
+
+        def _close() -> None:
+            time.sleep(0.05)
+            for method in ("destroy", "close", "hide", "minimize"):
+                fn = getattr(window, method, None)
+                if not callable(fn):
+                    continue
+                try:
+                    fn()
+                    return
+                except Exception as e:
+                    log.debug("window.%s failed: %s", method, e)
+
+        threading.Thread(
+            target=_close, name="uoink-splash-close", daemon=True).start()
 
 
 def _slide_up(window, final_x: int, sh: int) -> None:
