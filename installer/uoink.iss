@@ -109,6 +109,12 @@ Source: "staging\scripts.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\voice_dna.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\writing_studio.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\page_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
+; v3.2.1/v3.3 modules imported by server.py at boot. These must be in both
+; build.ps1 staging and Inno's installed file list; staging-only coverage is
+; not enough because the real helper imports from {app}.
+Source: "staging\source_manifest.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\openapi_bridge.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\reddit_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\memory_layer.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\podcasts.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\mobile_playlists.py"; DestDir: "{app}"; Flags: ignoreversion
