@@ -2,7 +2,7 @@
 
 Turns the MCP TOOL_REGISTRY into an OpenAPI spec so any HTTP-capable AI that
 can't speak MCP (Gemini, Grok, Perplexity, custom agents) can still call the
-same 63 tools over plain HTTP. The transport is a thin wrapper around
+same tools over plain HTTP. The transport is a thin wrapper around
 uoink_mcp_tools.call_tool, so MCP and HTTP share one dispatch path, one rate
 limiter, and one auth gate.
 
@@ -11,9 +11,17 @@ GET /.well-known/uoink-mcp.json, POST /tools/<name>).
 """
 from __future__ import annotations
 
+import re
 from typing import Any
 
 OPENAPI_VERSION = "3.1.0"
+
+# Defensive strip for any leading internal version/sprint tag that slips into a
+# tool description (e.g. "v3.1 podcast: ", "v2.5 P3 your-channel mode: ").
+# Tool descriptions get cleaned at the source in uoink_mcp_tools.py, but this
+# guard makes sure a stray prefix never reaches the public OpenAPI spec summary
+# when a future tool is added with the old habit.
+_VERSION_TAG_RE = re.compile(r"^v\d+\.\d+(?:\.\d+)?\b[^:]*:\s*")
 
 # Tools that return a job_id and run asynchronously -- OpenAPI clients should
 # poll get_job_status rather than expect a synchronous result. Surfaced in the
@@ -36,8 +44,10 @@ _RESULT_SCHEMA = {
 
 def _summary(description: str) -> str:
     """First sentence of the tool description, capped, for the operation
-    summary."""
-    text = (description or "").strip()
+    summary. Strips any leading internal version/sprint tag defensively."""
+    text = _VERSION_TAG_RE.sub("", (description or "").strip())
+    if text:
+        text = text[0].upper() + text[1:]
     head = text.split(". ", 1)[0].rstrip(".")
     return (head[:117] + "...") if len(head) > 120 else head
 

@@ -1971,7 +1971,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "analyze_self_channel": ToolSpec(
         name="analyze_self_channel",
         description=(
-            "v2.5 P3 your-channel mode: aggregate the user's own saved "
+            "Aggregate the user's own saved "
             "videos (those tagged is_self via channel-name recognition) "
             "into hook evolution, format evolution, performance trend by "
             "month, and a top-performers list. Pass `handle` to scope to "
@@ -2009,7 +2009,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "get_user_role": ToolSpec(
         name="get_user_role",
         description=(
-            "v3.1 P2: report the user's persisted role (creator | "
+            "Report the user's persisted role (creator | "
             "researcher | marketer | mixed) + the dashboard emphasis "
             "(primary/secondary chip order + default sort) the helper "
             "computes from it. Read-only."
@@ -2021,7 +2021,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "set_user_role": ToolSpec(
         name="set_user_role",
         description=(
-            "v3.1 P2: persist the user's role choice. Drives Library "
+            "Persist the user's role choice. Drives Library "
             "default sort + filter-chip emphasis on the dashboard. "
             "Bounded enum -- one of creator | researcher | marketer | "
             "mixed."
@@ -2038,7 +2038,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "check_live_status": ToolSpec(
         name="check_live_status",
         description=(
-            "v3.1: probe a URL to find out if it is a live broadcast "
+            "Probe a URL to find out if it is a live broadcast "
             "without extracting. Returns one of: not_live | live | "
             "upcoming | post_live | was_live. The agent uses this to "
             "decide between immediate extraction and 'wait until the "
@@ -2055,7 +2055,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "add_podcast_feed": ToolSpec(
         name="add_podcast_feed",
         description=(
-            "v3.1 podcast: register an RSS feed URL. Idempotent -- "
+            "Register an RSS feed URL. Idempotent -- "
             "existing URL returns the same row. poll_interval_min "
             "default 60, range 15-1440."
         ),
@@ -2070,7 +2070,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_podcast_feeds": ToolSpec(
         name="list_podcast_feeds",
-        description="v3.1 podcast: list registered RSS feeds newest-first.",
+        description="List registered RSS feeds newest-first.",
         input_schema=_schema({
             "enabled_only": {"type": "boolean", "default": False},
         }, []),
@@ -2080,7 +2080,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "remove_podcast_feed": ToolSpec(
         name="remove_podcast_feed",
         description=(
-            "v3.1 podcast: delete a feed + cascade its episodes."
+            "Delete a feed + cascade its episodes."
         ),
         input_schema=_schema({
             "feed_id": {"type": "integer"},
@@ -2091,7 +2091,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "poll_podcast_feed": ToolSpec(
         name="poll_podcast_feed",
         description=(
-            "v3.1 podcast: trigger one feed poll (HTTP GET + RSS/Atom "
+            "Trigger one feed poll (HTTP GET + RSS/Atom "
             "parse + upsert episodes). Conditional GET via ETag/"
             "If-Modified-Since on subsequent polls so daily-news "
             "podcasts don't re-download an unchanged feed body."
@@ -2105,7 +2105,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "list_podcast_episodes": ToolSpec(
         name="list_podcast_episodes",
         description=(
-            "v3.1 podcast: list episodes. Optional feed_id + status "
+            "List episodes. Optional feed_id + status "
             "filters (new | queued | downloaded | transcribed | "
             "ignored). Newest published first."
         ),
@@ -2123,7 +2123,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "download_podcast_episode": ToolSpec(
         name="download_podcast_episode",
         description=(
-            "v3.1 podcast: download an episode's MP3 via yt-dlp + "
+            "Download an episode's MP3 via yt-dlp + "
             "ffmpeg. Synchronous. Returns when the file lands at "
             "<data_root>/Podcasts/<feed-slug>/<episode-slug>.mp3 or "
             "yt-dlp errors. Idempotent -- skips re-download when the "
@@ -2138,7 +2138,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "get_whisperx_status": ToolSpec(
         name="get_whisperx_status",
         description=(
-            "v3.1: report whether the WhisperX runtime is importable + "
+            "Report whether the WhisperX runtime is importable + "
             "the currently-selected model size + the diarization "
             "default. Agents call this before transcribe to decide "
             "whether to surface an install prompt to the user."
@@ -2150,7 +2150,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "transcribe_podcast_episode": ToolSpec(
         name="transcribe_podcast_episode",
         description=(
-            "v3.1 podcast: run WhisperX on a downloaded episode. "
+            "Run WhisperX on a downloaded episode. "
             "Synchronous. Reads audio_local_path; writes the JSON "
             "transcript next to the MP3. Returns the structured "
             "transcript metadata, OR consent_required=True when the "
@@ -2173,7 +2173,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "add_monitored_playlist": ToolSpec(
         name="add_monitored_playlist",
         description=(
-            "v3.1 mobile bridge: register a YouTube playlist URL to "
+            "Register a YouTube playlist URL to "
             "monitor for auto-uoinks. Idempotent on UNIQUE "
             "playlist_url. poll_interval_min default 5, range 1-1440."
         ),
@@ -2188,7 +2188,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_monitored_playlists": ToolSpec(
         name="list_monitored_playlists",
-        description=("v3.1 mobile bridge: list registered playlists "
+        description=("List registered playlists "
                       "newest-first."),
         input_schema=_schema({
             "enabled_only": {"type": "boolean", "default": False},
@@ -2198,7 +2198,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "remove_monitored_playlist": ToolSpec(
         name="remove_monitored_playlist",
-        description=("v3.1 mobile bridge: delete a playlist + cascade "
+        description=("Delete a playlist + cascade "
                       "its discovery events."),
         input_schema=_schema({
             "playlist_id": {"type": "integer"},
@@ -2209,7 +2209,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "poll_monitored_playlist": ToolSpec(
         name="poll_monitored_playlist",
         description=(
-            "v3.1 mobile bridge: poll one playlist (yt-dlp "
+            "Poll one playlist (yt-dlp "
             "--flat-playlist) + diff against last_seen_video_ids + "
             "auto-queue new videos via the existing pending_yoinks "
             "retry worker. Returns the new[] discovery list so the "
@@ -2225,7 +2225,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "list_monitored_playlist_events": ToolSpec(
         name="list_monitored_playlist_events",
         description=(
-            "v3.1 mobile bridge: list per-discovery events. Optional "
+            "List per-discovery events. Optional "
             "filters: playlist_id, status (discovered | queued | "
             "extracted | failed). Newest first."
         ),
@@ -2243,7 +2243,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "get_user_taste": ToolSpec(
         name="get_user_taste",
         description=(
-            "v2.5 S4 taste memory: return the consolidated TASTE.md "
+            "Return the consolidated TASTE.md "
             "(preferred hooks/formats, avoid list, top performance "
             "anchors). Generated from engagement events + persisted "
             "taste anchors. Read-only, no arguments."
@@ -2255,7 +2255,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "get_user_memory": ToolSpec(
         name="get_user_memory",
         description=(
-            "v2.5 S4 user memory: return the user's free-form USER.md "
+            "Return the user's free-form USER.md "
             "notes (Channels I admire, My channel(s), Topics, Workflow "
             "notes). Hand-edited markdown -- the consolidator never "
             "overwrites this file. No arguments."
@@ -2267,7 +2267,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "update_user_taste": ToolSpec(
         name="update_user_taste",
         description=(
-            "v2.5 S4 taste anchors: set one taste anchor section "
+            "Set one taste anchor section "
             "(preferred_hooks | preferred_formats | avoid) and "
             "re-consolidate TASTE.md. `content` is markdown that "
             "replaces the section body verbatim -- bullets recommended."
@@ -2285,7 +2285,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "get_engagement_signal": ToolSpec(
         name="get_engagement_signal",
         description=(
-            "v2.5 S2 engagement memory: return the time-decayed value_score "
+            "Return the time-decayed value_score "
             "for one video plus per-event-type counts and last event "
             "timestamp. Events live entirely on the local SQLite index "
             "(zero outbound). Weights are documented in index.py "
@@ -2593,7 +2593,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "write_tweet": ToolSpec(
         name="write_tweet",
         description=(
-            "v3.2 Writing Studio: two-phase tweet/thread generator. "
+            "Two-phase tweet/thread generator. "
             "Phase 1 (no `body`) returns grounding (source yoink + "
             "creator credit + style anchors + Voice DNA prompt). "
             "Phase 2 (`body` present) persists + scans for Voice DNA "
@@ -2621,7 +2621,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "write_blog": ToolSpec(
         name="write_blog",
         description=(
-            "v3.2 Writing Studio: two-phase blog generator. Same shape "
+            "Two-phase blog generator. Same shape "
             "as write_tweet but Phase 2 accepts title, dek, tags, and "
             "expects markdown body with a Source section. Soft-warn "
             "Voice DNA scan; creator credit non-suppressible."
@@ -2647,7 +2647,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "list_writing_pieces": ToolSpec(
         name="list_writing_pieces",
         description=(
-            "v3.2 Writing Studio: list generated pieces newest-first. "
+            "List generated pieces newest-first. "
             "Optional `kind` (tweet|thread|blog) + `yoink_id` filters."
         ),
         input_schema=_schema({
@@ -2662,7 +2662,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "get_writing_piece": ToolSpec(
         name="get_writing_piece",
-        description="v3.2 Writing Studio: fetch one piece by id.",
+        description="Fetch one piece by id.",
         input_schema=_schema({
             "id": {"type": "integer"},
             "piece_id": {"type": "integer"},
@@ -2673,7 +2673,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "add_style_anchor": ToolSpec(
         name="add_style_anchor",
         description=(
-            "v3.2 Writing Studio: add a Substack-style voice anchor "
+            "Add a Substack-style voice anchor "
             "(URL or raw pasted text). User names each. Cap at 10 -- "
             "returns 422-shaped error when exceeded. URL ingestion "
             "extracts prose via the helper's page extractor (Universal "
@@ -2691,7 +2691,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "list_style_anchors": ToolSpec(
         name="list_style_anchors",
-        description=("v3.2 Writing Studio: list style anchors + their "
+        description=("List style anchors + their "
                       "active flag + the helper's 10-anchor cap."),
         input_schema=_schema({
             "active_only": {"type": "boolean", "default": False},
@@ -2701,7 +2701,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     ),
     "remove_style_anchor": ToolSpec(
         name="remove_style_anchor",
-        description="v3.2 Writing Studio: delete a style anchor.",
+        description="Delete a style anchor.",
         input_schema=_schema({
             "anchor_id": {"type": "integer"},
             "id": {"type": "integer"},
@@ -2713,7 +2713,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "uoink_page": ToolSpec(
         name="uoink_page",
         description=(
-            "v3.2 Universal Site Uoinking: capture an allowed page as "
+            "Capture an allowed page as "
             "a yoink. Crawl4AI runs ON-DEVICE when available "
             "(JS render + screenshot); stdlib fallback otherwise "
             "(static HTML + markdown synthesis, no screenshot). "
@@ -2737,7 +2737,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "uoink_reddit_thread": ToolSpec(
         name="uoink_reddit_thread",
         description=(
-            "v3.3 Reddit capture: fetch a thread via its public .json "
+            "Fetch a thread via its public .json "
             "(no API key, no OAuth), flatten the comment tree with a depth "
             "limit and a score threshold, and persist it as a yoink with "
             "source_type='reddit_thread'. Renders as Post -> Top comments -> "
@@ -2759,7 +2759,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "list_allowed_sites": ToolSpec(
         name="list_allowed_sites",
         description=(
-            "v3.2 Universal Site: list the user's allowed hostnames. "
+            "List the user's allowed hostnames. "
             "Default seeds (youtube.com, youtu.be, x.com, "
             "twitter.com) are pre-added by migration 0015 and "
             "removable like any other entry."
@@ -2773,7 +2773,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "add_allowed_site": ToolSpec(
         name="add_allowed_site",
         description=(
-            "v3.2 Universal Site: add a hostname or wildcard pattern "
+            "Add a hostname or wildcard pattern "
             "(`*.docs.example.com` matches all sub.docs.example.com "
             "subdomains). Idempotent on UNIQUE url_pattern. Plain "
             "hostnames also match their subdomains (so 'example.com' "
@@ -2788,7 +2788,7 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "remove_allowed_site": ToolSpec(
         name="remove_allowed_site",
         description=(
-            "v3.2 Universal Site: remove a hostname or wildcard "
+            "Remove a hostname or wildcard "
             "pattern from the allowlist."
         ),
         input_schema=_schema({
