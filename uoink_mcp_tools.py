@@ -1212,6 +1212,44 @@ def uoink_page(args: dict[str, Any]) -> dict[str, Any]:
     return result
 
 
+def uoink_reddit_thread(args: dict[str, Any]) -> dict[str, Any]:
+    """v3.3 Reddit capture: fetch a thread via its public .json (no API key),
+    flatten the comment tree (depth + score limited), and persist it as a
+    yoink with source_type='reddit_thread'.
+
+    Body shape: {url, depth_limit?=4, score_threshold?=2}. Returns the yoink
+    video_id, title, and how many comments cleared the filters. Runs
+    on-device; no allowlist gate (the .json fetch is its own path)."""
+    server = _b()
+    import reddit_extractor as _re  # noqa: WPS433
+    import page_extractor as _pe  # noqa: WPS433
+    url = args.get("url")
+    if not isinstance(url, str) or not url.strip():
+        return _err("url (string) is required")
+
+    def _bounded(value, default, lo, hi):
+        try:
+            return max(lo, min(int(value), hi))
+        except (TypeError, ValueError):
+            return default
+
+    depth = _bounded(args.get("depth_limit"), _re.DEFAULT_DEPTH_LIMIT, 0, 10)
+    score = _bounded(args.get("score_threshold"),
+                     _re.DEFAULT_SCORE_THRESHOLD, -100, 100000)
+    result = _re.extract_reddit_thread(url.strip(), depth_limit=depth,
+                                       score_threshold=score)
+    if not result.get("ok"):
+        return result  # already in {ok: False, error, code} shape
+    try:
+        result["video_id"] = _pe.persist_page_yoink(
+            server._get_index(), result, data_root=server.DATA_ROOT,
+            source_type=_re.SOURCE_TYPE, subfolder="Reddit",
+            slug_prefix="reddit")
+    except Exception as e:
+        return _err(f"captured the thread but couldn't save it: {e}")
+    return result
+
+
 def list_allowed_sites(args: dict[str, Any]) -> dict[str, Any]:
     """v3.2 Universal Site: list the user's allowed sites. Default
     seeds (youtube.com, youtu.be, x.com, twitter.com) are pre-added by
@@ -2695,6 +2733,28 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, ["url"]),
         handler=uoink_page,
         rate_limiter=_RateLimiter(15),
+    ),
+    "uoink_reddit_thread": ToolSpec(
+        name="uoink_reddit_thread",
+        description=(
+            "v3.3 Reddit capture: fetch a thread via its public .json "
+            "(no API key, no OAuth), flatten the comment tree with a depth "
+            "limit and a score threshold, and persist it as a yoink with "
+            "source_type='reddit_thread'. Renders as Post -> Top comments -> "
+            "nested replies so search and facets work on the conversation. "
+            "Runs on-device; no allowlist gate."
+        ),
+        input_schema=_schema({
+            "url": {"type": "string",
+                     "description": "reddit.com/r/<sub>/comments/... thread URL."},
+            "depth_limit": {"type": "integer", "minimum": 0, "maximum": 10,
+                              "default": 4,
+                              "description": "How many reply levels to keep."},
+            "score_threshold": {"type": "integer", "default": 2,
+                                  "description": "Drop comments below this score."},
+        }, ["url"]),
+        handler=uoink_reddit_thread,
+        rate_limiter=_RateLimiter(10),
     ),
     "list_allowed_sites": ToolSpec(
         name="list_allowed_sites",
