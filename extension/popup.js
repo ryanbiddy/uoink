@@ -1489,8 +1489,7 @@ async function postTasteAnchor(videoId, anchorType, title) {
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}`);
     }
-  } catch (e) {
-    console.warn("Failed to POST taste anchor, saving locally", e);
+  } catch {
     chrome.storage.local.get({ uoink_taste_anchors: { best: [], worst: [], admired_channels: [] } }, (stored) => {
       const anchors = stored.uoink_taste_anchors || { best: [], worst: [], admired_channels: [] };
       const list = anchorType === "best" ? anchors.best : anchors.worst;
