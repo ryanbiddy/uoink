@@ -5400,6 +5400,167 @@ def _resolve_served_file(raw_path: str) -> tuple[Path | None, str | None, int, s
 
 
 # ---------------------------------------------------------------------------
+# Screenshot picker + re-yoink (D-20: pick screenshots on post / refresh source)
+# ---------------------------------------------------------------------------
+def _image_dimensions(path: Path) -> tuple[int | None, int | None]:
+    """Read (width, height) from a JPEG or PNG header without a third-party
+    image library. Walks JPEG segment markers to the SOFn frame header;
+    reads the PNG IHDR. Returns (None, None) on anything it can't parse so
+    the picker still lists the file, just without a known aspect ratio."""
+    try:
+        with open(path, "rb") as f:
+            head = f.read(2)
+            if head == b"\xff\xd8":  # JPEG (SOI)
+                while True:
+                    byte = f.read(1)
+                    if not byte:
+                        break
+                    if byte != b"\xff":
+                        continue
+                    marker = f.read(1)
+                    while marker == b"\xff":  # skip fill bytes
+                        marker = f.read(1)
+                    if not marker:
+                        break
+                    m = marker[0]
+                    # Standalone markers carry no length payload.
+                    if m == 0x01 or 0xD0 <= m <= 0xD9:
+                        continue
+                    length_bytes = f.read(2)
+                    if len(length_bytes) < 2:
+                        break
+                    seg_len = int.from_bytes(length_bytes, "big")
+                    # SOF0..SOF15 hold the frame dimensions (skip DHT/JPG/DAC).
+                    if 0xC0 <= m <= 0xCF and m not in (0xC4, 0xC8, 0xCC):
+                        frame = f.read(5)
+                        if len(frame) < 5:
+                            break
+                        height = int.from_bytes(frame[1:3], "big")
+                        width = int.from_bytes(frame[3:5], "big")
+                        return width or None, height or None
+                    f.seek(seg_len - 2, 1)
+                return None, None
+            if head == b"\x89P":  # PNG
+                rest = f.read(24)
+                buf = head + rest
+                if len(buf) >= 24 and buf[:8] == b"\x89PNG\r\n\x1a\n":
+                    width = int.from_bytes(buf[16:20], "big")
+                    height = int.from_bytes(buf[20:24], "big")
+                    return width or None, height or None
+    except OSError:
+        return None, None
+    return None, None
+
+
+def _screenshot_list_for_yoink(idx, video_id: str) -> dict | None:
+    """Build the picker payload for a yoink: every available screenshot with
+    its absolute path, a /file URL the dashboard can render, the capture
+    timestamp, and pixel dimensions. The sidecar's structured screenshot
+    list is the source of truth; a filesystem glob backstops it so a fresh
+    re-yoink whose sidecar hasn't been re-read still surfaces its shots.
+
+    Returns None when the yoink id is unknown. A capture with no screenshots
+    (text / page yoinks) returns an empty list, not None -- the picker shows
+    a "text-only, nothing to attach" state for those."""
+    from urllib.parse import quote
+
+    row = idx.get_yoink(video_id)
+    if not row:
+        return None
+
+    corpus_path = row.get("corpus_path") or ""
+    sidecar_path = row.get("sidecar_path") or ""
+    folder = Path(corpus_path).parent if corpus_path else None
+
+    sidecar: dict = {}
+    if sidecar_path and Path(sidecar_path).exists():
+        try:
+            sidecar = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            sidecar = {}
+
+    interval = sidecar.get("interval_seconds")
+    try:
+        interval = int(interval) if interval else None
+    except (TypeError, ValueError):
+        interval = None
+
+    def _entry(name: str, index: int, ts_human, ts_secs, abs_path: Path) -> dict:
+        width, height = _image_dimensions(abs_path)
+        return {
+            "index": index,
+            "filename": name,
+            "timestamp": ts_human,
+            "timestamp_seconds": ts_secs,
+            "rel_path": f"screenshots/{name}",
+            "path": str(abs_path),
+            "file_url": "/file?path=" + quote(str(abs_path)),
+            "width": width,
+            "height": height,
+        }
+
+    entries: list[dict] = []
+    seen: set[str] = set()
+    shots_dir = (folder / "screenshots") if folder else None
+
+    for i, shot in enumerate(sidecar.get("screenshots") or []):
+        if not isinstance(shot, dict):
+            continue
+        name = (shot.get("filename") or Path(shot.get("path") or "").name).strip()
+        if not name or not shots_dir:
+            continue
+        abs_path = shots_dir / name
+        if not abs_path.exists():
+            continue  # referenced but gone; don't offer a broken thumbnail
+        seen.add(name)
+        ts_secs = (i * interval) if interval is not None else None
+        entries.append(_entry(name, i, shot.get("timestamp"), ts_secs, abs_path))
+
+    # Filesystem backstop: shots on disk the sidecar didn't list (re-yoink
+    # drift). Derive the timestamp from the shot number when we know the
+    # interval so the picker still labels them.
+    if shots_dir and shots_dir.is_dir():
+        for p in sorted(shots_dir.glob("shot_*.jpg")):
+            if p.name in seen:
+                continue
+            match = re.match(r"shot_(\d+)", p.stem)
+            shot_no = int(match.group(1)) if match else (len(entries) + 1)
+            ts_secs = ((shot_no - 1) * interval) if interval is not None else None
+            ts_human = fmt_time(ts_secs) if ts_secs is not None else None
+            entries.append(_entry(p.name, len(entries), ts_human, ts_secs, p))
+
+    return {
+        "video_id": video_id,
+        "title": row.get("title"),
+        "folder": str(folder) if folder else None,
+        "interval_seconds": interval,
+        "count": len(entries),
+        "screenshots": entries,
+    }
+
+
+def _reyoink_source(idx, video_id: str) -> tuple[str, int | None] | None:
+    """Resolve the original source URL + capture interval for a yoink so it
+    can be re-captured. Returns None when the yoink is unknown; ('', None)
+    when it has no saved source link (e.g. a manual import)."""
+    row = idx.get_yoink(video_id)
+    if not row:
+        return None
+    sidecar_path = row.get("sidecar_path") or ""
+    url = ""
+    interval = None
+    if sidecar_path and Path(sidecar_path).exists():
+        try:
+            sidecar = json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
+            url = (sidecar.get("url") or "").strip()
+            raw_interval = sidecar.get("interval_seconds")
+            interval = int(raw_interval) if raw_interval else None
+        except (OSError, json.JSONDecodeError, TypeError, ValueError):
+            pass
+    return url, interval
+
+
+# ---------------------------------------------------------------------------
 # MCP HTTP transport helpers
 # ---------------------------------------------------------------------------
 MCP_PROTOCOL_VERSION = "2025-11-25"
@@ -6489,6 +6650,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_open_index()
         if bare == "/recent":
             return self._handle_recent()
+        if bare.startswith("/yoinks/") and bare.endswith("/screenshots"):
+            return self._handle_yoink_screenshots(bare)
         if bare == "/open-folder":
             return self._handle_open_folder()
         if bare == "/jobs/stream":
@@ -8523,6 +8686,56 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _handle_yoink_screenshots(self, bare: str):
+        """GET /yoinks/<id>/screenshots -- list the source's screenshots for
+        the Writing Studio picker (D-20). Token gate already cleared by
+        do_GET. Returns 404 for an unknown id, 200 with an empty list for a
+        text-only capture."""
+        from urllib.parse import unquote
+        video_id = unquote(
+            bare[len("/yoinks/"):-len("/screenshots")]).strip("/")
+        if not video_id:
+            return self._send_json(400, {"ok": False,
+                                         "error": "video_id required"})
+        try:
+            payload = _screenshot_list_for_yoink(_get_index(), video_id)
+        except Exception:
+            log.exception("/yoinks/<id>/screenshots failed")
+            return self._send_json(500, {
+                "ok": False, "error": "Couldn't read this uoink's screenshots."})
+        if payload is None:
+            return self._send_json(404, {"ok": False,
+                                         "error": "uoink not found"})
+        return self._send_json(200, {"ok": True, **payload})
+
+    def _handle_reyoink(self, bare: str):
+        """POST /yoinks/<id>/reyoink -- re-capture the source so the composer
+        gets a fresh transcript + screenshots (D-20 Capability A). Reuses the
+        /extract path verbatim so live-detection, rate-limit queueing, and
+        job recording behave identically; the composer re-fetches
+        /yoinks/<id>/screenshots once this returns ok."""
+        from urllib.parse import unquote
+        video_id = unquote(
+            bare[len("/yoinks/"):-len("/reyoink")]).strip("/")
+        if not video_id:
+            return self._send_json(400, {"ok": False,
+                                         "error": "video_id required"})
+        resolved = _reyoink_source(_get_index(), video_id)
+        if resolved is None:
+            return self._send_json(404, {"ok": False,
+                                         "error": "uoink not found"})
+        url, interval = resolved
+        if not url:
+            return self._send_json(400, {
+                "ok": False,
+                "error": ("This uoink has no saved source link to re-capture. "
+                          "Grab it again from the original page.")})
+        body = {"url": url}
+        if isinstance(interval, int) and interval > 0:
+            body["interval"] = interval
+        log.info("POST /yoinks/%s/reyoink -> re-extract %s", video_id, url)
+        return self._handle_extract(body)
+
     def do_POST(self):
         # Auth first so we don't even read the body for unauthenticated
         # callers. Public POST endpoints don't exist today, so the gate is
@@ -8555,6 +8768,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_extract(body)
         if bare == "/extract/any":
             return self._handle_extract_any(body)
+        if bare.startswith("/yoinks/") and bare.endswith("/reyoink"):
+            return self._handle_reyoink(bare)
         if bare == "/index/backfill-cancel":
             _backfill_cancel.set()
             return self._send_json(200, {"ok": True, "cancelled": True})
