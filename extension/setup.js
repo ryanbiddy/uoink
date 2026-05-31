@@ -194,7 +194,7 @@ function updateHeader(status) {
     pageTitle.textContent = isSettingsMode ? "Uoink settings." : "Uoink is ready.";
     pageLede.textContent = isSettingsMode
       ? "Manage local AI features and agent integration."
-      : "The local helper is running. Open the dashboard from your tray to view your full library, or uoink any YouTube video to begin.";
+      : "The local helper is running. Open the dashboard from your tray to view your full library, or uoink a supported source to begin.";
     return;
   }
   if (source === "offline") {
@@ -208,7 +208,7 @@ function updateHeader(status) {
   } else {
     pageTitle.textContent = "Let's get you set up.";
     pageLede.textContent =
-      "Two minutes. Then you'll be uoinking videos straight into Claude.";
+      "Two minutes. Then you'll be turning sources into a local corpus your AI can read.";
   }
 }
 
@@ -1104,16 +1104,16 @@ function applyDownloadState() {
     downloadBtn.classList.remove("disabled");
     downloadBtn.removeAttribute("aria-disabled");
     downloadBtn.title = "";
-    downloadBtn.href = "https://github.com/ryanbiddy/uoink/releases/download/v3.2.0/Uoink-Setup-3.2.0.exe";
+    downloadBtn.href = "https://github.com/ryanbiddy/uoink/releases/download/v3.2.1/Uoink-Setup-3.2.1.exe";
     downloadBtn.removeEventListener("click", preventDefaultClick);
   } else {
     downloadBtn.classList.add("disabled");
     downloadBtn.setAttribute("aria-disabled", "true");
     const macSpan = downloadBtn.querySelector('[data-mac-only]');
     const linuxSpan = downloadBtn.querySelector('[data-linux-only]');
-    if (macSpan) macSpan.textContent = "Coming soon";
-    if (linuxSpan) linuxSpan.textContent = "Coming soon";
-    downloadBtn.title = "Installer publishes at launch.";
+    if (macSpan) macSpan.textContent = "Mac build queued";
+    if (linuxSpan) linuxSpan.textContent = "Windows installer only";
+    downloadBtn.title = "Mac build is queued after Windows stabilizes.";
     downloadBtn.addEventListener("click", preventDefaultClick);
     downloadBtn.removeAttribute("href");
   }

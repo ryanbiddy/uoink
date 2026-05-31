@@ -649,7 +649,7 @@
     </div>
 
     <h1 id="page-title">Let's get you set up.</h1>
-    <p class="lede" id="page-lede">Two minutes. Then you'll be uoinking videos straight into Claude.</p>
+    <p class="lede" id="page-lede">Two minutes. Then you'll be turning sources into a local corpus your AI can read.</p>
 
     <!-- Settings will sync banner -->
     <div id="settings-pending-banner" class="cost-estimate hidden" style="margin-bottom:20px; border-color:var(--rust-bright); background:rgba(249, 115, 22, 0.08); color:var(--rust-bright); font-weight:600;">
@@ -683,10 +683,10 @@
         <div class="step-num"><span class="step-num-text">1</span></div>
         <h2>What is Uoink?</h2>
       </div>
-      <p>Uoink turns YouTube videos into structured input for Claude or ChatGPT: a full transcript, screenshots at any interval, comments, and channel context, packaged into one paste-ready document.</p>
-      <p class="sub">Skip the "summarize this for me" routine. Hand the model the whole video and ask it anything.</p>
+      <p>Uoink turns videos, podcasts, articles, and threads into structured source cards for Claude, ChatGPT, Cursor, and any agent that can read your local corpus.</p>
+      <p class="sub">Skip the "summarize this for me" routine. Hand the model the source with receipts and ask it anything.</p>
       <div class="button-row">
-        <button id="get-started-btn" class="button" type="button">Get started →</button>
+        <button id="get-started-btn" class="button" type="button">Get started</button>
       </div>
     </section>
 
@@ -696,16 +696,16 @@
         <div class="step-num"><span class="step-num-text">2</span></div>
         <h2>Install the Uoink helper</h2>
       </div>
-      <p>Uoink runs a tiny program on your computer that does the heavy lifting locally, which is why your data stays private. Nothing leaves your machine except the YouTube transcript request.</p>
+      <p>Uoink runs a tiny program on your computer that does the heavy lifting locally, which is why your corpus stays private. Source requests happen only when you ask Uoink to capture something.</p>
 
-      <p class="sub">Uoink starts automatically when you log in, runs silently in your system tray, and saves corpora to your Desktop's Uoink folder.</p>
+      <p class="sub">Uoink starts automatically when you log in, runs silently in your system tray, and saves source cards to your Desktop's Uoink folder.</p>
 
       <div class="installer-mock" aria-hidden="true">
         <div class="icon">U</div>
         <div>
           <div class="filename">
-            <span data-win-only>Uoink-Setup-3.2.0.exe</span>
-            <span data-mac-only>Uoink-Setup-2.1.0.dmg</span>
+            <span data-win-only>Uoink-Setup-3.2.1.exe</span>
+            <span data-mac-only>Mac build queued</span>
             <span data-linux-only>Uoink helper package</span>
           </div>
           <div class="caption">Double-click to install. Takes about 30 seconds.</div>
@@ -791,7 +791,7 @@
         <div class="step-num"><span class="step-num-text">4</span></div>
         <h2>You're all set! Try your first uoink.</h2>
       </div>
-      <p>Here's a fresh one to test with: pick this one or any YouTube video you've been meaning to dig into.</p>
+      <p>Here's a fresh video to test with, or start with any supported source you've been meaning to dig into.</p>
 
       <div class="video-card">
         <img id="suggested-thumb" class="video-thumb" alt="Video thumbnail">
@@ -799,12 +799,12 @@
           <div id="suggested-title" class="video-title">-</div>
           <div id="suggested-byline" class="video-byline">-</div>
           <div class="button-row">
-            <button id="uoink-suggested-btn" class="button" type="button">Uoink this video →</button>
+            <button id="uoink-suggested-btn" class="button" type="button">Uoink this source</button>
           </div>
         </div>
       </div>
 
-      <p class="sub">Or click the rust <b>Uoink</b> button under any YouTube video.</p>
+      <p class="sub">Or use the <b>Uoink</b> button on a supported source page.</p>
       <p class="sub">Click the rust <b>U</b> in your tray any time to control the helper. Open dashboard from the tray for your full library.</p>
     </section>
 
