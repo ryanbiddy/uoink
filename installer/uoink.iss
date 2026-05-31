@@ -280,23 +280,23 @@ begin
   WelcomePage := CreateCustomPage(wpWelcome,
     'Welcome to Uoink',
     'Build a local corpus your AI can write from.');
-  { Finding 2.1 (creative review v2.2, AG): step tracker above the hero.
-    Sits at the top of the surface (y=15, height=18) so it reads as a
-    breadcrumb above the wordmark hero, matching mock 1.2.1's layout. }
-  AddLabel(WelcomePage, 'STEP 1 OF 4',       15,  18,  9, [fsBold], C_RUST);
+  { The step tracker needs its own vertical lane. Inno clips overlapping
+    static-text controls at runtime, so keep it clear of the hero on every
+    DPI/font-rendering variant. }
+  AddLabel(WelcomePage, 'STEP 1 OF 4',       10,  24,  9, [fsBold], C_RUST);
   { Hero (mock 1.2.1). Rust on the cream wizard ground passes AA for large
     text (>=18pt bold); body copy below stays on the default ink-on-cream the
     wizard uses -- never rust on ink, per the contrast rules. }
-  AddLabel(WelcomePage, 'Build from receipts.',  20,  56, 28, [fsBold], C_RUST);
+  AddLabel(WelcomePage, 'Build from receipts.',  42,  50, 28, [fsBold], C_RUST);
   AddLabel(WelcomePage,
     'Save videos, podcasts, articles, and threads into a cited corpus on your disk.',
-                                              92,  36, 11, [], C_INK);
+                                              106, 36, 11, [], C_INK);
   AddLabel(WelcomePage,
     'This installs the local helper that does the work. ' +
     'No account, no cloud. Takes about a minute.',
-                                              138, 44, 10, [], C_INK);
+                                              150, 44, 10, [], C_INK);
   AddLabel(WelcomePage,
-    'MIT - open source - uoink.app',          210, 18,  9, [fsItalic], C_RUST);
+    'MIT - open source - uoink.app',          222, 22,  9, [fsItalic], C_RUST);
 end;
 
 procedure BuildMigratePage();
