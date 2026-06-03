@@ -28,6 +28,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import server  # noqa: E402
+import index as index_module  # noqa: E402
 
 
 def _assert(cond, msg):
@@ -281,6 +282,28 @@ def test_extract_route_carries_chunked_mode(tmp: Path):
     print("ok  /extract: validates, passes, and exposes long_video_mode=chunked")
 
 
+def test_queued_chunked_mode_survives_restart(tmp: Path):
+    idx = index_module.Index.open(tmp / "index.db")
+    try:
+        pending_id = idx.enqueue_pending(
+            "https://www.youtube.com/watch?v=abcdef",
+            120,
+            "2099-01-01T00:00:00",
+            "chunked",
+        )
+        row = idx.list_pending(limit=1)[0]
+        _assert(row["pending_id"] == pending_id, "queued row returned")
+        _assert(row["long_video_mode"] == "chunked",
+                f"queue persists chunk mode: {row}")
+        server._pending_long_video_modes.clear()
+        shaped = server._pending_with_long_video_mode(row)
+        _assert(shaped["long_video_mode"] == "chunked",
+                "queue status reads persisted mode after process memory reset")
+    finally:
+        idx.close()
+    print("ok  queue: chunked mode persists across helper restart")
+
+
 def test_screenshot_phase_end_to_end(tmp: Path):
     if not shutil.which("ffmpeg"):
         print("skip end-to-end: ffmpeg not on PATH")
@@ -340,6 +363,9 @@ def main():
         route = base / "route"
         route.mkdir()
         test_extract_route_carries_chunked_mode(route)
+        queue = base / "queue"
+        queue.mkdir()
+        test_queued_chunked_mode_survives_restart(queue)
     test_phase_error_and_activity_record()
     print("\nALL LONG-VIDEO TESTS PASSED")
     return 0

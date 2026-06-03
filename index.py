@@ -889,7 +889,7 @@ class Index:
 
     # ---- rate-limit retry queue (Sprint 19 / C4) ------------------------
     def enqueue_pending(self, url: str, interval: int,
-                        retry_after: str) -> int:
+                        retry_after: str, long_video_mode: str = "full") -> int:
         """Add a rate-limited URL to the queue with status='pending' and
         attempt_count=0. Returns the new pending_id.
 
@@ -921,9 +921,10 @@ class Index:
             cur = self._conn.execute(
                 "INSERT INTO pending_yoinks "
                 "(url, interval_seconds, queued_at, retry_after, "
-                " attempt_count, status) "
-                "VALUES (?, ?, ?, ?, 0, 'pending')",
-                (url, int(interval or 30), _now_iso(), retry_after),
+                " attempt_count, status, long_video_mode) "
+                "VALUES (?, ?, ?, ?, 0, 'pending', ?)",
+                (url, int(interval or 30), _now_iso(), retry_after,
+                 str(long_video_mode or "full")),
             )
             self._conn.commit()
             return cur.lastrowid

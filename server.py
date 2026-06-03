@@ -6775,6 +6775,10 @@ def _pending_long_video_mode(pending_id: int, *, remove: bool = False) -> str:
 
 def _pending_with_long_video_mode(row: dict) -> dict:
     shaped = dict(row)
+    persisted = shaped.get("long_video_mode")
+    if persisted:
+        shaped["long_video_mode"] = _normalize_long_video_mode(persisted)
+        return shaped
     pending_id = shaped.get("pending_id")
     if pending_id is not None:
         shaped["long_video_mode"] = _pending_long_video_mode(pending_id)
@@ -6798,7 +6802,8 @@ def _retry_pending_one() -> bool:
     url = row["url"]
     interval = row["interval_seconds"] or 30
     attempts_before = row["attempt_count"] or 0
-    long_video_mode = _pending_long_video_mode(pending_id)
+    long_video_mode = _normalize_long_video_mode(
+        row.get("long_video_mode") or _pending_long_video_mode(pending_id))
 
     try:
         idx.mark_pending_running(pending_id)
@@ -10778,7 +10783,7 @@ class Handler(BaseHTTPRequestHandler):
         )).strftime("%Y-%m-%dT%H:%M:%S")
         try:
             pending_id = _get_index().enqueue_pending(
-                url, interval, retry_after)
+                url, interval, retry_after, long_video_mode)
         except Exception as e:
             log.warning("live: enqueue failed (%s); proceeding inline", e)
             return None  # fall through -- best-effort
@@ -10880,7 +10885,7 @@ class Handler(BaseHTTPRequestHandler):
                     )).strftime("%Y-%m-%dT%H:%M:%S")
                     try:
                         pending_id = _get_index().enqueue_pending(
-                            url, interval, retry_after)
+                            url, interval, retry_after, long_video_mode)
                     except Exception as enqueue_err:
                         # Index unavailable; fall through to the pre-Sprint-19
                         # error path so the user still gets a useful message.
