@@ -283,6 +283,7 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
     started_at = b._now_iso()
     title = None
     folder = None
+    current_phase = "metadata"
     with b._extract_lock:
         try:
             metadata = b._fetch_metadata(url)
@@ -293,13 +294,24 @@ def uoink_video(args: dict[str, Any]) -> dict[str, Any]:
                 / b._topic_folder_name(topic)
                 / (b.slugify(title) or "video")
             )
-            result = b._run_extraction(url, interval, folder, metadata=metadata, topic=topic)
+
+            def phase_cb(phase):
+                nonlocal current_phase
+                current_phase = phase
+
+            result = b._run_extraction(
+                url, interval, folder, metadata=metadata, topic=topic,
+                phase_callback=phase_cb)
         except BaseException as e:
             msg = b.friendly_error(e)
+            detail = b.machine_error_detail(e)
             b._record_single_extract_job(
                 url,
                 started_at,
                 error=msg,
+                error_detail=detail,
+                failure_phase=b._failure_phase(e, current_phase),
+                long_video_mode=b.LONG_VIDEO_MODE_FULL,
                 title=title,
                 folder=folder,
             )
@@ -975,7 +987,8 @@ def _writing_persist(yoink_id, kind, body_text, *, title=None, dek=None,
                        target_length=None, parent_id=None,
                        suppress_credit=False,
                        skip_voice_dna_this_time=False,
-                       source_credit_line=None):
+                       source_credit_line=None,
+                       mode=None):
     server = _b()
     import writing_studio as _ws  # noqa: WPS433
     settings = server._read_settings() or {}
@@ -989,11 +1002,354 @@ def _writing_persist(yoink_id, kind, body_text, *, title=None, dek=None,
         style_anchor_ids=style_anchor_ids,
         angle=angle, target_length=target_length,
         parent_id=parent_id,
+        mode=(mode or _ws.COMPUTE_MODE_AGENT),
         voice_dna_warnings_enabled=bool(
             settings.get("voice_dna_warnings_enabled", True)),
         skip_voice_dna_this_time=skip_voice_dna_this_time,
         suppress_credit=suppress_credit,
     )
+
+
+# ---- Path C: BYO-key direct generation (Fix 4B) ---------------------------
+# When no MCP agent is connected but the user saved an Anthropic key in
+# Settings, the dashboard's Generate button asks the helper to do the LLM
+# call itself (mode="byo_key") instead of returning grounding-only. Voice DNA
+# (prepended to the system prompt), the non-suppressible creator credit, and
+# native attribution all apply -- the persisted piece is indistinguishable
+# from one an agent wrote, except mode is recorded as byo_key.
+_BYO_SOURCE_CHAR_CAP = 8000
+
+
+def _byo_source_text(server, yoink_row) -> str:
+    """A capped slab of the source material for the prompt: the sidecar
+    transcript when present, else the corpus markdown. Best-effort -- an
+    empty string is fine (the model still has the title/channel)."""
+    if not yoink_row:
+        return ""
+    from pathlib import Path as _Path
+    sidecar_path = yoink_row.get("sidecar_path") or ""
+    if sidecar_path and _Path(sidecar_path).exists():
+        try:
+            data = json.loads(_Path(sidecar_path).read_text(encoding="utf-8"))
+            segs = data.get("transcript") or []
+            text = " ".join(
+                str(s.get("text") or "").strip()
+                for s in segs if isinstance(s, dict))
+            if text.strip():
+                return text[:_BYO_SOURCE_CHAR_CAP]
+        except (OSError, json.JSONDecodeError, AttributeError):
+            pass
+    corpus_path = yoink_row.get("corpus_path") or ""
+    if corpus_path and _Path(corpus_path).exists():
+        try:
+            return _Path(corpus_path).read_text(
+                encoding="utf-8")[:_BYO_SOURCE_CHAR_CAP]
+        except OSError:
+            pass
+    return ""
+
+
+def _byo_build_prompts(kind, grounding, *, angle, target_length, source_text):
+    """System + user prompt for the BYO-key call. Voice DNA is prepended to
+    the system prompt; the creator credit line is supplied so the model emits
+    it verbatim (it's non-suppressible and persist_piece re-checks it)."""
+    import writing_studio as _ws  # noqa: WPS433
+    import voice_dna  # noqa: WPS433
+    credit = (grounding.get("source_credit") or {}).get(kind) or ""
+    anchors = grounding.get("style_anchors") or []
+    anchor_block = "\n\n".join(
+        f"Style anchor '{a.get('name')}':\n{(a.get('raw_text') or '').strip()}"
+        for a in anchors if (a.get("raw_text") or "").strip())
+
+    if kind == _ws.KIND_BLOG:
+        kind_rules = (
+            "Write a short blog post grounded in the source. Return ONLY a "
+            "JSON object with keys: title (string), dek (one-sentence "
+            "standfirst), body (markdown string), tags (array of <=5 short "
+            "strings). Put the Source credit line verbatim at the end of the "
+            "body.")
+        length_hint = (f"Aim for about {target_length} words of body."
+                       if target_length else "Keep it tight and skimmable.")
+    elif kind == _ws.KIND_THREAD:
+        kind_rules = (
+            "Write an X/Twitter thread grounded in the source. Number each "
+            "post. Keep every post under 280 characters. Put the credit line "
+            "verbatim in the final post. Return plain text only.")
+        length_hint = (f"Aim for about {target_length} total characters "
+                       "across the thread."
+                       if target_length else "3-6 posts is plenty.")
+    else:  # tweet
+        kind_rules = (
+            "Write a single X/Twitter post grounded in the source, under 280 "
+            "characters. Include the credit line verbatim. Return plain text "
+            "only.")
+        length_hint = ""
+
+    base_system = (
+        "You are helping a creator turn their own captured research (a "
+        "'uoink') into a post in their voice. Ground every claim in the "
+        "supplied source. Do not invent facts. " + kind_rules + "\n\n"
+        f"Creator credit line (include verbatim, do not alter or omit):\n{credit}"
+    )
+    system = voice_dna.prepend_system_prompt(base_system)
+
+    user_parts = []
+    if angle:
+        user_parts.append(f"Angle / lens to emphasize: {angle}")
+    hook_lens = grounding.get("hook_lens") or {}
+    if hook_lens.get("directive"):
+        user_parts.append(
+            f"Hook lens ({hook_lens.get('type')}): {hook_lens['directive']}")
+    if length_hint:
+        user_parts.append(length_hint)
+    if anchor_block:
+        user_parts.append("Match the tone of these style anchors:\n"
+                          + anchor_block)
+    src_yoink = grounding.get("source_yoink") or {}
+    head = (f"Source title: {src_yoink.get('title') or 'Untitled'}\n"
+            f"Source channel: {src_yoink.get('channel') or 'unknown'}")
+    user_parts.append(head)
+    user_parts.append("Source material:\n" + (source_text or "(no transcript "
+                                              "available; use title + channel)"))
+    return system, "\n\n".join(user_parts), credit
+
+
+def _byo_fatal_warnings(text):
+    import voice_dna  # noqa: WPS433
+    return [
+        warning for warning in voice_dna.scan(text)
+        if warning.get("category") == "The Big One"
+    ]
+
+
+def _byo_shape_generation(kind, text, fallback_tags):
+    import writing_studio as _ws  # noqa: WPS433
+    title = dek = None
+    tags = fallback_tags or []
+    body_text = text
+    if kind == _ws.KIND_BLOG:
+        parsed = _byo_extract_json(text)
+        if isinstance(parsed, dict) and parsed.get("body"):
+            body_text = str(parsed.get("body") or "")
+            title = parsed.get("title") or None
+            dek = parsed.get("dek") or None
+            if isinstance(parsed.get("tags"), list):
+                tags = [str(t) for t in parsed["tags"]][:5]
+    return body_text, title, dek, tags
+
+
+def _byo_voice_text(body_text, title, dek):
+    return "\n\n".join(
+        str(part) for part in (title, dek, body_text) if part
+    )
+
+
+def _byo_call_anthropic(server, key, *, system, user, max_tokens):
+    try:
+        resp = server._anthropic_messages(
+            key, system=system, user=user, max_tokens=max_tokens)
+        return server._anthropic_text(resp), None
+    except server.AnthropicAPIError as e:
+        if getattr(e, "status", None) == 401:
+            try:
+                server._mark_anthropic_key_invalid()
+            except Exception as mark_error:  # noqa: BLE001
+                server.log.warning(
+                    "Path C could not mark Anthropic key invalid: %s",
+                    mark_error)
+            return None, _err(
+                "Anthropic rejected the saved API key. Update it in Settings "
+                "and try again.")
+        server.log.warning("Path C Anthropic generation failed: %s", e)
+        if getattr(e, "status", None) == 429:
+            return None, _err(
+                "Anthropic is rate-limiting this request. Try again shortly.")
+        return None, _err(
+            "Anthropic couldn't generate this piece. Try again shortly.")
+    except Exception as e:  # noqa: BLE001
+        server.log.warning("Path C generation failed: %s", e)
+        return None, _err(
+            "Direct generation couldn't finish. Try again shortly.")
+
+
+def _byo_generate(kind, args):
+    """Run the BYO-key generation for one piece and persist it.
+
+    Fatal Voice DNA output gets exactly one regeneration attempt before any
+    persistence. A second fatal result is returned unsaved.
+    """
+    server = _b()
+    import writing_studio as _ws  # noqa: WPS433
+
+    try:
+        key = server._saved_anthropic_key()
+    except Exception as e:  # noqa: BLE001
+        server.log.warning("Path C key lookup failed: %s", e)
+        return _err(
+            "Direct generation couldn't read the saved key. "
+            "Nothing was saved.")
+    if not key:
+        return _err(
+            "No AI agent connected and no Anthropic key saved. Connect an "
+            "agent, or add an Anthropic API key in Settings to generate "
+            "directly.")
+
+    yoink_id = args.get("source_yoink_id") or args.get("yoink_id")
+    if yoink_id is not None and not isinstance(yoink_id, str):
+        return _err("source_yoink_id must be a string")
+    style_anchor_ids = args.get("style_anchor_ids") or []
+    if not isinstance(style_anchor_ids, list):
+        return _err("style_anchor_ids must be a list")
+    try:
+        hook_type_lens = _ws.normalize_hook_lens(args.get("hook_type_lens"))
+    except ValueError as e:
+        return _err(str(e))
+
+    try:
+        grounding = _writing_grounding(
+            yoink_id, style_anchor_ids, hook_type_lens)
+        yoink_row = (
+            server._get_index().get_yoink(yoink_id) if yoink_id else None)
+        source_text = _byo_source_text(server, yoink_row)
+    except Exception as e:  # noqa: BLE001
+        server.log.warning("Path C grounding failed: %s", e)
+        return _err(
+            "Direct generation couldn't prepare the source material. "
+            "Nothing was saved.")
+    target_length = (args.get("target_length_words")
+                     if kind == _ws.KIND_BLOG
+                     else args.get("target_length_chars"))
+    try:
+        system, user, credit = _byo_build_prompts(
+            kind, grounding, angle=args.get("angle"),
+            target_length=target_length, source_text=source_text)
+    except Exception as e:  # noqa: BLE001
+        server.log.warning("Path C prompt build failed: %s", e)
+        return _err(
+            "Direct generation couldn't prepare the writing prompt. "
+            "Nothing was saved.")
+
+    max_tokens = 2400 if kind == _ws.KIND_BLOG else 1200
+    text, error = _byo_call_anthropic(
+        server, key, system=system, user=user, max_tokens=max_tokens)
+    if error:
+        return error
+
+    try:
+        body_text, title, dek, tags = _byo_shape_generation(
+            kind, text, args.get("tags") or [])
+        fatal_warnings = _byo_fatal_warnings(
+            _byo_voice_text(body_text, title, dek))
+    except Exception as e:  # noqa: BLE001
+        server.log.warning("Path C generated output parse failed: %s", e)
+        return _err(
+            "Direct generation returned an unreadable response. "
+            "Nothing was saved.")
+    regenerated_for_voice_dna = False
+    if fatal_warnings:
+        regenerated_for_voice_dna = True
+        phrases = ", ".join(sorted({
+            str(warning.get("phrase") or "fatal pattern")
+            for warning in fatal_warnings
+        }))
+        retry_user = (
+            "PREVIOUS ATTEMPT VIOLATED VOICE DNA: "
+            f"{phrases}. Regenerate the output strictly avoiding these "
+            "patterns.\n\n" + user
+        )
+        text, error = _byo_call_anthropic(
+            server, key, system=system, user=retry_user, max_tokens=max_tokens)
+        if error:
+            return error
+        try:
+            body_text, title, dek, tags = _byo_shape_generation(
+                kind, text, args.get("tags") or [])
+            fatal_warnings = _byo_fatal_warnings(
+                _byo_voice_text(body_text, title, dek))
+        except Exception as e:  # noqa: BLE001
+            server.log.warning("Path C retry output parse failed: %s", e)
+            return _err(
+                "Direct generation returned an unreadable response. "
+                "Nothing was saved.")
+        if fatal_warnings:
+            return {
+                "ok": False,
+                "error": (
+                    "Generation still violated a fatal Voice DNA rule after "
+                    "one retry. Nothing was saved."
+                ),
+                "voice_warnings": fatal_warnings,
+                "retry_recommended": True,
+            }
+
+    # Creator credit is non-suppressible. The model is told to include it, but
+    # if it didn't, append it so the piece still ships with attribution (and
+    # persist_piece's credit check passes).
+    try:
+        if credit and not _ws._check_credit_present(body_text, credit):
+            body_text = body_text.rstrip() + "\n\n" + credit
+    except Exception as e:  # noqa: BLE001
+        server.log.warning("Path C generated output validation failed: %s", e)
+        return _err(
+            "Direct generation returned an unreadable response. "
+            "Nothing was saved.")
+
+    try:
+        piece = _writing_persist(
+            yoink_id, kind, body_text,
+            title=title, dek=dek, tags=tags,
+            style_anchor_ids=style_anchor_ids,
+            angle=args.get("angle"),
+            target_length=target_length,
+            parent_id=args.get("parent_id"),
+            skip_voice_dna_this_time=bool(
+                args.get("skip_voice_dna_this_time")),
+            source_credit_line=credit or args.get("source_credit_line"),
+            mode=_ws.COMPUTE_MODE_BYO_KEY)
+    except ValueError as e:
+        server.log.warning("Path C generated piece failed validation: %s", e)
+        return _err(
+            "The generated piece failed validation. Nothing was saved.")
+    except Exception as e:  # noqa: BLE001
+        server.log.warning("Path C persist failed: %s", e)
+        return _err(
+            "The generated piece couldn't be saved. Nothing was changed.")
+
+    piece["mode"] = "persisted"
+    piece["compute_path"] = _ws.COMPUTE_MODE_BYO_KEY
+    piece["generated_via"] = "byo_key"
+    piece["voice_dna_regenerated"] = regenerated_for_voice_dna
+    return _ok(**piece)
+
+
+def _byo_extract_json(text):
+    """Pull the first top-level JSON object out of a model response (it may be
+    fenced or have prose around it). Returns None when there's nothing
+    parseable."""
+    if not text:
+        return None
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        stripped = stripped.split("```", 2)
+        stripped = stripped[1] if len(stripped) > 1 else text
+        if stripped.lstrip().startswith("json"):
+            stripped = stripped.lstrip()[4:]
+    start = stripped.find("{")
+    end = stripped.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        return None
+    try:
+        return json.loads(stripped[start:end + 1])
+    except json.JSONDecodeError:
+        return None
+
+
+def _byo_requested(args) -> bool:
+    """True when the caller asked the helper to generate server-side (Path C)
+    rather than just return grounding for an agent to write."""
+    if args.get("generate") in (True, "true", "1", 1):
+        return True
+    return args.get("compute_mode") == "byo_key"
 
 
 def write_tweet(args: dict[str, Any]) -> dict[str, Any]:
@@ -1004,6 +1360,9 @@ def write_tweet(args: dict[str, Any]) -> dict[str, Any]:
     `body` present -> persists + scans + returns warnings (NEVER
     auto-blocks; see VOICE-DNA.md soft-warn policy)."""
     import writing_studio as _ws  # noqa: WPS433
+    kind = args.get("kind") or _ws.KIND_TWEET
+    if kind not in (_ws.KIND_TWEET, _ws.KIND_THREAD):
+        return _err("kind must be tweet or thread")
     yoink_id = (args.get("source_yoink_id")
                  or args.get("yoink_id"))
     if yoink_id is not None and not isinstance(yoink_id, str):
@@ -1017,14 +1376,18 @@ def write_tweet(args: dict[str, Any]) -> dict[str, Any]:
         return _err(str(e))
     body_text = args.get("body")
     if body_text is None:
-        return _ok(mode="grounding_only", kind=_ws.KIND_TWEET,
+        # Path C (Fix 4B): no agent to write the body, but the caller asked
+        # the helper to generate it directly with the user's Anthropic key.
+        if _byo_requested(args):
+            return _byo_generate(kind, args)
+        return _ok(mode="grounding_only", kind=kind,
                     context=_writing_grounding(yoink_id, style_anchor_ids,
                                                hook_type_lens),
-                    next=("Produce the tweet body (with credit line "
+                    next=(f"Produce the {kind} body (with credit line "
                           "included verbatim) and re-call with `body`."))
     try:
         piece = _writing_persist(
-            yoink_id, _ws.KIND_TWEET, body_text,
+            yoink_id, kind, body_text,
             tags=args.get("tags") or [],
             style_anchor_ids=style_anchor_ids,
             angle=args.get("angle"),
@@ -1050,6 +1413,8 @@ def write_blog(args: dict[str, Any]) -> dict[str, Any]:
     """v3.2 Writing Studio (blog): same two-phase contract as
     write_tweet. Phase 2 also accepts `title`, `dek`, `tags`."""
     import writing_studio as _ws  # noqa: WPS433
+    if args.get("kind") not in (None, "", _ws.KIND_BLOG):
+        return _err("kind must be blog")
     yoink_id = (args.get("source_yoink_id")
                  or args.get("yoink_id"))
     if yoink_id is not None and not isinstance(yoink_id, str):
@@ -1063,6 +1428,8 @@ def write_blog(args: dict[str, Any]) -> dict[str, Any]:
         return _err(str(e))
     body_text = args.get("body")
     if body_text is None:
+        if _byo_requested(args):  # Path C (Fix 4B)
+            return _byo_generate(_ws.KIND_BLOG, args)
         return _ok(mode="grounding_only", kind=_ws.KIND_BLOG,
                     context=_writing_grounding(yoink_id, style_anchor_ids,
                                                hook_type_lens),
@@ -1573,6 +1940,7 @@ def generate_script(args: dict[str, Any]) -> dict[str, Any]:
     script = args.get("script")
     mode = args.get("mode") or _scripts_mod.COMPUTE_MODE_AGENT
     parent = args.get("parent_script_id")
+    hook_type_lens = args.get("hook_type_lens")
     try:
         parent_id = int(parent) if parent is not None else None
     except (TypeError, ValueError):
@@ -2631,6 +2999,18 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "source_yoink_id": {"type": "string"},
             "angle": {"type": "string"},
             "target_length_chars": {"type": "integer"},
+            "generate": {
+                "type": "boolean",
+                "description": "When true and body is absent, generate "
+                               "directly with the saved Anthropic key."},
+            "compute_mode": {
+                "type": "string",
+                "enum": ["agent", "byo_key"],
+                "description": "Use byo_key to request direct generation."},
+            "kind": {
+                "type": "string",
+                "enum": ["tweet", "thread"],
+                "description": "Direct-generation output kind."},
             "hook_type_lens": {
                 "type": "string",
                 "enum": ["informative", "engagement_bait",
@@ -2665,6 +3045,18 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
             "source_yoink_id": {"type": "string"},
             "angle": {"type": "string"},
             "target_length_words": {"type": "integer"},
+            "generate": {
+                "type": "boolean",
+                "description": "When true and body is absent, generate "
+                               "directly with the saved Anthropic key."},
+            "compute_mode": {
+                "type": "string",
+                "enum": ["agent", "byo_key"],
+                "description": "Use byo_key to request direct generation."},
+            "kind": {
+                "type": "string",
+                "enum": ["blog"],
+                "description": "Direct-generation output kind."},
             "hook_type_lens": {
                 "type": "string",
                 "enum": ["informative", "engagement_bait",

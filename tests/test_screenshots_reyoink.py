@@ -84,7 +84,8 @@ def test_screenshot_list_happy(tmp: Path) -> None:
         "title": "Demo Video",
         "screenshots": [
             {"timestamp": "0:00", "path": "screenshots/shot_0001.jpg", "filename": "shot_0001.jpg"},
-            {"timestamp": "0:30", "path": "screenshots/shot_0002.jpg", "filename": "shot_0002.jpg"},
+            # Deliberately non-contiguous: chunked extraction keeps source time.
+            {"timestamp": "10:00", "path": "screenshots/shot_0002.jpg", "filename": "shot_0002.jpg"},
             # references a file that no longer exists -> must be skipped
             {"timestamp": "1:00", "path": "screenshots/shot_9999.jpg", "filename": "shot_9999.jpg"},
         ],
@@ -104,7 +105,8 @@ def test_screenshot_list_happy(tmp: Path) -> None:
     first = payload["screenshots"][0]
     _assert(first["timestamp"] == "0:00", "sidecar timestamp not passed through")
     _assert(first["timestamp_seconds"] == 0, "ts_seconds[0] should be 0")
-    _assert(payload["screenshots"][1]["timestamp_seconds"] == 30, "ts_seconds[1] should be 30")
+    _assert(payload["screenshots"][1]["timestamp_seconds"] == 600,
+            "sidecar source timestamp should win over interval math")
     _assert(first["width"] == 1280 and first["height"] == 720, "dims not populated")
     _assert(first["file_url"].startswith("/file?path="), "file_url shape wrong")
     _assert(first["path"].endswith("shot_0001.jpg"), "absolute path wrong")
