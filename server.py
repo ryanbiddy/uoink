@@ -266,9 +266,20 @@ MAX_SCREENSHOTS = 200                  # cap per video
 PLAYLIST_VIDEO_CAP = 10                # v2 Playlist Mode first-ship cap
 MAX_SERVED_FILE_BYTES = 10 * 1024 * 1024
 LONG_VIDEO_SECONDS = 2 * 60 * 60       # 2 hours -- log warning above this
-YTDLP_TIMEOUT_SEC = 30 * 60            # main extract timeout
+YTDLP_TIMEOUT_SEC = 30 * 60            # download timeout FLOOR (short videos)
+# v3.2.4: a flat 30-min download timeout is the prime suspect for long-video
+# failures -- a throttled 2-hour download legitimately exceeds it, and the
+# old error told users to raise the *screenshot interval*, which can't help a
+# download timeout. We now scale the budget with the video's real duration
+# (clamped) so a 2-hour video gets room, while a stuck download still can't
+# hang the extract lock forever.
+YTDLP_TIMEOUT_PER_VIDEO_SEC = 0.5      # 0.5s of download budget per second of video
+YTDLP_TIMEOUT_HARD_CAP_SEC = 2 * 60 * 60  # never wait more than 2 hours
 COMMENTS_TIMEOUT_SEC = 5 * 60
-FFMPEG_TIMEOUT_SEC = 15 * 60
+# Screenshot decode also scales: a 2-hour source takes ffmpeg longer to walk
+# than a 5-minute one even at the same shot interval.
+FFMPEG_TIMEOUT_SEC = 15 * 60           # screenshot timeout FLOOR
+FFMPEG_TIMEOUT_PER_VIDEO_SEC = 0.25
 CLIPBOARD_SCREENSHOT_CAP_DEFAULT = 4
 CLIPBOARD_SCREENSHOT_CAP_MAX = 12
 RELIABILITY_MODEL_NAME = "tiny"
@@ -1915,6 +1926,32 @@ def _terminate_process(proc: subprocess.Popen):
             pass
 
 
+def _ytdlp_timeout_for(duration_seconds: float) -> int:
+    """Download timeout budget for a video of `duration_seconds`.
+
+    Floors at YTDLP_TIMEOUT_SEC (so short videos behave exactly as before),
+    grows linearly with duration for long videos, and is hard-capped so a
+    stuck download can never hold the extract lock indefinitely. A 2-hour
+    (7200s) video gets max(1800, 3600) = 3600s; a 4-hour livestream VOD gets
+    capped at YTDLP_TIMEOUT_HARD_CAP_SEC."""
+    try:
+        dur = max(0.0, float(duration_seconds or 0))
+    except (TypeError, ValueError):
+        dur = 0.0
+    scaled = int(dur * YTDLP_TIMEOUT_PER_VIDEO_SEC)
+    return max(YTDLP_TIMEOUT_SEC, min(scaled, YTDLP_TIMEOUT_HARD_CAP_SEC))
+
+
+def _ffmpeg_timeout_for(duration_seconds: float) -> int:
+    """Screenshot-extraction timeout budget, scaled like the download one."""
+    try:
+        dur = max(0.0, float(duration_seconds or 0))
+    except (TypeError, ValueError):
+        dur = 0.0
+    scaled = int(dur * FFMPEG_TIMEOUT_PER_VIDEO_SEC)
+    return max(FFMPEG_TIMEOUT_SEC, min(scaled, YTDLP_TIMEOUT_HARD_CAP_SEC))
+
+
 def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = None,
                     timeout: int | float | None = None, check: bool = True,
                     stdout=None, stderr=None, text: bool = False,
@@ -3444,8 +3481,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # Thumbnail (best-effort; absence shouldn't fail the extraction).
     _download_thumbnail(metadata, output_folder, cancel_event=cancel_event)
 
-    # Video + subs. Bounded to YTDLP_TIMEOUT_SEC so a stuck download doesn't
-    # hold _extract_lock forever and block other yoinks.
+    # Video + subs. Bounded to a duration-scaled timeout so a stuck download
+    # doesn't hold _extract_lock forever, while a legitimately long (but
+    # progressing) download isn't killed at a flat 30 minutes.
+    download_timeout = _ytdlp_timeout_for(duration)
     try:
         if phase_callback:
             phase_callback("download")
@@ -3462,6 +3501,14 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                 "-f", "worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst",
                 # Bail before downloading a multi-GB file (livestream VODs).
                 "--max-filesize", str(YTDLP_MAX_FILESIZE_BYTES),
+                # v3.2.4 long-video hardening: pull DASH fragments in parallel
+                # (faster on long videos), retry transient stalls, and cap the
+                # per-socket wait so a throttled connection surfaces as retries
+                # instead of one silent multi-minute hang.
+                "--concurrent-fragments", "4",
+                "--retries", "10",
+                "--fragment-retries", "10",
+                "--socket-timeout", "30",
                 "-o", str(output_folder / "video.%(ext)s"),
                 url,
             ],
@@ -3469,12 +3516,22 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE,
-            timeout=YTDLP_TIMEOUT_SEC,
+            timeout=download_timeout,
         )
     except subprocess.TimeoutExpired:
+        # Log the real cause (duration + the budget we actually used) so
+        # helper.log has a trace -- the old path discarded this and left the
+        # 2-hour failure looking like "nothing happened".
+        log.error(
+            "yt-dlp download timed out after %ds (video duration ~%.0fs): %s",
+            download_timeout, duration, url)
+        mins = max(1, download_timeout // 60)
         raise RuntimeError(
-            "Video too long for current settings -- try again with a longer "
-            "screenshot interval, or this video may be too long for Uoink."
+            f"Download timed out after about {mins} minutes. This is a "
+            "download/network issue, not a screenshot setting -- the video "
+            "may be very long, or the connection to YouTube is slow or being "
+            "throttled. Try again on a faster connection, or pick a shorter "
+            "video."
         )
 
     video_files = [f for f in output_folder.glob("video.*")
@@ -3505,9 +3562,13 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE,
-            timeout=FFMPEG_TIMEOUT_SEC,
+            timeout=_ffmpeg_timeout_for(duration),
         )
     except subprocess.TimeoutExpired:
+        log.error(
+            "ffmpeg screenshot extraction timed out after %ds "
+            "(video duration ~%.0fs, interval %ds)",
+            _ffmpeg_timeout_for(duration), duration, interval)
         raise RuntimeError(
             "Screenshot generation timed out -- try a longer screenshot "
             "interval (current: %ds)." % interval
@@ -5618,6 +5679,153 @@ def _reyoink_source(idx, video_id: str) -> tuple[str, int | None] | None:
 
 
 # ---------------------------------------------------------------------------
+# Screenshot picker v3.2.4 -- visual-diff dedup + auto-suggest (grid UI)
+# ---------------------------------------------------------------------------
+# A small perceptual "average hash" (aHash) is enough to spot near-duplicate
+# frames (a static talking-head shot that barely changes for a minute). We
+# lazy-import Pillow -- it's a bundled dependency (requirements.txt) but the
+# helper must never crash the picker if a broken bundle ships without it, so
+# every caller treats "no Pillow" as "dedup unavailable, return everything".
+_AHASH_SIDE = 8  # 8x8 -> 64-bit hash
+
+
+def _ahash_file(path: Path) -> int | None:
+    """64-bit average hash of an image, or None when it can't be read.
+
+    No third-party dep is *required*: returns None if Pillow is missing so
+    the picker degrades to "show all frames" rather than erroring."""
+    try:
+        from PIL import Image  # lazy: bundled, but optional at runtime
+    except Exception:
+        return None
+    try:
+        with Image.open(path) as im:
+            small = im.convert("L").resize(
+                (_AHASH_SIDE, _AHASH_SIDE), Image.BILINEAR)
+            pixels = list(small.getdata())
+    except Exception:
+        return None
+    if not pixels:
+        return None
+    avg = sum(pixels) / len(pixels)
+    bits = 0
+    for i, px in enumerate(pixels):
+        if px >= avg:
+            bits |= (1 << i)
+    return bits
+
+
+def _hamming(a: int, b: int) -> int:
+    return bin(a ^ b).count("1")
+
+
+def _dedupe_screenshot_entries(entries: list[dict], *,
+                               threshold: int = 5) -> tuple[list[dict], int, bool]:
+    """Drop frames that are visually near-identical to the last frame we
+    kept, comparing average-hashes with a Hamming-distance threshold.
+
+    Comparing against the *last kept* frame (not the immediate predecessor)
+    means a slow pan still surfaces periodic frames instead of collapsing to
+    one. Returns (kept, removed_count, dedupe_available). When Pillow is
+    unavailable for the very first frame we bail and return everything with
+    dedupe_available=False so the transport can tell the UI."""
+    if not entries:
+        return entries, 0, True
+    kept: list[dict] = []
+    last_hash: int | None = None
+    any_hash = False
+    for entry in entries:
+        h = _ahash_file(Path(entry["path"])) if entry.get("path") else None
+        if h is None:
+            # Unhashable (or no Pillow): never silently drop a frame we
+            # couldn't compare. Keep it and reset the anchor.
+            kept.append(entry)
+            last_hash = None
+            continue
+        any_hash = True
+        if last_hash is not None and _hamming(h, last_hash) <= threshold:
+            continue  # near-duplicate of the last kept frame
+        kept.append(entry)
+        last_hash = h
+    removed = len(entries) - len(kept)
+    return kept, removed, any_hash
+
+
+def _even_indices(n: int, count: int) -> list[int]:
+    """`count` indices spread evenly across range(n), endpoints included,
+    de-duplicated and sorted. Used by the thread/blog auto-suggest."""
+    if n <= 0 or count <= 0:
+        return []
+    if count == 1:
+        return [n // 2]
+    if count >= n:
+        return list(range(n))
+    out = sorted({round(i * (n - 1) / (count - 1)) for i in range(count)})
+    # Rounding collisions can leave us short; backfill from the gaps.
+    i = 0
+    while len(out) < count and i < n:
+        if i not in out:
+            out.append(i)
+        i += 1
+    return sorted(out)[:count]
+
+
+# Auto-suggest defaults. The corpus carries a *video-level* hook_type
+# classification but no per-timestamp hook position (see sidecar schema), so
+# "best frame for a tweet" is a documented heuristic: skip the cold-open and
+# land just inside the opening zone where the hook is delivered on camera.
+_HOOK_ZONE_FRACTION = 0.08   # ~8% into the timeline
+_BLOG_SUGGEST_COUNT = 5      # 3-5; we aim for 5 and clamp to what's available
+_THREAD_MIN, _THREAD_MAX = 3, 8
+
+
+def _suggest_screenshots(payload: dict, *, mode: str,
+                         thread_size: int | None = None) -> dict:
+    """Pick a sensible default frame set for tweet / thread / blog.
+
+    tweet  -> 1 frame in the hook zone (heuristic; see _HOOK_ZONE_FRACTION).
+    thread -> one frame per post, evenly distributed across the timeline.
+    blog   -> 3-5 frames sampled start/mid/end.
+
+    Returns a dict with the chosen entries + the indices + the strategy used
+    so the UI (and the convergence doc) can show *why* these frames."""
+    entries = payload.get("screenshots") or []
+    n = len(entries)
+    mode = (mode or "").strip().lower()
+    if mode not in ("tweet", "thread", "blog"):
+        raise ValueError("mode must be one of tweet|thread|blog")
+
+    if n == 0:
+        return {"mode": mode, "strategy": "empty", "count": 0,
+                "indices": [], "selected": []}
+
+    if mode == "tweet":
+        idx = max(1, round(_HOOK_ZONE_FRACTION * (n - 1))) if n > 1 else 0
+        indices = [idx]
+        strategy = "hook_zone_heuristic"
+    elif mode == "thread":
+        size = thread_size if isinstance(thread_size, int) else 5
+        size = max(_THREAD_MIN, min(_THREAD_MAX, size))
+        indices = _even_indices(n, size)
+        strategy = "even_distribution"
+    else:  # blog
+        count = min(_BLOG_SUGGEST_COUNT, n)
+        count = max(min(3, n), count)
+        indices = _even_indices(n, count)
+        strategy = "start_mid_end_zones"
+
+    selected = [entries[i] for i in indices if 0 <= i < n]
+    return {
+        "mode": mode,
+        "strategy": strategy,
+        "thread_size": (thread_size if mode == "thread" else None),
+        "count": len(selected),
+        "indices": indices,
+        "selected": selected,
+    }
+
+
+# ---------------------------------------------------------------------------
 # MCP HTTP transport helpers
 # ---------------------------------------------------------------------------
 MCP_PROTOCOL_VERSION = "2025-11-25"
@@ -5688,6 +5896,196 @@ def _mcp_config_payload() -> dict:
             "sse_url": f"http://{HOST}:{PORT}/mcp/v1/sse",
             "auth_header": "X-Uoink-Token",
         },
+    }
+
+
+# ---------------------------------------------------------------------------
+# Fix 4A -- one-click agent setup. Detect installed desktop AI clients and
+# write Uoink's MCP server entry into their config in place (with a backup).
+# Creator-facing: the dashboard turns these into "Connect Claude Desktop"
+# buttons instead of dumping raw JSON. Detection is read-only; connect only
+# ever edits a JSON config file -- it never installs or launches anything.
+# ---------------------------------------------------------------------------
+# Canonical client ids the connect endpoint accepts.
+AGENT_CLIENTS = ("claude-desktop", "cursor", "cline", "continue")
+
+
+def _env_dir(var: str) -> Path | None:
+    val = os.environ.get(var)
+    return Path(val) if val else None
+
+
+def _agent_client_specs() -> list[dict]:
+    """Per-client detection spec: the config file we'd edit, plus the marker
+    paths whose existence means "this client is installed". Windows-first
+    (the only shipped build today); falls back to ~/.<client> paths that are
+    correct on macOS/Linux too so the logic is portable when the Mac build
+    lands."""
+    home = Path.home()
+    appdata = _env_dir("APPDATA") or (home / "AppData" / "Roaming")
+    local = _env_dir("LOCALAPPDATA") or (home / "AppData" / "Local")
+    code_user = appdata / "Code" / "User"
+    return [
+        {
+            "name": "claude-desktop",
+            "label": "Claude Desktop",
+            "config_path": appdata / "Claude" / "claude_desktop_config.json",
+            "markers": [appdata / "Claude",
+                        local / "AnthropicClaude",
+                        local / "Programs" / "claude"],
+        },
+        {
+            "name": "cursor",
+            "label": "Cursor",
+            # Cursor reads global MCP servers from ~/.cursor/mcp.json.
+            "config_path": home / ".cursor" / "mcp.json",
+            "markers": [home / ".cursor",
+                        appdata / "Cursor",
+                        local / "Programs" / "cursor"],
+        },
+        {
+            "name": "cline",
+            "label": "Cline",
+            # Cline (VS Code extension) keeps its MCP servers here.
+            "config_path": (code_user / "globalStorage"
+                            / "saoudrizwan.claude-dev" / "settings"
+                            / "cline_mcp_settings.json"),
+            "markers": [code_user / "globalStorage" / "saoudrizwan.claude-dev",
+                        appdata / "Code"],
+        },
+        {
+            "name": "continue",
+            "label": "Continue",
+            "config_path": home / ".continue" / "config.json",
+            "markers": [home / ".continue"],
+        },
+    ]
+
+
+def _agent_client_spec(name: str) -> dict | None:
+    name = (name or "").strip().lower()
+    for spec in _agent_client_specs():
+        if spec["name"] == name:
+            return spec
+    return None
+
+
+def _uoink_mcp_entry() -> dict:
+    """The mcpServers entry every client gets: the bundled stdio command."""
+    command, args = _mcp_stdio_command()
+    return {"command": command, "args": args}
+
+
+def _client_is_connected(config_path: Path) -> bool:
+    """True when the client's config already lists a `uoink` mcpServers entry.
+    Best-effort: an unreadable / non-JSON file reads as not-connected."""
+    try:
+        if not config_path.exists():
+            return False
+        data = json.loads(config_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    servers = data.get("mcpServers") if isinstance(data, dict) else None
+    return isinstance(servers, dict) and "uoink" in servers
+
+
+def _detect_ai_clients() -> list[dict]:
+    """Scan for installed desktop AI clients. Pure read; never writes."""
+    out: list[dict] = []
+    for spec in _agent_client_specs():
+        installed = any(p.exists() for p in spec["markers"])
+        cfg = spec["config_path"]
+        out.append({
+            "name": spec["name"],
+            "label": spec["label"],
+            "installed": installed,
+            "config_path": str(cfg),
+            "config_exists": cfg.exists(),
+            "connected": _client_is_connected(cfg),
+        })
+    return out
+
+
+def _connect_ai_client(name: str) -> dict:
+    """Add Uoink's MCP server entry to a client's config file in place.
+
+    Validates existing JSON before touching it (a malformed config is left
+    untouched and reported, never clobbered), writes a `.bak` copy first, then
+    atomically rewrites the file with the `uoink` entry merged into
+    `mcpServers`. Returns a result dict; raises ValueError (mapped to 4xx) for
+    an unknown client or a missing parent directory ("not installed")."""
+    spec = _agent_client_spec(name)
+    if spec is None:
+        e = ValueError(f"unknown client '{name}'")
+        e.http_status = 404
+        raise e
+    cfg: Path = spec["config_path"]
+    installed = any(p.exists() for p in spec["markers"])
+    if not installed and not cfg.parent.exists():
+        e = ValueError(
+            f"{spec['label']} doesn't look installed on this machine "
+            f"(no config directory at {cfg.parent}).")
+        e.http_status = 409
+        raise e
+
+    existed = cfg.exists()
+    data: dict = {}
+    if existed:
+        try:
+            raw = cfg.read_text(encoding="utf-8")
+        except OSError as exc:
+            e = ValueError(f"couldn't read {spec['label']} config: {exc}")
+            e.http_status = 500
+            raise e
+        if raw.strip():
+            try:
+                parsed = json.loads(raw)
+            except json.JSONDecodeError as exc:
+                e = ValueError(
+                    f"{spec['label']} config isn't valid JSON ({exc}); "
+                    "left it untouched. Open it and fix the syntax, then "
+                    "try connecting again.")
+                e.http_status = 422
+                raise e
+            if not isinstance(parsed, dict):
+                e = ValueError(
+                    f"{spec['label']} config isn't a JSON object; "
+                    "left it untouched.")
+                e.http_status = 422
+                raise e
+            data = parsed
+
+    servers = data.get("mcpServers")
+    if not isinstance(servers, dict):
+        servers = {}
+    already = "uoink" in servers
+    servers["uoink"] = _uoink_mcp_entry()
+    data["mcpServers"] = servers
+
+    backup_path = cfg.with_suffix(cfg.suffix + ".bak")
+    cfg.parent.mkdir(parents=True, exist_ok=True)
+    if existed:
+        try:
+            shutil.copy2(cfg, backup_path)
+        except OSError as exc:
+            log.warning("agent connect: backup failed (%s)", exc)
+            backup_path = None
+    else:
+        backup_path = None
+
+    tmp = cfg.with_suffix(cfg.suffix + ".tmp")
+    tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False),
+                   encoding="utf-8")
+    tmp.replace(cfg)
+    log.info("agent connect: wrote uoink mcpServers entry to %s", cfg)
+    return {
+        "client": spec["name"],
+        "label": spec["label"],
+        "config_path": str(cfg),
+        "backup_path": (str(backup_path) if backup_path else None),
+        "action": "updated" if already else "added",
+        "created_config": not existed,
+        "entry": servers["uoink"],
     }
 
 
@@ -6728,6 +7126,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_recent()
         if bare.startswith("/yoinks/") and bare.endswith("/screenshots"):
             return self._handle_yoink_screenshots(bare)
+        if bare.startswith("/yoinks/") and bare.endswith("/screenshots/suggest"):
+            return self._handle_yoink_screenshots_suggest(bare)
+        if bare.startswith("/yoinks/") and "/screenshots/" in bare:
+            return self._handle_yoink_screenshot_file(bare)
+        if bare == "/agents/detect":
+            return self._handle_agents_detect()
         if bare == "/open-folder":
             return self._handle_open_folder()
         if bare == "/jobs/stream":
@@ -8945,13 +9349,27 @@ class Handler(BaseHTTPRequestHandler):
         """GET /yoinks/<id>/screenshots -- list the source's screenshots for
         the Writing Studio picker (D-20). Token gate already cleared by
         do_GET. Returns 404 for an unknown id, 200 with an empty list for a
-        text-only capture."""
+        text-only capture.
+
+        v3.2.4: `?dedupe=true` hides visually near-duplicate frames (a static
+        shot that barely changes). `?dedupe_threshold=N` tunes the Hamming
+        cutoff (default 5; higher = more aggressive). When the runtime can't
+        hash images (no Pillow) the full list is returned with
+        `dedupe_available=false` so the grid can say so."""
         from urllib.parse import unquote
         video_id = unquote(
             bare[len("/yoinks/"):-len("/screenshots")]).strip("/")
         if not video_id:
             return self._send_json(400, {"ok": False,
                                          "error": "video_id required"})
+        qs = parse_qs(urlparse(self.path).query)
+        dedupe = (qs.get("dedupe") or [""])[0].strip().lower() in (
+            "1", "true", "yes")
+        try:
+            threshold = int((qs.get("dedupe_threshold") or ["5"])[0])
+        except (TypeError, ValueError):
+            threshold = 5
+        threshold = max(0, min(32, threshold))
         try:
             payload = _screenshot_list_for_yoink(_get_index(), video_id)
         except Exception:
@@ -8961,7 +9379,127 @@ class Handler(BaseHTTPRequestHandler):
         if payload is None:
             return self._send_json(404, {"ok": False,
                                          "error": "uoink not found"})
+        if dedupe:
+            kept, removed, available = _dedupe_screenshot_entries(
+                payload.get("screenshots") or [], threshold=threshold)
+            payload["screenshots"] = kept
+            payload["count"] = len(kept)
+            payload["deduped"] = True
+            payload["dedupe_removed"] = removed
+            payload["dedupe_available"] = available
+            payload["dedupe_threshold"] = threshold
         return self._send_json(200, {"ok": True, **payload})
+
+    def _handle_yoink_screenshots_suggest(self, bare: str):
+        """GET /yoinks/<id>/screenshots/suggest?mode=tweet|thread|blog&thread_size=N
+        -- return the auto-suggested frame set for a post type. Token gate
+        cleared by do_GET. 404 unknown id; 400 bad mode."""
+        from urllib.parse import unquote
+        head = bare[len("/yoinks/"):-len("/screenshots/suggest")]
+        video_id = unquote(head).strip("/")
+        if not video_id:
+            return self._send_json(400, {"ok": False,
+                                         "error": "video_id required"})
+        qs = parse_qs(urlparse(self.path).query)
+        mode = (qs.get("mode") or ["tweet"])[0]
+        thread_size = None
+        raw_ts = (qs.get("thread_size") or [None])[0]
+        if raw_ts is not None:
+            try:
+                thread_size = int(raw_ts)
+            except (TypeError, ValueError):
+                return self._send_json(400, {
+                    "ok": False, "error": "thread_size must be an integer"})
+        try:
+            payload = _screenshot_list_for_yoink(_get_index(), video_id)
+        except Exception:
+            log.exception("/yoinks/<id>/screenshots/suggest failed")
+            return self._send_json(500, {
+                "ok": False, "error": "Couldn't read this uoink's screenshots."})
+        if payload is None:
+            return self._send_json(404, {"ok": False,
+                                         "error": "uoink not found"})
+        try:
+            suggestion = _suggest_screenshots(
+                payload, mode=mode, thread_size=thread_size)
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        return self._send_json(200, {
+            "ok": True, "video_id": video_id,
+            "interval_seconds": payload.get("interval_seconds"),
+            "total_available": payload.get("count"),
+            **suggestion,
+        })
+
+    def _handle_yoink_screenshot_file(self, bare: str):
+        """GET /yoinks/<id>/screenshots/<n>.png -- serve the Nth screenshot
+        (0-based, matching the `index` field of the list endpoint) as binary
+        image bytes for an inline grid that can't use /file?path=. The `.png`
+        suffix is cosmetic; the real bytes are JPEG and the Content-Type
+        follows the file on disk."""
+        from urllib.parse import unquote
+        tail = bare[len("/yoinks/"):]
+        head, _, idx_part = tail.rpartition("/screenshots/")
+        video_id = unquote(head).strip("/")
+        idx_str = idx_part.rsplit(".", 1)[0]  # strip an optional .png/.jpg
+        if not video_id or not idx_str.isdigit():
+            return self._send_json(400, {
+                "ok": False, "error": "expected /yoinks/<id>/screenshots/<n>"})
+        index = int(idx_str)
+        try:
+            payload = _screenshot_list_for_yoink(_get_index(), video_id)
+        except Exception:
+            log.exception("/yoinks/<id>/screenshots/<n> failed")
+            return self._send_json(500, {
+                "ok": False, "error": "Couldn't read this uoink's screenshots."})
+        if payload is None:
+            return self._send_json(404, {"ok": False,
+                                         "error": "uoink not found"})
+        shots = payload.get("screenshots") or []
+        if index < 0 or index >= len(shots):
+            return self._send_json(404, {
+                "ok": False, "error": "screenshot index out of range"})
+        path, mime, status, error = _resolve_served_file(shots[index]["path"])
+        if error:
+            return self._send_json(status, {"ok": False, "error": error})
+        return self._send_file(path, mime)
+
+    def _handle_agents_detect(self):
+        """GET /agents/detect -- list desktop AI clients on this machine so
+        the dashboard can offer one-click connect buttons (Fix 4A). Token gate
+        cleared by do_GET. Pure read."""
+        try:
+            agents = _detect_ai_clients()
+        except Exception:
+            log.exception("/agents/detect failed")
+            return self._send_json(500, {
+                "ok": False, "error": "Couldn't scan for AI clients."})
+        return self._send_json(200, {
+            "ok": True,
+            "agents": agents,
+            "any_installed": any(a["installed"] for a in agents),
+        })
+
+    def _handle_agents_connect(self, bare: str):
+        """POST /agents/connect/<client> -- merge Uoink's MCP server entry
+        into the client's config file in place (.bak backup, JSON validated
+        first). Fix 4A. Token gate cleared by do_POST."""
+        from urllib.parse import unquote
+        client = unquote(bare[len("/agents/connect/"):]).strip("/")
+        if not client:
+            return self._send_json(400, {"ok": False,
+                                         "error": "client required"})
+        try:
+            result = _connect_ai_client(client)
+        except ValueError as e:
+            return self._send_json(getattr(e, "http_status", 400),
+                                   {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/agents/connect/%s failed", client)
+            return self._send_json(500, {
+                "ok": False,
+                "error": f"Couldn't update the {client} config: {e}"})
+        return self._send_json(200, {"ok": True, **result})
 
     def _handle_reyoink(self, bare: str):
         """POST /yoinks/<id>/reyoink -- re-capture the source so the composer
@@ -9007,6 +9545,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_settings_post(body)
         if bare == "/settings/test-key":
             return self._handle_settings_test_key(body)
+        if bare.startswith("/agents/connect/"):
+            return self._handle_agents_connect(bare)
         if bare == "/helper/quit":
             return self._handle_helper_quit()
         if bare == "/facets/classify":
