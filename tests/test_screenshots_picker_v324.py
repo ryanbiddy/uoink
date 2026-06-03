@@ -104,6 +104,18 @@ def test_suggest_edges():
     raise AssertionError("bad mode should raise ValueError")
 
 
+def test_dedupe_query_contract():
+    enabled, threshold = server._screenshot_dedupe_query({
+        "dedupe": ["true"], "dedupe_threshold": ["99"]})
+    _assert(enabled is True and threshold == 32,
+            f"dedupe query enables + clamps: {enabled}, {threshold}")
+    enabled, threshold = server._screenshot_dedupe_query({
+        "dedupe": ["no"], "dedupe_threshold": ["bad"]})
+    _assert(enabled is False and threshold == 5,
+            f"dedupe query defaults invalid threshold: {enabled}, {threshold}")
+    print("ok  dedupe query: shared enable/default/clamp contract")
+
+
 def test_dedupe(tmp: Path):
     if not _has_pillow():
         # Documented fallback: without Pillow nothing is hashable, so dedupe
@@ -160,6 +172,7 @@ def main():
         test_even_indices()
         test_suggest_modes()
         test_suggest_edges()
+        test_dedupe_query_contract()
         sub1 = base / "dedupe"; sub1.mkdir()
         test_dedupe(sub1)
         sub2 = base / "ahash"; sub2.mkdir()

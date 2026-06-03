@@ -130,11 +130,21 @@ def main() -> int:
             _assert(payload.get("deduped") is True, "deduped flag missing")
             _assert(payload["count"] < 4, f"dedupe should drop a frame: {payload['count']}")
             _assert(payload.get("dedupe_available") is True, "dedupe_available flag")
+            deduped_count = payload["count"]
 
-            # suggest thread
-            status, payload = _req("GET", "/yoinks/known/screenshots/suggest?mode=thread&thread_size=3")
+            # suggest thread on the exact same deduped set as the picker
+            status, payload = _req(
+                "GET",
+                "/yoinks/known/screenshots/suggest"
+                "?mode=thread&thread_size=3&dedupe=true")
             _assert(status == 200 and payload.get("ok"), f"suggest not ok: {status} {payload}")
-            _assert(payload["mode"] == "thread" and payload["count"] == 3, f"suggest thread: {payload}")
+            _assert(payload["mode"] == "thread", f"suggest thread: {payload}")
+            _assert(payload["total_available"] == deduped_count,
+                    f"suggest must use picker deduped set: {payload}")
+            _assert(payload.get("deduped") is True,
+                    "suggest response exposes dedupe mode")
+            _assert(payload["count"] <= deduped_count,
+                    "suggest cannot select outside deduped set")
             _assert(payload["strategy"] == "even_distribution", "thread strategy label")
 
             # suggest tweet

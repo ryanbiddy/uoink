@@ -7,6 +7,8 @@ response, and drives uoink_mcp_tools.write_tweet / write_blog through the
 Path C branch (generate=True / compute_mode=byo_key). Verifies:
   - no key  -> a clear _err, no crash
   - tweet   -> persisted with mode=byo_key, credit + Voice DNA applied
+  - selected hook lens reaches the direct-generation prompt
+  - fatal Voice DNA output regenerates once before any persistence
   - missing credit in model output -> credit auto-appended
   - blog    -> JSON {title,dek,body,tags} parsed and persisted
 No network (the only outbound call is stubbed).
@@ -68,14 +70,24 @@ class MemIndex:
 
 def _install_backend(monkey, *, key="sk-test", reply=""):
     idx = MemIndex()
+    idx.calls = []
     tools.bind_backend(server)
     monkey["idx"] = idx
     server._get_index = lambda: idx
     server._read_settings = lambda: {}
     server._saved_anthropic_key = lambda: key
     server._mark_anthropic_key_invalid = lambda: None
-    server._anthropic_messages = lambda *a, **k: {
-        "content": [{"type": "text", "text": reply}]}
+
+    replies = list(reply) if isinstance(reply, list) else None
+
+    def anthropic(*_a, **kwargs):
+        idx.calls.append(kwargs)
+        value = replies.pop(0) if replies is not None else reply
+        if isinstance(value, BaseException):
+            raise value
+        return {"content": [{"type": "text", "text": value}]}
+
+    server._anthropic_messages = anthropic
     return idx
 
 
@@ -101,7 +113,8 @@ def test_extract_json():
 
 
 def test_prompts_carry_voice_and_credit():
-    grounding = ws.assemble_grounding(MemIndex(), "v1")
+    grounding = ws.assemble_grounding(
+        MemIndex(), "v1", hook_type_lens="curiosity_gap")
     system, user, credit = tools._byo_build_prompts(
         ws.KIND_TWEET, grounding, angle="contrarian",
         target_length=None, source_text="the source transcript text")
@@ -110,8 +123,32 @@ def test_prompts_carry_voice_and_credit():
                 "Voice DNA must be prepended to the system prompt")
     _assert(credit and credit in system, "credit line embedded in system prompt")
     _assert("contrarian" in user, "angle carried into user prompt")
+    _assert("Hook lens (curiosity_gap)" in user
+            and ws.HOOK_LENS_TYPES["curiosity_gap"] in user,
+            "selected hook lens carried into Path C prompt")
     _assert("the source transcript text" in user, "source text in user prompt")
-    print("ok  _byo_build_prompts: voice DNA + credit + angle + source")
+    _, thread_user, _ = tools._byo_build_prompts(
+        ws.KIND_THREAD, grounding, angle=None,
+        target_length=1200, source_text="source")
+    _assert("1200 total characters" in thread_user,
+            "thread target_length_chars remains a character target")
+    _assert("1200 posts" not in thread_user,
+            "thread character target must not become post count")
+    print("ok  _byo_build_prompts: voice + credit + angle + hook lens + "
+          "thread char target")
+
+
+def test_tool_schemas_advertise_path_c():
+    for name in ("write_tweet", "write_blog"):
+        schema = tools.TOOL_REGISTRY[name].input_schema
+        props = schema["properties"]
+        _assert(schema["additionalProperties"] is False,
+                f"{name} remains closed-schema")
+        for field in ("generate", "compute_mode", "kind"):
+            _assert(field in props, f"{name} schema missing {field}")
+    _assert("thread" in tools.TOOL_REGISTRY["write_tweet"].input_schema[
+        "properties"]["kind"]["enum"], "write_tweet advertises thread kind")
+    print("ok  Path C tool schemas: generate + compute_mode + kind advertised")
 
 
 def test_no_key_errors():
@@ -150,6 +187,33 @@ def test_tweet_generates_and_persists():
     print("ok  write_tweet Path C: generates, persists, mode=byo_key in DB")
 
 
+def test_thread_keeps_character_target():
+    saved = _snapshot()
+    try:
+        reply = ("1. Keep the source close.\n"
+                 "2. Draft from evidence. via @AndrejKarpathy https://youtu.be/abc")
+        idx = _install_backend({}, reply=reply)
+        res = tools.write_tweet({
+            "source_yoink_id": "v1",
+            "kind": "thread",
+            "target_length_chars": 1200,
+            "generate": True,
+        })
+        _assert(res["ok"] is True, f"thread generated: {res}")
+        _assert("1200 total characters" in idx.calls[0]["user"],
+                "Path C thread prompt retains character target")
+        _assert("1200 posts" not in idx.calls[0]["user"],
+                "Path C thread target never becomes post count")
+        row = idx._conn.execute(
+            "SELECT kind, target_length FROM writing_pieces WHERE id=?",
+            (res["id"],)).fetchone()
+        _assert(row["kind"] == "thread" and row["target_length"] == 1200,
+                f"thread kind/char target persisted: {dict(row)}")
+    finally:
+        _restore(saved)
+    print("ok  write_tweet Path C thread: character target + kind persisted")
+
+
 def test_credit_auto_appended():
     saved = _snapshot()
     try:
@@ -164,6 +228,66 @@ def test_credit_auto_appended():
     finally:
         _restore(saved)
     print("ok  write_tweet Path C: missing credit auto-appended")
+
+
+def test_fatal_voice_dna_regenerates_once():
+    saved = _snapshot()
+    try:
+        first = "This isn't a tool. This is a workflow."
+        second = "The workflow keeps captured research close to the draft."
+        idx = _install_backend({}, reply=[first, second])
+        res = tools.write_tweet({
+            "source_yoink_id": "v1",
+            "generate": True,
+            "hook_type_lens": "curiosity_gap",
+        })
+        _assert(res["ok"] is True, f"clean retry should persist: {res}")
+        _assert(res["voice_dna_regenerated"] is True, "retry flag exposed")
+        _assert(len(idx.calls) == 2, f"exactly one retry: {len(idx.calls)} calls")
+        _assert("PREVIOUS ATTEMPT VIOLATED VOICE DNA" in idx.calls[1]["user"],
+                "retry prompt highlights prior violation")
+        _assert(ws.HOOK_LENS_TYPES["curiosity_gap"] in idx.calls[0]["user"],
+                "selected hook lens reaches Path C call")
+        _assert(first not in res["body"] and second in res["body"],
+                "only regenerated body persists")
+        count = idx._conn.execute(
+            "SELECT COUNT(*) AS c FROM writing_pieces").fetchone()["c"]
+        _assert(count == 1, f"only clean retry persisted: {count}")
+    finally:
+        _restore(saved)
+    print("ok  Path C fatal Voice DNA: regenerates once before persistence")
+
+
+def test_fatal_voice_dna_second_failure_not_persisted():
+    saved = _snapshot()
+    try:
+        bad = "This isn't a tool. This is a workflow."
+        idx = _install_backend({}, reply=[bad, bad])
+        res = tools.write_tweet({"source_yoink_id": "v1", "generate": True})
+        _assert(res["ok"] is False and res.get("retry_recommended") is True,
+                f"second fatal result must fail unsaved: {res}")
+        _assert(len(idx.calls) == 2, "fatal path gets one retry, never more")
+        count = idx._conn.execute(
+            "SELECT COUNT(*) AS c FROM writing_pieces").fetchone()["c"]
+        _assert(count == 0, "fatal second result must not persist")
+    finally:
+        _restore(saved)
+    print("ok  Path C fatal Voice DNA: second violation remains unsaved")
+
+
+def test_path_c_exception_is_sanitized():
+    saved = _snapshot()
+    try:
+        raw = OSError(r"raw machinery C:\Users\secret\key.txt")
+        _install_backend({}, reply=raw)
+        res = tools.write_tweet({"source_yoink_id": "v1", "generate": True})
+        _assert(res["ok"] is False, f"exception -> error: {res}")
+        _assert("raw machinery" not in res["error"]
+                and "C:\\Users\\secret" not in res["error"],
+                f"user-facing Path C error leaked internals: {res}")
+    finally:
+        _restore(saved)
+    print("ok  Path C exceptions: sanitized, no paths/raw machinery")
 
 
 def test_blog_json_parsed():
@@ -192,9 +316,14 @@ def test_blog_json_parsed():
 def main():
     test_extract_json()
     test_prompts_carry_voice_and_credit()
+    test_tool_schemas_advertise_path_c()
     test_no_key_errors()
     test_tweet_generates_and_persists()
+    test_thread_keeps_character_target()
     test_credit_auto_appended()
+    test_fatal_voice_dna_regenerates_once()
+    test_fatal_voice_dna_second_failure_not_persisted()
+    test_path_c_exception_is_sanitized()
     test_blog_json_parsed()
     print("\nALL PATH C (BYO-KEY) TESTS PASSED")
     return 0

@@ -266,6 +266,17 @@ MAX_SCREENSHOTS = 200                  # cap per video
 PLAYLIST_VIDEO_CAP = 10                # v2 Playlist Mode first-ship cap
 MAX_SERVED_FILE_BYTES = 10 * 1024 * 1024
 LONG_VIDEO_SECONDS = 2 * 60 * 60       # 2 hours -- log warning above this
+LONG_VIDEO_MODE_FULL = "full"
+LONG_VIDEO_MODE_CHUNKED = "chunked"
+LONG_VIDEO_MODES = (LONG_VIDEO_MODE_FULL, LONG_VIDEO_MODE_CHUNKED)
+# Chunked mode downloads at most six representative 10-minute windows. It
+# keeps the full subtitle track, but bounds the heavy media download/decode
+# work to one hour and runs screenshot extraction one window at a time.
+LONG_VIDEO_CHUNK_SECONDS = 10 * 60
+LONG_VIDEO_MAX_CHUNKS = 6
+LONG_VIDEO_CHUNK_BUDGET_SECONDS = (
+    LONG_VIDEO_CHUNK_SECONDS * LONG_VIDEO_MAX_CHUNKS
+)
 YTDLP_TIMEOUT_SEC = 30 * 60            # download timeout FLOOR (short videos)
 # v3.2.4: a flat 30-min download timeout is the prime suspect for long-video
 # failures -- a throttled 2-hour download legitimately exceeds it, and the
@@ -1909,6 +1920,14 @@ class PlaylistJobCancelled(Exception):
     """Raised inside a playlist worker when the user cancels the job."""
 
 
+class ExtractionPhaseError(RuntimeError):
+    """A user-actionable extraction failure with its pipeline phase attached."""
+
+    def __init__(self, phase: str, message: str):
+        super().__init__(message)
+        self.phase = phase
+
+
 def _raise_if_cancelled(cancel_event: threading.Event | None):
     if cancel_event is not None and cancel_event.is_set():
         raise PlaylistJobCancelled("playlist job cancelled")
@@ -1950,6 +1969,80 @@ def _ffmpeg_timeout_for(duration_seconds: float) -> int:
         dur = 0.0
     scaled = int(dur * FFMPEG_TIMEOUT_PER_VIDEO_SEC)
     return max(FFMPEG_TIMEOUT_SEC, min(scaled, YTDLP_TIMEOUT_HARD_CAP_SEC))
+
+
+def _normalize_long_video_mode(value) -> str:
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return LONG_VIDEO_MODE_FULL
+    if not isinstance(value, str):
+        raise ValueError("long_video_mode must be 'full' or 'chunked'")
+    mode = value.strip().lower()
+    if mode not in LONG_VIDEO_MODES:
+        raise ValueError("long_video_mode must be 'full' or 'chunked'")
+    return mode
+
+
+def _long_video_chunks(duration_seconds: float) -> list[dict]:
+    """Representative media windows for chunked extraction.
+
+    Sources up to the one-hour budget are partitioned contiguously. Longer
+    sources are sampled evenly from the opening through the ending so the
+    heavy media work stays bounded while the subtitle download remains full.
+    """
+    try:
+        duration = max(0, int(float(duration_seconds or 0)))
+    except (TypeError, ValueError):
+        duration = 0
+    if duration <= 0:
+        return []
+
+    count = min(
+        LONG_VIDEO_MAX_CHUNKS,
+        max(1, int((min(duration, LONG_VIDEO_CHUNK_BUDGET_SECONDS)
+                    + LONG_VIDEO_CHUNK_SECONDS - 1)
+                   // LONG_VIDEO_CHUNK_SECONDS)),
+    )
+    if duration <= LONG_VIDEO_CHUNK_BUDGET_SECONDS:
+        starts = [i * LONG_VIDEO_CHUNK_SECONDS for i in range(count)]
+    elif count == 1:
+        starts = [0]
+    else:
+        last_start = max(0, duration - LONG_VIDEO_CHUNK_SECONDS)
+        starts = [
+            round(i * last_start / (count - 1))
+            for i in range(count)
+        ]
+
+    chunks = []
+    for i, start in enumerate(starts, 1):
+        end = min(duration, start + LONG_VIDEO_CHUNK_SECONDS)
+        chunks.append({
+            "index": i,
+            "start_seconds": start,
+            "end_seconds": end,
+            "duration_seconds": max(0, end - start),
+        })
+    return chunks
+
+
+def _chunk_section_spec(chunk: dict) -> str:
+    return (
+        f"*{fmt_time(chunk['start_seconds'])}-"
+        f"{fmt_time(chunk['end_seconds'])}"
+    )
+
+
+def _estimated_screenshot_count(durations: list[float], interval: int) -> int:
+    step = max(1, int(interval))
+    return sum(
+        int((max(0.0, float(duration or 0)) + step - 1) // step)
+        for duration in durations
+    )
+
+
+def _failure_phase(e: BaseException, fallback: str | None = None) -> str | None:
+    phase = getattr(e, "phase", None)
+    return phase if isinstance(phase, str) and phase else fallback
 
 
 def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = None,
@@ -3282,7 +3375,8 @@ def _start_comments_thread(url: str, output_folder: Path,
 def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
                     interval: int, channel_ctx: dict,
                     yoinked_at: str, topic: str,
-                    cap_warning: str | None = None) -> str:
+                    cap_warning: str | None = None,
+                    shot_times: list[int] | None = None) -> str:
     """Produce the v1 corpus markdown. Comments section is a placeholder
     that the background worker rewrites once the fetch completes.
     """
@@ -3367,7 +3461,7 @@ def _build_yoink_md(metadata: dict, url: str, entries: list, shots: list,
     parts.append("## Screenshots")
     parts.append("")
     for i, shot in enumerate(shots):
-        start = i * interval
+        start = shot_times[i] if shot_times and i < len(shot_times) else i * interval
         ts = fmt_time(start)
         parts.append(f"### [{ts}]")
         parts.append("")
@@ -3420,6 +3514,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     metadata: dict | None = None,
                     topic: str | None = None,
                     generate_paste: bool = True,
+                    long_video_mode: str = LONG_VIDEO_MODE_FULL,
                     cancel_event: threading.Event | None = None,
                     phase_callback=None) -> dict:
     """Yoink a single video into output_folder.
@@ -3436,6 +3531,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     Returns a dict with folder, yoink_md (current text), screenshot_count,
     title, video_slug, caption_count.
     """
+    requested_long_video_mode = _normalize_long_video_mode(long_video_mode)
     output_folder.mkdir(parents=True, exist_ok=True)
 
     if metadata is None:
@@ -3456,18 +3552,48 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     if duration > LONG_VIDEO_SECONDS:
         log.warning("Long video: %.0f minutes -- yoink may take a while",
                     duration / 60.0)
+    long_video_chunks = (
+        _long_video_chunks(duration)
+        if requested_long_video_mode == LONG_VIDEO_MODE_CHUNKED
+        else []
+    )
+    effective_long_video_mode = (
+        LONG_VIDEO_MODE_CHUNKED if long_video_chunks
+        else LONG_VIDEO_MODE_FULL
+    )
+    work_durations = (
+        [chunk["duration_seconds"] for chunk in long_video_chunks]
+        if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED
+        else [duration]
+    )
+    processed_media_seconds = int(sum(work_durations))
     requested_interval = interval
-    cap_warning: str | None = None
-    if duration > 0 and (duration / max(1, interval)) > MAX_SCREENSHOTS:
-        # Round up so we land at <= MAX_SCREENSHOTS shots, not slightly over.
-        new_interval = max(interval, int((duration + MAX_SCREENSHOTS - 1) // MAX_SCREENSHOTS))
-        cap_warning = (
+    notes: list[str] = []
+    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+        notes.append(
+            f"Chunked mode sampled {len(long_video_chunks)} media sections "
+            f"({processed_media_seconds // 60}m of {int(duration) // 60}m) "
+            "while retaining the full available subtitle track."
+        )
+    elif requested_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+        notes.append(
+            "Chunked mode was requested, but the source duration was unknown; "
+            "Uoink used the full-media path."
+        )
+
+    estimate = _estimated_screenshot_count(work_durations, interval)
+    if estimate > MAX_SCREENSHOTS:
+        new_interval = interval
+        while _estimated_screenshot_count(work_durations, new_interval) > MAX_SCREENSHOTS:
+            new_interval += 1
+        notes.append(
             f"Capped screenshots at {MAX_SCREENSHOTS}: interval raised from "
             f"{requested_interval}s to {new_interval}s for this video "
-            f"(duration {int(duration // 60)}m)."
+            f"(processed media {processed_media_seconds // 60}m)."
         )
-        log.warning(cap_warning)
+        log.warning(notes[-1])
         interval = new_interval
+    cap_warning = " ".join(notes) or None
 
     # Persist the raw metadata blob for debugging without re-downloading.
     try:
@@ -3481,37 +3607,53 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # Thumbnail (best-effort; absence shouldn't fail the extraction).
     _download_thumbnail(metadata, output_folder, cancel_event=cancel_event)
 
-    # Video + subs. Bounded to a duration-scaled timeout so a stuck download
-    # doesn't hold _extract_lock forever, while a legitimately long (but
-    # progressing) download isn't killed at a flat 30 minutes.
-    download_timeout = _ytdlp_timeout_for(duration)
+    # Clear only helper-owned transient media from an earlier attempt in this
+    # same yoink folder. The corpus/sidecar remain until the new run succeeds.
+    for pattern in ("video.*", "video-chunk-*.*"):
+        for stale in output_folder.glob(pattern):
+            if stale.is_file():
+                stale.unlink(missing_ok=True)
+
+    # Full mode downloads one low-res media file plus subtitles. Chunked mode
+    # downloads representative media sections with yt-dlp's section support,
+    # then fetches the full available subtitle track separately.
+    download_timeout = _ytdlp_timeout_for(processed_media_seconds or duration)
+    media_cmd = [
+        *YTDLP_CMD,
+        # Require a video stream. Plain `worst` can pick audio-only on some
+        # Shorts, which makes ffmpeg screenshot extraction fail with no packets.
+        "-f", "worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst",
+        "--concurrent-fragments", "4",
+        "--retries", "10",
+        "--fragment-retries", "10",
+        "--socket-timeout", "30",
+    ]
+    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+        for chunk in long_video_chunks:
+            media_cmd.extend(["--download-sections", _chunk_section_spec(chunk)])
+        media_cmd.extend([
+            "-o", str(output_folder / "video-chunk-%(section_number)03d.%(ext)s"),
+            url,
+        ])
+    else:
+        media_cmd.extend([
+            # Full mode still refuses a multi-GB media file. Chunked mode
+            # intentionally omits this source-level check because the selected
+            # sections already bound the downloaded media work.
+            "--max-filesize", str(YTDLP_MAX_FILESIZE_BYTES),
+            "--write-auto-subs",
+            "--write-subs",
+            "--sub-lang", "en.*,en",
+            "--convert-subs", "srt",
+            "-o", str(output_folder / "video.%(ext)s"),
+            url,
+        ])
+
     try:
         if phase_callback:
             phase_callback("download")
         _run_subprocess(
-            [
-                *YTDLP_CMD,
-                "--write-auto-subs",
-                "--write-subs",
-                "--sub-lang", "en.*,en",
-                "--convert-subs", "srt",
-                # Require a video stream. Plain `worst` can pick audio-only
-                # on some Shorts, which makes ffmpeg screenshot extraction
-                # fail with "no packets" even though yt-dlp succeeded.
-                "-f", "worst*[vcodec!=none][height>=360]/worst*[vcodec!=none]/worst",
-                # Bail before downloading a multi-GB file (livestream VODs).
-                "--max-filesize", str(YTDLP_MAX_FILESIZE_BYTES),
-                # v3.2.4 long-video hardening: pull DASH fragments in parallel
-                # (faster on long videos), retry transient stalls, and cap the
-                # per-socket wait so a throttled connection surfaces as retries
-                # instead of one silent multi-minute hang.
-                "--concurrent-fragments", "4",
-                "--retries", "10",
-                "--fragment-retries", "10",
-                "--socket-timeout", "30",
-                "-o", str(output_folder / "video.%(ext)s"),
-                url,
-            ],
+            media_cmd,
             cancel_event=cancel_event,
             check=True,
             stdout=subprocess.DEVNULL,
@@ -3523,10 +3665,13 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         # helper.log has a trace -- the old path discarded this and left the
         # 2-hour failure looking like "nothing happened".
         log.error(
-            "yt-dlp download timed out after %ds (video duration ~%.0fs): %s",
-            download_timeout, duration, url)
+            "yt-dlp %s download timed out after %ds "
+            "(source duration ~%.0fs, media work ~%ds): %s",
+            effective_long_video_mode, download_timeout, duration,
+            processed_media_seconds, url)
         mins = max(1, download_timeout // 60)
-        raise RuntimeError(
+        raise ExtractionPhaseError(
+            "download",
             f"Download timed out after about {mins} minutes. This is a "
             "download/network issue, not a screenshot setting -- the video "
             "may be very long, or the connection to YouTube is slow or being "
@@ -3534,52 +3679,148 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "video."
         )
 
-    video_files = [f for f in output_folder.glob("video.*")
+    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+        if phase_callback:
+            phase_callback("transcript")
+        try:
+            _run_subprocess(
+                [
+                    *YTDLP_CMD,
+                    "--skip-download",
+                    "--write-auto-subs",
+                    "--write-subs",
+                    "--sub-lang", "en.*,en",
+                    "--convert-subs", "srt",
+                    "-o", str(output_folder / "video.%(ext)s"),
+                    url,
+                ],
+                cancel_event=cancel_event,
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                timeout=COMMENTS_TIMEOUT_SEC,
+            )
+        except PlaylistJobCancelled:
+            raise
+        except (OSError, subprocess.CalledProcessError,
+                subprocess.TimeoutExpired) as e:
+            # Captions are optional throughout the existing pipeline. Chunked
+            # media should still succeed when the source exposes none.
+            log.warning("chunked subtitle fetch unavailable: %s", e)
+
+    media_glob = (
+        "video-chunk-*.*"
+        if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED
+        else "video.*"
+    )
+    video_files = [f for f in sorted(output_folder.glob(media_glob))
                    if f.suffix in (".mp4", ".webm", ".mkv")]
     srt_files = list(output_folder.glob("video*.srt"))
     if not video_files:
-        raise RuntimeError(
+        if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+            raise ExtractionPhaseError(
+                "download",
+                "Chunked download produced no media sections. The source may "
+                "be unavailable, private, region-locked, or may not support "
+                "section downloads."
+            )
+        raise ExtractionPhaseError(
+            "download",
             "yt-dlp produced no video file. The video may exceed the 2 GB "
             "download cap (set in helper config), or it may be unavailable, "
             "private, or region-locked."
         )
-    video_file = video_files[0]
 
     shots_dir = output_folder / "screenshots"
     shots_dir.mkdir(exist_ok=True)
-    try:
-        if phase_callback:
-            phase_callback("screenshots")
-        _run_subprocess(
-            [
-                "ffmpeg", "-loglevel", "error", "-y",
-                "-i", str(video_file),
-                "-vf", f"fps=1/{interval}",
-                "-q:v", "2",
-                str(shots_dir / "shot_%04d.jpg"),
-            ],
-            cancel_event=cancel_event,
-            check=True,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.PIPE,
-            timeout=_ffmpeg_timeout_for(duration),
-        )
-    except subprocess.TimeoutExpired:
-        log.error(
-            "ffmpeg screenshot extraction timed out after %ds "
-            "(video duration ~%.0fs, interval %ds)",
-            _ffmpeg_timeout_for(duration), duration, interval)
-        raise RuntimeError(
-            "Screenshot generation timed out -- try a longer screenshot "
-            "interval (current: %ds)." % interval
-        )
+    for pattern in ("shot_*.jpg", "chunk_*_shot_*.jpg"):
+        for stale in shots_dir.glob(pattern):
+            stale.unlink(missing_ok=True)
+
+    shot_times: list[int] = []
+    if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+        shot_number = 1
+        for i, video_file in enumerate(video_files):
+            chunk = long_video_chunks[min(i, len(long_video_chunks) - 1)]
+            chunk_phase = f"screenshots_chunk_{i + 1}_of_{len(video_files)}"
+            try:
+                if phase_callback:
+                    phase_callback(chunk_phase)
+                prefix = f"chunk_{i + 1:03d}_shot_"
+                _run_subprocess(
+                    [
+                        "ffmpeg", "-loglevel", "error", "-y",
+                        "-i", str(video_file),
+                        "-vf", f"fps=1/{interval}",
+                        "-q:v", "2",
+                        str(shots_dir / f"{prefix}%04d.jpg"),
+                    ],
+                    cancel_event=cancel_event,
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
+                    timeout=_ffmpeg_timeout_for(chunk["duration_seconds"]),
+                )
+            except subprocess.TimeoutExpired:
+                log.error(
+                    "ffmpeg chunk %d/%d timed out (section %ss-%ss, interval %ds)",
+                    i + 1, len(video_files), chunk["start_seconds"],
+                    chunk["end_seconds"], interval)
+                raise ExtractionPhaseError(
+                    chunk_phase,
+                    f"Screenshot generation timed out in chunk {i + 1} of "
+                    f"{len(video_files)}. Try a longer screenshot interval "
+                    f"(current: {interval}s)."
+                )
+            local_shots = sorted(shots_dir.glob(f"{prefix}*.jpg"))
+            for local_i, local_shot in enumerate(local_shots):
+                target = shots_dir / f"shot_{shot_number:04d}.jpg"
+                local_shot.replace(target)
+                shot_times.append(
+                    int(chunk["start_seconds"] + (local_i * interval))
+                )
+                shot_number += 1
+    else:
+        video_file = video_files[0]
+        try:
+            if phase_callback:
+                phase_callback("screenshots")
+            _run_subprocess(
+                [
+                    "ffmpeg", "-loglevel", "error", "-y",
+                    "-i", str(video_file),
+                    "-vf", f"fps=1/{interval}",
+                    "-q:v", "2",
+                    str(shots_dir / "shot_%04d.jpg"),
+                ],
+                cancel_event=cancel_event,
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                timeout=_ffmpeg_timeout_for(duration),
+            )
+        except subprocess.TimeoutExpired:
+            log.error(
+                "ffmpeg screenshot extraction timed out after %ds "
+                "(video duration ~%.0fs, interval %ds)",
+                _ffmpeg_timeout_for(duration), duration, interval)
+            raise ExtractionPhaseError(
+                "screenshots",
+                "Screenshot generation timed out -- try a longer screenshot "
+                "interval (current: %ds)." % interval
+            )
     shots = sorted(shots_dir.glob("shot_*.jpg"))
+    if not shot_times:
+        shot_times = [i * interval for i in range(len(shots))]
 
     entries = list(parse_srt(srt_files[0])) if srt_files else []
 
     if entries:
         plain = "\n".join(text for _, _, text in entries)
         (output_folder / "transcript.txt").write_text(plain, encoding="utf-8")
+
+    if phase_callback:
+        phase_callback("write")
 
     # Channel context (description + recent videos). Best-effort.
     channel_url = (metadata.get("channel_url")
@@ -3593,6 +3834,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         interval=interval, channel_ctx=channel_ctx,
         yoinked_at=_now_iso(), topic=topic,
         cap_warning=cap_warning,
+        shot_times=shot_times,
     )
     # Filename matches the folder's slug -- "kapathy-talk/kapathy-talk.md"
     # rather than "kapathy-talk/yoink.md" -- so the file is identifiable
@@ -3627,6 +3869,10 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "requested_interval_seconds": requested_interval,
             "screenshot_cap_warning": cap_warning,
             "duration_seconds": duration,
+            "requested_long_video_mode": requested_long_video_mode,
+            "long_video_mode": effective_long_video_mode,
+            "long_video_chunks": long_video_chunks,
+            "processed_media_seconds": processed_media_seconds,
             "channel": metadata.get("channel") or metadata.get("uploader"),
             "channel_url": metadata.get("channel_url") or metadata.get("uploader_url"),
             "upload_date": metadata.get("upload_date"),
@@ -3640,7 +3886,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             # consumers don't have to parse paths or recompute timestamps.
             "screenshots": [
                 {
-                    "timestamp": fmt_time(int(i * interval)),
+                    "timestamp": fmt_time(shot_times[i]),
                     "path": f"screenshots/{p.name}",
                     "filename": p.name,
                 }
@@ -3684,11 +3930,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # the ~150 MB model download. Run before deleting the downloaded video so
     # the automatic path does not need a second yt-dlp fetch.
     try:
-        if _read_settings().get("transcript_reliability_auto_check"):
+        if (_read_settings().get("transcript_reliability_auto_check")
+                and effective_long_video_mode == LONG_VIDEO_MODE_FULL):
             rel = _compute_transcript_reliability(
                 sidecar.get("video_id") or metadata.get("id") or "",
                 folder=output_folder,
-                audio_path=video_file,
+                audio_path=video_files[0],
                 threshold=RELIABILITY_DEFAULT_THRESHOLD,
                 allow_model_download=False,
             )
@@ -3698,7 +3945,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     except Exception as e:
         log.warning("transcript reliability auto-check failed: %s", e)
 
-    video_file.unlink(missing_ok=True)
+    for video_file in video_files:
+        video_file.unlink(missing_ok=True)
 
     # Sprint 19.6 / Fix 6: refresh _all-yoinks-index.md INCREMENTALLY
     # instead of the pre-Sprint-19.6 full-tree rescan that became O(N) on
@@ -3779,6 +4027,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         "video_slug": video_slug,
         "caption_count": len(entries),
         "topic": topic,
+        "requested_long_video_mode": requested_long_video_mode,
+        "long_video_mode": effective_long_video_mode,
+        "long_video_chunks": long_video_chunks,
+        "processed_media_seconds": processed_media_seconds,
+        "source_duration_seconds": int(duration),
     }
 
 
@@ -3904,6 +4157,8 @@ def _plain_error_from_text(text: str) -> str:
 
 def friendly_error(e: BaseException) -> str:
     """Translate raw exceptions into copy the user can act on."""
+    if isinstance(e, ExtractionPhaseError):
+        return str(e)
     if isinstance(e, FileNotFoundError):
         return ("Uoink can't find yt-dlp or ffmpeg on this machine. "
                 f"Install both from {INSTALL_HELP_URL}, then try again.")
@@ -5093,6 +5348,10 @@ def _public_job(job: dict) -> dict:
         "completed_at": job.get("completed_at"),
         "error": job.get("error"),
         "error_detail": job.get("error_detail"),
+        "requested_long_video_mode": job.get("requested_long_video_mode"),
+        "long_video_mode": job.get("long_video_mode"),
+        "processed_media_seconds": job.get("processed_media_seconds"),
+        "source_duration_seconds": job.get("source_duration_seconds"),
         "result": result,
         "warnings": list(job.get("warnings") or []),
         "message": job.get("message"),
@@ -5244,6 +5503,8 @@ def _record_single_extract_job(url: str, started_at: str, *,
                                result: dict | None = None,
                                error: str | None = None,
                                error_detail: str | None = None,
+                               failure_phase: str | None = None,
+                               long_video_mode: str | None = None,
                                title: str | None = None,
                                folder: Path | None = None) -> dict:
     now = _now_iso()
@@ -5262,12 +5523,24 @@ def _record_single_extract_job(url: str, started_at: str, *,
         "videos_done": 1 if ok else 0,
         "videos_failed": 0 if ok else 1,
         "current_video": None,
-        "current_video_phase": None,
+        "current_video_phase": None if ok else failure_phase,
         "started_at": started_at,
         "updated_at": now,
         "completed_at": now,
         "error": None if ok else (error or "single-video extraction failed"),
         "error_detail": None if ok else error_detail,
+        "requested_long_video_mode": (
+            (result or {}).get("requested_long_video_mode") or long_video_mode
+        ),
+        "long_video_mode": (
+            (result or {}).get("long_video_mode") or long_video_mode
+        ),
+        "processed_media_seconds": (
+            (result or {}).get("processed_media_seconds")
+        ),
+        "source_duration_seconds": (
+            (result or {}).get("source_duration_seconds")
+        ),
         "result": {
             "combined_md_path": str(corpus_path) if corpus_path else None,
             # Full corpus text is intentionally NOT persisted into the
@@ -5277,6 +5550,12 @@ def _record_single_extract_job(url: str, started_at: str, *,
             # from combined_md_path / folder on demand.
             "combined_md_text": "",
             "folder": str(folder_path) if folder_path else None,
+            "requested_long_video_mode": result.get(
+                "requested_long_video_mode"),
+            "long_video_mode": result.get("long_video_mode"),
+            "long_video_chunks": result.get("long_video_chunks") or [],
+            "processed_media_seconds": result.get("processed_media_seconds"),
+            "source_duration_seconds": result.get("source_duration_seconds"),
         } if ok else None,
         "warnings": [],
         "message": "Single-video yoink complete." if ok else "Single-video yoink failed.",
@@ -5631,7 +5910,9 @@ def _screenshot_list_for_yoink(idx, video_id: str) -> dict | None:
         if not abs_path.exists():
             continue  # referenced but gone; don't offer a broken thumbnail
         seen.add(name)
-        ts_secs = (i * interval) if interval is not None else None
+        ts_secs = _parse_hms(shot.get("timestamp"))
+        if ts_secs is None and interval is not None:
+            ts_secs = i * interval
         entries.append(_entry(name, i, shot.get("timestamp"), ts_secs, abs_path))
 
     # Filesystem backstop: shots on disk the sidecar didn't list (re-yoink
@@ -5749,6 +6030,28 @@ def _dedupe_screenshot_entries(entries: list[dict], *,
         last_hash = h
     removed = len(entries) - len(kept)
     return kept, removed, any_hash
+
+
+def _screenshot_dedupe_query(qs: dict) -> tuple[bool, int]:
+    dedupe = (qs.get("dedupe") or [""])[0].strip().lower() in (
+        "1", "true", "yes")
+    try:
+        threshold = int((qs.get("dedupe_threshold") or ["5"])[0])
+    except (TypeError, ValueError):
+        threshold = 5
+    return dedupe, max(0, min(32, threshold))
+
+
+def _apply_screenshot_dedupe(payload: dict, *, threshold: int) -> dict:
+    kept, removed, available = _dedupe_screenshot_entries(
+        payload.get("screenshots") or [], threshold=threshold)
+    payload["screenshots"] = kept
+    payload["count"] = len(kept)
+    payload["deduped"] = True
+    payload["dedupe_removed"] = removed
+    payload["dedupe_available"] = available
+    payload["dedupe_threshold"] = threshold
+    return payload
 
 
 def _even_indices(n: int, count: int) -> list[int]:
@@ -5950,8 +6253,9 @@ def _agent_client_specs() -> list[dict]:
             "config_path": (code_user / "globalStorage"
                             / "saoudrizwan.claude-dev" / "settings"
                             / "cline_mcp_settings.json"),
-            "markers": [code_user / "globalStorage" / "saoudrizwan.claude-dev",
-                        appdata / "Code"],
+            # Plain VS Code is not Cline. Require Cline's own extension
+            # storage marker so detection does not offer a false connect.
+            "markers": [code_user / "globalStorage" / "saoudrizwan.claude-dev"],
         },
         {
             "name": "continue",
@@ -6016,15 +6320,14 @@ def _connect_ai_client(name: str) -> dict:
     an unknown client or a missing parent directory ("not installed")."""
     spec = _agent_client_spec(name)
     if spec is None:
-        e = ValueError(f"unknown client '{name}'")
+        e = ValueError("That AI client is not supported.")
         e.http_status = 404
         raise e
     cfg: Path = spec["config_path"]
     installed = any(p.exists() for p in spec["markers"])
     if not installed and not cfg.parent.exists():
         e = ValueError(
-            f"{spec['label']} doesn't look installed on this machine "
-            f"(no config directory at {cfg.parent}).")
+            f"{spec['label']} doesn't look installed on this machine.")
         e.http_status = 409
         raise e
 
@@ -6034,15 +6337,18 @@ def _connect_ai_client(name: str) -> dict:
         try:
             raw = cfg.read_text(encoding="utf-8")
         except OSError as exc:
-            e = ValueError(f"couldn't read {spec['label']} config: {exc}")
+            log.warning("agent connect: config read failed (%s)", exc)
+            e = ValueError(
+                f"Couldn't read the {spec['label']} settings. "
+                "Nothing was changed.")
             e.http_status = 500
             raise e
         if raw.strip():
             try:
                 parsed = json.loads(raw)
-            except json.JSONDecodeError as exc:
+            except json.JSONDecodeError:
                 e = ValueError(
-                    f"{spec['label']} config isn't valid JSON ({exc}); "
+                    f"{spec['label']} settings aren't valid JSON; "
                     "left it untouched. Open it and fix the syntax, then "
                     "try connecting again.")
                 e.http_status = 422
@@ -6063,20 +6369,41 @@ def _connect_ai_client(name: str) -> dict:
     data["mcpServers"] = servers
 
     backup_path = cfg.with_suffix(cfg.suffix + ".bak")
-    cfg.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        cfg.parent.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        log.warning("agent connect: settings directory unavailable (%s)", exc)
+        e = ValueError(
+            f"Couldn't prepare the {spec['label']} settings folder. "
+            "Nothing was changed.")
+        e.http_status = 500
+        raise e
     if existed:
         try:
             shutil.copy2(cfg, backup_path)
         except OSError as exc:
             log.warning("agent connect: backup failed (%s)", exc)
-            backup_path = None
+            e = ValueError(
+                f"Couldn't back up the {spec['label']} settings, so Uoink "
+                "refused to change them.")
+            e.http_status = 500
+            raise e
     else:
         backup_path = None
 
     tmp = cfg.with_suffix(cfg.suffix + ".tmp")
-    tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False),
-                   encoding="utf-8")
-    tmp.replace(cfg)
+    try:
+        tmp.write_text(json.dumps(data, indent=2, ensure_ascii=False),
+                       encoding="utf-8")
+        tmp.replace(cfg)
+    except OSError as exc:
+        log.warning("agent connect: config write failed (%s)", exc)
+        tmp.unlink(missing_ok=True)
+        e = ValueError(
+            f"Couldn't update the {spec['label']} settings. "
+            "The original settings were left in place.")
+        e.http_status = 500
+        raise e
     log.info("agent connect: wrote uoink mcpServers entry to %s", cfg)
     return {
         "client": spec["name"],
@@ -6150,6 +6477,7 @@ def _playlist_worker(job_id: str):
     videos_done = 0
     videos_failed = 0
     rate_limit_hits = 0
+    last_failure_phase = None
 
     try:
         for v in videos:
@@ -6170,10 +6498,11 @@ def _playlist_worker(job_id: str):
                 "url": v.get("url"),
             }
             target: Path | None = None
+            current_phase = "metadata"
             _update_job(
                 job_id,
                 current_video=current,
-                current_video_phase="metadata",
+                current_video_phase=current_phase,
                 message=f"Uoinking video {idx} of {len(videos)}.",
             )
 
@@ -6185,6 +6514,8 @@ def _playlist_worker(job_id: str):
                 _update_job(job_id, current_video=current)
 
                 def phase_cb(phase: str, *, _job_id=job_id):
+                    nonlocal current_phase
+                    current_phase = phase
                     _update_job(_job_id, current_video_phase=phase)
 
                 with _extract_lock:
@@ -6225,6 +6556,8 @@ def _playlist_worker(job_id: str):
             except BaseException as e:
                 msg = friendly_error(e)
                 detail = machine_error_detail(e)
+                failure_phase = _failure_phase(e, current_phase)
+                last_failure_phase = failure_phase
                 log.error("playlist job %s video %d failed: %s", job_id, idx, msg)
                 if target is None:
                     target = _unique_child_folder(
@@ -6249,11 +6582,13 @@ def _playlist_worker(job_id: str):
                     "ok": False,
                     "error": msg,
                     "error_detail": detail,
+                    "error_phase": failure_phase,
                 })
                 videos_failed += 1
                 _update_job(
                     job_id,
                     videos_failed=videos_failed,
+                    current_video_phase=failure_phase,
                     message=f"Video {idx} failed; continuing.",
                 )
                 if _is_rate_limit_error(e):
@@ -6285,7 +6620,7 @@ def _playlist_worker(job_id: str):
                 job_id,
                 state="failed",
                 current_video=None,
-                current_video_phase=None,
+                current_video_phase=last_failure_phase,
                 completed_at=_now_iso(),
                 error="playlist extraction failed: zero videos succeeded",
                 result=None,
@@ -6321,12 +6656,14 @@ def _playlist_worker(job_id: str):
     except BaseException as e:
         msg = friendly_error(e)
         detail = machine_error_detail(e)
+        failure_phase = _failure_phase(
+            e, (_get_public_job(job_id) or {}).get("current_video_phase"))
         log.error("playlist job %s failed: %s", job_id, msg)
         _update_job(
             job_id,
             state="failed",
             current_video=None,
-            current_video_phase=None,
+            current_video_phase=failure_phase,
             completed_at=_now_iso(),
             error=msg,
             error_detail=detail,
@@ -6418,6 +6755,30 @@ _RETRY_POLL_INTERVAL_SEC = 30
 # Exponential backoff base; doubled on each strike, capped at the max.
 _RETRY_INITIAL_BACKOFF_SEC = 60
 _RETRY_MAX_BACKOFF_SEC = 15 * 60
+_pending_long_video_modes: dict[int, str] = {}
+_pending_long_video_modes_lock = threading.Lock()
+
+
+def _remember_pending_long_video_mode(pending_id: int, mode: str) -> None:
+    with _pending_long_video_modes_lock:
+        _pending_long_video_modes[int(pending_id)] = _normalize_long_video_mode(mode)
+
+
+def _pending_long_video_mode(pending_id: int, *, remove: bool = False) -> str:
+    with _pending_long_video_modes_lock:
+        if remove:
+            return _pending_long_video_modes.pop(
+                int(pending_id), LONG_VIDEO_MODE_FULL)
+        return _pending_long_video_modes.get(
+            int(pending_id), LONG_VIDEO_MODE_FULL)
+
+
+def _pending_with_long_video_mode(row: dict) -> dict:
+    shaped = dict(row)
+    pending_id = shaped.get("pending_id")
+    if pending_id is not None:
+        shaped["long_video_mode"] = _pending_long_video_mode(pending_id)
+    return shaped
 
 
 def _retry_pending_one() -> bool:
@@ -6437,6 +6798,7 @@ def _retry_pending_one() -> bool:
     url = row["url"]
     interval = row["interval_seconds"] or 30
     attempts_before = row["attempt_count"] or 0
+    long_video_mode = _pending_long_video_mode(pending_id)
 
     try:
         idx.mark_pending_running(pending_id)
@@ -6449,6 +6811,7 @@ def _retry_pending_one() -> bool:
     started_at = _now_iso()
     title = None
     folder = None
+    current_phase = "metadata"
     with _extract_lock:
         try:
             metadata = _fetch_metadata(url)
@@ -6456,8 +6819,15 @@ def _retry_pending_one() -> bool:
             topic = _classify_topic(metadata)
             folder = (DESKTOP_ROOT / _topic_folder_name(topic)
                       / (slugify(title) or "video"))
+
+            def phase_cb(phase: str):
+                nonlocal current_phase
+                current_phase = phase
+
             result = _run_extraction(url, interval, folder,
-                                     metadata=metadata, topic=topic)
+                                     metadata=metadata, topic=topic,
+                                     long_video_mode=long_video_mode,
+                                     phase_callback=phase_cb)
         except BaseException as e:
             if _is_youtube_rate_limit(e):
                 # Still rate-limited: back off exponentially and re-queue
@@ -6486,6 +6856,7 @@ def _retry_pending_one() -> bool:
             # long-lived store (Sprint 19.6 / Fix 8).
             msg = friendly_error(e)
             detail = machine_error_detail(e)
+            failure_phase = _failure_phase(e, current_phase)
             persisted = _sanitize_error(msg)
             try:
                 idx.mark_pending_failed(
@@ -6494,7 +6865,10 @@ def _retry_pending_one() -> bool:
                 log.exception("retry worker: mark_pending_failed failed")
             _record_single_extract_job(
                 url, started_at, error=msg, error_detail=detail,
+                failure_phase=failure_phase,
+                long_video_mode=long_video_mode,
                 title=title, folder=folder)
+            _pending_long_video_mode(pending_id, remove=True)
             log.warning(
                 "retry worker: pending #%d non-recoverable: %s",
                 pending_id, persisted)
@@ -6506,6 +6880,7 @@ def _retry_pending_one() -> bool:
         idx.mark_pending_succeeded(pending_id, job_id)
     except Exception:
         log.exception("retry worker: mark_pending_succeeded failed")
+    _pending_long_video_mode(pending_id, remove=True)
     log.info("retry worker: pending #%d succeeded -> %s", pending_id, job_id)
     return True
 
@@ -9363,13 +9738,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {"ok": False,
                                          "error": "video_id required"})
         qs = parse_qs(urlparse(self.path).query)
-        dedupe = (qs.get("dedupe") or [""])[0].strip().lower() in (
-            "1", "true", "yes")
-        try:
-            threshold = int((qs.get("dedupe_threshold") or ["5"])[0])
-        except (TypeError, ValueError):
-            threshold = 5
-        threshold = max(0, min(32, threshold))
+        dedupe, threshold = _screenshot_dedupe_query(qs)
         try:
             payload = _screenshot_list_for_yoink(_get_index(), video_id)
         except Exception:
@@ -9380,20 +9749,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(404, {"ok": False,
                                          "error": "uoink not found"})
         if dedupe:
-            kept, removed, available = _dedupe_screenshot_entries(
-                payload.get("screenshots") or [], threshold=threshold)
-            payload["screenshots"] = kept
-            payload["count"] = len(kept)
-            payload["deduped"] = True
-            payload["dedupe_removed"] = removed
-            payload["dedupe_available"] = available
-            payload["dedupe_threshold"] = threshold
+            _apply_screenshot_dedupe(payload, threshold=threshold)
         return self._send_json(200, {"ok": True, **payload})
 
     def _handle_yoink_screenshots_suggest(self, bare: str):
         """GET /yoinks/<id>/screenshots/suggest?mode=tweet|thread|blog&thread_size=N
-        -- return the auto-suggested frame set for a post type. Token gate
-        cleared by do_GET. 404 unknown id; 400 bad mode."""
+        &dedupe=true -- return the auto-suggested frame set for a post type.
+        With dedupe enabled, suggestions operate on the exact same reduced
+        frame set as the picker. Token gate cleared by do_GET."""
         from urllib.parse import unquote
         head = bare[len("/yoinks/"):-len("/screenshots/suggest")]
         video_id = unquote(head).strip("/")
@@ -9402,6 +9765,7 @@ class Handler(BaseHTTPRequestHandler):
                                          "error": "video_id required"})
         qs = parse_qs(urlparse(self.path).query)
         mode = (qs.get("mode") or ["tweet"])[0]
+        dedupe, threshold = _screenshot_dedupe_query(qs)
         thread_size = None
         raw_ts = (qs.get("thread_size") or [None])[0]
         if raw_ts is not None:
@@ -9419,6 +9783,8 @@ class Handler(BaseHTTPRequestHandler):
         if payload is None:
             return self._send_json(404, {"ok": False,
                                          "error": "uoink not found"})
+        if dedupe:
+            _apply_screenshot_dedupe(payload, threshold=threshold)
         try:
             suggestion = _suggest_screenshots(
                 payload, mode=mode, thread_size=thread_size)
@@ -9428,6 +9794,10 @@ class Handler(BaseHTTPRequestHandler):
             "ok": True, "video_id": video_id,
             "interval_seconds": payload.get("interval_seconds"),
             "total_available": payload.get("count"),
+            "deduped": bool(payload.get("deduped")),
+            "dedupe_removed": payload.get("dedupe_removed", 0),
+            "dedupe_available": payload.get("dedupe_available"),
+            "dedupe_threshold": payload.get("dedupe_threshold"),
             **suggestion,
         })
 
@@ -9494,11 +9864,12 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError as e:
             return self._send_json(getattr(e, "http_status", 400),
                                    {"ok": False, "error": str(e)})
-        except Exception as e:
+        except Exception:
             log.exception("/agents/connect/%s failed", client)
             return self._send_json(500, {
                 "ok": False,
-                "error": f"Couldn't update the {client} config: {e}"})
+                "error": "Couldn't update that AI client's settings. "
+                         "Nothing was changed."})
         return self._send_json(200, {"ok": True, **result})
 
     def _handle_reyoink(self, bare: str):
@@ -10111,7 +10482,10 @@ class Handler(BaseHTTPRequestHandler):
         idx = _get_index()
         try:
             overview = idx.pending_counts()
-            pending = idx.list_pending(limit=50, include_terminal=False)
+            pending = [
+                _pending_with_long_video_mode(row)
+                for row in idx.list_pending(limit=50, include_terminal=False)
+            ]
         except Exception as e:
             log.warning("queue status: index error: %s", e)
             return self._send_json(
@@ -10157,6 +10531,7 @@ class Handler(BaseHTTPRequestHandler):
                 "ok": False,
                 "error": "pending row not found or already terminal",
             })
+        _pending_long_video_mode(pending_id, remove=True)
         log.info("queue cancel: pending_id=%d", pending_id)
         self._send_json(200, {"ok": True})
 
@@ -10347,7 +10722,7 @@ class Handler(BaseHTTPRequestHandler):
         })
 
     def _handle_live_extract_dispatch(self, url, interval, live_state,
-                                        metadata):
+                                      metadata, long_video_mode):
         """v3.1 live stream branch. Returns a Response dict (and the
         caller short-circuits) when we want to defer the extraction;
         returns None when the caller should proceed with the normal
@@ -10407,6 +10782,7 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             log.warning("live: enqueue failed (%s); proceeding inline", e)
             return None  # fall through -- best-effort
+        _remember_pending_long_video_mode(pending_id, long_video_mode)
         log.info("POST /extract -> queued (live state=%s) pending_id=%d",
                   live_state, pending_id)
         return self._send_json(200, {
@@ -10418,6 +10794,7 @@ class Handler(BaseHTTPRequestHandler):
             "live_state": live_state,
             "behavior": behavior,
             "title": live_title,
+            "long_video_mode": long_video_mode,
         })
 
     def _handle_live_status_get(self):
@@ -10454,12 +10831,19 @@ class Handler(BaseHTTPRequestHandler):
         if err:
             log.info("POST /extract -> 400 (%s)", err)
             return self._send_json(400, {"ok": False, "error": err})
+        try:
+            long_video_mode = _normalize_long_video_mode(
+                body.get("long_video_mode"))
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
 
-        log.info("POST /extract url=%s interval=%d -> running", url, interval)
+        log.info("POST /extract url=%s interval=%d long_video_mode=%s -> running",
+                 url, interval, long_video_mode)
         DESKTOP_ROOT.mkdir(parents=True, exist_ok=True)
         started_at = _now_iso()
         title = None
         folder = None
+        current_phase = "metadata"
         with _extract_lock:
             try:
                 # One metadata fetch up front — used both to derive the folder
@@ -10472,14 +10856,21 @@ class Handler(BaseHTTPRequestHandler):
                 if live_state in (LIVE_STATE_LIVE, LIVE_STATE_UPCOMING,
                                     LIVE_STATE_POST_LIVE):
                     response = self._handle_live_extract_dispatch(
-                        url, interval, live_state, metadata)
+                        url, interval, live_state, metadata, long_video_mode)
                     if response is not None:
                         return response
                 title = metadata.get("title") or "Untitled"
                 topic = _classify_topic(metadata)
                 folder = DESKTOP_ROOT / _topic_folder_name(topic) / (slugify(title) or "video")
+
+                def phase_cb(phase: str):
+                    nonlocal current_phase
+                    current_phase = phase
+
                 result = _run_extraction(url, interval, folder,
-                                          metadata=metadata, topic=topic)
+                                          metadata=metadata, topic=topic,
+                                          long_video_mode=long_video_mode,
+                                          phase_callback=phase_cb)
             except BaseException as e:
                 # Sprint 19 / C4: YouTube 429 -> queue for retry instead of
                 # surfacing an error. The retry worker takes over from here.
@@ -10496,6 +10887,8 @@ class Handler(BaseHTTPRequestHandler):
                         log.warning("POST /extract -> could not enqueue "
                                     "rate-limited URL: %s", enqueue_err)
                     else:
+                        _remember_pending_long_video_mode(
+                            pending_id, long_video_mode)
                         log.info(
                             "POST /extract -> queued (rate-limit) pending_id=%d",
                             pending_id)
@@ -10505,15 +10898,19 @@ class Handler(BaseHTTPRequestHandler):
                             "pending_id": pending_id,
                             "retry_after": retry_after,
                             "reason": "youtube_rate_limit",
+                            "long_video_mode": long_video_mode,
                         })
                 msg = friendly_error(e)
                 detail = machine_error_detail(e)
+                failure_phase = _failure_phase(e, current_phase)
                 log.error("POST /extract -> error: %s", msg)
                 _record_single_extract_job(
                     url,
                     started_at,
                     error=msg,
                     error_detail=detail,
+                    failure_phase=failure_phase,
+                    long_video_mode=long_video_mode,
                     title=title,
                     folder=folder,
                 )
@@ -10521,6 +10918,7 @@ class Handler(BaseHTTPRequestHandler):
                     "ok": False,
                     "error": msg,
                     "error_detail": detail,
+                    "failure_phase": failure_phase,
                 })
 
         _record_single_extract_job(url, started_at, result=result)
