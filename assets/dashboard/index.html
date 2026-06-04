@@ -166,6 +166,25 @@
       border-top: 1px solid var(--border);
     }
 
+    .sidebar-action {
+      width: 100%;
+      min-height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .sidebar-action:hover,
+    .sidebar-action:focus-visible {
+      outline: none;
+      border-color: rgba(249, 115, 22, 0.48);
+      color: var(--cream);
+      background: rgba(194, 65, 12, 0.12);
+    }
+
     .running-pill {
       display: inline-flex;
       align-items: center;
@@ -1096,6 +1115,37 @@
       text-decoration: none;
     }
 
+    .agent-setup-card,
+    .generate-research-panel {
+      display: grid;
+      gap: 10px;
+      border: 1px solid rgba(249, 115, 22, 0.28);
+      border-radius: var(--control-radius);
+      padding: 13px;
+      background: rgba(194, 65, 12, 0.08);
+    }
+
+    .agent-setup-card.success {
+      border-color: rgba(0, 200, 83, 0.34);
+      background: rgba(0, 200, 83, 0.07);
+    }
+
+    .agent-setup-card details {
+      color: var(--muted);
+    }
+
+    .agent-setup-card summary {
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .compute-indicator {
+      width: fit-content;
+      color: var(--dim);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
     .writing-output {
       min-height: 240px;
       padding: 14px;
@@ -1306,7 +1356,7 @@
     .screenshot-picker,
     .handoff-shot-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 10px;
     }
 
@@ -1321,6 +1371,22 @@
     .screenshot-choice.selected {
       border-color: rgba(249, 115, 22, 0.58);
       box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.18);
+    }
+
+    .screenshot-choice {
+      position: relative;
+      display: grid;
+      padding: 0;
+      color: var(--cream);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .screenshot-choice:hover,
+    .screenshot-choice:focus-visible {
+      outline: none;
+      border-color: rgba(249, 115, 22, 0.48);
+      transform: translateY(-1px);
     }
 
     .screenshot-choice img,
@@ -1340,6 +1406,71 @@
       color: var(--muted);
       font-family: var(--font-mono);
       font-size: 11px;
+    }
+
+    .screenshot-choice .shot-check {
+      position: absolute;
+      top: 7px;
+      right: 7px;
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border: 1px solid rgba(255, 244, 236, 0.42);
+      border-radius: 999px;
+      background: rgba(10, 10, 10, 0.78);
+      color: transparent;
+      font-weight: 900;
+    }
+
+    .screenshot-choice.selected .shot-check {
+      border-color: var(--rust-bright);
+      background: var(--rust-bright);
+      color: var(--ink);
+    }
+
+    .picker-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .picker-toolbar .field {
+      width: 118px;
+      min-width: 0;
+    }
+
+    .action-menu {
+      position: relative;
+    }
+
+    .action-menu summary {
+      list-style: none;
+    }
+
+    .action-menu summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .action-menu-popover {
+      position: absolute;
+      top: calc(100% + 7px);
+      right: 0;
+      z-index: 30;
+      display: grid;
+      gap: 7px;
+      min-width: 220px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 8px;
+      background: #0d0b09;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .thread-shot-select {
+      width: 100%;
+      margin-top: 2px;
     }
 
     .handoff-shot.used {
@@ -2230,6 +2361,11 @@
         padding-top: 0;
         border-top: 0;
       }
+
+      .screenshot-picker,
+      .handoff-shot-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
       .control-grid,
       .activity-layout,
       .feature-grid,
@@ -2245,6 +2381,13 @@
         grid-template-columns: 1fr;
       }
     }
+
+    @media (max-width: 620px) {
+      .screenshot-picker,
+      .handoff-shot-list {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
   </style>
 </head>
 <body>
@@ -2255,22 +2398,17 @@
         <span class="wordmark-text">OINK</span>
       </div>
       <nav class="nav" aria-label="Sections">
-        <button class="nav-button" type="button" data-tab-button="yoink">Uoink</button>
         <button class="nav-button active" type="button" data-tab-button="library">Library <span class="nav-count" id="libraryNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="sources">Sources <span class="nav-count" id="sourcesNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="for-you">For You <span class="nav-count" id="forYouNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="writing">Writing <span class="nav-count" id="writingNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="build">Build <span class="nav-count" id="buildNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="script">Script <span class="nav-count" id="scriptNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="evidence">Evidence <span class="nav-count" id="evidenceNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="activity">Activity <span class="nav-count" id="activityNavCount">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="writing">Generate <span class="nav-count" id="writingNavCount">0</span></button>
         <button class="nav-button" type="button" data-tab-button="settings">Settings</button>
-        <button class="nav-button" type="button" data-tab-button="features">Features</button>
-        <button class="nav-button" type="button" data-tab-button="about">About</button>
       </nav>
       <div class="sidebar-bottom">
         <div class="running-pill" id="runningPill"><span class="pip"></span><span>Uoink is running</span></div>
         <div class="localhost" id="portLabel">localhost:5179</div>
+        <button class="sidebar-action" type="button" id="viewActivity">View activity <span class="nav-count" id="activityNavCount">0</span></button>
+        <button class="sidebar-action" type="button" id="starGithub">⭐ Star on GitHub</button>
         <button class="stop" type="button" id="stopHelper">Stop helper</button>
       </div>
     </aside>
@@ -2513,13 +2651,13 @@
         <section class="tab-panel" id="tab-writing" data-tab-panel="writing">
           <div class="page-head">
             <div>
-              <div class="eyebrow">Writing Studio</div>
-              <h1>Turn a uoink into <em>a tweet or blog.</em></h1>
-              <p class="lede">Pick a source, choose the output, blend in style anchors, then let an agent write with source credit kept in the frame.</p>
+              <div class="eyebrow">Generate</div>
+              <h1>Turn a source into <em>something worth publishing.</em></h1>
+              <p class="lede">Generate a tweet, thread, blog, or grounded script from your local corpus. Source credit and your writing choices stay visible.</p>
             </div>
             <button class="button ghost" type="button" id="reloadWriting">Reload</button>
           </div>
-          <div class="learn-links" aria-label="Writing walkthrough links">
+          <div class="learn-links" aria-label="Generate walkthrough links">
             <a href="https://uoink.app/features/writing-studio" target="_blank" rel="noreferrer">Learn: Writing Studio</a>
             <a href="https://uoink.app/features/style-anchors" target="_blank" rel="noreferrer">Learn: Style Anchors</a>
           </div>
@@ -2542,8 +2680,25 @@
                   <label class="choice-row"><input type="radio" name="writingMode" value="tweet" checked><span>Tweet</span></label>
                   <label class="choice-row"><input type="radio" name="writingMode" value="thread"><span>Thread</span></label>
                   <label class="choice-row"><input type="radio" name="writingMode" value="blog"><span>Blog</span></label>
+                  <label class="choice-row"><input type="radio" name="writingMode" value="script"><span>Script</span></label>
                 </div>
                 <input class="field" id="writingAngle" type="text" list="angleSuggestions" autocomplete="off" placeholder="angle, optional">
+                <label class="soft-note">Hook pattern</label>
+                <div class="radio-grid" id="generateHookLensPicker">
+                  <label class="choice-row"><input type="radio" name="generateHookLens" value="informative" checked><span>Informative</span></label>
+                  <label class="choice-row"><input type="radio" name="generateHookLens" value="curiosity_gap"><span>Curiosity gap</span></label>
+                  <label class="choice-row"><input type="radio" name="generateHookLens" value="disappointment_contrarian"><span>Contrarian</span></label>
+                  <label class="choice-row"><input type="radio" name="generateHookLens" value="stakes"><span>Stakes</span></label>
+                  <label class="choice-row"><input type="radio" name="generateHookLens" value="question_open_loop"><span>Question</span></label>
+                  <label class="choice-row"><input type="radio" name="generateHookLens" value="failure_lesson"><span>Failure lesson</span></label>
+                </div>
+                <div class="generate-script-options hidden" id="generateScriptOptions">
+                  <label class="soft-note" for="generateScriptLength">Script options</label>
+                  <input class="field" id="generateScriptLength" type="number" min="15" step="15" value="120" placeholder="target length seconds">
+                  <input class="field" id="generateScriptCta" type="text" list="ctaSuggestions" autocomplete="off" placeholder="CTA target, optional">
+                  <label class="inline-row"><input id="generatePastPerformance" type="checkbox" checked> Use your past performance as the default style anchor</label>
+                  <button class="button ghost" type="button" id="surfaceAudienceQuestions">Surface audience questions</button>
+                </div>
                 <label class="soft-note">Style</label>
                 <div class="choice-grid" id="writingStyleMode">
                   <label class="choice-row"><input type="radio" name="writingStyle" value="default" checked><span>Default voice</span></label>
@@ -2554,6 +2709,10 @@
                 <label class="inline-row"><input id="writingShowWarnings" type="checkbox" checked> Show Voice DNA warnings</label>
                 <label class="inline-row"><input id="writingSkipWarnings" type="checkbox"> Skip warnings this time</label>
                 <button class="button primary" type="button" id="generateWriting">Generate</button>
+                <div class="agent-setup-card" id="agentSetupCard">
+                  <strong>Checking for a writing agent...</strong>
+                  <span class="soft-note">You can also generate with your Anthropic key when no agent is connected.</span>
+                </div>
               </div>
             </aside>
 
@@ -2564,7 +2723,13 @@
                   <div class="inline-row">
                     <button class="button ghost" type="button" id="copyWriting">Copy</button>
                     <button class="button" type="button" id="saveWriting" disabled>Save</button>
-                    <button class="button ghost" type="button" id="reviseWriting" disabled>Revise</button>
+                    <details class="action-menu">
+                      <summary class="button ghost">Revise</summary>
+                      <div class="action-menu-popover">
+                        <button class="button ghost" type="button" id="reviseWriting" disabled>Regenerate from source</button>
+                        <button class="button ghost" type="button" id="critiqueWriting" disabled>Critique against corpus</button>
+                      </div>
+                    </details>
                   </div>
                 </div>
                 <div class="panel-body">
@@ -2573,7 +2738,9 @@
                     <strong>Choose a source. Uoink keeps creator credit beside the draft.</strong>
                     <p>Generated drafts, manual edits, screenshot choices, and X handoff all stay visible here before anything leaves your machine.</p>
                   </div>
+                  <div class="compute-indicator hidden" id="writingComputeIndicator">Generated using your Anthropic key (no agent)</div>
                   <div class="writing-output markdown-rendered" id="writingOutput">Choose a source, then generate or paste a draft.</div>
+                  <div class="generate-research-panel hidden" id="generateResearchPanel"></div>
                   <div class="warning-panel" id="voiceWarningPanel">
                     <strong>Voice DNA warning panel</strong>
                     <p id="voiceWarningCopy">If a draft starts sounding canned, Uoink shows the flagged phrases here. Regenerate, use it anyway, or change the warning setting.</p>
@@ -2621,8 +2788,16 @@
                 </div>
                 <div class="panel-body">
                   <div class="summary-line">
-                    <span id="writingScreenshotSummary">Pick screenshots when posting is on.</span>
-                    <label class="inline-row"><input id="writingPickScreenshots" type="checkbox" checked> Pick screenshots when posting</label>
+                    <span id="writingScreenshotSummary">Choose a source to load screenshots. Nothing is selected by default.</span>
+                    <button class="button ghost" type="button" id="clearWritingScreenshots">Clear selection</button>
+                  </div>
+                  <div class="picker-toolbar">
+                    <button class="button primary" type="button" id="pickBestScreenshots">Pick best for Tweet</button>
+                    <button class="button ghost" type="button" id="autoDistributeScreenshots">Auto-distribute to posts</button>
+                    <label class="inline-row"><input id="writingDedupe" type="checkbox" checked> Hide visual duplicates</label>
+                    <input class="field" id="writingShotFrom" type="text" inputmode="numeric" placeholder="from 00:00">
+                    <input class="field" id="writingShotTo" type="text" inputmode="numeric" placeholder="to 00:00">
+                    <button class="button ghost" type="button" id="applyWritingShotRange">Apply range</button>
                   </div>
                   <div class="screenshot-picker" id="writingScreenshotPicker"></div>
                 </div>
@@ -2969,9 +3144,16 @@
             </div>
 
             <div class="setting-block">
-              <h2>Agent config</h2>
-              <textarea class="mono-box" id="mcpConfig" readonly>Loading agent config...</textarea>
-              <button class="button" type="button" id="copyMcp">Copy</button>
+              <h2>Writing agent</h2>
+              <div class="agent-setup-card" id="settingsAgentSetupCard">
+                <strong>Checking installed writing agents...</strong>
+                <span class="soft-note">Uoink will offer one-click setup for clients already on this machine.</span>
+              </div>
+              <details>
+                <summary>Advanced: show config JSON</summary>
+                <textarea class="mono-box" id="mcpConfig" readonly>Loading agent config...</textarea>
+                <button class="button" type="button" id="copyMcp">Copy config JSON</button>
+              </details>
             </div>
 
             <div class="setting-block">
@@ -3002,7 +3184,6 @@
               <label class="inline-row"><input id="voiceWarningsEnabled" type="checkbox" checked> Show Voice DNA warnings</label>
               <label class="inline-row"><input id="voiceWarningsPerGeneration" type="checkbox" checked> Show the per-draft skip control</label>
               <label class="inline-row"><input id="writingScreenshotPickerToggle" type="checkbox" checked> Show screenshot picker in composer</label>
-              <label class="inline-row"><input id="writingDefaultAttachAll" type="checkbox"> Preselect all screenshots</label>
             </div>
 
             <div class="setting-block">
@@ -3206,8 +3387,14 @@
       writingSelectedSourceRow: null,
       writingScreenshots: [],
       writingSelectedScreenshots: new Set(),
+      writingScreenshotAssignments: new Map(),
       writingUsedScreenshots: new Set(),
       writingSourceComboOpen: false,
+      writingScreenshotRange: { from: null, to: null },
+      writingScreenshotMeta: {},
+      agents: [],
+      agentDetectionLoaded: false,
+      generateWorkspace: null,
     };
 
     const FALLBACK_FACETS = {
@@ -3345,9 +3532,19 @@
       writingAnchorList: document.getElementById("writingAnchorList"),
       writingShowWarnings: document.getElementById("writingShowWarnings"),
       writingSkipWarnings: document.getElementById("writingSkipWarnings"),
+      generateHookLensPicker: document.getElementById("generateHookLensPicker"),
+      generateScriptOptions: document.getElementById("generateScriptOptions"),
+      generateScriptLength: document.getElementById("generateScriptLength"),
+      generateScriptCta: document.getElementById("generateScriptCta"),
+      generatePastPerformance: document.getElementById("generatePastPerformance"),
+      agentSetupCard: document.getElementById("agentSetupCard"),
+      settingsAgentSetupCard: document.getElementById("settingsAgentSetupCard"),
       writingOutput: document.getElementById("writingOutput"),
+      writingComputeIndicator: document.getElementById("writingComputeIndicator"),
+      generateResearchPanel: document.getElementById("generateResearchPanel"),
       saveWriting: document.getElementById("saveWriting"),
       reviseWriting: document.getElementById("reviseWriting"),
+      critiqueWriting: document.getElementById("critiqueWriting"),
       voiceWarningPanel: document.getElementById("voiceWarningPanel"),
       voiceWarningCopy: document.getElementById("voiceWarningCopy"),
       styleAnchorManager: document.getElementById("styleAnchorManager"),
@@ -3446,12 +3643,13 @@
       writingSourceOptions: document.getElementById("writingSourceOptions"),
       threadBuilder: document.getElementById("threadBuilder"),
       writingAttributionLine: document.getElementById("writingAttributionLine"),
-      writingPickScreenshots: document.getElementById("writingPickScreenshots"),
       writingScreenshotPanel: document.getElementById("writingScreenshotPanel"),
       writingScreenshotPicker: document.getElementById("writingScreenshotPicker"),
       writingScreenshotSummary: document.getElementById("writingScreenshotSummary"),
       writingScreenshotPickerToggle: document.getElementById("writingScreenshotPickerToggle"),
-      writingDefaultAttachAll: document.getElementById("writingDefaultAttachAll"),
+      writingDedupe: document.getElementById("writingDedupe"),
+      writingShotFrom: document.getElementById("writingShotFrom"),
+      writingShotTo: document.getElementById("writingShotTo"),
       writingHandoffPopup: document.getElementById("writingHandoffPopup"),
       writingHandoffShots: document.getElementById("writingHandoffShots"),
     };
@@ -3627,6 +3825,7 @@
     function setWritingActionsEnabled(enabled) {
       if (els.saveWriting) els.saveWriting.disabled = !enabled;
       if (els.reviseWriting) els.reviseWriting.disabled = !enabled;
+      if (els.critiqueWriting) els.critiqueWriting.disabled = !enabled;
     }
 
     function looksLikeWritingScaffold(value) {
@@ -3647,6 +3846,7 @@
         renderAgentConnectionFallback();
         return;
       }
+      els.writingComputeIndicator.classList.add("hidden");
       els.writingOutput.dataset.rawText = text;
       els.writingOutput.innerHTML = renderMarkdown(text) || htmlEscape(text);
       setWritingActionsEnabled(Boolean(text.trim()));
@@ -3654,19 +3854,107 @@
     }
 
     function renderAgentConnectionFallback() {
+      const connected = connectedAgents();
+      const hasConnectedConfig = connected.length > 0;
       state.writingLastPayload = null;
       state.writingDrafts = [""];
       els.writingOutput.dataset.rawText = "";
       els.writingOutput.innerHTML = `
         <div class="connect-agent-state">
-          <strong>Connect Claude Desktop to generate</strong>
-          <p>Uoink found the source. A connected agent needs to write the draft before there is text to show here.</p>
-          <a class="button primary" href="https://uoink.app/agents" target="_blank" rel="noreferrer">Open agent setup</a>
+          <strong>${hasConnectedConfig ? `Open ${htmlEscape(connected.map((agent) => agent.label).join(" or "))} to generate this draft` : "Connect a writing agent to generate this draft"}</strong>
+          <p>${hasConnectedConfig ? "Uoink prepared the local context, but this dashboard cannot invoke the connected client directly. Open that client or add an Anthropic key for dashboard generation." : "Uoink found the source and prepared the local context. Finish setup in the agent card beside the Generate button."}</p>
+          <button class="button primary" type="button" data-focus-agent-setup>${hasConnectedConfig ? "Review agent setup" : "View agent setup"}</button>
         </div>
       `;
       setWritingActionsEnabled(false);
       renderThreadBuilder();
       els.voiceWarningCopy.textContent = "Voice DNA warnings appear after an agent returns a draft.";
+      renderAgentSetup();
+    }
+
+    function connectedAgents() {
+      return state.agents.filter((agent) => agent.connected);
+    }
+
+    function writingAgentBridge() {
+      return window.uoinkWritingAgent || nativeApi()?.uoinkWritingAgent || null;
+    }
+
+    function hasWritingAgentBridge() {
+      return Boolean(writingAgentBridge());
+    }
+
+    function agentSetupMarkup() {
+      const installed = state.agents.filter((agent) => agent.installed);
+      const connected = connectedAgents();
+      const keyReady = Boolean(state.settings && state.settings.anthropic_key_set);
+      const advanced = `
+        <details>
+          <summary>Advanced: show config JSON</summary>
+          <div class="mono-box">${htmlEscape(els.mcpConfig?.value || "Load Settings to inspect the generated config.")}</div>
+          <button class="button ghost" type="button" data-copy-agent-config>Copy config JSON</button>
+        </details>
+      `;
+      if (!state.agentDetectionLoaded) {
+        return `<strong>Checking installed writing agents...</strong><span class="soft-note">This takes a moment and never changes a client until you choose Connect.</span>`;
+      }
+      if (connected.length) {
+        return `
+          <strong>${htmlEscape(connected.map((agent) => agent.label).join(", "))} connected</strong>
+          <span class="soft-note">Uoink is ready inside that client. ${keyReady ? "Dashboard Generate will use your Anthropic key when no live agent bridge is open." : "Open the connected client to write with its model, or add an Anthropic key for dashboard generation."}</span>
+          ${advanced}
+        `;
+      }
+      if (installed.length) {
+        return `
+          <strong>Connect a writing agent</strong>
+          <span class="soft-note">Uoink found ${htmlEscape(installed.map((agent) => agent.label).join(", "))}. One click adds Uoink to that client's config and keeps a backup.</span>
+          <div class="inline-row">
+            ${installed.map((agent) => `<button class="button primary" type="button" data-connect-agent="${htmlEscape(agent.name)}">Connect ${htmlEscape(agent.label)}</button>`).join("")}
+          </div>
+          ${keyReady ? `<span class="compute-indicator">Your Anthropic key is ready as the no-agent fallback.</span>` : ""}
+          ${advanced}
+        `;
+      }
+      return `
+        <strong>No supported writing agent found</strong>
+        <span class="soft-note">${keyReady ? "Your Anthropic key can generate tweets and blogs now. Install Claude Desktop for agent-grounded scripts and critique." : "Install Claude Desktop, then return here for one-click connection."}</span>
+        <button class="button primary" type="button" data-open-external="https://claude.ai/download">Install Claude Desktop</button>
+        ${advanced}
+      `;
+    }
+
+    function renderAgentSetup() {
+      const markup = agentSetupMarkup();
+      [els.agentSetupCard, els.settingsAgentSetupCard].filter(Boolean).forEach((card) => {
+        card.classList.toggle("success", connectedAgents().length > 0);
+        card.innerHTML = markup;
+      });
+    }
+
+    async function loadAgentSetup() {
+      try {
+        const data = await authFetch("/agents/detect");
+        state.agents = Array.isArray(data.agents) ? data.agents : [];
+      } catch (_) {
+        state.agents = [];
+      }
+      state.agentDetectionLoaded = true;
+      renderAgentSetup();
+    }
+
+    async function connectAgent(client) {
+      if (!client) return;
+      try {
+        await authFetch(`/agents/connect/${encodeURIComponent(client)}`, {
+          method: "POST",
+          body: JSON.stringify({}),
+        });
+        showToast("Writing agent connected.");
+        await loadAgentSetup();
+      } catch (err) {
+        showToast(`Could not connect that agent: ${err.message}`);
+      }
     }
 
     function rawMachineDetails(value) {
@@ -4207,16 +4495,18 @@
       await Promise.all(images.map(async (img) => {
         const path = img.dataset.fileImg;
         if (!path) return;
+        const url = img.dataset.fileUrl || `/file?path=${encodeURIComponent(path)}`;
+        const cacheKey = img.dataset.fileUrl || path;
         try {
-          if (!state.blobUrls.has(path)) {
+          if (!state.blobUrls.has(cacheKey)) {
             const token = await getToken();
-            const res = await fetch(`/file?path=${encodeURIComponent(path)}`, {
+            const res = await fetch(url, {
               headers: { "X-Uoink-Token": token },
             });
             if (!res.ok) throw new Error("file unavailable");
-            state.blobUrls.set(path, URL.createObjectURL(await res.blob()));
+            state.blobUrls.set(cacheKey, URL.createObjectURL(await res.blob()));
           }
-          img.src = state.blobUrls.get(path);
+          img.src = state.blobUrls.get(cacheKey);
           img.classList.remove("hidden");
         } catch (_) {}
       }));
@@ -4945,9 +5235,9 @@
       els.scriptTitle.textContent = "Script";
       els.scriptDetail.innerHTML = `
         <div class="connect-agent-state">
-          <strong>Connect Claude Desktop to generate</strong>
-          <p>Uoink found the source. A connected agent needs to write the script before there is text to show here.</p>
-          <a class="button primary" href="https://uoink.app/agents" target="_blank" rel="noreferrer">Open agent setup</a>
+          <strong>Connect a writing agent to generate</strong>
+          <p>Uoink found the source. Finish setup from Generate or Settings, then run the script again.</p>
+          <button class="button primary" type="button" data-tab-button-proxy="writing">Open Generate</button>
         </div>
       `;
     }
@@ -5748,6 +6038,40 @@
       return "";
     }
 
+    function activityErrorMessage(raw, phase, context = {}) {
+      const normalized = normalizePhase(phase);
+      const haystack = String(raw || "").toLowerCase();
+      const timeout = haystack.includes("timeout") || haystack.includes("timed out") || haystack.includes("deadline");
+      if (normalized === "fetch" && timeout) {
+        return "Download timed out before the source finished arriving. Chunked mode retries with lighter local media work.";
+      }
+      if (normalized === "transcribe" && timeout) {
+        return "The source downloaded, but transcription timed out on the long audio. Chunked mode gives the local transcript pass more room.";
+      }
+      if (normalized === "screenshots" && timeout) {
+        return "The source downloaded, but frame extraction timed out. Chunked mode retries with fewer screenshots.";
+      }
+      if (normalized === "classify") {
+        return "The media and transcript are saved, but the local classification pass did not finish.";
+      }
+      if (normalized === "write") {
+        return "The source is saved, but the final index write did not finish.";
+      }
+      return translateMachineMessage(raw, context);
+    }
+
+    function shouldOfferChunkedRetry(raw, phase) {
+      const haystack = `${raw || ""} ${phase || ""}`.toLowerCase();
+      return ["timeout", "timed out", "deadline", "long video", "ffmpeg", "whisper", "transcrib", "screenshot"]
+        .some((needle) => haystack.includes(needle));
+    }
+
+    function shouldOfferCookieRetry(raw) {
+      const haystack = String(raw || "").toLowerCase();
+      return ["sign in", "login", "cookies", "captcha", "guest token", "members-only", "members only"]
+        .some((needle) => haystack.includes(needle));
+    }
+
     function phaseChips(activePhase, stateValue) {
       const phases = ["fetch", "transcribe", "screenshots", "classify", "write"];
       const normalized = normalizePhase(activePhase);
@@ -5783,8 +6107,10 @@
       const title = job.title || job.playlist_title || (job.current_video && job.current_video.title) || job.url || job.source_url || "Uoink job";
       const rawError = job.error_detail || (job.error_code ? `${job.error_code}: ${job.error || ""}` : job.error || "");
       const errorLine = failed && rawError
-        ? translateMachineMessage(rawError, { url: job.url || job.source_url || "", code: job.error_code || "" })
+        ? activityErrorMessage(rawError, phase, { url: job.url || job.source_url || "", code: job.error_code || "" })
         : "";
+      const chunkedRetry = failed && shouldOfferChunkedRetry(rawError, phase);
+      const cookieRetry = failed && shouldOfferCookieRetry(rawError);
       const sub = [
         job.kind || "job",
         stateValue,
@@ -5800,7 +6126,8 @@
               ${sourceChip}
             </div>
             <div class="inline-row">
-              ${failed ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(job.url || job.source_url || "")}">Retry with cookies</button>` : ""}
+              ${chunkedRetry ? `<button class="button primary" type="button" data-retry-chunked="${htmlEscape(job.url || job.source_url || "")}">Retry with chunked mode</button>` : ""}
+              ${cookieRetry ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(job.url || job.source_url || "")}">Retry with cookies</button>` : ""}
               ${["queued", "running"].includes(stateValue) && job.id ? `<button class="button danger" type="button" data-cancel-job="${htmlEscape(job.id)}">Cancel</button>` : ""}
             </div>
           </div>
@@ -5820,8 +6147,10 @@
       const sourceChip = activitySourceChip(row);
       const rawError = row.error_detail || row.last_error || row.error || "";
       const errorLine = failed && rawError
-        ? translateMachineMessage(rawError, { url: row.url || row.source_url || "" })
+        ? activityErrorMessage(rawError, activePhase, { url: row.url || row.source_url || "" })
         : "";
+      const chunkedRetry = failed && shouldOfferChunkedRetry(rawError, activePhase);
+      const cookieRetry = failed && shouldOfferCookieRetry(rawError);
       return `
         <div class="job-row ${failed ? "failed" : ""}" data-pending-id="${htmlEscape(row.pending_id || "")}">
           <div class="job-top">
@@ -5831,7 +6160,8 @@
               ${sourceChip}
             </div>
             <div class="inline-row">
-              ${failed ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(row.url || "")}">Retry with cookies</button>` : ""}
+              ${chunkedRetry ? `<button class="button primary" type="button" data-retry-chunked="${htmlEscape(row.url || row.source_url || "")}">Retry with chunked mode</button>` : ""}
+              ${cookieRetry ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(row.url || "")}">Retry with cookies</button>` : ""}
               ${stateValue === "pending" || failed ? `<button class="button ghost" type="button" data-retry="${htmlEscape(row.pending_id || "")}">Retry now</button>` : ""}
               ${stateValue !== "succeeded" ? `<button class="button danger" type="button" data-cancel="${htmlEscape(row.pending_id || "")}">Cancel</button>` : ""}
             </div>
@@ -5858,10 +6188,10 @@
         els.voiceWarningsEnabled.checked = state.settings.voice_dna_warnings_enabled !== false;
         els.voiceWarningsPerGeneration.checked = state.settings.voice_dna_show_per_generation_toggle !== false;
         els.writingScreenshotPickerToggle.checked = state.settings.writing_show_screenshot_picker !== false;
-        els.writingDefaultAttachAll.checked = Boolean(state.settings.writing_default_attach_all_screenshots);
         els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
         els.scriptVoiceWarnings.checked = els.voiceWarningsEnabled.checked;
         renderWritingScreenshots();
+        renderAgentSetup();
         renderRolePicker(state.settings.role || "mixed");
         syncWhisperModelOptions();
         const relModel = state.settings.transcript_reliability_model || {};
@@ -5889,7 +6219,7 @@
         els.mcpConfig.value = "Agent config needs another moment.";
       }
       renderTopics(state.settings && Array.isArray(state.settings.topics) ? state.settings.topics : []);
-      await Promise.all([loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites()]);
+      await Promise.all([loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites(), loadAgentSetup()]);
     }
 
     function diagnoseSummary(diag) {
@@ -6061,12 +6391,14 @@
         }).join("")
         : `<div class="job-row"><div class="job-title">${rows.length ? "No matching uoinks." : "Load Library first."}</div><div class="job-sub">Saved sources appear here with thumbnails.</div></div>`;
       const selected = rows.find((row) => writingRowId(row) === current) || rows[0] || null;
-      if (!current && selected) {
+      if (!current && !query && selected) {
         state.writingSelectedSourceRow = selected;
         els.writingSource.value = writingRowId(selected);
         els.writingSourceSearch.value = rowTitle(selected);
       } else if (current) {
         state.writingSelectedSourceRow = rows.find((row) => writingRowId(row) === current) || state.writingSelectedSourceRow;
+      } else {
+        state.writingSelectedSourceRow = null;
       }
       updateWritingAttribution();
       loadDetailFileImages();
@@ -6076,6 +6408,7 @@
       const row = state.library.find((item) => writingRowId(item) === id);
       if (!row) return;
       state.writingSelectedSourceRow = row;
+      state.generateWorkspace = null;
       els.writingSource.value = writingRowId(row);
       els.writingSourceSearch.value = rowTitle(row);
       document.getElementById("writingSourceCombo").classList.remove("open");
@@ -6106,6 +6439,19 @@
 
     function selectedWritingMode() {
       return selectedRadio("writingMode", "tweet");
+    }
+
+    function selectedGenerateHookLens() {
+      return selectedRadio("generateHookLens", "informative");
+    }
+
+    function syncGenerateModeUi() {
+      const mode = selectedWritingMode();
+      els.generateScriptOptions.classList.toggle("hidden", mode !== "script");
+      document.getElementById("writingComposerPanel").classList.toggle("hidden", mode === "script" || mode === "blog");
+      document.getElementById("autoDistributeScreenshots").classList.toggle("hidden", mode !== "thread");
+      document.getElementById("generateWriting").textContent = mode === "script" ? "Generate script" : "Generate";
+      renderWritingScreenshots();
     }
 
     const X_URL_WEIGHTED_LENGTH = 23;
@@ -6163,10 +6509,18 @@
       if (!els.threadBuilder) return;
       const mode = selectedWritingMode();
       const drafts = state.writingDrafts.length ? state.writingDrafts : [writingAttributionLine()];
+      const selectedShots = selectedWritingScreenshots();
       els.threadBuilder.innerHTML = drafts.map((draft, index) => {
         const count = tweetLength(draft);
         const over = mode !== "blog" && count > 280;
-        const label = mode === "blog" ? "Blog markdown" : mode === "thread" ? `Tweet ${index + 1}` : "Tweet";
+        const label = mode === "blog" ? "Blog markdown" : mode === "script" ? "Script" : mode === "thread" ? `Tweet ${index + 1}` : "Tweet";
+        const assignment = state.writingScreenshotAssignments.get(index) || "";
+        const assignmentControl = mode === "thread" && selectedShots.length
+          ? `<select class="field thread-shot-select" data-thread-shot="${index}" aria-label="Screenshot for tweet ${index + 1}">
+              <option value="">No assigned screenshot</option>
+              ${selectedShots.map((shot) => `<option value="${htmlEscape(shot.id)}" ${assignment === shot.id ? "selected" : ""}>${htmlEscape(screenshotLabel(shot))}</option>`).join("")}
+            </select>`
+          : "";
         return `
           <div class="tweet-card ${over ? "over" : ""}" data-thread-card="${index}">
             <div class="tweet-top">
@@ -6174,6 +6528,7 @@
               <span class="char-count ${over ? "over" : ""}">${count}${mode === "blog" ? " chars" : "/280"}</span>
             </div>
             <textarea class="field tweet-text" data-thread-text="${index}" ${mode === "blog" ? "" : "maxlength=\"420\""}>${htmlEscape(draft)}</textarea>
+            ${assignmentControl}
             ${over ? `<div class="job-error">This one is over 280 characters. Tighten it before opening X.</div>` : ""}
           </div>
         `;
@@ -6218,35 +6573,64 @@
     }
 
     function screenshotLabel(shot) {
-      return firstValue(shot.label, shot.timestamp, fmtTimestamp(shot.start || shot.time || 0), "screenshot");
+      return firstValue(shot.label, shot.timestamp, fmtTimestamp(shot.timestamp_seconds ?? shot.start ?? shot.time ?? 0), "screenshot");
+    }
+
+    function screenshotSourceId(row) {
+      return String(firstValue(
+        row && row.video_id,
+        row && row.id,
+        row && row.slug,
+        evidenceVideoIdOf(row || {})
+      ) || "");
+    }
+
+    function parseTimestampInput(value) {
+      const text = String(value || "").trim();
+      if (!text) return null;
+      if (/^\d+(\.\d+)?$/.test(text)) return Number(text);
+      const parts = text.split(":").map(Number);
+      if (parts.some((part) => !Number.isFinite(part)) || parts.length > 3) return null;
+      return parts.reverse().reduce((total, part, index) => total + part * (60 ** index), 0);
+    }
+
+    function visibleWritingScreenshots() {
+      const { from, to } = state.writingScreenshotRange;
+      return state.writingScreenshots.filter((shot) => {
+        const seconds = Number(shot.timestamp_seconds);
+        if (!Number.isFinite(seconds)) return from === null && to === null;
+        return (from === null || seconds >= from) && (to === null || seconds <= to);
+      });
     }
 
     async function loadWritingScreenshots() {
       const row = state.writingSelectedSourceRow;
       state.writingScreenshots = [];
       state.writingSelectedScreenshots = new Set();
+      state.writingScreenshotAssignments = new Map();
+      state.writingScreenshotMeta = {};
       if (!row) {
         renderWritingScreenshots();
         return;
       }
-      const sidecarPath = sidecarPathForRow(row);
-      let sidecar = {};
-      if (sidecarPath) {
-        try {
-          sidecar = await loadJsonFile(sidecarPath);
-        } catch (_) {
-          sidecar = {};
-        }
+      const sourceId = screenshotSourceId(row);
+      if (!sourceId) {
+        renderWritingScreenshots();
+        return;
       }
-      const shots = Array.isArray(sidecar.screenshots) ? sidecar.screenshots : [];
-      state.writingScreenshots = shots.map((shot, index) => ({
-        ...shot,
-        id: `${index}:${screenshotPath(row, shot)}`,
-        path: screenshotPath(row, shot),
-        label: screenshotLabel(shot),
-      })).filter((shot) => shot.path);
-      if (state.settings && state.settings.writing_default_attach_all_screenshots) {
-        state.writingScreenshots.forEach((shot) => state.writingSelectedScreenshots.add(shot.id));
+      try {
+        const data = await authFetch(`/yoinks/${encodeURIComponent(sourceId)}/screenshots?dedupe=${els.writingDedupe.checked ? "true" : "false"}`);
+        const shots = Array.isArray(data.screenshots) ? data.screenshots : [];
+        state.writingScreenshotMeta = data;
+        state.writingScreenshots = shots.map((shot, position) => ({
+          ...shot,
+          id: String(shot.index ?? position),
+          path: shot.path || "",
+          thumb_url: `/yoinks/${encodeURIComponent(sourceId)}/screenshots/${encodeURIComponent(shot.index ?? position)}.png`,
+          label: screenshotLabel(shot),
+        })).filter((shot) => shot.path);
+      } catch (err) {
+        state.writingScreenshotMeta = { error: err.message };
       }
       renderWritingScreenshots();
     }
@@ -6255,31 +6639,81 @@
       if (!els.writingScreenshotPanel) return;
       const showPicker = !state.settings || state.settings.writing_show_screenshot_picker !== false;
       els.writingScreenshotPanel.classList.toggle("hidden", !showPicker);
-      els.writingPickScreenshots.checked = showPicker;
       if (!showPicker) return;
-      const shots = state.writingScreenshots;
-      els.writingScreenshotSummary.textContent = shots.length
-        ? `${shots.length} screenshot${shots.length === 1 ? "" : "s"} from this source. Default attach all is off.`
-        : "Screenshots appear here when the source has local frames.";
+      const shots = visibleWritingScreenshots();
+      const selectedCount = state.writingSelectedScreenshots.size;
+      const dedupeRemoved = Number(state.writingScreenshotMeta.dedupe_removed || 0);
+      document.getElementById("pickBestScreenshots").textContent = `Pick best for ${selectedWritingMode() === "blog" ? "Blog" : selectedWritingMode() === "thread" ? "Thread" : selectedWritingMode() === "script" ? "Blog" : "Tweet"}`;
+      els.writingScreenshotSummary.textContent = state.writingScreenshots.length
+        ? `${selectedCount} selected · ${shots.length} shown${dedupeRemoved ? ` · ${dedupeRemoved} visual duplicate${dedupeRemoved === 1 ? "" : "s"} hidden` : ""}`
+        : state.writingScreenshotMeta.error
+          ? "Screenshots could not be loaded for this source."
+          : "No screenshots on this source. Text-only sources do not need an attachment.";
       els.writingScreenshotPicker.innerHTML = shots.length
         ? shots.map((shot) => {
           const checked = state.writingSelectedScreenshots.has(shot.id);
           return `
-            <div class="screenshot-choice ${checked ? "selected" : ""}">
-              <img alt="" class="hidden" data-file-img="${htmlEscape(shot.path)}">
+            <button class="screenshot-choice ${checked ? "selected" : ""}" type="button" data-writing-shot="${htmlEscape(shot.id)}" aria-pressed="${checked ? "true" : "false"}">
+              <img alt="${htmlEscape(shot.label)}" class="hidden" data-file-img="${htmlEscape(shot.path)}" data-file-url="${htmlEscape(shot.thumb_url)}">
+              <span class="shot-check">✓</span>
               <label>
-                <span><input type="checkbox" data-writing-shot="${htmlEscape(shot.id)}" ${checked ? "checked" : ""}> ${htmlEscape(shot.label)}</span>
-                <span>${htmlEscape(basenameOf(shot.path))}</span>
+                <strong>${htmlEscape(shot.label)}</strong>
+                <span>${htmlEscape(shot.width && shot.height ? `${shot.width} × ${shot.height}` : basenameOf(shot.path))}</span>
               </label>
-            </div>
+            </button>
           `;
         }).join("")
-        : emptyPanelRow("No screenshots on this source yet.", "Use Re-uoink source if you want fresh screenshots for the post.");
+        : emptyPanelRow(
+          state.writingScreenshots.length ? "No screenshots in this timestamp range." : "No screenshots on this source yet.",
+          state.writingScreenshots.length ? "Clear the range or enter a wider timestamp window." : "Use Re-uoink source if you want fresh screenshots for the post."
+        );
+      renderThreadBuilder();
       loadDetailFileImages();
     }
 
     function selectedWritingScreenshots() {
       return state.writingScreenshots.filter((shot) => state.writingSelectedScreenshots.has(shot.id));
+    }
+
+    async function pickBestWritingScreenshots() {
+      const row = state.writingSelectedSourceRow;
+      const sourceId = screenshotSourceId(row);
+      if (!sourceId) return showToast("Choose a source first.");
+      const selectedMode = selectedWritingMode();
+      const mode = selectedMode === "script" ? "blog" : selectedMode;
+      const query = new URLSearchParams({ mode, dedupe: els.writingDedupe.checked ? "true" : "false" });
+      if (mode === "thread") query.set("thread_size", String(Math.max(3, state.writingDrafts.length || 3)));
+      try {
+        const data = await authFetch(`/yoinks/${encodeURIComponent(sourceId)}/screenshots/suggest?${query.toString()}`);
+        const suggestedIds = Array.isArray(data.selected) && data.selected.length
+          ? data.selected.map((shot) => String(shot.index))
+          : (data.indices || []).map(String);
+        state.writingSelectedScreenshots = new Set(suggestedIds);
+        if (mode === "thread") autoDistributeWritingScreenshots();
+        renderWritingScreenshots();
+        showToast(`${state.writingSelectedScreenshots.size} screenshot${state.writingSelectedScreenshots.size === 1 ? "" : "s"} picked.`);
+      } catch (err) {
+        showToast("Could not pick screenshots for this source.");
+      }
+    }
+
+    function autoDistributeWritingScreenshots() {
+      const shots = selectedWritingScreenshots();
+      state.writingScreenshotAssignments = new Map();
+      if (selectedWritingMode() === "thread") {
+        state.writingDrafts.forEach((_, index) => {
+          if (shots[index]) state.writingScreenshotAssignments.set(index, shots[index].id);
+        });
+      }
+      renderThreadBuilder();
+    }
+
+    function applyWritingScreenshotRange() {
+      state.writingScreenshotRange = {
+        from: parseTimestampInput(els.writingShotFrom.value),
+        to: parseTimestampInput(els.writingShotTo.value),
+      };
+      renderWritingScreenshots();
     }
 
     function blogMarkdownWithScreenshots(body) {
@@ -6291,20 +6725,43 @@
     }
 
     function renderWritingHandoff(shots) {
-      els.writingHandoffShots.innerHTML = shots.length
-        ? shots.map((shot) => `
-          <div class="handoff-shot ${state.writingUsedScreenshots.has(shot.id) ? "used" : ""}" draggable="true" data-handoff-shot="${htmlEscape(shot.id)}">
-            <img alt="" class="hidden" data-file-img="${htmlEscape(shot.path)}">
-            <div class="handoff-shot-meta">
-              <strong>${htmlEscape(shot.label)}</strong>
-              <span>${htmlEscape(shot.path)}</span>
-              <button class="button ghost" type="button" data-mark-shot-used="${htmlEscape(shot.id)}">Mark dragged</button>
+      if (selectedWritingMode() === "thread") {
+        const byId = new Map(shots.map((shot) => [shot.id, shot]));
+        const assignedIds = new Set(state.writingScreenshotAssignments.values());
+        const postRows = state.writingDrafts.map((draft, index) => {
+          const shot = byId.get(state.writingScreenshotAssignments.get(index));
+          return `
+            <div class="job-row">
+              <div class="job-title">Tweet ${index + 1}</div>
+              <div class="job-sub">${htmlEscape(String(draft || "").slice(0, 120))}</div>
+              ${shot ? handoffShotHtml(shot) : `<div class="soft-note">No screenshot assigned to this post.</div>`}
             </div>
-          </div>
-        `).join("")
-        : emptyPanelRow("No screenshots selected.", "Open X with text only, or select screenshots first.");
+          `;
+        }).join("");
+        const unassigned = shots.filter((shot) => !assignedIds.has(shot.id));
+        els.writingHandoffShots.innerHTML = postRows + (unassigned.length
+          ? `<div class="job-row"><div class="job-title">Unassigned screenshots</div><div class="handoff-shot-list">${unassigned.map(handoffShotHtml).join("")}</div></div>`
+          : "");
+      } else {
+        els.writingHandoffShots.innerHTML = shots.length
+          ? shots.map(handoffShotHtml).join("")
+          : emptyPanelRow("No screenshots selected.", "Open X with text only, or select screenshots first.");
+      }
       els.writingHandoffPopup.classList.remove("hidden");
       loadDetailFileImages();
+    }
+
+    function handoffShotHtml(shot) {
+      return `
+        <div class="handoff-shot ${state.writingUsedScreenshots.has(shot.id) ? "used" : ""}" draggable="true" data-handoff-shot="${htmlEscape(shot.id)}">
+          <img alt="" class="hidden" data-file-img="${htmlEscape(shot.path)}">
+          <div class="handoff-shot-meta">
+            <strong>${htmlEscape(shot.label)}</strong>
+            <span>${htmlEscape(shot.path)}</span>
+            <button class="button ghost" type="button" data-mark-shot-used="${htmlEscape(shot.id)}">Mark dragged</button>
+          </div>
+        </div>
+      `;
     }
 
     function openWritingInX() {
@@ -6323,12 +6780,22 @@
 
     async function loadWriting() {
       syncWritingSourceOptions();
+      if (!state.settings) {
+        try {
+          const data = await authFetch("/settings");
+          state.settings = data.settings || data || {};
+        } catch (_) {
+          state.settings = {};
+        }
+      }
       await loadStyleAnchors();
       els.writingNavCount.textContent = String(state.writingPieces.length || state.styleAnchors.length);
       renderSuggestionDatalists();
       renderThreadBuilder();
       updateWritingAttribution();
       await loadWritingScreenshots();
+      await loadAgentSetup();
+      syncGenerateModeUi();
     }
 
     async function loadStyleAnchors() {
@@ -6712,8 +7179,13 @@
         renderAgentConnectionFallback();
         return;
       }
-      const needsCredit = credit && !String(renderedBody).includes(String(credit).trim());
+      const bodyText = String(renderedBody);
+      const needsCredit = credit
+        && !bodyText.includes(String(credit).trim())
+        && !bodyText.includes("uoink.app")
+        && !bodyText.includes(sourceUrlOf(state.writingSelectedSourceRow));
       setWritingOutput(`${title}${dek}${renderedBody}${needsCredit ? `\n\n${credit}` : ""}`);
+      els.writingComputeIndicator.classList.toggle("hidden", !(piece.compute_path === "byo_key" || piece.generated_via === "byo_key"));
       const warnings = piece.voice_warnings || data.voice_warnings || [];
       const warningCopy = piece.warning_copy || data.warning_copy || "Uoink found no Voice DNA warnings in the returned payload.";
       els.voiceWarningCopy.textContent = warnings.length
@@ -6722,7 +7194,7 @@
     }
 
     async function connectedAgentDraft(toolName, mode, groundingPayload, args) {
-      const bridge = window.uoinkWritingAgent || nativeApi()?.uoinkWritingAgent;
+      const bridge = writingAgentBridge();
       if (!bridge) return null;
       const request = {
         tool: toolName,
@@ -6739,20 +7211,190 @@
       return null;
     }
 
+    async function ensureGenerateWorkspace() {
+      if (state.generateWorkspace && state.generateWorkspace.id) return state.generateWorkspace;
+      const row = state.writingSelectedSourceRow;
+      if (!row) throw new Error("Choose a source uoink first.");
+      if (!state.channels.length && els.generatePastPerformance.checked) {
+        try { await loadChannels(); } catch (_) {}
+      }
+      const yourChannel = els.generatePastPerformance.checked && state.channels.length
+        ? firstValue(state.channels[0].handle, state.channels[0].name, state.channels[0].channel_id)
+        : null;
+      const payload = {
+        format: "talking-head",
+        topic: firstValue(row.topic, rowTitle(row)),
+        hook_target: els.writingAngle.value.trim() || selectedGenerateHookLens(),
+        your_channel: yourChannel || null,
+        n_examples: 8,
+        notes: `Generate source: ${rowTitle(row)} ${sourceUrlOf(row)}`,
+      };
+      const data = await authFetch("/workspaces", { method: "POST", body: JSON.stringify(payload) });
+      state.generateWorkspace = data.workspace || data;
+      if (!state.generateWorkspace.id) throw new Error("Generate workspace could not be prepared.");
+      return state.generateWorkspace;
+    }
+
+    async function generateAssemblyBody() {
+      const row = state.writingSelectedSourceRow;
+      if (!row) throw new Error("Choose a source uoink first.");
+      if (!state.channels.length && els.generatePastPerformance.checked) {
+        try { await loadChannels(); } catch (_) {}
+      }
+      const yourChannel = els.generatePastPerformance.checked && state.channels.length
+        ? firstValue(state.channels[0].handle, state.channels[0].name, state.channels[0].channel_id)
+        : null;
+      return {
+        format: "talking-head",
+        topic: firstValue(row.topic, rowTitle(row)),
+        hook_target: els.writingAngle.value.trim() || selectedGenerateHookLens(),
+        your_channel: yourChannel || null,
+        n_examples: 8,
+      };
+    }
+
+    function showGenerateResearch(title, content) {
+      els.generateResearchPanel.classList.remove("hidden");
+      els.generateResearchPanel.innerHTML = `<strong>${htmlEscape(title)}</strong>${content}`;
+    }
+
+    async function surfaceAudienceQuestions() {
+      showGenerateResearch("Audience questions", `<span class="soft-note">Reading questions from the local corpus...</span>`);
+      try {
+        const data = await authFetch("/workspace/assemble", {
+          method: "POST",
+          body: JSON.stringify(await generateAssemblyBody()),
+        });
+        const questions = Array.isArray(data.audience_questions) ? data.audience_questions : [];
+        showGenerateResearch(
+          "Audience questions",
+          questions.length
+            ? questions.slice(0, 12).map((item) => `<div class="job-row"><div class="job-title">${htmlEscape(item.question || item.text || String(item))}</div><div class="job-sub">${htmlEscape(item.likes ? `${item.likes} likes` : "from your saved corpus")}</div></div>`).join("")
+            : `<span class="soft-note">No audience questions are stored for this corpus slice yet. The script can still use transcripts and performance patterns.</span>`
+        );
+      } catch (err) {
+        showGenerateResearch("Audience questions", degradedState("Questions need another pass.", "Uoink could not assemble this corpus slice.", err.message));
+      }
+    }
+
+    function renderLocalCorpusCritique(data, draft) {
+      const assembled = Array.isArray(data.assembled) ? data.assembled : [];
+      const questions = Array.isArray(data.audience_questions) ? data.audience_questions : [];
+      const hookCounts = new Map();
+      assembled.forEach((row) => {
+        const hook = prettyHook(row.hook_type || "other");
+        hookCounts.set(hook, (hookCounts.get(hook) || 0) + 1);
+      });
+      const topHook = [...hookCounts.entries()].sort((a, b) => b[1] - a[1])[0];
+      const opening = String(draft).split(/\n+/).find(Boolean) || "";
+      const moves = [
+        `Make the opening clearly use the selected ${selectedGenerateHookLens().replace(/_/g, " ")} lens.`,
+        questions[0]
+          ? `Answer this saved audience question: ${questions[0].question || questions[0].text}`
+          : "Add one concrete audience objection or question before the close.",
+        "Keep the source credit visible without letting it interrupt the main idea.",
+      ];
+      const signal = assembled.length
+        ? `${assembled.length} relevant saved examples${topHook ? `; ${topHook[0]} is the most common hook in this slice` : ""}.`
+        : "No close corpus examples matched this slice. Treat the revision moves as a structure check.";
+      return `
+        <div class="job-row">
+          <div class="job-title">Corpus signal</div>
+          <div class="job-sub">${htmlEscape(signal)}</div>
+        </div>
+        <div class="job-row">
+          <div class="job-title">Opening under review</div>
+          <div class="job-sub">${htmlEscape(opening.slice(0, 280))}</div>
+        </div>
+        <div class="job-row">
+          <div class="job-title">Revision moves</div>
+          ${moves.map((move, index) => `<div class="job-sub">${index + 1}. ${htmlEscape(move)}</div>`).join("")}
+        </div>
+      `;
+    }
+
+    async function critiqueWritingAgainstCorpus() {
+      const draft = currentWritingText().trim();
+      if (!draft) return showToast("Generate or write a draft before critique.");
+      showGenerateResearch("Critique against corpus", `<span class="soft-note">Preparing a grounded critique brief...</span>`);
+      try {
+        const data = await authFetch("/workspace/assemble", {
+          method: "POST",
+          body: JSON.stringify(await generateAssemblyBody()),
+        });
+        showGenerateResearch("Critique against corpus", renderLocalCorpusCritique(data, draft));
+      } catch (err) {
+        showGenerateResearch("Critique against corpus", degradedState("Critique needs another pass.", "The local corpus brief could not be prepared.", err.message));
+      }
+    }
+
+    async function generateScriptInWriting() {
+      const workspace = await ensureGenerateWorkspace();
+      const row = state.writingSelectedSourceRow;
+      const body = {
+        workspace_id: workspace.id,
+        output_mode: "script",
+        hook_type_lens: selectedGenerateHookLens(),
+        target_length_sec: Number(els.generateScriptLength.value || 120),
+        style_anchor_ids: selectedAnchorIds(),
+        cta: els.generateScriptCta.value.trim() || undefined,
+        source_yoink_id: screenshotSourceId(row),
+        source_credit_line: writingAttributionLine(row),
+        native_attribution: true,
+        voice_dna_warnings_enabled: Boolean(els.writingShowWarnings.checked && !els.writingSkipWarnings.checked),
+        skip_voice_dna_this_time: Boolean(els.writingSkipWarnings.checked),
+      };
+      const data = await callMcpTool("generate_script", body);
+      if (data.mode === "grounding_only") {
+        const agentDraft = await connectedAgentDraft("generate_script", "script", data, body);
+        const draft = normalizeScriptDraft(agentDraft);
+        if (draft && !looksLikeScriptScaffold(objectToMarkdown(draft))) {
+          const persisted = await callMcpTool("generate_script", { ...body, script: draft });
+          setWritingOutput(objectToMarkdown(draft));
+          state.writingLastPayload = persisted;
+          showToast("Script draft ready.");
+          return;
+        }
+        renderAgentConnectionFallback();
+        showToast("Connect a writing agent to generate the script.");
+        return;
+      }
+      const draft = normalizeScriptDraft(data) || data;
+      setWritingOutput(objectToMarkdown(draft));
+      showToast("Script draft ready.");
+    }
+
     async function generateWriting() {
       const sourceId = els.writingSource.value;
       if (!sourceId) return showToast("Choose a source uoink first.");
       const mode = selectedRadio("writingMode", "tweet");
+      if (mode === "script") {
+        setWritingOutput("Preparing a grounded script...");
+        try {
+          await generateScriptInWriting();
+        } catch (err) {
+          els.writingOutput.innerHTML = degradedState("Generate needs another pass.", "The helper could not prepare this script.", err.message);
+          els.writingOutput.dataset.rawText = "";
+          setWritingActionsEnabled(false);
+        }
+        return;
+      }
       const toolName = mode === "blog" ? "write_blog" : "write_tweet";
       const body = {
         source_yoink_id: sourceId,
         angle: els.writingAngle.value.trim() || undefined,
+        hook_type_lens: selectedGenerateHookLens(),
         style_anchor_ids: selectedAnchorIds(),
         output_mode: mode,
+        kind: mode,
         thread_max: mode === "thread" ? 10 : undefined,
         voice_dna_warnings_enabled: Boolean(els.writingShowWarnings.checked && !els.writingSkipWarnings.checked),
         skip_voice_dna_this_time: Boolean(els.writingSkipWarnings.checked),
       };
+      if (!hasWritingAgentBridge() && state.settings && state.settings.anthropic_key_set) {
+        body.generate = true;
+        body.compute_mode = "byo_key";
+      }
       setWritingOutput("Writing draft is being prepared...");
       try {
         const data = await callMcpTool(toolName, body);
@@ -6772,7 +7414,7 @@
           }
         }
         renderWritingResult(data);
-        showToast(data.mode === "grounding_only" ? "Connect Claude Desktop to generate." : "Writing draft ready.");
+        showToast(data.mode === "grounding_only" ? "Connect a writing agent to generate." : "Writing draft ready.");
       } catch (err) {
         els.writingOutput.innerHTML = degradedState("Writing Studio needs another pass.", "The helper could not prepare this draft. Details are tucked below.", err.message);
         els.writingOutput.dataset.rawText = "";
@@ -7136,6 +7778,20 @@
       }
     }
 
+    async function retryWithChunkedMode(url) {
+      if (!url) return showToast("No source URL available for retry.");
+      try {
+        await authFetch("/extract", {
+          method: "POST",
+          body: JSON.stringify({ url, interval: 120, long_video_mode: "chunked" }),
+        });
+        showToast("Chunked-mode retry queued.");
+        refreshActivity();
+      } catch (err) {
+        showToast("Could not queue the chunked-mode retry.");
+      }
+    }
+
     async function openLastYoutube() {
       try {
         const data = await authFetch("/open-last-youtube");
@@ -7146,11 +7802,10 @@
     }
 
     function switchTab(tab) {
+      if (tab === "build" || tab === "script") tab = "writing";
       document.querySelectorAll("[data-tab-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.tabButton === tab));
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
       if (tab === "for-you") loadForYou();
-      if (tab === "build") loadBuild();
-      if (tab === "script") loadScripts();
       if (tab === "writing") loadWriting();
       if (tab === "evidence") loadEvidence();
       if (tab === "yoink") renderYoinkDetail();
@@ -7158,15 +7813,17 @@
       if (tab === "activity") refreshActivity();
       if (tab === "settings") refreshSettings();
       if (tab === "features") loadFeatures();
+      document.querySelector(".content").scrollTop = 0;
     }
 
     function applyHashRoute() {
       const route = decodeURIComponent(location.hash || "").replace(/^#\/?/, "");
       if (!route) return false;
       const [tab, anchor] = route.split("/");
-      if (!document.querySelector(`[data-tab-panel="${CSS.escape(tab)}"]`)) return false;
-      switchTab(tab);
-      if (tab === "settings" && anchor === "byo-key") {
+      const routedTab = tab === "build" || tab === "script" ? "writing" : tab;
+      if (!document.querySelector(`[data-tab-panel="${CSS.escape(routedTab)}"]`)) return false;
+      switchTab(routedTab);
+      if (routedTab === "settings" && anchor === "byo-key") {
         window.setTimeout(() => {
           document.getElementById("byo-key")?.scrollIntoView({ block: "start" });
         }, 0);
@@ -7222,17 +7879,30 @@
       document.getElementById("reloadWriting").addEventListener("click", loadWriting);
       document.getElementById("generateWriting").addEventListener("click", generateWriting);
       document.getElementById("regenerateWriting").addEventListener("click", generateWriting);
+      document.getElementById("critiqueWriting").addEventListener("click", critiqueWritingAgainstCorpus);
+      document.getElementById("surfaceAudienceQuestions").addEventListener("click", surfaceAudienceQuestions);
       document.getElementById("copyWriting").addEventListener("click", copyWritingText);
       document.getElementById("saveWriting").addEventListener("click", () => showToast("Draft saved locally with its source credit."));
-      document.getElementById("reviseWriting").addEventListener("click", () => showToast("Use Regenerate for another pass."));
+      document.getElementById("reviseWriting").addEventListener("click", generateWriting);
       document.getElementById("useWritingAsIs").addEventListener("click", () => showToast("Marked for use in this session."));
       document.getElementById("writingSettingsLink").addEventListener("click", () => switchTab("settings"));
       els.writingSourceSearch.addEventListener("focus", () => toggleWritingSourceCombo(true));
       els.writingSourceSearch.addEventListener("input", () => {
+        if (state.writingSelectedSourceRow && els.writingSourceSearch.value !== rowTitle(state.writingSelectedSourceRow)) {
+          state.writingSelectedSourceRow = null;
+          state.generateWorkspace = null;
+          els.writingSource.value = "";
+          state.writingScreenshots = [];
+          state.writingSelectedScreenshots = new Set();
+          renderWritingScreenshots();
+        }
         toggleWritingSourceCombo(true);
         syncWritingSourceOptions();
       });
-      els.writingModePicker.addEventListener("change", () => updateWritingComposerFromText(els.writingOutput.dataset.rawText || currentWritingText()));
+      els.writingModePicker.addEventListener("change", () => {
+        updateWritingComposerFromText(els.writingOutput.dataset.rawText || currentWritingText());
+        syncGenerateModeUi();
+      });
       document.getElementById("addThreadTweet").addEventListener("click", () => {
         state.writingDrafts.push(writingAttributionLine());
         renderThreadBuilder();
@@ -7244,6 +7914,15 @@
         catch (_) { showToast("Could not copy credit."); }
       });
       document.getElementById("refreshWritingScreenshots").addEventListener("click", loadWritingScreenshots);
+      document.getElementById("pickBestScreenshots").addEventListener("click", pickBestWritingScreenshots);
+      document.getElementById("autoDistributeScreenshots").addEventListener("click", autoDistributeWritingScreenshots);
+      document.getElementById("clearWritingScreenshots").addEventListener("click", () => {
+        state.writingSelectedScreenshots = new Set();
+        state.writingScreenshotAssignments = new Map();
+        renderWritingScreenshots();
+      });
+      document.getElementById("applyWritingShotRange").addEventListener("click", applyWritingScreenshotRange);
+      els.writingDedupe.addEventListener("change", loadWritingScreenshots);
       document.getElementById("reYoinkWritingSource").addEventListener("click", async () => {
         const url = sourceUrlOf(state.writingSelectedSourceRow);
         if (!url) return showToast("No source URL stored for this uoink.");
@@ -7254,9 +7933,6 @@
         } catch (err) {
           showToast(translateMachineMessage(err.message, { url }));
         }
-      });
-      els.writingPickScreenshots.addEventListener("change", () => {
-        saveSettingsPatch({ writing_show_screenshot_picker: els.writingPickScreenshots.checked }, "Screenshot picker setting updated.");
       });
       document.getElementById("closeWritingHandoff").addEventListener("click", () => els.writingHandoffPopup.classList.add("hidden"));
       document.getElementById("previewStyleAnchor").addEventListener("click", previewStyleAnchor);
@@ -7296,6 +7972,8 @@
         refreshActivity();
       });
       document.getElementById("reloadSettings").addEventListener("click", refreshSettings);
+      document.getElementById("viewActivity").addEventListener("click", () => switchTab("activity"));
+      document.getElementById("starGithub").addEventListener("click", () => openExternal("https://github.com/ryanbiddy/uoink"));
       document.getElementById("saveKey").addEventListener("click", saveKey);
       document.getElementById("testKey").addEventListener("click", testKey);
       document.getElementById("copyMcp").addEventListener("click", async () => {
@@ -7336,9 +8014,6 @@
       });
       els.writingScreenshotPickerToggle.addEventListener("change", () => {
         saveSettingsPatch({ writing_show_screenshot_picker: els.writingScreenshotPickerToggle.checked }, "Screenshot picker setting updated.");
-      });
-      els.writingDefaultAttachAll.addEventListener("change", () => {
-        saveSettingsPatch({ writing_default_attach_all_screenshots: els.writingDefaultAttachAll.checked }, "Screenshot default updated.");
       });
       els.writingShowWarnings.addEventListener("change", () => {
         if (!els.writingShowWarnings.checked) els.voiceWarningCopy.textContent = "Warnings are hidden for this session.";
@@ -7418,13 +8093,44 @@
           selectWritingSourceById(sourceOption.dataset.writingSourceId);
           return;
         }
+        const tabProxy = event.target.closest("[data-tab-button-proxy]");
+        if (tabProxy) {
+          switchTab(tabProxy.dataset.tabButtonProxy);
+          return;
+        }
+        const connectAgentButton = event.target.closest("[data-connect-agent]");
+        if (connectAgentButton) {
+          connectAgent(connectAgentButton.dataset.connectAgent);
+          return;
+        }
+        const focusAgentSetup = event.target.closest("[data-focus-agent-setup]");
+        if (focusAgentSetup) {
+          els.agentSetupCard.scrollIntoView({ block: "center", behavior: "smooth" });
+          return;
+        }
+        const externalButton = event.target.closest("[data-open-external]");
+        if (externalButton) {
+          openExternal(externalButton.dataset.openExternal);
+          return;
+        }
+        const copyAgentConfig = event.target.closest("[data-copy-agent-config]");
+        if (copyAgentConfig) {
+          navigator.clipboard.writeText(els.mcpConfig.value).then(
+            () => showToast("Agent config copied."),
+            () => showToast("Could not copy config.")
+          );
+          return;
+        }
         if (!event.target.closest("#writingSourceCombo")) {
           toggleWritingSourceCombo(false);
         }
         const shotToggle = event.target.closest("[data-writing-shot]");
         if (shotToggle) {
-          if (shotToggle.checked) state.writingSelectedScreenshots.add(shotToggle.dataset.writingShot);
-          else state.writingSelectedScreenshots.delete(shotToggle.dataset.writingShot);
+          if (state.writingSelectedScreenshots.has(shotToggle.dataset.writingShot)) {
+            state.writingSelectedScreenshots.delete(shotToggle.dataset.writingShot);
+          } else {
+            state.writingSelectedScreenshots.add(shotToggle.dataset.writingShot);
+          }
           renderWritingScreenshots();
           return;
         }
@@ -7490,6 +8196,8 @@
         if (retry) postHelper("/queue/retry-now", { pending_id: retry.dataset.retry });
         const retryCookies = event.target.closest("[data-retry-cookies]");
         if (retryCookies) retryWithCookies(retryCookies.dataset.retryCookies);
+        const retryChunked = event.target.closest("[data-retry-chunked]");
+        if (retryChunked) retryWithChunkedMode(retryChunked.dataset.retryChunked);
         const removeTopic = event.target.closest("[data-remove-topic]");
         if (removeTopic) {
           const topics = readTopicEditor();
@@ -7504,6 +8212,12 @@
       document.addEventListener("change", (event) => {
         const defaultToggle = event.target.closest("[data-toggle-default-anchor]");
         if (defaultToggle) toggleDefaultAnchor(defaultToggle);
+        const threadShot = event.target.closest("[data-thread-shot]");
+        if (threadShot) {
+          const index = Number(threadShot.dataset.threadShot);
+          if (threadShot.value) state.writingScreenshotAssignments.set(index, threadShot.value);
+          else state.writingScreenshotAssignments.delete(index);
+        }
       });
       document.addEventListener("dragstart", (event) => {
         const shot = event.target.closest("[data-handoff-shot]");
@@ -7593,8 +8307,6 @@
       await refreshJobs();
       await loadLibrary({ reset: true });
       await loadForYou();
-      await loadBuild();
-      await loadScripts();
       await loadWriting();
       renderSources();
       await loadFeatures();

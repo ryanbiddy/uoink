@@ -201,6 +201,11 @@
       color: var(--ink);
     }
 
+    .button.star {
+      border-color: rgba(255, 210, 63, 0.46);
+      background: transparent;
+    }
+
     .button[hidden],
     .steps[hidden],
     .path-box[hidden],
@@ -219,7 +224,7 @@
     }
 
     .splash.extension .actions {
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
     }
 
     .splash.extension .button {
@@ -288,6 +293,7 @@
         <button class="button primary" type="button" data-primary>Open YouTube</button>
         <button class="button" type="button" data-secondary>Open dashboard</button>
         <button class="button" type="button" data-tertiary hidden>Done</button>
+        <button class="button star" type="button" id="starGithub">⭐ Star on GitHub</button>
       </div>
     </div>
     <div class="footnote">local helper dashboard</div>
@@ -309,6 +315,7 @@
       primary: document.querySelector("[data-primary]"),
       secondary: document.querySelector("[data-secondary]"),
       tertiary: document.querySelector("[data-tertiary]"),
+      starGithub: document.getElementById("starGithub"),
     };
     let token = "";
     let primaryAction = "youtube";
@@ -343,6 +350,8 @@
       }
       window.open(url, "_blank", "noopener");
     }
+
+    els.starGithub.addEventListener("click", () => openExternal("https://github.com/ryanbiddy/uoink"));
 
     async function getToken() {
       if (token) return token;
