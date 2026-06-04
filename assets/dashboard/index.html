@@ -7162,6 +7162,22 @@
       renderAgentConnectionFallback();
     }
 
+    function writingBodyWithCredit(body, credit) {
+      const bodyText = String(body || "");
+      const fullCredit = String(credit || "").trim();
+      if (!fullCredit
+          || bodyText.includes(fullCredit)
+          || bodyText.includes("uoink.app")
+          || bodyText.includes(sourceUrlOf(state.writingSelectedSourceRow))) {
+        return bodyText;
+      }
+      const creditStem = fullCredit.replace(/\s*·\s*uoink\.app\s*$/i, "").trim();
+      if (creditStem && bodyText.includes(creditStem)) {
+        return bodyText.replace(creditStem, fullCredit);
+      }
+      return `${bodyText}\n\n${fullCredit}`;
+    }
+
     function renderWritingResult(data) {
       state.writingLastPayload = data;
       const piece = data.structuredContent || data.structured_content || data.piece || data.result || data;
@@ -7179,12 +7195,7 @@
         renderAgentConnectionFallback();
         return;
       }
-      const bodyText = String(renderedBody);
-      const needsCredit = credit
-        && !bodyText.includes(String(credit).trim())
-        && !bodyText.includes("uoink.app")
-        && !bodyText.includes(sourceUrlOf(state.writingSelectedSourceRow));
-      setWritingOutput(`${title}${dek}${renderedBody}${needsCredit ? `\n\n${credit}` : ""}`);
+      setWritingOutput(`${title}${dek}${writingBodyWithCredit(renderedBody, credit)}`);
       els.writingComputeIndicator.classList.toggle("hidden", !(piece.compute_path === "byo_key" || piece.generated_via === "byo_key"));
       const warnings = piece.voice_warnings || data.voice_warnings || [];
       const warningCopy = piece.warning_copy || data.warning_copy || "Uoink found no Voice DNA warnings in the returned payload.";

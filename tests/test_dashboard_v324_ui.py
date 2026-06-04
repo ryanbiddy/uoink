@@ -64,7 +64,8 @@ def test_generate_and_agents() -> None:
     require("!hasWritingAgentBridge() && state.settings && state.settings.anthropic_key_set" in DASHBOARD, "BYO fallback incorrectly depends on agent config state")
     require("Generated using your Anthropic key (no agent)" in DASHBOARD, "BYO indicator missing")
     require("kind: mode" in DASHBOARD, "Tweet/Thread request does not send the backend kind contract")
-    require('!bodyText.includes("uoink.app")' in DASHBOARD, "duplicate credit guard missing")
+    require("function writingBodyWithCredit" in DASHBOARD, "duplicate credit guard missing")
+    require("bodyText.replace(creditStem, fullCredit)" in DASHBOARD, "existing creator credit is not upgraded in place")
     require("!current && !query && selected" in DASHBOARD, "typed source can silently reselect a stale id")
     audience = DASHBOARD.split("async function surfaceAudienceQuestions()", 1)[1].split("function renderLocalCorpusCritique", 1)[0]
     critique = DASHBOARD.split("async function critiqueWritingAgainstCorpus()", 1)[1].split("async function generateScriptInWriting()", 1)[0]
