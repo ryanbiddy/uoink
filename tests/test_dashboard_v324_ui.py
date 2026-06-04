@@ -33,6 +33,7 @@ def test_sidebar() -> None:
 
 def test_picker() -> None:
     require("grid-template-columns: repeat(4, minmax(0, 1fr))" in DASHBOARD, "picker is not four columns")
+    require("grid-template-columns: repeat(3, minmax(0, 1fr))" in DASHBOARD, "picker does not retain three columns at smaller widths")
     require("/screenshots?dedupe=${" in DASHBOARD, "picker list endpoint missing")
     require("/screenshots/suggest?${query.toString()}" in DASHBOARD, "suggest endpoint missing")
     require("/screenshots/${encodeURIComponent(shot.index ?? position)}.png" in DASHBOARD, "binary thumbnail endpoint missing")

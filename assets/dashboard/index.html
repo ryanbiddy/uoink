@@ -2362,7 +2362,9 @@
         border-top: 0;
       }
 
-      .screenshot-picker,
+      .screenshot-picker {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
       .handoff-shot-list {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -2383,8 +2385,16 @@
     }
 
     @media (max-width: 620px) {
-      .screenshot-picker,
+      .screenshot-picker {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
       .handoff-shot-list {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 420px) {
+      .screenshot-picker {
         grid-template-columns: minmax(0, 1fr);
       }
     }
