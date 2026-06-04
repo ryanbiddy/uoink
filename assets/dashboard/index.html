@@ -3854,14 +3854,16 @@
     }
 
     function renderAgentConnectionFallback() {
+      const connected = connectedAgents();
+      const hasConnectedConfig = connected.length > 0;
       state.writingLastPayload = null;
       state.writingDrafts = [""];
       els.writingOutput.dataset.rawText = "";
       els.writingOutput.innerHTML = `
         <div class="connect-agent-state">
-          <strong>Connect a writing agent to generate this draft</strong>
-          <p>Uoink found the source and prepared the local context. Finish setup in the agent card beside the Generate button.</p>
-          <button class="button primary" type="button" data-focus-agent-setup>View agent setup</button>
+          <strong>${hasConnectedConfig ? `Open ${htmlEscape(connected.map((agent) => agent.label).join(" or "))} to generate this draft` : "Connect a writing agent to generate this draft"}</strong>
+          <p>${hasConnectedConfig ? "Uoink prepared the local context, but this dashboard cannot invoke the connected client directly. Open that client or add an Anthropic key for dashboard generation." : "Uoink found the source and prepared the local context. Finish setup in the agent card beside the Generate button."}</p>
+          <button class="button primary" type="button" data-focus-agent-setup>${hasConnectedConfig ? "Review agent setup" : "View agent setup"}</button>
         </div>
       `;
       setWritingActionsEnabled(false);
@@ -3872,6 +3874,14 @@
 
     function connectedAgents() {
       return state.agents.filter((agent) => agent.connected);
+    }
+
+    function writingAgentBridge() {
+      return window.uoinkWritingAgent || nativeApi()?.uoinkWritingAgent || null;
+    }
+
+    function hasWritingAgentBridge() {
+      return Boolean(writingAgentBridge());
     }
 
     function agentSetupMarkup() {
@@ -3891,7 +3901,7 @@
       if (connected.length) {
         return `
           <strong>${htmlEscape(connected.map((agent) => agent.label).join(", "))} connected</strong>
-          <span class="soft-note">Generate will use your connected agent and keep the corpus context local.</span>
+          <span class="soft-note">Uoink is ready inside that client. ${keyReady ? "Dashboard Generate will use your Anthropic key when no live agent bridge is open." : "Open the connected client to write with its model, or add an Anthropic key for dashboard generation."}</span>
           ${advanced}
         `;
       }
@@ -6675,7 +6685,10 @@
       if (mode === "thread") query.set("thread_size", String(Math.max(3, state.writingDrafts.length || 3)));
       try {
         const data = await authFetch(`/yoinks/${encodeURIComponent(sourceId)}/screenshots/suggest?${query.toString()}`);
-        state.writingSelectedScreenshots = new Set((data.indices || []).map(String));
+        const suggestedIds = Array.isArray(data.selected) && data.selected.length
+          ? data.selected.map((shot) => String(shot.index))
+          : (data.indices || []).map(String);
+        state.writingSelectedScreenshots = new Set(suggestedIds);
         if (mode === "thread") autoDistributeWritingScreenshots();
         renderWritingScreenshots();
         showToast(`${state.writingSelectedScreenshots.size} screenshot${state.writingSelectedScreenshots.size === 1 ? "" : "s"} picked.`);
@@ -6712,20 +6725,43 @@
     }
 
     function renderWritingHandoff(shots) {
-      els.writingHandoffShots.innerHTML = shots.length
-        ? shots.map((shot) => `
-          <div class="handoff-shot ${state.writingUsedScreenshots.has(shot.id) ? "used" : ""}" draggable="true" data-handoff-shot="${htmlEscape(shot.id)}">
-            <img alt="" class="hidden" data-file-img="${htmlEscape(shot.path)}">
-            <div class="handoff-shot-meta">
-              <strong>${htmlEscape(shot.label)}</strong>
-              <span>${htmlEscape(shot.path)}</span>
-              <button class="button ghost" type="button" data-mark-shot-used="${htmlEscape(shot.id)}">Mark dragged</button>
+      if (selectedWritingMode() === "thread") {
+        const byId = new Map(shots.map((shot) => [shot.id, shot]));
+        const assignedIds = new Set(state.writingScreenshotAssignments.values());
+        const postRows = state.writingDrafts.map((draft, index) => {
+          const shot = byId.get(state.writingScreenshotAssignments.get(index));
+          return `
+            <div class="job-row">
+              <div class="job-title">Tweet ${index + 1}</div>
+              <div class="job-sub">${htmlEscape(String(draft || "").slice(0, 120))}</div>
+              ${shot ? handoffShotHtml(shot) : `<div class="soft-note">No screenshot assigned to this post.</div>`}
             </div>
-          </div>
-        `).join("")
-        : emptyPanelRow("No screenshots selected.", "Open X with text only, or select screenshots first.");
+          `;
+        }).join("");
+        const unassigned = shots.filter((shot) => !assignedIds.has(shot.id));
+        els.writingHandoffShots.innerHTML = postRows + (unassigned.length
+          ? `<div class="job-row"><div class="job-title">Unassigned screenshots</div><div class="handoff-shot-list">${unassigned.map(handoffShotHtml).join("")}</div></div>`
+          : "");
+      } else {
+        els.writingHandoffShots.innerHTML = shots.length
+          ? shots.map(handoffShotHtml).join("")
+          : emptyPanelRow("No screenshots selected.", "Open X with text only, or select screenshots first.");
+      }
       els.writingHandoffPopup.classList.remove("hidden");
       loadDetailFileImages();
+    }
+
+    function handoffShotHtml(shot) {
+      return `
+        <div class="handoff-shot ${state.writingUsedScreenshots.has(shot.id) ? "used" : ""}" draggable="true" data-handoff-shot="${htmlEscape(shot.id)}">
+          <img alt="" class="hidden" data-file-img="${htmlEscape(shot.path)}">
+          <div class="handoff-shot-meta">
+            <strong>${htmlEscape(shot.label)}</strong>
+            <span>${htmlEscape(shot.path)}</span>
+            <button class="button ghost" type="button" data-mark-shot-used="${htmlEscape(shot.id)}">Mark dragged</button>
+          </div>
+        </div>
+      `;
     }
 
     function openWritingInX() {
@@ -7158,7 +7194,7 @@
     }
 
     async function connectedAgentDraft(toolName, mode, groundingPayload, args) {
-      const bridge = window.uoinkWritingAgent || nativeApi()?.uoinkWritingAgent;
+      const bridge = writingAgentBridge();
       if (!bridge) return null;
       const request = {
         tool: toolName,
@@ -7199,6 +7235,24 @@
       return state.generateWorkspace;
     }
 
+    async function generateAssemblyBody() {
+      const row = state.writingSelectedSourceRow;
+      if (!row) throw new Error("Choose a source uoink first.");
+      if (!state.channels.length && els.generatePastPerformance.checked) {
+        try { await loadChannels(); } catch (_) {}
+      }
+      const yourChannel = els.generatePastPerformance.checked && state.channels.length
+        ? firstValue(state.channels[0].handle, state.channels[0].name, state.channels[0].channel_id)
+        : null;
+      return {
+        format: "talking-head",
+        topic: firstValue(row.topic, rowTitle(row)),
+        hook_target: els.writingAngle.value.trim() || selectedGenerateHookLens(),
+        your_channel: yourChannel || null,
+        n_examples: 8,
+      };
+    }
+
     function showGenerateResearch(title, content) {
       els.generateResearchPanel.classList.remove("hidden");
       els.generateResearchPanel.innerHTML = `<strong>${htmlEscape(title)}</strong>${content}`;
@@ -7207,16 +7261,9 @@
     async function surfaceAudienceQuestions() {
       showGenerateResearch("Audience questions", `<span class="soft-note">Reading questions from the local corpus...</span>`);
       try {
-        const workspace = await ensureGenerateWorkspace();
         const data = await authFetch("/workspace/assemble", {
           method: "POST",
-          body: JSON.stringify({
-            workspace_id: workspace.id,
-            topic: workspace.topic || null,
-            hook_target: workspace.hook_target || null,
-            your_channel: workspace.your_channel || null,
-            n_examples: Number(workspace.n_examples || 8),
-          }),
+          body: JSON.stringify(await generateAssemblyBody()),
         });
         const questions = Array.isArray(data.audience_questions) ? data.audience_questions : [];
         showGenerateResearch(
@@ -7230,17 +7277,52 @@
       }
     }
 
+    function renderLocalCorpusCritique(data, draft) {
+      const assembled = Array.isArray(data.assembled) ? data.assembled : [];
+      const questions = Array.isArray(data.audience_questions) ? data.audience_questions : [];
+      const hookCounts = new Map();
+      assembled.forEach((row) => {
+        const hook = prettyHook(row.hook_type || "other");
+        hookCounts.set(hook, (hookCounts.get(hook) || 0) + 1);
+      });
+      const topHook = [...hookCounts.entries()].sort((a, b) => b[1] - a[1])[0];
+      const opening = String(draft).split(/\n+/).find(Boolean) || "";
+      const moves = [
+        `Make the opening clearly use the selected ${selectedGenerateHookLens().replace(/_/g, " ")} lens.`,
+        questions[0]
+          ? `Answer this saved audience question: ${questions[0].question || questions[0].text}`
+          : "Add one concrete audience objection or question before the close.",
+        "Keep the source credit visible without letting it interrupt the main idea.",
+      ];
+      const signal = assembled.length
+        ? `${assembled.length} relevant saved examples${topHook ? `; ${topHook[0]} is the most common hook in this slice` : ""}.`
+        : "No close corpus examples matched this slice. Treat the revision moves as a structure check.";
+      return `
+        <div class="job-row">
+          <div class="job-title">Corpus signal</div>
+          <div class="job-sub">${htmlEscape(signal)}</div>
+        </div>
+        <div class="job-row">
+          <div class="job-title">Opening under review</div>
+          <div class="job-sub">${htmlEscape(opening.slice(0, 280))}</div>
+        </div>
+        <div class="job-row">
+          <div class="job-title">Revision moves</div>
+          ${moves.map((move, index) => `<div class="job-sub">${index + 1}. ${htmlEscape(move)}</div>`).join("")}
+        </div>
+      `;
+    }
+
     async function critiqueWritingAgainstCorpus() {
       const draft = currentWritingText().trim();
       if (!draft) return showToast("Generate or write a draft before critique.");
       showGenerateResearch("Critique against corpus", `<span class="soft-note">Preparing a grounded critique brief...</span>`);
       try {
-        const workspace = await ensureGenerateWorkspace();
-        const data = await authFetch("/workspace/critique", {
+        const data = await authFetch("/workspace/assemble", {
           method: "POST",
-          body: JSON.stringify({ workspace_id: workspace.id, draft_text: draft }),
+          body: JSON.stringify(await generateAssemblyBody()),
         });
-        showGenerateResearch("Critique against corpus", markdownBox(objectToMarkdown(data)));
+        showGenerateResearch("Critique against corpus", renderLocalCorpusCritique(data, draft));
       } catch (err) {
         showGenerateResearch("Critique against corpus", degradedState("Critique needs another pass.", "The local corpus brief could not be prepared.", err.message));
       }
@@ -7304,11 +7386,12 @@
         hook_type_lens: selectedGenerateHookLens(),
         style_anchor_ids: selectedAnchorIds(),
         output_mode: mode,
+        kind: mode,
         thread_max: mode === "thread" ? 10 : undefined,
         voice_dna_warnings_enabled: Boolean(els.writingShowWarnings.checked && !els.writingSkipWarnings.checked),
         skip_voice_dna_this_time: Boolean(els.writingSkipWarnings.checked),
       };
-      if (!connectedAgents().length && state.settings && state.settings.anthropic_key_set) {
+      if (!hasWritingAgentBridge() && state.settings && state.settings.anthropic_key_set) {
         body.generate = true;
         body.compute_mode = "byo_key";
       }

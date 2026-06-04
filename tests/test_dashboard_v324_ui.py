@@ -40,7 +40,10 @@ def test_picker() -> None:
     require("Preselect all screenshots" not in DASHBOARD, "preselect-all UI still present")
     for copy in ("Pick best for", "Hide visual duplicates", "Apply range", "Auto-distribute to posts"):
         require(copy in DASHBOARD, f"picker control missing: {copy}")
+    require("data.selected.map((shot) => String(shot.index))" in DASHBOARD, "deduped suggestions lose original screenshot ids")
     require("data-thread-shot" in DASHBOARD, "per-post screenshot assignment missing")
+    require("state.writingScreenshotAssignments.get(index)" in DASHBOARD, "per-post assignments are not used in handoff")
+    require("Unassigned screenshots" in DASHBOARD, "thread handoff does not distinguish unassigned screenshots")
     print("ok  picker: endpoint thumbnails, dedupe/range/suggest, zero default, post assignment")
 
 
@@ -58,9 +61,16 @@ def test_generate_and_agents() -> None:
     require("Advanced: show config JSON" in DASHBOARD, "advanced config disclosure missing")
     require("Open agent setup" not in DASHBOARD, "stale creator-path agent link remains")
     require("body.generate = true" in DASHBOARD, "BYO Path C opt-in missing")
+    require("!hasWritingAgentBridge() && state.settings && state.settings.anthropic_key_set" in DASHBOARD, "BYO fallback incorrectly depends on agent config state")
     require("Generated using your Anthropic key (no agent)" in DASHBOARD, "BYO indicator missing")
+    require("kind: mode" in DASHBOARD, "Tweet/Thread request does not send the backend kind contract")
     require('!bodyText.includes("uoink.app")' in DASHBOARD, "duplicate credit guard missing")
     require("!current && !query && selected" in DASHBOARD, "typed source can silently reselect a stale id")
+    audience = DASHBOARD.split("async function surfaceAudienceQuestions()", 1)[1].split("function renderLocalCorpusCritique", 1)[0]
+    critique = DASHBOARD.split("async function critiqueWritingAgainstCorpus()", 1)[1].split("async function generateScriptInWriting()", 1)[0]
+    require("ensureGenerateWorkspace" not in audience, "audience questions create a hidden Build workspace")
+    require("ensureGenerateWorkspace" not in critique, "critique creates a hidden Build workspace")
+    require("/workspace/critique" not in critique and "objectToMarkdown(data)" not in critique, "critique leaks raw backend machinery")
     print("ok  Generate: script features inline, context-aware agents, Path C indicator")
 
 
