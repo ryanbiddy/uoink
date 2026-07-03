@@ -1205,6 +1205,15 @@ def _byo_generate(kind, args):
     except ValueError as e:
         return _err(str(e))
 
+    # The dashboard's composer signals tweet-vs-thread via `output_mode`,
+    # not `kind`. Such a thread still PERSISTS as a tweet-kind piece
+    # (matching the composer convention -- it splits the body), but it must
+    # be PROMPTED as a thread, else BYO thread mode yields a single tweet.
+    output_mode = str(args.get("output_mode") or "").strip()
+    prompt_kind = kind
+    if kind == _ws.KIND_TWEET and output_mode == _ws.KIND_THREAD:
+        prompt_kind = _ws.KIND_THREAD
+
     try:
         grounding = _writing_grounding(
             yoink_id, style_anchor_ids, hook_type_lens)
@@ -1221,7 +1230,7 @@ def _byo_generate(kind, args):
                      else args.get("target_length_chars"))
     try:
         system, user, credit = _byo_build_prompts(
-            kind, grounding, angle=args.get("angle"),
+            prompt_kind, grounding, angle=args.get("angle"),
             target_length=target_length, source_text=source_text)
     except Exception as e:  # noqa: BLE001
         server.log.warning("Path C prompt build failed: %s", e)
@@ -3011,6 +3020,12 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
                 "type": "string",
                 "enum": ["tweet", "thread"],
                 "description": "Direct-generation output kind."},
+            "output_mode": {
+                "type": "string",
+                "enum": ["tweet", "thread"],
+                "description": "Composer output mode. thread prompts a "
+                               "thread while persisting a tweet-kind piece "
+                               "(the composer splits the body)."},
             "hook_type_lens": {
                 "type": "string",
                 "enum": ["informative", "engagement_bait",
