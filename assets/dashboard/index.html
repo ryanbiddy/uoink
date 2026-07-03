@@ -6573,6 +6573,46 @@
       return selectedWritingMode() === "thread" ? drafts.join("\n\n") : drafts[0] || "";
     }
 
+    async function saveWritingDraft() {
+      // Save must be a real request against POST /writing/draft (QA #32).
+      // The old handler toasted "saved locally" while sending nothing.
+      const body = currentWritingText().trim();
+      if (!body) return showToast("Write or generate a draft before saving.");
+      const payload = {
+        id: state.writingDraftId || undefined,
+        source_yoink_id: els.writingSource.value || undefined,
+        kind: selectedWritingMode(),
+        source_credit_line: writingAttributionLine(),
+        body,
+      };
+      try {
+        const data = await authFetch("/writing/draft", { method: "POST", body: JSON.stringify(payload) });
+        state.writingDraftId = data.id;
+        localStorage.setItem("uoink.writingDraftId", String(data.id));
+        showToast("Draft saved. It'll be here after a reload.");
+      } catch (err) {
+        showToast("Save needs another pass. The helper couldn't store this draft.");
+      }
+    }
+
+    async function restoreWritingDraft() {
+      const savedId = Number(localStorage.getItem("uoink.writingDraftId") || 0);
+      if (!savedId || state.writingDraftRestoreTried) return;
+      state.writingDraftRestoreTried = true;
+      if (currentWritingText().trim()) return;
+      try {
+        const data = await authFetch(`/writing/draft/${savedId}`);
+        if (data && data.body) {
+          state.writingDraftId = savedId;
+          setWritingOutput(data.body);
+          showToast("Recovered your saved draft.");
+        }
+      } catch (_) {
+        // The stored id no longer resolves (cleared DB, old install).
+        localStorage.removeItem("uoink.writingDraftId");
+      }
+    }
+
     async function copyWritingText() {
       try {
         await navigator.clipboard.writeText(currentWritingText());
@@ -6806,6 +6846,7 @@
       await loadWritingScreenshots();
       await loadAgentSetup();
       syncGenerateModeUi();
+      await restoreWritingDraft();
     }
 
     async function loadStyleAnchors() {
@@ -7903,7 +7944,7 @@
       document.getElementById("critiqueWriting").addEventListener("click", critiqueWritingAgainstCorpus);
       document.getElementById("surfaceAudienceQuestions").addEventListener("click", surfaceAudienceQuestions);
       document.getElementById("copyWriting").addEventListener("click", copyWritingText);
-      document.getElementById("saveWriting").addEventListener("click", () => showToast("Draft saved locally with its source credit."));
+      document.getElementById("saveWriting").addEventListener("click", saveWritingDraft);
       document.getElementById("reviseWriting").addEventListener("click", generateWriting);
       document.getElementById("useWritingAsIs").addEventListener("click", () => showToast("Marked for use in this session."));
       document.getElementById("writingSettingsLink").addEventListener("click", () => switchTab("settings"));
