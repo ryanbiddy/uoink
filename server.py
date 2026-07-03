@@ -7452,6 +7452,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_writing_style_anchors_defaults()
         if bare == "/writing/style-anchors":
             return self._handle_writing_style_anchors_list()
+        if bare == "/writing/draft" or bare.startswith("/writing/draft/"):
+            return self._handle_writing_draft_get(bare)
         if bare.startswith("/writing/") and not bare.endswith("/revise") \
                 and not bare.startswith("/writing/style-anchors"):
             return self._handle_writing_piece_get(bare)
@@ -8804,6 +8806,64 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {"ok": True, "piece": piece,
                                       "body": piece.get("body")})
 
+    def _handle_writing_draft_save(self, body):
+        """POST /writing/draft -- persist composer state (G-03, QA #32).
+        Insert when `id` is absent, update when present. Returns the stored
+        draft so the dashboard can keep the id and recover it after a
+        reload. Unlike POST /writing/<kind>, drafts skip the credit and
+        Voice DNA gates: this is work in progress, not a shipped piece."""
+        if not self._require_token():
+            return
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        draft_id = body.get("id")
+        if draft_id is not None:
+            try:
+                draft_id = int(draft_id)
+            except (TypeError, ValueError):
+                return self._send_json(400, {
+                    "ok": False, "error": "id must be an integer"})
+        try:
+            draft = _get_index().save_writing_draft(
+                draft_id=draft_id,
+                yoink_id=(body.get("source_yoink_id")
+                           or body.get("yoink_id") or "").strip() or None,
+                kind=str(body.get("kind") or "tweet"),
+                title=body.get("title"),
+                body=body.get("body") or "",
+                source_credit_line=body.get("source_credit_line"),
+            )
+        except ValueError as e:
+            status = 404 if "not found" in str(e) else 400
+            return self._send_json(status, {"ok": False, "error": str(e)})
+        except Exception as e:
+            log.exception("/writing/draft save failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        return self._send_json(200, {"ok": True, "draft": draft,
+                                      "id": draft["id"]})
+
+    def _handle_writing_draft_get(self, bare: str):
+        """GET /writing/draft/<id> -- one stored draft."""
+        if not self._require_token():
+            return
+        tail = bare[len("/writing/draft"):].strip("/")
+        try:
+            draft_id = int(tail)
+        except ValueError:
+            return self._send_json(400, {"ok": False,
+                                          "error": "draft id required"})
+        try:
+            draft = _get_index().get_writing_draft(draft_id)
+        except Exception as e:
+            log.exception("/writing/draft/<id> GET failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        if draft is None:
+            return self._send_json(404, {"ok": False,
+                                          "error": "draft not found"})
+        return self._send_json(200, {"ok": True, "draft": draft,
+                                      "body": draft.get("body")})
+
     def _writing_two_phase(self, body: dict, *, kind: str):
         """Shared two-phase contract for tweet/blog/revise. Phase 1: no
         body field -> return grounding payload (source yoink + anchors +
@@ -10031,6 +10091,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_monitored_playlist_poll(body)
         if bare == "/writing/compose/validate":
             return self._handle_writing_compose_validate(body)
+        if bare == "/writing/draft":
+            return self._handle_writing_draft_save(body)
         if bare == "/writing/tweet":
             return self._handle_writing_tweet(body)
         if bare == "/writing/blog":

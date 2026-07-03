@@ -1454,3 +1454,52 @@ class Index:
             d["deep_link"] = _entity_deep_link(d.get("video_id"), d.get("timestamp"))
             out.append(d)
         return out
+
+    # ---- writing drafts (v3.2.5 / G-03) ----------------------------------
+    def save_writing_draft(self, *, draft_id: int | None = None,
+                           yoink_id: str | None = None, kind: str = "tweet",
+                           title: str | None = None, body: str = "",
+                           source_credit_line: str | None = None) -> dict:
+        """Insert (draft_id is None) or update a writing draft, returning the
+        stored row. Drafts hold composer state so a reload can recover it;
+        unlike writing_pieces there is no credit or Voice DNA gate here.
+
+        Raises ValueError for an empty body or an unknown draft_id, so the
+        server can answer 400/404 instead of quietly saving nothing."""
+        body = str(body or "")
+        if not body.strip():
+            raise ValueError("draft body required")
+        now = _now_iso()
+        with self._lock:
+            if draft_id is None:
+                cur = self._conn.execute(
+                    "INSERT INTO writing_drafts "
+                    "(yoink_id, kind, title, body, source_credit_line, "
+                    " created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (yoink_id, str(kind or "tweet"), title, body,
+                     source_credit_line, now, now),
+                )
+                draft_id = cur.lastrowid
+            else:
+                cur = self._conn.execute(
+                    "UPDATE writing_drafts SET yoink_id=?, kind=?, title=?, "
+                    "body=?, source_credit_line=?, updated_at=? WHERE id=?",
+                    (yoink_id, str(kind or "tweet"), title, body,
+                     source_credit_line, now, int(draft_id)),
+                )
+                if cur.rowcount == 0:
+                    raise ValueError(f"draft {draft_id} not found")
+            self._conn.commit()
+        draft = self.get_writing_draft(int(draft_id))
+        if draft is None:  # pragma: no cover -- row written above
+            raise ValueError(f"draft {draft_id} not found")
+        return draft
+
+    def get_writing_draft(self, draft_id: int) -> dict | None:
+        """One stored draft as a dict, or None when the id is unknown."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM writing_drafts WHERE id=?",
+                (int(draft_id),),
+            ).fetchone()
+        return dict(row) if row else None
