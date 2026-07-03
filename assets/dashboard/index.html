@@ -2718,7 +2718,7 @@
                 <div class="anchor-list" id="writingAnchorList"></div>
                 <label class="inline-row"><input id="writingShowWarnings" type="checkbox" checked> Show Voice DNA warnings</label>
                 <label class="inline-row"><input id="writingSkipWarnings" type="checkbox"> Skip warnings this time</label>
-                <button class="button primary" type="button" id="generateWriting">Generate</button>
+                <button class="button primary" type="button" id="generateWriting" disabled>Generate</button>
                 <div class="agent-setup-card" id="agentSetupCard">
                   <strong>Checking for a writing agent...</strong>
                   <span class="soft-note">You can also generate with your Anthropic key when no agent is connected.</span>
@@ -5018,7 +5018,13 @@
           `;
         }).join("")
         : `<div class="job-row"><div class="job-title">${rows.length ? "No matching uoinks." : "Load Library first."}</div><div class="job-sub">Saved sources appear here with thumbnails.</div></div>`;
-      if (current) {
+      if (query && !filtered.length) {
+        // Same guard as the Writing picker: a no-match query clears the
+        // hidden pick so the script can't ground in (and credit) a source
+        // the user can't see (QA #26).
+        state.scriptSelectedSourceRow = null;
+        els.scriptSource.value = "";
+      } else if (current) {
         state.scriptSelectedSourceRow = rows.find((row) => writingRowId(row) === current) || state.scriptSelectedSourceRow;
       }
       loadDetailFileImages();
@@ -6410,8 +6416,21 @@
       } else {
         state.writingSelectedSourceRow = null;
       }
+      if (query && !filtered.length) {
+        // A no-match query must drop the old hidden pick, or Generate
+        // grounds the draft in a source the user can't see and credits
+        // the wrong creator (QA #26, #31).
+        state.writingSelectedSourceRow = null;
+        els.writingSource.value = "";
+      }
+      syncWritingGenerateState();
       updateWritingAttribution();
       loadDetailFileImages();
+    }
+
+    function syncWritingGenerateState() {
+      const hasPick = Boolean(els.writingSource.value && state.writingSelectedSourceRow);
+      document.getElementById("generateWriting").disabled = !hasPick;
     }
 
     async function selectWritingSourceById(id) {
@@ -6423,6 +6442,7 @@
       els.writingSourceSearch.value = rowTitle(row);
       document.getElementById("writingSourceCombo").classList.remove("open");
       els.writingSourceSearch.setAttribute("aria-expanded", "false");
+      syncWritingGenerateState();
       updateWritingAttribution();
       await loadWritingScreenshots();
     }
@@ -7894,6 +7914,10 @@
       els.scriptForm.addEventListener("submit", generateScriptFromForm);
       els.scriptSourceSearch.addEventListener("focus", () => toggleScriptSourceCombo(true));
       els.scriptSourceSearch.addEventListener("input", () => {
+        if (state.scriptSelectedSourceRow && els.scriptSourceSearch.value !== rowTitle(state.scriptSelectedSourceRow)) {
+          state.scriptSelectedSourceRow = null;
+          els.scriptSource.value = "";
+        }
         toggleScriptSourceCombo(true);
         syncScriptSourceOptions();
       });
