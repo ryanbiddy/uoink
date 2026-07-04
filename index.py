@@ -1201,6 +1201,18 @@ class Index:
             rows = self._conn.execute(sql, params).fetchall()
         return [dict(r) for r in rows]
 
+    def delete_job(self, job_id: str) -> int:
+        """Remove one job row by id. Returns the number of rows deleted (0 if
+        the id was unknown). Used to supersede a stale terminal job when a
+        fresh attempt for the same source replaces it (G-14)."""
+        if not job_id:
+            return 0
+        with self._lock:
+            cur = self._conn.execute(
+                "DELETE FROM jobs WHERE job_id=?", (job_id,))
+            self._conn.commit()
+            return cur.rowcount
+
     def prune_jobs(self, keep_terminal: int = 200) -> int:
         """Keep at most ``keep_terminal`` most-recent terminal jobs; non-
         terminal jobs (pending/running) are always retained. Returns the
