@@ -1308,6 +1308,72 @@
       color: var(--ink);
     }
 
+    /* Hooks explainer (U-06): the card badge is a real button now, the
+       "what's a hook?" links are quiet inline affordances, and the modal
+       rows read label + definition. */
+    button.hook-chip {
+      border: 0;
+      font: inherit;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    button.hook-chip:hover,
+    button.hook-chip:focus-visible {
+      outline: none;
+      text-decoration: underline dotted;
+    }
+
+    .hook-help-link {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: rgba(255, 244, 236, 0.55);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      text-decoration: underline dotted;
+    }
+
+    .hook-help-link:hover,
+    .hook-help-link:focus-visible {
+      outline: none;
+      color: var(--vermillion);
+    }
+
+    .hook-explainer-list {
+      display: grid;
+      gap: 8px;
+      max-height: 320px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 10px;
+    }
+
+    .hook-explainer-row {
+      display: grid;
+      gap: 2px;
+      padding: 6px 8px;
+      border-radius: 7px;
+    }
+
+    .hook-explainer-row.active {
+      background: rgba(194, 65, 12, 0.18);
+    }
+
+    .hook-explainer-row span {
+      color: rgba(255, 244, 236, 0.7);
+      font-size: 13px;
+    }
+
+    /* UX-06: label + count render as one non-wrapping unit. */
+    .hook-lens-label {
+      white-space: nowrap;
+    }
+
     /* Topics overview (U-05): corpus-wide topic chips with counts above
        the Library grid. Uncategorized gets a dashed border so the
        untagged pile is visible instead of buried in a dropdown. */
@@ -3120,14 +3186,17 @@
                       <input id="generateChannel" type="hidden">
                       <div class="combo-list" id="generateChannelOptions" role="listbox"></div>
                     </div>
-                    <label class="soft-note">Hook pattern</label>
+                    <label class="soft-note">Hook pattern <button class="hook-help-link" type="button" data-hook-explain="" aria-label="What's a hook?">what's a hook?</button></label>
                     <div class="radio-grid" id="generateHookLensPicker">
                       <label class="choice-row"><input type="radio" name="generateHookLens" value="informative" checked><span>Informative</span></label>
                       <label class="choice-row"><input type="radio" name="generateHookLens" value="curiosity_gap"><span>Curiosity gap</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="question_open_loop"><span>Question</span></label>
                       <label class="choice-row"><input type="radio" name="generateHookLens" value="disappointment_contrarian"><span>Contrarian</span></label>
                       <label class="choice-row"><input type="radio" name="generateHookLens" value="stakes"><span>Stakes</span></label>
-                      <label class="choice-row"><input type="radio" name="generateHookLens" value="question_open_loop"><span>Question</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="success_case_study"><span>Success case study</span></label>
                       <label class="choice-row"><input type="radio" name="generateHookLens" value="failure_lesson"><span>Failure lesson</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="engagement_bait"><span>Engagement bait</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="frame_shift"><span>Frame shift</span></label>
                     </div>
                     <label class="soft-note">Style</label>
                     <div class="choice-grid" id="writingStyleMode">
@@ -3355,7 +3424,7 @@
 
           <div class="summary-line">
             <span id="resultSummary">Loading library...</span>
-            <span><span id="activeFilters"></span> <span id="facetStatus" class="facet-status hidden" title="">?</span></span>
+            <span><span id="activeFilters"></span> <span id="facetStatus" class="facet-status hidden" title="">?</span> <button class="hook-help-link" type="button" data-hook-explain="">What's a hook?</button></span>
             <span class="health-legend" title="Card dots show transcript, screenshots, comments, hook, and comment-analysis readiness.">
               <span class="ok"><i></i>ready</span>
               <span class="warn"><i></i>working</span>
@@ -3783,6 +3852,24 @@
       </div>
     </div>
   </div>
+  <!-- U-06 (UX-14): the in-app hooks explainer. Fed by GET /hooks/guide so
+       the copy can never drift from the classifier. -->
+  <div class="modal-backdrop hidden" id="hookExplainer" role="dialog" aria-modal="true" aria-labelledby="hookExplainerTitle">
+    <div class="modal-card" style="width:min(600px, calc(100vw - 48px));max-height:min(640px, calc(100vh - 48px));overflow:auto">
+      <div>
+        <div class="soft-note">Hooks</div>
+        <div class="panel-title" id="hookExplainerTitle">A hook is how a video earns its first 10 seconds.</div>
+      </div>
+      <p class="setting-copy">Uoink sorts every save into 9 hook patterns. They show up as card badges, in the Hook filter, and as counts in Generate.</p>
+      <div class="hook-explainer-list" id="hookExplainerList">
+        <div class="soft-note">Loading the guide...</div>
+      </div>
+      <p class="setting-copy">Generate's "Hook pattern" picker is a different list: a writing directive for how your next draft should open. Counts there mark the patterns your saved sources already prove out.</p>
+      <div class="inline-row" style="justify-content:flex-end">
+        <button class="button ghost" type="button" id="hookExplainerClose">Close</button>
+      </div>
+    </div>
+  </div>
   <div class="handoff-popup hidden" id="writingHandoffPopup" role="dialog" aria-modal="false" aria-label="Screenshot drag targets">
     <div class="handoff-popup-head">
       <div>
@@ -3868,6 +3955,7 @@
       writingScreenshotAssignments: new Map(),
       writingUsedScreenshots: new Set(),
       writingSourceComboOpen: false,
+      hookGuide: null,
       // Dedicated corpus-wide source list for the Generate picker (U-02):
       // state.library is paged and shaped by the Library tab's filters, so
       // the picker keeps its own unfiltered newest-first copy.
@@ -4104,6 +4192,9 @@
       channelFilter: document.getElementById("channelFilter"),
       topicFilter: document.getElementById("topicFilter"),
       topicOverview: document.getElementById("topicOverview"),
+      hookExplainer: document.getElementById("hookExplainer"),
+      hookExplainerList: document.getElementById("hookExplainerList"),
+      hookExplainerClose: document.getElementById("hookExplainerClose"),
       hookFilter: document.getElementById("hookFilter"),
       formatFilter: document.getElementById("formatFilter"),
       performanceFilter: document.getElementById("performanceFilter"),
@@ -6632,7 +6723,7 @@
       const topEntities = Array.isArray(row.top_entities) ? row.top_entities.slice(0, 5).join(", ") : "";
       const bottomChip = podcast
         ? `<span class="speaker-count-chip">${htmlEscape(speakers ? `${speakers} speaker${speakers === 1 ? "" : "s"}` : "speakers pending")}</span>`
-        : `<span class="hook-chip">${hook}${htmlEscape(confidence)}</span>`;
+        : `<button class="hook-chip" type="button" data-hook-explain="${htmlEscape(row.hook_type || "other")}" title="What's a ${hook} hook?">${hook}${htmlEscape(confidence)}</button>`;
       const platformChip = live ? "live" : platformChipLabel(platform);
       const dotTitle = [
         "Dots: transcript, screenshots, comments, hook, comment analysis.",
@@ -6812,21 +6903,83 @@
         : `<span class="soft-note">Topics appear after a few saved uoinks.</span>`;
     }
 
+    // U-06: the Generate hook picker is the GENERATION lens (mirrors
+    // writing_studio.HOOK_LENS_TYPES; normalize_hook_lens 400s anything
+    // else), deliberately distinct from the classification taxonomy the
+    // detector stamps on saved uoinks (/hooks/guide). `classification`
+    // holds the mapping used to decorate a lens with corpus counts; null
+    // means no honest counterpart exists. Decision logged in
+    // handoff/DECISIONS-LOG.md (2026-07-04, map-don't-unify).
+    const HOOK_LENS_CATALOG = [
+      { value: "informative", label: "Informative", classification: null,
+        directive: "Lead with the single most useful fact, stated plainly." },
+      { value: "curiosity_gap", label: "Curiosity gap", classification: "curiosity_gap",
+        directive: "Open with a gap the reader needs the rest to close." },
+      { value: "question_open_loop", label: "Question", classification: "question",
+        directive: "Open with a question that stays unanswered until the payoff." },
+      { value: "disappointment_contrarian", label: "Contrarian", classification: "contrarian",
+        directive: "Open by overturning a common belief the audience holds." },
+      { value: "stakes", label: "Stakes", classification: "stakes",
+        directive: "Open by naming what's at risk if they get this wrong." },
+      { value: "success_case_study", label: "Success case study", classification: null,
+        directive: "Open on a concrete win and the result it produced." },
+      { value: "failure_lesson", label: "Failure lesson", classification: null,
+        directive: "Open on a specific failure and the lesson it taught." },
+      { value: "engagement_bait", label: "Engagement bait", classification: null,
+        directive: "Open with a line built to pull a reply or a save." },
+      { value: "frame_shift", label: "Frame shift", classification: null,
+        directive: "Open by reframing the topic so it reads in a new light." },
+    ];
+
     function renderGenerateHookChoices() {
       if (!els.generateHookLensPicker) return;
       const current = selectedGenerateHookLens();
-      const hooks = (state.smartInputs.hooks.length ? state.smartInputs.hooks : fallbackHookItems()).slice(0, 9);
-      const hasCurrent = hooks.some((item) => item.value === current);
-      const fallbackCurrent = fallbackHookItems().find((item) => item.value === current);
-      const options = hasCurrent || !current
-        ? hooks
-        : [smartItem(current, { label: fallbackCurrent ? fallbackCurrent.label : prettyHook(current) }), ...hooks].filter(Boolean);
-      els.generateHookLensPicker.innerHTML = options.map((item, index) => `
-        <label class="choice-row">
-          <input type="radio" name="generateHookLens" value="${htmlEscape(item.value)}" ${item.value === current || (!hasCurrent && index === 0) ? "checked" : ""}>
-          <span>${htmlEscape(item.label)}${item.count ? ` <span class="smart-count">${htmlEscape(item.count)}</span>` : ""}</span>
+      const counts = new Map((state.smartInputs.hooks || [])
+        .map((item) => [String(item.value || ""), Number(item.count) || 0]));
+      els.generateHookLensPicker.innerHTML = HOOK_LENS_CATALOG.map((lens) => {
+        const count = lens.classification ? (counts.get(lens.classification) || 0) : 0;
+        const countTitle = `${count} saved uoink${count === 1 ? "" : "s"} open this way`;
+        return `
+        <label class="choice-row" title="${htmlEscape(lens.directive)}">
+          <input type="radio" name="generateHookLens" value="${htmlEscape(lens.value)}" ${lens.value === (current || "informative") ? "checked" : ""}>
+          <span class="hook-lens-label">${htmlEscape(lens.label)}${count ? ` <span class="smart-count" title="${htmlEscape(countTitle)}">${count}</span>` : ""}</span>
         </label>
-      `).join("");
+      `;
+      }).join("");
+    }
+
+    // U-06 (UX-14): in-app hooks explainer, fed by the public /hooks/guide
+    // route so the copy is the classifier's own definitions.
+    async function loadHookGuide() {
+      if (Array.isArray(state.hookGuide) && state.hookGuide.length) return state.hookGuide;
+      try {
+        const res = await fetch("/hooks/guide");
+        const data = await res.json();
+        state.hookGuide = Array.isArray(data.hooks) ? data.hooks : [];
+      } catch (_) {
+        state.hookGuide = [];
+      }
+      return state.hookGuide;
+    }
+
+    async function openHookExplainer(hookId) {
+      els.hookExplainer.classList.remove("hidden");
+      const hooks = await loadHookGuide();
+      els.hookExplainerList.innerHTML = hooks.length
+        ? hooks.map((h) => `
+          <div class="hook-explainer-row ${h.id === hookId ? "active" : ""}">
+            <strong>${htmlEscape(h.label)}</strong>
+            <span>${htmlEscape(h.description)}</span>
+          </div>
+        `).join("")
+        : `<div class="soft-note">The guide didn't load. It ships with the helper; close this and try again.</div>`;
+      const active = els.hookExplainerList.querySelector(".hook-explainer-row.active");
+      if (active) active.scrollIntoView({ block: "nearest" });
+      els.hookExplainerClose.focus();
+    }
+
+    function closeHookExplainer() {
+      els.hookExplainer.classList.add("hidden");
     }
 
     function channelInitial(label) {
@@ -9615,6 +9768,13 @@
       els.stopHelperConfirm.addEventListener("keydown", (event) => {
         trapModalFocus(event, els.stopHelperConfirm, closeStopHelperConfirm);
       });
+      els.hookExplainerClose.addEventListener("click", closeHookExplainer);
+      els.hookExplainer.addEventListener("click", (event) => {
+        if (event.target === els.hookExplainer) closeHookExplainer();
+      });
+      els.hookExplainer.addEventListener("keydown", (event) => {
+        trapModalFocus(event, els.hookExplainer, closeHookExplainer);
+      });
       document.addEventListener("keydown", (event) => {
         if (!isCardActivationKey(event)) return;
         const card = event.target.closest(".uoink-card[role='button'], .insight-card[role='button']");
@@ -9822,6 +9982,13 @@
         const skipClaimButton = event.target.closest("[data-skip-claim]");
         if (skipClaimButton) {
           skipClaim(skipClaimButton.dataset.skipClaim);
+          return;
+        }
+        const hookExplain = event.target.closest("[data-hook-explain]");
+        if (hookExplain) {
+          // Before the card branch: hook badges live inside cards and must
+          // open the explainer, not the detail view.
+          openHookExplainer(hookExplain.dataset.hookExplain || "");
           return;
         }
         const writeFrom = event.target.closest("[data-write-from]");
