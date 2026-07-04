@@ -758,6 +758,39 @@ class Index:
                 f"ORDER BY yoinked_at DESC LIMIT ?", params).fetchall()
         return [dict(zip(cols, r)) for r in rows]
 
+    def corpus_facets(self) -> dict:
+        """Corpus-wide facet values with counts, plus the yoinked_at date
+        bounds. Backs the Library filter chips (G-12 / QA #14): filters must
+        reflect the whole corpus, not just the cards currently loaded on the
+        page, so a channel with no card in the first 50 rows still filters.
+
+        Every facet is a list of ``{value, count}`` newest-usage-agnostic,
+        ordered by count desc then value. Soft-deleted rows are excluded.
+        ``date_bounds`` is ``{min, max}`` (yoinked_at) or nulls on an empty
+        corpus."""
+        facet_cols = ("channel", "format", "performance_tier",
+                      "length_bucket", "topic", "hook_type")
+        out: dict = {}
+        with self._lock:
+            for col in facet_cols:
+                rows = self._conn.execute(
+                    f"SELECT {col} AS v, COUNT(*) AS n FROM yoinks "
+                    f"WHERE deleted_at IS NULL AND {col} IS NOT NULL "
+                    f"AND {col} != '' "
+                    f"GROUP BY {col} ORDER BY n DESC, v ASC",
+                ).fetchall()
+                out[col] = [{"value": r["v"], "count": int(r["n"])}
+                            for r in rows]
+            bounds = self._conn.execute(
+                "SELECT MIN(yoinked_at) AS lo, MAX(yoinked_at) AS hi "
+                "FROM yoinks WHERE deleted_at IS NULL"
+            ).fetchone()
+        out["date_bounds"] = {
+            "min": bounds["lo"] if bounds else None,
+            "max": bounds["hi"] if bounds else None,
+        }
+        return out
+
     def channel_view_counts(self, channel: str) -> list[int]:
         """View counts for a channel pulled from metadata_json. Used by the
         performance-tier heuristic (channel-relative percentile rank)."""

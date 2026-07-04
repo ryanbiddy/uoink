@@ -167,6 +167,45 @@ PERF_TIER_ENUM = ("over", "average", "under")
 LENGTH_BUCKET_ENUM = ("short", "medium", "long", "deep")  # <4m | 4-15 | 15-30 | >30
 
 
+# Human labels for the S1 enums, so the Library filter chips read like
+# English instead of leaking raw storage keys (G-12 / QA #15:
+# screen_recording -> "Screen recording"). The backend supplies the label
+# alongside the raw value so the frontend never hardcodes its own map.
+_FACET_LABELS = {
+    "format": {
+        "one_shot": "One shot", "talking_head": "Talking head",
+        "tutorial": "Tutorial", "listicle": "Listicle",
+        "narrative": "Narrative", "vlog": "Vlog", "interview": "Interview",
+        "screen_recording": "Screen recording", "broll_heavy": "B-roll heavy",
+    },
+    "performance_tier": {
+        "over": "Overperformed", "average": "Average",
+        "under": "Underperformed",
+    },
+    "length_bucket": {
+        "short": "Short (under 4m)", "medium": "Medium (4-15m)",
+        "long": "Long (15-30m)", "deep": "Deep (30m+)",
+    },
+    "hook_type": {
+        "curiosity_gap": "Curiosity gap", "question": "Question",
+        "contrarian": "Contrarian", "story_open": "Story open",
+        "promise_list": "Promise / list", "demo": "Demo",
+        "authority": "Authority", "stakes": "Stakes", "other": "Other",
+    },
+}
+
+
+def _humanize_facet(col: str, value: str) -> str:
+    """Human label for a facet value. Falls back to a de-underscored,
+    sentence-cased form for free-text facets (channel, topic) and any enum
+    value not in the explicit map."""
+    mapped = _FACET_LABELS.get(col, {}).get(value)
+    if mapped:
+        return mapped
+    text = str(value or "").replace("_", " ").strip()
+    return text[:1].upper() + text[1:] if text else text
+
+
 def _length_bucket_from_seconds(secs) -> str | None:
     """Bucket a video duration into one of LENGTH_BUCKET_ENUM."""
     try:
@@ -7463,6 +7502,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_update_check()
         if bare == "/engagement/scores":
             return self._handle_engagement_scores()
+        if bare == "/library/facets":
+            return self._handle_library_facets()
         if bare == "/facets/taxonomy":
             return self._handle_facets_taxonomy()
         if bare == "/facets/backfill":
@@ -7664,6 +7705,39 @@ class Handler(BaseHTTPRequestHandler):
             "performance_tier": list(PERF_TIER_ENUM),
             "length_bucket": list(LENGTH_BUCKET_ENUM),
             "hook": sorted(HOOK_TYPES.keys()) if isinstance(HOOK_TYPES, dict) else list(HOOK_TYPES),
+        })
+
+    def _handle_library_facets(self):
+        """GET /library/facets -- corpus-wide filter facets (G-12 / QA #14).
+
+        Distinct channels / formats / performance tiers / length buckets /
+        topics / hook types actually present in the corpus, each with a count
+        and a human `label`, plus the yoinked_at `date_bounds`. The Library
+        filters populate from this, not from the cards on the current page,
+        so a channel absent from the first 50 rows still filters. Token-gated
+        like the rest of the private Library API."""
+        if not self._require_token():
+            return
+        try:
+            facets = _get_index().corpus_facets()
+        except Exception as e:
+            log.warning("/library/facets failed: %s", e)
+            return self._send_json(503, {
+                "ok": False, "error": "facets unavailable",
+                "state": "unavailable"})
+        labelled = {}
+        for col in ("channel", "format", "performance_tier",
+                    "length_bucket", "topic", "hook_type"):
+            labelled[col] = [
+                {"value": item["value"],
+                 "label": _humanize_facet(col, item["value"]),
+                 "count": item["count"]}
+                for item in facets.get(col, [])
+            ]
+        self._send_json(200, {
+            "ok": True,
+            "facets": labelled,
+            "date_bounds": facets.get("date_bounds", {"min": None, "max": None}),
         })
 
     def _handle_facets_classify(self, body: dict):
