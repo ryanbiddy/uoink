@@ -2636,7 +2636,7 @@
           <div class="resurface-layout">
             <div class="panel">
               <div class="panel-head">
-                <div class="panel-title">Connections you have not explored</div>
+                <div class="panel-title">Connections you haven't explored</div>
                 <div class="localhost" id="connectionMeta">shared topics</div>
               </div>
               <div class="panel-body" id="connectionRows"></div>
@@ -2654,7 +2654,7 @@
 
           <div class="panel" style="margin-top:16px">
             <div class="panel-head">
-              <div class="panel-title">Anchors performing</div>
+              <div class="panel-title">Performing anchors</div>
               <div class="localhost" id="anchorMeta">anchor signals</div>
             </div>
             <div class="panel-body" id="anchorRows"></div>
@@ -2732,7 +2732,7 @@
                     <textarea class="field draft-box" id="workspaceDraft" placeholder="Paste a draft hook, outline, or rough script."></textarea>
                     <div class="inline-row">
                       <button class="button primary" type="button" id="runWorkspaceCritique">Run critique</button>
-                      <span class="soft-note">Model-agnostic: stores findings when an agent posts them back.</span>
+                      <span class="soft-note">Any agent can post findings back; Uoink stores them here.</span>
                     </div>
                     <div id="workspaceCritiqueResult"></div>
                   </div>
@@ -2747,7 +2747,7 @@
             <div>
               <div class="eyebrow">Script Studio</div>
               <h1>Draft with evidence, <em>and receipts.</em></h1>
-              <p class="lede">Start from a Build workspace, ask an agent for a grounded script, persist versions, revise against critique findings, and derive a shot list.</p>
+              <p class="lede">Start from a Build workspace, ask an agent for a grounded script, save versions, revise against critique notes, and pull a shot list.</p>
             </div>
             <button class="button ghost" type="button" id="reloadScripts">Reload</button>
           </div>
@@ -2812,7 +2812,7 @@
                 <div class="panel-body" id="scriptDetail">
                   <div class="job-row">
                     <div class="job-title">No script selected.</div>
-                    <div class="job-sub">Pick a workspace, get grounding context, then persist a script version.</div>
+                    <div class="job-sub">Pick a workspace and generate. Saved versions land here.</div>
                   </div>
                 </div>
               </div>
@@ -2824,7 +2824,7 @@
                 </div>
                 <div class="panel-body">
                   <textarea class="field draft-box" id="scriptRevisionNotes" placeholder="Paste critique findings or revision target."></textarea>
-                  <textarea class="field draft-box" id="scriptRevisionDraft" placeholder="Optional revised script body to persist as the next version."></textarea>
+                  <textarea class="field draft-box" id="scriptRevisionDraft" placeholder="Optional revised script to save as the next version."></textarea>
                   <button class="button primary" type="button" id="saveScriptRevision">Run revision / save version</button>
                   <div id="scriptRevisionResult"></div>
                 </div>
@@ -3025,7 +3025,7 @@
                     <button class="button ghost" type="button" id="previewStyleAnchor">Preview URL</button>
                     <button class="button" type="button" id="addStyleAnchor">Add anchor</button>
                   </div>
-                  <div class="mono-box" id="styleAnchorPreview">URL preview appears here after the page reader answers.</div>
+                  <div class="mono-box" id="styleAnchorPreview">Preview a URL to see the page text here.</div>
                 </div>
               </div>
             </section>
@@ -3219,7 +3219,7 @@
             <a href="https://uoink.app/features/mobile-playlist-bridge" target="_blank" rel="noreferrer">Learn: Mobile Bridge</a>
           </div>
           <div class="summary-line">
-            <span>Mobile-origin jobs are tagged distinctly.</span>
+            <span>Saves queued from your phone carry this tag:</span>
             <span class="activity-source-chip">from mobile playlist</span>
           </div>
 
@@ -3281,7 +3281,7 @@
 
             <div class="setting-block">
               <h2>Your role</h2>
-              <p class="setting-copy">This shapes Library emphasis and default dashboard views.</p>
+              <p class="setting-copy">Sets the default views and what Library puts first.</p>
               <div class="choice-grid" id="rolePicker"></div>
             </div>
 
@@ -3325,7 +3325,7 @@
                 <input class="field" style="flex:1;min-width:220px" id="allowedSitePattern" type="text" placeholder="example.com or *.docs.example.com" aria-label="Site domain pattern">
                 <button class="button" type="button" id="addAllowedSite">Add</button>
               </div>
-              <p class="setting-copy">Uoink only works on sites you've enabled. Right-click Uoink this page anywhere; if the site needs permission, the extension asks first.</p>
+              <p class="setting-copy">Uoink only works on sites you've enabled. Right-click any page and choose "Uoink this page"; if the site needs permission, the extension asks first.</p>
             </div>
 
             <div class="setting-block">
@@ -3382,7 +3382,7 @@
 
             <div class="setting-block">
               <h2>Clipboard screenshots</h2>
-              <p class="setting-copy">Controls how many screenshots are included in the multimodal clipboard paste.</p>
+              <p class="setting-copy">How many screenshots ride along when you paste a uoink into a chat.</p>
               <div class="inline-row">
                 <input class="field" style="width:120px" id="screenshotCount" type="number" min="0" max="12" step="1" value="4">
                 <button class="button" type="button" id="saveScreenshotCount">Save</button>
@@ -3397,7 +3397,7 @@
 
             <div class="setting-block">
               <h2>Writing Studio</h2>
-              <p class="setting-copy">Voice DNA warnings stay soft. Screenshot picking stays visible before the X handoff.</p>
+              <p class="setting-copy">Voice DNA warnings flag canned phrasing without blocking the draft. The screenshot picker shows before anything opens in X.</p>
               <label class="inline-row"><input id="voiceWarningsEnabled" type="checkbox" checked> Show Voice DNA warnings</label>
               <label class="inline-row"><input id="voiceWarningsPerGeneration" type="checkbox" checked> Show the per-draft skip control</label>
               <label class="inline-row"><input id="writingScreenshotPickerToggle" type="checkbox" checked> Show screenshot picker in composer</label>
@@ -4199,7 +4199,7 @@
       els.writingOutput.innerHTML = `
         <div class="connect-agent-state">
           <strong>${hasConnectedConfig ? `Open ${htmlEscape(connected.map((agent) => agent.label).join(" or "))} to generate this draft` : "Connect a writing agent to generate this draft"}</strong>
-          <p>${hasConnectedConfig ? "Uoink prepared the local context, but this dashboard cannot invoke the connected client directly. Open that client or add an Anthropic key for dashboard generation." : "Uoink found the source and prepared the local context. Finish setup in the agent card beside the Generate button."}</p>
+          <p>${hasConnectedConfig ? "Uoink prepared the context, but it can't drive that client from here. Open the client, or add an Anthropic key to generate right in the dashboard." : "Uoink found the source and prepared the local context. Finish setup in the agent card beside the Generate button."}</p>
           <button class="button primary" type="button" data-focus-agent-setup>${hasConnectedConfig ? "Review agent setup" : "View agent setup"}</button>
         </div>
       `;
@@ -4290,7 +4290,7 @@
         showToast("Writing agent connected.");
         await loadAgentSetup();
       } catch (err) {
-        showToast(`Could not connect that agent: ${err.message}`);
+        showToast(`Couldn't connect that agent: ${err.message}`);
       }
     }
 
@@ -4330,7 +4330,7 @@
         return `${source} kept this one behind members-only access.`;
       }
       if (haystack.includes("private") || haystack.includes("video unavailable") || haystack.includes("region")) {
-        return `${source} did not expose a usable video for this source.`;
+        return `${source} wouldn't show a usable video. It may be private, region-locked, or gone.`;
       }
       if (haystack.includes("is live") || haystack.includes("premiere")) {
         return `${source} is still live. Try again once the broadcast becomes a replay.`;
@@ -4345,7 +4345,7 @@
         return "Uoink can't find a local media tool. Details are tucked below.";
       }
       if (haystack.includes("yt-dlp") || haystack.includes("unable to download") || haystack.includes("extractor error")) {
-        return `${source} would not hand this one over cleanly. Details are tucked below.`;
+        return `${source} wouldn't hand this one over cleanly. Details are tucked below.`;
       }
       if (haystack.includes("queue unavailable") || haystack.includes("memory search unavailable") || haystack.includes("library unavailable")) {
         if (context.terminal) {
@@ -5030,10 +5030,10 @@
         const missing = err.message.includes("not found") || err.message.includes("404");
         state.retranscribeStatus = missing
           ? "re-transcription not ready in this build"
-          : "re-transcription could not be queued";
+          : "re-transcription couldn't be queued";
         showToast(missing
           ? "Re-transcription is not ready in this build."
-          : "Could not queue re-transcription.");
+          : "Couldn't queue re-transcription.");
       } finally {
         state.retranscribing = false;
         renderYoinkDetail();
@@ -5049,7 +5049,7 @@
       } catch (err) {
         showToast(err.data && err.data.state === "no_markdown"
           ? "No transcript file yet. Re-capture this source to rebuild it."
-          : "Could not open the transcript file.");
+          : "Couldn't open the transcript file.");
       }
     }
 
@@ -5066,7 +5066,7 @@
       } catch (err) {
         showToast(err.message.includes("source link")
           ? "No source link is stored for this uoink."
-          : "Could not queue a fresh capture.");
+          : "Couldn't queue a fresh capture.");
       }
     }
 
@@ -5081,7 +5081,7 @@
         showToast("Claim scan ready for an agent pass.");
         await loadEvidence();
       } catch (err) {
-        showToast("Could not prepare the claim scan.");
+        showToast("Couldn't prepare the claim scan.");
       }
     }
 
@@ -5211,14 +5211,14 @@
       const score = normalizedScore(row);
       const age = daysSince(row.last_event_ts || row.yoinked_at);
       const scorePill = score > 0
-        ? `<div class="score-pill">saved-work signal ${score.toFixed(1)}</div>`
+        ? `<div class="score-pill">signal ${score.toFixed(1)}</div>`
         : "";
       return `
         <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(videoIdOf(row))}" tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}">
           <div class="insight-kicker">${htmlEscape(kicker)}</div>
           <div class="insight-title">${htmlEscape(rowTitle(row))}</div>
           <div class="insight-meta">${htmlEscape(row.channel || "Source not labeled")} ${row.topic ? `| ${htmlEscape(row.topic)}` : ""}</div>
-          <div class="insight-copy">${age >= 9000 ? "No recent interaction recorded." : `${age} days since last saved-work signal.`}</div>
+          <div class="insight-copy">${age >= 9000 ? "No activity on this one yet." : `${age} days since you last touched it.`}</div>
           ${scorePill}
         </article>
       `;
@@ -5255,10 +5255,10 @@
       setSidebarBadge(els.forYouNavCount, worth.length + connections.length + gaps.length + anchors.length, "suggestions");
       els.forYouSummary.textContent = payload.source
         ? "Reading your saved work."
-        : "Using local resurface signals.";
+        : "Built from local signals.";
       els.worthCards.innerHTML = worth.length
         ? worth.slice(0, 3).map((row, i) => insightCard(row, i === 0 ? "highest signal" : "worth revisiting")).join("")
-        : [0, 1, 2].map(() => `<article class="insight-card"><div class="insight-kicker">waiting for signal</div><div class="insight-title">No aged high-value uoink yet.</div><div class="insight-copy">Open, paste, cite, or search saved uoinks and this card will become useful.</div></article>`).join("");
+        : [0, 1, 2].map(() => `<article class="insight-card"><div class="insight-kicker">waiting for signal</div><div class="insight-title">Nothing worth resurfacing yet.</div><div class="insight-copy">Open, cite, or search your saved uoinks. Once a good one sits idle for a couple weeks, it lands here.</div></article>`).join("");
       els.connectionMeta.textContent = `${connections.length} possible link${connections.length === 1 ? "" : "s"}`;
       els.connectionRows.innerHTML = connections.length
         ? connections.map(connectionHtml).join("")
@@ -5269,7 +5269,7 @@
         : emptyPanelRow("No low-coverage topics.", "Your current topics have enough saved examples to compare.");
       els.anchorMeta.textContent = `${anchors.length} local anchor${anchors.length === 1 ? "" : "s"}`;
       els.anchorRows.innerHTML = anchors.length
-        ? anchors.slice(0, 6).map((row) => insightCard(row, "anchor performing")).join("")
+        ? anchors.slice(0, 6).map((row) => insightCard(row, "performing anchor")).join("")
         : emptyPanelRow("No performing anchors yet.", "Anchor cards appear after engagement events or taste memory are available.");
     }
 
@@ -5292,7 +5292,7 @@
         state.workspaces = Array.isArray(data.workspaces) ? data.workspaces : [];
       } catch (err) {
         state.workspaces = [];
-        els.workspaceList.innerHTML = degradedState("Workspaces need another moment.", "Uoink could not load saved workspaces yet.", err.message);
+        els.workspaceList.innerHTML = degradedState("Workspaces need another moment.", "Uoink couldn't load saved workspaces yet.", err.message);
       }
       renderWorkspaceList();
       if (!state.currentWorkspace && state.workspaces.length) {
@@ -5321,7 +5321,7 @@
     function renderWorkspaceEmpty() {
       els.workspaceTitle.textContent = "Workspace";
       els.workspaceMeta.textContent = "no workspace selected";
-      els.workspaceSummary.innerHTML = `<div class="teach-card"><div class="teach-kicker">Build</div><strong>Start with the hook you are actually considering.</strong><p>Uoink will assemble saved examples, audience questions, and your own channel patterns into a working room for the next agent pass.</p></div>`;
+      els.workspaceSummary.innerHTML = `<div class="teach-card"><div class="teach-kicker">Build</div><strong>Start with the hook you're actually considering.</strong><p>Uoink will assemble saved examples, audience questions, and your own channel patterns into a working room for the next agent pass.</p></div>`;
       els.workspacePatterns.innerHTML = `<div class="teach-card"><div class="teach-kicker">Hook patterns</div><strong>Assembled examples land here.</strong><p>Pick a format and topic, then Assemble. The right column turns into the corpus slice you can teach from.</p></div>`;
       els.workspaceQuestions.innerHTML = `<div class="teach-card"><div class="teach-kicker">Audience questions</div><strong>Comment-derived questions show the gaps.</strong><p>When comments are present, this pane pulls objections and questions into the brief before you write.</p></div>`;
       els.workspacePerformance.innerHTML = `<div class="teach-card"><div class="teach-kicker">Your channel</div><strong>Your own overperformers become a guardrail.</strong><p>Add your channel handle to compare a new idea against patterns that already worked for you.</p></div>`;
@@ -5337,7 +5337,7 @@
         renderWorkspaceList();
         renderWorkspaceDetail(data.workspace, data.critique_log || []);
       } catch (err) {
-        showToast("Could not load that workspace.");
+        showToast("Couldn't load that workspace.");
       }
     }
 
@@ -5433,7 +5433,7 @@
         await loadBuild();
         if (data.workspace && data.workspace.id) await assembleCurrentWorkspace();
       } catch (err) {
-        showToast("Could not create that workspace.");
+        showToast("Couldn't create that workspace.");
       }
     }
 
@@ -5454,7 +5454,7 @@
         showToast("Workspace assembled.");
         renderWorkspaceDetail(ws);
       } catch (err) {
-        showToast("Could not assemble that workspace.");
+        showToast("Couldn't assemble that workspace.");
       }
     }
 
@@ -5470,7 +5470,7 @@
         });
         els.workspaceCritiqueResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Critique context ready")}</div>${markdownBox(objectToMarkdown(data))}</div>`;
       } catch (err) {
-        showToast("Could not run critique yet.");
+        showToast("Couldn't run critique yet.");
       }
     }
 
@@ -5484,7 +5484,7 @@
         state.scripts = Array.isArray(data.scripts) ? data.scripts : [];
       } catch (err) {
         state.scripts = [];
-        els.scriptList.innerHTML = degradedState("Scripts need another moment.", "Uoink could not load saved scripts yet.", err.message);
+        els.scriptList.innerHTML = degradedState("Scripts need another moment.", "Uoink couldn't load saved scripts yet.", err.message);
       }
       renderScriptList();
       if (!state.currentScript && state.scripts.length) {
@@ -5635,7 +5635,7 @@
         renderScriptList();
         renderScriptDetail(data.script);
       } catch (err) {
-        showToast("Could not load that script.");
+        showToast("Couldn't load that script.");
       }
     }
 
@@ -5880,7 +5880,7 @@
         renderScriptConnectionFallback();
         showToast("Connect Claude Desktop to generate.");
       } catch (err) {
-        els.scriptDetail.innerHTML = degradedState("Script Studio needs another pass.", "Uoink could not prepare this script. Details are tucked below.", err.message);
+        els.scriptDetail.innerHTML = degradedState("Script Studio needs another pass.", "Uoink couldn't prepare this script. Details are tucked below.", err.message);
       }
     }
 
@@ -5911,7 +5911,7 @@
           await selectScript(data.id);
         }
       } catch (err) {
-        showToast("Could not revise that script.");
+        showToast("Couldn't revise that script.");
       }
     }
 
@@ -5927,7 +5927,7 @@
         await selectScript(script.id);
         els.scriptRevisionResult.innerHTML = `<div class="job-row"><div class="job-title">Shot list</div>${markdownBox(objectToMarkdown(data))}</div>`;
       } catch (err) {
-        showToast("Could not create the shot list.");
+        showToast("Couldn't create the shot list.");
       }
     }
 
@@ -5967,7 +5967,7 @@
         state.claims = Array.isArray(data.claims) ? data.claims : [];
       } catch (err) {
         state.claims = [];
-        els.claimList.innerHTML = degradedState("Evidence notes need another moment.", "Uoink could not load the saved claim rows yet.", err.message);
+        els.claimList.innerHTML = degradedState("Evidence notes need another moment.", "Uoink couldn't load the saved claim rows yet.", err.message);
         return;
       }
       renderClaims();
@@ -5993,7 +5993,7 @@
     }
 
     function claimRowHtml(claim) {
-      const score = claim.check_worthiness == null ? "not scored yet" : `${Math.round(Number(claim.check_worthiness) * 100)} worth checking`;
+      const score = claim.check_worthiness == null ? "not scored yet" : `worth checking: ${Math.round(Number(claim.check_worthiness) * 100)}/100`;
       const evidence = Array.isArray(claim.evidence) ? claim.evidence : [];
       return `
         <details class="claim-row" data-claim-id="${htmlEscape(claim.id)}">
@@ -6046,7 +6046,7 @@
         showToast("Evidence recorded.");
         await loadEvidence();
       } catch (err) {
-        showToast("Could not record that evidence.");
+        showToast("Couldn't record that evidence.");
       }
     }
 
@@ -6059,7 +6059,7 @@
         showToast("Claim marked not attempted.");
         await loadEvidence();
       } catch (err) {
-        showToast("Could not update that claim.");
+        showToast("Couldn't update that claim.");
       }
     }
 
@@ -7661,9 +7661,9 @@
       if (!text) return showToast("Write or generate a draft before copying.");
       try {
         await navigator.clipboard.writeText(text);
-        showToast("Writing copied.");
+        showToast("Draft copied.");
       } catch (_) {
-        showToast("Could not copy writing.");
+        showToast("Couldn't copy the draft.");
       }
     }
 
@@ -7742,8 +7742,8 @@
       els.writingScreenshotSummary.textContent = state.writingScreenshots.length
         ? `${selectedCount} selected · ${shots.length} shown${dedupeRemoved ? ` · ${dedupeRemoved} visual duplicate${dedupeRemoved === 1 ? "" : "s"} hidden` : ""}`
         : state.writingScreenshotMeta.error
-          ? "Screenshots could not be loaded for this source."
-          : "No screenshots on this source. Text-only sources do not need an attachment.";
+          ? "Screenshots couldn't be loaded for this source."
+          : "No screenshots on this source. Text-only sources don't need an attachment.";
       els.writingScreenshotPicker.innerHTML = shots.length
         ? shots.map((shot) => {
           const checked = state.writingSelectedScreenshots.has(shot.id);
@@ -7788,7 +7788,7 @@
         renderWritingScreenshots();
         showToast(`${state.writingSelectedScreenshots.size} screenshot${state.writingSelectedScreenshots.size === 1 ? "" : "s"} picked.`);
       } catch (err) {
-        showToast("Could not pick screenshots for this source.");
+        showToast("Couldn't pick screenshots for this source.");
       }
     }
 
@@ -7904,7 +7904,7 @@
         state.styleAnchorCap = Number(data.cap || data.limit || state.styleAnchorCap || 10) || 10;
       } catch (err) {
         state.styleAnchors = [];
-        els.styleAnchorPreview.textContent = "Style anchors need Uoink to answer before previews appear.";
+        els.styleAnchorPreview.textContent = "Style anchors didn't load. Try again in a moment.";
       }
       await loadDefaultStyleAnchors();
       renderStyleAnchors();
@@ -8066,7 +8066,7 @@
               </label>
             </header>
             <div class="default-anchor-preview">${htmlEscape(preview || "Preview appears after the default library is loaded.")}</div>
-            <div class="soft-note">Default anchor. Deactivate it any time; it cannot be deleted from the library.</div>
+            <div class="soft-note">Default anchor. Deactivate it any time; it can't be deleted.</div>
           </article>
         `;
       }).join("");
@@ -8106,7 +8106,7 @@
       try {
         await setStyleAnchorActive(id, nextActive);
       } catch (_) {
-        showToast("Style anchor could not be updated yet.");
+        showToast("Style anchor couldn't be updated yet.");
         renderStyleAnchors();
       }
     }
@@ -8126,7 +8126,7 @@
       try {
         await setStyleAnchorActive(id, nextActive);
       } catch (_) {
-        showToast("Default anchor could not be updated yet.");
+        showToast("Default anchor couldn't be updated yet.");
         await loadDefaultStyleAnchors();
         renderDefaultStyleAnchors();
       }
@@ -8155,7 +8155,7 @@
         });
         els.styleAnchorPreview.textContent = (data.markdown || data.text || data.title || "No prose returned.").slice(0, 1200);
       } catch (err) {
-        els.styleAnchorPreview.textContent = "URL preview needs the page reader to answer. Try again in a moment.";
+        els.styleAnchorPreview.textContent = "The page reader didn't answer. Try again in a moment.";
       }
     }
 
@@ -8187,7 +8187,7 @@
         showToast("Style anchor saved.");
         await loadStyleAnchors();
       } catch (err) {
-        showToast("Style anchor could not be saved yet.");
+        showToast("Style anchor couldn't be saved yet.");
       }
     }
 
@@ -8204,13 +8204,13 @@
     async function removeStyleAnchor(id) {
       if (!id) return;
       const anchor = state.styleAnchors.find((row) => String(anchorId(row)) === String(id));
-      if (anchorIsDefault(anchor)) return showToast("Default anchors can be deactivated, not deleted.");
+      if (anchorIsDefault(anchor)) return showToast("Default anchors can only be deactivated.");
       try {
         await authFetch(`/writing/style-anchors/${encodeURIComponent(id)}/remove`, { method: "POST", body: JSON.stringify({}) });
         showToast("Style anchor removed.");
         await loadStyleAnchors();
       } catch (err) {
-        showToast("Style anchor could not be removed yet.");
+        showToast("Style anchor couldn't be removed yet.");
       }
     }
 
@@ -8301,7 +8301,7 @@
       setWritingOutput(`${title}${dek}${writingBodyWithCredit(renderedBody, credit)}`);
       els.writingComputeIndicator.classList.toggle("hidden", !(piece.compute_path === "byo_key" || piece.generated_via === "byo_key"));
       const warnings = piece.voice_warnings || data.voice_warnings || [];
-      const warningCopy = piece.warning_copy || data.warning_copy || "Uoink found no Voice DNA warnings in the returned payload.";
+      const warningCopy = piece.warning_copy || data.warning_copy || "No Voice DNA warnings in this draft.";
       els.voiceWarningCopy.textContent = warnings.length
         ? `${warningCopy} ${warnings.map((w) => w.phrase || w).join(", ")}`
         : warningCopy;
@@ -8407,7 +8407,7 @@
             : `<span class="soft-note">No audience questions are stored for this corpus slice yet. The script can still use transcripts and performance patterns.</span>`
         );
       } catch (err) {
-        showGenerateResearch("Audience questions", degradedState("Questions need another pass.", "Uoink could not assemble this corpus slice.", err.message));
+        showGenerateResearch("Audience questions", degradedState("Questions need another pass.", "Uoink couldn't assemble this corpus slice.", err.message));
       }
     }
 
@@ -8458,7 +8458,7 @@
         });
         showGenerateResearch("Critique against corpus", renderLocalCorpusCritique(data, draft));
       } catch (err) {
-        showGenerateResearch("Critique against corpus", degradedState("Critique needs another pass.", "The local corpus brief could not be prepared.", err.message));
+        showGenerateResearch("Critique against corpus", degradedState("Critique needs another pass.", "The local corpus brief couldn't be prepared.", err.message));
       }
     }
 
@@ -8498,7 +8498,7 @@
         try {
           await generateScriptInWriting();
         } catch (err) {
-          els.writingOutput.innerHTML = degradedState("Generate needs another pass.", "Uoink could not prepare this script.", err.message);
+          els.writingOutput.innerHTML = degradedState("Generate needs another pass.", "Uoink couldn't prepare this script.", err.message);
           els.writingOutput.dataset.rawText = "";
           setWritingActionsEnabled(false);
         }
@@ -8520,7 +8520,7 @@
         body.generate = true;
         body.compute_mode = "byo_key";
       }
-      setWritingOutput("Writing draft is being prepared...");
+      setWritingOutput("Preparing your draft...");
       try {
         const data = await callMcpTool(toolName, body);
         if (data.mode === "grounding_only") {
@@ -8541,7 +8541,7 @@
         renderWritingResult(data);
         showToast(data.mode === "grounding_only" ? "Connect a writing agent to generate." : "Writing draft ready.");
       } catch (err) {
-        els.writingOutput.innerHTML = degradedState("Writing Studio needs another pass.", "Uoink could not prepare this draft. Details are tucked below.", err.message);
+        els.writingOutput.innerHTML = degradedState("Writing Studio needs another pass.", "Uoink couldn't prepare this draft. Details are tucked below.", err.message);
         els.writingOutput.dataset.rawText = "";
         setWritingActionsEnabled(false);
       }
@@ -8591,7 +8591,7 @@
         showToast("Channel added.");
         await loadChannels();
       } catch (err) {
-        showToast("Could not add that channel.");
+        showToast("Couldn't add that channel.");
       }
     }
 
@@ -8601,7 +8601,7 @@
         showToast("Channel verified.");
         await loadChannels();
       } catch (err) {
-        showToast("Could not verify that channel.");
+        showToast("Couldn't verify that channel.");
       }
     }
 
@@ -8611,7 +8611,7 @@
         showToast("Channel removed.");
         await loadChannels();
       } catch (err) {
-        showToast("Could not remove that channel.");
+        showToast("Couldn't remove that channel.");
       }
     }
 
@@ -8621,7 +8621,7 @@
         showToast(`Recognition updated ${data.updated || data.tagged || 0} uoinks.`);
         await loadChannels();
       } catch (err) {
-        showToast("Could not recognize past uoinks yet.");
+        showToast("Couldn't recognize past uoinks yet.");
       }
     }
 
@@ -8640,7 +8640,7 @@
         els.allowedSitesStatus.textContent = `${state.allowedSites.length} user-added site${state.allowedSites.length === 1 ? "" : "s"}.`;
       } catch (err) {
         state.allowedSites = [];
-        els.allowedSitesStatus.textContent = "Extra site permissions need Uoink to answer first.";
+        els.allowedSitesStatus.textContent = "Site permissions need another moment.";
       }
       renderAllowedSites();
     }
@@ -8678,7 +8678,7 @@
         showToast("Site enabled.");
         await loadAllowedSites();
       } catch (err) {
-        showToast("Could not add that site yet.");
+        showToast("Couldn't add that site yet.");
       }
     }
 
@@ -8691,7 +8691,7 @@
         showToast("Site removed.");
         await loadAllowedSites();
       } catch (err) {
-        showToast("Could not remove that site.");
+        showToast("Couldn't remove that site.");
       }
     }
 
@@ -8784,7 +8784,7 @@
         showToast("Playlist monitor added.");
         loadPlaylistSettings();
       } catch (err) {
-        showToast("Could not add that playlist.");
+        showToast("Couldn't add that playlist.");
       }
     }
 
@@ -8800,7 +8800,7 @@
         showToast("Podcast feed added.");
         loadPodcastFeedSettings();
       } catch (err) {
-        showToast("Could not add that feed.");
+        showToast("Couldn't add that feed.");
       }
     }
 
@@ -8831,7 +8831,7 @@
       renderTopics(topics, { useDefaults: false });
       if (!removed) return clearTopicUndo();
       state.topicUndo = { topic: removed, index: Number(index) };
-      els.topicUndoText.textContent = `${removed.name || "Untitled topic"} removed. Save topics when you are ready.`;
+      els.topicUndoText.textContent = `${removed.name || "Untitled topic"} removed. Save topics when you're ready.`;
       els.topicUndo.classList.remove("hidden");
     }
 
@@ -8851,7 +8851,7 @@
         showToast(successMessage);
         refreshSettings();
       } catch (err) {
-        showToast("Could not save settings yet.");
+        showToast("Couldn't save settings yet.");
       }
     }
 
@@ -8864,7 +8864,7 @@
         showToast("Key saved on this device.");
         refreshSettings();
       } catch (err) {
-        showToast("Could not save that key.");
+        showToast("Couldn't save that key.");
       }
     }
 
@@ -8885,7 +8885,7 @@
       } catch (err) {
         showToast(err.message.includes("not found")
           ? "This action is not ready in this build."
-          : "This action could not run.");
+          : "This action couldn't run.");
       }
     }
 
@@ -8931,7 +8931,7 @@
         refreshSettings();
       } catch (err) {
         if (!err.message.includes("not found") && !err.message.includes("404")) {
-          showToast("Could not save that output folder.");
+          showToast("Couldn't save that output folder.");
           return;
         }
         await saveSettingsPatch({ output_dir: outputDir }, "Output folder updated.");
@@ -8957,7 +8957,7 @@
       } catch (err) {
         showToast(err.message.includes("not found")
           ? "Retry-with-cookies is not ready in this build."
-          : "Could not queue that retry.");
+          : "Couldn't queue that retry.");
       }
     }
 
@@ -8970,7 +8970,7 @@
           body: JSON.stringify({ initial_dir: initialDir }),
         });
         if (!data.ok) {
-          showToast(data.cancelled ? "No folder selected." : "Could not choose that folder.");
+          showToast(data.cancelled ? "No folder selected." : "Couldn't choose that folder.");
           return;
         }
         state.settings = data.settings || state.settings || {};
@@ -8980,7 +8980,7 @@
           : "Output folder updated.");
         refreshSettings();
       } catch (err) {
-        showToast("Could not choose that folder.");
+        showToast("Couldn't choose that folder.");
       } finally {
         els.pickOutputFolder.disabled = false;
       }
@@ -8996,7 +8996,7 @@
         showToast("Retry queued for captions only.");
         refreshActivity();
       } catch (err) {
-        showToast("Could not queue the captions-only retry.");
+        showToast("Couldn't queue the captions-only retry.");
       }
     }
 
@@ -9126,7 +9126,7 @@
       document.getElementById("openWritingInX").addEventListener("click", openWritingInX);
       document.getElementById("copyWritingAttribution").addEventListener("click", async () => {
         try { await navigator.clipboard.writeText(writingAttributionLine()); showToast("Credit copied."); }
-        catch (_) { showToast("Could not copy credit."); }
+        catch (_) { showToast("Couldn't copy credit."); }
       });
       document.getElementById("refreshWritingScreenshots").addEventListener("click", loadWritingScreenshots);
       document.getElementById("pickBestScreenshots").addEventListener("click", pickBestWritingScreenshots);
@@ -9162,7 +9162,7 @@
       els.runEvidenceClaims.addEventListener("click", runClaimsForSelectedEvidence);
       els.yoinkOpenFolder.addEventListener("click", () => {
         const folder = folderPathOf(state.selectedYoink);
-        if (folder) authFetch(`/open-folder?path=${encodeURIComponent(folder)}`).catch(() => showToast("Could not open that folder."));
+        if (folder) authFetch(`/open-folder?path=${encodeURIComponent(folder)}`).catch(() => showToast("Couldn't open that folder."));
       });
       els.yoinkOpenMarkdown.addEventListener("click", openSelectedMarkdown);
       els.yoinkRetryCapture.addEventListener("click", retrySelectedYoinkCapture);
@@ -9188,7 +9188,7 @@
         await Promise.all(pending.map((row) => row.pending_id
           ? authFetch("/queue/cancel", { method: "POST", body: JSON.stringify({ pending_id: row.pending_id }) }).catch(() => null)
           : null));
-        showToast("Cancel requested for visible active work.");
+        showToast("Cancel requested for all active work.");
         refreshActivity();
       });
       document.getElementById("reloadSettings").addEventListener("click", refreshSettings);
@@ -9198,7 +9198,7 @@
       document.getElementById("testKey").addEventListener("click", testKey);
       document.getElementById("copyMcp").addEventListener("click", async () => {
         try { await navigator.clipboard.writeText(els.mcpConfig.value); showToast("Agent connection copied."); }
-        catch (_) { showToast("Could not copy connection."); }
+        catch (_) { showToast("Couldn't copy connection."); }
       });
       document.getElementById("checkUpdates").addEventListener("click", async () => {
         try {
@@ -9264,7 +9264,7 @@
       els.reliabilityAutoCheck.addEventListener("change", () => saveSettingsPatch({ transcript_reliability_auto_check: els.reliabilityAutoCheck.checked }, "Transcript reliability setting updated."));
       els.downloadReliabilityModel.addEventListener("click", async () => {
         const modelLabel = transcriptModelLabel(els.whisperModel.value);
-        if (!confirm(`Download the ${modelLabel} transcript checker now? It is about 150 MB and stays on this machine.`)) return;
+        if (!confirm(`Download the ${modelLabel} transcript checker now? It's about 150 MB and stays on this machine.`)) return;
         els.downloadReliabilityModel.disabled = true;
         els.reliabilityStatus.textContent = `Downloading the ${modelLabel} checker model...`;
         try {
@@ -9274,7 +9274,7 @@
           refreshSettings();
         } catch (err) {
           els.reliabilityStatus.textContent = "Model download failed.";
-          showToast("Could not download model.");
+          showToast("Couldn't download model.");
         } finally {
           els.downloadReliabilityModel.disabled = false;
         }
@@ -9289,7 +9289,7 @@
       document.getElementById("openOutput").addEventListener("click", () => {
         const path = els.outputFolder.value;
         if (path && !path.includes("unavailable")) {
-          authFetch(`/open-folder?path=${encodeURIComponent(path)}`).catch(() => showToast("Could not open that folder."));
+          authFetch(`/open-folder?path=${encodeURIComponent(path)}`).catch(() => showToast("Couldn't open that folder."));
         }
       });
       document.getElementById("addTopic").addEventListener("click", () => {
@@ -9336,7 +9336,7 @@
         if (copyScript) {
           navigator.clipboard.writeText(els.scriptDetail.dataset.rawText || "").then(
             () => showToast("Script copied."),
-            () => showToast("Could not copy script.")
+            () => showToast("Couldn't copy script.")
           );
           return;
         }
@@ -9393,7 +9393,7 @@
         if (copyAgentConfig) {
           navigator.clipboard.writeText(els.mcpConfig.value).then(
             () => showToast("Agent connection copied."),
-            () => showToast("Could not copy connection.")
+            () => showToast("Couldn't copy connection.")
           );
           return;
         }
@@ -9437,7 +9437,7 @@
           return;
         }
         const openPath = event.target.closest("[data-open-path]");
-        if (openPath) authFetch(`/open-folder?path=${encodeURIComponent(openPath.dataset.openPath)}`).catch(() => showToast("Could not open that folder."));
+        if (openPath) authFetch(`/open-folder?path=${encodeURIComponent(openPath.dataset.openPath)}`).catch(() => showToast("Couldn't open that folder."));
         const gap = event.target.closest("[data-gap-topic]");
         if (gap) {
           els.topicFilter.value = gap.dataset.gapTopic || "";
