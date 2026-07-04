@@ -7525,6 +7525,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_writing_style_anchors_list()
         if bare == "/writing/draft" or bare.startswith("/writing/draft/"):
             return self._handle_writing_draft_get(bare)
+        if bare == "/writing/recent-ctas":
+            return self._handle_writing_recent_ctas()
         if bare.startswith("/writing/") and not bare.endswith("/revise") \
                 and not bare.startswith("/writing/style-anchors"):
             return self._handle_writing_piece_get(bare)
@@ -7536,6 +7538,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_engagement_scores()
         if bare == "/library/facets":
             return self._handle_library_facets()
+        if bare == "/corpus/channels":
+            return self._handle_corpus_channels()
         if bare == "/facets/taxonomy":
             return self._handle_facets_taxonomy()
         if bare == "/facets/backfill":
@@ -7852,6 +7856,66 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(500, {"ok": False, "error": str(e)})
         return self._send_json(200, {"ok": True, "channels": rows,
                                       "count": len(rows)})
+
+    def _handle_corpus_channels(self):
+        """GET /corpus/channels -- channels appearing across the captured
+        corpus, for the source/channel picker (G-21). Each row is
+        {channel, count, thumbnail_url}, thumbnail_url being a representative
+        yoink's thumbnail (or null). Optional ?q= substring for type-ahead,
+        ?limit= bounded. Distinct from /channels (the user's own registered
+        channels) -- this is the corpus answering for itself.
+
+        Topic and hook facets are NOT duplicated here; consume /library/facets
+        for those (G-12)."""
+        if not self._require_token():
+            return
+        from urllib.parse import quote
+        qs = parse_qs(urlparse(self.path).query)
+        q = (qs.get("q") or [""])[0].strip() or None
+        try:
+            limit = max(1, min(500, int((qs.get("limit") or ["200"])[0])))
+        except (TypeError, ValueError):
+            return self._send_json(400, {"ok": False,
+                                          "error": "limit must be an integer"})
+        try:
+            rows = _get_index().corpus_channels(q=q, limit=limit)
+        except Exception as e:
+            log.warning("/corpus/channels failed: %s", e)
+            return self._send_json(503, {"ok": False,
+                                          "error": "channels unavailable",
+                                          "state": "unavailable"})
+        out = []
+        for r in rows:
+            corpus_path = r.get("corpus_path") or ""
+            thumb_url = None
+            if corpus_path:
+                thumb = Path(corpus_path).parent / "thumbnail.jpg"
+                if thumb.exists():
+                    thumb_url = "/file?path=" + quote(str(thumb))
+            out.append({"channel": r["channel"], "count": r["count"],
+                        "thumbnail_url": thumb_url})
+        return self._send_json(200, {"ok": True, "channels": out,
+                                      "total": len(out)})
+
+    def _handle_writing_recent_ctas(self):
+        """GET /writing/recent-ctas -- distinct CTAs used in past scripts,
+        most-recent first, for the CTA picker (G-21). {text, last_used}."""
+        if not self._require_token():
+            return
+        qs = parse_qs(urlparse(self.path).query)
+        try:
+            limit = max(1, min(100, int((qs.get("limit") or ["20"])[0])))
+        except (TypeError, ValueError):
+            return self._send_json(400, {"ok": False,
+                                          "error": "limit must be an integer"})
+        try:
+            ctas = _get_index().recent_ctas(limit=limit)
+        except Exception as e:
+            log.warning("/writing/recent-ctas failed: %s", e)
+            return self._send_json(503, {"ok": False,
+                                          "error": "ctas unavailable",
+                                          "state": "unavailable"})
+        return self._send_json(200, {"ok": True, "ctas": ctas})
 
     def _handle_channels_add(self, body):
         if not isinstance(body, dict):

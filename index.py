@@ -213,6 +213,13 @@ def _run_migrations(conn: sqlite3.Connection) -> int:
 _FTS_TERM_RE = re.compile(r"[A-Za-z0-9_]+")
 
 
+def _like_escape(value: str) -> str:
+    """Escape a substring for a SQL LIKE pattern (used with ESCAPE '\\'), so a
+    user query containing % or _ filters literally instead of as wildcards."""
+    return (str(value or "")
+            .replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_"))
+
+
 def _fts_query(raw: str) -> str:
     """Turn an arbitrary user string into a safe FTS5 MATCH expression.
 
@@ -809,6 +816,51 @@ class Index:
             except (json.JSONDecodeError, TypeError):
                 pass
         return out
+
+    # ---- smart-input pickers (G-21) -------------------------------------
+    def corpus_channels(self, *, q: str | None = None,
+                        limit: int = 200) -> list[dict]:
+        """Channels present across the captured corpus, with a count and the
+        most-recent corpus_path per channel (so the caller can resolve a
+        representative thumbnail). Backs the channel picker (G-21).
+
+        Distinct from the registered-channels list (that's the user's own
+        channels); this is every channel appearing in saved uoinks. Optional
+        ``q`` is a case-insensitive substring filter for type-ahead. Bounded
+        by ``limit`` (top by count) so a large corpus never returns thousands
+        of rows. Soft-deleted rows are excluded."""
+        clauses = ["deleted_at IS NULL", "channel IS NOT NULL", "channel != ''"]
+        params: list = []
+        if q:
+            clauses.append("channel LIKE ? ESCAPE '\\'")
+            params.append("%" + _like_escape(q) + "%")
+        where = " AND ".join(clauses)
+        params.append(max(1, min(int(limit), 500)))
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT channel, COUNT(*) AS n, MAX(yoinked_at) AS recent, "
+                "(SELECT corpus_path FROM yoinks y2 "
+                " WHERE y2.channel = y.channel AND y2.deleted_at IS NULL "
+                " ORDER BY yoinked_at DESC LIMIT 1) AS corpus_path "
+                f"FROM yoinks y WHERE {where} "
+                "GROUP BY channel ORDER BY n DESC, channel ASC LIMIT ?",
+                params,
+            ).fetchall()
+        return [{"channel": r["channel"], "count": int(r["n"]),
+                 "corpus_path": r["corpus_path"] or ""} for r in rows]
+
+    def recent_ctas(self, *, limit: int = 20) -> list[dict]:
+        """Distinct CTAs used in past scripts, most-recent first, for the CTA
+        picker (G-21). Returns ``[{text, last_used}]``. Empty when the scripts
+        table is empty or the column is unused."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT cta AS text, MAX(generated_at) AS last_used "
+                "FROM scripts WHERE cta IS NOT NULL AND TRIM(cta) != '' "
+                "GROUP BY cta ORDER BY last_used DESC LIMIT ?",
+                (max(1, min(int(limit), 100)),),
+            ).fetchall()
+        return [{"text": r["text"], "last_used": r["last_used"]} for r in rows]
 
     # ---- memory / soft delete (Sprint 18) -------------------------------
     def search_yoinks_for_memory(self, *, q: str | None = None,
