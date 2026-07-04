@@ -161,3 +161,16 @@ jobs:
           else
             bash -n scripts/verify-launch-readiness.sh
           fi
+
+  stdlib-tests:
+    name: stdlib tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install pytest Pillow
+      - name: Run tests
+        run: pytest tests/
