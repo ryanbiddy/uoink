@@ -6652,13 +6652,25 @@
       renderGenerateSmartInputs();
     }
 
+    // G-44 (E2E D6): empty-state labels for facets with zero tagged sources.
+    // The classify facets fill in after the optional AI pass; channel/topic
+    // fill in as soon as a source is saved.
+    const FACET_EMPTY_STATES = {
+      channel: { label: "Channel: none yet", title: "Channels show up here once you've saved a source." },
+      topic: { label: "Topic: none yet", title: "Topics show up here once you've saved a source." },
+      hook_type: { label: "Hook: none yet", title: "No saved sources carry a hook tag yet. The optional AI classify pass fills these in." },
+      format: { label: "Format: none yet", title: "No saved sources carry a format tag yet. The optional AI classify pass fills these in." },
+      performance: { label: "Performance: none yet", title: "No saved sources carry a performance tag yet. The optional AI classify pass fills these in." },
+      length: { label: "Length: none yet", title: "No saved sources carry a length tag yet. The optional AI classify pass fills these in." },
+    };
+
     function syncFacetOptions() {
-      syncOptions(els.channelFilter, "Channel: all", facetItems("channel"));
-      syncOptions(els.topicFilter, "Topic: all", facetItems("topic"));
-      syncOptions(els.hookFilter, "Hook: any", facetItems("hook_type"));
-      syncOptions(els.formatFilter, "Format: all", facetItems("format"));
-      syncOptions(els.performanceFilter, "Performance: all", facetItems("performance"));
-      syncOptions(els.lengthFilter, "Length: all", facetItems("length"));
+      syncOptions(els.channelFilter, "Channel: all", facetItems("channel"), FACET_EMPTY_STATES.channel);
+      syncOptions(els.topicFilter, "Topic: all", facetItems("topic"), FACET_EMPTY_STATES.topic);
+      syncOptions(els.hookFilter, "Hook: any", facetItems("hook_type"), FACET_EMPTY_STATES.hook_type);
+      syncOptions(els.formatFilter, "Format: all", facetItems("format"), FACET_EMPTY_STATES.format);
+      syncOptions(els.performanceFilter, "Performance: all", facetItems("performance"), FACET_EMPTY_STATES.performance);
+      syncOptions(els.lengthFilter, "Length: all", facetItems("length"), FACET_EMPTY_STATES.length);
       syncWorkspaceOptions();
       els.facetStatus.classList.toggle("hidden", !state.facetsFallback);
       els.facetStatus.title = state.facetsFallback
@@ -6742,9 +6754,23 @@
       return match ? match.label : fallbackFacetLabel(raw);
     }
 
-    function syncOptions(select, label, items) {
+    function syncOptions(select, label, items, empty = null) {
       const current = select.value;
       const options = normalizeFacetItems(items);
+      // G-44 (E2E D6): a facet with zero tagged sources used to render as an
+      // "all"-only dropdown indistinguishable from a broken control. When the
+      // corpus-wide facets really loaded and this one came back empty, render
+      // a labeled, disabled empty state instead. The fallback path (backend
+      // unreachable) keeps its usable built-in defaults.
+      if (empty && !options.length && !state.facetsFallback) {
+        select.innerHTML = `<option value="">${htmlEscape(empty.label)}</option>`;
+        select.value = "";
+        select.disabled = true;
+        select.title = empty.title;
+        return;
+      }
+      select.disabled = false;
+      select.removeAttribute("title");
       select.innerHTML = `<option value="">${label}</option>` + options
         .map((item) => `<option value="${htmlEscape(item.value)}">${htmlEscape(item.label)}</option>`)
         .join("");
