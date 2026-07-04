@@ -77,7 +77,8 @@ def test_generate_and_agents() -> None:
 
 
 def test_activity_and_star() -> None:
-    require("Retry with chunked mode" in DASHBOARD, "chunked retry affordance missing")
+    require("Retry, captions only" in DASHBOARD, "captions-only retry affordance missing")
+    require('long_video_mode: "lite"' in DASHBOARD, "retry does not post lite recovery mode")
     require("activityErrorMessage" in DASHBOARD, "phase-level error copy missing")
     locked = "⭐ Star on GitHub"
     url = "https://github.com/ryanbiddy/uoink"
