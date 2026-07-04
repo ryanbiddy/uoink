@@ -6,15 +6,17 @@ Uoink - Local corpus for AI
 <!-- 28 chars. -->
 
 ## Short description (132 chars max)
-Save videos, podcasts, and articles on your disk, then hand a cited corpus to your AI for writing.
+Save videos, podcasts, and articles to your own disk, then hand your AI a cited corpus to write from.
 
-<!-- 94 chars. -->
+<!-- 101 chars. -->
 
 ## Long description
 
 Uoink keeps the videos, podcasts, and articles you study on your own disk, then hands them to your AI as a cited corpus you can write from in your voice.
 
-This Chrome extension adds the fastest capture path for YouTube. Click the Uoink button under a video, press Alt+U, or right-click a YouTube video link. Uoink saves the source as a structured local corpus on your computer. The clipboard version is ready for Claude, ChatGPT, or your agent. The full files stay on disk.
+Paste a bare YouTube link into Claude and it will happily invent what the video says. Give it a Uoink corpus and it quotes the transcript, cites timestamps, and reads the comments.
+
+This extension is the fastest capture path for YouTube. Click the Uoink button under a video, press Alt+U, or right-click a video link. Uoink saves the source as a structured corpus on your computer, puts a paste-ready version on your clipboard for Claude, ChatGPT, or your agent, and keeps the full files on disk.
 
 For YouTube sources, Uoink captures:
 
@@ -30,7 +32,7 @@ Use it when a source is worth studying, quoting, remixing, or writing from later
 ### Ways To Use Uoink
 
 **Chrome extension**
-Click the in-page Uoink button, use Alt+U, or right-click a YouTube video link. Uoink saves the source, copies the useful version to your clipboard, and keeps the full corpus on your machine.
+One click on a video page (or Alt+U, or right-click). Uoink saves the source, loads your clipboard, and keeps the full corpus on your machine.
 
 **Local dashboard**
 Search your Library, filter by topic or channel, inspect Evidence, and turn saved videos, podcasts, and articles into credited tweets, threads, blog drafts, or scripts.
@@ -54,7 +56,7 @@ Core capture works without an API key. Optional features use your own Anthropic 
 - Hook Type classification labels the opening style.
 - Entity Extraction finds people, tools, products, companies, and topics across your library.
 
-These features are off by default. Your key is stored with the operating system credential store and is only sent to Anthropic for the calls you choose.
+These features are off by default. Your key lives in the operating system credential store and goes only to Anthropic, only for the calls you choose.
 
 ### Privacy Summary
 
