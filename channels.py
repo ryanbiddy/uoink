@@ -28,7 +28,6 @@ import re
 import urllib.error
 import urllib.request
 from datetime import datetime
-from typing import Any
 
 log = logging.getLogger("uoink.channels")
 
