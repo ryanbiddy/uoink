@@ -402,9 +402,28 @@
       color: var(--vermillion);
     }
 
+    .button:disabled,
+    .icon-button:disabled,
+    .button:disabled:hover,
+    .icon-button:disabled:hover,
+    .button:disabled:focus-visible,
+    .icon-button:disabled:focus-visible {
+      border-color: var(--border);
+      background: rgba(255, 244, 236, 0.03);
+      color: var(--dim);
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.58;
+    }
+
     .button:active,
     .icon-button:active {
       transform: translateY(1px);
+    }
+
+    .button:disabled:active,
+    .icon-button:disabled:active {
+      transform: none;
     }
 
     .control-grid {
@@ -3635,6 +3654,7 @@
       queueMeta: document.getElementById("queueMeta"),
       activityCount: document.getElementById("activityCount"),
       activityNavCount: document.getElementById("activityNavCount"),
+      cancelAll: document.getElementById("cancelAll"),
       completedRows: document.getElementById("completedRows"),
       completedToday: document.getElementById("completedToday"),
       keyStatus: document.getElementById("keyStatus"),
@@ -4934,9 +4954,8 @@
       }
     }
 
-    async function createWorkspaceFromForm(event) {
-      event.preventDefault();
-      const payload = {
+    function workspacePayloadFromForm() {
+      return {
         hook_target: els.workspaceHook.value.trim() || null,
         format: els.workspaceFormat.value || null,
         topic: els.workspaceTopic.value.trim() || null,
@@ -4944,6 +4963,24 @@
         n_examples: Number(els.workspaceExamples.value || 10),
         notes: els.workspaceTaste.checked ? "use_taste_anchors=true" : "use_taste_anchors=false",
       };
+    }
+
+    function workspaceValidationMessage(payload) {
+      const hasDirection = Boolean(payload.hook_target || payload.format || payload.topic || payload.your_channel);
+      if (!hasDirection) return "Add a hook, topic, format, or channel before creating a workspace.";
+      return "";
+    }
+
+    function showWorkspaceValidation(message) {
+      showToast(message);
+      els.workspaceSummary.innerHTML = degradedState("Workspace needs a direction.", message);
+    }
+
+    async function createWorkspaceFromForm(event) {
+      event.preventDefault();
+      const payload = workspacePayloadFromForm();
+      const validation = workspaceValidationMessage(payload);
+      if (validation) return showWorkspaceValidation(validation);
       try {
         const data = await authFetch("/workspaces", { method: "POST", body: JSON.stringify(payload) });
         state.currentWorkspace = data.workspace;
@@ -5339,23 +5376,7 @@
     async function ensureScriptWorkspace() {
       const existing = els.scriptWorkspace.value;
       if (existing) return existing;
-      const row = state.scriptSelectedSourceRow;
-      const topic = firstValue(els.scriptTopic.value.trim(), row && row.topic, row && rowTitle(row));
-      if (!topic) throw new Error("Choose a workspace, source uoink, or topic first.");
-      const payload = {
-        format: "talking-head",
-        topic,
-        hook_target: null,
-        n_examples: row ? 6 : 10,
-        notes: row ? `Script source: ${rowTitle(row)} ${sourceUrlOf(row)}` : "Script Studio topic source",
-      };
-      const data = await authFetch("/workspaces", { method: "POST", body: JSON.stringify(payload) });
-      const workspace = data.workspace || data;
-      if (!workspace.id) throw new Error("Workspace could not be prepared.");
-      state.workspaces.unshift(workspace);
-      syncScriptWorkspaceOptions();
-      els.scriptWorkspace.value = workspace.id;
-      return workspace.id;
+      throw new Error("Choose a saved workspace before generating a script.");
     }
 
     async function generateScriptFromForm(event) {
@@ -5994,10 +6015,13 @@
       const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(normalizedStatus(job)));
       const failedJobs = state.jobs.filter((job) => ["failed", "cancelled"].includes(normalizedStatus(job)));
       const activeCount = activeJobs.length + queueActive.length;
+      const cancelableCount = activeJobs.filter((job) => job.id).length + queueActive.filter((row) => row.pending_id).length;
       const mobileCount = activeJobs.concat(queueActive, failedJobs, queueFailed)
         .filter(isMobileQueued).length;
       els.activityCount.textContent = String(activeCount);
       els.activityNavCount.textContent = String(activeCount);
+      els.cancelAll.disabled = cancelableCount === 0;
+      els.cancelAll.title = cancelableCount ? `Cancel ${cancelableCount} active item${cancelableCount === 1 ? "" : "s"}.` : "No active work to cancel.";
       els.queueMeta.textContent = `${runningCount || activeJobs.filter((job) => normalizedStatus(job) === "running").length} running | ${pendingCount || queueActive.length} queued${mobileCount ? ` | ${mobileCount} mobile` : ""}`;
       // v2.2.1 fix: dedupe failed queue rows whose video already has a
       // failed job row, so the same yoink doesn't render twice. Jobs win
@@ -7323,30 +7347,6 @@
       return null;
     }
 
-    async function ensureGenerateWorkspace() {
-      if (state.generateWorkspace && state.generateWorkspace.id) return state.generateWorkspace;
-      const row = state.writingSelectedSourceRow;
-      if (!row) throw new Error("Choose a source uoink first.");
-      if (!state.channels.length && els.generatePastPerformance.checked) {
-        try { await loadChannels(); } catch (_) {}
-      }
-      const yourChannel = els.generatePastPerformance.checked && state.channels.length
-        ? firstValue(state.channels[0].handle, state.channels[0].name, state.channels[0].channel_id)
-        : null;
-      const payload = {
-        format: "talking-head",
-        topic: firstValue(row.topic, rowTitle(row)),
-        hook_target: els.writingAngle.value.trim() || selectedGenerateHookLens(),
-        your_channel: yourChannel || null,
-        n_examples: 8,
-        notes: `Generate source: ${rowTitle(row)} ${sourceUrlOf(row)}`,
-      };
-      const data = await authFetch("/workspaces", { method: "POST", body: JSON.stringify(payload) });
-      state.generateWorkspace = data.workspace || data;
-      if (!state.generateWorkspace.id) throw new Error("Generate workspace could not be prepared.");
-      return state.generateWorkspace;
-    }
-
     async function generateAssemblyBody() {
       const row = state.writingSelectedSourceRow;
       if (!row) throw new Error("Choose a source uoink first.");
@@ -7362,6 +7362,32 @@
         hook_target: els.writingAngle.value.trim() || selectedGenerateHookLens(),
         your_channel: yourChannel || null,
         n_examples: 8,
+      };
+    }
+
+    async function generateScriptGrounding() {
+      const row = state.writingSelectedSourceRow;
+      if (!row) throw new Error("Choose a source uoink first.");
+      const body = await generateAssemblyBody();
+      const data = await authFetch("/workspace/assemble", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+      const assembled = Array.isArray(data.assembled) ? data.assembled : [];
+      showGenerateResearch(
+        "Script grounding",
+        `<span class="soft-note">${assembled.length} saved example${assembled.length === 1 ? "" : "s"} ready for the connected writing agent.</span>`
+      );
+      return {
+        ...data,
+        workspace: body,
+        context: {
+          source_credit_line: writingAttributionLine(row),
+          source: {
+            title: rowTitle(row),
+            url: sourceUrlOf(row),
+          },
+        },
       };
     }
 
@@ -7441,10 +7467,9 @@
     }
 
     async function generateScriptInWriting() {
-      const workspace = await ensureGenerateWorkspace();
       const row = state.writingSelectedSourceRow;
+      const grounding = await generateScriptGrounding();
       const body = {
-        workspace_id: workspace.id,
         output_mode: "script",
         hook_type_lens: selectedGenerateHookLens(),
         target_length_sec: Number(els.generateScriptLength.value || 120),
@@ -7456,24 +7481,16 @@
         voice_dna_warnings_enabled: Boolean(els.writingShowWarnings.checked && !els.writingSkipWarnings.checked),
         skip_voice_dna_this_time: Boolean(els.writingSkipWarnings.checked),
       };
-      const data = await callMcpTool("generate_script", body);
-      if (data.mode === "grounding_only") {
-        const agentDraft = await connectedAgentDraft("generate_script", "script", data, body);
-        const draft = normalizeScriptDraft(agentDraft);
-        if (draft && !looksLikeScriptScaffold(objectToMarkdown(draft))) {
-          const persisted = await callMcpTool("generate_script", { ...body, script: draft });
-          setWritingOutput(objectToMarkdown(draft));
-          state.writingLastPayload = persisted;
-          showToast("Script draft ready.");
-          return;
-        }
-        renderAgentConnectionFallback();
-        showToast("Connect a writing agent to generate the script.");
+      const agentDraft = await connectedAgentDraft("generate_script", "script", grounding, body);
+      const draft = normalizeScriptDraft(agentDraft);
+      if (draft && !looksLikeScriptScaffold(objectToMarkdown(draft))) {
+        setWritingOutput(objectToMarkdown(draft));
+        state.writingLastPayload = { mode: "agent_draft", grounding, draft };
+        showToast("Script draft ready.");
         return;
       }
-      const draft = normalizeScriptDraft(data) || data;
-      setWritingOutput(objectToMarkdown(draft));
-      showToast("Script draft ready.");
+      renderAgentConnectionFallback();
+      showToast("Connect a writing agent to generate the script.");
     }
 
     async function generateWriting() {
@@ -8079,8 +8096,9 @@
       document.getElementById("refreshActivity").addEventListener("click", refreshActivity);
       document.getElementById("cancelAll").addEventListener("click", async () => {
         const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(String(job.state || "").toLowerCase()) && job.id);
+        const pending = state.queue && Array.isArray(state.queue.pending) ? state.queue.pending.filter((row) => row.pending_id && !["failed", "succeeded", "completed", "cancelled"].includes(normalizedStatus(row))) : [];
+        if (!activeJobs.length && !pending.length) return showToast("No active work to cancel.");
         await Promise.all(activeJobs.map((job) => authFetch(`/jobs/${encodeURIComponent(job.id)}/cancel`, { method: "POST" }).catch(() => null)));
-        const pending = state.queue && Array.isArray(state.queue.pending) ? state.queue.pending : [];
         await Promise.all(pending.map((row) => row.pending_id
           ? authFetch("/queue/cancel", { method: "POST", body: JSON.stringify({ pending_id: row.pending_id }) }).catch(() => null)
           : null));
