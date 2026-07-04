@@ -4315,6 +4315,12 @@
       const source = sourceNameFromUrl(context.url || raw);
       if (!raw) return "";
       if (haystack.includes("too many requests") || haystack.includes("http error 429") || haystack.includes("rate-limit") || haystack.includes("rate limit")) {
+        // G-43 (E2E D4): a terminal row never promises a retry that won't
+        // run. This also covers failed jobs that predate the /jobs
+        // retry_exhausted field but still carry rate-limit error text.
+        if (context.terminal) {
+          return `${source} kept refusing this one. Give it a few minutes, then retry it yourself.`;
+        }
         return "Uoink needs a minute. Retrying...";
       }
       if (haystack.includes("sign in") || haystack.includes("login") || haystack.includes("cookies") || haystack.includes("captcha") || haystack.includes("guest token")) {
@@ -4342,6 +4348,9 @@
         return `${source} would not hand this one over cleanly. Details are tucked below.`;
       }
       if (haystack.includes("queue unavailable") || haystack.includes("memory search unavailable") || haystack.includes("library unavailable")) {
+        if (context.terminal) {
+          return "Uoink couldn't finish this one. Details are tucked below.";
+        }
         return "Uoink needs a minute. Retrying...";
       }
       return "Uoink couldn't finish this one. Details are tucked below.";
@@ -6972,6 +6981,17 @@
     }
 
     function activityErrorMessage(raw, phase, context = {}) {
+      // G-43 (E2E D4): jobs whose automatic retry budget is used up carry
+      // retry_exhausted (plus attempt_count) from /jobs. Say Uoink gave up;
+      // never promise a retry that won't run. Jobs that predate the field
+      // fall through to the text translation, where the terminal flag keeps
+      // rate-limit copy honest.
+      if (context.retryExhausted) {
+        const attempts = Number(context.attempts);
+        return Number.isFinite(attempts) && attempts > 0
+          ? `Uoink gave up after ${attempts} attempts. It won't retry this one on its own.`
+          : "Uoink gave up on this one. It won't retry it on its own.";
+      }
       const normalized = normalizePhase(phase);
       const haystack = String(raw || "").toLowerCase();
       const timeout = haystack.includes("timeout") || haystack.includes("timed out") || haystack.includes("deadline");
@@ -7039,8 +7059,15 @@
       const phase = job.current_video_phase || job.phase || "";
       const title = job.title || job.playlist_title || (job.current_video && job.current_video.title) || job.url || job.source_url || "Uoink job";
       const rawError = job.error_detail || (job.error_code ? `${job.error_code}: ${job.error || ""}` : job.error || "");
-      const errorLine = failed && rawError
-        ? activityErrorMessage(rawError, phase, { url: job.url || job.source_url || "", code: job.error_code || "" })
+      const exhausted = job.retry_exhausted === true;
+      const errorLine = failed && (rawError || exhausted)
+        ? activityErrorMessage(rawError, phase, {
+          url: job.url || job.source_url || "",
+          code: job.error_code || "",
+          terminal: failed,
+          retryExhausted: exhausted,
+          attempts: job.attempt_count,
+        })
         : "";
       const liteRetry = failed && shouldOfferChunkedRetry(rawError, phase);
       const cookieRetry = failed && shouldOfferCookieRetry(rawError);
@@ -7079,8 +7106,14 @@
       const activePhase = row.phase || (stateValue === "running" ? "screenshots" : "");
       const sourceChip = activitySourceChip(row);
       const rawError = row.error_detail || row.last_error || row.error || "";
-      const errorLine = failed && rawError
-        ? activityErrorMessage(rawError, activePhase, { url: row.url || row.source_url || "" })
+      const exhausted = row.retry_exhausted === true;
+      const errorLine = failed && (rawError || exhausted)
+        ? activityErrorMessage(rawError, activePhase, {
+          url: row.url || row.source_url || "",
+          terminal: failed,
+          retryExhausted: exhausted,
+          attempts: row.attempt_count,
+        })
         : "";
       const liteRetry = failed && shouldOfferChunkedRetry(rawError, activePhase);
       const cookieRetry = failed && shouldOfferCookieRetry(rawError);
@@ -7089,7 +7122,7 @@
           <div class="job-top">
             <div>
               <div class="job-title">${htmlEscape(row.title || row.url || "Queued uoink")}</div>
-              <div class="job-sub">${htmlEscape(stateValue)}${row.retry_after ? ` | retry ${htmlEscape(fmtAge(row.retry_after))}` : ""}</div>
+              <div class="job-sub">${htmlEscape(stateValue)}${row.retry_after && !exhausted ? ` | retry ${htmlEscape(fmtAge(row.retry_after))}` : ""}</div>
               ${sourceChip}
             </div>
             <div class="inline-row">
