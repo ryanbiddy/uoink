@@ -117,10 +117,17 @@ def main():
         status, res = _call("POST", "/writing/draft",
                             {"id": "abc", "body": "x"})
         _assert(status == 400, f"non-integer id -> 400: {status} {res}")
+        # G-90 regression: an id beyond SQLite's 64-bit range must be a clean
+        # 404, not a 500 from the failed integer bind.
+        huge = 10 ** 20
+        status, res = _call("POST", "/writing/draft", {"id": huge, "body": "x"})
+        _assert(status == 404, f"oversized id update -> 404, not 500: {status} {res}")
+        status, res = _call("GET", f"/writing/draft/{huge}")
+        _assert(status == 404, f"oversized id GET -> 404, not 500: {status} {res}")
         row = idx._conn.execute(
             "SELECT COUNT(*) AS c FROM writing_drafts").fetchone()
         _assert(row["c"] == 1, f"rejected saves persisted nothing: {row['c']}")
-        print("ok  bad input: 400s, nothing extra saved")
+        print("ok  bad input: 400s + oversized id 404 (G-90), nothing extra saved")
 
         # No token -> rejected.
         status, res = _call("GET", f"/writing/draft/{draft_id}", token=False)
