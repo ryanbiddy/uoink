@@ -411,14 +411,14 @@
 
     .control-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 10px;
       margin: 18px 0 18px;
     }
 
     .control-grid .control:first-child {
       grid-column: span 2;
-      min-width: 220px;
+      min-width: 260px;
     }
 
     .control,
@@ -446,6 +446,7 @@
 
     select.control {
       appearance: none;
+      padding-right: 38px;
       background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
       background-position: calc(100% - 18px) 18px, calc(100% - 12px) 18px;
       background-size: 6px 6px, 6px 6px;
@@ -1613,7 +1614,7 @@
 
     .radio-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
       gap: 8px;
     }
 
@@ -2169,6 +2170,11 @@
       flex: 0 0 auto;
     }
 
+    .choice-row span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
     .settings-list-row strong,
     .settings-list-row span {
       overflow: hidden;
@@ -2227,8 +2233,9 @@
 
     .topic-row {
       display: grid;
-      grid-template-columns: minmax(140px, 0.65fr) minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
+      align-items: start;
       border: 1px solid var(--border);
       border-radius: var(--control-radius);
       padding: 10px;
@@ -2248,13 +2255,23 @@
       text-transform: uppercase;
     }
 
+    .topic-field:nth-child(2) {
+      grid-column: 1 / -1;
+    }
+
     .topic-keywords {
-      min-height: 64px;
+      min-height: 112px;
+      line-height: 1.45;
+      padding-top: 10px;
+      padding-bottom: 10px;
       resize: vertical;
     }
 
     .topic-remove {
       align-self: start;
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: end;
     }
 
     .topic-undo {
@@ -2457,9 +2474,11 @@
         min-height: 36px;
         padding: 0 9px;
         font-size: 12px;
+        justify-content: flex-start;
+        gap: 6px;
       }
       .nav-button .nav-count {
-        margin-left: 6px;
+        margin-left: 0;
       }
       .content {
         padding: 26px 18px 34px;
@@ -2543,8 +2562,11 @@
       .about-grid {
         grid-template-columns: 1fr;
       }
+      .control-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
       .control-grid .control:first-child {
-        grid-column: auto;
+        grid-column: 1 / -1;
         min-width: 0;
       }
     }
@@ -2569,6 +2591,17 @@
       }
       .handoff-shot-list {
         grid-template-columns: minmax(0, 1fr);
+      }
+      .control-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .topic-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .topic-remove {
+        grid-column: 1;
+        grid-row: auto;
+        justify-self: stretch;
       }
     }
 
@@ -3094,10 +3127,10 @@
 
           <div class="control-grid">
             <input class="control" id="searchInput" type="search" placeholder="search transcripts, titles, comments" aria-label="Search Library">
-            <select class="control" id="channelFilter" aria-label="Filter by channel"><option value="">Channel: all</option></select>
-            <select class="control" id="topicFilter" aria-label="Filter by topic"><option value="">Topic: all</option></select>
+            <select class="control" id="channelFilter" aria-label="Filter by channel"><option value="">All channels</option></select>
+            <select class="control" id="topicFilter" aria-label="Filter by topic"><option value="">All topics</option></select>
             <select class="control" id="hookFilter" aria-label="Filter by hook">
-              <option value="">Hook: any</option>
+              <option value="">Any hook</option>
               <option value="curiosity_gap">curiosity gap</option>
               <option value="question">question</option>
               <option value="contrarian">contrarian</option>
@@ -3108,9 +3141,9 @@
               <option value="stakes">stakes</option>
               <option value="other">other</option>
             </select>
-            <select class="control" id="formatFilter" aria-label="Filter by format"><option value="">Format: all</option></select>
-            <select class="control" id="performanceFilter" aria-label="Filter by performance"><option value="">Performance: all</option></select>
-            <select class="control" id="lengthFilter" aria-label="Filter by length"><option value="">Length: all</option></select>
+            <select class="control" id="formatFilter" aria-label="Filter by format"><option value="">Format</option></select>
+            <select class="control" id="performanceFilter" aria-label="Filter by performance"><option value="">Performance</option></select>
+            <select class="control" id="lengthFilter" aria-label="Filter by length"><option value="">Length</option></select>
             <input class="control" id="dateFrom" type="date" aria-label="Date from">
             <input class="control" id="dateTo" type="date" aria-label="Date to">
             <select class="control" id="sortFilter" aria-label="Sort Library">
@@ -6665,21 +6698,21 @@
     // The classify facets fill in after the optional AI pass; channel/topic
     // fill in as soon as a source is saved.
     const FACET_EMPTY_STATES = {
-      channel: { label: "Channel: none yet", title: "Channels show up here once you've saved a source." },
-      topic: { label: "Topic: none yet", title: "Topics show up here once you've saved a source." },
-      hook_type: { label: "Hook: none yet", title: "No saved sources carry a hook tag yet. The optional AI classify pass fills these in." },
-      format: { label: "Format: none yet", title: "No saved sources carry a format tag yet. The optional AI classify pass fills these in." },
-      performance: { label: "Performance: none yet", title: "No saved sources carry a performance tag yet. The optional AI classify pass fills these in." },
-      length: { label: "Length: none yet", title: "No saved sources carry a length tag yet. The optional AI classify pass fills these in." },
+      channel: { label: "Channel", title: "Channels show up here once you've saved a source." },
+      topic: { label: "Topic", title: "Topics show up here once you've saved a source." },
+      hook_type: { label: "Hook", title: "No saved sources carry a hook tag yet. The optional AI classify pass fills these in." },
+      format: { label: "Format", title: "No saved sources carry a format tag yet. The optional AI classify pass fills these in." },
+      performance: { label: "Performance", title: "No saved sources carry a performance tag yet. The optional AI classify pass fills these in." },
+      length: { label: "Length", title: "No saved sources carry a length tag yet. The optional AI classify pass fills these in." },
     };
 
     function syncFacetOptions() {
-      syncOptions(els.channelFilter, "Channel: all", facetItems("channel"), FACET_EMPTY_STATES.channel);
-      syncOptions(els.topicFilter, "Topic: all", facetItems("topic"), FACET_EMPTY_STATES.topic);
-      syncOptions(els.hookFilter, "Hook: any", facetItems("hook_type"), FACET_EMPTY_STATES.hook_type);
-      syncOptions(els.formatFilter, "Format: all", facetItems("format"), FACET_EMPTY_STATES.format);
-      syncOptions(els.performanceFilter, "Performance: all", facetItems("performance"), FACET_EMPTY_STATES.performance);
-      syncOptions(els.lengthFilter, "Length: all", facetItems("length"), FACET_EMPTY_STATES.length);
+      syncOptions(els.channelFilter, "All channels", facetItems("channel"), FACET_EMPTY_STATES.channel);
+      syncOptions(els.topicFilter, "All topics", facetItems("topic"), FACET_EMPTY_STATES.topic);
+      syncOptions(els.hookFilter, "Any hook", facetItems("hook_type"), FACET_EMPTY_STATES.hook_type);
+      syncOptions(els.formatFilter, "Format", facetItems("format"), FACET_EMPTY_STATES.format);
+      syncOptions(els.performanceFilter, "Performance", facetItems("performance"), FACET_EMPTY_STATES.performance);
+      syncOptions(els.lengthFilter, "Length", facetItems("length"), FACET_EMPTY_STATES.length);
       syncWorkspaceOptions();
       els.facetStatus.classList.toggle("hidden", !state.facetsFallback);
       els.facetStatus.title = state.facetsFallback
@@ -7250,6 +7283,17 @@
           <button class="button ghost topic-remove" type="button" data-remove-topic="${index}">Remove</button>
         </div>
       `).join("");
+      syncTopicKeywordTextareas();
+    }
+
+    function autoSizeTopicKeywordTextarea(textarea) {
+      if (!textarea) return;
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.max(112, textarea.scrollHeight)}px`;
+    }
+
+    function syncTopicKeywordTextareas() {
+      [...els.topicList.querySelectorAll("[data-topic-keywords]")].forEach(autoSizeTopicKeywordTextarea);
     }
 
     function renderRolePicker(role = "mixed") {
@@ -9487,6 +9531,8 @@
       document.addEventListener("input", (event) => {
         const threadInput = event.target.closest("[data-thread-text]");
         if (threadInput) syncThreadInput(threadInput);
+        const topicKeywords = event.target.closest("[data-topic-keywords]");
+        if (topicKeywords) autoSizeTopicKeywordTextarea(topicKeywords);
       });
       document.addEventListener("change", (event) => {
         const defaultToggle = event.target.closest("[data-toggle-default-anchor]");
