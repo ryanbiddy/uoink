@@ -1080,19 +1080,25 @@ class Index:
 
     def mark_pending_failed(self, pending_id: int, error: str,
                              retry_after: str, *,
-                             force_final: bool = False) -> None:
+                             force_final: bool = False) -> str:
         """Record one failed attempt. Increments attempt_count, then either
         re-queues with the supplied retry_after (status='pending') if under
         the strike cap, or marks the row terminally 'failed' (when the cap
         is reached, or when force_final=True for non-recoverable errors).
-        No-op for an unknown pending_id."""
+
+        Returns the resulting status so the caller can tell a re-queue from
+        a strike-out without a second query: 'pending' when the row will be
+        retried, 'failed' when it went terminal, '' for an unknown
+        pending_id (G-43 / E2E D5 -- the retry worker used to log a phantom
+        'retry at ...' after the final attempt because it couldn't see the
+        strike-out happen)."""
         with self._lock:
             row = self._conn.execute(
                 "SELECT attempt_count FROM pending_yoinks WHERE pending_id=?",
                 (pending_id,),
             ).fetchone()
             if row is None:
-                return
+                return ""
             attempts = (row["attempt_count"] or 0) + 1
             if force_final or attempts >= _PENDING_MAX_ATTEMPTS:
                 self._conn.execute(
@@ -1101,6 +1107,7 @@ class Index:
                     "WHERE pending_id=?",
                     (attempts, error, pending_id),
                 )
+                status = "failed"
             else:
                 self._conn.execute(
                     "UPDATE pending_yoinks "
@@ -1109,7 +1116,9 @@ class Index:
                     "WHERE pending_id=?",
                     (attempts, error, retry_after, pending_id),
                 )
+                status = "pending"
             self._conn.commit()
+            return status
 
     def cancel_pending(self, pending_id: int) -> bool:
         """Mark a pending row terminally cancelled. Returns True when a row
