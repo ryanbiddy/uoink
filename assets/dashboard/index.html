@@ -2663,7 +2663,7 @@
             <div>
               <div class="eyebrow">Generate</div>
               <h1>Turn a source into <em>something worth publishing.</em></h1>
-              <p class="lede">Generate a tweet, thread, blog, or grounded script from your local corpus. Source credit and your writing choices stay visible.</p>
+              <p class="lede">Generate a tweet, thread, blog, newsletter, or grounded script from your local corpus. Source credit and your writing choices stay visible.</p>
             </div>
             <button class="button ghost" type="button" id="reloadWriting">Reload</button>
           </div>
@@ -2690,6 +2690,7 @@
                   <label class="choice-row"><input type="radio" name="writingMode" value="tweet" checked><span>Tweet</span></label>
                   <label class="choice-row"><input type="radio" name="writingMode" value="thread"><span>Thread</span></label>
                   <label class="choice-row"><input type="radio" name="writingMode" value="blog"><span>Blog</span></label>
+                  <label class="choice-row"><input type="radio" name="writingMode" value="newsletter"><span>Newsletter</span></label>
                   <label class="choice-row"><input type="radio" name="writingMode" value="script"><span>Script</span></label>
                 </div>
                 <input class="field" id="writingAngle" type="text" list="angleSuggestions" autocomplete="off" placeholder="angle, optional">
@@ -5436,12 +5437,13 @@
       return `<span class="status-chip ${safe}">${htmlEscape(status)}</span>`;
     }
 
-    async function openEvidenceFor(videoId, title = "") {
+    function openEvidenceFor(videoId, title = "") {
       if (!videoId) return;
       state.selectedEvidenceVideo = videoId;
       state.selectedEvidenceTitle = title || videoId;
+      // switchTab("evidence") already runs loadEvidence(); a second call
+      // here double-loaded the panel.
       switchTab("evidence");
-      await loadEvidence();
     }
 
     async function loadEvidence() {
@@ -6458,7 +6460,7 @@
     function syncGenerateModeUi() {
       const mode = selectedWritingMode();
       els.generateScriptOptions.classList.toggle("hidden", mode !== "script");
-      document.getElementById("writingComposerPanel").classList.toggle("hidden", mode === "script" || mode === "blog");
+      document.getElementById("writingComposerPanel").classList.toggle("hidden", mode === "script" || mode === "blog" || mode === "newsletter");
       document.getElementById("autoDistributeScreenshots").classList.toggle("hidden", mode !== "thread");
       document.getElementById("generateWriting").textContent = mode === "script" ? "Generate script" : "Generate";
       renderWritingScreenshots();
@@ -6653,7 +6655,7 @@
       const shots = visibleWritingScreenshots();
       const selectedCount = state.writingSelectedScreenshots.size;
       const dedupeRemoved = Number(state.writingScreenshotMeta.dedupe_removed || 0);
-      document.getElementById("pickBestScreenshots").textContent = `Pick best for ${selectedWritingMode() === "blog" ? "Blog" : selectedWritingMode() === "thread" ? "Thread" : selectedWritingMode() === "script" ? "Blog" : "Tweet"}`;
+      document.getElementById("pickBestScreenshots").textContent = `Pick best for ${selectedWritingMode() === "blog" ? "Blog" : selectedWritingMode() === "newsletter" ? "Newsletter" : selectedWritingMode() === "thread" ? "Thread" : selectedWritingMode() === "script" ? "Blog" : "Tweet"}`;
       els.writingScreenshotSummary.textContent = state.writingScreenshots.length
         ? `${selectedCount} selected · ${shots.length} shown${dedupeRemoved ? ` · ${dedupeRemoved} visual duplicate${dedupeRemoved === 1 ? "" : "s"} hidden` : ""}`
         : state.writingScreenshotMeta.error
@@ -7160,7 +7162,7 @@
     }
 
     function writingCreditLine(context, modeOrKind) {
-      const mode = modeOrKind === "blog" ? "blog" : modeOrKind === "thread" ? "thread" : "tweet";
+      const mode = modeOrKind === "blog" || modeOrKind === "newsletter" ? "blog" : modeOrKind === "thread" ? "thread" : "tweet";
       const credits = context && context.source_credit;
       const line = (context && context.source_credit_line)
         || (credits && (credits[mode] || credits.tweet || credits.blog))
@@ -7400,14 +7402,14 @@
         }
         return;
       }
-      const toolName = mode === "blog" ? "write_blog" : "write_tweet";
+      const toolName = mode === "blog" || mode === "newsletter" ? "write_blog" : "write_tweet";
       const body = {
         source_yoink_id: sourceId,
         angle: els.writingAngle.value.trim() || undefined,
         hook_type_lens: selectedGenerateHookLens(),
         style_anchor_ids: selectedAnchorIds(),
         output_mode: mode,
-        kind: mode,
+        kind: mode === "newsletter" ? "blog" : mode,
         thread_max: mode === "thread" ? 10 : undefined,
         voice_dna_warnings_enabled: Boolean(els.writingShowWarnings.checked && !els.writingSkipWarnings.checked),
         skip_voice_dna_this_time: Boolean(els.writingSkipWarnings.checked),

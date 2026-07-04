@@ -214,6 +214,31 @@ def test_thread_keeps_character_target():
     print("ok  write_tweet Path C thread: character target + kind persisted")
 
 
+def test_thread_uses_thread_prompt():
+    # The dashboard's composer sends output_mode:"thread" (kind may be
+    # absent), and the BYO path must PROMPT a thread while persisting a
+    # tweet-kind piece (the composer splits the body into posts).
+    saved = _snapshot()
+    try:
+        reply = ("1/ LLMs are autocomplete.\n2/ But useful.\n"
+                 "3/ via @AndrejKarpathy https://youtu.be/abc")
+        idx = _install_backend({}, reply=reply)
+        res = tools.write_tweet({"source_yoink_id": "v1", "generate": True,
+                                 "output_mode": "thread"})
+        _assert(res["ok"] is True, f"thread BYO generated: {res}")
+        _assert("thread" in str(idx.calls[0].get("system", "")).lower(),
+                "output_mode=thread must select the thread prompt, not tweet")
+        row = idx._conn.execute(
+            "SELECT kind FROM writing_pieces WHERE id=?",
+            (res["id"],)).fetchone()
+        _assert(row["kind"] == "tweet",
+                "thread persists as tweet-kind (composer splits the body)")
+    finally:
+        _restore(saved)
+    print("ok  write_tweet Path C: output_mode=thread -> thread prompt, "
+          "tweet persist")
+
+
 def test_credit_auto_appended():
     saved = _snapshot()
     try:
@@ -320,6 +345,7 @@ def main():
     test_no_key_errors()
     test_tweet_generates_and_persists()
     test_thread_keeps_character_target()
+    test_thread_uses_thread_prompt()
     test_credit_auto_appended()
     test_fatal_voice_dna_regenerates_once()
     test_fatal_voice_dna_second_failure_not_persisted()
