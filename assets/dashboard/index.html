@@ -3434,6 +3434,8 @@
       settings: null,
       facets: null,
       facetsFallback: false,
+      corpusFilterRows: [],
+      corpusFiltersLoaded: false,
       resurface: null,
       workspaces: [],
       currentWorkspace: null,
@@ -6006,15 +6008,41 @@
     }
 
     function populateFilterOptions(rows) {
+      if (state.corpusFiltersLoaded) {
+        rows = state.corpusFilterRows;
+      }
       const channels = new Set();
       const topics = new Set();
       state.library.concat(rows).forEach((row) => {
         if (row.channel) channels.add(row.channel);
         if (row.topic) topics.add(row.topic);
       });
-      syncOptions(els.channelFilter, "Channel: all", channels);
-      syncOptions(els.topicFilter, "Topic: all", topics);
+      syncOptions(els.channelFilter, "Channel: all", channels, (value) => value);
+      syncOptions(els.topicFilter, "Topic: all", topics, (value) => value);
       renderSuggestionDatalists();
+    }
+
+    async function loadCorpusFilterOptions() {
+      const rows = [];
+      const limit = 200;
+      let offset = 0;
+      let total = null;
+      try {
+        do {
+          const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+          const data = await authFetch(`/memory/search?${params.toString()}`);
+          const batch = Array.isArray(data.results) ? data.results : [];
+          rows.push(...batch);
+          total = Number(data.total) || rows.length;
+          offset += batch.length;
+        } while (offset < total && offset < 4000);
+        state.corpusFilterRows = rows;
+        state.corpusFiltersLoaded = true;
+        populateFilterOptions(rows);
+      } catch (_) {
+        state.corpusFilterRows = [];
+        state.corpusFiltersLoaded = false;
+      }
     }
 
     function setDatalist(id, values) {
@@ -6048,9 +6076,9 @@
 
     function syncFacetOptions() {
       const facets = state.facets || FALLBACK_FACETS;
-      syncOptions(els.formatFilter, "Format: all", facets.format || FALLBACK_FACETS.format);
-      syncOptions(els.performanceFilter, "Performance: all", facets.performance || facets.performance_tier || FALLBACK_FACETS.performance);
-      syncOptions(els.lengthFilter, "Length: all", facets.length || facets.length_bucket || FALLBACK_FACETS.length);
+      syncOptions(els.formatFilter, "Format: all", facets.format || FALLBACK_FACETS.format, facetOptionLabel);
+      syncOptions(els.performanceFilter, "Performance: all", facets.performance || facets.performance_tier || FALLBACK_FACETS.performance, facetOptionLabel);
+      syncOptions(els.lengthFilter, "Length: all", facets.length || facets.length_bucket || FALLBACK_FACETS.length, facetOptionLabel);
       syncWorkspaceOptions();
       els.facetStatus.classList.toggle("hidden", !state.facetsFallback);
       els.facetStatus.title = state.facetsFallback
@@ -6070,11 +6098,82 @@
       syncFacetOptions();
     }
 
-    function syncOptions(select, label, values) {
+    function facetOptionLabel(value) {
+      const raw = String(value || "").trim();
+      const normalized = raw.toLowerCase().replace(/-/g, "_");
+      const labels = {
+        one_shot: "One shot",
+        talking_head: "Talking head",
+        screen_recording: "Screen recording",
+        broll_heavy: "B-roll heavy",
+        tutorial: "Tutorial",
+        listicle: "Listicle",
+        narrative: "Narrative",
+        vlog: "Vlog",
+        interview: "Interview",
+        over: "Overperforming",
+        average: "Average",
+        under: "Underperforming",
+        short: "Short",
+        medium: "Medium",
+        long: "Long",
+        deep: "Deep dive",
+      };
+      if (labels[normalized]) return labels[normalized];
+      return raw.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+
+    function syncOptions(select, label, values, labeler = facetOptionLabel) {
       const current = select.value;
       select.innerHTML = `<option value="">${label}</option>` + [...values].sort()
-        .map((v) => `<option value="${htmlEscape(v)}">${htmlEscape(v)}</option>`).join("");
+        .map((v) => `<option value="${htmlEscape(v)}">${htmlEscape(labeler(v))}</option>`).join("");
       select.value = current;
+    }
+
+    function libraryDateRangeMessage() {
+      const from = els.dateFrom.value;
+      const to = els.dateTo.value;
+      if (from && to && from > to) return "Start date has to be before end date.";
+      return "";
+    }
+
+    function validateLibraryDateRange({ announce = false } = {}) {
+      const message = libraryDateRangeMessage();
+      els.dateFrom.setCustomValidity(message);
+      els.dateTo.setCustomValidity(message);
+      if (!message) return true;
+      els.resultSummary.textContent = message;
+      els.pageSummary.textContent = "Fix the dates to search Library.";
+      els.loadMore.classList.add("hidden");
+      if (announce) showToast(message);
+      return false;
+    }
+
+    function libraryFilterLabel(key) {
+      return ({
+        q: "Search",
+        channel: "Channel",
+        topic: "Topic",
+        hook_type: "Hook",
+        format: "Format",
+        performance: "Performance",
+        length: "Length",
+        date_from: "From",
+        date_to: "To",
+      })[key] || key;
+    }
+
+    function libraryFilterDisplayValue(key, value) {
+      if (key === "hook_type") return prettyHook(value);
+      if (key === "format" || key === "performance" || key === "length") return facetOptionLabel(value);
+      return String(value || "").trim();
+    }
+
+    function activeLibraryFilterSummary() {
+      return Object.entries(state.filters)
+        .filter(([key, value]) => value && key !== "sort")
+        .map(([key, value]) => `${libraryFilterLabel(key)}: ${libraryFilterDisplayValue(key, value)}`)
+        .join(" | ");
     }
 
     function rawStatus(row) {
@@ -8161,6 +8260,7 @@
         state.filters.date_from = els.dateFrom.value;
         state.filters.date_to = els.dateTo.value;
         state.filters.sort = els.sortFilter.value;
+        if (!validateLibraryDateRange({ announce: true })) return;
         loadLibrary({ reset: true });
       }, 260);
       [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
@@ -8636,6 +8736,7 @@
       window.addEventListener("hashchange", applyHashRoute);
       await refreshHealth();
       await loadFacetTaxonomy();
+      await loadCorpusFilterOptions();
       await refreshJobs();
       await loadLibrary({ reset: true });
       await loadForYou();
