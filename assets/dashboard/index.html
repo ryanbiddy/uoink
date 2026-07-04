@@ -2980,7 +2980,10 @@
               <h1>Claims worth <em>checking.</em></h1>
               <p class="lede">Assistance only. Uoink surfaces checkable claims and evidence signals; you decide what the evidence means.</p>
             </div>
-            <button class="button ghost" type="button" id="reloadEvidence">Reload</button>
+            <div class="inline-row">
+              <button class="button ghost" type="button" id="runEvidenceClaims" disabled>Run claim scan</button>
+              <button class="button ghost" type="button" id="reloadEvidence">Reload</button>
+            </div>
           </div>
           <div class="learn-links" aria-label="Evidence walkthrough links">
             <a href="https://uoink.app/features/claim-extraction" target="_blank" rel="noreferrer">Learn: Claim Extraction</a>
@@ -2996,15 +2999,15 @@
               <div class="panel-body" id="evidenceContext">
                 <div class="job-row">
                   <div class="job-title">Pick a uoink card.</div>
-                  <div class="job-sub">Click any library, For You, or workspace example card to load its Claims section here.</div>
+                  <div class="job-sub">Click any library, For You, or workspace example card to load its evidence notes here.</div>
                 </div>
               </div>
             </aside>
 
             <section class="panel">
               <div class="panel-head">
-                <div class="panel-title">Claims section</div>
-                <div class="localhost">supports / contradicts / mixed / inconclusive</div>
+                <div class="panel-title">Evidence notes</div>
+                <div class="localhost">signals, not verdicts</div>
               </div>
               <div class="panel-body">
                 <div class="claim-list" id="claimList"></div>
@@ -3109,11 +3112,13 @@
               <h1 id="yoinkHeading">Pick a uoink <em>to inspect.</em></h1>
               <p class="lede" id="yoinkSubhead">Podcast episodes, interviews, and regular videos share one local detail view.</p>
             </div>
-            <div class="inline-row">
-              <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
-              <button class="button ghost" type="button" id="yoinkRetranscribe">Re-transcribe</button>
-              <button class="button primary" type="button" id="yoinkEvidence">Evidence</button>
-            </div>
+              <div class="inline-row">
+                <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
+                <button class="button ghost" type="button" id="yoinkOpenMarkdown">Open transcript file</button>
+                <button class="button ghost" type="button" id="yoinkRetryCapture">Re-capture source</button>
+                <button class="button ghost" type="button" id="yoinkRetranscribe">Re-transcribe</button>
+                <button class="button primary" type="button" id="yoinkEvidence">Evidence</button>
+              </div>
           </div>
           <div class="learn-links" aria-label="Uoink detail walkthrough links">
             <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
@@ -3524,6 +3529,9 @@
       selectedYoink: null,
       selectedYoinkSidecar: null,
       selectedYoinkSidecarError: "",
+      selectedYoinkMarkdown: "",
+      selectedYoinkMarkdownState: "idle",
+      selectedYoinkMarkdownError: "",
       retranscribeStatus: "",
       retranscribing: false,
       mobilePlaylists: [],
@@ -3742,6 +3750,7 @@
       evidenceContext: document.getElementById("evidenceContext"),
       claimList: document.getElementById("claimList"),
       claimVerificationToggle: document.getElementById("claimVerificationToggle"),
+      runEvidenceClaims: document.getElementById("runEvidenceClaims"),
       yoinkHeading: document.getElementById("yoinkHeading"),
       yoinkSubhead: document.getElementById("yoinkSubhead"),
       yoinkTitle: document.getElementById("yoinkTitle"),
@@ -3750,6 +3759,8 @@
       yoinkFacts: document.getElementById("yoinkFacts"),
       yoinkFactMeta: document.getElementById("yoinkFactMeta"),
       yoinkOpenFolder: document.getElementById("yoinkOpenFolder"),
+      yoinkOpenMarkdown: document.getElementById("yoinkOpenMarkdown"),
+      yoinkRetryCapture: document.getElementById("yoinkRetryCapture"),
       yoinkRetranscribe: document.getElementById("yoinkRetranscribe"),
       yoinkEvidence: document.getElementById("yoinkEvidence"),
       runningPill: document.getElementById("runningPill"),
@@ -4556,12 +4567,39 @@
       return `<div class="waveform" aria-hidden="true">${bars.map((height) => `<span style="--bar-height:${height}%"></span>`).join("")}</div>`;
     }
 
+    function markdownPreviewLines(value) {
+      return String(value || "")
+        .split(/\n+/)
+        .map((line) => line.trim())
+        .filter((line) => line && !/^---$/.test(line))
+        .filter((line) => !/^#\s+/.test(line))
+        .slice(0, 8);
+    }
+
+    function markdownTranscriptPreviewHtml(markdown) {
+      const lines = markdownPreviewLines(markdown);
+      if (!lines.length) return "";
+      return `
+        <div class="transcript-preview markdown-rendered">
+          ${lines.map((line) => `<div class="transcript-segment"><div class="job-sub">${renderInlineMarkdown(line)}</div></div>`).join("")}
+        </div>
+      `;
+    }
+
     function transcriptPreviewHtml(sidecar = {}, podcast = false) {
       const segments = transcriptSegments(sidecar).slice(0, podcast ? 10 : 6);
       if (!segments.length) {
+        const markdownPreview = markdownTranscriptPreviewHtml(state.selectedYoinkMarkdown);
+        if (markdownPreview) return markdownPreview;
+        if (state.selectedYoinkMarkdownState === "no_markdown") {
+          return emptyPanelRow(
+            "Transcript file needs a fresh capture.",
+            "Re-capture this source to rebuild the saved transcript file."
+          );
+        }
         return emptyPanelRow(
           "Transcript preview unavailable.",
-          podcast ? "Speaker labels appear here when the local transcript includes them." : "Open the saved markdown for the full transcript."
+          podcast ? "Speaker labels appear here when the local transcript includes them." : "Open the transcript file for the full source text."
         );
       }
       return `
@@ -4600,20 +4638,27 @@
 
     function yoinkFactsHtml(row, sidecar = {}) {
       const speakers = speakerNames(sidecar);
+      const markdownState = state.selectedYoinkMarkdown
+        ? "ready"
+        : state.selectedYoinkMarkdownState === "no_markdown"
+          ? "needs re-capture"
+          : state.selectedYoinkMarkdownState === "loading"
+            ? "checking"
+            : (state.selectedYoinkMarkdownError || "not loaded");
       const facts = [
         ["Platform", platformOf(row, sidecar)],
         ["Duration", fmtDuration(durationOf(row, sidecar))],
         ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
         ["Topic", firstValue(row && row.topic, "Uncategorized")],
         ["Speakers", speakers.length ? `${speakers.length}` : "pending"],
-        ["Whisper model", firstValue(state.settings && state.settings.whisper_model, "base")],
         ["Re-transcription", state.retranscribeStatus || "ready"],
+        ["Transcript file", markdownState],
         ["Source", sourceUrlOf(row, sidecar) || "not stored"],
       ];
       if (state.selectedYoinkSidecarError) {
-        facts.push(["Local detail", state.selectedYoinkSidecarError]);
+        facts.push(["Saved details", state.selectedYoinkSidecarError]);
       } else {
-        facts.push(["Local detail", state.selectedYoinkSidecar ? "ready" : "checking"]);
+        facts.push(["Saved details", state.selectedYoinkSidecar ? "ready" : "checking"]);
       }
       return facts.map(([label, value]) => `
         <div class="job-row">
@@ -4627,17 +4672,21 @@
       const row = state.selectedYoink;
       const sidecar = state.selectedYoinkSidecar || {};
       const hasRow = Boolean(row);
+      const sourceUrl = sourceUrlOf(row, sidecar);
       els.yoinkOpenFolder.disabled = !hasRow || !folderPathOf(row);
+      els.yoinkOpenMarkdown.disabled = !hasRow || !videoIdOf(row);
+      els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row);
       els.yoinkEvidence.disabled = !hasRow || !evidenceVideoIdOf(row, sidecar);
       els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing;
       els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
+      els.yoinkRetryCapture.title = sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.";
       if (!hasRow) {
         els.yoinkHeading.innerHTML = "Pick a uoink <em>to inspect.</em>";
         els.yoinkSubhead.textContent = "Podcast episodes, interviews, and regular videos share one local detail view.";
         els.yoinkTitle.textContent = "No uoink selected";
-        els.yoinkMeta.textContent = "library detail";
+        els.yoinkMeta.textContent = "saved source";
         els.yoinkFactMeta.textContent = "local files";
-        els.yoinkDetail.innerHTML = emptyPanelRow("No uoink selected.", "Choose a library card to open its local detail view.");
+        els.yoinkDetail.innerHTML = emptyPanelRow("No uoink selected.", "Choose a library card to open its saved source view.");
         els.yoinkFacts.innerHTML = emptyPanelRow("No local facts loaded.", "Details are read from the saved library row when present.");
         return;
       }
@@ -4645,15 +4694,15 @@
       const mediaLabel = mediaLabelFor(row, sidecar);
       const speakers = speakerNames(sidecar);
       const title = rowTitle({ ...row, title: firstValue(sidecar.episode_title, sidecar.title, row.title) });
-      els.yoinkHeading.innerHTML = `${htmlEscape(mediaLabel)} <em>detail.</em>`;
+      els.yoinkHeading.innerHTML = `Saved ${htmlEscape(mediaLabel)} <em>source.</em>`;
       els.yoinkSubhead.textContent = title;
       els.yoinkTitle.textContent = title;
       els.yoinkMeta.textContent = [
         mediaLabel,
         firstValue(sidecar.podcast_title, sidecar.host, sidecar.channel, row.channel),
         fmtDuration(durationOf(row, sidecar)),
-      ].filter((value) => value && value !== "--:--").join(" | ") || "local detail";
-      els.yoinkFactMeta.textContent = state.selectedYoinkSidecar ? "ready" : "reading from library";
+      ].filter((value) => value && value !== "--:--").join(" | ") || "saved source";
+      els.yoinkFactMeta.textContent = state.selectedYoinkSidecar ? "ready" : "checking saved files";
       const speakerHtml = speakers.length
         ? `<div class="speaker-row">${speakers.map((speaker) => `<span class="speaker-chip">${htmlEscape(speaker)}</span>`).join("")}</div>`
         : `<div class="job-sub">${podcast ? "No speaker labels stored for this episode yet." : "No speaker labels stored for this uoink."}</div>`;
@@ -4688,6 +4737,11 @@
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return JSON.parse(await res.text());
+    }
+
+    async function loadYoinkMarkdown(videoId) {
+      const data = await authFetch(`/yoinks/${encodeURIComponent(videoId)}/markdown`);
+      return data.markdown || "";
     }
 
     async function loadDetailFileImages() {
@@ -4729,17 +4783,36 @@
       state.selectedYoink = row || null;
       state.selectedYoinkSidecar = null;
       state.selectedYoinkSidecarError = "";
+      state.selectedYoinkMarkdown = "";
+      state.selectedYoinkMarkdownState = row ? "loading" : "idle";
+      state.selectedYoinkMarkdownError = "";
       state.retranscribeStatus = "";
       state.retranscribing = false;
       renderYoinkDetail();
       switchTab("yoink");
       const sidecarPath = sidecarPathForRow(row);
-      if (!sidecarPath) return;
-      try {
-        state.selectedYoinkSidecar = await loadJsonFile(sidecarPath);
-      } catch (err) {
-        state.selectedYoinkSidecarError = "local detail needs another moment";
+      const videoId = videoIdOf(row);
+      const tasks = [];
+      if (sidecarPath) {
+        tasks.push(loadJsonFile(sidecarPath)
+          .then((data) => { state.selectedYoinkSidecar = data; })
+          .catch(() => { state.selectedYoinkSidecarError = "saved details need another moment"; }));
       }
+      if (videoId) {
+        tasks.push(loadYoinkMarkdown(videoId)
+          .then((markdown) => {
+            state.selectedYoinkMarkdown = markdown;
+            state.selectedYoinkMarkdownState = markdown ? "ready" : "empty";
+          })
+          .catch((err) => {
+            state.selectedYoinkMarkdown = "";
+            state.selectedYoinkMarkdownState = (err.data && err.data.state) || "unavailable";
+            state.selectedYoinkMarkdownError = err.message;
+          }));
+      } else {
+        state.selectedYoinkMarkdownState = "unavailable";
+      }
+      if (tasks.length) await Promise.all(tasks);
       renderYoinkDetail();
     }
 
@@ -4779,6 +4852,51 @@
       } finally {
         state.retranscribing = false;
         renderYoinkDetail();
+      }
+    }
+
+    async function openSelectedMarkdown() {
+      const videoId = videoIdOf(state.selectedYoink);
+      if (!videoId) return showToast("Select a uoink first.");
+      try {
+        await authFetch(`/yoinks/${encodeURIComponent(videoId)}/open-markdown`);
+        showToast("Transcript file opened.");
+      } catch (err) {
+        showToast(err.data && err.data.state === "no_markdown"
+          ? "No transcript file yet. Re-capture this source to rebuild it."
+          : "Could not open the transcript file.");
+      }
+    }
+
+    async function retrySelectedYoinkCapture() {
+      const videoId = videoIdOf(state.selectedYoink);
+      if (!videoId) return showToast("Select a uoink first.");
+      try {
+        await authFetch(`/yoinks/${encodeURIComponent(videoId)}/reyoink`, {
+          method: "POST",
+          body: JSON.stringify({}),
+        });
+        showToast("Re-capture queued.");
+        refreshActivity();
+      } catch (err) {
+        showToast(err.message.includes("source link")
+          ? "No source link is stored for this uoink."
+          : "Could not queue a fresh capture.");
+      }
+    }
+
+    async function runClaimsForSelectedEvidence() {
+      const videoId = state.selectedEvidenceVideo || evidenceVideoIdOf(state.selectedYoink, state.selectedYoinkSidecar || {});
+      if (!videoId) return showToast("Pick a uoink before running a claim scan.");
+      try {
+        await authFetch("/claims/extract", {
+          method: "POST",
+          body: JSON.stringify({ video_id: videoId, claims: [], mode: "agent" }),
+        });
+        showToast("Claim scan ready for an agent pass.");
+        await loadEvidence();
+      } catch (err) {
+        showToast("Could not prepare the claim scan.");
       }
     }
 
@@ -5645,6 +5763,7 @@
 
     async function loadEvidence() {
       const videoId = state.selectedEvidenceVideo;
+      els.runEvidenceClaims.disabled = !videoId;
       if (!videoId) {
         renderEvidenceEmpty();
         return;
@@ -5652,7 +5771,10 @@
       els.evidenceContext.innerHTML = `
         <div class="job-row">
           <div class="job-title">${htmlEscape(state.selectedEvidenceTitle || videoId)}</div>
-          <div class="job-sub">${htmlEscape(videoId)}</div>
+          <div class="job-sub">Ready for a claim review pass. Uoink stores evidence signals here for your judgment.</div>
+          <div class="inline-row">
+            <button class="button ghost" type="button" data-run-claims>Run claim scan</button>
+          </div>
         </div>
       `;
       try {
@@ -5668,10 +5790,11 @@
 
     function renderEvidenceEmpty() {
       state.claims = [];
-      els.evidenceNavCount.textContent = "0";
+      if (els.evidenceNavCount) els.evidenceNavCount.textContent = "0";
       els.claimCount.textContent = "0";
+      els.runEvidenceClaims.disabled = true;
       els.evidenceContext.innerHTML = `<div class="teach-card"><div class="teach-kicker">Evidence</div><strong>Pick a uoink to inspect claims.</strong><p>Library, For You, and workspace cards can load their extracted claims into this panel.</p></div>`;
-      els.claimList.innerHTML = `<div class="teach-card"><div class="teach-kicker">Claims</div><strong>Evidence signals appear after selection.</strong><p>Uoink surfaces support, contradiction, mixed, or inconclusive notes. You still decide what the evidence means.</p></div>`;
+      els.claimList.innerHTML = `<div class="teach-card"><div class="teach-kicker">Evidence notes</div><strong>Evidence signals appear after selection.</strong><p>Uoink records support, contradiction, mixed, or inconclusive notes. You still decide what the evidence means.</p></div>`;
     }
 
     function evidenceSourceHtml(ev) {
@@ -5706,11 +5829,19 @@
     }
 
     function renderClaims() {
-      els.evidenceNavCount.textContent = String(state.claims.length);
+      if (els.evidenceNavCount) els.evidenceNavCount.textContent = String(state.claims.length);
       els.claimCount.textContent = String(state.claims.length);
       els.claimList.innerHTML = state.claims.length
         ? state.claims.map(claimRowHtml).join("")
-        : emptyPanelRow("No claims extracted for this uoink.", "Turn on Claim verification for new uoinks, or ask an agent to run extract_claims for this video.");
+        : `
+          <div class="job-row">
+            <div class="job-title">No claims saved for this uoink yet.</div>
+            <div class="job-sub">Run a claim scan with an agent, then Uoink will store the extracted claims here.</div>
+            <div class="inline-row">
+              <button class="button" type="button" data-run-claims>Run claim scan</button>
+            </div>
+          </div>
+        `;
     }
 
     async function recordClaimEvidence(claimId) {
@@ -8643,10 +8774,13 @@
         if (event.target === els.defaultAnchorsModal) closeDefaultAnchorsModal();
       });
       document.getElementById("reloadEvidence").addEventListener("click", loadEvidence);
+      els.runEvidenceClaims.addEventListener("click", runClaimsForSelectedEvidence);
       els.yoinkOpenFolder.addEventListener("click", () => {
         const folder = folderPathOf(state.selectedYoink);
         if (folder) authFetch(`/open-folder?path=${encodeURIComponent(folder)}`).catch(() => showToast("Could not open that folder."));
       });
+      els.yoinkOpenMarkdown.addEventListener("click", openSelectedMarkdown);
+      els.yoinkRetryCapture.addEventListener("click", retrySelectedYoinkCapture);
       els.yoinkRetranscribe.addEventListener("click", requestRetranscription);
       els.yoinkEvidence.addEventListener("click", () => {
         if (!state.selectedYoink) return;
@@ -8885,6 +9019,11 @@
         const verifyClaim = event.target.closest("[data-verify-claim]");
         if (verifyClaim) {
           recordClaimEvidence(verifyClaim.dataset.verifyClaim);
+          return;
+        }
+        const runClaims = event.target.closest("[data-run-claims]");
+        if (runClaims) {
+          runClaimsForSelectedEvidence();
           return;
         }
         const skipClaimButton = event.target.closest("[data-skip-claim]");
