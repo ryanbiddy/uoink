@@ -1285,6 +1285,29 @@
       display: block;
     }
 
+    /* "Write from this" card CTA (U-04): the one action a saved source is
+       for, on every card. Outlined at rest so 12 cards don't become 12
+       orange alarms competing with the headline; fills on card hover,
+       button hover, or keyboard focus. */
+    .button.primary.card-write {
+      width: 100%;
+      margin-top: 4px;
+      padding: 8px 10px;
+      font-size: 13px;
+      border-color: rgba(255, 61, 0, 0.55);
+      background: transparent;
+      color: var(--vermillion);
+      box-shadow: none;
+    }
+
+    .uoink-card:hover .button.primary.card-write,
+    .button.primary.card-write:hover,
+    .button.primary.card-write:focus-visible {
+      border-color: var(--vermillion);
+      background: var(--vermillion);
+      color: var(--ink);
+    }
+
     /* Advanced options disclosure (U-03): one drawer for everything a
        first draft doesn't need, so Source > Output > Topic > Generate fit
        one screen. */
@@ -3334,7 +3357,8 @@
                 <button class="button ghost" type="button" id="yoinkOpenMarkdown">Open transcript file</button>
                 <button class="button ghost" type="button" id="yoinkRetryCapture">Re-capture source</button>
                 <button class="button ghost" type="button" id="yoinkRetranscribe">Re-transcribe</button>
-                <button class="button primary" type="button" id="yoinkEvidence">Evidence</button>
+                <button class="button ghost" type="button" id="yoinkEvidence">Evidence</button>
+                <button class="button primary" type="button" id="yoinkWriteFrom">Write from this</button>
               </div>
           </div>
           <div class="learn-links" aria-label="Uoink detail walkthrough links">
@@ -4006,6 +4030,7 @@
       yoinkRetryCapture: document.getElementById("yoinkRetryCapture"),
       yoinkRetranscribe: document.getElementById("yoinkRetranscribe"),
       yoinkEvidence: document.getElementById("yoinkEvidence"),
+      yoinkWriteFrom: document.getElementById("yoinkWriteFrom"),
       runningPill: document.getElementById("runningPill"),
       portLabel: document.getElementById("portLabel"),
       libraryGrid: document.getElementById("libraryGrid"),
@@ -5029,6 +5054,7 @@
       els.yoinkOpenMarkdown.disabled = !hasRow || !videoIdOf(row);
       els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row);
       els.yoinkEvidence.disabled = !hasRow || !evidenceVideoIdOf(row, sidecar);
+      els.yoinkWriteFrom.disabled = !hasRow || !videoIdOf(row);
       els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing;
       els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
       els.yoinkRetryCapture.title = sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.";
@@ -6571,6 +6597,7 @@
               <span class="age">${htmlEscape(fmtAge(row.yoinked_at))}</span>
             </div>
             <div class="health-dots" title="${htmlEscape(dotTitle)}" aria-label="${htmlEscape(dotTitle)}">${healthDots(row.health)}</div>
+            <button class="button primary card-write" type="button" data-write-from="${id}" aria-label="Write from ${title}">Write from this</button>
           </div>
         </article>
       `;
@@ -7639,6 +7666,26 @@
       syncWritingGenerateState();
       updateWritingAttribution();
       if (focus) els.writingSourceSearch.focus();
+    }
+
+    // U-04 (UX-09): "Write from this" deep link. Jumps to Generate with the
+    // given source pre-picked, so nobody re-finds a video they were just
+    // looking at. Resolves through videoIdOf because picker rows and
+    // library cards can carry different primary keys.
+    async function writeFromSource(videoId) {
+      const wanted = String(videoId || "");
+      if (!wanted) return;
+      switchTab("writing");
+      await loadWritingSources();
+      const row = writingSourceRowsAll().find((item) => videoIdOf(item) === wanted)
+        || state.library.find((item) => videoIdOf(item) === wanted);
+      if (!row) {
+        clearWritingSource({ focus: true });
+        showToast("Couldn't preselect that source. It's in the list.");
+        return;
+      }
+      await selectWritingSourceById(writingRowId(row));
+      document.querySelector(".content").scrollTop = 0;
     }
 
     async function selectWritingSourceById(id) {
@@ -9416,6 +9463,12 @@
       els.yoinkOpenMarkdown.addEventListener("click", openSelectedMarkdown);
       els.yoinkRetryCapture.addEventListener("click", retrySelectedYoinkCapture);
       els.yoinkRetranscribe.addEventListener("click", requestRetranscription);
+      els.yoinkWriteFrom.addEventListener("click", () => {
+        if (!state.selectedYoink) return;
+        const videoId = videoIdOf(state.selectedYoink);
+        if (!videoId) return showToast("This uoink has no saved source id yet.");
+        writeFromSource(videoId);
+      });
       els.yoinkEvidence.addEventListener("click", () => {
         if (!state.selectedYoink) return;
         const videoId = evidenceVideoIdOf(state.selectedYoink, state.selectedYoinkSidecar || {});
@@ -9678,6 +9731,13 @@
         const skipClaimButton = event.target.closest("[data-skip-claim]");
         if (skipClaimButton) {
           skipClaim(skipClaimButton.dataset.skipClaim);
+          return;
+        }
+        const writeFrom = event.target.closest("[data-write-from]");
+        if (writeFrom) {
+          // Before the card branch: the button sits inside a [data-folder]
+          // card and must win over opening the detail view.
+          writeFromSource(writeFrom.dataset.writeFrom);
           return;
         }
         const card = event.target.closest("[data-folder]");
