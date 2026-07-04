@@ -246,52 +246,9 @@
 
     .main {
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
       min-width: 0;
       min-height: 0;
-    }
-
-    .chrome {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      min-height: 48px;
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      background: rgba(10, 10, 10, 0.82);
-      color: var(--muted);
-      font-family: var(--font-mono);
-      font-size: 12px;
-    }
-
-    .chrome-brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .chrome-brand b {
-      color: var(--cream);
-      font-family: var(--font-ui);
-      letter-spacing: 0.03em;
-    }
-
-    .chrome-brand span {
-      color: var(--dim);
-    }
-
-    .window-controls {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .window-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 99px;
-      border: 1px solid var(--dim);
-      opacity: 0.85;
     }
 
     .content {
@@ -2478,9 +2435,6 @@
       .nav-button .nav-count {
         margin-left: 6px;
       }
-      .chrome {
-        padding: 0 18px;
-      }
       .content {
         padding: 26px 18px 34px;
       }
@@ -2593,15 +2547,6 @@
     </aside>
 
     <main class="main">
-      <div class="chrome">
-        <span class="chrome-brand"><b>UOINK</b><span>private dashboard</span></span>
-        <div class="window-controls" aria-hidden="true">
-          <span class="window-dot"></span>
-          <span class="window-dot"></span>
-          <span class="window-dot"></span>
-        </div>
-      </div>
-
       <div class="content">
         <section class="tab-panel" id="tab-for-you" data-tab-panel="for-you">
           <div class="page-head">
