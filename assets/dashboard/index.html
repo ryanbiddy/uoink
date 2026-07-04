@@ -5688,7 +5688,9 @@
     }
 
     function libraryFilterValue(key, value) {
-      if (key === "hook_type") return prettyHook(value);
+      if (["channel", "topic", "hook_type", "format", "performance", "length"].includes(key)) {
+        return facetLabelForValue(key, value);
+      }
       return String(value || "").trim();
     }
 
@@ -6137,34 +6139,6 @@
         .map((item) => `<option value="${htmlEscape(item.value)}">${htmlEscape(item.label)}</option>`)
         .join("");
       select.value = current;
-    }
-
-    function libraryFilterLabel(key) {
-      return ({
-        q: "Search",
-        channel: "Channel",
-        topic: "Topic",
-        hook_type: "Hook",
-        format: "Format",
-        performance: "Performance",
-        length: "Length",
-        date_from: "From",
-        date_to: "To",
-      })[key] || key;
-    }
-
-    function libraryFilterDisplayValue(key, value) {
-      if (["channel", "topic", "hook_type", "format", "performance", "length"].includes(key)) {
-        return facetLabelForValue(key, value);
-      }
-      return String(value || "").trim();
-    }
-
-    function activeLibraryFilterSummary() {
-      return Object.entries(state.filters)
-        .filter(([key, value]) => value && key !== "sort")
-        .map(([key, value]) => `${libraryFilterLabel(key)}: ${libraryFilterDisplayValue(key, value)}`)
-        .join(" | ");
     }
 
     function rawStatus(row) {
