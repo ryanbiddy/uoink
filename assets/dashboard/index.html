@@ -7906,12 +7906,12 @@
               <div class="anchor-row-top">
                 <div>
                   <strong>${htmlEscape(label)}</strong>
-                  <div class="job-sub">${htmlEscape(anchor.source_type || "anchor")}${active ? " | active" : " | inactive"}${isDefault ? " | deactivate to free the slot" : ""}</div>
+                  <div class="job-sub">${htmlEscape(anchor.source_type || "anchor")}${active ? " | active" : " | inactive"}${isDefault ? (active ? " | deactivate to free the slot" : " | default anchor") : ""}</div>
                 </div>
                 ${isDefault ? `<span class="anchor-badge">Default</span>` : ""}
                 <div class="inline-row">
                   ${isDefault
-                    ? `<button class="button ghost" type="button" data-toggle-style-anchor="${htmlEscape(id)}" data-anchor-active="${active ? "true" : "false"}">${toggleLabel}</button><button class="button ghost" type="button" disabled title="Default anchors can be deactivated, not deleted.">Keep</button>`
+                    ? `<button class="button ghost" type="button" data-toggle-style-anchor="${htmlEscape(id)}" data-anchor-active="${active ? "true" : "false"}">${toggleLabel}</button>`
                     : `<button class="button ghost" type="button" data-edit-style-anchor="${htmlEscape(id)}" data-anchor-name="${htmlEscape(label)}" data-anchor-type="${htmlEscape(anchor.source_type || (anchor.source_url ? "url" : "text"))}" data-anchor-value="${htmlEscape(sourceValue)}" data-anchor-active="${active ? "true" : "false"}">Edit</button><button class="button ghost" type="button" data-remove-style-anchor="${htmlEscape(id)}">Delete</button>`}
                 </div>
               </div>
