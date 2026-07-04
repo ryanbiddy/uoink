@@ -1308,6 +1308,57 @@
       color: var(--ink);
     }
 
+    /* Topics overview (U-05): corpus-wide topic chips with counts above
+       the Library grid. Uncategorized gets a dashed border so the
+       untagged pile is visible instead of buried in a dropdown. */
+    .topic-overview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .topic-overview.hidden {
+      display: none;
+    }
+
+    .topic-overview-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: transparent;
+      color: var(--cream);
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .topic-overview-chip span {
+      color: rgba(255, 244, 236, 0.55);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .topic-overview-chip:hover,
+    .topic-overview-chip:focus-visible {
+      outline: none;
+      border-color: var(--vermillion);
+    }
+
+    .topic-overview-chip.active {
+      border-color: var(--vermillion);
+      background: rgba(194, 65, 12, 0.18);
+    }
+
+    .topic-overview-chip.uncategorized {
+      border-style: dashed;
+      color: rgba(255, 244, 236, 0.75);
+    }
+
     /* Advanced options disclosure (U-03): one drawer for everything a
        first draft doesn't need, so Source > Output > Topic > Generate fit
        one screen. */
@@ -3312,6 +3363,11 @@
             </span>
           </div>
 
+          <!-- U-05 (UX-13): every topic you've uoinked, with counts, as the
+               clickable overview the corpus never had. Feeds the topic
+               filter below. -->
+          <div class="topic-overview hidden" id="topicOverview" role="group" aria-label="Your topics with saved counts"></div>
+
           <div id="libraryGrid" class="grid" aria-live="polite"></div>
           <div id="libraryEmpty" class="empty-state hidden">
             <div>
@@ -4047,6 +4103,7 @@
       searchInput: document.getElementById("searchInput"),
       channelFilter: document.getElementById("channelFilter"),
       topicFilter: document.getElementById("topicFilter"),
+      topicOverview: document.getElementById("topicOverview"),
       hookFilter: document.getElementById("hookFilter"),
       formatFilter: document.getElementById("formatFilter"),
       performanceFilter: document.getElementById("performanceFilter"),
@@ -6502,6 +6559,7 @@
     }
 
     function renderLibrary() {
+      renderTopicOverview();
       const rows = sortRows(state.library.slice());
       const filtersActive = hasLibraryFilters();
       const corpusTotal = Number(state.corpusTotal || 0);
@@ -6894,6 +6952,39 @@
         state.facetsFallback = true;
       }
       syncFacetOptions();
+      renderTopicOverview();
+    }
+
+    // U-05 (UX-13): the topics-you've-uoinked overview. Corpus-wide counts
+    // from /library/facets, biggest first, Uncategorized visually flagged
+    // (it's a hygiene debt, 8/31 at audit time). Click filters the Library;
+    // click again clears.
+    function renderTopicOverview() {
+      const wrap = els.topicOverview;
+      if (!wrap) return;
+      const topics = (state.facets && Array.isArray(state.facets.topic))
+        ? state.facets.topic.slice() : [];
+      if (!topics.length) {
+        wrap.classList.add("hidden");
+        wrap.innerHTML = "";
+        return;
+      }
+      topics.sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0));
+      const active = state.filters.topic || "";
+      wrap.innerHTML = topics.map((t) => {
+        const value = String(t.value || "");
+        const label = String(t.label || t.value || "");
+        const count = Number(t.count) || 0;
+        const isUncat = value.toLowerCase() === "uncategorized";
+        const hint = isUncat
+          ? `${count} saved uoink${count === 1 ? "" : "s"} with no topic yet. Click to see them; topics live in Settings.`
+          : `Show the ${count} saved uoink${count === 1 ? "" : "s"} in ${label}.`;
+        const classes = ["topic-overview-chip",
+          active === value ? "active" : "",
+          isUncat ? "uncategorized" : ""].filter(Boolean).join(" ");
+        return `<button type="button" class="${classes}" data-topic-overview="${htmlEscape(value)}" title="${htmlEscape(hint)}" aria-pressed="${active === value}">${htmlEscape(label)}<span>${count}</span></button>`;
+      }).join("");
+      wrap.classList.remove("hidden");
     }
 
     function facetSourceKeys(key) {
@@ -9747,6 +9838,16 @@
         }
         const openPath = event.target.closest("[data-open-path]");
         if (openPath) authFetch(`/open-folder?path=${encodeURIComponent(openPath.dataset.openPath)}`).catch(() => showToast("Couldn't open that folder."));
+        const overviewChip = event.target.closest("[data-topic-overview]");
+        if (overviewChip) {
+          const value = overviewChip.dataset.topicOverview || "";
+          const next = state.filters.topic === value ? "" : value;
+          els.topicFilter.value = next;
+          state.filters.topic = next;
+          renderTopicOverview();
+          loadLibrary({ reset: true });
+          return;
+        }
         const gap = event.target.closest("[data-gap-topic]");
         if (gap) {
           els.topicFilter.value = gap.dataset.gapTopic || "";
