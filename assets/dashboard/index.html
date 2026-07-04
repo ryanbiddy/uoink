@@ -3322,6 +3322,19 @@
       <div class="default-anchor-list" id="defaultAnchorList"></div>
     </div>
   </div>
+  <div class="modal-backdrop hidden" id="stopHelperConfirm" role="dialog" aria-modal="true" aria-labelledby="stopHelperConfirmTitle">
+    <div class="modal-card" style="width:min(460px, calc(100vw - 48px))">
+      <div>
+        <div class="soft-note">Local app</div>
+        <div class="panel-title" id="stopHelperConfirmTitle">Stop Uoink helper?</div>
+      </div>
+      <p class="setting-copy">The dashboard and browser capture will stop until you launch Uoink again.</p>
+      <div class="inline-row" style="justify-content:flex-end">
+        <button class="button ghost" type="button" id="cancelStopHelper">Keep running</button>
+        <button class="button danger" type="button" id="confirmStopHelper">Stop helper</button>
+      </div>
+    </div>
+  </div>
   <div class="handoff-popup hidden" id="writingHandoffPopup" role="dialog" aria-modal="false" aria-label="Screenshot drag targets">
     <div class="handoff-popup-head">
       <div>
@@ -3406,6 +3419,7 @@
       agents: [],
       agentDetectionLoaded: false,
       generateWorkspace: null,
+      stopHelperFocusTarget: null,
     };
 
     const FALLBACK_FACETS = {
@@ -3567,6 +3581,9 @@
       styleAnchorPreview: document.getElementById("styleAnchorPreview"),
       defaultAnchorsModal: document.getElementById("defaultAnchorsModal"),
       defaultAnchorList: document.getElementById("defaultAnchorList"),
+      stopHelperConfirm: document.getElementById("stopHelperConfirm"),
+      cancelStopHelper: document.getElementById("cancelStopHelper"),
+      confirmStopHelper: document.getElementById("confirmStopHelper"),
       evidenceNavCount: document.getElementById("evidenceNavCount"),
       claimCount: document.getElementById("claimCount"),
       evidenceContext: document.getElementById("evidenceContext"),
@@ -7822,6 +7839,29 @@
       }
     }
 
+    function openStopHelperConfirm(trigger) {
+      state.stopHelperFocusTarget = trigger || document.activeElement;
+      els.stopHelperConfirm.classList.remove("hidden");
+      els.cancelStopHelper.focus();
+    }
+
+    function closeStopHelperConfirm() {
+      els.stopHelperConfirm.classList.add("hidden");
+      if (state.stopHelperFocusTarget && typeof state.stopHelperFocusTarget.focus === "function") {
+        state.stopHelperFocusTarget.focus();
+      }
+      state.stopHelperFocusTarget = null;
+    }
+
+    function confirmStopHelper() {
+      closeStopHelperConfirm();
+      postHelper("/helper/quit");
+    }
+
+    function stopHelperWithConfirm(event) {
+      openStopHelperConfirm(event && event.currentTarget);
+    }
+
     async function saveOutputFolder() {
       const outputDir = els.outputFolder.value.trim();
       if (!outputDir) return showToast("Enter an output folder first.");
@@ -8080,8 +8120,16 @@
           els.updateLine.textContent = "Update check needs another moment.";
         }
       });
-      document.getElementById("stopHelper").addEventListener("click", () => postHelper("/helper/quit"));
-      document.getElementById("stopHelperSettings").addEventListener("click", () => postHelper("/helper/quit"));
+      document.getElementById("stopHelper").addEventListener("click", stopHelperWithConfirm);
+      document.getElementById("stopHelperSettings").addEventListener("click", stopHelperWithConfirm);
+      els.cancelStopHelper.addEventListener("click", closeStopHelperConfirm);
+      els.confirmStopHelper.addEventListener("click", confirmStopHelper);
+      els.stopHelperConfirm.addEventListener("click", (event) => {
+        if (event.target === els.stopHelperConfirm) closeStopHelperConfirm();
+      });
+      els.stopHelperConfirm.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeStopHelperConfirm();
+      });
       els.autostartToggle.addEventListener("change", () => saveSettingsPatch({ autostart: els.autostartToggle.checked }, "Autostart updated."));
       els.rolePicker.addEventListener("change", (event) => {
         const input = event.target.closest('input[name="role"]');
