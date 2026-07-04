@@ -1,40 +1,40 @@
 # Uoink Public Roadmap
 
-Uoink is the local corpus + agent layer for AI-native creators and the developers building tools alongside them. Whatever is on the web—video, podcast, text—Uoink keeps the source and hands it to your AI, in your voice, with the creator credit intact.
+Uoink is the local corpus + agent layer for AI-native creators and the developers building tools alongside them. Whatever the source (video, podcast, text), Uoink keeps it on your disk and hands it to your AI, in your voice, with the creator credit intact.
 
-Here is what we're building next. 
+Here's what we're building next.
 
 ## v3.3 Focus Areas
 
 ### 1. Source Coverage Expansion
-We're expanding beyond YouTube and Podcasts to cover the most critical platforms for creators:
-- **Substack**: Articles and newsletters.
-- **LinkedIn Videos**: Growing platform for B2B creators.
-- **Reddit Threads**: Pure text and comments.
+YouTube and podcasts are in. Next, the platforms creators study most:
+- **Substack**: articles and newsletters.
+- **LinkedIn Videos**: a growing home for B2B creators.
+- **Reddit Threads**: pure text and comments.
 - **Micro-content Platforms**: Bluesky, Threads, and Mastodon.
 - **Newsletters**: Beehiiv, Ghost, and Buttondown.
 
 ### 2. Writing Studio Expansion
-Making the composer experience smoother and native:
+The composer gets smoother and more native:
 - **X/Twitter Composer**: Typefully-style thread builder, character limits, and one-click intents to publish directly on X.
-- **Native Attribution**: Automatic, non-suppressible creator credit (e.g., `via @creator`) appended to tweets and blogs to ensure proper attribution.
+- **Native Attribution**: automatic, non-suppressible creator credit (e.g. `via @creator`) appended to tweets and blogs.
 
 ### 3. AI Consumer Expansion (The Iterate Layer)
-Expanding how you interact with your corpus:
-- **OpenAPI Bridge**: Allowing non-MCP AIs (like Gemini, Grok, Perplexity) to hit Uoink.
-- **Local LLM Support**: First-class support for Ollama and LM Studio.
-- **Browser Extension Chat**: A ChatGPT-style popup to chat against your corpus using your own API keys.
-- **Voice Mode**: Talk directly to your corpus via Whisper and TTS.
-- **IDE Plugins**: Direct integrations for Cursor, Replit, and other developer environments.
+More ways to point an AI at your corpus:
+- **OpenAPI Bridge**: lets non-MCP AIs (Gemini, Grok, Perplexity) hit Uoink.
+- **Local LLM Support**: first-class support for Ollama and LM Studio.
+- **Browser Extension Chat**: a ChatGPT-style popup that chats against your corpus with your own API keys.
+- **Voice Mode**: talk directly to your corpus via Whisper and TTS.
+- **IDE Plugins**: direct integrations for Cursor, Replit, and other developer environments.
 
 ### 4. UX & Discoverability Polish
-- **Smart Dashboard Inputs**: Autocomplete for hook types, topics, and channels. Markdown rendering in description fields.
-- **Per-Source Landing Pages**: Dedicated spaces for discovering how to use Uoink with specific platforms (Substack, TikTok, etc.).
-- **MCP Discovery**: A clean OpenAPI spec and active presence in MCP registries to ensure agents can find and use Uoink tools effortlessly.
+- **Smart Dashboard Inputs**: autocomplete for hook types, topics, and channels. Markdown rendering in description fields.
+- **Per-Source Landing Pages**: dedicated pages for using Uoink with specific platforms (Substack, TikTok, etc.).
+- **MCP Discovery**: a clean OpenAPI spec and an active presence in MCP registries so agents can find and call Uoink tools.
 
 ## Beyond v3.3
 - Native Mac App
 - Chrome Web Store submission
 - Formal bookmarking sync (browser sync, reader mode, highlights, tags)
 
-*Have feedback? Join the conversation in our GitHub Discussions!*
+*Have feedback? Join the conversation in GitHub Discussions.*
