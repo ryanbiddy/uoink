@@ -25,7 +25,6 @@ import json
 import logging
 import secrets
 from datetime import datetime
-from typing import Any
 
 log = logging.getLogger("uoink.workspaces")
 
