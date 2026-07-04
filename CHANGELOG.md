@@ -10,24 +10,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [3.2.5] - 2026-07-04
 
+This one's about trust. Every surface that used to fake it (silent saves, phantom retries, "0 uoinks" on a failed request) now does the real thing or says plainly that it can't.
+
 ### Added
 
-- **Captions-only retry for long videos.** Activity and detail surfaces can retry a stuck source in lite mode, keeping the transcript path while skipping the fragile extras.
-- **Smart Generate inputs.** Topic, channel, hook, target-length, CTA, and style-anchor controls now pull from the local corpus instead of asking for raw values.
-- **Source-first recovery actions.** Detail and Evidence now expose Open folder, Open transcript file, Re-capture, Re-transcribe, Evidence, and Run claim scan where those actions help.
+- **Real draft saving.** New `POST /writing/draft` and `GET /writing/draft/<id>` endpoints (migration 0018). Writing Save now stores your draft and a reload gets it back. Before this, Save quietly did nothing.
+- **Captions-only retry for long videos.** When a long source keeps failing, "Retry, captions only" runs a lite pass: transcript kept, screenshots capped at roughly 1 per 5 minutes, comments skipped.
+- **Smart Generate inputs.** Topic and channel pickers with corpus counts, hook chips, target-length presets with units, CTA and style-anchor pickers. They pull from your actual corpus instead of asking for raw values.
+- **`/resurface` and `/taste/anchors` routes.** The dashboard's For You tab and the extension popup/setup called endpoints the helper never served (silent 404 on every load). The helper now serves `GET /resurface`, `/resurface/today`, and `/taste/anchors`.
+- **Source-first recovery actions.** Detail and Evidence expose Open folder, Open transcript file, Re-capture, Re-transcribe, and Run claim scan where they help, so dead-end empty states have a way out.
+- **Newsletter output mode**, and BYO thread mode now prompts as an actual thread instead of a single tweet.
 
 ### Changed
 
-- **Library state model.** No matches, empty corpus, unavailable Library, invalid dates, and corpus-wide facets now render as distinct states with human copy.
-- **Dashboard copy and accessibility pass.** Raw helper/route/config language moved behind advanced disclosures, keyboard card activation works, modals trap focus, and placeholder-led controls have accessible names.
-- **Settings polish.** Output folder picking, topic undo, model/key status copy, and transcript checker controls now read like product settings instead of implementation details.
+- **Library overhaul.** Fits inside the shipped 1280x800 window with per-tab scroll. No matches, empty corpus, and "Library temporarily unavailable" render as 3 distinct states (a request failure never shows "0 uoinks"). Filters populate from corpus-wide facets, impossible date ranges are rejected, and enum labels read like words (`screen_recording` shows as "Screen recording").
+- **Copy overhaul, dashboard + extension.** Contractions across ~45 toasts, machine-voiced errors rewritten plain, jargon tucked behind advanced disclosures, and 50 mojibake strings in the extension popup (double-encoded dashes, dots, check marks) repaired.
+- **Accessibility pass.** Keyboard activation on card controls, modal focus traps with Esc to close, real labels on placeholder-only inputs, labeled sidebar count badges, source-card semantics.
+- **Stop Uoink asks first.** Stopping the helper now takes a confirmation and shows explicit stopped-state copy. The one-click kill is gone.
+- **Settings polish.** Output folder picker instead of a raw path box, topic delete with undo, plain-language model and key status.
+- **Chrome Web Store listing rebranded.** Listing copy and promo tiles redone for Uoink's multi-source framing.
 
 ### Fixed
 
-- **Generate workspace validation.** Blank or hidden workspace creation is rejected before anything is written.
-- **Activity duplicate failures.** Failed single-video jobs and retry rows dedupe by source so the same source does not double-render.
-- **Stop Uoink confirmation.** Stop controls now ask first and avoid the old one-click helper shutdown path.
-- **Writing Studio no-op actions.** Blank Copy is disabled, Save waits for a real draft, and stale `Use as-is` behavior is gone.
+- **Picker attribution.** A no-match source search clears the stale hidden pick and disables Generate until you pick for real, so output can't get attributed to the wrong source.
+- **Manual drafts count.** Typing or pasting a draft into Generate enables Save and Copy, matching what the placeholder invites you to do.
+- **Honest retry exhaustion.** Jobs that burn their last retry say they gave up instead of showing "Retrying..." forever, and the retry worker stops logging a phantom "retry at ..." after the final attempt.
+- **Activity dedupe.** Failed single-video jobs coalesce by source URL, so one failure doesn't render as 2 rows with competing states.
+- **Workspace validation.** Generate no longer silently POSTs a workspace right after source pick; blank forms are rejected before anything is written.
+- **Draft endpoints return 404** for ids beyond SQLite's rowid range (they used to crash with a 500).
+- **Facets with zero tagged sources** render a labeled empty state instead of an "all"-only dropdown that looks broken.
+- **No-op controls removed.** Blank-draft Copy is disabled, the style-anchor `Keep` dead button is gone, and the fake window chrome (inert traffic-light dots) is off the dashboard.
 
 ## [2.1.1] - 2026-05-26
 
