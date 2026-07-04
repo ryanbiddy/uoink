@@ -26,12 +26,12 @@ def test_empty_facets_get_labeled_disabled_state() -> None:
     require("select.disabled = true;" in DASHBOARD, "empty facet control is not disabled")
     require("select.title = empty.title;" in DASHBOARD, "empty facet control carries no explanation")
     for label in (
-        "Format: none tagged yet",
-        "Performance: none tagged yet",
-        "Length: none tagged yet",
-        "Hook: none tagged yet",
-        "Channel: none saved yet",
-        "Topic: none saved yet",
+        "Format: none yet",
+        "Performance: none yet",
+        "Length: none yet",
+        "Hook: none yet",
+        "Channel: none yet",
+        "Topic: none yet",
     ):
         require(label in DASHBOARD, f"empty-state label missing: {label}")
     print("ok  loaded-but-empty facets render a labeled, disabled state")
