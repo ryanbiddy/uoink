@@ -2273,6 +2273,7 @@
     }
 
     .link-list a,
+    .link-list button,
     .row-link {
       display: flex;
       justify-content: space-between;
@@ -2283,6 +2284,13 @@
       padding: 10px 11px;
       background: var(--ink-warm);
       text-decoration: none;
+    }
+
+    .link-list button {
+      color: var(--cream);
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
     }
 
     .row-link {
@@ -2530,17 +2538,17 @@
         <button class="nav-button" type="button" data-tab-button="settings">Settings</button>
       </nav>
       <div class="sidebar-bottom">
-        <div class="running-pill" id="runningPill"><span class="pip"></span><span>Uoink is running</span></div>
-        <div class="localhost" id="portLabel">localhost:5179</div>
+        <div class="running-pill" id="runningPill"><span class="pip"></span><span>Ready on this device</span></div>
+        <div class="localhost" id="portLabel">Private local app</div>
         <button class="sidebar-action" type="button" id="viewActivity">View activity <span class="nav-count" id="activityNavCount">0</span></button>
         <button class="sidebar-action" type="button" id="starGithub">⭐ Star on GitHub</button>
-        <button class="stop" type="button" id="stopHelper">Stop helper</button>
+        <button class="stop" type="button" id="stopHelper">Stop Uoink</button>
       </div>
     </aside>
 
     <main class="main">
       <div class="chrome">
-        <span class="chrome-brand"><b>UOINK</b><span>local helper dashboard</span></span>
+        <span class="chrome-brand"><b>UOINK</b><span>private dashboard</span></span>
         <div class="window-controls" aria-hidden="true">
           <span class="window-dot"></span>
           <span class="window-dot"></span>
@@ -2554,7 +2562,7 @@
             <div>
               <div class="eyebrow">For You</div>
               <h1>Worth revisiting <em>today.</em></h1>
-              <p class="lede">Local signals only: your engagement history, corpus overlap, facets, and old-but-valuable uoinks. No global trend guessing.</p>
+              <p class="lede">Built from your saves, recent engagement, and older uoinks worth another look. No global trend guessing.</p>
             </div>
             <div class="inline-row">
               <button class="button ghost" type="button" id="refreshForYou">Refresh</button>
@@ -2564,7 +2572,7 @@
 
           <div class="summary-line">
             <span id="forYouSummary">Building local recommendations...</span>
-            <span class="soft-note">Engagement Memory + S1 facets</span>
+            <span class="soft-note">Saved work and recent signals</span>
           </div>
           <div class="learn-links" aria-label="For You walkthrough links">
             <a href="https://uoink.app/features/resurface-for-you" target="_blank" rel="noreferrer">Learn: For You</a>
@@ -2577,7 +2585,7 @@
             <div class="panel">
               <div class="panel-head">
                 <div class="panel-title">Connections you have not explored</div>
-                <div class="localhost" id="connectionMeta">topic/entity overlap</div>
+                <div class="localhost" id="connectionMeta">shared topics</div>
               </div>
               <div class="panel-body" id="connectionRows"></div>
             </div>
@@ -2595,7 +2603,7 @@
           <div class="panel" style="margin-top:16px">
             <div class="panel-head">
               <div class="panel-title">Anchors performing</div>
-              <div class="localhost" id="anchorMeta">rated anchors + engagement</div>
+              <div class="localhost" id="anchorMeta">anchor signals</div>
             </div>
             <div class="panel-body" id="anchorRows"></div>
           </div>
@@ -2992,7 +3000,7 @@
           <div class="evidence-layout">
             <aside class="panel">
               <div class="panel-head">
-                <div class="panel-title">Selected uoink</div>
+                <div class="panel-title">Selected source</div>
                 <span class="nav-count" id="claimCount">0</span>
               </div>
               <div class="panel-body" id="evidenceContext">
@@ -3092,7 +3100,7 @@
             <div>
               <div class="eyebrow">Sources</div>
               <h1>What Uoink can <em>read next.</em></h1>
-              <p class="lede">A plain map of capture surfaces, what lands locally, and what each source becomes inside Library, Writing, Build, Script, and Evidence.</p>
+              <p class="lede">A plain map of capture surfaces, what lands locally, and where each source shows up next.</p>
             </div>
             <button class="button primary" type="button" data-open-youtube>+ Uoink</button>
           </div>
@@ -3109,7 +3117,7 @@
             <div>
               <div class="eyebrow">Uoink</div>
               <h1 id="yoinkHeading">Pick a uoink <em>to inspect.</em></h1>
-              <p class="lede" id="yoinkSubhead">Podcast episodes, interviews, and regular videos share one local detail view.</p>
+              <p class="lede" id="yoinkSubhead">Podcast episodes, interviews, and regular videos share one saved-source view.</p>
             </div>
               <div class="inline-row">
                 <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
@@ -3128,14 +3136,14 @@
             <section class="panel">
               <div class="panel-head">
                 <div class="panel-title" id="yoinkTitle">No uoink selected</div>
-                <div class="localhost" id="yoinkMeta">library detail</div>
+                <div class="localhost" id="yoinkMeta">saved source</div>
               </div>
               <div class="panel-body" id="yoinkDetail"></div>
             </section>
             <aside class="panel">
               <div class="panel-head">
                 <div class="panel-title">Local facts</div>
-                <div class="localhost" id="yoinkFactMeta">local files</div>
+                <div class="localhost" id="yoinkFactMeta">saved files</div>
               </div>
               <div class="panel-body" id="yoinkFacts"></div>
             </aside>
@@ -3167,7 +3175,7 @@
             <div class="panel">
               <div class="panel-head">
                 <div class="panel-title">Queue</div>
-                <div class="localhost" id="queueMeta">waiting for helper</div>
+                <div class="localhost" id="queueMeta">waiting for local app</div>
               </div>
               <div class="panel-body" id="queueRows"></div>
             </div>
@@ -3185,8 +3193,8 @@
           <div class="page-head">
             <div>
               <div class="eyebrow">Settings</div>
-              <h1>Tune the <em>helper.</em></h1>
-              <p class="lede">Key storage, output folders, topic routing, helper status, agent config, and update checks live here.</p>
+              <h1>Set up <em>Uoink.</em></h1>
+              <p class="lede">Keys, folders, topics, source rules, transcript checks, and agent connections live here.</p>
             </div>
             <button class="button ghost" type="button" id="reloadSettings">Reload</button>
           </div>
@@ -3212,9 +3220,9 @@
 
             <div class="setting-block">
               <h2>Local app</h2>
-              <p class="setting-copy" id="helperStatus">Checking local status...</p>
+              <p class="setting-copy" id="helperStatus">Checking app status...</p>
               <div class="inline-row">
-                <button class="button danger" type="button" id="stopHelperSettings">Stop</button>
+                <button class="button danger" type="button" id="stopHelperSettings">Stop Uoink</button>
                 <label class="inline-row"><input id="autostartToggle" type="checkbox" checked> Autostart on login</label>
               </div>
             </div>
@@ -3279,7 +3287,7 @@
 
             <div class="setting-block">
               <h2>Topics</h2>
-              <p class="setting-copy">Edit topic names and comma-separated keywords. The helper uses these for local folder routing.</p>
+              <p class="setting-copy">Edit topic names and comma-separated keywords. Uoink uses these for local folder routing.</p>
               <div class="topic-list" id="topicList"></div>
               <div class="inline-row">
                 <button class="button ghost" type="button" id="addTopic">+ Add topic</button>
@@ -3288,15 +3296,15 @@
             </div>
 
             <div class="setting-block">
-              <h2>Writing agent</h2>
+              <h2>Agent connection</h2>
               <div class="agent-setup-card" id="settingsAgentSetupCard">
                 <strong>Checking installed writing agents...</strong>
                 <span class="soft-note">Uoink will offer one-click setup for clients already on this machine.</span>
               </div>
               <details>
-                <summary>Advanced: show config JSON</summary>
-                <textarea class="mono-box" id="mcpConfig" readonly>Loading agent config...</textarea>
-                <button class="button" type="button" id="copyMcp">Copy config JSON</button>
+                <summary>Advanced: connection JSON</summary>
+                <textarea class="mono-box" id="mcpConfig" readonly>Loading agent connection...</textarea>
+                <button class="button" type="button" id="copyMcp">Copy connection JSON</button>
               </details>
             </div>
 
@@ -3332,16 +3340,16 @@
 
             <div class="setting-block">
               <h2>Transcript reliability</h2>
-              <p class="setting-copy" id="reliabilityStatus">Checking local Whisper model...</p>
+              <p class="setting-copy" id="reliabilityStatus">Checking transcript checker...</p>
               <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox"> Auto-check transcript reliability</label>
               <div class="inline-row">
                 <select class="field" id="whisperModel"></select>
-                <button class="button ghost" type="button" id="saveWhisperModel">Save model</button>
+                <button class="button ghost" type="button" id="saveWhisperModel">Save choice</button>
               </div>
               <div class="inline-row">
-                <button class="button" type="button" id="downloadReliabilityModel">Download Whisper model now</button>
+                <button class="button" type="button" id="downloadReliabilityModel">Download transcript checker</button>
               </div>
-              <p class="setting-copy">Uses whisper-timestamped locally to flag low-confidence transcript spans. The tiny model downloads only after you ask for it (~150 MB) and is cached under your Uoink data folder.</p>
+              <p class="setting-copy">Runs locally to flag low-confidence transcript spans. The small starter model downloads only after you ask for it and stays in your Uoink data folder.</p>
             </div>
           </div>
         </section>
@@ -3355,7 +3363,7 @@
             </div>
             <div class="inline-row">
               <button class="button ghost" type="button" id="reloadFeatures">Reload</button>
-              <button class="button primary" type="button" id="openFeaturesIndex">Open /features</button>
+              <button class="button primary" type="button" id="openFeaturesIndex">Open feature guide</button>
             </div>
           </div>
 
@@ -3377,7 +3385,7 @@
             <section class="panel">
               <div class="panel-head">
                 <div class="panel-title" id="featureGroupTitle">Feature walkthroughs</div>
-                <div class="localhost">uoink.app</div>
+                <div class="localhost">guide pages</div>
               </div>
               <div class="panel-body">
                 <div class="feature-row-list" id="featureRows"></div>
@@ -3395,40 +3403,44 @@
                   <span class="wordmark-text">OINK</span>
                 </div>
                 <p class="lede" style="margin:18px auto 0">Local-first. Open source. Your machine does the work.</p>
-                <div class="running-pill" id="aboutStatus" style="margin-top:18px"><span class="pip"></span><span>Checking helper</span></div>
+                <div class="running-pill" id="aboutStatus" style="margin-top:18px"><span class="pip"></span><span>Checking Uoink</span></div>
                 <div class="quote">&quot;Yo. Uoink that.&quot;</div>
               </div>
             </div>
             <div class="setting-block">
               <h2>Local surfaces</h2>
-              <p class="setting-copy">The same helper serves the dashboard, startup screen, and agent bridge. No cloud account, no sync layer.</p>
+              <p class="setting-copy">The same local app serves the dashboard, startup screen, and agent bridge. No cloud account, no sync layer.</p>
               <div class="link-list">
                 <a href="/dashboard" target="_blank" rel="noreferrer">Dashboard <span>local view</span></a>
-                <a href="/splash" target="_blank" rel="noreferrer">Splash <span>startup screen</span></a>
-                <a href="/settings/mcp-config" target="_blank" rel="noreferrer">Agent config <span>copy/paste bridge</span></a>
+                <a href="/splash" target="_blank" rel="noreferrer">Startup screen <span>local view</span></a>
+                <button type="button" data-tab-button-proxy="settings">Agent setup <span>Settings</span></button>
               </div>
             </div>
             <div class="setting-block">
               <h2>Runtime</h2>
               <p class="setting-copy" id="aboutVersion">Version: checking...</p>
-              <p class="setting-copy" id="aboutPort">Loopback: localhost:5179</p>
+              <p class="setting-copy">Dashboard, capture, and agent tools are running on this computer.</p>
+              <details>
+                <summary>Advanced: local address</summary>
+                <p class="setting-copy" id="aboutPort">Local address loading...</p>
+              </details>
             </div>
             <div class="setting-block">
               <h2>Learn</h2>
               <div class="link-list">
-                <a href="https://uoink.app" target="_blank" rel="noreferrer">uoink.app <span>-></span></a>
-                <a href="https://uoink.app/how" target="_blank" rel="noreferrer">Quick start guide <span>-></span></a>
-                <a href="https://uoink.app/hooks" target="_blank" rel="noreferrer">9 hook types explained <span>-></span></a>
-                <a href="https://uoink.app/agents" target="_blank" rel="noreferrer">Agent integration docs <span>-></span></a>
+                <a href="https://uoink.app" target="_blank" rel="noreferrer">uoink.app <span>open</span></a>
+                <a href="https://uoink.app/how" target="_blank" rel="noreferrer">Quick start guide <span>open</span></a>
+                <a href="https://uoink.app/hooks" target="_blank" rel="noreferrer">9 hook types explained <span>open</span></a>
+                <a href="https://uoink.app/agents" target="_blank" rel="noreferrer">Agent integration docs <span>open</span></a>
               </div>
             </div>
             <div class="setting-block">
               <h2>Release + support</h2>
               <div class="link-list">
-                <a href="https://github.com/ryanbiddy/uoink/blob/main/CHANGELOG.md" target="_blank" rel="noreferrer">CHANGELOG.md <span>-></span></a>
-                <a href="https://github.com/ryanbiddy/uoink/releases" target="_blank" rel="noreferrer">GitHub releases <span>-></span></a>
-                <a href="https://github.com/ryanbiddy/uoink/issues" target="_blank" rel="noreferrer">File an issue <span>-></span></a>
-                <a href="https://uoink.app/privacy" target="_blank" rel="noreferrer">Privacy policy <span>-></span></a>
+                <a href="https://github.com/ryanbiddy/uoink/blob/main/CHANGELOG.md" target="_blank" rel="noreferrer">Release notes <span>open</span></a>
+                <a href="https://github.com/ryanbiddy/uoink/releases" target="_blank" rel="noreferrer">GitHub releases <span>open</span></a>
+                <a href="https://github.com/ryanbiddy/uoink/issues" target="_blank" rel="noreferrer">File an issue <span>open</span></a>
+                <a href="https://uoink.app/privacy" target="_blank" rel="noreferrer">Privacy policy <span>open</span></a>
               </div>
             </div>
           </div>
@@ -3459,12 +3471,12 @@
     <div class="modal-card" style="width:min(460px, calc(100vw - 48px))">
       <div>
         <div class="soft-note">Local app</div>
-        <div class="panel-title" id="stopHelperConfirmTitle">Stop Uoink helper?</div>
+        <div class="panel-title" id="stopHelperConfirmTitle">Stop Uoink?</div>
       </div>
       <p class="setting-copy">The dashboard and browser capture will stop until you launch Uoink again.</p>
       <div class="inline-row" style="justify-content:flex-end">
         <button class="button ghost" type="button" id="cancelStopHelper">Keep running</button>
-        <button class="button danger" type="button" id="confirmStopHelper">Stop helper</button>
+        <button class="button danger" type="button" id="confirmStopHelper">Stop Uoink</button>
       </div>
     </div>
   </div>
@@ -3595,7 +3607,7 @@
     const FALLBACK_FEATURES = [
       ["Capture", "in-page-button", "In-page button", "Save a YouTube video from the player actions row.", "https://uoink.app/features/in-page-button"],
       ["Capture", "right-click-any-link", "Right-click any link", "Queue a video without opening it first.", "https://uoink.app/features/right-click-any-link"],
-      ["Capture", "mobile-playlist-bridge", "Mobile playlist bridge", "Save on mobile, let the desktop helper pick it up.", "https://uoink.app/features/mobile-playlist-bridge"],
+      ["Capture", "mobile-playlist-bridge", "Mobile playlist bridge", "Save on mobile, let the local app pick it up.", "https://uoink.app/features/mobile-playlist-bridge"],
       ["Capture", "universal-page-uoink", "Universal page uoink", "Turn an allowed web page into local markdown and metadata.", "https://uoink.app/features/universal-page-uoink"],
       ["Capture", "twitter-video", "Twitter video", "Capture X videos with creator credit kept close.", "https://uoink.app/twitter"],
       ["Capture", "podcast-feeds", "Podcast feeds", "Watch RSS feeds and transcribe episodes locally.", "https://uoink.app/features/podcast-feeds"],
@@ -3609,22 +3621,22 @@
       ["Workspace", "writing-studio", "Writing Studio", "Turn a saved source into a credited tweet, thread, or blog.", "https://uoink.app/features/writing-studio"],
       ["Workspace", "style-anchors", "Style anchors", "Bring named writing samples into the draft context.", "https://uoink.app/features/style-anchors"],
       ["Verification", "claim-extraction", "Claim extraction", "Find factual claims worth checking.", "https://uoink.app/features/claim-extraction"],
-      ["Verification", "evidence-panel", "Evidence panel", "Record support, contradiction, mixed, or inconclusive signals.", "https://uoink.app/features/evidence-panel"],
+      ["Verification", "evidence-panel", "Evidence panel", "Record evidence signals while you decide what they mean.", "https://uoink.app/features/evidence-panel"],
       ["Distribution", "mcp-server", "Agent bridge", "Let agents query and assemble your local corpus.", "https://uoink.app/features/mcp-server"],
       ["Distribution", "claude-desktop-integration", "Claude Desktop", "Connect Claude to the local Uoink tools.", "https://uoink.app/features/claude-desktop-integration"],
       ["Distribution", "cursor-integration", "Cursor", "Use the same local corpus from your editor.", "https://uoink.app/features/cursor-integration"],
       ["Identity", "byo-anthropic-key", "BYO Anthropic key", "Keep optional model calls under your key.", "https://uoink.app/features/byo-anthropic-key"],
       ["Identity", "local-first", "Local-first", "Keep the index, screenshots, and settings on this machine.", "https://uoink.app/features/local-first"],
-      ["Identity", "no-cloud", "No Uoink cloud", "Use loopback helper surfaces instead of a hosted account.", "https://uoink.app/features/no-cloud"],
+      ["Identity", "no-cloud", "No Uoink cloud", "Use local app surfaces instead of a hosted account.", "https://uoink.app/features/no-cloud"],
     ].map(([group, slug, name, description, url]) => ({ group, slug, name, description, url }));
 
     const SOURCE_CAPABILITIES = [
-      ["YouTube video", "shipped", "In-page button, right-click link, playlist bridge", "Transcript, screenshots, comments, facets, hooks", "Library cards, Writing drafts, Build examples, Script shots, Evidence claims"],
+      ["YouTube video", "shipped", "In-page button, right-click link, playlist bridge", "Transcript, screenshots, comments, facets, hooks", "Library cards, drafts, scripts, and evidence notes"],
       ["X video", "shipped", "Right-click or paste supported X links", "Creator handle, media metadata, transcript when available", "Writing attribution, Library search, source credit in exports"],
-      ["Podcasts / RSS", "shipped", "Feed monitor or one-off episode URL", "Local transcript, speakers, waveform preview, episode facts", "Build research, Script evidence, long-form source memory"],
+      ["Podcasts / RSS", "shipped", "Feed monitor or one-off episode URL", "Local transcript, speakers, waveform preview, episode facts", "Research packets, scripts, and long-form source memory"],
       ["Substack", "planned", "Universal page uoink from allowed site", "Article text, author, publication URL, highlights", "Writing citations, quote bank, topic memory"],
       ["LinkedIn videos", "planned", "Universal page uoink once enabled", "Video metadata, creator, transcript where exposed", "B2B source memory and creator attribution"],
-      ["Reddit threads", "shipped", "Paste or right-click a Reddit thread URL", "Post, top comments, community, score signals", "Audience questions and Build objections"],
+      ["Reddit threads", "shipped", "Paste or right-click a Reddit thread URL", "Post, top comments, community, score signals", "Audience questions and research objections"],
       ["Bluesky", "planned", "Universal page uoink from post URL", "Thread text, author handle, linked media", "Writing references and attribution"],
       ["Threads", "planned", "Universal page uoink from thread URL", "Post text, author handle, linked media", "Writing references and creator credit"],
       ["Mastodon", "planned", "Universal page uoink from post URL", "Post text, instance, author handle, linked media", "Open-web references and attribution"],
@@ -4091,9 +4103,9 @@
       const keyReady = Boolean(state.settings && state.settings.anthropic_key_set);
       const advanced = `
         <details>
-          <summary>Advanced: show config JSON</summary>
-          <div class="mono-box">${htmlEscape(els.mcpConfig?.value || "Load Settings to inspect the generated config.")}</div>
-          <button class="button ghost" type="button" data-copy-agent-config>Copy config JSON</button>
+          <summary>Advanced: connection JSON</summary>
+          <div class="mono-box">${htmlEscape(els.mcpConfig?.value || "Load Settings to inspect the generated connection.")}</div>
+          <button class="button ghost" type="button" data-copy-agent-config>Copy connection JSON</button>
         </details>
       `;
       if (!state.agentDetectionLoaded) {
@@ -4179,7 +4191,7 @@
       const source = sourceNameFromUrl(context.url || raw);
       if (!raw) return "";
       if (haystack.includes("too many requests") || haystack.includes("http error 429") || haystack.includes("rate-limit") || haystack.includes("rate limit")) {
-        return "Helper's catching its breath. Retrying...";
+        return "Uoink needs a minute. Retrying...";
       }
       if (haystack.includes("sign in") || haystack.includes("login") || haystack.includes("cookies") || haystack.includes("captcha") || haystack.includes("guest token")) {
         return `${source} wouldn't hand this one over without a login. Retry with cookies?`;
@@ -4200,13 +4212,13 @@
         return "The local transcript step tripped. Details are tucked below.";
       }
       if (haystack.includes("can't find yt-dlp") || haystack.includes("can't find ffmpeg") || haystack.includes("no such file")) {
-        return "Uoink can't find a local media helper. Details are tucked below.";
+        return "Uoink can't find a local media tool. Details are tucked below.";
       }
       if (haystack.includes("yt-dlp") || haystack.includes("unable to download") || haystack.includes("extractor error")) {
         return `${source} would not hand this one over cleanly. Details are tucked below.`;
       }
       if (haystack.includes("queue unavailable") || haystack.includes("memory search unavailable") || haystack.includes("library unavailable")) {
-        return "Helper's catching its breath. Retrying...";
+        return "Uoink needs a minute. Retrying...";
       }
       return "Uoink couldn't finish this one. Details are tucked below.";
     }
@@ -4318,6 +4330,44 @@
         if (value !== undefined && value !== null && String(value).trim() !== "") return value;
       }
       return "";
+    }
+
+    function humanLabel(value) {
+      return String(value || "")
+        .replace(/[_-]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+
+    function sourceStatusLabel(value) {
+      const key = String(value || "").toLowerCase();
+      if (key === "shipped") return "Ready";
+      if (key === "in-flight") return "In progress";
+      if (key === "planned") return "Coming soon";
+      return humanLabel(value) || "Planned";
+    }
+
+    function evidenceSignalLabel(value) {
+      const key = String(value || "not reviewed").toLowerCase();
+      return ({
+        supports: "Supports the claim",
+        contradicts: "Challenges the claim",
+        mixed: "Mixed evidence",
+        inconclusive: "Needs more checking",
+        extracted: "Ready to review",
+      })[key] || humanLabel(key);
+    }
+
+    function transcriptModelLabel(value) {
+      const key = String(value || "base").toLowerCase();
+      return ({
+        tiny: "Tiny, fastest",
+        base: "Base, balanced",
+        small: "Small, more careful",
+        medium: "Medium, slower",
+        large: "Large, slowest",
+      })[key] || humanLabel(key);
     }
 
     function folderPathOf(row) {
@@ -4600,7 +4650,7 @@
         }
         return emptyPanelRow(
           "Transcript preview unavailable.",
-          podcast ? "Speaker labels appear here when the local transcript includes them." : "Open the transcript file for the full source text."
+          podcast ? "Speaker labels appear here when the local transcript includes them." : "Open the saved transcript for the full text."
         );
       }
       return `
@@ -4651,7 +4701,7 @@
         ["Duration", fmtDuration(durationOf(row, sidecar))],
         ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
         ["Topic", firstValue(row && row.topic, "Uncategorized")],
-        ["Speakers", speakers.length ? `${speakers.length}` : "pending"],
+        ["Speakers", speakers.length ? `${speakers.length}` : "not labeled yet"],
         ["Re-transcription", state.retranscribeStatus || "ready"],
         ["Transcript file", markdownState],
         ["Source", sourceUrlOf(row, sidecar) || "not stored"],
@@ -4683,11 +4733,11 @@
       els.yoinkRetryCapture.title = sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.";
       if (!hasRow) {
         els.yoinkHeading.innerHTML = "Pick a uoink <em>to inspect.</em>";
-        els.yoinkSubhead.textContent = "Podcast episodes, interviews, and regular videos share one local detail view.";
+        els.yoinkSubhead.textContent = "Podcast episodes, interviews, and regular videos share one saved-source view.";
         els.yoinkTitle.textContent = "No uoink selected";
         els.yoinkMeta.textContent = "saved source";
-        els.yoinkFactMeta.textContent = "local files";
-        els.yoinkDetail.innerHTML = emptyPanelRow("No uoink selected.", "Choose a library card to open its saved source view.");
+        els.yoinkFactMeta.textContent = "saved files";
+        els.yoinkDetail.innerHTML = emptyPanelRow("No uoink selected.", "Choose a library card to open its saved-source view.");
         els.yoinkFacts.innerHTML = emptyPanelRow("No local facts loaded.", "Details are read from the saved library row when present.");
         return;
       }
@@ -4823,9 +4873,9 @@
       if (!row || !videoId) return showToast("Select a uoink first.");
       const sidecar = state.selectedYoinkSidecar || {};
       const model = firstValue(state.settings && state.settings.whisper_model, "base");
-      if (!confirm(`Queue local Whisper re-transcription with the ${model} model?`)) return;
+      if (!confirm(`Queue re-transcription with ${transcriptModelLabel(model)}?`)) return;
       state.retranscribing = true;
-      state.retranscribeStatus = "queueing local Whisper job";
+      state.retranscribeStatus = "queueing transcript job";
       renderYoinkDetail();
       try {
         const data = await authFetch("/transcription/retranscribe", {
@@ -4972,9 +5022,9 @@
         state.resurface = payload;
         renderForYou(payload);
       } catch (err) {
-        els.forYouSummary.textContent = "For You is reading straight from your disk.";
+        els.forYouSummary.textContent = "For You is checking your saved work.";
         els.worthCards.innerHTML = "";
-        els.connectionRows.innerHTML = degradedState("Local recommendations need a minute.", "Uoink a few more videos or interact with existing cards to build Engagement Memory.", err.message);
+        els.connectionRows.innerHTML = degradedState("Local recommendations need a minute.", "Save a few more sources or interact with existing cards to give Uoink better signals.", err.message);
         els.gapRows.innerHTML = "";
         els.anchorRows.innerHTML = emptyPanelRow("No anchors yet.", "Anchor signals appear after engagement events or taste data exist locally.");
       }
@@ -5014,7 +5064,7 @@
         <article class="source-card">
           <div class="source-card-head">
             <h2>${htmlEscape(source.name)}</h2>
-            <span class="source-status ${htmlEscape(source.status.replace(/\s+/g, "-"))}">${htmlEscape(source.status)}</span>
+            <span class="source-status ${htmlEscape(source.status.replace(/\s+/g, "-"))}">${htmlEscape(sourceStatusLabel(source.status))}</span>
           </div>
           <p><strong>Capture:</strong> ${htmlEscape(source.capture)}</p>
           <p><strong>Corpus:</strong> ${htmlEscape(source.corpus)}</p>
@@ -5027,14 +5077,14 @@
       const score = normalizedScore(row);
       const age = daysSince(row.last_event_ts || row.yoinked_at);
       const scorePill = score > 0
-        ? `<div class="score-pill">local signal ${score.toFixed(1)}</div>`
+        ? `<div class="score-pill">saved-work signal ${score.toFixed(1)}</div>`
         : "";
       return `
         <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(videoIdOf(row))}" tabindex="0" role="button">
           <div class="insight-kicker">${htmlEscape(kicker)}</div>
           <div class="insight-title">${htmlEscape(rowTitle(row))}</div>
-          <div class="insight-meta">${htmlEscape(row.channel || "Unknown channel")} ${row.topic ? `| ${htmlEscape(row.topic)}` : ""}</div>
-          <div class="insight-copy">${age >= 9000 ? "No recent interaction recorded." : `${age} days since last local signal.`}</div>
+          <div class="insight-meta">${htmlEscape(row.channel || "Source not labeled")} ${row.topic ? `| ${htmlEscape(row.topic)}` : ""}</div>
+          <div class="insight-copy">${age >= 9000 ? "No recent interaction recorded." : `${age} days since last saved-work signal.`}</div>
           ${scorePill}
         </article>
       `;
@@ -5070,7 +5120,7 @@
       const anchors = Array.isArray(payload.anchors) ? payload.anchors : [];
       els.forYouNavCount.textContent = String(worth.length + connections.length + gaps.length + anchors.length);
       els.forYouSummary.textContent = payload.source
-        ? "Reading straight from your disk."
+        ? "Reading your saved work."
         : "Using local resurface signals.";
       els.worthCards.innerHTML = worth.length
         ? worth.slice(0, 3).map((row, i) => insightCard(row, i === 0 ? "highest signal" : "worth revisiting")).join("")
@@ -5108,7 +5158,7 @@
         state.workspaces = Array.isArray(data.workspaces) ? data.workspaces : [];
       } catch (err) {
         state.workspaces = [];
-        els.workspaceList.innerHTML = degradedState("Workspaces need another moment.", "The helper did not return saved workspaces yet.", err.message);
+        els.workspaceList.innerHTML = degradedState("Workspaces need another moment.", "Uoink could not load saved workspaces yet.", err.message);
       }
       renderWorkspaceList();
       if (!state.currentWorkspace && state.workspaces.length) {
@@ -5300,7 +5350,7 @@
         state.scripts = Array.isArray(data.scripts) ? data.scripts : [];
       } catch (err) {
         state.scripts = [];
-        els.scriptList.innerHTML = degradedState("Scripts need another moment.", "The helper did not return saved scripts yet.", err.message);
+        els.scriptList.innerHTML = degradedState("Scripts need another moment.", "Uoink could not load saved scripts yet.", err.message);
       }
       renderScriptList();
       if (!state.currentScript && state.scripts.length) {
@@ -5440,7 +5490,7 @@
       state.currentScript = null;
       els.scriptTitle.textContent = "Script";
       els.scriptDetail.innerHTML = `<div class="teach-card"><div class="teach-kicker">Script Studio</div><strong>Choose a Build workspace first.</strong><p>Grounding context, script versions, shot lists, and citations will appear here as readable sections.</p></div>`;
-      els.scriptRevisionResult.innerHTML = `<div class="teach-card"><div class="teach-kicker">Revision loop</div><strong>Paste the critique target, then run the pass.</strong><p>The response stays readable here, with the raw helper detail kept out of the main path.</p></div>`;
+      els.scriptRevisionResult.innerHTML = `<div class="teach-card"><div class="teach-kicker">Revision loop</div><strong>Paste the critique target, then run the pass.</strong><p>The response stays readable here, with technical detail tucked away.</p></div>`;
     }
 
     async function selectScript(scriptId) {
@@ -5696,7 +5746,7 @@
         renderScriptConnectionFallback();
         showToast("Connect Claude Desktop to generate.");
       } catch (err) {
-        els.scriptDetail.innerHTML = degradedState("Script Studio needs another pass.", "The helper could not prepare this script. Details are tucked below.", err.message);
+        els.scriptDetail.innerHTML = degradedState("Script Studio needs another pass.", "Uoink could not prepare this script. Details are tucked below.", err.message);
       }
     }
 
@@ -5750,7 +5800,7 @@
     function evidenceStatusChip(value) {
       const status = String(value || "extracted").toLowerCase();
       const safe = ["supports", "contradicts", "mixed", "inconclusive"].includes(status) ? status : "";
-      return `<span class="status-chip ${safe}">${htmlEscape(status)}</span>`;
+      return `<span class="status-chip ${safe}">${htmlEscape(evidenceSignalLabel(status))}</span>`;
     }
 
     function openEvidenceFor(videoId, title = "") {
@@ -5772,7 +5822,7 @@
       els.evidenceContext.innerHTML = `
         <div class="job-row">
           <div class="job-title">${htmlEscape(state.selectedEvidenceTitle || videoId)}</div>
-          <div class="job-sub">Ready for a claim review pass. Uoink stores evidence signals here for your judgment.</div>
+          <div class="job-sub">Ready for an evidence review. Uoink stores signals here for your judgment.</div>
           <div class="inline-row">
             <button class="button ghost" type="button" data-run-claims>Run claim scan</button>
           </div>
@@ -5783,7 +5833,7 @@
         state.claims = Array.isArray(data.claims) ? data.claims : [];
       } catch (err) {
         state.claims = [];
-        els.claimList.innerHTML = degradedState("Claims need another moment.", "The helper did not return claim rows yet.", err.message);
+        els.claimList.innerHTML = degradedState("Evidence notes need another moment.", "Uoink could not load the saved claim rows yet.", err.message);
         return;
       }
       renderClaims();
@@ -5794,32 +5844,32 @@
       if (els.evidenceNavCount) els.evidenceNavCount.textContent = "0";
       els.claimCount.textContent = "0";
       els.runEvidenceClaims.disabled = true;
-      els.evidenceContext.innerHTML = `<div class="teach-card"><div class="teach-kicker">Evidence</div><strong>Pick a uoink to inspect claims.</strong><p>Library, For You, and workspace cards can load their extracted claims into this panel.</p></div>`;
-      els.claimList.innerHTML = `<div class="teach-card"><div class="teach-kicker">Evidence notes</div><strong>Evidence signals appear after selection.</strong><p>Uoink records support, contradiction, mixed, or inconclusive notes. You still decide what the evidence means.</p></div>`;
+      els.evidenceContext.innerHTML = `<div class="teach-card"><div class="teach-kicker">Evidence</div><strong>Pick a uoink to inspect claims.</strong><p>Library, For You, and workspace cards can load their evidence notes into this panel.</p></div>`;
+      els.claimList.innerHTML = `<div class="teach-card"><div class="teach-kicker">Evidence notes</div><strong>Evidence signals appear after selection.</strong><p>Uoink records signals for your review. You still decide what the evidence means.</p></div>`;
     }
 
     function evidenceSourceHtml(ev) {
       return `
         <div class="evidence-source">
           ${evidenceStatusChip(ev.alignment_signal)}
-          <div class="job-title">${htmlEscape(ev.source_url || "source URL missing")}</div>
+          <div class="job-title">${htmlEscape(ev.source_url || "Source link not saved")}</div>
           <div class="job-sub markdown-rendered">${renderMarkdown(ev.quote || "No quote captured.")}</div>
         </div>
       `;
     }
 
     function claimRowHtml(claim) {
-      const score = claim.check_worthiness == null ? "not scored" : `${Math.round(Number(claim.check_worthiness) * 100)} check-worthiness`;
+      const score = claim.check_worthiness == null ? "not scored yet" : `${Math.round(Number(claim.check_worthiness) * 100)} worth checking`;
       const evidence = Array.isArray(claim.evidence) ? claim.evidence : [];
       return `
         <details class="claim-row" data-claim-id="${htmlEscape(claim.id)}">
           <summary>
             <span>${renderInlineMarkdown(claim.claim_text || "Untitled claim")}</span>
-            <span class="job-sub">${htmlEscape(score)} | ${htmlEscape(claim.status || "extracted")}</span>
+            <span class="job-sub">${htmlEscape(score)} | ${htmlEscape(evidenceSignalLabel(claim.status || "extracted"))}</span>
           </summary>
           <div class="claim-body">
             ${evidence.length ? evidence.map(evidenceSourceHtml).join("") : `<div class="job-sub">No evidence sources recorded yet.</div>`}
-            <textarea class="field draft-box" data-evidence-json="${htmlEscape(claim.id)}" placeholder='Paste evidence JSON: [{"source_url":"https://...","quote":"...","alignment_signal":"supports"}]'></textarea>
+            <textarea class="field draft-box" data-evidence-json="${htmlEscape(claim.id)}" placeholder="Paste evidence notes from an agent pass"></textarea>
             <div class="inline-row">
               <button class="button" type="button" data-verify-claim="${htmlEscape(claim.id)}">Record evidence</button>
               <button class="button ghost" type="button" data-skip-claim="${htmlEscape(claim.id)}">Mark not attempted</button>
@@ -5837,7 +5887,7 @@
         : `
           <div class="job-row">
             <div class="job-title">No claims saved for this uoink yet.</div>
-            <div class="job-sub">Run a claim scan with an agent, then Uoink will store the extracted claims here.</div>
+            <div class="job-sub">Run a claim scan with an agent, then Uoink will store evidence notes here.</div>
             <div class="inline-row">
               <button class="button" type="button" data-run-claims>Run claim scan</button>
             </div>
@@ -5847,12 +5897,12 @@
 
     async function recordClaimEvidence(claimId) {
       const input = document.querySelector(`[data-evidence-json="${CSS.escape(String(claimId))}"]`);
-      if (!input || !input.value.trim()) return showToast("Paste evidence JSON first.");
+      if (!input || !input.value.trim()) return showToast("Paste evidence notes first.");
       let evidence = null;
       try {
         evidence = JSON.parse(input.value);
       } catch (err) {
-        return showToast("Evidence JSON is invalid.");
+        return showToast("Evidence notes need valid JSON.");
       }
       try {
         await authFetch(`/claims/${encodeURIComponent(claimId)}/verify`, {
@@ -6057,7 +6107,7 @@
       } catch (err) {
         if (!state.jobsLoaded) state.jobs = [];
         if (render && els.queueMeta) {
-          els.queueMeta.textContent = "Helper's catching its breath. Retrying...";
+          els.queueMeta.textContent = "Uoink needs a minute. Retrying...";
         }
         return state.jobs;
       }
@@ -6172,7 +6222,7 @@
       const platform = platformOf(row);
       const variant = cardVariantClass(row);
       const title = htmlEscape(firstValue(row.episode_title, row.title, "Untitled uoink"));
-      const channel = htmlEscape(firstValue(row.host, row.channel, podcast ? row.podcast_title : "", "Unknown channel"));
+      const channel = htmlEscape(firstValue(row.host, row.channel, podcast ? row.podcast_title : "", "Source not labeled"));
       const topic = htmlEscape(row.topic || "Uncategorized");
       const hook = htmlEscape(prettyHook(row.hook_type));
       const confidence = row.hook_type_confidence != null ? ` - confidence ${row.hook_type_confidence}/5` : "";
@@ -6474,8 +6524,8 @@
       syncWorkspaceOptions();
       els.facetStatus.classList.toggle("hidden", !state.facetsFallback);
       els.facetStatus.title = state.facetsFallback
-        ? "Library filters need the helper's facet list."
-        : "Library facets loaded from the helper.";
+        ? "Using built-in facet defaults until Uoink sends the latest list."
+        : "Facet options loaded from Uoink.";
     }
 
     async function loadLibraryFacets() {
@@ -6622,18 +6672,18 @@
         state.health = data;
         const ok = data && data.ok !== false;
         els.runningPill.classList.toggle("offline", !ok);
-        els.runningPill.querySelector("span:last-child").textContent = ok ? "Uoink is running" : "Uoink is offline";
-        els.portLabel.textContent = `localhost:${data.port || 5179}`;
+        els.runningPill.querySelector("span:last-child").textContent = ok ? "Ready on this device" : "Uoink is offline";
+        els.portLabel.textContent = ok ? "Private local app" : "Open Uoink to reconnect";
         els.versionLine.textContent = `v${data.version || "unknown"} | current`;
         els.aboutStatus.classList.toggle("offline", !ok);
-        els.aboutStatus.querySelector("span:last-child").textContent = ok ? "Helper running" : "Helper offline";
+        els.aboutStatus.querySelector("span:last-child").textContent = ok ? "Uoink ready" : "Uoink offline";
         els.aboutVersion.textContent = `Version: ${data.version || "unknown"}`;
-        els.aboutPort.textContent = `Loopback: localhost:${data.port || 5179}`;
+        els.aboutPort.textContent = `http://127.0.0.1:${data.port || 5179}`;
       } catch (_) {
         els.runningPill.classList.add("offline");
         els.runningPill.querySelector("span:last-child").textContent = "Uoink is offline";
         els.aboutStatus.classList.add("offline");
-        els.aboutStatus.querySelector("span:last-child").textContent = "Helper offline";
+        els.aboutStatus.querySelector("span:last-child").textContent = "Uoink offline";
       }
     }
 
@@ -6644,8 +6694,8 @@
         state.queue = data;
         renderQueue(data);
       } catch (err) {
-        els.queueMeta.textContent = "Helper's catching its breath. Retrying...";
-        els.queueRows.innerHTML = degradedState("Helper's catching its breath.", "Queue will refresh again in a moment.", err.message);
+        els.queueMeta.textContent = "Uoink needs a minute. Retrying...";
+        els.queueRows.innerHTML = degradedState("Uoink needs a minute.", "Queue will refresh again in a moment.", err.message);
       }
     }
 
@@ -6915,8 +6965,8 @@
         syncWhisperModelOptions();
         const relModel = state.settings.transcript_reliability_model || {};
         els.reliabilityStatus.textContent = relModel.cached
-          ? `Local Whisper ${relModel.model || "tiny"} model ready.`
-          : `Local Whisper model not downloaded yet (~${relModel.estimated_download_mb || 150} MB).`;
+          ? `Transcript checker ready (${transcriptModelLabel(relModel.model || "tiny")}).`
+          : `Transcript checker not downloaded yet (~${relModel.estimated_download_mb || 150} MB).`;
       } catch (err) {
         els.keyStatus.textContent = "Settings need another moment.";
         renderRolePicker("mixed");
@@ -6929,25 +6979,25 @@
           els.outputFolder.value = diag.output_root || diag.output_dir || diag.desktop_root || "Output folder unavailable";
         }
       } catch (err) {
-        els.helperStatus.textContent = "Helper status needs another moment.";
+        els.helperStatus.textContent = "App status needs another moment.";
       }
       try {
         const cfg = await authFetch("/settings/mcp-config");
         els.mcpConfig.value = cfg.raw || JSON.stringify(cfg.claude_desktop || cfg, null, 2);
       } catch (err) {
-        els.mcpConfig.value = "Agent config needs another moment.";
+        els.mcpConfig.value = "Agent connection needs another moment.";
       }
       renderTopics(state.settings && Array.isArray(state.settings.topics) ? state.settings.topics : []);
       await Promise.all([loadPlaylistSettings(), loadPodcastFeedSettings(), loadChannels(), loadAllowedSites(), loadAgentSetup()]);
     }
 
     function diagnoseSummary(diag) {
-      if (!diag || diag.ok === false) return "Helper diagnostics reported an issue.";
+      if (!diag || diag.ok === false) return "Uoink reported an issue.";
       if (Array.isArray(diag.checks)) {
         const bad = diag.checks.filter((c) => c.status && c.status !== "ok");
-        return bad.length ? `${bad.length} check(s) need attention.` : "All helper checks green.";
+        return bad.length ? `${bad.length} check${bad.length === 1 ? "" : "s"} need attention.` : "All local checks are green.";
       }
-      return "Helper is responsive.";
+      return "Uoink is responsive.";
     }
 
     function renderTopics(topics) {
@@ -6982,7 +7032,7 @@
         ? state.settings.whisper_model
         : "base";
       els.whisperModel.innerHTML = models.map((model) => (
-        `<option value="${htmlEscape(model)}">${htmlEscape(model)}</option>`
+        `<option value="${htmlEscape(model)}">${htmlEscape(transcriptModelLabel(model))}</option>`
       )).join("");
       els.whisperModel.value = models.includes(current) ? current : "base";
     }
@@ -7023,13 +7073,13 @@
           features = [];
         }
         if (!features.length) features = FALLBACK_FEATURES.slice();
-        els.featuresStatus.textContent = `Features list unavailable from uoink.app. Showing ${source}.`;
+        els.featuresStatus.textContent = `Feature guide unavailable. Showing ${source === "local cache" ? "the saved copy" : "the built-in guide"}.`;
       }
       state.features = features;
       if (!state.selectedFeatureGroup || !features.some((item) => item.group === state.selectedFeatureGroup)) {
         state.selectedFeatureGroup = features[0] ? features[0].group : "Capture";
       }
-      if (source === "uoink.app") els.featuresStatus.textContent = `${features.length} feature walkthroughs loaded from uoink.app.`;
+      if (source === "uoink.app") els.featuresStatus.textContent = `${features.length} feature walkthroughs ready.`;
       renderFeatureGroups();
       renderFeatureRows();
     }
@@ -7066,10 +7116,13 @@
               </div>
               <button class="button ghost" type="button" data-open-feature="${htmlEscape(item.url)}">Open walkthrough</button>
             </div>
-            <div class="soft-note">${htmlEscape(item.slug)}</div>
+            <details class="error-details">
+              <summary>Advanced: page detail</summary>
+              <div class="soft-note">${htmlEscape(item.slug)}</div>
+            </details>
           </article>
         `).join("")
-        : emptyPanelRow("Features list unavailable.", "Check uoink.app/features.");
+        : emptyPanelRow("Feature guide unavailable.", "Open the public feature guide from the button above.");
     }
 
     function writingRowId(row) {
@@ -7318,7 +7371,7 @@
         localStorage.setItem("uoink.writingDraftId", String(data.id));
         showToast("Draft saved. It'll be here after a reload.");
       } catch (err) {
-        showToast("Save needs another pass. The helper couldn't store this draft.");
+        showToast("Save needs another pass. Uoink couldn't store this draft.");
       }
     }
 
@@ -7586,7 +7639,7 @@
         state.styleAnchorCap = Number(data.cap || data.limit || state.styleAnchorCap || 10) || 10;
       } catch (err) {
         state.styleAnchors = [];
-        els.styleAnchorPreview.textContent = "Style anchors need the helper to answer before previews appear.";
+        els.styleAnchorPreview.textContent = "Style anchors need Uoink to answer before previews appear.";
       }
       await loadDefaultStyleAnchors();
       renderStyleAnchors();
@@ -7678,7 +7731,7 @@
             </label>
           `;
         }).join("")
-        : `<div class="job-row"><div class="job-title">No style anchors yet.</div><div class="job-sub">Browse defaults or add a URL when the helper is ready.</div></div>`;
+        : `<div class="job-row"><div class="job-title">No style anchors yet.</div><div class="job-sub">Browse defaults or add a URL when Uoink is ready.</div></div>`;
       els.writingAnchorList.innerHTML = rows;
       els.styleAnchorManager.innerHTML = state.styleAnchors.length
         ? state.styleAnchors.map((anchor) => {
@@ -7721,7 +7774,7 @@
       if (!defaults.length) {
         els.defaultAnchorList.innerHTML = emptyPanelRow(
           "Default anchors are not loaded yet.",
-          "They appear here after the helper ships the default anchor library."
+          "They appear here after Uoink loads the default anchor library."
         );
         return;
       }
@@ -8176,7 +8229,7 @@
         try {
           await generateScriptInWriting();
         } catch (err) {
-          els.writingOutput.innerHTML = degradedState("Generate needs another pass.", "The helper could not prepare this script.", err.message);
+          els.writingOutput.innerHTML = degradedState("Generate needs another pass.", "Uoink could not prepare this script.", err.message);
           els.writingOutput.dataset.rawText = "";
           setWritingActionsEnabled(false);
         }
@@ -8219,7 +8272,7 @@
         renderWritingResult(data);
         showToast(data.mode === "grounding_only" ? "Connect a writing agent to generate." : "Writing draft ready.");
       } catch (err) {
-        els.writingOutput.innerHTML = degradedState("Writing Studio needs another pass.", "The helper could not prepare this draft. Details are tucked below.", err.message);
+        els.writingOutput.innerHTML = degradedState("Writing Studio needs another pass.", "Uoink could not prepare this draft. Details are tucked below.", err.message);
         els.writingOutput.dataset.rawText = "";
         setWritingActionsEnabled(false);
       }
@@ -8318,7 +8371,7 @@
         els.allowedSitesStatus.textContent = `${state.allowedSites.length} user-added site${state.allowedSites.length === 1 ? "" : "s"}.`;
       } catch (err) {
         state.allowedSites = [];
-        els.allowedSitesStatus.textContent = "Extra site permissions need the helper to answer first.";
+        els.allowedSitesStatus.textContent = "Extra site permissions need Uoink to answer first.";
       }
       renderAllowedSites();
     }
@@ -8536,8 +8589,8 @@
         refreshQueue();
       } catch (err) {
         showToast(err.message.includes("not found")
-          ? "This helper action is not ready in this build."
-          : "This helper action could not run.");
+          ? "This action is not ready in this build."
+          : "This action could not run.");
       }
     }
 
@@ -8583,7 +8636,7 @@
         const cfg = await authFetch("/settings/mcp-config");
         els.mcpConfig.value = cfg.raw || JSON.stringify(cfg.claude_desktop || cfg, null, 2);
       } catch (err) {
-        els.mcpConfig.value = "Agent config needs another moment.";
+        els.mcpConfig.value = "Agent connection needs another moment.";
       }
       renderTopics(state.settings && Array.isArray(state.settings.topics) ? state.settings.topics : []);
     }
@@ -8814,8 +8867,8 @@
       document.getElementById("saveKey").addEventListener("click", saveKey);
       document.getElementById("testKey").addEventListener("click", testKey);
       document.getElementById("copyMcp").addEventListener("click", async () => {
-        try { await navigator.clipboard.writeText(els.mcpConfig.value); showToast("Agent config copied."); }
-        catch (_) { showToast("Could not copy config."); }
+        try { await navigator.clipboard.writeText(els.mcpConfig.value); showToast("Agent connection copied."); }
+        catch (_) { showToast("Could not copy connection."); }
       });
       document.getElementById("checkUpdates").addEventListener("click", async () => {
         try {
@@ -8867,18 +8920,18 @@
         if (!els.scriptVoiceWarnings.checked) showToast("Voice DNA warnings hidden for this script.");
       });
       els.saveWhisperModel.addEventListener("click", () => {
-        saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Whisper model preference updated.");
+        saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Transcript checker choice updated.");
       });
       els.claimVerificationToggle.addEventListener("change", () => saveSettingsPatch({ claim_verification_enabled: els.claimVerificationToggle.checked }, "Claim verification setting updated."));
       els.reliabilityAutoCheck.addEventListener("change", () => saveSettingsPatch({ transcript_reliability_auto_check: els.reliabilityAutoCheck.checked }, "Transcript reliability setting updated."));
       els.downloadReliabilityModel.addEventListener("click", async () => {
-        if (!confirm("Download the local Whisper tiny model now? It is about 150 MB and stays on this machine.")) return;
+        if (!confirm("Download the starter transcript checker now? It is about 150 MB and stays on this machine.")) return;
         els.downloadReliabilityModel.disabled = true;
-        els.reliabilityStatus.textContent = "Downloading local Whisper model...";
+        els.reliabilityStatus.textContent = "Downloading transcript checker...";
         try {
           const data = await authFetch("/reliability/model/download", { method: "POST", body: JSON.stringify({}) });
           if (!data.ok) throw new Error(data.error || "download failed");
-          showToast("Whisper model downloaded.");
+          showToast("Transcript checker downloaded.");
           refreshSettings();
         } catch (err) {
           els.reliabilityStatus.textContent = "Model download failed.";
@@ -8994,8 +9047,8 @@
         const copyAgentConfig = event.target.closest("[data-copy-agent-config]");
         if (copyAgentConfig) {
           navigator.clipboard.writeText(els.mcpConfig.value).then(
-            () => showToast("Agent config copied."),
-            () => showToast("Could not copy config.")
+            () => showToast("Agent connection copied."),
+            () => showToast("Could not copy connection.")
           );
           return;
         }

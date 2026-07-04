@@ -59,7 +59,7 @@ def test_generate_and_agents() -> None:
     require('authFetch("/agents/detect")' in DASHBOARD, "agent detection missing")
     require("/agents/connect/${encodeURIComponent(client)}" in DASHBOARD, "one-click agent connect missing")
     require("Install Claude Desktop" in DASHBOARD, "zero-agent install CTA missing")
-    require("Advanced: show config JSON" in DASHBOARD, "advanced config disclosure missing")
+    require("Advanced: connection JSON" in DASHBOARD, "advanced connection disclosure missing")
     require("Open agent setup" not in DASHBOARD, "stale creator-path agent link remains")
     require("body.generate = true" in DASHBOARD, "BYO Path C opt-in missing")
     require("!hasWritingAgentBridge() && state.settings && state.settings.anthropic_key_set" in DASHBOARD, "BYO fallback incorrectly depends on agent config state")
