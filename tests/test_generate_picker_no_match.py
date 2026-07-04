@@ -32,16 +32,25 @@ def section(start: str, end: str) -> str:
 
 
 def test_writing_picker_clears_on_no_match() -> None:
+    # U-02 rebuilt the writing picker around a selected-source chip: the
+    # search input only exists while nothing is selected, and re-entering
+    # browse mode goes through clearWritingSource(), which drops the hidden
+    # id. A stale pick behind a typed query is structurally impossible, so
+    # the G-01 guarantee is now: (1) the render pass never writes the
+    # hidden id, and (2) every path back to the input clears it first.
     body = section("function syncWritingSourceOptions()",
-                   "async function selectWritingSourceById")
-    require("if (query && !filtered.length)" in body,
-            "writing picker keeps a stale pick after a no-match query")
-    clear = body.split("if (query && !filtered.length)", 1)[1]
+                   "function syncWritingGenerateState")
+    require("els.writingSource.value =" not in body,
+            "writing picker render must never write the hidden source ID")
+    clear = section("function clearWritingSource(",
+                    "async function selectWritingSourceById")
     require('els.writingSource.value = "";' in clear,
-            "no-match query must clear the hidden writing source ID")
+            "clearWritingSource must clear the hidden writing source ID")
     require("state.writingSelectedSourceRow = null;" in clear,
-            "no-match query must clear the selected writing row")
-    print("ok  writing picker: no-match query clears the hidden source ID")
+            "clearWritingSource must clear the selected writing row")
+    require("clearWritingSource({ focus: true })" in DASHBOARD,
+            "chip must route back to browse mode through clearWritingSource")
+    print("ok  writing picker: browse mode structurally drops stale picks")
 
 
 def test_script_picker_clears_on_no_match() -> None:

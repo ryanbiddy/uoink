@@ -1274,7 +1274,134 @@
     }
 
     .combo-option:hover,
-    .combo-option:focus-visible {
+    .combo-option:focus-visible,
+    .combo-option.active {
+      outline: none;
+      background: rgba(194, 65, 12, 0.18);
+    }
+
+    /* Title on its own line; the channel | topic | duration sub reads as a
+       second line instead of running on after the title. */
+    .combo-option strong {
+      display: block;
+    }
+
+    /* Advanced options disclosure (U-03): one drawer for everything a
+       first draft doesn't need, so Source > Output > Topic > Generate fit
+       one screen. */
+    .advanced-disclosure {
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      background: rgba(255, 244, 236, 0.02);
+    }
+
+    .advanced-disclosure > summary {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      list-style: none;
+      font-weight: 700;
+      user-select: none;
+    }
+
+    .advanced-disclosure > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .advanced-arrow {
+      display: inline-block;
+      color: var(--acid);
+      transition: transform 0.15s ease;
+    }
+
+    .advanced-disclosure[open] .advanced-arrow {
+      transform: rotate(90deg);
+    }
+
+    .advanced-hint {
+      margin-left: auto;
+      color: rgba(255, 244, 236, 0.45);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .advanced-disclosure > summary > span:not(.advanced-hint) {
+      white-space: nowrap;
+    }
+
+    .advanced-disclosure[open] .advanced-hint {
+      display: none;
+    }
+
+    .advanced-body {
+      display: grid;
+      gap: 10px;
+      padding: 2px 12px 12px;
+      border-top: 1px solid rgba(255, 244, 236, 0.08);
+    }
+
+    /* Selected-source chip: replaces the raw search input once a source is
+       picked so the title can wrap to two lines instead of truncating
+       (UX-05) and the title text can never become the dropdown filter
+       (UX-08). */
+    .source-chip {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: stretch;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      background: #0d0b09;
+    }
+
+    .source-chip.hidden {
+      display: none;
+    }
+
+    .source-chip-main {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      border: 0;
+      padding: 9px;
+      background: transparent;
+      color: var(--cream);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .source-chip-main strong {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .source-chip-main:hover,
+    .source-chip-main:focus-visible {
+      outline: none;
+      background: rgba(194, 65, 12, 0.18);
+    }
+
+    .source-chip-clear {
+      border: 0;
+      border-left: 1px solid var(--border);
+      padding: 0 14px;
+      background: transparent;
+      color: var(--cream);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .source-chip-clear:hover,
+    .source-chip-clear:focus-visible {
       outline: none;
       background: rgba(194, 65, 12, 0.18);
     }
@@ -2138,6 +2265,19 @@
       flex-wrap: wrap;
     }
 
+    /* Checkbox labels: keep the box beside the first line of its text and
+       let the text wrap in place, instead of dropping the whole sentence
+       under the checkbox. */
+    label.inline-row {
+      flex-wrap: nowrap;
+      align-items: flex-start;
+    }
+
+    label.inline-row input {
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
     .choice-grid,
     .settings-list {
       display: grid;
@@ -2889,8 +3029,12 @@
               <div class="panel-body">
                 <label class="soft-note" for="writingSourceSearch">Source uoink</label>
                 <div class="combo" id="writingSourceCombo">
-                  <input class="field combo-input" id="writingSourceSearch" type="search" role="combobox" autocomplete="off" aria-expanded="false" aria-controls="writingSourceOptions" placeholder="Search saved uoinks">
+                  <input class="field combo-input" id="writingSourceSearch" type="search" role="combobox" autocomplete="off" aria-expanded="false" aria-controls="writingSourceOptions" aria-autocomplete="list" placeholder="Browse saved uoinks, newest first">
                   <input id="writingSource" type="hidden">
+                  <div class="source-chip hidden" id="writingSourceChip">
+                    <button class="source-chip-main" id="writingSourceChipMain" type="button" title="Change source"></button>
+                    <button class="source-chip-clear" id="writingSourceChipClear" type="button" aria-label="Clear selected source">&times;</button>
+                  </div>
                   <div class="combo-list" id="writingSourceOptions" role="listbox"></div>
                 </div>
                 <label class="soft-note">Output</label>
@@ -2901,28 +3045,8 @@
                   <label class="choice-row"><input type="radio" name="writingMode" value="newsletter"><span>Newsletter</span></label>
                   <label class="choice-row"><input type="radio" name="writingMode" value="script"><span>Script</span></label>
                 </div>
-                <label class="soft-note" for="generateTopicInput">Topic</label>
-                <div class="smart-picker">
-                  <input class="field" id="generateTopicInput" type="text" list="topicSuggestions" autocomplete="off" placeholder="Pick a topic or type one">
-                  <div class="smart-chip-row" id="generateTopicChips" aria-label="Popular corpus topics"></div>
-                </div>
-                <label class="soft-note" for="writingAngle">Angle</label>
-                <input class="field" id="writingAngle" type="text" list="angleSuggestions" autocomplete="off" placeholder="optional angle">
-                <label class="soft-note" for="generateChannelInput">Channel pattern</label>
-                <div class="combo" id="generateChannelCombo">
-                  <input class="field combo-input" id="generateChannelInput" type="search" role="combobox" autocomplete="off" aria-expanded="false" aria-controls="generateChannelOptions" placeholder="Pick a corpus channel">
-                  <input id="generateChannel" type="hidden">
-                  <div class="combo-list" id="generateChannelOptions" role="listbox"></div>
-                </div>
-                <label class="soft-note">Hook pattern</label>
-                <div class="radio-grid" id="generateHookLensPicker">
-                  <label class="choice-row"><input type="radio" name="generateHookLens" value="informative" checked><span>Informative</span></label>
-                  <label class="choice-row"><input type="radio" name="generateHookLens" value="curiosity_gap"><span>Curiosity gap</span></label>
-                  <label class="choice-row"><input type="radio" name="generateHookLens" value="disappointment_contrarian"><span>Contrarian</span></label>
-                  <label class="choice-row"><input type="radio" name="generateHookLens" value="stakes"><span>Stakes</span></label>
-                  <label class="choice-row"><input type="radio" name="generateHookLens" value="question_open_loop"><span>Question</span></label>
-                  <label class="choice-row"><input type="radio" name="generateHookLens" value="failure_lesson"><span>Failure lesson</span></label>
-                </div>
+                <!-- Script options live directly under the Output choice that
+                     reveals them (UX-11), not two screens down. -->
                 <div class="generate-script-options hidden" id="generateScriptOptions">
                   <label class="soft-note" for="generateScriptLength">Script options</label>
                   <div class="length-preset-row" id="generateLengthPresets" aria-label="Script length presets"></div>
@@ -2932,15 +3056,49 @@
                   <label class="inline-row"><input id="generatePastPerformance" type="checkbox" checked> Use your past performance as the default style anchor</label>
                   <button class="button ghost" type="button" id="surfaceAudienceQuestions">Surface audience questions</button>
                 </div>
-                <label class="soft-note">Style</label>
-                <div class="choice-grid" id="writingStyleMode">
-                  <label class="choice-row"><input type="radio" name="writingStyle" value="default" checked><span>Default voice</span></label>
-                  <label class="choice-row"><input type="radio" name="writingStyle" value="anchors"><span>From anchors</span></label>
-                  <label class="choice-row"><input type="radio" name="writingStyle" value="specific"><span>Specific anchor</span></label>
+                <label class="soft-note" for="generateTopicInput">Topic</label>
+                <div class="smart-picker">
+                  <input class="field" id="generateTopicInput" type="text" list="topicSuggestions" autocomplete="off" placeholder="Pick a topic or type one">
+                  <div class="smart-chip-row" id="generateTopicChips" aria-label="Popular corpus topics"></div>
                 </div>
-                <div class="anchor-list" id="writingAnchorList"></div>
-                <label class="inline-row"><input id="writingShowWarnings" type="checkbox" checked> Show Voice DNA warnings</label>
-                <label class="inline-row"><input id="writingSkipWarnings" type="checkbox"> Skip warnings this time</label>
+                <!-- Everything a first tweet doesn't need lives behind one
+                     disclosure (UX-10): angle, channel, hook lens, style,
+                     Voice DNA warning toggles. -->
+                <details class="advanced-disclosure" id="generateAdvanced">
+                  <summary>
+                    <span class="advanced-arrow" aria-hidden="true">&#9656;</span>
+                    <span>Advanced options</span>
+                    <span class="advanced-hint">angle &middot; hook &middot; style</span>
+                  </summary>
+                  <div class="advanced-body">
+                    <label class="soft-note" for="writingAngle">Angle</label>
+                    <input class="field" id="writingAngle" type="text" list="angleSuggestions" autocomplete="off" placeholder="optional angle">
+                    <label class="soft-note" for="generateChannelInput">Channel pattern</label>
+                    <div class="combo" id="generateChannelCombo">
+                      <input class="field combo-input" id="generateChannelInput" type="search" role="combobox" autocomplete="off" aria-expanded="false" aria-controls="generateChannelOptions" placeholder="Pick a corpus channel">
+                      <input id="generateChannel" type="hidden">
+                      <div class="combo-list" id="generateChannelOptions" role="listbox"></div>
+                    </div>
+                    <label class="soft-note">Hook pattern</label>
+                    <div class="radio-grid" id="generateHookLensPicker">
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="informative" checked><span>Informative</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="curiosity_gap"><span>Curiosity gap</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="disappointment_contrarian"><span>Contrarian</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="stakes"><span>Stakes</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="question_open_loop"><span>Question</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="failure_lesson"><span>Failure lesson</span></label>
+                    </div>
+                    <label class="soft-note">Style</label>
+                    <div class="choice-grid" id="writingStyleMode">
+                      <label class="choice-row"><input type="radio" name="writingStyle" value="default" checked><span>Default voice</span></label>
+                      <label class="choice-row"><input type="radio" name="writingStyle" value="anchors"><span>From anchors</span></label>
+                      <label class="choice-row"><input type="radio" name="writingStyle" value="specific"><span>Specific anchor</span></label>
+                    </div>
+                    <div class="anchor-list" id="writingAnchorList"></div>
+                    <label class="inline-row"><input id="writingShowWarnings" type="checkbox" checked> Show Voice DNA warnings</label>
+                    <label class="inline-row"><input id="writingSkipWarnings" type="checkbox"> Skip warnings this time</label>
+                  </div>
+                </details>
                 <button class="button primary" type="button" id="generateWriting" disabled>Generate</button>
                 <div class="agent-setup-card" id="agentSetupCard">
                   <strong>Checking for a writing agent...</strong>
@@ -3663,6 +3821,12 @@
       writingScreenshotAssignments: new Map(),
       writingUsedScreenshots: new Set(),
       writingSourceComboOpen: false,
+      // Dedicated corpus-wide source list for the Generate picker (U-02):
+      // state.library is paged and shaped by the Library tab's filters, so
+      // the picker keeps its own unfiltered newest-first copy.
+      writingSourceRows: [],
+      writingSourceLoaded: false,
+      writingSourceActive: -1,
       writingScreenshotRange: { from: null, to: null },
       writingScreenshotMeta: {},
       agents: [],
@@ -3955,6 +4119,9 @@
       sourcesNavCount: document.getElementById("sourcesNavCount"),
       sourceMap: document.getElementById("sourceMap"),
       writingSourceSearch: document.getElementById("writingSourceSearch"),
+      writingSourceChip: document.getElementById("writingSourceChip"),
+      writingSourceChipMain: document.getElementById("writingSourceChipMain"),
+      writingSourceChipClear: document.getElementById("writingSourceChipClear"),
       writingSourceOptions: document.getElementById("writingSourceOptions"),
       threadBuilder: document.getElementById("threadBuilder"),
       writingAttributionLine: document.getElementById("writingAttributionLine"),
@@ -6306,6 +6473,9 @@
         state.library = [];
         state.libraryState = "loading";
         state.libraryErrorDetail = "";
+        // New saves change the corpus, so the Generate picker's dedicated
+        // list refetches next time it opens (U-02).
+        state.writingSourceLoaded = false;
         revokeThumbs();
         els.libraryGrid.innerHTML = "";
       }
@@ -7421,20 +7591,43 @@
       return String(row && (row.thumbnail_path || row.thumbnail || row.poster_path) || "");
     }
 
+    // U-02 (UX-08): the picker keeps its own unfiltered corpus list so
+    // opening it browses every saved source newest-first, independent of
+    // Library paging and filters. Falls back to state.library rows if the
+    // dedicated fetch hasn't landed yet.
+    function writingSourceRowsAll() {
+      return state.writingSourceRows.length ? state.writingSourceRows : state.library;
+    }
+
+    async function loadWritingSources(force = false) {
+      if (state.writingSourceLoaded && !force) return;
+      try {
+        const data = await authFetch("/memory/search?limit=200");
+        state.writingSourceRows = Array.isArray(data.results) ? data.results : [];
+        state.writingSourceLoaded = true;
+      } catch (_) {
+        state.writingSourceRows = [];
+        state.writingSourceLoaded = false;
+      }
+      syncWritingSourceOptions();
+    }
+
     function syncWritingSourceOptions() {
-      const rows = state.library.slice(0, 80);
-      const current = els.writingSource.value;
-      const query = String(els.writingSourceSearch.value || "").toLowerCase();
+      const rows = writingSourceRowsAll();
+      const query = String(els.writingSourceSearch.value || "").trim().toLowerCase();
       const filtered = rows.filter((row) => {
         const haystack = `${rowTitle(row)} ${writingSourceSubtitle(row)} ${sourceUrlOf(row)}`.toLowerCase();
         return !query || haystack.includes(query);
       });
+      state.writingSourceFiltered = filtered;
+      state.writingSourceActive = -1;
+      els.writingSourceSearch.removeAttribute("aria-activedescendant");
       els.writingSourceOptions.innerHTML = filtered.length
-        ? filtered.slice(0, 20).map((row) => {
+        ? filtered.map((row, index) => {
           const id = writingRowId(row);
           const thumb = sourceThumbnailPath(row);
           return `
-            <button class="combo-option" type="button" role="option" data-writing-source-id="${htmlEscape(id)}">
+            <button class="combo-option" type="button" role="option" id="writingSourceOpt${index}" data-writing-source-id="${htmlEscape(id)}">
               <span class="combo-thumb">${thumb ? `<img alt="" class="hidden" data-file-img="${htmlEscape(thumb)}">` : ""}</span>
               <span>
                 <strong>${htmlEscape(rowTitle(row))}</strong>
@@ -7443,27 +7636,7 @@
             </button>
           `;
         }).join("")
-        : `<div class="job-row"><div class="job-title">${rows.length ? "No matching uoinks." : "Load Library first."}</div><div class="job-sub">Saved sources appear here with thumbnails.</div></div>`;
-      const selected = rows.find((row) => writingRowId(row) === current) || rows[0] || null;
-      if (!current && !query && selected) {
-        state.writingSelectedSourceRow = selected;
-        els.writingSource.value = writingRowId(selected);
-        els.writingSourceSearch.value = rowTitle(selected);
-      } else if (current) {
-        state.writingSelectedSourceRow = rows.find((row) => writingRowId(row) === current) || state.writingSelectedSourceRow;
-      } else {
-        state.writingSelectedSourceRow = null;
-      }
-      if (query && !filtered.length) {
-        // A no-match query must drop the old hidden pick, or Generate
-        // grounds the draft in a source the user can't see and credits
-        // the wrong creator (QA #26, #31).
-        state.writingSelectedSourceRow = null;
-        els.writingSource.value = "";
-      }
-      if (state.writingSelectedSourceRow && !els.generateTopicInput.value.trim() && state.writingSelectedSourceRow.topic) {
-        els.generateTopicInput.value = state.writingSelectedSourceRow.topic;
-      }
+        : `<div class="job-row"><div class="job-title">${rows.length ? "No matching uoinks." : "Nothing saved yet."}</div><div class="job-sub">${rows.length ? "Try fewer letters, or clear the search to browse everything." : "Save a source first; it lands here ready to write from."}</div></div>`;
       syncWritingGenerateState();
       updateWritingAttribution();
       loadDetailFileImages();
@@ -7474,16 +7647,55 @@
       document.getElementById("generateWriting").disabled = !hasPick;
     }
 
+    // The selected source renders as a two-line chip in place of the raw
+    // input (UX-05), so the title can never become the dropdown's filter
+    // text (the root cause of the 1-of-31 picker, UX-08).
+    function renderWritingSourceChip() {
+      const row = state.writingSelectedSourceRow;
+      if (!row) {
+        els.writingSourceChip.classList.add("hidden");
+        els.writingSourceSearch.classList.remove("hidden");
+        return;
+      }
+      const thumb = sourceThumbnailPath(row);
+      els.writingSourceChipMain.innerHTML = `
+        <span class="combo-thumb">${thumb ? `<img alt="" class="hidden" data-file-img="${htmlEscape(thumb)}">` : ""}</span>
+        <span>
+          <strong>${htmlEscape(rowTitle(row))}</strong>
+          <span class="job-sub">${htmlEscape(writingSourceSubtitle(row) || platformChipLabel(platformOf(row)))}</span>
+        </span>
+      `;
+      els.writingSourceChipMain.title = `${rowTitle(row)} (click to change source)`;
+      els.writingSourceChip.classList.remove("hidden");
+      els.writingSourceSearch.classList.add("hidden");
+      loadDetailFileImages();
+    }
+
+    function clearWritingSource({ focus = false } = {}) {
+      state.writingSelectedSourceRow = null;
+      state.generateWorkspace = null;
+      els.writingSource.value = "";
+      state.writingScreenshots = [];
+      state.writingSelectedScreenshots = new Set();
+      renderWritingScreenshots();
+      els.writingSourceSearch.value = "";
+      renderWritingSourceChip();
+      syncWritingGenerateState();
+      updateWritingAttribution();
+      if (focus) els.writingSourceSearch.focus();
+    }
+
     async function selectWritingSourceById(id) {
-      const row = state.library.find((item) => writingRowId(item) === id);
+      const row = writingSourceRowsAll().find((item) => writingRowId(item) === id)
+        || state.library.find((item) => writingRowId(item) === id);
       if (!row) return;
       state.writingSelectedSourceRow = row;
       state.generateWorkspace = null;
       els.writingSource.value = writingRowId(row);
-      els.writingSourceSearch.value = rowTitle(row);
+      els.writingSourceSearch.value = "";
       if (!els.generateTopicInput.value.trim() && row.topic) els.generateTopicInput.value = row.topic;
-      document.getElementById("writingSourceCombo").classList.remove("open");
-      els.writingSourceSearch.setAttribute("aria-expanded", "false");
+      toggleWritingSourceCombo(false);
+      renderWritingSourceChip();
       syncWritingGenerateState();
       updateWritingAttribution();
       await loadWritingScreenshots();
@@ -7494,6 +7706,19 @@
       document.getElementById("writingSourceCombo").classList.toggle("open", open);
       els.writingSourceSearch.setAttribute("aria-expanded", open ? "true" : "false");
       if (open) syncWritingSourceOptions();
+    }
+
+    function moveWritingSourceActive(delta) {
+      const options = Array.from(els.writingSourceOptions.querySelectorAll("[data-writing-source-id]"));
+      if (!options.length) return;
+      const count = options.length;
+      state.writingSourceActive = ((state.writingSourceActive + delta) % count + count) % count;
+      options.forEach((option, index) => {
+        option.classList.toggle("active", index === state.writingSourceActive);
+      });
+      const active = options[state.writingSourceActive];
+      els.writingSourceSearch.setAttribute("aria-activedescendant", active.id);
+      active.scrollIntoView({ block: "nearest" });
     }
 
     function writingAttributionLine(row = state.writingSelectedSourceRow) {
@@ -7918,6 +8143,7 @@
     }
 
     async function loadWriting() {
+      loadWritingSources();
       syncWritingSourceOptions();
       if (!state.settings) {
         try {
@@ -9136,19 +9362,42 @@
       document.getElementById("saveWriting").addEventListener("click", saveWritingDraft);
       document.getElementById("reviseWriting").addEventListener("click", generateWriting);
       document.getElementById("writingSettingsLink").addEventListener("click", () => switchTab("settings"));
-      els.writingSourceSearch.addEventListener("focus", () => toggleWritingSourceCombo(true));
+      els.writingSourceSearch.addEventListener("focus", () => {
+        toggleWritingSourceCombo(true);
+        loadWritingSources();
+      });
       els.writingSourceSearch.addEventListener("input", () => {
-        if (state.writingSelectedSourceRow && els.writingSourceSearch.value !== rowTitle(state.writingSelectedSourceRow)) {
-          state.writingSelectedSourceRow = null;
-          state.generateWorkspace = null;
-          els.writingSource.value = "";
-          state.writingScreenshots = [];
-          state.writingSelectedScreenshots = new Set();
-          renderWritingScreenshots();
-        }
         toggleWritingSourceCombo(true);
         syncWritingSourceOptions();
       });
+      els.writingSourceSearch.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+          event.preventDefault();
+          if (!state.writingSourceComboOpen) toggleWritingSourceCombo(true);
+          moveWritingSourceActive(event.key === "ArrowDown" ? 1 : -1);
+          return;
+        }
+        if (event.key === "Enter") {
+          const options = Array.from(els.writingSourceOptions.querySelectorAll("[data-writing-source-id]"));
+          const target = options[state.writingSourceActive] || options[0];
+          if (state.writingSourceComboOpen && target) {
+            event.preventDefault();
+            selectWritingSourceById(target.dataset.writingSourceId);
+          }
+          return;
+        }
+        if (event.key === "Escape") {
+          // preventDefault stops the search input's native clear, whose
+          // input event would immediately reopen the list.
+          event.preventDefault();
+          toggleWritingSourceCombo(false);
+        }
+      });
+      // Chip actions: the main body swaps back to browse mode (dropping the
+      // pick so Generate can never ground a draft in a source the user
+      // can't see); the x just clears.
+      els.writingSourceChipMain.addEventListener("click", () => clearWritingSource({ focus: true }));
+      els.writingSourceChipClear.addEventListener("click", () => clearWritingSource());
       els.generateChannelInput.addEventListener("focus", () => toggleGenerateChannelCombo(true));
       els.generateChannelInput.addEventListener("input", () => {
         if (els.generateChannel.value && els.generateChannelInput.value !== els.generateChannel.value) {

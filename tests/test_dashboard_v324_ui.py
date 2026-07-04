@@ -67,7 +67,10 @@ def test_generate_and_agents() -> None:
     require("kind: mode" in DASHBOARD, "Tweet/Thread request does not send the backend kind contract")
     require("function writingBodyWithCredit" in DASHBOARD, "duplicate credit guard missing")
     require("bodyText.replace(creditStem, fullCredit)" in DASHBOARD, "existing creator credit is not upgraded in place")
-    require("!current && !query && selected" in DASHBOARD, "typed source can silently reselect a stale id")
+    # U-02: the picker no longer auto-selects anything, so the old
+    # reselect-guard condition is gone; assert the prefill itself is gone.
+    require("!current && !query && selected" not in DASHBOARD, "auto-reselect crept back into the writing picker")
+    require("els.writingSourceSearch.value = rowTitle(" not in DASHBOARD, "typed source title must never become the picker filter")
     audience = DASHBOARD.split("async function surfaceAudienceQuestions()", 1)[1].split("function renderLocalCorpusCritique", 1)[0]
     critique = DASHBOARD.split("async function critiqueWritingAgainstCorpus()", 1)[1].split("async function generateScriptInWriting()", 1)[0]
     require("ensureGenerateWorkspace" not in audience, "audience questions create a hidden Build workspace")
