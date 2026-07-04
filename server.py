@@ -7400,6 +7400,113 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
 
 
 # ---------------------------------------------------------------------------
+# /resurface -- local For You payload (G-41 / E2E D2)
+# ---------------------------------------------------------------------------
+# The dashboard's For You tab always called GET /resurface, but no route
+# existed, so every load logged a 404 and fell back to a client-side
+# approximation. This is that approximation computed server-side over the
+# full corpus (the client fallback only saw the loaded Library page):
+#
+#   worth_revisiting  engagement-scored uoinks idle >= 14 days (or, with no
+#                     engagement data yet, the oldest saved uoinks)
+#   connections       topic pairs: the 2 most recent uoinks per shared topic
+#   corpus_gaps       topics with <= 2 saved uoinks
+#   anchors           top engagement-scored uoinks
+#
+# Everything is computed from local data (index + engagement events). No
+# network, no AI calls.
+_RESURFACE_IDLE_DAYS = 14
+_RESURFACE_POOL_LIMIT = 200
+
+
+def _resurface_days_since(value) -> float:
+    """Days since an ISO timestamp; a huge sentinel for missing/bad values
+    so undated rows sort as 'oldest' (matches the dashboard's daysSince)."""
+    if not value:
+        return 9999.0
+    try:
+        ts = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return 9999.0
+    if ts.tzinfo is not None:
+        ts = ts.replace(tzinfo=None)
+    return max(0.0, (datetime.now() - ts).total_seconds() / 86400.0)
+
+
+def _resurface_payload(idx) -> dict:
+    """Build the For You payload from local corpus + engagement data."""
+    res = idx.search_yoinks_for_memory(limit=_RESURFACE_POOL_LIMIT)
+    rows = _enrich_yoink_rows(idx, res.get("results") or [])
+    by_id = {r.get("video_id"): r for r in rows if r.get("video_id")}
+
+    # Merge engagement scores onto their corpus rows. Scores whose video is
+    # no longer in the corpus (deleted uoinks) are dropped -- a ghost card
+    # the user can't open isn't a recommendation.
+    scored: list[dict] = []
+    try:
+        signals = idx.top_engaged(limit=24)
+    except Exception as e:
+        log.warning("/resurface: top_engaged failed: %s", e)
+        signals = []
+    for signal in signals:
+        row = by_id.get(signal.get("video_id"))
+        if not row:
+            continue
+        merged = dict(row)
+        merged.update(signal)
+        scored.append(merged)
+
+    if scored:
+        worth = [
+            r for r in scored
+            if _resurface_days_since(r.get("last_event_ts")
+                                     or r.get("yoinked_at"))
+            >= _RESURFACE_IDLE_DAYS
+        ]
+        worth.sort(key=lambda r: (
+            -(r.get("value_score") or 0.0),
+            -_resurface_days_since(r.get("yoinked_at")),
+        ))
+    else:
+        # No engagement data yet: resurface the oldest saved uoinks.
+        worth = sorted(
+            rows, key=lambda r: -_resurface_days_since(r.get("yoinked_at")))
+
+    by_topic: dict[str, list[dict]] = {}
+    for row in rows:
+        topic = (row.get("topic") or "Uncategorized").strip() or "Uncategorized"
+        by_topic.setdefault(topic, []).append(row)
+
+    connections = []
+    for topic, group in by_topic.items():
+        if len(group) < 2:
+            continue
+        pair = sorted(group, key=lambda r: str(r.get("yoinked_at") or ""),
+                      reverse=True)[:2]
+        connections.append({
+            "topic": topic,
+            "a": pair[0],
+            "b": pair[1],
+            "reason": (f"{topic} appears across multiple uoinks. Revisit "
+                       "the pair for reusable framing or contrast."),
+        })
+
+    gaps = sorted(
+        ({"topic": topic, "count": len(group)}
+         for topic, group in by_topic.items() if len(group) <= 2),
+        key=lambda g: (g["count"], g["topic"]),
+    )
+
+    return {
+        "worth_revisiting": worth[:3],
+        "connections": connections[:5],
+        "corpus_gaps": gaps[:8],
+        "anchors": scored[:6],
+        "source": "engagement memory" if scored else "local library",
+    }
+
+
+# ---------------------------------------------------------------------------
 # HTTP handler
 # ---------------------------------------------------------------------------
 class Handler(BaseHTTPRequestHandler):
@@ -7685,6 +7792,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_update_check()
         if bare == "/engagement/scores":
             return self._handle_engagement_scores()
+        if bare == "/resurface":
+            return self._handle_resurface()
         if bare == "/library/facets":
             return self._handle_library_facets()
         if bare == "/corpus/channels":
@@ -7919,6 +8028,24 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(500, {"ok": False, "error": str(e)})
         return self._send_json(200, {"ok": True, "scores": scores,
                                       "count": len(scores)})
+
+    def _handle_resurface(self):
+        """GET /resurface -- the For You payload (G-41 / E2E D2). Local
+        corpus + engagement data only; see _resurface_payload. Token-gated.
+        On an index error the dashboard falls back to its client-side
+        approximation, so failure here is a 503, never a fake payload."""
+        if not self._require_token():
+            return
+        try:
+            payload = _resurface_payload(_get_index())
+        except Exception as e:
+            log.warning("/resurface failed: %s", e)
+            return self._send_json(503, {
+                "ok": False,
+                "error": "resurface unavailable",
+                "state": "unavailable",
+            })
+        return self._send_json(200, {"ok": True, "resurface": payload})
 
     # ---- v2.5 S1 facet endpoints -------------------------------------------
     def _handle_facets_taxonomy(self):
