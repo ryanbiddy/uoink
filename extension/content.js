@@ -243,7 +243,7 @@
       btn.title = "Extract transcript + screenshots and open Claude";
       btn.disabled = false;
     } else if (serverStatus === "offline") {
-      btn.title = "Uoink Helper offline — click to start";
+      btn.title = "Uoink Helper offline. Click to start.";
       btn.disabled = false;
     } else {
       btn.title = "Checking Uoink Helper status...";
@@ -475,8 +475,8 @@
       const msg = STC.friendlyError(data && data.error);
       if (/queue full/i.test(msg)) {
         setButtonState(btn, "error", "Queue full");
-        btn.title = "Queue full, wait a few minutes.";
-        notify("Uoink queue full", "Queue full, wait a few minutes.");
+        btn.title = "Queue full. Give it a few minutes.";
+        notify("Uoink queue full", "Give it a few minutes, then try again.");
         resetButtonAfter(btn, 5000);
         return;
       }

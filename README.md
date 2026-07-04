@@ -1,14 +1,14 @@
 # Uoink
 *The missing layer between YouTube and your AI.*
 
-Uoink any YouTube video into Claude, ChatGPT, or your AI agent — full transcript,
+Uoink any YouTube video into Claude, ChatGPT, or your AI agent: full transcript,
 screenshots, comments, and metadata in one structured corpus. Works as a Chrome
 extension (one click) or as a local MCP server your agent can call directly.
 
 > The magnet logo was always a U. We just renamed the product to match.
 > New home: **uoink.video**
 
-![Uoink — the rust U button under a YouTube video](assets/readme-hero-v3.1.png)
+![Uoink: the rust U button under a YouTube video](assets/readme-hero-v3.1.png)
 
 ## Why Uoink
 
@@ -18,15 +18,15 @@ You give up and watch the whole thing on 2x while taking notes by hand.
 
 Uoink fixes that. Click the button under any YouTube video and you get the full
 transcript, timestamped screenshots, top comments, channel context, and video
-metadata — automatically copied to your clipboard, ready for Claude, ChatGPT, or
-your notes app of choice. Or, in v2, tell your AI agent "uoink that video and
-decode the hook" and it does both — no clipboard step.
+metadata, copied to your clipboard and ready for Claude, ChatGPT, or your notes
+app. Or, since v2, tell your AI agent "uoink that video and decode the hook"
+and it does both. No clipboard step.
 
 ## What's new in v2.1
 
 - **Renamed Yoink → Uoink.** The magnet logo is the U. New domain: uoink.video.
 - **Your install moves itself.** Existing v2.0 data, settings, and saved API key
-  migrate automatically from `\Yoink\` to `\Uoink\` on first launch — nothing lost.
+  migrate automatically from `\Yoink\` to `\Uoink\` on first launch. Nothing lost.
 - **MCP tools renamed** (`yoink_*` → `uoink_*`); the old names keep working
   through v2.5.
 - **Mac universal build** (Apple Silicon + Intel).
@@ -44,9 +44,9 @@ v2 ships three adoption paths:
   Cursor / etc into a YouTube research analyst. Works across 8+ clients via the
   agentskills.io open standard.
 
-AI-powered features are opt-in and BYO Anthropic API key (stored securely in
-Windows Credential Manager). The core extraction flow remains fully local —
-nothing leaves your machine except the YouTube fetch.
+AI-powered features are opt-in and BYO Anthropic API key (stored in Windows
+Credential Manager). The core extraction flow stays fully local: nothing
+leaves your machine except the YouTube fetch.
 
 ## Uoink Operator Skill
 
@@ -67,19 +67,20 @@ Uoink v2 bundles a portable Skill at `skills/uoink/SKILL.md` and installs it to 
 - Two destination buttons: Send to Claude, Send to ChatGPT
 
 **Multi-video (v2)**
-- **Playlist Mode** — paste any YouTube playlist URL, uoink up to 10 videos. Async with live progress, cancel mid-flight, partial-failure tolerance. Combined corpus to clipboard, per-video files on disk.
+- **Playlist Mode:** paste any YouTube playlist URL, uoink up to 10 videos. Async with live progress, cancel mid-flight, partial-failure tolerance. Combined corpus to clipboard, per-video files on disk.
 
 **AI-powered analysis (v2, BYO Anthropic key)**
-- **Comment Intelligence** — clusters comment themes, extracts mentioned products/tools, flags notable disagreements. Three structured sections appended per video.
-- **Hook Type classification** — classifies each video's opening style across 9 hook categories (curiosity gap, question, contrarian, story open, promise/list, demo, authority, stakes, other) with brief explanation.
-- **Entity Extraction** — pulls entities from each video's transcript into a local queryable graph. Agents call `find_mentions(entity)` to find every video that mentioned a specific person, tool, product, or topic across the user's library.
+- **Comment Intelligence:** clusters comment themes, extracts mentioned products/tools, flags notable disagreements. Three structured sections appended per video.
+- **Hook Type classification:** classifies each video's opening style across 9 hook categories (curiosity gap, question, contrarian, story open, promise/list, demo, authority, stakes, other) with brief explanation.
+- **Entity Extraction:** pulls entities from each video's transcript into a local queryable graph. Agents call `find_mentions(entity)` to find every video that mentioned a specific person, tool, product, or topic across the user's library.
 
 **Local transcript reliability (v2.5)**
-- **Transcript Reliability** — optional local Whisper check that flags low-confidence transcript spans, especially around proper nouns, homophones, accents, and technical terms. The `whisper-timestamped` library ships with the helper; the Whisper `tiny` model is not bundled and downloads only after user consent (~150 MB) into `%LOCALAPPDATA%\Uoink\models\whisper`.
+- **Transcript Reliability:** optional local Whisper check that flags low-confidence transcript spans, especially around proper nouns, homophones, accents, and technical terms. The `whisper-timestamped` library ships with the helper; the Whisper `tiny` model is not bundled and downloads only after user consent (~150 MB) into `%LOCALAPPDATA%\Uoink\models\whisper`.
 
 ### Local feature: Smart Screenshot Picker
 
-Opt-in grid that shows the screenshots embedded in your clipboard paste so you can pick which to keep. Embed count is configurable on the setup page (default 4, max 12). Fully local — no API key, no network calls.
+Opt-in grid that shows the screenshots embedded in your clipboard paste so you can pick which to keep. Embed count is configurable on the setup page (default 4, max 12). Fully local: no API key, no network calls.
+
 **For agent developers (v2)**
 - **MCP server (stdio):** a curated everyday set of tools your AI can call directly: `uoink_video`, `uoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `get_uoink_health`, `find_mentions`, `get_transcript_reliability`. The old `yoink_*` names keep working as deprecated aliases through v2.5.
 - **Two tool surfaces, on purpose.** The curated stdio set above is what most agents need. The full local tool registry (64 entries, including the Writing Studio, workspaces, podcasts, monitored playlists, taste/engagement memory, and source-capture tools) is exposed over the local HTTP transport at `/mcp/v1` and, for agents that don't speak MCP (Gemini, Grok, Perplexity), over an OpenAPI 3.1 bridge at `/openapi/v1/spec.json` + `POST /tools/<name>`. Same handlers, same auth token, same rate limits, one dispatch path.
@@ -96,7 +97,7 @@ Opt-in grid that shows the screenshots embedded in your clipboard paste so you c
 
 ## Install
 
-1. **Download the installer** — grab `Uoink-Setup-3.2.4.exe` from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest). Windows is available now; the Mac `.dmg` follows the v3.1 QA gate.
+1. **Download the installer.** Grab `Uoink-Setup-3.2.4.exe` from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest). Windows is available now; the Mac `.dmg` follows the v3.1 QA gate.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The "Launch Uoink now" checkbox on the finish page starts the helper immediately, and an autostart entry runs it on every Windows login.
 3. **Load the bundled extension.** On first launch, Uoink shows the installed extension folder and opens `chrome://extensions/` so you can turn on Developer mode, click **Load unpacked**, and select `%LOCALAPPDATA%\Uoink\extension`. Chrome requires this user-approved step for unpacked extensions.
 
@@ -104,7 +105,7 @@ Opt-in grid that shows the screenshots embedded in your clipboard paste so you c
 
 If the popup indicator stays orange, open the Start Menu, search "Uoink", and click **Uoink**. Stop it the same way via **Stop Uoink**. Uninstall removes everything including the autostart entry.
 
-For developers running from source, see [REQUIREMENTS.md](./REQUIREMENTS.md). Build the installer locally with `./build.ps1` — see [docs/build-installer.md](./docs/build-installer.md).
+For developers running from source, see [REQUIREMENTS.md](./REQUIREMENTS.md). Build the installer locally with `./build.ps1` (see [docs/build-installer.md](./docs/build-installer.md)).
 
 ## How it works
 
@@ -120,13 +121,13 @@ For developers running from source, see [REQUIREMENTS.md](./REQUIREMENTS.md). Bu
 3. Agent calls `uoink_video` → `classify_hook` → produces analysis
 4. No clipboard step, no context switching
 
-## Optional AI features — privacy
+## Optional AI features and privacy
 
 Comment Intelligence, Hook Type classification, and the agent-callable `analyze_comments` / `classify_hook` tools all call the Anthropic API. They're off by default. When you enable any of them, you provide your own Anthropic API key on the setup page. The key is stored in Windows Credential Manager (encrypted at rest by the OS) and used only for the API calls those features make. Uoink itself collects nothing. You can revoke a key at any time via the setup page's Clear button.
 
 ## Prompt library
 
-The Uoink popup ships with 11 starter prompts ("Decode the hook", "Outline the structure", "Format as Twitter thread", and so on). For v1/v2 the prompts are baked into the extension package and aren't user-editable from the UI — a v2.1 task adds an inline editor that persists user prompts via `chrome.storage.local`.
+The Uoink popup ships with 11 starter prompts ("Decode the hook", "Outline the structure", "Format as Twitter thread", and so on). For v1/v2 the prompts are baked into the extension package and aren't user-editable from the UI; a v2.1 task adds an inline editor that persists user prompts via `chrome.storage.local`.
 
 If you're running from source, the file lives at `extension/prompts.json` and changes take effect the next time you open the popup:
 

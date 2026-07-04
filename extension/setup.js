@@ -1266,7 +1266,7 @@ if (tcSaveBtn) {
       
       if (res.ok) {
         // Success
-        tcStatus.textContent = "Taste profile saved successfully ✓";
+        tcStatus.textContent = "Taste profile saved ✓";
         tcStatus.className = "settings-status ok";
         if (tcPendingNote) tcPendingNote.classList.add("hidden");
         // Clear pending from storage
