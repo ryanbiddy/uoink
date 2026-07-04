@@ -24,7 +24,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 import voice_dna
@@ -88,7 +88,7 @@ def hook_lens_grounding(lens: str | None) -> dict | None:
 
 
 def _now_iso() -> str:
-    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    return datetime.now(timezone.utc).replace(tzinfo=None, microsecond=0).isoformat() + "Z"
 
 
 # ---- style anchors -----------------------------------------------------

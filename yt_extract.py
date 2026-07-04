@@ -237,3 +237,6 @@ def main():
     print()
     print(f"Done. {len(shots)} screenshots, {len(entries)} caption lines.")
     print(f"Folder: {folder}")
+
+if __name__ == "__main__":
+    main()
