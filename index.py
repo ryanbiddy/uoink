@@ -54,6 +54,20 @@ _PENDING_TERMINAL_STATES = ("succeeded", "failed", "cancelled")
 # evicted -- they're load-bearing for the retry worker.
 _PENDING_TABLE_CAP = 1000
 
+# SQLite stores INTEGER as signed 64-bit. A row id outside this range cannot
+# exist, and binding one raises OverflowError -- so callers treat out-of-range
+# ids as "not found" rather than letting the bind crash (G-90 bug hunt).
+_SQLITE_INT_MIN = -(2 ** 63)
+_SQLITE_INT_MAX = 2 ** 63 - 1
+
+
+def _valid_rowid(value) -> bool:
+    """True when value is an int SQLite can bind as a rowid."""
+    try:
+        return _SQLITE_INT_MIN <= int(value) <= _SQLITE_INT_MAX
+    except (TypeError, ValueError):
+        return False
+
 # Columns of the `yoinks` table, in declaration order. video_id is the
 # primary key and is handled separately in the upsert.
 # v2.5: per-row data-shape version. v2.5+ writers set CURRENT_YOINK_SCHEMA via
@@ -1590,6 +1604,10 @@ class Index:
                      source_credit_line, now, now),
                 )
                 draft_id = cur.lastrowid
+            elif not _valid_rowid(draft_id):
+                # An id SQLite can't hold can't match a row -> not found,
+                # not a 500 from the failed bind (G-90).
+                raise ValueError(f"draft {draft_id} not found")
             else:
                 cur = self._conn.execute(
                     "UPDATE writing_drafts SET yoink_id=?, kind=?, title=?, "
@@ -1607,6 +1625,8 @@ class Index:
 
     def get_writing_draft(self, draft_id: int) -> dict | None:
         """One stored draft as a dict, or None when the id is unknown."""
+        if not _valid_rowid(draft_id):
+            return None  # out-of-range id can't exist (G-90)
         with self._lock:
             row = self._conn.execute(
                 "SELECT * FROM writing_drafts WHERE id=?",
