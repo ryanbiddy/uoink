@@ -4321,7 +4321,10 @@ def _plain_error_from_text(text: str) -> str:
     source = _source_name_from_error(text)
     if ("too many requests" in lower or "http error 429" in lower
             or "rate-limit" in lower or "rate limit" in lower):
-        return "Helper's catching its breath. Retrying..."
+        # Terminal contexts store this string, so it can't promise a retry
+        # that may never run (G-43 / E2E D4). Point at the user action.
+        return ("YouTube is refusing requests right now. Give it a few "
+                "minutes, then retry this one.")
     if ("sign in" in lower or "login" in lower or "cookies" in lower
             or "captcha" in lower or "guest token" in lower):
         return f"{source} wouldn't hand this one over without a login. Retry with cookies?"
@@ -5543,6 +5546,8 @@ def _public_job(job: dict) -> dict:
         "result": result,
         "warnings": list(job.get("warnings") or []),
         "message": job.get("message"),
+        "retry_exhausted": bool(job.get("retry_exhausted")),
+        "attempt_count": job.get("attempt_count"),
     }
 
 
@@ -5726,7 +5731,12 @@ def _record_single_extract_job(url: str, started_at: str, *,
                                failure_phase: str | None = None,
                                long_video_mode: str | None = None,
                                title: str | None = None,
-                               folder: Path | None = None) -> dict:
+                               folder: Path | None = None,
+                               retry_exhausted: bool = False,
+                               attempt_count: int | None = None) -> dict:
+    # retry_exhausted marks a terminal failure whose automatic retry budget
+    # is used up (G-43 / E2E D4). The dashboard can key honest "stopped
+    # retrying" copy off this flag instead of pattern-matching error text.
     now = _now_iso()
     ok = result is not None and not error
     folder_path = Path(result["folder"]) if result and result.get("folder") else folder
@@ -5779,7 +5789,13 @@ def _record_single_extract_job(url: str, started_at: str, *,
         } if ok else None,
         "warnings": [],
         "message": "Single-video yoink complete." if ok else "Single-video yoink failed.",
+        "retry_exhausted": bool(retry_exhausted) and not ok,
+        "attempt_count": int(attempt_count) if attempt_count else None,
     }
+    if job["retry_exhausted"]:
+        job["message"] = (
+            f"Uoink stopped after {int(attempt_count)} attempts."
+            if attempt_count else "Uoink stopped retrying this one.")
     return _add_job_record(job)
 
 
@@ -7055,9 +7071,44 @@ def _retry_pending_one() -> bool:
                                      phase_callback=phase_cb)
         except BaseException as e:
             if _is_youtube_rate_limit(e):
-                # Still rate-limited: back off exponentially and re-queue
-                # (mark_pending_failed handles the strike-out at the cap).
                 attempts = attempts_before + 1
+                if attempts >= index._PENDING_MAX_ATTEMPTS:
+                    # Final strike (G-43 / E2E D4 + D5): the row goes
+                    # terminal, so say so. No "retry at ..." log line for a
+                    # retry that will never run, and a real failed job so
+                    # Activity shows the uoink honestly instead of it
+                    # silently vanishing from /queue/status.
+                    final_msg = (
+                        f"YouTube kept refusing this one. Uoink stopped "
+                        f"after {attempts} attempts and won't retry it on "
+                        f"its own.")
+                    final_detail = (
+                        f"YouTube answered HTTP 429 (too busy) on all "
+                        f"{attempts} attempts. The automatic retry budget "
+                        f"is used up, so Uoink stopped.")
+                    try:
+                        idx.mark_pending_failed(
+                            pending_id, _sanitize_error(final_msg),
+                            _now_iso())
+                    except Exception:
+                        log.exception(
+                            "retry worker: mark_pending_failed failed")
+                    _record_single_extract_job(
+                        url, started_at, error=final_msg,
+                        error_detail=final_detail,
+                        failure_phase=_failure_phase(e, current_phase),
+                        long_video_mode=long_video_mode,
+                        title=title, folder=folder,
+                        retry_exhausted=True, attempt_count=attempts)
+                    _pending_long_video_mode(pending_id, remove=True)
+                    log.warning(
+                        "retry worker: pending #%d gave up after %d "
+                        "attempts; YouTube kept refusing. No further "
+                        "retries are scheduled.",
+                        pending_id, attempts)
+                    return True
+                # Still under the strike cap: back off exponentially and
+                # re-queue (mark_pending_failed re-queues below the cap).
                 delay = min(
                     _RETRY_INITIAL_BACKOFF_SEC * (2 ** attempts),
                     _RETRY_MAX_BACKOFF_SEC,
@@ -7071,8 +7122,9 @@ def _retry_pending_one() -> bool:
                     log.exception("retry worker: mark_pending_failed failed")
                 log.info(
                     "retry worker: pending #%d still rate-limited; "
-                    "retry at %s (backoff %ds)",
-                    pending_id, retry_at, delay)
+                    "retry at %s (backoff %ds, attempt %d of %d)",
+                    pending_id, retry_at, delay, attempts,
+                    index._PENDING_MAX_ATTEMPTS)
                 return True
             # Non-recoverable error -- jump straight to terminal failure.
             # The user-facing job gets on-brand copy plus a disclosure detail;
