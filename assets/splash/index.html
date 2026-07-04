@@ -322,6 +322,7 @@
     let secondaryAction = "dashboard";
     let tertiaryAction = "";
     let extensionPath = "";
+    let extensionBrowser = null;
 
     function nativeApi() {
       return window.pywebview && window.pywebview.api ? window.pywebview.api : null;
@@ -382,6 +383,16 @@
       els.extensionPath.hidden = true;
       els.copyStatus.hidden = true;
       els.copyStatus.textContent = "";
+    }
+
+    function escapeHtml(value) {
+      return String(value || "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[char]));
     }
 
     function setMode({ mode, eyebrow, pill, headline, copy, primary, secondary, tertiary }) {
@@ -447,19 +458,22 @@
 
     function setExtensionHint(status) {
       extensionPath = status?.path || "";
-      callNative("set_window_title", "Last step - load the extension");
+      extensionBrowser = status?.browser || { name: "your Chromium browser", url: "chrome://extensions/" };
+      const browserName = extensionBrowser.name || "your Chromium browser";
+      const extensionUrl = extensionBrowser.url || "chrome://extensions/";
+      callNative("set_window_title", `Last step - load the extension in ${browserName}`);
       setMode({
         mode: "extension",
         eyebrow: "One-time setup",
         pill: status?.manifest_exists ? "Extension folder ready" : "Extension folder missing",
-        headline: "Uoink Extension - load into Chrome (60 sec)",
-        copy: "Chrome requires you to approve unpacked extensions manually.",
-        primary: { text: "Open Chrome to chrome://extensions/", action: "extension-open" },
+        headline: `Load the Uoink button in ${escapeHtml(browserName)} (60 sec)`,
+        copy: `${browserName} needs one manual approval for unpacked extensions.`,
+        primary: { text: `Open ${browserName} extensions`, action: "extension-open" },
         secondary: { text: "Copy path", action: "copy-path" },
         tertiary: { text: "I've loaded it - done", action: "extension-done" },
       });
       els.steps.innerHTML = `
-        <li>Open chrome://extensions/ in Chrome</li>
+        <li>Open ${escapeHtml(extensionUrl)} in ${escapeHtml(browserName)}</li>
         <li>Turn ON "Developer mode" (top-right toggle)</li>
         <li>Click "Load unpacked" -> select this folder:</li>
       `;
@@ -589,8 +603,12 @@
       else if (action === "youtube") openLastYoutube();
       else if (action === "dismiss") dismiss();
       else if (action === "extension-open") {
-        try { await callNative("open_chrome_extensions"); }
-        catch (_) { openExternal("chrome://extensions/"); }
+        try {
+          const opened = await callNative("open_extensions_page", extensionBrowser?.id || "");
+          if (!opened) throw new Error("native open failed");
+        } catch (_) {
+          openExternal(extensionBrowser?.url || "chrome://extensions/");
+        }
       } else if (action === "copy-path") {
         await copyPath();
       } else if (action === "extension-done") {

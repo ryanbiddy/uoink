@@ -86,6 +86,80 @@ def _extension_dir() -> Path:
     return HERE / "extension"
 
 
+BROWSER_CATALOG = [
+    {
+        "id": "edge",
+        "name": "Microsoft Edge",
+        "url": "edge://extensions/",
+        "commands": ["msedge", "msedge.exe"],
+        "progids": ["msedge", "microsoftedge"],
+        "paths": [
+            ("PROGRAMFILES(X86)", "Microsoft/Edge/Application/msedge.exe"),
+            ("PROGRAMFILES", "Microsoft/Edge/Application/msedge.exe"),
+            ("LOCALAPPDATA", "Microsoft/Edge/Application/msedge.exe"),
+        ],
+    },
+    {
+        "id": "chrome",
+        "name": "Chrome",
+        "url": "chrome://extensions/",
+        "commands": ["chrome", "chrome.exe"],
+        "progids": ["chrome"],
+        "paths": [
+            ("PROGRAMFILES", "Google/Chrome/Application/chrome.exe"),
+            ("PROGRAMFILES(X86)", "Google/Chrome/Application/chrome.exe"),
+            ("LOCALAPPDATA", "Google/Chrome/Application/chrome.exe"),
+        ],
+    },
+    {
+        "id": "brave",
+        "name": "Brave",
+        "url": "brave://extensions/",
+        "commands": ["brave", "brave.exe", "brave-browser"],
+        "progids": ["brave"],
+        "paths": [
+            ("PROGRAMFILES", "BraveSoftware/Brave-Browser/Application/brave.exe"),
+            ("PROGRAMFILES(X86)", "BraveSoftware/Brave-Browser/Application/brave.exe"),
+            ("LOCALAPPDATA", "BraveSoftware/Brave-Browser/Application/brave.exe"),
+        ],
+    },
+    {
+        "id": "vivaldi",
+        "name": "Vivaldi",
+        "url": "vivaldi://extensions/",
+        "commands": ["vivaldi", "vivaldi.exe"],
+        "progids": ["vivaldi"],
+        "paths": [
+            ("PROGRAMFILES", "Vivaldi/Application/vivaldi.exe"),
+            ("PROGRAMFILES(X86)", "Vivaldi/Application/vivaldi.exe"),
+            ("LOCALAPPDATA", "Vivaldi/Application/vivaldi.exe"),
+        ],
+    },
+    {
+        "id": "opera-gx",
+        "name": "Opera GX",
+        "url": "opera://extensions/",
+        "commands": ["opera", "launcher.exe"],
+        "progids": ["operagx", "opera gx"],
+        "paths": [
+            ("LOCALAPPDATA", "Programs/Opera GX/launcher.exe"),
+            ("PROGRAMFILES", "Opera GX/launcher.exe"),
+        ],
+    },
+    {
+        "id": "arc",
+        "name": "Arc",
+        "url": "arc://extensions/",
+        "commands": ["arc", "arc.exe"],
+        "progids": ["arc"],
+        "paths": [
+            ("LOCALAPPDATA", "Microsoft/WindowsApps/Arc.exe"),
+            ("LOCALAPPDATA", "The Browser Company/Arc/Application/Arc.exe"),
+        ],
+    },
+]
+
+
 def _write_sentinel(path: Path) -> None:
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -125,28 +199,105 @@ def _failed_splash_html(detail: str) -> str:
     return injected + html
 
 
-def _open_chrome_extensions_page() -> bool:
-    candidates = []
-    for root in (
-        os.environ.get("PROGRAMFILES"),
-        os.environ.get("PROGRAMFILES(X86)"),
-        os.environ.get("LOCALAPPDATA"),
-    ):
-        if root:
-            candidates.append(Path(root) / "Google" / "Chrome" / "Application" / "chrome.exe")
-    chrome = next((path for path in candidates if path.is_file()), None)
-    if chrome is None:
-        found = shutil.which("chrome") or shutil.which("chrome.exe")
-        chrome = Path(found) if found else None
+def _browser_by_id(browser_id: str | None):
+    wanted = (browser_id or "").lower()
+    return next((browser for browser in BROWSER_CATALOG if browser["id"] == wanted), None)
+
+
+def _default_browser_prog_id() -> str:
+    if sys.platform != "win32":
+        return ""
     try:
-        if chrome:
+        import winreg
+        with winreg.OpenKey(
+            winreg.HKEY_CURRENT_USER,
+            r"Software\Microsoft\Windows\Shell\Associations\UrlAssociations\https\UserChoice",
+        ) as key:
+            value, _ = winreg.QueryValueEx(key, "ProgId")
+            return str(value or "")
+    except Exception as e:
+        log.debug("default browser lookup failed: %s", e)
+        return ""
+
+
+def _browser_from_prog_id(prog_id: str):
+    needle = (prog_id or "").lower()
+    if not needle:
+        return None
+    for browser in BROWSER_CATALOG:
+        if any(token in needle for token in browser["progids"]):
+            return browser
+    return None
+
+
+def _browser_executable(browser) -> str:
+    for env_name, relative in browser["paths"]:
+        root = os.environ.get(env_name)
+        if not root:
+            continue
+        path = Path(root) / Path(relative)
+        if path.is_file():
+            return str(path)
+    for command in browser["commands"]:
+        found = shutil.which(command)
+        if found:
+            return found
+    return ""
+
+
+def _browser_descriptor(browser, *, is_default: bool = False) -> dict:
+    executable = _browser_executable(browser)
+    return {
+        "id": browser["id"],
+        "name": browser["name"],
+        "url": browser["url"],
+        "executable": executable,
+        "installed": bool(executable),
+        "is_default": is_default,
+    }
+
+
+def _available_browsers() -> list[dict]:
+    default = _browser_from_prog_id(_default_browser_prog_id())
+    browsers = []
+    for browser in BROWSER_CATALOG:
+        descriptor = _browser_descriptor(browser, is_default=browser is default)
+        if descriptor["installed"] or descriptor["is_default"]:
+            browsers.append(descriptor)
+    return browsers
+
+
+def _preferred_browser() -> dict:
+    browsers = _available_browsers()
+    default = next((browser for browser in browsers if browser["is_default"]), None)
+    if default:
+        return default
+    installed = next((browser for browser in browsers if browser["installed"]), None)
+    if installed:
+        return installed
+    return {
+        "id": "chromium",
+        "name": "your Chromium browser",
+        "url": "chrome://extensions/",
+        "executable": "",
+        "installed": False,
+        "is_default": False,
+    }
+
+
+def _open_extensions_page(browser_id: str | None = None) -> bool:
+    selected = _browser_by_id(browser_id)
+    browser = _browser_descriptor(selected) if selected else _preferred_browser()
+    try:
+        if browser.get("executable"):
             creationflags = 0x08000000 if sys.platform == "win32" else 0
-            subprocess.Popen([str(chrome), "chrome://extensions/"], creationflags=creationflags)
+            subprocess.Popen([str(browser["executable"]), str(browser["url"])],
+                             creationflags=creationflags)
             return True
-        webbrowser.open("chrome://extensions/")
+        webbrowser.open(str(browser["url"]))
         return True
     except Exception as e:
-        log.debug("open chrome extensions failed: %s", e)
+        log.debug("open extensions page failed: %s", e)
         return False
 
 
@@ -252,10 +403,15 @@ class JsApi:
             "sentinel_exists": sentinel_exists,
             "sentinel_current": sentinel_current,
             "should_show": should_show,
+            "browser": _preferred_browser(),
+            "browsers": _available_browsers(),
         }
 
     def open_chrome_extensions(self):
-        return _open_chrome_extensions_page()
+        return _open_extensions_page("chrome")
+
+    def open_extensions_page(self, browser_id=None):
+        return _open_extensions_page(str(browser_id or "") or None)
 
     def copy_extension_path(self):
         path = str(_extension_dir())
@@ -286,6 +442,11 @@ class JsApi:
             return
         self._dismissed = True
         _write_sentinel(self._sentinel)
+        self._close_window()
+
+    def _auto_close(self) -> None:
+        if self._dismissed:
+            return
         self._close_window()
 
     def _close_window(self) -> None:
@@ -380,14 +541,13 @@ def main() -> int:
         _slide_up(window, final_x, sh)
         time.sleep(LINGER_SEC)
         if not api.should_hold_open():
-            api._dismiss()
+            api._auto_close()
 
     threading.Thread(target=_after_loaded, name="uoink-splash-anim", daemon=True).start()
     try:
         webview.start()
     finally:
-        # Cover any path where start() returns without going through _dismiss.
-        _write_sentinel(sentinel)
+        log.debug("splash webview exited")
     return 0
 
 

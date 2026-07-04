@@ -279,7 +279,6 @@ class UoinkTray:
             MenuItem("Recent Uoinks", Menu(lambda: self._recent_items())),
             MenuItem("Settings…", self._open_settings),
             Menu.SEPARATOR,
-            MenuItem("Stop Helper", self._on_stop),
             MenuItem("Quit Uoink", self._on_stop),
         )
 
