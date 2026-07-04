@@ -3434,8 +3434,6 @@
       settings: null,
       facets: null,
       facetsFallback: false,
-      corpusFilterRows: [],
-      corpusFiltersLoaded: false,
       resurface: null,
       workspaces: [],
       currentWorkspace: null,
@@ -4878,8 +4876,9 @@
     }
 
     function workspaceFormatOptions() {
-      const formats = (state.facets && state.facets.format) || FALLBACK_FACETS.format;
-      return `<option value="">Format: any</option>` + formats.map((value) => `<option value="${htmlEscape(value)}">${htmlEscape(value)}</option>`).join("");
+      return `<option value="">Format: any</option>` + facetItems("format")
+        .map((item) => `<option value="${htmlEscape(item.value)}">${htmlEscape(item.label)}</option>`)
+        .join("");
     }
 
     function syncWorkspaceOptions() {
@@ -6007,42 +6006,9 @@
       state.blobUrls.clear();
     }
 
-    function populateFilterOptions(rows) {
-      if (state.corpusFiltersLoaded) {
-        rows = state.corpusFilterRows;
-      }
-      const channels = new Set();
-      const topics = new Set();
-      state.library.concat(rows).forEach((row) => {
-        if (row.channel) channels.add(row.channel);
-        if (row.topic) topics.add(row.topic);
-      });
-      syncOptions(els.channelFilter, "Channel: all", channels, (value) => value);
-      syncOptions(els.topicFilter, "Topic: all", topics, (value) => value);
+    function populateFilterOptions() {
+      syncFacetOptions();
       renderSuggestionDatalists();
-    }
-
-    async function loadCorpusFilterOptions() {
-      const rows = [];
-      const limit = 200;
-      let offset = 0;
-      let total = null;
-      try {
-        do {
-          const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
-          const data = await authFetch(`/memory/search?${params.toString()}`);
-          const batch = Array.isArray(data.results) ? data.results : [];
-          rows.push(...batch);
-          total = Number(data.total) || rows.length;
-          offset += batch.length;
-        } while (offset < total && offset < 4000);
-        state.corpusFilterRows = rows;
-        state.corpusFiltersLoaded = true;
-        populateFilterOptions(rows);
-      } catch (_) {
-        state.corpusFilterRows = [];
-        state.corpusFiltersLoaded = false;
-      }
     }
 
     function setDatalist(id, values) {
@@ -6075,78 +6041,102 @@
     }
 
     function syncFacetOptions() {
-      const facets = state.facets || FALLBACK_FACETS;
-      syncOptions(els.formatFilter, "Format: all", facets.format || FALLBACK_FACETS.format, facetOptionLabel);
-      syncOptions(els.performanceFilter, "Performance: all", facets.performance || facets.performance_tier || FALLBACK_FACETS.performance, facetOptionLabel);
-      syncOptions(els.lengthFilter, "Length: all", facets.length || facets.length_bucket || FALLBACK_FACETS.length, facetOptionLabel);
+      syncOptions(els.channelFilter, "Channel: all", facetItems("channel"));
+      syncOptions(els.topicFilter, "Topic: all", facetItems("topic"));
+      syncOptions(els.hookFilter, "Hook: any", facetItems("hook_type"));
+      syncOptions(els.formatFilter, "Format: all", facetItems("format"));
+      syncOptions(els.performanceFilter, "Performance: all", facetItems("performance"));
+      syncOptions(els.lengthFilter, "Length: all", facetItems("length"));
       syncWorkspaceOptions();
       els.facetStatus.classList.toggle("hidden", !state.facetsFallback);
       els.facetStatus.title = state.facetsFallback
-        ? "Using built-in facet defaults until the helper sends the latest taxonomy."
-        : "Facet taxonomy loaded from the helper.";
+        ? "Library filters need the helper's facet list."
+        : "Library facets loaded from the helper.";
     }
 
-    async function loadFacetTaxonomy() {
+    async function loadLibraryFacets() {
       try {
-        const data = await authFetch("/facets/taxonomy");
-        state.facets = data.facets || data.taxonomy || data;
+        const data = await authFetch("/library/facets");
+        state.facets = data.facets || {};
         state.facetsFallback = false;
       } catch (err) {
-        state.facets = FALLBACK_FACETS;
+        state.facets = null;
         state.facetsFallback = true;
       }
       syncFacetOptions();
     }
 
-    function facetOptionLabel(value) {
+    function facetSourceKeys(key) {
+      return ({
+        channel: ["channel"],
+        topic: ["topic"],
+        hook_type: ["hook_type"],
+        format: ["format"],
+        performance: ["performance_tier", "performance"],
+        length: ["length_bucket", "length"],
+      })[key] || [key];
+    }
+
+    function fallbackFacetValues(key) {
+      if (key === "hook_type") {
+        return Array.from(els.hookFilter.options)
+          .map((option) => option.value)
+          .filter(Boolean);
+      }
+      if (key === "performance") return FALLBACK_FACETS.performance || [];
+      if (key === "length") return FALLBACK_FACETS.length || [];
+      return FALLBACK_FACETS[key] || [];
+    }
+
+    function fallbackFacetLabel(value) {
+      const text = String(value || "").replace(/[_-]+/g, " ").trim();
+      return text.replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+
+    function normalizeFacetItems(items) {
+      return (Array.isArray(items) ? items : [])
+        .map((item) => {
+          if (item && typeof item === "object") {
+            const value = String(item.value || "").trim();
+            if (!value) return null;
+            return {
+              value,
+              label: String(item.label || "").trim() || fallbackFacetLabel(value),
+              count: Number(item.count || 0),
+            };
+          }
+          const value = String(item || "").trim();
+          return value ? { value, label: fallbackFacetLabel(value), count: 0 } : null;
+        })
+        .filter(Boolean);
+    }
+
+    function facetItems(key) {
+      const facets = state.facets;
+      if (facets) {
+        for (const sourceKey of facetSourceKeys(key)) {
+          if (Object.prototype.hasOwnProperty.call(facets, sourceKey)) {
+            return normalizeFacetItems(facets[sourceKey]);
+          }
+        }
+      }
+      return normalizeFacetItems(fallbackFacetValues(key));
+    }
+
+    function facetLabelForValue(key, value) {
       const raw = String(value || "").trim();
-      const normalized = raw.toLowerCase().replace(/-/g, "_");
-      const labels = {
-        one_shot: "One shot",
-        talking_head: "Talking head",
-        screen_recording: "Screen recording",
-        broll_heavy: "B-roll heavy",
-        tutorial: "Tutorial",
-        listicle: "Listicle",
-        narrative: "Narrative",
-        vlog: "Vlog",
-        interview: "Interview",
-        over: "Overperforming",
-        average: "Average",
-        under: "Underperforming",
-        short: "Short",
-        medium: "Medium",
-        long: "Long",
-        deep: "Deep dive",
-      };
-      if (labels[normalized]) return labels[normalized];
-      return raw.replace(/[_-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+      if (!raw) return "";
+      const match = facetItems(key).find((item) => item.value === raw);
+      return match ? match.label : fallbackFacetLabel(raw);
     }
 
-    function syncOptions(select, label, values, labeler = facetOptionLabel) {
+    function syncOptions(select, label, items) {
       const current = select.value;
-      select.innerHTML = `<option value="">${label}</option>` + [...values].sort()
-        .map((v) => `<option value="${htmlEscape(v)}">${htmlEscape(labeler(v))}</option>`).join("");
+      const options = normalizeFacetItems(items);
+      select.innerHTML = `<option value="">${label}</option>` + options
+        .map((item) => `<option value="${htmlEscape(item.value)}">${htmlEscape(item.label)}</option>`)
+        .join("");
       select.value = current;
-    }
-
-    function libraryDateRangeMessage() {
-      const from = els.dateFrom.value;
-      const to = els.dateTo.value;
-      if (from && to && from > to) return "Start date has to be before end date.";
-      return "";
-    }
-
-    function validateLibraryDateRange({ announce = false } = {}) {
-      const message = libraryDateRangeMessage();
-      els.dateFrom.setCustomValidity(message);
-      els.dateTo.setCustomValidity(message);
-      if (!message) return true;
-      els.resultSummary.textContent = message;
-      els.pageSummary.textContent = "Fix the dates to search Library.";
-      els.loadMore.classList.add("hidden");
-      if (announce) showToast(message);
-      return false;
     }
 
     function libraryFilterLabel(key) {
@@ -6164,8 +6154,9 @@
     }
 
     function libraryFilterDisplayValue(key, value) {
-      if (key === "hook_type") return prettyHook(value);
-      if (key === "format" || key === "performance" || key === "length") return facetOptionLabel(value);
+      if (["channel", "topic", "hook_type", "format", "performance", "length"].includes(key)) {
+        return facetLabelForValue(key, value);
+      }
       return String(value || "").trim();
     }
 
@@ -8260,7 +8251,6 @@
         state.filters.date_from = els.dateFrom.value;
         state.filters.date_to = els.dateTo.value;
         state.filters.sort = els.sortFilter.value;
-        if (!validateLibraryDateRange({ announce: true })) return;
         loadLibrary({ reset: true });
       }, 260);
       [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
@@ -8735,8 +8725,7 @@
       applyHashRoute();
       window.addEventListener("hashchange", applyHashRoute);
       await refreshHealth();
-      await loadFacetTaxonomy();
-      await loadCorpusFilterOptions();
+      await loadLibraryFacets();
       await refreshJobs();
       await loadLibrary({ reset: true });
       await loadForYou();
