@@ -91,6 +91,7 @@ import page_extractor  # noqa: E402  -- v3.2 Universal Site Uoinking
 import source_manifest  # noqa: E402  -- v3.2.1 site/dashboard product manifests
 import openapi_bridge  # noqa: E402  -- v3.3 OpenAPI bridge for non-MCP AIs
 import reddit_extractor  # noqa: E402  -- v3.3 Reddit thread capture (.json)
+import substack_extractor  # noqa: E402  -- Q-01 Substack post capture (API)
 
 
 def _extract_page_to_prose(url: str) -> str | None:
@@ -10408,6 +10409,55 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _handle_extract_substack(self, body: dict):
+        """POST /extract/substack {url} -- capture a free Substack post via
+        the publication's public JSON API as a yoink with
+        source_type='substack_post'. Ships dark behind the
+        substack_capture_enabled settings flag (Q-01, AMBER); the flag
+        answers before any network so the feature is inert until flipped.
+        Paid posts refuse honestly (code='paywalled') instead of saving the
+        teaser. Token gate cleared by do_POST."""
+        settings = _read_settings() or {}
+        if not settings.get("substack_capture_enabled"):
+            return self._send_json(200, {
+                "ok": False, "code": "disabled",
+                "error": "Substack capture is off. Set "
+                         "substack_capture_enabled to true in settings to "
+                         "try it.",
+            })
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                         "error": "json object required"})
+        url = (body.get("url") or "").strip()
+        if not url:
+            return self._send_json(400, {"ok": False, "error": "url required"})
+        result = substack_extractor.extract_substack_post(url)
+        if not result.get("ok"):
+            log.info("POST /extract/substack -> %s", result.get("code"))
+            return self._send_json(200, {
+                "ok": False, "error": result.get("error"),
+                "code": result.get("code")})
+        try:
+            video_id = page_extractor.persist_page_yoink(
+                _get_index(), result, data_root=DATA_ROOT,
+                source_type=substack_extractor.SOURCE_TYPE,
+                subfolder="Substack", slug_prefix="substack")
+        except Exception:
+            log.exception("/extract/substack persist failed")
+            return self._send_json(500, {
+                "ok": False,
+                "error": "Captured the post but couldn't save it locally."})
+        if not video_id:
+            return self._send_json(500, {
+                "ok": False, "error": "Couldn't save the Substack post."})
+        log.info("POST /extract/substack -> ok (%s)", video_id)
+        return self._send_json(200, {
+            "ok": True,
+            "video_id": video_id,
+            "title": result["title"],
+            "metadata": result.get("metadata", {}),
+        })
+
     def _handle_extract_reddit(self, body: dict):
         """POST /extract/reddit {url, depth_limit?, score_threshold?} --
         capture a Reddit thread via its public .json as a yoink with
@@ -10835,6 +10885,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_reyoink(bare)
         if bare == "/extract/reddit":
             return self._handle_extract_reddit(body)
+        if bare == "/extract/substack":
+            return self._handle_extract_substack(body)
         if bare.startswith("/tools/"):
             return self._handle_tools_call_http(bare, body)
         if bare == "/index/backfill-cancel":
