@@ -2876,10 +2876,11 @@
       <div class="sidebar-bottom">
         <div class="running-pill" id="runningPill"><span class="pip"></span><span>Ready on this device</span></div>
         <div class="localhost" id="portLabel">Private local app</div>
-        <button class="sidebar-action" type="button" id="viewActivity" data-nav-label="View activity">View activity <span class="nav-count" id="activityNavCount" title="0 active jobs" aria-label="0 active jobs">0</span></button>
+        <button class="sidebar-action" type="button" id="viewActivity" data-tab-button="activity" data-nav-label="Activity">Activity <span class="nav-count" id="activityNavCount" title="0 active jobs" aria-label="0 active jobs">0</span></button>
         <details class="sidebar-more" id="sidebarControls" open>
           <summary class="sidebar-action sidebar-more-summary">More controls</summary>
           <div class="sidebar-more-actions">
+            <button class="sidebar-action" type="button" data-tab-button="about" data-nav-label="About">About Uoink</button>
             <button class="sidebar-action" type="button" id="starGithub">⭐ Star on GitHub</button>
             <button class="stop" type="button" id="stopHelper">Stop Uoink</button>
           </div>
@@ -3131,7 +3132,6 @@
             <aside class="panel">
               <div class="panel-head">
                 <div class="panel-title">Write from a source</div>
-                <span class="nav-count" id="writingAnchorCount">0/10 anchors</span>
               </div>
               <div class="panel-body">
                 <label class="soft-note" for="writingSourceSearch">Source uoink</label>
@@ -3204,7 +3204,15 @@
                       <label class="choice-row"><input type="radio" name="writingStyle" value="anchors"><span>From anchors</span></label>
                       <label class="choice-row"><input type="radio" name="writingStyle" value="specific"><span>Specific anchor</span></label>
                     </div>
-                    <div class="anchor-list" id="writingAnchorList"></div>
+                    <!-- UX-12: this list picks which anchors ground THIS
+                         draft; the anchor library has ONE manager, the
+                         Style anchors panel in the right column. Hidden for
+                         Default voice, where it means nothing. -->
+                    <div class="hidden" id="writingAnchorSelect">
+                      <div class="soft-note">Anchors for this draft</div>
+                      <div class="anchor-list" id="writingAnchorList"></div>
+                      <button class="hook-help-link" type="button" id="manageAnchorsLink">Manage anchors &rarr;</button>
+                    </div>
                     <label class="inline-row"><input id="writingShowWarnings" type="checkbox" checked> Show Voice DNA warnings</label>
                     <label class="inline-row"><input id="writingSkipWarnings" type="checkbox"> Skip warnings this time</label>
                   </div>
@@ -3513,7 +3521,7 @@
           <div class="page-head">
             <div>
               <div class="eyebrow">Activity</div>
-              <h1><span id="activityCount">0</span> in flight <em>uoinking...</em></h1>
+              <h1 id="activityHeadline">Nothing uoinking <em>right now.</em></h1>
               <p class="lede">Live work, queue retries, today&apos;s completions, and failures use the same phase language as the popup: fetch, transcribe, screenshots, classify, write.</p>
             </div>
             <div class="inline-row">
@@ -4113,7 +4121,7 @@
       scriptRevisionDraft: document.getElementById("scriptRevisionDraft"),
       scriptRevisionResult: document.getElementById("scriptRevisionResult"),
       writingNavCount: document.getElementById("writingNavCount"),
-      writingAnchorCount: document.getElementById("writingAnchorCount"),
+      writingAnchorSelect: document.getElementById("writingAnchorSelect"),
       writingSource: document.getElementById("writingSource"),
       writingModePicker: document.getElementById("writingModePicker"),
       writingAngle: document.getElementById("writingAngle"),
@@ -4206,7 +4214,7 @@
       facetStatus: document.getElementById("facetStatus"),
       queueRows: document.getElementById("queueRows"),
       queueMeta: document.getElementById("queueMeta"),
-      activityCount: document.getElementById("activityCount"),
+      activityHeadline: document.getElementById("activityHeadline"),
       activityNavCount: document.getElementById("activityNavCount"),
       cancelAll: document.getElementById("cancelAll"),
       completedRows: document.getElementById("completedRows"),
@@ -4565,13 +4573,9 @@
       const installed = state.agents.filter((agent) => agent.installed);
       const connected = connectedAgents();
       const keyReady = Boolean(state.settings && state.settings.anthropic_key_set);
-      const advanced = `
-        <details>
-          <summary>Advanced: connection JSON</summary>
-          <div class="mono-box">${htmlEscape(els.mcpConfig?.value || "Load Settings to inspect the generated connection.")}</div>
-          <button class="button ghost" type="button" data-copy-agent-config>Copy connection JSON</button>
-        </details>
-      `;
+      // UX-16: the connection JSON disclosure lives once, in Settings >
+      // Agent connection (the static details below the status card), not
+      // duplicated inside every status-card variant.
       if (!state.agentDetectionLoaded) {
         return `<strong>Checking installed writing agents...</strong><span class="soft-note">This takes a moment and never changes a client until you choose Connect.</span>`;
       }
@@ -4579,7 +4583,6 @@
         return `
           <strong>${htmlEscape(connected.map((agent) => agent.label).join(", "))} connected</strong>
           <span class="soft-note">Uoink is ready inside that client. ${keyReady ? "Dashboard Generate will use your Anthropic key when no live agent bridge is open." : "Open the connected client to write with its model, or add an Anthropic key for dashboard generation."}</span>
-          ${advanced}
         `;
       }
       if (installed.length) {
@@ -4590,14 +4593,12 @@
             ${installed.map((agent) => `<button class="button primary" type="button" data-connect-agent="${htmlEscape(agent.name)}">Connect ${htmlEscape(agent.label)}</button>`).join("")}
           </div>
           ${keyReady ? `<span class="compute-indicator">Your Anthropic key is ready as the no-agent fallback.</span>` : ""}
-          ${advanced}
         `;
       }
       return `
         <strong>No supported writing agent found</strong>
         <span class="soft-note">${keyReady ? "Your Anthropic key can generate tweets and blogs now. Install Claude Desktop for agent-grounded scripts and critique." : "Install Claude Desktop, then return here for one-click connection."}</span>
         <button class="button primary" type="button" data-open-external="https://claude.ai/download">Install Claude Desktop</button>
-        ${advanced}
       `;
     }
 
@@ -7331,7 +7332,11 @@
       const cancelableCount = activeJobs.filter((job) => job.id).length + queueActive.filter((row) => row.pending_id).length;
       const mobileCount = activeJobs.concat(queueActive, failedJobs, queueFailed)
         .filter(isMobileQueued).length;
-      els.activityCount.textContent = String(activeCount);
+      // UX-17: at zero the old "0 in flight uoinking..." headline read as
+      // broken English; give the zero state its own sentence.
+      els.activityHeadline.innerHTML = activeCount
+        ? `${activeCount} in flight <em>uoinking...</em>`
+        : "Nothing uoinking <em>right now.</em>";
       setSidebarBadge(els.activityNavCount, activeCount, "active jobs");
       els.cancelAll.disabled = cancelableCount === 0;
       els.cancelAll.title = cancelableCount ? `Cancel ${cancelableCount} active item${cancelableCount === 1 ? "" : "s"}.` : "No active work to cancel.";
@@ -8491,7 +8496,8 @@
       const activeCount = state.styleAnchors.length
         ? activeStyleAnchorCount()
         : mergedDefaultAnchors().length;
-      els.writingAnchorCount.textContent = `${activeCount}/${cap} active`;
+      // UX-12: the active-count badge lives on the manager panel only; the
+      // form's duplicate counter is gone.
       if (els.styleAnchorSummary) els.styleAnchorSummary.textContent = `${activeCount}/${cap} active`;
       const composerAnchors = state.styleAnchors.length ? state.styleAnchors : mergedDefaultAnchors();
       const rows = composerAnchors.length
@@ -8647,6 +8653,11 @@
         await loadDefaultStyleAnchors();
         renderDefaultStyleAnchors();
       }
+    }
+
+    function syncWritingStyleUi() {
+      const mode = selectedRadio("writingStyle", "default");
+      els.writingAnchorSelect.classList.toggle("hidden", mode === "default");
     }
 
     function selectedAnchorIds() {
@@ -9526,9 +9537,14 @@
       }
     }
 
+    // U-07 (UX-15): panels without their own nav entry highlight their
+    // logical parent, so the sidebar never lies or goes blank.
+    const NAV_OWNER = { yoink: "library", evidence: "library", features: "sources" };
+
     function switchTab(tab) {
       if (tab === "build" || tab === "script") tab = "writing";
-      document.querySelectorAll("[data-tab-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.tabButton === tab));
+      const navTab = NAV_OWNER[tab] || tab;
+      document.querySelectorAll("[data-tab-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.tabButton === navTab));
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
       if (tab === "for-you") loadForYou();
       if (tab === "writing") loadWriting();
@@ -9738,7 +9754,7 @@
         refreshActivity();
       });
       document.getElementById("reloadSettings").addEventListener("click", refreshSettings);
-      document.getElementById("viewActivity").addEventListener("click", () => switchTab("activity"));
+      // viewActivity carries data-tab-button now; the nav loop wires it.
       document.getElementById("starGithub").addEventListener("click", () => openExternal("https://github.com/ryanbiddy/uoink"));
       document.getElementById("saveKey").addEventListener("click", saveKey);
       document.getElementById("testKey").addEventListener("click", testKey);
@@ -9767,6 +9783,14 @@
       });
       els.stopHelperConfirm.addEventListener("keydown", (event) => {
         trapModalFocus(event, els.stopHelperConfirm, closeStopHelperConfirm);
+      });
+      // UX-12: the per-draft anchor list only means something when a style
+      // mode that uses anchors is picked.
+      document.getElementById("writingStyleMode").addEventListener("change", syncWritingStyleUi);
+      document.getElementById("manageAnchorsLink").addEventListener("click", () => {
+        const manager = document.getElementById("styleAnchorManager");
+        const panel = manager && manager.closest(".panel");
+        if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
       });
       els.hookExplainerClose.addEventListener("click", closeHookExplainer);
       els.hookExplainer.addEventListener("click", (event) => {
