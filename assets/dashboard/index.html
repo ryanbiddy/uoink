@@ -4876,8 +4876,9 @@
     }
 
     function workspaceFormatOptions() {
-      const formats = (state.facets && state.facets.format) || FALLBACK_FACETS.format;
-      return `<option value="">Format: any</option>` + formats.map((value) => `<option value="${htmlEscape(value)}">${htmlEscape(value)}</option>`).join("");
+      return `<option value="">Format: any</option>` + facetItems("format")
+        .map((item) => `<option value="${htmlEscape(item.value)}">${htmlEscape(item.label)}</option>`)
+        .join("");
     }
 
     function syncWorkspaceOptions() {
@@ -5687,7 +5688,9 @@
     }
 
     function libraryFilterValue(key, value) {
-      if (key === "hook_type") return prettyHook(value);
+      if (["channel", "topic", "hook_type", "format", "performance", "length"].includes(key)) {
+        return facetLabelForValue(key, value);
+      }
       return String(value || "").trim();
     }
 
@@ -6005,15 +6008,8 @@
       state.blobUrls.clear();
     }
 
-    function populateFilterOptions(rows) {
-      const channels = new Set();
-      const topics = new Set();
-      state.library.concat(rows).forEach((row) => {
-        if (row.channel) channels.add(row.channel);
-        if (row.topic) topics.add(row.topic);
-      });
-      syncOptions(els.channelFilter, "Channel: all", channels);
-      syncOptions(els.topicFilter, "Topic: all", topics);
+    function populateFilterOptions() {
+      syncFacetOptions();
       renderSuggestionDatalists();
     }
 
@@ -6047,33 +6043,101 @@
     }
 
     function syncFacetOptions() {
-      const facets = state.facets || FALLBACK_FACETS;
-      syncOptions(els.formatFilter, "Format: all", facets.format || FALLBACK_FACETS.format);
-      syncOptions(els.performanceFilter, "Performance: all", facets.performance || facets.performance_tier || FALLBACK_FACETS.performance);
-      syncOptions(els.lengthFilter, "Length: all", facets.length || facets.length_bucket || FALLBACK_FACETS.length);
+      syncOptions(els.channelFilter, "Channel: all", facetItems("channel"));
+      syncOptions(els.topicFilter, "Topic: all", facetItems("topic"));
+      syncOptions(els.hookFilter, "Hook: any", facetItems("hook_type"));
+      syncOptions(els.formatFilter, "Format: all", facetItems("format"));
+      syncOptions(els.performanceFilter, "Performance: all", facetItems("performance"));
+      syncOptions(els.lengthFilter, "Length: all", facetItems("length"));
       syncWorkspaceOptions();
       els.facetStatus.classList.toggle("hidden", !state.facetsFallback);
       els.facetStatus.title = state.facetsFallback
-        ? "Using built-in facet defaults until the helper sends the latest taxonomy."
-        : "Facet taxonomy loaded from the helper.";
+        ? "Library filters need the helper's facet list."
+        : "Library facets loaded from the helper.";
     }
 
-    async function loadFacetTaxonomy() {
+    async function loadLibraryFacets() {
       try {
-        const data = await authFetch("/facets/taxonomy");
-        state.facets = data.facets || data.taxonomy || data;
+        const data = await authFetch("/library/facets");
+        state.facets = data.facets || {};
         state.facetsFallback = false;
       } catch (err) {
-        state.facets = FALLBACK_FACETS;
+        state.facets = null;
         state.facetsFallback = true;
       }
       syncFacetOptions();
     }
 
-    function syncOptions(select, label, values) {
+    function facetSourceKeys(key) {
+      return ({
+        channel: ["channel"],
+        topic: ["topic"],
+        hook_type: ["hook_type"],
+        format: ["format"],
+        performance: ["performance_tier", "performance"],
+        length: ["length_bucket", "length"],
+      })[key] || [key];
+    }
+
+    function fallbackFacetValues(key) {
+      if (key === "hook_type") {
+        return Array.from(els.hookFilter.options)
+          .map((option) => option.value)
+          .filter(Boolean);
+      }
+      if (key === "performance") return FALLBACK_FACETS.performance || [];
+      if (key === "length") return FALLBACK_FACETS.length || [];
+      return FALLBACK_FACETS[key] || [];
+    }
+
+    function fallbackFacetLabel(value) {
+      const text = String(value || "").replace(/[_-]+/g, " ").trim();
+      return text.replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+
+    function normalizeFacetItems(items) {
+      return (Array.isArray(items) ? items : [])
+        .map((item) => {
+          if (item && typeof item === "object") {
+            const value = String(item.value || "").trim();
+            if (!value) return null;
+            return {
+              value,
+              label: String(item.label || "").trim() || fallbackFacetLabel(value),
+              count: Number(item.count || 0),
+            };
+          }
+          const value = String(item || "").trim();
+          return value ? { value, label: fallbackFacetLabel(value), count: 0 } : null;
+        })
+        .filter(Boolean);
+    }
+
+    function facetItems(key) {
+      const facets = state.facets;
+      if (facets) {
+        for (const sourceKey of facetSourceKeys(key)) {
+          if (Object.prototype.hasOwnProperty.call(facets, sourceKey)) {
+            return normalizeFacetItems(facets[sourceKey]);
+          }
+        }
+      }
+      return normalizeFacetItems(fallbackFacetValues(key));
+    }
+
+    function facetLabelForValue(key, value) {
+      const raw = String(value || "").trim();
+      if (!raw) return "";
+      const match = facetItems(key).find((item) => item.value === raw);
+      return match ? match.label : fallbackFacetLabel(raw);
+    }
+
+    function syncOptions(select, label, items) {
       const current = select.value;
-      select.innerHTML = `<option value="">${label}</option>` + [...values].sort()
-        .map((v) => `<option value="${htmlEscape(v)}">${htmlEscape(v)}</option>`).join("");
+      const options = normalizeFacetItems(items);
+      select.innerHTML = `<option value="">${label}</option>` + options
+        .map((item) => `<option value="${htmlEscape(item.value)}">${htmlEscape(item.label)}</option>`)
+        .join("");
       select.value = current;
     }
 
@@ -8635,7 +8699,7 @@
       applyHashRoute();
       window.addEventListener("hashchange", applyHashRoute);
       await refreshHealth();
-      await loadFacetTaxonomy();
+      await loadLibraryFacets();
       await refreshJobs();
       await loadLibrary({ reset: true });
       await loadForYou();
