@@ -473,6 +473,19 @@ class Index:
                 return []
         return [dict(r) for r in rows]
 
+    def count_corpus(self) -> int:
+        """Total non-deleted yoinks in the library, ignoring every filter.
+
+        Backs the Library state contract (G-11): the search handler compares
+        this against a filtered result count so the frontend can tell an
+        *empty corpus* apart from a *query that matched nothing*, instead of
+        collapsing both into ``total: 0``."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT COUNT(*) AS n FROM yoinks WHERE deleted_at IS NULL"
+            ).fetchone()
+        return int(row["n"]) if row else 0
+
     def list_recent(self, limit: int = 20) -> list[dict]:
         """Most-recently-yoinked rows, newest first. Excludes soft-deleted
         (deleted_at IS NOT NULL) rows."""

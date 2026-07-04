@@ -9542,6 +9542,15 @@ class Handler(BaseHTTPRequestHandler):
             if value and not _valid_iso_date(value):
                 return self._send_json(
                     400, {"ok": False, "error": f"{label} must be YYYY-MM-DD"})
+        # Reject an impossible window server-side (G-12 / QA #13). Before this
+        # the from>to range fell through to an empty result that read as "no
+        # uoinks," hiding the real problem (the dates are backwards).
+        if date_from and date_to and date_from > date_to:
+            return self._send_json(400, {
+                "ok": False,
+                "error": "date_from is after date_to",
+                "state": "invalid_range",
+            })
         try:
             limit = max(1, min(200, int(_one("limit") or "50")))
             offset = max(0, int(_one("offset") or "0"))
@@ -9556,13 +9565,35 @@ class Handler(BaseHTTPRequestHandler):
                 hook_type=hook_type, date_from=date_from, date_to=date_to,
                 limit=limit, offset=offset,
             )
+            corpus_total = idx.count_corpus()
         except Exception as e:
+            # The Library-unavailable state (G-11 / QA #12). The frontend must
+            # render this distinctly and NEVER fall back to job records dressed
+            # as uoinks. `state: "unavailable"` is the signal to do that.
             log.warning("memory search: index error: %s", e)
-            return self._send_json(500, {"ok": False, "error": "search failed"})
+            return self._send_json(503, {
+                "ok": False,
+                "error": "search failed",
+                "state": "unavailable",
+            })
         results = _enrich_yoink_rows(idx, res["results"])
+        # Three distinct populated-but-zero states so the frontend stops
+        # collapsing them into one "0 uoinks" message (G-11 / QA #11, #12):
+        #   matches      -> rows to show
+        #   no_matches   -> corpus has uoinks, this query/filter set matched 0
+        #   empty_corpus -> nothing saved yet; show the real onboarding CTA
+        total = res["total"]
+        if total > 0:
+            state = "matches"
+        elif corpus_total > 0:
+            state = "no_matches"
+        else:
+            state = "empty_corpus"
         self._send_json(200, {
             "ok": True,
-            "total": res["total"],
+            "state": state,
+            "total": total,
+            "corpus_total": corpus_total,
             "limit": limit,
             "offset": offset,
             "results": results,
