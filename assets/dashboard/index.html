@@ -3013,7 +3013,7 @@
           <div class="page-head">
             <div>
               <div class="eyebrow">Activity</div>
-              <h1 id="activityHeadline"><span id="activityCount">0</span><span id="activityHeadlineText"> in flight </span><em id="activityHeadlineAccent">uoinking...</em></h1>
+              <h1><span id="activityCount">0</span> in flight <em>uoinking...</em></h1>
               <p class="lede">Live work, queue retries, today&apos;s completions, and failures use the same phase language as the popup: fetch, transcribe, screenshots, classify, write.</p>
             </div>
             <div class="inline-row">
@@ -3605,8 +3605,6 @@
       facetStatus: document.getElementById("facetStatus"),
       queueRows: document.getElementById("queueRows"),
       queueMeta: document.getElementById("queueMeta"),
-      activityHeadlineText: document.getElementById("activityHeadlineText"),
-      activityHeadlineAccent: document.getElementById("activityHeadlineAccent"),
       activityCount: document.getElementById("activityCount"),
       activityNavCount: document.getElementById("activityNavCount"),
       completedRows: document.getElementById("completedRows"),
@@ -4094,32 +4092,6 @@
       const m = url.match(/[?&]v=([A-Za-z0-9_-]{6,})|youtu\.be\/([A-Za-z0-9_-]{6,})|\/shorts\/([A-Za-z0-9_-]{6,})/);
       if (m) return m[1] || m[2] || m[3] || "";
       return "";
-    }
-
-    function activityRowKey(row) {
-      if (!row) return "";
-      const videoKey = failureKey(row);
-      if (videoKey) return `video:${videoKey}`;
-      const url = String(row.url || row.source_url || row.playlist_url || "").trim().toLowerCase();
-      if (url) return `url:${url}`;
-      const current = row.current_video || {};
-      const title = String(row.title || row.playlist_title || current.title || "").trim().toLowerCase();
-      const kind = String(row.kind || row.type || "job").trim().toLowerCase();
-      if (title) return `${kind}:${title}`;
-      if (row.pending_id) return `pending:${row.pending_id}`;
-      if (row.id) return `job:${row.id}`;
-      return "";
-    }
-
-    function dedupeActivityRows(rows) {
-      const seen = new Set();
-      return (Array.isArray(rows) ? rows : []).filter((row) => {
-        const key = activityRowKey(row);
-        if (!key) return true;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
     }
 
     function daysSince(value) {
@@ -5989,21 +5961,16 @@
       const pending = Array.isArray(data.pending) ? data.pending : [];
       const pendingCount = Array.isArray(data.pending) ? pending.length : countValue(data.pending, countValue(data.pending_count, 0));
       const runningCount = countValue(data.running, countValue(data.running_count, 0));
-      const queueActive = dedupeActivityRows(pending.filter((row) => !["failed", "succeeded", "completed", "cancelled"].includes(normalizedStatus(row))));
-      const queueFailed = dedupeActivityRows(pending.filter((row) => normalizedStatus(row) === "failed"));
-      const activeJobs = dedupeActivityRows(state.jobs.filter((job) => ["queued", "running"].includes(normalizedStatus(job))));
-      const failedJobs = dedupeActivityRows(state.jobs.filter((job) => ["failed", "cancelled"].includes(normalizedStatus(job))));
+      const queueActive = pending.filter((row) => !["failed", "succeeded", "completed", "cancelled"].includes(normalizedStatus(row)));
+      const queueFailed = pending.filter((row) => normalizedStatus(row) === "failed");
+      const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(normalizedStatus(job)));
+      const failedJobs = state.jobs.filter((job) => ["failed", "cancelled"].includes(normalizedStatus(job)));
       const activeCount = activeJobs.length + queueActive.length;
       const mobileCount = activeJobs.concat(queueActive, failedJobs, queueFailed)
         .filter(isMobileQueued).length;
-      els.activityCount.textContent = activeCount ? String(activeCount) : "";
-      els.activityCount.classList.toggle("hidden", activeCount === 0);
-      els.activityHeadlineText.textContent = activeCount ? " in flight " : "No active work ";
-      els.activityHeadlineAccent.textContent = activeCount ? "uoinking..." : "right now.";
+      els.activityCount.textContent = String(activeCount);
       els.activityNavCount.textContent = String(activeCount);
-      els.queueMeta.textContent = activeCount
-        ? `${runningCount || activeJobs.filter((job) => normalizedStatus(job) === "running").length} running | ${pendingCount || queueActive.length} queued${mobileCount ? ` | ${mobileCount} mobile` : ""}`
-        : `No active work${mobileCount ? ` | ${mobileCount} mobile` : ""}`;
+      els.queueMeta.textContent = `${runningCount || activeJobs.filter((job) => normalizedStatus(job) === "running").length} running | ${pendingCount || queueActive.length} queued${mobileCount ? ` | ${mobileCount} mobile` : ""}`;
       // v2.2.1 fix: dedupe failed queue rows whose video already has a
       // failed job row, so the same yoink doesn't render twice. Jobs win
       // because they carry richer state (phase, error_code, retry button).
@@ -6018,7 +5985,7 @@
         .concat(failedJobs.map(jobRowHtml))
         .concat(queueFailedDeduped.map(queueRowHtml));
       if (!rows.length) {
-        els.queueRows.innerHTML = `<div class="job-row"><div class="job-title">Nothing running right now.</div><div class="job-sub">New uoinks and retries will appear here. Mobile saves use this label:</div><span class="activity-source-chip">from mobile playlist</span></div>`;
+        els.queueRows.innerHTML = `<div class="job-row"><div class="job-title">Nothing running right now.</div><div class="job-sub">New uoinks and rate-limit retries will appear here. Mobile saves use this label:</div><span class="activity-source-chip">from mobile playlist</span></div>`;
       } else {
         els.queueRows.innerHTML = rows.join("");
       }
@@ -6108,10 +6075,7 @@
       if (normalized === "write") {
         return "The source is saved, but the final index write did not finish.";
       }
-      const translated = translateMachineMessage(raw, context);
-      return translated.includes("Retrying")
-        ? "This run stopped before it finished. Details are tucked below."
-        : translated;
+      return translateMachineMessage(raw, context);
     }
 
     function shouldOfferChunkedRetry(raw, phase) {
@@ -6124,22 +6088,6 @@
       const haystack = String(raw || "").toLowerCase();
       return ["sign in", "login", "cookies", "captcha", "guest token", "members-only", "members only"]
         .some((needle) => haystack.includes(needle));
-    }
-
-    function activityStatusLabel(stateValue, row = {}) {
-      const status = normalizedStatus({ state: stateValue, status: stateValue });
-      if (status === "failed") return "Failed";
-      if (status === "cancelled") return "Cancelled";
-      if (status === "queued" || status === "pending") return row.retry_after ? "Retry scheduled" : "Waiting";
-      if (status === "running") return "Running";
-      if (status === "completed" || status === "succeeded") return "Completed";
-      return status ? status.replace(/_/g, " ") : "Waiting";
-    }
-
-    function activityVideoProgressLabel(row, stateValue) {
-      const total = Number(row.videos_total || 0);
-      if (total <= 1 || ["failed", "cancelled"].includes(stateValue)) return "";
-      return `${Number(row.videos_done || 0)}/${total} videos`;
     }
 
     function phaseChips(activePhase, stateValue) {
@@ -6183,11 +6131,10 @@
       const cookieRetry = failed && shouldOfferCookieRetry(rawError);
       const sub = [
         job.kind || "job",
-        activityStatusLabel(stateValue, job),
-        activityVideoProgressLabel(job, stateValue),
+        stateValue,
+        job.videos_total ? `${job.videos_done || 0}/${job.videos_total} videos` : "",
       ].filter(Boolean).join(" | ");
       const sourceChip = activitySourceChip(job);
-      const showMotion = !failed && ["queued", "running"].includes(stateValue);
       return `
         <div class="job-row ${failed ? "failed" : ""}" data-job-id="${htmlEscape(job.id || "")}">
           <div class="job-top">
@@ -6203,7 +6150,8 @@
             </div>
           </div>
           ${errorLine ? `<div class="job-error">${htmlEscape(errorLine)}${renderErrorDetails(rawError)}</div>` : ""}
-          ${showMotion ? `<div class="phase-row">${phaseChips(phase, stateValue)}</div><div class="progress"><span style="width:${Math.max(0, Math.min(100, progress))}%"></span></div>` : ""}
+          <div class="phase-row">${phaseChips(phase, stateValue)}</div>
+          <div class="progress"><span style="width:${Math.max(0, Math.min(100, progress))}%"></span></div>
         </div>
       `;
     }
@@ -6221,14 +6169,12 @@
         : "";
       const chunkedRetry = failed && shouldOfferChunkedRetry(rawError, activePhase);
       const cookieRetry = failed && shouldOfferCookieRetry(rawError);
-      const showMotion = !failed && ["pending", "queued", "running"].includes(stateValue);
-      const retryCopy = row.retry_after && !failed ? ` | retry ${htmlEscape(fmtAge(row.retry_after))}` : "";
       return `
         <div class="job-row ${failed ? "failed" : ""}" data-pending-id="${htmlEscape(row.pending_id || "")}">
           <div class="job-top">
             <div>
               <div class="job-title">${htmlEscape(row.title || row.url || "Queued uoink")}</div>
-              <div class="job-sub">${htmlEscape(activityStatusLabel(stateValue, row))}${retryCopy}</div>
+              <div class="job-sub">${htmlEscape(stateValue)}${row.retry_after ? ` | retry ${htmlEscape(fmtAge(row.retry_after))}` : ""}</div>
               ${sourceChip}
             </div>
             <div class="inline-row">
@@ -6239,7 +6185,8 @@
             </div>
           </div>
           ${errorLine ? `<div class="job-error">${htmlEscape(errorLine)}${renderErrorDetails(rawError)}</div>` : ""}
-          ${showMotion ? `<div class="phase-row">${phaseChips(activePhase, stateValue)}</div><div class="progress"><span style="width:${Math.max(0, Math.min(100, progress || (stateValue === "running" ? 62 : 0)))}%"></span></div>` : ""}
+          <div class="phase-row">${phaseChips(activePhase, stateValue)}</div>
+          <div class="progress"><span style="width:${Math.max(0, Math.min(100, progress || (stateValue === "running" ? 62 : 0)))}%"></span></div>
         </div>
       `;
     }
