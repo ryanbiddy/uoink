@@ -1285,6 +1285,66 @@
       display: block;
     }
 
+    /* Advanced options disclosure (U-03): one drawer for everything a
+       first draft doesn't need, so Source > Output > Topic > Generate fit
+       one screen. */
+    .advanced-disclosure {
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      background: rgba(255, 244, 236, 0.02);
+    }
+
+    .advanced-disclosure > summary {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+      list-style: none;
+      font-weight: 700;
+      user-select: none;
+    }
+
+    .advanced-disclosure > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .advanced-arrow {
+      display: inline-block;
+      color: var(--acid);
+      transition: transform 0.15s ease;
+    }
+
+    .advanced-disclosure[open] .advanced-arrow {
+      transform: rotate(90deg);
+    }
+
+    .advanced-hint {
+      margin-left: auto;
+      color: rgba(255, 244, 236, 0.45);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .advanced-disclosure > summary > span:not(.advanced-hint) {
+      white-space: nowrap;
+    }
+
+    .advanced-disclosure[open] .advanced-hint {
+      display: none;
+    }
+
+    .advanced-body {
+      display: grid;
+      gap: 10px;
+      padding: 2px 12px 12px;
+      border-top: 1px solid rgba(255, 244, 236, 0.08);
+    }
+
     /* Selected-source chip: replaces the raw search input once a source is
        picked so the title can wrap to two lines instead of truncating
        (UX-05) and the title text can never become the dropdown filter
@@ -2204,6 +2264,19 @@
       flex-wrap: wrap;
     }
 
+    /* Checkbox labels: keep the box beside the first line of its text and
+       let the text wrap in place, instead of dropping the whole sentence
+       under the checkbox. */
+    label.inline-row {
+      flex-wrap: nowrap;
+      align-items: flex-start;
+    }
+
+    label.inline-row input {
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
     .choice-grid,
     .settings-list {
       display: grid;
@@ -2939,28 +3012,8 @@
                   <label class="choice-row"><input type="radio" name="writingMode" value="newsletter"><span>Newsletter</span></label>
                   <label class="choice-row"><input type="radio" name="writingMode" value="script"><span>Script</span></label>
                 </div>
-                <label class="soft-note" for="generateTopicInput">Topic</label>
-                <div class="smart-picker">
-                  <input class="field" id="generateTopicInput" type="text" list="topicSuggestions" autocomplete="off" placeholder="Pick a topic or type one">
-                  <div class="smart-chip-row" id="generateTopicChips" aria-label="Popular corpus topics"></div>
-                </div>
-                <label class="soft-note" for="writingAngle">Angle</label>
-                <input class="field" id="writingAngle" type="text" list="angleSuggestions" autocomplete="off" placeholder="optional angle">
-                <label class="soft-note" for="generateChannelInput">Channel pattern</label>
-                <div class="combo" id="generateChannelCombo">
-                  <input class="field combo-input" id="generateChannelInput" type="search" role="combobox" autocomplete="off" aria-expanded="false" aria-controls="generateChannelOptions" placeholder="Pick a corpus channel">
-                  <input id="generateChannel" type="hidden">
-                  <div class="combo-list" id="generateChannelOptions" role="listbox"></div>
-                </div>
-                <label class="soft-note">Hook pattern</label>
-                <div class="radio-grid" id="generateHookLensPicker">
-                  <label class="choice-row"><input type="radio" name="generateHookLens" value="informative" checked><span>Informative</span></label>
-                  <label class="choice-row"><input type="radio" name="generateHookLens" value="curiosity_gap"><span>Curiosity gap</span></label>
-                  <label class="choice-row"><input type="radio" name="generateHookLens" value="disappointment_contrarian"><span>Contrarian</span></label>
-                  <label class="choice-row"><input type="radio" name="generateHookLens" value="stakes"><span>Stakes</span></label>
-                  <label class="choice-row"><input type="radio" name="generateHookLens" value="question_open_loop"><span>Question</span></label>
-                  <label class="choice-row"><input type="radio" name="generateHookLens" value="failure_lesson"><span>Failure lesson</span></label>
-                </div>
+                <!-- Script options live directly under the Output choice that
+                     reveals them (UX-11), not two screens down. -->
                 <div class="generate-script-options hidden" id="generateScriptOptions">
                   <label class="soft-note" for="generateScriptLength">Script options</label>
                   <div class="length-preset-row" id="generateLengthPresets" aria-label="Script length presets"></div>
@@ -2970,15 +3023,49 @@
                   <label class="inline-row"><input id="generatePastPerformance" type="checkbox" checked> Use your past performance as the default style anchor</label>
                   <button class="button ghost" type="button" id="surfaceAudienceQuestions">Surface audience questions</button>
                 </div>
-                <label class="soft-note">Style</label>
-                <div class="choice-grid" id="writingStyleMode">
-                  <label class="choice-row"><input type="radio" name="writingStyle" value="default" checked><span>Default voice</span></label>
-                  <label class="choice-row"><input type="radio" name="writingStyle" value="anchors"><span>From anchors</span></label>
-                  <label class="choice-row"><input type="radio" name="writingStyle" value="specific"><span>Specific anchor</span></label>
+                <label class="soft-note" for="generateTopicInput">Topic</label>
+                <div class="smart-picker">
+                  <input class="field" id="generateTopicInput" type="text" list="topicSuggestions" autocomplete="off" placeholder="Pick a topic or type one">
+                  <div class="smart-chip-row" id="generateTopicChips" aria-label="Popular corpus topics"></div>
                 </div>
-                <div class="anchor-list" id="writingAnchorList"></div>
-                <label class="inline-row"><input id="writingShowWarnings" type="checkbox" checked> Show Voice DNA warnings</label>
-                <label class="inline-row"><input id="writingSkipWarnings" type="checkbox"> Skip warnings this time</label>
+                <!-- Everything a first tweet doesn't need lives behind one
+                     disclosure (UX-10): angle, channel, hook lens, style,
+                     Voice DNA warning toggles. -->
+                <details class="advanced-disclosure" id="generateAdvanced">
+                  <summary>
+                    <span class="advanced-arrow" aria-hidden="true">&#9656;</span>
+                    <span>Advanced options</span>
+                    <span class="advanced-hint">angle &middot; hook &middot; style</span>
+                  </summary>
+                  <div class="advanced-body">
+                    <label class="soft-note" for="writingAngle">Angle</label>
+                    <input class="field" id="writingAngle" type="text" list="angleSuggestions" autocomplete="off" placeholder="optional angle">
+                    <label class="soft-note" for="generateChannelInput">Channel pattern</label>
+                    <div class="combo" id="generateChannelCombo">
+                      <input class="field combo-input" id="generateChannelInput" type="search" role="combobox" autocomplete="off" aria-expanded="false" aria-controls="generateChannelOptions" placeholder="Pick a corpus channel">
+                      <input id="generateChannel" type="hidden">
+                      <div class="combo-list" id="generateChannelOptions" role="listbox"></div>
+                    </div>
+                    <label class="soft-note">Hook pattern</label>
+                    <div class="radio-grid" id="generateHookLensPicker">
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="informative" checked><span>Informative</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="curiosity_gap"><span>Curiosity gap</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="disappointment_contrarian"><span>Contrarian</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="stakes"><span>Stakes</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="question_open_loop"><span>Question</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="failure_lesson"><span>Failure lesson</span></label>
+                    </div>
+                    <label class="soft-note">Style</label>
+                    <div class="choice-grid" id="writingStyleMode">
+                      <label class="choice-row"><input type="radio" name="writingStyle" value="default" checked><span>Default voice</span></label>
+                      <label class="choice-row"><input type="radio" name="writingStyle" value="anchors"><span>From anchors</span></label>
+                      <label class="choice-row"><input type="radio" name="writingStyle" value="specific"><span>Specific anchor</span></label>
+                    </div>
+                    <div class="anchor-list" id="writingAnchorList"></div>
+                    <label class="inline-row"><input id="writingShowWarnings" type="checkbox" checked> Show Voice DNA warnings</label>
+                    <label class="inline-row"><input id="writingSkipWarnings" type="checkbox"> Skip warnings this time</label>
+                  </div>
+                </details>
                 <button class="button primary" type="button" id="generateWriting" disabled>Generate</button>
                 <div class="agent-setup-card" id="agentSetupCard">
                   <strong>Checking for a writing agent...</strong>
