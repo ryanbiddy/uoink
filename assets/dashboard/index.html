@@ -2587,16 +2587,16 @@
         <span class="wordmark-text">OINK</span>
       </div>
       <nav class="nav" aria-label="Sections">
-        <button class="nav-button active" type="button" data-tab-button="library">Library <span class="nav-count" id="libraryNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="sources">Sources <span class="nav-count" id="sourcesNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="for-you">For You <span class="nav-count" id="forYouNavCount">0</span></button>
-        <button class="nav-button" type="button" data-tab-button="writing">Generate <span class="nav-count" id="writingNavCount">0</span></button>
+        <button class="nav-button active" type="button" data-tab-button="library" data-nav-label="Library">Library <span class="nav-count" id="libraryNavCount" title="0 saved sources" aria-label="0 saved sources">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="sources" data-nav-label="Sources">Sources <span class="nav-count" id="sourcesNavCount" title="0 source types" aria-label="0 source types">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="for-you" data-nav-label="For You">For You <span class="nav-count" id="forYouNavCount" title="0 suggestions" aria-label="0 suggestions">0</span></button>
+        <button class="nav-button" type="button" data-tab-button="writing" data-nav-label="Generate">Generate <span class="nav-count" id="writingNavCount" title="0 Generate items" aria-label="0 Generate items">0</span></button>
         <button class="nav-button" type="button" data-tab-button="settings">Settings</button>
       </nav>
       <div class="sidebar-bottom">
         <div class="running-pill" id="runningPill"><span class="pip"></span><span>Ready on this device</span></div>
         <div class="localhost" id="portLabel">Private local app</div>
-        <button class="sidebar-action" type="button" id="viewActivity">View activity <span class="nav-count" id="activityNavCount">0</span></button>
+        <button class="sidebar-action" type="button" id="viewActivity" data-nav-label="View activity">View activity <span class="nav-count" id="activityNavCount" title="0 active jobs" aria-label="0 active jobs">0</span></button>
         <details class="sidebar-more" id="sidebarControls" open>
           <summary class="sidebar-action sidebar-more-summary">More controls</summary>
           <div class="sidebar-more-actions">
@@ -5184,7 +5184,7 @@
 
     function renderSources() {
       if (!els.sourceMap) return;
-      els.sourcesNavCount.textContent = String(SOURCE_CAPABILITIES.length);
+      setSidebarBadge(els.sourcesNavCount, SOURCE_CAPABILITIES.length, "source types");
       els.sourceMap.innerHTML = SOURCE_CAPABILITIES.map((source, index) => `
         <article class="source-card" role="listitem" aria-labelledby="source-card-title-${index}">
           <div class="source-card-head">
@@ -5243,7 +5243,7 @@
       const connections = Array.isArray(payload.connections) ? payload.connections : [];
       const gaps = Array.isArray(payload.corpus_gaps) ? payload.corpus_gaps : [];
       const anchors = Array.isArray(payload.anchors) ? payload.anchors : [];
-      els.forYouNavCount.textContent = String(worth.length + connections.length + gaps.length + anchors.length);
+      setSidebarBadge(els.forYouNavCount, worth.length + connections.length + gaps.length + anchors.length, "suggestions");
       els.forYouSummary.textContent = payload.source
         ? "Reading your saved work."
         : "Using local resurface signals.";
@@ -6155,10 +6155,23 @@
       }
     }
 
+    function setSidebarBadge(el, count, label, options = {}) {
+      if (!el) return;
+      const visibleCount = Number(count) || 0;
+      const text = options.text !== undefined ? String(options.text) : String(visibleCount);
+      el.textContent = options.hideWhenZero && visibleCount <= 0 ? "" : text;
+      el.classList.toggle("hidden", Boolean(options.hideWhenZero && visibleCount <= 0));
+      const countLabel = `${visibleCount} ${label}`;
+      el.title = countLabel;
+      el.setAttribute("aria-label", countLabel);
+      const button = el.closest("button");
+      const navLabel = button && button.dataset.navLabel;
+      if (button && navLabel) button.setAttribute("aria-label", `${navLabel}, ${countLabel}`);
+    }
+
     function setLibraryNavCount(count) {
       const visibleCount = Number(count) || 0;
-      els.libraryNavCount.textContent = visibleCount > 0 ? String(visibleCount) : "";
-      els.libraryNavCount.classList.toggle("hidden", visibleCount <= 0);
+      setSidebarBadge(els.libraryNavCount, visibleCount, "saved sources", { hideWhenZero: true });
     }
 
     function setLibraryEmptyState(mode) {
@@ -6843,7 +6856,7 @@
       const mobileCount = activeJobs.concat(queueActive, failedJobs, queueFailed)
         .filter(isMobileQueued).length;
       els.activityCount.textContent = String(activeCount);
-      els.activityNavCount.textContent = String(activeCount);
+      setSidebarBadge(els.activityNavCount, activeCount, "active jobs");
       els.cancelAll.disabled = cancelableCount === 0;
       els.cancelAll.title = cancelableCount ? `Cancel ${cancelableCount} active item${cancelableCount === 1 ? "" : "s"}.` : "No active work to cancel.";
       els.queueMeta.textContent = `${runningCount || activeJobs.filter((job) => normalizedStatus(job) === "running").length} running | ${pendingCount || queueActive.length} queued${mobileCount ? ` | ${mobileCount} mobile` : ""}`;
@@ -7788,7 +7801,9 @@
       }
       await loadStyleAnchors();
       await loadGenerateSmartInputs();
-      els.writingNavCount.textContent = String(state.writingPieces.length || state.styleAnchors.length);
+      const generateBadgeCount = state.writingPieces.length || state.styleAnchors.length;
+      const generateBadgeLabel = state.writingPieces.length ? "saved drafts" : "style anchors";
+      setSidebarBadge(els.writingNavCount, generateBadgeCount, generateBadgeLabel);
       renderSuggestionDatalists();
       renderThreadBuilder();
       updateWritingAttribution();
