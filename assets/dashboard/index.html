@@ -456,6 +456,14 @@
       font-size: 12px;
     }
 
+    .field-error {
+      margin: -6px 0 14px;
+      color: var(--acid);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
     .facet-status {
       display: inline-flex;
       align-items: center;
@@ -2928,6 +2936,7 @@
               <option value="title">Sort: title</option>
             </select>
           </div>
+          <div id="dateRangeError" class="field-error hidden" role="status" aria-live="polite"></div>
 
           <div class="summary-line">
             <span id="resultSummary">Loading library...</span>
@@ -3345,7 +3354,8 @@
       limit: 24,
       loading: false,
       hasMore: false,
-      libraryUnavailable: false,
+      libraryState: "loading",
+      libraryErrorDetail: "",
       filters: {
         q: "",
         channel: "",
@@ -3605,6 +3615,7 @@
       lengthFilter: document.getElementById("lengthFilter"),
       dateFrom: document.getElementById("dateFrom"),
       dateTo: document.getElementById("dateTo"),
+      dateRangeError: document.getElementById("dateRangeError"),
       sortFilter: document.getElementById("sortFilter"),
       facetStatus: document.getElementById("facetStatus"),
       queueRows: document.getElementById("queueRows"),
@@ -3725,7 +3736,10 @@
       let data = null;
       try { data = text ? JSON.parse(text) : null; } catch (_) { data = { ok: false, error: text || "invalid JSON" }; }
       if (!res.ok || (data && data.ok === false)) {
-        throw new Error((data && data.error) || `HTTP ${res.status}`);
+        const err = new Error((data && data.error) || `HTTP ${res.status}`);
+        err.status = res.status;
+        err.data = data || {};
+        throw err;
       }
       return data;
     }
@@ -5607,6 +5621,35 @@
         .join(" | ");
     }
 
+    function libraryDateRangeMessage() {
+      const from = state.filters.date_from || els.dateFrom.value;
+      const to = state.filters.date_to || els.dateTo.value;
+      return from && to && from > to ? "Start date has to be before end date." : "";
+    }
+
+    function setLibraryDateError(message = "") {
+      els.dateFrom.setCustomValidity(message);
+      els.dateTo.setCustomValidity(message);
+      els.dateFrom.setAttribute("aria-invalid", message ? "true" : "false");
+      els.dateTo.setAttribute("aria-invalid", message ? "true" : "false");
+      els.dateRangeError.textContent = message;
+      els.dateRangeError.classList.toggle("hidden", !message);
+    }
+
+    function isInvalidRangeError(err) {
+      const data = err && err.data ? err.data : {};
+      return data.state === "invalid_range" || (err && err.status === 400 && String(err.message || "").includes("date_"));
+    }
+
+    function normalizeLibraryState(data, rows) {
+      const value = String(data && data.state || "").toLowerCase();
+      if (["matches", "no_matches", "empty_corpus"].includes(value)) return value;
+      if (rows.length) return "matches";
+      const corpusFromData = data ? data.corpus_total : null;
+      const knownCorpusTotal = Number(corpusFromData ?? state.corpusTotal ?? 0);
+      return knownCorpusTotal > 0 ? "no_matches" : "empty_corpus";
+    }
+
     function setLibraryHeadline(mode, count = 0) {
       const visibleCount = Number(count) || 0;
       const showCount = mode === "ready";
@@ -5621,6 +5664,9 @@
       } else if (mode === "unavailable") {
         els.libraryHeadlineText.textContent = "Library needs ";
         els.libraryHeadlineAccent.textContent = "a moment.";
+      } else if (mode === "date-error") {
+        els.libraryHeadlineText.textContent = "Dates need ";
+        els.libraryHeadlineAccent.textContent = "a fix.";
       } else {
         els.libraryHeadlineText.textContent = " uoinks ";
         els.libraryHeadlineAccent.textContent = "ready to read.";
@@ -5662,11 +5708,13 @@
       [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
       els.sortFilter.value = "newest";
       state.filters = { q: "", channel: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest" };
+      setLibraryDateError("");
       loadLibrary({ reset: true });
     }
 
     function renderLibraryUnavailable(detail) {
-      state.libraryUnavailable = true;
+      state.libraryState = "unavailable";
+      state.libraryErrorDetail = detail || state.libraryErrorDetail || "";
       state.hasMore = false;
       setLibraryHeadline("unavailable");
       setLibraryNavCount(state.corpusTotal ?? state.total);
@@ -5675,7 +5723,21 @@
       els.pageSummary.textContent = "Try again in a moment.";
       els.loadMore.classList.add("hidden");
       els.libraryEmpty.classList.add("hidden");
-      els.libraryGrid.innerHTML = degradedState("Library needs a moment.", "Your saved uoinks are still here. Try again in a bit.", detail);
+      els.libraryGrid.innerHTML = degradedState("Library needs a moment.", "Your saved uoinks are still here. Try again in a bit.", state.libraryErrorDetail);
+    }
+
+    function renderLibraryInvalidRange(message = "Start date has to be before end date.") {
+      state.libraryState = "invalid_range";
+      state.hasMore = false;
+      setLibraryDateError(message);
+      setLibraryHeadline("date-error");
+      setLibraryNavCount(state.corpusTotal ?? state.total);
+      els.resultSummary.textContent = message;
+      els.activeFilters.textContent = libraryFilterSummary();
+      els.pageSummary.textContent = "Fix the dates to search Library.";
+      els.loadMore.classList.add("hidden");
+      els.libraryEmpty.classList.add("hidden");
+      els.libraryGrid.innerHTML = "";
     }
 
     async function refreshJobs({ render = false } = {}) {
@@ -5696,14 +5758,21 @@
 
     async function loadLibrary({ reset = false } = {}) {
       if (state.loading) return;
+      const dateMessage = libraryDateRangeMessage();
+      if (dateMessage) {
+        renderLibraryInvalidRange(dateMessage);
+        return;
+      }
       state.loading = true;
       if (reset) {
         state.offset = 0;
         state.library = [];
-        state.libraryUnavailable = false;
+        state.libraryState = "loading";
+        state.libraryErrorDetail = "";
         revokeThumbs();
         els.libraryGrid.innerHTML = "";
       }
+      setLibraryDateError("");
       els.resultSummary.textContent = "Loading library...";
       try {
         if (!state.jobsLoaded || reset) await refreshJobs();
@@ -5711,8 +5780,9 @@
         const data = await authFetch(`/memory/search?${params.toString()}`);
         const rows = Array.isArray(data.results) ? data.results : [];
         state.total = Number(data.total) || 0;
-        if (!hasLibraryFilters()) state.corpusTotal = state.total;
-        state.libraryUnavailable = false;
+        state.corpusTotal = Number.isFinite(Number(data.corpus_total)) ? Number(data.corpus_total) : (hasLibraryFilters() ? state.corpusTotal : state.total);
+        state.libraryState = normalizeLibraryState(data, rows);
+        state.libraryErrorDetail = "";
         state.library = reset ? rows : state.library.concat(rows);
         state.offset += rows.length;
         state.hasMore = state.offset < state.total;
@@ -5720,91 +5790,36 @@
         populateFilterOptions(rows);
       } catch (err) {
         if (reset) state.library = [];
-        renderLibraryUnavailable(err.message);
+        if (isInvalidRangeError(err)) {
+          renderLibraryInvalidRange("Start date has to be before end date.");
+        } else {
+          renderLibraryUnavailable(err.message);
+        }
       } finally {
         state.loading = false;
         syncWritingSourceOptions();
       }
     }
 
-    function jobsToCards(jobs) {
-      return (Array.isArray(jobs) ? jobs : [])
-        .filter((job) => normalizedStatus(job) === "completed")
-        .map((job) => {
-          const result = job.result || {};
-          return {
-            slug: job.id,
-            video_id: result.video_id || job.video_id || job.id,
-            title: job.title || job.playlist_title || result.title || "Completed uoink",
-            channel: result.channel || job.channel || "",
-            topic: result.topic || job.topic || "Job record",
-            folder: job.session_folder || result.folder || "",
-            yoinked_at: job.completed_at || job.updated_at || job.started_at,
-            hook_type: result.hook_type || job.hook_type || "",
-            format: result.format || result.format_type || job.format || job.format_type || "",
-            performance: result.performance || result.performance_tier || job.performance || job.performance_tier || "",
-            length: result.length || result.length_bucket || job.length || job.length_bucket || "",
-            hook_type_confidence: result.hook_type_confidence || job.hook_type_confidence,
-            health: result.health || job.health || null,
-            entity_count: result.entity_count || job.entity_count || 0,
-            top_entities: result.top_entities || job.top_entities || [],
-            thumbnail_path: result.thumbnail_path || job.thumbnail_path || "",
-            duration_seconds: result.duration_seconds || job.duration_seconds || 0,
-            platform: result.platform || job.platform || "",
-            media_type: result.media_type || job.media_type || "",
-            content_type: result.content_type || job.content_type || "",
-            is_live: Boolean(result.is_live || job.is_live),
-            live_status: result.live_status || job.live_status || "",
-            podcast_title: result.podcast_title || job.podcast_title || "",
-            episode_title: result.episode_title || job.episode_title || "",
-            host: result.host || job.host || "",
-            speaker_count: result.speaker_count || job.speaker_count || 0,
-          };
-        });
-    }
-
-    function filterJobCards(rows) {
-      const q = state.filters.q.trim().toLowerCase();
-      const from = state.filters.date_from ? new Date(`${state.filters.date_from}T00:00:00`) : null;
-      const to = state.filters.date_to ? new Date(`${state.filters.date_to}T23:59:59`) : null;
-      return rows.filter((row) => {
-        const text = `${row.title || ""} ${row.channel || ""} ${row.topic || ""}`.toLowerCase();
-        if (q && !text.includes(q)) return false;
-        if (state.filters.channel && row.channel !== state.filters.channel) return false;
-        if (state.filters.topic && row.topic !== state.filters.topic) return false;
-        if (state.filters.hook_type && row.hook_type !== state.filters.hook_type) return false;
-        if (state.filters.format && facetValue(row, "format") !== state.filters.format) return false;
-        if (state.filters.performance && facetValue(row, "performance") !== state.filters.performance) return false;
-        if (state.filters.length && facetValue(row, "length") !== state.filters.length) return false;
-        const when = row.yoinked_at ? new Date(row.yoinked_at) : null;
-        if (from && (!when || when < from)) return false;
-        if (to && (!when || when > to)) return false;
-        return true;
-      });
-    }
-
-    function facetValue(row, key) {
-      if (!row) return "";
-      if (key === "format") return row.format || row.format_type || "";
-      if (key === "performance") return row.performance || row.performance_tier || "";
-      if (key === "length") return row.length || row.length_bucket || "";
-      return "";
-    }
-
     function renderLibrary() {
       const rows = sortRows(state.library.slice());
       const filtersActive = hasLibraryFilters();
-      const corpusTotal = state.corpusTotal ?? (filtersActive ? null : state.total);
-      const navTotal = corpusTotal ?? state.total;
-      if (state.libraryUnavailable) {
+      const corpusTotal = Number(state.corpusTotal || 0);
+      const navTotal = corpusTotal || state.total;
+      const libraryState = state.libraryState || (rows.length ? "matches" : "empty_corpus");
+      if (libraryState === "unavailable") {
         renderLibraryUnavailable();
+        return;
+      }
+      if (libraryState === "invalid_range") {
+        renderLibraryInvalidRange();
         return;
       }
       setLibraryNavCount(navTotal);
       els.activeFilters.textContent = libraryFilterSummary();
       els.loadMore.classList.toggle("hidden", !state.hasMore);
-      if (!rows.length) {
-        if (filtersActive) {
+      if (!rows.length || libraryState === "no_matches" || libraryState === "empty_corpus") {
+        if (libraryState === "no_matches") {
           setLibraryHeadline("no-matches");
           els.resultSummary.textContent = "No saved uoinks match those filters.";
           els.pageSummary.textContent = "Clear filters to see the full Library.";
