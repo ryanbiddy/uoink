@@ -2690,25 +2690,42 @@ def _normalize_hook_analysis(data: dict) -> dict:
     }
 
 
-# The nine hook-type categories with one-line definitions, used as the
-# system-prompt classification guide (Sprint 17 / A3). The names match
-# HOOK_TYPES exactly.
-_HOOK_TYPE_GUIDE = (
-    "Hook type categories (pick exactly one):\n"
-    "- curiosity_gap: teases an answer or outcome without revealing it, "
-    "opening an information gap the viewer wants closed.\n"
-    "- question: opens by directly asking the viewer a question.\n"
-    "- contrarian: leads with a claim that challenges a common belief or "
-    "consensus.\n"
-    "- story_open: opens with a personal anecdote or a narrative scene.\n"
-    "- promise_list: promises a specific list or count of takeaways, e.g. "
-    "'5 ways to ...'.\n"
-    "- demo: opens by showing the thing in action -- a visual or live "
-    "demonstration.\n"
-    "- authority: opens by establishing credentials, results, or proof of "
-    "expertise.\n"
-    "- stakes: opens by emphasizing what the viewer stands to gain or lose.\n"
-    "- other: none of the above, or no identifiable hook pattern."
+# The nine hook-type categories with one-line definitions (Sprint 17 / A3).
+# Structured source of truth: GET /hooks/guide serves these as JSON for the
+# in-app hooks explainer (U-01/U-06), and _HOOK_TYPE_GUIDE below renders the
+# same rows into the system-prompt classification guide, so the UI and the
+# classifier can never drift apart. The ids match HOOK_TYPES exactly; order
+# is the canonical guide order (test_u01_backend_enablers pins the rendered
+# prompt byte-for-byte).
+_HOOK_TYPE_DEFINITIONS = (
+    ("curiosity_gap",
+     "teases an answer or outcome without revealing it, "
+     "opening an information gap the viewer wants closed."),
+    ("question",
+     "opens by directly asking the viewer a question."),
+    ("contrarian",
+     "leads with a claim that challenges a common belief or "
+     "consensus."),
+    ("story_open",
+     "opens with a personal anecdote or a narrative scene."),
+    ("promise_list",
+     "promises a specific list or count of takeaways, e.g. "
+     "'5 ways to ...'."),
+    ("demo",
+     "opens by showing the thing in action -- a visual or live "
+     "demonstration."),
+    ("authority",
+     "opens by establishing credentials, results, or proof of "
+     "expertise."),
+    ("stakes",
+     "opens by emphasizing what the viewer stands to gain or lose."),
+    ("other",
+     "none of the above, or no identifiable hook pattern."),
+)
+
+_HOOK_TYPE_GUIDE = "Hook type categories (pick exactly one):\n" + "\n".join(
+    f"- {hook_id}: {definition}"
+    for hook_id, definition in _HOOK_TYPE_DEFINITIONS
 )
 
 
@@ -7779,6 +7796,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_sources_manifest()
         if bare == "/creators/manifest":
             return self._handle_creators_manifest()
+        if bare == "/hooks/guide":
+            # Public product metadata, same posture as the manifests above.
+            return self._handle_hooks_guide()
         if bare == "/developers/manifest":
             return self._handle_developers_manifest()
         if bare == "/openapi/v1/spec.json":
@@ -7890,6 +7910,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_skill_system_prompt()
         if bare == "/open-prompts":
             return self._handle_open_prompts()
+        if bare == "/open-extension":
+            return self._handle_open_extension()
         if bare == "/open-index":
             return self._handle_open_index()
         if bare == "/recent":
@@ -10324,6 +10346,39 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(200, {"ok": False, "error": str(e)})
         log.info("GET /open-prompts -> %s", prompts_path)
         self._send_json(200, {"ok": True, "path": str(prompts_path)})
+
+    # ---- /open-extension ----
+    # Pop the OS file manager with the bundled extension folder selected so
+    # the "get the extension" card (UX-07) can point chrome://extensions
+    # "Load unpacked" at a folder the user can actually see. Same reveal
+    # pattern as /open-prompts, deliberately NOT the sandboxed /open-folder:
+    # the extension ships inside the install dir (HERE), which sits outside
+    # DESKTOP_ROOT by design.
+    def _handle_open_extension(self):
+        ext_dir = HERE / "extension"
+        if not ext_dir.is_dir():
+            return self._send_json(200, {
+                "ok": False,
+                "error": f"extension folder not found at {ext_dir}",
+            })
+        try:
+            _platform.reveal_in_file_manager(ext_dir)
+        except Exception as e:
+            return self._send_json(200, {"ok": False, "error": str(e)})
+        log.info("GET /open-extension -> %s", ext_dir)
+        self._send_json(200, {"ok": True, "path": str(ext_dir)})
+
+    # ---- /hooks/guide ----
+    # The hook-type taxonomy as JSON so the dashboard can explain hooks
+    # in-app (UX-14 / U-06) instead of linking out to uoink.app. Public
+    # product metadata (no user data), same posture as /sources/manifest.
+    def _handle_hooks_guide(self):
+        hooks = [{
+            "id": hook_id,
+            "label": _hook_display_name(hook_id),
+            "description": definition,
+        } for hook_id, definition in _HOOK_TYPE_DEFINITIONS]
+        self._send_json(200, {"ok": True, "hooks": hooks})
 
     # ---- /skill/system-prompt ----
     # setup.html uses this to offer a copyable fallback prompt for clients
