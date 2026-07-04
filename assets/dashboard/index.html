@@ -3087,10 +3087,10 @@
           </div>
 
           <div class="control-grid">
-            <input class="control" id="searchInput" type="search" placeholder="search transcripts, titles, comments">
-            <select class="control" id="channelFilter"><option value="">Channel: all</option></select>
-            <select class="control" id="topicFilter"><option value="">Topic: all</option></select>
-            <select class="control" id="hookFilter">
+            <input class="control" id="searchInput" type="search" placeholder="search transcripts, titles, comments" aria-label="Search Library">
+            <select class="control" id="channelFilter" aria-label="Filter by channel"><option value="">Channel: all</option></select>
+            <select class="control" id="topicFilter" aria-label="Filter by topic"><option value="">Topic: all</option></select>
+            <select class="control" id="hookFilter" aria-label="Filter by hook">
               <option value="">Hook: any</option>
               <option value="curiosity_gap">curiosity gap</option>
               <option value="question">question</option>
@@ -3102,12 +3102,12 @@
               <option value="stakes">stakes</option>
               <option value="other">other</option>
             </select>
-            <select class="control" id="formatFilter"><option value="">Format: all</option></select>
-            <select class="control" id="performanceFilter"><option value="">Performance: all</option></select>
-            <select class="control" id="lengthFilter"><option value="">Length: all</option></select>
+            <select class="control" id="formatFilter" aria-label="Filter by format"><option value="">Format: all</option></select>
+            <select class="control" id="performanceFilter" aria-label="Filter by performance"><option value="">Performance: all</option></select>
+            <select class="control" id="lengthFilter" aria-label="Filter by length"><option value="">Length: all</option></select>
             <input class="control" id="dateFrom" type="date" aria-label="Date from">
             <input class="control" id="dateTo" type="date" aria-label="Date to">
-            <select class="control" id="sortFilter">
+            <select class="control" id="sortFilter" aria-label="Sort Library">
               <option value="newest">Sort: newest</option>
               <option value="oldest">Sort: oldest</option>
               <option value="title">Sort: title</option>
@@ -3155,7 +3155,7 @@
             <a href="https://uoink.app/twitter" target="_blank" rel="noreferrer">Learn: X Video</a>
             <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
           </div>
-          <div class="source-map" id="sourceMap"></div>
+          <div class="source-map" id="sourceMap" role="list" aria-label="Supported source types"></div>
         </section>
 
         <section class="tab-panel" id="tab-yoink" data-tab-panel="yoink">
@@ -3257,7 +3257,7 @@
               <h2>AI writing key</h2>
               <p class="setting-copy" id="keyStatus">Checking key status...</p>
               <div class="inline-row">
-                <input class="field" style="flex:1;min-width:260px" id="anthropicKey" type="password" placeholder="Paste your Anthropic key">
+                <input class="field" style="flex:1;min-width:260px" id="anthropicKey" type="password" placeholder="Paste your Anthropic key" aria-label="Anthropic API key">
                 <button class="button" type="button" id="saveKey">Save key</button>
                 <button class="button ghost" type="button" id="testKey">Test</button>
               </div>
@@ -3284,7 +3284,7 @@
               <p class="setting-copy" id="channelsStatus">Checking your channel registry...</p>
               <div class="channel-list" id="channelsList"></div>
               <div class="inline-row">
-                <input class="field" style="flex:1;min-width:220px" id="channelHandle" type="text" placeholder="@yourhandle">
+                <input class="field" style="flex:1;min-width:220px" id="channelHandle" type="text" placeholder="@yourhandle" aria-label="Channel handle">
                 <button class="button" type="button" id="addChannel">Add</button>
                 <button class="button ghost" type="button" id="recognizeChannels">Recognize past uoinks</button>
               </div>
@@ -3295,7 +3295,7 @@
               <p class="setting-copy" id="playlistStatus">Checking playlist monitor...</p>
               <div class="settings-list" id="playlistList"></div>
               <div class="inline-row">
-                <input class="field" style="flex:1;min-width:240px" id="playlistUrl" type="url" placeholder="YouTube playlist URL">
+                <input class="field" style="flex:1;min-width:240px" id="playlistUrl" type="url" placeholder="YouTube playlist URL" aria-label="YouTube playlist URL">
                 <button class="button" type="button" id="addPlaylist">Add</button>
               </div>
             </div>
@@ -3305,7 +3305,7 @@
               <p class="setting-copy" id="podcastFeedStatus">Checking podcast feeds...</p>
               <div class="settings-list" id="podcastFeedList"></div>
               <div class="inline-row">
-                <input class="field" style="flex:1;min-width:240px" id="podcastFeedUrl" type="url" placeholder="RSS feed URL">
+                <input class="field" style="flex:1;min-width:240px" id="podcastFeedUrl" type="url" placeholder="RSS feed URL" aria-label="Podcast RSS feed URL">
                 <button class="button" type="button" id="addPodcastFeed">Add</button>
               </div>
             </div>
@@ -3316,7 +3316,7 @@
               <div class="badge-row" id="defaultSitesList"></div>
               <div class="site-list" id="allowedSitesList"></div>
               <div class="inline-row">
-                <input class="field" style="flex:1;min-width:220px" id="allowedSitePattern" type="text" placeholder="example.com or *.docs.example.com">
+                <input class="field" style="flex:1;min-width:220px" id="allowedSitePattern" type="text" placeholder="example.com or *.docs.example.com" aria-label="Site domain pattern">
                 <button class="button" type="button" id="addAllowedSite">Add</button>
               </div>
               <p class="setting-copy">Uoink only works on sites you've enabled. Right-click Uoink this page anywhere; if the site needs permission, the extension asks first.</p>
@@ -3635,6 +3635,7 @@
         channels: [],
         ctas: [],
       },
+      defaultAnchorsFocusTarget: null,
       topicUndo: null,
       stopHelperFocusTarget: null,
     };
@@ -4041,6 +4042,57 @@
         '"': "&quot;",
         "'": "&#39;",
       }[c]));
+    }
+
+    const FOCUSABLE_SELECTOR = [
+      "a[href]",
+      "button:not([disabled])",
+      "input:not([disabled])",
+      "select:not([disabled])",
+      "textarea:not([disabled])",
+      "[tabindex]:not([tabindex='-1'])",
+    ].join(",");
+
+    function focusableElements(container) {
+      return [...container.querySelectorAll(FOCUSABLE_SELECTOR)]
+        .filter((el) => el.offsetParent !== null || el === document.activeElement);
+    }
+
+    function focusFirstIn(container, preferred) {
+      const target = preferred || focusableElements(container)[0] || container;
+      if (target && typeof target.focus === "function") target.focus();
+    }
+
+    function restoreFocus(target) {
+      if (target && typeof target.focus === "function") target.focus();
+    }
+
+    function trapModalFocus(event, modal, closeFn) {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeFn();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusables = focusableElements(modal);
+      if (!focusables.length) {
+        event.preventDefault();
+        modal.focus();
+        return;
+      }
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    function isCardActivationKey(event) {
+      return event.key === "Enter" || event.key === " ";
     }
 
     function renderInlineMarkdown(value) {
@@ -5127,10 +5179,10 @@
     function renderSources() {
       if (!els.sourceMap) return;
       els.sourcesNavCount.textContent = String(SOURCE_CAPABILITIES.length);
-      els.sourceMap.innerHTML = SOURCE_CAPABILITIES.map((source) => `
-        <article class="source-card">
+      els.sourceMap.innerHTML = SOURCE_CAPABILITIES.map((source, index) => `
+        <article class="source-card" role="listitem" aria-labelledby="source-card-title-${index}">
           <div class="source-card-head">
-            <h2>${htmlEscape(source.name)}</h2>
+            <h2 id="source-card-title-${index}">${htmlEscape(source.name)}</h2>
             <span class="source-status ${htmlEscape(source.status.replace(/\s+/g, "-"))}">${htmlEscape(sourceStatusLabel(source.status))}</span>
           </div>
           <p><strong>Capture:</strong> ${htmlEscape(source.capture)}</p>
@@ -5147,7 +5199,7 @@
         ? `<div class="score-pill">saved-work signal ${score.toFixed(1)}</div>`
         : "";
       return `
-        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(videoIdOf(row))}" tabindex="0" role="button">
+        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(videoIdOf(row))}" tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}">
           <div class="insight-kicker">${htmlEscape(kicker)}</div>
           <div class="insight-title">${htmlEscape(rowTitle(row))}</div>
           <div class="insight-meta">${htmlEscape(row.channel || "Source not labeled")} ${row.topic ? `| ${htmlEscape(row.topic)}` : ""}</div>
@@ -7916,12 +7968,16 @@
     }
 
     function openDefaultAnchorsModal() {
+      state.defaultAnchorsFocusTarget = document.activeElement;
       renderDefaultStyleAnchors();
       els.defaultAnchorsModal.classList.remove("hidden");
+      focusFirstIn(els.defaultAnchorsModal, document.getElementById("closeDefaultAnchors"));
     }
 
     function closeDefaultAnchorsModal() {
       els.defaultAnchorsModal.classList.add("hidden");
+      restoreFocus(state.defaultAnchorsFocusTarget);
+      state.defaultAnchorsFocusTarget = null;
     }
 
     async function setStyleAnchorActive(id, active) {
@@ -8731,13 +8787,13 @@
     function openStopHelperConfirm(trigger) {
       state.stopHelperFocusTarget = trigger || document.activeElement;
       els.stopHelperConfirm.classList.remove("hidden");
-      els.cancelStopHelper.focus();
+      focusFirstIn(els.stopHelperConfirm, els.cancelStopHelper);
     }
 
     function closeStopHelperConfirm() {
       els.stopHelperConfirm.classList.add("hidden");
       if (state.stopHelperFocusTarget && typeof state.stopHelperFocusTarget.focus === "function") {
-        state.stopHelperFocusTarget.focus();
+        restoreFocus(state.stopHelperFocusTarget);
       }
       state.stopHelperFocusTarget = null;
     }
@@ -8988,6 +9044,7 @@
       els.defaultAnchorsModal.addEventListener("click", (event) => {
         if (event.target === els.defaultAnchorsModal) closeDefaultAnchorsModal();
       });
+      els.defaultAnchorsModal.addEventListener("keydown", (event) => trapModalFocus(event, els.defaultAnchorsModal, closeDefaultAnchorsModal));
       document.getElementById("reloadEvidence").addEventListener("click", loadEvidence);
       els.runEvidenceClaims.addEventListener("click", runClaimsForSelectedEvidence);
       els.yoinkOpenFolder.addEventListener("click", () => {
@@ -9050,7 +9107,15 @@
         if (event.target === els.stopHelperConfirm) closeStopHelperConfirm();
       });
       els.stopHelperConfirm.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") closeStopHelperConfirm();
+        trapModalFocus(event, els.stopHelperConfirm, closeStopHelperConfirm);
+      });
+      document.addEventListener("keydown", (event) => {
+        if (!isCardActivationKey(event)) return;
+        const card = event.target.closest(".uoink-card[role='button'], .insight-card[role='button']");
+        if (!card || event.target.closest("a, button, input, select, textarea, summary")) return;
+        if (!card.dataset.videoId && !card.dataset.folder) return;
+        event.preventDefault();
+        openYoinkDetail(rowFromCard(card));
       });
       els.autostartToggle.addEventListener("change", () => saveSettingsPatch({ autostart: els.autostartToggle.checked }, "Autostart updated."));
       els.rolePicker.addEventListener("change", (event) => {
