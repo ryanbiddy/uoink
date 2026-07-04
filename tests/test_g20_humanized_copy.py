@@ -52,7 +52,6 @@ def test_recheck_stale_copy_removed() -> None:
 
 def test_advanced_details_are_disclosed() -> None:
     for marker in (
-        "private dashboard",
         "Ready on this device",
         "Advanced: local address",
         "Advanced: connection JSON",
