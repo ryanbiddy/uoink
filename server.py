@@ -307,7 +307,17 @@ MAX_SERVED_FILE_BYTES = 10 * 1024 * 1024
 LONG_VIDEO_SECONDS = 2 * 60 * 60       # 2 hours -- log warning above this
 LONG_VIDEO_MODE_FULL = "full"
 LONG_VIDEO_MODE_CHUNKED = "chunked"
-LONG_VIDEO_MODES = (LONG_VIDEO_MODE_FULL, LONG_VIDEO_MODE_CHUNKED)
+# A-01 spec A: lite recovery. When a long extract fails, retry by landing the
+# high-value transcript and shedding the fragile/expensive work -- keep the
+# full captions, take sparse screenshots (~1 per 5 min), and skip the comments
+# fetch. Cheaper and less fragile than the full path, without segmenting the
+# download (that's the reserve, spec B / chunked).
+LONG_VIDEO_MODE_LITE = "lite"
+LONG_VIDEO_MODES = (LONG_VIDEO_MODE_FULL, LONG_VIDEO_MODE_CHUNKED,
+                    LONG_VIDEO_MODE_LITE)
+# Lite mode forces the screenshot interval to at least this (1 per 5 min), so
+# a 2-hour video yields a couple dozen frames instead of hundreds.
+LITE_SHOT_INTERVAL_SEC = 5 * 60
 # Chunked mode downloads at most six representative 10-minute windows. It
 # keeps the full subtitle track, but bounds the heavy media download/decode
 # work to one hour and runs screenshot extraction one window at a time.
@@ -2011,13 +2021,14 @@ def _ffmpeg_timeout_for(duration_seconds: float) -> int:
 
 
 def _normalize_long_video_mode(value) -> str:
+    _valid = "'full', 'chunked', or 'lite'"
     if value is None or (isinstance(value, str) and not value.strip()):
         return LONG_VIDEO_MODE_FULL
     if not isinstance(value, str):
-        raise ValueError("long_video_mode must be 'full' or 'chunked'")
+        raise ValueError(f"long_video_mode must be {_valid}")
     mode = value.strip().lower()
     if mode not in LONG_VIDEO_MODES:
-        raise ValueError("long_video_mode must be 'full' or 'chunked'")
+        raise ValueError(f"long_video_mode must be {_valid}")
     return mode
 
 
@@ -3591,15 +3602,24 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     if duration > LONG_VIDEO_SECONDS:
         log.warning("Long video: %.0f minutes -- yoink may take a while",
                     duration / 60.0)
+    # Lite recovery (A-01): force sparse screenshots so a long source's frame
+    # extraction stops being a bottleneck. The full transcript still lands and
+    # comments are skipped below. Done before the estimate/cap math so the
+    # capped-interval note reflects the real interval used.
+    is_lite = requested_long_video_mode == LONG_VIDEO_MODE_LITE
+    if is_lite:
+        interval = max(interval, LITE_SHOT_INTERVAL_SEC)
     long_video_chunks = (
         _long_video_chunks(duration)
         if requested_long_video_mode == LONG_VIDEO_MODE_CHUNKED
         else []
     )
-    effective_long_video_mode = (
-        LONG_VIDEO_MODE_CHUNKED if long_video_chunks
-        else LONG_VIDEO_MODE_FULL
-    )
+    if long_video_chunks:
+        effective_long_video_mode = LONG_VIDEO_MODE_CHUNKED
+    elif is_lite:
+        effective_long_video_mode = LONG_VIDEO_MODE_LITE
+    else:
+        effective_long_video_mode = LONG_VIDEO_MODE_FULL
     work_durations = (
         [chunk["duration_seconds"] for chunk in long_video_chunks]
         if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED
@@ -3618,6 +3638,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         notes.append(
             "Chunked mode was requested, but the source duration was unknown; "
             "Uoink used the full-media path."
+        )
+    if is_lite:
+        notes.append(
+            "Lite recovery mode: kept the full transcript, took a screenshot "
+            f"about every {interval // 60} minutes, and skipped the comments "
+            "fetch. Re-yoink in full mode for dense screenshots and comments."
         )
 
     estimate = _estimated_screenshot_count(work_durations, interval)
@@ -3933,8 +3959,22 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             ],
             "channel_context": channel_ctx,
             "comments": None,
-            "comments_status": "pending",
-            "hook_type_status": "pending" if hook_type_pending else "skipped",
+            # Lite recovery skips the comments fetch, so mark it skipped rather
+            # than leaving it "pending" forever (no worker will resolve it).
+            "comments_status": (
+                "skipped"
+                if effective_long_video_mode == LONG_VIDEO_MODE_LITE
+                else "pending"
+            ),
+            # Hook Type runs inside the comments worker, so lite mode (which
+            # skips comments) skips hook typing too -- mark it skipped, not
+            # pending, so nothing waits on a worker that never starts.
+            "hook_type_status": (
+                "pending"
+                if hook_type_pending
+                and effective_long_video_mode != LONG_VIDEO_MODE_LITE
+                else "skipped"
+            ),
             "hook_type": None,
             "hook_explanation": None,
             "hook_type_confidence": None,
@@ -4039,10 +4079,14 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
 
     # Comments fetch in background; updates the corpus file when done. Hook
     # Type waits for this comments worker to finish so it can include the top
-    # comment when one is available.
-    if phase_callback:
-        phase_callback("comments")
-    _start_comments_thread(url, output_folder, yoink_path, metadata, entries)
+    # comment when one is available. Lite recovery (A-01) skips it: comments
+    # are the fragile/expensive tail this mode exists to shed.
+    if effective_long_video_mode == LONG_VIDEO_MODE_LITE:
+        log.info("lite mode: skipping comments fetch for %s", url)
+    else:
+        if phase_callback:
+            phase_callback("comments")
+        _start_comments_thread(url, output_folder, yoink_path, metadata, entries)
     if phase_callback:
         phase_callback("done")
 
