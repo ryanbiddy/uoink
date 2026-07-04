@@ -4177,6 +4177,17 @@
       return "";
     }
 
+    function dedupeFailedJobsByFailureKey(jobs) {
+      const seen = new Set();
+      return (Array.isArray(jobs) ? jobs : []).filter((job) => {
+        const key = failureKey(job);
+        if (!key) return true;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
     function daysSince(value) {
       if (!value) return 9999;
       const t = new Date(value);
@@ -6165,7 +6176,7 @@
       const queueActive = pending.filter((row) => !["failed", "succeeded", "completed", "cancelled"].includes(normalizedStatus(row)));
       const queueFailed = pending.filter((row) => normalizedStatus(row) === "failed");
       const activeJobs = state.jobs.filter((job) => ["queued", "running"].includes(normalizedStatus(job)));
-      const failedJobs = state.jobs.filter((job) => ["failed", "cancelled"].includes(normalizedStatus(job)));
+      const failedJobs = dedupeFailedJobsByFailureKey(state.jobs.filter((job) => ["failed", "cancelled"].includes(normalizedStatus(job))));
       const activeCount = activeJobs.length + queueActive.length;
       const cancelableCount = activeJobs.filter((job) => job.id).length + queueActive.filter((row) => row.pending_id).length;
       const mobileCount = activeJobs.concat(queueActive, failedJobs, queueFailed)
