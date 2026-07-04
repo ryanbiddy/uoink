@@ -305,7 +305,8 @@ def test_extension_wiring():
     lib = (root / "extension" / "lib" / "extract.js").read_text(encoding="utf-8")
     _assert('id="uoink-x-text-btn"' in popup_html,
             "popup needs the X text capture button")
-    _assert("hidden" in popup_html.split('id="uoink-x-text-btn"')[0].rsplit("<button", 1)[1],
+    button_tag = popup_html.split('id="uoink-x-text-btn"', 1)[1].split(">", 1)[0]
+    _assert("hidden" in button_tag,
             "the button ships hidden (flag-gated)")
     _assert("x_text_capture_enabled" in popup_js,
             "popup must gate the button on the server flag")
