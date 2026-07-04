@@ -166,6 +166,32 @@
       border-top: 1px solid var(--border);
     }
 
+    .sidebar-more {
+      display: grid;
+      gap: 12px;
+    }
+
+    .sidebar-more summary {
+      list-style: none;
+    }
+
+    .sidebar-more summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .sidebar-more-summary {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 0 12px;
+      cursor: pointer;
+    }
+
+    .sidebar-more-actions {
+      display: grid;
+      gap: 12px;
+    }
+
     .sidebar-action {
       width: 100%;
       min-height: 36px;
@@ -2510,12 +2536,37 @@
       }
       .sidebar-bottom {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: minmax(180px, auto) minmax(100px, 1fr) minmax(150px, 1fr) minmax(128px, 0.75fr);
         grid-column: 1 / -1;
         gap: 8px;
+        align-items: center;
         margin-top: 0;
         padding-top: 0;
         border-top: 0;
+      }
+      .sidebar-more {
+        position: relative;
+        display: block;
+        min-width: 0;
+      }
+      .sidebar-more-summary {
+        display: flex;
+        width: 100%;
+      }
+      .sidebar-more-actions {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        z-index: 26;
+        width: min(260px, calc(100vw - 36px));
+        border: 1px solid var(--border);
+        border-radius: var(--control-radius);
+        padding: 8px;
+        background: #080706;
+        box-shadow: var(--shadow-soft);
+      }
+      .sidebar-more:not([open]) .sidebar-more-actions {
+        display: none;
       }
 
       .screenshot-picker {
@@ -2554,6 +2605,11 @@
       .sidebar-bottom {
         grid-template-columns: 1fr;
       }
+      .sidebar-more-actions {
+        left: 0;
+        right: auto;
+        width: 100%;
+      }
       .screenshot-picker {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -2587,8 +2643,13 @@
         <div class="running-pill" id="runningPill"><span class="pip"></span><span>Ready on this device</span></div>
         <div class="localhost" id="portLabel">Private local app</div>
         <button class="sidebar-action" type="button" id="viewActivity">View activity <span class="nav-count" id="activityNavCount">0</span></button>
-        <button class="sidebar-action" type="button" id="starGithub">⭐ Star on GitHub</button>
-        <button class="stop" type="button" id="stopHelper">Stop Uoink</button>
+        <details class="sidebar-more" id="sidebarControls" open>
+          <summary class="sidebar-action sidebar-more-summary">More controls</summary>
+          <div class="sidebar-more-actions">
+            <button class="sidebar-action" type="button" id="starGithub">⭐ Star on GitHub</button>
+            <button class="stop" type="button" id="stopHelper">Stop Uoink</button>
+          </div>
+        </details>
       </div>
     </aside>
 
@@ -8807,6 +8868,14 @@
       openStopHelperConfirm(event && event.currentTarget);
     }
 
+    function syncSidebarControlsDensity() {
+      const controls = document.getElementById("sidebarControls");
+      if (!controls) return;
+      const compact = window.matchMedia("(max-width: 1080px)").matches;
+      if (compact) controls.removeAttribute("open");
+      else controls.setAttribute("open", "");
+    }
+
     async function saveOutputFolder() {
       const outputDir = els.outputFolder.value.trim();
       if (!outputDir) return showToast("Enter an output folder first.");
@@ -9465,8 +9534,10 @@
 
     async function init() {
       hydrateMarks();
+      syncSidebarControlsDensity();
       wireEvents();
       applyHashRoute();
+      window.addEventListener("resize", syncSidebarControlsDensity);
       window.addEventListener("hashchange", applyHashRoute);
       await refreshHealth();
       await loadLibraryFacets();
