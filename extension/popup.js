@@ -76,6 +76,8 @@ const queueDetails = document.getElementById("queue-details");
 const firstUoinkPanel = document.getElementById("first-uoink-panel");
 const currentVideoPreview = document.getElementById("current-video-preview");
 const uoinkCurrentBtn = document.getElementById("uoink-current-btn");
+const uoinkXTextBtn = document.getElementById("uoink-x-text-btn");
+let currentXStatusUrl = null;
 const destinationPanel = document.getElementById("destination-panel");
 const quickPromptsPanel = document.getElementById("quick-prompts-panel");
 const recentPanel = document.getElementById("recent-panel");
@@ -343,6 +345,7 @@ async function loadCurrentVideoPreview() {
     const url = tab && tab.url;
     const normalized = STC.normalizeYouTubeUrl(url || "");
     currentVideoUrl = normalized;
+    await syncXTextButton(url || "");
     if (!normalized) {
       currentVideoPreview.textContent = "Open a YouTube video tab, then reopen this popup.";
       uoinkCurrentBtn.disabled = true;
@@ -354,6 +357,61 @@ async function loadCurrentVideoPreview() {
     currentVideoPreview.textContent = "Couldn't read the current tab.";
     uoinkCurrentBtn.disabled = true;
   }
+}
+
+// U-15: on an X status tab, offer text/thread capture next to the video
+// path. Ships dark: the button only appears when the server's
+// x_text_capture_enabled flag is on, so nothing changes for anyone who
+// hasn't opted in.
+async function syncXTextButton(rawUrl) {
+  if (!uoinkXTextBtn) return;
+  currentXStatusUrl = null;
+  const isXStatus = Boolean(STC.normalizeTwitterUrl(rawUrl || ""));
+  if (!isXStatus) {
+    uoinkXTextBtn.classList.add("hidden");
+    return;
+  }
+  let enabled = false;
+  try {
+    const data = await STC.getSettings();
+    enabled = Boolean(data && (data.settings || data || {}).x_text_capture_enabled);
+  } catch {
+    enabled = false;
+  }
+  if (!enabled) {
+    uoinkXTextBtn.classList.add("hidden");
+    return;
+  }
+  currentXStatusUrl = rawUrl;
+  uoinkXTextBtn.classList.remove("hidden");
+  uoinkXTextBtn.disabled = !serverOnline;
+}
+
+async function runPopupUoinkXText() {
+  if (!uoinkXTextBtn || !currentXStatusUrl) return;
+  const old = uoinkXTextBtn.textContent;
+  uoinkXTextBtn.disabled = true;
+  uoinkXTextBtn.textContent = "Saving text...";
+  try {
+    const data = await STC.postExtractX(currentXStatusUrl);
+    if (!data || !data.ok) {
+      // The server's copy already says exactly what X did; show it as-is.
+      showToast((data && data.error) || "X capture failed. Try again in a minute.");
+      return;
+    }
+    const count = Number(data.tweets_captured) || 1;
+    showToast(`Saved ${count} post${count === 1 ? "" : "s"} to your library.`);
+    loadRecentUoinks();
+  } catch (e) {
+    showToast(`X capture failed: ${e && e.message || e}`);
+  } finally {
+    uoinkXTextBtn.disabled = !serverOnline || !currentXStatusUrl;
+    uoinkXTextBtn.textContent = old;
+  }
+}
+
+if (uoinkXTextBtn) {
+  uoinkXTextBtn.addEventListener("click", runPopupUoinkXText);
 }
 
 // ---- Interval setting -----------------------------------------------------

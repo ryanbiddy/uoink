@@ -189,6 +189,26 @@
     });
   }
 
+  // U-15: X text/thread capture. POST /extract/x with the raw status URL.
+  // The server owns the feature flag (x_text_capture_enabled) and the
+  // honest failure copy, so this just relays the JSON body. 60s timeout:
+  // worst case is a hop-capped ancestor walk, not a transcript job.
+  async function postExtractX(url) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60 * 1000);
+    try {
+      const res = await _authedFetch("/extract/x", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+        signal: controller.signal,
+      });
+      return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   // POST /extract with a 10-minute timeout. Returns the server's JSON body
   // (success or {ok: false, error: ...}). Throws only for network failures
   // (server unreachable / aborted).
@@ -637,6 +657,7 @@
     getInterval,
     postExtract,
     postExtractAny,
+    postExtractX,
     ping,
     startSession,
     addToSession,
