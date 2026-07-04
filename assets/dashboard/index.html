@@ -7483,6 +7483,7 @@
           </div>
         `;
       }).join("");
+      syncWritingActionsFromComposer();
     }
 
     function readThreadDrafts() {
@@ -7505,6 +7506,30 @@
         countEl.classList.toggle("over", over);
       }
       if (card) card.classList.toggle("over", over);
+      syncWritingActionsFromComposer();
+    }
+
+    // G-40 (E2E D1): the output placeholder invites pasting a draft, so a
+    // typed or pasted draft has to unlock Save/Copy/Revise/Critique the same
+    // way agent output does. A composer card still holding its untouched
+    // credit-line seed counts as blank, which keeps the G-23 guard honest
+    // (Copy and Save stay disabled until there's a real draft).
+    function isComposerSeedText(value) {
+      const text = String(value || "").trim();
+      if (!text) return true;
+      if (text === "Pick a source to build the credit line.") return true;
+      return text === writingAttributionLine().trim();
+    }
+
+    function composerHasManualDraft() {
+      return state.writingDrafts.some((draft) => !isComposerSeedText(draft));
+    }
+
+    function syncWritingActionsFromComposer() {
+      // Agent output governs the action state through setWritingOutput; the
+      // composer only takes over while no generated draft is on screen.
+      if (String(els.writingOutput.dataset.rawText || "").trim()) return;
+      setWritingActionsEnabled(composerHasManualDraft());
     }
 
     function currentWritingText() {
