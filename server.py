@@ -5531,9 +5531,41 @@ def _migrate_jobs_json_to_index() -> None:
         log.exception("jobs.json migration failed; leaving the file in place")
 
 
+def _supersede_terminal_single_jobs_locked(source_url: str, keep_id: str) -> None:
+    """Drop older terminal single-video jobs for the same source URL.
+
+    Caller must hold _jobs_lock. Every /extract attempt mints a fresh job
+    id, so re-extracting a URL (a rate-limit retry, the retry worker, or the
+    user re-yoinking) used to leave a second failed `single` job in _jobs.
+    Both then rendered in Activity as identical failed rows (QA #42 -- the
+    OpenClaw job twice). Activity's client-side dedupe only covers
+    job-vs-queue, never job-vs-job, so the coalescing has to happen here at
+    the source. Running/queued jobs are never touched -- they're live."""
+    if not source_url:
+        return
+    stale = [
+        jid for jid, j in _jobs.items()
+        if jid != keep_id
+        and j.get("kind") == "single"
+        and j.get("source_url") == source_url
+        and (j.get("state") or "") in _JOB_TERMINAL_STATES
+    ]
+    for jid in stale:
+        _jobs.pop(jid, None)
+        try:
+            _get_index().delete_job(jid)
+        except Exception as e:  # noqa: BLE001
+            log.warning("could not drop superseded job %s: %s", jid, e)
+
+
 def _add_job_record(job: dict) -> dict:
     with _jobs_lock:
         _jobs[job["id"]] = job
+        # A new single-video attempt supersedes any prior terminal attempt
+        # for the same URL, so Activity shows one row per source (G-14).
+        if job.get("kind") == "single":
+            _supersede_terminal_single_jobs_locked(
+                job.get("source_url") or "", job["id"])
         _persist_jobs_locked(job)
         return _public_job(job)
 
