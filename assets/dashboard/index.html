@@ -298,6 +298,7 @@
       min-width: 0;
       min-height: 0;
       overflow: auto;
+      overflow-x: hidden;
       padding: 28px 28px 34px;
     }
 
@@ -408,9 +409,14 @@
 
     .control-grid {
       display: grid;
-      grid-template-columns: minmax(240px, 2fr) repeat(9, minmax(112px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
       gap: 10px;
       margin: 18px 0 18px;
+    }
+
+    .control-grid .control:first-child {
+      grid-column: span 2;
+      min-width: 220px;
     }
 
     .control,
@@ -2306,18 +2312,26 @@
         position: static;
         z-index: 20;
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
         gap: 12px;
-        padding: 18px;
+        padding: 14px 18px;
+      }
+      .wordmark {
+        font-size: 24px;
+      }
+      .uoink-mark {
+        width: 28px;
+        height: 28px;
       }
       .nav {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 8px;
       }
       .nav-button {
         min-width: 0;
-        min-height: 38px;
-        padding: 0 10px;
+        min-height: 36px;
+        padding: 0 9px;
         font-size: 12px;
       }
       .nav-button .nav-count {
@@ -2355,7 +2369,8 @@
       }
       .sidebar-bottom {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-column: 1 / -1;
         gap: 8px;
         margin-top: 0;
         padding-top: 0;
@@ -2382,9 +2397,22 @@
       .about-grid {
         grid-template-columns: 1fr;
       }
+      .control-grid .control:first-child {
+        grid-column: auto;
+        min-width: 0;
+      }
     }
 
     @media (max-width: 620px) {
+      .sidebar {
+        grid-template-columns: 1fr;
+      }
+      .nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .sidebar-bottom {
+        grid-template-columns: 1fr;
+      }
       .screenshot-picker {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
