@@ -531,7 +531,7 @@
     if (copied) {
       return `${topicLine}Paste with Ctrl+V in Claude or ChatGPT. ${tail}`.trim();
     }
-    return `${topicLine}Clipboard was blocked — open the saved file in the uoink folder.`.trim();
+    return `${topicLine}Clipboard was blocked. Open the saved file in the uoink folder.`.trim();
   }
 
   async function logEngagement(eventType, source, metadata) {

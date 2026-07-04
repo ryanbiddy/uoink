@@ -128,7 +128,7 @@ chrome.commands.onCommand.addListener(async (command) => {
               job.session_name = active.name;
             }
             if (kind === "extract" && !(await serverQueueHasRoom())) {
-              notify("Queue full", "Wait a few minutes");
+              notify("Queue full", "Give it a few minutes, then try again.");
               return;
             }
             await enqueue(job);
@@ -231,7 +231,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     }
   }
   if (!normalized) {
-    notify("Invalid URL", "Couldn't find YouTube video ID or Twitter/X status ID");
+    notify("Invalid URL", "Couldn't find a YouTube video or X/Twitter post in that link.");
     return;
   }
 
@@ -243,7 +243,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (kind === "session_add") {
     const active = await getActiveFromStorage();
     if (!active || !active.id) {
-      notify("Uoink", "No active session, start one in the popup first.");
+      notify("Uoink", "No active session. Start one in the popup first.");
       return;
     }
     job.session_id = active.id;
@@ -437,7 +437,7 @@ async function serverQueueHasRoom() {
 }
 
 async function notifyClipboardRetry(text) {
-  const id = await notify("Clipboard copy blocked", "Click Try again to retry", {
+  const id = await notify("Clipboard copy blocked", "Your uoink is ready. Click Try again to copy it.", {
     buttons: [{ title: "Try again" }],
   });
   if (id) _clipboardRetryPayloads.set(id, text);

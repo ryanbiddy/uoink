@@ -21,20 +21,20 @@ function buildBackgroundAiIndicator(settings) {
   if (!settings) return "";
   const ci = !!settings.comment_intelligence_enabled;
   const hook = !!settings.hook_type_enabled;
-  // Skip the indicator entirely if no key is set â€” the features won't run.
+  // Skip the indicator entirely if no key is set — the features won't run.
   if ((ci || hook) && settings.anthropic_key_set === false) return "";
   if (ci && hook) {
     return "Comment Intelligence and Hook Type are still running in the " +
-      "background â€” re-open per-video .md files in a few minutes for the " +
+      "background. Re-open per-video .md files in a few minutes for the " +
       "full analysis.";
   }
   if (ci) {
-    return "Comment Intelligence is still running in the background â€” " +
-      "re-open per-video .md files in a few minutes for analysis.";
+    return "Comment Intelligence is still running in the background. " +
+      "Re-open per-video .md files in a few minutes for analysis.";
   }
   if (hook) {
-    return "Hook Type analysis is still running in the background â€” " +
-      "re-open per-video .md files in a few minutes.";
+    return "Hook Type analysis is still running in the background. " +
+      "Re-open per-video .md files in a few minutes.";
   }
   return "";
 }
@@ -137,7 +137,7 @@ function updateDestButtons() {
     if (!serverOnline) {
       destHint.textContent = "Start Uoink Server to enable these.";
     } else if (!recent) {
-      destHint.textContent = "Uoink a video first. Destinations unlock for 5 minutes after a successful copy.";
+      destHint.textContent = "Uoink a video first. These buttons stay live for 5 minutes after a copy.";
     } else {
       destHint.textContent = DEST_HINT_DEFAULT;
     }
@@ -170,7 +170,7 @@ function renderClipboardBudget() {
   const shotLabel = `${screenshots} screenshot${screenshots === 1 ? "" : "s"}`;
   clipboardBudgetEl.textContent = `${shotLabel} \u00b7 ~${tokenText} tokens`;
   if (tokens > 50_000) {
-    clipboardBudgetEl.textContent += " \u00b7 Large paste - Claude may truncate.";
+    clipboardBudgetEl.textContent += " \u00b7 Large paste. Claude may truncate.";
     clipboardBudgetEl.classList.add("warn");
   } else {
     clipboardBudgetEl.classList.remove("warn");
@@ -429,7 +429,7 @@ async function refreshActiveFromServer() {
   // Background also fires the storage.onChanged event; we just need to read it.
   try {
     await chrome.runtime.sendMessage({ type: "refreshActiveSession" });
-  } catch { /* ignore â€” fall back to local storage */ }
+  } catch { /* ignore — fall back to local storage */ }
   const s = await readActiveFromStorage();
   renderActive(s);
 }
@@ -521,7 +521,7 @@ endBtn.addEventListener("click", async () => {
   }
 
   // Copy via background (offscreen). Popups can call navigator.clipboard
-  // directly too â€” try that first for the fast path, then fall back.
+  // directly too — try that first for the fast path, then fall back.
   let copied = false;
   try {
     await navigator.clipboard.writeText(res.corpus_md);
@@ -534,11 +534,11 @@ endBtn.addEventListener("click", async () => {
   }
 
   // Notify. The destination buttons up top let the user pick where to paste,
-  // so we don't auto-open a tab here â€” that would force Claude.
+  // so we don't auto-open a tab here — that would force Claude.
   const lines = `${fmtCount(res.video_count, "video")}, ${fmtCount(res.caption_count || 0, "caption line")}`;
   const note = copied
     ? `Session uoinked! ${lines}. Pick a destination above and paste.`
-    : `Session closed. ${lines}. Clipboard failed â€” corpus.md is in the session folder (already open in Explorer).`;
+    : `Session closed. ${lines}. Clipboard failed, but corpus.md is in the session folder (already open in Explorer).`;
   await chrome.runtime.sendMessage({ type: "notify", title: "Research session uoinked", message: note });
   if (copied) {
     markClipboardUoinkNow();
@@ -550,7 +550,7 @@ endBtn.addEventListener("click", async () => {
   if ((res.corpus_md || "").length > CORPUS_WARN_CHARS) {
     sessionWarn.classList.remove("hidden");
     sessionWarn.innerHTML =
-      `Corpus is ${(res.corpus_md.length / 1000).toFixed(0)}K characters â€” may exceed the ` +
+      `Corpus is ${(res.corpus_md.length / 1000).toFixed(0)}K characters, which may exceed the ` +
       `paste-friendly size. Drag <code>corpus.md</code> into Claude or ChatGPT instead.<br>` +
       `<button id="open-folder" class="secondary" style="margin-top:6px">Open session folder</button>`;
     document.getElementById("open-folder").addEventListener("click", () => {
@@ -584,7 +584,7 @@ async function loadRecentSessions() {
     item.className = "recent-item";
     const date = (s.created_at || "").slice(0, 10);
     item.innerHTML = `<span>${escapeHtml(s.name || s.session_id)}</span>` +
-                     `<span class="meta">${s.video_count} Â· ${s.status} Â· ${date}</span>`;
+                     `<span class="meta">${s.video_count} · ${s.status} · ${date}</span>`;
     item.title = s.folder || "";
     item.addEventListener("click", () => STC.openSession(s.session_id));
     recentSessionsEl.appendChild(item);
@@ -772,7 +772,7 @@ function renderFailureRow(failure) {
     ev.stopPropagation();
     const videoId = failure.videoId || (failure.url && STC.extractVideoId(failure.url));
     if (!videoId) {
-      showToast("Can't retry â€” missing video URL.");
+      showToast("Can't retry: the video URL is missing.");
       return;
     }
     await removeRecentFailure(failure.id);
@@ -1329,7 +1329,7 @@ async function writeClipboardText(text) {
 async function runPopupUoinkCurrent() {
   if (!uoinkCurrentBtn || !currentVideoUrl) return;
   if ((await serverQueuePendingCount()) >= 5) {
-    showToast("Queue full, wait a few minutes.");
+    showToast("Queue full. Give it a few minutes, then try again.");
     pollQueueStatus();
     return;
   }
@@ -1352,7 +1352,7 @@ async function runPopupUoinkCurrent() {
     saveClipboardBudget(data, clipboardText);
     if (await shouldUseScreenshotPicker()) {
       await STC.stashPickerCorpus(data);
-      showToast("Uoink ready - pick screenshots in the popup.");
+      showToast("Uoink ready. Pick screenshots in the popup.");
       return;
     }
     const copied = await writeClipboardText(clipboardText);
@@ -2194,10 +2194,10 @@ document.getElementById("open-index").addEventListener("click", async (ev) => {
   try {
     const res = await STC.openIndex();
     if (!res || res.ok === false) {
-      showToast("Couldn't open the uoinks index â€” server may be down.");
+      showToast("Couldn't open the uoinks index. The server may be down.");
     }
   } catch {
-    showToast("Couldn't open the uoinks index â€” server may be down.");
+    showToast("Couldn't open the uoinks index. The server may be down.");
   }
 });
 wireKeyActivation(document.getElementById("open-index"));
@@ -2215,7 +2215,7 @@ if (openDashboardLink) {
 // ---- Settings link (Sprint 2) ---------------------------------------------
 // Lives in the popup footer so it's visible in both single-video and playlist
 // modes. setup.html is the canonical settings surface (Codex's lane), so we
-// just open it in a new tab â€” never duplicate the form inside the popup.
+// just open it in a new tab — never duplicate the form inside the popup.
 const openSettingsLink = document.getElementById("open-settings");
 if (openSettingsLink) {
   openSettingsLink.addEventListener("click", (ev) => {
@@ -2286,7 +2286,7 @@ document.addEventListener("visibilitychange", () => {
 });
 
 // =====================================================================
-// v2 â€” Playlist mode
+// v2 — Playlist mode
 // =====================================================================
 // Self-contained: only touches its own DOM (#mode-playlist + .mode-btn) and
 // the #mode-single wrapper visibility. The single-video flow above runs
@@ -2474,7 +2474,7 @@ document.addEventListener("visibilitychange", () => {
   // ---- Sprint 6 (item 4): active-playlist pill -------------------------
   // Shown when user is in single-video mode AND lastJob is non-terminal
   // (queued or running). Clicking returns to playlist mode + progress
-  // panel. On terminal state we just hide the pill â€” the next-popup-open
+  // panel. On terminal state we just hide the pill — the next-popup-open
   // "Last uoink completed" affordance (item 3) is what surfaces the
   // result on the playlist input panel.
   const activePlaylistPillEl = document.getElementById("active-playlist-pill");
@@ -2491,14 +2491,14 @@ document.addEventListener("visibilitychange", () => {
       activePlaylistPillEl.classList.add("hidden");
       return;
     }
-    // Label uses textContent to keep XSS-discipline â€” playlist_title
+    // Label uses textContent to keep XSS-discipline — playlist_title
     // could in principle be attacker-shaped via a malicious playlist
     // title (yt-dlp would surface it). Safe via textContent.
     const total = lastJob.videos_total || 0;
     const done = (lastJob.videos_done || 0) + (lastJob.videos_failed || 0);
     const title = lastJob.playlist_title || "Playlist";
     const state = lastJob.state === "queued" ? "Queued" : `${done}/${total}`;
-    activePlaylistPillLabelEl.textContent = `${title} Â· ${state}`;
+    activePlaylistPillLabelEl.textContent = `${title} · ${state}`;
     activePlaylistPillEl.classList.remove("hidden");
   }
 
@@ -2519,14 +2519,14 @@ document.addEventListener("visibilitychange", () => {
 
   // ---- helpers ---------------------------------------------------------
   function fmtDuration(seconds) {
-    if (seconds == null) return "â€”";
+    if (seconds == null) return "-";
     const s = Math.max(0, parseInt(seconds, 10) || 0);
     const m = Math.floor(s / 60);
     const r = s % 60;
     return `${m}:${String(r).padStart(2, "0")}`;
   }
 
-  function fmtNullable(v) { return (v == null || v === "") ? "â€”" : v; }
+  function fmtNullable(v) { return (v == null || v === "") ? "-" : v; }
 
   function showOnly(panel) {
     for (const el of [inputPanel, previewPanel, progressPanel, donePanel, cancelledPanel, failedPanel]) {
@@ -2554,9 +2554,9 @@ document.addEventListener("visibilitychange", () => {
       stripEl.classList.add("hidden");
       return;
     }
-    // Multi-warning support: join with " Â· ". The contract only specifies
-    // "playlist exceeds cap" today but the shape is an array â€” handle N.
-    stripEl.textContent = list.join(" Â· ");
+    // Multi-warning support: join with " · ". The contract only specifies
+    // "playlist exceeds cap" today but the shape is an array — handle N.
+    stripEl.textContent = list.join(" · ");
     stripEl.classList.remove("hidden");
   }
 
@@ -2591,7 +2591,7 @@ document.addEventListener("visibilitychange", () => {
     doneFailedListEl.innerHTML = "";
     doneFailedListEl.classList.add("hidden");
     progressFill.style.width = "0%";
-    progressText.textContent = "Queuedâ€¦";
+    progressText.textContent = "Queued…";
     progressCiEl.classList.add("hidden");
     progressDisconnectEl.classList.add("hidden");
     progressDisconnectEl.replaceChildren();
@@ -2605,7 +2605,7 @@ document.addEventListener("visibilitychange", () => {
 
   // ---- preview ---------------------------------------------------------
   function isLikelyPlaylistUrl(s) {
-    // Light client-side guard â€” the backend is authoritative. Just enough to
+    // Light client-side guard — the backend is authoritative. Just enough to
     // catch an obvious mis-paste so we don't 500ms-spin on garbage.
     if (!s) return false;
     try {
@@ -2625,7 +2625,7 @@ document.addEventListener("visibilitychange", () => {
       return;
     }
     previewBtn.disabled = true;
-    previewBtn.textContent = "Previewingâ€¦";
+    previewBtn.textContent = "Previewing…";
     try {
       const res = await STC.playlistPreview(raw);
       if (!res || !res.ok || !res.playlist) {
@@ -2650,11 +2650,11 @@ document.addEventListener("visibilitychange", () => {
     const uploader = fmtNullable(playlist.uploader);
     const vc = playlist.video_count != null ? playlist.video_count : (playlist.videos || []).length;
     const willProc = playlist.will_process_count != null ? playlist.will_process_count : (playlist.videos || []).length;
-    previewSubtitleEl.textContent = `${uploader} Â· ${willProc} of ${vc} videos`;
+    previewSubtitleEl.textContent = `${uploader} · ${willProc} of ${vc} videos`;
 
     // Message (e.g., "Playlist has 12 videos -- uoinking the first 10.")
     // is displayed as the warnings strip when present alongside warnings,
-    // otherwise we surface it inside the warnings strip too â€” it carries
+    // otherwise we surface it inside the warnings strip too — it carries
     // the same "be aware of the cap" signal as the warnings list.
     // Per the contract, prefer `message` (human copy) when both exist;
     // fall back to the raw warnings list when only warnings are present.
@@ -2665,7 +2665,7 @@ document.addEventListener("visibilitychange", () => {
       renderWarnings(previewWarningsEl, warnings);
     }
 
-    // Video list â€” contract shape: {index, id, url, title, channel, duration_seconds}
+    // Video list — contract shape: {index, id, url, title, channel, duration_seconds}
     previewListEl.innerHTML = "";
     for (const v of (playlist.videos || [])) {
       const row = document.createElement("div");
@@ -2694,7 +2694,7 @@ document.addEventListener("visibilitychange", () => {
       // Use the nullable-format helper instead of erroring.
       const channelLabel = fmtNullable(v.channel);
       const durationLabel = fmtDuration(v.duration_seconds);
-      sub.textContent = `${channelLabel} Â· ${durationLabel}`;
+      sub.textContent = `${channelLabel} · ${durationLabel}`;
       meta.appendChild(title);
       meta.appendChild(sub);
       row.appendChild(meta);
@@ -2709,7 +2709,7 @@ document.addEventListener("visibilitychange", () => {
   startBtn.addEventListener("click", async () => {
     if (!previewedUrl) return;
     startBtn.disabled = true;
-    startBtn.textContent = "Startingâ€¦";
+    startBtn.textContent = "Starting…";
     try {
       // Sprint 5: source interval from the same chrome.storage.sync setting
       // single-video uses, so the popup's interval slider actually applies
@@ -2731,7 +2731,7 @@ document.addEventListener("visibilitychange", () => {
       const total = (res.job && res.job.videos_total) ||
         (previewedPlaylist && previewedPlaylist.will_process_count) ||
         PLAYLIST_CAP;
-      progressText.textContent = `Queued â€” ${total} videos`;
+      progressText.textContent = `Queued: ${total} videos`;
       progressPlaylistTitleEl.textContent =
         (res.job && res.job.playlist_title) ||
         (previewedPlaylist && previewedPlaylist.title) || "";
@@ -2844,7 +2844,7 @@ document.addEventListener("visibilitychange", () => {
 
   // Build the banner DOM once per stall episode. createElement-only
   // (no innerHTML interpolation) per the XSS discipline established in
-  // Sprint 5 â€” even though the strings here are static, keeping the
+  // Sprint 5 — even though the strings here are static, keeping the
   // pattern consistent avoids future-PR regressions.
   function _paintDisconnectBanner() {
     progressDisconnectEl.replaceChildren();
@@ -2856,7 +2856,7 @@ document.addEventListener("visibilitychange", () => {
     link.textContent = "Open setup guide";
     link.href = "#";
     // Sprint 9: aria-label tells screen readers what the link does AND
-    // that activation opens a new tab â€” a11y polish deferred from Sprint 6.
+    // that activation opens a new tab — a11y polish deferred from Sprint 6.
     link.setAttribute("aria-label", "Opens setup guide in a new tab");
     link.style.color = "#ffd9d9";
     link.style.textDecoration = "underline";
@@ -2883,7 +2883,7 @@ document.addEventListener("visibilitychange", () => {
   function _onPollFailure(reason) {
     pollFailures++;
     // Track the start of the disconnect episode on the very first failure,
-    // not the threshold cross â€” see comment above on disconnectStartTs.
+    // not the threshold cross — see comment above on disconnectStartTs.
     if (disconnectStartTs === 0) disconnectStartTs = Date.now();
     if (pollFailures < STALL_THRESHOLD) return;
 
@@ -2931,7 +2931,7 @@ document.addEventListener("visibilitychange", () => {
       // ok:false with a non-recoverable error -> fail the job. But a
       // transient {ok: false} without a recognisable error string is also
       // treated as a poll failure (helper restarted mid-call, body parse
-      // failed, etc) â€” give it the stall budget before declaring failure.
+      // failed, etc) — give it the stall budget before declaring failure.
       const err = res && res.error;
       if (err && /not found|invalid/i.test(String(err))) {
         stopPolling();
@@ -2976,7 +2976,7 @@ document.addEventListener("visibilitychange", () => {
     progressFill.style.width = `${pct}%`;
 
     if (job.state === "queued") {
-      progressText.textContent = `Queued â€” ${total} videos`;
+      progressText.textContent = `Queued: ${total} videos`;
     } else if (job.current_video) {
       const title = job.current_video.title || "(untitled)";
       const idx = job.current_video.index || (advanced + 1);
@@ -3021,12 +3021,12 @@ document.addEventListener("visibilitychange", () => {
   cancelBtnEl.addEventListener("click", async () => {
     if (!activeJobId) return;
     cancelBtnEl.disabled = true;
-    cancelBtnEl.textContent = "Cancellingâ€¦";
+    cancelBtnEl.textContent = "Cancelling…";
     try {
       const res = await STC.jobCancel(activeJobId);
       // Contract: cancel returns the full updated job. If we got it, render
       // the cancelled view immediately instead of waiting for the next poll
-      // tick â€” same data, faster transition.
+      // tick — same data, faster transition.
       if (res && res.ok && res.job) {
         stopPolling();
         lastJob = res.job;
@@ -3051,7 +3051,7 @@ document.addEventListener("visibilitychange", () => {
     const failed = job.videos_failed || 0;
     const total = job.videos_total || PLAYLIST_CAP;
     cancelledSummaryEl.textContent = "Cancelled.";
-    setText(cancelledMetaEl, `${done} of ${total} videos completed${failed ? ` Â· ${failed} failed` : ""}`);
+    setText(cancelledMetaEl, `${done} of ${total} videos completed${failed ? ` · ${failed} failed` : ""}`);
     setText(cancelledMessageEl, job.message || "");
     renderWarnings(cancelledWarningsEl, job.warnings || []);
     showOnly(cancelledPanel);
@@ -3083,13 +3083,13 @@ document.addEventListener("visibilitychange", () => {
     const kb = corpusText ? (corpusText.length / 1024).toFixed(1) : "0";
 
     doneSummary.textContent = copied
-      ? "Done â€” corpus copied to clipboard"
-      : "Done â€” clipboard blocked, open the folder";
+      ? "Done: corpus copied to clipboard"
+      : "Done: clipboard blocked, open the folder";
 
     const totalProcessed = perVideo.length || job.videos_total || 0;
     const metaBits = [`${successCount} of ${totalProcessed} videos`, `${kb} KB combined`];
     if (failedVideos.length) metaBits.splice(1, 0, `${failedVideos.length} failed`);
-    doneMeta.textContent = metaBits.join(" Â· ");
+    doneMeta.textContent = metaBits.join(" · ");
 
     setText(doneMessageEl, job.message || "");
     renderWarnings(doneWarningsEl, job.warnings || []);
@@ -3124,7 +3124,7 @@ document.addEventListener("visibilitychange", () => {
       const titleLine = document.createElement("div");
       const icon = document.createElement("span");
       icon.className = "pl-failed-icon";
-      icon.textContent = "âš ";
+      icon.textContent = "⚠";
       const titleSpan = document.createElement("span");
       titleSpan.className = "pl-failed-title";
       titleSpan.textContent = `#${f.index} ${f.title || "(untitled)"}`;
@@ -3156,13 +3156,13 @@ document.addEventListener("visibilitychange", () => {
       return;
     }
     try {
-      // openFolder is the existing v1 server endpoint â€” in mock mode the
+      // openFolder is the existing v1 server endpoint — in mock mode the
       // server may not be running, in which case the toast below is the
       // recovery.
       const res = await STC.openFolder(path);
-      if (!res || res.ok === false) showToast("Couldn't open folder â€” server may be offline.");
+      if (!res || res.ok === false) showToast("Couldn't open the folder. The server may be offline.");
     } catch {
-      showToast("Couldn't open folder â€” server may be offline.");
+      showToast("Couldn't open the folder. The server may be offline.");
     }
   }
   openFolderBtn.addEventListener("click", openSessionFolder);
@@ -3183,7 +3183,7 @@ document.addEventListener("visibilitychange", () => {
   // honest about "recent" (a uoink from 45 min ago is probably out of mind
   // and clutters the surface), longer than 15 covers the case where the
   // user starts an uoink, walks away, and comes back to finish reading.
-  // No dismissal Ã— yet â€” auto-expiry covers most of the value, and adding
+  // No dismissal × yet — auto-expiry covers most of the value, and adding
   // a per-job dismissal-storage was deemed not worth the complexity for
   // first ship. Document if we hit user pushback.
   const LAST_UOINK_WINDOW_MS = 30 * 60 * 1000;
@@ -3229,10 +3229,10 @@ document.addEventListener("visibilitychange", () => {
       try {
         const res = await STC.openFolder(path);
         if (!res || res.ok === false) {
-          showToast("Couldn't open folder â€” server may be offline.");
+          showToast("Couldn't open the folder. The server may be offline.");
         }
       } catch {
-        showToast("Couldn't open folder â€” server may be offline.");
+        showToast("Couldn't open the folder. The server may be offline.");
       }
     };
     lastUoinkEl.classList.remove("hidden");
@@ -3283,7 +3283,7 @@ document.addEventListener("visibilitychange", () => {
       startPolling();
       return;
     }
-    // No in-flight job â€” look for a recently completed one. Sort by
+    // No in-flight job — look for a recently completed one. Sort by
     // completed_at desc (falling back to updated_at if completed_at is
     // missing) and pick the freshest.
     const recent = res.jobs
@@ -3294,13 +3294,13 @@ document.addEventListener("visibilitychange", () => {
 })();
 
 // =====================================================================
-// v3 â€” Smart Screenshot Picker
+// v3 — Smart Screenshot Picker
 // =====================================================================
 // Activates when chrome.storage.local.pending_picker is set by the
 // background or content-script intercept. When active, the picker view
 // owns the popup surface (mode selector and both mode panels hide). On
 // Copy/Cancel: writes the chosen corpus to clipboard, clears the pending
-// state, opens Claude, and closes the popup â€” same end behavior as v1
+// state, opens Claude, and closes the popup — same end behavior as v1
 // auto-copy, just user-mediated.
 // ---------------------------------------------------------------------
 
@@ -3328,7 +3328,7 @@ document.addEventListener("visibilitychange", () => {
 
   // One-time settings snapshot for the CI/Hook done indicator. Same
   // pattern as the playlist controller (its own fetch is isolated from
-  // this one â€” cheap enough that the duplication is worth the
+  // this one — cheap enough that the duplication is worth the
   // encapsulation).
   (async function loadSettings() {
     try {
@@ -3348,7 +3348,7 @@ document.addEventListener("visibilitychange", () => {
     pickerMode.classList.add("hidden");
     modeSelectorWrap.classList.remove("hidden");
     // Whichever mode the user was in before the picker activated isn't
-    // tracked â€” restoring to single-video matches the v1 boot default.
+    // tracked — restoring to single-video matches the v1 boot default.
     modeSingleEl.classList.remove("hidden");
     modePlaylistEl.classList.add("hidden");
   }
@@ -3372,7 +3372,7 @@ document.addEventListener("visibilitychange", () => {
 
   // Build a filtered corpus by removing image lines at the given drop
   // indices. Operates on whichever corpus the user wants to send to
-  // clipboard â€” for the multimodal-paste case (corpus_md_paste) this
+  // clipboard — for the multimodal-paste case (corpus_md_paste) this
   // preserves the base64-embedded form for KEPT screenshots while
   // dropping unselected ones. Image lines are matched in source order
   // and aligned to the yoink_md parse positionally.
@@ -3446,7 +3446,7 @@ document.addEventListener("visibilitychange", () => {
 
       const check = document.createElement("div");
       check.className = "picker-thumb-check";
-      check.textContent = "âœ“";
+      check.textContent = "✓";
       tile.appendChild(check);
 
       tile.addEventListener("click", () => toggleIndex(i));
@@ -3463,7 +3463,7 @@ document.addEventListener("visibilitychange", () => {
 
   // Sprint 4 (1c): real-mode thumbnails come back as blob: URLs from
   // URL.createObjectURL(). Revoke them on picker exit so they don't sit
-  // in memory until popup unload. Mock-mode entries are data: URLs â€” no
+  // in memory until popup unload. Mock-mode entries are data: URLs — no
   // revocation needed (and revoking a data URL is a no-op anyway, but
   // skipping the call keeps the loop cheap on large grids).
   function _revokeThumbBlobs() {
@@ -3508,7 +3508,7 @@ document.addEventListener("visibilitychange", () => {
   // Two-uoinks-back-to-back disambiguation: when pending_picker gets
   // overwritten, the user sees "just now" vs "3m ago" so they know which
   // uoink they're looking at. Falls back to ISO date for older stashes
-  // (shouldn't happen in practice â€” pending_picker is cleared on copy).
+  // (shouldn't happen in practice — pending_picker is cleared on copy).
   function formatRelativeTime(iso) {
     if (!iso) return "";
     const t = Date.parse(iso);
@@ -3580,7 +3580,7 @@ document.addEventListener("visibilitychange", () => {
     if (!pendingPicker) { hidePicker(); return; }
     pickerCopyBtn.disabled = true;
     pickerCancelBtn.disabled = true;
-    pickerCopyBtn.textContent = kind === "copy" ? "Copyingâ€¦" : "Cancellingâ€¦";
+    pickerCopyBtn.textContent = kind === "copy" ? "Copying…" : "Cancelling…";
 
     // Source corpus: prefer multimodal paste so KEPT screenshots stay
     // base64-embedded. Falls back to yoink_md when corpus_md_paste isn't
