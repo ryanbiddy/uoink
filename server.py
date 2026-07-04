@@ -779,6 +779,93 @@ def _write_settings(data: dict) -> None:
             pass
 
 
+def _validate_output_dir_value(value: object) -> tuple[Path | None, str | None]:
+    if not isinstance(value, str) or not value.strip():
+        return None, "output_dir must be a non-empty string"
+    try:
+        candidate = Path(value).expanduser()
+        candidate.mkdir(parents=True, exist_ok=True)
+        if not _is_writable_dir(candidate):
+            raise OSError("not writable")
+        return candidate.resolve(), None
+    except OSError:
+        return None, f"output_dir is not a writable folder: {value}"
+
+
+def _pick_output_folder_windows(initial_dir: Path | None = None) -> str | None:
+    script = r"""
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+$dialog = New-Object System.Windows.Forms.FolderBrowserDialog
+$dialog.Description = "Choose where Uoink saves new sources"
+$dialog.ShowNewFolderButton = $true
+if ($env:UOINK_INITIAL_FOLDER -and (Test-Path -LiteralPath $env:UOINK_INITIAL_FOLDER)) {
+  $dialog.SelectedPath = $env:UOINK_INITIAL_FOLDER
+}
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+if ($dialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+  Write-Output $dialog.SelectedPath
+}
+"""
+    env = os.environ.copy()
+    if initial_dir:
+        env["UOINK_INITIAL_FOLDER"] = str(initial_dir)
+    try:
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-STA", "-WindowStyle", "Hidden", "-Command", script],
+            capture_output=True,
+            text=True,
+            timeout=300,
+            env=env,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as e:
+        log.warning("output folder picker unavailable: %s", e)
+        return None
+    if result.returncode != 0:
+        log.warning("output folder picker failed: %s", result.stderr.strip())
+        return None
+    return result.stdout.strip() or None
+
+
+def _pick_output_folder_tk(initial_dir: Path | None = None) -> str | None:
+    try:
+        import tkinter as tk  # type: ignore
+        from tkinter import filedialog  # type: ignore
+    except Exception as e:  # pragma: no cover - environment-specific fallback
+        log.warning("output folder picker unavailable: %s", e)
+        return None
+    root = None
+    try:
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        selected = filedialog.askdirectory(
+            parent=root,
+            title="Choose where Uoink saves new sources",
+            initialdir=str(initial_dir) if initial_dir and initial_dir.exists() else str(Path.home()),
+            mustexist=False,
+        )
+        return selected or None
+    except Exception as e:  # pragma: no cover - requires desktop session
+        log.warning("output folder picker failed: %s", e)
+        return None
+    finally:
+        if root is not None:
+            try:
+                root.destroy()
+            except Exception:
+                pass
+
+
+def _pick_output_folder(initial_dir: Path | None = None) -> str | None:
+    if os.name == "nt":
+        selected = _pick_output_folder_windows(initial_dir)
+        if selected:
+            return selected
+    return _pick_output_folder_tk(initial_dir)
+
+
 def _credential_store_error() -> CredentialStoreError | None:
     if _keyring is None:
         detail = (
@@ -876,6 +963,9 @@ def _migrate_plaintext_anthropic_key() -> None:
 def _public_settings(data: dict | None = None) -> dict:
     data = data or _read_settings()
     key = _get_saved_anthropic_key()
+    configured_output_dir = str(
+        Path(data.get("output_dir") or DESKTOP_ROOT).expanduser()
+    )
     return {
         "comment_intelligence_enabled": bool(data.get("comment_intelligence_enabled")),
         "hook_type_enabled": bool(data.get("hook_type_enabled")),
@@ -888,7 +978,9 @@ def _public_settings(data: dict | None = None) -> dict:
         "transcript_reliability_auto_check": bool(
             data.get("transcript_reliability_auto_check")
         ),
-        "transcript_reliability_model": _reliability_model_status(),
+        "transcript_reliability_model": _reliability_model_status(
+            data.get("whisper_model")
+        ),
         # v3 A2: default OFF -- claims are extracted on every yoink only when
         # ON; otherwise extraction is per-claim, user-triggered.
         "claim_verification_enabled": bool(
@@ -897,9 +989,10 @@ def _public_settings(data: dict | None = None) -> dict:
         # Tier 2 dashboard Settings tab additions:
         "anthropic_key_masked": _mask_anthropic_key(key),
         "output_dir": str(DESKTOP_ROOT),
+        "output_dir_configured": configured_output_dir,
         "output_dir_pending_restart": bool(
             data.get("output_dir")
-            and str(Path(data["output_dir"]).expanduser()) != str(DESKTOP_ROOT)
+            and configured_output_dir != str(DESKTOP_ROOT)
         ),
         "autostart": _autostart_enabled(),
         "topics": (_load_topics() or {}).get("topics", []),
@@ -1432,13 +1525,24 @@ def compute_health(sidecar: dict) -> dict:
     }
 
 
-def _reliability_model_status() -> dict:
-    model_file = RELIABILITY_MODEL_ROOT / f"{RELIABILITY_MODEL_NAME}.pt"
+def _normalize_reliability_model(model_name: object) -> str:
+    model = str(model_name or "").strip().lower()
+    return model if model in _WHISPER_MODELS else RELIABILITY_MODEL_NAME
+
+
+def _selected_reliability_model(data: dict | None = None) -> str:
+    settings = data if data is not None else _read_settings()
+    return _normalize_reliability_model(settings.get("whisper_model"))
+
+
+def _reliability_model_status(model_name: object | None = None) -> dict:
+    selected_model = _normalize_reliability_model(
+        model_name if model_name is not None else _selected_reliability_model()
+    )
+    model_file = RELIABILITY_MODEL_ROOT / f"{selected_model}.pt"
     cached = model_file.exists()
-    if not cached and RELIABILITY_MODEL_ROOT.exists():
-        cached = any(RELIABILITY_MODEL_ROOT.glob("*.pt"))
     return {
-        "model": RELIABILITY_MODEL_NAME,
+        "model": selected_model,
         "model_root": str(RELIABILITY_MODEL_ROOT),
         "cached": bool(cached),
         "estimated_download_mb": 150,
@@ -1592,11 +1696,12 @@ def _compute_transcript_reliability(
         _write_reliability_to_sidecar(folder, reliability)
         return {"ok": True, "reliability": reliability, "cached": False}
 
-    if not allow_model_download and not _reliability_model_status()["cached"]:
+    reliability_model = _selected_reliability_model()
+    if not allow_model_download and not _reliability_model_status(reliability_model)["cached"]:
         reliability = {
             "status": "skipped",
             "reason": "model_not_downloaded",
-            "model": RELIABILITY_MODEL_NAME,
+            "model": reliability_model,
             "model_root": str(RELIABILITY_MODEL_ROOT),
             "spans": [],
             "span_count": 0,
@@ -1610,12 +1715,12 @@ def _compute_transcript_reliability(
             transcript_text,
             path,
             threshold=threshold,
-            model_name=RELIABILITY_MODEL_NAME,
+            model_name=reliability_model,
             model_root=RELIABILITY_MODEL_ROOT,
         )
         return {
             "status": "completed",
-            "model": RELIABILITY_MODEL_NAME,
+            "model": reliability_model,
             "model_root": str(RELIABILITY_MODEL_ROOT),
             "threshold": threshold,
             "spans": [s.to_dict() for s in spans],
@@ -7708,6 +7813,41 @@ class Handler(BaseHTTPRequestHandler):
     def _handle_settings_get(self):
         self._send_json(200, {"ok": True, "settings": _public_settings()})
 
+    def _handle_settings_output_folder_pick(self, body: dict):
+        settings = _read_settings()
+        initial_value = (
+            body.get("initial_dir")
+            if isinstance(body, dict) and isinstance(body.get("initial_dir"), str)
+            else settings.get("output_dir") or str(DESKTOP_ROOT)
+        )
+        initial_dir = Path(initial_value).expanduser()
+        selected = _pick_output_folder(initial_dir)
+        if not selected:
+            return self._send_json(200, {
+                "ok": False,
+                "cancelled": True,
+                "error": "No folder selected.",
+                "settings": _public_settings(settings),
+            })
+        candidate, error = _validate_output_dir_value(selected)
+        if error or candidate is None:
+            return self._send_json(400, {"ok": False, "error": error})
+        settings["output_dir"] = str(candidate)
+        settings["updated_at"] = _now_iso()
+        try:
+            _write_settings(settings)
+        except OSError as e:
+            log.warning("settings output folder picker write failed: %s", e)
+            return self._send_json(200, {
+                "ok": False,
+                "error": "settings write failed",
+            })
+        self._send_json(200, {
+            "ok": True,
+            "output_dir": str(candidate),
+            "settings": _public_settings(settings),
+        })
+
     def _handle_settings_pricing(self):
         self._send_json(200, {"ok": True, "pricing": _anthropic_pricing_payload()})
 
@@ -9334,24 +9474,37 @@ class Handler(BaseHTTPRequestHandler):
         self._send_json(200, {"ok": True, "mcp_config": _mcp_settings_snippet()})
 
     def _handle_reliability_model_status(self):
-        self._send_json(200, {"ok": True, "model": _reliability_model_status()})
+        self._send_json(200, {
+            "ok": True,
+            "model": _reliability_model_status(),
+        })
 
-    def _handle_reliability_model_download(self):
+    def _handle_reliability_model_download(self, body: dict | None = None):
+        raw_model = body.get("model") if isinstance(body, dict) else None
+        if raw_model is not None:
+            model_name = str(raw_model).strip().lower()
+            if model_name not in _WHISPER_MODELS:
+                return self._send_json(400, {
+                    "ok": False,
+                    "error": f"model must be one of {list(_WHISPER_MODELS)}",
+                })
+        else:
+            model_name = _selected_reliability_model()
         try:
             status = uoink_reliability.ensure_model(
-                RELIABILITY_MODEL_NAME,
+                model_name,
                 RELIABILITY_MODEL_ROOT,
             )
         except Exception as e:
             return self._send_json(200, {
                 "ok": False,
                 "error": _sanitize_error(str(e)),
-                "model": _reliability_model_status(),
+                "model": _reliability_model_status(model_name),
             })
         self._send_json(200, {
             "ok": True,
             "downloaded": True,
-            "model": {**_reliability_model_status(), **status},
+            "model": {**_reliability_model_status(model_name), **status},
         })
 
     def _handle_reliability_get(self, video_id: str):
@@ -9501,18 +9654,12 @@ class Handler(BaseHTTPRequestHandler):
             data["anthropic_key_invalid"] = False
         # ---- Tier 2 extras ----
         if "output_dir" in body:
-            val = body.get("output_dir")
-            if not isinstance(val, str) or not val.strip():
+            cand, error = _validate_output_dir_value(body.get("output_dir"))
+            if error or cand is None:
                 return self._send_json(400, {
-                    "ok": False, "error": "output_dir must be a non-empty string"})
-            try:
-                cand = Path(val).expanduser()
-                cand.mkdir(parents=True, exist_ok=True)
-                if not _is_writable_dir(cand):
-                    raise OSError("not writable")
-            except OSError:
-                return self._send_json(400, {
-                    "ok": False, "error": f"output_dir is not a writable folder: {val}"})
+                    "ok": False,
+                    "error": error,
+                })
             # Persisted; _get_output_root applies it on the next start (no live
             # DESKTOP_ROOT mutation under in-flight extractions).
             data["output_dir"] = str(cand.resolve())
@@ -10299,6 +10446,8 @@ class Handler(BaseHTTPRequestHandler):
         bare = self.path.split("?", 1)[0]
         if bare == "/settings":
             return self._handle_settings_post(body)
+        if bare == "/settings/output-folder/pick":
+            return self._handle_settings_output_folder_pick(body)
         if bare == "/settings/test-key":
             return self._handle_settings_test_key(body)
         if bare.startswith("/agents/connect/"):
@@ -10335,7 +10484,7 @@ class Handler(BaseHTTPRequestHandler):
         if bare == "/memory/restore":
             return self._handle_memory_restore(body)
         if bare == "/reliability/model/download":
-            return self._handle_reliability_model_download()
+            return self._handle_reliability_model_download(body)
         m = re.fullmatch(r"/reliability/([^/]+)/compute", bare)
         if m:
             return self._handle_reliability_compute(m.group(1), body)

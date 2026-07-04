@@ -2193,6 +2193,33 @@
       white-space: nowrap;
     }
 
+    .folder-summary,
+    .topic-undo,
+    .topic-empty {
+      display: grid;
+      gap: 6px;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 12px;
+      background: var(--ink-warm);
+    }
+
+    .folder-summary strong {
+      color: var(--cream);
+      overflow-wrap: anywhere;
+    }
+
+    .manual-path {
+      display: grid;
+      gap: 10px;
+    }
+
+    .manual-path summary {
+      cursor: pointer;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
     .mono-box,
     textarea.mono-box {
       width: 100%;
@@ -2217,7 +2244,7 @@
 
     .topic-row {
       display: grid;
-      grid-template-columns: 120px minmax(0, 1fr) auto;
+      grid-template-columns: minmax(140px, 0.65fr) minmax(0, 1fr) auto;
       gap: 10px;
       border: 1px solid var(--border);
       border-radius: var(--control-radius);
@@ -2225,16 +2252,35 @@
       background: var(--ink-warm);
     }
 
-    .topic-row b {
-      color: var(--cream);
+    .topic-field {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
     }
 
-    .topic-row span {
+    .topic-field span {
       color: var(--dim);
       font-size: 12px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+
+    .topic-keywords {
+      min-height: 64px;
+      resize: vertical;
+    }
+
+    .topic-remove {
+      align-self: start;
+    }
+
+    .topic-undo {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+    }
+
+    .topic-empty {
+      color: var(--muted);
     }
 
     .about-grid {
@@ -3208,14 +3254,14 @@
 
           <div class="settings-grid">
             <div class="setting-block" id="byo-key">
-              <h2>Anthropic key (BYO)</h2>
+              <h2>AI writing key</h2>
               <p class="setting-copy" id="keyStatus">Checking key status...</p>
               <div class="inline-row">
-                <input class="field" style="flex:1;min-width:260px" id="anthropicKey" type="password" placeholder="sk-ant-...">
-                <button class="button" type="button" id="saveKey">Replace</button>
+                <input class="field" style="flex:1;min-width:260px" id="anthropicKey" type="password" placeholder="Paste your Anthropic key">
+                <button class="button" type="button" id="saveKey">Save key</button>
                 <button class="button ghost" type="button" id="testKey">Test</button>
               </div>
-              <p class="setting-copy">Stored in Windows Credential Manager. Never sent anywhere but Anthropic.</p>
+              <p class="setting-copy">Stored on this device and used only for the optional AI features you turn on.</p>
             </div>
 
             <div class="setting-block">
@@ -3278,19 +3324,32 @@
 
             <div class="setting-block">
               <h2>Output folder</h2>
-              <input class="field" id="outputFolder" type="text" value="Loading...">
-              <div class="inline-row">
-                <button class="button" type="button" id="openOutput">Open folder</button>
-                <button class="button ghost" type="button" id="saveOutput">Save</button>
+              <div class="folder-summary">
+                <span class="soft-note">Current save location</span>
+                <strong id="outputFolderDisplay">Loading...</strong>
+                <span class="setting-copy" id="outputFolderPending"></span>
               </div>
+              <div class="inline-row">
+                <button class="button" type="button" id="pickOutputFolder">Choose folder</button>
+                <button class="button ghost" type="button" id="openOutput">Open current folder</button>
+              </div>
+              <details class="manual-path">
+                <summary>Enter a path manually</summary>
+                <input class="field" id="outputFolder" type="text" value="Loading..." aria-label="Output folder path">
+                <button class="button ghost" type="button" id="saveOutput">Save path</button>
+              </details>
             </div>
 
             <div class="setting-block">
               <h2>Topics</h2>
-              <p class="setting-copy">Edit topic names and comma-separated keywords. Uoink uses these for local folder routing.</p>
+              <p class="setting-copy">Edit topic names and keywords. Remove a topic, undo it if needed, then save when the list looks right.</p>
               <div class="topic-list" id="topicList"></div>
+              <div class="topic-undo hidden" id="topicUndo" role="status">
+                <span id="topicUndoText">Topic removed.</span>
+                <button class="button ghost" type="button" id="undoTopicRemove">Undo</button>
+              </div>
               <div class="inline-row">
-                <button class="button ghost" type="button" id="addTopic">+ Add topic</button>
+                <button class="button ghost" type="button" id="addTopic">Add topic</button>
                 <button class="button" type="button" id="saveTopics">Save topics</button>
               </div>
             </div>
@@ -3339,17 +3398,17 @@
             </div>
 
             <div class="setting-block">
-              <h2>Transcript reliability</h2>
+              <h2>Transcript checker</h2>
               <p class="setting-copy" id="reliabilityStatus">Checking transcript checker...</p>
-              <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox"> Auto-check transcript reliability</label>
+              <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox"> Auto-check transcript quality</label>
               <div class="inline-row">
-                <select class="field" id="whisperModel"></select>
+                <select class="field" id="whisperModel" aria-label="Transcript checker model"></select>
                 <button class="button ghost" type="button" id="saveWhisperModel">Save choice</button>
               </div>
               <div class="inline-row">
-                <button class="button" type="button" id="downloadReliabilityModel">Download transcript checker</button>
+                <button class="button" type="button" id="downloadReliabilityModel">Download selected model</button>
               </div>
-              <p class="setting-copy">Runs locally to flag low-confidence transcript spans. The small starter model downloads only after you ask for it and stays in your Uoink data folder.</p>
+              <p class="setting-copy">Runs locally to flag low-confidence transcript spans. Downloads only after you ask and stays in your Uoink data folder.</p>
             </div>
           </div>
         </section>
@@ -3576,6 +3635,7 @@
         channels: [],
         ctas: [],
       },
+      topicUndo: null,
       stopHelperFocusTarget: null,
     };
 
@@ -3810,11 +3870,17 @@
       keyStatus: document.getElementById("keyStatus"),
       anthropicKey: document.getElementById("anthropicKey"),
       outputFolder: document.getElementById("outputFolder"),
+      outputFolderDisplay: document.getElementById("outputFolderDisplay"),
+      outputFolderPending: document.getElementById("outputFolderPending"),
+      pickOutputFolder: document.getElementById("pickOutputFolder"),
       helperStatus: document.getElementById("helperStatus"),
       mcpConfig: document.getElementById("mcpConfig"),
       versionLine: document.getElementById("versionLine"),
       updateLine: document.getElementById("updateLine"),
       topicList: document.getElementById("topicList"),
+      topicUndo: document.getElementById("topicUndo"),
+      topicUndoText: document.getElementById("topicUndoText"),
+      undoTopicRemove: document.getElementById("undoTopicRemove"),
       autostartToggle: document.getElementById("autostartToggle"),
       screenshotCount: document.getElementById("screenshotCount"),
       rolePicker: document.getElementById("rolePicker"),
@@ -4702,6 +4768,7 @@
         ["Channel/host", firstValue(sidecar.host, sidecar.author, sidecar.channel, row && row.channel, "unknown")],
         ["Topic", firstValue(row && row.topic, "Uncategorized")],
         ["Speakers", speakers.length ? `${speakers.length}` : "not labeled yet"],
+        ["Transcript checker", transcriptModelLabel(firstValue(state.settings && state.settings.whisper_model, "base"))],
         ["Re-transcription", state.retranscribeStatus || "ready"],
         ["Transcript file", markdownState],
         ["Source", sourceUrlOf(row, sidecar) || "not stored"],
@@ -6942,14 +7009,44 @@
       `;
     }
 
+    function outputFolderPathFromSettings() {
+      return firstValue(
+        state.settings && state.settings.output_dir_configured,
+        state.settings && state.settings.output_dir,
+        state.settings && state.settings.output_folder,
+        els.outputFolder.value,
+        ""
+      );
+    }
+
+    function renderOutputFolder(path, pendingRestart = false) {
+      const value = String(path || "").trim() || "Output folder unavailable";
+      els.outputFolder.value = value;
+      els.outputFolderDisplay.textContent = value;
+      els.outputFolderPending.textContent = pendingRestart
+        ? "Uoink will use this folder after you restart the app."
+        : "New captures save here.";
+    }
+
+    function transcriptModelLabel(model) {
+      const labels = {
+        tiny: "Fast",
+        base: "Balanced",
+        small: "Careful",
+        medium: "Deep",
+        large: "Max accuracy",
+      };
+      return labels[String(model || "").toLowerCase()] || "Balanced";
+    }
+
     async function refreshSettings() {
       try {
         const data = await authFetch("/settings");
         state.settings = data.settings || data || {};
         els.keyStatus.textContent = state.settings.anthropic_key_set
-          ? `Key set${state.settings.anthropic_key_masked ? ` (${state.settings.anthropic_key_masked})` : ""}. Optional AI features can run.`
-          : "Key not set. Comment Intelligence, Hook Type, and entity extraction skip silently.";
-        els.outputFolder.value = state.settings.output_dir || state.settings.output_folder || els.outputFolder.value || "";
+          ? "Key is saved. Optional AI features can run."
+          : "No key saved yet. Local capture still works; optional AI features stay off.";
+        renderOutputFolder(outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
         els.autostartToggle.checked = Boolean(state.settings.autostart);
         els.screenshotCount.value = String(state.settings.screenshot_count ?? state.settings.clipboard_screenshot_cap ?? 4);
         els.claimVerificationToggle.checked = Boolean(state.settings.claim_verification_enabled);
@@ -6964,9 +7061,10 @@
         renderRolePicker(state.settings.role || "mixed");
         syncWhisperModelOptions();
         const relModel = state.settings.transcript_reliability_model || {};
+        const modelLabel = transcriptModelLabel(relModel.model || state.settings.whisper_model);
         els.reliabilityStatus.textContent = relModel.cached
-          ? `Transcript checker ready (${transcriptModelLabel(relModel.model || "tiny")}).`
-          : `Transcript checker not downloaded yet (~${relModel.estimated_download_mb || 150} MB).`;
+          ? `${modelLabel} checker model is ready on this device.`
+          : `${modelLabel} checker model is not downloaded yet (~${relModel.estimated_download_mb || 150} MB).`;
       } catch (err) {
         els.keyStatus.textContent = "Settings need another moment.";
         renderRolePicker("mixed");
@@ -6976,7 +7074,7 @@
         const diag = await (await fetch("/diagnose")).json();
         els.helperStatus.textContent = diagnoseSummary(diag);
         if (!state.settings || !state.settings.output_dir) {
-          els.outputFolder.value = diag.output_root || diag.output_dir || diag.desktop_root || "Output folder unavailable";
+          renderOutputFolder(diag.output_root || diag.output_dir || diag.desktop_root || "Output folder unavailable");
         }
       } catch (err) {
         els.helperStatus.textContent = "App status needs another moment.";
@@ -7000,16 +7098,26 @@
       return "Uoink is responsive.";
     }
 
-    function renderTopics(topics) {
-      const rows = topics.length ? topics : [
+    function renderTopics(topics, { useDefaults = true } = {}) {
+      const rows = topics.length || !useDefaults ? topics : [
         { name: "AI and ML", keywords: ["llm", "agent", "claude"] },
         { name: "DevTools", keywords: ["vercel", "cursor", "ide", "editor"] },
       ];
+      if (!rows.length) {
+        els.topicList.innerHTML = `<div class="topic-empty">No topics in the editor. Add one or save an empty list.</div>`;
+        return;
+      }
       els.topicList.innerHTML = rows.map((topic, index) => `
         <div class="topic-row">
-          <input class="field" data-topic-name="${index}" value="${htmlEscape(topic.name || "")}" aria-label="Topic name">
-          <input class="field" data-topic-keywords="${index}" value="${htmlEscape((topic.keywords || []).join(", "))}" aria-label="Topic keywords">
-          <button class="icon-button" type="button" data-remove-topic="${index}" aria-label="Remove topic">x</button>
+          <label class="topic-field">
+            <span>Topic</span>
+            <input class="field" data-topic-name="${index}" value="${htmlEscape(topic.name || "")}" aria-label="Topic name">
+          </label>
+          <label class="topic-field">
+            <span>Keywords</span>
+            <textarea class="field topic-keywords" data-topic-keywords="${index}" aria-label="Topic keywords">${htmlEscape((topic.keywords || []).join(", "))}</textarea>
+          </label>
+          <button class="button ghost topic-remove" type="button" data-remove-topic="${index}">Remove</button>
         </div>
       `).join("");
     }
@@ -8535,18 +8643,44 @@
       }
     }
 
-    function readTopicEditor() {
-      return [...els.topicList.querySelectorAll("[data-topic-name]")].map((nameInput) => {
+    function readTopicEditor({ keepBlank = false } = {}) {
+      const topics = [...els.topicList.querySelectorAll("[data-topic-name]")].map((nameInput) => {
         const index = nameInput.dataset.topicName;
         const keywordsInput = els.topicList.querySelector(`[data-topic-keywords="${CSS.escape(index)}"]`);
         return {
           name: nameInput.value.trim(),
           keywords: String(keywordsInput ? keywordsInput.value : "")
-            .split(",")
+            .split(/[,\n]/)
             .map((item) => item.trim())
             .filter(Boolean),
         };
-      }).filter((topic) => topic.name);
+      });
+      return keepBlank ? topics : topics.filter((topic) => topic.name);
+    }
+
+    function clearTopicUndo() {
+      state.topicUndo = null;
+      els.topicUndo.classList.add("hidden");
+      els.topicUndoText.textContent = "Topic removed.";
+    }
+
+    function removeTopicAt(index) {
+      const topics = readTopicEditor({ keepBlank: true });
+      const removed = topics.splice(Number(index), 1)[0];
+      renderTopics(topics, { useDefaults: false });
+      if (!removed) return clearTopicUndo();
+      state.topicUndo = { topic: removed, index: Number(index) };
+      els.topicUndoText.textContent = `${removed.name || "Untitled topic"} removed. Save topics when you are ready.`;
+      els.topicUndo.classList.remove("hidden");
+    }
+
+    function undoTopicRemove() {
+      if (!state.topicUndo) return;
+      const topics = readTopicEditor({ keepBlank: true });
+      const index = Math.max(0, Math.min(state.topicUndo.index, topics.length));
+      topics.splice(index, 0, state.topicUndo.topic);
+      renderTopics(topics, { useDefaults: false });
+      clearTopicUndo();
     }
 
     async function saveSettingsPatch(patch, successMessage) {
@@ -8566,7 +8700,7 @@
       try {
         await authFetch("/settings", { method: "POST", body: JSON.stringify({ anthropic_key: key }) });
         els.anthropicKey.value = "";
-        showToast("Key saved to Credential Manager.");
+        showToast("Key saved on this device.");
         refreshSettings();
       } catch (err) {
         showToast("Could not save that key.");
@@ -8623,6 +8757,7 @@
       try {
         const data = await authFetch("/settings/output-folder", { method: "POST", body: JSON.stringify({ output_dir: outputDir }) });
         state.settings = data.settings || data || state.settings || {};
+        renderOutputFolder(outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
         showToast("Output folder updated.");
         refreshSettings();
       } catch (err) {
@@ -8654,6 +8789,31 @@
         showToast(err.message.includes("not found")
           ? "Retry-with-cookies is not ready in this build."
           : "Could not queue that retry.");
+      }
+    }
+
+    async function pickOutputFolder() {
+      const initialDir = els.outputFolder.value.trim();
+      els.pickOutputFolder.disabled = true;
+      try {
+        const data = await authFetch("/settings/output-folder/pick", {
+          method: "POST",
+          body: JSON.stringify({ initial_dir: initialDir }),
+        });
+        if (!data.ok) {
+          showToast(data.cancelled ? "No folder selected." : "Could not choose that folder.");
+          return;
+        }
+        state.settings = data.settings || state.settings || {};
+        renderOutputFolder(data.output_dir || outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
+        showToast(state.settings.output_dir_pending_restart
+          ? "Folder selected. Restart Uoink to use it."
+          : "Output folder updated.");
+        refreshSettings();
+      } catch (err) {
+        showToast("Could not choose that folder.");
+      } finally {
+        els.pickOutputFolder.disabled = false;
       }
     }
 
@@ -8920,18 +9080,19 @@
         if (!els.scriptVoiceWarnings.checked) showToast("Voice DNA warnings hidden for this script.");
       });
       els.saveWhisperModel.addEventListener("click", () => {
-        saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Transcript checker choice updated.");
+        saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Transcript checker choice saved.");
       });
       els.claimVerificationToggle.addEventListener("change", () => saveSettingsPatch({ claim_verification_enabled: els.claimVerificationToggle.checked }, "Claim verification setting updated."));
       els.reliabilityAutoCheck.addEventListener("change", () => saveSettingsPatch({ transcript_reliability_auto_check: els.reliabilityAutoCheck.checked }, "Transcript reliability setting updated."));
       els.downloadReliabilityModel.addEventListener("click", async () => {
-        if (!confirm("Download the starter transcript checker now? It is about 150 MB and stays on this machine.")) return;
+        const modelLabel = transcriptModelLabel(els.whisperModel.value);
+        if (!confirm(`Download the ${modelLabel} transcript checker now? It is about 150 MB and stays on this machine.`)) return;
         els.downloadReliabilityModel.disabled = true;
-        els.reliabilityStatus.textContent = "Downloading transcript checker...";
+        els.reliabilityStatus.textContent = `Downloading the ${modelLabel} checker model...`;
         try {
-          const data = await authFetch("/reliability/model/download", { method: "POST", body: JSON.stringify({}) });
+          const data = await authFetch("/reliability/model/download", { method: "POST", body: JSON.stringify({ model: els.whisperModel.value }) });
           if (!data.ok) throw new Error(data.error || "download failed");
-          showToast("Transcript checker downloaded.");
+          showToast("Transcript checker model downloaded.");
           refreshSettings();
         } catch (err) {
           els.reliabilityStatus.textContent = "Model download failed.";
@@ -8941,6 +9102,7 @@
         }
       });
       document.getElementById("saveOutput").addEventListener("click", saveOutputFolder);
+      els.pickOutputFolder.addEventListener("click", pickOutputFolder);
       document.getElementById("saveScreenshotCount").addEventListener("click", () => {
         const value = Math.max(0, Math.min(12, Number(els.screenshotCount.value || 4)));
         els.screenshotCount.value = String(value);
@@ -8953,11 +9115,16 @@
         }
       });
       document.getElementById("addTopic").addEventListener("click", () => {
-        const topics = readTopicEditor();
+        const topics = readTopicEditor({ keepBlank: true });
         topics.push({ name: "", keywords: [] });
-        renderTopics(topics);
+        renderTopics(topics, { useDefaults: false });
+        clearTopicUndo();
       });
-      document.getElementById("saveTopics").addEventListener("click", () => saveSettingsPatch({ topics: readTopicEditor() }, "Topics updated."));
+      els.undoTopicRemove.addEventListener("click", undoTopicRemove);
+      document.getElementById("saveTopics").addEventListener("click", () => {
+        clearTopicUndo();
+        saveSettingsPatch({ topics: readTopicEditor() }, "Topics updated.");
+      });
       document.getElementById("newYoink").addEventListener("click", openLastYoutube);
       document.getElementById("openYouTubeForYou").addEventListener("click", openLastYoutube);
       document.getElementById("reloadFeatures").addEventListener("click", loadFeatures);
@@ -9136,9 +9303,7 @@
         if (retryChunked) retryWithLiteMode(retryChunked.dataset.retryChunked);
         const removeTopic = event.target.closest("[data-remove-topic]");
         if (removeTopic) {
-          const topics = readTopicEditor();
-          topics.splice(Number(removeTopic.dataset.removeTopic), 1);
-          renderTopics(topics);
+          removeTopicAt(removeTopic.dataset.removeTopic);
         }
       });
       document.addEventListener("input", (event) => {
