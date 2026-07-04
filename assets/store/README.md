@@ -1,45 +1,45 @@
-# `assets/store/` — Chrome Web Store assets
+# `assets/store/`: Chrome Web Store Assets
 
-Generated placeholders for the v1 submission. Refine in Figma or Canva before submitting.
+Generated placeholder assets for the Chrome Web Store listing. Regenerate them from `assets/build_store_assets.py`, then replace screenshots with real product captures before submission.
 
 ## Files
 
 | File | Dimensions | Web Store role | Required? |
 | --- | --- | --- | --- |
-| `promo-small-440x280.png` | 440 × 280 | Small promo tile (search & category cards) | **Required** |
-| `promo-large-920x680.png` | 920 × 680 | Large promo tile (featured placements) | Recommended |
-| `promo-marquee-1400x560.png` | 1400 × 560 | Marquee promo tile (top of category page) | Optional |
+| `promo-small-440x280.png` | 440 x 280 | Small promo tile, used in search and category cards | Required |
+| `promo-large-920x680.png` | 920 x 680 | Large promo tile, used in featured placements | Recommended |
+| `promo-marquee-1400x560.png` | 1400 x 560 | Marquee promo tile, used at the top of category pages | Optional |
 
-Screenshots aren't generated — they need to be captured from the live product. See `docs/screenshot-list.md` for the 5 required screenshots and capture spec.
+Capture screenshots from the live product. See `docs/screenshot-list.md` for the required 1280x800 set.
 
 ## Composition
 
-All three placeholder tiles share the same composition:
+All three placeholder tiles use the v3.1 Uoink brand direction:
 
-- Black background (`#0F0F11`) with a subtle bottom-right glow
-- White **YOINK** wordmark on the left (from `assets/wordmark-dark.png`)
-- Tagline below: "The missing layer between YouTube and your AI."
-- Sub-line: "Local-first. Free. Open source."
-- Mock Yoink pill button (top-right) with sparkle accent and "Yoink" label
-- Hint below the button: "↑ One click under any YouTube video"
+- Cream ground with rust and ink type
+- UOINK wordmark text drawn by the generator
+- Tagline: "Local corpus for AI writing."
+- Sub-line: "Videos, podcasts, articles. Your disk."
+- Mock Uoink pill button in the YouTube actions row position
+- Hint below the button: "Capture the source. Keep the credit."
 
-## What to refine before submitting
+## What To Replace Before Submission
 
-1. **Real screenshot in the right pane.** Replace the mock pill with an actual cropped screenshot of the in-page Yoink button on a real YouTube video.
-2. **Brand polish.** The mock pill uses a generic yellow `#FFD354` — swap to the canonical brand accent if it's defined elsewhere.
-3. **Marquee left whitespace.** The 1400 × 560 tile has empty mid-canvas space — Figma can fill it with a video timeline strip or sample yoink markdown preview.
-4. **Tagline kerning.** PIL doesn't kern beautifully. The hand-set version in Figma will look noticeably better at the small (440 × 280) size.
+1. Use a real screenshot in the right pane once the store listing screenshots are captured.
+2. Confirm the promo set matches the final Chrome Web Store screenshot order.
+3. Re-run the generator after any brand asset changes.
+4. Verify the rendered tiles at 100% size. Small-promo text should stay readable.
 
-## Regenerating the placeholders
+## Regenerating The Placeholders
 
 ```powershell
-python C:\Users\hello\OneDrive\Desktop\yt-extractor\assets\build_store_assets.py
+python assets/build_store_assets.py
 ```
 
-The script also regenerates `extension/icons/icon-{16,32,48,128}.png` from `assets/logo-mark.png`.
+The script also regenerates `extension/icons/icon-{16,32,48,128}.png` from `assets/logo-mark-dark.png`.
 
-## Asset sources
+## Asset Sources
 
-- **Wordmark** — `assets/wordmark-dark.png` (white wordmark, transparent background, designed for dark surfaces)
-- **Mark** — `assets/logo-mark.png` (square symbol, used for all four extension icon sizes)
-- **Full logo** — `assets/logo.png` (wordmark + mark together, currently unused in the placeholders but available for redesign)
+- **Mark**: `assets/logo-mark-dark.png`, used for extension icon sizes
+- **Full logo**: `assets/logo.png`, available for manual redesigns
+- **Legacy wordmark images**: kept in `assets/` for historical reference; generated promo tiles draw UOINK text directly

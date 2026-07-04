@@ -1,8 +1,7 @@
-"""Regenerate Yoink Chrome Web Store assets from the source brand files.
+"""Regenerate Uoink Chrome Web Store assets from the source brand files.
 
 Inputs (must exist in assets/):
-    logo-mark.png     - square brand mark (used for all extension icon sizes)
-    wordmark.png      - "Yoink" wordmark (placeholder promo tiles)
+    logo-mark-dark.png - square light mark (used for extension icon sizes)
 
 Outputs:
     extension/icons/icon-16.png, icon-32.png, icon-48.png, icon-128.png
@@ -32,12 +31,19 @@ PROMO_SIZES = {
     "promo-marquee-1400x560.png": (1400, 560),
 }
 
-TAGLINE = "The missing layer between YouTube and your AI."
-BG_COLOR = (15, 15, 17, 255)        # near-black
-TAGLINE_COLOR = (180, 180, 190, 255)
-BTN_BG = (40, 40, 44, 255)
-BTN_TEXT = (235, 235, 240, 255)
-BTN_ACCENT = (255, 211, 84, 255)    # warm yellow accent on the mock button
+WORDMARK = "UOINK"
+TAGLINE = "Local corpus for AI writing."
+SUBLINE = "Videos, podcasts, articles. Your disk."
+BG_COLOR = (255, 244, 236, 255)     # cream
+INK = (10, 10, 10, 255)
+RUST = (194, 65, 12, 255)
+OXBLOOD = (123, 45, 14, 255)
+ACID = (255, 210, 63, 255)
+TAGLINE_COLOR = INK
+SUBLINE_COLOR = (72, 52, 42, 255)
+BTN_BG = RUST
+BTN_TEXT = BG_COLOR
+BTN_ACCENT = ACID
 
 
 # ---------- helpers ----------------------------------------------------------
@@ -55,20 +61,18 @@ def _load_font(size: int) -> ImageFont.FreeTypeFont:
     return ImageFont.load_default()
 
 
-def _paste_resized(canvas: Image.Image, src: Image.Image,
-                   max_w: int, max_h: int, anchor: tuple[int, int]) -> tuple[int, int]:
-    """Resize src into a max_w x max_h box (preserving aspect) and paste at anchor.
-    Returns the (w, h) of the pasted image."""
-    aspect = src.width / src.height
-    if max_w / max_h > aspect:
-        h = max_h
-        w = int(round(max_h * aspect))
-    else:
-        w = max_w
-        h = int(round(max_w / aspect))
-    resized = src.resize((w, h), Image.LANCZOS)
-    canvas.paste(resized, anchor, resized if resized.mode == "RGBA" else None)
-    return w, h
+def _fit_font(text: str, max_w: int, max_h: int, start_size: int) -> ImageFont.FreeTypeFont:
+    """Return the largest available font that fits text in the box."""
+    size = max(12, start_size)
+    probe = Image.new("RGBA", (1, 1), (0, 0, 0, 0))
+    d = ImageDraw.Draw(probe)
+    while size > 12:
+        font = _load_font(size)
+        bbox = d.textbbox((0, 0), text, font=font)
+        if (bbox[2] - bbox[0]) <= max_w and (bbox[3] - bbox[1]) <= max_h:
+            return font
+        size -= 2
+    return _load_font(size)
 
 
 # ---------- icon rendering ---------------------------------------------------
@@ -94,9 +98,9 @@ def render_icons() -> None:
             out.save(ICONS_OUT / f"icon-{size}{suffix}.png", optimize=True)
 
 
-# ---------- mock YouTube "Yoink" button --------------------------------------
+# ---------- mock YouTube "Uoink" button --------------------------------------
 def render_mock_button(width: int, height: int) -> Image.Image:
-    """A pill-shaped button mimicking the in-page Yoink button on YouTube."""
+    """A pill-shaped button mimicking the in-page Uoink button on YouTube."""
     btn = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     d = ImageDraw.Draw(btn)
     radius = height // 2
@@ -115,7 +119,7 @@ def render_mock_button(width: int, height: int) -> Image.Image:
     d.polygon(pts, fill=BTN_ACCENT)
 
     # Label.
-    label = "Yoink"
+    label = "Uoink"
     font = _load_font(int(height * 0.45))
     bbox = d.textbbox((0, 0), label, font=font)
     text_w = bbox[2] - bbox[0]
@@ -130,19 +134,19 @@ def render_mock_button(width: int, height: int) -> Image.Image:
 def render_promo_tile(out_path: Path, width: int, height: int) -> None:
     canvas = Image.new("RGBA", (width, height), BG_COLOR)
 
-    # Subtle radial-ish vignette so the tile reads as styled, not flat.
+    # Subtle brand glow so the tile reads as styled, not flat.
     glow = Image.new("RGBA", (width, height), (0, 0, 0, 0))
     gd = ImageDraw.Draw(glow)
     glow_r = int(min(width, height) * 0.6)
     gd.ellipse(
         (-glow_r // 2, height - glow_r,
          glow_r + width // 3, height + glow_r // 2),
-        fill=(40, 40, 50, 90),
+        fill=(OXBLOOD[0], OXBLOOD[1], OXBLOOD[2], 70),
     )
     glow = glow.filter(ImageFilter.GaussianBlur(radius=width // 18))
     canvas.alpha_composite(glow)
 
-    # --- right side first: mock Yoink pill anchored top-right ---
+    # --- right side first: mock Uoink pill anchored top-right ---
     # Cap the button so it stays a tasteful chip on the bigger tiles instead
     # of dominating the canvas. Anchored upper-right so it doesn't collide
     # with the tagline below the wordmark.
@@ -154,7 +158,7 @@ def render_promo_tile(out_path: Path, width: int, height: int) -> None:
     canvas.alpha_composite(btn, (btn_x, btn_y))
 
     hint_font = _load_font(max(11, int(height * 0.035)))
-    hint = "↑ One click under any YouTube video"
+    hint = "Capture the source. Keep the credit."
     hd = ImageDraw.Draw(canvas)
     hint_bbox = hd.textbbox((0, 0), hint, font=hint_font)
     hint_w = hint_bbox[2] - hint_bbox[0]
@@ -162,27 +166,19 @@ def render_promo_tile(out_path: Path, width: int, height: int) -> None:
                  btn_x + (btn_w - hint_w) // 2)
     hd.text(
         (hint_x, btn_y + btn_h + int(height * 0.035)),
-        hint, font=hint_font, fill=(140, 140, 150, 255),
+        hint, font=hint_font, fill=(92, 59, 43, 255),
     )
     right_block_left = btn_x
 
     # --- left side: wordmark, then tagline + sub ---
-    # wordmark-dark.png is the white wordmark designed for dark backgrounds.
     wm_x = int(width * 0.06)
     wm_y = int(height * 0.18)
-    # Cap wordmark width so the tagline below has room to breathe and we
-    # never collide with the right-side button.
     max_wm_w = min(int(width * 0.42), right_block_left - wm_x - int(width * 0.04))
     max_wm_h = int(height * 0.32)
-
-    wordmark_path = ASSETS / "wordmark-dark.png"
-    if wordmark_path.exists():
-        wordmark = Image.open(wordmark_path).convert("RGBA")
-        _paste_resized(canvas, wordmark, max_wm_w, max_wm_h, (wm_x, wm_y))
-    else:
-        font = _load_font(max_wm_h)
-        ImageDraw.Draw(canvas).text((wm_x, wm_y), "Yoink", font=font,
-                                     fill=(245, 245, 245, 255))
+    wordmark_font = _fit_font(WORDMARK, max_wm_w, max_wm_h, max_wm_h)
+    d = ImageDraw.Draw(canvas)
+    wb = d.textbbox((0, 0), WORDMARK, font=wordmark_font)
+    d.text((wm_x, wm_y - wb[1]), WORDMARK, font=wordmark_font, fill=RUST)
 
     # Tagline below the wordmark, capped so it never runs into the button area.
     tag_font = _load_font(max(14, int(height * 0.055)))
@@ -195,8 +191,8 @@ def render_promo_tile(out_path: Path, width: int, height: int) -> None:
     sub_y = tag_y + int(height * 0.10)
     ImageDraw.Draw(canvas).text(
         (tag_x, sub_y),
-        "Local-first. Free. Open source.",
-        font=sub_font, fill=(120, 120, 130, 255),
+        SUBLINE,
+        font=sub_font, fill=SUBLINE_COLOR,
     )
 
     canvas.convert("RGB").save(out_path, "PNG", optimize=True)
