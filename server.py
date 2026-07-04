@@ -7538,7 +7538,8 @@ class Handler(BaseHTTPRequestHandler):
         if origin:
             self.send_header("Access-Control-Allow-Origin", origin)
             self.send_header("Vary", "Origin")
-            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Methods",
+                             "GET, POST, DELETE, OPTIONS")
             # X-Uoink-Token is the auth header the extension sends on every
             # mutating request. X-Uoink-Client is the /token gate header.
             # Browsers won't send custom headers without the OPTIONS
@@ -7874,6 +7875,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_reliability_get(m.group(1))
         if bare == "/queue/status":
             return self._handle_queue_status()
+        if bare == "/taste/anchors":
+            return self._handle_taste_anchors_get()
+        if bare == "/resurface/today":
+            return self._handle_resurface_today()
         log.info("GET %s -> 404", self.path)
         self._send_json(404, {"ok": False, "error": "not found"})
 
@@ -8738,6 +8743,118 @@ class Handler(BaseHTTPRequestHandler):
             log.exception("/memory/user POST failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
         return self._send_json(200, result)
+
+    # ---- extension taste anchors + daily resurface (G-42 / E2E D3) -----
+    # The popup and setup page have called these routes since Sprint 3;
+    # the helper never served them, so every popup open logged 404s and
+    # the extension quietly fell back to a chrome.storage.local mirror.
+    # Storage + shape live in memory_layer.py (taste.anchors KV blob).
+
+    def _handle_taste_anchors_get(self):
+        """GET /taste/anchors -- {ok, anchors:{best, worst,
+        admired_channels}}. Token-gated, local only."""
+        if not self._require_token():
+            return
+        try:
+            anchors = memory_layer.get_taste_anchors(_get_index())
+        except Exception as e:
+            log.warning("/taste/anchors GET failed: %s", e)
+            return self._send_json(503, {
+                "ok": False, "error": "taste anchors unavailable"})
+        return self._send_json(200, {"ok": True, "anchors": anchors})
+
+    def _handle_taste_anchors_post(self, body):
+        """POST /taste/anchors -- body {video_id, anchor_type, title?}.
+        anchor_type is "best" or "worst"; the video moves between the two
+        lists rather than appearing in both. Already token-gated."""
+        video_id = (body.get("video_id") or "").strip()
+        anchor_type = (body.get("anchor_type") or "").strip()
+        title = (body.get("title") or "").strip()
+        try:
+            anchors = memory_layer.add_taste_anchor(
+                _get_index(), video_id, anchor_type, title)
+        except ValueError as e:
+            return self._send_json(400, {"ok": False, "error": str(e)})
+        except Exception:
+            log.exception("/taste/anchors POST failed")
+            return self._send_json(500, {
+                "ok": False, "error": "could not save the anchor"})
+        return self._send_json(200, {"ok": True, "anchors": anchors})
+
+    def _handle_taste_anchor_delete(self, anchor_id: str):
+        """DELETE /taste/anchors/<id> -- id is a video_id or an admired
+        channel name. 404 when nothing matched (the setup page then prunes
+        its local mirror instead). Token-gated by do_DELETE."""
+        try:
+            removed = memory_layer.remove_taste_anchor(
+                _get_index(), anchor_id)
+        except Exception:
+            log.exception("/taste/anchors DELETE failed")
+            return self._send_json(500, {
+                "ok": False, "error": "could not remove the anchor"})
+        if not removed:
+            return self._send_json(404, {
+                "ok": False, "error": "anchor not found"})
+        return self._send_json(200, {"ok": True, "removed": True})
+
+    # Days a uoink has to sit untouched before /resurface/today offers it
+    # back. Matches the popup's own client-side fallback policy.
+    _RESURFACE_TODAY_IDLE_DAYS = 14
+
+    @staticmethod
+    def _days_since_iso(value) -> float:
+        """Days since an ISO timestamp; huge sentinel for missing/bad
+        values so undated rows count as long-idle."""
+        if not value:
+            return 9999.0
+        try:
+            ts = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        except ValueError:
+            return 9999.0
+        if ts.tzinfo is not None:
+            ts = ts.replace(tzinfo=None)
+        return max(0.0, (datetime.now() - ts).total_seconds() / 86400.0)
+
+    def _handle_resurface_today(self):
+        """GET /resurface/today -- up to 3 saved uoinks worth another look:
+        engagement-scored, idle >= 14 days, highest value_score first.
+        {ok, items:[{video_id, title, folder, yoinked_at, last_event_ts,
+        value_score}]}. Empty items when nothing qualifies -- the popup
+        hides the card. Local only; token-gated."""
+        if not self._require_token():
+            return
+        idx = _get_index()
+        items = []
+        try:
+            for signal in idx.top_engaged(limit=24):
+                if (signal.get("value_score") or 0) <= 0:
+                    continue
+                row = idx.get_yoink(signal.get("video_id") or "")
+                if not row or row.get("deleted_at"):
+                    continue
+                idle = self._days_since_iso(
+                    signal.get("last_event_ts") or row.get("yoinked_at"))
+                if idle < self._RESURFACE_TODAY_IDLE_DAYS:
+                    continue
+                corpus_path = row.get("corpus_path") or ""
+                items.append({
+                    "video_id": row.get("video_id"),
+                    "title": row.get("title") or "",
+                    "folder": str(Path(corpus_path).parent)
+                    if corpus_path else None,
+                    "yoinked_at": row.get("yoinked_at"),
+                    "last_event_ts": signal.get("last_event_ts"),
+                    "value_score": signal.get("value_score"),
+                })
+                if len(items) >= 3:
+                    break
+        except Exception as e:
+            log.warning("/resurface/today failed: %s", e)
+            return self._send_json(503, {
+                "ok": False, "error": "resurface unavailable"})
+        return self._send_json(200, {
+            "ok": True, "items": items,
+            "idle_days": self._RESURFACE_TODAY_IDLE_DAYS})
 
     # ---- v3.1 podcast RSS feeds ---------------------------------------
     # Feed registry + polling. Episode rows materialise as metadata-only
@@ -10559,6 +10676,18 @@ class Handler(BaseHTTPRequestHandler):
         log.info("GET /yoinks/%s/open-markdown -> %s", video_id, path)
         return self._send_json(200, {"ok": True, "path": str(path)})
 
+    def do_DELETE(self):
+        # Token first, same as do_POST -- every DELETE route is private.
+        if not self._require_token():
+            return
+        from urllib.parse import unquote
+        bare = self.path.split("?", 1)[0]
+        m = re.fullmatch(r"/taste/anchors/([^/]+)", bare)
+        if m:
+            return self._handle_taste_anchor_delete(unquote(m.group(1)))
+        log.info("DELETE %s -> 404", self.path)
+        self._send_json(404, {"ok": False, "error": "not found"})
+
     def do_POST(self):
         # Auth first so we don't even read the body for unauthenticated
         # callers. Public POST endpoints don't exist today, so the gate is
@@ -10633,6 +10762,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_move_desktop_corpus(body)
         if bare == "/engagement/log":
             return self._handle_engagement_log(body)
+        if bare == "/taste/anchors":
+            return self._handle_taste_anchors_post(body)
         if bare == "/channels":
             return self._handle_channels_add(body)
         if bare == "/channels/remove":
