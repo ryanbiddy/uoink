@@ -7585,6 +7585,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_yoink_screenshots_suggest(bare)
         if bare.startswith("/yoinks/") and "/screenshots/" in bare:
             return self._handle_yoink_screenshot_file(bare)
+        if bare.startswith("/yoinks/") and bare.endswith("/open-markdown"):
+            return self._handle_yoink_open_markdown(bare)
+        if bare.startswith("/yoinks/") and bare.endswith("/markdown"):
+            return self._handle_yoink_markdown(bare)
         if bare == "/agents/detect":
             return self._handle_agents_detect()
         if bare == "/open-folder":
@@ -10101,6 +10105,77 @@ class Handler(BaseHTTPRequestHandler):
             body["interval"] = interval
         log.info("POST /yoinks/%s/reyoink -> re-extract %s", video_id, url)
         return self._handle_extract(body)
+
+    def _yoink_markdown_path(self, video_id: str):
+        """Resolve a yoink's on-disk corpus markdown, sandboxed to the Uoink
+        output root. Returns (path, error_json_tuple). Shared by the read and
+        open recovery endpoints (G-24)."""
+        row = _get_index().get_yoink(video_id)
+        if row is None:
+            return None, (404, {"ok": False, "error": "uoink not found"})
+        corpus_path = row.get("corpus_path") or ""
+        if not corpus_path:
+            return None, (404, {
+                "ok": False,
+                "error": "This uoink has no saved markdown on disk yet.",
+                "state": "no_markdown"})
+        try:
+            p = Path(corpus_path).resolve()
+            p.relative_to(DESKTOP_ROOT.resolve())
+        except (ValueError, OSError):
+            return None, (400, {"ok": False,
+                                 "error": "markdown path is outside the "
+                                          "Uoink folder"})
+        if not p.exists() or not p.is_file():
+            return None, (404, {
+                "ok": False,
+                "error": "The saved markdown file is missing. Re-capture to "
+                         "rebuild it.",
+                "state": "no_markdown"})
+        return p, None
+
+    def _handle_yoink_markdown(self, bare: str):
+        """GET /yoinks/<id>/markdown -- the yoink's corpus markdown text, so
+        the detail view can show a real transcript/preview instead of a
+        dead-end "needs another moment" state (G-24 / QA #18, #19)."""
+        from urllib.parse import unquote
+        video_id = unquote(
+            bare[len("/yoinks/"):-len("/markdown")]).strip("/")
+        if not video_id:
+            return self._send_json(400, {"ok": False,
+                                         "error": "video_id required"})
+        path, err = self._yoink_markdown_path(video_id)
+        if err:
+            return self._send_json(*err)
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as e:
+            log.warning("/yoinks/%s/markdown read failed: %s", video_id, e)
+            return self._send_json(500, {"ok": False,
+                                         "error": "could not read markdown"})
+        return self._send_json(200, {"ok": True, "video_id": video_id,
+                                      "markdown": text,
+                                      "corpus_path": str(path)})
+
+    def _handle_yoink_open_markdown(self, bare: str):
+        """GET /yoinks/<id>/open-markdown -- open the yoink's saved markdown in
+        the OS default viewer (G-24 / QA #19: the transcript preview promised
+        an open-markdown action that did not exist)."""
+        from urllib.parse import unquote
+        video_id = unquote(
+            bare[len("/yoinks/"):-len("/open-markdown")]).strip("/")
+        if not video_id:
+            return self._send_json(400, {"ok": False,
+                                         "error": "video_id required"})
+        path, err = self._yoink_markdown_path(video_id)
+        if err:
+            return self._send_json(*err)
+        try:
+            _platform.open_in_os(path)
+        except Exception as e:  # noqa: BLE001
+            return self._send_json(200, {"ok": False, "error": str(e)})
+        log.info("GET /yoinks/%s/open-markdown -> %s", video_id, path)
+        return self._send_json(200, {"ok": True, "path": str(path)})
 
     def do_POST(self):
         # Auth first so we don't even read the body for unauthenticated
