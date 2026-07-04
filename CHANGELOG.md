@@ -8,6 +8,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [3.2.5] - 2026-07-04
+
+### Added
+
+- **Captions-only retry for long videos.** Activity and detail surfaces can retry a stuck source in lite mode, keeping the transcript path while skipping the fragile extras.
+- **Smart Generate inputs.** Topic, channel, hook, target-length, CTA, and style-anchor controls now pull from the local corpus instead of asking for raw values.
+- **Source-first recovery actions.** Detail and Evidence now expose Open folder, Open transcript file, Re-capture, Re-transcribe, Evidence, and Run claim scan where those actions help.
+
+### Changed
+
+- **Library state model.** No matches, empty corpus, unavailable Library, invalid dates, and corpus-wide facets now render as distinct states with human copy.
+- **Dashboard copy and accessibility pass.** Raw helper/route/config language moved behind advanced disclosures, keyboard card activation works, modals trap focus, and placeholder-led controls have accessible names.
+- **Settings polish.** Output folder picking, topic undo, model/key status copy, and transcript checker controls now read like product settings instead of implementation details.
+
+### Fixed
+
+- **Generate workspace validation.** Blank or hidden workspace creation is rejected before anything is written.
+- **Activity duplicate failures.** Failed single-video jobs and retry rows dedupe by source so the same source does not double-render.
+- **Stop Uoink confirmation.** Stop controls now ask first and avoid the old one-click helper shutdown path.
+- **Writing Studio no-op actions.** Blank Copy is disabled, Save waits for a real draft, and stale `Use as-is` behavior is gone.
+
 ## [2.1.1] - 2026-05-26
 
 ### Added
