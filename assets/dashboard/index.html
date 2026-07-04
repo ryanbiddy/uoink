@@ -1310,6 +1310,66 @@
       object-fit: cover;
     }
 
+    .combo-thumb.placeholder {
+      display: grid;
+      place-items: center;
+      color: var(--acid);
+      font-family: var(--font-mono);
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .smart-picker {
+      display: grid;
+      gap: 8px;
+    }
+
+    .smart-chip-row,
+    .length-preset-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .smart-chip,
+    .length-preset {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 30px;
+      border: 1px solid rgba(255, 244, 236, 0.14);
+      border-radius: var(--pill-radius);
+      padding: 0 10px;
+      background: rgba(255, 244, 236, 0.04);
+      color: var(--cream);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .smart-chip:hover,
+    .smart-chip:focus-visible,
+    .length-preset:hover,
+    .length-preset:focus-visible {
+      outline: none;
+      border-color: rgba(249, 115, 22, 0.5);
+      background: rgba(194, 65, 12, 0.16);
+    }
+
+    .length-preset.active {
+      border-color: rgba(255, 210, 63, 0.48);
+      background: rgba(255, 210, 63, 0.11);
+      color: var(--acid);
+    }
+
+    .smart-count {
+      color: var(--dim);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
     .teach-card,
     .handoff-note,
     .attribution-panel {
@@ -2748,7 +2808,19 @@
                   <label class="choice-row"><input type="radio" name="writingMode" value="newsletter"><span>Newsletter</span></label>
                   <label class="choice-row"><input type="radio" name="writingMode" value="script"><span>Script</span></label>
                 </div>
-                <input class="field" id="writingAngle" type="text" list="angleSuggestions" autocomplete="off" placeholder="angle, optional">
+                <label class="soft-note" for="generateTopicInput">Topic</label>
+                <div class="smart-picker">
+                  <input class="field" id="generateTopicInput" type="text" list="topicSuggestions" autocomplete="off" placeholder="Pick a topic or type one">
+                  <div class="smart-chip-row" id="generateTopicChips" aria-label="Popular corpus topics"></div>
+                </div>
+                <label class="soft-note" for="writingAngle">Angle</label>
+                <input class="field" id="writingAngle" type="text" list="angleSuggestions" autocomplete="off" placeholder="optional angle">
+                <label class="soft-note" for="generateChannelInput">Channel pattern</label>
+                <div class="combo" id="generateChannelCombo">
+                  <input class="field combo-input" id="generateChannelInput" type="search" role="combobox" autocomplete="off" aria-expanded="false" aria-controls="generateChannelOptions" placeholder="Pick a corpus channel">
+                  <input id="generateChannel" type="hidden">
+                  <div class="combo-list" id="generateChannelOptions" role="listbox"></div>
+                </div>
                 <label class="soft-note">Hook pattern</label>
                 <div class="radio-grid" id="generateHookLensPicker">
                   <label class="choice-row"><input type="radio" name="generateHookLens" value="informative" checked><span>Informative</span></label>
@@ -2760,8 +2832,10 @@
                 </div>
                 <div class="generate-script-options hidden" id="generateScriptOptions">
                   <label class="soft-note" for="generateScriptLength">Script options</label>
-                  <input class="field" id="generateScriptLength" type="number" min="15" step="15" value="120" placeholder="target length seconds">
+                  <div class="length-preset-row" id="generateLengthPresets" aria-label="Script length presets"></div>
+                  <input class="field" id="generateScriptLength" type="number" min="15" step="15" value="120" aria-label="Script length in seconds" placeholder="custom seconds">
                   <input class="field" id="generateScriptCta" type="text" list="ctaSuggestions" autocomplete="off" placeholder="CTA target, optional">
+                  <div class="smart-chip-row" id="generateCtaChips" aria-label="Recent CTA choices"></div>
                   <label class="inline-row"><input id="generatePastPerformance" type="checkbox" checked> Use your past performance as the default style anchor</label>
                   <button class="button ghost" type="button" id="surfaceAudienceQuestions">Surface audience questions</button>
                 </div>
@@ -3477,6 +3551,12 @@
       agents: [],
       agentDetectionLoaded: false,
       generateWorkspace: null,
+      smartInputs: {
+        topics: [],
+        hooks: [],
+        channels: [],
+        ctas: [],
+      },
       stopHelperFocusTarget: null,
     };
 
@@ -3494,6 +3574,14 @@
     ];
 
     const FALLBACK_WHISPER_MODELS = ["tiny", "base", "small", "medium", "large"];
+
+    const SCRIPT_LENGTH_PRESETS = [
+      [30, "30 sec"],
+      [60, "1 min"],
+      [120, "2 min"],
+      [180, "3 min"],
+      [300, "5 min"],
+    ];
 
     const FEATURE_MANIFEST_URL = "https://uoink.app/api/features-manifest";
 
@@ -3615,10 +3703,17 @@
       writingAnchorList: document.getElementById("writingAnchorList"),
       writingShowWarnings: document.getElementById("writingShowWarnings"),
       writingSkipWarnings: document.getElementById("writingSkipWarnings"),
+      generateTopicInput: document.getElementById("generateTopicInput"),
+      generateTopicChips: document.getElementById("generateTopicChips"),
+      generateChannel: document.getElementById("generateChannel"),
+      generateChannelInput: document.getElementById("generateChannelInput"),
+      generateChannelOptions: document.getElementById("generateChannelOptions"),
       generateHookLensPicker: document.getElementById("generateHookLensPicker"),
       generateScriptOptions: document.getElementById("generateScriptOptions"),
+      generateLengthPresets: document.getElementById("generateLengthPresets"),
       generateScriptLength: document.getElementById("generateScriptLength"),
       generateScriptCta: document.getElementById("generateScriptCta"),
+      generateCtaChips: document.getElementById("generateCtaChips"),
       generatePastPerformance: document.getElementById("generatePastPerformance"),
       agentSetupCard: document.getElementById("agentSetupCard"),
       settingsAgentSetupCard: document.getElementById("settingsAgentSetupCard"),
@@ -6031,19 +6126,214 @@
 
     function renderSuggestionDatalists() {
       const rows = state.library || [];
-      setDatalist("topicSuggestions", rows.map((row) => row.topic));
-      setDatalist("channelSuggestions", rows.map((row) => firstValue(row.channel, row.host, row.podcast_title)));
+      setDatalist("topicSuggestions", [
+        ...state.smartInputs.topics.map((item) => item.label),
+        ...rows.map((row) => row.topic),
+      ]);
+      setDatalist("channelSuggestions", [
+        ...state.smartInputs.channels.map((item) => item.label),
+        ...rows.map((row) => firstValue(row.channel, row.host, row.podcast_title)),
+      ]);
       setDatalist("hookSuggestions", [
+        ...state.smartInputs.hooks.map((item) => item.label),
         ...rows.map((row) => prettyHook(row.hook_type)),
         ...state.styleAnchors.map((anchor) => anchor.name),
         "contrarian", "question", "curiosity gap", "story open", "demo", "stakes",
       ]);
       setDatalist("angleSuggestions", [
+        ...state.smartInputs.topics.map((item) => item.label),
         ...rows.map((row) => row.topic),
         "what changed", "why this matters now", "how to use it", "hidden tradeoff", "creator takeaway",
       ]);
-      setDatalist("ctaSuggestions", ["reply with your source", "save this", "watch the full video", "read the blog", "try the workflow"]);
+      setDatalist("ctaSuggestions", [
+        ...state.smartInputs.ctas.map((item) => item.label),
+        "reply with your source", "save this", "watch the full video", "read the blog", "try the workflow",
+      ]);
       setDatalist("anchorNameSuggestions", state.styleAnchors.map((anchor) => anchor.name));
+    }
+
+    function smartItem(value, { label, count, meta, thumb } = {}) {
+      const rawValue = String(value || label || "").trim();
+      const rawLabel = String(label || rawValue || "").trim();
+      if (!rawValue || !rawLabel) return null;
+      const n = Number(count);
+      return {
+        value: rawValue,
+        label: rawLabel,
+        count: Number.isFinite(n) ? n : 0,
+        meta: meta || "",
+        thumb: thumb || "",
+      };
+    }
+
+    function normalizeFacetItems(items, { humanize = (value) => String(value || "") } = {}) {
+      return (Array.isArray(items) ? items : [])
+        .map((item) => {
+          if (typeof item === "string") return smartItem(item, { label: humanize(item) });
+          const value = item && (item.value || item.key || item.name || item.label);
+          return smartItem(value, {
+            label: item && (item.label || humanize(value)),
+            count: item && item.count,
+          });
+        })
+        .filter(Boolean);
+    }
+
+    function fallbackTopicItems() {
+      const counts = new Map();
+      (state.library || []).forEach((row) => {
+        const topic = String(row.topic || "").trim();
+        if (topic) counts.set(topic, (counts.get(topic) || 0) + 1);
+      });
+      return [...counts.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .map(([topic, count]) => smartItem(topic, { label: topic, count }))
+        .filter(Boolean);
+    }
+
+    function fallbackChannelItems() {
+      const counts = new Map();
+      (state.library || []).forEach((row) => {
+        const channel = String(firstValue(row.channel, row.host, row.podcast_title) || "").trim();
+        if (channel) counts.set(channel, (counts.get(channel) || 0) + 1);
+      });
+      return [...counts.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .map(([channel, count]) => smartItem(channel, { label: channel, count }))
+        .filter(Boolean);
+    }
+
+    function fallbackHookItems() {
+      return [
+        smartItem("informative", { label: "Informative" }),
+        smartItem("curiosity_gap", { label: "Curiosity gap" }),
+        smartItem("disappointment_contrarian", { label: "Contrarian" }),
+        smartItem("stakes", { label: "Stakes" }),
+        smartItem("question_open_loop", { label: "Question" }),
+        smartItem("failure_lesson", { label: "Failure lesson" }),
+      ].filter(Boolean);
+    }
+
+    function fallbackCtaItems() {
+      return ["reply with your source", "save this", "watch the full video", "read the blog", "try the workflow"]
+        .map((cta) => smartItem(cta, { label: cta }))
+        .filter(Boolean);
+    }
+
+    function countBadge(item) {
+      return item && item.count ? `<span class="smart-count">${htmlEscape(item.count)} saved</span>` : "";
+    }
+
+    function renderGenerateTopicChips() {
+      if (!els.generateTopicChips) return;
+      const topics = (state.smartInputs.topics.length ? state.smartInputs.topics : fallbackTopicItems()).slice(0, 8);
+      els.generateTopicChips.innerHTML = topics.length
+        ? topics.map((item) => `<button class="smart-chip" type="button" data-generate-topic="${htmlEscape(item.value)}">${htmlEscape(item.label)}${countBadge(item)}</button>`).join("")
+        : `<span class="soft-note">Topics appear after a few saved uoinks.</span>`;
+    }
+
+    function renderGenerateHookChoices() {
+      if (!els.generateHookLensPicker) return;
+      const current = selectedGenerateHookLens();
+      const hooks = (state.smartInputs.hooks.length ? state.smartInputs.hooks : fallbackHookItems()).slice(0, 9);
+      const hasCurrent = hooks.some((item) => item.value === current);
+      const fallbackCurrent = fallbackHookItems().find((item) => item.value === current);
+      const options = hasCurrent || !current
+        ? hooks
+        : [smartItem(current, { label: fallbackCurrent ? fallbackCurrent.label : prettyHook(current) }), ...hooks].filter(Boolean);
+      els.generateHookLensPicker.innerHTML = options.map((item, index) => `
+        <label class="choice-row">
+          <input type="radio" name="generateHookLens" value="${htmlEscape(item.value)}" ${item.value === current || (!hasCurrent && index === 0) ? "checked" : ""}>
+          <span>${htmlEscape(item.label)}${item.count ? ` <span class="smart-count">${htmlEscape(item.count)}</span>` : ""}</span>
+        </label>
+      `).join("");
+    }
+
+    function channelInitial(label) {
+      const match = String(label || "").trim().match(/[A-Za-z0-9]/);
+      return match ? match[0].toUpperCase() : "U";
+    }
+
+    function renderGenerateChannelOptions() {
+      if (!els.generateChannelOptions) return;
+      const channels = state.smartInputs.channels.length ? state.smartInputs.channels : fallbackChannelItems();
+      const query = String(els.generateChannelInput.value || "").toLowerCase();
+      const filtered = channels.filter((item) => !query || `${item.label} ${item.value}`.toLowerCase().includes(query));
+      els.generateChannelOptions.innerHTML = filtered.length
+        ? filtered.slice(0, 20).map((item) => `
+          <button class="combo-option" type="button" role="option" data-generate-channel="${htmlEscape(item.value)}" data-generate-channel-label="${htmlEscape(item.label)}">
+            <span class="combo-thumb ${item.thumb ? "" : "placeholder"}">${item.thumb ? `<img alt="" class="hidden" data-file-img="${htmlEscape(item.value)}" data-file-url="${htmlEscape(item.thumb)}">` : htmlEscape(channelInitial(item.label))}</span>
+            <span>
+              <strong>${htmlEscape(item.label)}</strong>
+              <span class="job-sub">${item.count ? `${htmlEscape(item.count)} saved uoink${item.count === 1 ? "" : "s"}` : "Corpus channel"}</span>
+            </span>
+          </button>
+        `).join("")
+        : `<div class="job-row"><div class="job-title">No matching channels.</div><div class="job-sub">Type a channel name or pick one from your corpus.</div></div>`;
+      loadDetailFileImages();
+    }
+
+    function renderGenerateLengthPresets() {
+      if (!els.generateLengthPresets) return;
+      const current = Number(els.generateScriptLength.value || 0);
+      els.generateLengthPresets.innerHTML = SCRIPT_LENGTH_PRESETS.map(([value, label]) => `
+        <button class="length-preset ${current === value ? "active" : ""}" type="button" data-generate-length="${value}">${label}</button>
+      `).join("");
+    }
+
+    function renderGenerateCtaChips() {
+      if (!els.generateCtaChips) return;
+      const ctas = (state.smartInputs.ctas.length ? state.smartInputs.ctas : fallbackCtaItems()).slice(0, 6);
+      els.generateCtaChips.innerHTML = ctas.length
+        ? ctas.map((item) => `<button class="smart-chip" type="button" data-generate-cta="${htmlEscape(item.value)}">${htmlEscape(item.label)}${item.meta ? `<span class="smart-count">${htmlEscape(item.meta)}</span>` : ""}</button>`).join("")
+        : `<span class="soft-note">Recent CTAs appear after saved scripts.</span>`;
+    }
+
+    function renderGenerateSmartInputs() {
+      renderSuggestionDatalists();
+      renderGenerateTopicChips();
+      renderGenerateHookChoices();
+      renderGenerateChannelOptions();
+      renderGenerateLengthPresets();
+      renderGenerateCtaChips();
+    }
+
+    async function loadGenerateSmartInputs() {
+      const [facetsRes, channelsRes, ctasRes] = await Promise.allSettled([
+        authFetch("/library/facets"),
+        authFetch("/corpus/channels?limit=80"),
+        authFetch("/writing/recent-ctas?limit=20"),
+      ]);
+      if (facetsRes.status === "fulfilled") {
+        const facets = facetsRes.value.facets || {};
+        state.smartInputs.topics = normalizeFacetItems(facets.topic);
+        state.smartInputs.hooks = normalizeFacetItems(facets.hook_type, { humanize: prettyHook });
+      } else {
+        state.smartInputs.topics = fallbackTopicItems();
+        state.smartInputs.hooks = fallbackHookItems();
+      }
+      if (channelsRes.status === "fulfilled") {
+        state.smartInputs.channels = (channelsRes.value.channels || [])
+          .map((row) => smartItem(row.channel, {
+            label: row.channel,
+            count: row.count,
+            thumb: row.thumbnail_url || "",
+          }))
+          .filter(Boolean);
+      } else {
+        state.smartInputs.channels = fallbackChannelItems();
+      }
+      if (ctasRes.status === "fulfilled") {
+        state.smartInputs.ctas = (ctasRes.value.ctas || [])
+          .map((row) => smartItem(row.text, {
+            label: row.text,
+            meta: row.last_used ? fmtAge(row.last_used) : "",
+          }))
+          .filter(Boolean);
+      } else {
+        state.smartInputs.ctas = fallbackCtaItems();
+      }
+      renderGenerateSmartInputs();
     }
 
     function syncFacetOptions() {
@@ -6640,6 +6930,9 @@
         state.writingSelectedSourceRow = null;
         els.writingSource.value = "";
       }
+      if (state.writingSelectedSourceRow && !els.generateTopicInput.value.trim() && state.writingSelectedSourceRow.topic) {
+        els.generateTopicInput.value = state.writingSelectedSourceRow.topic;
+      }
       syncWritingGenerateState();
       updateWritingAttribution();
       loadDetailFileImages();
@@ -6657,6 +6950,7 @@
       state.generateWorkspace = null;
       els.writingSource.value = writingRowId(row);
       els.writingSourceSearch.value = rowTitle(row);
+      if (!els.generateTopicInput.value.trim() && row.topic) els.generateTopicInput.value = row.topic;
       document.getElementById("writingSourceCombo").classList.remove("open");
       els.writingSourceSearch.setAttribute("aria-expanded", "false");
       syncWritingGenerateState();
@@ -7076,6 +7370,7 @@
         }
       }
       await loadStyleAnchors();
+      await loadGenerateSmartInputs();
       els.writingNavCount.textContent = String(state.writingPieces.length || state.styleAnchors.length);
       renderSuggestionDatalists();
       renderThreadBuilder();
@@ -7516,16 +7811,34 @@
       if (!state.channels.length && els.generatePastPerformance.checked) {
         try { await loadChannels(); } catch (_) {}
       }
+      const selectedChannel = (els.generateChannel.value || els.generateChannelInput.value || "").trim();
       const yourChannel = els.generatePastPerformance.checked && state.channels.length
-        ? firstValue(state.channels[0].handle, state.channels[0].name, state.channels[0].channel_id)
-        : null;
+        ? firstValue(selectedChannel, state.channels[0].handle, state.channels[0].name, state.channels[0].channel_id)
+        : (els.generatePastPerformance.checked ? selectedChannel : null);
+      const topic = firstValue(els.generateTopicInput.value.trim(), row.topic, rowTitle(row));
+      const hookTarget = selectedGenerateHookLens();
+      if (els.generateTopicInput && !els.generateTopicInput.value.trim() && row.topic) {
+        els.generateTopicInput.value = row.topic;
+      }
       return {
         format: "talking-head",
-        topic: firstValue(row.topic, rowTitle(row)),
-        hook_target: els.writingAngle.value.trim() || selectedGenerateHookLens(),
+        topic,
+        hook_target: hookTarget,
         your_channel: yourChannel || null,
         n_examples: 8,
       };
+    }
+
+    function selectGenerateChannel(value, label) {
+      els.generateChannel.value = value || "";
+      els.generateChannelInput.value = label || value || "";
+      toggleGenerateChannelCombo(false);
+    }
+
+    function toggleGenerateChannelCombo(open) {
+      document.getElementById("generateChannelCombo").classList.toggle("open", open);
+      els.generateChannelInput.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) renderGenerateChannelOptions();
     }
 
     async function generateScriptGrounding() {
@@ -8213,6 +8526,15 @@
         toggleWritingSourceCombo(true);
         syncWritingSourceOptions();
       });
+      els.generateChannelInput.addEventListener("focus", () => toggleGenerateChannelCombo(true));
+      els.generateChannelInput.addEventListener("input", () => {
+        if (els.generateChannel.value && els.generateChannelInput.value !== els.generateChannel.value) {
+          els.generateChannel.value = "";
+        }
+        toggleGenerateChannelCombo(true);
+        renderGenerateChannelOptions();
+      });
+      els.generateScriptLength.addEventListener("input", renderGenerateLengthPresets);
       els.writingModePicker.addEventListener("change", () => {
         updateWritingComposerFromText(els.writingOutput.dataset.rawText || currentWritingText());
         syncGenerateModeUi();
@@ -8424,6 +8746,30 @@
         if (sourceOption) {
           selectWritingSourceById(sourceOption.dataset.writingSourceId);
           return;
+        }
+        const topicChip = event.target.closest("[data-generate-topic]");
+        if (topicChip) {
+          els.generateTopicInput.value = topicChip.dataset.generateTopic || "";
+          return;
+        }
+        const channelOption = event.target.closest("[data-generate-channel]");
+        if (channelOption) {
+          selectGenerateChannel(channelOption.dataset.generateChannel, channelOption.dataset.generateChannelLabel);
+          return;
+        }
+        const lengthPreset = event.target.closest("[data-generate-length]");
+        if (lengthPreset) {
+          els.generateScriptLength.value = lengthPreset.dataset.generateLength || "120";
+          renderGenerateLengthPresets();
+          return;
+        }
+        const ctaChip = event.target.closest("[data-generate-cta]");
+        if (ctaChip) {
+          els.generateScriptCta.value = ctaChip.dataset.generateCta || "";
+          return;
+        }
+        if (!event.target.closest("#generateChannelCombo")) {
+          toggleGenerateChannelCombo(false);
         }
         const tabProxy = event.target.closest("[data-tab-button-proxy]");
         if (tabProxy) {
