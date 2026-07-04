@@ -2861,7 +2861,7 @@
                 <div class="panel-head">
                   <div class="panel-title">Preview</div>
                   <div class="inline-row">
-                    <button class="button ghost" type="button" id="copyWriting">Copy</button>
+                    <button class="button ghost" type="button" id="copyWriting" disabled>Copy</button>
                     <button class="button" type="button" id="saveWriting" disabled>Save</button>
                     <details class="action-menu">
                       <summary class="button ghost">Revise</summary>
@@ -2883,10 +2883,9 @@
                   <div class="generate-research-panel hidden" id="generateResearchPanel"></div>
                   <div class="warning-panel" id="voiceWarningPanel">
                     <strong>Voice DNA warning panel</strong>
-                    <p id="voiceWarningCopy">If a draft starts sounding canned, Uoink shows the flagged phrases here. Regenerate, use it anyway, or change the warning setting.</p>
+                    <p id="voiceWarningCopy">If a draft starts sounding canned, Uoink shows the flagged phrases here. Regenerate, save the draft, or change the warning setting.</p>
                     <div class="inline-row">
                       <button class="button ghost" type="button" id="regenerateWriting">Regenerate</button>
-                      <button class="button" type="button" id="useWritingAsIs">Use as-is</button>
                       <button class="button ghost" type="button" id="writingSettingsLink">Settings</button>
                     </div>
                   </div>
@@ -3728,6 +3727,7 @@
       writingOutput: document.getElementById("writingOutput"),
       writingComputeIndicator: document.getElementById("writingComputeIndicator"),
       generateResearchPanel: document.getElementById("generateResearchPanel"),
+      copyWriting: document.getElementById("copyWriting"),
       saveWriting: document.getElementById("saveWriting"),
       reviseWriting: document.getElementById("reviseWriting"),
       critiqueWriting: document.getElementById("critiqueWriting"),
@@ -4023,6 +4023,7 @@
     }
 
     function setWritingActionsEnabled(enabled) {
+      if (els.copyWriting) els.copyWriting.disabled = !enabled;
       if (els.saveWriting) els.saveWriting.disabled = !enabled;
       if (els.reviseWriting) els.reviseWriting.disabled = !enabled;
       if (els.critiqueWriting) els.critiqueWriting.disabled = !enabled;
@@ -7340,8 +7341,10 @@
     }
 
     async function copyWritingText() {
+      const text = currentWritingText().trim();
+      if (!text) return showToast("Write or generate a draft before copying.");
       try {
-        await navigator.clipboard.writeText(currentWritingText());
+        await navigator.clipboard.writeText(text);
         showToast("Writing copied.");
       } catch (_) {
         showToast("Could not copy writing.");
@@ -8706,7 +8709,6 @@
       document.getElementById("copyWriting").addEventListener("click", copyWritingText);
       document.getElementById("saveWriting").addEventListener("click", saveWritingDraft);
       document.getElementById("reviseWriting").addEventListener("click", generateWriting);
-      document.getElementById("useWritingAsIs").addEventListener("click", () => showToast("Marked for use in this session."));
       document.getElementById("writingSettingsLink").addEventListener("click", () => switchTab("settings"));
       els.writingSourceSearch.addEventListener("focus", () => toggleWritingSourceCombo(true));
       els.writingSourceSearch.addEventListener("input", () => {
