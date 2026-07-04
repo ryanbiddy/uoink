@@ -114,6 +114,112 @@ def set_anchor(idx, section: str, content: str) -> None:
             (key, body, _now_iso()))
 
 
+# ---- extension taste anchors (best / worst / admired channels) ------------
+# The popup's taste-refinement pair POSTs "this was a 10/10" / "0/10"
+# judgments and the setup page lists + removes them. Storage is one JSON
+# blob in the same memory_layer KV table (key ``taste.anchors``) -- the
+# extension kept a chrome.storage.local mirror with exactly this shape, so
+# the helper adopts it as the wire contract:
+#
+#     {"best": [{"video_id", "title"}], "worst": [...],
+#      "admired_channels": ["Channel name", ...]}
+TASTE_ANCHORS_KEY = "taste.anchors"
+TASTE_ANCHOR_TYPES = ("best", "worst")
+
+
+def _empty_taste_anchors() -> dict:
+    return {"best": [], "worst": [], "admired_channels": []}
+
+
+def get_taste_anchors(idx) -> dict:
+    """Return the persisted taste anchors, always in the full shape."""
+    row = idx._conn.execute(
+        "SELECT value FROM memory_layer WHERE key=?",
+        (TASTE_ANCHORS_KEY,)).fetchone()
+    out = _empty_taste_anchors()
+    if not row or not row["value"]:
+        return out
+    try:
+        data = json.loads(row["value"])
+    except (json.JSONDecodeError, TypeError):
+        log.warning("taste anchors blob is not valid JSON; starting empty")
+        return out
+    if isinstance(data, dict):
+        for key in out:
+            items = data.get(key)
+            if isinstance(items, list):
+                out[key] = items
+    return out
+
+
+def _write_taste_anchors(idx, anchors: dict) -> None:
+    with idx._lock:
+        idx._conn.execute(
+            "INSERT INTO memory_layer (key, value, updated_at) VALUES (?,?,?) "
+            "ON CONFLICT(key) DO UPDATE SET value=excluded.value, "
+            "updated_at=excluded.updated_at",
+            (TASTE_ANCHORS_KEY, json.dumps(anchors, ensure_ascii=False),
+             _now_iso()))
+        idx._conn.commit()
+
+
+def _taste_anchor_id(item) -> str:
+    """The removal id of one stored anchor entry. Videos key on video_id;
+    admired channels are plain strings (or dicts with a name)."""
+    if isinstance(item, dict):
+        return str(item.get("video_id") or item.get("id")
+                   or item.get("name") or "")
+    return str(item)
+
+
+def add_taste_anchor(idx, video_id: str, anchor_type: str,
+                     title: str = "") -> dict:
+    """Add (or move) one video anchor. A video can't be best and worst at
+    the same time, so it is removed from the other list first. When the
+    caller sends no title, the corpus row's title is used if the video is
+    saved locally. Returns the updated anchors dict."""
+    if anchor_type not in TASTE_ANCHOR_TYPES:
+        raise ValueError(
+            f"anchor_type must be one of {TASTE_ANCHOR_TYPES}, "
+            f"got {anchor_type!r}")
+    video_id = (video_id or "").strip()
+    if not video_id:
+        raise ValueError("video_id required")
+    title = (title or "").strip()
+    if not title:
+        try:
+            row = idx.get_yoink(video_id)
+        except Exception:
+            row = None
+        title = ((row or {}).get("title") or "").strip()
+    anchors = get_taste_anchors(idx)
+    for key in TASTE_ANCHOR_TYPES:
+        anchors[key] = [x for x in anchors[key]
+                        if _taste_anchor_id(x) != video_id]
+    anchors[anchor_type].append(
+        {"video_id": video_id, "title": title or video_id})
+    _write_taste_anchors(idx, anchors)
+    return anchors
+
+
+def remove_taste_anchor(idx, anchor_id: str) -> bool:
+    """Remove one anchor by id (a video_id, or an admired-channel name).
+    Returns True when something was actually removed."""
+    anchor_id = (anchor_id or "").strip()
+    if not anchor_id:
+        return False
+    anchors = get_taste_anchors(idx)
+    changed = False
+    for key in ("best", "worst", "admired_channels"):
+        kept = [x for x in anchors[key] if _taste_anchor_id(x) != anchor_id]
+        if len(kept) != len(anchors[key]):
+            anchors[key] = kept
+            changed = True
+    if changed:
+        _write_taste_anchors(idx, anchors)
+    return changed
+
+
 # ---- consolidation --------------------------------------------------------
 def consolidate_taste(idx, *, top_n: int = 10) -> str:
     """Pure function: produce the TASTE.md content from current engagement
