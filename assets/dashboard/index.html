@@ -6276,13 +6276,13 @@
       const haystack = String(raw || "").toLowerCase();
       const timeout = haystack.includes("timeout") || haystack.includes("timed out") || haystack.includes("deadline");
       if (normalized === "fetch" && timeout) {
-        return "Download timed out before the source finished arriving. Chunked mode retries with lighter local media work.";
+        return "Download timed out before the source finished arriving. Retry can save the captions first.";
       }
       if (normalized === "transcribe" && timeout) {
-        return "The source downloaded, but transcription timed out on the long audio. Chunked mode gives the local transcript pass more room.";
+        return "The source downloaded, but transcription timed out on the long audio. Retry can save the captions first.";
       }
       if (normalized === "screenshots" && timeout) {
-        return "The source downloaded, but frame extraction timed out. Chunked mode retries with fewer screenshots.";
+        return "The source downloaded, but frame extraction timed out. Retry can save captions with fewer screenshots.";
       }
       if (normalized === "classify") {
         return "The media and transcript are saved, but the local classification pass did not finish.";
@@ -6342,7 +6342,7 @@
       const errorLine = failed && rawError
         ? activityErrorMessage(rawError, phase, { url: job.url || job.source_url || "", code: job.error_code || "" })
         : "";
-      const chunkedRetry = failed && shouldOfferChunkedRetry(rawError, phase);
+      const liteRetry = failed && shouldOfferChunkedRetry(rawError, phase);
       const cookieRetry = failed && shouldOfferCookieRetry(rawError);
       const sub = [
         job.kind || "job",
@@ -6359,7 +6359,7 @@
               ${sourceChip}
             </div>
             <div class="inline-row">
-              ${chunkedRetry ? `<button class="button primary" type="button" data-retry-chunked="${htmlEscape(job.url || job.source_url || "")}">Retry with chunked mode</button>` : ""}
+              ${liteRetry ? `<button class="button primary" type="button" data-retry-chunked="${htmlEscape(job.url || job.source_url || "")}">Retry, captions only</button>` : ""}
               ${cookieRetry ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(job.url || job.source_url || "")}">Retry with cookies</button>` : ""}
               ${["queued", "running"].includes(stateValue) && job.id ? `<button class="button danger" type="button" data-cancel-job="${htmlEscape(job.id)}">Cancel</button>` : ""}
             </div>
@@ -6382,7 +6382,7 @@
       const errorLine = failed && rawError
         ? activityErrorMessage(rawError, activePhase, { url: row.url || row.source_url || "" })
         : "";
-      const chunkedRetry = failed && shouldOfferChunkedRetry(rawError, activePhase);
+      const liteRetry = failed && shouldOfferChunkedRetry(rawError, activePhase);
       const cookieRetry = failed && shouldOfferCookieRetry(rawError);
       return `
         <div class="job-row ${failed ? "failed" : ""}" data-pending-id="${htmlEscape(row.pending_id || "")}">
@@ -6393,7 +6393,7 @@
               ${sourceChip}
             </div>
             <div class="inline-row">
-              ${chunkedRetry ? `<button class="button primary" type="button" data-retry-chunked="${htmlEscape(row.url || row.source_url || "")}">Retry with chunked mode</button>` : ""}
+              ${liteRetry ? `<button class="button primary" type="button" data-retry-chunked="${htmlEscape(row.url || row.source_url || "")}">Retry, captions only</button>` : ""}
               ${cookieRetry ? `<button class="button ghost" type="button" data-retry-cookies="${htmlEscape(row.url || "")}">Retry with cookies</button>` : ""}
               ${stateValue === "pending" || failed ? `<button class="button ghost" type="button" data-retry="${htmlEscape(row.pending_id || "")}">Retry now</button>` : ""}
               ${stateValue !== "succeeded" ? `<button class="button danger" type="button" data-cancel="${htmlEscape(row.pending_id || "")}">Cancel</button>` : ""}
@@ -8093,17 +8093,17 @@
       }
     }
 
-    async function retryWithChunkedMode(url) {
+    async function retryWithLiteMode(url) {
       if (!url) return showToast("No source URL available for retry.");
       try {
         await authFetch("/extract", {
           method: "POST",
-          body: JSON.stringify({ url, interval: 120, long_video_mode: "chunked" }),
+          body: JSON.stringify({ url, interval: 120, long_video_mode: "lite" }),
         });
-        showToast("Chunked-mode retry queued.");
+        showToast("Retry queued for captions only.");
         refreshActivity();
       } catch (err) {
-        showToast("Could not queue the chunked-mode retry.");
+        showToast("Could not queue the captions-only retry.");
       }
     }
 
@@ -8529,7 +8529,7 @@
         const retryCookies = event.target.closest("[data-retry-cookies]");
         if (retryCookies) retryWithCookies(retryCookies.dataset.retryCookies);
         const retryChunked = event.target.closest("[data-retry-chunked]");
-        if (retryChunked) retryWithChunkedMode(retryChunked.dataset.retryChunked);
+        if (retryChunked) retryWithLiteMode(retryChunked.dataset.retryChunked);
         const removeTopic = event.target.closest("[data-remove-topic]");
         if (removeTopic) {
           const topics = readTopicEditor();
