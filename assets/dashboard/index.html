@@ -2888,7 +2888,7 @@
           <div class="page-head">
             <div>
               <div class="eyebrow">Library</div>
-              <h1><span id="libraryCount">0</span> uoinks <em>ready to read.</em></h1>
+              <h1 id="libraryHeadline"><span id="libraryCount">0</span><span id="libraryHeadlineText"> uoinks </span><em id="libraryHeadlineAccent">ready to read.</em></h1>
               <p class="lede">Search transcripts, comments, channels, topics, and hooks. Everything stays on this machine in your Uoink index.</p>
             </div>
             <div class="inline-row">
@@ -2942,12 +2942,11 @@
           <div id="libraryGrid" class="grid" aria-live="polite"></div>
           <div id="libraryEmpty" class="empty-state hidden">
             <div>
-              <h2>No uoinks yet.</h2>
-              <p>Save a video, podcast, or article. It will show up here as a local source card with transcript, screenshots when available, and creator credit.</p>
+              <h2>No saved uoinks yet.</h2>
+              <p>Save a video, podcast, or article. It will show up here with transcript, screenshots when available, and creator credit.</p>
               <div class="inline-row" style="justify-content:center;margin-top:20px">
-                <button class="button primary" type="button" data-open-youtube>Start with YouTube</button>
+                <button class="button primary" type="button" data-tab-button-proxy="sources">Open Sources</button>
               </div>
-              <div class="tip">Tip: right-click supported links, or open Sources to see what Uoink can read.</div>
             </div>
           </div>
           <div class="summary-line" style="margin-top:18px">
@@ -3341,10 +3340,12 @@
       jobs: [],
       jobsLoaded: false,
       total: 0,
+      corpusTotal: null,
       offset: 0,
       limit: 24,
       loading: false,
       hasMore: false,
+      libraryUnavailable: false,
       filters: {
         q: "",
         channel: "",
@@ -3586,7 +3587,10 @@
       portLabel: document.getElementById("portLabel"),
       libraryGrid: document.getElementById("libraryGrid"),
       libraryEmpty: document.getElementById("libraryEmpty"),
+      libraryHeadline: document.getElementById("libraryHeadline"),
       libraryCount: document.getElementById("libraryCount"),
+      libraryHeadlineText: document.getElementById("libraryHeadlineText"),
+      libraryHeadlineAccent: document.getElementById("libraryHeadlineAccent"),
       libraryNavCount: document.getElementById("libraryNavCount"),
       resultSummary: document.getElementById("resultSummary"),
       pageSummary: document.getElementById("pageSummary"),
@@ -5573,6 +5577,107 @@
       return params;
     }
 
+    function hasLibraryFilters() {
+      return Object.entries(state.filters).some(([key, value]) => key !== "sort" && String(value || "").trim());
+    }
+
+    function libraryFilterLabel(key) {
+      return ({
+        q: "Search",
+        channel: "Channel",
+        topic: "Topic",
+        hook_type: "Hook",
+        format: "Format",
+        performance: "Performance",
+        length: "Length",
+        date_from: "From",
+        date_to: "To",
+      })[key] || key;
+    }
+
+    function libraryFilterValue(key, value) {
+      if (key === "hook_type") return prettyHook(value);
+      return String(value || "").trim();
+    }
+
+    function libraryFilterSummary() {
+      return Object.entries(state.filters)
+        .filter(([key, value]) => key !== "sort" && String(value || "").trim())
+        .map(([key, value]) => `${libraryFilterLabel(key)}: ${libraryFilterValue(key, value)}`)
+        .join(" | ");
+    }
+
+    function setLibraryHeadline(mode, count = 0) {
+      const visibleCount = Number(count) || 0;
+      const showCount = mode === "ready";
+      els.libraryCount.textContent = showCount ? String(visibleCount) : "";
+      els.libraryCount.classList.toggle("hidden", !showCount);
+      if (mode === "no-matches") {
+        els.libraryHeadlineText.textContent = "No matches ";
+        els.libraryHeadlineAccent.textContent = "yet.";
+      } else if (mode === "empty") {
+        els.libraryHeadlineText.textContent = "Your Library is ";
+        els.libraryHeadlineAccent.textContent = "ready.";
+      } else if (mode === "unavailable") {
+        els.libraryHeadlineText.textContent = "Library needs ";
+        els.libraryHeadlineAccent.textContent = "a moment.";
+      } else {
+        els.libraryHeadlineText.textContent = " uoinks ";
+        els.libraryHeadlineAccent.textContent = "ready to read.";
+      }
+    }
+
+    function setLibraryNavCount(count) {
+      const visibleCount = Number(count) || 0;
+      els.libraryNavCount.textContent = visibleCount > 0 ? String(visibleCount) : "";
+      els.libraryNavCount.classList.toggle("hidden", visibleCount <= 0);
+    }
+
+    function setLibraryEmptyState(mode) {
+      const states = {
+        "no-matches": {
+          title: "No Library matches.",
+          copy: "Try a broader search, or clear the filters and start from the full Library.",
+          action: `<button class="button primary" type="button" data-clear-library-filters>Clear filters</button>`,
+        },
+        empty: {
+          title: "No saved uoinks yet.",
+          copy: "Save a video, podcast, or article. It will show up here with transcript, screenshots when available, and creator credit.",
+          action: `<button class="button primary" type="button" data-tab-button-proxy="sources">Open Sources</button>`,
+        },
+      };
+      const stateCopy = states[mode] || states.empty;
+      els.libraryEmpty.innerHTML = `
+        <div>
+          <h2>${htmlEscape(stateCopy.title)}</h2>
+          <p>${htmlEscape(stateCopy.copy)}</p>
+          <div class="inline-row" style="justify-content:center;margin-top:20px">
+            ${stateCopy.action}
+          </div>
+        </div>
+      `;
+    }
+
+    function resetLibraryFilters() {
+      [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
+      els.sortFilter.value = "newest";
+      state.filters = { q: "", channel: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest" };
+      loadLibrary({ reset: true });
+    }
+
+    function renderLibraryUnavailable(detail) {
+      state.libraryUnavailable = true;
+      state.hasMore = false;
+      setLibraryHeadline("unavailable");
+      setLibraryNavCount(state.corpusTotal ?? state.total);
+      els.resultSummary.textContent = "We couldn't refresh Library just now.";
+      els.activeFilters.textContent = libraryFilterSummary();
+      els.pageSummary.textContent = "Try again in a moment.";
+      els.loadMore.classList.add("hidden");
+      els.libraryEmpty.classList.add("hidden");
+      els.libraryGrid.innerHTML = degradedState("Library needs a moment.", "Your saved uoinks are still here. Try again in a bit.", detail);
+    }
+
     async function refreshJobs({ render = false } = {}) {
       try {
         const data = await authFetch("/jobs");
@@ -5595,6 +5700,7 @@
       if (reset) {
         state.offset = 0;
         state.library = [];
+        state.libraryUnavailable = false;
         revokeThumbs();
         els.libraryGrid.innerHTML = "";
       }
@@ -5605,26 +5711,16 @@
         const data = await authFetch(`/memory/search?${params.toString()}`);
         const rows = Array.isArray(data.results) ? data.results : [];
         state.total = Number(data.total) || 0;
+        if (!hasLibraryFilters()) state.corpusTotal = state.total;
+        state.libraryUnavailable = false;
         state.library = reset ? rows : state.library.concat(rows);
         state.offset += rows.length;
         state.hasMore = state.offset < state.total;
         renderLibrary();
         populateFilterOptions(rows);
       } catch (err) {
-        const fallbackRows = filterJobCards(jobsToCards(state.jobs));
-        state.total = fallbackRows.length;
-        state.library = sortRows(fallbackRows).slice(0, state.limit);
-        state.offset = state.library.length;
-        state.hasMore = false;
-        renderLibrary();
-        const friendly = translateMachineMessage(err.message);
-        els.resultSummary.textContent = fallbackRows.length
-          ? `Showing ${fallbackRows.length} recent job records. ${friendly}`
-          : "Helper's catching its breath. Retrying...";
-        if (!fallbackRows.length) {
-          els.libraryEmpty.classList.add("hidden");
-          els.libraryGrid.innerHTML = degradedState("Helper's catching its breath.", "Retrying from your local library. Details are tucked below.", err.message);
-        }
+        if (reset) state.library = [];
+        renderLibraryUnavailable(err.message);
       } finally {
         state.loading = false;
         syncWritingSourceOptions();
@@ -5697,18 +5793,42 @@
 
     function renderLibrary() {
       const rows = sortRows(state.library.slice());
-      els.libraryCount.textContent = String(state.total);
-      els.libraryNavCount.textContent = String(state.total);
-      els.resultSummary.textContent = state.total
-        ? `${rows.length} shown of ${state.total} local uoinks`
-        : "No uoinks found";
-      const filterBits = Object.entries(state.filters)
-        .filter(([key, value]) => value && key !== "sort")
-        .map(([key, value]) => `${key}: ${value}`);
-      els.activeFilters.textContent = filterBits.join(" | ");
-      els.pageSummary.textContent = state.hasMore ? `${state.offset} of ${state.total}` : "End of library";
+      const filtersActive = hasLibraryFilters();
+      const corpusTotal = state.corpusTotal ?? (filtersActive ? null : state.total);
+      const navTotal = corpusTotal ?? state.total;
+      if (state.libraryUnavailable) {
+        renderLibraryUnavailable();
+        return;
+      }
+      setLibraryNavCount(navTotal);
+      els.activeFilters.textContent = libraryFilterSummary();
       els.loadMore.classList.toggle("hidden", !state.hasMore);
-      els.libraryEmpty.classList.toggle("hidden", rows.length > 0);
+      if (!rows.length) {
+        if (filtersActive) {
+          setLibraryHeadline("no-matches");
+          els.resultSummary.textContent = "No saved uoinks match those filters.";
+          els.pageSummary.textContent = "Clear filters to see the full Library.";
+          els.loadMore.classList.add("hidden");
+          els.libraryGrid.innerHTML = "";
+          setLibraryEmptyState("no-matches");
+          els.libraryEmpty.classList.remove("hidden");
+          return;
+        }
+        setLibraryHeadline("empty");
+        els.resultSummary.textContent = "Save your first source to start filling Library.";
+        els.pageSummary.textContent = "Library is empty.";
+        els.loadMore.classList.add("hidden");
+        els.libraryGrid.innerHTML = "";
+        setLibraryEmptyState("empty");
+        els.libraryEmpty.classList.remove("hidden");
+        return;
+      }
+      setLibraryHeadline("ready", filtersActive ? state.total : navTotal);
+      els.resultSummary.textContent = filtersActive
+        ? `${rows.length} shown of ${state.total} matching uoinks`
+        : `${rows.length} shown of ${state.total} local uoinks`;
+      els.pageSummary.textContent = state.hasMore ? `${state.offset} of ${state.total}` : "End of library";
+      els.libraryEmpty.classList.add("hidden");
       els.libraryGrid.innerHTML = rows.map(cardHtml).join("");
       rows.forEach(loadThumbnail);
     }
@@ -7935,12 +8055,7 @@
       [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
         el.addEventListener(el.tagName === "INPUT" ? "input" : "change", reload);
       });
-      document.getElementById("clearFilters").addEventListener("click", () => {
-        [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
-        els.sortFilter.value = "newest";
-        state.filters = { q: "", channel: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest" };
-        loadLibrary({ reset: true });
-      });
+      document.getElementById("clearFilters").addEventListener("click", resetLibraryFilters);
       document.getElementById("refreshForYou").addEventListener("click", loadForYou);
       els.loadMore.addEventListener("click", () => loadLibrary());
       document.getElementById("reloadBuild").addEventListener("click", loadBuild);
@@ -8152,7 +8267,6 @@
       document.getElementById("openYouTubeForYou").addEventListener("click", openLastYoutube);
       document.getElementById("reloadFeatures").addEventListener("click", loadFeatures);
       document.getElementById("openFeaturesIndex").addEventListener("click", () => openExternal("https://uoink.app/features"));
-      document.querySelectorAll("[data-open-youtube]").forEach((btn) => btn.addEventListener("click", openLastYoutube));
       document.querySelectorAll('a[target="_blank"]').forEach((link) => {
         link.addEventListener("click", (event) => {
           event.preventDefault();
@@ -8160,6 +8274,16 @@
         });
       });
       document.addEventListener("click", (event) => {
+        const openYouTubeButton = event.target.closest("[data-open-youtube]");
+        if (openYouTubeButton) {
+          openLastYoutube();
+          return;
+        }
+        const clearLibraryButton = event.target.closest("[data-clear-library-filters]");
+        if (clearLibraryButton) {
+          resetLibraryFilters();
+          return;
+        }
         const scriptSourceOption = event.target.closest("[data-script-source-id]");
         if (scriptSourceOption) {
           selectScriptSourceById(scriptSourceOption.dataset.scriptSourceId);
@@ -8405,9 +8529,7 @@
 
     init().catch((err) => {
       showToast("Dashboard needed a minute. Details are in the Library panel.");
-      els.resultSummary.textContent = "Helper's catching its breath. Retrying...";
-      els.libraryEmpty.classList.add("hidden");
-      els.libraryGrid.innerHTML = degradedState("Helper's catching its breath.", "Reload the dashboard in a moment.", err.message);
+      renderLibraryUnavailable(err.message);
     });
 </script>
 </body>
