@@ -1,6 +1,66 @@
 # Installer And First-Run Surface Map
 
-This map covers the first-run pieces that start after the Windows installer launches the local helper.
+The Windows installer is built from `installer/uoink.iss` through `build.ps1`. The build script stages the app under `installer/staging`, regenerates wizard art, rewrites `#define AppVersion`, then runs Inno Setup. After install, first-run setup moves through the local helper, splash window, tray, and dashboard.
+
+## Installer Pages
+
+Welcome:
+
+- The stock Inno welcome page is skipped.
+- `BuildWelcomePage()` creates the branded page.
+- Labels are positioned with `ScaleY()` so 125 percent and 150 percent display scaling do not clip the headline or body copy.
+- The page uses the cream surface color from the installer palette.
+- The fake `STEP 1 OF 4` tracker was removed.
+- The first-page Next button is widened to 112 scaled pixels, right-aligned, and labeled `Let's go ->`.
+- When the wizard leaves the Welcome page, the default Next button caption, width, left edge, and Back button are restored.
+
+Directory and Ready:
+
+- These are stock Inno pages with Uoink copy from `[Messages]`.
+- `UpdateReadyMemo()` prints the chosen install path on the Ready page.
+
+Migration:
+
+- `BuildMigratePage()` creates a legacy-install note for machines with the old local folder.
+- `ShouldSkipPage()` hides it on clean installs.
+
+Finish:
+
+- The finish copy points users at the Uoink browser-button setup window.
+- The checked finish action starts `server.py` without `--show-dashboard`.
+- The dashboard is not forced open from the installer finish page.
+
+## Verification
+
+`CurStepChanged(ssPostInstall)` calls `VerifyInstalledHelper()`.
+
+That procedure runs `installer/verify_install.ps1` as a files-only check. It does not launch `pythonw.exe`, does not start `server.py`, and does not probe `/health` unless a caller passes `-ProbeHealth` to the PowerShell script.
+
+Verification checks:
+
+- `VERSION` matches the expected installer version.
+- Required top-level modules exist in the installed app folder.
+- Required defaults exist under `defaults`.
+
+Failure state:
+
+- Setup logs the warning.
+- The user may see an informational warning with the log location.
+- Setup never raises after files are already copied.
+
+## First Run After Finish
+
+When the user keeps `Set up the browser button now` checked, Inno starts the helper once the wizard reaches the finish step.
+
+Runtime order:
+
+1. `server.py` starts the loopback helper.
+2. The tray starts if pystray is available.
+3. If `.first-run-done` does not match the current version, the splash subprocess starts.
+4. While that splash is visible, the regular ready toast is skipped.
+5. The splash owns browser-button setup. The dashboard opens later by user action or first capture.
+
+This keeps first run to one primary window after the wizard closes.
 
 ## Splash Wrapper
 
@@ -56,7 +116,38 @@ Other modes:
 
 The stop action appears once as `Quit Uoink`. It calls `_on_stop()`, hides the icon, stops pystray, and asks the helper to shut down.
 
+## Wizard Art
+
+`installer/generate_bitmaps.py` writes 24-bit BMP files at 100, 125, 150, and 200 percent scale.
+
+Large art:
+
+- `wizard-large-100.bmp`
+- `wizard-large-125.bmp`
+- `wizard-large-150.bmp`
+- `wizard-large-200.bmp`
+
+Small art:
+
+- `wizard-small-100.bmp`
+- `wizard-small-125.bmp`
+- `wizard-small-150.bmp`
+- `wizard-small-200.bmp`
+
+`installer/uoink.iss` references those files as comma lists in `WizardImageFile` and `WizardSmallImageFile`. The BMPs are ignored in git because `build.ps1` regenerates them before Inno compiles.
+
 ## Regression Checks
+
+`tests/test_u11_installer_overhaul.py` guards:
+
+- post-install verification does not spawn UI
+- verification is files-only by default
+- install verification is non-fatal
+- finish launch does not force the dashboard
+- welcome labels are DPI-safe
+- the fake step tracker stays gone
+- first-run splash suppresses the ready toast
+- multi-scale wizard art is referenced and generated
 
 `tests/test_u12_first_run_polish.py` guards:
 

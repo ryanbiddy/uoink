@@ -1,8 +1,14 @@
 r"""Generate the Inno Setup wizard bitmaps from source at build time.
 
 Outputs (24-bit BMP, the format Inno requires):
-  installer/assets/wizard-large.bmp  164x314  -- WizardImageFile (Welcome/Finish left panel)
-  installer/assets/wizard-small.bmp   58x58   -- WizardSmallImageFile (header corner)
+  installer/assets/wizard-large-100.bmp  164x314  -- WizardImageFile base
+  installer/assets/wizard-large-125.bmp  205x393
+  installer/assets/wizard-large-150.bmp  246x471
+  installer/assets/wizard-large-200.bmp  328x628
+  installer/assets/wizard-small-100.bmp   58x58   -- WizardSmallImageFile base
+  installer/assets/wizard-small-125.bmp   73x73
+  installer/assets/wizard-small-150.bmp   87x87
+  installer/assets/wizard-small-200.bmp  116x116
 
 Variant A ("Minimalist Magnet-U", WIZARD-COPY-AND-BITMAPS.md §5): solid ink
 ground, a large rust+cream magnet-U with a soft vermillion glow, and the
@@ -29,6 +35,12 @@ VERMILLION = (255, 61, 0)   # #FF3D00 -- glow only
 ACID = (255, 210, 63)       # #FFD23F -- magnet tips (brand v3.1)
 
 ASSETS = Path(__file__).resolve().parent / "assets"
+SCALES = {
+    100: 1.0,
+    125: 1.25,
+    150: 1.5,
+    200: 2.0,
+}
 
 # Magnet-U on a 100x100 grid (favicon glyph): blocky horseshoe, cream tips.
 _U_OUTLINE = [
@@ -95,37 +107,46 @@ def _centered_text(d: ImageDraw.ImageDraw, cx: int, y: int, text: str, font,
     d.text((cx - w / 2, y), text, font=font, fill=fill)
 
 
-def make_large(path: Path) -> None:
-    W, H = 164, 314
+def _scaled(value: int, scale: float) -> int:
+    return int(value * scale + 0.5)
+
+
+def make_large(path: Path, scale: float = 1.0) -> tuple[int, int]:
+    W, H = _scaled(164, scale), _scaled(314, scale)
     img = Image.new("RGBA", (W, H), INK + (255,))
-    side = 96
-    _draw_magnet_u(img, (W - side) // 2, 70, side, glow=True)
+    side = _scaled(96, scale)
+    _draw_magnet_u(img, (W - side) // 2, _scaled(70, scale), side, glow=True)
     d = ImageDraw.Draw(img)
     # Cream wordmark near the bottom (cream on ink = AAA).
-    _centered_text(d, W // 2, H - 70, "UOINK", _load_font(34), CREAM)
-    _centered_text(d, W // 2, H - 34, "uoink.app", _load_font(13), CREAM)
+    _centered_text(d, W // 2, H - _scaled(70, scale), "UOINK", _load_font(_scaled(34, scale)), CREAM)
+    _centered_text(d, W // 2, H - _scaled(34, scale), "uoink.app", _load_font(_scaled(13, scale)), CREAM)
     img.convert("RGB").save(path, "BMP")
+    return W, H
 
 
-def make_small(path: Path) -> None:
-    W = H = 58
+def make_small(path: Path, scale: float = 1.0) -> tuple[int, int]:
+    W = H = _scaled(58, scale)
     img = Image.new("RGBA", (W, H), INK + (255,))
-    side = 50  # 4px padding all round (AG spec)
+    side = _scaled(50, scale)  # 4px padding all round at 100% (AG spec)
     _draw_magnet_u(img, (W - side) // 2, (H - side) // 2, side, glow=False)
     img.convert("RGB").save(path, "BMP")
+    return W, H
 
 
 def main() -> int:
     ASSETS.mkdir(parents=True, exist_ok=True)
-    large = ASSETS / "wizard-large.bmp"
-    small = ASSETS / "wizard-small.bmp"
-    make_large(large)
-    make_small(small)
-    for p, (w, h) in ((large, (164, 314)), (small, (58, 58))):
+    outputs: list[tuple[Path, tuple[int, int]]] = []
+    for pct, scale in SCALES.items():
+        large = ASSETS / f"wizard-large-{pct}.bmp"
+        small = ASSETS / f"wizard-small-{pct}.bmp"
+        outputs.append((large, make_large(large, scale)))
+        outputs.append((small, make_small(small, scale)))
+
+    for p, expected_size in outputs:
         with Image.open(p) as im:
-            assert im.size == (w, h), f"{p.name} is {im.size}, expected {(w, h)}"
+            assert im.size == expected_size, f"{p.name} is {im.size}, expected {expected_size}"
             assert im.mode == "RGB", f"{p.name} must be 24-bit RGB BMP, got {im.mode}"
-        print(f"  wrote {p} ({w}x{h}, 24-bit BMP)")
+        print(f"  wrote {p} ({expected_size[0]}x{expected_size[1]}, 24-bit BMP)")
     return 0
 
 

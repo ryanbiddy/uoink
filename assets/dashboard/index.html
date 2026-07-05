@@ -411,14 +411,14 @@
 
     .control-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 10px;
       margin: 18px 0 18px;
     }
 
     .control-grid .control:first-child {
       grid-column: span 2;
-      min-width: 220px;
+      min-width: 260px;
     }
 
     .control,
@@ -446,6 +446,7 @@
 
     select.control {
       appearance: none;
+      padding-right: 38px;
       background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
       background-position: calc(100% - 18px) 18px, calc(100% - 12px) 18px;
       background-size: 6px 6px, 6px 6px;
@@ -1285,6 +1286,146 @@
       display: block;
     }
 
+    /* "Write from this" card CTA (U-04): the one action a saved source is
+       for, on every card. Outlined at rest so 12 cards don't become 12
+       orange alarms competing with the headline; fills on card hover,
+       button hover, or keyboard focus. */
+    .button.primary.card-write {
+      width: 100%;
+      margin-top: 4px;
+      padding: 8px 10px;
+      font-size: 13px;
+      border-color: rgba(255, 61, 0, 0.55);
+      background: transparent;
+      color: var(--vermillion);
+      box-shadow: none;
+    }
+
+    .uoink-card:hover .button.primary.card-write,
+    .button.primary.card-write:hover,
+    .button.primary.card-write:focus-visible {
+      border-color: var(--vermillion);
+      background: var(--vermillion);
+      color: var(--ink);
+    }
+
+    /* Hooks explainer (U-06): the card badge is a real button now, the
+       "what's a hook?" links are quiet inline affordances, and the modal
+       rows read label + definition. */
+    button.hook-chip {
+      border: 0;
+      font: inherit;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    button.hook-chip:hover,
+    button.hook-chip:focus-visible {
+      outline: none;
+      text-decoration: underline dotted;
+    }
+
+    .hook-help-link {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: rgba(255, 244, 236, 0.55);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      text-decoration: underline dotted;
+    }
+
+    .hook-help-link:hover,
+    .hook-help-link:focus-visible {
+      outline: none;
+      color: var(--vermillion);
+    }
+
+    .hook-explainer-list {
+      display: grid;
+      gap: 8px;
+      max-height: 320px;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 10px;
+    }
+
+    .hook-explainer-row {
+      display: grid;
+      gap: 2px;
+      padding: 6px 8px;
+      border-radius: 7px;
+    }
+
+    .hook-explainer-row.active {
+      background: rgba(194, 65, 12, 0.18);
+    }
+
+    .hook-explainer-row span {
+      color: rgba(255, 244, 236, 0.7);
+      font-size: 13px;
+    }
+
+    /* UX-06: label + count render as one non-wrapping unit. */
+    .hook-lens-label {
+      white-space: nowrap;
+    }
+
+    /* Topics overview (U-05): corpus-wide topic chips with counts above
+       the Library grid. Uncategorized gets a dashed border so the
+       untagged pile is visible instead of buried in a dropdown. */
+    .topic-overview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .topic-overview.hidden {
+      display: none;
+    }
+
+    .topic-overview-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: transparent;
+      color: var(--cream);
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .topic-overview-chip span {
+      color: rgba(255, 244, 236, 0.55);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 400;
+    }
+
+    .topic-overview-chip:hover,
+    .topic-overview-chip:focus-visible {
+      outline: none;
+      border-color: var(--vermillion);
+    }
+
+    .topic-overview-chip.active {
+      border-color: var(--vermillion);
+      background: rgba(194, 65, 12, 0.18);
+    }
+
+    .topic-overview-chip.uncategorized {
+      border-style: dashed;
+      color: rgba(255, 244, 236, 0.75);
+    }
+
     /* Advanced options disclosure (U-03): one drawer for everything a
        first draft doesn't need, so Source > Output > Topic > Generate fit
        one screen. */
@@ -1740,7 +1881,7 @@
 
     .radio-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
       gap: 8px;
     }
 
@@ -2309,6 +2450,11 @@
       flex: 0 0 auto;
     }
 
+    .choice-row span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
     .settings-list-row strong,
     .settings-list-row span {
       overflow: hidden;
@@ -2367,8 +2513,9 @@
 
     .topic-row {
       display: grid;
-      grid-template-columns: minmax(140px, 0.65fr) minmax(0, 1fr) auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       gap: 10px;
+      align-items: start;
       border: 1px solid var(--border);
       border-radius: var(--control-radius);
       padding: 10px;
@@ -2388,13 +2535,23 @@
       text-transform: uppercase;
     }
 
+    .topic-field:nth-child(2) {
+      grid-column: 1 / -1;
+    }
+
     .topic-keywords {
-      min-height: 64px;
+      min-height: 112px;
+      line-height: 1.45;
+      padding-top: 10px;
+      padding-bottom: 10px;
       resize: vertical;
     }
 
     .topic-remove {
       align-self: start;
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: end;
     }
 
     .topic-undo {
@@ -2597,9 +2754,11 @@
         min-height: 36px;
         padding: 0 9px;
         font-size: 12px;
+        justify-content: flex-start;
+        gap: 6px;
       }
       .nav-button .nav-count {
-        margin-left: 6px;
+        margin-left: 0;
       }
       .content {
         padding: 26px 18px 34px;
@@ -2683,8 +2842,11 @@
       .about-grid {
         grid-template-columns: 1fr;
       }
+      .control-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
       .control-grid .control:first-child {
-        grid-column: auto;
+        grid-column: 1 / -1;
         min-width: 0;
       }
     }
@@ -2709,6 +2871,17 @@
       }
       .handoff-shot-list {
         grid-template-columns: minmax(0, 1fr);
+      }
+      .control-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .topic-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .topic-remove {
+        grid-column: 1;
+        grid-row: auto;
+        justify-self: stretch;
       }
     }
 
@@ -2736,10 +2909,11 @@
       <div class="sidebar-bottom">
         <div class="running-pill" id="runningPill"><span class="pip"></span><span>Ready on this device</span></div>
         <div class="localhost" id="portLabel">Private local app</div>
-        <button class="sidebar-action" type="button" id="viewActivity" data-nav-label="View activity">View activity <span class="nav-count" id="activityNavCount" title="0 active jobs" aria-label="0 active jobs">0</span></button>
+        <button class="sidebar-action" type="button" id="viewActivity" data-tab-button="activity" data-nav-label="Activity">Activity <span class="nav-count" id="activityNavCount" title="0 active jobs" aria-label="0 active jobs">0</span></button>
         <details class="sidebar-more" id="sidebarControls" open>
           <summary class="sidebar-action sidebar-more-summary">More controls</summary>
           <div class="sidebar-more-actions">
+            <button class="sidebar-action" type="button" data-tab-button="about" data-nav-label="About">About Uoink</button>
             <button class="sidebar-action" type="button" id="starGithub">⭐ Star on GitHub</button>
             <button class="stop" type="button" id="stopHelper">Stop Uoink</button>
           </div>
@@ -2991,7 +3165,6 @@
             <aside class="panel">
               <div class="panel-head">
                 <div class="panel-title">Write from a source</div>
-                <span class="nav-count" id="writingAnchorCount">0/10 anchors</span>
               </div>
               <div class="panel-body">
                 <label class="soft-note" for="writingSourceSearch">Source uoink</label>
@@ -3046,14 +3219,17 @@
                       <input id="generateChannel" type="hidden">
                       <div class="combo-list" id="generateChannelOptions" role="listbox"></div>
                     </div>
-                    <label class="soft-note">Hook pattern</label>
+                    <label class="soft-note">Hook pattern <button class="hook-help-link" type="button" data-hook-explain="" aria-label="What's a hook?">what's a hook?</button></label>
                     <div class="radio-grid" id="generateHookLensPicker">
                       <label class="choice-row"><input type="radio" name="generateHookLens" value="informative" checked><span>Informative</span></label>
                       <label class="choice-row"><input type="radio" name="generateHookLens" value="curiosity_gap"><span>Curiosity gap</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="question_open_loop"><span>Question</span></label>
                       <label class="choice-row"><input type="radio" name="generateHookLens" value="disappointment_contrarian"><span>Contrarian</span></label>
                       <label class="choice-row"><input type="radio" name="generateHookLens" value="stakes"><span>Stakes</span></label>
-                      <label class="choice-row"><input type="radio" name="generateHookLens" value="question_open_loop"><span>Question</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="success_case_study"><span>Success case study</span></label>
                       <label class="choice-row"><input type="radio" name="generateHookLens" value="failure_lesson"><span>Failure lesson</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="engagement_bait"><span>Engagement bait</span></label>
+                      <label class="choice-row"><input type="radio" name="generateHookLens" value="frame_shift"><span>Frame shift</span></label>
                     </div>
                     <label class="soft-note">Style</label>
                     <div class="choice-grid" id="writingStyleMode">
@@ -3061,7 +3237,15 @@
                       <label class="choice-row"><input type="radio" name="writingStyle" value="anchors"><span>From anchors</span></label>
                       <label class="choice-row"><input type="radio" name="writingStyle" value="specific"><span>Specific anchor</span></label>
                     </div>
-                    <div class="anchor-list" id="writingAnchorList"></div>
+                    <!-- UX-12: this list picks which anchors ground THIS
+                         draft; the anchor library has ONE manager, the
+                         Style anchors panel in the right column. Hidden for
+                         Default voice, where it means nothing. -->
+                    <div class="hidden" id="writingAnchorSelect">
+                      <div class="soft-note">Anchors for this draft</div>
+                      <div class="anchor-list" id="writingAnchorList"></div>
+                      <button class="hook-help-link" type="button" id="manageAnchorsLink">Manage anchors &rarr;</button>
+                    </div>
                     <label class="inline-row"><input id="writingShowWarnings" type="checkbox" checked> Show Voice DNA warnings</label>
                     <label class="inline-row"><input id="writingSkipWarnings" type="checkbox"> Skip warnings this time</label>
                   </div>
@@ -3252,10 +3436,10 @@
 
           <div class="control-grid">
             <input class="control" id="searchInput" type="search" placeholder="search transcripts, titles, comments" aria-label="Search Library">
-            <select class="control" id="channelFilter" aria-label="Filter by channel"><option value="">Channel: all</option></select>
-            <select class="control" id="topicFilter" aria-label="Filter by topic"><option value="">Topic: all</option></select>
+            <select class="control" id="channelFilter" aria-label="Filter by channel"><option value="">All channels</option></select>
+            <select class="control" id="topicFilter" aria-label="Filter by topic"><option value="">All topics</option></select>
             <select class="control" id="hookFilter" aria-label="Filter by hook">
-              <option value="">Hook: any</option>
+              <option value="">Any hook</option>
               <option value="curiosity_gap">curiosity gap</option>
               <option value="question">question</option>
               <option value="contrarian">contrarian</option>
@@ -3266,9 +3450,9 @@
               <option value="stakes">stakes</option>
               <option value="other">other</option>
             </select>
-            <select class="control" id="formatFilter" aria-label="Filter by format"><option value="">Format: all</option></select>
-            <select class="control" id="performanceFilter" aria-label="Filter by performance"><option value="">Performance: all</option></select>
-            <select class="control" id="lengthFilter" aria-label="Filter by length"><option value="">Length: all</option></select>
+            <select class="control" id="formatFilter" aria-label="Filter by format"><option value="">Format</option></select>
+            <select class="control" id="performanceFilter" aria-label="Filter by performance"><option value="">Performance</option></select>
+            <select class="control" id="lengthFilter" aria-label="Filter by length"><option value="">Length</option></select>
             <input class="control" id="dateFrom" type="date" aria-label="Date from">
             <input class="control" id="dateTo" type="date" aria-label="Date to">
             <select class="control" id="sortFilter" aria-label="Sort Library">
@@ -3281,13 +3465,18 @@
 
           <div class="summary-line">
             <span id="resultSummary">Loading library...</span>
-            <span><span id="activeFilters"></span> <span id="facetStatus" class="facet-status hidden" title="">?</span></span>
+            <span><span id="activeFilters"></span> <span id="facetStatus" class="facet-status hidden" title="">?</span> <button class="hook-help-link" type="button" data-hook-explain="">What's a hook?</button></span>
             <span class="health-legend" title="Card dots show transcript, screenshots, comments, hook, and comment-analysis readiness.">
               <span class="ok"><i></i>ready</span>
               <span class="warn"><i></i>working</span>
               <span class="fail"><i></i>missing</span>
             </span>
           </div>
+
+          <!-- U-05 (UX-13): every topic you've uoinked, with counts, as the
+               clickable overview the corpus never had. Feeds the topic
+               filter below. -->
+          <div class="topic-overview hidden" id="topicOverview" role="group" aria-label="Your topics with saved counts"></div>
 
           <div id="libraryGrid" class="grid" aria-live="polite"></div>
           <div id="libraryEmpty" class="empty-state hidden">
@@ -3334,7 +3523,8 @@
                 <button class="button ghost" type="button" id="yoinkOpenMarkdown">Open transcript file</button>
                 <button class="button ghost" type="button" id="yoinkRetryCapture">Re-capture source</button>
                 <button class="button ghost" type="button" id="yoinkRetranscribe">Re-transcribe</button>
-                <button class="button primary" type="button" id="yoinkEvidence">Evidence</button>
+                <button class="button ghost" type="button" id="yoinkEvidence">Evidence</button>
+                <button class="button primary" type="button" id="yoinkWriteFrom">Write from this</button>
               </div>
           </div>
           <div class="learn-links" aria-label="Uoink detail walkthrough links">
@@ -3364,7 +3554,7 @@
           <div class="page-head">
             <div>
               <div class="eyebrow">Activity</div>
-              <h1><span id="activityCount">0</span> in flight <em>uoinking...</em></h1>
+              <h1 id="activityHeadline">Nothing uoinking <em>right now.</em></h1>
               <p class="lede">Live work, queue retries, today&apos;s completions, and failures use the same phase language as the popup: fetch, transcribe, screenshots, classify, write.</p>
             </div>
             <div class="inline-row">
@@ -3703,6 +3893,24 @@
       </div>
     </div>
   </div>
+  <!-- U-06 (UX-14): the in-app hooks explainer. Fed by GET /hooks/guide so
+       the copy can never drift from the classifier. -->
+  <div class="modal-backdrop hidden" id="hookExplainer" role="dialog" aria-modal="true" aria-labelledby="hookExplainerTitle">
+    <div class="modal-card" style="width:min(600px, calc(100vw - 48px));max-height:min(640px, calc(100vh - 48px));overflow:auto">
+      <div>
+        <div class="soft-note">Hooks</div>
+        <div class="panel-title" id="hookExplainerTitle">A hook is how a video earns its first 10 seconds.</div>
+      </div>
+      <p class="setting-copy">Uoink sorts every save into 9 hook patterns. They show up as card badges, in the Hook filter, and as counts in Generate.</p>
+      <div class="hook-explainer-list" id="hookExplainerList">
+        <div class="soft-note">Loading the guide...</div>
+      </div>
+      <p class="setting-copy">Generate's "Hook pattern" picker is a different list: a writing directive for how your next draft should open. Counts there mark the patterns your saved sources already prove out.</p>
+      <div class="inline-row" style="justify-content:flex-end">
+        <button class="button ghost" type="button" id="hookExplainerClose">Close</button>
+      </div>
+    </div>
+  </div>
   <div class="handoff-popup hidden" id="writingHandoffPopup" role="dialog" aria-modal="false" aria-label="Screenshot drag targets">
     <div class="handoff-popup-head">
       <div>
@@ -3788,6 +3996,7 @@
       writingScreenshotAssignments: new Map(),
       writingUsedScreenshots: new Set(),
       writingSourceComboOpen: false,
+      hookGuide: null,
       // Dedicated corpus-wide source list for the Generate picker (U-02):
       // state.library is paged and shaped by the Library tab's filters, so
       // the picker keeps its own unfiltered newest-first copy.
@@ -3945,7 +4154,7 @@
       scriptRevisionDraft: document.getElementById("scriptRevisionDraft"),
       scriptRevisionResult: document.getElementById("scriptRevisionResult"),
       writingNavCount: document.getElementById("writingNavCount"),
-      writingAnchorCount: document.getElementById("writingAnchorCount"),
+      writingAnchorSelect: document.getElementById("writingAnchorSelect"),
       writingSource: document.getElementById("writingSource"),
       writingModePicker: document.getElementById("writingModePicker"),
       writingAngle: document.getElementById("writingAngle"),
@@ -4006,6 +4215,7 @@
       yoinkRetryCapture: document.getElementById("yoinkRetryCapture"),
       yoinkRetranscribe: document.getElementById("yoinkRetranscribe"),
       yoinkEvidence: document.getElementById("yoinkEvidence"),
+      yoinkWriteFrom: document.getElementById("yoinkWriteFrom"),
       runningPill: document.getElementById("runningPill"),
       portLabel: document.getElementById("portLabel"),
       libraryGrid: document.getElementById("libraryGrid"),
@@ -4022,6 +4232,10 @@
       searchInput: document.getElementById("searchInput"),
       channelFilter: document.getElementById("channelFilter"),
       topicFilter: document.getElementById("topicFilter"),
+      topicOverview: document.getElementById("topicOverview"),
+      hookExplainer: document.getElementById("hookExplainer"),
+      hookExplainerList: document.getElementById("hookExplainerList"),
+      hookExplainerClose: document.getElementById("hookExplainerClose"),
       hookFilter: document.getElementById("hookFilter"),
       formatFilter: document.getElementById("formatFilter"),
       performanceFilter: document.getElementById("performanceFilter"),
@@ -4033,7 +4247,7 @@
       facetStatus: document.getElementById("facetStatus"),
       queueRows: document.getElementById("queueRows"),
       queueMeta: document.getElementById("queueMeta"),
-      activityCount: document.getElementById("activityCount"),
+      activityHeadline: document.getElementById("activityHeadline"),
       activityNavCount: document.getElementById("activityNavCount"),
       cancelAll: document.getElementById("cancelAll"),
       completedRows: document.getElementById("completedRows"),
@@ -4392,13 +4606,9 @@
       const installed = state.agents.filter((agent) => agent.installed);
       const connected = connectedAgents();
       const keyReady = Boolean(state.settings && state.settings.anthropic_key_set);
-      const advanced = `
-        <details>
-          <summary>Advanced: connection JSON</summary>
-          <div class="mono-box">${htmlEscape(els.mcpConfig?.value || "Load Settings to inspect the generated connection.")}</div>
-          <button class="button ghost" type="button" data-copy-agent-config>Copy connection JSON</button>
-        </details>
-      `;
+      // UX-16: the connection JSON disclosure lives once, in Settings >
+      // Agent connection (the static details below the status card), not
+      // duplicated inside every status-card variant.
       if (!state.agentDetectionLoaded) {
         return `<strong>Checking installed writing agents...</strong><span class="soft-note">This takes a moment and never changes a client until you choose Connect.</span>`;
       }
@@ -4406,7 +4616,6 @@
         return `
           <strong>${htmlEscape(connected.map((agent) => agent.label).join(", "))} connected</strong>
           <span class="soft-note">Uoink is ready inside that client. ${keyReady ? "Dashboard Generate will use your Anthropic key when no live agent bridge is open." : "Open the connected client to write with its model, or add an Anthropic key for dashboard generation."}</span>
-          ${advanced}
         `;
       }
       if (installed.length) {
@@ -4417,14 +4626,12 @@
             ${installed.map((agent) => `<button class="button primary" type="button" data-connect-agent="${htmlEscape(agent.name)}">Connect ${htmlEscape(agent.label)}</button>`).join("")}
           </div>
           ${keyReady ? `<span class="compute-indicator">Your Anthropic key is ready as the no-agent fallback.</span>` : ""}
-          ${advanced}
         `;
       }
       return `
         <strong>No supported writing agent found</strong>
         <span class="soft-note">${keyReady ? "Your Anthropic key can generate tweets and blogs now. Install Claude Desktop for agent-grounded scripts and critique." : "Install Claude Desktop, then return here for one-click connection."}</span>
         <button class="button primary" type="button" data-open-external="https://claude.ai/download">Install Claude Desktop</button>
-        ${advanced}
       `;
     }
 
@@ -5029,6 +5236,7 @@
       els.yoinkOpenMarkdown.disabled = !hasRow || !videoIdOf(row);
       els.yoinkRetryCapture.disabled = !hasRow || !videoIdOf(row);
       els.yoinkEvidence.disabled = !hasRow || !evidenceVideoIdOf(row, sidecar);
+      els.yoinkWriteFrom.disabled = !hasRow || !videoIdOf(row);
       els.yoinkRetranscribe.disabled = !hasRow || !videoIdOf(row) || state.retranscribing;
       els.yoinkRetranscribe.textContent = state.retranscribing ? "Queuing..." : "Re-transcribe";
       els.yoinkRetryCapture.title = sourceUrl ? "Queue a fresh capture for this source." : "No source link is stored for this uoink.";
@@ -6476,6 +6684,7 @@
     }
 
     function renderLibrary() {
+      renderTopicOverview();
       const rows = sortRows(state.library.slice());
       const filtersActive = hasLibraryFilters();
       const corpusTotal = Number(state.corpusTotal || 0);
@@ -6548,7 +6757,7 @@
       const topEntities = Array.isArray(row.top_entities) ? row.top_entities.slice(0, 5).join(", ") : "";
       const bottomChip = podcast
         ? `<span class="speaker-count-chip">${htmlEscape(speakers ? `${speakers} speaker${speakers === 1 ? "" : "s"}` : "speakers pending")}</span>`
-        : `<span class="hook-chip">${hook}${htmlEscape(confidence)}</span>`;
+        : `<button class="hook-chip" type="button" data-hook-explain="${htmlEscape(row.hook_type || "other")}" title="What's a ${hook} hook?">${hook}${htmlEscape(confidence)}</button>`;
       const platformChip = live ? "live" : platformChipLabel(platform);
       const dotTitle = [
         "Dots: transcript, screenshots, comments, hook, comment analysis.",
@@ -6571,6 +6780,7 @@
               <span class="age">${htmlEscape(fmtAge(row.yoinked_at))}</span>
             </div>
             <div class="health-dots" title="${htmlEscape(dotTitle)}" aria-label="${htmlEscape(dotTitle)}">${healthDots(row.health)}</div>
+            <button class="button primary card-write" type="button" data-write-from="${id}" aria-label="Write from ${title}">Write from this</button>
           </div>
         </article>
       `;
@@ -6727,21 +6937,83 @@
         : `<span class="soft-note">Topics appear after a few saved uoinks.</span>`;
     }
 
+    // U-06: the Generate hook picker is the GENERATION lens (mirrors
+    // writing_studio.HOOK_LENS_TYPES; normalize_hook_lens 400s anything
+    // else), deliberately distinct from the classification taxonomy the
+    // detector stamps on saved uoinks (/hooks/guide). `classification`
+    // holds the mapping used to decorate a lens with corpus counts; null
+    // means no honest counterpart exists. Decision logged in
+    // handoff/DECISIONS-LOG.md (2026-07-04, map-don't-unify).
+    const HOOK_LENS_CATALOG = [
+      { value: "informative", label: "Informative", classification: null,
+        directive: "Lead with the single most useful fact, stated plainly." },
+      { value: "curiosity_gap", label: "Curiosity gap", classification: "curiosity_gap",
+        directive: "Open with a gap the reader needs the rest to close." },
+      { value: "question_open_loop", label: "Question", classification: "question",
+        directive: "Open with a question that stays unanswered until the payoff." },
+      { value: "disappointment_contrarian", label: "Contrarian", classification: "contrarian",
+        directive: "Open by overturning a common belief the audience holds." },
+      { value: "stakes", label: "Stakes", classification: "stakes",
+        directive: "Open by naming what's at risk if they get this wrong." },
+      { value: "success_case_study", label: "Success case study", classification: null,
+        directive: "Open on a concrete win and the result it produced." },
+      { value: "failure_lesson", label: "Failure lesson", classification: null,
+        directive: "Open on a specific failure and the lesson it taught." },
+      { value: "engagement_bait", label: "Engagement bait", classification: null,
+        directive: "Open with a line built to pull a reply or a save." },
+      { value: "frame_shift", label: "Frame shift", classification: null,
+        directive: "Open by reframing the topic so it reads in a new light." },
+    ];
+
     function renderGenerateHookChoices() {
       if (!els.generateHookLensPicker) return;
       const current = selectedGenerateHookLens();
-      const hooks = (state.smartInputs.hooks.length ? state.smartInputs.hooks : fallbackHookItems()).slice(0, 9);
-      const hasCurrent = hooks.some((item) => item.value === current);
-      const fallbackCurrent = fallbackHookItems().find((item) => item.value === current);
-      const options = hasCurrent || !current
-        ? hooks
-        : [smartItem(current, { label: fallbackCurrent ? fallbackCurrent.label : prettyHook(current) }), ...hooks].filter(Boolean);
-      els.generateHookLensPicker.innerHTML = options.map((item, index) => `
-        <label class="choice-row">
-          <input type="radio" name="generateHookLens" value="${htmlEscape(item.value)}" ${item.value === current || (!hasCurrent && index === 0) ? "checked" : ""}>
-          <span>${htmlEscape(item.label)}${item.count ? ` <span class="smart-count">${htmlEscape(item.count)}</span>` : ""}</span>
+      const counts = new Map((state.smartInputs.hooks || [])
+        .map((item) => [String(item.value || ""), Number(item.count) || 0]));
+      els.generateHookLensPicker.innerHTML = HOOK_LENS_CATALOG.map((lens) => {
+        const count = lens.classification ? (counts.get(lens.classification) || 0) : 0;
+        const countTitle = `${count} saved uoink${count === 1 ? "" : "s"} open this way`;
+        return `
+        <label class="choice-row" title="${htmlEscape(lens.directive)}">
+          <input type="radio" name="generateHookLens" value="${htmlEscape(lens.value)}" ${lens.value === (current || "informative") ? "checked" : ""}>
+          <span class="hook-lens-label">${htmlEscape(lens.label)}${count ? ` <span class="smart-count" title="${htmlEscape(countTitle)}">${count}</span>` : ""}</span>
         </label>
-      `).join("");
+      `;
+      }).join("");
+    }
+
+    // U-06 (UX-14): in-app hooks explainer, fed by the public /hooks/guide
+    // route so the copy is the classifier's own definitions.
+    async function loadHookGuide() {
+      if (Array.isArray(state.hookGuide) && state.hookGuide.length) return state.hookGuide;
+      try {
+        const res = await fetch("/hooks/guide");
+        const data = await res.json();
+        state.hookGuide = Array.isArray(data.hooks) ? data.hooks : [];
+      } catch (_) {
+        state.hookGuide = [];
+      }
+      return state.hookGuide;
+    }
+
+    async function openHookExplainer(hookId) {
+      els.hookExplainer.classList.remove("hidden");
+      const hooks = await loadHookGuide();
+      els.hookExplainerList.innerHTML = hooks.length
+        ? hooks.map((h) => `
+          <div class="hook-explainer-row ${h.id === hookId ? "active" : ""}">
+            <strong>${htmlEscape(h.label)}</strong>
+            <span>${htmlEscape(h.description)}</span>
+          </div>
+        `).join("")
+        : `<div class="soft-note">The guide didn't load. It ships with the helper; close this and try again.</div>`;
+      const active = els.hookExplainerList.querySelector(".hook-explainer-row.active");
+      if (active) active.scrollIntoView({ block: "nearest" });
+      els.hookExplainerClose.focus();
+    }
+
+    function closeHookExplainer() {
+      els.hookExplainer.classList.add("hidden");
     }
 
     function channelInitial(label) {
@@ -6835,21 +7107,21 @@
     // The classify facets fill in after the optional AI pass; channel/topic
     // fill in as soon as a source is saved.
     const FACET_EMPTY_STATES = {
-      channel: { label: "Channel: none yet", title: "Channels show up here once you've saved a source." },
-      topic: { label: "Topic: none yet", title: "Topics show up here once you've saved a source." },
-      hook_type: { label: "Hook: none yet", title: "No saved sources carry a hook tag yet. The optional AI classify pass fills these in." },
-      format: { label: "Format: none yet", title: "No saved sources carry a format tag yet. The optional AI classify pass fills these in." },
-      performance: { label: "Performance: none yet", title: "No saved sources carry a performance tag yet. The optional AI classify pass fills these in." },
-      length: { label: "Length: none yet", title: "No saved sources carry a length tag yet. The optional AI classify pass fills these in." },
+      channel: { label: "Channel", title: "Channels show up here once you've saved a source." },
+      topic: { label: "Topic", title: "Topics show up here once you've saved a source." },
+      hook_type: { label: "Hook", title: "No saved sources carry a hook tag yet. The optional AI classify pass fills these in." },
+      format: { label: "Format", title: "No saved sources carry a format tag yet. The optional AI classify pass fills these in." },
+      performance: { label: "Performance", title: "No saved sources carry a performance tag yet. The optional AI classify pass fills these in." },
+      length: { label: "Length", title: "No saved sources carry a length tag yet. The optional AI classify pass fills these in." },
     };
 
     function syncFacetOptions() {
-      syncOptions(els.channelFilter, "Channel: all", facetItems("channel"), FACET_EMPTY_STATES.channel);
-      syncOptions(els.topicFilter, "Topic: all", facetItems("topic"), FACET_EMPTY_STATES.topic);
-      syncOptions(els.hookFilter, "Hook: any", facetItems("hook_type"), FACET_EMPTY_STATES.hook_type);
-      syncOptions(els.formatFilter, "Format: all", facetItems("format"), FACET_EMPTY_STATES.format);
-      syncOptions(els.performanceFilter, "Performance: all", facetItems("performance"), FACET_EMPTY_STATES.performance);
-      syncOptions(els.lengthFilter, "Length: all", facetItems("length"), FACET_EMPTY_STATES.length);
+      syncOptions(els.channelFilter, "All channels", facetItems("channel"), FACET_EMPTY_STATES.channel);
+      syncOptions(els.topicFilter, "All topics", facetItems("topic"), FACET_EMPTY_STATES.topic);
+      syncOptions(els.hookFilter, "Any hook", facetItems("hook_type"), FACET_EMPTY_STATES.hook_type);
+      syncOptions(els.formatFilter, "Format", facetItems("format"), FACET_EMPTY_STATES.format);
+      syncOptions(els.performanceFilter, "Performance", facetItems("performance"), FACET_EMPTY_STATES.performance);
+      syncOptions(els.lengthFilter, "Length", facetItems("length"), FACET_EMPTY_STATES.length);
       syncWorkspaceOptions();
       els.facetStatus.classList.toggle("hidden", !state.facetsFallback);
       els.facetStatus.title = state.facetsFallback
@@ -6867,6 +7139,39 @@
         state.facetsFallback = true;
       }
       syncFacetOptions();
+      renderTopicOverview();
+    }
+
+    // U-05 (UX-13): the topics-you've-uoinked overview. Corpus-wide counts
+    // from /library/facets, biggest first, Uncategorized visually flagged
+    // (it's a hygiene debt, 8/31 at audit time). Click filters the Library;
+    // click again clears.
+    function renderTopicOverview() {
+      const wrap = els.topicOverview;
+      if (!wrap) return;
+      const topics = (state.facets && Array.isArray(state.facets.topic))
+        ? state.facets.topic.slice() : [];
+      if (!topics.length) {
+        wrap.classList.add("hidden");
+        wrap.innerHTML = "";
+        return;
+      }
+      topics.sort((a, b) => (Number(b.count) || 0) - (Number(a.count) || 0));
+      const active = state.filters.topic || "";
+      wrap.innerHTML = topics.map((t) => {
+        const value = String(t.value || "");
+        const label = String(t.label || t.value || "");
+        const count = Number(t.count) || 0;
+        const isUncat = value.toLowerCase() === "uncategorized";
+        const hint = isUncat
+          ? `${count} saved uoink${count === 1 ? "" : "s"} with no topic yet. Click to see them; topics live in Settings.`
+          : `Show the ${count} saved uoink${count === 1 ? "" : "s"} in ${label}.`;
+        const classes = ["topic-overview-chip",
+          active === value ? "active" : "",
+          isUncat ? "uncategorized" : ""].filter(Boolean).join(" ");
+        return `<button type="button" class="${classes}" data-topic-overview="${htmlEscape(value)}" title="${htmlEscape(hint)}" aria-pressed="${active === value}">${htmlEscape(label)}<span>${count}</span></button>`;
+      }).join("");
+      wrap.classList.remove("hidden");
     }
 
     function facetSourceKeys(key) {
@@ -7060,7 +7365,11 @@
       const cancelableCount = activeJobs.filter((job) => job.id).length + queueActive.filter((row) => row.pending_id).length;
       const mobileCount = activeJobs.concat(queueActive, failedJobs, queueFailed)
         .filter(isMobileQueued).length;
-      els.activityCount.textContent = String(activeCount);
+      // UX-17: at zero the old "0 in flight uoinking..." headline read as
+      // broken English; give the zero state its own sentence.
+      els.activityHeadline.innerHTML = activeCount
+        ? `${activeCount} in flight <em>uoinking...</em>`
+        : "Nothing uoinking <em>right now.</em>";
       setSidebarBadge(els.activityNavCount, activeCount, "active jobs");
       els.cancelAll.disabled = cancelableCount === 0;
       els.cancelAll.title = cancelableCount ? `Cancel ${cancelableCount} active item${cancelableCount === 1 ? "" : "s"}.` : "No active work to cancel.";
@@ -7420,6 +7729,17 @@
           <button class="button ghost topic-remove" type="button" data-remove-topic="${index}">Remove</button>
         </div>
       `).join("");
+      syncTopicKeywordTextareas();
+    }
+
+    function autoSizeTopicKeywordTextarea(textarea) {
+      if (!textarea) return;
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.max(112, textarea.scrollHeight)}px`;
+    }
+
+    function syncTopicKeywordTextareas() {
+      [...els.topicList.querySelectorAll("[data-topic-keywords]")].forEach(autoSizeTopicKeywordTextarea);
     }
 
     function renderRolePicker(role = "mixed") {
@@ -7639,6 +7959,26 @@
       syncWritingGenerateState();
       updateWritingAttribution();
       if (focus) els.writingSourceSearch.focus();
+    }
+
+    // U-04 (UX-09): "Write from this" deep link. Jumps to Generate with the
+    // given source pre-picked, so nobody re-finds a video they were just
+    // looking at. Resolves through videoIdOf because picker rows and
+    // library cards can carry different primary keys.
+    async function writeFromSource(videoId) {
+      const wanted = String(videoId || "");
+      if (!wanted) return;
+      switchTab("writing");
+      await loadWritingSources();
+      const row = writingSourceRowsAll().find((item) => videoIdOf(item) === wanted)
+        || state.library.find((item) => videoIdOf(item) === wanted);
+      if (!row) {
+        clearWritingSource({ focus: true });
+        showToast("Couldn't preselect that source. It's in the list.");
+        return;
+      }
+      await selectWritingSourceById(writingRowId(row));
+      document.querySelector(".content").scrollTop = 0;
     }
 
     async function selectWritingSourceById(id) {
@@ -8200,7 +8540,8 @@
       const activeCount = state.styleAnchors.length
         ? activeStyleAnchorCount()
         : mergedDefaultAnchors().length;
-      els.writingAnchorCount.textContent = `${activeCount}/${cap} active`;
+      // UX-12: the active-count badge lives on the manager panel only; the
+      // form's duplicate counter is gone.
       if (els.styleAnchorSummary) els.styleAnchorSummary.textContent = `${activeCount}/${cap} active`;
       const composerAnchors = state.styleAnchors.length ? state.styleAnchors : mergedDefaultAnchors();
       const rows = composerAnchors.length
@@ -8356,6 +8697,11 @@
         await loadDefaultStyleAnchors();
         renderDefaultStyleAnchors();
       }
+    }
+
+    function syncWritingStyleUi() {
+      const mode = selectedRadio("writingStyle", "default");
+      els.writingAnchorSelect.classList.toggle("hidden", mode === "default");
     }
 
     function selectedAnchorIds() {
@@ -9235,9 +9581,14 @@
       }
     }
 
+    // U-07 (UX-15): panels without their own nav entry highlight their
+    // logical parent, so the sidebar never lies or goes blank.
+    const NAV_OWNER = { yoink: "library", evidence: "library", features: "sources" };
+
     function switchTab(tab) {
       if (tab === "build" || tab === "script") tab = "writing";
-      document.querySelectorAll("[data-tab-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.tabButton === tab));
+      const navTab = NAV_OWNER[tab] || tab;
+      document.querySelectorAll("[data-tab-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.tabButton === navTab));
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
       if (tab === "for-you") loadForYou();
       if (tab === "writing") loadWriting();
@@ -9416,6 +9767,12 @@
       els.yoinkOpenMarkdown.addEventListener("click", openSelectedMarkdown);
       els.yoinkRetryCapture.addEventListener("click", retrySelectedYoinkCapture);
       els.yoinkRetranscribe.addEventListener("click", requestRetranscription);
+      els.yoinkWriteFrom.addEventListener("click", () => {
+        if (!state.selectedYoink) return;
+        const videoId = videoIdOf(state.selectedYoink);
+        if (!videoId) return showToast("This uoink has no saved source id yet.");
+        writeFromSource(videoId);
+      });
       els.yoinkEvidence.addEventListener("click", () => {
         if (!state.selectedYoink) return;
         const videoId = evidenceVideoIdOf(state.selectedYoink, state.selectedYoinkSidecar || {});
@@ -9441,7 +9798,7 @@
         refreshActivity();
       });
       document.getElementById("reloadSettings").addEventListener("click", refreshSettings);
-      document.getElementById("viewActivity").addEventListener("click", () => switchTab("activity"));
+      // viewActivity carries data-tab-button now; the nav loop wires it.
       document.getElementById("starGithub").addEventListener("click", () => openExternal("https://github.com/ryanbiddy/uoink"));
       document.getElementById("saveKey").addEventListener("click", saveKey);
       document.getElementById("testKey").addEventListener("click", testKey);
@@ -9470,6 +9827,21 @@
       });
       els.stopHelperConfirm.addEventListener("keydown", (event) => {
         trapModalFocus(event, els.stopHelperConfirm, closeStopHelperConfirm);
+      });
+      // UX-12: the per-draft anchor list only means something when a style
+      // mode that uses anchors is picked.
+      document.getElementById("writingStyleMode").addEventListener("change", syncWritingStyleUi);
+      document.getElementById("manageAnchorsLink").addEventListener("click", () => {
+        const manager = document.getElementById("styleAnchorManager");
+        const panel = manager && manager.closest(".panel");
+        if (panel) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      els.hookExplainerClose.addEventListener("click", closeHookExplainer);
+      els.hookExplainer.addEventListener("click", (event) => {
+        if (event.target === els.hookExplainer) closeHookExplainer();
+      });
+      els.hookExplainer.addEventListener("keydown", (event) => {
+        trapModalFocus(event, els.hookExplainer, closeHookExplainer);
       });
       document.addEventListener("keydown", (event) => {
         if (!isCardActivationKey(event)) return;
@@ -9680,6 +10052,20 @@
           skipClaim(skipClaimButton.dataset.skipClaim);
           return;
         }
+        const hookExplain = event.target.closest("[data-hook-explain]");
+        if (hookExplain) {
+          // Before the card branch: hook badges live inside cards and must
+          // open the explainer, not the detail view.
+          openHookExplainer(hookExplain.dataset.hookExplain || "");
+          return;
+        }
+        const writeFrom = event.target.closest("[data-write-from]");
+        if (writeFrom) {
+          // Before the card branch: the button sits inside a [data-folder]
+          // card and must win over opening the detail view.
+          writeFromSource(writeFrom.dataset.writeFrom);
+          return;
+        }
         const card = event.target.closest("[data-folder]");
         if (card && (card.dataset.videoId || card.dataset.folder)) {
           openYoinkDetail(rowFromCard(card));
@@ -9687,6 +10073,16 @@
         }
         const openPath = event.target.closest("[data-open-path]");
         if (openPath) authFetch(`/open-folder?path=${encodeURIComponent(openPath.dataset.openPath)}`).catch(() => showToast("Couldn't open that folder."));
+        const overviewChip = event.target.closest("[data-topic-overview]");
+        if (overviewChip) {
+          const value = overviewChip.dataset.topicOverview || "";
+          const next = state.filters.topic === value ? "" : value;
+          els.topicFilter.value = next;
+          state.filters.topic = next;
+          renderTopicOverview();
+          loadLibrary({ reset: true });
+          return;
+        }
         const gap = event.target.closest("[data-gap-topic]");
         if (gap) {
           els.topicFilter.value = gap.dataset.gapTopic || "";
@@ -9736,6 +10132,8 @@
       document.addEventListener("input", (event) => {
         const threadInput = event.target.closest("[data-thread-text]");
         if (threadInput) syncThreadInput(threadInput);
+        const topicKeywords = event.target.closest("[data-topic-keywords]");
+        if (topicKeywords) autoSizeTopicKeywordTextarea(topicKeywords);
       });
       document.addEventListener("change", (event) => {
         const defaultToggle = event.target.closest("[data-toggle-default-anchor]");

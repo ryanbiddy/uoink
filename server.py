@@ -91,6 +91,7 @@ import page_extractor  # noqa: E402  -- v3.2 Universal Site Uoinking
 import source_manifest  # noqa: E402  -- v3.2.1 site/dashboard product manifests
 import openapi_bridge  # noqa: E402  -- v3.3 OpenAPI bridge for non-MCP AIs
 import reddit_extractor  # noqa: E402  -- v3.3 Reddit thread capture (.json)
+import x_extractor  # noqa: E402  -- U-15 X text/thread capture (syndication)
 
 
 def _extract_page_to_prose(url: str) -> str | None:
@@ -10408,6 +10409,55 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _handle_extract_x(self, body: dict):
+        """POST /extract/x {url} -- capture an X post's text plus the
+        author's own earlier chain via the public syndication endpoint, as
+        a yoink with source_type='x_thread'. Ships dark behind the
+        x_text_capture_enabled settings flag (U-15); the flag answers
+        before any network so the feature is inert until flipped. Token
+        gate cleared by do_POST."""
+        settings = _read_settings() or {}
+        if not settings.get("x_text_capture_enabled"):
+            return self._send_json(200, {
+                "ok": False, "code": "disabled",
+                "error": "X text capture is off. Set x_text_capture_enabled "
+                         "to true in settings to try it.",
+            })
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                         "error": "json object required"})
+        url = (body.get("url") or "").strip()
+        if not url:
+            return self._send_json(400, {"ok": False, "error": "url required"})
+        result = x_extractor.extract_x_thread(url)
+        if not result.get("ok"):
+            log.info("POST /extract/x -> %s", result.get("code"))
+            return self._send_json(200, {
+                "ok": False, "error": result.get("error"),
+                "code": result.get("code")})
+        try:
+            video_id = page_extractor.persist_page_yoink(
+                _get_index(), result, data_root=DATA_ROOT,
+                source_type=x_extractor.SOURCE_TYPE,
+                subfolder="X", slug_prefix="x")
+        except Exception:
+            log.exception("/extract/x persist failed")
+            return self._send_json(500, {
+                "ok": False,
+                "error": "Captured the posts but couldn't save them locally."})
+        if not video_id:
+            return self._send_json(500, {
+                "ok": False, "error": "Couldn't save the X posts."})
+        log.info("POST /extract/x -> ok (%s, %d posts)",
+                 video_id, result.get("tweets_captured", 0))
+        return self._send_json(200, {
+            "ok": True,
+            "video_id": video_id,
+            "title": result["title"],
+            "tweets_captured": result.get("tweets_captured", 0),
+            "metadata": result.get("metadata", {}),
+        })
+
     def _handle_extract_reddit(self, body: dict):
         """POST /extract/reddit {url, depth_limit?, score_threshold?} --
         capture a Reddit thread via its public .json as a yoink with
@@ -10835,6 +10885,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_reyoink(bare)
         if bare == "/extract/reddit":
             return self._handle_extract_reddit(body)
+        if bare == "/extract/x":
+            return self._handle_extract_x(body)
         if bare.startswith("/tools/"):
             return self._handle_tools_call_http(bare, body)
         if bare == "/index/backfill-cancel":
@@ -12279,6 +12331,7 @@ def main(*, show_dashboard: bool = False):
         # the main thread; pythonw.exe so the launch doesn't flash a console.
         # Non-fatal -- if pywebview / WebView2 isn't available the boot toast is
         # the fallback.
+        splash_spawned = False
         try:
             _splash_sentinel = DATA_ROOT / ".first-run-done"
             if _splash_should_spawn(_splash_sentinel):
@@ -12286,9 +12339,12 @@ def main(*, show_dashboard: bool = False):
                 _splash_pyw = str(HERE / "python" / "pythonw.exe")
                 subprocess.Popen([_splash_pyw, _splash_script],
                                  creationflags=0x08000000)  # CREATE_NO_WINDOW
+                splash_spawned = True
                 log.info("splash: spawned (version %s)", VERSION)
         except Exception as e:
             log.warning("splash: failed to spawn (non-fatal): %s", e)
+    else:
+        splash_spawned = False
 
     if show_dashboard:
         _spawn_dashboard_window(reason="launch-flag")
@@ -12302,7 +12358,9 @@ def main(*, show_dashboard: bool = False):
     # double-notify. If the install migration just ran, fire the one-time
     # post-migration toast instead of the regular ready toast, gated on
     # a settings flag so it never repeats.
-    if not _maybe_post_migration_toast():
+    if splash_spawned:
+        log.info("toast: skipped regular ready toast while first-run splash is visible")
+    elif not _maybe_post_migration_toast():
         maybe_toast(
             "Uoink is Active & Ready ✓",
             "Click the rust U under any YouTube video to pull context. "
