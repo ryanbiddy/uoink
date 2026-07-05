@@ -8,6 +8,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [3.2.6] - 2026-07-05
+
+Two waves in one release. The first is a top-to-bottom UX overhaul: Generate, the source picker, the Library, and the install page all got rebuilt around what you're actually trying to do. The second is the brand-critical trust pass: the headline agentic path (stdio MCP) now works, your corpus is durable and portable, a moved output folder heals itself instead of silently breaking, and the disclosures and developer docs finally say the true thing.
+
+### Added
+
+- **Reddit capture.** The extension now grabs Reddit threads (old and new layouts) the same way it grabs YouTube and X. The helper maps `reddit.com` to a real platform, and capture buttons show up on comment pages.
+- **X text and thread capture.** The extension can pull X posts and threads behind a flag, so a source doesn't have to be a video to become a uoink.
+- **In-app hooks explainer.** A short, honest walkthrough of what hooks are and which ones fire, reconciled against the actual hook taxonomy instead of a marketing list.
+- **Topics overview.** A topics summary sits above the Library grid so you can see what your corpus is made of before you dig in.
+- **Write from this.** Every Library card and Uoink detail view now has a direct "Write from this" call to action, so you go from a source to a draft in 1 click.
+- **Get the extension, in app.** The dashboard's Sources and empty Library states now include a path to install the browser extension, instead of assuming you already had it.
+- **stdio MCP that actually runs.** The agentic path had never worked on a real install: the bundled Python couldn't import `server`, so Claude Desktop logged 22 crashes and 0 successes. `uoink_mcp.py` now pins its own directory onto the path before importing, `--doctor` gains an `mcp_stdio` check that walks a real handshake, and CI runs it so it can't regress.
+- **Corpus export and import.** New `--export-corpus` / `--import-corpus` (and `/corpus/export` + `/corpus/import`) back up and restore the SQLite-only tables with a conservative merge. `--rebuild-index` rebuilds from on-disk sidecars and restores the newest export, so a dead index no longer comes back empty.
+- **Stale-path heal.** `--heal-paths` and a boot pass relink corpus rows that point at a moved output folder, matching by path tail and only ever relinking files it actually finds.
+- **Third-party notices.** `THIRD-PARTY-NOTICES.md` is generated from the real shipped bundle at build time, and a new Disclaimer and Terms of Use section spells out that Uoink is for personal research and that you're responsible for each platform's terms.
+
+### Changed
+
+- **Generate, rebuilt.** One screen with a single Advanced disclosure instead of a wall of fields. The common path is short; the power options are there when you open for them.
+- **Source picker, rebuilt.** Picking what you write from is now a real picker with corpus counts, not a raw input you have to guess at.
+- **Install page, rebuilt.** The download button leads the hero, a SmartScreen note sits right under it, sideloading steps are laid out above the fold, and the dead release-zip link is gone. Chrome, Edge, and Brave instructions are unified.
+- **Navigation hygiene.** Dead and duplicate nav entries are cleaned up so the sidebar and top nav point only at things that exist.
+- **License compliance.** Transcript reliability is rebuilt on faster-whisper (MIT), dropping whisper-timestamped (AGPL) and dtw-python (GPL). ffmpeg is now BtbN's win64-LGPL build instead of the GPL essentials build, so the whole bundle is MIT-clean.
+- **Honest health.** `/health`, `/diagnose`, and `--doctor` now surface path-integrity failures instead of reporting green while every content action fails.
+- **Honest disclosures.** The dashboard's update check now states plainly that "Check now" queries `api.github.com` and sends no telemetry, and the website's privacy and terms pages distinguish basic site analytics from the local app's zero-telemetry status.
+- **Accurate developer docs.** The docs drop the fake `uoink_mcp.exe` / "14 tools" claims, list all 64 tools, and give a working stdio config plus the HTTP transport details (`http://localhost:5179/mcp/v1`, `X-Uoink-Token`, token at `%LOCALAPPDATA%\Uoink\token.txt`).
+- **First-run polish.** The installer shows the migration note before Ready instead of after Install, and the splash is brand-correct with offline-safe fonts.
+
+### Fixed
+
+- **DNS-rebinding hardening.** A Host-header allowlist is now the first check on every request, so a rebinding attacker's Host is rejected before the token or body is ever read. The bound port is validated too, and `/token` can pin the extension ID once the store listing is live.
+- **Durability.** Four writes that never committed (engagement logging, facets, tags, and taste anchors) now commit for real, proven by independent readers that only see committed data, the way a process would after a crash.
+- **Stale output folder.** Moving your output folder used to leave every row pointing at a dead root while health stayed green. On one real index that was 31 of 31 dead; the heal pass relinked all 31.
+
 ## [3.2.5] - 2026-07-04
 
 This one's about trust. Every surface that used to fake it (silent saves, phantom retries, "0 uoinks" on a failed request) now does the real thing or says plainly that it can't.

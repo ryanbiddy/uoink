@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Uoink",
   "short_name": "Uoink",
-  "version": "3.2.5",
+  "version": "3.2.6",
   "description": "Save videos, podcasts, and articles to a local corpus your AI can write from.",
   "homepage_url": "https://uoink.app",
   "permissions": ["alarms", "clipboardWrite", "notifications", "storage", "contextMenus", "activeTab", "offscreen"],
