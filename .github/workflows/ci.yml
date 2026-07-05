@@ -171,6 +171,8 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install dependencies
-        run: pip install pytest Pillow
+        # mcp: the stdio entry point's SDK, required so the C-01 regression
+        # test actually drives uoink_mcp.py instead of skipping.
+        run: pip install pytest Pillow mcp
       - name: Run tests
         run: pytest tests/

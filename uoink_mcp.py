@@ -19,6 +19,20 @@ removed in v3. See docs/v2-mcp.md.
 from __future__ import annotations
 
 import sys
+from pathlib import Path
+
+# CRIT-1 (C-01): the installer bundles the embeddable Windows Python, whose
+# ._pth locks sys.path to the interpreter's own directory and never adds the
+# script's folder. Every MCP client launch therefore died on
+# `ModuleNotFoundError: No module named 'server'` before this line existed
+# (Claude Desktop: 22 crashes, 0 successes). Pin the app dir (this file's
+# folder) onto sys.path before importing anything that lives beside us.
+# tests/test_c01_mcp_stdio.py re-creates the embeddable condition with
+# `python -P` and drives the full initialize->tools/list->tools/call
+# handshake; `--doctor` runs the same self-check on the installed copy.
+_APP_DIR = str(Path(__file__).resolve().parent)
+if _APP_DIR not in sys.path:
+    sys.path.insert(0, _APP_DIR)
 
 
 try:

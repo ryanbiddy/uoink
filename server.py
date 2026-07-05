@@ -18,6 +18,7 @@ Endpoints:
 import json
 import logging
 import os
+import queue
 import re
 import secrets
 import shutil
@@ -12377,12 +12378,106 @@ def _print_json(payload: dict) -> None:
     print(json.dumps(payload, indent=2, default=str))
 
 
+def _mcp_stdio_selfcheck(timeout: float = 60.0) -> dict:
+    """C-01 (CRIT-1): prove the stdio MCP entry point actually boots from
+    THIS interpreter and answers the protocol, the way an MCP client would
+    drive it. Runs `python -P uoink_mcp.py` (-P withholds the script dir
+    from sys.path, recreating the bundled embeddable Python's ._pth
+    behavior even on a dev interpreter) and walks
+    initialize -> initialized -> tools/list. Returns {ok, tools|error}.
+
+    This is the check that was missing while every install shipped a dead
+    agentic path: the import crash only reproduced under the embeddable
+    interpreter, so nothing in dev or CI ever saw it."""
+    script = HERE / "uoink_mcp.py"
+    if not script.exists():
+        return {"ok": False, "error": f"uoink_mcp.py not found at {script}"}
+    try:
+        proc = subprocess.Popen(
+            [sys.executable, "-P", str(script)],
+            cwd=str(HERE), stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, text=True, encoding="utf-8")
+    except OSError as e:
+        return {"ok": False, "error": f"couldn't launch the MCP process: {e}"}
+
+    lines: queue.Queue = queue.Queue()
+    threading.Thread(
+        target=lambda: [lines.put(line) for line in proc.stdout],
+        daemon=True).start()
+    stderr_tail: list[str] = []
+
+    def _drain_stderr() -> None:
+        for line in proc.stderr:
+            stderr_tail.append(line.rstrip())
+            del stderr_tail[:-5]
+
+    threading.Thread(target=_drain_stderr, daemon=True).start()
+    deadline = time.time() + timeout
+
+    def _send(message: dict) -> None:
+        proc.stdin.write(json.dumps(message) + "\n")
+        proc.stdin.flush()
+
+    def _wait_for(request_id: int) -> dict | None:
+        while time.time() < deadline:
+            try:
+                line = lines.get(timeout=0.5)
+            except queue.Empty:
+                if proc.poll() is not None:
+                    return None
+                continue
+            try:
+                message = json.loads(line)
+            except (json.JSONDecodeError, TypeError):
+                continue
+            if message.get("id") == request_id:
+                return message
+        return None
+
+    try:
+        _send({"jsonrpc": "2.0", "id": 1, "method": "initialize",
+               "params": {"protocolVersion": "2024-11-05", "capabilities": {},
+                          "clientInfo": {"name": "uoink-doctor",
+                                         "version": VERSION}}})
+        init = _wait_for(1)
+        if not init or "result" not in init:
+            tail = "; ".join(stderr_tail)
+            return {"ok": False,
+                    "error": "initialize got no response"
+                             + (f" (stderr: {tail})" if tail else "")}
+        _send({"jsonrpc": "2.0", "method": "notifications/initialized"})
+        _send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
+        tools = _wait_for(2)
+        if not tools or "result" not in tools:
+            return {"ok": False, "error": "tools/list got no response"}
+        count = len((tools.get("result") or {}).get("tools") or [])
+        if count < 14:
+            return {"ok": False,
+                    "error": f"tools/list returned only {count} tools"}
+        return {"ok": True, "tools": count}
+    except Exception as e:
+        return {"ok": False, "error": f"stdio handshake failed: {e}"}
+    finally:
+        try:
+            proc.stdin.close()
+        except Exception:
+            pass
+        try:
+            proc.wait(timeout=10)
+        except Exception:
+            proc.kill()
+
+
 def doctor_payload() -> dict:
     """`uoink doctor`: the /diagnose self-check plus the install-migration
-    status, for support triage from the console without the popup."""
+    status, for support triage from the console without the popup. Since
+    C-01 it also proves the stdio MCP path boots, because that path was
+    broken on every install for months while every other check reported
+    green."""
     return {
         "diagnose": _diagnose_payload(),
         "migration": migrate_install.migration_status(),
+        "mcp_stdio": _mcp_stdio_selfcheck(),
     }
 
 
