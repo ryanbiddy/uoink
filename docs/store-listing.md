@@ -68,6 +68,10 @@ These features are off by default. Your key lives in the operating system creden
 
 Full policy: `https://uoink.video/privacy`
 
+### Disclaimer & Terms of Use
+
+Uoink is designed and built for personal research and study. Users are solely responsible for ensuring that their use of captured media (including transcript text, screenshots, and comments) complies with the Terms of Service, copyright policies, and API guidelines of YouTube, Reddit, X (Twitter), and any other source platforms. Uoink does not host, share, or claim any ownership rights over third-party media.
+
 ### Requirements
 
 - Windows 10 or Windows 11
