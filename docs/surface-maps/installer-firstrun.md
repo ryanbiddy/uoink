@@ -99,6 +99,12 @@ If no supported browser is detected, the splash falls back to `your Chromium bro
 
 `assets/splash/index.html` asks the native API for extension status before it checks key status.
 
+Brand and offline safety (IN-14):
+
+- The splash fetches no web fonts. It carries no `fonts.googleapis.com` link, so a first boot on an offline or locked-down machine renders with the system UI face (Segoe UI on Windows) and Consolas for mono. No external font request at runtime.
+- The header wordmark is plain `UOINK` text, not the magnet-U glyph plus `OINK`. The magnet identity stays on the window and taskbar icon; the header spells the name so it cannot read as `OINK`.
+- The dismiss control is a bordered icon button with an inline SVG X, not a lowercase text `x`.
+
 Extension mode:
 
 - The headline names the detected browser.
