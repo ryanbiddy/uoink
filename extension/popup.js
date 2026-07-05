@@ -828,15 +828,18 @@ function renderFailureRow(failure) {
   retry.textContent = "Retry";
   retry.addEventListener("click", async (ev) => {
     ev.stopPropagation();
+    const isReddit = failure.url && STC.normalizeRedditUrl(failure.url);
+    const isTwitter = failure.url && STC.normalizeTwitterUrl(failure.url);
     const videoId = failure.videoId || (failure.url && STC.extractVideoId(failure.url));
-    if (!videoId) {
-      showToast("Can't retry: the video URL is missing.");
+    if (!videoId && !isReddit && !isTwitter) {
+      showToast("Can't retry: the URL is missing or invalid.");
       return;
     }
     await removeRecentFailure(failure.id);
-    chrome.storage.local.set({ auto_yoink: { videoId, ts: Date.now() } }, () => {
+    const autoYoinkObj = videoId ? { videoId, ts: Date.now() } : { url: failure.url, ts: Date.now() };
+    chrome.storage.local.set({ auto_yoink: autoYoinkObj }, () => {
       chrome.tabs.create({
-        url: failure.url || `https://www.youtube.com/watch?v=${videoId}`,
+        url: failure.url || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : ""),
         active: true,
       });
       window.close();
@@ -1991,7 +1994,10 @@ async function loadRecentUoinks() {
     const text = document.createElement("span");
     text.className = "recent-item-text";
 
-    const pf = r.platform || "";
+    let pf = r.platform || "";
+    if (!pf && r.source_type === "reddit_thread") {
+      pf = "reddit";
+    }
     let pfText = "";
     let pfClass = "";
     if (pf === "youtube") {
@@ -2000,6 +2006,9 @@ async function loadRecentUoinks() {
     } else if (pf === "twitter") {
       pfText = "X";
       pfClass = "twitter";
+    } else if (pf === "reddit") {
+      pfText = "Reddit";
+      pfClass = "reddit";
     } else if (pf) {
       pfText = pf.charAt(0).toUpperCase() + pf.slice(1);
       pfClass = "generic";
@@ -2150,7 +2159,11 @@ async function loadResurfaceCard(recent) {
 
     const thumb = document.createElement("img");
     thumb.className = "resurface-thumb";
-    thumb.src = item.thumbnail_url || `https://i.ytimg.com/vi/${item.video_id}/mqdefault.jpg`;
+    if (item.source_type === "reddit_thread" || (item.video_id && item.video_id.startsWith("reddit_"))) {
+      thumb.src = chrome.runtime.getURL("icons/icon128.png");
+    } else {
+      thumb.src = item.thumbnail_url || `https://i.ytimg.com/vi/${item.video_id}/mqdefault.jpg`;
+    }
     thumb.alt = "";
 
     const contentWrap = document.createElement("div");

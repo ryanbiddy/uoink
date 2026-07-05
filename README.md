@@ -150,6 +150,10 @@ See [BACKLOG.md](./BACKLOG.md) for v2.1 / v2.5 / v3 plans. Highlights:
 - **v3**: Send to Project, Podcast extraction, multi-platform video support
 - **v4+**: Hosted version, public HTTPS API, most-uoinked leaderboard
 
+## Disclaimer & Terms of Use
+
+Uoink is designed and built for personal research, study, and original creator content drafting. Users are solely responsible for ensuring that their use of captured media (including transcript text, screenshots, and comments) complies with the Terms of Service, copyright policies, and API guidelines of YouTube, Reddit, X (Twitter), and any other source platforms. Uoink does not host, share, or claim any ownership rights over third-party media.
+
 ## License
 
 MIT. See LICENSE.

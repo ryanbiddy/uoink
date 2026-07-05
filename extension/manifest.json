@@ -13,6 +13,7 @@
     "https://x.com/*",
     "https://twitter.com/*",
     "https://mobile.twitter.com/*",
+    "https://*.reddit.com/*",
     "http://127.0.0.1:5179/*",
     "http://localhost:5179/*"
   ],
@@ -44,6 +45,13 @@
         "https://m.youtube.com/shorts/*"
       ],
       "js": ["lib/extract.js", "lib/ui.js", "content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://*.reddit.com/r/*/comments/*"
+      ],
+      "js": ["lib/extract.js", "lib/ui.js", "content-reddit.js"],
       "run_at": "document_idle"
     }
   ],

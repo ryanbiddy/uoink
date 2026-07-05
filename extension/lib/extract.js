@@ -647,6 +647,64 @@
     return _getJson("/memory/search" + query);
   }
 
+  function normalizeRedditUrl(rawUrl) {
+    if (!rawUrl) return null;
+    let u;
+    try { u = new URL(rawUrl); }
+    catch { return null; }
+
+    const host = u.hostname.replace(/^www\.|^old\.|^new\.|^np\./, "").toLowerCase();
+    if (host !== "reddit.com") return null;
+
+    // Pattern: /r/<subreddit>/comments/<id>/<slug>/
+    const match = u.pathname.match(/^\/r\/([^/]+)\/comments\/([^/]+)/);
+    if (!match) return null;
+
+    const subreddit = match[1];
+    const id = match[2];
+    
+    // Canonicalize to www.reddit.com/r/<sub>/comments/<id>/
+    return `https://www.reddit.com/r/${subreddit}/comments/${id}/`;
+  }
+
+  async function postExtractReddit(url, interval) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const targetUrl = `${SERVER}/extract/reddit`;
+    const requestBody = { url, interval };
+    try {
+      let res;
+      try {
+        res = await _authedFetch("/extract/reddit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        });
+      } catch (e) {
+        if (e instanceof TypeError) {
+          console.error("[Uoink] server unreachable at", targetUrl, e);
+        } else {
+          console.error("[Uoink] fetch aborted/failed", targetUrl, e);
+        }
+        throw e;
+      }
+
+      const text = await res.text();
+      if (!res.ok) {
+        console.error("[Uoink] HTTP", res.status, "body:", text);
+      }
+      try {
+        return JSON.parse(text);
+      } catch {
+        console.error("[Uoink] JSON parse error, raw text:", text);
+        return { ok: false, error: "Server returned a non-JSON response." };
+      }
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   global.STC = {
     SERVER,
     DEFAULT_INTERVAL,
@@ -654,10 +712,12 @@
     extractVideoId,
     normalizeYouTubeUrl,
     normalizeTwitterUrl,
+    normalizeRedditUrl,
     getInterval,
     postExtract,
     postExtractAny,
     postExtractX,
+    postExtractReddit,
     ping,
     startSession,
     addToSession,
