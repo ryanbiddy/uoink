@@ -77,9 +77,17 @@ if ($ManifestVersion -ne $VERSION) {
 $PYTHON_VERSION = '3.11.9'
 $PYTHON_URL     = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"
 $GETPIP_URL     = 'https://bootstrap.pypa.io/get-pip.py'
-# ffmpeg 8.1.1 essentials build from gyan.dev (mirrored on GitHub for stable URL).
-$FFMPEG_VERSION = '8.1.1'
-$FFMPEG_URL     = "https://github.com/GyanD/codexffmpeg/releases/download/$FFMPEG_VERSION/ffmpeg-$FFMPEG_VERSION-essentials_build.zip"
+# C-02 (license compliance): ffmpeg is now BtbN's win64-LGPL build, not the
+# gyan.dev "essentials" GPLv3 build. The essentials build links GPL
+# components (x264/x265) and its GPL redistribution obligations (offer of
+# source, license text) were never met, which is one leg of the false-MITs
+# claim. BtbN publishes an LGPL variant built without the GPL encoders; we
+# only need ffmpeg for audio extraction/decoding, so the LGPL build is
+# feature-sufficient. Versioned release tag (not "latest") so the hash pin
+# below stays meaningful. THIRD-PARTY-NOTICES.md records the LGPL text +
+# where to get ffmpeg's source.
+$FFMPEG_VERSION = 'n7.1'
+$FFMPEG_URL     = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-01-12-59/ffmpeg-$FFMPEG_VERSION-win64-lgpl.zip"
 # yt-dlp pip pin -- bump after compatibility-testing a new release.
 $YTDLP_VERSION  = '2026.03.17'
 # Pillow is used for the multimodal paste-corpus generator (resize +
@@ -102,9 +110,11 @@ $PYSTRAY_VERSION = '0.19.5'
 # legacy MSHTML renderer.
 $PYWEBVIEW_VERSION = '5.4'
 $PYTHONNET_VERSION = '3.0.5'
-# v2.5 A1 transcript reliability detection. Library ships; Whisper model does
-# not. The tiny model downloads lazily to %LOCALAPPDATA%\Uoink\models\whisper.
-$WHISPER_TIMESTAMPED_VERSION = '1.15.9'
+# Transcript reliability detection (C-02: was whisper-timestamped, now
+# faster-whisper for license compliance -- MIT, no dtw-python/openai-whisper).
+# Library ships; the tiny Whisper model downloads lazily to
+# %LOCALAPPDATA%\Uoink\models\whisper.
+$FASTER_WHISPER_VERSION = '1.1.0'
 # v3.1.2 podcast/A1 transcription runtime. This bundles WhisperX and its
 # runtime deps into the embeddable Python so podcast transcription works on a
 # fresh install; model weights still download only after user consent.
@@ -290,10 +300,27 @@ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
 #     MCP powers uoink_mcp.py for stdio agent integrations. keyring stores
 #     the user's Anthropic API key in Windows Credential Manager.
-Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION + whisper-timestamped==$WHISPER_TIMESTAMPED_VERSION + whisperx==$WHISPERX_VERSION..."
+Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION + faster-whisper==$FASTER_WHISPER_VERSION + whisperx==$WHISPERX_VERSION..."
 & $embedPython -m pip install --no-warn-script-location --no-compile `
-    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "whisper-timestamped==$WHISPER_TIMESTAMPED_VERSION" "whisperx==$WHISPERX_VERSION"
-if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray + whisper-timestamped + whisperx) failed' }
+    "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "faster-whisper==$FASTER_WHISPER_VERSION" "whisperx==$WHISPERX_VERSION"
+if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray + faster-whisper + whisperx) failed' }
+
+# C-02: regenerate THIRD-PARTY-NOTICES.md from the bundle we just built, so
+# the shipped notices match the shipped dependency tree exactly. pip-licenses
+# reads the embeddable Python's installed metadata. Best-effort: a missing
+# pip-licenses (offline dev build) warns but doesn't fail the build; the
+# committed file is the fallback.
+Write-Step 'Generating THIRD-PARTY-NOTICES.md'
+& $embedPython -m pip install --no-warn-script-location --no-compile "pip-licenses==5.0.0" 2>$null
+if ($LASTEXITCODE -eq 0) {
+    $noticesPath = Join-Path $RepoRoot 'THIRD-PARTY-NOTICES.md'
+    & $embedPython (Join-Path $RepoRoot 'scripts\gen_third_party_notices.py') $noticesPath
+    if ($LASTEXITCODE -ne 0) { Write-Warning 'THIRD-PARTY-NOTICES generation failed; committed file kept.' }
+    # pip-licenses is a build-time tool, not a runtime dep -- strip it back out.
+    & $embedPython -m pip uninstall -y pip-licenses prettytable 2>$null
+} else {
+    Write-Warning 'pip-licenses unavailable; THIRD-PARTY-NOTICES.md not regenerated.'
+}
 
 # 2d-bis. Regenerate installer\uoink.ico from assets\logo-mark-color.png. Uses
 # the embeddable Pillow (just installed). Runs BEFORE the staging copy of
