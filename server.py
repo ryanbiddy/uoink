@@ -285,6 +285,40 @@ ALLOWED_ORIGINS = {
     "https://youtube.com",
 }
 
+# C-04 (CRIT-4): DNS-rebinding defense. A malicious page can rebind its own
+# domain to 127.0.0.1 and then fetch the local helper; the browser sends
+# such requests with the ATTACKER's Host header, not localhost. Validating
+# Host against a tight allowlist blocks the rebind at the door, before any
+# route runs. Only these literal loopback names are trusted; a real hostname
+# never appears here for a legitimately-local request. The port (when the
+# Host carries one) is validated separately against the port the server is
+# actually bound to, so this holds whatever port the install ended up on.
+ALLOWED_HOST_NAMES = frozenset({
+    HOST, "localhost", "127.0.0.1", "::1", "[::1]",
+})
+
+
+# C-04: optional extension-ID pin for /token. Empty by default (load-unpacked
+# gives every dev a different id, and no Chrome Web Store id is published
+# yet). Once the CWS id is known, set UOINK_EXTENSION_IDS=<id>[,<id>] (or the
+# extension_ids settings key) and /token only mints the token for those
+# extension origins. Until then any chrome-/moz-extension origin is accepted,
+# exactly as before -- the Host allowlist above is the load-bearing rebind
+# defense; this is defense-in-depth for after launch.
+def _allowed_extension_ids() -> set[str]:
+    raw = (os.environ.get("UOINK_EXTENSION_IDS") or "").strip()
+    if not raw:
+        try:
+            settings = _read_settings() or {}
+        except Exception:
+            settings = {}
+        value = settings.get("extension_ids")
+        if isinstance(value, (list, tuple)):
+            raw = ",".join(str(v) for v in value)
+        elif isinstance(value, str):
+            raw = value
+    return {part.strip() for part in raw.split(",") if part.strip()}
+
 CREATE_NO_WINDOW = 0x08000000 if sys.platform == "win32" else 0
 SUBPROCESS_KW = {"creationflags": CREATE_NO_WINDOW} if sys.platform == "win32" else {}
 
@@ -7658,18 +7692,79 @@ class Handler(BaseHTTPRequestHandler):
     def _check_token(self) -> bool:
         return secrets.compare_digest(self._request_token(), TOKEN)
 
+    def _host_allowed(self) -> bool:
+        """C-04: reject any request whose Host header isn't loopback. This is
+        the DNS-rebinding wall: a rebind arrives with the attacker's Host, so
+        the allowlist blocks it before origin/token logic ever runs. A
+        missing Host (HTTP/1.0, hand-rolled clients) is treated as loopback
+        since it can't carry a rebind target. The port, when present, must
+        equal the port the server is actually bound to."""
+        host = self.headers.get("Host")
+        if host is None:
+            return True
+        host = host.strip().lower()
+        # Split host:port, keeping bracketed IPv6 literals ([::1]:port) whole.
+        if host.startswith("["):
+            name, _, port = host.partition("]")
+            name += "]"
+            port = port.lstrip(":")
+        elif host.count(":") == 1:
+            name, _, port = host.partition(":")
+        else:
+            name, port = host, ""
+        if name not in ALLOWED_HOST_NAMES:
+            return False
+        if port:
+            try:
+                bound_port = self.server.server_address[1]
+            except Exception:
+                bound_port = PORT
+            if port != str(bound_port):
+                return False
+        return True
+
+    def _reject_bad_host(self) -> bool:
+        """Send 403 + log when Host validation fails. Returns True when it
+        rejected (caller should `return`), False when the host is fine."""
+        if self._host_allowed():
+            return False
+        log.warning("auth: rejected %s %s (host=%r not loopback -- possible "
+                    "DNS rebinding)", self.command,
+                    self.path.split("?", 1)[0], self.headers.get("Host"))
+        try:
+            self._send_json(403, {"ok": False, "error": "forbidden host"})
+        except Exception:
+            pass
+        return True
+
     def _is_extension_origin(self) -> bool:
         """True if Origin looks like a browser extension OR is absent.
         Some Chromium forks (Comet, observed in v1 testing) issue
         same-process service-worker fetches with no Origin header at all,
         so a strict allowlist locks them out. Browser-side CSRF defense
         moves to the X-Uoink-Client header gate + the existing CORS ACAO
-        allowlist; see docs/security.md."""
+        allowlist; see docs/security.md.
+
+        C-04: the absent-Origin path is now only reachable after the Host
+        allowlist has passed (a rebind carries the attacker's Host and is
+        already rejected), so trusting a missing Origin here no longer
+        widens the rebind surface -- it only serves the genuine
+        same-process service-worker case.
+
+        C-04: when UOINK_EXTENSION_IDS / settings.extension_ids is set, a
+        present extension Origin must additionally match one of those ids.
+        Empty (today) accepts any extension origin, unchanged."""
         origin = (self.headers.get("Origin", "") or "")
         if not origin:
             return True
-        return (origin.startswith("chrome-extension://")
-                or origin.startswith("moz-extension://"))
+        if not (origin.startswith("chrome-extension://")
+                or origin.startswith("moz-extension://")):
+            return False
+        allowed = _allowed_extension_ids()
+        if not allowed:
+            return True
+        ext_id = origin.split("://", 1)[1].split("/", 1)[0].strip()
+        return ext_id in allowed
 
     def _has_yoink_client_header(self) -> bool:
         """Defense-in-depth header that the extension sets on /token. A
@@ -7761,6 +7856,8 @@ class Handler(BaseHTTPRequestHandler):
 
     # ---- Methods ----
     def do_OPTIONS(self):
+        if self._reject_bad_host():
+            return
         raw_origin = self.headers.get("Origin")
         origin = self._cors_origin()
         pna = self.headers.get("Access-Control-Request-Private-Network")
@@ -7772,6 +7869,10 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        # C-04: Host allowlist before anything, including the public probes,
+        # so a rebind can't even read /health or the dashboard shell.
+        if self._reject_bad_host():
+            return
         # /health is a friendlier alias for the same liveness probe; both
         # paths return the same payload so existing clients keep working.
         bare = self.path.split("?", 1)[0]
@@ -10854,7 +10955,9 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {"ok": True, "path": str(path)})
 
     def do_DELETE(self):
-        # Token first, same as do_POST -- every DELETE route is private.
+        # C-04 Host allowlist first, then token, same as do_POST.
+        if self._reject_bad_host():
+            return
         if not self._require_token():
             return
         from urllib.parse import unquote
@@ -10866,6 +10969,10 @@ class Handler(BaseHTTPRequestHandler):
         self._send_json(404, {"ok": False, "error": "not found"})
 
     def do_POST(self):
+        # C-04: Host allowlist before auth so a rebind never reaches the
+        # token check or the body reader.
+        if self._reject_bad_host():
+            return
         # Auth first so we don't even read the body for unauthenticated
         # callers. Public POST endpoints don't exist today, so the gate is
         # unconditional here.
