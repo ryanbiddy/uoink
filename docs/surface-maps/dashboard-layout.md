@@ -35,6 +35,22 @@ Routes consumed:
 - `GET /engagement/scores`
 - `GET /resurface`
 
+## Sources
+
+The Sources tab opens with the headline, three learning links, then the `.get-extension` card, then `#sourceMap`.
+
+`.get-extension` (id `#getExtensionCard`) is the in-app path to the browser button (UX-07). It carries:
+
+- An `Open extension folder` button with `data-open-extension`. The delegated click handler calls `GET /open-extension`, which reveals `%LOCALAPPDATA%\Uoink\extension` in the OS file manager so the user can point `Load unpacked` at a folder they can see.
+- A three-step load-unpacked list (extensions page, Developer mode, Load unpacked) whose copy matches the site `/install` steps for Chrome, Edge, and Brave.
+
+The empty Library state (`setLibraryEmptyState("empty")` and the static `#libraryEmpty` fallback) carries the same `data-open-extension` button next to `Open Sources`, so a new user with an empty corpus has a direct install path.
+
+Routes consumed:
+
+- `GET /sources/manifest`
+- `GET /open-extension`
+
 ## Generate
 
 Generate uses `.writing-layout`: a left form and a right draft/refine column.
