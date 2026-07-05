@@ -119,7 +119,7 @@ $PYTHONNET_VERSION = '3.0.5'
 # faster-whisper for license compliance -- MIT, no dtw-python/openai-whisper).
 # Library ships; the tiny Whisper model downloads lazily to
 # %LOCALAPPDATA%\Uoink\models\whisper.
-$FASTER_WHISPER_VERSION = '1.1.0'
+$FASTER_WHISPER_VERSION = '1.2.1'
 # v3.1.2 podcast/A1 transcription runtime. This bundles WhisperX and its
 # runtime deps into the embeddable Python so podcast transcription works on a
 # fresh install; model weights still download only after user consent.
@@ -231,6 +231,7 @@ foreach ($f in @(
     'source_manifest.py',
     'openapi_bridge.py',
     'reddit_extractor.py',
+    'x_extractor.py',
     'defaults\style_anchors.json',
     'yt_extract.py',
     'topics.json',
@@ -399,6 +400,10 @@ Copy-Item (Join-Path $RepoRoot 'page_extractor.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'source_manifest.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'openapi_bridge.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'reddit_extractor.py') $StagingDir -Force
+# U-15 X text/thread capture. server.py imports x_extractor at module top,
+# so it must ship or the helper crashes with ModuleNotFoundError before
+# binding the port (cf. reddit_extractor.py). Added v3.2.6.
+Copy-Item (Join-Path $RepoRoot 'x_extractor.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'memory_layer.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'podcasts.py')    $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'mobile_playlists.py') $StagingDir -Force
@@ -457,7 +462,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py page_extractor.py source_manifest.py openapi_bridge.py reddit_extractor.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py page_extractor.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }

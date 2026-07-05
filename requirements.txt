@@ -9,7 +9,7 @@ pythonnet==3.0.5
 # pulled openai-whisper + dtw-python and made the "MIT" product claim false)
 # is dropped. whisperx already depends on faster-whisper, so this pin just
 # makes the direct use explicit.
-faster-whisper==1.1.0
+faster-whisper==1.2.1
 whisperx==3.8.6
 # v3.2 Universal Site Uoinking. Lazy-imported by page_extractor.py; the
 # helper falls back to a stdlib HTML-to-markdown path when crawl4ai

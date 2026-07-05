@@ -22,7 +22,9 @@ moved. A `_transcribe` injection seam lets the clustering logic be tested
 without pulling torch.
 
 Dropped: `whisper-timestamped==1.15.9` (and its transitive `dtw-python`)
-from `requirements.txt` and `build.ps1`. Added `faster-whisper==1.1.0`.
+from `requirements.txt` and `build.ps1`. Added `faster-whisper==1.2.1`
+(matches whisperx's `faster-whisper>=1.2.0` requirement, so the resolved
+version — and the bundle — is unchanged from what whisperx already pulled).
 
 ### 2. ffmpeg: BtbN win64-LGPL, not gyan.dev essentials
 
@@ -60,9 +62,12 @@ curated fallback listing the direct bundled deps and their licenses.
    ffmpeg — approved by Ryan ("go").
 2. **ffmpeg SHA**: filled from a real download and license-verified
    (see above); `Confirm-Hash` enforces it.
-3. **faster-whisper pin**: 1.1.0. Clean-install test in a fresh venv
-   confirmed the reliability path imports and runs without
-   whisper-timestamped/dtw-python present.
+3. **faster-whisper pin**: 1.2.1. (Initially pinned 1.1.0, but whisperx
+   3.8.6 requires `faster-whisper>=1.2.0`, so 1.1.0 aborted the build's
+   pip step with a resolver conflict; 1.2.1 is the current MIT release and
+   satisfies whisperx, so it's the version whisperx already resolved to.)
+   Clean-install test in a fresh venv confirmed the reliability path
+   imports and runs without whisper-timestamped/dtw-python present.
 
 ## Tests / proof
 
