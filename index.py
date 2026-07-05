@@ -507,6 +507,27 @@ class Index:
             ).fetchone()
         return int(row["n"]) if row else 0
 
+    def list_content_paths(self) -> list[dict]:
+        """Every non-deleted row's (video_id, corpus_path, sidecar_path),
+        for the C-05 path-integrity check and heal."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT video_id, corpus_path, sidecar_path FROM yoinks "
+                "WHERE deleted_at IS NULL"
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def update_content_paths(self, video_id: str, *, corpus_path: str,
+                             sidecar_path: str) -> None:
+        """Re-point one row's on-disk paths (C-05 stale-path heal)."""
+        with self._lock:
+            self._conn.execute(
+                "UPDATE yoinks SET corpus_path=?, sidecar_path=? "
+                "WHERE video_id=?",
+                (corpus_path, sidecar_path, video_id),
+            )
+            self._conn.commit()
+
     def list_recent(self, limit: int = 20) -> list[dict]:
         """Most-recently-yoinked rows, newest first. Excludes soft-deleted
         (deleted_at IS NOT NULL) rows."""

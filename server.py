@@ -7252,6 +7252,21 @@ def _diagnose_payload() -> dict:
             f"Uoink can't write to {DESKTOP_ROOT}. Check folder "
             "permissions, or set the UOINK_OUTPUT_DIR environment variable.")
 
+    # 3b. path_integrity (C-05): a moved output folder used to leave every
+    # row pointing at dead files while this payload stayed all-ok.
+    integrity = _path_integrity_status()
+    if integrity.get("ok"):
+        add("path_integrity", "ok",
+            f"{integrity.get('checked', 0)} saved files where the index says")
+    else:
+        add("path_integrity", "error",
+            f"{integrity.get('missing', 0)} of {integrity.get('checked', 0)} "
+            "saved files are missing from their indexed location")
+        warnings.append(
+            "Some saved uoinks point at files that moved or were deleted. "
+            "Restart Uoink to relink them automatically, or run "
+            "python server.py --heal-paths.")
+
     # 4. anthropic_key_set + 5. anthropic_key_valid
     try:
         settings_data = _read_settings()
@@ -7779,6 +7794,10 @@ class Handler(BaseHTTPRequestHandler):
                 # Desktop\Yoink to %LOCALAPPDATA%\Yoink\output because the
                 # Desktop path was not writable at startup.
                 "output_root_fallback": _OUTPUT_ROOT_FALLBACK,
+                # C-05: {ok, checked, missing[, hint]} over every row's
+                # corpus_path (cached ~60s). "ok": true above means the
+                # process answers; a healthy install also needs this ok.
+                "path_integrity": _path_integrity_status(),
             })
         if bare == "/index/backfill-status":
             # Public, read-only progress counts (same posture as /health) so
@@ -12271,6 +12290,10 @@ def main(*, show_dashboard: bool = False):
     # user has any anchor). Runs after the index is open (migration 0016 added
     # the is_default column).
     _seed_default_style_anchors()
+    # C-05: relink rows whose files moved with the output folder, so a
+    # renamed/moved library heals on launch instead of failing action by
+    # action while /health smiles.
+    _heal_stale_corpus_paths_at_boot()
     # Hydrate the in-memory job dict from the index.
     _restore_jobs_from_disk()
     # Backfill the index from disk in the background so a missing index
@@ -12468,16 +12491,125 @@ def _mcp_stdio_selfcheck(timeout: float = 60.0) -> dict:
             proc.kill()
 
 
+# ---- C-05 (CRIT-5): stale-path integrity + heal ---------------------------
+# When the output folder moves (the Yoink->Uoink rename, a OneDrive shuffle,
+# a user reorganizing their Desktop), every yoinks row keeps pointing at the
+# dead root. Content actions then fail one by one while /health reports
+# green. These helpers make the lie visible (/health path_integrity, doctor)
+# and heal it (boot pass + --heal-paths).
+
+_PATH_INTEGRITY_TTL = 60.0  # /health polls every few seconds; scan at most 1/min
+_path_integrity_cache: dict = {"checked_at": 0.0, "result": None}
+
+
+def _path_integrity_status(force: bool = False) -> dict:
+    """{ok, checked, missing[, hint]} over every non-deleted row's
+    corpus_path. Cached so the extension's /health poll stays cheap."""
+    now = time.time()
+    cached = _path_integrity_cache["result"]
+    if (cached is not None and not force
+            and now - _path_integrity_cache["checked_at"] < _PATH_INTEGRITY_TTL):
+        return cached
+    try:
+        rows = _get_index().list_content_paths()
+    except Exception as e:
+        result = {"ok": False, "checked": 0, "missing": 0,
+                  "error": f"index unavailable: {e}"}
+    else:
+        missing = sum(
+            1 for row in rows
+            if (row.get("corpus_path") or "")
+            and not Path(row["corpus_path"]).exists())
+        result = {"ok": missing == 0, "checked": len(rows), "missing": missing}
+        if missing:
+            result["hint"] = ("Saved files moved since they were indexed. "
+                              "Restart Uoink or run --heal-paths to relink.")
+    _path_integrity_cache["checked_at"] = now
+    _path_integrity_cache["result"] = result
+    return result
+
+
+def _relink_candidate(old_path: str, new_root: Path) -> Path | None:
+    """Find where a moved file lives under the current output root by
+    grafting progressively shorter tails of its old path (longest first,
+    so Topic\\slug\\file wins over slug\\file). Returns None when nothing
+    exists at any candidate."""
+    parts = Path(old_path).parts
+    for k in range(min(len(parts) - 1, 6), 0, -1):
+        candidate = new_root.joinpath(*parts[-k:])
+        if candidate.exists():
+            return candidate
+    return None
+
+
+def heal_stale_corpus_paths(*, output_root: Path | None = None) -> dict:
+    """Re-point index rows whose corpus_path no longer exists at their new
+    location under the current output root. Only rows whose file is
+    actually found get updated; the rest are reported, never guessed."""
+    root = Path(output_root) if output_root else DESKTOP_ROOT
+    idx = _get_index()
+    relinked: list[str] = []
+    unresolved: list[str] = []
+    for row in idx.list_content_paths():
+        corpus_path = row.get("corpus_path") or ""
+        if not corpus_path or Path(corpus_path).exists():
+            continue
+        new_corpus = _relink_candidate(corpus_path, root)
+        if new_corpus is None:
+            unresolved.append(row["video_id"])
+            continue
+        sidecar = row.get("sidecar_path") or ""
+        new_sidecar = sidecar
+        if sidecar and not Path(sidecar).exists():
+            candidate = _relink_candidate(sidecar, root)
+            if candidate is None:
+                # sidecars live beside their corpus file
+                sibling = new_corpus.parent / Path(sidecar).name
+                candidate = sibling if sibling.exists() else None
+            if candidate is not None:
+                new_sidecar = str(candidate)
+        idx.update_content_paths(row["video_id"],
+                                 corpus_path=str(new_corpus),
+                                 sidecar_path=new_sidecar)
+        relinked.append(row["video_id"])
+    _path_integrity_cache["result"] = None  # next status call rescans
+    return {"ok": not unresolved, "relinked": len(relinked),
+            "unresolved": unresolved, "output_root": str(root)}
+
+
+def _heal_stale_corpus_paths_at_boot() -> None:
+    """Boot-time migration pass: if any row points at a dead path, try the
+    relink immediately so a moved library heals on the next launch instead
+    of failing action by action. Never fatal."""
+    try:
+        status = _path_integrity_status(force=True)
+        if not status.get("missing"):
+            return
+        report = heal_stale_corpus_paths()
+        log.info("path heal at boot: %d missing -> relinked %d, unresolved %d",
+                 status["missing"], report["relinked"],
+                 len(report["unresolved"]))
+        if report["unresolved"]:
+            log.warning("path heal: couldn't find new homes for %s "
+                        "(files deleted, or moved outside %s)",
+                        ", ".join(report["unresolved"][:5]),
+                        report["output_root"])
+    except Exception as e:
+        log.warning("path heal at boot failed (non-fatal): %s", e)
+
+
 def doctor_payload() -> dict:
     """`uoink doctor`: the /diagnose self-check plus the install-migration
-    status, for support triage from the console without the popup. Since
-    C-01 it also proves the stdio MCP path boots, because that path was
-    broken on every install for months while every other check reported
-    green."""
+    status, for support triage from the console without the popup. C-01
+    added mcp_stdio (the agentic path was broken on every install for
+    months while every other check reported green) and C-05 added
+    path_integrity (a green doctor while every content action 404s was the
+    exact failure mode on the machine that motivated the fix)."""
     return {
         "diagnose": _diagnose_payload(),
         "migration": migrate_install.migration_status(),
         "mcp_stdio": _mcp_stdio_selfcheck(),
+        "path_integrity": _path_integrity_status(force=True),
     }
 
 
@@ -12488,6 +12620,8 @@ def run_cli(argv: list[str]) -> int:
       copy / move / delete and the keyring entry it'd rewrite, changing
       nothing. De-risks the clean-VM upgrade test.
     - --doctor          : print the /diagnose payload + migration status.
+    - --heal-paths      : relink index rows whose saved files moved with
+      the output folder (C-05); prints the relink report.
     - --show-dashboard  : run the server, then open the dashboard window.
     (no flag)           : run the server.
     """
@@ -12496,6 +12630,22 @@ def run_cli(argv: list[str]) -> int:
         return 0
     if "--doctor" in argv:
         _print_json(doctor_payload())
+        return 0
+    if "--heal-paths" in argv:
+        # C-05: relink index rows whose files moved with the output folder.
+        # An optional path argument searches a different root, for a corpus
+        # that moved somewhere the configured root can't see:
+        #   python server.py --heal-paths            (current output root)
+        #   python server.py --heal-paths D:\my\corpus
+        position = argv.index("--heal-paths")
+        explicit = None
+        if position + 1 < len(argv) and not argv[position + 1].startswith("--"):
+            explicit = Path(argv[position + 1])
+            if not explicit.is_dir():
+                _print_json({"ok": False,
+                             "error": f"{explicit} is not a folder"})
+                return 1
+        _print_json(heal_stale_corpus_paths(output_root=explicit))
         return 0
     main(show_dashboard="--show-dashboard" in argv)
     return 0
