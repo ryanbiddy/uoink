@@ -1,6 +1,6 @@
 # Installer And First-Run Surface Map
 
-The Windows installer is built from `installer/uoink.iss` through `build.ps1`. The build script stages the app under `installer/staging`, regenerates wizard art, rewrites `#define AppVersion`, then runs Inno Setup.
+The Windows installer is built from `installer/uoink.iss` through `build.ps1`. The build script stages the app under `installer/staging`, regenerates wizard art, rewrites `#define AppVersion`, then runs Inno Setup. After install, first-run setup moves through the local helper, splash window, tray, and dashboard.
 
 ## Installer Pages
 
@@ -34,7 +34,7 @@ Finish:
 
 `CurStepChanged(ssPostInstall)` calls `VerifyInstalledHelper()`.
 
-That procedure now runs `installer/verify_install.ps1` as a files-only check. It does not launch `pythonw.exe`, does not start `server.py`, and does not probe `/health` unless a caller passes `-ProbeHealth` to the PowerShell script.
+That procedure runs `installer/verify_install.ps1` as a files-only check. It does not launch `pythonw.exe`, does not start `server.py`, and does not probe `/health` unless a caller passes `-ProbeHealth` to the PowerShell script.
 
 Verification checks:
 
@@ -58,9 +58,63 @@ Runtime order:
 2. The tray starts if pystray is available.
 3. If `.first-run-done` does not match the current version, the splash subprocess starts.
 4. While that splash is visible, the regular ready toast is skipped.
-5. The splash owns the browser-button setup. The dashboard opens later by user action or first capture.
+5. The splash owns browser-button setup. The dashboard opens later by user action or first capture.
 
 This keeps first run to one primary window after the wizard closes.
+
+## Splash Wrapper
+
+`uoink_splash.py` is launched as a subprocess by `server.py` when the once-per-version sentinel is missing or stale. It opens `http://127.0.0.1:5179/splash` in a frameless pywebview window.
+
+Native API:
+
+- `extension_status()` returns the installed extension folder, manifest state, extension-loaded sentinel state, preferred browser, and detected browser list.
+- `open_extensions_page(browser_id)` opens the matching browser extension settings page.
+- `copy_extension_path()` copies the installed extension folder.
+- `mark_extension_loaded()` writes the extension sentinel and dismisses the splash.
+- `open_dashboard()` and `open_settings()` open dashboard windows and dismiss the splash.
+- `close()` and `minimize()` are explicit dismiss actions and write the once-per-version splash sentinel.
+
+Auto-close:
+
+- The 8-second linger closes the splash window without writing `.first-run-done`.
+- The sentinel is written only by explicit user actions that call `_dismiss()`, including close, minimize, opening dashboard/settings, or marking extension setup complete.
+
+## Browser Guidance
+
+The native wrapper detects the default HTTPS browser on Windows through the `UrlAssociations\https\UserChoice` registry key. It maps common Chromium browsers to their extension pages:
+
+- Microsoft Edge, `edge://extensions/`
+- Chrome, `chrome://extensions/`
+- Brave, `brave://extensions/`
+- Vivaldi, `vivaldi://extensions/`
+- Opera GX, `opera://extensions/`
+- Arc, `arc://extensions/`
+
+If no supported browser is detected, the splash falls back to `your Chromium browser` with `chrome://extensions/` and keeps the Copy path button visible.
+
+## Splash HTML
+
+`assets/splash/index.html` asks the native API for extension status before it checks key status.
+
+Extension mode:
+
+- The headline names the detected browser.
+- The primary button opens that browser's extension settings page.
+- Steps show the matching extension URL, Developer mode, Load unpacked, and the installed extension folder.
+- Copy path remains the universal fallback.
+
+Other modes:
+
+- Missing-key and bad-key modes send users to Settings.
+- Happy mode offers YouTube and Dashboard.
+- Failure mode points at diagnostics.
+
+## Tray Menu
+
+`uoink_tray.py` owns the Windows tray menu.
+
+The stop action appears once as `Quit Uoink`. It calls `_on_stop()`, hides the icon, stops pystray, and asks the helper to shut down.
 
 ## Wizard Art
 
@@ -84,7 +138,7 @@ Small art:
 
 ## Regression Checks
 
-`tests/test_u11_installer_overhaul.py` guards the static contract:
+`tests/test_u11_installer_overhaul.py` guards:
 
 - post-install verification does not spawn UI
 - verification is files-only by default
@@ -94,3 +148,12 @@ Small art:
 - the fake step tracker stays gone
 - first-run splash suppresses the ready toast
 - multi-scale wizard art is referenced and generated
+
+`tests/test_u12_first_run_polish.py` guards:
+
+- browser detection data includes per-browser extension URLs
+- extension status returns browser metadata
+- auto-close does not write the splash sentinel
+- explicit close still writes the splash sentinel
+- splash HTML has no Chrome-only setup copy
+- the tray menu has one quit action and no duplicate stop row
