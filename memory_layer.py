@@ -112,6 +112,7 @@ def set_anchor(idx, section: str, content: str) -> None:
             "ON CONFLICT(key) DO UPDATE SET value=excluded.value, "
             "updated_at=excluded.updated_at",
             (key, body, _now_iso()))
+        idx._conn.commit()  # C-03: taste anchors must survive a kill
 
 
 # ---- extension taste anchors (best / worst / admired channels) ------------

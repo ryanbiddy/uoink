@@ -1884,14 +1884,16 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
     return True
 
 
-def _iter_corpus_folders():
+def _iter_corpus_folders(root: Path | None = None):
     """Yield (folder, corpus_path) for every live yoink folder under
-    DESKTOP_ROOT. Soft-deleted yoinks parked under _yoink-trash/ are
-    skipped so the backfill never re-indexes a trashed video."""
-    if not DESKTOP_ROOT.exists():
+    ``root`` (default: DESKTOP_ROOT). Soft-deleted yoinks parked under
+    _yoink-trash/ are skipped so the backfill never re-indexes a trashed
+    video."""
+    scan_root = Path(root) if root else DESKTOP_ROOT
+    if not scan_root.exists():
         return
     trash = _trash_root()
-    for folder in DESKTOP_ROOT.rglob("*"):
+    for folder in scan_root.rglob("*"):
         if not folder.is_dir():
             continue
         if folder == trash or trash in folder.parents:
@@ -1901,9 +1903,11 @@ def _iter_corpus_folders():
             yield folder, corpus
 
 
-def _run_backfill() -> None:
+def _run_backfill(root: Path | None = None) -> None:
     """Index every on-disk yoink folder not already in index.db. Incremental
-    (skips rows already present) and cancellable via _backfill_cancel."""
+    (skips rows already present) and cancellable via _backfill_cancel.
+    ``root`` overrides the scan root for --rebuild-index (C-03): the corpus
+    may live somewhere the configured output root can't see."""
     global _index_recovering
     try:
         known = _get_index().all_video_ids()
@@ -1912,7 +1916,7 @@ def _run_backfill() -> None:
         with _backfill_lock:
             _backfill_state.update(state="complete")
         return
-    folders = list(_iter_corpus_folders())
+    folders = list(_iter_corpus_folders(root))
     with _backfill_lock:
         _backfill_state.update(state="running", current=0, total=len(folders))
     done = 0
@@ -11016,6 +11020,20 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_reyoink(bare)
         if bare == "/extract/reddit":
             return self._handle_extract_reddit(body)
+        if bare == "/corpus/export":
+            # C-03: dump the SQLite-only user data into the corpus folder.
+            try:
+                return self._send_json(200, export_corpus_data())
+            except Exception as e:
+                log.exception("/corpus/export failed")
+                return self._send_json(500, {"ok": False, "error": str(e)})
+        if bare == "/corpus/import":
+            path = ((body or {}).get("path") or "").strip() if isinstance(body, dict) else ""
+            if not path:
+                return self._send_json(400, {"ok": False,
+                                             "error": "path required"})
+            result = import_corpus_data(path)
+            return self._send_json(200 if result.get("ok") else 400, result)
         if bare == "/extract/x":
             return self._handle_extract_x(body)
         if bare.startswith("/tools/"):
@@ -12709,6 +12727,79 @@ def _heal_stale_corpus_paths_at_boot() -> None:
         log.warning("path heal at boot failed (non-fatal): %s", e)
 
 
+# ---- C-03 (CRIT-3): corpus export / import / rebuild ----------------------
+# "Own your data" was ~70% true: the .md/.json corpus lives on disk, but
+# engagement, tags, taste, drafts, workspaces, and style anchors lived only
+# inside index.db, and a rebuilt index came back empty. Export writes those
+# tables into the user-owned corpus folder; import restores them; the
+# rebuild scans sidecars back into the index and then restores the newest
+# export it finds.
+
+EXPORTS_DIRNAME = "_exports"
+
+
+def export_corpus_data(*, output_root: Path | None = None) -> dict:
+    """Write the SQLite-only user data to
+    <output_root>/_exports/uoink-export-<stamp>.json. With the export file
+    sitting beside the corpus files, the folder a user backs up IS their
+    whole library."""
+    root = Path(output_root) if output_root else DESKTOP_ROOT
+    payload = _get_index().export_payload()
+    payload["app_version"] = VERSION
+    exports_dir = root / EXPORTS_DIRNAME
+    exports_dir.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    path = exports_dir / f"uoink-export-{stamp}.json"
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2),
+                    encoding="utf-8")
+    counts = {table: len(rows) for table, rows in payload["tables"].items()}
+    log.info("corpus export -> %s (%s)", path,
+             ", ".join(f"{t}={n}" for t, n in counts.items()))
+    return {"ok": True, "path": str(path), "rows": counts}
+
+
+def import_corpus_data(path) -> dict:
+    """Restore an export file. Merge rules live in Index.import_payload
+    (conservative: never clobbers newer or existing local rows)."""
+    file_path = Path(path)
+    if not file_path.is_file():
+        return {"ok": False, "error": f"{file_path} is not a file"}
+    try:
+        payload = json.loads(file_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as e:
+        return {"ok": False, "error": f"couldn't read the export: {e}"}
+    try:
+        report = _get_index().import_payload(payload)
+    except ValueError as e:
+        return {"ok": False, "error": str(e)}
+    log.info("corpus import <- %s (%s)", file_path,
+             ", ".join(f"{t}+{r['imported']}" for t, r in report.items()))
+    return {"ok": True, "path": str(file_path), "report": report}
+
+
+def rebuild_index_from_disk(*, root: Path | None = None) -> dict:
+    """C-03 gate: index.db is rebuildable from the on-disk corpus. Scans
+    ``root`` (default: current output root) for sidecar folders and indexes
+    every one not already present, then restores the newest export found
+    under <root>/_exports so the SQLite-only tables come back too. Runs
+    synchronously (this is a CLI/triage path, not the boot path)."""
+    scan_root = Path(root) if root else DESKTOP_ROOT
+    idx = _get_index()
+    before = idx.count_corpus()
+    _run_backfill(scan_root)
+    after = idx.count_corpus()
+    restored = None
+    exports_dir = scan_root / EXPORTS_DIRNAME
+    if exports_dir.is_dir():
+        newest = max(exports_dir.glob("uoink-export-*.json"),
+                     key=lambda item: item.name, default=None)
+        if newest is not None:
+            restored = import_corpus_data(newest)
+    return {"ok": True, "scanned_root": str(scan_root),
+            "rows_before": before, "rows_after": after,
+            "indexed": after - before, "restored": restored}
+
+
 def doctor_payload() -> dict:
     """`uoink doctor`: the /diagnose self-check plus the install-migration
     status, for support triage from the console without the popup. C-01
@@ -12733,6 +12824,11 @@ def run_cli(argv: list[str]) -> int:
     - --doctor          : print the /diagnose payload + migration status.
     - --heal-paths      : relink index rows whose saved files moved with
       the output folder (C-05); prints the relink report.
+    - --export-corpus   : write engagement/tags/taste/drafts/workspaces/
+      anchors to <output root>/_exports/uoink-export-<stamp>.json (C-03).
+    - --import-corpus <file> : restore an export (conservative merge).
+    - --rebuild-index [root] : re-index every on-disk sidecar folder, then
+      restore the newest export found under <root>/_exports (C-03).
     - --show-dashboard  : run the server, then open the dashboard window.
     (no flag)           : run the server.
     """
@@ -12757,6 +12853,31 @@ def run_cli(argv: list[str]) -> int:
                              "error": f"{explicit} is not a folder"})
                 return 1
         _print_json(heal_stale_corpus_paths(output_root=explicit))
+        return 0
+    if "--export-corpus" in argv:
+        # C-03: write the SQLite-only user data into the corpus folder.
+        _print_json(export_corpus_data())
+        return 0
+    if "--import-corpus" in argv:
+        position = argv.index("--import-corpus")
+        if position + 1 >= len(argv):
+            _print_json({"ok": False,
+                         "error": "--import-corpus needs a file path"})
+            return 1
+        _print_json(import_corpus_data(argv[position + 1]))
+        return 0
+    if "--rebuild-index" in argv:
+        # C-03: rebuild index.db from on-disk sidecars (+ newest export).
+        # Optional path argument scans a different root.
+        position = argv.index("--rebuild-index")
+        explicit = None
+        if position + 1 < len(argv) and not argv[position + 1].startswith("--"):
+            explicit = Path(argv[position + 1])
+            if not explicit.is_dir():
+                _print_json({"ok": False,
+                             "error": f"{explicit} is not a folder"})
+                return 1
+        _print_json(rebuild_index_from_disk(root=explicit))
         return 0
     main(show_dashboard="--show-dashboard" in argv)
     return 0
