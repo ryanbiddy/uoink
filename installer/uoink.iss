@@ -315,7 +315,13 @@ begin
   // Keep legacy-folder details out of visible installer copy. The real
   // migration source path remains in logs and code, but the wizard text needs
   // to pass the strict user-facing brand audit.
-  MigratePage := CreateCustomPage(wpReady, 'Migrating your previous install',
+  //
+  // IN-12: anchor this after wpSelectDir, not wpReady, so the expectation-
+  // setting note appears BEFORE the user commits on Ready. Anchoring it to
+  // wpReady put another page of prose after the Install click. The page is
+  // pure copy (migration itself runs on the helper's first boot), so its
+  // position has no functional effect on the migration.
+  MigratePage := CreateCustomPage(wpSelectDir, 'Migrating your previous install',
     'Moving your saved videos, settings, and API key safely into Uoink');
   MigrateText := TNewStaticText.Create(MigratePage);
   MigrateText.Parent := MigratePage.Surface;
