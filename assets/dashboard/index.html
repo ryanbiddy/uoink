@@ -1170,6 +1170,65 @@
       white-space: pre-wrap;
     }
 
+    .get-extension {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(249, 115, 22, 0.28);
+      border-radius: var(--card-radius);
+      padding: 16px 18px;
+      background: rgba(194, 65, 12, 0.08);
+    }
+
+    .get-extension-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .get-extension-head h2 {
+      color: var(--cream);
+      font-size: 20px;
+      line-height: 1.2;
+      margin: 2px 0 6px;
+    }
+
+    .get-extension-head p {
+      margin: 0;
+      max-width: 62ch;
+      color: var(--muted);
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .get-extension-head .button {
+      flex-shrink: 0;
+    }
+
+    .get-extension-steps {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding-left: 20px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .get-extension-steps code,
+    .get-extension-head code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--cream);
+    }
+
+    .get-extension-note {
+      margin: 0;
+      color: var(--dim);
+      font-size: 13px;
+    }
+
     .source-map {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -3482,9 +3541,10 @@
           <div id="libraryEmpty" class="empty-state hidden">
             <div>
               <h2>No saved uoinks yet.</h2>
-              <p>Save a video, podcast, or article. It will show up here with transcript, screenshots when available, and creator credit.</p>
+              <p>Save a video, podcast, or article and it shows up here with transcript, screenshots when available, and creator credit. New here? Load the browser button first, then click Uoink on any video.</p>
               <div class="inline-row" style="justify-content:center;margin-top:20px">
-                <button class="button primary" type="button" data-tab-button-proxy="sources">Open Sources</button>
+                <button class="button primary" type="button" data-open-extension>Get the extension</button>
+                <button class="button ghost" type="button" data-tab-button-proxy="sources">Open Sources</button>
               </div>
             </div>
           </div>
@@ -3507,6 +3567,22 @@
             <a href="https://uoink.app/features/universal-page-uoink" target="_blank" rel="noreferrer">Learn: Universal Page Uoink</a>
             <a href="https://uoink.app/twitter" target="_blank" rel="noreferrer">Learn: X Video</a>
             <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
+          </div>
+          <div class="get-extension" id="getExtensionCard">
+            <div class="get-extension-head">
+              <div>
+                <div class="eyebrow">Browser button</div>
+                <h2>Get the extension</h2>
+                <p>The Uoink button lives in a browser extension you load once. It's already on this machine at <code>%LOCALAPPDATA%\Uoink\extension</code>.</p>
+              </div>
+              <button class="button primary" type="button" data-open-extension>Open extension folder</button>
+            </div>
+            <ol class="get-extension-steps">
+              <li>Open your extensions page: <code>chrome://extensions</code> (Chrome), <code>edge://extensions</code> (Edge), or <code>brave://extensions</code> (Brave).</li>
+              <li>Turn on <strong>Developer mode</strong> in the top right.</li>
+              <li>Click <strong>Load unpacked</strong> and pick the <code>extension</code> folder that just opened.</li>
+            </ol>
+            <p class="get-extension-note">Chrome Web Store review is still pending, so you load it unpacked for now.</p>
           </div>
           <div class="source-map" id="sourceMap" role="list" aria-label="Supported source types"></div>
         </section>
@@ -6568,8 +6644,8 @@
         },
         empty: {
           title: "No saved uoinks yet.",
-          copy: "Save a video, podcast, or article. It will show up here with transcript, screenshots when available, and creator credit.",
-          action: `<button class="button primary" type="button" data-tab-button-proxy="sources">Open Sources</button>`,
+          copy: "Save a video, podcast, or article and it shows up here with transcript, screenshots when available, and creator credit. New here? Load the browser button first, then click Uoink on any video.",
+          action: `<button class="button primary" type="button" data-open-extension>Get the extension</button><button class="button ghost" type="button" data-tab-button-proxy="sources">Open Sources</button>`,
         },
       };
       const stateCopy = states[mode] || states.empty;
@@ -9939,6 +10015,14 @@
         const openYouTubeButton = event.target.closest("[data-open-youtube]");
         if (openYouTubeButton) {
           openLastYoutube();
+          return;
+        }
+        const openExtensionButton = event.target.closest("[data-open-extension]");
+        if (openExtensionButton) {
+          authFetch("/open-extension").then(
+            () => showToast("Opened the extension folder. Load it unpacked from there."),
+            () => showToast("Couldn't open it. The extension lives at %LOCALAPPDATA%\\Uoink\\extension.")
+          );
           return;
         }
         const clearLibraryButton = event.target.closest("[data-clear-library-filters]");
