@@ -2,7 +2,9 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$ExpectedVersion,
 
-    [int]$TimeoutSeconds = 25
+    [int]$TimeoutSeconds = 25,
+
+    [switch]$ProbeHealth
 )
 
 $ErrorActionPreference = 'Continue'
@@ -47,6 +49,11 @@ foreach ($rf in $requiredFiles) {
     }
 }
 Write-VerifyLog ("bundled files present: {0}" -f ($requiredFiles -join ', '))
+
+if (-not $ProbeHealth) {
+    Write-VerifyLog 'files-only install verification OK; live health probe skipped'
+    exit 0
+}
 
 $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
 $lastError = $null

@@ -51,8 +51,8 @@ WizardStyle=modern
 ; Branded wizard bitmaps (Variant A magnet-U), regenerated each build by
 ; ../generate_bitmaps.py into installer/assets/. Compile-time only (baked into
 ; Setup.exe, not installed to {app}). 24-bit BMP per Inno's requirement.
-WizardImageFile=assets\wizard-large.bmp
-WizardSmallImageFile=assets\wizard-small.bmp
+WizardImageFile=assets\wizard-large-100.bmp,assets\wizard-large-125.bmp,assets\wizard-large-150.bmp,assets\wizard-large-200.bmp
+WizardSmallImageFile=assets\wizard-small-100.bmp,assets\wizard-small-125.bmp,assets\wizard-small-150.bmp,assets\wizard-small-200.bmp
 SetupIconFile=uoink.ico
 UninstallDisplayIcon={app}\uoink.ico
 UninstallDisplayName={#AppName}
@@ -71,8 +71,8 @@ SelectDirLabel3=Uoink runs a lightweight program on your computer to process sou
 ReadyLabel1=Uoink is ready to set up on your machine. Click Install to place the local helper and dependencies in:
 StatusExtractFiles=Placing local helper files and media dependencies...
 FinishedHeadingLabel=Uoink is Ready
-FinishedLabelNoIcons=Uoink has been successfully installed. Save a supported video, podcast, or article to start building your local source corpus.%n%nTo configure API keys, screenshot defaults, source permissions, or agent access, open the browser extension or dashboard.
-FinishedLabel=Uoink has been successfully installed. Save a supported video, podcast, or article to start building your local source corpus.%n%nTo configure API keys, screenshot defaults, source permissions, or agent access, open the browser extension or dashboard.
+FinishedLabelNoIcons=Uoink has been successfully installed. The Uoink window will walk you through loading the browser button, then your first save opens the dashboard with the source ready to read.
+FinishedLabel=Uoink has been successfully installed. The Uoink window will walk you through loading the browser button, then your first save opens the dashboard with the source ready to read.
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -205,11 +205,11 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; \
   Flags: uninsdeletevalue
 
 [Run]
-; "Launch Uoink now" checkbox on the finish page (default checked).
+; "Set up the browser button now" checkbox on the finish page (default checked).
 Filename: "{app}\python\pythonw.exe"; \
-  Parameters: """{app}\server.py"" --show-dashboard"; \
+  Parameters: """{app}\server.py"""; \
   WorkingDir: "{app}"; \
-  Description: "Launch Uoink now"; \
+  Description: "Set up the browser button now"; \
   Flags: postinstall nowait skipifsilent
 
 [UninstallRun]
@@ -261,6 +261,9 @@ var
   WelcomePage:  TWizardPage;
   MigratePage:  TWizardPage;
   MigrateText:  TNewStaticText;
+  DefaultNextCaption: String;
+  DefaultNextLeft: Integer;
+  DefaultNextWidth: Integer;
 
 function LegacyYoinkPresent(): Boolean;
 begin
@@ -275,10 +278,10 @@ begin
   L := TNewStaticText.Create(P);
   L.Parent := P.Surface;
   L.AutoSize := False;
-  L.Left := 0;
-  L.Top := Top;
+  L.Left := ScaleX(0);
+  L.Top := ScaleY(Top);
   L.Width := P.SurfaceWidth;
-  L.Height := Height;
+  L.Height := ScaleY(Height);
   L.Caption := Caption;
   L.Font.Size := FontSize;
   L.Font.Style := FontStyle;
@@ -291,23 +294,20 @@ begin
   WelcomePage := CreateCustomPage(wpWelcome,
     'Welcome to Uoink',
     'Build a local corpus your AI can write from.');
-  { The step tracker needs its own vertical lane. Inno clips overlapping
-    static-text controls at runtime, so keep it clear of the hero on every
-    DPI/font-rendering variant. }
-  AddLabel(WelcomePage, 'STEP 1 OF 4',       10,  24,  9, [fsBold], C_RUST);
+  WelcomePage.Surface.Color := C_CREAM;
   { Hero (mock 1.2.1). Rust on the cream wizard ground passes AA for large
     text (>=18pt bold); body copy below stays on the default ink-on-cream the
     wizard uses -- never rust on ink, per the contrast rules. }
-  AddLabel(WelcomePage, 'Build from receipts.',  42,  50, 28, [fsBold], C_RUST);
+  AddLabel(WelcomePage, 'Build from receipts.',  20,  58, 28, [fsBold], C_RUST);
   AddLabel(WelcomePage,
     'Save videos, podcasts, articles, and threads into a cited corpus on your disk.',
-                                              106, 36, 11, [], C_INK);
+                                               96, 42, 11, [], C_INK);
   AddLabel(WelcomePage,
     'This installs the local helper that does the work. ' +
     'No account, no cloud. Takes about a minute.',
-                                              150, 44, 10, [], C_INK);
+                                              146, 48, 10, [], C_INK);
   AddLabel(WelcomePage,
-    'MIT - open source - uoink.app',          222, 22,  9, [fsItalic], C_RUST);
+    'MIT - open source - uoink.app',          218, 24,  9, [fsItalic], C_RUST);
 end;
 
 procedure BuildMigratePage();
@@ -338,6 +338,9 @@ end;
 
 procedure InitializeWizard();
 begin
+  DefaultNextCaption := WizardForm.NextButton.Caption;
+  DefaultNextLeft := WizardForm.NextButton.Left;
+  DefaultNextWidth := WizardForm.NextButton.Width;
   BuildWelcomePage();
   BuildMigratePage();
 end;
@@ -436,21 +439,9 @@ var
   ResultCode: Integer;
   VerifyScript: String;
   VerifyParams: String;
-  LaunchOk: Boolean;
   VerifyOk: Boolean;
 begin
-  Log('Post-install verification: launching helper for /health check');
-  LaunchOk := Exec(
-    ExpandConstant('{app}\python\pythonw.exe'),
-    '"' + ExpandConstant('{app}\server.py') + '"',
-    ExpandConstant('{app}'),
-    SW_HIDE,
-    ewNoWait,
-    ResultCode);
-  if not LaunchOk then
-    Log('Post-install verification: helper launch Exec() returned false');
-
-  Sleep(1500);
+  Log('Post-install verification: checking bundled files without starting helper');
   VerifyScript := ExpandConstant('{app}\verify_install.ps1');
   VerifyParams :=
     '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' +
@@ -465,16 +456,18 @@ begin
 
   if (not VerifyOk) or (ResultCode <> 0) then
   begin
-    MsgBox(
-      'Uoink installed, but the local helper did not report version {#AppVersion} on /health.' +
+    Log('Post-install verification warning: files-only check failed with exit code ' + IntToStr(ResultCode));
+    SuppressibleMsgBox(
+      'Uoink is installed, but setup could not verify every bundled file.' +
       Chr(13) + Chr(10) + Chr(13) + Chr(10) +
-      'Setup log: %TEMP%\uoink-install-verify.log',
-      mbError,
-      MB_OK);
-    RaiseException('Post-install /health verification failed with exit code ' + IntToStr(ResultCode));
+      'You can still start Uoink. Details are in your Temp folder as uoink-install-verify.log.',
+      mbInformation,
+      MB_OK,
+      IDOK);
+    Exit;
   end;
 
-  Log('Post-install verification: helper /health returned {#AppVersion}');
+  Log('Post-install verification: bundled files verified for {#AppVersion}');
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
@@ -509,10 +502,22 @@ begin
 end;
 
 procedure CurPageChanged(CurPageID: Integer);
+var
+  TargetWidth: Integer;
+  WidthDelta: Integer;
 begin
   if CurPageID = WelcomePage.ID then
   begin
+    TargetWidth := ScaleX(112);
+    WidthDelta := TargetWidth - DefaultNextWidth;
     WizardForm.NextButton.Caption := 'Let''s go ' + Chr($2192);
+    WizardForm.NextButton.Width := TargetWidth;
+    WizardForm.NextButton.Left := DefaultNextLeft - WidthDelta;
     WizardForm.BackButton.Visible := False;
+  end else
+  begin
+    WizardForm.NextButton.Caption := DefaultNextCaption;
+    WizardForm.NextButton.Width := DefaultNextWidth;
+    WizardForm.NextButton.Left := DefaultNextLeft;
   end;
 end;

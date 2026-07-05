@@ -12331,6 +12331,7 @@ def main(*, show_dashboard: bool = False):
         # the main thread; pythonw.exe so the launch doesn't flash a console.
         # Non-fatal -- if pywebview / WebView2 isn't available the boot toast is
         # the fallback.
+        splash_spawned = False
         try:
             _splash_sentinel = DATA_ROOT / ".first-run-done"
             if _splash_should_spawn(_splash_sentinel):
@@ -12338,9 +12339,12 @@ def main(*, show_dashboard: bool = False):
                 _splash_pyw = str(HERE / "python" / "pythonw.exe")
                 subprocess.Popen([_splash_pyw, _splash_script],
                                  creationflags=0x08000000)  # CREATE_NO_WINDOW
+                splash_spawned = True
                 log.info("splash: spawned (version %s)", VERSION)
         except Exception as e:
             log.warning("splash: failed to spawn (non-fatal): %s", e)
+    else:
+        splash_spawned = False
 
     if show_dashboard:
         _spawn_dashboard_window(reason="launch-flag")
@@ -12354,7 +12358,9 @@ def main(*, show_dashboard: bool = False):
     # double-notify. If the install migration just ran, fire the one-time
     # post-migration toast instead of the regular ready toast, gated on
     # a settings flag so it never repeats.
-    if not _maybe_post_migration_toast():
+    if splash_spawned:
+        log.info("toast: skipped regular ready toast while first-run splash is visible")
+    elif not _maybe_post_migration_toast():
         maybe_toast(
             "Uoink is Active & Ready ✓",
             "Click the rust U under any YouTube video to pull context. "
