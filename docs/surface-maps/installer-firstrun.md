@@ -22,7 +22,9 @@ Directory and Ready:
 Migration:
 
 - `BuildMigratePage()` creates a legacy-install note for machines with the old local folder.
+- The page is anchored after `wpSelectDir`, so it appears before the Ready commit click, not after Install. Order for an upgrader: Welcome, Select dir, Migrate, Ready, Install.
 - `ShouldSkipPage()` hides it on clean installs.
+- The page is expectation-setting copy only. The migration itself runs on the helper's first boot, so the page position has no functional effect.
 
 Finish:
 
