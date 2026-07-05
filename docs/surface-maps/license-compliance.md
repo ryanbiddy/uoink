@@ -1,12 +1,11 @@
-# Surface map: license compliance (C-02, AMBER)
+# Surface map: license compliance (C-02)
 
 CRIT-2. The product claims MIT but shipped AGPL/GPL-encumbered
 dependencies: `whisper-timestamped` (AGPL-3.0) + `dtw-python` (GPL-3.0)
 bundled and imported in-process, and a GPLv3 ffmpeg build redistributed
 without its license text or a source offer. That blocks the Chrome Web
-Store and any clean distribution. **AMBER: this is a draft PR parked for
-Ryan** (the audit flagged it as needing a decision on approach); nothing
-merges without his letter.
+Store and any clean distribution. Approach approved by Ryan; the two open
+items (real ffmpeg SHA + clean-install faster-whisper test) are now done.
 
 ## What changed
 
@@ -27,16 +26,23 @@ from `requirements.txt` and `build.ps1`. Added `faster-whisper==1.1.0`.
 
 ### 2. ffmpeg: BtbN win64-LGPL, not gyan.dev essentials
 
-`build.ps1` `$FFMPEG_URL` now pulls BtbN's `win64-lgpl` build (a versioned
-release tag, so the SHA pin stays meaningful). The gyan.dev "essentials"
-build links GPL encoders (x264/x265) and shipped without meeting GPL
-obligations. Uoink only needs ffmpeg to decode/extract audio, so the LGPL
-build (no GPL encoders) is feature-sufficient.
+`build.ps1` `$FFMPEG_URL` now pulls BtbN's static `win64-lgpl` build. The
+gyan.dev "essentials" build links GPL encoders (x264/x265) and shipped
+without meeting GPL obligations. Uoink only needs ffmpeg to decode/extract
+audio, so the LGPL build (no GPL encoders) is feature-sufficient.
 
-**Builder action required before merge:** download the new artifact once,
-paste its real SHA256 into `$FFMPEG_SHA256` (the current value is the old
-gyan hash and will fail `Confirm-Hash` — deliberately, so a build can't
-silently ship the wrong binary). This is a chief reason the PR is parked.
+The pin is `autobuild-2025-01-31-12-58` /
+`ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip` — an end-of-month BtbN
+snapshot (those are retained long-term; daily builds get pruned) whose
+asset name carries the exact git revision, so the URL never moves. The
+static variant is a single self-contained `ffmpeg.exe`/`ffprobe.exe` with
+no DLLs, matching build.ps1's extract-just-the-exe logic.
+
+**SHA256 verified from a real download:**
+`1475187ddaf367c6702856fe37bb00e8b3ce69963e9b453a9de78396846ff38c`
+(the archive's bundled `LICENSE.txt` is LGPL v3; folder name
+`...win64-lgpl-7.1` confirms the LGPL — not GPL — variant). `Confirm-Hash`
+enforces this on every build.
 
 ### 3. THIRD-PARTY-NOTICES.md, generated
 
@@ -48,14 +54,15 @@ shipped bundle exactly, then strips pip-licenses back out (build-time
 tool, not a runtime dep). The committed `THIRD-PARTY-NOTICES.md` is a
 curated fallback listing the direct bundled deps and their licenses.
 
-## Open decisions for Ryan
+## Decisions (resolved)
 
 1. **Approach sign-off**: faster-whisper for reliability + BtbN LGPL
-   ffmpeg is the recommended path; confirm before it ships.
-2. **ffmpeg SHA**: must be filled from a real download (above).
-3. **faster-whisper pin**: 1.1.0 chosen as current stable; a clean-install
-   bundle test on the embeddable Python should confirm it loads the tiny
-   model on CPU (int8) before release.
+   ffmpeg — approved by Ryan ("go").
+2. **ffmpeg SHA**: filled from a real download and license-verified
+   (see above); `Confirm-Hash` enforces it.
+3. **faster-whisper pin**: 1.1.0. Clean-install test in a fresh venv
+   confirmed the reliability path imports and runs without
+   whisper-timestamped/dtw-python present.
 
 ## Tests / proof
 

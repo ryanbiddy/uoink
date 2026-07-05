@@ -87,7 +87,12 @@ $GETPIP_URL     = 'https://bootstrap.pypa.io/get-pip.py'
 # below stays meaningful. THIRD-PARTY-NOTICES.md records the LGPL text +
 # where to get ffmpeg's source.
 $FFMPEG_VERSION = 'n7.1'
-$FFMPEG_URL     = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-01-12-59/ffmpeg-$FFMPEG_VERSION-win64-lgpl.zip"
+# BtbN publishes dated release tags; the end-of-month builds are retained
+# long-term (daily builds get pruned), so we pin to a monthly snapshot. The
+# asset name carries the exact git revision, so this URL is fully pinned --
+# it never moves. "win64-lgpl" is the static LGPL variant (no GPL encoders,
+# single self-contained ffmpeg.exe -- no DLLs to ship).
+$FFMPEG_URL     = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-31-12-58/ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip"
 # yt-dlp pip pin -- bump after compatibility-testing a new release.
 $YTDLP_VERSION  = '2026.03.17'
 # Pillow is used for the multimodal paste-corpus generator (resize +
@@ -127,7 +132,7 @@ $WHISPERX_VERSION = '3.8.6'
 # "SHA256 mismatch" if anything changes; Confirm-Hash deletes the bad cached
 # file so a re-run pulls fresh.
 $PYTHON_SHA256 = "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b"
-$FFMPEG_SHA256 = "6f58ce889f59c311410f7d2b18895b33c03456463486f3b1ebc93d97a0f54541"
+$FFMPEG_SHA256 = "1475187ddaf367c6702856fe37bb00e8b3ce69963e9b453a9de78396846ff38c"
 $GETPIP_SHA256 = "66904bccb878e363db6236ea900e6935e507dcb887e9f178f6212edfe7f46a76"
 
 # ---- Helpers ------------------------------------------------------------
@@ -256,7 +261,7 @@ if (-not $migrationFiles -or $migrationFiles.Count -eq 0) {
 # ---- 1. Download dependencies ------------------------------------------
 Write-Step 'Fetching dependencies'
 $pythonZip = Join-Path $CacheDir "python-$PYTHON_VERSION-embed-amd64.zip"
-$ffmpegZip = Join-Path $CacheDir 'ffmpeg-release-essentials.zip'
+$ffmpegZip = Join-Path $CacheDir 'ffmpeg-win64-lgpl.zip'
 $getPipPy  = Join-Path $CacheDir 'get-pip.py'
 
 Get-CachedFile $PYTHON_URL $pythonZip
@@ -359,7 +364,7 @@ $ffmpegTmp = Join-Path $BuildDir '_ffmpeg_tmp'
 if (Test-Path $ffmpegTmp) { Remove-Item -Recurse -Force $ffmpegTmp }
 Expand-Archive -Path $ffmpegZip -DestinationPath $ffmpegTmp -Force
 $ffmpegExe = Get-ChildItem -Path $ffmpegTmp -Recurse -Filter 'ffmpeg.exe' | Select-Object -First 1
-if (-not $ffmpegExe) { throw 'ffmpeg.exe not found inside the gyan.dev archive' }
+if (-not $ffmpegExe) { throw 'ffmpeg.exe not found inside the BtbN LGPL archive' }
 Copy-Item $ffmpegExe.FullName "$StagingDir\bin\ffmpeg.exe" -Force
 $ffprobeExe = Get-ChildItem -Path $ffmpegTmp -Recurse -Filter 'ffprobe.exe' | Select-Object -First 1
 if ($ffprobeExe) {
