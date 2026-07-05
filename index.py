@@ -539,6 +539,113 @@ class Index:
             ).fetchall()
         return [dict(r) for r in rows]
 
+    # ---- C-03 (CRIT-3): export / import of the SQLite-only user data ----
+    # The corpus .md/.json files live on disk and are already user-owned;
+    # these six tables existed ONLY inside index.db, so a lost or corrupt
+    # database silently ate engagement history, tags, taste, drafts,
+    # workspaces, and style anchors. Export writes them to a portable JSON
+    # payload; import restores it (fresh-restore exact, merge conservative).
+    EXPORT_TABLES = ("engagement_events", "yoink_tags", "memory_layer",
+                     "writing_drafts", "workspaces", "style_anchors")
+    EXPORT_FORMAT = "uoink-corpus-export"
+    EXPORT_FORMAT_VERSION = 1
+
+    def export_payload(self) -> dict:
+        tables: dict[str, list[dict]] = {}
+        with self._lock:
+            for table in self.EXPORT_TABLES:
+                rows = self._conn.execute(f"SELECT * FROM {table}").fetchall()
+                tables[table] = [dict(r) for r in rows]
+        return {
+            "format": self.EXPORT_FORMAT,
+            "format_version": self.EXPORT_FORMAT_VERSION,
+            "exported_at": _now_iso(),
+            "tables": tables,
+        }
+
+    def import_payload(self, payload: dict) -> dict:
+        """Restore an export. Merge rules, conservative on purpose:
+
+        - engagement_events: surrogate id dropped; a row identical on
+          (video_id, event_type, ts_utc, source) is skipped.
+        - memory_layer: newer updated_at wins; older imports never clobber.
+        - id-keyed tables (drafts, workspaces, style_anchors): skipped when
+          the id already exists (never overwrite local work with imports).
+        - yoink_tags: INSERT OR IGNORE on the (video_id, tag) PK.
+
+        Returns {table: {imported, skipped}} per table."""
+        if not isinstance(payload, dict) \
+                or payload.get("format") != self.EXPORT_FORMAT:
+            raise ValueError("not a uoink corpus export")
+        if int(payload.get("format_version") or 0) > self.EXPORT_FORMAT_VERSION:
+            raise ValueError(
+                "this export was written by a newer Uoink; update first")
+        report: dict[str, dict] = {}
+        with self._lock:
+            for table in self.EXPORT_TABLES:
+                rows = (payload.get("tables") or {}).get(table) or []
+                table_cols = {r[1] for r in self._conn.execute(
+                    f"PRAGMA table_info({table})")}
+                imported = skipped = 0
+                for row in rows:
+                    if not isinstance(row, dict):
+                        skipped += 1
+                        continue
+                    data = {k: v for k, v in row.items() if k in table_cols}
+                    if not data:
+                        skipped += 1
+                        continue
+                    if table == "engagement_events":
+                        data.pop("id", None)
+                        exists = self._conn.execute(
+                            "SELECT 1 FROM engagement_events WHERE video_id=? "
+                            "AND event_type=? AND ts_utc=? AND source=?",
+                            (data.get("video_id"), data.get("event_type"),
+                             data.get("ts_utc"), data.get("source"))
+                        ).fetchone()
+                        if exists:
+                            skipped += 1
+                            continue
+                    elif table == "memory_layer":
+                        existing = self._conn.execute(
+                            "SELECT updated_at FROM memory_layer WHERE key=?",
+                            (data.get("key"),)).fetchone()
+                        if existing and str(existing["updated_at"] or "") \
+                                >= str(data.get("updated_at") or ""):
+                            skipped += 1
+                            continue
+                        self._conn.execute(
+                            "INSERT INTO memory_layer (key, value, updated_at) "
+                            "VALUES (?,?,?) ON CONFLICT(key) DO UPDATE SET "
+                            "value=excluded.value, "
+                            "updated_at=excluded.updated_at",
+                            (data.get("key"), data.get("value"),
+                             data.get("updated_at")))
+                        imported += 1
+                        continue
+                    elif data.get("id") is not None:
+                        exists = self._conn.execute(
+                            f"SELECT 1 FROM {table} WHERE id=?",
+                            (data["id"],)).fetchone()
+                        if exists:
+                            skipped += 1
+                            continue
+                    columns = ", ".join(data.keys())
+                    marks = ", ".join("?" for _ in data)
+                    try:
+                        cur = self._conn.execute(
+                            f"INSERT OR IGNORE INTO {table} ({columns}) "
+                            f"VALUES ({marks})", tuple(data.values()))
+                        if cur.rowcount:
+                            imported += 1
+                        else:
+                            skipped += 1
+                    except sqlite3.Error:
+                        skipped += 1
+                report[table] = {"imported": imported, "skipped": skipped}
+            self._conn.commit()
+        return report
+
     def enrich_yoinks(self, rows: list[dict]) -> list[dict]:
         """Batch-annotate a page of yoink rows with index-side enrichment
         (Sprint 19.6 / Fix 4). Adds, in place:
@@ -653,6 +760,10 @@ class Index:
                 "INSERT INTO engagement_events (video_id, event_type, ts_utc, source) "
                 "VALUES (?, ?, ?, ?)",
                 (video_id, event_type, ts, source))
+            # C-03 (CRIT-3): without this commit the event sat in an open
+            # transaction until some other write path happened to commit,
+            # and a process kill silently dropped it.
+            self._conn.commit()
             return cur.lastrowid or 0
 
     def _decayed(self, weight: float, age_days: float) -> float:
@@ -736,6 +847,7 @@ class Index:
         with self._lock:
             self._conn.execute(
                 f"UPDATE yoinks SET {set_sql} WHERE video_id=?", params)
+            self._conn.commit()  # C-03: facets must survive a kill
         return len(pairs)
 
     def add_tags(self, video_id: str, tags, *, source: str = "agent") -> int:
@@ -758,6 +870,8 @@ class Index:
                     added += 1
                 except sqlite3.IntegrityError:
                     pass
+            if added:
+                self._conn.commit()  # C-03: tags must survive a kill
         return added
 
     def get_tags(self, video_id: str) -> list[str]:
