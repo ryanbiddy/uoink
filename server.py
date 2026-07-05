@@ -4408,6 +4408,10 @@ _KNOWN_PLATFORMS = (PLATFORM_YOUTUBE, PLATFORM_TWITTER, PLATFORM_GENERIC)
 # but the sidecar still records the raw host so a future Codex/AG pass
 # can expand the recognized list without a helper-side migration.
 _PLATFORM_HOST_HINTS: dict[str, str] = {
+    "reddit.com": "reddit",
+    "www.reddit.com": "reddit",
+    "old.reddit.com": "reddit",
+    "new.reddit.com": "reddit",
     # Vimeo, Dailymotion, etc. are TBD -- left to Codex's chip work
     # so this PR stays focused on the helper-side extractor surface.
 }

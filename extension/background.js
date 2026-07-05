@@ -18,6 +18,8 @@ importScripts("lib/extract.js", "lib/ui.js");
 const MENU_LINK = "stc-extract-link";
 const MENU_PAGE = "stc-extract-page";
 const MENU_SESSION = "stc-extract-session";
+const MENU_REDDIT_LINK = "stc-extract-reddit-link";
+const MENU_REDDIT_PAGE = "stc-extract-reddit-page";
 const ICON_URL = chrome.runtime.getURL("icons/icon128.png");
 const OFFSCREEN_URL = "offscreen.html";
 // CLIPBOARD covers the existing copy path; MATCH_MEDIA lets the doc stay
@@ -38,6 +40,7 @@ const LINK_PATTERNS = [
   "*://twitter.com/*/status/*",
   "*://mobile.twitter.com/*/status/*",
   "*://www.x.com/*/status/*",
+  "*://*.reddit.com/r/*/comments/*",
 ];
 const PAGE_PATTERNS = [
   "https://www.youtube.com/watch*",
@@ -46,6 +49,7 @@ const PAGE_PATTERNS = [
   "https://m.youtube.com/shorts/*",
   "*://x.com/*/status/*",
   "*://twitter.com/*/status/*",
+  "*://*.reddit.com/r/*/comments/*",
 ];
 
 // ---- Lifecycle ------------------------------------------------------------
@@ -178,17 +182,32 @@ chrome.storage.onChanged.addListener((changes, area) => {
 async function rebuildContextMenus() {
   await new Promise((r) => chrome.contextMenus.removeAll(r));
 
+  // YouTube / general video
   chrome.contextMenus.create({
     id: MENU_LINK,
     title: "Uoink video link",
     contexts: ["link"],
-    targetUrlPatterns: LINK_PATTERNS,
+    targetUrlPatterns: LINK_PATTERNS.filter(p => !p.includes("reddit.com")),
   });
   chrome.contextMenus.create({
     id: MENU_PAGE,
     title: "Uoink video",
     contexts: ["page", "video"],
-    documentUrlPatterns: PAGE_PATTERNS,
+    documentUrlPatterns: PAGE_PATTERNS.filter(p => !p.includes("reddit.com")),
+  });
+
+  // Reddit thread
+  chrome.contextMenus.create({
+    id: MENU_REDDIT_LINK,
+    title: "Uoink Reddit thread link",
+    contexts: ["link"],
+    targetUrlPatterns: ["*://*.reddit.com/r/*/comments/*"],
+  });
+  chrome.contextMenus.create({
+    id: MENU_REDDIT_PAGE,
+    title: "Uoink Reddit thread",
+    contexts: ["page"],
+    documentUrlPatterns: ["*://*.reddit.com/r/*/comments/*"],
   });
 
   const active = await getActiveFromStorage();
@@ -209,10 +228,10 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   let raw = null;
   let kind = "extract";
 
-  if (info.menuItemId === MENU_LINK) {
+  if (info.menuItemId === MENU_LINK || info.menuItemId === MENU_REDDIT_LINK) {
     raw = info.linkUrl;
     kind = "extract";
-  } else if (info.menuItemId === MENU_PAGE) {
+  } else if (info.menuItemId === MENU_PAGE || info.menuItemId === MENU_REDDIT_PAGE) {
     raw = info.pageUrl || (tab && tab.url);
     kind = "extract";
   } else if (info.menuItemId === MENU_SESSION) {
@@ -224,6 +243,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   let normalized = STC.normalizeYouTubeUrl(raw || "");
   let isTwitter = false;
+  let isReddit = false;
   if (!normalized) {
     normalized = STC.normalizeTwitterUrl(raw || "");
     if (normalized) {
@@ -231,7 +251,13 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     }
   }
   if (!normalized) {
-    notify("Invalid URL", "Couldn't find a YouTube video or X/Twitter post in that link.");
+    normalized = STC.normalizeRedditUrl(raw || "");
+    if (normalized) {
+      isReddit = true;
+    }
+  }
+  if (!normalized) {
+    notify("Invalid URL", "Couldn't find a YouTube video, X/Twitter post, or Reddit thread in that link.");
     return;
   }
 
@@ -239,6 +265,9 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   const job = { kind, url: normalized, interval, addedAt: Date.now() };
   if (isTwitter) {
     job.useExtractAny = true;
+  }
+  if (isReddit) {
+    job.useReddit = true;
   }
   if (kind === "session_add") {
     const active = await getActiveFromStorage();
@@ -319,7 +348,12 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           sendResponse({ data: { ok: false, error: "Queue full, wait a few minutes" } });
           return;
         }
-        const data = await STC.postExtract(msg.url, msg.interval);
+        let data;
+        if (STC.normalizeRedditUrl(msg.url)) {
+          data = await STC.postExtractReddit(msg.url, msg.interval);
+        } else {
+          data = await STC.postExtract(msg.url, msg.interval);
+        }
         sendResponse({ data });
         if (data && data.ok) tryOpenPopup();
       } catch (e) {
@@ -683,6 +717,8 @@ async function runExtractJob(job) {
   try {
     if (job.useExtractAny) {
       data = await STC.postExtractAny(job.url, job.interval);
+    } else if (job.useReddit) {
+      data = await STC.postExtractReddit(job.url, job.interval);
     } else {
       data = await STC.postExtract(job.url, job.interval);
     }
