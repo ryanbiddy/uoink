@@ -39,6 +39,7 @@ $requiredFiles = @(
     'source_manifest.py',
     'openapi_bridge.py',
     'reddit_extractor.py',
+    'x_extractor.py',
     'defaults\style_anchors.json'
 )
 foreach ($rf in $requiredFiles) {

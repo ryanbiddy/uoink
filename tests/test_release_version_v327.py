@@ -1,6 +1,6 @@
-"""Cross-file release version contract for v3.2.6.
+"""Cross-file release version contract for v3.2.7.
 
-Run: python tests/test_release_version_v326.py
+Run: python tests/test_release_version_v327.py
 """
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-EXPECTED = "3.2.6"
+EXPECTED = "3.2.7"
 
 
 def match(path: str, pattern: str) -> str:
