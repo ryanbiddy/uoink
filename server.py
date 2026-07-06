@@ -4665,6 +4665,134 @@ def _normalize_playlist_url(raw: str) -> str | None:
     return f"https://www.youtube.com/playlist?list={list_id}"
 
 
+# V-2a: shape-only signal that a URL is a podcast/RSS feed. Feeds are just
+# http(s) URLs, so there is no way to be certain from the string alone. We
+# only claim "podcast feed" when the URL clearly looks like one; everything
+# else falls through to the generic web-page path. This keeps the chip
+# honest instead of guessing wrong.
+_FEED_URL_HINT_RE = re.compile(
+    r"(\.(rss|xml)$|/(feed|feeds|rss|podcast|podcasts)(/|$)|[?&]format=(rss|xml))",
+    re.IGNORECASE)
+
+
+def _looks_like_feed_url(raw: str) -> bool:
+    if not raw or not isinstance(raw, str):
+        return False
+    try:
+        u = urlparse(raw if "://" in raw else "https://" + raw)
+    except ValueError:
+        return False
+    if u.scheme not in ("http", "https"):
+        return False
+    host = (u.hostname or "").lower()
+    if host.startswith("feeds.") or host.startswith("feed."):
+        return True
+    probe = f"{u.path}?{u.query}" if u.query else u.path
+    return bool(_FEED_URL_HINT_RE.search(probe))
+
+
+# V-2a: the single detection brain behind the dashboard's universal capture
+# box and GET /detect. It composes the validators that already ship
+# (_normalize_youtube_url, _normalize_playlist_url, _normalize_twitter_url,
+# reddit_extractor.is_reddit_thread_url, _normalize_any_url) plus
+# _detect_platform_from_url, so detection can never drift from what the
+# extension and the individual capture routes actually accept. Precedence
+# matters: a YouTube watch URL that also carries a list= param is a video
+# (they are watching a video), so video is checked before playlist.
+_CAPTURE_SOURCES = {
+    "youtube_video": {
+        "label": "YouTube video",
+        "endpoint": "/extract",
+        "payload_key": "url",
+        "note": "",
+    },
+    "youtube_playlist": {
+        "label": "YouTube playlist",
+        "endpoint": "/playlist/start",
+        "payload_key": "url",
+        "note": "Captures every video in the playlist, up to the cap.",
+    },
+    "x_video": {
+        "label": "X video",
+        "endpoint": "/extract",
+        "payload_key": "url",
+        "note": "Captures the video only. Tweet and thread text isn't "
+                "supported yet.",
+    },
+    "reddit_thread": {
+        "label": "Reddit thread",
+        "endpoint": "/extract/reddit",
+        "payload_key": "url",
+        "note": "",
+    },
+    "podcast_feed": {
+        "label": "Podcast feed",
+        "endpoint": "/podcasts/feeds",
+        "payload_key": "feed_url",
+        "note": "Adds the RSS feed so new episodes transcribe locally.",
+    },
+    "web_page": {
+        "label": "Article / web page",
+        "endpoint": "/extract/page",
+        "payload_key": "url",
+        "note": "Works on allowed sites. Pages you haven't allowed yet "
+                "get an honest heads-up.",
+    },
+}
+
+
+def _classify_capture_url(raw: str) -> dict:
+    """Classify a pasted URL into one capture source. Returns a dict the
+    dashboard can render straight into a chip and route from:
+
+        {ok, source, label, endpoint, payload_key, canonical, note}
+
+    `ok` is False (source == 'unsupported') when nothing above accepts the
+    URL. Every branch reuses an existing validator so the chip agrees with
+    what the capture route will actually do."""
+    text = (raw or "").strip()
+    if not text:
+        return {"ok": False, "source": "empty", "label": "",
+                "endpoint": None, "payload_key": None, "canonical": "",
+                "note": "Paste a link to see what Uoink can do with it."}
+
+    def _result(source: str, canonical: str) -> dict:
+        spec = _CAPTURE_SOURCES[source]
+        return {
+            "ok": True,
+            "source": source,
+            "label": spec["label"],
+            "endpoint": spec["endpoint"],
+            "payload_key": spec["payload_key"],
+            "canonical": canonical,
+            "note": spec["note"],
+            "platform": _detect_platform_from_url(canonical),
+        }
+
+    yt = _normalize_youtube_url(text)
+    if yt:
+        return _result("youtube_video", yt)
+    playlist = _normalize_playlist_url(text)
+    if playlist:
+        return _result("youtube_playlist", playlist)
+    tw = _normalize_twitter_url(text)
+    if tw:
+        return _result("x_video", tw)
+    if reddit_extractor.is_reddit_thread_url(text):
+        return _result("reddit_thread", text.strip())
+    if _looks_like_feed_url(text):
+        canonical, _platform = _normalize_any_url(text)
+        return _result("podcast_feed", canonical or text.strip())
+    canonical, _platform = _normalize_any_url(text)
+    if canonical:
+        return _result("web_page", canonical)
+    return {
+        "ok": False, "source": "unsupported", "label": "Not a supported "
+        "source yet", "endpoint": None, "payload_key": None,
+        "canonical": text, "note": "Uoink can't read this link yet. "
+        "YouTube, X, Reddit threads, podcasts, and most web pages work."}
+
+
 def _is_valid_job_id(s: str) -> bool:
     return bool(s) and bool(_JOB_ID_RE.match(s))
 
@@ -7991,6 +8119,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_writing_piece_get(bare)
         if bare == "/extract/page/allowlist":
             return self._handle_page_allowlist_get()
+        if bare == "/detect":
+            return self._handle_detect()
         if bare == "/update/check":
             return self._handle_update_check()
         if bare == "/engagement/scores":
@@ -8190,6 +8320,20 @@ class Handler(BaseHTTPRequestHandler):
             return
         force = (parse_qs(urlparse(self.path).query).get("force") or [""])[0] == "1"
         self._send_json(200, {"ok": True, **_check_for_update(force=force)})
+
+    def _handle_detect(self):
+        """GET /detect?url=... -- V-2a universal capture detection.
+
+        Classifies a pasted URL into one capture source and tells the
+        dashboard which route + payload key to use. Reuses
+        _classify_capture_url so detection stays glued to what the capture
+        routes actually accept. No user data, but token-gated like the rest
+        of the mutating/reading surface (the dashboard already carries the
+        token). Always 200: an unsupported URL is a valid answer, not an
+        error."""
+        raw = (parse_qs(urlparse(self.path).query).get("url") or [""])[0]
+        result = _classify_capture_url(raw)
+        self._send_json(200, result)
 
     # ---- v2.5 S2 engagement memory -----------------------------------------
     # Pure local instrumentation. value_score formula + decay live on the

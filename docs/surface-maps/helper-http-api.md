@@ -94,3 +94,48 @@ canonical guide order (`curiosity_gap` first, `other` last). Each entry:
 different, corpus-derived lens list. Reconciling the two taxonomies is
 U-06's job and will be logged in DECISIONS-LOG.md; this route serves the
 classification taxonomy only.
+
+---
+
+## GET /detect (token-gated)
+
+Added by V-2a for the dashboard's universal "paste a URL to uoink" box.
+
+**What it does.** Classifies one pasted URL into a single capture source and
+tells the caller which existing route + payload key to use. Thin wrapper over
+`_classify_capture_url`, which composes the validators that already ship
+(`_normalize_youtube_url`, `_normalize_playlist_url`, `_normalize_twitter_url`,
+`reddit_extractor.is_reddit_thread_url`, `_looks_like_feed_url`,
+`_normalize_any_url`) plus `_detect_platform_from_url`. Detection therefore
+can never claim a source the capture route would reject.
+
+**Why it exists.** So the dashboard has one clean detection call instead of
+duplicating every normaliser in JS, and so detection stays glued to the
+routes. See `docs/surface-maps/universal-capture.md`.
+
+**Request.** `?url=<raw url>`. No body.
+
+**Response.** Always `200`. Supported URL:
+
+```json
+{
+  "ok": true,
+  "source": "youtube_video",
+  "label": "YouTube video",
+  "endpoint": "/extract",
+  "payload_key": "url",
+  "canonical": "https://www.youtube.com/watch?v=ID",
+  "note": "",
+  "platform": "youtube"
+}
+```
+
+`source` is one of `youtube_video`, `youtube_playlist`, `x_video`,
+`reddit_thread`, `podcast_feed`, `web_page`. `endpoint` is the route to POST
+to; `payload_key` is the body key it expects (`url` for most, `feed_url` for
+podcasts). Send `canonical` as the value; add `interval` for `/extract` and
+`/playlist/start`.
+
+Unsupported URL (also `200`, not an error): `ok: false`, `source:
+"unsupported"` or `"empty"`, `endpoint: null`, and a plain-language `note`.
+X video carries an honest `note` that it captures the video only.

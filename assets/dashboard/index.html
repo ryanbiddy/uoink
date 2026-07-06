@@ -1229,6 +1229,87 @@
       font-size: 13px;
     }
 
+    /* V-2a: universal "paste any URL" capture box. Prominent card at the
+       top of Sources; the Library empty state links here. */
+    .universal-capture {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(249, 115, 22, 0.34);
+      border-radius: var(--card-radius);
+      padding: 18px 18px 16px;
+      background: rgba(194, 65, 12, 0.10);
+    }
+
+    .universal-capture h2 {
+      color: var(--cream);
+      font-size: 20px;
+      line-height: 1.2;
+      margin: 2px 0 0;
+    }
+
+    .universal-capture .universal-lede {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      max-width: 66ch;
+    }
+
+    .universal-capture-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .universal-capture-row .field {
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .universal-capture-row .button {
+      flex-shrink: 0;
+    }
+
+    .universal-capture-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 26px;
+      align-self: flex-start;
+      border: 1px solid rgba(255, 244, 236, 0.16);
+      border-radius: var(--pill-radius);
+      padding: 0 11px;
+      color: var(--cream);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .universal-capture-chip[data-state="supported"] {
+      border-color: rgba(0, 200, 83, 0.4);
+      color: var(--ok);
+    }
+
+    .universal-capture-chip[data-state="unsupported"] {
+      border-color: rgba(249, 115, 22, 0.42);
+      color: var(--rust-bright);
+    }
+
+    .universal-capture-chip[data-state="checking"] {
+      color: var(--dim);
+    }
+
+    .universal-capture-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      min-height: 1em;
+    }
+
     .source-map {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -3541,10 +3622,10 @@
           <div id="libraryEmpty" class="empty-state hidden">
             <div>
               <h2>No saved uoinks yet.</h2>
-              <p>Save a video, podcast, or article and it shows up here with transcript, screenshots when available, and creator credit. New here? Load the browser button first, then click Uoink on any video.</p>
+              <p>Save a video, podcast, or article and it shows up here with transcript, screenshots when available, and creator credit. Quickest start: paste any URL below and Uoink figures out the rest.</p>
               <div class="inline-row" style="justify-content:center;margin-top:20px">
-                <button class="button primary" type="button" data-open-extension>Get the extension</button>
-                <button class="button ghost" type="button" data-tab-button-proxy="sources">Open Sources</button>
+                <button class="button primary" type="button" id="emptyPasteUrl">Paste a URL to uoink</button>
+                <button class="button ghost" type="button" data-open-extension>Get the extension</button>
               </div>
             </div>
           </div>
@@ -3567,6 +3648,17 @@
             <a href="https://uoink.app/features/universal-page-uoink" target="_blank" rel="noreferrer">Learn: Universal Page Uoink</a>
             <a href="https://uoink.app/twitter" target="_blank" rel="noreferrer">Learn: X Video</a>
             <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
+          </div>
+          <div class="universal-capture" id="universalCapture">
+            <div class="eyebrow">Paste a URL</div>
+            <h2>Uoink anything</h2>
+            <p class="universal-lede">Drop in any link. Uoink figures out the source and sends it down the right path: YouTube videos and playlists, X videos, Reddit threads, podcast feeds, and most web pages.</p>
+            <div class="universal-capture-row">
+              <input class="field" id="universalCaptureInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste a YouTube, X, Reddit, podcast, or article URL" aria-label="Paste any URL to uoink" aria-describedby="universalCaptureNote">
+              <span class="universal-capture-chip" id="universalCaptureChip" data-state="empty" role="status" aria-live="polite">Paste a link</span>
+              <button class="button primary" type="button" id="universalCaptureButton" disabled>Uoink it</button>
+            </div>
+            <p class="universal-capture-note" id="universalCaptureNote">Detection runs as you paste. Nothing gets captured until you click Uoink it.</p>
           </div>
           <div class="get-extension" id="getExtensionCard">
             <div class="get-extension-head">
@@ -4376,6 +4468,11 @@
       aboutPort: document.getElementById("aboutPort"),
       sourcesNavCount: document.getElementById("sourcesNavCount"),
       sourceMap: document.getElementById("sourceMap"),
+      universalCapture: document.getElementById("universalCapture"),
+      universalCaptureInput: document.getElementById("universalCaptureInput"),
+      universalCaptureChip: document.getElementById("universalCaptureChip"),
+      universalCaptureButton: document.getElementById("universalCaptureButton"),
+      universalCaptureNote: document.getElementById("universalCaptureNote"),
       writingSourceSearch: document.getElementById("writingSourceSearch"),
       writingSourceChip: document.getElementById("writingSourceChip"),
       writingSourceChipMain: document.getElementById("writingSourceChipMain"),
@@ -5657,6 +5754,141 @@
           <p><strong>Output:</strong> ${htmlEscape(source.output)}</p>
         </article>
       `).join("");
+    }
+
+    // V-2a: universal "paste any URL" capture. Detection is server-owned
+    // (GET /detect reuses the same validators the capture routes use), so
+    // the chip can never claim a source the route will reject. We read the
+    // detection response raw (not via authFetch) because an unsupported URL
+    // is a valid 200 answer with ok:false, not an error.
+    let universalDetectSeq = 0;
+    let universalDetectTimer = null;
+    const universalState = { source: null, endpoint: null, payloadKey: null, canonical: "", label: "", busy: false, lastRaw: null };
+
+    async function detectCaptureUrl(url) {
+      const token = await getToken();
+      const res = await fetch(`/detect?url=${encodeURIComponent(url)}`, {
+        headers: { "X-Uoink-Token": token },
+      });
+      return res.json();
+    }
+
+    function setCaptureChip(state, label) {
+      if (!els.universalCaptureChip) return;
+      els.universalCaptureChip.dataset.state = state;
+      els.universalCaptureChip.textContent = label;
+    }
+
+    function resetUniversalCapture(note) {
+      universalState.source = null;
+      universalState.endpoint = null;
+      universalState.payloadKey = null;
+      universalState.canonical = "";
+      universalState.label = "";
+      universalState.lastRaw = null;
+      setCaptureChip("empty", "Paste a link");
+      if (els.universalCaptureButton) els.universalCaptureButton.disabled = true;
+      if (els.universalCaptureNote) {
+        els.universalCaptureNote.textContent = note
+          || "Detection runs as you paste. Nothing gets captured until you click Uoink it.";
+      }
+    }
+
+    function applyDetection(result) {
+      const supported = Boolean(result && result.ok && result.endpoint);
+      universalState.source = result && result.source;
+      universalState.endpoint = supported ? result.endpoint : null;
+      universalState.payloadKey = supported ? (result.payload_key || "url") : null;
+      universalState.canonical = (result && result.canonical) || "";
+      universalState.label = (result && result.label) || "";
+      setCaptureChip(supported ? "supported" : "unsupported",
+        result && result.label ? result.label : "Not a supported source yet");
+      if (els.universalCaptureButton) els.universalCaptureButton.disabled = !supported;
+      if (els.universalCaptureNote) {
+        els.universalCaptureNote.textContent = (result && result.note)
+          || (supported ? "Ready. Click Uoink it to capture it." : "");
+      }
+    }
+
+    async function runCaptureDetection() {
+      const raw = els.universalCaptureInput ? els.universalCaptureInput.value.trim() : "";
+      if (!raw) {
+        resetUniversalCapture();
+        return;
+      }
+      // Skip a redundant re-detect (e.g. blur firing after paste already
+      // settled). Re-detecting here would briefly disable the Uoink button
+      // and could swallow the very click that blurred the field.
+      if (raw === universalState.lastRaw) return;
+      const seq = ++universalDetectSeq;
+      setCaptureChip("checking", "Checking...");
+      if (els.universalCaptureButton) els.universalCaptureButton.disabled = true;
+      try {
+        const result = await detectCaptureUrl(raw);
+        if (seq !== universalDetectSeq) return; // a newer paste won
+        universalState.lastRaw = raw;
+        applyDetection(result);
+      } catch (_) {
+        if (seq !== universalDetectSeq) return;
+        setCaptureChip("unsupported", "Couldn't check that link");
+        if (els.universalCaptureNote) {
+          els.universalCaptureNote.textContent = "Detection needs the local app. Give it a moment and paste again.";
+        }
+      }
+    }
+
+    function scheduleCaptureDetection() {
+      if (universalDetectTimer) clearTimeout(universalDetectTimer);
+      universalDetectTimer = setTimeout(runCaptureDetection, 220);
+    }
+
+    async function runUniversalCapture() {
+      if (universalState.busy || !universalState.endpoint) return;
+      const url = universalState.canonical
+        || (els.universalCaptureInput ? els.universalCaptureInput.value.trim() : "");
+      if (!url) return;
+      const body = {};
+      body[universalState.payloadKey || "url"] = url;
+      // /extract and /playlist/start expect an interval; the others ignore it.
+      if (universalState.endpoint === "/extract" || universalState.endpoint === "/playlist/start") {
+        body.interval = 30;
+      }
+      universalState.busy = true;
+      const btn = els.universalCaptureButton;
+      const label = universalState.label || "source";
+      if (btn) { btn.disabled = true; btn.textContent = "Uoinking..."; }
+      try {
+        await authFetch(universalState.endpoint, {
+          method: "POST",
+          body: JSON.stringify(body),
+        });
+        if (universalState.source === "podcast_feed") {
+          showToast("Podcast feed added. New episodes transcribe locally.");
+        } else {
+          showToast(`Uoinking that ${label.toLowerCase()}. Track it in Activity.`);
+        }
+        if (els.universalCaptureInput) els.universalCaptureInput.value = "";
+        resetUniversalCapture();
+        refreshActivity();
+      } catch (err) {
+        if (err && err.data && err.data.code === "host_not_allowed") {
+          showToast("That site isn't on your allowed pages list yet. Add it in Settings, then try again.");
+        } else {
+          showToast(translateMachineMessage(err.message, { url }));
+        }
+      } finally {
+        universalState.busy = false;
+        if (btn) btn.textContent = "Uoink it";
+        if (btn) btn.disabled = !universalState.endpoint;
+      }
+    }
+
+    function focusUniversalCapture() {
+      switchTab("sources");
+      window.setTimeout(() => {
+        if (els.universalCapture) els.universalCapture.scrollIntoView({ block: "start" });
+        if (els.universalCaptureInput) els.universalCaptureInput.focus();
+      }, 0);
     }
 
     function insightCard(row, kicker) {
@@ -10003,6 +10235,22 @@
       });
       document.getElementById("newYoink").addEventListener("click", openLastYoutube);
       document.getElementById("openYouTubeForYou").addEventListener("click", openLastYoutube);
+      if (els.universalCaptureInput) {
+        els.universalCaptureInput.addEventListener("input", scheduleCaptureDetection);
+        els.universalCaptureInput.addEventListener("paste", () => window.setTimeout(runCaptureDetection, 0));
+        els.universalCaptureInput.addEventListener("blur", runCaptureDetection);
+        els.universalCaptureInput.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          if (universalState.endpoint) runUniversalCapture();
+          else runCaptureDetection();
+        });
+      }
+      if (els.universalCaptureButton) {
+        els.universalCaptureButton.addEventListener("click", runUniversalCapture);
+      }
+      const emptyPasteUrl = document.getElementById("emptyPasteUrl");
+      if (emptyPasteUrl) emptyPasteUrl.addEventListener("click", focusUniversalCapture);
       document.getElementById("reloadFeatures").addEventListener("click", loadFeatures);
       document.getElementById("openFeaturesIndex").addEventListener("click", () => openExternal("https://uoink.app/features"));
       document.querySelectorAll('a[target="_blank"]').forEach((link) => {
