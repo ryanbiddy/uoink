@@ -52,9 +52,10 @@ def test_welcome_page_is_dpi_safe() -> None:
     require("WelcomePage.Surface.Color := C_CREAM;" in ISS, "welcome page does not use the cream surface")
     require("L.Top := ScaleY(Top);" in ISS, "welcome labels do not scale vertical position")
     require("L.Height := ScaleY(Height);" in ISS, "welcome labels do not scale height")
-    require("WizardForm.NextButton.Width := TargetWidth;" in ISS, "welcome CTA width is not set")
-    require("WizardForm.NextButton.Left := DefaultNextLeft - WidthDelta;" in ISS,
-            "welcome CTA is not kept right-aligned")
+    require("SizeNextButtonToCaption('Let''s go ->')" in ISS,
+            "welcome CTA is not sized from its caption (ASCII arrow)")
+    require("Meas.AutoSize := True;" in ISS,
+            "welcome CTA width is not measured at real DPI")
 
 
 def test_verify_script_is_files_only_by_default() -> None:
