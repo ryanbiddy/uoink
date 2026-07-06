@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [3.2.7] - 2026-07-05
+
+A hotfix for a broken 3.2.6 installer.
+
+### Fixed
+
+- Fixed a startup crash in 3.2.6 where the installer did not bundle the X-capture module, so the helper failed silently on launch. Added the desktop shortcut the installer promised.
+
 ## [3.2.6] - 2026-07-05
 
 Two waves in one release. The first is a top-to-bottom UX overhaul: Generate, the source picker, the Library, and the install page all got rebuilt around what you're actually trying to do. The second is the brand-critical trust pass: the headline agentic path (stdio MCP) now works, your corpus is durable and portable, a moved output folder heals itself instead of silently breaking, and the disclosures and developer docs finally say the true thing.

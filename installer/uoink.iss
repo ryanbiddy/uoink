@@ -23,7 +23,7 @@
 
 #define AppName       "Uoink"
 ; build.ps1 rewrites AppVersion from helper/_version.py before compiling.
-#define AppVersion    "3.2.6"
+#define AppVersion    "3.2.7"
 #define AppPublisher  "ReplayRyan"
 #define AppURL        "https://uoink.app"
 
@@ -77,6 +77,11 @@ FinishedLabel=Uoink has been successfully installed. The Uoink window will walk 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
+[Tasks]
+; Optional desktop shortcut (checked by default). The matching [Icons] entry
+; below is gated on this task so users who uncheck it get no desktop icon.
+Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"
+
 [Files]
 ; Python embeddable distribution (already includes pythonw.exe + python.exe
 ; + the stdlib zip). After staging, Lib\site-packages contains yt_dlp,
@@ -115,6 +120,11 @@ Source: "staging\page_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\source_manifest.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\openapi_bridge.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\reddit_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
+; U-15 X text/thread capture. server.py imports x_extractor at module top, so it
+; MUST be in Inno's installed file list too -- build.ps1 staging coverage alone is
+; not enough. Its absence here is why v3.2.6 shipped without it and the helper
+; crashed on launch with ModuleNotFoundError: No module named 'x_extractor'.
+Source: "staging\x_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\memory_layer.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\podcasts.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\mobile_playlists.py"; DestDir: "{app}"; Flags: ignoreversion
@@ -194,6 +204,17 @@ Name: "{group}\Open Uoink folder"; \
 
 Name: "{group}\Uninstall Uoink"; \
   Filename: "{uninstallexe}"
+
+; Desktop launcher -- mirrors the {group}\Uoink start-menu entry above, gated on
+; the optional "desktopicon" task. v3.2.7: the installer had promised a desktop
+; shortcut but never created one.
+Name: "{autodesktop}\Uoink"; \
+  Filename: "{app}\python\pythonw.exe"; \
+  Parameters: """{app}\server.py"" --show-dashboard"; \
+  WorkingDir: "{app}"; \
+  IconFilename: "{app}\uoink.ico"; \
+  Comment: "Start Uoink"; \
+  Tasks: desktopicon
 
 [Registry]
 ; Auto-start the helper on every Windows login. uninsdeletevalue removes the
@@ -489,13 +510,47 @@ end;
   is scoped to wpWelcome's custom-page id only; subsequent pages keep
   Inno's stock chrome with no else branch needed.
 
-  Arrow note: the U+2192 right-arrow is built via Chr($2192) rather than
-  embedded as a literal byte sequence because build.ps1 writes the
-  generated .iss without a BOM, and Inno Setup 6 reads BOM-less sources
-  as the system ANSI code page (cp1252 on en-US Windows). A literal `arrow`
-  encoded as UTF-8 would land as three garbage glyphs. Chr() builds the
-  string at runtime from a numeric code point and dodges the entire
-  source-encoding question. }
+  IN-04 hardening (button DPI/glyph safety):
+    * Caption uses a plain ASCII "->" arrow, matching the marketing site's
+      button voice ("Download ->", "Open release ->"). This drops the old
+      Chr($2192) Unicode right-arrow, which relied on the default wizard
+      font carrying U+2192 and on the source-encoding dance (build.ps1
+      writes the .iss BOM-less, read as cp1252). ASCII "->" renders in every
+      font at every code page with zero glyph or encoding risk.
+    * The button auto-sizes to its caption via SizeNextButtonToCaption
+      instead of a hand-computed ScaleX(112) magic width. Measuring the
+      real caption in the real button font at the real DPI means the label
+      can never be clipped at 125%/150% Windows display scaling, and the
+      button never carries dead padding. It is anchored by its right edge so
+      the layout matches Inno's stock Next placement. }
+procedure SizeNextButtonToCaption(const Cap: String);
+var
+  Meas: TNewStaticText;
+  W: Integer;
+begin
+  WizardForm.NextButton.Caption := Cap;
+  { Measure the caption in the button's own font so the width is correct at
+    whatever DPI the wizard is running under. TNewStaticText.AutoSize gives us
+    the rendered run width without guessing. }
+  Meas := TNewStaticText.Create(WizardForm);
+  try
+    Meas.Parent := WizardForm;
+    Meas.Visible := False;
+    Meas.AutoSize := True;
+    Meas.Font.Name := WizardForm.NextButton.Font.Name;
+    Meas.Font.Size := WizardForm.NextButton.Font.Size;
+    Meas.Font.Style := WizardForm.NextButton.Font.Style;
+    Meas.Caption := Cap;
+    W := Meas.Width + ScaleX(28);   { room for the button's internal padding }
+  finally
+    Meas.Free;
+  end;
+  if W < DefaultNextWidth then
+    W := DefaultNextWidth;          { never narrower than Inno's stock Next }
+  WizardForm.NextButton.Width := W;
+  { Keep the right edge where Inno's stock Next button sits. }
+  WizardForm.NextButton.Left := (DefaultNextLeft + DefaultNextWidth) - W;
+end;
 function UpdateReadyMemo(
   Space, NewLine, MemoUserInfoInfo, MemoDirInfo, MemoTypeInfo,
   MemoComponentsInfo, MemoGroupInfo, MemoTasksInfo: String): String;
@@ -508,17 +563,10 @@ begin
 end;
 
 procedure CurPageChanged(CurPageID: Integer);
-var
-  TargetWidth: Integer;
-  WidthDelta: Integer;
 begin
   if CurPageID = WelcomePage.ID then
   begin
-    TargetWidth := ScaleX(112);
-    WidthDelta := TargetWidth - DefaultNextWidth;
-    WizardForm.NextButton.Caption := 'Let''s go ' + Chr($2192);
-    WizardForm.NextButton.Width := TargetWidth;
-    WizardForm.NextButton.Left := DefaultNextLeft - WidthDelta;
+    SizeNextButtonToCaption('Let''s go ->');
     WizardForm.BackButton.Visible := False;
   end else
   begin
