@@ -3153,6 +3153,17 @@
             <a href="https://uoink.app/features/engagement-memory" target="_blank" rel="noreferrer">Learn: Engagement Memory</a>
           </div>
 
+          <div class="panel hidden" id="freshPanel" style="margin-bottom:16px">
+            <div class="panel-head">
+              <div class="panel-title">Fresh from your sources</div>
+              <div class="localhost" id="freshMeta">auto-uoinked (taste match)</div>
+            </div>
+            <div class="panel-body">
+              <p class="setting-copy" id="freshNote" style="margin-top:0"></p>
+              <div class="feature-grid" id="freshCards"></div>
+            </div>
+          </div>
+
           <div class="feature-grid" id="worthCards"></div>
 
           <div class="resurface-layout">
@@ -3891,6 +3902,17 @@
               </div>
             </div>
 
+            <div class="setting-block" id="auto-uoink">
+              <h2>Taste-aware auto-uoink</h2>
+              <p class="setting-copy">Off by default. When on, Uoink scores <em>new</em> videos from the playlists you already monitor (above) against your taste &mdash; your 10/10 anchors, admired channels, engagement, and corpus &mdash; and auto-captures the strong matches. They land in your library labelled <strong>auto-uoinked (taste match)</strong>.</p>
+              <label class="inline-row"><input id="autoUoinkToggle" type="checkbox"> Auto-uoink videos that match my taste</label>
+              <p class="setting-copy" id="autoUoinkStatus">Checking auto-uoink status...</p>
+              <div class="inline-row">
+                <button class="button" type="button" id="autoUoinkScan">Scan my sources now</button>
+              </div>
+              <p class="setting-copy">Only works over sources you already track &mdash; no web crawling, no new accounts. Capture uses the same local download + transcription as a manual save, so there is <strong>no AI spend</strong>. Reversible: turn it off any time, and auto-captured uoinks are ordinary uoinks you can delete.</p>
+            </div>
+
             <div class="setting-block">
               <h2>Podcast feeds</h2>
               <p class="setting-copy" id="podcastFeedStatus">Checking podcast feeds...</p>
@@ -4344,6 +4366,10 @@
       resumeCard: document.getElementById("resumeCard"),
       forYouNavCount: document.getElementById("forYouNavCount"),
       forYouSummary: document.getElementById("forYouSummary"),
+      freshPanel: document.getElementById("freshPanel"),
+      freshMeta: document.getElementById("freshMeta"),
+      freshNote: document.getElementById("freshNote"),
+      freshCards: document.getElementById("freshCards"),
       worthCards: document.getElementById("worthCards"),
       connectionRows: document.getElementById("connectionRows"),
       connectionMeta: document.getElementById("connectionMeta"),
@@ -4442,6 +4468,9 @@
       evidenceContext: document.getElementById("evidenceContext"),
       claimList: document.getElementById("claimList"),
       claimVerificationToggle: document.getElementById("claimVerificationToggle"),
+      autoUoinkToggle: document.getElementById("autoUoinkToggle"),
+      autoUoinkStatus: document.getElementById("autoUoinkStatus"),
+      autoUoinkScan: document.getElementById("autoUoinkScan"),
       runEvidenceClaims: document.getElementById("runEvidenceClaims"),
       yoinkHeading: document.getElementById("yoinkHeading"),
       yoinkSubhead: document.getElementById("yoinkSubhead"),
@@ -5873,14 +5902,23 @@
       els.forYouSummary.textContent = "Building local recommendations...";
       try {
         let payload = null;
+        // V-4: prefer /discovery (resurface + auto-uoinked fresh items,
+        // one composed digest). Fall back to /resurface, then to the
+        // client-side approximation, so older helpers keep working.
         try {
-          const data = await authFetch("/resurface");
-          payload = data.resurface || data;
+          const data = await authFetch("/discovery");
+          payload = data.discovery || data;
         } catch (_) {
-          payload = await buildForYouFallback();
+          try {
+            const data = await authFetch("/resurface");
+            payload = data.resurface || data;
+          } catch (__) {
+            payload = await buildForYouFallback();
+          }
         }
         state.resurface = payload;
         renderForYou(payload);
+        renderFresh(payload);
       } catch (err) {
         els.forYouSummary.textContent = "For You is checking your saved work.";
         els.worthCards.innerHTML = "";
@@ -6142,6 +6180,52 @@
       els.anchorRows.innerHTML = anchors.length
         ? anchors.slice(0, 6).map((row) => insightCard(row, "performing anchor", { writeFrom: true })).join("")
         : emptyPanelRow("No performing anchors yet.", "Anchor cards appear after engagement events or taste memory are available.");
+    }
+
+    // V-4: the "Fresh from your sources" strip -- V-3 auto-uoinked items.
+    function freshCard(item) {
+      const vid = item.video_id || "";
+      const score = (item.taste_score != null) ? Number(item.taste_score).toFixed(2) : null;
+      const scorePill = score ? `<div class="score-pill">taste ${score}</div>` : "";
+      const ready = item.in_corpus === true;
+      // Only offer Write-from-this once the local capture has finished and
+      // it's actually in the corpus -- otherwise say so honestly.
+      const action = (ready && vid)
+        ? `<button class="button primary insight-write" type="button" data-write-from="${htmlEscape(vid)}" aria-label="Write from ${htmlEscape(item.title || "this")}">Write from this</button>`
+        : `<div class="job-sub">Capturing locally &mdash; transcript in progress.</div>`;
+      return `
+        <article class="insight-card" data-video-id="${htmlEscape(vid)}">
+          <div class="insight-kicker">auto-uoinked (taste match)</div>
+          <div class="insight-title">${htmlEscape(item.title || vid)}</div>
+          <div class="insight-meta">${htmlEscape(item.channel || "Source not labeled")}${item.topic ? ` | ${htmlEscape(item.topic)}` : ""}</div>
+          ${scorePill}
+          ${action}
+        </article>
+      `;
+    }
+
+    function renderFresh(payload) {
+      if (!els.freshPanel) return;
+      const fresh = Array.isArray(payload && payload.auto_uoinked) ? payload.auto_uoinked : [];
+      const status = (payload && payload.auto_uoink) || {};
+      // Hide the strip entirely when there's nothing honest to show and the
+      // feature is off -- no empty "coming soon" theatre.
+      if (!fresh.length && !status.enabled) {
+        els.freshPanel.classList.add("hidden");
+        return;
+      }
+      els.freshPanel.classList.remove("hidden");
+      if (els.freshMeta) els.freshMeta.textContent = `${fresh.length} fresh`;
+      if (els.freshNote) {
+        if (fresh.length) {
+          els.freshNote.textContent = "Captured from the sources you monitor because they matched your taste.";
+        } else if (status.needs_sources) {
+          els.freshNote.textContent = "Auto-uoink is on but you're not monitoring any sources yet. Add a playlist in Settings so it has something to watch.";
+        } else {
+          els.freshNote.textContent = "Auto-uoink is on. Nothing has cleared your taste bar yet — run a scan from Settings or add more sources.";
+        }
+      }
+      els.freshCards.innerHTML = fresh.length ? fresh.map(freshCard).join("") : "";
     }
 
     function workspaceFormatOptions() {
@@ -8159,6 +8243,8 @@
         els.voiceWarningsEnabled.checked = state.settings.voice_dna_warnings_enabled !== false;
         els.voiceWarningsPerGeneration.checked = state.settings.voice_dna_show_per_generation_toggle !== false;
         els.writingScreenshotPickerToggle.checked = state.settings.writing_show_screenshot_picker !== false;
+        if (els.autoUoinkToggle) els.autoUoinkToggle.checked = Boolean(state.settings.auto_uoink_enabled);
+        renderAutoUoinkStatus();
         els.writingShowWarnings.checked = els.voiceWarningsEnabled.checked;
         els.scriptVoiceWarnings.checked = els.voiceWarningsEnabled.checked;
         renderWritingScreenshots();
@@ -9912,6 +9998,47 @@
       clearTopicUndo();
     }
 
+    // V-3 taste-aware auto-uoink status + manual scan.
+    async function renderAutoUoinkStatus() {
+      if (!els.autoUoinkStatus) return;
+      try {
+        const data = await authFetch("/auto-uoink/status");
+        const s = (data && data.auto_uoink) || {};
+        state.autoUoink = s;
+        if (!s.enabled) {
+          els.autoUoinkStatus.textContent = "Off. Turn it on to auto-capture taste matches from your monitored playlists.";
+        } else if (s.needs_sources) {
+          els.autoUoinkStatus.textContent = "On, but you're not monitoring any sources yet. Add a playlist above so auto-uoink has something to watch.";
+        } else if (!s.has_taste_signal) {
+          els.autoUoinkStatus.textContent = `On. Watching ${s.monitored_sources} source${s.monitored_sources === 1 ? "" : "s"}, but there's no taste signal yet — mark a few 10/10s or save more so scoring has something to go on.`;
+        } else {
+          els.autoUoinkStatus.textContent = `On. Watching ${s.monitored_sources} source${s.monitored_sources === 1 ? "" : "s"}; capturing videos scoring ≥ ${s.threshold}.`;
+        }
+        if (els.autoUoinkScan) els.autoUoinkScan.disabled = !s.enabled;
+      } catch (_) {
+        els.autoUoinkStatus.textContent = "Auto-uoink status needs another moment.";
+      }
+    }
+
+    async function runAutoUoinkScan() {
+      if (!els.autoUoinkScan) return;
+      els.autoUoinkScan.disabled = true;
+      const original = els.autoUoinkScan.textContent;
+      els.autoUoinkScan.textContent = "Scanning...";
+      try {
+        const data = await authFetch("/auto-uoink/scan", { method: "POST", body: JSON.stringify({}) });
+        showToast(data.message || "Scan finished.");
+        refreshActivity();
+        if (typeof loadForYou === "function") loadForYou();
+      } catch (err) {
+        const msg = (err && err.data && err.data.message) || "Couldn't scan right now.";
+        showToast(msg);
+      } finally {
+        els.autoUoinkScan.textContent = original;
+        renderAutoUoinkStatus();
+      }
+    }
+
     async function saveSettingsPatch(patch, successMessage) {
       try {
         const data = await authFetch("/settings", { method: "POST", body: JSON.stringify(patch) });
@@ -10378,6 +10505,10 @@
         saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Transcript checker choice saved.");
       });
       els.claimVerificationToggle.addEventListener("change", () => saveSettingsPatch({ claim_verification_enabled: els.claimVerificationToggle.checked }, "Claim verification setting updated."));
+      if (els.autoUoinkToggle) {
+        els.autoUoinkToggle.addEventListener("change", () => saveSettingsPatch({ auto_uoink_enabled: els.autoUoinkToggle.checked }, els.autoUoinkToggle.checked ? "Taste-aware auto-uoink is on." : "Taste-aware auto-uoink is off."));
+      }
+      if (els.autoUoinkScan) els.autoUoinkScan.addEventListener("click", runAutoUoinkScan);
       els.reliabilityAutoCheck.addEventListener("change", () => saveSettingsPatch({ transcript_reliability_auto_check: els.reliabilityAutoCheck.checked }, "Transcript reliability setting updated."));
       els.downloadReliabilityModel.addEventListener("click", async () => {
         const modelLabel = transcriptModelLabel(els.whisperModel.value);
