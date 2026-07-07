@@ -12591,13 +12591,42 @@ def _existing_server_responds() -> bool:
         return False
 
 
+def _bundled_interpreter(*, gui: bool) -> Path | None:
+    """Path to the interpreter bundled with an installed Uoink, used to spawn
+    the splash / dashboard helper subprocesses -- or None when running from a
+    dev checkout (no bundled ``python/`` dir), so callers fall back to
+    ``sys.executable`` or a browser tab.
+
+    Windows installer layout: ``python\\pythonw.exe`` (gui=True, no console
+    flash) or ``python\\python.exe``. A future macOS ``.app`` bundle ships a
+    relocatable Python at ``python/bin/python3`` -- there is no windowless
+    variant because a ``.app``-launched child has no console to flash, so
+    ``gui`` is ignored off Windows. This is the single place that encodes
+    "where is the bundled interpreter". It is Windows-behaviour-identical: the
+    darwin/linux branch can only match when a Mac/Linux bundle actually exists
+    on disk, which never happens on a Windows install. The macOS branch needs
+    Mac runtime verification -- see docs/MAC-BUILD-PLAN.md."""
+    base = HERE / "python"
+    if sys.platform == "win32":
+        exe = base / ("pythonw.exe" if gui else "python.exe")
+        return exe if exe.exists() else None
+    cand = base / "bin" / "python3"
+    return cand if cand.exists() else None
+
+
+def _is_installed_layout() -> bool:
+    """True when running from an installed Uoink bundle (Windows installer or a
+    future macOS ``.app``), False from a dev checkout. Gates the ambient tray +
+    first-run splash so a ``python server.py`` dev run never spawns them."""
+    return _bundled_interpreter(gui=True) is not None
+
+
 def _spawn_dashboard_window(*, reason: str) -> bool:
     """Open the local dashboard window without making the helper re-bind."""
     try:
         script = HERE / "uoink_dashboard.py"
         if script.exists():
-            bundled = HERE / "python" / "pythonw.exe"
-            exe = bundled if bundled.exists() else Path(sys.executable)
+            exe = _bundled_interpreter(gui=True) or Path(sys.executable)
             creationflags = 0x08000000 if sys.platform == "win32" else 0
             subprocess.Popen(
                 [str(exe), str(script)],
@@ -12720,7 +12749,7 @@ def main(*, show_dashboard: bool = False):
     # spawns a tray. Runs in a daemon thread; any failure (no pystray, no
     # system tray) degrades to "no tray, server still runs" -- the boot balloon
     # below is the fallback "it's running" affordance.
-    if (HERE / "python" / "pythonw.exe").exists():
+    if _is_installed_layout():
         try:
             import uoink_tray
 
@@ -12751,9 +12780,10 @@ def main(*, show_dashboard: bool = False):
             _splash_sentinel = DATA_ROOT / ".first-run-done"
             if _splash_should_spawn(_splash_sentinel):
                 _splash_script = str(HERE / "uoink_splash.py")
-                _splash_pyw = str(HERE / "python" / "pythonw.exe")
+                _splash_pyw = str(_bundled_interpreter(gui=True) or sys.executable)
+                _splash_flags = 0x08000000 if sys.platform == "win32" else 0  # CREATE_NO_WINDOW
                 subprocess.Popen([_splash_pyw, _splash_script],
-                                 creationflags=0x08000000)  # CREATE_NO_WINDOW
+                                 creationflags=_splash_flags)
                 splash_spawned = True
                 log.info("splash: spawned (version %s)", VERSION)
         except Exception as e:

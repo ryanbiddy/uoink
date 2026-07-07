@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Uoink.app Info.plist TEMPLATE (cc/mac-prep).
+
+  STATUS: scaffold, never loaded by a real .app on a Mac yet. build-mac.sh
+  copies this into Contents/Info.plist. Values marked __PLACEHOLDER__ or noted
+  below still need confirming on a Mac. See docs/MAC-BUILD-PLAN.md.
+
+  Key decisions encoded here:
+  - LSUIElement = true: Uoink is a background/menu-bar helper, not a Dock app.
+    This mirrors the Windows tray-only presence. The pystray/rumps menu bar
+    item and pywebview windows still appear; there is just no Dock icon.
+  - CFBundleIdentifier = com.ryanbiddy.uoink: matches the LaunchAgent label in
+    installer/mac/com.ryanbiddy.uoink.plist and docs/mac-install.md.
+  - CFBundleVersion / CFBundleShortVersionString: build-mac.sh must rewrite
+    these from the repo VERSION file at build time (the way build.ps1 rewrites
+    #define AppVersion in uoink.iss).
+  - NSAppTransportSecurity: the helper serves loopback HTTP on 127.0.0.1:5179.
+    NSAllowsLocalNetworking permits the extension<->helper loopback traffic
+    without weakening ATS for real remote hosts.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Uoink</string>
+    <key>CFBundleDisplayName</key>
+    <string>Uoink</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.ryanbiddy.uoink</string>
+    <key>CFBundleExecutable</key>
+    <string>Uoink</string>
+    <key>CFBundleIconFile</key>
+    <string>Uoink.icns</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <!-- build-mac.sh rewrites both from ./VERSION at build time. -->
+    <key>CFBundleShortVersionString</key>
+    <string>__VERSION__</string>
+    <key>CFBundleVersion</key>
+    <string>__VERSION__</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>12.0</string>
+    <!-- Background/menu-bar helper: no Dock icon (mirrors the Windows tray). -->
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>Uoink is MIT-licensed. See THIRD-PARTY-NOTICES.md for bundled components.</string>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsLocalNetworking</key>
+        <true/>
+    </dict>
+</dict>
+</plist>

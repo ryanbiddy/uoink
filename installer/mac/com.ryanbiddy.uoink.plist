@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  LaunchAgent TEMPLATE for Uoink autostart on macOS (cc/mac-prep).
+
+  STATUS: scaffold, never loaded by launchd on a Mac yet. This is the macOS
+  equivalent of the Windows installer's HKCU\...\Run "Uoink" value (see
+  installer/uoink.iss [Registry]). It starts the helper at login.
+
+  Install location: ~/Library/LaunchAgents/com.ryanbiddy.uoink.plist
+  docs/mac-install.md already documents removing exactly this path on uninstall.
+
+  On first run the helper should WRITE this file and `launchctl load` it, the
+  same way server.py's _set_autostart() writes the Run key on Windows. That
+  code path does not exist yet (as of cc/mac-prep, _set_autostart() returns
+  None on non-Windows). See docs/MAC-BUILD-PLAN.md ("Autostart") for the plan.
+
+  __APP_PATH__ is rewritten at install/first-run time to the real bundle path
+  (normally /Applications/Uoink.app).
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.ryanbiddy.uoink</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>__APP_PATH__/Contents/Resources/python/bin/python3</string>
+        <string>__APP_PATH__/Contents/Resources/server.py</string>
+    </array>
+    <!-- Start at login. -->
+    <key>RunAtLoad</key>
+    <true/>
+    <!-- Do NOT set KeepAlive=true unconditionally: the single-instance guard
+         in server.main() exits(0) when a helper is already bound to 5179, and
+         a blanket KeepAlive would respawn it in a tight loop. If a restart
+         policy is wanted, gate it on Crashed only. -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>Crashed</key>
+        <true/>
+    </dict>
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>StandardOutPath</key>
+    <string>/tmp/uoink.launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/uoink.launchd.err.log</string>
+</dict>
+</plist>
