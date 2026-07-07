@@ -7763,6 +7763,96 @@ def _resurface_payload(idx) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# /resume -- "resume where you left off" open-loop (R-02)
+# ---------------------------------------------------------------------------
+# One compact card at the top of the dashboard so reopening the app has an
+# obvious next step. It reads two local signals and nothing else:
+#
+#   last_draft   the most recently touched writing draft (writing_drafts),
+#                with its source resolved to a title/channel when linked
+#   last_source  the most recently saved uoink (yoinks, newest first)
+#
+# The `suggested.action` is the honest next move: continue the draft if one
+# is in flight, otherwise write from the last thing you saved. Copy lives in
+# the dashboard (Voice DNA); this route ships data + an action key only.
+_RESUME_BODY_PREVIEW_CHARS = 160
+
+
+def _resume_source_brief(row: dict | None) -> dict | None:
+    """Minimal source projection for the resume card: just enough to name
+    the uoink and deep-link Generate to it."""
+    if not row:
+        return None
+    video_id = row.get("video_id") or ""
+    if not video_id:
+        return None
+    return {
+        "video_id": video_id,
+        "title": row.get("title") or "Untitled",
+        "channel": row.get("channel") or "",
+        "topic": row.get("topic") or "",
+        "yoinked_at": row.get("yoinked_at"),
+    }
+
+
+def _resume_payload(idx) -> dict:
+    """Build the R-02 open-loop from local drafts + saved sources."""
+    try:
+        recent = idx.list_recent(limit=1)
+    except Exception as e:
+        log.warning("/resume: list_recent failed: %s", e)
+        recent = []
+    last_source = _resume_source_brief(recent[0] if recent else None)
+
+    last_draft = None
+    try:
+        draft = idx.latest_writing_draft()
+    except Exception as e:
+        log.warning("/resume: latest_writing_draft failed: %s", e)
+        draft = None
+    if draft:
+        body = str(draft.get("body") or "").strip()
+        preview = " ".join(body.split())
+        if len(preview) > _RESUME_BODY_PREVIEW_CHARS:
+            preview = preview[:_RESUME_BODY_PREVIEW_CHARS].rstrip() + "..."
+        draft_source = None
+        yoink_id = draft.get("yoink_id")
+        if yoink_id:
+            try:
+                draft_source = _resume_source_brief(idx.get_yoink(yoink_id))
+            except Exception as e:
+                log.warning("/resume: draft source lookup failed: %s", e)
+        last_draft = {
+            "id": draft.get("id"),
+            "kind": draft.get("kind") or "tweet",
+            "title": draft.get("title"),
+            "body_preview": preview,
+            "updated_at": draft.get("updated_at"),
+            "source": draft_source,
+        }
+
+    if last_draft:
+        suggested = {
+            "action": "continue_draft",
+            "draft_id": last_draft["id"],
+            "video_id": (last_draft["source"] or {}).get("video_id"),
+        }
+    elif last_source:
+        suggested = {
+            "action": "write_from_source",
+            "video_id": last_source["video_id"],
+        }
+    else:
+        suggested = {"action": "none"}
+
+    return {
+        "last_draft": last_draft,
+        "last_source": last_source,
+        "suggested": suggested,
+    }
+
+
+# ---------------------------------------------------------------------------
 # HTTP handler
 # ---------------------------------------------------------------------------
 class Handler(BaseHTTPRequestHandler):
@@ -8127,6 +8217,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_engagement_scores()
         if bare == "/resurface":
             return self._handle_resurface()
+        if bare == "/resume":
+            return self._handle_resume()
         if bare == "/library/facets":
             return self._handle_library_facets()
         if bare == "/corpus/channels":
@@ -8399,6 +8491,24 @@ class Handler(BaseHTTPRequestHandler):
                 "state": "unavailable",
             })
         return self._send_json(200, {"ok": True, "resurface": payload})
+
+    def _handle_resume(self):
+        """GET /resume -- the "resume where you left off" open-loop (R-02).
+        Local drafts + saved sources only; see _resume_payload. Token-gated.
+        On an index error the dashboard just hides the card, so failure here
+        is a 503, never a misleading half-card."""
+        if not self._require_token():
+            return
+        try:
+            payload = _resume_payload(_get_index())
+        except Exception as e:
+            log.warning("/resume failed: %s", e)
+            return self._send_json(503, {
+                "ok": False,
+                "error": "resume unavailable",
+                "state": "unavailable",
+            })
+        return self._send_json(200, {"ok": True, "resume": payload})
 
     # ---- v2.5 S1 facet endpoints -------------------------------------------
     def _handle_facets_taxonomy(self):
