@@ -23,7 +23,7 @@
 
 #define AppName       "Uoink"
 ; build.ps1 rewrites AppVersion from helper/_version.py before compiling.
-#define AppVersion    "3.2.8"
+#define AppVersion    "3.3.0"
 #define AppPublisher  "ReplayRyan"
 #define AppURL        "https://uoink.app"
 
@@ -120,6 +120,7 @@ Source: "staging\page_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\source_manifest.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\openapi_bridge.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\reddit_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\taste_scoring.py"; DestDir: "{app}"; Flags: ignoreversion
 ; U-15 X text/thread capture. server.py imports x_extractor at module top, so it
 ; MUST be in Inno's installed file list too -- build.ps1 staging coverage alone is
 ; not enough. Its absence here is why v3.2.6 shipped without it and the helper

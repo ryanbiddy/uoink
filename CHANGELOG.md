@@ -8,13 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
-## [Unreleased]
+## [3.3.0] - 2026-07-07
 
-X is no longer video-only.
+Capture the whole web, and let your corpus surface what's worth writing about. X is no longer video-only.
 
 ### Added
 
 - **Uoink an X post's words, not just its video.** "Uoink this post" now captures the tweet's text and the author's own earlier thread, and queues the video too when the post has one. A text-only post finally saves instead of dead-ending. Uses X's public syndication endpoint (no login, no paid API), so it's the same source path the video capture already used.
+- **Taste-aware auto-uoink (opt-in, off by default).** Turn it on and Uoink scores new videos from the playlists you already monitor against your local taste, then captures the strong matches for you, clearly labelled. No crawler, no accounts, no AI spend. It only watches sources you already track, and every auto-saved item is an ordinary uoink you can delete.
+- **Discovery digest.** A calm "worth your attention" view that blends resurfaced corpus items with fresh taste-matched captures, each one click from a draft. Private, local, yours.
+- **One-click MCP bundle.** A `.mcpb` package so you can add Uoink to Claude Desktop without hand-editing config.
 
 ### Changed
 

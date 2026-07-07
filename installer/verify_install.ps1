@@ -40,6 +40,7 @@ $requiredFiles = @(
     'openapi_bridge.py',
     'reddit_extractor.py',
     'x_extractor.py',
+    'taste_scoring.py',
     'defaults\style_anchors.json'
 )
 foreach ($rf in $requiredFiles) {
