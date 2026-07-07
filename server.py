@@ -86,6 +86,7 @@ import memory_layer  # noqa: E402  -- v2.5 S4 markdown taste/user memory
 import podcasts  # noqa: E402  -- v3.1 podcast RSS feed registry + polling
 import whisper_runner  # noqa: E402  -- v3.1 WhisperX transcription (lazy)
 import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
+import taste_scoring  # noqa: E402  -- V-3 taste-aware auto-uoink scoring
 import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
 import writing_studio  # noqa: E402  -- v3.2 Writing Studio (tweet/blog)
 import page_extractor  # noqa: E402  -- v3.2 Universal Site Uoinking
@@ -737,6 +738,15 @@ def _default_settings() -> dict:
         # screenshot is intentionally off so the user chooses what travels.
         "writing_show_screenshot_picker": True,
         "writing_default_attach_all_screenshots": False,
+        # V-3 taste-aware auto-uoink. OPT-IN, default OFF. When True, a
+        # scan scores NEW candidates surfaced by the user's already-
+        # monitored playlists against the local taste model and auto-
+        # captures the ones above the taste threshold (labelled
+        # "auto-uoinked (taste match)" in Activity). No web crawling, no
+        # AI spend -- capture reuses the same local yt-dlp + transcription
+        # path as a manual save. Reversible: turn it off any time; captured
+        # uoinks are ordinary uoinks you can delete.
+        "auto_uoink_enabled": False,
         "anthropic_key_invalid": False,
         # v2.1 rename: set True after the one-time post-migration
         # post-migration toast has fired, so it never repeats.
@@ -777,6 +787,7 @@ def _normalize_settings(data: dict) -> dict:
     clean["writing_default_attach_all_screenshots"] = bool(
         clean.get("writing_default_attach_all_screenshots", False)
     )
+    clean["auto_uoink_enabled"] = bool(clean.get("auto_uoink_enabled"))
     try:
         cap = int(clean.get("clipboard_screenshot_cap"))
     except (TypeError, ValueError):
@@ -1069,6 +1080,11 @@ def _public_settings(data: dict | None = None) -> dict:
             data.get("writing_show_screenshot_picker", True)),
         "writing_default_attach_all_screenshots": bool(
             data.get("writing_default_attach_all_screenshots", False)),
+        # V-3 taste-aware auto-uoink (opt-in, default OFF). The threshold
+        # is a helper constant (not user-tunable in this MVP) surfaced so
+        # the Settings + digest copy can state the bar honestly.
+        "auto_uoink_enabled": bool(data.get("auto_uoink_enabled")),
+        "auto_uoink_threshold": taste_scoring.DEFAULT_THRESHOLD,
     }
 
 
@@ -7771,6 +7787,132 @@ def _resurface_payload(idx) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# V-3 auto-uoink status + V-4 local discovery digest
+# ---------------------------------------------------------------------------
+# The discovery digest is a COMPOSITION of data Uoink already computes -- it
+# invents no new signal and does no network/AI work. It stitches:
+#   * the R-01 resurface payload (idle corpus items worth another look,
+#     topic connections, coverage gaps, performing anchors)
+#   * the V-3 auto-uoinked "fresh from your sources" captures (recent
+#     taste-match discovery events, joined to their corpus row when the
+#     local extraction has finished so each can offer "Write from this")
+# ...into one calm, ranked "worth your attention" list. Private, local,
+# owned -- not an algorithmic feed.
+_AUTO_UOINK_CAPTURE_LIMIT = 12
+
+
+def _auto_uoink_status_payload(idx) -> dict:
+    """The opt-in state + what auto-uoink can see right now. Local only."""
+    settings = _read_settings()
+    enabled = bool(settings.get("auto_uoink_enabled"))
+    try:
+        sources = mobile_playlists.list_playlists(idx, enabled_only=True)
+    except Exception as e:
+        log.warning("auto-uoink status: playlist list failed: %s", e)
+        sources = []
+    try:
+        profile = taste_scoring.build_taste_profile(idx)
+    except Exception as e:
+        log.warning("auto-uoink status: profile build failed: %s", e)
+        profile = {"has_signal": False, "signal_count": 0}
+    return {
+        "enabled": enabled,
+        "threshold": taste_scoring.DEFAULT_THRESHOLD,
+        "monitored_sources": len(sources),
+        "has_taste_signal": bool(profile.get("has_signal")),
+        "taste_signal_count": int(profile.get("signal_count") or 0),
+        # An honest one-liner the UI can show verbatim.
+        "needs_sources": len(sources) == 0,
+    }
+
+
+def _auto_uoink_recent_captures(idx, *, limit=_AUTO_UOINK_CAPTURE_LIMIT):
+    """Recent auto-uoinked items, each joined to its corpus row when the
+    local capture has finished (so the digest can offer Write-from-this).
+    Rows still extracting are surfaced honestly as pending."""
+    try:
+        events = mobile_playlists.list_taste_captures(idx, limit=limit)
+    except Exception as e:
+        log.warning("auto-uoink captures failed: %s", e)
+        return []
+    out = []
+    for ev in events:
+        vid = ev.get("video_id")
+        row = None
+        try:
+            row = idx.get_yoink(vid) if vid else None
+        except Exception:
+            row = None
+        captured = bool(row and not row.get("deleted_at"))
+        out.append({
+            "video_id": vid,
+            "title": (row or {}).get("title") or ev.get("video_title") or vid,
+            "channel": (row or {}).get("channel") or "",
+            "topic": (row or {}).get("topic") or "",
+            "taste_score": ev.get("taste_score"),
+            "discovered_at": ev.get("discovered_at"),
+            # In corpus + extraction done -> Write-from-this is live.
+            "in_corpus": captured,
+            "status": "ready" if captured else "capturing",
+            "label": "auto-uoinked (taste match)",
+        })
+    return out
+
+
+def _discovery_payload(idx) -> dict:
+    """Compose the V-4 local discovery digest from existing local data."""
+    resurface = _resurface_payload(idx)
+    captures = _auto_uoink_recent_captures(idx)
+    status = _auto_uoink_status_payload(idx)
+
+    # The single ranked "attention" stream: fresh taste-matched captures
+    # first (newest signal), then the highest-signal resurfaced items.
+    attention: list[dict] = []
+    for c in captures:
+        attention.append({
+            "kind": "auto_uoink",
+            "video_id": c["video_id"],
+            "title": c["title"],
+            "channel": c["channel"],
+            "topic": c["topic"],
+            "score": c.get("taste_score"),
+            "in_corpus": c["in_corpus"],
+            "label": c["label"],
+            "why": "Auto-captured because it matched your taste.",
+        })
+    for r in (resurface.get("worth_revisiting") or []):
+        attention.append({
+            "kind": "resurface",
+            "video_id": r.get("video_id"),
+            "title": r.get("title"),
+            "channel": r.get("channel") or "",
+            "topic": r.get("topic") or "",
+            "score": r.get("value_score"),
+            "in_corpus": True,
+            "label": "worth revisiting",
+            "why": "A strong saved uoink you haven't touched in a while.",
+        })
+
+    return {
+        "generated_at": _now_iso(),
+        # Calm, non-urgent framing (Voice DNA): a standing digest, not a
+        # notification stream. The UI labels it "your digest", no counters
+        # screaming for attention.
+        "window": "your standing digest",
+        "attention": attention[:12],
+        "auto_uoinked": captures,
+        "auto_uoink": status,
+        # Pass the resurface keys straight through so the existing
+        # renderForYou() keeps working unchanged (discovery is a superset).
+        "worth_revisiting": resurface.get("worth_revisiting") or [],
+        "connections": resurface.get("connections") or [],
+        "corpus_gaps": resurface.get("corpus_gaps") or [],
+        "anchors": resurface.get("anchors") or [],
+        "source": resurface.get("source"),
+    }
+
+
+# ---------------------------------------------------------------------------
 # /resume -- "resume where you left off" open-loop (R-02)
 # ---------------------------------------------------------------------------
 # One compact card at the top of the dashboard so reopening the app has an
@@ -8225,6 +8367,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_engagement_scores()
         if bare == "/resurface":
             return self._handle_resurface()
+        if bare == "/discovery":
+            return self._handle_discovery()
+        if bare == "/auto-uoink/status":
+            return self._handle_auto_uoink_status()
         if bare == "/resume":
             return self._handle_resume()
         if bare == "/library/facets":
@@ -9738,6 +9884,138 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {"ok": True, "events": rows,
                                       "count": len(rows)})
 
+    # ---- V-3 taste-aware auto-uoink + V-4 discovery digest ----------
+
+    def _handle_auto_uoink_status(self):
+        """GET /auto-uoink/status -- the opt-in state + what auto-uoink can
+        see (monitored source count, whether the taste model has any
+        signal yet). Local only; token-gated. Never captures anything."""
+        if not self._require_token():
+            return
+        try:
+            payload = _auto_uoink_status_payload(_get_index())
+        except Exception as e:
+            log.warning("/auto-uoink/status failed: %s", e)
+            return self._send_json(503, {
+                "ok": False, "error": "auto-uoink status unavailable"})
+        return self._send_json(200, {"ok": True, "auto_uoink": payload})
+
+    def _handle_auto_uoink_scan(self, body):
+        """POST /auto-uoink/scan -- score NEW candidates from the user's
+        already-monitored playlists against the local taste model and
+        auto-capture the ones above the taste threshold.
+
+        Honest + safe by construction:
+          * Refuses unless the opt-in setting is ON (409 + reason).
+          * If there are no monitored sources it explains that -- it does
+            NOT invent a crawler or reach out to the open web.
+          * Capture = the existing local yt-dlp + transcription path
+            (same as a manual save). No AI spend.
+          * Reuses mobile_playlists.poll_playlist with a taste filter.
+
+        Returns per-source {captured[], skipped[]} + totals so the UI /
+        Activity can show exactly what happened and why."""
+        settings = _read_settings()
+        if not settings.get("auto_uoink_enabled"):
+            return self._send_json(409, {
+                "ok": False,
+                "enabled": False,
+                "error": "auto-uoink is off",
+                "message": ("Taste-aware auto-uoink is opt-in and currently "
+                            "off. Turn it on in Settings first."),
+            })
+        idx = _get_index()
+        try:
+            sources = mobile_playlists.list_playlists(idx, enabled_only=True)
+        except Exception as e:
+            log.exception("/auto-uoink/scan: playlist list failed")
+            return self._send_json(500, {"ok": False, "error": str(e)})
+        if not sources:
+            return self._send_json(200, {
+                "ok": True,
+                "enabled": True,
+                "needs_sources": True,
+                "sources_scanned": 0,
+                "captured": [],
+                "skipped": [],
+                "message": ("Auto-uoink watches sources you already track. "
+                            "Add a monitored playlist in Settings, then it "
+                            "can score new videos for you."),
+            })
+        # Build the taste profile once for the whole scan.
+        profile = taste_scoring.build_taste_profile(idx)
+        threshold = taste_scoring.DEFAULT_THRESHOLD
+        taste_filter = taste_scoring.make_filter(profile, threshold)
+
+        def _vid_to_url(vid):
+            if not vid:
+                return None
+            return _normalize_youtube_url(
+                f"https://www.youtube.com/watch?v={vid}")
+
+        captured: list[dict] = []
+        skipped: list[dict] = []
+        source_results: list[dict] = []
+        for pl in sources:
+            try:
+                result = mobile_playlists.poll_playlist(
+                    idx, pl["id"],
+                    normalize_video_to_canonical_url=_vid_to_url,
+                    taste_filter=taste_filter)
+            except Exception as e:
+                log.warning("/auto-uoink/scan poll failed (%s): %s",
+                            pl.get("id"), e)
+                source_results.append({"playlist_id": pl.get("id"),
+                                        "name": pl.get("name"),
+                                        "ok": False, "error": str(e)})
+                continue
+            if not result.get("ok"):
+                source_results.append({"playlist_id": pl.get("id"),
+                                        "name": pl.get("name"),
+                                        "ok": False,
+                                        "error": result.get("error")})
+                continue
+            new_items = result.get("new") or []
+            captured.extend(new_items)
+            skipped.extend(result.get("skipped") or [])
+            source_results.append({
+                "playlist_id": pl.get("id"),
+                "name": pl.get("name"),
+                "ok": True,
+                "captured": len(new_items),
+                "skipped": len(result.get("skipped") or []),
+            })
+        return self._send_json(200, {
+            "ok": True,
+            "enabled": True,
+            "needs_sources": False,
+            "threshold": threshold,
+            "has_taste_signal": bool(profile.get("has_signal")),
+            "sources_scanned": len(sources),
+            "captured": captured,
+            "skipped": skipped,
+            "sources": source_results,
+            "message": (f"Scanned {len(sources)} source"
+                        f"{'' if len(sources) == 1 else 's'}: "
+                        f"auto-uoinked {len(captured)}, "
+                        f"skipped {len(skipped)}."),
+        })
+
+    def _handle_discovery(self):
+        """GET /discovery -- the V-4 local discovery digest. A composition
+        of the R-01 resurface payload + the V-3 auto-uoinked captures into
+        one calm ranked 'worth your attention' list. Local only; no
+        network, no AI; token-gated."""
+        if not self._require_token():
+            return
+        try:
+            payload = _discovery_payload(_get_index())
+        except Exception as e:
+            log.warning("/discovery failed: %s", e)
+            return self._send_json(503, {
+                "ok": False, "error": "discovery unavailable"})
+        return self._send_json(200, {"ok": True, "discovery": payload})
+
     # ---- v3.2 Writing Studio --------------------------------------
     # Server is POST-only at the dispatch layer; we expose the prompt's
     # PATCH/DELETE semantics via POST action paths so the dashboard +
@@ -10297,6 +10575,7 @@ class Handler(BaseHTTPRequestHandler):
             "voice_dna_show_per_generation_toggle",  # v3.2 Writing Studio
             "writing_show_screenshot_picker",  # v3.3 D-20
             "writing_default_attach_all_screenshots",  # v3.3 D-20
+            "auto_uoink_enabled",           # V-3 taste-aware auto-uoink
         )
         integer_fields = ("clipboard_screenshot_cap",)
         extra_fields = ("output_dir", "autostart", "topics",
@@ -11386,6 +11665,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_monitored_playlist_set_enabled(body)
         if bare == "/playlists/monitored/poll":
             return self._handle_monitored_playlist_poll(body)
+        if bare == "/auto-uoink/scan":
+            return self._handle_auto_uoink_scan(body)
         if bare == "/writing/compose/validate":
             return self._handle_writing_compose_validate(body)
         if bare == "/writing/draft":

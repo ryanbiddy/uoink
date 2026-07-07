@@ -157,17 +157,25 @@ def _fetch_playlist_video_ids(playlist_url: str, *,
             continue
         vid = entry.get("id")
         if vid:
+            # Channel/uploader is best-effort: --flat-playlist usually
+            # exposes it, but not always. V-3 taste scoring uses it when
+            # present and falls back to title-only signal when it isn't.
+            channel = (entry.get("channel") or entry.get("uploader")
+                       or entry.get("uploader_id") or "")
             entries.append({"video_id": vid,
-                              "title": entry.get("title")})
+                              "title": entry.get("title"),
+                              "channel": channel})
     return entries
 
 
 def poll_playlist(idx, playlist_id: int, *,
                    ytdlp_cmd: list[str] | None = None,
-                   normalize_video_to_canonical_url=None) -> dict:
+                   normalize_video_to_canonical_url=None,
+                   taste_filter=None,
+                   fetch_entries=None) -> dict:
     """Fetch + diff + record the new entries. Returns:
         {ok, playlist_id, new[{video_id, title, canonical_url}], seen_count,
-         total_in_playlist, enqueued[]}
+         total_in_playlist, enqueued[], skipped[]}
 
     Does NOT itself call /extract -- it records the discovery events
     and (optionally) registers each new video to pending_yoinks via the
@@ -176,10 +184,23 @@ def poll_playlist(idx, playlist_id: int, *,
     cheap + lets the dashboard's Activity tab show the pre-queue
     "discovered" state.
 
+    V-3 taste-aware auto-uoink: when ``taste_filter`` is passed (a
+    callable(candidate) -> {capture, score, reason, reasons}) the poll
+    becomes selective -- only candidates the filter accepts are enqueued
+    and get a discovery event, stamped with ``capture_reason`` +
+    ``taste_score`` so Activity + the digest can label them
+    "auto-uoinked (taste match)". Declined candidates are returned in
+    ``skipped[]`` (with their score/reasons) but are NOT enqueued and get
+    no event row -- Activity stays clean. When ``taste_filter`` is None
+    the behaviour is exactly the pre-V-3 "capture every new video" poll,
+    so the manual poll path is unchanged.
+
     Injection rationale (same shape as add_playlist): the canonical
     URL helper lives in server.py; importing it from this module would
     create a server -> mobile_playlists -> server cycle. The endpoint
-    handler wires the dependency at call-time."""
+    handler wires the dependency at call-time. ``fetch_entries`` is an
+    optional injection point (tests pass candidates directly, avoiding a
+    real yt-dlp network call)."""
     pl = get_playlist(idx, playlist_id)
     if pl is None:
         return {"ok": False, "error": f"playlist not found: {playlist_id}"}
@@ -194,8 +215,11 @@ def poll_playlist(idx, playlist_id: int, *,
             ytdlp_cmd = []
 
     try:
-        entries = _fetch_playlist_video_ids(pl["playlist_url"],
-                                              ytdlp_cmd=ytdlp_cmd)
+        if callable(fetch_entries):
+            entries = fetch_entries(pl["playlist_url"])
+        else:
+            entries = _fetch_playlist_video_ids(pl["playlist_url"],
+                                                  ytdlp_cmd=ytdlp_cmd)
     except Exception as e:
         log.warning("playlist poll failed (%s): %s", pl["playlist_url"], e)
         _record_poll_failure(idx, playlist_id, str(e))
@@ -207,9 +231,33 @@ def poll_playlist(idx, playlist_id: int, *,
     all_ids = [e["video_id"] for e in entries]
 
     enqueued: list[dict] = []
+    skipped: list[dict] = []
     now = _now_iso()
     with idx._lock:
         for e in new_entries:
+            # V-3: when a taste filter is wired, let it decide. A declined
+            # candidate is recorded in skipped[] only (no queue, no event).
+            capture_reason = None
+            taste_score = None
+            if callable(taste_filter):
+                try:
+                    verdict = taste_filter(e) or {}
+                except Exception as tf_err:
+                    log.warning("taste_filter raised: %s", tf_err)
+                    verdict = {"capture": False,
+                               "reasons": ["taste filter error"]}
+                if not verdict.get("capture"):
+                    skipped.append({
+                        "video_id": e["video_id"],
+                        "title": e.get("title"),
+                        "score": verdict.get("score"),
+                        "reasons": verdict.get("reasons") or [],
+                        "blocked": bool(verdict.get("blocked")),
+                    })
+                    continue
+                capture_reason = verdict.get("reason") or "auto_uoink:taste"
+                taste_score = verdict.get("score")
+
             canonical = None
             pending_id = None
             if callable(normalize_video_to_canonical_url):
@@ -235,11 +283,11 @@ def poll_playlist(idx, playlist_id: int, *,
             cur = idx._conn.execute(
                 "INSERT INTO mobile_queue_events "
                 "(playlist_id, video_id, video_title, discovered_at, "
-                " status, pending_id) "
-                "VALUES (?, ?, ?, ?, ?, ?)",
+                " status, pending_id, capture_reason, taste_score) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 (playlist_id, e["video_id"], e.get("title"), now,
                  EVENT_QUEUED if pending_id else EVENT_DISCOVERED,
-                 pending_id))
+                 pending_id, capture_reason, taste_score))
             enqueued.append({
                 "event_id": cur.lastrowid,
                 "video_id": e["video_id"],
@@ -247,6 +295,8 @@ def poll_playlist(idx, playlist_id: int, *,
                 "canonical_url": canonical,
                 "pending_id": pending_id,
                 "status": EVENT_QUEUED if pending_id else EVENT_DISCOVERED,
+                "capture_reason": capture_reason,
+                "taste_score": taste_score,
             })
         # Update the rolling state on the playlist row.
         idx._conn.execute(
@@ -262,6 +312,7 @@ def poll_playlist(idx, playlist_id: int, *,
         "playlist_id": playlist_id,
         "playlist_url": pl["playlist_url"],
         "new": enqueued,
+        "skipped": skipped,
         "seen_count": len(seen),
         "total_in_playlist": len(all_ids),
     }
@@ -299,4 +350,20 @@ def list_events(idx, *, playlist_id: int | None = None,
         "SELECT * FROM mobile_queue_events" + where_sql +
         " ORDER BY discovered_at DESC LIMIT ?",
         params).fetchall()
+    return [dict(r) for r in rows]
+
+
+def list_taste_captures(idx, *, limit: int = 20) -> list[dict]:
+    """V-3/V-4: recent auto-uoinked (taste-match) discovery events, newest
+    first. These are the rows the taste filter chose to capture -- the
+    ``capture_reason`` column is only set on that path, so this cleanly
+    excludes both manual mobile-playlist queues and pre-V-3 rows. The V-4
+    digest joins each to its corpus row (when extraction has finished) to
+    offer a one-click 'Write from this'."""
+    limit = max(1, min(int(limit or 20), 200))
+    rows = idx._conn.execute(
+        "SELECT * FROM mobile_queue_events "
+        "WHERE capture_reason IS NOT NULL "
+        "ORDER BY discovered_at DESC LIMIT ?",
+        (limit,)).fetchall()
     return [dict(r) for r in rows]
