@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "uoink",
   "display_name": "Uoink",
-  "version": "3.3.1",
+  "version": "3.3.2",
   "description": "Hand your AI a cited local corpus. Uoink saves the YouTube videos, X posts, podcasts, and articles you study to your own disk, then exposes them to Claude Desktop as MCP tools.",
   "long_description": "Uoink keeps the videos, podcasts, and articles you study on your own disk, then hands them to Claude as a cited corpus. This bundle connects Claude Desktop to your already-installed Uoink helper's local MCP server (stdio). Install the Uoink helper from https://uoink.app/install first, then install this bundle. Core capture is local and needs no API key; optional AI features use your own Anthropic key.",
   "author": {

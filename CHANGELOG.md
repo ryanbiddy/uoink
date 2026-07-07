@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [3.3.2] - 2026-07-07
+
+Tool fixes from testing v3.3.1 on a real install.
+
+### Fixed
+
+- **Captures now save where you told them to.** X, Reddit, and article captures were writing to the app's own folder instead of your configured output folder, so they landed apart from the rest of your library. All capture paths now use your output folder, matching YouTube.
+- **The extension popup tells the truth about X.** It now says it captures the post text and the author's thread (plus the video if there is one), matching what the feature actually does.
+- **The popup shows the real version** instead of a stale "v2.1" label.
+- Developer setup: the site's config snippet now emits the working MCP command (it previously pointed at a file that doesn't exist), the tool count reads a consistent 64 (14 over stdio) everywhere, and the published MCP card reports the current version.
+
 ## [3.3.1] - 2026-07-07
 
 A cleanup pass from a full review of the 3.3.0 work.
