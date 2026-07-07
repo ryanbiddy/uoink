@@ -754,7 +754,8 @@
     },
     x_video: {
       label: "post", endpoint: "/extract", action: "x_video",
-      note: "Captures the video. Post + thread text is a separate toggle.",
+      note: "Captures the post text and the author's thread -- plus the "
+        + "video if the post has one.",
     },
     reddit_thread: {
       label: "thread", endpoint: "/extract/reddit", action: "reddit", note: "",

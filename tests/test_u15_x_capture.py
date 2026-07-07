@@ -298,6 +298,53 @@ def test_route_captures_and_persists():
     print("ok  route persists an x_thread yoink and relays honest errors")
 
 
+def test_capture_lands_under_output_root():
+    # Real data bug (v3.3.1 capture test): an X text capture must write its
+    # corpus under the configured output root (server.DESKTOP_ROOT / a user's
+    # UOINK_OUTPUT_DIR), the same place video captures, the corpus scan, and
+    # the stale-path heal all use -- NOT hardcoded into %LOCALAPPDATA%
+    # (server.DATA_ROOT). Otherwise a user who set an output root ends up with
+    # a corpus split across two drives and X captures the heal can't see.
+    #
+    # Red on the pre-fix code: the route passed data_root=DATA_ROOT, so the
+    # corpus landed under DATA_ROOT, not the output root -> both asserts fail.
+    with tempfile.TemporaryDirectory() as out_root, \
+            tempfile.TemporaryDirectory() as d:
+        out_root = Path(out_root).resolve()
+        idx = index_mod.Index.open(Path(d) / "index.db")
+        original_get_index = server._get_index
+        original_extract = server.x_extractor.extract_x_thread
+        original_root = server.DESKTOP_ROOT
+        server._get_index = lambda: idx
+        server.DESKTOP_ROOT = out_root
+        fetch = _fetcher({"7": _payload("7", "Land me under the output root.")})
+        server.x_extractor.extract_x_thread = (
+            lambda url, **kw: original_extract(url, _fetch=fetch))
+        try:
+            with _server({"x_text_capture_enabled": True}):
+                status, res = _post(
+                    "/extract/x",
+                    {"url": "https://x.com/ryanbiddy/status/7"})
+                _assert(status == 200 and res.get("ok") is True,
+                        f"capture failed: {status} {res}")
+                row = idx.get_yoink(res["video_id"])
+                corpus = Path((row or {}).get("corpus_path") or "").resolve()
+                _assert(str(corpus).startswith(str(out_root)),
+                        f"corpus_path must be under the output root "
+                        f"{out_root}, got {corpus}")
+                _assert(server.DATA_ROOT.resolve() not in corpus.parents,
+                        f"corpus_path must NOT be hardcoded under "
+                        f"%LOCALAPPDATA% ({server.DATA_ROOT}), got {corpus}")
+                _assert(corpus.exists(),
+                        f"corpus file should exist on disk: {corpus}")
+        finally:
+            server._get_index = original_get_index
+            server.x_extractor.extract_x_thread = original_extract
+            server.DESKTOP_ROOT = original_root
+            idx.close()
+    print("ok  X capture corpus lands under the output root, not AppData")
+
+
 def test_default_flag_on():
     # V-2b ship: X text capture is on by default so an X post captures its
     # words, not just its video. Red on main: the key doesn't exist yet.
@@ -334,6 +381,40 @@ def test_extension_wiring():
     print("ok  primary button captures X text (+ video), old button retired")
 
 
+def test_popup_x_copy_and_version_current():
+    # v3.3.1 capture-test findings (extension popup):
+    #  (2) the client-side x_video note lagged the text-first behavior --
+    #      "Captures the video. Post + thread text is a separate toggle." It
+    #      must now match reality + the dashboard ("Captures the post text and
+    #      the author's thread"), since the primary button captures text +
+    #      thread (+ video when present).
+    #  (3) the footer version read a hardcoded "v2.1". It must not hardcode a
+    #      stale version; the popup sources it from the manifest instead.
+    # Red on the pre-fix files: the stale strings are present.
+    root = Path(__file__).resolve().parent.parent
+    extract_js = (root / "extension" / "lib" / "extract.js").read_text(
+        encoding="utf-8")
+    popup_html = (root / "extension" / "popup.html").read_text(encoding="utf-8")
+    popup_js = (root / "extension" / "popup.js").read_text(encoding="utf-8")
+
+    # (2) stale X note gone; honest text-first copy in, aligned with dashboard.
+    _assert("separate toggle" not in extract_js,
+            "the stale 'separate toggle' X note must be gone")
+    _assert("Captures the video. Post + thread text" not in extract_js,
+            "the stale video-first X note must be gone")
+    _assert("post text and the author's thread" in extract_js,
+            "the X note must say it captures the post text and the thread")
+
+    # (3) no hardcoded stale version; popup sources it from the manifest.
+    _assert("v2.1" not in popup_html,
+            "the footer must not hardcode the stale v2.1 version")
+    _assert("getManifest()" in popup_js,
+            "the popup must source its version from the manifest")
+    _assert('id="popup-version"' in popup_html,
+            "the version label needs an id the popup can populate")
+    print("ok  X popup note is text-first + version sourced from the manifest")
+
+
 def main():
     for fn in (
         test_url_matcher,
@@ -347,8 +428,10 @@ def main():
         test_route_flag_off_by_default,
         test_route_token_gated,
         test_route_captures_and_persists,
+        test_capture_lands_under_output_root,
         test_default_flag_on,
         test_extension_wiring,
+        test_popup_x_copy_and_version_current,
     ):
         fn()
     print("\nall green")
