@@ -2,7 +2,7 @@
   "manifest_version": "0.4",
   "name": "uoink",
   "display_name": "Uoink",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "Hand your AI a cited local corpus. Uoink saves the YouTube videos, X posts, podcasts, and articles you study to your own disk, then exposes them to Claude Desktop as MCP tools.",
   "long_description": "Uoink keeps the videos, podcasts, and articles you study on your own disk, then hands them to Claude as a cited corpus. This bundle connects Claude Desktop to your already-installed Uoink helper's local MCP server (stdio). Install the Uoink helper from https://uoink.app/install first, then install this bundle. Core capture is local and needs no API key; optional AI features use your own Anthropic key.",
   "author": {
@@ -52,24 +52,68 @@
     }
   },
   "tools": [
-    { "name": "uoink_video", "description": "Extract a single YouTube video into a Uoink corpus." },
-    { "name": "uoink_playlist", "description": "Start asynchronous extraction for a YouTube playlist." },
-    { "name": "get_job_status", "description": "Return the full status object for an async Uoink job." },
-    { "name": "cancel_job", "description": "Cancel an async Uoink job and leave partial outputs on disk." },
-    { "name": "list_recent_uoinks", "description": "List recent saved Uoink corpora." },
-    { "name": "search_uoinks", "description": "Keyword search across saved Uoink markdown corpora." },
-    { "name": "get_uoink_corpus", "description": "Return the full markdown corpus for a saved uoink by slug." },
-    { "name": "analyze_comments", "description": "Run Comment Intelligence on an existing uoink (uses your Anthropic key)." },
-    { "name": "classify_hook", "description": "Classify the hook type for an existing uoink." },
-    { "name": "get_taxonomy", "description": "Return captured Hook Type taxonomy rows, optionally filtered." },
-    { "name": "get_citation_map", "description": "Return the transcript + screenshot citation map for a saved uoink." },
-    { "name": "get_uoink_health", "description": "Return the per-section extraction health score for a saved uoink." },
-    { "name": "find_mentions", "description": "Find every mention of an entity across saved uoinks, each with a timestamped deep link." },
-    { "name": "get_transcript_reliability", "description": "Return stored transcript reliability spans for a saved uoink." }
+    {
+      "name": "uoink_video",
+      "description": "Extract a single YouTube video into a Uoink corpus."
+    },
+    {
+      "name": "uoink_playlist",
+      "description": "Start asynchronous extraction for a YouTube playlist."
+    },
+    {
+      "name": "get_job_status",
+      "description": "Return the full status object for an async Uoink job."
+    },
+    {
+      "name": "cancel_job",
+      "description": "Cancel an async Uoink job and leave partial outputs on disk."
+    },
+    {
+      "name": "list_recent_uoinks",
+      "description": "List recent saved Uoink corpora."
+    },
+    {
+      "name": "search_uoinks",
+      "description": "Keyword search across saved Uoink markdown corpora."
+    },
+    {
+      "name": "get_uoink_corpus",
+      "description": "Return the full markdown corpus for a saved uoink by slug."
+    },
+    {
+      "name": "analyze_comments",
+      "description": "Run Comment Intelligence on an existing uoink (uses your Anthropic key)."
+    },
+    {
+      "name": "classify_hook",
+      "description": "Classify the hook type for an existing uoink."
+    },
+    {
+      "name": "get_taxonomy",
+      "description": "Return captured Hook Type taxonomy rows, optionally filtered."
+    },
+    {
+      "name": "get_citation_map",
+      "description": "Return the transcript + screenshot citation map for a saved uoink."
+    },
+    {
+      "name": "get_uoink_health",
+      "description": "Return the per-section extraction health score for a saved uoink."
+    },
+    {
+      "name": "find_mentions",
+      "description": "Find every mention of an entity across saved uoinks, each with a timestamped deep link."
+    },
+    {
+      "name": "get_transcript_reliability",
+      "description": "Return stored transcript reliability spans for a saved uoink."
+    }
   ],
   "compatibility": {
     "claude_desktop": ">=0.10.0",
-    "platforms": ["win32"],
+    "platforms": [
+      "win32"
+    ],
     "runtimes": {
       "python": ">=3.10,<4"
     }

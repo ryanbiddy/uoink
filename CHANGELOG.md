@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [3.3.1] - 2026-07-07
+
+A cleanup pass from a full review of the 3.3.0 work.
+
+### Fixed
+
+- **Auto-uoink no longer skips videos it should keep.** The taste scan used to move the shared "already seen" marker past every video it looked at, including the ones it declined. That quietly did two bad things: it burned your current backlog if you scanned before Uoink had learned your taste, and it made the plain "capture everything" watch skip videos it was supposed to grab. The scan now only advances that marker past videos it actually captured.
+- **The dashboard's paste box tells the truth about X.** It now captures X post text and threads (the same path the extension uses) instead of claiming text "isn't supported yet."
+- The one-click MCP bundle now stamps the real release version at build time, and CI checks it alongside the other version surfaces.
+- Playlist watch commits its progress durably; an X post with a video says so when the queue is full instead of hiding it; the discovery digest no longer lists the same item twice.
+
 ## [3.3.0] - 2026-07-07
 
 Capture the whole web, and let your corpus surface what's worth writing about. X is no longer video-only.
