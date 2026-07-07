@@ -28,12 +28,18 @@ Facet states:
 - Each empty facet carries a `title` that explains why it is empty.
 - If `/library/facets` is unavailable, the built-in defaults stay enabled and `#facetStatus` explains the fallback.
 
+The Library also opens with `#resumeCard`, the R-02 "resume where you left
+off" open-loop, above the headline. It is populated by `GET /resume` on boot
+and stays hidden when nothing qualifies. See
+[corpus-digest.md](corpus-digest.md).
+
 Routes consumed:
 
 - `GET /memory/search`
 - `GET /library/facets`
 - `GET /engagement/scores`
 - `GET /resurface`
+- `GET /resume`
 
 ## Sources
 
