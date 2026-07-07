@@ -5,7 +5,7 @@
   "version": "3.2.7",
   "description": "Save videos, podcasts, and articles to a local corpus your AI can write from.",
   "homepage_url": "https://uoink.app",
-  "permissions": ["alarms", "clipboardWrite", "notifications", "storage", "contextMenus", "activeTab", "offscreen"],
+  "permissions": ["alarms", "clipboardWrite", "notifications", "storage", "contextMenus", "activeTab", "scripting", "offscreen"],
   "host_permissions": [
     "https://www.youtube.com/*",
     "https://m.youtube.com/*",

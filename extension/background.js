@@ -20,6 +20,7 @@ const MENU_PAGE = "stc-extract-page";
 const MENU_SESSION = "stc-extract-session";
 const MENU_REDDIT_LINK = "stc-extract-reddit-link";
 const MENU_REDDIT_PAGE = "stc-extract-reddit-page";
+const MENU_ARTICLE_PAGE = "stc-extract-article-page";
 const ICON_URL = chrome.runtime.getURL("icons/icon128.png");
 const OFFSCREEN_URL = "offscreen.html";
 // CLIPBOARD covers the existing copy path; MATCH_MEDIA lets the doc stay
@@ -210,6 +211,16 @@ async function rebuildContextMenus() {
     documentUrlPatterns: ["*://*.reddit.com/r/*/comments/*"],
   });
 
+  // Article / web page. Allowlist-gated server-side; an un-allowed host
+  // returns an honest "not allowed yet" notification (the popup offers a
+  // one-click allow-and-retry; the context menu keeps it simple).
+  chrome.contextMenus.create({
+    id: MENU_ARTICLE_PAGE,
+    title: "Uoink this page (article)",
+    contexts: ["page"],
+    documentUrlPatterns: ["http://*/*", "https://*/*"],
+  });
+
   const active = await getActiveFromStorage();
   if (active && active.id) {
     const name = active.name || active.id;
@@ -227,6 +238,22 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   // Decide raw URL by menu id.
   let raw = null;
   let kind = "extract";
+
+  // Article / web page: route straight to /extract/page (no video-URL
+  // normalization). Reuses the corpus success path via job.usePage.
+  if (info.menuItemId === MENU_ARTICLE_PAGE) {
+    const pageUrl = info.pageUrl || (tab && tab.url);
+    if (!pageUrl || !/^https?:\/\//i.test(pageUrl)) {
+      notify("Invalid URL", "Couldn't read a web page URL from this tab.");
+      return;
+    }
+    if (!(await serverQueueHasRoom())) {
+      notify("Queue full", "Wait a few minutes");
+      return;
+    }
+    await enqueue({ kind: "extract", url: pageUrl, usePage: true, addedAt: Date.now() });
+    return;
+  }
 
   if (info.menuItemId === MENU_LINK || info.menuItemId === MENU_REDDIT_LINK) {
     raw = info.linkUrl;
@@ -715,7 +742,9 @@ async function runJob(job) {
 async function runExtractJob(job) {
   let data;
   try {
-    if (job.useExtractAny) {
+    if (job.usePage) {
+      data = await STC.postExtractPage(job.url);
+    } else if (job.useExtractAny) {
       data = await STC.postExtractAny(job.url, job.interval);
     } else if (job.useReddit) {
       data = await STC.postExtractReddit(job.url, job.interval);

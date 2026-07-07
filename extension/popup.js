@@ -74,10 +74,19 @@ const queueBannerToggle = document.getElementById("queue-banner-toggle");
 const queueBannerActions = document.getElementById("queue-banner-actions");
 const queueDetails = document.getElementById("queue-details");
 const firstUoinkPanel = document.getElementById("first-uoink-panel");
-const currentVideoPreview = document.getElementById("current-video-preview");
+const currentSourcePreview = document.getElementById("current-source-preview");
 const uoinkCurrentBtn = document.getElementById("uoink-current-btn");
 const uoinkXTextBtn = document.getElementById("uoink-x-text-btn");
+const uoinkPodcastBtn = document.getElementById("uoink-podcast-btn");
+const uoinkAllowRetryBtn = document.getElementById("uoink-allow-retry-btn");
+const currentSourceNote = document.getElementById("current-source-note");
 let currentXStatusUrl = null;
+// Source-aware current-tab capture state. currentSource holds the last
+// classifyCaptureUrl result ({source, action, canonical, ...}); the pending
+// vars stash the URL/host for the retry + podcast secondary buttons.
+let currentSource = null;
+let pendingAllowHost = null;
+let pendingPodcastFeed = null;
 const destinationPanel = document.getElementById("destination-panel");
 const quickPromptsPanel = document.getElementById("quick-prompts-panel");
 const recentPanel = document.getElementById("recent-panel");
@@ -104,7 +113,6 @@ let serverOnline = false;
 let isTier2 = false;
 let lastUoinkAt = 0;
 let lastClipboardBudget = null;
-let currentVideoUrl = null;
 let queueExpanded = false;
 let knownRecentUoinkCount = 0;
 
@@ -246,7 +254,7 @@ async function ping() {
       if (currentMode === "playlist") modePlaylist.classList.remove("hidden");
     }
     updateDestButtons();
-    if (uoinkCurrentBtn && currentVideoUrl) uoinkCurrentBtn.disabled = false;
+    if (uoinkCurrentBtn && currentSource) uoinkCurrentBtn.disabled = false;
 
     // Detect Tier 2 dashboard support
     const oldTier2 = isTier2;
@@ -337,24 +345,105 @@ if (moreOptions) {
   });
 }
 
-async function loadCurrentVideoPreview() {
-  if (!currentVideoPreview || !uoinkCurrentBtn) return;
+// Primary-button copy per source. The verb is "uoink" (lowercase); the
+// label names exactly what the active tab will capture, so no source ever
+// gets the old YouTube-only dead end.
+const SOURCE_BUTTON_LABELS = {
+  youtube_video: "Uoink this video",
+  youtube_playlist: "Uoink this playlist",
+  x_video: "Uoink this post",
+  reddit_thread: "Uoink this thread",
+  podcast_feed: "Uoink this podcast",
+  web_page: "Uoink this page",
+};
+
+function setSourceNote(text) {
+  if (!currentSourceNote) return;
+  if (text) {
+    currentSourceNote.textContent = text;
+    currentSourceNote.classList.remove("hidden");
+  } else {
+    currentSourceNote.textContent = "";
+    currentSourceNote.classList.add("hidden");
+  }
+}
+
+// Read the page's RSS/Atom feed link via activeTab + chrome.scripting. This
+// is the ONLY source that can't be classified from the tab URL alone -- the
+// feed URL lives in <link rel="alternate" type="application/rss+xml">.
+async function sniffPodcastFeed(tab) {
+  if (!tab || !tab.id) return null;
+  if (!chrome.scripting || !chrome.scripting.executeScript) return null;
+  try {
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => {
+        const sel = 'link[rel="alternate"][type*="rss"], '
+          + 'link[rel="alternate"][type*="atom"], '
+          + 'link[type="application/rss+xml"], '
+          + 'link[type="application/atom+xml"]';
+        const links = Array.from(document.querySelectorAll(sel));
+        for (const l of links) {
+          if (l.href) return l.href;
+        }
+        return null;
+      },
+    });
+    const hit = results && results.find((r) => r && r.result);
+    return hit ? hit.result : null;
+  } catch {
+    return null;
+  }
+}
+
+// Classify the active tab client-side and drive the one adaptive primary
+// button (plus the X-text / podcast / allow-retry secondaries). Replaces
+// the YouTube-only preview and its "Open a YouTube video tab" dead end.
+async function detectCurrentSource() {
+  if (!currentSourcePreview || !uoinkCurrentBtn) return;
+  // Reset the secondaries; each detect pass re-decides which apply.
+  if (uoinkAllowRetryBtn) uoinkAllowRetryBtn.classList.add("hidden");
+  if (uoinkPodcastBtn) uoinkPodcastBtn.classList.add("hidden");
+  pendingAllowHost = null;
+  pendingPodcastFeed = null;
+  setSourceNote("");
   try {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     const tab = tabs && tabs[0];
-    const url = tab && tab.url;
-    const normalized = STC.normalizeYouTubeUrl(url || "");
-    currentVideoUrl = normalized;
-    await syncXTextButton(url || "");
-    if (!normalized) {
-      currentVideoPreview.textContent = "Open a YouTube video tab, then reopen this popup.";
+    const url = (tab && tab.url) || "";
+    await syncXTextButton(url);
+    const cls = STC.classifyCaptureUrl(url);
+    if (!cls || !cls.ok) {
+      currentSource = null;
+      currentSourcePreview.textContent =
+        "This tab isn't a source Uoink can grab yet. Open a YouTube video, "
+        + "X post, Reddit thread, podcast, or article, then reopen this.";
+      uoinkCurrentBtn.textContent = "Nothing to uoink here";
       uoinkCurrentBtn.disabled = true;
       return;
     }
-    currentVideoPreview.textContent = (tab.title || "YouTube video").replace(/\s+-\s+YouTube\s*$/i, "");
+    // A generic web page may actually be a podcast page. Don't relabel the
+    // primary (a news article with an RSS feed isn't "a podcast") -- offer
+    // the feed as a secondary "Add this podcast feed" button instead.
+    if (cls.source === "web_page") {
+      const feed = await sniffPodcastFeed(tab);
+      if (feed && uoinkPodcastBtn) {
+        pendingPodcastFeed = feed;
+        uoinkPodcastBtn.classList.remove("hidden");
+        uoinkPodcastBtn.disabled = !serverOnline;
+      }
+    }
+    currentSource = cls;
+    const title = (tab.title || "").replace(/\s+-\s+YouTube\s*$/i, "").trim();
+    currentSourcePreview.textContent = title || cls.canonical;
+    uoinkCurrentBtn.textContent =
+      SOURCE_BUTTON_LABELS[cls.source] || "Uoink this tab";
     uoinkCurrentBtn.disabled = !serverOnline;
+    setSourceNote(cls.note || "");
   } catch {
-    currentVideoPreview.textContent = "Couldn't read the current tab.";
+    currentSource = null;
+    currentSourcePreview.textContent = "Couldn't read the current tab.";
+    uoinkCurrentBtn.textContent = "Uoink this tab";
     uoinkCurrentBtn.disabled = true;
   }
 }
@@ -1387,55 +1476,190 @@ async function writeClipboardText(text) {
   }
 }
 
-async function runPopupUoinkCurrent() {
-  if (!uoinkCurrentBtn || !currentVideoUrl) return;
-  if ((await serverQueuePendingCount()) >= 5) {
-    showToast("Queue full. Give it a few minutes, then try again.");
+// Shared success path for the capture routes that return a corpus straight
+// back (YouTube/X video, Reddit thread, article page): copy to clipboard,
+// honor the screenshot picker, then open Claude. Returns true if handled.
+async function handleCorpusCapture(data) {
+  if (data && data.ok && data.queued) {
+    showToast(queuedToastMessage(data));
     pollQueueStatus();
-    return;
+    return true;
   }
+  if (!data || !data.ok) {
+    showToast(STC.friendlyError(data && data.error));
+    return false;
+  }
+  const clipboardText = data.corpus_md_paste || data.yoink_md || "";
+  saveClipboardBudget(data, clipboardText);
+  if (await shouldUseScreenshotPicker()) {
+    await STC.stashPickerCorpus(data);
+    showToast("Uoink ready. Pick screenshots in the popup.");
+    return true;
+  }
+  const copied = await writeClipboardText(clipboardText);
+  if (!copied) {
+    await chrome.runtime.sendMessage({ type: "clipboardRetry", text: clipboardText });
+    showToast("Couldn't copy. Use the Try again notification.");
+    return true;
+  }
+  markClipboardUoinkNow();
+  await chrome.tabs.create({ url: CLAUDE_URL, active: true });
+  showToast("Uoinked ★ Paste in Claude.");
+  loadRecentUoinks();
+  return true;
+}
+
+async function runPopupUoinkCurrent() {
+  if (!uoinkCurrentBtn || !currentSource) return;
+  const src = currentSource;
   const old = uoinkCurrentBtn.textContent;
   uoinkCurrentBtn.disabled = true;
   uoinkCurrentBtn.textContent = "Uoinking...";
   try {
     const interval = await STC.getInterval();
-    const data = await STC.postExtract(currentVideoUrl, interval);
-    if (data && data.ok && data.queued) {
-      showToast(queuedToastMessage(data));
-      pollQueueStatus();
+
+    // Playlist: hand off to the playlist job, mirroring Playlist Mode.
+    if (src.action === "playlist") {
+      const res = await STC.playlistStart(src.canonical, interval);
+      if (!res || !res.ok) {
+        showToast(STC.friendlyError(res && res.error) || "Couldn't start the playlist.");
+        return;
+      }
+      showToast("Playlist queued. Track it in Playlist mode.");
       return;
     }
-    if (!data || !data.ok) {
-      showToast(STC.friendlyError(data && data.error));
+
+    // Podcast feed: subscribe so new episodes transcribe locally.
+    if (src.action === "podcast") {
+      const res = await STC.postPodcastFeed(src.canonical);
+      if (!res || !res.ok) {
+        showToast(STC.friendlyError(res && res.error) || "Couldn't add that feed.");
+        return;
+      }
+      showToast("Podcast added. New episodes will transcribe locally.");
       return;
     }
-    const clipboardText = data.corpus_md_paste || data.yoink_md || "";
-    saveClipboardBudget(data, clipboardText);
-    if (await shouldUseScreenshotPicker()) {
-      await STC.stashPickerCorpus(data);
-      showToast("Uoink ready. Pick screenshots in the popup.");
+
+    // Article / web page: allowlist-gated. On host_not_allowed, surface the
+    // one-click "Allow this site and retry" button instead of a dead error.
+    if (src.action === "page") {
+      const data = await STC.postExtractPage(src.canonical);
+      if (data && data.code === "host_not_allowed") {
+        offerAllowRetry(src.canonical);
+        return;
+      }
+      await handleCorpusCapture(data);
       return;
     }
-    const copied = await writeClipboardText(clipboardText);
-    if (!copied) {
-      await chrome.runtime.sendMessage({ type: "clipboardRetry", text: clipboardText });
-      showToast("Couldn't copy. Use the Try again notification.");
+
+    // Video (YouTube/X) + Reddit thread: corpus-returning captures. /extract
+    // queues, so guard the queue for those two; Reddit returns synchronously.
+    if (src.action === "video" || src.action === "x_video") {
+      if ((await serverQueuePendingCount()) >= 5) {
+        showToast("Queue full. Give it a few minutes, then try again.");
+        pollQueueStatus();
+        return;
+      }
+      const data = await STC.postExtract(src.canonical, interval);
+      await handleCorpusCapture(data);
       return;
     }
-    markClipboardUoinkNow();
-    await chrome.tabs.create({ url: CLAUDE_URL, active: true });
-    showToast("Uoinked ★ Paste in Claude.");
-    loadRecentUoinks();
+    if (src.action === "reddit") {
+      const data = await STC.postExtractReddit(src.canonical, interval);
+      await handleCorpusCapture(data);
+      return;
+    }
   } catch (e) {
     showToast(`Uoink failed: ${e && e.message || e}`);
   } finally {
-    uoinkCurrentBtn.disabled = !serverOnline || !currentVideoUrl;
+    uoinkCurrentBtn.disabled = !serverOnline || !currentSource;
     uoinkCurrentBtn.textContent = old;
+  }
+}
+
+// Reveal the "Allow this site and retry" affordance for a page that hit the
+// allowlist wall. Stashes the host so the click handler can grant + re-fire.
+function offerAllowRetry(pageUrl) {
+  try {
+    pendingAllowHost = new URL(pageUrl).hostname;
+  } catch {
+    pendingAllowHost = null;
+  }
+  if (!pendingAllowHost) {
+    showToast("That page's site can't be allowed automatically.");
+    return;
+  }
+  setSourceNote(`Uoink hasn't been allowed on ${pendingAllowHost} yet.`);
+  if (uoinkAllowRetryBtn) {
+    uoinkAllowRetryBtn.classList.remove("hidden");
+    uoinkAllowRetryBtn.disabled = !serverOnline;
+  }
+}
+
+async function runAllowSiteAndRetry() {
+  if (!uoinkAllowRetryBtn || !pendingAllowHost || !currentSource) return;
+  const host = pendingAllowHost;
+  const pageUrl = currentSource.canonical;
+  const old = uoinkAllowRetryBtn.textContent;
+  uoinkAllowRetryBtn.disabled = true;
+  uoinkAllowRetryBtn.textContent = "Allowing...";
+  try {
+    const allow = await STC.addAllowedSite(host);
+    if (!allow || !allow.ok) {
+      showToast(STC.friendlyError(allow && allow.error) || "Couldn't allow that site.");
+      return;
+    }
+    uoinkAllowRetryBtn.classList.add("hidden");
+    setSourceNote("");
+    pendingAllowHost = null;
+    const data = await STC.postExtractPage(pageUrl);
+    if (data && data.code === "host_not_allowed") {
+      offerAllowRetry(pageUrl);
+      return;
+    }
+    await handleCorpusCapture(data);
+  } catch (e) {
+    showToast(`Uoink failed: ${e && e.message || e}`);
+  } finally {
+    uoinkAllowRetryBtn.textContent = old;
+    if (!uoinkAllowRetryBtn.classList.contains("hidden")) {
+      uoinkAllowRetryBtn.disabled = !serverOnline;
+    }
+  }
+}
+
+async function runAddPodcastFeed() {
+  if (!uoinkPodcastBtn || !pendingPodcastFeed) return;
+  const feed = pendingPodcastFeed;
+  const old = uoinkPodcastBtn.textContent;
+  uoinkPodcastBtn.disabled = true;
+  uoinkPodcastBtn.textContent = "Adding...";
+  try {
+    const res = await STC.postPodcastFeed(feed);
+    if (!res || !res.ok) {
+      showToast(STC.friendlyError(res && res.error) || "Couldn't add that feed.");
+      return;
+    }
+    showToast("Podcast added. New episodes will transcribe locally.");
+    uoinkPodcastBtn.classList.add("hidden");
+  } catch (e) {
+    showToast(`Couldn't add feed: ${e && e.message || e}`);
+  } finally {
+    uoinkPodcastBtn.textContent = old;
+    if (!uoinkPodcastBtn.classList.contains("hidden")) {
+      uoinkPodcastBtn.disabled = !serverOnline;
+    }
   }
 }
 
 if (uoinkCurrentBtn) {
   uoinkCurrentBtn.addEventListener("click", runPopupUoinkCurrent);
+}
+if (uoinkAllowRetryBtn) {
+  uoinkAllowRetryBtn.addEventListener("click", runAllowSiteAndRetry);
+}
+if (uoinkPodcastBtn) {
+  uoinkPodcastBtn.addEventListener("click", runAddPodcastFeed);
 }
 
 function renderHealthRow(health) {
@@ -2322,7 +2546,7 @@ ping();
 loadInterval();
 loadPrompts();
 readMoreOptionsState();
-loadCurrentVideoPreview();
+detectCurrentSource();
 refreshQueue();
 refreshActiveFromServer();
 loadRecentSessions();
