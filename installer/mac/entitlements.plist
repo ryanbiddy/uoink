@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Hardened-runtime entitlements TEMPLATE for codesigning Uoink.app (cc/mac-prep).
+
+  STATUS: scaffold, never used in a real codesign run. Notarization requires
+  the hardened runtime (codesign with options=runtime). A bundled CPython that
+  imports C extensions and (for whisperx/torch) may JIT/allocate executable
+  memory needs the allow-jit / allow-unsigned-executable-memory entitlements
+  below, or it crashes at launch under the hardened runtime. Confirm the
+  minimal set on a Mac: start with these and remove any that prove
+  unnecessary. See docs/MAC-BUILD-PLAN.md.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- CPython + some native deps need writable+executable pages / unsigned
+         dylib loads. Required for a bundled interpreter under hardened runtime. -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+</dict>
+</plist>

@@ -1,2 +1,7 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Shell scripts must stay LF on every platform or a macOS checkout gets a
+# CRLF shebang ("bad interpreter: /usr/bin/env bash^M"). Covers build-mac.sh
+# and the macOS bundle launcher (installer/mac/launcher.sh).
+*.sh text eol=lf
