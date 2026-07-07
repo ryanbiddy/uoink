@@ -8,6 +8,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [3.2.8] - 2026-07-06
+
+Capture from anywhere, and a reason to come back.
+
+### Added
+
+- **Uoink any source from the popup.** The extension popup now reads whatever tab you're on and offers one button that fits it: "Uoink this video" on YouTube, "this thread" on Reddit, "this post" on X, "this podcast" on a feed page, "this page" on an article, "this playlist" on a YouTube playlist. No more "open a YouTube tab" when you're somewhere else.
+- **Paste a URL to uoink.** A universal capture box in the dashboard: drop any link, it detects the source and captures it. Unsupported links say so plainly.
+- **Corpus Digest.** The For You surface now turns idle, high-value uoinks into action. Each resurfaced item has a "Write from this" button that opens Generate with the source already picked, so a video you saved weeks ago is one click from a draft.
+- **Resume where you left off.** A card at the top of the app on launch: continue your last draft, or write from your last saved source.
+
+### Changed
+
+- X video capture works from the popup on its own, no longer tied to the text-capture toggle.
+- Blocked article captures now offer a one-click "Allow this site and retry."
+
+### Fixed
+
+- Screenshots and thumbnails render again after a moved corpus folder: the app serves files from wherever your output folder points, so the Library, the writing screenshot picker, and Open Folder all show real images.
+
 ## [3.2.7] - 2026-07-05
 
 A hotfix for a broken 3.2.6 installer.
