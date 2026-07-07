@@ -107,17 +107,142 @@ def test_auto_uoink_poll():
                 f"taste captures list is correct: {caps}")
         print("ok  provenance persisted + list_taste_captures works")
 
-        # Re-poll with the same candidates: both now 'seen', nothing new.
+        # Re-poll with the same candidates. M-1: the taste scan advances the
+        # shared cursor ONLY past the video it captured, so the *captured* one
+        # is not re-captured (no duplicate), but the *declined* one stays
+        # eligible and is re-evaluated (still skipped, taste unchanged). This
+        # is what keeps a later scan able to catch the backlog once taste
+        # improves, and keeps the plain poll able to grab it.
         result2 = mobile_playlists.poll_playlist(
             idx, pid,
             normalize_video_to_canonical_url=lambda vid:
                 f"https://www.youtube.com/watch?v={vid}",
             taste_filter=tf,
             fetch_entries=lambda _url: candidates)
-        _assert(result2["new"] == [] and result2["skipped"] == [],
-                f"re-poll sees nothing new: {result2}")
-        print("ok  re-poll is idempotent (no duplicate captures)")
+        _assert(result2["new"] == [],
+                f"re-poll makes no duplicate capture: {result2}")
+        _assert([s["video_id"] for s in result2["skipped"]] == ["newmehvid22"],
+                f"declined video stays eligible and is re-evaluated: {result2}")
+        print("ok  re-poll: no duplicate capture, declined stays eligible")
 
+        print("\nall green")
+    finally:
+        idx.close()
+        tmp.cleanup()
+
+
+def test_auto_uoink_does_not_burn_backlog_or_starve_plain_poll():
+    """M-1 regression: the taste scan must NOT advance the shared poll cursor
+    past videos it declined.
+
+    Proves two properties the review demanded:
+      1. A video the taste scan declined is still capturable later -- both by
+         a plain 'capture everything' poll (cross-feature) AND by a later
+         taste scan once taste signal exists (backlog burn).
+      2. A plain poll running after a taste scan still grabs the non-matching
+         videos the scan skipped.
+    """
+    tmp = tempfile.TemporaryDirectory()
+    idx = index_mod.Index.open(Path(tmp.name) / "index.db")
+    try:
+        pl = mobile_playlists.add_playlist(
+            idx, "https://youtube.com/playlist?list=PLm1",
+            name="Backlog", normalize_playlist_url=lambda u: u)
+        pid = pl["id"]
+
+        candidates = [
+            {"video_id": "backlogvid1", "title": "AI agents deep dive",
+             "channel": "Fireship"},
+            {"video_id": "backlogvid2", "title": "Gardening tips",
+             "channel": "GardenWorld"},
+        ]
+
+        # --- Scan with NO taste signal: an empty corpus/anchors means the
+        # filter declines everything (scores ~0). Pre-fix, this burned the
+        # whole backlog by advancing last_seen past both.
+        empty_profile = taste_scoring.build_taste_profile(idx)
+        empty_filter = taste_scoring.make_filter(empty_profile)
+        scan1 = mobile_playlists.poll_playlist(
+            idx, pid,
+            normalize_video_to_canonical_url=lambda vid:
+                f"https://www.youtube.com/watch?v={vid}",
+            taste_filter=empty_filter,
+            fetch_entries=lambda _url: candidates)
+        _assert(scan1["new"] == [],
+                f"no signal -> nothing auto-captured: {scan1}")
+        _assert(sorted(s["video_id"] for s in scan1["skipped"])
+                == ["backlogvid1", "backlogvid2"],
+                f"both declined for lack of signal: {scan1}")
+        # The declined videos must NOT be marked seen.
+        row = mobile_playlists.get_playlist(idx, pid)
+        _assert(row["last_seen_video_ids"] == [],
+                f"declined videos must stay unseen in the cursor: {row}")
+
+        # --- Property 2: a PLAIN poll (no taste_filter, capture-everything)
+        # after the scan still grabs both non-matching videos.
+        plain_urls = []
+        plain = mobile_playlists.poll_playlist(
+            idx, pid,
+            normalize_video_to_canonical_url=lambda vid: (
+                plain_urls.append(vid)
+                or f"https://www.youtube.com/watch?v={vid}"),
+            fetch_entries=lambda _url: candidates)
+        _assert(sorted(n["video_id"] for n in plain["new"])
+                == ["backlogvid1", "backlogvid2"],
+                f"plain poll grabs the scan-declined videos: {plain}")
+        _assert(sorted(plain_urls) == ["backlogvid1", "backlogvid2"],
+                f"plain poll enqueues both: {plain_urls}")
+        print("ok  plain poll after a scan still captures scan-declined videos")
+
+        print("\nall green")
+    finally:
+        idx.close()
+        tmp.cleanup()
+
+
+def test_declined_video_captured_after_taste_improves():
+    """M-1 regression, backlog-burn half: a video declined by a weak-signal
+    scan is re-scored and captured by a later scan once taste signal exists --
+    it is not permanently suppressed."""
+    tmp = tempfile.TemporaryDirectory()
+    idx = index_mod.Index.open(Path(tmp.name) / "index.db")
+    try:
+        pl = mobile_playlists.add_playlist(
+            idx, "https://youtube.com/playlist?list=PLm2",
+            name="Backlog2", normalize_playlist_url=lambda u: u)
+        pid = pl["id"]
+        candidates = [
+            {"video_id": "laterhit001", "title": "AI agents deep dive",
+             "channel": "Fireship"},
+        ]
+
+        # Scan #1 with no signal -> declined, and (post-fix) left unseen.
+        f0 = taste_scoring.make_filter(taste_scoring.build_taste_profile(idx))
+        scan1 = mobile_playlists.poll_playlist(
+            idx, pid,
+            normalize_video_to_canonical_url=lambda vid:
+                f"https://www.youtube.com/watch?v={vid}",
+            taste_filter=f0, fetch_entries=lambda _url: candidates)
+        _assert(scan1["new"] == [], f"declined with no signal: {scan1}")
+
+        # User now builds taste signal: admire 'Fireship'.
+        _seed(idx, tmp.name, "seedbbbbbbb", "AI agents 101", "Fireship")
+        anchors = memory_layer.get_taste_anchors(idx)
+        anchors["admired_channels"] = ["Fireship"]
+        memory_layer._write_taste_anchors(idx, anchors)
+
+        # Scan #2 with signal -> the previously declined video is re-evaluated
+        # and now captured. Pre-fix it would have been 'seen' and skipped
+        # forever.
+        f1 = taste_scoring.make_filter(taste_scoring.build_taste_profile(idx))
+        scan2 = mobile_playlists.poll_playlist(
+            idx, pid,
+            normalize_video_to_canonical_url=lambda vid:
+                f"https://www.youtube.com/watch?v={vid}",
+            taste_filter=f1, fetch_entries=lambda _url: candidates)
+        _assert([n["video_id"] for n in scan2["new"]] == ["laterhit001"],
+                f"declined video is captured once taste improves: {scan2}")
+        print("ok  declined video is captured by a later scan once taste exists")
         print("\nall green")
     finally:
         idx.close()
@@ -126,3 +251,5 @@ def test_auto_uoink_poll():
 
 if __name__ == "__main__":
     test_auto_uoink_poll()
+    test_auto_uoink_does_not_burn_backlog_or_starve_plain_poll()
+    test_declined_video_captured_after_taste_improves()

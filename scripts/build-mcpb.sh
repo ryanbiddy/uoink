@@ -31,12 +31,34 @@ print(m["version"])
 PYEOF
 )"
 echo "Manifest validated OK (valid JSON; entry command matches working stdio command)."
+
+# M-2: derive the bundle version from the product VERSION at build time so the
+# .mcpb can never drift from the release. The committed manifest.version is a
+# fallback kept equal by the test_release_version parity test.
+if [ -f "$REPO_ROOT/VERSION" ]; then
+  REPO_VERSION="$(tr -d '[:space:]' < "$REPO_ROOT/VERSION")"
+  if [ -n "$REPO_VERSION" ] && [ "$REPO_VERSION" != "$VERSION" ]; then
+    echo "WARN: manifest.version ($VERSION) != VERSION ($REPO_VERSION); stamping the bundle with VERSION." >&2
+    VERSION="$REPO_VERSION"
+  fi
+else
+  echo "WARN: VERSION file not found; using committed manifest.version ($VERSION)." >&2
+fi
 echo "Bundle version: $VERSION"
 
 # --- Stage -----------------------------------------------------------------
 BUILD_DIR="$REPO_ROOT/build/mcpb/uoink"
 rm -rf "$BUILD_DIR"; mkdir -p "$BUILD_DIR"
 cp "$MANIFEST" "$BUILD_DIR/manifest.json"
+# Stamp the derived version into the staged manifest (only the top-level
+# "version" value changes; original formatting is preserved).
+"$PY" - "$BUILD_DIR/manifest.json" "$VERSION" <<'PYEOF'
+import re, sys
+path, version = sys.argv[1], sys.argv[2]
+text = open(path, encoding="utf-8").read()
+text = re.sub(r'"version"\s*:\s*"[^"]*"', '"version": "%s"' % version, text, count=1)
+open(path, "w", encoding="utf-8", newline="\n").write(text)
+PYEOF
 for f in uoink_mcp.py uoink_mcp_tools.py; do
   [ -f "$REPO_ROOT/$f" ] && cp "$REPO_ROOT/$f" "$BUILD_DIR/$f" || true
 done

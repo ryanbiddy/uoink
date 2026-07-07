@@ -232,6 +232,10 @@ def poll_playlist(idx, playlist_id: int, *,
 
     enqueued: list[dict] = []
     skipped: list[dict] = []
+    # M-1: track only the ids we actually captured this pass. When a taste
+    # filter is active the shared poll cursor advances past *these* alone --
+    # never past declined videos (see the cursor update below).
+    captured_ids: list[str] = []
     now = _now_iso()
     with idx._lock:
         for e in new_entries:
@@ -288,6 +292,7 @@ def poll_playlist(idx, playlist_id: int, *,
                 (playlist_id, e["video_id"], e.get("title"), now,
                  EVENT_QUEUED if pending_id else EVENT_DISCOVERED,
                  pending_id, capture_reason, taste_score))
+            captured_ids.append(e["video_id"])
             enqueued.append({
                 "event_id": cur.lastrowid,
                 "video_id": e["video_id"],
@@ -298,7 +303,27 @@ def poll_playlist(idx, playlist_id: int, *,
                 "capture_reason": capture_reason,
                 "taste_score": taste_score,
             })
-        # Update the rolling state on the playlist row.
+        # M-1: advance the shared poll cursor.
+        #
+        # Plain poll (no taste_filter, "capture everything"): snapshot the
+        # whole playlist -- every video seen this pass is now "seen".
+        # Unchanged pre-V-3 semantics.
+        #
+        # Taste scan (taste_filter set, selective auto-uoink): advance ONLY
+        # past videos we actually captured. Videos the taste filter DECLINED
+        # stay out of the cursor, so (a) a later scan re-scores them against
+        # an improved taste model instead of burning the backlog forever, and
+        # (b) the plain "capture everything" poll -- which shares this cursor
+        # -- still grabs them, instead of the selective feature silently
+        # starving the exhaustive one. The two features no longer compete for
+        # one cursor: the scan can only ever *add* captures to it.
+        if callable(taste_filter):
+            new_seen_ids = list(pl.get("last_seen_video_ids") or [])
+            for vid in captured_ids:
+                if vid not in seen:
+                    new_seen_ids.append(vid)
+        else:
+            new_seen_ids = all_ids
         idx._conn.execute(
             "UPDATE monitored_playlists SET "
             "  last_polled_at = ?, "
@@ -306,7 +331,14 @@ def poll_playlist(idx, playlist_id: int, *,
             "  error_count = 0, "
             "  last_error = NULL "
             "WHERE id = ?",
-            (now, json.dumps(all_ids), playlist_id))
+            (now, json.dumps(new_seen_ids), playlist_id))
+        # L-1: commit before returning. This INSERT + cursor UPDATE are now
+        # load-bearing for auto-uoink; without an explicit commit the last
+        # event and the cursor advance sit in an open transaction until some
+        # unrelated write happens to flush them, and a crash in that window
+        # re-detects the same videos -> duplicate auto-captures (enqueue_pending
+        # does not dedupe by URL). Matches index.py's C-03 durability discipline.
+        idx._conn.commit()
     return {
         "ok": True,
         "playlist_id": playlist_id,

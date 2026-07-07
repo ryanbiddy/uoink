@@ -52,9 +52,9 @@ def test_classifier_routes_each_source():
         "https://www.youtube.com/playlist?list=PLabcdEFGH12345678":
             ("youtube_playlist", "/playlist/start", "url"),
         "https://x.com/ryanbiddy/status/1790000000000000000":
-            ("x_video", "/extract", "url"),
+            ("x_video", "/extract/x", "url"),
         "https://twitter.com/i/status/1790000000000000000":
-            ("x_video", "/extract", "url"),
+            ("x_video", "/extract/x", "url"),
         "https://www.reddit.com/r/python/comments/abc123/some_title/":
             ("reddit_thread", "/extract/reddit", "url"),
         "https://feeds.megaphone.fm/vergecast":
@@ -87,15 +87,20 @@ def test_classifier_video_wins_over_playlist():
     print("ok  watch?v=...&list=... is a single video, not a playlist")
 
 
-def test_classifier_x_is_video_only_and_honest():
+def test_classifier_x_routes_to_text_capture_and_is_honest():
+    # M-3: X text/thread capture shipped this release, so the dashboard box
+    # must route an X link to /extract/x (the same path the extension uses)
+    # and must NOT claim the feature "isn't supported yet".
     r = server._classify_capture_url(
         "https://x.com/ryanbiddy/status/1790000000000000000")
+    _assert(r["endpoint"] == "/extract/x",
+            f"X must route to the text+thread path: {r}")
     note = (r.get("note") or "").lower()
-    _assert("video only" in note,
-            f"X note must say video only: {r}")
-    _assert("text isn't supported" in note or "text isn" in note,
-            f"X note must be honest about missing text: {r}")
-    print("ok  X detection is honest: video only, no text")
+    _assert("isn't supported" not in note and "not supported" not in note,
+            f"X note must not claim the shipped feature is unsupported: {r}")
+    _assert("text" in note,
+            f"X note must tell the truth that post text is captured: {r}")
+    print("ok  X detection routes to /extract/x and is honest about text")
 
 
 def test_classifier_unsupported_is_honest_not_an_error():
@@ -222,7 +227,7 @@ def main():
     for fn in (
         test_classifier_routes_each_source,
         test_classifier_video_wins_over_playlist,
-        test_classifier_x_is_video_only_and_honest,
+        test_classifier_x_routes_to_text_capture_and_is_honest,
         test_classifier_unsupported_is_honest_not_an_error,
         test_detect_route_classifies,
         test_detect_route_token_gated,

@@ -491,7 +491,15 @@ async function captureXPost(url, interval) {
     loadRecentUoinks();
     return;
   }
-  showToast(`Saved ${posts} to your library.`);
+  // L-2: reaching here with a video means the pending queue was at its cap,
+  // so we couldn't add it. Say so instead of a bare success that hides the
+  // dropped video.
+  if (hasVideo) {
+    showToast(`Saved ${posts}. Video not queued -- the queue is full. `
+      + `Try the video again in a few minutes.`);
+  } else {
+    showToast(`Saved ${posts} to your library.`);
+  }
   loadRecentUoinks();
 }
 
