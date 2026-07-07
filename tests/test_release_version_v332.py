@@ -1,4 +1,4 @@
-"""Cross-file release version contract for v3.3.1.
+"""Cross-file release version contract for v3.3.2.
 
 Run: python tests/test_release_version_v330.py
      (or via pytest -- test_release_version() enforces the same contract)
@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-EXPECTED = "3.3.1"
+EXPECTED = "3.3.2"
 
 
 def match(path: str, pattern: str) -> str:
@@ -35,7 +35,7 @@ def collect() -> dict:
         ),
         "README.md": match("README.md", r"Uoink-Setup-([0-9.]+)\.exe"),
         # M-2: the .mcpb bundle is a shipped distribution surface too. Enforce
-        # it here so it can't drift the way it did into the 3.3.1 cycle (it was
+        # it here so it can't drift the way it did into the 3.3.2 cycle (it was
         # left at 3.2.8). build-mcpb.* also derives the bundle version from
         # VERSION at build time; this parity check is the CI backstop.
         ".mcpb/manifest.json": json.loads(
