@@ -43,6 +43,21 @@ try { $m = $json | ConvertFrom-Json } catch { throw "manifest.json is not valid 
 $version = $m.version
 if (-not $version) { throw "manifest.version is missing" }
 
+# M-2: derive the bundle version from the product VERSION at build time so the
+# .mcpb can never drift from the release the way build.ps1 does for the iss.
+# The committed manifest.version is a fallback; the test_release_version parity
+# test keeps them equal, but the build authoritatively stamps VERSION here.
+$VersionFile = Join-Path $RepoRoot "VERSION"
+if (Test-Path $VersionFile) {
+  $repoVersion = (Get-Content $VersionFile -Raw).Trim()
+  if ($repoVersion -and $repoVersion -ne $version) {
+    Write-Warning "manifest.version ($version) != VERSION ($repoVersion); stamping the bundle with VERSION."
+    $version = $repoVersion
+  }
+} else {
+  Write-Warning "VERSION file not found; using committed manifest.version ($version)."
+}
+
 $cmd  = $m.server.mcp_config.command
 $args = $m.server.mcp_config.args -join " "
 Write-Host "Bundle version : $version"
@@ -66,7 +81,10 @@ $BuildDir = Join-Path $RepoRoot "build\mcpb\uoink"
 if (Test-Path $BuildDir) { Remove-Item $BuildDir -Recurse -Force }
 New-Item -ItemType Directory -Path $BuildDir -Force | Out-Null
 
-Copy-Item $Manifest (Join-Path $BuildDir "manifest.json") -Force
+# Stamp the derived version into the staged manifest (string replace keeps the
+# original formatting; only the top-level "version" value changes).
+$stagedJson = $json -replace '"version"\s*:\s*"[^"]*"', ('"version": "' + $version + '"')
+Set-Content -Path (Join-Path $BuildDir "manifest.json") -Value $stagedJson -Encoding utf8
 
 # Reference copies so entry_point resolves inside the bundle. The RUNTIME uses
 # the installed copy (via user_config.uoink_dir) because that is where the

@@ -4737,11 +4737,16 @@ _CAPTURE_SOURCES = {
         "note": "Captures every video in the playlist, up to the cap.",
     },
     "x_video": {
-        "label": "X video",
-        "endpoint": "/extract",
+        "label": "X post",
+        "endpoint": "/extract/x",
         "payload_key": "url",
-        "note": "Captures the video only. Tweet and thread text isn't "
-                "supported yet.",
+        # M-3: X text/thread capture shipped this release (POST /extract/x,
+        # the same path the extension's "Uoink this post" uses). Route the
+        # dashboard box there too so the two surfaces agree, and tell the
+        # truth about what happens -- no "not supported yet" on a shipped
+        # feature. A video in the post is queued by the extension button.
+        "note": "Captures the post text and the author's thread. For a "
+                "video in the post, use the extension's Uoink button.",
     },
     "reddit_thread": {
         "label": "Reddit thread",
@@ -7867,9 +7872,22 @@ def _discovery_payload(idx) -> dict:
 
     # The single ranked "attention" stream: fresh taste-matched captures
     # first (newest signal), then the highest-signal resurfaced items.
+    # L-3: dedupe by video_id so a video that was both auto-uoinked AND is a
+    # "worth revisiting" row doesn't burn two of the 12 slots. The auto_uoink
+    # entry is appended first, so first-wins keeps the taste-match card.
     attention: list[dict] = []
+    seen_video_ids: set = set()
+
+    def _add(item: dict) -> None:
+        vid = item.get("video_id")
+        if vid:
+            if vid in seen_video_ids:
+                return
+            seen_video_ids.add(vid)
+        attention.append(item)
+
     for c in captures:
-        attention.append({
+        _add({
             "kind": "auto_uoink",
             "video_id": c["video_id"],
             "title": c["title"],
@@ -7881,7 +7899,7 @@ def _discovery_payload(idx) -> dict:
             "why": "Auto-captured because it matched your taste.",
         })
     for r in (resurface.get("worth_revisiting") or []):
-        attention.append({
+        _add({
             "kind": "resurface",
             "video_id": r.get("video_id"),
             "title": r.get("title"),

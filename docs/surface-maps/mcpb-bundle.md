@@ -23,8 +23,15 @@ instead of hand-editing `claude_desktop_config.json`.
   `server.py::_mcp_stdio_command`:
   `<install>\python\python.exe  <install>\uoink_mcp.py`.
   Both build scripts assert this and fail the build if it drifts.
-- `manifest.version` tracks the product `VERSION` (currently 3.2.8). Bump it in
-  `.mcpb/manifest.json` on each release that ships a new bundle.
+- `manifest.version` tracks the product `VERSION` (currently 3.3.0). Two
+  guards keep it from drifting (it was left at 3.2.8 during the 3.3.0 cycle):
+  (1) both build scripts derive the bundle version from `VERSION` at build
+  time and stamp the staged `manifest.json` with it, so `pwsh
+  scripts\build-mcpb.ps1` always produces `dist/uoink-<VERSION>.mcpb`; and
+  (2) `tests/test_release_version_v330.py` includes `.mcpb/manifest.json` in
+  the cross-file version-parity contract, so CI fails if the committed value
+  drifts from `VERSION`. Still bump `.mcpb/manifest.json` alongside the other
+  version surfaces on release.
 - `user_config.uoink_dir` default `${HOME}/AppData/Local/Uoink` == the standard
   Windows install location. If the installer ever changes the default install
   dir, update this default too.

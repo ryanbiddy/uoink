@@ -138,4 +138,5 @@ podcasts). Send `canonical` as the value; add `interval` for `/extract` and
 
 Unsupported URL (also `200`, not an error): `ok: false`, `source:
 "unsupported"` or `"empty"`, `endpoint: null`, and a plain-language `note`.
-X video carries an honest `note` that it captures the video only.
+An X post routes to `/extract/x` (text + thread, shipped v3.3.0) with an
+honest `note`; a video in the post is queued via the extension's Uoink button.

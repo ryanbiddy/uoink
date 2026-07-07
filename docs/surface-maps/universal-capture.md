@@ -44,20 +44,24 @@ The returned dict is what both `/detect` and the dashboard render:
 {
   "ok": true,
   "source": "x_video",
-  "label": "X video",
-  "endpoint": "/extract",
+  "label": "X post",
+  "endpoint": "/extract/x",
   "payload_key": "url",
   "canonical": "https://x.com/handle/status/123",
-  "note": "Captures the video only. Tweet and thread text isn't supported yet.",
+  "note": "Captures the post text and the author's thread. For a video in the post, use the extension's Uoink button.",
   "platform": "twitter"
 }
 ```
 
 ## Honest states
 
-- **X video** carries `note`: "Captures the video only. Tweet and thread
-  text isn't supported yet." The box shows exactly that. It never implies
-  tweet-text capture works (that lives behind the flagged `/extract/x`).
+- **X post** routes to `/extract/x` -- the same text + thread path the
+  extension's "Uoink this post" uses (shipped v3.3.0). The `note` says
+  "Captures the post text and the author's thread. For a video in the post,
+  use the extension's Uoink button." No "not supported yet" copy on a shipped
+  feature: the dashboard box and the extension now agree on what an X link
+  does. (`/extract/x` still answers `code: "disabled"` when the user turns
+  `x_text_capture_enabled` off, and `authFetch` surfaces that honestly.)
 - **Unsupported** answers `ok: false` with the plain label "Not a supported
   source yet" and a note that lists what does work. It is a valid answer,
   not an error: the button stays disabled instead of failing weird.
