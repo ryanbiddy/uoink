@@ -1777,3 +1777,15 @@ class Index:
                 (int(draft_id),),
             ).fetchone()
         return dict(row) if row else None
+
+    def latest_writing_draft(self) -> dict | None:
+        """The most recently touched draft, or None when none exist. Powers
+        the R-02 "resume where you left off" card: the draft the user was
+        last editing is the obvious thing to reopen. Ordered by updated_at,
+        with id as a stable tiebreaker for drafts saved in the same second."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM writing_drafts "
+                "ORDER BY updated_at DESC, id DESC LIMIT 1"
+            ).fetchone()
+        return dict(row) if row else None

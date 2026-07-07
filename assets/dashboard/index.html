@@ -832,6 +832,12 @@
       gap: 12px;
       min-height: 178px;
       padding: 16px;
+      align-content: start;
+    }
+
+    .insight-write {
+      justify-self: start;
+      margin-top: 4px;
     }
 
     .insight-kicker,
@@ -865,6 +871,68 @@
       background: rgba(0, 200, 83, 0.09);
       color: var(--cream);
       text-transform: none;
+    }
+
+    .resume-card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--rust);
+      border-radius: var(--card-radius);
+      background: rgba(21, 17, 13, 0.82);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 18px;
+      margin-bottom: 20px;
+    }
+
+    .resume-body {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+      flex: 1 1 320px;
+    }
+
+    .resume-kicker {
+      color: var(--rust-bright);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .resume-title {
+      color: var(--cream);
+      font-size: 17px;
+      font-weight: 900;
+      line-height: 1.2;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .resume-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .resume-actions {
+      display: flex;
+      gap: 10px;
+      flex: 0 0 auto;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 620px) {
+      .resume-actions {
+        width: 100%;
+      }
     }
 
     .resurface-layout {
@@ -3558,6 +3626,7 @@
         </section>
 
         <section class="tab-panel active" id="tab-library" data-tab-panel="library">
+          <div class="resume-card hidden" id="resumeCard" aria-live="polite"></div>
           <div class="page-head">
             <div>
               <div class="eyebrow">Library</div>
@@ -4125,6 +4194,7 @@
       facets: null,
       facetsFallback: false,
       resurface: null,
+      resume: null,
       workspaces: [],
       currentWorkspace: null,
       workspaceAssembly: null,
@@ -4271,6 +4341,7 @@
 
     const els = {
       toast: document.getElementById("toast"),
+      resumeCard: document.getElementById("resumeCard"),
       forYouNavCount: document.getElementById("forYouNavCount"),
       forYouSummary: document.getElementById("forYouSummary"),
       worthCards: document.getElementById("worthCards"),
@@ -5692,6 +5763,112 @@
         .map(([topic, count]) => ({ topic, count }));
     }
 
+    // R-02: "resume where you left off" open-loop. One compact card at the
+    // top of the Library (the launch tab) so reopening the app has an obvious
+    // next step. Reads GET /resume (last draft + last saved source); on any
+    // failure or empty corpus the card just stays hidden -- it's a nudge, not
+    // a blocker.
+    function resumeAgeLabel(value) {
+      const d = daysSince(value);
+      if (d >= 9000) return "";
+      if (d === 0) return "today";
+      if (d === 1) return "yesterday";
+      return `${d} days ago`;
+    }
+
+    function draftKindLabel(kind) {
+      const map = { tweet: "tweet", thread: "thread", blog: "blog post", newsletter: "newsletter", script: "script" };
+      return map[String(kind || "tweet")] || "draft";
+    }
+
+    async function loadResume() {
+      try {
+        const data = await authFetch("/resume");
+        state.resume = data.resume || data;
+      } catch (_) {
+        state.resume = null;
+      }
+      renderResumeCard(state.resume);
+    }
+
+    function renderResumeCard(payload) {
+      const card = els.resumeCard;
+      if (!card) return;
+      const draft = payload && payload.last_draft;
+      const source = payload && payload.last_source;
+      let html = "";
+      if (draft) {
+        const kind = draftKindLabel(draft.kind);
+        const title = (draft.title && draft.title.trim()) || `Your ${kind} in progress`;
+        const sub = [];
+        if (draft.source && draft.source.title) sub.push(`From ${draft.source.title}`);
+        const age = resumeAgeLabel(draft.updated_at);
+        if (age) sub.push(`saved ${age}`);
+        const previewLine = draft.body_preview
+          ? `<div class="resume-meta">${htmlEscape(draft.body_preview)}</div>` : "";
+        const subLine = sub.length
+          ? `<div class="resume-meta">${htmlEscape(sub.join(" · "))}</div>` : "";
+        const vid = (draft.source && draft.source.video_id) || "";
+        html = `
+          <div class="resume-body">
+            <div class="resume-kicker">Resume where you left off</div>
+            <div class="resume-title">${htmlEscape(title)}</div>
+            ${previewLine}${subLine}
+          </div>
+          <div class="resume-actions">
+            <button class="button primary" type="button" data-resume-draft="${htmlEscape(String(draft.id))}" data-resume-kind="${htmlEscape(draft.kind || "tweet")}" data-resume-video="${htmlEscape(vid)}">Continue draft</button>
+          </div>`;
+      } else if (source) {
+        const age = resumeAgeLabel(source.yoinked_at);
+        const sub = [source.channel, age ? `saved ${age}` : ""].filter(Boolean).join(" · ");
+        html = `
+          <div class="resume-body">
+            <div class="resume-kicker">Start from your last save</div>
+            <div class="resume-title">${htmlEscape(source.title)}</div>
+            ${sub ? `<div class="resume-meta">${htmlEscape(sub)}</div>` : ""}
+          </div>
+          <div class="resume-actions">
+            <button class="button primary" type="button" data-write-from="${htmlEscape(source.video_id)}">Write from this</button>
+          </div>`;
+      }
+      card.innerHTML = html;
+      card.classList.toggle("hidden", !html);
+    }
+
+    // Deep-link the resume card's "Continue draft" into Generate: preselect
+    // the linked source (reusing the write-from-this picker path), set the
+    // output kind, then load the saved body so the composer is exactly where
+    // the user left it.
+    async function resumeContinueDraft(draftId, kind, videoId) {
+      const id = Number(draftId);
+      if (!id) return;
+      switchTab("writing");
+      await loadWritingSources();
+      if (videoId) {
+        const row = writingSourceRowsAll().find((r) => videoIdOf(r) === videoId)
+          || state.library.find((r) => videoIdOf(r) === videoId);
+        if (row) await selectWritingSourceById(writingRowId(row));
+      }
+      if (kind) {
+        const radio = document.querySelector(`input[name="writingMode"][value="${kind}"]`);
+        if (radio) {
+          radio.checked = true;
+          radio.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      }
+      try {
+        const data = await authFetch(`/writing/draft/${id}`);
+        if (data && data.body) {
+          state.writingDraftId = id;
+          localStorage.setItem("uoink.writingDraftId", String(id));
+          setWritingOutput(data.body);
+        }
+      } catch (_) {
+        showToast("Couldn't reopen that draft. It may have been cleared.");
+      }
+      document.querySelector(".content").scrollTop = 0;
+    }
+
     async function loadForYou() {
       els.forYouSummary.textContent = "Building local recommendations...";
       try {
@@ -5891,19 +6068,29 @@
       }, 0);
     }
 
-    function insightCard(row, kicker) {
+    function insightCard(row, kicker, { writeFrom = false } = {}) {
       const score = normalizedScore(row);
       const age = daysSince(row.last_event_ts || row.yoinked_at);
       const scorePill = score > 0
         ? `<div class="score-pill">signal ${score.toFixed(1)}</div>`
         : "";
+      // R-01: the whole point of the digest is turning an idle uoink into a
+      // draft. When the row has a video id, every card carries a prominent
+      // "Write from this" that deep-links into Generate with it pre-picked
+      // (reusing the U-04 write-from wiring). The click delegate runs
+      // [data-write-from] before the card-open branch, so the button wins.
+      const vid = videoIdOf(row);
+      const writeBtn = writeFrom && vid
+        ? `<button class="button primary insight-write" type="button" data-write-from="${htmlEscape(vid)}" aria-label="Write from ${htmlEscape(rowTitle(row))}">Write from this</button>`
+        : "";
       return `
-        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(videoIdOf(row))}" tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}">
+        <article class="insight-card" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${htmlEscape(vid)}" tabindex="0" role="button" aria-label="Open ${htmlEscape(rowTitle(row))}">
           <div class="insight-kicker">${htmlEscape(kicker)}</div>
           <div class="insight-title">${htmlEscape(rowTitle(row))}</div>
           <div class="insight-meta">${htmlEscape(row.channel || "Source not labeled")} ${row.topic ? `| ${htmlEscape(row.topic)}` : ""}</div>
           <div class="insight-copy">${age >= 9000 ? "No activity on this one yet." : `${age} days since you last touched it.`}</div>
           ${scorePill}
+          ${writeBtn}
         </article>
       `;
     }
@@ -5941,7 +6128,7 @@
         ? "Reading your saved work."
         : "Built from local signals.";
       els.worthCards.innerHTML = worth.length
-        ? worth.slice(0, 3).map((row, i) => insightCard(row, i === 0 ? "highest signal" : "worth revisiting")).join("")
+        ? worth.slice(0, 3).map((row, i) => insightCard(row, i === 0 ? "highest signal" : "worth revisiting", { writeFrom: true })).join("")
         : [0, 1, 2].map(() => `<article class="insight-card"><div class="insight-kicker">waiting for signal</div><div class="insight-title">Nothing worth resurfacing yet.</div><div class="insight-copy">Open, cite, or search your saved uoinks. Once a good one sits idle for a couple weeks, it lands here.</div></article>`).join("");
       els.connectionMeta.textContent = `${connections.length} possible link${connections.length === 1 ? "" : "s"}`;
       els.connectionRows.innerHTML = connections.length
@@ -5953,7 +6140,7 @@
         : emptyPanelRow("No low-coverage topics.", "Your current topics have enough saved examples to compare.");
       els.anchorMeta.textContent = `${anchors.length} local anchor${anchors.length === 1 ? "" : "s"}`;
       els.anchorRows.innerHTML = anchors.length
-        ? anchors.slice(0, 6).map((row) => insightCard(row, "performing anchor")).join("")
+        ? anchors.slice(0, 6).map((row) => insightCard(row, "performing anchor", { writeFrom: true })).join("")
         : emptyPanelRow("No performing anchors yet.", "Anchor cards appear after engagement events or taste memory are available.");
     }
 
@@ -10392,6 +10579,14 @@
           openHookExplainer(hookExplain.dataset.hookExplain || "");
           return;
         }
+        const resumeDraftButton = event.target.closest("[data-resume-draft]");
+        if (resumeDraftButton) {
+          resumeContinueDraft(
+            resumeDraftButton.dataset.resumeDraft,
+            resumeDraftButton.dataset.resumeKind,
+            resumeDraftButton.dataset.resumeVideo);
+          return;
+        }
         const writeFrom = event.target.closest("[data-write-from]");
         if (writeFrom) {
           // Before the card branch: the button sits inside a [data-folder]
@@ -10567,6 +10762,7 @@
       await loadLibraryFacets();
       await refreshJobs();
       await loadLibrary({ reset: true });
+      await loadResume();
       await loadForYou();
       await loadWriting();
       renderSources();
