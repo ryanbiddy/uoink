@@ -741,6 +741,11 @@ def _default_settings() -> dict:
         # v2.1 rename: set True after the one-time post-migration
         # post-migration toast has fired, so it never repeats.
         "post_migration_toast_shown": False,
+        # V-2b (U-15 ship): X text/thread capture is on by default so an X
+        # post captures its words, not just its video. POST /extract/x still
+        # honors the key, so a user who sets it False falls back to the
+        # video-only path in the extension.
+        "x_text_capture_enabled": True,
         "updated_at": None,
     }
 
@@ -783,6 +788,9 @@ def _normalize_settings(data: dict) -> dict:
     clean["anthropic_key_invalid"] = bool(clean.get("anthropic_key_invalid"))
     clean["post_migration_toast_shown"] = bool(
         clean.get("post_migration_toast_shown")
+    )
+    clean["x_text_capture_enabled"] = bool(
+        clean.get("x_text_capture_enabled", True)
     )
     model = str(clean.get("whisper_model") or "base").strip().lower()
     clean["whisper_model"] = model if model in _WHISPER_MODELS else "base"

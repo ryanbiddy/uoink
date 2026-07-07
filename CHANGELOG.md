@@ -8,6 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [Unreleased]
+
+X is no longer video-only.
+
+### Added
+
+- **Uoink an X post's words, not just its video.** "Uoink this post" now captures the tweet's text and the author's own earlier thread, and queues the video too when the post has one. A text-only post finally saves instead of dead-ending. Uses X's public syndication endpoint (no login, no paid API), so it's the same source path the video capture already used.
+
+### Changed
+
+- The X text/thread capture that shipped dark is now on by default (`x_text_capture_enabled`). One button does it all; the separate "Save post text + thread" button is gone. Turn the setting off and X posts fall back to video-only capture as before.
+
+### Fixed
+
+- When X rate-limits or walls a post, capture says so plainly (deleted, protected, rate-limited, or blocked) and saves nothing, instead of leaving a broken uoink.
+
 ## [3.2.8] - 2026-07-06
 
 Capture from anywhere, and a reason to come back.
