@@ -1,20 +1,23 @@
-# Surface map: X text/thread capture (U-15)
+# Surface map: X text/thread capture (U-15, shipped V-2b)
 
 Captures the TEXT of an X post plus the author's own earlier chain as a
-yoink. Ships dark behind a flag. Today X was video-only (yt-dlp with
-`twitter:api=syndication`); this adds the text path over the same public
-endpoint.
+yoink. X used to be video-only (yt-dlp with `twitter:api=syndication`);
+this adds the text path over the same public endpoint. **V-2b ships it on
+by default**: a single X post now captures its words, and its video too
+when it has one -- no longer video-only.
 
 ## The flag
 
-`x_text_capture_enabled` (boolean settings key, absent/false by default).
+`x_text_capture_enabled` (boolean settings key, **default `True`** as of
+V-2b; `_default_settings()` / `_normalize_settings`).
 
 - Server side: `POST /extract/x` answers
   `{ok: false, code: "disabled", error: "...x_text_capture_enabled..."}`
-  before touching the network while the flag is off.
-- Extension side: the popup button only renders when the flag reads true
-  (via `STC.getSettings()`), so nothing changes for anyone who hasn't
-  opted in. Flip the key through the Settings PATCH or settings.json.
+  before touching the network when a user has explicitly set the key
+  `False`.
+- Extension side: the primary "Uoink this post" button drives the capture
+  (see below). A user who opts out (`False`) falls back to the video-only
+  path automatically, so nothing breaks.
 
 ## Backend: `x_extractor.py`
 
@@ -62,24 +65,36 @@ Title shape: `@handle: <first 60 chars of the root post>`. Markdown:
 `# Author (@handle) on X`, source link, capture-scope line, then each post
 as `## n/N` with text + date + photo/video notes.
 
-## Extension
+## Extension (V-2b: one button, text + video)
 
 - `STC.postExtractX(url)` in `lib/extract.js`: POST `/extract/x`, 60s
   timeout, relays the server JSON.
-- Popup (`popup.html` / `popup.js`): `#uoink-x-text-btn` ("Save post text
-  + thread"), hidden by default. `syncXTextButton` shows it only when the
-  active tab is an X status URL (`STC.normalizeTwitterUrl`) AND the server
-  flag is on. Click -> "Saving text..." -> success toast with the post
-  count, or the server's failure copy verbatim.
-- The existing video path (context menus, "Uoink current video") is
-  untouched; a video post's markdown tells the user to use it.
+- Popup (`popup.html` / `popup.js`): the source-aware primary button
+  ("Uoink this post" on an X status tab) routes through **`captureXPost`**.
+  The standalone text button is retired.
+  - Calls `postExtractX` first (text/thread, synchronous).
+  - If the post also carries video (`metadata.has_video`), queues the
+    video through the same `/extract` path YouTube uses ->
+    "Saved N posts + queued the video."
+  - Text-only post -> "Saved N post(s) to your library."
+  - `code: "empty"` (video-only, no text) or `code: "disabled"` (user
+    opted out) -> falls back to the `/extract` video path
+    (`handleCorpusCapture`), so a video post never dead-ends.
+  - Any other `ok: false` (404 / 429 / tombstone / block) -> the server's
+    honest copy via `showToast`; nothing is queued, no half-saved uoink.
 
 ## Tests / proof
 
-`tests/test_u15_x_capture.py` (red on unpatched main: no module, route
-404): URL matcher, token-vs-JS pin, single post, embedded-parent walk with
-zero refetches, refetch walk, other-author stop, deleted-ancestor
-survival, honest failure copy, flag-off default, token gate, full
-persist-through-index round trip, extension wiring. Live X traffic is
-deliberately not exercised in CI; the flag keeps the feature dark until a
-human tries it against real X.
+`tests/test_u15_x_capture.py`: URL matcher, token-vs-JS pin, single post,
+embedded-parent walk with zero refetches, refetch walk, other-author stop,
+deleted-ancestor survival, honest failure copy, disabled-when-off route,
+token gate, full persist-through-index round trip, **default-flag-on**
+(`test_default_flag_on`), extension wiring (primary button owns X, old
+button retired). Live X traffic is not exercised in CI.
+
+Live verification (V-2b, from the build IP): `x/jack/status/20` -> 1 post
+captured; `x/naval/status/...` mid-thread -> 2 posts walked up root-first;
+`x/SpaceX/status/...` -> `has_video: True` (combined flow queues the
+video); tombstone + deleted posts -> honest `fetch_failed` copy; full
+`POST /extract/x` round trip persisted `source_type: x_thread` into the
+corpus.

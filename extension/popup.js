@@ -76,11 +76,9 @@ const queueDetails = document.getElementById("queue-details");
 const firstUoinkPanel = document.getElementById("first-uoink-panel");
 const currentSourcePreview = document.getElementById("current-source-preview");
 const uoinkCurrentBtn = document.getElementById("uoink-current-btn");
-const uoinkXTextBtn = document.getElementById("uoink-x-text-btn");
 const uoinkPodcastBtn = document.getElementById("uoink-podcast-btn");
 const uoinkAllowRetryBtn = document.getElementById("uoink-allow-retry-btn");
 const currentSourceNote = document.getElementById("current-source-note");
-let currentXStatusUrl = null;
 // Source-aware current-tab capture state. currentSource holds the last
 // classifyCaptureUrl result ({source, action, canonical, ...}); the pending
 // vars stash the URL/host for the retry + podcast secondary buttons.
@@ -411,7 +409,6 @@ async function detectCurrentSource() {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     const tab = tabs && tabs[0];
     const url = (tab && tab.url) || "";
-    await syncXTextButton(url);
     const cls = STC.classifyCaptureUrl(url);
     if (!cls || !cls.ok) {
       currentSource = null;
@@ -448,59 +445,54 @@ async function detectCurrentSource() {
   }
 }
 
-// U-15: on an X status tab, offer text/thread capture next to the video
-// path. Ships dark: the button only appears when the server's
-// x_text_capture_enabled flag is on, so nothing changes for anyone who
-// hasn't opted in.
-async function syncXTextButton(rawUrl) {
-  if (!uoinkXTextBtn) return;
-  currentXStatusUrl = null;
-  const isXStatus = Boolean(STC.normalizeTwitterUrl(rawUrl || ""));
-  if (!isXStatus) {
-    uoinkXTextBtn.classList.add("hidden");
-    return;
-  }
-  let enabled = false;
-  try {
-    const data = await STC.getSettings();
-    enabled = Boolean(data && (data.settings || data || {}).x_text_capture_enabled);
-  } catch {
-    enabled = false;
-  }
-  if (!enabled) {
-    uoinkXTextBtn.classList.add("hidden");
-    return;
-  }
-  currentXStatusUrl = rawUrl;
-  uoinkXTextBtn.classList.remove("hidden");
-  uoinkXTextBtn.disabled = !serverOnline;
-}
-
-async function runPopupUoinkXText() {
-  if (!uoinkXTextBtn || !currentXStatusUrl) return;
-  const old = uoinkXTextBtn.textContent;
-  uoinkXTextBtn.disabled = true;
-  uoinkXTextBtn.textContent = "Saving text...";
-  try {
-    const data = await STC.postExtractX(currentXStatusUrl);
-    if (!data || !data.ok) {
-      // The server's copy already says exactly what X did; show it as-is.
-      showToast((data && data.error) || "X capture failed. Try again in a minute.");
+// V-2b (U-15 ship): capture an X post's words, and its video if it has one.
+// The primary "Uoink this post" button routes here via runPopupUoinkCurrent
+// (normalizeTwitterUrl classified the tab as x_video). Text/thread lands
+// synchronously through POST /extract/x (server flag x_text_capture_enabled,
+// on by default); a video is queued through the same /extract path YouTube
+// uses. Video-only posts and a disabled flag fall back to that video path so
+// nothing regresses, and a blocked fetch says so plainly instead of leaving
+// a half-saved uoink.
+async function captureXPost(url, interval) {
+  const textData = await STC.postExtractX(url);
+  // Flag off, or a video-only post with no text worth saving -> video path.
+  if (!textData || textData.code === "disabled" || textData.code === "empty") {
+    if ((await serverQueuePendingCount()) >= 5) {
+      showToast("Queue full. Give it a few minutes, then try again.");
+      pollQueueStatus();
       return;
     }
-    const count = Number(data.tweets_captured) || 1;
-    showToast(`Saved ${count} post${count === 1 ? "" : "s"} to your library.`);
-    loadRecentUoinks();
-  } catch (e) {
-    showToast(`X capture failed: ${e && e.message || e}`);
-  } finally {
-    uoinkXTextBtn.disabled = !serverOnline || !currentXStatusUrl;
-    uoinkXTextBtn.textContent = old;
+    const data = await STC.postExtract(url, interval);
+    await handleCorpusCapture(data);
+    return;
   }
-}
-
-if (uoinkXTextBtn) {
-  uoinkXTextBtn.addEventListener("click", runPopupUoinkXText);
+  // X refused the fetch (404 / 429 / tombstone / block page). The server's
+  // copy already says which; show it and stop -- no queue, no broken uoink.
+  if (!textData.ok) {
+    showToast(STC.friendlyError(textData.error)
+      || "X wouldn't hand over this post. Try again in a minute.");
+    return;
+  }
+  const count = Number(textData.tweets_captured) || 1;
+  const posts = `${count} post${count === 1 ? "" : "s"}`;
+  const hasVideo = Boolean(textData.metadata && textData.metadata.has_video);
+  if (hasVideo && (await serverQueuePendingCount()) < 5) {
+    try {
+      const vid = await STC.postExtract(url, interval);
+      if (vid && (vid.ok || vid.queued || vid.video_id)) {
+        showToast(`Saved ${posts} + queued the video.`);
+        pollQueueStatus();
+      } else {
+        showToast(`Saved ${posts}. Couldn't queue the video -- try again.`);
+      }
+    } catch {
+      showToast(`Saved ${posts}. Couldn't queue the video -- try again.`);
+    }
+    loadRecentUoinks();
+    return;
+  }
+  showToast(`Saved ${posts} to your library.`);
+  loadRecentUoinks();
 }
 
 // ---- Interval setting -----------------------------------------------------
@@ -1552,9 +1544,9 @@ async function runPopupUoinkCurrent() {
       return;
     }
 
-    // Video (YouTube/X) + Reddit thread: corpus-returning captures. /extract
-    // queues, so guard the queue for those two; Reddit returns synchronously.
-    if (src.action === "video" || src.action === "x_video") {
+    // YouTube video: corpus-returning capture. /extract queues, so guard
+    // the queue before firing.
+    if (src.action === "video") {
       if ((await serverQueuePendingCount()) >= 5) {
         showToast("Queue full. Give it a few minutes, then try again.");
         pollQueueStatus();
@@ -1562,6 +1554,12 @@ async function runPopupUoinkCurrent() {
       }
       const data = await STC.postExtract(src.canonical, interval);
       await handleCorpusCapture(data);
+      return;
+    }
+    // X post: capture its text/thread (and its video if present). No longer
+    // video-only. captureXPost owns the combined flow + honest states.
+    if (src.action === "x_video") {
+      await captureXPost(src.canonical, interval);
       return;
     }
     if (src.action === "reddit") {

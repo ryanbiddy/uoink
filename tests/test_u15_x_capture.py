@@ -298,23 +298,40 @@ def test_route_captures_and_persists():
     print("ok  route persists an x_thread yoink and relays honest errors")
 
 
+def test_default_flag_on():
+    # V-2b ship: X text capture is on by default so an X post captures its
+    # words, not just its video. Red on main: the key doesn't exist yet.
+    _assert(server._default_settings().get("x_text_capture_enabled") is True,
+            "x_text_capture_enabled must default True")
+    _assert(server._normalize_settings({}).get("x_text_capture_enabled") is True,
+            "empty settings normalize to the feature on")
+    _assert(server._normalize_settings(
+        {"x_text_capture_enabled": False}).get("x_text_capture_enabled") is False,
+            "an explicit opt-out is preserved")
+    print("ok  x_text_capture_enabled defaults on, opt-out honored")
+
+
 def test_extension_wiring():
+    # V-2b: the primary "Uoink this post" button now captures an X post's
+    # text/thread (and its video if present) through /extract/x -- the
+    # separate hidden text button is retired. Red on main: captureXPost
+    # doesn't exist and the old flag-gated button did.
     root = Path(__file__).resolve().parent.parent
     popup_html = (root / "extension" / "popup.html").read_text(encoding="utf-8")
     popup_js = (root / "extension" / "popup.js").read_text(encoding="utf-8")
     lib = (root / "extension" / "lib" / "extract.js").read_text(encoding="utf-8")
-    _assert('id="uoink-x-text-btn"' in popup_html,
-            "popup needs the X text capture button")
-    button_tag = popup_html.split('id="uoink-x-text-btn"', 1)[1].split(">", 1)[0]
-    _assert("hidden" in button_tag,
-            "the button ships hidden (flag-gated)")
-    _assert("x_text_capture_enabled" in popup_js,
-            "popup must gate the button on the server flag")
+    _assert('id="uoink-x-text-btn"' not in popup_html,
+            "the standalone X text button is retired (primary button owns it)")
+    _assert("captureXPost" in popup_js,
+            "popup must route X posts through captureXPost")
     _assert("postExtractX" in popup_js and "normalizeTwitterUrl" in popup_js,
             "popup must detect X status tabs and post through the lib")
+    # The combined flow queues the video too when the post carries one.
+    _assert("has_video" in popup_js,
+            "popup must queue the video when the post has one")
     _assert('"/extract/x"' in lib and "postExtractX," in lib,
             "lib must expose postExtractX on STC")
-    print("ok  extension button wired, dark by default")
+    print("ok  primary button captures X text (+ video), old button retired")
 
 
 def main():
@@ -330,6 +347,7 @@ def main():
         test_route_flag_off_by_default,
         test_route_token_gated,
         test_route_captures_and_persists,
+        test_default_flag_on,
         test_extension_wiring,
     ):
         fn()
