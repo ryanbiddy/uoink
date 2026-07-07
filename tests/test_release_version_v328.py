@@ -1,4 +1,4 @@
-"""Cross-file release version contract for v3.2.7.
+"""Cross-file release version contract for v3.2.8.
 
 Run: python tests/test_release_version_v327.py
 """
@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-EXPECTED = "3.2.7"
+EXPECTED = "3.2.8"
 
 
 def match(path: str, pattern: str) -> str:

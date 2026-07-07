@@ -2,10 +2,19 @@
   "manifest_version": 3,
   "name": "Uoink",
   "short_name": "Uoink",
-  "version": "3.2.7",
+  "version": "3.2.8",
   "description": "Save videos, podcasts, and articles to a local corpus your AI can write from.",
   "homepage_url": "https://uoink.app",
-  "permissions": ["alarms", "clipboardWrite", "notifications", "storage", "contextMenus", "activeTab", "scripting", "offscreen"],
+  "permissions": [
+    "alarms",
+    "clipboardWrite",
+    "notifications",
+    "storage",
+    "contextMenus",
+    "activeTab",
+    "scripting",
+    "offscreen"
+  ],
   "host_permissions": [
     "https://www.youtube.com/*",
     "https://m.youtube.com/*",
@@ -44,14 +53,22 @@
         "https://m.youtube.com/watch*",
         "https://m.youtube.com/shorts/*"
       ],
-      "js": ["lib/extract.js", "lib/ui.js", "content.js"],
+      "js": [
+        "lib/extract.js",
+        "lib/ui.js",
+        "content.js"
+      ],
       "run_at": "document_idle"
     },
     {
       "matches": [
         "*://*.reddit.com/r/*/comments/*"
       ],
-      "js": ["lib/extract.js", "lib/ui.js", "content-reddit.js"],
+      "js": [
+        "lib/extract.js",
+        "lib/ui.js",
+        "content-reddit.js"
+      ],
       "run_at": "document_idle"
     }
   ],
