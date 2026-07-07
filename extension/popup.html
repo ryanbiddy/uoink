@@ -1204,9 +1204,17 @@
         <span>Paste (<kbd style="background:#222; border:1px solid #444; padding:0 3px; border-radius:3px; font-family:var(--font-mono);">Ctrl+V</kbd>) into Claude or ChatGPT!</span>
       </div>
     </div>
-    <div id="current-video-preview" class="url-preview">Checking current tab...</div>
-    <button id="uoink-current-btn" class="primary" type="button" disabled style="margin-top:0;">Uoink current video</button>
+  </div>
+
+  <!-- Source-aware current-tab capture. One adaptive button that classifies
+       the active tab client-side and routes to the right capture path. -->
+  <div class="panel" id="current-source-panel">
+    <div id="current-source-preview" class="url-preview">Checking current tab...</div>
+    <button id="uoink-current-btn" class="primary" type="button" disabled style="margin-top:0;">Uoink this tab</button>
     <button id="uoink-x-text-btn" class="secondary hidden" type="button" style="margin-top:6px;">Save post text + thread</button>
+    <button id="uoink-podcast-btn" class="secondary hidden" type="button" style="margin-top:6px;">Add this podcast feed</button>
+    <button id="uoink-allow-retry-btn" class="secondary hidden" type="button" style="margin-top:6px;">Allow this site and retry</button>
+    <div id="current-source-note" class="hint hidden" style="margin-top:6px;"></div>
   </div>
 
   <!-- Highlighted Last Uoink active card -->

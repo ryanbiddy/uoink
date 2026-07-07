@@ -667,6 +667,196 @@
     return `https://www.reddit.com/r/${subreddit}/comments/${id}/`;
   }
 
+  // ---- Client-side capture classifier (V-2a parity, no /detect) --------
+  // The dashboard's universal paste box classifies server-side via
+  // _classify_capture_url -> GET /detect. /detect is NOT in the shipped
+  // helper build, so the popup classifies the ACTIVE TAB here instead,
+  // reusing the same normalizers so the popup can never disagree with what
+  // the capture route will actually accept. Precedence mirrors the server:
+  // a watch URL that also carries a list= param is a VIDEO (the user is
+  // watching), so video is checked before playlist.
+  const _PLAYLIST_ID_RE = /^[A-Za-z0-9_-]{2,}$/;
+
+  function normalizePlaylistUrl(raw) {
+    if (!raw || typeof raw !== "string") return null;
+    let u;
+    try { u = new URL(raw.includes("://") ? raw : "https://" + raw); }
+    catch { return null; }
+    const host = (u.hostname || "").toLowerCase();
+    if (!["youtube.com", "www.youtube.com", "m.youtube.com"].includes(host)) {
+      return null;
+    }
+    const listId = u.searchParams.get("list") || "";
+    if (!listId || !_PLAYLIST_ID_RE.test(listId)) return null;
+    // Drop the video position: Playlist Mode always starts from the first
+    // entry after the cap. Only accept playlist-shaped paths.
+    if (!["", "/", "/playlist", "/watch"].includes(u.pathname)) return null;
+    return `https://www.youtube.com/playlist?list=${listId}`;
+  }
+
+  // Shape-only signal that a URL is a podcast/RSS feed. Feeds are just
+  // http(s) URLs, so we only claim "podcast feed" when the URL clearly
+  // looks like one; everything else falls through to the generic web-page
+  // path. Mirrors server _looks_like_feed_url so the chip stays honest.
+  const _FEED_URL_HINT_RE =
+    /(\.(rss|xml)$|\/(feed|feeds|rss|podcast|podcasts)(\/|$)|[?&]format=(rss|xml))/i;
+
+  function looksLikeFeedUrl(raw) {
+    if (!raw || typeof raw !== "string") return false;
+    let u;
+    try { u = new URL(raw.includes("://") ? raw : "https://" + raw); }
+    catch { return false; }
+    if (u.protocol !== "http:" && u.protocol !== "https:") return false;
+    const host = (u.hostname || "").toLowerCase();
+    if (host.startsWith("feeds.") || host.startsWith("feed.")) return true;
+    const probe = u.search ? `${u.pathname}${u.search}` : u.pathname;
+    return _FEED_URL_HINT_RE.test(probe);
+  }
+
+  // Generic http(s) validator + canonicalizer. Mirrors the generic branch
+  // of server _normalize_any_url: rejects dangerous schemes and non-DNS
+  // hostnames, then returns scheme://host[:port]/path?query (no fragment).
+  const _GENERIC_HOST_RE = /^[A-Za-z0-9]([A-Za-z0-9.-]{0,253}[A-Za-z0-9])?$/;
+  const _BAD_SCHEMES = [
+    "javascript:", "data:", "vbscript:", "file:", "ftp:", "mailto:", "blob:",
+  ];
+
+  function normalizeAnyUrl(raw) {
+    if (!raw || typeof raw !== "string") return null;
+    raw = raw.trim();
+    if (!raw) return null;
+    const lower = raw.toLowerCase();
+    for (const bad of _BAD_SCHEMES) {
+      if (lower.startsWith(bad)) return null;
+    }
+    const withScheme = raw.includes("://") ? raw : "https://" + raw;
+    let u;
+    try { u = new URL(withScheme); } catch { return null; }
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    const host = u.hostname || "";
+    if (!host || host.length > 253) return null;
+    if (!_GENERIC_HOST_RE.test(host)) return null;
+    let netloc = host.toLowerCase();
+    if (u.port) netloc = `${netloc}:${u.port}`;
+    const query = u.search || "";
+    return `${u.protocol}//${netloc}${u.pathname}${query}`;
+  }
+
+  // Per-source routing metadata. `action` is the popup dispatch key;
+  // `endpoint` documents the capture route each source actually hits.
+  const CAPTURE_SOURCES = {
+    youtube_video: {
+      label: "video", endpoint: "/extract", action: "video", note: "",
+    },
+    youtube_playlist: {
+      label: "playlist", endpoint: "/playlist/start", action: "playlist",
+      note: "Captures every video in the playlist, up to the cap.",
+    },
+    x_video: {
+      label: "post", endpoint: "/extract", action: "x_video",
+      note: "Captures the video. Post + thread text is a separate toggle.",
+    },
+    reddit_thread: {
+      label: "thread", endpoint: "/extract/reddit", action: "reddit", note: "",
+    },
+    podcast_feed: {
+      label: "podcast", endpoint: "/podcasts/feeds", action: "podcast",
+      note: "Adds the RSS feed so new episodes transcribe locally.",
+    },
+    web_page: {
+      label: "page", endpoint: "/extract/page", action: "page", note: "",
+    },
+  };
+
+  function _classifyResult(source, canonical) {
+    const spec = CAPTURE_SOURCES[source];
+    return {
+      ok: true,
+      source,
+      label: spec.label,
+      endpoint: spec.endpoint,
+      action: spec.action,
+      canonical,
+      note: spec.note,
+    };
+  }
+
+  // Classify a single URL into exactly one capture source. Returns
+  // {ok, source, label, endpoint, action, canonical, note}. ok is false
+  // ("unsupported" / "empty") when nothing accepts it.
+  function classifyCaptureUrl(raw) {
+    const text = (raw || "").trim();
+    if (!text) {
+      return {
+        ok: false, source: "empty", label: "", endpoint: null,
+        action: null, canonical: "", note: "",
+      };
+    }
+    const yt = normalizeYouTubeUrl(text);
+    if (yt) return _classifyResult("youtube_video", yt);
+    const pl = normalizePlaylistUrl(text);
+    if (pl) return _classifyResult("youtube_playlist", pl);
+    const tw = normalizeTwitterUrl(text);
+    if (tw) return _classifyResult("x_video", tw);
+    const rd = normalizeRedditUrl(text);
+    if (rd) return _classifyResult("reddit_thread", rd);
+    if (looksLikeFeedUrl(text)) {
+      return _classifyResult("podcast_feed", normalizeAnyUrl(text) || text);
+    }
+    const generic = normalizeAnyUrl(text);
+    if (generic) return _classifyResult("web_page", generic);
+    return {
+      ok: false, source: "unsupported", label: "", endpoint: null,
+      action: null, canonical: text,
+      note: "Uoink can't read this link yet. YouTube, X, Reddit threads, "
+        + "podcasts, and most web pages work.",
+    };
+  }
+
+  // ---- Article / web-page capture (P1) ---------------------------------
+  async function postExtractPage(url) {
+    const res = await _authedFetch("/extract/page", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+    const text = await res.text();
+    if (!res.ok && res.status !== 403) {
+      console.error("[Uoink] HTTP", res.status, "body:", text);
+    }
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { ok: false, error: "Server returned a non-JSON response." };
+    }
+  }
+
+  // One-click allowlist grant: POST /extract/page/allowlist {action:'add'}.
+  // The server matches a bare hostname pattern against the host AND its
+  // subdomains, so passing the tab's hostname is enough.
+  async function addAllowedSite(urlPattern) {
+    const res = await _authedFetch("/extract/page/allowlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "add", url_pattern: urlPattern }),
+    });
+    return await res.json().catch(() => ({
+      ok: false, error: "Server returned a non-JSON response.",
+    }));
+  }
+
+  // ---- Podcast feed subscribe (P1) -------------------------------------
+  async function postPodcastFeed(feedUrl) {
+    const res = await _authedFetch("/podcasts/feeds", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ feed_url: feedUrl }),
+    });
+    return await res.json().catch(() => ({
+      ok: false, error: "Server returned a non-JSON response.",
+    }));
+  }
+
   async function postExtractReddit(url, interval) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -713,11 +903,19 @@
     normalizeYouTubeUrl,
     normalizeTwitterUrl,
     normalizeRedditUrl,
+    normalizePlaylistUrl,
+    looksLikeFeedUrl,
+    normalizeAnyUrl,
+    classifyCaptureUrl,
+    CAPTURE_SOURCES,
     getInterval,
     postExtract,
     postExtractAny,
     postExtractX,
     postExtractReddit,
+    postExtractPage,
+    addAllowedSite,
+    postPodcastFeed,
     ping,
     startSession,
     addToSession,
