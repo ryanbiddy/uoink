@@ -1592,7 +1592,7 @@ def uoink_page(args: dict[str, Any]) -> dict[str, Any]:
     try:
         video_id = _pe.persist_page_yoink(
             server._get_index(), result,
-            data_root=server.DATA_ROOT)
+            data_root=server.DESKTOP_ROOT)
         result["video_id"] = video_id
     except Exception:
         result["video_id"] = None
@@ -1629,7 +1629,7 @@ def uoink_reddit_thread(args: dict[str, Any]) -> dict[str, Any]:
         return result  # already in {ok: False, error, code} shape
     try:
         result["video_id"] = _pe.persist_page_yoink(
-            server._get_index(), result, data_root=server.DATA_ROOT,
+            server._get_index(), result, data_root=server.DESKTOP_ROOT,
             source_type=_re.SOURCE_TYPE, subfolder="Reddit",
             slug_prefix="reddit")
     except Exception as e:

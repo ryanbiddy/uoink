@@ -51,7 +51,19 @@ House pattern of `reddit_extractor.py`: fetch separated from parse/render,
 
 `{url}` -> flag gate -> `x_extractor.extract_x_thread` ->
 `page_extractor.persist_page_yoink(source_type="x_thread",
-subfolder="X", slug_prefix="x")`.
+subfolder="X", slug_prefix="x", data_root=DESKTOP_ROOT)`.
+
+**Storage root** (fixed after the v3.3.1 capture test): the corpus lands
+under the configured output root (`DESKTOP_ROOT` /
+`UOINK_OUTPUT_DIR`) at `<output_root>/X/<url-digest>/x.md` — the same root
+video captures, the corpus scan (`_iter_corpus_folders`), and the stale-path
+heal all use. It previously passed `data_root=DATA_ROOT`, so X (and the
+sibling Reddit / universal-page routes, which shared the same pattern) wrote
+their corpus into `%LOCALAPPDATA%\Uoink\` instead, splitting a user's corpus
+off their chosen output drive and leaving files the heal couldn't see. All
+three page-shaped persist callers (`/extract/x`, `/extract/reddit`,
+`/extract/page`, plus the `uoink_page` / `uoink_reddit_thread` MCP tools) now
+use `DESKTOP_ROOT`.
 
 | Case | Status | Body |
 |---|---|---|
@@ -90,7 +102,11 @@ embedded-parent walk with zero refetches, refetch walk, other-author stop,
 deleted-ancestor survival, honest failure copy, disabled-when-off route,
 token gate, full persist-through-index round trip, **default-flag-on**
 (`test_default_flag_on`), extension wiring (primary button owns X, old
-button retired). Live X traffic is not exercised in CI.
+button retired), **output-root storage**
+(`test_capture_lands_under_output_root` — corpus lands under the configured
+output root, not `%LOCALAPPDATA%`), and **current popup copy/version**
+(`test_popup_x_copy_and_version_current` — text-first X note, no hardcoded
+version). Live X traffic is not exercised in CI.
 
 Live verification (V-2b, from the build IP): `x/jack/status/20` -> 1 post
 captured; `x/naval/status/...` mid-thread -> 2 posts walked up root-first;

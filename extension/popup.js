@@ -2547,7 +2547,21 @@ if (openMcpLink) {
   wireKeyActivation(openMcpLink);
 }
 
+// ---- Version label --------------------------------------------------------
+// Source the footer version from the manifest so it can't drift (the old
+// hardcoded "v2.1" lagged the real build). getManifest() is synchronous and
+// always the installed version.
+function showVersion() {
+  const el = document.getElementById("popup-version");
+  if (!el) return;
+  try {
+    const v = chrome.runtime.getManifest().version;
+    if (v) el.textContent = `v${v}`;
+  } catch { /* leave the static fallback in the HTML */ }
+}
+
 // ---- Boot -----------------------------------------------------------------
+showVersion();
 ping();
 loadInterval();
 loadPrompts();

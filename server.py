@@ -10462,10 +10462,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, result)
 
         # Auto-persist as a yoink row -- universal site captures land in
-        # the same Library as videos, distinguished by source_type.
+        # the same Library as videos, distinguished by source_type. Corpus
+        # goes under the configured output root (DESKTOP_ROOT), the same place
+        # video captures, the corpus scan, and the stale-path heal all use, so
+        # a user who set UOINK_OUTPUT_DIR keeps one corpus in one place instead
+        # of a split with %LOCALAPPDATA%.
         try:
             video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, data_root=DATA_ROOT)
+                _get_index(), result, data_root=DESKTOP_ROOT)
             result["video_id"] = video_id
         except Exception as e:
             log.warning("/extract/page persist failed: %s", e)
@@ -11125,7 +11129,7 @@ class Handler(BaseHTTPRequestHandler):
                 "code": result.get("code")})
         try:
             video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, data_root=DATA_ROOT,
+                _get_index(), result, data_root=DESKTOP_ROOT,
                 source_type=x_extractor.SOURCE_TYPE,
                 subfolder="X", slug_prefix="x")
         except Exception:
@@ -11177,7 +11181,7 @@ class Handler(BaseHTTPRequestHandler):
                 "code": result.get("code")})
         try:
             video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, data_root=DATA_ROOT,
+                _get_index(), result, data_root=DESKTOP_ROOT,
                 source_type=reddit_extractor.SOURCE_TYPE,
                 subfolder="Reddit", slug_prefix="reddit")
         except Exception:

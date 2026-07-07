@@ -42,8 +42,16 @@ returning users too:
   page advertises an RSS/Atom feed (see §4).
 - `#uoink-allow-retry-btn` — secondary "Allow this site and retry"; shown when
   an article capture hits the allowlist wall (see §3).
-- `#current-source-note` — honest per-source note (e.g. X: "Captures the
-  video. Post + thread text is a separate toggle.").
+- `#current-source-note` — honest per-source note, sourced from the
+  classifier's `note`. For X it reads "Captures the post text and the
+  author's thread — plus the video if the post has one," matching the
+  text-first V-2b behavior and the dashboard's wording (the old
+  "Captures the video. Post + thread text is a separate toggle." lagged the
+  ship and was corrected after the v3.3.1 capture test).
+- `#popup-version` — the footer version label. Sourced from
+  `chrome.runtime.getManifest().version` at boot (`showVersion()` in
+  `popup.js`) so it tracks the real build instead of a hardcoded string that
+  drifts — the v3.3.1 capture test caught it stuck at "v2.1".
 
 ## 3. Article capture + one-click allowlist (P1)
 
