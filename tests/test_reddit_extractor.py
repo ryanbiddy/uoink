@@ -139,10 +139,16 @@ def test_persist_integration():
         _assert(video_id and video_id.startswith("reddit_"), f"video_id prefix wrong: {video_id}")
         rec, content = idx.records[0]
         _assert(rec["source_type"] == "reddit_thread", "source_type not set")
-        _assert(rec["channel"] == "www.reddit.com", f"channel wrong: {rec['channel']}")
+        # Phase 2: channel is the real "who" (the subreddit), not the host.
+        _assert(rec["channel"] == "r/LocalLLaMA", f"channel wrong: {rec['channel']}")
+        _assert(rec["platform"] == "reddit", f"platform wrong: {rec['platform']}")
+        _assert(rec["author"] == "r/LocalLLaMA", f"author wrong: {rec['author']}")
         corpus = Path(rec["corpus_path"])
         sidecar = Path(rec["sidecar_path"])
         _assert(corpus.exists() and corpus.parent.parent.name == "Reddit", "corpus folder wrong")
+        # Phase 2: readable slug folder (r-<sub>-<hash>), not an opaque hash.
+        _assert(corpus.parent.name.startswith("r-localllama-"),
+                f"reddit folder not a readable slug: {corpus.parent.name}")
         _assert(corpus.name == "reddit.md", f"corpus filename wrong: {corpus.name}")
         body = corpus.read_text(encoding="utf-8")
         _assert("Best local AI setup?" in body and "## Top comments" in body, "corpus content wrong")

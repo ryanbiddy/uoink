@@ -176,6 +176,17 @@ LENGTH_BUCKET_ENUM = ("short", "medium", "long", "deep")  # <4m | 4-15 | 15-30 |
 # screen_recording -> "Screen recording"). The backend supplies the label
 # alongside the raw value so the frontend never hardcodes its own map.
 _FACET_LABELS = {
+    "platform": {
+        "youtube": "YouTube", "x": "X", "reddit": "Reddit",
+        "podcast": "Podcast", "web": "Web",
+        # legacy metadata_json tags a stray row might still carry.
+        "twitter": "X", "generic": "Web",
+    },
+    "source_type": {
+        "video": "Video", "x_thread": "X post", "x_article": "X article",
+        "reddit_thread": "Reddit thread", "page": "Web page",
+        "episode": "Podcast episode",
+    },
     "format": {
         "one_shot": "One shot", "talking_head": "Talking head",
         "tutorial": "Tutorial", "listicle": "Listicle",
@@ -1875,16 +1886,31 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
                    if corpus_path and corpus_path.exists() else "")
     except OSError:
         content = ""
+    # Phase 2 taxonomy on the video / sidecar-driven path. YouTube's channel
+    # is already the real uploader, so author = channel; platform derives from
+    # the sidecar's source_type (None/'video' -> youtube).
+    _src_type = sidecar.get("source_type")
+    _platform = page_extractor.platform_for(
+        _src_type, sidecar.get("url") or "")
+    # Normalise a YouTube capture with no explicit source_type to 'video' so
+    # it filters by type alongside every other source (matches migration 0020).
+    if not _src_type and _platform == page_extractor.PLATFORM_YOUTUBE:
+        _src_type = "video"
+    _author = (page_extractor.author_for(_src_type, sidecar, sidecar.get("url") or "")
+               or sidecar.get("channel"))
     record = {
         "video_id": video_id,
         "slug": folder.name,
         "channel": sidecar.get("channel"),
+        "platform": _platform,
+        "author": _author,
         "title": sidecar.get("title"),
         "topic": sidecar.get("topic"),
         "hook_type": sidecar.get("hook_type"),
         "yoinked_at": sidecar.get("yoinked_at") or _now_iso(),
         "corpus_path": str(corpus_path) if corpus_path else "",
         "sidecar_path": str(sidecar_path),
+        "source_type": _src_type,
         "health_score_json": (
             json.dumps(sidecar["health"], ensure_ascii=False)
             if isinstance(sidecar.get("health"), dict) else None
@@ -1985,8 +2011,44 @@ def _start_backfill_thread() -> None:
             log.exception("backfill thread crashed")
             with _backfill_lock:
                 _backfill_state["state"] = "complete"
+        # Phase 2 (categorization): one-time author/channel correction for
+        # existing X / Reddit / web rows. Guarded by a memory_layer flag so it
+        # runs at most once per install; idempotent even if that flag is lost.
+        try:
+            _run_phase2_author_backfill_once()
+        except Exception:
+            log.exception("phase 2 author backfill crashed")
 
     threading.Thread(target=_runner, name="index-backfill", daemon=True).start()
+
+
+_PHASE2_BACKFILL_KEY = "phase2_author_backfill_done"
+
+
+def _run_phase2_author_backfill_once() -> None:
+    """Run the Phase 2 sidecar author backfill a single time per install.
+    The SQL migration (0020) already set platform + the YouTube author; this
+    recovers the real X / Reddit author from the sidecars and corrects the
+    hostname `channel` values (Bug 3)."""
+    idx = _get_index()
+    try:
+        row = idx._conn.execute(
+            "SELECT value FROM memory_layer WHERE key=?",
+            (_PHASE2_BACKFILL_KEY,)).fetchone()
+    except Exception:
+        row = None
+    if row is not None:
+        return  # already run on this install
+    stats = page_extractor.backfill_platform_author(idx)
+    log.info("phase 2 author backfill: %s", stats)
+    try:
+        idx._conn.execute(
+            "INSERT OR REPLACE INTO memory_layer (key, value, updated_at) "
+            "VALUES (?, ?, ?)",
+            (_PHASE2_BACKFILL_KEY, json.dumps(stats), _now_iso()))
+        idx._conn.commit()
+    except Exception:
+        log.warning("could not record phase 2 backfill completion flag")
 
 
 # Markers in yoink.md so the comments section can be replaced after the
@@ -7660,10 +7722,20 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             except (json.JSONDecodeError, TypeError):
                 metadata = {}
 
+        # Phase 2: the stored `platform` column carries the clean taxonomy tag
+        # (youtube/x/reddit/podcast/web); prefer it, then the sidecar, then a
+        # last-resort URL sniff. `author` is the real "who" for every source.
         platform = (
-            live.get("platform")
+            r.get("platform")
+            or live.get("platform")
             or metadata.get("platform")
             or _detect_platform_from_url(live.get("url") or metadata.get("url") or "")
+        )
+        author = (
+            r.get("author")
+            or live.get("author")
+            or metadata.get("author")
+            or r.get("channel")
         )
         duration_seconds = (
             live.get("duration_seconds")
@@ -7708,6 +7780,8 @@ def _enrich_yoink_rows(idx, rows: list[dict]) -> list[dict]:
             "sidecar_path": sidecar_path,
             "source_url": live.get("url") or metadata.get("url"),
             "platform": platform,
+            "author": author,
+            "source_type": r.get("source_type"),
             "media_type": live.get("media_type") or metadata.get("media_type"),
             "content_type": live.get("content_type") or metadata.get("content_type"),
             "is_live": bool(live.get("is_live") or metadata.get("is_live")),
@@ -8749,7 +8823,8 @@ class Handler(BaseHTTPRequestHandler):
                 "ok": False, "error": "facets unavailable",
                 "state": "unavailable"})
         labelled = {}
-        for col in ("channel", "format", "performance_tier",
+        for col in ("platform", "source_type", "author", "channel",
+                    "format", "performance_tier",
                     "length_bucket", "topic", "hook_type"):
             labelled[col] = [
                 {"value": item["value"],
@@ -10514,7 +10589,8 @@ class Handler(BaseHTTPRequestHandler):
         # of a split with %LOCALAPPDATA%.
         try:
             video_id = page_extractor.persist_page_yoink(
-                _get_index(), result, data_root=DESKTOP_ROOT)
+                _get_index(), result, data_root=DESKTOP_ROOT,
+                topic_classifier=_classify_topic)
             result["video_id"] = video_id
         except Exception as e:
             log.warning("/extract/page persist failed: %s", e)
@@ -10983,7 +11059,10 @@ class Handler(BaseHTTPRequestHandler):
         try:
             res = idx.search_yoinks_for_memory(
                 q=_one("q"), channel=_one("channel"), topic=_one("topic"),
-                hook_type=hook_type, date_from=date_from, date_to=date_to,
+                hook_type=hook_type,
+                platform=_one("platform"), source_type=_one("source_type"),
+                author=_one("author"),
+                date_from=date_from, date_to=date_to,
                 limit=limit, offset=offset,
             )
             corpus_total = idx.count_corpus()
@@ -11176,7 +11255,8 @@ class Handler(BaseHTTPRequestHandler):
             video_id = page_extractor.persist_page_yoink(
                 _get_index(), result, data_root=DESKTOP_ROOT,
                 source_type=x_extractor.SOURCE_TYPE,
-                subfolder="X", slug_prefix="x")
+                subfolder="X", slug_prefix="x",
+                topic_classifier=_classify_topic)
         except Exception:
             log.exception("/extract/x persist failed")
             return self._send_json(500, {
@@ -11216,7 +11296,8 @@ class Handler(BaseHTTPRequestHandler):
             video_id = page_extractor.persist_page_yoink(
                 _get_index(), result, data_root=DESKTOP_ROOT,
                 source_type=x_article_extractor.SOURCE_TYPE,
-                subfolder="X", slug_prefix="x-article")
+                subfolder="X", slug_prefix="x-article",
+                topic_classifier=_classify_topic)
         except Exception:
             log.exception("/extract/x-article persist failed")
             return self._send_json(500, {
@@ -11268,7 +11349,8 @@ class Handler(BaseHTTPRequestHandler):
             video_id = page_extractor.persist_page_yoink(
                 _get_index(), result, data_root=DESKTOP_ROOT,
                 source_type=reddit_extractor.SOURCE_TYPE,
-                subfolder="Reddit", slug_prefix="reddit")
+                subfolder="Reddit", slug_prefix="reddit",
+                topic_classifier=_classify_topic)
         except Exception:
             log.exception("/extract/reddit persist failed")
             return self._send_json(500, {
@@ -12444,11 +12526,17 @@ class Handler(BaseHTTPRequestHandler):
 
         # Persist as a yoink row so it appears in Library + MCP search.
         try:
+            # Phase 2: store the clean platform tag + author on the row so the
+            # generic (yt-dlp) captures filter alongside everything else.
+            _plat = page_extractor.platform_for(None, canonical)
+            _auth = sidecar["channel"] or sidecar["host"]
             _get_index().upsert_yoink({
                 "video_id": (metadata.get("id")
                                 or f"generic_{abs(hash(canonical)) & 0xFFFFFF:06x}"),
                 "slug": folder.name,
                 "channel": sidecar["channel"],
+                "platform": _plat,
+                "author": _auth,
                 "title": title,
                 "topic": topic,
                 "yoinked_at": sidecar["yoinked_at"],
@@ -12456,6 +12544,7 @@ class Handler(BaseHTTPRequestHandler):
                 "sidecar_path": str(sidecar_path),
                 "metadata_json": json.dumps({
                     "platform": platform,
+                    "author": _auth,
                     "duration_seconds": sidecar["duration_seconds"],
                     "host": sidecar["host"],
                 }),
@@ -13511,9 +13600,21 @@ def run_cli(argv: list[str]) -> int:
     - --import-corpus <file> : restore an export (conservative merge).
     - --rebuild-index [root] : re-index every on-disk sidecar folder, then
       restore the newest export found under <root>/_exports (C-03).
+    - --backfill-authors [--dry-run] : Phase 2 sidecar backfill -- fill the
+      `author` column + correct hostname `channel` values for X / Reddit / web
+      rows from their sidecars. Idempotent; prints before/after counts.
     - --show-dashboard  : run the server, then open the dashboard window.
     (no flag)           : run the server.
     """
+    if "--backfill-authors" in argv:
+        # Phase 2 (categorization): the SQL migration set platform + YouTube
+        # author; this reads each non-YouTube sidecar for the real author and
+        # corrects the "x.com"/"reddit.com" channel values (Bug 3).
+        stats = page_extractor.backfill_platform_author(
+            _get_index(), dry_run="--dry-run" in argv)
+        _print_json({"ok": True, "dry_run": "--dry-run" in argv,
+                     "backfill": stats})
+        return 0
     if "--migrate-dry-run" in argv:
         _print_json(migrate_install.run_migration(dry_run=True, app_dir=HERE))
         return 0

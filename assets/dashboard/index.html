@@ -628,6 +628,37 @@
       color: var(--vermillion);
     }
 
+    /* Phase 2: source-type badge sits under the platform chip, top-right. */
+    .source-type-chip {
+      position: absolute;
+      top: 38px;
+      right: 12px;
+      display: inline-flex;
+      align-items: center;
+      min-height: 20px;
+      border-radius: var(--pill-radius);
+      padding: 0 9px;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: lowercase;
+      letter-spacing: 0.02em;
+      border: 1px solid rgba(255, 244, 236, 0.14);
+      background: rgba(10, 10, 10, 0.6);
+      color: var(--cream);
+      white-space: nowrap;
+    }
+
+    /* Phase 2: source-first meta line ("Platform · type") above the author. */
+    .card-source {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      color: var(--vermillion);
+      opacity: 0.85;
+      margin-bottom: 2px;
+    }
+
     .speaker-count-chip {
       position: absolute;
       bottom: 10px;
@@ -3686,7 +3717,7 @@
             <div>
               <div class="eyebrow">Library</div>
               <h1 id="libraryHeadline"><span id="libraryCount">0</span><span id="libraryHeadlineText"> uoinks </span><em id="libraryHeadlineAccent">ready to read.</em></h1>
-              <p class="lede">Search transcripts, comments, channels, topics, and hooks. Everything stays on this machine in your Uoink index.</p>
+              <p class="lede">Filter by platform, source type, author, and topic, or search across every transcript and comment. Everything stays on this machine in your Uoink index.</p>
             </div>
             <div class="inline-row">
               <button class="button ghost" type="button" id="clearFilters">Clear filters</button>
@@ -3700,9 +3731,11 @@
 
           <div class="control-grid">
             <input class="control" id="searchInput" type="search" placeholder="search transcripts, titles, comments" aria-label="Search Library">
-            <select class="control" id="channelFilter" aria-label="Filter by channel"><option value="">All channels</option></select>
+            <select class="control" id="platformFilter" aria-label="Filter by platform"><option value="">All platforms</option></select>
+            <select class="control" id="sourceTypeFilter" aria-label="Filter by source type"><option value="">All types</option></select>
+            <select class="control" id="channelFilter" aria-label="Filter by author"><option value="">All authors</option></select>
             <select class="control" id="topicFilter" aria-label="Filter by topic"><option value="">All topics</option></select>
-            <select class="control" id="hookFilter" aria-label="Filter by hook">
+            <select class="control video-facet" id="hookFilter" aria-label="Filter by hook">
               <option value="">Any hook</option>
               <option value="curiosity_gap">curiosity gap</option>
               <option value="question">question</option>
@@ -3714,9 +3747,9 @@
               <option value="stakes">stakes</option>
               <option value="other">other</option>
             </select>
-            <select class="control" id="formatFilter" aria-label="Filter by format"><option value="">Format</option></select>
-            <select class="control" id="performanceFilter" aria-label="Filter by performance"><option value="">Performance</option></select>
-            <select class="control" id="lengthFilter" aria-label="Filter by length"><option value="">Length</option></select>
+            <select class="control video-facet" id="formatFilter" aria-label="Filter by format"><option value="">Format</option></select>
+            <select class="control video-facet" id="performanceFilter" aria-label="Filter by performance"><option value="">Performance</option></select>
+            <select class="control video-facet" id="lengthFilter" aria-label="Filter by length"><option value="">Length</option></select>
             <input class="control" id="dateFrom" type="date" aria-label="Date from">
             <input class="control" id="dateTo" type="date" aria-label="Date to">
             <select class="control" id="sortFilter" aria-label="Sort Library">
@@ -4243,7 +4276,9 @@
       libraryErrorDetail: "",
       filters: {
         q: "",
-        channel: "",
+        platform: "",
+        source_type: "",
+        author: "",
         topic: "",
         hook_type: "",
         format: "",
@@ -4325,6 +4360,8 @@
     };
 
     const FALLBACK_FACETS = {
+      platform: ["youtube", "x", "reddit", "podcast", "web"],
+      source_type: ["video", "x_thread", "x_article", "reddit_thread", "page", "episode"],
       format: ["one-shot", "talking-head", "tutorial", "listicle", "narrative", "vlog", "interview", "screen-recording", "B-roll-heavy"],
       performance: ["over", "average", "under"],
       length: ["short", "medium", "long", "deep"],
@@ -4543,6 +4580,8 @@
       activeFilters: document.getElementById("activeFilters"),
       loadMore: document.getElementById("loadMore"),
       searchInput: document.getElementById("searchInput"),
+      platformFilter: document.getElementById("platformFilter"),
+      sourceTypeFilter: document.getElementById("sourceTypeFilter"),
       channelFilter: document.getElementById("channelFilter"),
       topicFilter: document.getElementById("topicFilter"),
       topicOverview: document.getElementById("topicOverview"),
@@ -5407,14 +5446,34 @@
       const value = String(platform || "web").toLowerCase();
       const labels = {
         youtube: "YouTube",
-        twitter: "X/Twitter",
+        twitter: "X",
         x: "X",
+        reddit: "Reddit",
+        podcast: "Podcast",
+        web: "Web",
         generic: "Web",
         rss: "RSS",
         spotify: "Spotify",
         "apple podcasts": "Apple",
       };
       return labels[value] || value.replace(/_/g, " ");
+    }
+
+    // Phase 2: a short, human source-type label for the card badge.
+    function sourceTypeLabel(row) {
+      const st = String((row && row.source_type) || "").toLowerCase();
+      const labels = {
+        video: "video",
+        x_thread: "post",
+        x_article: "article",
+        reddit_thread: "thread",
+        page: "page",
+        episode: "episode",
+      };
+      if (labels[st]) return labels[st];
+      if (isPodcastContent(row)) return "episode";
+      if (isLiveContent(row)) return "live";
+      return platformOf(row) === "youtube" ? "video" : "page";
     }
 
     function cardVariantClass(row) {
@@ -7076,7 +7135,9 @@
       const params = new URLSearchParams();
       const q = state.filters.q.trim();
       if (q) params.set("q", q);
-      if (state.filters.channel) params.set("channel", state.filters.channel);
+      if (state.filters.platform) params.set("platform", state.filters.platform);
+      if (state.filters.source_type) params.set("source_type", state.filters.source_type);
+      if (state.filters.author) params.set("author", state.filters.author);
       if (state.filters.topic) params.set("topic", state.filters.topic);
       if (state.filters.hook_type) params.set("hook_type", state.filters.hook_type);
       if (state.filters.format) params.set("format", state.filters.format);
@@ -7096,7 +7157,9 @@
     function libraryFilterLabel(key) {
       return ({
         q: "Search",
-        channel: "Channel",
+        platform: "Platform",
+        source_type: "Type",
+        author: "Author",
         topic: "Topic",
         hook_type: "Hook",
         format: "Format",
@@ -7108,7 +7171,7 @@
     }
 
     function libraryFilterValue(key, value) {
-      if (["channel", "topic", "hook_type", "format", "performance", "length"].includes(key)) {
+      if (["platform", "source_type", "author", "topic", "hook_type", "format", "performance", "length"].includes(key)) {
         return facetLabelForValue(key, value);
       }
       return String(value || "").trim();
@@ -7218,10 +7281,11 @@
     }
 
     function resetLibraryFilters() {
-      [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
+      [els.searchInput, els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo].forEach((el) => { el.value = ""; });
       els.sortFilter.value = "newest";
-      state.filters = { q: "", channel: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest" };
+      state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest" };
       setLibraryDateError("");
+      updateVideoFacetVisibility();
       loadLibrary({ reset: true });
     }
 
@@ -7382,7 +7446,11 @@
       const platform = platformOf(row);
       const variant = cardVariantClass(row);
       const title = htmlEscape(firstValue(row.episode_title, row.title, "Untitled uoink"));
-      const channel = htmlEscape(firstValue(row.host, row.channel, podcast ? row.podcast_title : "", "Source not labeled"));
+      // Phase 2: the real author is the "who" (X author, r/<sub>, YouTube
+      // channel), never the bare host.
+      const author = htmlEscape(firstValue(row.author, row.host, row.channel, podcast ? row.podcast_title : "", "Source not labeled"));
+      const platformLabel = htmlEscape(platformChipLabel(platform));
+      const sourceType = htmlEscape(sourceTypeLabel(row));
       const topic = htmlEscape(row.topic || "Uncategorized");
       const hook = htmlEscape(prettyHook(row.hook_type));
       const confidence = row.hook_type_confidence != null ? ` - confidence ${row.hook_type_confidence}/5` : "";
@@ -7402,13 +7470,15 @@
           <div class="thumb">
             <span class="duration">${htmlEscape(fmtDuration(durationOf(row)))}</span>
             <span class="platform-chip ${live ? "live" : ""}">${htmlEscape(platformChip)}</span>
+            <span class="source-type-chip">${sourceType}</span>
             ${podcast ? cardWaveformHtml(row) : ""}
             ${bottomChip}
             <img alt="" data-thumb-for="${id}" class="hidden">
           </div>
           <div class="card-body">
             <div class="card-title">${title}</div>
-            <div class="card-meta">${channel}${podcast && row.podcast_title ? ` | ${htmlEscape(row.podcast_title)}` : ""}${entities && !podcast ? ` | ${entities} entities` : ""}${live ? " | stream" : ""}</div>
+            <div class="card-source">${platformLabel} &middot; ${sourceType}</div>
+            <div class="card-meta">${author}${podcast && row.podcast_title ? ` | ${htmlEscape(row.podcast_title)}` : ""}${entities && !podcast ? ` | ${entities} entities` : ""}${live ? " | stream" : ""}</div>
             <div class="card-foot">
               <span class="topic-chip">${topic}</span>
               <span class="age">${htmlEscape(fmtAge(row.yoinked_at))}</span>
@@ -7741,7 +7811,9 @@
     // The classify facets fill in after the optional AI pass; channel/topic
     // fill in as soon as a source is saved.
     const FACET_EMPTY_STATES = {
-      channel: { label: "Channel", title: "Channels show up here once you've saved a source." },
+      platform: { label: "Platform", title: "Platforms show up here once you've saved a source." },
+      source_type: { label: "Type", title: "Source types show up here once you've saved a source." },
+      author: { label: "Author", title: "Authors show up here once you've saved a source." },
       topic: { label: "Topic", title: "Topics show up here once you've saved a source." },
       hook_type: { label: "Hook", title: "No saved sources carry a hook tag yet. The optional AI classify pass fills these in." },
       format: { label: "Format", title: "No saved sources carry a format tag yet. The optional AI classify pass fills these in." },
@@ -7750,7 +7822,9 @@
     };
 
     function syncFacetOptions() {
-      syncOptions(els.channelFilter, "All channels", facetItems("channel"), FACET_EMPTY_STATES.channel);
+      syncOptions(els.platformFilter, "All platforms", facetItems("platform"), FACET_EMPTY_STATES.platform);
+      syncOptions(els.sourceTypeFilter, "All types", facetItems("source_type"), FACET_EMPTY_STATES.source_type);
+      syncOptions(els.channelFilter, "All authors", facetItems("author"), FACET_EMPTY_STATES.author);
       syncOptions(els.topicFilter, "All topics", facetItems("topic"), FACET_EMPTY_STATES.topic);
       syncOptions(els.hookFilter, "Any hook", facetItems("hook_type"), FACET_EMPTY_STATES.hook_type);
       syncOptions(els.formatFilter, "Format", facetItems("format"), FACET_EMPTY_STATES.format);
@@ -7773,7 +7847,28 @@
         state.facetsFallback = true;
       }
       syncFacetOptions();
+      updateVideoFacetVisibility();
       renderTopicOverview();
+    }
+
+    // Phase 2 (source-first browse): the video-only facets (hook, format,
+    // performance, length) only make sense for YouTube videos -- every other
+    // source leaves them null. Hide them whenever a non-YouTube platform is
+    // selected so the filter row stays clean instead of offering dead
+    // controls. Shown for YouTube and for "All platforms".
+    function updateVideoFacetVisibility() {
+      const platform = String(state.filters.platform || "").toLowerCase();
+      const hide = platform && platform !== "youtube";
+      document.querySelectorAll(".control-grid .video-facet").forEach((el) => {
+        el.classList.toggle("hidden", hide);
+        if (hide) el.value = "";
+      });
+      if (hide) {
+        state.filters.hook_type = "";
+        state.filters.format = "";
+        state.filters.performance = "";
+        state.filters.length = "";
+      }
     }
 
     // U-05 (UX-13): the topics-you've-uoinked overview. Corpus-wide counts
@@ -7810,6 +7905,9 @@
 
     function facetSourceKeys(key) {
       return ({
+        platform: ["platform"],
+        source_type: ["source_type"],
+        author: ["author", "channel"],
         channel: ["channel"],
         topic: ["topic"],
         hook_type: ["hook_type"],
@@ -10299,7 +10397,9 @@
       });
       const reload = debounce(() => {
         state.filters.q = els.searchInput.value;
-        state.filters.channel = els.channelFilter.value;
+        state.filters.platform = els.platformFilter.value;
+        state.filters.source_type = els.sourceTypeFilter.value;
+        state.filters.author = els.channelFilter.value;
         state.filters.topic = els.topicFilter.value;
         state.filters.hook_type = els.hookFilter.value;
         state.filters.format = els.formatFilter.value;
@@ -10308,9 +10408,10 @@
         state.filters.date_from = els.dateFrom.value;
         state.filters.date_to = els.dateTo.value;
         state.filters.sort = els.sortFilter.value;
+        updateVideoFacetVisibility();
         loadLibrary({ reset: true });
       }, 260);
-      [els.searchInput, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
+      [els.searchInput, els.platformFilter, els.sourceTypeFilter, els.channelFilter, els.topicFilter, els.hookFilter, els.formatFilter, els.performanceFilter, els.lengthFilter, els.dateFrom, els.dateTo, els.sortFilter].forEach((el) => {
         el.addEventListener(el.tagName === "INPUT" ? "input" : "change", reload);
       });
       document.getElementById("clearFilters").addEventListener("click", resetLibraryFilters);
