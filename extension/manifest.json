@@ -70,6 +70,20 @@
         "content-reddit.js"
       ],
       "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://x.com/*/article/*",
+        "https://x.com/i/article/*",
+        "https://www.x.com/*/article/*",
+        "https://twitter.com/*/article/*",
+        "https://www.twitter.com/*/article/*"
+      ],
+      "js": [
+        "lib/x-article.js",
+        "content-x-article.js"
+      ],
+      "run_at": "document_idle"
     }
   ],
   "commands": {

@@ -175,6 +175,40 @@
     return null;
   }
 
+  // V-2c: X ARTICLE (long-form) URL detection. Distinct from a status URL:
+  // articles live at x.com/<handle>/article/<id> or x.com/i/article/<id>.
+  // The canonical form is what the popup shows + the fallback /extract/page
+  // attempt receives. The reliable capture is the content-script DOM parse
+  // (see content-x-article.js); this normaliser only classifies the tab.
+  const _X_ARTICLE_HOSTS = new Set([
+    "x.com", "www.x.com", "twitter.com", "www.twitter.com",
+    "mobile.twitter.com", "mobile.x.com",
+  ]);
+  const _X_HANDLE_RE = /^[A-Za-z0-9_]{1,15}$/;
+  const _X_ARTICLE_ID_RE = /^[A-Za-z0-9]{5,}$/;
+
+  function normalizeXArticleUrl(raw) {
+    if (!raw) return null;
+    let u;
+    try {
+      u = new URL(raw.includes("://") ? raw : "https://" + raw);
+    } catch {
+      return null;
+    }
+    if (!_X_ARTICLE_HOSTS.has(u.hostname.toLowerCase())) return null;
+    const parts = u.pathname.replace(/^\/+|\/+$/g, "").split("/");
+    if (parts.length < 3) return null;
+    if (parts[0].toLowerCase() === "i" && parts[1] === "article"
+        && _X_ARTICLE_ID_RE.test(parts[2])) {
+      return `https://x.com/i/article/${parts[2]}`;
+    }
+    if (parts[1] === "article" && _X_HANDLE_RE.test(parts[0])
+        && _X_ARTICLE_ID_RE.test(parts[2])) {
+      return `https://x.com/${parts[0]}/article/${parts[2]}`;
+    }
+    return null;
+  }
+
   function getInterval() {
     return new Promise((resolve) => {
       try {
@@ -204,6 +238,28 @@
         signal: controller.signal,
       });
       return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // V-2c: X ARTICLE capture. POST /extract/x-article with the DOM already
+  // parsed by the content script (the payload is
+  // {url, title, author, markdown, images}) — the server never touches X, it
+  // just persists the pre-parsed article as source_type 'x_article'. 60s
+  // timeout: this is a local write, not a network extraction.
+  async function postExtractXArticle(article) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 60 * 1000);
+    try {
+      const res = await _authedFetch("/extract/x-article", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(article || {}),
+        signal: controller.signal,
+      });
+      return await res.json().catch(() => ({
+        ok: false, error: "Server returned a non-JSON response." }));
     } finally {
       clearTimeout(timer);
     }
@@ -491,6 +547,9 @@
   function postExtractViaBg(url, interval) {
     return _proxy("stcExtract", { url, interval });
   }
+  function postExtractXArticleViaBg(article) {
+    return _proxy("stcExtractXArticle", { article });
+  }
   function addToSessionViaBg(sessionId, url, interval) {
     return _proxy("stcSessionAdd", { session_id: sessionId, url, interval });
   }
@@ -757,6 +816,11 @@
       note: "Captures the post text and the author's thread -- plus the "
         + "video if the post has one.",
     },
+    x_article: {
+      label: "article", endpoint: "/extract/x-article", action: "x_article",
+      note: "Reads X's long-form article out of the page you're logged into. "
+        + "If that can't be read, Uoink falls back to fetching the page.",
+    },
     reddit_thread: {
       label: "thread", endpoint: "/extract/reddit", action: "reddit", note: "",
     },
@@ -797,6 +861,8 @@
     if (yt) return _classifyResult("youtube_video", yt);
     const pl = normalizePlaylistUrl(text);
     if (pl) return _classifyResult("youtube_playlist", pl);
+    const xa = normalizeXArticleUrl(text);
+    if (xa) return _classifyResult("x_article", xa);
     const tw = normalizeTwitterUrl(text);
     if (tw) return _classifyResult("x_video", tw);
     const rd = normalizeRedditUrl(text);
@@ -903,6 +969,7 @@
     extractVideoId,
     normalizeYouTubeUrl,
     normalizeTwitterUrl,
+    normalizeXArticleUrl,
     normalizeRedditUrl,
     normalizePlaylistUrl,
     looksLikeFeedUrl,
@@ -913,6 +980,8 @@
     postExtract,
     postExtractAny,
     postExtractX,
+    postExtractXArticle,
+    postExtractXArticleViaBg,
     postExtractReddit,
     postExtractPage,
     addAllowedSite,

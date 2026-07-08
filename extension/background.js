@@ -390,6 +390,23 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     })();
     return true;
   }
+  // V-2c: X ARTICLE capture proxied from the in-page content script. The
+  // article is already parsed from the page DOM; the SW just relays it to the
+  // helper (same blocker-bypass rationale as stcExtract). No queue guard —
+  // this is a local persist, not a transcription job.
+  if (msg.type === "stcExtractXArticle" && msg.article) {
+    (async () => {
+      try {
+        const data = await STC.postExtractXArticle(msg.article);
+        sendResponse({ data });
+        if (data && data.ok) tryOpenPopup();
+      } catch (e) {
+        console.error("[stc] proxied x-article extract failed", e);
+        sendResponse({ networkError: String(e && e.message || e) });
+      }
+    })();
+    return true;
+  }
   if (msg.type === "stcSessionAdd" && msg.session_id && msg.url) {
     (async () => {
       try {

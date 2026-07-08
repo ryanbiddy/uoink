@@ -64,9 +64,11 @@ v3.3.3 makes this honest end to end:
 - `x_extractor.is_x_article_url` (regex `_ARTICLE_RE`) detects the Article
   shape. `_classify_capture_url` checks it right before the generic
   web-page fallback and returns the `x_article` source: label "X Article",
-  route `/extract/page` (best effort), and an up-front honest note that X
-  login-walls Articles and that posts/threads capture fully from a
-  `/status/` link.
+  route `/extract/page` (best effort for a *pasted* link), and an up-front
+  honest note that the reliable capture is the extension's **Uoink this
+  article** button and that a pasted link is best-effort because X often
+  login-walls it. (V-2c adds the real capture -- see
+  `x-article-capture.md`.)
 - `page_extractor._is_x_login_wall(url, result)` recognises X's wall
   (host is x/twitter **and** the markdown leads with "JavaScript is not
   available" **and** there is no real `<title>`). `extract_page` turns that
@@ -80,9 +82,11 @@ v3.3.3 makes this honest end to end:
 
 Best-effort caveat, stated plainly: on a build without a JS renderer /
 logged-in session (the shipped desktop helper uses the stdlib fetch), the
-Article path will essentially always hit the wall and return the honest
-failure. Full X Article capture would need a new authenticated extractor;
-this ships the honest-error half.
+*pasted-URL* Article path will essentially always hit the wall and return the
+honest failure. The reliable X Article capture ships in V-2c as an extension
+content script that reads the Article from your logged-in page and persists it
+via `POST /extract/x-article` -- see `x-article-capture.md`. This section owns
+only the pasted-URL fallback and its honest login-wall handling.
 
 ## Route: `POST /extract/x` (token-gated)
 

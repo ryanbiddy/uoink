@@ -39,6 +39,12 @@ _SOURCES: list[dict] = [
         "best_for": "Citing a clip in a credited thread.",
     },
     {
+        "slug": "x-article", "name": "X article", "category": "text", "status": SHIPPED,
+        "capture": "Open an X long-form article and click “Uoink this article”.",
+        "lands": "Title, author, and the article body as clean markdown.",
+        "best_for": "Saving a long-form X piece you want to write from.",
+    },
+    {
         "slug": "podcasts", "name": "Podcasts", "category": "audio", "status": SHIPPED,
         "capture": "Add an RSS feed; episodes transcribe on demand.",
         "lands": "Speaker-labeled transcript (WhisperX diarization), episode metadata.",

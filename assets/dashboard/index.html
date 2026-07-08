@@ -5011,7 +5011,9 @@
       }
       if (source === "X" && (haystack.includes("http error 404") || haystack.includes("not all metadata or media") || haystack.includes("unable to download json metadata"))) {
         // An X link with no downloadable video isn't a failed "download".
-        return "X didn't return a capturable video for this link. Capture an X post or thread as text; X Articles aren't supported yet.";
+        // Long-form X Articles ARE supported now via the extension's in-page
+        // "Uoink this article" button, so point there instead of a dead end.
+        return "X didn't return a capturable video for this link. Capture an X post or thread as text, and capture a long-form X Article with the extension's Uoink this article button.";
       }
       if (haystack.includes("yt-dlp") || haystack.includes("unable to download") || haystack.includes("extractor error")) {
         return `${source} wouldn't hand this one over cleanly. Details are tucked below.`;

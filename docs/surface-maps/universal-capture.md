@@ -66,15 +66,21 @@ The returned dict is what both `/detect` and the dashboard render:
 - **X Article** (X's long-form `/**/article/**` format, detected by
   `x_extractor.is_x_article_url`) is its own `x_article` source, checked
   right before the generic web-page fallback so the chip reads "X Article",
-  not a plain "Article / web page". Articles aren't served by the
-  syndication endpoint the post/thread path uses and need a logged-in
-  browser, so the route is a best-effort `/extract/page`. The note is honest
-  up front: "X Articles need a logged-in browser, so Uoink tries the
-  web-page reader as a best effort and X often blocks it behind its login
-  wall. X posts and threads capture fully from a /status/ link." When X's
-  login/nojs wall is what comes back, `page_extractor` returns
-  `code: "x_login_wall"` (see `x-text-capture.md`) instead of persisting the
-  wall as a junk uoink, and the dashboard shows that honest copy verbatim
+  not a plain "Article / web page". Articles **are** supported (V-2c): the
+  reliable capture is the extension's in-page **Uoink this article** button,
+  which reads the rendered Article DOM from your logged-in session and
+  persists it via `POST /extract/x-article` (see `x-article-capture.md`).
+  Articles aren't served by the syndication endpoint the post/thread path
+  uses, so a *pasted* URL can only route a best-effort `/extract/page` fetch.
+  The classifier canonicalises the link to `x.com/<handle>/article/<id>` via
+  `x_article_extractor.canonical_article_url`. The note is honest up front:
+  "Long-form X article. For a reliable capture, open it and use the
+  extension's Uoink this article button, which reads the article from your
+  logged-in page. A pasted link is a best-effort web-page fetch and X often
+  login-walls it." When X's login/nojs wall is what comes back,
+  `page_extractor._is_x_login_wall` returns `code: "x_login_wall"` (the single
+  login-wall implementation, see `x-text-capture.md`) instead of persisting
+  the wall as a junk uoink, and the dashboard shows that honest copy verbatim
   rather than a misleading "retry with cookies".
 - **Unsupported** answers `ok: false` with the plain label "Not a supported
   source yet" and a note that lists what does work. It is a valid answer,

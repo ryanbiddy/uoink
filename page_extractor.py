@@ -307,9 +307,11 @@ def extract_page(idx, url: str, *,
             "url": canonical,
             "extraction_engine": result.get("extraction_engine"),
             "error": ("X needs a logged-in browser to show this, so Uoink "
-                      "can't get past X's login wall for Articles or pages. "
-                      "X posts and threads capture fully from a /status/ "
-                      "link."),
+                      "can't get past X's login wall from a pasted link. For "
+                      "a long-form X Article, open it and use the extension's "
+                      "Uoink this article button, which reads it from your "
+                      "logged-in page. X posts and threads capture fully from "
+                      "a /status/ link."),
         }
     return result
 
