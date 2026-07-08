@@ -57,6 +57,30 @@ Routes consumed:
 - `GET /sources/manifest`
 - `GET /open-extension`
 
+## Uoink detail (saved-source view)
+
+The `#tab-yoink` panel is the "uoink screen" opened from a Library card. Its
+header (`.page-head`) carries the six action buttons in a
+`.inline-row.yoink-actions` toolbar: Open folder, Open transcript file,
+Re-capture source, Re-transcribe, Evidence, Write from this.
+
+- On v3.3.2 the toolbar sat in the right column of a `space-between` flex
+  `.page-head`, competing with the heading. Even at 1280 CSS px it wrapped
+  into two cramped rows in the top-right, and on a DPI-scaled window (a
+  physical 1280x800 window at 125-150% Windows scaling renders at ~1024-853
+  CSS px) it degraded further, so not every action read as reachable.
+- v3.3.3 scopes a rule to this header only: `#tab-yoink .page-head` is
+  `flex-wrap: wrap`, the heading block is `flex: 1 1 320px`, and
+  `.yoink-actions` is `flex: 1 1 100%`. The toolbar always drops to its own
+  full-width row under the heading and wraps its buttons within the full
+  content width, so at 1280 all six sit on one clean row and at narrower
+  widths they wrap to two rows -- every action reachable, none cut off.
+  Other tabs' `.page-head` layout is unchanged.
+
+Verified with Playwright at 1280x800 and the DPI-scaled equivalents
+(1024x640, 853x533): `document.body` never gains horizontal scroll and no
+action button's right edge exceeds the viewport.
+
 ## Generate
 
 Generate uses `.writing-layout`: a left form and a right draft/refine column.

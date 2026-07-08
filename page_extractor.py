@@ -100,6 +100,33 @@ _PAGE_MAX_BYTES = 8 * 1024 * 1024  # 8 MB hard cap on body read
 _MAX_FOLLOW_LINKS_DEPTH = 1
 
 
+# Hosts that serve a "JavaScript is not available" login/nojs wall to a
+# plain (non-browser) fetch. Reading real content on these needs a
+# logged-in browser, so a stdlib/static fetch gets the wall, not the page.
+_X_WALL_HOSTS = {
+    "x.com", "www.x.com", "mobile.x.com",
+    "twitter.com", "www.twitter.com", "mobile.twitter.com",
+}
+_X_WALL_SIGNAL = "javascript is not available"
+
+
+def _is_x_login_wall(url: str, result: dict) -> bool:
+    """True when `result` is X's login/nojs wall page rather than real
+    content. Guards against saving that wall as a junk uoink (title=None,
+    body = 'enable JavaScript...'). Keyed on host + the wall's headline so a
+    genuine article that happens to mention JavaScript isn't caught."""
+    try:
+        host = (urlparse(url).hostname or "").lower()
+    except Exception:
+        return False
+    if host not in _X_WALL_HOSTS:
+        return False
+    md = (result.get("markdown") or "").lower()
+    title = (result.get("title") or "").strip()
+    # The wall has no real <title> and leads with the headline.
+    return _X_WALL_SIGNAL in md and not title
+
+
 def _now_iso() -> str:
     return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
 
@@ -256,16 +283,35 @@ def extract_page(idx, url: str, *,
     depth = max(0, min(int(follow_links_depth or 0),
                           _MAX_FOLLOW_LINKS_DEPTH))
 
+    result = None
     if _CRAWL4AI_AVAILABLE:
         try:
-            return _extract_crawl4ai(canonical, render_mode=render_mode,
-                                       include_screenshot=include_screenshot,
-                                       follow_links_depth=depth)
+            result = _extract_crawl4ai(
+                canonical, render_mode=render_mode,
+                include_screenshot=include_screenshot,
+                follow_links_depth=depth)
         except Exception as e:
             log.warning("crawl4ai extract failed (%s); falling back to "
                           "stdlib: %s", canonical, e)
-    return _extract_stdlib(canonical,
-                              include_screenshot=include_screenshot)
+    if result is None:
+        result = _extract_stdlib(canonical,
+                                   include_screenshot=include_screenshot)
+    # Honest handling of X's login/nojs wall: a plain fetch of an x.com
+    # Article or page comes back as "JavaScript is not available", not the
+    # content. Fail cleanly with actionable copy instead of persisting the
+    # wall as a junk uoink (the v3.3.2 behaviour Ryan hit).
+    if result.get("ok") and _is_x_login_wall(canonical, result):
+        return {
+            "ok": False,
+            "code": "x_login_wall",
+            "url": canonical,
+            "extraction_engine": result.get("extraction_engine"),
+            "error": ("X needs a logged-in browser to show this, so Uoink "
+                      "can't get past X's login wall for Articles or pages. "
+                      "X posts and threads capture fully from a /status/ "
+                      "link."),
+        }
+    return result
 
 
 def _extract_crawl4ai(url: str, *, render_mode: str,

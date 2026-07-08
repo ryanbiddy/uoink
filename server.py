@@ -4422,6 +4422,15 @@ def _plain_error_from_text(text: str) -> str:
         return "The local transcript step tripped. Details are tucked below."
     if "can't find yt-dlp" in lower or "can't find ffmpeg" in lower or "no such file" in lower:
         return "Uoink can't find a local media helper. Details are tucked below."
+    if source == "X" and ("http error 404" in lower
+                          or "not all metadata or media" in lower
+                          or "unable to download json metadata" in lower):
+        # An X link that carries no downloadable video (a text post, or the
+        # syndication endpoint 404ing) shouldn't read as a failed "download".
+        # Say what happened and what to do; X Articles need a new extractor.
+        return ("X didn't return a capturable video for this link. Capture "
+                "an X post or thread as text instead; X Articles aren't "
+                "supported yet.")
     if "yt-dlp" in lower or "unable to download" in lower or "extractor error" in lower:
         return f"{source} would not hand this one over cleanly. Details are tucked below."
     return "Uoink couldn't finish this one. Details are tucked below."
@@ -4748,6 +4757,20 @@ _CAPTURE_SOURCES = {
         "note": "Captures the post text and the author's thread. For a "
                 "video in the post, use the extension's Uoink button.",
     },
+    "x_article": {
+        "label": "X Article",
+        "endpoint": "/extract/page",
+        "payload_key": "url",
+        # X Articles (long-form) aren't served by the syndication endpoint the
+        # post/thread path uses, and reading them needs a logged-in browser.
+        # We route to the web-page reader as an honest best effort and say so:
+        # X login-walls these, so it usually can't get past the wall. Posts and
+        # threads still capture fully from a /status/ link.
+        "note": "X Articles need a logged-in browser, so Uoink tries the "
+                "web-page reader as a best effort and X often blocks it "
+                "behind its login wall. X posts and threads capture fully "
+                "from a /status/ link.",
+    },
     "reddit_thread": {
         "label": "Reddit thread",
         "endpoint": "/extract/reddit",
@@ -4807,6 +4830,12 @@ def _classify_capture_url(raw: str) -> dict:
     tw = _normalize_twitter_url(text)
     if tw:
         return _result("x_video", tw)
+    if x_extractor.is_x_article_url(text):
+        # Detect the Article shape BEFORE the generic web-page fallback so the
+        # chip is honest ("X Article", login-wall warning) instead of a plain
+        # "Article / web page". Still routes to /extract/page as a best effort.
+        canonical, _platform = _normalize_any_url(text)
+        return _result("x_article", canonical or text.strip())
     if reddit_extractor.is_reddit_thread_url(text):
         return _result("reddit_thread", text.strip())
     if _looks_like_feed_url(text):

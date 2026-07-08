@@ -47,6 +47,43 @@ House pattern of `reddit_extractor.py`: fetch separated from parse/render,
   text-less video post returns `code: "empty"` and points at the regular
   Uoink button.
 
+## X Articles are a different shape (v3.3.3)
+
+X's long-form **Article** format (`x.com/<handle>/article/<id>` and
+`x.com/i/article/<id>`) is NOT a post. The syndication endpoint above only
+serves `/status/` posts, so `x_extractor.extract_x_thread` can't pull an
+Article (`tweet_id_from_url` returns `None` -> `code: "bad_url"`). On
+v3.3.2 an Article URL pasted into the dashboard box fell through
+`_normalize_twitter_url` (no `/status/`) to the generic web-page path, and
+because reading X needs a logged-in browser, a plain fetch got X's
+"JavaScript is not available" login/nojs wall -- which `/extract/page`
+saved as a **junk uoink** (title `None`, body = the wall text).
+
+v3.3.3 makes this honest end to end:
+
+- `x_extractor.is_x_article_url` (regex `_ARTICLE_RE`) detects the Article
+  shape. `_classify_capture_url` checks it right before the generic
+  web-page fallback and returns the `x_article` source: label "X Article",
+  route `/extract/page` (best effort), and an up-front honest note that X
+  login-walls Articles and that posts/threads capture fully from a
+  `/status/` link.
+- `page_extractor._is_x_login_wall(url, result)` recognises X's wall
+  (host is x/twitter **and** the markdown leads with "JavaScript is not
+  available" **and** there is no real `<title>`). `extract_page` turns that
+  into `{ok: false, code: "x_login_wall", error}` instead of returning
+  `ok: true` with the wall as content, so `persist_page_yoink` never lands
+  a junk uoink. The check covers both engines (Crawl4AI and the stdlib
+  fallback). A genuine x.com page that actually renders is untouched.
+- The dashboard (`runUniversalCapture`) shows the `x_login_wall` error copy
+  verbatim rather than routing it through the "retry with cookies" mapping,
+  which doesn't apply to the page path.
+
+Best-effort caveat, stated plainly: on a build without a JS renderer /
+logged-in session (the shipped desktop helper uses the stdlib fetch), the
+Article path will essentially always hit the wall and return the honest
+failure. Full X Article capture would need a new authenticated extractor;
+this ships the honest-error half.
+
 ## Route: `POST /extract/x` (token-gated)
 
 `{url}` -> flag gate -> `x_extractor.extract_x_thread` ->
