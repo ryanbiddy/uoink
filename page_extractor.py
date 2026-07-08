@@ -84,6 +84,139 @@ DEFAULT_ALLOW_SEEDS = ("youtube.com", "youtu.be", "x.com", "twitter.com")
 # Source-type tag persisted on the yoink row.
 SOURCE_TYPE_PAGE = "page"
 
+# ---- Phase 2 source-agnostic taxonomy -------------------------------------
+# The `platform` column stores one clean tag per source network. These are
+# the values the Library's Platform facet filters on, so they stay short and
+# stable (x, not "twitter"; web, not "generic").
+PLATFORM_YOUTUBE = "youtube"
+PLATFORM_X = "x"
+PLATFORM_REDDIT = "reddit"
+PLATFORM_PODCAST = "podcast"
+PLATFORM_WEB = "web"
+KNOWN_PLATFORMS = (PLATFORM_YOUTUBE, PLATFORM_X, PLATFORM_REDDIT,
+                   PLATFORM_PODCAST, PLATFORM_WEB)
+
+# source_type (already stored per capture route) -> platform.
+_SOURCE_TYPE_PLATFORM = {
+    "video": PLATFORM_YOUTUBE,
+    "x_thread": PLATFORM_X,
+    "x_article": PLATFORM_X,
+    "reddit_thread": PLATFORM_REDDIT,
+    "page": PLATFORM_WEB,
+    "episode": PLATFORM_PODCAST,
+}
+
+_YOUTUBE_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"}
+_X_HOSTS = {"x.com", "www.x.com", "twitter.com", "www.twitter.com",
+            "mobile.twitter.com"}
+_REDDIT_HOSTS = {"reddit.com", "www.reddit.com", "old.reddit.com",
+                 "new.reddit.com"}
+
+
+def platform_for(source_type: str | None, url: str = "") -> str:
+    """Map a capture to its platform tag. source_type is authoritative
+    (it's set per route); the URL host is the fallback for rows that have no
+    source_type. A legacy row with neither is treated as a YouTube video,
+    which is what every pre-v3.2 row is."""
+    st = (source_type or "").strip().lower()
+    if st in _SOURCE_TYPE_PLATFORM:
+        return _SOURCE_TYPE_PLATFORM[st]
+    host = ""
+    try:
+        host = (urlparse(url).hostname or "").lower()
+    except Exception:
+        host = ""
+    if host in _YOUTUBE_HOSTS:
+        return PLATFORM_YOUTUBE
+    if host in _X_HOSTS:
+        return PLATFORM_X
+    if host in _REDDIT_HOSTS:
+        return PLATFORM_REDDIT
+    if not st and not host:
+        return PLATFORM_YOUTUBE
+    return PLATFORM_WEB
+
+
+def author_for(source_type: str | None, metadata: dict | None,
+               url: str = "") -> str | None:
+    """Derive the real "who" from a capture's extractor metadata.
+
+    - X (post/article): "Name (@handle)", or "@handle", or the name alone.
+    - Reddit: "r/<subreddit>" (the community is the durable "who"; the OP
+      username is often deleted).
+    - web page: the site host (best signal a generic page has).
+
+    Returns None when nothing usable is present, so the caller can fall back
+    to the hostname."""
+    md = metadata or {}
+    platform = platform_for(source_type, url)
+    if platform in (PLATFORM_YOUTUBE, PLATFORM_PODCAST):
+        # The caller already has the real "who" (the channel / show name); the
+        # host would be the wrong answer here.
+        return None
+    if platform == PLATFORM_X:
+        name = (md.get("author_name") or md.get("author") or "").strip()
+        handle = (md.get("author_handle") or "").strip().lstrip("@")
+        if name and handle:
+            return f"{name} (@{handle})"
+        if handle:
+            return f"@{handle}"
+        if name:
+            return name
+        return None
+    if platform == PLATFORM_REDDIT:
+        sub = (md.get("subreddit") or "").strip()
+        if sub:
+            return f"r/{sub}"
+        author = (md.get("author") or "").strip()
+        if author and author not in ("[unknown]", "[deleted]", ""):
+            return f"u/{author}"
+        return None
+    # Generic web page: the host is the site, which is the honest "who".
+    host = ""
+    try:
+        host = (urlparse(url).hostname or "").lower()
+    except Exception:
+        host = ""
+    return host or None
+
+
+_SLUG_STRIP_RE = re.compile(r"[^a-z0-9]+")
+
+
+def _slugify(value: str, *, max_len: int = 40) -> str:
+    """Lowercase, ASCII-ish, hyphen-joined slug for a readable folder name.
+    Empty / all-punctuation input returns ''."""
+    text = _SLUG_STRIP_RE.sub("-", str(value or "").lower()).strip("-")
+    return text[:max_len].strip("-")
+
+
+def readable_slug(source_type: str | None, metadata: dict | None,
+                  url: str, digest: str) -> str:
+    """A human-legible folder slug for a non-YouTube capture, mirroring the
+    on-disk legibility YouTube captures already have. Deterministic from the
+    handle/subreddit/host + a short stable hash, so re-capturing the same URL
+    lands in the same folder. e.g. 'boardyai-805baf72', 'r-python-1a2b3c4d'."""
+    md = metadata or {}
+    short = (digest or "")[:8] or "00000000"
+    platform = platform_for(source_type, url)
+    base = ""
+    if platform == PLATFORM_X:
+        base = _slugify(md.get("author_handle") or md.get("author_name") or "x")
+    elif platform == PLATFORM_REDDIT:
+        sub = _slugify(md.get("subreddit") or "")
+        base = f"r-{sub}" if sub else "reddit"
+    else:
+        host = ""
+        try:
+            host = (urlparse(url).hostname or "").lower()
+        except Exception:
+            host = ""
+        if host.startswith("www."):
+            host = host[4:]
+        base = _slugify(host) or "page"
+    return f"{base}-{short}" if base else short
+
 # yt-dlp + extension already enforce safety on those URLs; for universal
 # site we add our own scheme + hostname gate so attacker-shaped inputs
 # can't reach urlopen.
@@ -470,7 +603,8 @@ def persist_page_yoink(idx, extract_result: dict, *,
                          data_root: Path | None = None,
                          source_type: str = SOURCE_TYPE_PAGE,
                          subfolder: str = "Pages",
-                         slug_prefix: str = "page") -> str | None:
+                         slug_prefix: str = "page",
+                         topic_classifier=None) -> str | None:
     """Persist a successful extract_page-shaped result as a yoink row.
     Returns the synthetic video_id used (so caller can link to it). When the
     extract result is ok=False, returns None.
@@ -491,13 +625,41 @@ def persist_page_yoink(idx, extract_result: dict, *,
     digest = hashlib.sha1(url.encode("utf-8")).hexdigest()
     video_id = f"{slug_prefix}_{digest[:11]}"
 
+    # Phase 2 taxonomy: stop hard-coding channel=hostname. Derive the real
+    # platform + author from the extractor metadata, and fall back to the host
+    # only when there is no better "who" (a generic web page).
+    platform = platform_for(source_type, url)
+    author = author_for(source_type, metadata, url) or (urlparse(url).hostname or "")
+    # `channel` stays populated for every path that still reads it (search,
+    # the channel picker, performance tier), but now with the real author
+    # instead of "x.com" / "reddit.com".
+    channel = author or (urlparse(url).hostname or "")
+
+    # Classify a topic for non-video sources too, so X / Reddit / web stop
+    # piling into Uncategorized. The caller injects the classifier (server's
+    # _classify_topic) so page_extractor stays standalone. Only runs when the
+    # caller didn't already pass a topic.
+    if topic is None and topic_classifier is not None:
+        try:
+            topic = topic_classifier({
+                "title": title or "",
+                "description": (md or "")[:2000],
+                "channel": author or "",
+            }) or None
+        except Exception as e:  # defensive: never block a save on classify
+            log.warning("persist_page_yoink topic classify failed: %s", e)
+            topic = None
+
+    # Readable slug folder (Phase 2), mirroring YouTube's on-disk legibility.
+    slug = readable_slug(source_type, metadata, url, digest)
+
     # Folder for the corpus + sidecar. If data_root is supplied, drop under
-    # <data_root>/<subfolder>/<digest[:8]>/.
+    # <data_root>/<subfolder>/<readable-slug>/.
     folder = None
     corpus_path = None
     sidecar_path = None
     if data_root is not None:
-        folder = Path(data_root) / subfolder / digest[:8]
+        folder = Path(data_root) / subfolder / slug
         folder.mkdir(parents=True, exist_ok=True)
         corpus_path = folder / f"{slug_prefix}.md"
         sidecar_path = folder / f"{slug_prefix}.json"
@@ -508,6 +670,8 @@ def persist_page_yoink(idx, extract_result: dict, *,
         sidecar_path.write_text(_json.dumps({
             "schema_version": 2,
             "source_type": source_type,
+            "platform": platform,
+            "author": author,
             "url": url, "title": title,
             "extraction_engine": extract_result.get("extraction_engine"),
             "metadata": metadata,
@@ -517,19 +681,130 @@ def persist_page_yoink(idx, extract_result: dict, *,
             "extracted_at": extract_result.get("extracted_at"),
         }, indent=2, ensure_ascii=False), encoding="utf-8")
 
+    import json as _json
+    metadata_json = _json.dumps({
+        **metadata,
+        "url": url,
+        "platform": platform,
+        "author": author,
+        "source_type": source_type,
+    }, ensure_ascii=False)
+
     try:
         idx.upsert_yoink({
             "video_id": video_id,
-            "slug": digest[:11],
-            "channel": urlparse(url).hostname or "",
+            "slug": slug,
+            "channel": channel,
+            "platform": platform,
+            "author": author,
             "title": title[:240] if title else None,
             "topic": topic,
             "yoinked_at": extract_result.get("extracted_at") or _now_iso(),
             "corpus_path": str(corpus_path) if corpus_path else None,
             "sidecar_path": str(sidecar_path) if sidecar_path else None,
+            "metadata_json": metadata_json,
             "source_type": source_type,
         }, content=md[:65000])
     except Exception as e:
         log.warning("persist_page_yoink upsert failed: %s", e)
         return None
     return video_id
+
+
+# ---- Phase 2 backfill: correct existing non-YouTube rows -------------------
+def _looks_like_host(channel: str, url: str) -> bool:
+    """True when `channel` is a bare hostname (the Bug 3 value) rather than a
+    real author. Matches the row's own URL host, a known platform host, or the
+    generic www./domain.tld shape."""
+    c = (channel or "").strip().lower()
+    if not c:
+        return True
+    try:
+        host = (urlparse(url).hostname or "").lower()
+    except Exception:
+        host = ""
+    if c == host and host:
+        return True
+    if c in _X_HOSTS or c in _REDDIT_HOSTS or c in _YOUTUBE_HOSTS:
+        return True
+    # A bare domain with no spaces (example.com, sub.example.co.uk).
+    return bool(re.match(r"^[a-z0-9.-]+\.[a-z]{2,}$", c)) and " " not in c
+
+
+def backfill_platform_author(idx, *, dry_run: bool = False) -> dict:
+    """Second half of the Phase 2 backfill (the SQL migration did platform +
+    YouTube author). Re-reads each non-YouTube row's sidecar to recover the
+    real author X / Reddit / web captured, sets the `author` column, and
+    corrects `channel` where it's still the hostname (the Bug 3 value).
+
+    Idempotent: a row that already has a real author + a non-hostname channel
+    is skipped, so re-running does nothing. Returns before/after counts:
+    {total, scanned, author_from_sidecar, channel_corrected, stayed_hostname,
+     already_ok, missing_sidecar}."""
+    import json as _json
+    rows = idx.rows_for_taxonomy_backfill()
+    stats = {
+        "total": len(rows), "scanned": 0, "author_from_sidecar": 0,
+        "channel_corrected": 0, "stayed_hostname": 0, "already_ok": 0,
+        "missing_sidecar": 0,
+    }
+    for row in rows:
+        platform = row.get("platform") or platform_for(
+            row.get("source_type"), "")
+        if platform == PLATFORM_YOUTUBE:
+            continue  # handled by the SQL migration (author = channel)
+        stats["scanned"] += 1
+        channel = row.get("channel") or ""
+        author = row.get("author") or ""
+        # Read the sidecar for the real author. persist_page_yoink writes a
+        # top-level `author` on new rows; older sidecars only nest it under
+        # `metadata`, so derive from there as a fallback.
+        sidecar_path = row.get("sidecar_path") or ""
+        url = ""
+        sc_author = ""
+        sc_meta: dict = {}
+        source_type = row.get("source_type")
+        if sidecar_path and Path(sidecar_path).exists():
+            try:
+                sc = _json.loads(Path(sidecar_path).read_text(encoding="utf-8"))
+                url = sc.get("url") or ""
+                sc_meta = sc.get("metadata") or {}
+                source_type = sc.get("source_type") or source_type
+                sc_author = (sc.get("author")
+                             or author_for(source_type, sc_meta, url) or "")
+            except (OSError, _json.JSONDecodeError, TypeError):
+                stats["missing_sidecar"] += 1
+        else:
+            stats["missing_sidecar"] += 1
+
+        # The best author we can offer: an existing real author wins, then the
+        # sidecar's, then the current channel (host) as a last resort.
+        new_author = author or sc_author or channel or None
+        # Correct channel only when it's still the bare hostname AND we have a
+        # genuinely better name (a real author that isn't itself the host).
+        new_channel = channel
+        if (sc_author and not _looks_like_host(sc_author, url)
+                and _looks_like_host(channel, url)):
+            new_channel = sc_author
+
+        author_changed = bool(new_author) and new_author != author
+        channel_changed = new_channel != channel
+
+        if author_changed and sc_author and new_author == sc_author:
+            stats["author_from_sidecar"] += 1
+        if channel_changed:
+            stats["channel_corrected"] += 1
+        if not author_changed and not channel_changed:
+            if _looks_like_host(new_channel, url):
+                stats["stayed_hostname"] += 1
+            else:
+                stats["already_ok"] += 1
+            continue
+        if not author_changed and channel_changed and _looks_like_host(new_channel, url):
+            stats["stayed_hostname"] += 1
+
+        if not dry_run:
+            idx.update_taxonomy(
+                row["video_id"], platform=platform,
+                author=new_author, channel=new_channel)
+    return stats

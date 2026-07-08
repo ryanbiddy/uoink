@@ -19,7 +19,9 @@ def require(condition: bool, message: str) -> None:
 def test_controls_have_real_names() -> None:
     for marker in (
         'id="searchInput" type="search" placeholder="search transcripts, titles, comments" aria-label="Search Library"',
-        'id="channelFilter" aria-label="Filter by channel"',
+        'id="platformFilter" aria-label="Filter by platform"',
+        'id="sourceTypeFilter" aria-label="Filter by source type"',
+        'id="channelFilter" aria-label="Filter by author"',
         'id="topicFilter" aria-label="Filter by topic"',
         'id="hookFilter" aria-label="Filter by hook"',
         'id="formatFilter" aria-label="Filter by format"',

@@ -10,7 +10,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
-Categorization Phase 1: authoritative X-Article routing and honest, visible feedback (no data-model or Library changes yet).
+Categorization Phase 2: a source-agnostic data model plus a source-first Library. The data model was YouTube-shaped, so every non-YouTube capture showed its hostname (x.com, reddit.com) as the "who" and there was no way to filter by platform, source type, or author.
+
+### Added
+
+- **Filter your Library by platform, source type, and author.** The filter row now leads with Platform (YouTube / X / Reddit / Web), Source type (video / post / article / thread / page), and Author, then Topic. The old "channel" picker that listed `x.com` and `reddit.com` next to real creators is gone. The video-only filters (hook, format, performance, length) only show up when you're looking at YouTube, so the row stays clean for everything else.
+- **Every uoink shows where it came from.** Each card carries its platform, source type, and the real author (an X post reads "X · post · Boardy (@boardyai)", not "x.com"). A Reddit thread shows "r/<subreddit>"; a YouTube video shows the channel.
+- **New captures from X, Reddit, and the web get readable folders** (`X\boardyai-<id>`, `Reddit\r-python-<id>`) instead of opaque hashes, matching how YouTube captures already land on disk.
+
+### Changed
+
+- **The real author is now stored and searchable for every source.** New `platform` and `author` columns on the yoinks table (migration 0020, additive and idempotent) hold the source network and the real "who". A one-time backfill fills them for existing captures from their sidecars and corrects the old hostname values (`x.com` becomes "Boardy (@boardyai)"), also runnable as `python server.py --backfill-authors`. Topics are now classified for X, Reddit, and web captures too, not only videos.
 
 ### Fixed
 

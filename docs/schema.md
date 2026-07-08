@@ -70,12 +70,15 @@ Primary metadata table for one saved single-video yoink.
 
 | Column | Type | Nullability | Stores |
 |---|---|---|---|
-| `video_id` | TEXT PRIMARY KEY | required | YouTube video ID. Also the join key for FTS, citations, health, and taxonomy. |
+| `video_id` | TEXT PRIMARY KEY | required | YouTube video ID (or a synthetic `x-article_`/`reddit_`/`page_` id for non-video captures). Also the join key for FTS, citations, health, and taxonomy. |
 | `slug` | TEXT UNIQUE | required | Folder slug, usually the saved folder name. |
-| `channel` | TEXT | nullable | Channel/uploader name from the sidecar. |
-| `title` | TEXT | nullable | Video title from the sidecar. |
-| `topic` | TEXT | nullable | Uoink topic folder name. |
-| `hook_type` | TEXT | nullable | Latest Hook Type category when available. |
+| `channel` | TEXT | nullable | The real "who". YouTube uploader, X "Name (@handle)", reddit "r/<sub>", or a site host. Kept equal to `author` for backward compatibility (FTS, performance-tier, channel picker). |
+| `platform` | TEXT | nullable | cat P2 (migration 0020). Source network: `youtube` / `x` / `reddit` / `podcast` / `web`. Indexed + filterable. |
+| `author` | TEXT | nullable | cat P2 (migration 0020). The real author, same value as `channel`. Indexed + filterable. |
+| `source_type` | TEXT | nullable | `video` / `x_thread` / `x_article` / `reddit_thread` / `page` / `episode`. Filterable. |
+| `title` | TEXT | nullable | Video/post/article title from the sidecar. |
+| `topic` | TEXT | nullable | Uoink topic folder name. Classified for every source, not just video. |
+| `hook_type` | TEXT | nullable | Latest Hook Type category when available (YouTube-only). |
 | `yoinked_at` | TEXT | required | Timestamp from the sidecar, or current local timestamp during indexing. |
 | `corpus_path` | TEXT | required | Absolute path to the per-video markdown corpus. |
 | `sidecar_path` | TEXT | required | Absolute path to the per-video JSON sidecar. |

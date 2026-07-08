@@ -31,7 +31,10 @@ def test_empty_facets_get_labeled_disabled_state() -> None:
         ("performance", "Performance"),
         ("length", "Length"),
         ("hook_type", "Hook"),
-        ("channel", "Channel"),
+        # Phase 2 source-first facets replaced the single "channel" facet.
+        ("platform", "Platform"),
+        ("source_type", "Type"),
+        ("author", "Author"),
         ("topic", "Topic"),
     ):
         expected = f'{key}: {{ label: "{label}",'
@@ -51,10 +54,11 @@ def test_fallback_and_populated_paths_stay_usable() -> None:
 
 
 def test_every_library_facet_is_covered() -> None:
-    for key in ("channel", "topic", "hook_type", "format", "performance", "length"):
+    for key in ("platform", "source_type", "author", "topic", "hook_type",
+                "format", "performance", "length"):
         require(f"FACET_EMPTY_STATES.{key}" in DASHBOARD,
                 f"facet {key} does not pass its empty state to syncOptions")
-    print("ok  all six Library facet dropdowns carry an empty state")
+    print("ok  all Library facet dropdowns carry an empty state")
 
 
 def main() -> int:

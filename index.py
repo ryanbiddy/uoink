@@ -83,6 +83,8 @@ _YOINK_COLUMNS = (
     "metadata_json",
     "schema_version",
     "source_type",
+    # Phase 2 source-agnostic taxonomy (migration 0020).
+    "platform", "author",
 )
 
 _JOB_COLUMNS = (
@@ -528,6 +530,37 @@ class Index:
             )
             self._conn.commit()
 
+    # ---- Phase 2 taxonomy backfill (migration 0020) --------------------
+    def rows_for_taxonomy_backfill(self) -> list[dict]:
+        """Every live row's taxonomy-relevant fields, for the sidecar
+        backfill (page_extractor.backfill_platform_author). Includes rows that
+        already look fine; the backfill itself decides what to touch so it can
+        report accurate before/after counts."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT video_id, source_type, platform, channel, author, "
+                "sidecar_path FROM yoinks WHERE deleted_at IS NULL"
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def update_taxonomy(self, video_id: str, *, platform: str | None,
+                        author: str | None, channel: str | None) -> None:
+        """Set platform / author / channel on one row and refresh the FTS
+        `channel` term so a corrected author is searchable. Used only by the
+        Phase 2 backfill; new writes go through upsert_yoink."""
+        with self._lock:
+            self._conn.execute(
+                "UPDATE yoinks SET platform=?, author=?, channel=? "
+                "WHERE video_id=?",
+                (platform, author, channel, video_id),
+            )
+            # Keep FTS in sync so a corrected author name is findable.
+            self._conn.execute(
+                "UPDATE yoinks_fts SET channel=? WHERE video_id=?",
+                (channel, video_id),
+            )
+            self._conn.commit()
+
     def list_recent(self, limit: int = 20) -> list[dict]:
         """Most-recently-yoinked rows, newest first. Excludes soft-deleted
         (deleted_at IS NOT NULL) rows."""
@@ -924,7 +957,12 @@ class Index:
         ordered by count desc then value. Soft-deleted rows are excluded.
         ``date_bounds`` is ``{min, max}`` (yoinked_at) or nulls on an empty
         corpus."""
-        facet_cols = ("channel", "format", "performance_tier",
+        # Phase 2: platform / source_type / author are the source-first facets
+        # (every source maps into them); the video-only facets (format,
+        # performance_tier, length_bucket) are kept but the UI shows them only
+        # when Platform=YouTube. `channel` stays for backward compatibility.
+        facet_cols = ("platform", "source_type", "author", "channel",
+                      "format", "performance_tier",
                       "length_bucket", "topic", "hook_type")
         out: dict = {}
         with self._lock:
@@ -1016,6 +1054,9 @@ class Index:
                                  channel: str | None = None,
                                  topic: str | None = None,
                                  hook_type: str | None = None,
+                                 platform: str | None = None,
+                                 source_type: str | None = None,
+                                 author: str | None = None,
                                  date_from: str | None = None,
                                  date_to: str | None = None,
                                  limit: int = 50,
@@ -1036,6 +1077,15 @@ class Index:
         if channel:
             clauses.append("y.channel = ?")
             params.append(channel)
+        if platform:
+            clauses.append("y.platform = ?")
+            params.append(platform)
+        if source_type:
+            clauses.append("y.source_type = ?")
+            params.append(source_type)
+        if author:
+            clauses.append("y.author = ?")
+            params.append(author)
         if topic:
             clauses.append("y.topic = ?")
             params.append(topic)
