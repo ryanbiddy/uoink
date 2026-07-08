@@ -13,13 +13,15 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const extractPath = join(here, "..", "..", "extension", "lib", "extract.js");
+const libDir = join(here, "..", "..", "extension", "lib");
 
-// extract.js is a classic-script IIFE that attaches globalThis.STC. It only
-// *defines* functions at load (no chrome/fetch calls run), so evaluating it
-// in this Node context is safe and populates globalThis.STC.
-const code = readFileSync(extractPath, "utf8");
-(0, eval)(code); // eslint-disable-line no-eval
+// A1: x-article.js owns the single X-Article URL definition and must load
+// before extract.js so STC.normalizeXArticleUrl can delegate to XArticle --
+// same load order the popup + background use. Both are classic-script IIFEs
+// that only *define* functions at load (no chrome/fetch calls run), so
+// eval'ing them in this Node context is safe and populates the globals.
+(0, eval)(readFileSync(join(libDir, "x-article.js"), "utf8")); // eslint-disable-line no-eval
+(0, eval)(readFileSync(join(libDir, "extract.js"), "utf8")); // eslint-disable-line no-eval
 
 const STC = globalThis.STC;
 if (!STC || typeof STC.classifyCaptureUrl !== "function") {

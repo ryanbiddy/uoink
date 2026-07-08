@@ -19,6 +19,7 @@ helper's `/detect` route**, which is absent from the shipped build.
 | `youtube_video` | `normalizeYouTubeUrl` | `video` | `POST /extract` |
 | `youtube_playlist` | `normalizePlaylistUrl` | `playlist` | `POST /playlist/start` |
 | `x_video` | `normalizeTwitterUrl` | `x_video` | `POST /extract` |
+| `x_article` | `normalizeXArticleUrl` (→ `XArticle`) | `x_article` | in-page DOM parse → `POST /extract/x-article` |
 | `reddit_thread` | `normalizeRedditUrl` | `reddit` | `POST /extract/reddit` |
 | `podcast_feed` | `looksLikeFeedUrl` | `podcast` | `POST /podcasts/feeds` |
 | `web_page` | `normalizeAnyUrl` | `page` | `POST /extract/page` |
@@ -26,6 +27,30 @@ helper's `/detect` route**, which is absent from the shipped build.
 
 Precedence: a `watch?v=…&list=…` URL is a **video** (video is checked before
 playlist), matching the server.
+
+### DOM-aware tab resolution (Categorization Phase 1, A1)
+
+`classifyCaptureUrl` reads the URL only. An X Article reached via its
+announcing `/status/` tweet, a `t.co` redirect, or an unsettled SPA route has a
+URL that lies, and used to fall through to `x_video`/`web_page` → "Uoink this
+page". `detectCurrentSource` now probes the live tab DOM
+(`probeXArticleDom`, `activeTab`+`scripting`, selectors mirroring
+`XArticle.BODY_SELECTORS`) and resolves through
+`STC.resolveTabSource(url, {hasArticleDom})`: **a rendered Article body wins
+over the URL shape**, so the button reliably reads "Uoink this article" on an
+actual article. The single Article URL definition lives in
+`lib/x-article.js` (`XArticle`); `STC.normalizeXArticleUrl` delegates to it, so
+the popup, the background context menu, and the helper classifier can't
+disagree.
+
+### Honest, persistent walled feedback (A2)
+
+When a pasted/fallback article capture hits X's login wall,
+`captureXArticle` shows a **persistent** alert (`#current-source-alert`,
+`showSourceAlert`) — not the 1.8s `#popup-toast` — telling the user X blocked
+the logged-out fetch and to click the in-page "Uoink this article" button, and
+stating that nothing was saved. The alert clears on the next detect pass or via
+its dismiss (×).
 
 ## 2. Popup DOM (`extension/popup.html`)
 

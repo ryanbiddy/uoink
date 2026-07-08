@@ -79,6 +79,28 @@ const uoinkCurrentBtn = document.getElementById("uoink-current-btn");
 const uoinkPodcastBtn = document.getElementById("uoink-podcast-btn");
 const uoinkAllowRetryBtn = document.getElementById("uoink-allow-retry-btn");
 const currentSourceNote = document.getElementById("current-source-note");
+const currentSourceAlert = document.getElementById("current-source-alert");
+const currentSourceAlertText =
+  document.getElementById("current-source-alert-text");
+const currentSourceAlertDismiss =
+  document.getElementById("current-source-alert-dismiss");
+if (currentSourceAlertDismiss) {
+  currentSourceAlertDismiss.addEventListener("click", () => clearSourceAlert());
+}
+// A2: a persistent, honest alert for a walled/failed capture. Unlike showToast
+// (1.8s) this stays until dismissed or the next detect pass, so the user
+// actually sees it and can act.
+function showSourceAlert(message) {
+  if (!currentSourceAlert || !currentSourceAlertText) {
+    showToast(message);
+    return;
+  }
+  currentSourceAlertText.textContent = message;
+  currentSourceAlert.classList.remove("hidden");
+}
+function clearSourceAlert() {
+  if (currentSourceAlert) currentSourceAlert.classList.add("hidden");
+}
 // Source-aware current-tab capture state. currentSource holds the last
 // classifyCaptureUrl result ({source, action, canonical, ...}); the pending
 // vars stash the URL/host for the retry + podcast secondary buttons.
@@ -395,6 +417,45 @@ async function sniffPodcastFeed(tab) {
   }
 }
 
+// A1: probe the live tab DOM for a rendered X Article body. This is what lets
+// the popup recognise an article even when the URL is its announcing /status/
+// tweet, a t.co redirect, or an SPA route the address bar hasn't settled — the
+// URL lies, the DOM doesn't. Selectors mirror XArticle.BODY_SELECTORS (kept in
+// sync there); this runs in the page world via activeTab + scripting, so it
+// can't reference the extension's globals.
+async function probeXArticleDom(tab) {
+  if (!tab || !tab.id) return false;
+  if (!chrome.scripting || !chrome.scripting.executeScript) return false;
+  const host = (() => {
+    try { return new URL(tab.url || "").hostname.toLowerCase(); }
+    catch { return ""; }
+  })();
+  const X_HOSTS = new Set([
+    "x.com", "www.x.com", "mobile.x.com",
+    "twitter.com", "www.twitter.com", "mobile.twitter.com",
+  ]);
+  if (!X_HOSTS.has(host)) return false;
+  try {
+    const results = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => {
+        const sel = [
+          '[data-testid="twitterArticleRichTextComponent"]',
+          '[data-testid="longformRichTextComponent"]',
+          '[data-testid="ArticleBody"]',
+          '[data-testid="articleBody"]',
+          '[data-testid="longform-article"]',
+        ];
+        return sel.some((s) => !!document.querySelector(s));
+      },
+    });
+    const hit = results && results.find((r) => r && r.result);
+    return !!hit;
+  } catch {
+    return false;
+  }
+}
+
 // Classify the active tab client-side and drive the one adaptive primary
 // button (plus the X-text / podcast / allow-retry secondaries). Replaces
 // the YouTube-only preview and its "Open a YouTube video tab" dead end.
@@ -403,6 +464,7 @@ async function detectCurrentSource() {
   // Reset the secondaries; each detect pass re-decides which apply.
   if (uoinkAllowRetryBtn) uoinkAllowRetryBtn.classList.add("hidden");
   if (uoinkPodcastBtn) uoinkPodcastBtn.classList.add("hidden");
+  clearSourceAlert();
   pendingAllowHost = null;
   pendingPodcastFeed = null;
   setSourceNote("");
@@ -410,7 +472,10 @@ async function detectCurrentSource() {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     const tab = tabs && tabs[0];
     const url = (tab && tab.url) || "";
-    const cls = STC.classifyCaptureUrl(url);
+    // A1: let a live-DOM article signal win over URL-shape guessing so an
+    // actual article never silently degrades to "Uoink this page".
+    const hasArticleDom = await probeXArticleDom(tab);
+    const cls = STC.resolveTabSource(url, { hasArticleDom });
     if (!cls || !cls.ok) {
       currentSource = null;
       currentSourcePreview.textContent =
@@ -558,11 +623,22 @@ async function captureXArticle(url) {
     offerAllowRetry(url);
     return;
   }
+  // A2: X login wall (or any failure to serve the article to a pasted link) is
+  // honest and actionable, not a generic failure. Surface it as a PERSISTENT
+  // alert (not a 1.8s toast) that names what happened and what to do, so the
+  // user never reads a walled capture as a silent no-op.
+  if (pageData && pageData.code === "x_login_wall") {
+    showSourceAlert("X blocks logged-out link fetches, so Uoink can't read "
+      + "this article from a pasted link. Click the \"Uoink this article\" "
+      + "button on the page (bottom-right) to save it from your logged-in "
+      + "session. Nothing was saved.");
+    return;
+  }
   if (!pageData || !pageData.ok) {
-    showToast(STC.friendlyError(pageData && pageData.error)
-      || "X didn't serve this article to Uoink. Open the article and use "
-        + "the in-page “Uoink this article” button while you're "
-        + "logged in.");
+    showSourceAlert(STC.friendlyError(pageData && pageData.error)
+      || "X didn't serve this article to Uoink. Open the article and click "
+        + "the in-page \"Uoink this article\" button while you're logged in. "
+        + "Nothing was saved.");
     return;
   }
   await handleCorpusCapture(pageData);

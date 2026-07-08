@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [Unreleased]
+
+Categorization Phase 1: authoritative X-Article routing and honest, visible feedback (no data-model or Library changes yet).
+
+### Fixed
+
+- **Every way you reach an X Article now captures it, instead of some paths saving "Uoink this page."** The right-click menu used to be a static "Uoink this page (article)" that skipped detection and hit the login-walled page fetch; it now detects an X Article, reads it from your logged-in page, and its label reads "Uoink this article" on an article tab. The popup now recognises an article even when you got there via its announcing post, a t.co link, or a still-loading page (it checks the page itself, not just the address bar), so an actual article never quietly falls back to "Uoink this page." Article detection is now a single shared definition, so the label and the capture can't disagree.
+- **A blocked X Article capture tells you what happened and what to do, and stays put.** When X blocks a logged-out link fetch, Uoink now shows a persistent, plain message ("X blocks logged-out link fetches; open the article and click Uoink this article on the page") in the popup and as a sticky notification, instead of a toast that vanishes or a generic "Uoink failed." It never saves an empty or junk uoink. A stale-token error on the page path now refreshes the token and retries so it doesn't dead-end.
+
 ## [3.4.1] - 2026-07-07
 
 Two UX fixes from using v3.4.0 on a real install.

@@ -46,7 +46,9 @@ def test_x_extractor_detects_article_urls():
         "https://x.com/i/article/1789012345678901234",
         "https://twitter.com/paulg/article/1789012345678901234",
         "https://www.x.com/paulg/article/1789012345678901234",
-        "https://mobile.twitter.com/paulg/article/9",
+        # A1: detection is now the single strict x_article_extractor shape
+        # (id >= 5 chars), shared by classify + persist so they can't disagree.
+        "https://mobile.twitter.com/paulg/article/98765",
     ]
     for u in articles:
         _assert(x_extractor.is_x_article_url(u),
