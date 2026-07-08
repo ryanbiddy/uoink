@@ -23,7 +23,7 @@
 
 #define AppName       "Uoink"
 ; build.ps1 rewrites AppVersion from helper/_version.py before compiling.
-#define AppVersion    "3.3.2"
+#define AppVersion    "3.4.0"
 #define AppPublisher  "ReplayRyan"
 #define AppURL        "https://uoink.app"
 
@@ -126,6 +126,7 @@ Source: "staging\taste_scoring.py"; DestDir: "{app}"; Flags: ignoreversion
 ; not enough. Its absence here is why v3.2.6 shipped without it and the helper
 ; crashed on launch with ModuleNotFoundError: No module named 'x_extractor'.
 Source: "staging\x_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\x_article_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\memory_layer.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\podcasts.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\mobile_playlists.py"; DestDir: "{app}"; Flags: ignoreversion

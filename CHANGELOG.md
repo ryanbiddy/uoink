@@ -8,9 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
-## [3.3.3] - Unreleased
+## [3.4.0] - 2026-07-07
 
-Three live fixes from using v3.3.2, plus real X Article capture.
+Real X Article capture, plus three fixes from using v3.3.2 on a real install.
 
 ### Added
 
