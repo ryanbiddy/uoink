@@ -40,6 +40,7 @@ $requiredFiles = @(
     'openapi_bridge.py',
     'reddit_extractor.py',
     'x_extractor.py',
+    'x_article_extractor.py',
     'taste_scoring.py',
     'defaults\style_anchors.json'
 )
