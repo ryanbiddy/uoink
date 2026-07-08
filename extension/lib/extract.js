@@ -90,7 +90,14 @@
     let res = await doFetch(token);
     if (res.status === 403) {
       // Server may have regenerated the token (reinstall) -- refresh once.
+      // A2: this retry is what keeps a STALE token from dead-ending a capture
+      // (the live `rejected POST /extract/page (token mismatch)` 403). Every
+      // authed route -- including /extract/page and /extract/x-article -- goes
+      // through here, so none can bypass the refresh. If /token itself hiccups
+      // and returns nothing, fall back to the last stored token rather than
+      // retrying with no token at all (which would 403 a second time).
       token = await getToken({ refresh: true });
+      if (!token) token = await _readStoredToken();
       res = await doFetch(token);
     }
     return res;
@@ -175,38 +182,26 @@
     return null;
   }
 
-  // V-2c: X ARTICLE (long-form) URL detection. Distinct from a status URL:
-  // articles live at x.com/<handle>/article/<id> or x.com/i/article/<id>.
-  // The canonical form is what the popup shows + the fallback /extract/page
-  // attempt receives. The reliable capture is the content-script DOM parse
-  // (see content-x-article.js); this normaliser only classifies the tab.
-  const _X_ARTICLE_HOSTS = new Set([
-    "x.com", "www.x.com", "twitter.com", "www.twitter.com",
-    "mobile.twitter.com", "mobile.x.com",
-  ]);
-  const _X_HANDLE_RE = /^[A-Za-z0-9_]{1,15}$/;
-  const _X_ARTICLE_ID_RE = /^[A-Za-z0-9]{5,}$/;
-
+  // V-2c / A1: X ARTICLE (long-form) URL detection. Distinct from a status
+  // URL: articles live at x.com/<handle>/article/<id> or x.com/i/article/<id>.
+  //
+  // A1 (authoritative routing): there is exactly ONE JS definition of the
+  // Article URL shape — XArticle.normalizeXArticleUrl in lib/x-article.js.
+  // This delegates to it so the popup classifier, the background context menu,
+  // and the in-page content script can never disagree on what an Article is.
+  // x-article.js is loaded before extract.js everywhere STC classifies an
+  // Article tab (popup.html, background.js importScripts); when it isn't
+  // present (a context that never classifies Articles) this returns null.
+  // Do not reintroduce a local regex copy here.
   function normalizeXArticleUrl(raw) {
-    if (!raw) return null;
-    let u;
-    try {
-      u = new URL(raw.includes("://") ? raw : "https://" + raw);
-    } catch {
-      return null;
-    }
-    if (!_X_ARTICLE_HOSTS.has(u.hostname.toLowerCase())) return null;
-    const parts = u.pathname.replace(/^\/+|\/+$/g, "").split("/");
-    if (parts.length < 3) return null;
-    if (parts[0].toLowerCase() === "i" && parts[1] === "article"
-        && _X_ARTICLE_ID_RE.test(parts[2])) {
-      return `https://x.com/i/article/${parts[2]}`;
-    }
-    if (parts[1] === "article" && _X_HANDLE_RE.test(parts[0])
-        && _X_ARTICLE_ID_RE.test(parts[2])) {
-      return `https://x.com/${parts[0]}/article/${parts[2]}`;
-    }
-    return null;
+    const lib = global.XArticle;
+    return (lib && typeof lib.normalizeXArticleUrl === "function")
+      ? lib.normalizeXArticleUrl(raw)
+      : null;
+  }
+
+  function isXArticleUrl(raw) {
+    return !!normalizeXArticleUrl(raw);
   }
 
   function getInterval() {
@@ -880,6 +875,28 @@
     };
   }
 
+  // A1: resolve what the ACTIVE TAB is, letting a live-DOM signal win over
+  // URL-shape guessing. classifyCaptureUrl alone mislabels an X Article that
+  // was reached via its announcing /status/ tweet, a t.co redirect, or an SPA
+  // route the address bar hasn't settled — all classify as x_video or
+  // web_page and fall to "Uoink this page". When the popup probes the tab and
+  // finds a rendered Article body (opts.hasArticleDom), we route to the
+  // article path regardless of the URL shape, so an actual article never
+  // silently degrades. The canonical URL is the clean /article/ form when the
+  // URL already carries it, else the tab URL (the reliable capture is the
+  // in-page DOM parse, which reads location.href itself; this URL is only the
+  // /extract/page fallback target).
+  function resolveTabSource(rawUrl, opts) {
+    const options = opts || {};
+    const cls = classifyCaptureUrl(rawUrl);
+    if (options.hasArticleDom && cls.source !== "x_article") {
+      const canonical = normalizeXArticleUrl(rawUrl)
+        || (cls && cls.canonical) || (rawUrl || "").trim();
+      return _classifyResult("x_article", canonical);
+    }
+    return cls;
+  }
+
   // ---- Article / web-page capture (P1) ---------------------------------
   async function postExtractPage(url) {
     const res = await _authedFetch("/extract/page", {
@@ -970,11 +987,13 @@
     normalizeYouTubeUrl,
     normalizeTwitterUrl,
     normalizeXArticleUrl,
+    isXArticleUrl,
     normalizeRedditUrl,
     normalizePlaylistUrl,
     looksLikeFeedUrl,
     normalizeAnyUrl,
     classifyCaptureUrl,
+    resolveTabSource,
     CAPTURE_SOURCES,
     getInterval,
     postExtract,

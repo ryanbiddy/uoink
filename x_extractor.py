@@ -28,6 +28,8 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
+import x_article_extractor
+
 SOURCE_TYPE = "x_thread"
 SYNDICATION_URL = "https://cdn.syndication.twimg.com/tweet-result"
 # The endpoint answers this UA reliably; same choice yt-dlp ships.
@@ -38,17 +40,6 @@ _STATUS_RE = re.compile(
     r"^https?://(?:www\.|mobile\.)?(?:x|twitter)\.com/[^/]+/status(?:es)?/(\d+)",
     re.IGNORECASE,
 )
-
-# X's long-form "Article" format lives at /<handle>/article/<id> and the
-# handle-less /i/article/<id>. The syndication endpoint this module speaks
-# only serves posts (/status/), so an Article can't be pulled here; this
-# matcher lets callers detect one and answer honestly instead of failing
-# with the vague "not an X post URL" copy.
-_ARTICLE_RE = re.compile(
-    r"^https?://(?:www\.|mobile\.)?(?:x|twitter)\.com/[^/]+/article(?:/|$)",
-    re.IGNORECASE,
-)
-
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace(
@@ -63,8 +54,13 @@ def is_x_article_url(url: str) -> bool:
     """True for an X long-form Article URL (/<handle>/article/<id> or
     /i/article/<id>). These are NOT posts: the public syndication endpoint
     doesn't serve them, so the caller routes them to a best-effort web-page
-    capture with honest copy rather than the /status/ text path."""
-    return bool(_ARTICLE_RE.match((url or "").strip()))
+    capture with honest copy rather than the /status/ text path.
+
+    A1 (authoritative routing): this delegates to the single canonical
+    definition in x_article_extractor so classify (this module, via the
+    server capture classifier) and persist (x_article_extractor) can never
+    disagree on what an Article is. Do not reintroduce a local regex here."""
+    return x_article_extractor.is_x_article_url(url)
 
 
 def tweet_id_from_url(url: str) -> str | None:

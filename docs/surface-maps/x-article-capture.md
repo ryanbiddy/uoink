@@ -115,6 +115,60 @@ test):
 fixtures are synthetic. Real content only lands in the user's local corpus at
 capture time.
 
+## Categorization Phase 1 — authoritative routing + honest feedback (A1/A2)
+
+Phase 1 closed the gap where an Article was reachable but the entry point
+mislabelled or misrouted it, and where a walled capture read as a silent no-op.
+
+**A1 — one authoritative Article definition; every entry point uses it.**
+
+- **One Python definition.** `x_extractor.is_x_article_url` now delegates to the
+  strict `x_article_extractor.is_x_article_url` (the single canonical shape:
+  `/i/article/<id>` or `/<handle>/article/<id>`, id ≥ 5 chars). The server
+  capture classifier (`_classify_capture_url`) and the persist path can no
+  longer disagree — the old loose copy (matched a no-id `/article` path) is
+  gone.
+- **One JS definition.** `XArticle.normalizeXArticleUrl` in `lib/x-article.js`
+  is the sole owner; `STC.normalizeXArticleUrl`/`isXArticleUrl`
+  (`lib/extract.js`) delegate to it. `x-article.js` loads before `extract.js`
+  everywhere STC classifies an Article tab (`popup.html`, `background.js`
+  `importScripts`).
+- **Context menu (`background.js`).** The former static **"Uoink this page
+  (article)"** that skipped detection and hit `/extract/page` is gone. The menu
+  item's title now flips to **"Uoink this article"** per tab
+  (`updateArticleMenuTitle` on `tabs.onActivated`/`onUpdated`), and on click an
+  X Article routes to `captureXArticleFromTab` — the in-page DOM parse
+  (`uoinkParseXArticle` → `/extract/x-article`), with the best-effort
+  `/extract/page` only as a fallback. Generic pages still take `/extract/page`.
+- **Popup (`popup.js`).** `detectCurrentSource` now probes the live tab DOM
+  (`probeXArticleDom`, via `activeTab`+`scripting`, selectors mirroring
+  `XArticle.BODY_SELECTORS`) and resolves through `STC.resolveTabSource(url,
+  {hasArticleDom})`. A live-DOM article signal **wins over URL-shape guessing**,
+  so an article reached via its announcing `/status/` tweet, a `t.co` redirect,
+  or an unsettled SPA route is still labelled **"Uoink this article"** instead
+  of silently degrading to "Uoink this page".
+
+**A2 — a walled/failed capture is honest and visible.**
+
+- **Popup** surfaces the X login wall (and any failure to serve a pasted link)
+  as a **persistent alert** (`#current-source-alert`, `showSourceAlert`) — not
+  the 1.8s toast — with actionable copy ("click the Uoink this article button
+  on the page") and an explicit "Nothing was saved."
+- **Context menu** uses a persistent notification (`notifyWalledXArticle`,
+  `requireInteraction:true`) with the same honest copy, replacing the generic
+  auto-dismissing "Uoink failed".
+- **Stale-token 403.** `/extract/page` and `/extract/x-article` ride
+  `_authedFetch`'s 403 retry, which refreshes the token (and now falls back to
+  the stored token if `/token` momentarily returns nothing) so a stale token
+  can't cause a second dead end.
+
+Pinned by `tests/test_cat_p1_routing_feedback.py` (detector agreement + variants,
+server classifier, walled-fails-nothing-persisted, context-menu/popup routing +
+persistent feedback, 403 refresh, Voice-DNA dash check) and
+`tests/js/x_article_routing_test.mjs` (`resolveTabSource` + STC→XArticle
+delegation across `/article/`, `/i/article/`, via-status, and t.co-normalized
+variants).
+
 ## Live-vs-mock note
 
 X Articles are login-walled to logged-out fetches, and no headed

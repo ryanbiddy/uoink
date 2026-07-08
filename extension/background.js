@@ -13,7 +13,11 @@
 // Network logic is shared with content.js via lib/extract.js (importScripts;
 // exposes globalThis.STC).
 
-importScripts("lib/extract.js", "lib/ui.js");
+// x-article.js owns the single X-Article URL definition (A1). It loads before
+// extract.js so STC.normalizeXArticleUrl/isXArticleUrl delegate to XArticle,
+// and so the context menu can detect an Article and route it to the in-page
+// DOM parse instead of the login-walled /extract/page fetch.
+importScripts("lib/x-article.js", "lib/extract.js", "lib/ui.js");
 
 const MENU_LINK = "stc-extract-link";
 const MENU_PAGE = "stc-extract-page";
@@ -211,12 +215,14 @@ async function rebuildContextMenus() {
     documentUrlPatterns: ["*://*.reddit.com/r/*/comments/*"],
   });
 
-  // Article / web page. Allowlist-gated server-side; an un-allowed host
-  // returns an honest "not allowed yet" notification (the popup offers a
-  // one-click allow-and-retry; the context menu keeps it simple).
+  // Article / web page. On an X Article this routes to the in-page DOM parse
+  // (see the click handler); on any other page it's the allowlist-gated
+  // /extract/page fetch. The title is updated per-tab by
+  // updateArticleMenuTitle so it reads "Uoink this article" on an X Article
+  // and "Uoink this page" elsewhere (A1: no more static mislabel).
   chrome.contextMenus.create({
     id: MENU_ARTICLE_PAGE,
-    title: "Uoink this page (article)",
+    title: "Uoink this page",
     contexts: ["page"],
     documentUrlPatterns: ["http://*/*", "https://*/*"],
   });
@@ -234,17 +240,59 @@ async function rebuildContextMenus() {
   }
 }
 
+// A1: keep the "Uoink this page / article" context-menu label honest per tab.
+// The single MENU_ARTICLE_PAGE item shows on every http(s) page; its title
+// flips to "Uoink this article" when the tab is an X Article so the label
+// matches what the click will actually do.
+function isXArticleTab(url) {
+  try {
+    return !!(globalThis.XArticle && XArticle.isXArticleUrl(url || ""));
+  } catch { return false; }
+}
+
+async function updateArticleMenuTitle(url) {
+  const title = isXArticleTab(url) ? "Uoink this article" : "Uoink this page";
+  try {
+    await new Promise((resolve) =>
+      chrome.contextMenus.update(MENU_ARTICLE_PAGE, { title }, () => {
+        void chrome.runtime.lastError; // menu may not exist yet; ignore
+        resolve();
+      }));
+  } catch { /* menus unavailable in some contexts */ }
+}
+
+try {
+  chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+    try {
+      const tab = await chrome.tabs.get(tabId);
+      await updateArticleMenuTitle(tab && tab.url);
+    } catch { /* tab gone */ }
+  });
+  chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
+    if (changeInfo.url || (changeInfo.status === "complete" && tab)) {
+      updateArticleMenuTitle(tab && tab.url).catch(() => {});
+    }
+  });
+} catch { /* tabs events unavailable in some contexts */ }
+
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   // Decide raw URL by menu id.
   let raw = null;
   let kind = "extract";
 
-  // Article / web page: route straight to /extract/page (no video-URL
-  // normalization). Reuses the corpus success path via job.usePage.
+  // Article / web page. A1: detect an X Article FIRST and route it to the
+  // in-page DOM parse (the only path that gets past X's login wall) instead
+  // of the login-walled /extract/page fetch. Genuinely generic pages still
+  // take the /extract/page path (reuses the corpus success path via
+  // job.usePage).
   if (info.menuItemId === MENU_ARTICLE_PAGE) {
     const pageUrl = info.pageUrl || (tab && tab.url);
     if (!pageUrl || !/^https?:\/\//i.test(pageUrl)) {
       notify("Invalid URL", "Couldn't read a web page URL from this tab.");
+      return;
+    }
+    if (isXArticleTab(pageUrl) && tab && tab.id) {
+      await captureXArticleFromTab(tab.id, pageUrl);
       return;
     }
     if (!(await serverQueueHasRoom())) {
@@ -779,7 +827,15 @@ async function runExtractJob(job) {
     return;
   }
   if (!data || !data.ok) {
-    notify("Uoink failed", STC.friendlyError(data && data.error));
+    // A2: an X login wall (or a pasted X link X won't serve logged-out) is not
+    // a generic failure — it's honest and actionable. Say what happened and
+    // what to do, and make it persistent so it isn't a toast that vanishes.
+    if (data && data.code === "x_login_wall") {
+      await notifyWalledXArticle();
+      return;
+    }
+    notify("Uoink failed", STC.friendlyError(data && data.error),
+           { requireInteraction: true });
     return;
   }
   if (data.queued) {
@@ -822,6 +878,110 @@ async function runExtractJob(job) {
   // so the in-page YouTube button gets the same first-time CTA.
   const message = await STC.buildUoinkedMessage(data, copied);
   notify("Uoinked ★", message);
+}
+
+// A2: the one honest, persistent "X walled it" message. requireInteraction
+// keeps the Chrome notification on screen until the user dismisses it, so the
+// walled capture is never a silent no-op. Copy is plain (no em/en dashes,
+// Voice DNA) and actionable: open the article and click the in-page button.
+function notifyWalledXArticle() {
+  return notify(
+    "Couldn't capture this X Article",
+    "X blocks logged-out link fetches, so Uoink can't read it from a pasted "
+      + "link. Open the article and click the \"Uoink this article\" button on "
+      + "the page (bottom-right) to save it from your logged-in session. "
+      + "Nothing was saved.",
+    { requireInteraction: true });
+}
+
+// Message a tab and resolve the response (or null if the content script isn't
+// there / errors). Mirrors the popup's messageActiveTab.
+function messageTab(tabId, payload) {
+  return new Promise((resolve) => {
+    try {
+      chrome.tabs.sendMessage(tabId, payload, (resp) => {
+        void chrome.runtime.lastError; // no listener -> lastError; treat as null
+        resolve(resp || null);
+      });
+    } catch { resolve(null); }
+  });
+}
+
+// A1: capture an X Article from the context menu the same way the in-page
+// button and the popup do — parse the rendered Article DOM out of the user's
+// authenticated session first (side-steps X's login wall), and only fall back
+// to the best-effort /extract/page fetch when the in-page parser isn't
+// available. A walled fallback reports honestly (A2) instead of saving junk.
+async function captureXArticleFromTab(tabId, pageUrl) {
+  // 1) PRIMARY — in-page DOM parse via content-x-article.js.
+  const resp = await messageTab(tabId, { type: "uoinkParseXArticle" });
+  const parsed = (resp && resp.ok && resp.article && resp.article.ok)
+    ? resp.article : null;
+  if (parsed) {
+    let data;
+    try {
+      data = await STC.postExtractXArticle(parsed);
+    } catch (e) {
+      console.error("[stc] context-menu x-article capture failed", e);
+      notify("Uoink Helper offline",
+             "Start Uoink from the Start Menu, then try again.",
+             { requireInteraction: true });
+      return;
+    }
+    if (data && data.ok) {
+      const imgs = Number(data.image_count) || 0;
+      const extra = imgs ? ` (${imgs} image${imgs === 1 ? "" : "s"})` : "";
+      notify("Uoinked ★", `Saved the X Article${extra} to your library.`);
+      tryOpenPopup();
+      return;
+    }
+    notify("Uoink failed",
+           STC.friendlyError(data && data.error)
+             || "Read the article but couldn't save it. Try again.",
+           { requireInteraction: true });
+    return;
+  }
+
+  // 2) FALLBACK — best-effort /extract/page. Honest on a login wall (A2).
+  let pageData;
+  try {
+    pageData = await STC.postExtractPage(pageUrl);
+  } catch (e) {
+    console.error("[stc] context-menu x-article page fallback failed", e);
+    notify("Uoink Helper offline",
+           "Start Uoink from the Start Menu, then try again.",
+           { requireInteraction: true });
+    return;
+  }
+  if (pageData && pageData.code === "x_login_wall") {
+    await notifyWalledXArticle();
+    return;
+  }
+  if (pageData && pageData.code === "host_not_allowed") {
+    // X hosts ship in the default allowlist, so this is unlikely here; still,
+    // don't dead-end — point at the reliable in-page path.
+    await notifyWalledXArticle();
+    return;
+  }
+  if (!pageData || !pageData.ok) {
+    notify("Uoink failed",
+           STC.friendlyError(pageData && pageData.error)
+             || "X didn't serve this article to Uoink. Open it and use the "
+               + "in-page \"Uoink this article\" button while logged in.",
+           { requireInteraction: true });
+    return;
+  }
+  // Rare success (a genuinely readable page): copy + open like a normal page.
+  const clipboardText = pageData.corpus_md_paste || pageData.yoink_md;
+  if (clipboardText) {
+    await rememberClipboardBudget(pageData, clipboardText);
+    const copied = await copyToClipboard(clipboardText);
+    const message = await STC.buildUoinkedMessage(pageData, copied);
+    notify("Uoinked ★", message);
+  } else {
+    notify("Uoinked ★", "Saved the article to your library.");
+  }
+  tryOpenPopup();
 }
 
 // Fetches /settings on demand and returns true if the picker is enabled.
