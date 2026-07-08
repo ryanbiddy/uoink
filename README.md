@@ -72,7 +72,7 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 ## Install
 
-1. **Download the installer.** Grab `Uoink-Setup-3.4.1.exe` from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest). Windows 10/11 is available now; the Mac `.dmg` is queued after Windows stabilizes.
+1. **Download the installer.** Grab `Uoink-Setup-3.5.0.exe` from the [latest release](https://github.com/ryanbiddy/uoink/releases/latest). Windows 10/11 is available now; the Mac `.dmg` is queued after Windows stabilizes.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 3. **Load the bundled extension.** On first launch, Uoink opens `chrome://extensions/` and shows the extension folder so you can enable Developer mode, click **Load unpacked**, and select `%LOCALAPPDATA%\Uoink\extension`. (The Chrome Web Store listing is pending; sideload is the current path.)
 

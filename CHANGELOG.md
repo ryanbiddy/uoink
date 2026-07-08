@@ -8,9 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
-## [Unreleased]
+## [3.5.0] - 2026-07-08
 
-Categorization Phase 2: a source-agnostic data model plus a source-first Library. The data model was YouTube-shaped, so every non-YouTube capture showed its hostname (x.com, reddit.com) as the "who" and there was no way to filter by platform, source type, or author.
+A categorization overhaul: X Articles capture from every entry point, and the whole Library is now source-first. The data model was YouTube-shaped, so every non-YouTube capture showed its hostname (x.com, reddit.com) as the "who" and there was no way to filter by platform, source type, or author.
 
 ### Added
 
