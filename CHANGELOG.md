@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [Unreleased]
+
+Two UX fixes from using v3.4.0 on a real install.
+
+### Fixed
+
+- **The extension popup's primary action is always reachable.** The popup content used to scroll as one long page inside Chrome's ~600px cap, so with More options open (or a busy Recent/last-uoink state) the "Uoink this ..." button scrolled off the top and every action needed the awkward popup arrow-scroll. The popup now has a pinned header and a single clean scroll region, with the primary "Uoink this ..." button pinned in view; the secondary panels scroll beneath it.
+- **Thumbnails in the Generate flow are legible.** The source picker's video thumbnails were a cramped 58px, and text sources (X posts, articles) showed a dead grey square. Source thumbnails are now larger and clearer, text sources get an honest "no preview" tile, and the writing screenshot picker uses larger, better-framed tiles so you can actually recognise what you're picking.
+
 ## [3.4.0] - 2026-07-07
 
 Real X Article capture, plus three fixes from using v3.3.2 on a real install.

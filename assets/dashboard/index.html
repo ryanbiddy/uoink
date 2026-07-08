@@ -1486,8 +1486,8 @@
 
     .combo-option {
       display: grid;
-      grid-template-columns: 58px minmax(0, 1fr);
-      gap: 10px;
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 12px;
       width: 100%;
       border: 0;
       border-bottom: 1px solid rgba(255, 244, 236, 0.08);
@@ -1730,8 +1730,8 @@
 
     .source-chip-main {
       display: grid;
-      grid-template-columns: 58px minmax(0, 1fr);
-      gap: 10px;
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 12px;
       align-items: center;
       border: 0;
       padding: 9px;
@@ -1772,12 +1772,13 @@
     }
 
     .combo-thumb {
-      width: 58px;
+      width: 88px;
       aspect-ratio: 16 / 9;
       overflow: hidden;
-      border: 1px solid var(--border);
-      border-radius: 7px;
+      border: 1px solid rgba(255, 244, 236, 0.16);
+      border-radius: 8px;
       background: #241f1b;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
     }
 
     .combo-thumb img {
@@ -1792,7 +1793,24 @@
       color: var(--acid);
       font-family: var(--font-mono);
       font-weight: 900;
+      font-size: 18px;
       text-transform: uppercase;
+    }
+
+    /* Text sources (X posts, articles) carry no thumbnail, so the option
+       renders an empty .combo-thumb. Give it an honest "no preview" glyph
+       instead of a dead grey square. */
+    .combo-thumb:empty {
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #211c18, #2c251f);
+    }
+
+    .combo-thumb:empty::after {
+      content: "\25A4";
+      color: rgba(255, 244, 236, 0.26);
+      font-size: 22px;
+      line-height: 1;
     }
 
     .smart-picker {
@@ -1922,17 +1940,25 @@
       background: rgba(255, 210, 63, 0.07);
     }
 
-    .screenshot-picker,
     .handoff-shot-list {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 10px;
     }
 
+    /* Bigger, self-sizing tiles so a user can actually recognise what
+       they're picking. auto-fill keeps them large at any column width
+       instead of shrinking to 4-across. */
+    .screenshot-picker {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+      gap: 12px;
+    }
+
     .screenshot-choice,
     .handoff-shot {
       overflow: hidden;
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255, 244, 236, 0.16);
       border-radius: var(--control-radius);
       background: #0d0b09;
     }
@@ -1965,6 +1991,7 @@
       aspect-ratio: 16 / 9;
       object-fit: cover;
       background: #241f1b;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.45);
     }
 
     .screenshot-choice label,

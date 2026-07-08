@@ -14,7 +14,7 @@ two mutually exclusive visual states inside `#writingSourceCombo`:
   uoinks, newest first") plus a dropdown (`#writingSourceOptions`,
   `role="listbox"`).
 - **Selected mode**: the input hides and a two-line chip
-  (`#writingSourceChip`) renders in its place: 58px thumbnail, title
+  (`#writingSourceChip`) renders in its place: 88px thumbnail, title
   clamped to 2 lines, channel | topic | duration subtitle, and a separate
   clear button. The full title lives in the chip's `title` tooltip.
 
@@ -79,6 +79,18 @@ all only within that window; revisit then.
   `loadWritingScreenshots()`.
 - Thumbnails render through the shared `data-file-img` loader
   (`GET /file?path=`).
+
+## Thumbnail presentation
+
+The dropdown option (`.combo-option`) and the selected chip
+(`.source-chip-main`) share an 88px 16:9 `.combo-thumb` (bumped from 58px
+so a user can actually recognise the source at a glance). Text sources
+(X posts, articles) have no `thumbnail_path`, so `.combo-thumb` renders
+empty; a `:empty::after` "no preview" glyph fills it instead of a dead
+grey square. The writing screenshot picker (`.screenshot-picker`) sizes
+its tiles with `repeat(auto-fill, minmax(158px, 1fr))` so they stay large
+instead of shrinking to a fixed 4-across grid. Selection logic is
+untouched -- this is presentation only.
 
 ## Tests / proof
 

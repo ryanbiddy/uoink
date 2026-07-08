@@ -25,11 +25,54 @@
     body {
       font-family: var(--font-sans);
       width: 320px;
+      /* Chrome caps popup height at ~600px. Lock the body to a fixed height
+         and give it an internal scroll region so the whole popup no longer
+         scrolls as one long page (the janky arrow-scroll Ryan hit). The
+         header and the primary "Uoink this ..." action stay reachable; the
+         rest scrolls cleanly below. */
+      height: 580px;
       margin: 0;
-      padding: 14px;
+      padding: 0;
       background: var(--ink);
       color: var(--cream);
       font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    /* Pinned header — never scrolls away. */
+    .popup-header {
+      flex: 0 0 auto;
+      padding: 14px 14px 10px;
+      background: var(--ink);
+      border-bottom: 1px solid var(--border);
+    }
+    /* The one scroll container. Everything below the header lives here. */
+    .popup-scroll {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 12px 14px 14px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--rust) var(--ink);
+    }
+    .popup-scroll::-webkit-scrollbar { width: 9px; }
+    .popup-scroll::-webkit-scrollbar-track { background: var(--ink); }
+    .popup-scroll::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 9999px;
+      border: 2px solid var(--ink);
+    }
+    .popup-scroll::-webkit-scrollbar-thumb:hover { background: var(--rust); }
+    /* Single-video primary capture stays pinned to the top of the scroll
+       region so "Uoink this tab" is always one click away, no hunting. */
+    #current-source-panel.sticky-primary {
+      position: sticky;
+      top: 0;
+      z-index: 6;
+      margin-top: 0;
+      box-shadow: 0 6px 12px -6px rgba(0, 0, 0, 0.8);
     }
     h1 {
       display: none;
@@ -1090,7 +1133,7 @@
   </style>
 </head>
 <body>
-  <div style="display:flex;align-items:center;margin-bottom:12px;justify-content:space-between;">
+  <div class="popup-header" style="display:flex;align-items:center;justify-content:space-between;">
     <div style="display:flex;align-items:center;">
       <svg viewBox="0 0 100 100" width="16" height="20" aria-hidden="true" style="display:inline-block;vertical-align:middle;margin-right:6px;">
         <path d="M 0 0 L 32 0 L 32 60 L 68 60 L 68 0 L 100 0 L 100 80 Q 100 100 80 100 L 20 100 Q 0 100 0 80 Z" fill="#C2410C"/>
@@ -1104,6 +1147,8 @@
       <span id="status" style="font-size:10px;color:#888;">Checking...</span>
     </div>
   </div>
+
+  <div class="popup-scroll">
 
   <!-- Helper Offline warning card -->
   <div id="helper-down-card" class="panel hidden" style="border:3px solid var(--rust);background:var(--ink-warm);padding:12px;margin-bottom:12px;">
@@ -1208,7 +1253,7 @@
 
   <!-- Source-aware current-tab capture. One adaptive button that classifies
        the active tab client-side and routes to the right capture path. -->
-  <div class="panel" id="current-source-panel">
+  <div class="panel sticky-primary" id="current-source-panel">
     <div id="current-source-preview" class="url-preview">Checking current tab...</div>
     <button id="uoink-current-btn" class="primary" type="button" disabled style="margin-top:0;">Uoink this tab</button>
     <button id="uoink-podcast-btn" class="secondary hidden" type="button" style="margin-top:6px;">Add this podcast feed</button>
@@ -1457,6 +1502,8 @@
       </div>
     </div>
   </div>
+
+  </div><!-- /.popup-scroll -->
 
   <div id="popup-toast" class="toast"></div>
 
