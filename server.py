@@ -94,6 +94,7 @@ import source_manifest  # noqa: E402  -- v3.2.1 site/dashboard product manifests
 import openapi_bridge  # noqa: E402  -- v3.3 OpenAPI bridge for non-MCP AIs
 import reddit_extractor  # noqa: E402  -- v3.3 Reddit thread capture (.json)
 import x_extractor  # noqa: E402  -- U-15 X text/thread capture (syndication)
+import x_article_extractor  # noqa: E402  -- V-2c X Article (DOM) capture
 
 
 def _extract_page_to_prose(url: str) -> str | None:
@@ -4427,10 +4428,11 @@ def _plain_error_from_text(text: str) -> str:
                           or "unable to download json metadata" in lower):
         # An X link that carries no downloadable video (a text post, or the
         # syndication endpoint 404ing) shouldn't read as a failed "download".
-        # Say what happened and what to do; X Articles need a new extractor.
+        # Say what happened and what to do. Long-form X Articles ARE supported
+        # now via the extension's in-page button (V-2c), so point there.
         return ("X didn't return a capturable video for this link. Capture "
-                "an X post or thread as text instead; X Articles aren't "
-                "supported yet.")
+                "an X post or thread as text instead, and capture a long-form "
+                "X Article with the extension's Uoink this article button.")
     if "yt-dlp" in lower or "unable to download" in lower or "extractor error" in lower:
         return f"{source} would not hand this one over cleanly. Details are tucked below."
     return "Uoink couldn't finish this one. Details are tucked below."
@@ -4761,15 +4763,16 @@ _CAPTURE_SOURCES = {
         "label": "X Article",
         "endpoint": "/extract/page",
         "payload_key": "url",
-        # X Articles (long-form) aren't served by the syndication endpoint the
-        # post/thread path uses, and reading them needs a logged-in browser.
-        # We route to the web-page reader as an honest best effort and say so:
-        # X login-walls these, so it usually can't get past the wall. Posts and
-        # threads still capture fully from a /status/ link.
-        "note": "X Articles need a logged-in browser, so Uoink tries the "
-                "web-page reader as a best effort and X often blocks it "
-                "behind its login wall. X posts and threads capture fully "
-                "from a /status/ link.",
+        # V-2c: an X long-form article. Articles ARE supported now: the reliable
+        # capture is the extension content script reading the authenticated
+        # Article DOM from the user's logged-in page (POST /extract/x-article).
+        # A PASTED url can only be attempted best-effort via /extract/page,
+        # which fails honestly when X login-walls the logged-out fetch. Say so
+        # instead of pretending it always works or that it isn't supported.
+        "note": "Long-form X article. For a reliable capture, open it and use "
+                "the extension's “Uoink this article” button, which reads the "
+                "article from your logged-in page. A pasted link is a "
+                "best-effort web-page fetch and X often login-walls it.",
     },
     "reddit_thread": {
         "label": "Reddit thread",
@@ -4831,11 +4834,16 @@ def _classify_capture_url(raw: str) -> dict:
     if tw:
         return _result("x_video", tw)
     if x_extractor.is_x_article_url(text):
-        # Detect the Article shape BEFORE the generic web-page fallback so the
-        # chip is honest ("X Article", login-wall warning) instead of a plain
-        # "Article / web page". Still routes to /extract/page as a best effort.
-        canonical, _platform = _normalize_any_url(text)
-        return _result("x_article", canonical or text.strip())
+        # V-2c: an X long-form Article. Detect the Article shape BEFORE the
+        # generic web-page fallback so the chip is honest ("X Article", the
+        # login-wall note) instead of a plain "Article / web page". Articles
+        # ARE supported now: the reliable capture is the extension's in-page
+        # "Uoink this article" button; a pasted link still routes here as a
+        # best-effort /extract/page fetch. Canonicalise to the clean
+        # x.com/<handle>/article/<id> form when we can.
+        canonical = (x_article_extractor.canonical_article_url(text)
+                     or _normalize_any_url(text)[0] or text.strip())
+        return _result("x_article", canonical)
     if reddit_extractor.is_reddit_thread_url(text):
         return _result("reddit_thread", text.strip())
     if _looks_like_feed_url(text):
@@ -10490,6 +10498,14 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send_json(403, result)
             return self._send_json(400, result)
 
+        # V-2c fallback honesty: a pasted X ARTICLE URL routes here (X articles
+        # aren't a distinct capture route server-side). A logged-out fetch of
+        # an X article is almost always login-walled, but that is handled once,
+        # upstream: page_extractor.extract_page detects X's login wall and
+        # returns {ok: False, code: "x_login_wall"} before we reach this point,
+        # so nothing walled ever persists. The reliable path is still the
+        # extension content script reading the authenticated DOM.
+
         # Auto-persist as a yoink row -- universal site captures land in
         # the same Library as videos, distinguished by source_type. Corpus
         # goes under the configured output root (DESKTOP_ROOT), the same place
@@ -11179,6 +11195,46 @@ class Handler(BaseHTTPRequestHandler):
             "metadata": result.get("metadata", {}),
         })
 
+    def _handle_extract_x_article(self, body: dict):
+        """POST /extract/x-article {url, title, author, markdown, images} --
+        persist an X ARTICLE that the extension already parsed out of the
+        user's authenticated page DOM (content-x-article.js). The server does
+        NOT fetch X: the reliable capture happens in the page, side-stepping
+        the login wall. Lands as a yoink with source_type='x_article' under
+        the configured output root (DESKTOP_ROOT), the same place every other
+        page-shaped capture writes. Token gate cleared by do_POST."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                         "error": "json object required"})
+        result = x_article_extractor.build_extract_result(body)
+        if not result.get("ok"):
+            log.info("POST /extract/x-article -> %s", result.get("code"))
+            return self._send_json(200, {
+                "ok": False, "error": result.get("error"),
+                "code": result.get("code")})
+        try:
+            video_id = page_extractor.persist_page_yoink(
+                _get_index(), result, data_root=DESKTOP_ROOT,
+                source_type=x_article_extractor.SOURCE_TYPE,
+                subfolder="X", slug_prefix="x-article")
+        except Exception:
+            log.exception("/extract/x-article persist failed")
+            return self._send_json(500, {
+                "ok": False,
+                "error": "Read the article but couldn't save it locally."})
+        if not video_id:
+            return self._send_json(500, {
+                "ok": False, "error": "Couldn't save the X article."})
+        log.info("POST /extract/x-article -> ok (%s, %d images)",
+                 video_id, result.get("image_count", 0))
+        return self._send_json(200, {
+            "ok": True,
+            "video_id": video_id,
+            "title": result["title"],
+            "image_count": result.get("image_count", 0),
+            "metadata": result.get("metadata", {}),
+        })
+
     def _handle_extract_reddit(self, body: dict):
         """POST /extract/reddit {url, depth_limit?, score_threshold?} --
         capture a Reddit thread via its public .json as a yoink with
@@ -11628,6 +11684,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(200 if result.get("ok") else 400, result)
         if bare == "/extract/x":
             return self._handle_extract_x(body)
+        if bare == "/extract/x-article":
+            return self._handle_extract_x_article(body)
         if bare.startswith("/tools/"):
             return self._handle_tools_call_http(bare, body)
         if bare == "/index/backfill-cancel":

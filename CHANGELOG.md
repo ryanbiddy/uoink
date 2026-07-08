@@ -10,12 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [3.3.3] - Unreleased
 
-Three fixes from using v3.3.2 live.
+Three live fixes from using v3.3.2, plus real X Article capture.
+
+### Added
+
+- **Capture X (Twitter) Articles.** Open a long-form X Article and click the extension's **Uoink this article** button: the content script reads the rendered Article from your logged-in page and saves it as a proper uoink (`source_type: x_article`) under your output folder, sidestepping X's login wall the same way the Reddit capture does. A pasted Article link still works as a best-effort web-page fetch and reports honestly when X login-walls the logged-out request.
 
 ### Fixed
 
-- **X Articles fail honestly instead of saving junk.** Pasting an X *Article* link (X's long-form format, `x.com/<handle>/article/...`) used to quietly save X's "JavaScript is not available" login wall as an empty, untitled uoink. Uoink now recognises an X Article, tells you up front that X login-walls these and that posts and threads capture fully from a `/status/` link, and if it does hit the wall it says so plainly rather than pretending it captured something. (Full X Article capture would need a logged-in browser; this ships the honest handling.)
-- **Clearer Activity copy when an X link has no video.** An X post with no downloadable video no longer shows a confusing failed "download". Activity now says X returned no capturable video and points you at capturing the post or thread as text.
+- **X Articles no longer save junk, and now capture for real.** Pasting an X *Article* link (X's long-form format, `x.com/<handle>/article/...`) used to quietly save X's "JavaScript is not available" login wall as an empty, untitled uoink. Uoink now recognises an X Article, captures it properly via the extension's in-page button, and for a pasted link says plainly when X login-walls the fetch rather than pretending it captured something.
+- **Clearer Activity copy when an X link has no video.** An X post with no downloadable video no longer shows a confusing failed "download". Activity now says X returned no capturable video and points you at capturing the post or thread as text (and a long-form Article at the extension's article button).
 - **Every button on the uoink screen is reachable.** The action buttons (Open folder, transcript, Re-capture, Re-transcribe, Evidence, Write from this) used to crowd into the top-right corner and get cut off on a scaled-up display. They now sit in a full-width row that wraps cleanly, so all of them are reachable at the standard window size and smaller.
 
 ## [3.3.2] - 2026-07-07

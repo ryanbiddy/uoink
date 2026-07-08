@@ -9,8 +9,9 @@ Red on unpatched main:
   wall as a junk uoink (title=None) instead of failing honestly.
 - Bug 2: server._plain_error_from_text turns an X 404 (no video in the post)
   into "X would not hand this one over cleanly" with the "Single-video"
-  download framing -- no honest guidance that a post/thread is text and X
-  Articles aren't supported.
+  download framing -- no honest guidance that a post/thread is text. Reconciled
+  with V-2c: the honest copy now also points long-form X Articles at the
+  extension's "Uoink this article" button (Articles ARE supported).
 - Bug 3: the uoink detail header (#tab-yoink .page-head) has no rule making
   the 6-button action toolbar a full-width wrapping row, so the buttons wrap
   into a squeezed right column and get cut off on a DPI-scaled window.
@@ -169,8 +170,14 @@ def test_x_no_video_error_copy_is_honest_not_a_download():
             f"copy should name X: {msg!r}")
     _assert("post" in low or "thread" in low,
             f"copy should point at post/thread text capture: {msg!r}")
+    # Reconciled with V-2c: X Articles ARE supported now (extension button), so
+    # the copy must name Articles and point at the button, not a dead end.
     _assert("article" in low,
-            f"copy should say X Articles aren't supported: {msg!r}")
+            f"copy should name X Articles specifically: {msg!r}")
+    _assert("aren't supported" not in low and "not supported" not in low,
+            f"copy must not claim Articles are unsupported: {msg!r}")
+    _assert("uoink this article" in low,
+            f"copy should point at the extension's article button: {msg!r}")
     # The old generic copy is misleading here -- it must not be what we return.
     _assert("would not hand this one over cleanly" not in low,
             f"must not fall back to the vague yt-dlp copy: {msg!r}")
@@ -184,8 +191,12 @@ def test_dashboard_mirrors_honest_x_no_video_copy():
     # keyed on the syndication 404 signature.
     _assert("not all metadata or media" in DASHBOARD.lower(),
             "dashboard needs the X syndication 404 signal")
-    _assert("X Articles aren't supported yet" in DASHBOARD,
-            "dashboard needs the honest X no-video message")
+    # Reconciled with V-2c: Articles are supported via the extension button, so
+    # the dashboard's no-video copy points there instead of the old dead end.
+    _assert("Uoink this article button" in DASHBOARD,
+            "dashboard no-video copy must point at the article button")
+    _assert("X Articles aren't supported yet" not in DASHBOARD,
+            "the now-false 'not supported yet' dead end must be gone")
     print("ok  dashboard mirrors the honest X no-video copy")
 
 

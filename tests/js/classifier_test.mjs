@@ -72,6 +72,20 @@ const cases = [
     canonical: "https://x.com/jack/status/1234567890123456789",
   },
   {
+    name: "X article (long-form)",
+    url: "https://x.com/jack/article/1900000000001",
+    source: "x_article",
+    endpoint: "/extract/x-article",
+    action: "x_article",
+    canonical: "https://x.com/jack/article/1900000000001",
+  },
+  {
+    name: "X /i/article normalizes",
+    url: "https://twitter.com/i/article/1900000000002?s=20",
+    source: "x_article",
+    canonical: "https://x.com/i/article/1900000000002",
+  },
+  {
     name: "Podcast RSS feed URL",
     url: "https://feeds.megaphone.fm/vergecast",
     source: "podcast_feed",

@@ -350,6 +350,7 @@ const SOURCE_BUTTON_LABELS = {
   youtube_video: "Uoink this video",
   youtube_playlist: "Uoink this playlist",
   x_video: "Uoink this post",
+  x_article: "Uoink this article",
   reddit_thread: "Uoink this thread",
   podcast_feed: "Uoink this podcast",
   web_page: "Uoink this page",
@@ -501,6 +502,70 @@ async function captureXPost(url, interval) {
     showToast(`Saved ${posts} to your library.`);
   }
   loadRecentUoinks();
+}
+
+// V-2c: capture an X ARTICLE (long-form). PRIMARY path asks the in-page
+// content script (content-x-article.js) to parse the rendered Article out of
+// the user's authenticated DOM, then POSTs the parsed {url,title,author,
+// markdown,images} to /extract/x-article. FALLBACK: if the content script
+// isn't present (SPA nav / not injected) or the parse comes back thin, try
+// the best-effort /extract/page path — which fails honestly when X
+// login-walls a logged-out fetch instead of saving junk.
+function messageActiveTab(tabId, payload) {
+  return new Promise((resolve) => {
+    try {
+      chrome.tabs.sendMessage(tabId, payload, (resp) => {
+        if (chrome.runtime.lastError) return resolve(null);
+        resolve(resp || null);
+      });
+    } catch { resolve(null); }
+  });
+}
+
+async function captureXArticle(url) {
+  let tab = null;
+  try {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    tab = tabs && tabs[0];
+  } catch { tab = null; }
+
+  // 1) PRIMARY — content-script DOM parse.
+  let parsed = null;
+  if (tab && tab.id) {
+    const resp = await messageActiveTab(tab.id, { type: "uoinkParseXArticle" });
+    if (resp && resp.ok && resp.article && resp.article.ok) {
+      parsed = resp.article;
+    }
+  }
+  if (parsed) {
+    const data = await STC.postExtractXArticle(parsed);
+    if (data && data.ok) {
+      const imgs = Number(data.image_count
+        || (parsed.images && parsed.images.length)) || 0;
+      const extra = imgs ? ` (${imgs} image${imgs === 1 ? "" : "s"})` : "";
+      showToast(`Saved the article${extra} to your library.`);
+      loadRecentUoinks();
+      return;
+    }
+    showToast(STC.friendlyError(data && data.error)
+      || "Read the article but couldn't save it. Try again.");
+    return;
+  }
+
+  // 2) FALLBACK — best-effort /extract/page. Honest failure on a login wall.
+  const pageData = await STC.postExtractPage(url);
+  if (pageData && pageData.code === "host_not_allowed") {
+    offerAllowRetry(url);
+    return;
+  }
+  if (!pageData || !pageData.ok) {
+    showToast(STC.friendlyError(pageData && pageData.error)
+      || "X didn't serve this article to Uoink. Open the article and use "
+        + "the in-page “Uoink this article” button while you're "
+        + "logged in.");
+    return;
+  }
+  await handleCorpusCapture(pageData);
 }
 
 // ---- Interval setting -----------------------------------------------------
@@ -1568,6 +1633,11 @@ async function runPopupUoinkCurrent() {
     // video-only. captureXPost owns the combined flow + honest states.
     if (src.action === "x_video") {
       await captureXPost(src.canonical, interval);
+      return;
+    }
+    // X article: content-script DOM parse first, /extract/page as fallback.
+    if (src.action === "x_article") {
+      await captureXArticle(src.canonical);
       return;
     }
     if (src.action === "reddit") {
