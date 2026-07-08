@@ -34,7 +34,7 @@ jobs:
             --env browser,worker,webextensions,es2022 \
             --rule 'no-undef: error' \
             --rule 'no-unused-vars: off' \
-            --global STC --global YoinkUI --global UoinkUI \
+            --global STC --global YoinkUI --global UoinkUI --global XArticle \
             $(find extension -name '*.js' -print)
 
       - name: Validate JSON files
