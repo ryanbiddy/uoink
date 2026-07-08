@@ -53,6 +53,30 @@ returning users too:
   `popup.js`) so it tracks the real build instead of a hardcoded string that
   drifts — the v3.3.1 capture test caught it stuck at "v2.1".
 
+## 2a. Popup layout shell — pinned header + primary, one scroll region
+
+Chrome caps a popup at ~600px and, before this, the whole `body` scrolled
+as one long page: with `#more-options` open (or a populated Recent /
+active-uoink / resurface state) the primary "Uoink this ..." button scrolled
+off the top and every action needed the janky Chrome popup arrow-scroll.
+
+The shell now fixes that:
+
+- `body` is a fixed-height (`580px`) flex column with `overflow: hidden`, so
+  the popup no longer grows past the cap or scrolls as a whole.
+- `.popup-header` (logo + status dot) is `flex: 0 0 auto` and stays pinned.
+- `.popup-scroll` is the single `overflow-y: auto` region holding every
+  banner, mode panel, and the footer. It carries the only scrollbar.
+- `#current-source-panel.sticky-primary` is `position: sticky; top: 0`
+  inside `.popup-scroll`, so in single-video mode the adaptive
+  "Uoink this ..." button is always visible while the secondary panels
+  (Send to, prompts, Recent, More options) scroll cleanly beneath it.
+
+Fixed height is a deliberate trade: short states (helper-offline, a picker
+with few shots) show some empty space below the footer, in exchange for a
+stable window and a primary action that never hides. Picker and playlist
+modes swap their own content into the same scroll region.
+
 ## 3. Article capture + one-click allowlist (P1)
 
 `page` action → `STC.postExtractPage(url)`.
