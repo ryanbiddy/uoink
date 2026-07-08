@@ -303,6 +303,23 @@
       margin-bottom: 18px;
     }
 
+    /* Uoink detail header (Bug fix): the six action buttons form a full-width
+       wrapping toolbar under the heading, so every action stays reachable at
+       the shipped 1280x800 window and on DPI-scaled windows. Before this, the
+       toolbar was squeezed into a narrow right column that wrapped awkwardly
+       and could clip off the edge with no way to scroll to it. */
+    #tab-yoink .page-head {
+      flex-wrap: wrap;
+    }
+    #tab-yoink .page-head > div:first-child {
+      flex: 1 1 320px;
+      min-width: 0;
+    }
+    .yoink-actions {
+      flex: 1 1 100%;
+      justify-content: flex-start;
+    }
+
     .eyebrow {
       color: var(--rust-bright, #F97316);
       font-family: var(--font-mono);
@@ -3766,7 +3783,7 @@
               <h1 id="yoinkHeading">Pick a uoink <em>to inspect.</em></h1>
               <p class="lede" id="yoinkSubhead">Podcast episodes, interviews, and regular videos share one saved-source view.</p>
             </div>
-              <div class="inline-row">
+              <div class="inline-row yoink-actions">
                 <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
                 <button class="button ghost" type="button" id="yoinkOpenMarkdown">Open transcript file</button>
                 <button class="button ghost" type="button" id="yoinkRetryCapture">Re-capture source</button>
@@ -4992,6 +5009,10 @@
       if (haystack.includes("can't find yt-dlp") || haystack.includes("can't find ffmpeg") || haystack.includes("no such file")) {
         return "Uoink can't find a local media tool. Details are tucked below.";
       }
+      if (source === "X" && (haystack.includes("http error 404") || haystack.includes("not all metadata or media") || haystack.includes("unable to download json metadata"))) {
+        // An X link with no downloadable video isn't a failed "download".
+        return "X didn't return a capturable video for this link. Capture an X post or thread as text; X Articles aren't supported yet.";
+      }
       if (haystack.includes("yt-dlp") || haystack.includes("unable to download") || haystack.includes("extractor error")) {
         return `${source} wouldn't hand this one over cleanly. Details are tucked below.`;
       }
@@ -6088,6 +6109,10 @@
       } catch (err) {
         if (err && err.data && err.data.code === "host_not_allowed") {
           showToast("That site isn't on your allowed pages list yet. Add it in Settings, then try again.");
+        } else if (err && err.data && err.data.code === "x_login_wall") {
+          // Honest copy straight from the helper: X login-walls Articles and
+          // pages. Don't run it through the "retry with cookies" mapping.
+          showToast(err.data.error || "X login-walls this one. Paste a /status/ link to capture X posts and threads.");
         } else {
           showToast(translateMachineMessage(err.message, { url }));
         }

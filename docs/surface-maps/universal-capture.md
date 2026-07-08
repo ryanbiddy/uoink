@@ -20,7 +20,8 @@ drift from what the capture routes actually accept:
 |---|---|---|---|---|
 | YouTube video | `_normalize_youtube_url` | `youtube_video` | `/extract` | `url` |
 | YouTube playlist | `_normalize_playlist_url` | `youtube_playlist` | `/playlist/start` | `url` |
-| X video | `_normalize_twitter_url` | `x_video` | `/extract` | `url` |
+| X post/thread | `_normalize_twitter_url` | `x_video` | `/extract/x` | `url` |
+| X Article | `x_extractor.is_x_article_url` | `x_article` | `/extract/page` | `url` |
 | Reddit thread | `reddit_extractor.is_reddit_thread_url` | `reddit_thread` | `/extract/reddit` | `url` |
 | Podcast feed | `_looks_like_feed_url` (shape heuristic) | `podcast_feed` | `/podcasts/feeds` | `feed_url` |
 | Web page | `_normalize_any_url` | `web_page` | `/extract/page` | `url` |
@@ -62,6 +63,19 @@ The returned dict is what both `/detect` and the dashboard render:
   feature: the dashboard box and the extension now agree on what an X link
   does. (`/extract/x` still answers `code: "disabled"` when the user turns
   `x_text_capture_enabled` off, and `authFetch` surfaces that honestly.)
+- **X Article** (X's long-form `/**/article/**` format, detected by
+  `x_extractor.is_x_article_url`) is its own `x_article` source, checked
+  right before the generic web-page fallback so the chip reads "X Article",
+  not a plain "Article / web page". Articles aren't served by the
+  syndication endpoint the post/thread path uses and need a logged-in
+  browser, so the route is a best-effort `/extract/page`. The note is honest
+  up front: "X Articles need a logged-in browser, so Uoink tries the
+  web-page reader as a best effort and X often blocks it behind its login
+  wall. X posts and threads capture fully from a /status/ link." When X's
+  login/nojs wall is what comes back, `page_extractor` returns
+  `code: "x_login_wall"` (see `x-text-capture.md`) instead of persisting the
+  wall as a junk uoink, and the dashboard shows that honest copy verbatim
+  rather than a misleading "retry with cookies".
 - **Unsupported** answers `ok: false` with the plain label "Not a supported
   source yet" and a note that lists what does work. It is a valid answer,
   not an error: the button stays disabled instead of failing weird.

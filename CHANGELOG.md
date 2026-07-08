@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [3.3.3] - Unreleased
+
+Three fixes from using v3.3.2 live.
+
+### Fixed
+
+- **X Articles fail honestly instead of saving junk.** Pasting an X *Article* link (X's long-form format, `x.com/<handle>/article/...`) used to quietly save X's "JavaScript is not available" login wall as an empty, untitled uoink. Uoink now recognises an X Article, tells you up front that X login-walls these and that posts and threads capture fully from a `/status/` link, and if it does hit the wall it says so plainly rather than pretending it captured something. (Full X Article capture would need a logged-in browser; this ships the honest handling.)
+- **Clearer Activity copy when an X link has no video.** An X post with no downloadable video no longer shows a confusing failed "download". Activity now says X returned no capturable video and points you at capturing the post or thread as text.
+- **Every button on the uoink screen is reachable.** The action buttons (Open folder, transcript, Re-capture, Re-transcribe, Evidence, Write from this) used to crowd into the top-right corner and get cut off on a scaled-up display. They now sit in a full-width row that wraps cleanly, so all of them are reachable at the standard window size and smaller.
+
 ## [3.3.2] - 2026-07-07
 
 Tool fixes from testing v3.3.1 on a real install.
