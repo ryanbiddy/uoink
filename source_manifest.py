@@ -39,6 +39,24 @@ _SOURCES: list[dict] = [
         "best_for": "Citing a clip in a credited thread.",
     },
     {
+        "slug": "tiktok", "name": "TikTok", "category": "video", "status": SHIPPED,
+        "capture": "Paste a TikTok link, or open one and click the rust U.",
+        "lands": "The clip, its caption, the creator, and a transcript when TikTok exposes captions.",
+        "best_for": "Saving a short you want to study or write from.",
+    },
+    {
+        "slug": "instagram-reels", "name": "Instagram Reels", "category": "video", "status": SHIPPED,
+        "capture": "Paste a Reel or post link.",
+        "lands": "The clip, its caption, the creator, and a transcript when captions exist.",
+        "best_for": "Keeping a Reel next to the other shorts you studied.",
+    },
+    {
+        "slug": "youtube-shorts", "name": "YouTube Shorts", "category": "video", "status": SHIPPED,
+        "capture": "Paste a Shorts link, or click the rust U on the Short.",
+        "lands": "The same as a YouTube video, tagged as a short so it filters with the others.",
+        "best_for": "Treating a Short as a first-class source, not a second-class video.",
+    },
+    {
         "slug": "x-article", "name": "X article", "category": "text", "status": SHIPPED,
         "capture": "Open an X long-form article and click “Uoink this article”.",
         "lands": "Title, author, and the article body as clean markdown.",

@@ -180,11 +180,13 @@ _FACET_LABELS = {
     "platform": {
         "youtube": "YouTube", "x": "X", "reddit": "Reddit",
         "podcast": "Podcast", "web": "Web", "note": "Note",
+        "tiktok": "TikTok", "instagram": "Instagram",
         # legacy metadata_json tags a stray row might still carry.
         "twitter": "X", "generic": "Web",
     },
     "source_type": {
-        "video": "Video", "x_thread": "X post", "x_article": "X article",
+        "video": "Video", "short_video": "Short video",
+        "x_thread": "X post", "x_article": "X article",
         "reddit_thread": "Reddit thread", "page": "Web page",
         "episode": "Podcast episode", "note": "Note",
     },
@@ -3813,6 +3815,7 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     *, open_explorer: bool = True,
                     metadata: dict | None = None,
                     topic: str | None = None,
+                    source_type: str | None = None,
                     generate_paste: bool = True,
                     long_video_mode: str = LONG_VIDEO_MODE_FULL,
                     cancel_event: threading.Event | None = None,
@@ -4177,6 +4180,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             # 'youtube' so existing rows that pre-date this field render
             # as YouTube without a migration.
             "platform": _detect_platform_from_url(url),
+            # source_type is None for a regular YouTube/X video (the index
+            # normalizes that to 'video'); 'short_video' for a TikTok /
+            # Instagram Reel / YouTube Short, so it filters as its own facet
+            # without disturbing existing long-form video rows.
+            "source_type": source_type,
             "title": title,
             "topic": topic,
             "yoinked_at": _now_iso(),
@@ -4188,7 +4196,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "long_video_mode": effective_long_video_mode,
             "long_video_chunks": long_video_chunks,
             "processed_media_seconds": processed_media_seconds,
-            "channel": metadata.get("channel") or metadata.get("uploader"),
+            # TikTok/Instagram expose the creator as uploader/creator rather
+            # than channel, so fall back through all three. This is the "who"
+            # the taxonomy uses as author for a short video.
+            "channel": (metadata.get("channel") or metadata.get("uploader")
+                        or metadata.get("creator")),
             "channel_url": metadata.get("channel_url") or metadata.get("uploader_url"),
             "upload_date": metadata.get("upload_date"),
             "view_count": metadata.get("view_count"),
@@ -4456,6 +4468,10 @@ def _source_name_from_error(text: str) -> str:
         return "YouTube"
     if "x.com" in lower or "twitter" in lower:
         return "X"
+    if "tiktok" in lower:
+        return "TikTok"
+    if "instagram" in lower:
+        return "Instagram"
     if "vimeo" in lower:
         return "Vimeo"
     return "The source"
@@ -4524,6 +4540,13 @@ _YOUTUBE_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"}
 # x.com switch. mobile.twitter.com kept for old shares.
 _TWITTER_HOSTS = {"twitter.com", "www.twitter.com", "mobile.twitter.com",
                    "x.com", "www.x.com"}
+# Short-form video (context-layer item 2). yt-dlp already supports all three,
+# so we reuse the existing download/transcript/thumbnail pipeline; these host
+# sets just gate the URLs (same posture as YouTube/X) and tag the platform.
+# vm./vt. are TikTok's short-link redirect hosts (yt-dlp follows them).
+_TIKTOK_HOSTS = {"tiktok.com", "www.tiktok.com", "m.tiktok.com",
+                  "vm.tiktok.com", "vt.tiktok.com"}
+_INSTAGRAM_HOSTS = {"instagram.com", "www.instagram.com", "m.instagram.com"}
 # Twitter status id is a 15-19 digit snowflake. Strict so we can't accept
 # attacker-shaped paths like /status/junk.
 _TWITTER_STATUS_RE = re.compile(r"^\d{15,19}$")
@@ -4535,10 +4558,21 @@ _TWITTER_HANDLE_RE = re.compile(r"^[A-Za-z0-9_]{1,15}$")
 # compat with existing rows that pre-date this field.
 PLATFORM_YOUTUBE = "youtube"
 PLATFORM_TWITTER = "twitter"
+# Short-form video platforms (context-layer item 2). A TikTok / Instagram Reel
+# gets its own platform tag; a YouTube Short stays PLATFORM_YOUTUBE and is
+# distinguished by source_type='short_video'.
+PLATFORM_TIKTOK = "tiktok"
+PLATFORM_INSTAGRAM = "instagram"
 # v3.1 universal extract: any URL yt-dlp supports that isn't a known
 # host gets the generic platform tag. Dashboard renders a neutral chip.
 PLATFORM_GENERIC = "generic"
-_KNOWN_PLATFORMS = (PLATFORM_YOUTUBE, PLATFORM_TWITTER, PLATFORM_GENERIC)
+_KNOWN_PLATFORMS = (PLATFORM_YOUTUBE, PLATFORM_TWITTER, PLATFORM_TIKTOK,
+                    PLATFORM_INSTAGRAM, PLATFORM_GENERIC)
+
+# The source_type tag for a short-form video (TikTok / Instagram Reel /
+# YouTube Short). A distinct type (not the existing 'video') so YouTube
+# long-form video rows are untouched and shorts filter as their own facet.
+SOURCE_TYPE_SHORT_VIDEO = "short_video"
 
 # v3.1: per-host platform hint table for the (small) set of sites the
 # dashboard renders with a custom chip. Anything not here is 'generic'
@@ -4638,6 +4672,102 @@ def _normalize_twitter_url(raw: str) -> str | None:
     return None
 
 
+# Instagram short-form paths: /reel/<code>, /reels/<code>, /p/<code>, each
+# optionally prefixed by the author handle (/<user>/reel/<code>). We only
+# claim these three; a bare profile or a story is out of scope.
+_INSTAGRAM_KIND_RE = re.compile(
+    r"^/(?:[^/]+/)?(reel|reels|p)/([A-Za-z0-9_-]+)", re.IGNORECASE)
+
+
+def _normalize_tiktok_url(raw: str) -> str | None:
+    """Canonical TikTok video URL, or None. Host-gated to the TikTok hosts
+    (including the vm./vt. short-link redirect hosts, which yt-dlp resolves).
+    A bare tiktok.com homepage is rejected; anything with a real path is
+    handed to yt-dlp, which owns TikTok extraction. Query + fragment are
+    dropped so re-capturing the same clip canonicalizes identically."""
+    if not raw or not isinstance(raw, str):
+        return None
+    try:
+        u = urlparse(raw if "://" in raw else "https://" + raw)
+    except ValueError:
+        return None
+    if u.scheme and u.scheme not in ("http", "https"):
+        return None
+    host = (u.hostname or "").lower()
+    if host not in _TIKTOK_HOSTS:
+        return None
+    path = (u.path or "").rstrip("/")
+    if not path or path == "":
+        return None
+    return f"https://{host}{path}"
+
+
+def _normalize_instagram_url(raw: str) -> str | None:
+    """Canonical Instagram Reel / post URL, or None. Only /reel, /reels and
+    /p paths are accepted (the short-form video shapes); a profile or story
+    URL returns None. Canonicalizes to www.instagram.com/<kind>/<code>/."""
+    if not raw or not isinstance(raw, str):
+        return None
+    try:
+        u = urlparse(raw if "://" in raw else "https://" + raw)
+    except ValueError:
+        return None
+    if u.scheme and u.scheme not in ("http", "https"):
+        return None
+    host = (u.hostname or "").lower()
+    if host not in _INSTAGRAM_HOSTS:
+        return None
+    m = _INSTAGRAM_KIND_RE.match(u.path or "")
+    if not m:
+        return None
+    kind = m.group(1).lower()
+    code = m.group(2)
+    return f"https://www.instagram.com/{kind}/{code}/"
+
+
+def _is_youtube_short_url(raw: str) -> bool:
+    """True for a youtube.com/shorts/<id> URL. youtu.be/<id> is a normal
+    share link that carries no 'this is a Short' signal, so it is treated as
+    a regular video (honest: we don't guess)."""
+    if not raw or not isinstance(raw, str):
+        return False
+    try:
+        u = urlparse(raw if "://" in raw else "https://" + raw)
+    except ValueError:
+        return False
+    return ((u.hostname or "").lower() in _YOUTUBE_HOSTS
+            and (u.path or "").startswith("/shorts/"))
+
+
+def _normalize_short_video_url(raw: str) -> tuple[str | None, str | None]:
+    """Detect a short-form video URL and return (canonical, platform).
+
+    Covers TikTok, Instagram Reels, and YouTube Shorts. A YouTube Short
+    normalizes to the canonical watch?v= form (it extracts through the same
+    YouTube pipeline) but the caller still tags it source_type='short_video'
+    so it filters alongside TikToks and Reels. Returns (None, None) for
+    anything that isn't a short."""
+    if _is_youtube_short_url(raw):
+        yt = _normalize_youtube_url(raw)
+        if yt:
+            return yt, PLATFORM_YOUTUBE
+    tt = _normalize_tiktok_url(raw)
+    if tt:
+        return tt, PLATFORM_TIKTOK
+    ig = _normalize_instagram_url(raw)
+    if ig:
+        return ig, PLATFORM_INSTAGRAM
+    return None, None
+
+
+def _is_short_video_url(raw: str) -> bool:
+    """True when the RAW (pre-normalization) URL is a short-form video. The
+    raw form matters: YouTube Shorts lose the /shorts/ signal once normalized
+    to watch?v=, so this must run against what the user pasted."""
+    canonical, _platform = _normalize_short_video_url(raw)
+    return bool(canonical)
+
+
 def _detect_platform_from_url(url: str) -> str:
     """Return the platform tag for a canonical URL. Used by the sidecar
     writer + the dashboard chip. Pre-v3.1 callers that pass a raw YouTube
@@ -4653,6 +4783,10 @@ def _detect_platform_from_url(url: str) -> str:
         return PLATFORM_YOUTUBE
     if host in _TWITTER_HOSTS:
         return PLATFORM_TWITTER
+    if host in _TIKTOK_HOSTS:
+        return PLATFORM_TIKTOK
+    if host in _INSTAGRAM_HOSTS:
+        return PLATFORM_INSTAGRAM
     if host in _PLATFORM_HOST_HINTS:
         return _PLATFORM_HOST_HINTS[host]
     return PLATFORM_GENERIC
@@ -4726,7 +4860,9 @@ def _normalize_any_url(raw: str) -> tuple[str | None, str | None]:
 
 def _normalize_video_url(raw: str) -> tuple[str | None, str | None]:
     """v3.1: dispatch a raw URL to the appropriate platform validator and
-    return (canonical_url, platform). Tries YouTube first, then Twitter/X.
+    return (canonical_url, platform). Tries YouTube first, then Twitter/X,
+    then the short-form networks (TikTok, Instagram Reels). YouTube Shorts
+    are already accepted by the YouTube branch (they normalize to watch?v=).
     Returns (None, None) for unsupported / attacker-shaped inputs."""
     yt = _normalize_youtube_url(raw)
     if yt:
@@ -4734,6 +4870,12 @@ def _normalize_video_url(raw: str) -> tuple[str | None, str | None]:
     tw = _normalize_twitter_url(raw)
     if tw:
         return tw, PLATFORM_TWITTER
+    tt = _normalize_tiktok_url(raw)
+    if tt:
+        return tt, PLATFORM_TIKTOK
+    ig = _normalize_instagram_url(raw)
+    if ig:
+        return ig, PLATFORM_INSTAGRAM
     return None, None
 
 
@@ -4809,6 +4951,16 @@ _CAPTURE_SOURCES = {
         "endpoint": "/playlist/start",
         "payload_key": "url",
         "note": "Captures every video in the playlist, up to the cap.",
+    },
+    "short_video": {
+        "label": "Short video",
+        "endpoint": "/extract",
+        "payload_key": "url",
+        # TikTok, Instagram Reel, or YouTube Short. Same yt-dlp pipeline as a
+        # YouTube video: it lands the clip, its caption/description, and a
+        # transcript when the platform exposes one.
+        "note": "Captures the clip, its caption, and a transcript when the "
+                "platform provides one.",
     },
     "x_video": {
         "label": "X post",
@@ -4887,6 +5039,13 @@ def _classify_capture_url(raw: str) -> dict:
             "platform": _detect_platform_from_url(canonical),
         }
 
+    # Short-form video (TikTok, Instagram Reel, YouTube Short) before the
+    # plain YouTube branch so a youtube.com/shorts/ link reads as a short
+    # rather than a generic video. A regular watch URL is not a short, so
+    # this returns None for it and the YouTube branch below still wins.
+    sv, _sv_platform = _normalize_short_video_url(text)
+    if sv:
+        return _result("short_video", sv)
     yt = _normalize_youtube_url(text)
     if yt:
         return _result("youtube_video", yt)
@@ -11974,13 +12133,21 @@ class Handler(BaseHTTPRequestHandler):
         # it on the sidecar without re-parsing the URL.
         normalized, platform = _normalize_video_url(url)
         if not normalized:
-            return None, None, ("URL must be a youtube.com, youtu.be, or "
-                                  "twitter.com/x.com video link")
+            return None, None, ("URL must be a YouTube, X, TikTok, or "
+                                  "Instagram Reel video link")
         # Stash the platform on the body so the downstream handler can
         # pull it without re-parsing. Backward-compatible: callers that
         # don't read body["platform"] still get the normalized URL.
+        #
+        # __source_type carries the short-form signal down to _run_extraction
+        # so the sidecar is tagged source_type='short_video'. Computed from
+        # the RAW url (before normalization) because a YouTube Short loses its
+        # /shorts/ signal once normalized to watch?v=. None for a regular
+        # video, so the existing YouTube/X paths are untouched.
         if isinstance(body, dict):
             body["__platform"] = platform
+            body["__source_type"] = (
+                SOURCE_TYPE_SHORT_VIDEO if _is_short_video_url(url) else None)
         return normalized, interval, None
 
     def _validate_playlist_body(self, body: dict, *, require_interval: bool = False):
@@ -12469,8 +12636,11 @@ class Handler(BaseHTTPRequestHandler):
                           "filters attacker-shaped inputs)")})
         # If it's a known platform we already have a full pipeline for,
         # delegate. The downstream handler runs its own validation; we
-        # pass the canonical so we don't double-normalise.
-        if platform in (PLATFORM_YOUTUBE, PLATFORM_TWITTER):
+        # pass the canonical so we don't double-normalise. Short-form
+        # networks (TikTok, Instagram) reuse the same full pipeline as
+        # YouTube/X, and _handle_extract tags them source_type='short_video'.
+        if platform in (PLATFORM_YOUTUBE, PLATFORM_TWITTER,
+                        PLATFORM_TIKTOK, PLATFORM_INSTAGRAM):
             body = dict(body)
             body["url"] = canonical
             return self._handle_extract(body)
@@ -12757,6 +12927,7 @@ class Handler(BaseHTTPRequestHandler):
 
                 result = _run_extraction(url, interval, folder,
                                           metadata=metadata, topic=topic,
+                                          source_type=body.get("__source_type"),
                                           long_video_mode=long_video_mode,
                                           phase_callback=phase_cb)
             except BaseException as e:

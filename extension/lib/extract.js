@@ -204,6 +204,67 @@
     return !!normalizeXArticleUrl(raw);
   }
 
+  // Short-form video (context-layer item 2): TikTok, Instagram Reels, and
+  // YouTube Shorts. Mirrors server._normalize_short_video_url so the popup
+  // classifier can never disagree with what /extract will accept. yt-dlp owns
+  // all three; these just host-gate + canonicalize the URLs.
+  const TIKTOK_HOSTS = new Set([
+    "tiktok.com", "www.tiktok.com", "m.tiktok.com",
+    "vm.tiktok.com", "vt.tiktok.com",
+  ]);
+  const INSTAGRAM_HOSTS = new Set([
+    "instagram.com", "www.instagram.com", "m.instagram.com",
+  ]);
+  const _IG_KIND_RE = /^\/(?:[^/]+\/)?(reel|reels|p)\/([A-Za-z0-9_-]+)/i;
+
+  function normalizeTikTokUrl(raw) {
+    if (!raw || typeof raw !== "string") return null;
+    let u;
+    try { u = new URL(raw.includes("://") ? raw : "https://" + raw); }
+    catch { return null; }
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    const host = (u.hostname || "").toLowerCase();
+    if (!TIKTOK_HOSTS.has(host)) return null;
+    const path = (u.pathname || "").replace(/\/+$/, "");
+    if (!path) return null;
+    return `https://${host}${path}`;
+  }
+
+  function normalizeInstagramUrl(raw) {
+    if (!raw || typeof raw !== "string") return null;
+    let u;
+    try { u = new URL(raw.includes("://") ? raw : "https://" + raw); }
+    catch { return null; }
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    const host = (u.hostname || "").toLowerCase();
+    if (!INSTAGRAM_HOSTS.has(host)) return null;
+    const m = (u.pathname || "").match(_IG_KIND_RE);
+    if (!m) return null;
+    return `https://www.instagram.com/${m[1].toLowerCase()}/${m[2]}/`;
+  }
+
+  // youtube.com/shorts/<id> is a Short; youtu.be/<id> carries no such signal
+  // so it stays a regular video (honest: we don't guess).
+  function isYouTubeShortUrl(raw) {
+    if (!raw || typeof raw !== "string") return false;
+    let u;
+    try { u = new URL(raw.includes("://") ? raw : "https://" + raw); }
+    catch { return false; }
+    const host = (u.hostname || "").replace(/^www\.|^m\./, "").toLowerCase();
+    return host === "youtube.com" && /^\/shorts\//.test(u.pathname || "");
+  }
+
+  // Returns the canonical URL for a short-form video (TikTok / Instagram Reel
+  // / YouTube Short), or null. A YouTube Short normalizes to the watch URL
+  // (it extracts through the same path) but classifies as source "short_video".
+  function normalizeShortVideoUrl(raw) {
+    if (isYouTubeShortUrl(raw)) {
+      const yt = normalizeYouTubeUrl(raw);
+      if (yt) return yt;
+    }
+    return normalizeTikTokUrl(raw) || normalizeInstagramUrl(raw);
+  }
+
   function getInterval() {
     return new Promise((resolve) => {
       try {
@@ -806,6 +867,11 @@
       label: "playlist", endpoint: "/playlist/start", action: "playlist",
       note: "Captures every video in the playlist, up to the cap.",
     },
+    short_video: {
+      label: "short video", endpoint: "/extract", action: "video",
+      note: "Captures the clip, its caption, and a transcript when the "
+        + "platform provides one.",
+    },
     x_video: {
       label: "post", endpoint: "/extract", action: "x_video",
       note: "Captures the post text and the author's thread -- plus the "
@@ -852,6 +918,11 @@
         action: null, canonical: "", note: "",
       };
     }
+    // Short-form video (TikTok / Instagram Reel / YouTube Short) before the
+    // plain YouTube branch so a /shorts/ link reads as a short. A regular
+    // watch URL returns null here, so youtube_video still wins for it.
+    const sv = normalizeShortVideoUrl(text);
+    if (sv) return _classifyResult("short_video", sv);
     const yt = normalizeYouTubeUrl(text);
     if (yt) return _classifyResult("youtube_video", yt);
     const pl = normalizePlaylistUrl(text);
@@ -990,6 +1061,10 @@
     isXArticleUrl,
     normalizeRedditUrl,
     normalizePlaylistUrl,
+    normalizeTikTokUrl,
+    normalizeInstagramUrl,
+    isYouTubeShortUrl,
+    normalizeShortVideoUrl,
     looksLikeFeedUrl,
     normalizeAnyUrl,
     classifyCaptureUrl,

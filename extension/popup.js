@@ -371,6 +371,7 @@ if (moreOptions) {
 const SOURCE_BUTTON_LABELS = {
   youtube_video: "Uoink this video",
   youtube_playlist: "Uoink this playlist",
+  short_video: "Uoink this short video",
   x_video: "Uoink this post",
   x_article: "Uoink this article",
   reddit_thread: "Uoink this thread",
