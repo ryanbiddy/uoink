@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [Unreleased]
+
+The first context-layer item type: your own notes are now first-class uoinks.
+
+### Added
+
+- **Jot a note.** A new "Jot a note" compose box on the Sources tab (title optional, markdown body, Ctrl/Cmd+Enter to save) writes a note straight into your corpus as a first-class uoink: source type "note", author "You", with a classified topic. It shows up in your Library right away and filters by platform / source type = Note, like anything else. Notes are queryable by your AI over MCP and by you via search, with no special-casing. Behind it: `POST /notes` (token-gated) and a standalone `notes.py` module, persisting under your output root at `Notes/<slug>/`. First step of the context-layer vision (musings you write to yourself).
+
 ## [3.5.0] - 2026-07-08
 
 A categorization overhaul: X Articles capture from every entry point, and the whole Library is now source-first. The data model was YouTube-shaped, so every non-YouTube capture showed its hostname (x.com, reddit.com) as the "who" and there was no way to filter by platform, source type, or author.

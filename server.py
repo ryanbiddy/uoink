@@ -95,6 +95,7 @@ import openapi_bridge  # noqa: E402  -- v3.3 OpenAPI bridge for non-MCP AIs
 import reddit_extractor  # noqa: E402  -- v3.3 Reddit thread capture (.json)
 import x_extractor  # noqa: E402  -- U-15 X text/thread capture (syndication)
 import x_article_extractor  # noqa: E402  -- V-2c X Article (DOM) capture
+import notes  # noqa: E402  -- context-layer item 1: quick notes / musings capture
 
 
 def _extract_page_to_prose(url: str) -> str | None:
@@ -178,14 +179,14 @@ LENGTH_BUCKET_ENUM = ("short", "medium", "long", "deep")  # <4m | 4-15 | 15-30 |
 _FACET_LABELS = {
     "platform": {
         "youtube": "YouTube", "x": "X", "reddit": "Reddit",
-        "podcast": "Podcast", "web": "Web",
+        "podcast": "Podcast", "web": "Web", "note": "Note",
         # legacy metadata_json tags a stray row might still carry.
         "twitter": "X", "generic": "Web",
     },
     "source_type": {
         "video": "Video", "x_thread": "X post", "x_article": "X article",
         "reddit_thread": "Reddit thread", "page": "Web page",
-        "episode": "Podcast episode",
+        "episode": "Podcast episode", "note": "Note",
     },
     "format": {
         "one_shot": "One shot", "talking_head": "Talking head",
@@ -11316,6 +11317,48 @@ class Handler(BaseHTTPRequestHandler):
             "metadata": result.get("metadata", {}),
         })
 
+    def _handle_create_note(self, body: dict):
+        """POST /notes {text, title?, author?} -- persist a quick note / musing
+        the user jotted as a first-class uoink (source_type='note', platform=
+        'note', author='You' by default). Lands under the configured output
+        root (DESKTOP_ROOT/Notes/<slug>/), the same place every capture writes,
+        and surfaces in /recent, /memory/search, /library/facets, and the MCP
+        tools with no special-casing. Token gate cleared by do_POST."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                         "error": "json object required"})
+        note = notes.build_note(
+            text=body.get("text"),
+            title=body.get("title"),
+            author=body.get("author"))
+        if not note.get("ok"):
+            log.info("POST /notes -> %s", note.get("code"))
+            return self._send_json(200, {
+                "ok": False, "error": note.get("error"),
+                "code": note.get("code")})
+        try:
+            video_id = notes.persist_note(
+                _get_index(), note, data_root=DESKTOP_ROOT,
+                topic_classifier=_classify_topic)
+        except Exception:
+            log.exception("/notes persist failed")
+            return self._send_json(500, {
+                "ok": False,
+                "error": "Wrote your note but couldn't save it locally."})
+        if not video_id:
+            return self._send_json(500, {
+                "ok": False, "error": "Couldn't save your note."})
+        log.info("POST /notes -> ok (%s)", video_id)
+        return self._send_json(200, {
+            "ok": True,
+            "video_id": video_id,
+            "slug": note["slug"],
+            "title": note["title"],
+            "author": note["author"],
+            "source_type": notes.SOURCE_TYPE,
+            "platform": notes.PLATFORM,
+        })
+
     def _handle_extract_reddit(self, body: dict):
         """POST /extract/reddit {url, depth_limit?, score_threshold?} --
         capture a Reddit thread via its public .json as a yoink with
@@ -11750,6 +11793,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_reyoink(bare)
         if bare == "/extract/reddit":
             return self._handle_extract_reddit(body)
+        if bare == "/notes":
+            return self._handle_create_note(body)
         if bare == "/corpus/export":
             # C-03: dump the SQLite-only user data into the corpus folder.
             try:

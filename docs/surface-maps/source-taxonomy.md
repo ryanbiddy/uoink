@@ -9,15 +9,21 @@ YouTube." This map is the coherent model every source drops into cleanly.
 ## The taxonomy
 
 ```
-Platform     youtube | x | reddit | podcast | web      (stored + indexed)
+Platform     youtube | x | reddit | podcast | web |     (stored + indexed)
+             note
 Source type  video | x_thread | x_article |            (stored + indexed)
-             reddit_thread | page | episode
+             reddit_thread | page | episode | note
 Author       the real "who": YouTube uploader, X        (stored + indexed)
              "Name (@handle)", reddit "r/<sub>",
-             or the site host for a bare web page
+             the site host for a bare web page, or
+             "You" for a note you wrote
 Topic        classified for every source, not just video
 Hook         optional, YouTube-only
 ```
+
+`note` is the first context-layer item type (a musing you wrote to yourself):
+`source_type='note'` on `platform='note'`, author `"You"`, persisted by
+`notes.persist_note` under `<output_root>/Notes/`. See `notes-capture.md`.
 
 ## Schema (migration 0020)
 

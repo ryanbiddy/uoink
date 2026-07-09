@@ -41,6 +41,7 @@ $requiredFiles = @(
     'reddit_extractor.py',
     'x_extractor.py',
     'x_article_extractor.py',
+    'notes.py',
     'taste_scoring.py',
     'defaults\style_anchors.json'
 )
