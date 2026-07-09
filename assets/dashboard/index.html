@@ -1395,6 +1395,38 @@
       line-height: 1.45;
     }
 
+    .image-drop {
+      width: 100%;
+      min-height: 140px;
+      border: 2px dashed var(--border, #cbd5e1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .image-drop:hover,
+    .image-drop:focus-visible,
+    .image-drop.dragover {
+      border-color: var(--accent, #b45309);
+      background: rgba(180, 83, 9, 0.06);
+      outline: none;
+    }
+    .image-drop-hint {
+      font-size: 0.9rem;
+      color: var(--muted, #64748b);
+      max-width: 32ch;
+    }
+    .image-drop-preview {
+      max-width: 100%;
+      max-height: 260px;
+      border-radius: 8px;
+      object-fit: contain;
+    }
+
     .universal-capture-chip {
       display: inline-flex;
       align-items: center;
@@ -3836,6 +3868,22 @@
             </div>
             <p class="universal-capture-note" id="noteCaptureNote">Saves as a note by You. It shows up in your Library right away.</p>
           </div>
+          <div class="universal-capture image-capture" id="imageCapture">
+            <div class="eyebrow">A picture worth keeping</div>
+            <h2>Save an image</h2>
+            <p class="universal-lede">Drop, paste, or pick a meme, a screenshot, a diagram. It lands in your corpus like anything else, with a preview in your Library. Your AI can read the image itself when you ask about it. PNG, JPEG, or WebP.</p>
+            <div class="image-drop" id="imageDrop" tabindex="0" role="button" aria-label="Drop, paste, or click to pick an image">
+              <img class="image-drop-preview" id="imageDropPreview" alt="" hidden>
+              <div class="image-drop-hint" id="imageDropHint">Drop an image here, paste with Ctrl/Cmd+V, or click to pick a file.</div>
+              <input type="file" id="imageFileInput" accept="image/png,image/jpeg,image/webp" hidden>
+            </div>
+            <input class="field" id="imageCaptionInput" type="text" autocomplete="off" placeholder="Caption (optional, makes it searchable)" aria-label="Image caption">
+            <div class="universal-capture-row">
+              <button class="button primary" type="button" id="imageSaveButton" disabled>Save image</button>
+              <button class="button" type="button" id="imageClearButton" hidden>Clear</button>
+            </div>
+            <p class="universal-capture-note" id="imageCaptureNote">Saved by You under your output folder. It shows up in your Library right away.</p>
+          </div>
           <div class="get-extension" id="getExtensionCard">
             <div class="get-extension-head">
               <div>
@@ -4379,8 +4427,8 @@
     };
 
     const FALLBACK_FACETS = {
-      platform: ["youtube", "x", "reddit", "podcast", "web", "note"],
-      source_type: ["video", "x_thread", "x_article", "reddit_thread", "page", "episode", "note"],
+      platform: ["youtube", "x", "reddit", "podcast", "web", "note", "image"],
+      source_type: ["video", "x_thread", "x_article", "reddit_thread", "page", "episode", "note", "image"],
       format: ["one-shot", "talking-head", "tutorial", "listicle", "narrative", "vlog", "interview", "screen-recording", "B-roll-heavy"],
       performance: ["over", "average", "under"],
       length: ["short", "medium", "long", "deep"],
@@ -4680,6 +4728,15 @@
       noteTextInput: document.getElementById("noteTextInput"),
       noteSaveButton: document.getElementById("noteSaveButton"),
       noteCaptureNote: document.getElementById("noteCaptureNote"),
+      imageCapture: document.getElementById("imageCapture"),
+      imageDrop: document.getElementById("imageDrop"),
+      imageDropPreview: document.getElementById("imageDropPreview"),
+      imageDropHint: document.getElementById("imageDropHint"),
+      imageFileInput: document.getElementById("imageFileInput"),
+      imageCaptionInput: document.getElementById("imageCaptionInput"),
+      imageSaveButton: document.getElementById("imageSaveButton"),
+      imageClearButton: document.getElementById("imageClearButton"),
+      imageCaptureNote: document.getElementById("imageCaptureNote"),
       writingSourceSearch: document.getElementById("writingSourceSearch"),
       writingSourceChip: document.getElementById("writingSourceChip"),
       writingSourceChipMain: document.getElementById("writingSourceChipMain"),
@@ -5477,6 +5534,7 @@
         web: "Web",
         generic: "Web",
         note: "Note",
+        image: "Image",
         rss: "RSS",
         spotify: "Spotify",
         "apple podcasts": "Apple",
@@ -5495,6 +5553,7 @@
         page: "page",
         episode: "episode",
         note: "note",
+        image: "image",
       };
       if (labels[st]) return labels[st];
       if (isPodcastContent(row)) return "episode";
@@ -6286,6 +6345,86 @@
         noteState.busy = false;
         if (btn) btn.textContent = "Save note";
         syncNoteButton();
+      }
+    }
+
+    // Context-layer item 3: save an image. An image is a first-class uoink, so
+    // the compose surface POSTs the raw bytes to /images and the image lands in
+    // the Library with a preview like any other capture (source_type=image,
+    // author=You). Bytes go raw (not JSON) so they clear the 64KB JSON cap;
+    // caption rides the query string.
+    const imageState = { busy: false, file: null, url: "" };
+    const IMAGE_TYPES = ["image/png", "image/jpeg", "image/webp"];
+    const IMAGE_MAX_BYTES = 10 * 1024 * 1024;
+
+    function syncImageButton() {
+      if (!els.imageSaveButton) return;
+      els.imageSaveButton.disabled = imageState.busy || !imageState.file;
+      if (els.imageClearButton) els.imageClearButton.hidden = !imageState.file;
+    }
+
+    function clearImageSelection() {
+      if (imageState.url) { URL.revokeObjectURL(imageState.url); imageState.url = ""; }
+      imageState.file = null;
+      if (els.imageFileInput) els.imageFileInput.value = "";
+      if (els.imageDropPreview) { els.imageDropPreview.hidden = true; els.imageDropPreview.src = ""; }
+      if (els.imageDropHint) els.imageDropHint.hidden = false;
+      syncImageButton();
+    }
+
+    function setImageSelection(file) {
+      if (!file) return;
+      if (!IMAGE_TYPES.includes(file.type)) {
+        showToast("That file isn't a PNG, JPEG, or WebP image.");
+        return;
+      }
+      if (file.size > IMAGE_MAX_BYTES) {
+        showToast("That image is over 10 MB.");
+        return;
+      }
+      if (imageState.url) URL.revokeObjectURL(imageState.url);
+      imageState.file = file;
+      imageState.url = URL.createObjectURL(file);
+      if (els.imageDropPreview) {
+        els.imageDropPreview.src = imageState.url;
+        els.imageDropPreview.hidden = false;
+      }
+      if (els.imageDropHint) els.imageDropHint.hidden = true;
+      syncImageButton();
+    }
+
+    async function saveImage() {
+      if (imageState.busy || !imageState.file) return;
+      const file = imageState.file;
+      const caption = els.imageCaptionInput ? els.imageCaptionInput.value.trim() : "";
+      imageState.busy = true;
+      const btn = els.imageSaveButton;
+      if (btn) { btn.disabled = true; btn.textContent = "Saving..."; }
+      try {
+        const params = new URLSearchParams();
+        if (caption) params.set("caption", caption);
+        if (file.name) params.set("filename", file.name);
+        const qs = params.toString();
+        await authFetch("/images" + (qs ? "?" + qs : ""), {
+          method: "POST",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+        if (els.imageCaptionInput) els.imageCaptionInput.value = "";
+        clearImageSelection();
+        showToast("Saved your image. It's in your Library.");
+        await loadLibrary({ reset: true });
+        // Refresh the facet dropdowns so the new image is immediately
+        // filterable by platform / source type = Image.
+        loadLibraryFacets();
+        refreshActivity();
+      } catch (err) {
+        const honest = err && err.data && err.data.error;
+        showToast(honest || translateMachineMessage(err && err.message));
+      } finally {
+        imageState.busy = false;
+        if (btn) btn.textContent = "Save image";
+        syncImageButton();
       }
     }
 
@@ -10805,6 +10944,49 @@
       if (els.noteSaveButton) {
         els.noteSaveButton.addEventListener("click", saveNote);
       }
+      if (els.imageDrop) {
+        els.imageDrop.addEventListener("click", () => {
+          if (els.imageFileInput) els.imageFileInput.click();
+        });
+        els.imageDrop.addEventListener("keydown", (event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            if (els.imageFileInput) els.imageFileInput.click();
+          }
+        });
+        els.imageDrop.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          els.imageDrop.classList.add("dragover");
+        });
+        els.imageDrop.addEventListener("dragleave", () => {
+          els.imageDrop.classList.remove("dragover");
+        });
+        els.imageDrop.addEventListener("drop", (event) => {
+          event.preventDefault();
+          els.imageDrop.classList.remove("dragover");
+          const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+          if (file) setImageSelection(file);
+        });
+        // Paste an image straight from the clipboard while the surface is on
+        // screen (Ctrl/Cmd+V after a screenshot, no file to save first).
+        els.imageDrop.addEventListener("paste", (event) => {
+          const items = (event.clipboardData && event.clipboardData.items) || [];
+          for (const item of items) {
+            if (item.kind === "file" && item.type.startsWith("image/")) {
+              const file = item.getAsFile();
+              if (file) { event.preventDefault(); setImageSelection(file); return; }
+            }
+          }
+        });
+      }
+      if (els.imageFileInput) {
+        els.imageFileInput.addEventListener("change", (event) => {
+          const file = event.target && event.target.files && event.target.files[0];
+          if (file) setImageSelection(file);
+        });
+      }
+      if (els.imageSaveButton) els.imageSaveButton.addEventListener("click", saveImage);
+      if (els.imageClearButton) els.imageClearButton.addEventListener("click", clearImageSelection);
       const emptyPasteUrl = document.getElementById("emptyPasteUrl");
       if (emptyPasteUrl) emptyPasteUrl.addEventListener("click", focusUniversalCapture);
       document.getElementById("reloadFeatures").addEventListener("click", loadFeatures);

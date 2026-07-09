@@ -103,9 +103,13 @@ PLATFORM_INSTAGRAM = "instagram"
 # the same platform facet so a note filters like any other uoink. Kept 1:1 with
 # source_type='note', the way every other source maps (x_thread->x, page->web).
 PLATFORM_NOTE = "note"
+# An image / meme the user saved (context-layer item 3). Like a note, it isn't a
+# source network, but it slots into the same platform facet so an image filters
+# like any other uoink. Kept 1:1 with source_type='image'.
+PLATFORM_IMAGE = "image"
 KNOWN_PLATFORMS = (PLATFORM_YOUTUBE, PLATFORM_X, PLATFORM_REDDIT,
                    PLATFORM_PODCAST, PLATFORM_WEB, PLATFORM_TIKTOK,
-                   PLATFORM_INSTAGRAM, PLATFORM_NOTE)
+                   PLATFORM_INSTAGRAM, PLATFORM_NOTE, PLATFORM_IMAGE)
 
 # source_type (already stored per capture route) -> platform.
 #
@@ -121,6 +125,7 @@ _SOURCE_TYPE_PLATFORM = {
     "page": PLATFORM_WEB,
     "episode": PLATFORM_PODCAST,
     "note": PLATFORM_NOTE,
+    "image": PLATFORM_IMAGE,
 }
 
 _YOUTUBE_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"}
@@ -184,6 +189,11 @@ def author_for(source_type: str | None, metadata: dict | None,
     if platform == PLATFORM_NOTE:
         # A note's author is the user, supplied by notes.persist_note ("You" by
         # default). Return whatever the sidecar carried; never the host.
+        return (md.get("author") or "").strip() or None
+    if platform == PLATFORM_IMAGE:
+        # An image's author is whoever images.persist_image recorded: the source
+        # author when it was saved from a page/tweet, else "You". Return the
+        # sidecar value; never the host.
         return (md.get("author") or "").strip() or None
     if platform == PLATFORM_X:
         name = (md.get("author_name") or md.get("author") or "").strip()
