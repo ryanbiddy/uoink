@@ -127,6 +127,9 @@ Source: "staging\taste_scoring.py"; DestDir: "{app}"; Flags: ignoreversion
 ; crashed on launch with ModuleNotFoundError: No module named 'x_extractor'.
 Source: "staging\x_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\x_article_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
+; Context-layer item 1: quick notes capture. server.py imports notes at module
+; top, so it must be installed too or the helper crashes on launch.
+Source: "staging\notes.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\memory_layer.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\podcasts.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\mobile_playlists.py"; DestDir: "{app}"; Flags: ignoreversion

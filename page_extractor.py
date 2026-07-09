@@ -93,8 +93,12 @@ PLATFORM_X = "x"
 PLATFORM_REDDIT = "reddit"
 PLATFORM_PODCAST = "podcast"
 PLATFORM_WEB = "web"
+# A note the user wrote to themselves. Not a source network, but it slots into
+# the same platform facet so a note filters like any other uoink. Kept 1:1 with
+# source_type='note', the way every other source maps (x_thread->x, page->web).
+PLATFORM_NOTE = "note"
 KNOWN_PLATFORMS = (PLATFORM_YOUTUBE, PLATFORM_X, PLATFORM_REDDIT,
-                   PLATFORM_PODCAST, PLATFORM_WEB)
+                   PLATFORM_PODCAST, PLATFORM_WEB, PLATFORM_NOTE)
 
 # source_type (already stored per capture route) -> platform.
 _SOURCE_TYPE_PLATFORM = {
@@ -104,6 +108,7 @@ _SOURCE_TYPE_PLATFORM = {
     "reddit_thread": PLATFORM_REDDIT,
     "page": PLATFORM_WEB,
     "episode": PLATFORM_PODCAST,
+    "note": PLATFORM_NOTE,
 }
 
 _YOUTUBE_HOSTS = {"youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be"}
@@ -154,6 +159,10 @@ def author_for(source_type: str | None, metadata: dict | None,
         # The caller already has the real "who" (the channel / show name); the
         # host would be the wrong answer here.
         return None
+    if platform == PLATFORM_NOTE:
+        # A note's author is the user, supplied by notes.persist_note ("You" by
+        # default). Return whatever the sidecar carried; never the host.
+        return (md.get("author") or "").strip() or None
     if platform == PLATFORM_X:
         name = (md.get("author_name") or md.get("author") or "").strip()
         handle = (md.get("author_handle") or "").strip().lstrip("@")

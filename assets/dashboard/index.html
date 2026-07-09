@@ -1387,6 +1387,14 @@
       flex-shrink: 0;
     }
 
+    .note-capture-text {
+      width: 100%;
+      resize: vertical;
+      min-height: 96px;
+      font: inherit;
+      line-height: 1.45;
+    }
+
     .universal-capture-chip {
       display: inline-flex;
       align-items: center;
@@ -3817,6 +3825,17 @@
             </div>
             <p class="universal-capture-note" id="universalCaptureNote">Detection runs as you paste. Nothing gets captured until you click Uoink it.</p>
           </div>
+          <div class="universal-capture note-capture" id="noteCapture">
+            <div class="eyebrow">Your own words</div>
+            <h2>Jot a note</h2>
+            <p class="universal-lede">Write a thought, a musing, a reminder to yourself. It lands in your corpus like anything else, authored by You, queryable by you and your AI. Markdown works.</p>
+            <input class="field" id="noteTitleInput" type="text" autocomplete="off" placeholder="Title (optional, we'll use your first line)" aria-label="Note title">
+            <textarea class="field note-capture-text" id="noteTextInput" rows="5" placeholder="What's on your mind?" aria-label="Note text" aria-describedby="noteCaptureNote"></textarea>
+            <div class="universal-capture-row">
+              <button class="button primary" type="button" id="noteSaveButton" disabled>Save note</button>
+            </div>
+            <p class="universal-capture-note" id="noteCaptureNote">Saves as a note by You. It shows up in your Library right away.</p>
+          </div>
           <div class="get-extension" id="getExtensionCard">
             <div class="get-extension-head">
               <div>
@@ -4360,8 +4379,8 @@
     };
 
     const FALLBACK_FACETS = {
-      platform: ["youtube", "x", "reddit", "podcast", "web"],
-      source_type: ["video", "x_thread", "x_article", "reddit_thread", "page", "episode"],
+      platform: ["youtube", "x", "reddit", "podcast", "web", "note"],
+      source_type: ["video", "x_thread", "x_article", "reddit_thread", "page", "episode", "note"],
       format: ["one-shot", "talking-head", "tutorial", "listicle", "narrative", "vlog", "interview", "screen-recording", "B-roll-heavy"],
       performance: ["over", "average", "under"],
       length: ["short", "medium", "long", "deep"],
@@ -4656,6 +4675,11 @@
       universalCaptureChip: document.getElementById("universalCaptureChip"),
       universalCaptureButton: document.getElementById("universalCaptureButton"),
       universalCaptureNote: document.getElementById("universalCaptureNote"),
+      noteCapture: document.getElementById("noteCapture"),
+      noteTitleInput: document.getElementById("noteTitleInput"),
+      noteTextInput: document.getElementById("noteTextInput"),
+      noteSaveButton: document.getElementById("noteSaveButton"),
+      noteCaptureNote: document.getElementById("noteCaptureNote"),
       writingSourceSearch: document.getElementById("writingSourceSearch"),
       writingSourceChip: document.getElementById("writingSourceChip"),
       writingSourceChipMain: document.getElementById("writingSourceChipMain"),
@@ -5452,6 +5476,7 @@
         podcast: "Podcast",
         web: "Web",
         generic: "Web",
+        note: "Note",
         rss: "RSS",
         spotify: "Spotify",
         "apple podcasts": "Apple",
@@ -5469,6 +5494,7 @@
         reddit_thread: "thread",
         page: "page",
         episode: "episode",
+        note: "note",
       };
       if (labels[st]) return labels[st];
       if (isPodcastContent(row)) return "episode";
@@ -6217,6 +6243,50 @@
         if (els.universalCapture) els.universalCapture.scrollIntoView({ block: "start" });
         if (els.universalCaptureInput) els.universalCaptureInput.focus();
       }, 0);
+    }
+
+    // Context-layer item 1: jot a note. A note is a first-class uoink, so the
+    // compose box POSTs to /notes and the note lands in the Library like any
+    // other capture (source_type=note, author=You).
+    const noteState = { busy: false };
+
+    function syncNoteButton() {
+      if (!els.noteSaveButton) return;
+      const hasText = Boolean(els.noteTextInput && els.noteTextInput.value.trim());
+      els.noteSaveButton.disabled = noteState.busy || !hasText;
+    }
+
+    async function saveNote() {
+      if (noteState.busy || !els.noteTextInput) return;
+      const text = els.noteTextInput.value.trim();
+      if (!text) return;
+      const title = els.noteTitleInput ? els.noteTitleInput.value.trim() : "";
+      noteState.busy = true;
+      const btn = els.noteSaveButton;
+      if (btn) { btn.disabled = true; btn.textContent = "Saving..."; }
+      try {
+        await authFetch("/notes", {
+          method: "POST",
+          body: JSON.stringify(title ? { text, title } : { text }),
+        });
+        els.noteTextInput.value = "";
+        if (els.noteTitleInput) els.noteTitleInput.value = "";
+        showToast("Saved your note. It's in your Library.");
+        await loadLibrary({ reset: true });
+        // Refresh the facet dropdowns so the new note is immediately
+        // filterable by platform / source type = Note.
+        loadLibraryFacets();
+        refreshActivity();
+      } catch (err) {
+        // A helper-honest failure (empty note) rides authFetch's throw with the
+        // copy already on err.data.error; show it as-is.
+        const honest = err && err.data && err.data.error;
+        showToast(honest || translateMachineMessage(err && err.message));
+      } finally {
+        noteState.busy = false;
+        if (btn) btn.textContent = "Save note";
+        syncNoteButton();
+      }
     }
 
     function insightCard(row, kicker, { writeFrom = false } = {}) {
@@ -10721,6 +10791,19 @@
       }
       if (els.universalCaptureButton) {
         els.universalCaptureButton.addEventListener("click", runUniversalCapture);
+      }
+      if (els.noteTextInput) {
+        els.noteTextInput.addEventListener("input", syncNoteButton);
+        els.noteTextInput.addEventListener("keydown", (event) => {
+          // Ctrl/Cmd+Enter saves without reaching for the mouse.
+          if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+            event.preventDefault();
+            saveNote();
+          }
+        });
+      }
+      if (els.noteSaveButton) {
+        els.noteSaveButton.addEventListener("click", saveNote);
       }
       const emptyPasteUrl = document.getElementById("emptyPasteUrl");
       if (emptyPasteUrl) emptyPasteUrl.addEventListener("click", focusUniversalCapture);

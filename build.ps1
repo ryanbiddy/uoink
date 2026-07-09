@@ -233,6 +233,7 @@ foreach ($f in @(
     'reddit_extractor.py',
     'x_extractor.py',
     'x_article_extractor.py',
+    'notes.py',
     'taste_scoring.py',
     'defaults\style_anchors.json',
     'yt_extract.py',
@@ -408,6 +409,9 @@ Copy-Item (Join-Path $RepoRoot 'reddit_extractor.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'x_extractor.py') $StagingDir -Force
 # V-2c X Article capture. server.py imports x_article_extractor at module top.
 Copy-Item (Join-Path $RepoRoot 'x_article_extractor.py') $StagingDir -Force
+# Context-layer item 1: quick notes capture. server.py imports notes at module
+# top, so it must ship or the helper crashes on launch (cf. x_extractor.py).
+Copy-Item (Join-Path $RepoRoot 'notes.py') $StagingDir -Force
 # V-3 taste-aware auto-uoink. server.py imports taste_scoring at module top,
 # so it must ship or the helper crashes with ModuleNotFoundError. Added v3.3.0.
 Copy-Item (Join-Path $RepoRoot 'taste_scoring.py') $StagingDir -Force
@@ -469,7 +473,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py page_extractor.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py page_extractor.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
