@@ -93,14 +93,26 @@ PLATFORM_X = "x"
 PLATFORM_REDDIT = "reddit"
 PLATFORM_PODCAST = "podcast"
 PLATFORM_WEB = "web"
+# Short-form video networks (context-layer item 2). TikToks and Instagram
+# Reels are their own platform facet; a YouTube Short stays platform=youtube
+# (it IS YouTube) but is tagged source_type='short_video' so it filters
+# alongside the others. See server._normalize_short_video_url.
+PLATFORM_TIKTOK = "tiktok"
+PLATFORM_INSTAGRAM = "instagram"
 # A note the user wrote to themselves. Not a source network, but it slots into
 # the same platform facet so a note filters like any other uoink. Kept 1:1 with
 # source_type='note', the way every other source maps (x_thread->x, page->web).
 PLATFORM_NOTE = "note"
 KNOWN_PLATFORMS = (PLATFORM_YOUTUBE, PLATFORM_X, PLATFORM_REDDIT,
-                   PLATFORM_PODCAST, PLATFORM_WEB, PLATFORM_NOTE)
+                   PLATFORM_PODCAST, PLATFORM_WEB, PLATFORM_TIKTOK,
+                   PLATFORM_INSTAGRAM, PLATFORM_NOTE)
 
 # source_type (already stored per capture route) -> platform.
+#
+# NOTE: 'short_video' is deliberately NOT in this table. A short is
+# multi-platform (a TikTok, a Reel, OR a YouTube Short), so its platform must
+# come from the URL host, not the source_type. platform_for() falls through to
+# host detection for it.
 _SOURCE_TYPE_PLATFORM = {
     "video": PLATFORM_YOUTUBE,
     "x_thread": PLATFORM_X,
@@ -116,6 +128,9 @@ _X_HOSTS = {"x.com", "www.x.com", "twitter.com", "www.twitter.com",
             "mobile.twitter.com"}
 _REDDIT_HOSTS = {"reddit.com", "www.reddit.com", "old.reddit.com",
                  "new.reddit.com"}
+_TIKTOK_HOSTS = {"tiktok.com", "www.tiktok.com", "m.tiktok.com",
+                 "vm.tiktok.com", "vt.tiktok.com"}
+_INSTAGRAM_HOSTS = {"instagram.com", "www.instagram.com", "m.instagram.com"}
 
 
 def platform_for(source_type: str | None, url: str = "") -> str:
@@ -137,6 +152,10 @@ def platform_for(source_type: str | None, url: str = "") -> str:
         return PLATFORM_X
     if host in _REDDIT_HOSTS:
         return PLATFORM_REDDIT
+    if host in _TIKTOK_HOSTS:
+        return PLATFORM_TIKTOK
+    if host in _INSTAGRAM_HOSTS:
+        return PLATFORM_INSTAGRAM
     if not st and not host:
         return PLATFORM_YOUTUBE
     return PLATFORM_WEB
@@ -155,9 +174,12 @@ def author_for(source_type: str | None, metadata: dict | None,
     to the hostname."""
     md = metadata or {}
     platform = platform_for(source_type, url)
-    if platform in (PLATFORM_YOUTUBE, PLATFORM_PODCAST):
-        # The caller already has the real "who" (the channel / show name); the
-        # host would be the wrong answer here.
+    if platform in (PLATFORM_YOUTUBE, PLATFORM_PODCAST, PLATFORM_TIKTOK,
+                    PLATFORM_INSTAGRAM):
+        # The caller already has the real "who" (the channel / uploader /
+        # creator, from the extractor metadata); the host would be the wrong
+        # answer here. The video/short pipeline falls back to sidecar.channel,
+        # which it fills from yt-dlp's uploader/channel/creator.
         return None
     if platform == PLATFORM_NOTE:
         # A note's author is the user, supplied by notes.persist_note ("You" by
