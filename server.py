@@ -96,6 +96,7 @@ import reddit_extractor  # noqa: E402  -- v3.3 Reddit thread capture (.json)
 import x_extractor  # noqa: E402  -- U-15 X text/thread capture (syndication)
 import x_article_extractor  # noqa: E402  -- V-2c X Article (DOM) capture
 import notes  # noqa: E402  -- context-layer item 1: quick notes / musings capture
+import images  # noqa: E402  -- context-layer item 3: image / meme capture
 
 
 def _extract_page_to_prose(url: str) -> str | None:
@@ -180,7 +181,7 @@ _FACET_LABELS = {
     "platform": {
         "youtube": "YouTube", "x": "X", "reddit": "Reddit",
         "podcast": "Podcast", "web": "Web", "note": "Note",
-        "tiktok": "TikTok", "instagram": "Instagram",
+        "tiktok": "TikTok", "instagram": "Instagram", "image": "Image",
         # legacy metadata_json tags a stray row might still carry.
         "twitter": "X", "generic": "Web",
     },
@@ -188,7 +189,7 @@ _FACET_LABELS = {
         "video": "Video", "short_video": "Short video",
         "x_thread": "X post", "x_article": "X article",
         "reddit_thread": "Reddit thread", "page": "Web page",
-        "episode": "Podcast episode", "note": "Note",
+        "episode": "Podcast episode", "note": "Note", "image": "Image",
     },
     "format": {
         "one_shot": "One shot", "talking_head": "Talking head",
@@ -11518,6 +11519,83 @@ class Handler(BaseHTTPRequestHandler):
             "platform": notes.PLATFORM,
         })
 
+    def _handle_create_image(self):
+        """POST /images -- persist an image / meme the user dropped, pasted, or
+        picked as a first-class uoink (source_type='image', platform='image').
+
+        The body is the raw image bytes (Content-Type: image/png|jpeg|webp), NOT
+        JSON, because a base64 image blows past the 64KB JSON cap. Metadata rides
+        the query string: ?caption=&source_url=&author=&filename=. The bytes are
+        trusted only after a magic-byte sniff (images.build_image), then land
+        under the configured output root (DESKTOP_ROOT/Images/<slug>/), the same
+        place every capture writes, and surface in /recent, /memory/search,
+        /library/facets, and the MCP tools with no special-casing. Token gate
+        cleared by do_POST before this runs; do_POST routes here BEFORE the JSON
+        body reader so the raw bytes are read here directly.
+
+        Local-first: no cloud vision or OCR call. The image is caption-,
+        filename-, and source-searchable now, and a vision-capable MCP client
+        reads the file itself at query time (get_uoink_corpus returns the path +
+        a /file URL)."""
+        from urllib.parse import parse_qs, unquote_plus, urlparse
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+        except ValueError:
+            return self._send_json(400, {"ok": False,
+                                         "error": "Bad Content-Length"})
+        if length <= 0:
+            return self._send_json(200, {
+                "ok": False, "code": "empty",
+                "error": "No image came through. Nothing was saved."})
+        if length > images.MAX_IMAGE_BYTES:
+            mb = images.MAX_IMAGE_BYTES // (1024 * 1024)
+            return self._send_json(413, {
+                "ok": False, "code": "too_large",
+                "error": f"That image is over {mb} MB. Nothing was saved."})
+        image_bytes = self.rfile.read(length)
+
+        qs = parse_qs(urlparse(self.path).query)
+
+        def _q(name):
+            vals = qs.get(name)
+            return unquote_plus(vals[0]) if vals else None
+
+        content_type = (self.headers.get("Content-Type") or "").split(";", 1)[0]
+        built = images.build_image(
+            image_bytes,
+            mime=content_type.strip().lower() or None,
+            filename=_q("filename"),
+            caption=_q("caption"),
+            source_url=_q("source_url"),
+            author=_q("author"))
+        if not built.get("ok"):
+            log.info("POST /images -> %s", built.get("code"))
+            return self._send_json(200, {
+                "ok": False, "error": built.get("error"),
+                "code": built.get("code")})
+        try:
+            video_id = images.persist_image(
+                _get_index(), built, image_bytes, data_root=DESKTOP_ROOT,
+                topic_classifier=_classify_topic)
+        except Exception:
+            log.exception("/images persist failed")
+            return self._send_json(500, {
+                "ok": False,
+                "error": "Got your image but couldn't save it locally."})
+        if not video_id:
+            return self._send_json(500, {
+                "ok": False, "error": "Couldn't save your image."})
+        log.info("POST /images -> ok (%s)", video_id)
+        return self._send_json(200, {
+            "ok": True,
+            "video_id": video_id,
+            "slug": built["slug"],
+            "title": built["title"],
+            "author": built["author"],
+            "source_type": images.SOURCE_TYPE,
+            "platform": images.PLATFORM,
+        })
+
     def _handle_extract_reddit(self, body: dict):
         """POST /extract/reddit {url, depth_limit?, score_threshold?} --
         capture a Reddit thread via its public .json as a yoink with
@@ -11918,6 +11996,12 @@ class Handler(BaseHTTPRequestHandler):
         # unconditional here.
         if not self._require_token():
             return
+        # /images carries raw image bytes, not JSON, and can exceed the 64KB
+        # JSON body cap, so it must be handled BEFORE _read_json_body (which
+        # would 415 on the image Content-Type and 413 on the size). It reads
+        # the raw body itself.
+        if self.path.split("?", 1)[0] == "/images":
+            return self._handle_create_image()
         try:
             body = self._read_json_body()
         except Handler._BodyError as e:

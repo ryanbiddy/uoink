@@ -433,12 +433,34 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
             citations = _b()._get_index().get_citations(video_id)
         except Exception:
             citations = []
+    extra: dict[str, Any] = {}
+    # Context-layer item 3: for an image uoink, the corpus markdown carries the
+    # caption + source, but the pixels live in the image file. Hand a vision-
+    # capable MCP client an honest, reachable pointer to the file so it can read
+    # and describe the image at query time: the absolute path (for a client with
+    # local filesystem access) and a token-gated /file URL (the same route the
+    # dashboard renders previews through). No cloud vision runs here.
+    if (sidecar.get("source_type") == "image"
+            and isinstance(sidecar.get("image_filename"), str)):
+        from urllib.parse import quote
+        image_path = folder / sidecar["image_filename"]
+        if image_path.exists():
+            extra["image"] = {
+                "path": str(image_path),
+                "file_url": "/file?path=" + quote(str(image_path)),
+                "mime": sidecar.get("mime"),
+                "caption": sidecar.get("caption"),
+                "source_url": sidecar.get("source_url"),
+                "width": sidecar.get("width"),
+                "height": sidecar.get("height"),
+            }
     return _ok(
         corpus_md=md,
         folder=str(folder),
         video_id=video_id,
         video_url=video_url,
         citations=citations,
+        **extra,
     )
 
 

@@ -10,13 +10,14 @@ YouTube." This map is the coherent model every source drops into cleanly.
 
 ```
 Platform     youtube | x | reddit | podcast | web |     (stored + indexed)
-             note
+             note | image
 Source type  video | x_thread | x_article |            (stored + indexed)
-             reddit_thread | page | episode | note
+             reddit_thread | page | episode | note |
+             image
 Author       the real "who": YouTube uploader, X        (stored + indexed)
              "Name (@handle)", reddit "r/<sub>",
              the site host for a bare web page, or
-             "You" for a note you wrote
+             "You" for a note or image you saved
 Topic        classified for every source, not just video
 Hook         optional, YouTube-only
 ```
@@ -24,6 +25,12 @@ Hook         optional, YouTube-only
 `note` is the first context-layer item type (a musing you wrote to yourself):
 `source_type='note'` on `platform='note'`, author `"You"`, persisted by
 `notes.persist_note` under `<output_root>/Notes/`. See `notes-capture.md`.
+
+`image` is context-layer item 3 (a meme / screenshot / diagram you saved):
+`source_type='image'` on `platform='image'`, author `"You"` by default,
+persisted by `images.persist_image` under `<output_root>/Images/`. The image
+file is served to a vision-capable MCP client via `get_uoink_corpus`; OCR is
+deferred (no local OCR ships yet). See `image-capture.md`.
 
 ## Schema (migration 0020)
 
