@@ -303,7 +303,7 @@
       margin-bottom: 18px;
     }
 
-    /* Uoink detail header (Bug fix): the six action buttons form a full-width
+    /* Uoink detail header: the primary action and overflow menu form a full-width
        wrapping toolbar under the heading, so every action stays reachable at
        the shipped 1280x800 window and on DPI-scaled windows. Before this, the
        toolbar was squeezed into a narrow right column that wrapped awkwardly
@@ -318,6 +318,11 @@
     .yoink-actions {
       flex: 1 1 100%;
       justify-content: flex-start;
+    }
+
+    .yoink-action-menu .action-menu-popover .button {
+      justify-content: flex-start;
+      width: 100%;
     }
 
     .eyebrow {
@@ -3995,12 +4000,17 @@
               <p class="lede" id="yoinkSubhead">Podcast episodes, interviews, and regular videos share one saved-source view.</p>
             </div>
               <div class="inline-row yoink-actions">
-                <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
-                <button class="button ghost" type="button" id="yoinkOpenMarkdown">Open transcript file</button>
-                <button class="button ghost" type="button" id="yoinkRetryCapture">Re-capture source</button>
-                <button class="button ghost" type="button" id="yoinkRetranscribe">Re-transcribe</button>
-                <button class="button ghost" type="button" id="yoinkEvidence">Evidence</button>
                 <button class="button primary" type="button" id="yoinkWriteFrom">Write from this</button>
+                <details class="action-menu yoink-action-menu" id="yoinkActionMenu">
+                  <summary class="button ghost">More actions</summary>
+                  <div class="action-menu-popover">
+                    <button class="button ghost" type="button" id="yoinkOpenFolder">Open folder</button>
+                    <button class="button ghost" type="button" id="yoinkOpenMarkdown">Open transcript file</button>
+                    <button class="button ghost" type="button" id="yoinkRetryCapture">Re-capture source</button>
+                    <button class="button ghost" type="button" id="yoinkRetranscribe">Re-transcribe</button>
+                    <button class="button ghost" type="button" id="yoinkEvidence">Evidence</button>
+                  </div>
+                </details>
               </div>
           </div>
           <div class="learn-links" aria-label="Uoink detail walkthrough links">
@@ -10859,6 +10869,9 @@
         const videoId = evidenceVideoIdOf(state.selectedYoink, state.selectedYoinkSidecar || {});
         if (!videoId) return showToast("Evidence needs a saved source id first.");
         openEvidenceFor(videoId, rowTitle(state.selectedYoink));
+      });
+      document.querySelectorAll("#yoinkActionMenu button").forEach((button) => {
+        button.addEventListener("click", () => document.getElementById("yoinkActionMenu").removeAttribute("open"));
       });
       document.querySelectorAll("[data-workspace-tab]").forEach((btn) => {
         btn.addEventListener("click", () => {

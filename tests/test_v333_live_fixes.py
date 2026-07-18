@@ -13,7 +13,7 @@ Red on unpatched main:
   with V-2c: the honest copy now also points long-form X Articles at the
   extension's "Uoink this article" button (Articles ARE supported).
 - Bug 3: the uoink detail header (#tab-yoink .page-head) has no rule making
-  the 6-button action toolbar a full-width wrapping row, so the buttons wrap
+  the detail action toolbar a full-width wrapping row, so the controls wrap
   into a squeezed right column and get cut off on a DPI-scaled window.
 
 These tests avoid pytest-only fixtures so the file also runs standalone.
@@ -216,7 +216,7 @@ def test_detail_action_toolbar_wraps_full_width():
     head = DASHBOARD.split('id="tab-yoink"', 1)[1].split("</section>", 1)[0]
     _assert('class="inline-row yoink-actions"' in head
             or 'class="yoink-actions' in head,
-            "the six detail buttons must carry the yoink-actions class")
+            "the detail controls must carry the yoink-actions class")
     for marker in ("Open folder", "Open transcript file", "Re-capture source",
                    "Re-transcribe", "Evidence", "Write from this"):
         _assert(marker in head, f"detail action missing: {marker}")
