@@ -61,6 +61,21 @@ URL, before normalization.
   `_handle_extract` threads into `_run_extraction`, which writes it to the
   sidecar. `_index_yoink` reads it and derives platform + author.
 
+## Keeping the media file (E-1, opt-in)
+
+By default the downloaded clip is deleted once screenshots + transcript are
+extracted, same as every video capture. The `keep_media` setting (backend
+settings field, default **OFF**, settable via `POST /settings
+{"keep_media": true}`) keeps the downloaded file in the uoink folder for
+**short-video captures only** -- long-form captures always delete their
+media, whatever the flag says, because their files can run to gigabytes.
+When a clip is kept, the JSON sidecar records its filename in a
+`media_file` field (e.g. `"media_file": "video.mp4"`; the file sits next to
+the sidecar), so downstream tools -- the Zing director is the customer this
+exists for -- can find the clip without globbing. With the flag off the
+sidecar carries no `media_file` field and behavior is identical to before
+the flag existed. No dashboard control yet; backend setting only.
+
 ## Honest failure
 
 TikTok and Instagram rate-limit and login-wall aggressively. When yt-dlp
@@ -87,6 +102,10 @@ video" on a TikTok / Reel / Short tab.
   stubbed via `_run_subprocess`) asserting the persisted row carries the
   right platform/source_type/author/topic and surfaces in search + facets,
   and an honest-failure test (login wall persists nothing).
+- `tests/test_keep_media.py`: the E-1 `keep_media` flag -- default OFF
+  deletes media exactly as before (and adds no sidecar field), ON +
+  `short_video` keeps the file and records `media_file` in the sidecar,
+  ON + a regular video still deletes (scope is short_video only).
 - `tests/js/classifier_test.mjs`: the extension classifier for TikTok, the
   `vm.` short link, Instagram Reels (with and without the author prefix),
   YouTube Shorts (canonical is the watch URL), and the guard that a regular

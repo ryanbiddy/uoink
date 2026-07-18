@@ -772,6 +772,13 @@ def _default_settings() -> dict:
         # honors the key, so a user who sets it False falls back to the
         # video-only path in the extension.
         "x_text_capture_enabled": True,
+        # E-1 (Zing enabler): keep the downloaded media file for short-video
+        # captures instead of deleting it after extraction, so a downstream
+        # director tool (Zing) can analyze the actual clip (cuts / captions /
+        # audio). OPT-IN, default OFF -- disk cost is real. Scope is
+        # source_type='short_video' ONLY; long-form captures always delete
+        # their media regardless of this flag.
+        "keep_media": False,
         "updated_at": None,
     }
 
@@ -819,6 +826,7 @@ def _normalize_settings(data: dict) -> dict:
     clean["x_text_capture_enabled"] = bool(
         clean.get("x_text_capture_enabled", True)
     )
+    clean["keep_media"] = bool(clean.get("keep_media"))
     model = str(clean.get("whisper_model") or "base").strip().lower()
     clean["whisper_model"] = model if model in _WHISPER_MODELS else "base"
     return clean
@@ -1101,6 +1109,9 @@ def _public_settings(data: dict | None = None) -> dict:
         # the Settings + digest copy can state the bar honestly.
         "auto_uoink_enabled": bool(data.get("auto_uoink_enabled")),
         "auto_uoink_threshold": taste_scoring.DEFAULT_THRESHOLD,
+        # E-1 (Zing enabler): opt-in short-video media retention, default
+        # OFF. Backend setting only for now -- no dashboard control yet.
+        "keep_media": bool(data.get("keep_media")),
     }
 
 
@@ -4172,6 +4183,17 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # behavior. Consumers see `comments_status: "pending"` until the
     # worker either succeeds (`fetched`), finds none (`disabled`), or
     # fails (`unavailable`).
+    #
+    # E-1 (Zing enabler): opt-in keep_media retains the downloaded media
+    # file for SHORT-VIDEO captures only, so a downstream director tool
+    # (Zing) can analyze the actual clip (cuts / captions / audio). Scoped
+    # to short_video because shorts are tens of MB while long-form media
+    # can run to gigabytes. Default OFF: deletion below stays the unchanged
+    # path and the sidecar gains no field.
+    keep_media = (
+        source_type == SOURCE_TYPE_SHORT_VIDEO
+        and bool(_read_settings().get("keep_media"))
+    )
     try:
         sidecar = {
             "schema_version": 2,  # bumped: structured screenshots + comments
@@ -4253,6 +4275,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             ),
             "entity_extraction_error": None,
         }
+        # E-1: record the kept media filename so downstream tools find the
+        # file without globbing (it sits next to the sidecar in the uoink
+        # folder). Written ONLY when keep_media applies -- the default-off
+        # sidecar stays byte-identical to before.
+        if keep_media:
+            sidecar["media_file"] = video_files[0].name
         # A5: extraction-time health snapshot, stored on the sidecar.
         sidecar["health"] = compute_health(sidecar)
         # v2.5: stamp the per-file data-shape version. Lets v2.5+ readers tell
@@ -4287,8 +4315,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     except Exception as e:
         log.warning("transcript reliability auto-check failed: %s", e)
 
-    for video_file in video_files:
-        video_file.unlink(missing_ok=True)
+    # E-1: keep_media (short_video + opt-in only) skips the cleanup so the
+    # clip stays in the uoink folder for Zing. Every other capture deletes
+    # the media exactly as before.
+    if not keep_media:
+        for video_file in video_files:
+            video_file.unlink(missing_ok=True)
 
     # Sprint 19.6 / Fix 6: refresh _all-yoinks-index.md INCREMENTALLY
     # instead of the pre-Sprint-19.6 full-tree rescan that became O(N) on
@@ -10880,6 +10912,9 @@ class Handler(BaseHTTPRequestHandler):
             "writing_show_screenshot_picker",  # v3.3 D-20
             "writing_default_attach_all_screenshots",  # v3.3 D-20
             "auto_uoink_enabled",           # V-3 taste-aware auto-uoink
+            "keep_media",                   # E-1 Zing enabler -- keep
+                                            # short-video media after
+                                            # extraction (default OFF)
         )
         integer_fields = ("clipboard_screenshot_cap",)
         extra_fields = ("output_dir", "autostart", "topics",
