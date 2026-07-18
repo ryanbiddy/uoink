@@ -443,6 +443,90 @@
       min-width: 260px;
     }
 
+    .library-more-filters {
+      position: relative;
+      min-width: 0;
+    }
+
+    .library-filter-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--cream);
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .library-filter-summary::-webkit-details-marker { display: none; }
+
+    .library-filter-summary::after {
+      color: var(--dim);
+      content: "▾";
+    }
+
+    .library-more-filters[open] .library-filter-summary::after { content: "▴"; }
+
+    .library-filter-count {
+      min-width: 20px;
+      border-radius: var(--pill-radius);
+      padding: 2px 6px;
+      background: rgba(255, 244, 236, 0.08);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .library-filter-popover {
+      position: absolute;
+      top: calc(100% + 7px);
+      right: 0;
+      z-index: 35;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+      width: min(430px, calc(100vw - 48px));
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      padding: 10px;
+      background: #0d0b09;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .library-filter-chips {
+      display: flex;
+      flex: 1 1 280px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .library-filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+      border: 1px solid rgba(249, 115, 22, 0.34);
+      border-radius: var(--pill-radius);
+      padding: 4px 9px;
+      background: rgba(194, 65, 12, 0.12);
+      color: var(--cream);
+      cursor: pointer;
+      font: inherit;
+      font-size: 11px;
+    }
+
+    .library-filter-chip:hover,
+    .library-filter-chip:focus-visible {
+      border-color: var(--rust-bright);
+      outline: none;
+    }
+
+    .library-filter-chip span {
+      color: var(--rust-bright);
+      font-weight: 900;
+    }
+
     .control,
     .field {
       width: 100%;
@@ -3851,23 +3935,28 @@
             <select class="control" id="sourceTypeFilter" aria-label="Filter by source type"><option value="">All types</option></select>
             <select class="control" id="channelFilter" aria-label="Filter by author"><option value="">All authors</option></select>
             <select class="control" id="topicFilter" aria-label="Filter by topic"><option value="">All topics</option></select>
-            <select class="control video-facet" id="hookFilter" aria-label="Filter by hook">
-              <option value="">Any hook</option>
-              <option value="curiosity_gap">curiosity gap</option>
-              <option value="question">question</option>
-              <option value="contrarian">contrarian</option>
-              <option value="story_open">story open</option>
-              <option value="promise_list">promise/list</option>
-              <option value="demo">demo</option>
-              <option value="authority">authority</option>
-              <option value="stakes">stakes</option>
-              <option value="other">other</option>
-            </select>
-            <select class="control video-facet" id="formatFilter" aria-label="Filter by format"><option value="">Format</option></select>
-            <select class="control video-facet" id="performanceFilter" aria-label="Filter by performance"><option value="">Performance</option></select>
-            <select class="control video-facet" id="lengthFilter" aria-label="Filter by length"><option value="">Length</option></select>
-            <input class="control" id="dateFrom" type="date" aria-label="Date from">
-            <input class="control" id="dateTo" type="date" aria-label="Date to">
+            <details class="library-more-filters" id="libraryMoreFilters">
+              <summary class="control library-filter-summary">Filters <span class="library-filter-count" id="advancedFilterCount">0</span></summary>
+              <div class="library-filter-popover">
+                <select class="control video-facet" id="hookFilter" aria-label="Filter by hook">
+                  <option value="">Any hook</option>
+                  <option value="curiosity_gap">curiosity gap</option>
+                  <option value="question">question</option>
+                  <option value="contrarian">contrarian</option>
+                  <option value="story_open">story open</option>
+                  <option value="promise_list">promise/list</option>
+                  <option value="demo">demo</option>
+                  <option value="authority">authority</option>
+                  <option value="stakes">stakes</option>
+                  <option value="other">other</option>
+                </select>
+                <select class="control video-facet" id="formatFilter" aria-label="Filter by format"><option value="">Format</option></select>
+                <select class="control video-facet" id="performanceFilter" aria-label="Filter by performance"><option value="">Performance</option></select>
+                <select class="control video-facet" id="lengthFilter" aria-label="Filter by length"><option value="">Length</option></select>
+                <input class="control" id="dateFrom" type="date" aria-label="Date from">
+                <input class="control" id="dateTo" type="date" aria-label="Date to">
+              </div>
+            </details>
             <select class="control" id="sortFilter" aria-label="Sort Library">
               <option value="newest">Sort: newest</option>
               <option value="oldest">Sort: oldest</option>
@@ -3878,7 +3967,8 @@
 
           <div class="summary-line">
             <span id="resultSummary">Loading library...</span>
-            <span><span id="activeFilters"></span> <span id="facetStatus" class="facet-status hidden" title="">?</span> <button class="hook-help-link" type="button" data-hook-explain="">What's a hook?</button></span>
+            <div class="library-filter-chips hidden" id="activeFilters" aria-live="polite"></div>
+            <span><span id="facetStatus" class="facet-status hidden" title="">?</span> <button class="hook-help-link" type="button" data-hook-explain="">What's a hook?</button></span>
             <span class="health-legend" title="Card status appears only while extraction is working or needs attention.">
               <span class="warn"><i></i>still working</span>
               <span class="fail"><i></i>needs attention</span>
@@ -4733,6 +4823,8 @@
       resultSummary: document.getElementById("resultSummary"),
       pageSummary: document.getElementById("pageSummary"),
       activeFilters: document.getElementById("activeFilters"),
+      libraryMoreFilters: document.getElementById("libraryMoreFilters"),
+      advancedFilterCount: document.getElementById("advancedFilterCount"),
       loadMore: document.getElementById("loadMore"),
       searchInput: document.getElementById("searchInput"),
       platformFilter: document.getElementById("platformFilter"),
@@ -7489,11 +7581,57 @@
       return String(value || "").trim();
     }
 
-    function libraryFilterSummary() {
+    const ADVANCED_LIBRARY_FILTER_KEYS = new Set([
+      "hook_type", "format", "performance", "length", "date_from", "date_to",
+    ]);
+
+    function activeLibraryFilterEntries() {
       return Object.entries(state.filters)
         .filter(([key, value]) => key !== "sort" && String(value || "").trim())
-        .map(([key, value]) => `${libraryFilterLabel(key)}: ${libraryFilterValue(key, value)}`)
-        .join(" | ");
+        .map(([key, value]) => ({
+          key,
+          label: libraryFilterLabel(key),
+          value: libraryFilterValue(key, value),
+        }));
+    }
+
+    function renderLibraryFilterChips() {
+      const entries = activeLibraryFilterEntries();
+      els.activeFilters.innerHTML = entries.map((entry) => `
+        <button class="library-filter-chip" type="button" data-remove-library-filter="${htmlEscape(entry.key)}" aria-label="Remove ${htmlEscape(entry.label)} filter">
+          ${htmlEscape(entry.label)}: ${htmlEscape(entry.value)} <span aria-hidden="true">&times;</span>
+        </button>
+      `).join("");
+      els.activeFilters.classList.toggle("hidden", !entries.length);
+      const advancedCount = entries.filter((entry) => ADVANCED_LIBRARY_FILTER_KEYS.has(entry.key)).length;
+      els.advancedFilterCount.textContent = String(advancedCount);
+    }
+
+    function libraryFilterControl(key) {
+      return ({
+        q: els.searchInput,
+        platform: els.platformFilter,
+        source_type: els.sourceTypeFilter,
+        author: els.channelFilter,
+        topic: els.topicFilter,
+        hook_type: els.hookFilter,
+        format: els.formatFilter,
+        performance: els.performanceFilter,
+        length: els.lengthFilter,
+        date_from: els.dateFrom,
+        date_to: els.dateTo,
+      })[key] || null;
+    }
+
+    function removeLibraryFilter(key) {
+      if (!Object.prototype.hasOwnProperty.call(state.filters, key) || key === "sort") return;
+      const control = libraryFilterControl(key);
+      if (control) control.value = "";
+      state.filters[key] = "";
+      setLibraryDateError("");
+      updateVideoFacetVisibility();
+      renderLibraryFilterChips();
+      loadLibrary({ reset: true });
     }
 
     function libraryDateRangeMessage() {
@@ -7597,7 +7735,9 @@
       els.sortFilter.value = "newest";
       state.filters = { q: "", platform: "", source_type: "", author: "", topic: "", hook_type: "", format: "", performance: "", length: "", date_from: "", date_to: "", sort: "newest" };
       setLibraryDateError("");
+      els.libraryMoreFilters.removeAttribute("open");
       updateVideoFacetVisibility();
+      renderLibraryFilterChips();
       loadLibrary({ reset: true });
     }
 
@@ -7608,7 +7748,7 @@
       setLibraryHeadline("unavailable");
       setLibraryNavCount(state.corpusTotal ?? state.total);
       els.resultSummary.textContent = "We couldn't refresh Library just now.";
-      els.activeFilters.textContent = libraryFilterSummary();
+      renderLibraryFilterChips();
       els.pageSummary.textContent = "Try again in a moment.";
       els.loadMore.classList.add("hidden");
       els.libraryEmpty.classList.add("hidden");
@@ -7622,7 +7762,7 @@
       setLibraryHeadline("date-error");
       setLibraryNavCount(state.corpusTotal ?? state.total);
       els.resultSummary.textContent = message;
-      els.activeFilters.textContent = libraryFilterSummary();
+      renderLibraryFilterChips();
       els.pageSummary.textContent = "Fix the dates to search Library.";
       els.loadMore.classList.add("hidden");
       els.libraryEmpty.classList.add("hidden");
@@ -7709,7 +7849,7 @@
         return;
       }
       setLibraryNavCount(navTotal);
-      els.activeFilters.textContent = libraryFilterSummary();
+      renderLibraryFilterChips();
       els.loadMore.classList.toggle("hidden", !state.hasMore);
       if (!rows.length || libraryState === "no_matches" || libraryState === "empty_corpus") {
         if (libraryState === "no_matches") {
@@ -11115,6 +11255,11 @@
         const clearLibraryButton = event.target.closest("[data-clear-library-filters]");
         if (clearLibraryButton) {
           resetLibraryFilters();
+          return;
+        }
+        const removeLibraryFilterButton = event.target.closest("[data-remove-library-filter]");
+        if (removeLibraryFilterButton) {
+          removeLibraryFilter(removeLibraryFilterButton.dataset.removeLibraryFilter);
           return;
         }
         const scriptSourceOption = event.target.closest("[data-script-source-id]");

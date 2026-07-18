@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Capture-ready Sources first.** The Sources page now leads with source types Uoink can save today. Planned integrations stay available as a collapsed reference list instead of receiving equal card weight.
 - **One clear detail action.** A saved uoink now keeps "Write from this" primary and moves folder, transcript, retry, transcription, and evidence controls into a More actions menu.
 - **Reading stays primary on Library cards.** "Write from this" remains available as a compact secondary action instead of filling the card width.
+- **A shorter Library filter row.** Search, source, author, topic, and sort stay visible. Video-analysis and date controls now sit behind Filters, and every applied filter appears as a removable chip.
 
 ## [3.6.0] - 2026-07-08
 
