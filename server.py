@@ -1330,8 +1330,8 @@ def _test_anthropic_key(api_key: str) -> tuple[bool, str | None, int | None]:
 # isn't on PATH by default on Windows, so a bare "yt-dlp" call fails.
 #
 # v3.2 fix for v3.1.3 QA-42 (X/Twitter "Bad guest token"):
-# Twitter rotated their anonymous guest-token contract. yt-dlp 2026.3.17
-# (the PyPI latest) ships a workaround that uses the syndication API
+# Twitter rotated their anonymous guest-token contract. The bundled yt-dlp
+# release supports a workaround that uses the syndication API
 # instead of the guest-token-gated GraphQL endpoint. We have to opt in
 # explicitly via --extractor-args. The arg is a no-op for other
 # platforms, so we bake it into the canonical command instead of
