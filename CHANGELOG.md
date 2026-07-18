@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Refreshed video extraction.** The bundled yt-dlp moved from 2026.03.17 to 2026.07.04, picking up current Instagram and YouTube extractor fixes.
 - **Quieter Library health.** Healthy cards no longer carry five status dots. A card now shows a labeled "Still working" or "Needs attention" exception only when extraction has unfinished or missing sections.
 - **Capture-ready Sources first.** The Sources page now leads with source types Uoink can save today. Planned integrations stay available as a collapsed reference list instead of receiving equal card weight.
+- **One clear detail action.** A saved uoink now keeps "Write from this" primary and moves folder, transcript, retry, transcription, and evidence controls into a More actions menu.
 
 ## [3.6.0] - 2026-07-08
 
