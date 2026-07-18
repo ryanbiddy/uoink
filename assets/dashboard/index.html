@@ -1664,27 +1664,21 @@
       display: block;
     }
 
-    /* "Write from this" card CTA (U-04): the one action a saved source is
-       for, on every card. Outlined at rest so 12 cards don't become 12
-       orange alarms competing with the headline; fills on card hover,
-       button hover, or keyboard focus. */
-    .button.primary.card-write {
-      width: 100%;
-      margin-top: 4px;
-      padding: 8px 10px;
-      font-size: 13px;
-      border-color: rgba(255, 61, 0, 0.55);
-      background: transparent;
-      color: var(--vermillion);
-      box-shadow: none;
+    /* "Write from this" stays available without turning every Library card
+       into a full-width writing prompt. Reading the card remains primary. */
+    .button.ghost.card-write {
+      justify-self: start;
+      width: auto;
+      margin-top: 2px;
+      padding: 6px 9px;
+      color: var(--muted);
+      font-size: 12px;
     }
 
-    .uoink-card:hover .button.primary.card-write,
-    .button.primary.card-write:hover,
-    .button.primary.card-write:focus-visible {
+    .button.ghost.card-write:hover,
+    .button.ghost.card-write:focus-visible {
       border-color: var(--vermillion);
-      background: var(--vermillion);
-      color: var(--ink);
+      color: var(--vermillion);
     }
 
     /* Hooks explainer (U-06): the card badge is a real button now, the
@@ -7797,7 +7791,7 @@
               <span class="age">${htmlEscape(fmtAge(row.yoinked_at))}</span>
             </div>
             ${healthException(row.health)}
-            <button class="button primary card-write" type="button" data-write-from="${id}" aria-label="Write from ${title}">Write from this</button>
+            <button class="button ghost card-write" type="button" data-write-from="${id}" aria-label="Write from ${title}">Write from this</button>
           </div>
         </article>
       `;

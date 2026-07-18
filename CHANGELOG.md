@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Quieter Library health.** Healthy cards no longer carry five status dots. A card now shows a labeled "Still working" or "Needs attention" exception only when extraction has unfinished or missing sections.
 - **Capture-ready Sources first.** The Sources page now leads with source types Uoink can save today. Planned integrations stay available as a collapsed reference list instead of receiving equal card weight.
 - **One clear detail action.** A saved uoink now keeps "Write from this" primary and moves folder, transcript, retry, transcription, and evidence controls into a More actions menu.
+- **Reading stays primary on Library cards.** "Write from this" remains available as a compact secondary action instead of filling the card width.
 
 ## [3.6.0] - 2026-07-08
 
