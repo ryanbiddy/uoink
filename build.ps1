@@ -94,7 +94,7 @@ $FFMPEG_VERSION = 'n7.1'
 # single self-contained ffmpeg.exe -- no DLLs to ship).
 $FFMPEG_URL     = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-31-12-58/ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip"
 # yt-dlp pip pin -- bump after compatibility-testing a new release.
-$YTDLP_VERSION  = '2026.03.17'
+$YTDLP_VERSION  = '2026.07.04'
 # Pillow is used for the multimodal paste-corpus generator (resize +
 # JPEG-recompress + base64-encode the embedded screenshots). Pinned to
 # a recent stable; bump at release-prep time after testing.

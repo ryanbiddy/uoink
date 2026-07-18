@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
+## [Unreleased]
+
+### Changed
+
+- **Refreshed video extraction.** The bundled yt-dlp moved from 2026.03.17 to 2026.07.04, picking up current Instagram and YouTube extractor fixes.
+
 ## [3.6.0] - 2026-07-08
 
 Three new kinds of things you can save, all first-class uoinks in the same corpus: your own notes, short videos (TikTok / Reels / Shorts), and images. The first steps of the context-layer vision, so more of what you want to remember lives in one place your AI can read.

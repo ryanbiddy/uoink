@@ -48,7 +48,7 @@ MACOS_DIR="${CONTENTS}/MacOS"
 # same yt-dlp / Pillow / mcp / etc. versions so both platforms ship the same
 # behaviour. Only the interpreter + ffmpeg SOURCES differ per-OS.
 PYTHON_VERSION="3.11.9"          # python-build-standalone tag, not python.org embeddable
-YTDLP_VERSION="2026.03.17"
+YTDLP_VERSION="2026.07.04"
 PILLOW_VERSION="10.4.0"
 MCP_VERSION="1.27.1"
 KEYRING_VERSION="25.7.0"

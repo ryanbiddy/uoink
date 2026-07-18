@@ -144,7 +144,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | uvicorn | 0.50.0 | UNKNOWN | https://uvicorn.dev/ |
 | whisperx | 3.8.6 | BSD-2-Clause | https://github.com/m-bain/whisperx |
 | yarl | 1.24.2 | Apache-2.0 | https://github.com/aio-libs/yarl |
-| yt-dlp | 2026.3.17 | UNKNOWN | https://github.com/yt-dlp/yt-dlp |
+| yt-dlp | 2026.7.4 | UNKNOWN | https://github.com/yt-dlp/yt-dlp |
 | zipp | 4.1.0 | UNKNOWN | https://github.com/jaraco/zipp |
 
 ## ffmpeg (bundled binary, not a Python package)

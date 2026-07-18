@@ -123,7 +123,7 @@ All three are cached under `build\cache\` after the first download. Delete the c
 |---|---|---|---|
 | Python embeddable | 3.11.9 (amd64) | Locked in `build.ps1` | Acceptance: 3.11.9 is the last 3.11.x with binary installers from python.org. Later 3.11.x are source-only security releases that we'd have to build ourselves. v2 ships 3.11.9 knowing the gap; v2.1 plan: move to the latest 3.12 embeddable. |
 | ffmpeg | 7.1 essentials build | Locked in `build.ps1` | Pulled from `github.com/GyanD/codexffmpeg/releases` (gyan.dev's GitHub mirror) for stable URLs. |
-| yt-dlp | 2026.03.17 | (pip) | Pinned via `pip install yt-dlp==2026.03.17`. Bump after compatibility-testing a new release. |
+| yt-dlp | 2026.07.04 | (pip) | Pinned via `pip install yt-dlp==2026.07.04`. Bump after compatibility-testing a new release. |
 | Pillow | 10.4.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==10.4.0`. |
 | MCP Python SDK | 1.27.1 | (pip) | Official Model Context Protocol Python SDK. Powers the stdio MCP server. Pinned via `pip install mcp==1.27.1` and `requirements.txt`. |
 | keyring | 25.7.0 | (pip) | Stores the BYO Anthropic API key in Windows Credential Manager. Pinned via `pip install keyring==25.7.0` and `requirements.txt`. |
