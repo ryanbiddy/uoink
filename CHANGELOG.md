@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - **Refreshed video extraction.** The bundled yt-dlp moved from 2026.03.17 to 2026.07.04, picking up current Instagram and YouTube extractor fixes.
+- **Quieter Library health.** Healthy cards no longer carry five status dots. A card now shows a labeled "Still working" or "Needs attention" exception only when extraction has unfinished or missing sections.
 
 ## [3.6.0] - 2026-07-08
 

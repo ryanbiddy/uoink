@@ -724,23 +724,32 @@
       white-space: nowrap;
     }
 
-    .health-dots {
-      display: flex;
+    .health-exception {
+      display: inline-flex;
       align-items: center;
-      gap: 4px;
-      min-height: 12px;
+      gap: 6px;
+      width: fit-content;
+      border-radius: var(--pill-radius);
+      padding: 4px 8px;
+      color: var(--cream);
+      background: rgba(255, 244, 236, 0.06);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1.2;
+      text-transform: uppercase;
     }
 
-    .health-dot {
-      width: 8px;
-      height: 8px;
+    .health-exception::before {
+      width: 7px;
+      height: 7px;
       border-radius: 99px;
-      background: var(--dim);
+      background: currentColor;
+      content: "";
     }
 
-    .health-dot.ok { background: var(--ok); }
-    .health-dot.warn { background: var(--acid); }
-    .health-dot.fail { background: var(--vermillion); }
+    .health-exception.warn { color: var(--acid); }
+    .health-exception.fail { color: var(--vermillion); }
 
     .health-legend {
       display: flex;
@@ -767,7 +776,6 @@
       background: var(--dim);
     }
 
-    .health-legend .ok i { background: var(--ok); }
     .health-legend .warn i { background: var(--acid); }
     .health-legend .fail i { background: var(--vermillion); }
 
@@ -3803,10 +3811,9 @@
           <div class="summary-line">
             <span id="resultSummary">Loading library...</span>
             <span><span id="activeFilters"></span> <span id="facetStatus" class="facet-status hidden" title="">?</span> <button class="hook-help-link" type="button" data-hook-explain="">What's a hook?</button></span>
-            <span class="health-legend" title="Card dots show transcript, screenshots, comments, hook, and comment-analysis readiness.">
-              <span class="ok"><i></i>ready</span>
-              <span class="warn"><i></i>working</span>
-              <span class="fail"><i></i>missing</span>
+            <span class="health-legend" title="Card status appears only while extraction is working or needs attention.">
+              <span class="warn"><i></i>still working</span>
+              <span class="fail"><i></i>needs attention</span>
             </span>
           </div>
 
@@ -5190,16 +5197,19 @@
       `;
     }
 
-    function healthDots(health) {
+    function healthException(health) {
       const keys = ["transcript", "screenshots", "comments", "hook", "comment_intelligence"];
-      return keys.map((key) => {
+      const issues = keys.map((key) => {
         const value = health && health[key] ? String(health[key]) : "skipped";
-        let cls = "health-dot";
-        if (value.startsWith("ok")) cls += " ok";
-        else if (value.includes("missing") || value.includes("failed")) cls += " fail";
-        else if (value.includes("pending")) cls += " warn";
-        return `<span class="${cls}" title="${htmlEscape(key)}: ${htmlEscape(value)}"></span>`;
-      }).join("");
+        const failed = /missing|failed|error|unavailable/i.test(value);
+        const working = /pending|processing|queued/i.test(value);
+        return failed || working ? { key, value, failed } : null;
+      }).filter(Boolean);
+      if (!issues.length) return "";
+      const failed = issues.some((issue) => issue.failed);
+      const label = failed ? "Needs attention" : "Still working";
+      const detail = issues.map((issue) => `${humanLabel(issue.key)}: ${issue.value}`).join(". ");
+      return `<div class="health-exception ${failed ? "fail" : "warn"}" title="${htmlEscape(detail)}" aria-label="${htmlEscape(`${label}. ${detail}`)}">${label}</div>`;
     }
 
     function videoIdOf(row) {
@@ -7665,15 +7675,10 @@
       const confidence = row.hook_type_confidence != null ? ` - confidence ${row.hook_type_confidence}/5` : "";
       const entities = Number(row.entity_count || 0);
       const speakers = Number(row.speaker_count || 0);
-      const topEntities = Array.isArray(row.top_entities) ? row.top_entities.slice(0, 5).join(", ") : "";
       const bottomChip = podcast
         ? `<span class="speaker-count-chip">${htmlEscape(speakers ? `${speakers} speaker${speakers === 1 ? "" : "s"}` : "speakers pending")}</span>`
         : `<button class="hook-chip" type="button" data-hook-explain="${htmlEscape(row.hook_type || "other")}" title="What's a ${hook} hook?">${hook}${htmlEscape(confidence)}</button>`;
       const platformChip = live ? "live" : platformChipLabel(platform);
-      const dotTitle = [
-        "Dots: transcript, screenshots, comments, hook, comment analysis.",
-        topEntities ? `Top entities: ${topEntities}.` : "",
-      ].filter(Boolean).join(" ");
       return `
         <article class="uoink-card ${htmlEscape(variant)}" data-card-id="${id}" data-folder="${htmlEscape(row.folder || "")}" data-video-id="${id}" tabindex="0" role="button" aria-label="Open ${title}">
           <div class="thumb">
@@ -7692,7 +7697,7 @@
               <span class="topic-chip">${topic}</span>
               <span class="age">${htmlEscape(fmtAge(row.yoinked_at))}</span>
             </div>
-            <div class="health-dots" title="${htmlEscape(dotTitle)}" aria-label="${htmlEscape(dotTitle)}">${healthDots(row.health)}</div>
+            ${healthException(row.health)}
             <button class="button primary card-write" type="button" data-write-from="${id}" aria-label="Write from ${title}">Write from this</button>
           </div>
         </article>
