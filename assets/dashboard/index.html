@@ -1480,6 +1480,75 @@
       gap: 14px;
     }
 
+    .source-map-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 24px 0 12px;
+    }
+
+    .source-map-heading h2 {
+      color: var(--cream);
+      font-size: 20px;
+    }
+
+    .source-roadmap {
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      background: rgba(21, 17, 13, 0.58);
+    }
+
+    .source-roadmap > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 16px;
+      color: var(--cream);
+      cursor: pointer;
+      font-weight: 800;
+      list-style: none;
+    }
+
+    .source-roadmap > summary::-webkit-details-marker { display: none; }
+
+    .source-roadmap > summary::after {
+      color: var(--dim);
+      content: "+";
+      font-family: var(--font-mono);
+    }
+
+    .source-roadmap[open] > summary::after { content: "−"; }
+
+    .source-roadmap-list {
+      display: grid;
+      gap: 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .source-roadmap-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 244, 236, 0.07);
+    }
+
+    .source-roadmap-row:last-child { border-bottom: 0; }
+
+    .source-roadmap-row strong,
+    .source-roadmap-row span { display: block; }
+
+    .source-roadmap-row span {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
     .source-card {
       display: grid;
       gap: 12px;
@@ -3907,7 +3976,15 @@
             </ol>
             <p class="get-extension-note">Chrome Web Store review is still pending, so you load it unpacked for now.</p>
           </div>
+          <div class="source-map-heading">
+            <h2>Capture now</h2>
+            <span class="soft-note">Sources this version can save</span>
+          </div>
           <div class="source-map" id="sourceMap" role="list" aria-label="Supported source types"></div>
+          <details class="source-roadmap" id="sourceRoadmap">
+            <summary>Planned sources <span class="soft-note" id="sourceRoadmapCount">0</span></summary>
+            <div class="source-roadmap-list" id="sourceRoadmapList" role="list" aria-label="Planned source types"></div>
+          </details>
         </section>
 
         <section class="tab-panel" id="tab-yoink" data-tab-panel="yoink">
@@ -6161,8 +6238,10 @@
 
     function renderSources() {
       if (!els.sourceMap) return;
-      setSidebarBadge(els.sourcesNavCount, SOURCE_CAPABILITIES.length, "source types");
-      els.sourceMap.innerHTML = SOURCE_CAPABILITIES.map((source, index) => `
+      const ready = SOURCE_CAPABILITIES.filter((source) => source.status !== "planned");
+      const planned = SOURCE_CAPABILITIES.filter((source) => source.status === "planned");
+      setSidebarBadge(els.sourcesNavCount, ready.length, "capture-ready source types");
+      els.sourceMap.innerHTML = ready.map((source, index) => `
         <article class="source-card" role="listitem" aria-labelledby="source-card-title-${index}">
           <div class="source-card-head">
             <h2 id="source-card-title-${index}">${htmlEscape(source.name)}</h2>
@@ -6171,6 +6250,16 @@
           <p><strong>Capture:</strong> ${htmlEscape(source.capture)}</p>
           <p><strong>Corpus:</strong> ${htmlEscape(source.corpus)}</p>
           <p><strong>Output:</strong> ${htmlEscape(source.output)}</p>
+        </article>
+      `).join("");
+      document.getElementById("sourceRoadmapCount").textContent = String(planned.length);
+      document.getElementById("sourceRoadmapList").innerHTML = planned.map((source, index) => `
+        <article class="source-roadmap-row" role="listitem" aria-labelledby="planned-source-title-${index}">
+          <div>
+            <strong id="planned-source-title-${index}">${htmlEscape(source.name)}</strong>
+            <span>${htmlEscape(source.capture)}</span>
+          </div>
+          <span class="source-status planned">${htmlEscape(sourceStatusLabel(source.status))}</span>
         </article>
       `).join("");
     }
