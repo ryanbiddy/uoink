@@ -29,6 +29,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   fields, unknown fields, wrong types, and out-of-range values return HTTP 400
   before a tool runs. Human-readable errors now say "uoink"; the legacy
   response keys `yoinks` and `yoinked_at` remain unchanged for compatibility.
+- **Engagement from Writer and Zing now ages correctly.** Their RFC 3339 UTC
+  timestamps follow the same 30-day half-life as Uoink's native engagement
+  events instead of remaining at full weight forever.
 
 ## [3.6.0] - 2026-07-08
 

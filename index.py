@@ -890,7 +890,6 @@ class Index:
             return {"video_id": video_id, "value_score": 0.0,
                     "event_counts": {}, "last_event_ts": None,
                     "total_events": 0}
-        now = datetime.now()
         counts: dict[str, int] = {}
         score = 0.0
         last_ts = None
@@ -900,6 +899,12 @@ class Index:
             last_ts = r["ts_utc"]
             try:
                 ts = datetime.fromisoformat(r["ts_utc"])
+                # Native events predate the suite contract and use local,
+                # timezone-naive timestamps. Suite events are RFC 3339 UTC
+                # (`...Z`) and parse as timezone-aware. Subtract like from
+                # like so both histories decay on the same 30-day curve.
+                now = (datetime.now(ts.tzinfo)
+                       if ts.tzinfo is not None else datetime.now())
                 age_days = (now - ts).total_seconds() / 86400.0
             except (ValueError, TypeError):
                 age_days = 0.0
