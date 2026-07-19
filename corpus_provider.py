@@ -8,6 +8,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 import corpus_contract
+import corpus_intelligence
 import memory_layer
 
 MAX_CONTENT_BYTES = 2 * 1024 * 1024
@@ -159,6 +160,13 @@ class UoinkCorpusProvider:
                 "offset": request.offset,
             },
         }
+
+    def assemble(self, request: corpus_contract.AssemblyRequest) -> dict:
+        return corpus_intelligence.assemble(
+            self.idx,
+            request,
+            data_root=self.data_root,
+        )
 
     def _live_row(self, item_id: str) -> dict:
         item_id = str(item_id or "").strip()

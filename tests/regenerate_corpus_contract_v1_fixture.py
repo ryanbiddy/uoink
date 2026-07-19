@@ -168,6 +168,15 @@ def generate_fixture() -> dict:
                     lambda: "2030-01-02T03:04:05Z"):
                 taste = corpus_contract.success(
                     "taste", provider.taste())
+                assembly = corpus_contract.success(
+                    "assemble",
+                    provider.assemble(corpus_contract.AssemblyRequest(
+                        format="talking_head",
+                        topic="Local AI",
+                        hook_target="curiosity_gap",
+                        n_examples=5,
+                    )),
+                )
             try:
                 provider.get("missing-contract-item")
             except corpus_contract.ContractError as error:
@@ -198,6 +207,7 @@ def generate_fixture() -> dict:
             "get_non_video": note,
             "facets": facets,
             "taste": taste,
+            "assemble": assembly,
             "missing": missing,
         },
     }

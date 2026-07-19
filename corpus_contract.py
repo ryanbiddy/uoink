@@ -12,7 +12,7 @@ from typing import Any, Mapping, Protocol, runtime_checkable
 
 CONTRACT_NAME = "uoink.corpus.read"
 CONTRACT_VERSION = 1
-OPERATIONS = ("search", "get", "facets", "taste")
+OPERATIONS = ("search", "get", "facets", "taste", "assemble")
 SEARCH_STATES = ("matches", "no_matches", "empty_corpus")
 FACET_NAMES = (
     "platform",
@@ -37,6 +37,13 @@ SEARCH_QUERY_KEYS = {
     "date_to",
     "limit",
     "offset",
+}
+ASSEMBLY_BODY_KEYS = {
+    "format",
+    "topic",
+    "hook_target",
+    "your_channel",
+    "n_examples",
 }
 
 _ITEM_KEYS = {
@@ -69,6 +76,27 @@ _ATTACHMENT_KEYS = {
     "byte_length",
     "href",
 }
+_ASSEMBLY_DATA_KEYS = {
+    "filters",
+    "assembled",
+    "audience_questions",
+    "self_snapshot",
+    "taste_anchors",
+}
+_ASSEMBLY_FILTER_KEYS = set(ASSEMBLY_BODY_KEYS)
+_ASSEMBLED_ITEM_KEYS = {
+    "video_id",
+    "slug",
+    "title",
+    "channel",
+    "topic",
+    "hook_type",
+    "format",
+    "performance_tier",
+    "length_bucket",
+    "yoinked_at",
+}
+_AUDIENCE_QUESTION_KEYS = {"video_id", "question", "likes"}
 
 
 class ContractError(ValueError):
@@ -163,6 +191,59 @@ class SearchRequest:
         return cls(limit=limit, offset=offset, **values)
 
 
+@dataclass(frozen=True)
+class AssemblyRequest:
+    format: str | None = None
+    topic: str | None = None
+    hook_target: str | None = None
+    your_channel: str | None = None
+    n_examples: int = 10
+
+    @classmethod
+    def from_body(cls, body: Mapping[str, Any]) -> "AssemblyRequest":
+        if not isinstance(body, Mapping):
+            raise ContractError(
+                "invalid_request", "json object required")
+        unknown = sorted(set(body) - ASSEMBLY_BODY_KEYS)
+        if unknown:
+            raise ContractError(
+                "invalid_request",
+                "unknown assembly fields: " + ", ".join(unknown),
+            )
+
+        def optional_text(name: str) -> str | None:
+            raw = body.get(name)
+            if raw is None:
+                return None
+            if not isinstance(raw, str):
+                raise ContractError(
+                    "invalid_request", f"{name} must be a string or null")
+            value = raw.strip()
+            if len(value) > 200:
+                raise ContractError(
+                    "invalid_request",
+                    f"{name} is too long (max 200 characters)",
+                )
+            return value or None
+
+        n_examples = body.get("n_examples", 10)
+        if isinstance(n_examples, bool) or not isinstance(n_examples, int):
+            raise ContractError(
+                "invalid_request", "n_examples must be an integer")
+        if not 1 <= n_examples <= 100:
+            raise ContractError(
+                "invalid_request",
+                "n_examples must be between 1 and 100",
+            )
+        return cls(
+            format=optional_text("format"),
+            topic=optional_text("topic"),
+            hook_target=optional_text("hook_target"),
+            your_channel=optional_text("your_channel"),
+            n_examples=n_examples,
+        )
+
+
 @runtime_checkable
 class CorpusReadProvider(Protocol):
     def search(self, request: SearchRequest) -> dict:
@@ -175,6 +256,9 @@ class CorpusReadProvider(Protocol):
         ...
 
     def taste(self) -> dict:
+        ...
+
+    def assemble(self, request: AssemblyRequest) -> dict:
         ...
 
 
@@ -263,6 +347,79 @@ def validate_attachment(attachment: Any) -> None:
         raise ContractError(
             "provider_nonconformant",
             "attachment.byte_length must be a non-negative integer",
+            status=500,
+        )
+
+
+def validate_assembly(data: Any) -> None:
+    data = _exact_keys(data, _ASSEMBLY_DATA_KEYS, "assemble data")
+    filters = _exact_keys(
+        data["filters"], _ASSEMBLY_FILTER_KEYS, "assemble data.filters")
+    for name in ("format", "topic", "hook_target", "your_channel"):
+        _nullable_string(filters[name], f"assemble data.filters.{name}")
+    n_examples = filters["n_examples"]
+    if isinstance(n_examples, bool) or not isinstance(n_examples, int) \
+            or not 1 <= n_examples <= 100:
+        raise ContractError(
+            "provider_nonconformant",
+            "assemble data.filters.n_examples must be between 1 and 100",
+            status=500,
+        )
+
+    if not isinstance(data["assembled"], list):
+        raise ContractError(
+            "provider_nonconformant",
+            "assemble data.assembled must be a list",
+            status=500,
+        )
+    for item in data["assembled"]:
+        item = _exact_keys(
+            item, _ASSEMBLED_ITEM_KEYS, "assembled item")
+        if not isinstance(item["video_id"], str) or not item["video_id"]:
+            raise ContractError(
+                "provider_nonconformant",
+                "assembled item.video_id must be a non-empty string",
+                status=500,
+            )
+        for name in _ASSEMBLED_ITEM_KEYS - {"video_id"}:
+            _nullable_string(item[name], f"assembled item.{name}")
+
+    if not isinstance(data["audience_questions"], list):
+        raise ContractError(
+            "provider_nonconformant",
+            "assemble data.audience_questions must be a list",
+            status=500,
+        )
+    for question in data["audience_questions"]:
+        question = _exact_keys(
+            question, _AUDIENCE_QUESTION_KEYS, "audience question")
+        for name in ("video_id", "question"):
+            if not isinstance(question[name], str) or not question[name]:
+                raise ContractError(
+                    "provider_nonconformant",
+                    f"audience question.{name} must be a non-empty string",
+                    status=500,
+                )
+        if isinstance(question["likes"], bool) \
+                or not isinstance(question["likes"], int):
+            raise ContractError(
+                "provider_nonconformant",
+                "audience question.likes must be an integer",
+                status=500,
+            )
+
+    if data["self_snapshot"] is not None \
+            and not isinstance(data["self_snapshot"], dict):
+        raise ContractError(
+            "provider_nonconformant",
+            "assemble data.self_snapshot must be an object or null",
+            status=500,
+        )
+    if data["taste_anchors"] is not None and not isinstance(
+            data["taste_anchors"], (str, dict)):
+        raise ContractError(
+            "provider_nonconformant",
+            "assemble data.taste_anchors must be a string, object, or null",
             status=500,
         )
 
@@ -385,6 +542,9 @@ def validate_data(operation: str, data: Any) -> None:
             data["date_bounds"], {"min", "max"}, "facets date_bounds")
         _nullable_string(bounds["min"], "facets date_bounds.min")
         _nullable_string(bounds["max"], "facets date_bounds.max")
+        return
+    if operation == "assemble":
+        validate_assembly(data)
         return
     data = _exact_keys(data, {"markdown", "anchors"}, "taste data")
     if not isinstance(data["markdown"], str):
