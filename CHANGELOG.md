@@ -8,7 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 > Those historical entries are left unchanged. The product was renamed to
 > **Uoink** in 2.1.0; see below.
 
-## [Unreleased]
+## [3.7.0] - 2026-07-19
+
+Uoink can now hand local corpus context and retained short-video media to the
+other products in the suite through explicit, versioned contracts. This build
+also fixes the two short-video failures found after 3.6.0 was prepared and
+makes the Library quieter without hiding controls.
+
+### Added
+
+- **Local suite contracts.** Uoink now advertises a token-free local service manifest and authenticated health, corpus-read, media-handoff, engagement, and peer endpoints for compatible local products. Each product keeps its own token, and Uoink remains usable when its optional peers are stopped.
+- **A stable corpus-read boundary for Writer.** Versioned corpus snapshots expose citations and source metadata without giving another product direct access to Uoink's database.
+- **Opt-in retained media for Zing.** Short-video capture can keep the downloaded source file and expose a confined, integrity-checked local handoff when a user chooses to study that item in Zing.
 
 ### Changed
 
@@ -18,6 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **One clear detail action.** A saved uoink now keeps "Write from this" primary and moves folder, transcript, retry, transcription, and evidence controls into a More actions menu.
 - **Reading stays primary on Library cards.** "Write from this" remains available as a compact secondary action instead of filling the card width.
 - **A shorter Library filter row.** Search, source, author, topic, and sort stay visible. Video-analysis and date controls now sit behind Filters, and every applied filter appears as a removable chip.
+- **Assembly and writing use explicit boundaries.** Existing Generate and assembly behavior remains available while its data access now goes through the same versioned corpus contract used by the suite.
 - **The stdio MCP surface is exactly 14 canonical tools.** The six deprecated
   `yoink_*` aliases reached the removal point announced for Uoink v3 and are
   no longer listed or accepted. Clients must use the corresponding `uoink_*`
@@ -25,6 +37,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
+- **Short clips produce real screenshots.** Screenshot extraction now handles sub-30-second and limited-range video instead of returning dark or empty frames.
+- **Captionless videos can still get a transcript.** When a platform provides no captions, Uoink falls back to local speech recognition rather than silently leaving the transcript empty.
+- **Feature-branch CI runs once.** Pull requests no longer duplicate the same test run through both branch and pull-request triggers.
 - **OpenAPI calls now enforce their published input schemas.** Missing required
   fields, unknown fields, wrong types, and out-of-range values return HTTP 400
   before a tool runs. Human-readable errors now say "uoink"; the legacy
