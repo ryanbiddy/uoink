@@ -183,8 +183,8 @@
         "content": {
           "available": true,
           "media_type": "text/markdown",
-          "text": "# The saved hour\r\n\r\nA local workflow removed one repeated task.\r\n",
-          "byte_length": 65,
+          "text": "# The saved hour\n\nA local workflow removed one repeated task.\n",
+          "byte_length": 62,
           "truncated": false
         },
         "attachments": [
@@ -241,8 +241,8 @@
         "content": {
           "available": true,
           "media_type": "text/markdown",
-          "text": "# Local note\r\n\r\nA short note about repeatable systems.\r\n",
-          "byte_length": 56,
+          "text": "# Local note\n\nA short note about repeatable systems.\n",
+          "byte_length": 53,
           "truncated": false
         },
         "attachments": [

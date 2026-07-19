@@ -38,10 +38,8 @@ def build_provider(root: Path):
 
     video_corpus = video_folder / "video-contract.md"
     video_sidecar = video_folder / "video-contract.json"
-    video_corpus.write_text(
-        "# The saved hour\n\nA local workflow removed one repeated task.\n",
-        encoding="utf-8",
-    )
+    video_corpus.write_bytes(
+        b"# The saved hour\n\nA local workflow removed one repeated task.\n")
     (video_folder / "thumbnail.jpg").write_bytes(b"fixture-thumbnail")
     screenshots = video_folder / "screenshots"
     screenshots.mkdir()
@@ -61,10 +59,8 @@ def build_provider(root: Path):
 
     note_corpus = note_folder / "note-contract.md"
     note_sidecar = note_folder / "note-contract.json"
-    note_corpus.write_text(
-        "# Local note\n\nA short note about repeatable systems.\n",
-        encoding="utf-8",
-    )
+    note_corpus.write_bytes(
+        b"# Local note\n\nA short note about repeatable systems.\n")
     (note_folder / "note-image.png").write_bytes(b"fixture-note-image")
     note_sidecar.write_text(json.dumps({
         "schema_version": 2,
