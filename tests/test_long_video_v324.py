@@ -156,6 +156,9 @@ def test_chunked_extraction_path(tmp: Path):
     _assert(len(subtitle_calls) == 1, "full subtitle request is separate")
     _assert(len(ffmpeg_calls) == server.LONG_VIDEO_MAX_CHUNKS,
             "ffmpeg work is partitioned per downloaded section")
+    _assert(all(c[c.index("-pix_fmt") + 1] == "yuvj420p"
+                for c in ffmpeg_calls),
+            "every chunk must emit full-range JPEG YUV")
     _assert(result["long_video_mode"] == "chunked", f"mode exposed: {result}")
     _assert(result["processed_media_seconds"]
             == server.LONG_VIDEO_CHUNK_BUDGET_SECONDS, "bounded work exposed")
@@ -328,9 +331,8 @@ def test_screenshot_phase_end_to_end(tmp: Path):
     # phase, including the duration-scaled timeout.
     started = time.monotonic()
     server._run_subprocess(
-        ["ffmpeg", "-loglevel", "error", "-y", "-i", str(video),
-         "-vf", f"fps=1/{interval}", "-q:v", "2",
-         str(shots_dir / "shot_%04d.jpg")],
+        server._screenshot_ffmpeg_command(
+            video, interval, shots_dir / "shot_%04d.jpg"),
         check=True,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.PIPE,
