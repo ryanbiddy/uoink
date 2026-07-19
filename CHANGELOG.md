@@ -23,6 +23,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   no longer listed or accepted. Clients must use the corresponding `uoink_*`
   names.
 
+### Fixed
+
+- **OpenAPI calls now enforce their published input schemas.** Missing required
+  fields, unknown fields, wrong types, and out-of-range values return HTTP 400
+  before a tool runs. Human-readable errors now say "uoink"; the legacy
+  response keys `yoinks` and `yoinked_at` remain unchanged for compatibility.
+
 ## [3.6.0] - 2026-07-08
 
 Three new kinds of things you can save, all first-class uoinks in the same corpus: your own notes, short videos (TikTok / Reels / Shorts), and images. The first steps of the context-layer vision, so more of what you want to remember lives in one place your AI can read.

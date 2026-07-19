@@ -1037,9 +1037,9 @@ Error responses:
 |---:|---|---|
 | 400 | `video_id required` | Missing or empty video ID. |
 | 403 | `missing or invalid token` | `X-Uoink-Token` missing or stale. |
-| 404 | `yoink not found` | No indexed yoink exists for that video ID. |
+| 404 | `uoink not found` | No indexed uoink exists for that video ID. |
 | 409 | `already deleted` | The row already has `deleted_at`. |
-| 409 | `yoink folder missing on disk` | The index row exists, but its folder is missing. |
+| 409 | `uoink folder missing on disk` | The index row exists, but its folder is missing. |
 | 500 | `could not move folder to trash` | Windows/filesystem move failed; the index row is rolled back. |
 
 ### POST /memory/restore
@@ -1075,8 +1075,8 @@ Error responses:
 |---:|---|---|
 | 400 | `video_id required` | Missing or empty video ID. |
 | 403 | `missing or invalid token` | `X-Uoink-Token` missing or stale. |
-| 404 | `yoink not found` | No indexed yoink exists for that video ID. |
-| 409 | `yoink is not deleted` | The row has no `deleted_at` value. |
+| 404 | `uoink not found` | No indexed uoink exists for that video ID. |
+| 409 | `uoink is not deleted` | The row has no `deleted_at` value. |
 | 409 | `trash folder not found` | The trash folder no longer exists. |
 | 409 | `original location is occupied` | Restore would overwrite an existing folder. |
 | 500 | `could not restore folder` | Windows/filesystem move failed. |

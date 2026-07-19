@@ -325,6 +325,8 @@ def list_recent_uoinks(args: dict[str, Any]) -> dict[str, Any]:
     # Sprint 15: reads the SQLite library index instead of walking the
     # whole corpus tree on disk. Return shape unchanged.
     limit = _limit_int(args.get("limit"), default=20, low=1, high=100)
+    # Compatibility contract: `yoinks` and `yoinked_at` are frozen legacy
+    # wire keys. The product and all human-readable messages use Uoink.
     yoinks = []
     for r in _b()._get_index().list_recent(limit):
         sidecar_path = r.get("sidecar_path") or ""
@@ -368,7 +370,7 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
-        return _err("yoink not found")
+        return _err("uoink not found")
     try:
         md = corpus.read_text(encoding="utf-8")
     except OSError as e:
@@ -423,10 +425,10 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
-        return _err("yoink not found")
+        return _err("uoink not found")
     video_id = _read_sidecar(folder).get("video_id")
     if not isinstance(video_id, str) or not video_id.strip():
-        return _err("yoink has no video_id")
+        return _err("uoink has no video_id")
     transcript: list[dict[str, Any]] = []
     screenshots: list[dict[str, Any]] = []
     for r in _b()._get_index().get_citations(video_id):
@@ -457,7 +459,7 @@ def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
-        return _err("yoink not found")
+        return _err("uoink not found")
     sidecar = _read_sidecar(folder)
     video_id = sidecar.get("video_id")
     health = None
@@ -470,7 +472,7 @@ def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
         # Fall back to the sidecar's own snapshot if the index lacks a row.
         health = sidecar.get("health")
     if not isinstance(health, dict):
-        return _err("no health data for this yoink")
+        return _err("no health data for this uoink")
     return _ok(video_id=video_id or None, health=health)
 
 
@@ -2043,7 +2045,7 @@ def get_transcript_reliability(args: dict[str, Any]) -> dict[str, Any]:
         return _err("video_id required")
     folder, _row = _b()._folder_for_video_id(video_id.strip())
     if not folder:
-        return _err("yoink not found")
+        return _err("uoink not found")
     reliability = _read_sidecar(folder).get("reliability")
     if not isinstance(reliability, dict):
         reliability = {"status": "not_computed", "spans": [], "span_count": 0}
@@ -2058,7 +2060,7 @@ def analyze_comments_tool(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
-        return _err("yoink not found")
+        return _err("uoink not found")
     comments = _comments_for_folder(folder)
     if len(comments) < 5:
         return _err("not enough comments to analyze")
@@ -2087,7 +2089,7 @@ def classify_hook(args: dict[str, Any]) -> dict[str, Any]:
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
-        return _err("yoink not found")
+        return _err("uoink not found")
     try:
         context = _hook_context_for_folder(folder)
         analysis = b.analyze_hook_type(context, api_key=key)

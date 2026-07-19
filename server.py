@@ -1859,12 +1859,12 @@ def _compute_transcript_reliability(
     if folder is None:
         folder, _row = _folder_for_video_id(video_id)
     if folder is None:
-        return {"ok": False, "error": "yoink not found"}
+        return {"ok": False, "error": "uoink not found"}
 
     sidecar_path, sidecar = _read_sidecar_for_folder(folder)
     vid = (sidecar.get("video_id") or video_id or "").strip()
     if not vid:
-        return {"ok": False, "error": "yoink has no video_id"}
+        return {"ok": False, "error": "uoink has no video_id"}
     existing = sidecar.get("reliability")
     if isinstance(existing, dict) and existing.get("status") == "completed" and not force:
         return {"ok": True, "reliability": existing, "cached": True}
@@ -1919,7 +1919,7 @@ def _compute_transcript_reliability(
         else:
             url = (sidecar.get("url") or "").strip()
             if not url:
-                return {"ok": False, "error": "yoink has no source URL"}
+                return {"ok": False, "error": "uoink has no source URL"}
             with tempfile.TemporaryDirectory(prefix="uoink-reliability-") as tmp:
                 audio = _download_reliability_audio(url, Path(tmp))
                 reliability = run_detection(audio)
@@ -6471,7 +6471,7 @@ def _record_single_extract_job(url: str, started_at: str, *,
             "source_duration_seconds": result.get("source_duration_seconds"),
         } if ok else None,
         "warnings": [],
-        "message": "Single-video yoink complete." if ok else "Single-video yoink failed.",
+        "message": "Single-video uoink complete." if ok else "Single-video uoink failed.",
         "retry_exhausted": bool(retry_exhausted) and not ok,
         "attempt_count": int(attempt_count) if attempt_count else None,
     }
@@ -11203,7 +11203,7 @@ class Handler(BaseHTTPRequestHandler):
     def _handle_reliability_get(self, video_id: str):
         folder, _row = _folder_for_video_id(video_id)
         if folder is None:
-            return self._send_json(404, {"ok": False, "error": "yoink not found"})
+            return self._send_json(404, {"ok": False, "error": "uoink not found"})
         _sidecar_path, sidecar = _read_sidecar_for_folder(folder)
         reliability = sidecar.get("reliability")
         if not isinstance(reliability, dict):
@@ -12080,9 +12080,8 @@ class Handler(BaseHTTPRequestHandler):
         non-MCP agent can call them after reading /openapi/v1/spec.json.
         Token gate already cleared by do_POST. Routes through the same
         uoink_mcp_tools.call_tool the MCP transport uses (one dispatch path,
-        one rate limiter). Tool/validation errors come back as ok:false at
-        HTTP 200 (matching the rest of the helper); only an unknown tool name
-        is a 404."""
+        one rate limiter). Tool errors come back as ok:false at HTTP 200;
+        request-schema errors are HTTP 400, and an unknown tool name is 404."""
         from urllib.parse import unquote
         name = unquote(bare[len("/tools/"):]).strip("/")
         if not name or "/" in name:
@@ -12092,6 +12091,11 @@ class Handler(BaseHTTPRequestHandler):
         if name not in tools.TOOL_REGISTRY:
             return self._send_json(404, {"ok": False,
                                          "error": "tool not found"})
+        validation_error = openapi_bridge.validate_arguments(
+            body, tools.TOOL_REGISTRY[name].input_schema)
+        if validation_error:
+            return self._send_json(400, {"ok": False,
+                                         "error": validation_error})
         try:
             result = tools.call_tool(name, body if isinstance(body, dict) else {})
         except Exception:
@@ -12951,14 +12955,14 @@ class Handler(BaseHTTPRequestHandler):
         idx = _get_index()
         row = idx.get_yoink(video_id)
         if not row:
-            return self._send_json(404, {"ok": False, "error": "yoink not found"})
+            return self._send_json(404, {"ok": False, "error": "uoink not found"})
         if row.get("deleted_at"):
             return self._send_json(409, {"ok": False, "error": "already deleted"})
 
         src = Path(row.get("corpus_path") or "").parent
         if not src.exists() or not src.is_dir():
             return self._send_json(
-                409, {"ok": False, "error": "yoink folder missing on disk"})
+                409, {"ok": False, "error": "uoink folder missing on disk"})
 
         # Mark deleted first so the trash folder name derives from the same
         # deleted_at the index stores; roll the row back if the move fails.
@@ -12989,9 +12993,9 @@ class Handler(BaseHTTPRequestHandler):
         idx = _get_index()
         row = idx.get_yoink(video_id)
         if not row:
-            return self._send_json(404, {"ok": False, "error": "yoink not found"})
+            return self._send_json(404, {"ok": False, "error": "uoink not found"})
         if not row.get("deleted_at"):
-            return self._send_json(409, {"ok": False, "error": "yoink is not deleted"})
+            return self._send_json(409, {"ok": False, "error": "uoink is not deleted"})
 
         trash = _trash_folder_for(row)
         dst = Path(row.get("corpus_path") or "").parent
