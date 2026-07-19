@@ -111,7 +111,48 @@
           ],
           "hook_lens": null,
           "voice_dna_prompt": "# Voice DNA\n\nRyan's canonical voice spec for ALL written output Uoink produces. This is injected as system-prompt PREPEND on every Script Studio, Writing Studio, and future text-generation API call. Violations trigger the banned-phrase guard (one regenerate attempt with violations highlighted).\n\n## Writing Rules\n- Write like a sharp human, not a language model.\n- Use contractions naturally (don't, can't, won't).\n- Short paragraphs. 1-3 sentences max.\n- Get to the point. No throat-clearing, no preamble.\n- If making a claim, be specific. Use numbers, names, concrete details.\n- Vary sentence length. Mix short punchy lines with longer ones.\n- Use natural transitions, not mechanical ones (\"Furthermore,\" \"Additionally\").\n- When uncertain, say so plainly (\"I think,\" \"probably,\" \"kinda\"). Hedging is human.\n- Never pad output to seem more thorough. Shorter and accurate beats longer and fluffy.\n- Use physical verbs for abstract processes: \"sanded down\" not \"improved,\" \"bolted on\" not \"added,\" \"stripped back\" not \"simplified.\"\n- Humor comes from specificity, not from jokes. Be unexpectedly precise.\n- Parenthetical asides are good. Use them for editorial commentary, honest reactions, quick tangents, and deflating your own seriousness (like this).\n\n## Formatting Rules\n- Short paragraphs (1-2 sentences default, 3 max).\n- Numbers as digits.\n- Contractions always.\n- NO em dashes ever. Use commas, periods, colons, semicolons, or parentheses.\n- Bold sparingly, 1-2 key moments per section.\n- Code blocks for specific prompts, commands, or tool outputs.\n\n## Banned Phrases (never use these, ever)\n\n### Dead AI Language\n- \"In today's [anything]...\"\n- \"It's important to note that...\" / \"It's worth noting...\"\n- \"Delve\" / \"Dive into\" / \"Unpack\"\n- \"Harness\" / \"Leverage\" / \"Utilize\"\n- \"Landscape\" / \"Realm\" / \"Robust\"\n- \"Game-changer\" / \"Cutting-edge\"\n- \"Straightforward\"\n- \"I'd be happy to help\"\n- \"In order to\"\n\n### Dead Transitions\n- \"Furthermore\" / \"Additionally\" / \"Moreover\"\n- \"Moving forward\" / \"At the end of the day\"\n- \"To put this in perspective...\"\n- \"What makes this particularly interesting is...\"\n- \"The implications here are...\"\n- \"In other words...\"\n- \"It goes without saying...\"\n\n### Engagement Bait\n- \"Let that sink in\" / \"Read that again\" / \"Full stop\"\n- \"This changes everything\"\n- \"Are you paying attention?\"\n- \"You're not ready for this\"\n\n### AI Cringe\n- \"Supercharge\" / \"Unlock\" / \"Future-proof\"\n- \"10x your productivity\"\n- \"The AI revolution\"\n- \"In the age of AI\"\n\n### Generic Insider Claims\n- \"Here's the part nobody's talking about\"\n- \"What nobody tells you\"\n- Anything with \"nobody\" or \"most people don't realize\"\n\n### The Big One (FATAL)\n- \"This isn't X. This is Y.\" and ALL variations.\n- \"Not X. Y.\"\n- \"Forget X. This is Y.\"\n- \"Less X, more Y.\"\n- ANY sentence that negates one framing then asserts a corrected one.\n- If even ONE of these appears, the output fails. Delete the negation, just state the positive claim.\n\n---\n\n## Implementation contract\n\n### For agents writing copy directly\nRead this entire file before writing any user-facing prose. After drafting, self-audit against the banned list. If any violations slip through, regenerate that specific sentence/paragraph stating the positive claim only.\n\n### For backend code (CC's writing_studio + scripts modules)\n- This file's content is loaded at server boot and stored as `VOICE_DNA_PROMPT` constant.\n- Prepended to system prompts for any LLM generation call (Script Studio, Writing Studio, future surfaces).\n- Banned-phrase guard runs against the LLM output: if any banned phrase appears, return a structured `{warning, violations[], retry_recommended}` response and re-call the LLM once with the violations highlighted in a prefix to the original prompt: \"PREVIOUS ATTEMPT VIOLATED VOICE DNA: [list]. Regenerate the output strictly avoiding these patterns.\"\n\n### For Voice DNA evolution\nThis file is canonical. Updates flow from Ryan only. Agents may suggest additions to the banned list in their `RECOMMENDATIONS-{AGENT}.md` files; Ryan decides whether to fold them in.\n\n### For testing\nAG's `PRE-LAUNCH-QA-v3.md` (and future QA passes) should include a Voice DNA audit step: take 5 random AI-generated outputs (one Script Studio, one tweet, one blog, two scrambled), grep each for any banned phrase, report violations.\n",
-          "warning_copy": "Heads up — Uoink spotted some patterns that often read as AI-slop in your output. We just want you not to sound like a robot — up to you whether to keep them. Regenerate to try again, or toggle Voice DNA warnings off for this generation or forever in Settings."
+          "warning_copy": "Heads up — Uoink spotted some patterns that often read as AI-slop in your output. We just want you not to sound like a robot — up to you whether to keep them. Regenerate to try again, or toggle Voice DNA warnings off for this generation or forever in Settings.",
+          "corpus_item": {
+            "item": {
+              "id": "video-over",
+              "title": "The concrete opener",
+              "author": "Synthetic Creator",
+              "source_type": "youtube",
+              "platform": "youtube",
+              "source_url": null,
+              "captured_at": "2029-12-31T00:00:00Z",
+              "duration_seconds": null,
+              "credit": {
+                "creator": "Synthetic Creator",
+                "handle": null,
+                "source_url": null
+              },
+              "facets": {
+                "topic": "AI workflows",
+                "hook_type": "curiosity_gap",
+                "format": "talking_head",
+                "performance_tier": "over",
+                "length_bucket": "short"
+              },
+              "preview": null
+            },
+            "content": {
+              "available": false,
+              "media_type": "text/markdown",
+              "text": "",
+              "byte_length": 0,
+              "truncated": false
+            },
+            "attachments": []
+          },
+          "corpus_taste": {
+            "markdown": "{'anchors': ['specific mechanisms', 'plain claims']}",
+            "anchors": {
+              "best": [],
+              "worst": [],
+              "admired_channels": []
+            }
+          }
         },
         "next": "Produce the structured tweet (including the source_credit_line verbatim in the body) and POST again with `body` (and `title` + `dek` + `tags` for blogs) to persist."
       }

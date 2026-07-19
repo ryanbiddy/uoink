@@ -5956,11 +5956,11 @@
     }
 
     async function loadDetailFileImages() {
-      const images = [...document.querySelectorAll("img[data-file-img]")];
+      const images = [...document.querySelectorAll("img[data-file-img], img[data-file-url]")];
       await Promise.all(images.map(async (img) => {
-        const path = img.dataset.fileImg;
-        if (!path) return;
+        const path = img.dataset.fileImg || "";
         const url = img.dataset.fileUrl || `/file?path=${encodeURIComponent(path)}`;
+        if (!path && !img.dataset.fileUrl) return;
         const cacheKey = img.dataset.fileUrl || path;
         try {
           if (!state.blobUrls.has(cacheKey)) {
@@ -6992,7 +6992,7 @@
           const thumb = sourceThumbnailPath(row);
           return `
             <button class="combo-option" type="button" role="option" data-script-source-id="${htmlEscape(id)}">
-              <span class="combo-thumb">${thumb ? `<img alt="" class="hidden" data-file-img="${htmlEscape(thumb)}">` : ""}</span>
+              <span class="combo-thumb">${thumb ? `<img alt="" class="hidden" ${sourceThumbnailAttribute(row)}>` : ""}</span>
               <span>
                 <strong>${htmlEscape(rowTitle(row))}</strong>
                 <span class="job-sub">${htmlEscape(writingSourceSubtitle(row) || platformChipLabel(platformOf(row)))}</span>
@@ -8217,28 +8217,18 @@
     }
 
     async function loadGenerateSmartInputs() {
-      const [facetsRes, channelsRes, ctasRes] = await Promise.allSettled([
-        authFetch("/library/facets"),
-        authFetch("/corpus/channels?limit=80"),
+      const [facetsRes, ctasRes] = await Promise.allSettled([
+        authFetch("/api/corpus/v1/facets"),
         authFetch("/writing/recent-ctas?limit=20"),
       ]);
       if (facetsRes.status === "fulfilled") {
-        const facets = facetsRes.value.facets || {};
+        const facets = facetsRes.value.data && facetsRes.value.data.facets || {};
         state.smartInputs.topics = normalizeFacetItems(facets.topic);
         state.smartInputs.hooks = normalizeFacetItems(facets.hook_type, { humanize: prettyHook });
+        state.smartInputs.channels = normalizeFacetItems(facets.channel);
       } else {
         state.smartInputs.topics = fallbackTopicItems();
         state.smartInputs.hooks = fallbackHookItems();
-      }
-      if (channelsRes.status === "fulfilled") {
-        state.smartInputs.channels = (channelsRes.value.channels || [])
-          .map((row) => smartItem(row.channel, {
-            label: row.channel,
-            count: row.count,
-            thumb: row.thumbnail_url || "",
-          }))
-          .filter(Boolean);
-      } else {
         state.smartInputs.channels = fallbackChannelItems();
       }
       if (ctasRes.status === "fulfilled") {
@@ -9039,13 +9029,21 @@
     }
 
     function writingSourceSubtitle(row) {
-      return [firstValue(row && row.channel, row && row.host, row && row.podcast_title), row && row.topic, fmtDuration(durationOf(row))]
+      return [firstValue(row && row.author, row && row.credit && row.credit.creator, row && row.channel, row && row.host, row && row.podcast_title), row && row.facets && row.facets.topic, row && row.topic, fmtDuration(durationOf(row))]
         .filter((value) => value && value !== "--:--")
         .join(" | ");
     }
 
     function sourceThumbnailPath(row) {
-      return String(row && (row.thumbnail_path || row.thumbnail || row.poster_path) || "");
+      return String(row && (row.preview && row.preview.href || row.thumbnail_path || row.thumbnail || row.poster_path) || "");
+    }
+
+    function sourceThumbnailAttribute(row) {
+      const thumb = sourceThumbnailPath(row);
+      if (!thumb) return "";
+      return thumb.startsWith("/api/corpus/")
+        ? `data-file-url="${htmlEscape(thumb)}"`
+        : `data-file-img="${htmlEscape(thumb)}"`;
     }
 
     // U-02 (UX-08): the picker keeps its own unfiltered corpus list so
@@ -9059,8 +9057,9 @@
     async function loadWritingSources(force = false) {
       if (state.writingSourceLoaded && !force) return;
       try {
-        const data = await authFetch("/memory/search?limit=200");
-        state.writingSourceRows = Array.isArray(data.results) ? data.results : [];
+        const data = await authFetch("/api/corpus/v1/search?limit=200");
+        const items = data.data && data.data.items;
+        state.writingSourceRows = Array.isArray(items) ? items : [];
         state.writingSourceLoaded = true;
       } catch (_) {
         state.writingSourceRows = [];
@@ -9085,7 +9084,7 @@
           const thumb = sourceThumbnailPath(row);
           return `
             <button class="combo-option" type="button" role="option" id="writingSourceOpt${index}" data-writing-source-id="${htmlEscape(id)}">
-              <span class="combo-thumb">${thumb ? `<img alt="" class="hidden" data-file-img="${htmlEscape(thumb)}">` : ""}</span>
+              <span class="combo-thumb">${thumb ? `<img alt="" class="hidden" ${sourceThumbnailAttribute(row)}>` : ""}</span>
               <span>
                 <strong>${htmlEscape(rowTitle(row))}</strong>
                 <span class="job-sub">${htmlEscape(writingSourceSubtitle(row) || platformChipLabel(platformOf(row)))}</span>
@@ -9116,7 +9115,7 @@
       }
       const thumb = sourceThumbnailPath(row);
       els.writingSourceChipMain.innerHTML = `
-        <span class="combo-thumb">${thumb ? `<img alt="" class="hidden" data-file-img="${htmlEscape(thumb)}">` : ""}</span>
+        <span class="combo-thumb">${thumb ? `<img alt="" class="hidden" ${sourceThumbnailAttribute(row)}>` : ""}</span>
         <span>
           <strong>${htmlEscape(rowTitle(row))}</strong>
           <span class="job-sub">${htmlEscape(writingSourceSubtitle(row) || platformChipLabel(platformOf(row)))}</span>
@@ -9163,14 +9162,21 @@
     }
 
     async function selectWritingSourceById(id) {
-      const row = writingSourceRowsAll().find((item) => writingRowId(item) === id)
+      const searchRow = writingSourceRowsAll().find((item) => writingRowId(item) === id)
         || state.library.find((item) => writingRowId(item) === id);
-      if (!row) return;
+      if (!searchRow) return;
+      const response = await authFetch(`/api/corpus/v1/items/${encodeURIComponent(videoIdOf(searchRow))}`);
+      const detail = response.data || {};
+      const row = detail.item
+        ? { ...searchRow, ...detail.item, corpus_content: detail.content, attachments: detail.attachments || [] }
+        : null;
+      if (!row) throw new Error("Corpus contract returned no item.");
       state.writingSelectedSourceRow = row;
       state.generateWorkspace = null;
       els.writingSource.value = writingRowId(row);
       els.writingSourceSearch.value = "";
-      if (!els.generateTopicInput.value.trim() && row.topic) els.generateTopicInput.value = row.topic;
+      const sourceTopic = firstValue(row.facets && row.facets.topic, row.topic);
+      if (!els.generateTopicInput.value.trim() && sourceTopic) els.generateTopicInput.value = sourceTopic;
       toggleWritingSourceCombo(false);
       renderWritingSourceChip();
       syncWritingGenerateState();
@@ -9200,7 +9206,7 @@
 
     function writingAttributionLine(row = state.writingSelectedSourceRow) {
       if (!row) return "Pick a source to build the credit line.";
-      const handle = firstValue(row.creator_handle, row.author_handle, row.channel_handle, row.channel, row.host, "the creator");
+      const handle = firstValue(row.credit && row.credit.handle, row.credit && row.credit.creator, row.creator_handle, row.author_handle, row.channel_handle, row.author, row.channel, row.host, "the creator");
       const creator = String(handle).startsWith("@") || handle === "the creator" ? handle : `@${String(handle).replace(/\s+/g, "")}`;
       const url = sourceUrlOf(row);
       return [`via ${creator}`, url, "uoink.app"].filter(Boolean).join(" · ");
@@ -10088,10 +10094,11 @@
       const yourChannel = els.generatePastPerformance.checked && state.channels.length
         ? firstValue(selectedChannel, state.channels[0].handle, state.channels[0].name, state.channels[0].channel_id)
         : (els.generatePastPerformance.checked ? selectedChannel : null);
-      const topic = firstValue(els.generateTopicInput.value.trim(), row.topic, rowTitle(row));
+      const sourceTopic = firstValue(row.facets && row.facets.topic, row.topic);
+      const topic = firstValue(els.generateTopicInput.value.trim(), sourceTopic, rowTitle(row));
       const hookTarget = selectedGenerateHookLens();
-      if (els.generateTopicInput && !els.generateTopicInput.value.trim() && row.topic) {
-        els.generateTopicInput.value = row.topic;
+      if (els.generateTopicInput && !els.generateTopicInput.value.trim() && sourceTopic) {
+        els.generateTopicInput.value = sourceTopic;
       }
       return {
         format: "talking-head",

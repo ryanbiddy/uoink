@@ -23,12 +23,13 @@ def section(start: str, end: str) -> str:
 
 def test_endpoint_contracts() -> None:
     for endpoint in (
-        'authFetch("/library/facets")',
-        'authFetch("/corpus/channels?limit=80")',
+        'authFetch("/api/corpus/v1/facets")',
         'authFetch("/writing/recent-ctas?limit=20")',
     ):
         require(endpoint in DASHBOARD, f"missing smart-input endpoint: {endpoint}")
-    print("ok  smart inputs load corpus facets, channels, and recent CTAs")
+    require("normalizeFacetItems(facets.channel)" in DASHBOARD,
+            "channels must come from the corpus contract facets")
+    print("ok  smart inputs load contract facets and recent CTAs")
 
 
 def test_generate_controls_render() -> None:

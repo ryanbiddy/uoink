@@ -83,6 +83,8 @@ import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
 import claims  # noqa: E402  -- v3 A2 claim extraction + verification (Loki-inspired)
 import scripts as p5_scripts  # noqa: E402  -- v3 P5 script studio backend
 import memory_layer  # noqa: E402  -- v2.5 S4 markdown taste/user memory
+import corpus_contract  # noqa: E402  -- versioned read boundary for consumers
+import corpus_provider  # noqa: E402  -- Uoink provider for corpus contract v1
 import podcasts  # noqa: E402  -- v3.1 podcast RSS feed registry + polling
 import whisper_runner  # noqa: E402  -- v3.1 WhisperX transcription (lazy)
 import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
@@ -8695,6 +8697,17 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_auto_uoink_status()
         if bare == "/resume":
             return self._handle_resume()
+        if bare == "/api/corpus/v1/search":
+            return self._handle_corpus_v1_search()
+        if bare == "/api/corpus/v1/facets":
+            return self._handle_corpus_v1_facets()
+        if bare == "/api/corpus/v1/taste":
+            return self._handle_corpus_v1_taste()
+        if bare.startswith("/api/corpus/v1/items/") \
+                and "/attachments/" in bare:
+            return self._handle_corpus_v1_attachment(bare)
+        if bare.startswith("/api/corpus/v1/items/"):
+            return self._handle_corpus_v1_get(bare)
         if bare == "/library/facets":
             return self._handle_library_facets()
         if bare == "/corpus/channels":
@@ -8996,6 +9009,101 @@ class Handler(BaseHTTPRequestHandler):
             "length_bucket": list(LENGTH_BUCKET_ENUM),
             "hook": sorted(HOOK_TYPES.keys()) if isinstance(HOOK_TYPES, dict) else list(HOOK_TYPES),
         })
+
+    # ---- corpus read contract v1 ----------------------------------------
+    # This boundary is the first API the extracted writing product consumes.
+    # Old Library/Memory routes stay in place during the compatibility window;
+    # the Generate tab uses these contract routes now.
+
+    def _corpus_v1_provider(self):
+        return corpus_provider.UoinkCorpusProvider(
+            _get_index(),
+            DATA_ROOT,
+            facet_labeler=_humanize_facet,
+            vault_path=self._memory_vault_path(),
+        )
+
+    def _send_corpus_v1_error(self, operation: str,
+                              error: corpus_contract.ContractError):
+        return self._send_json(
+            error.status,
+            corpus_contract.failure(operation, error),
+        )
+
+    def _corpus_v1_call(self, operation: str, callback):
+        try:
+            data = callback()
+            payload = corpus_contract.success(operation, data)
+        except corpus_contract.ContractError as error:
+            return self._send_corpus_v1_error(operation, error)
+        except Exception:
+            log.exception("corpus contract v1 %s failed", operation)
+            error = corpus_contract.ContractError(
+                "unavailable",
+                f"corpus {operation} is unavailable",
+                status=503,
+                retryable=True,
+            )
+            return self._send_corpus_v1_error(operation, error)
+        return self._send_json(200, payload)
+
+    def _handle_corpus_v1_search(self):
+        query = parse_qs(urlparse(self.path).query)
+        try:
+            request = corpus_contract.SearchRequest.from_query(query)
+        except corpus_contract.ContractError as error:
+            return self._send_corpus_v1_error("search", error)
+        return self._corpus_v1_call(
+            "search",
+            lambda: self._corpus_v1_provider().search(request),
+        )
+
+    def _handle_corpus_v1_get(self, bare: str):
+        from urllib.parse import unquote
+        item_id = unquote(
+            bare[len("/api/corpus/v1/items/"):]).strip("/")
+        return self._corpus_v1_call(
+            "get",
+            lambda: self._corpus_v1_provider().get(item_id),
+        )
+
+    def _handle_corpus_v1_facets(self):
+        return self._corpus_v1_call(
+            "facets",
+            lambda: self._corpus_v1_provider().facets(),
+        )
+
+    def _handle_corpus_v1_taste(self):
+        return self._corpus_v1_call(
+            "taste",
+            lambda: self._corpus_v1_provider().taste(),
+        )
+
+    def _handle_corpus_v1_attachment(self, bare: str):
+        from urllib.parse import unquote
+        tail = bare[len("/api/corpus/v1/items/"):]
+        item_part, marker, attachment_part = tail.partition("/attachments/")
+        if not marker:
+            error = corpus_contract.ContractError(
+                "invalid_request", "attachment path is invalid")
+            return self._send_corpus_v1_error("get", error)
+        item_id = unquote(item_part).strip("/")
+        attachment_id = unquote(attachment_part).strip("/")
+        try:
+            path, mime = self._corpus_v1_provider().attachment(
+                item_id, attachment_id)
+        except corpus_contract.ContractError as error:
+            return self._send_corpus_v1_error("get", error)
+        except Exception:
+            log.exception("corpus contract v1 attachment failed")
+            error = corpus_contract.ContractError(
+                "unavailable",
+                "corpus attachment is unavailable",
+                status=503,
+                retryable=True,
+            )
+            return self._send_corpus_v1_error("get", error)
+        return self._send_file(path, mime)
 
     def _handle_library_facets(self):
         """GET /library/facets -- corpus-wide filter facets (G-12 / QA #14).
@@ -10552,6 +10660,27 @@ class Handler(BaseHTTPRequestHandler):
             grounding = writing_studio.assemble_grounding(
                 _get_index(), yoink_id,
                 style_anchor_ids=style_anchor_ids)
+            provider = self._corpus_v1_provider()
+            try:
+                corpus_item = provider.get(yoink_id) if yoink_id else None
+                if corpus_item is not None:
+                    corpus_contract.validate_data("get", corpus_item)
+                grounding["corpus_item"] = corpus_item
+            except corpus_contract.ContractError as error:
+                return error.status, {
+                    "ok": False,
+                    "error": error.message,
+                    "contract_error": error.code,
+                }
+            try:
+                corpus_taste = provider.taste()
+                corpus_contract.validate_data("taste", corpus_taste)
+                grounding["corpus_taste"] = corpus_taste
+            except corpus_contract.ContractError as error:
+                # Taste helps the writer but must not darken Generate when a
+                # local TASTE.md read fails. The source item remains required.
+                log.warning("Generate taste read skipped: %s", error.message)
+                grounding["corpus_taste"] = None
             return 200, {
                 "ok": True,
                 "mode": "grounding_only",

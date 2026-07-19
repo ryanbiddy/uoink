@@ -113,6 +113,8 @@ Source: "staging\claims.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\scripts.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\voice_dna.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\writing_studio.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\corpus_contract.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\corpus_provider.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\page_extractor.py"; DestDir: "{app}"; Flags: ignoreversion
 ; v3.2.1/v3.3 modules imported by server.py at boot. These must be in both
 ; build.ps1 staging and Inno's installed file list; staging-only coverage is
