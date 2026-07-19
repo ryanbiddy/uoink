@@ -1,0 +1,755 @@
+{
+  "_fixture": {
+    "contracts": [
+      "ryan.suite.runtime-lease/1",
+      "ryan.suite.service/1",
+      "ryan.suite.health/1",
+      "uoink.media.handoff/1",
+      "uoink.engagement.ingest/1"
+    ],
+    "provider": "Uoink",
+    "regenerate": "python tests/regenerate_suite_integration_v1_fixture.py",
+    "check": "python tests/regenerate_suite_integration_v1_fixture.py --check",
+    "data": "synthetic",
+    "network": "none"
+  },
+  "valid": {
+    "runtime_lease": {
+      "contract": "ryan.suite.runtime-lease",
+      "version": 1,
+      "service_id": "uoink",
+      "service_version": "3.6.0",
+      "api_version": 1,
+      "base_url": "http://127.0.0.1:5179",
+      "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
+      "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
+      "capabilities": [
+        "uoink.corpus.read/1",
+        "uoink.engagement.ingest/1",
+        "uoink.media.handoff/1"
+      ],
+      "ui": {
+        "home": "/dashboard",
+        "routes": {
+          "library": "/dashboard#library"
+        }
+      },
+      "pid": 1234,
+      "started_at": "2026-07-19T12:00:00Z"
+    },
+    "service_manifest": {
+      "ok": true,
+      "contract": "ryan.suite.service",
+      "version": 1,
+      "service": {
+        "id": "uoink",
+        "name": "Uoink",
+        "service_version": "3.6.0",
+        "api_version": 1,
+        "resident": true,
+        "default_port": 5179,
+        "health": {
+          "contract": "ryan.suite.health",
+          "version": 1,
+          "href": "/api/suite/v1/health"
+        },
+        "capabilities": [
+          "uoink.corpus.read/1",
+          "uoink.engagement.ingest/1",
+          "uoink.media.handoff/1"
+        ],
+        "ui": {
+          "home": "/dashboard",
+          "routes": {
+            "library": "/dashboard#library"
+          }
+        },
+        "mcp": {
+          "name": "uoink",
+          "transport": "stdio"
+        }
+      }
+    },
+    "health": {
+      "ready": {
+        "ok": true,
+        "contract": "ryan.suite.health",
+        "version": 1,
+        "service_id": "uoink",
+        "service_version": "3.6.0",
+        "state": "ready",
+        "checks": [
+          {
+            "id": "core",
+            "required": true,
+            "status": "ready"
+          },
+          {
+            "id": "index",
+            "required": true,
+            "status": "ready"
+          },
+          {
+            "id": "corpus_paths",
+            "required": true,
+            "status": "ready"
+          }
+        ]
+      },
+      "busy": {
+        "ok": true,
+        "contract": "ryan.suite.health",
+        "version": 1,
+        "service_id": "uoink",
+        "service_version": "3.6.0",
+        "state": "ready_with_limits",
+        "checks": [
+          {
+            "id": "core",
+            "required": true,
+            "status": "ready"
+          },
+          {
+            "id": "index",
+            "required": true,
+            "status": "busy"
+          },
+          {
+            "id": "corpus_paths",
+            "required": true,
+            "status": "ready"
+          }
+        ]
+      },
+      "failed": {
+        "ok": false,
+        "contract": "ryan.suite.health",
+        "version": 1,
+        "service_id": "uoink",
+        "service_version": "3.6.0",
+        "state": "needs_attention",
+        "checks": [
+          {
+            "id": "core",
+            "required": true,
+            "status": "ready"
+          },
+          {
+            "id": "index",
+            "required": true,
+            "status": "ready"
+          },
+          {
+            "id": "corpus_paths",
+            "required": true,
+            "status": "failed"
+          }
+        ]
+      }
+    },
+    "media_handoff": {
+      "available": {
+        "ok": true,
+        "contract": "uoink.media.handoff",
+        "version": 1,
+        "operation": "resolve",
+        "data": {
+          "item_ref": "uoink://item/short-123",
+          "state": "available",
+          "source_url": "https://example.test/short/123",
+          "media": {
+            "path": "${AUTHENTICATED_ABSOLUTE_MEDIA_PATH}",
+            "media_type": "video/mp4",
+            "byte_length": 25,
+            "sha256": "cbce2a5cbf65501aefc41c6cd6d7558d416dc9c1bcdd9e1e7cc371a046f7622a"
+          },
+          "provenance": {
+            "kind": "uoink_sidecar",
+            "sidecar_schema_version": 2,
+            "field": "media_file"
+          }
+        }
+      },
+      "not_kept": {
+        "ok": true,
+        "contract": "uoink.media.handoff",
+        "version": 1,
+        "operation": "resolve",
+        "data": {
+          "item_ref": "uoink://item/not-kept",
+          "state": "not_kept",
+          "source_url": "https://example.test/short/123",
+          "media": null,
+          "provenance": {
+            "kind": "uoink_sidecar",
+            "sidecar_schema_version": 2,
+            "field": "media_file"
+          }
+        }
+      },
+      "missing": {
+        "ok": true,
+        "contract": "uoink.media.handoff",
+        "version": 1,
+        "operation": "resolve",
+        "data": {
+          "item_ref": "uoink://item/missing-media",
+          "state": "missing",
+          "source_url": "https://example.test/short/123",
+          "media": null,
+          "provenance": {
+            "kind": "uoink_sidecar",
+            "sidecar_schema_version": 2,
+            "field": "media_file"
+          }
+        }
+      }
+    },
+    "engagement": {
+      "request": {
+        "contract": "uoink.engagement.ingest",
+        "version": 1,
+        "events": [
+          {
+            "event_id": "writer-fixture-accepted",
+            "item_ref": "uoink://item/short-123",
+            "event_type": "cite",
+            "source_product": "writer",
+            "occurred_at": "2026-07-19T12:00:00Z"
+          },
+          {
+            "event_id": "writer-fixture-missing",
+            "item_ref": "uoink://item/unknown",
+            "event_type": "cite",
+            "source_product": "writer",
+            "occurred_at": "2026-07-19T12:00:00Z"
+          }
+        ]
+      },
+      "first": {
+        "ok": true,
+        "contract": "uoink.engagement.ingest",
+        "version": 1,
+        "data": {
+          "submitted": 2,
+          "accepted": 1,
+          "duplicates": 0,
+          "rejected": [
+            {
+              "event_id": "writer-fixture-missing",
+              "code": "not_found",
+              "message": "corpus item not found",
+              "retryable": false
+            }
+          ]
+        }
+      },
+      "replay": {
+        "ok": true,
+        "contract": "uoink.engagement.ingest",
+        "version": 1,
+        "data": {
+          "submitted": 2,
+          "accepted": 0,
+          "duplicates": 1,
+          "rejected": [
+            {
+              "event_id": "writer-fixture-missing",
+              "code": "not_found",
+              "message": "corpus item not found",
+              "retryable": false
+            }
+          ]
+        }
+      }
+    }
+  },
+  "negative": {
+    "runtime_lease": {
+      "unknown_key": {
+        "contract": "ryan.suite.runtime-lease",
+        "version": 1,
+        "service_id": "uoink",
+        "service_version": "3.6.0",
+        "api_version": 1,
+        "base_url": "http://127.0.0.1:5179",
+        "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
+        "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
+        "capabilities": [
+          "uoink.corpus.read/1",
+          "uoink.engagement.ingest/1",
+          "uoink.media.handoff/1"
+        ],
+        "ui": {
+          "home": "/dashboard",
+          "routes": {
+            "library": "/dashboard#library"
+          }
+        },
+        "pid": 1234,
+        "started_at": "2026-07-19T12:00:00Z",
+        "surprise": true
+      },
+      "non_loopback_url": {
+        "contract": "ryan.suite.runtime-lease",
+        "version": 1,
+        "service_id": "uoink",
+        "service_version": "3.6.0",
+        "api_version": 1,
+        "base_url": "http://192.0.2.10:5179",
+        "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
+        "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
+        "capabilities": [
+          "uoink.corpus.read/1",
+          "uoink.engagement.ingest/1",
+          "uoink.media.handoff/1"
+        ],
+        "ui": {
+          "home": "/dashboard",
+          "routes": {
+            "library": "/dashboard#library"
+          }
+        },
+        "pid": 1234,
+        "started_at": "2026-07-19T12:00:00Z"
+      },
+      "token_field": {
+        "contract": "ryan.suite.runtime-lease",
+        "version": 1,
+        "service_id": "uoink",
+        "service_version": "3.6.0",
+        "api_version": 1,
+        "base_url": "http://127.0.0.1:5179",
+        "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
+        "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
+        "capabilities": [
+          "uoink.corpus.read/1",
+          "uoink.engagement.ingest/1",
+          "uoink.media.handoff/1"
+        ],
+        "ui": {
+          "home": "/dashboard",
+          "routes": {
+            "library": "/dashboard#library"
+          }
+        },
+        "pid": 1234,
+        "started_at": "2026-07-19T12:00:00Z",
+        "token": "must-not-cross"
+      },
+      "path_field": {
+        "contract": "ryan.suite.runtime-lease",
+        "version": 1,
+        "service_id": "uoink",
+        "service_version": "3.6.0",
+        "api_version": 1,
+        "base_url": "http://127.0.0.1:5179",
+        "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
+        "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
+        "capabilities": [
+          "uoink.corpus.read/1",
+          "uoink.engagement.ingest/1",
+          "uoink.media.handoff/1"
+        ],
+        "ui": {
+          "home": "/dashboard",
+          "routes": {
+            "library": "/dashboard#library"
+          }
+        },
+        "pid": 1234,
+        "started_at": "2026-07-19T12:00:00Z",
+        "corpus_path": "C:\\private"
+      },
+      "command_field": {
+        "contract": "ryan.suite.runtime-lease",
+        "version": 1,
+        "service_id": "uoink",
+        "service_version": "3.6.0",
+        "api_version": 1,
+        "base_url": "http://127.0.0.1:5179",
+        "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
+        "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
+        "capabilities": [
+          "uoink.corpus.read/1",
+          "uoink.engagement.ingest/1",
+          "uoink.media.handoff/1"
+        ],
+        "ui": {
+          "home": "/dashboard",
+          "routes": {
+            "library": "/dashboard#library"
+          }
+        },
+        "pid": 1234,
+        "started_at": "2026-07-19T12:00:00Z",
+        "command": [
+          "python",
+          "server.py"
+        ]
+      },
+      "wrong_identity": {
+        "contract": "ryan.suite.runtime-lease",
+        "version": 1,
+        "service_id": "writer",
+        "service_version": "3.6.0",
+        "api_version": 1,
+        "base_url": "http://127.0.0.1:5179",
+        "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
+        "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
+        "capabilities": [
+          "uoink.corpus.read/1",
+          "uoink.engagement.ingest/1",
+          "uoink.media.handoff/1"
+        ],
+        "ui": {
+          "home": "/dashboard",
+          "routes": {
+            "library": "/dashboard#library"
+          }
+        },
+        "pid": 1234,
+        "started_at": "2026-07-19T12:00:00Z"
+      },
+      "dead_pid": {
+        "contract": "ryan.suite.runtime-lease",
+        "version": 1,
+        "service_id": "uoink",
+        "service_version": "3.6.0",
+        "api_version": 1,
+        "base_url": "http://127.0.0.1:5179",
+        "health_url": "http://127.0.0.1:5179/api/suite/v1/health",
+        "manifest_url": "http://127.0.0.1:5179/.well-known/suite-service.json",
+        "capabilities": [
+          "uoink.corpus.read/1",
+          "uoink.engagement.ingest/1",
+          "uoink.media.handoff/1"
+        ],
+        "ui": {
+          "home": "/dashboard",
+          "routes": {
+            "library": "/dashboard#library"
+          }
+        },
+        "pid": 2147483647,
+        "started_at": "2026-07-19T12:00:00Z"
+      }
+    },
+    "service_manifest": {
+      "wrong_service": {
+        "ok": true,
+        "contract": "ryan.suite.service",
+        "version": 1,
+        "service": {
+          "id": "writer",
+          "name": "Uoink",
+          "service_version": "3.6.0",
+          "api_version": 1,
+          "resident": true,
+          "default_port": 5179,
+          "health": {
+            "contract": "ryan.suite.health",
+            "version": 1,
+            "href": "/api/suite/v1/health"
+          },
+          "capabilities": [
+            "uoink.corpus.read/1",
+            "uoink.engagement.ingest/1",
+            "uoink.media.handoff/1"
+          ],
+          "ui": {
+            "home": "/dashboard",
+            "routes": {
+              "library": "/dashboard#library"
+            }
+          },
+          "mcp": {
+            "name": "uoink",
+            "transport": "stdio"
+          }
+        }
+      },
+      "wrong_version": {
+        "ok": true,
+        "contract": "ryan.suite.service",
+        "version": 2,
+        "service": {
+          "id": "uoink",
+          "name": "Uoink",
+          "service_version": "3.6.0",
+          "api_version": 1,
+          "resident": true,
+          "default_port": 5179,
+          "health": {
+            "contract": "ryan.suite.health",
+            "version": 1,
+            "href": "/api/suite/v1/health"
+          },
+          "capabilities": [
+            "uoink.corpus.read/1",
+            "uoink.engagement.ingest/1",
+            "uoink.media.handoff/1"
+          ],
+          "ui": {
+            "home": "/dashboard",
+            "routes": {
+              "library": "/dashboard#library"
+            }
+          },
+          "mcp": {
+            "name": "uoink",
+            "transport": "stdio"
+          }
+        }
+      },
+      "unknown_key": {
+        "ok": true,
+        "contract": "ryan.suite.service",
+        "version": 1,
+        "service": {
+          "id": "uoink",
+          "name": "Uoink",
+          "service_version": "3.6.0",
+          "api_version": 1,
+          "resident": true,
+          "default_port": 5179,
+          "health": {
+            "contract": "ryan.suite.health",
+            "version": 1,
+            "href": "/api/suite/v1/health"
+          },
+          "capabilities": [
+            "uoink.corpus.read/1",
+            "uoink.engagement.ingest/1",
+            "uoink.media.handoff/1"
+          ],
+          "ui": {
+            "home": "/dashboard",
+            "routes": {
+              "library": "/dashboard#library"
+            }
+          },
+          "mcp": {
+            "name": "uoink",
+            "transport": "stdio"
+          },
+          "command": [
+            "python",
+            "server.py"
+          ]
+        }
+      },
+      "token_field": {
+        "ok": true,
+        "contract": "ryan.suite.service",
+        "version": 1,
+        "service": {
+          "id": "uoink",
+          "name": "Uoink",
+          "service_version": "3.6.0",
+          "api_version": 1,
+          "resident": true,
+          "default_port": 5179,
+          "health": {
+            "contract": "ryan.suite.health",
+            "version": 1,
+            "href": "/api/suite/v1/health"
+          },
+          "capabilities": [
+            "uoink.corpus.read/1",
+            "uoink.engagement.ingest/1",
+            "uoink.media.handoff/1"
+          ],
+          "ui": {
+            "home": "/dashboard",
+            "routes": {
+              "library": "/dashboard#library"
+            }
+          },
+          "mcp": {
+            "name": "uoink",
+            "transport": "stdio"
+          },
+          "token": "must-not-cross"
+        }
+      }
+    },
+    "health": {
+      "wrong_identity": {
+        "ok": true,
+        "contract": "ryan.suite.health",
+        "version": 1,
+        "service_id": "writer",
+        "service_version": "3.6.0",
+        "state": "ready",
+        "checks": [
+          {
+            "id": "core",
+            "required": true,
+            "status": "ready"
+          },
+          {
+            "id": "index",
+            "required": true,
+            "status": "ready"
+          },
+          {
+            "id": "corpus_paths",
+            "required": true,
+            "status": "ready"
+          }
+        ]
+      },
+      "inconsistent_ok": {
+        "ok": false,
+        "contract": "ryan.suite.health",
+        "version": 1,
+        "service_id": "uoink",
+        "service_version": "3.6.0",
+        "state": "ready",
+        "checks": [
+          {
+            "id": "core",
+            "required": true,
+            "status": "ready"
+          },
+          {
+            "id": "index",
+            "required": true,
+            "status": "ready"
+          },
+          {
+            "id": "corpus_paths",
+            "required": true,
+            "status": "ready"
+          }
+        ]
+      },
+      "path_field": {
+        "ok": true,
+        "contract": "ryan.suite.health",
+        "version": 1,
+        "service_id": "uoink",
+        "service_version": "3.6.0",
+        "state": "ready",
+        "checks": [
+          {
+            "id": "core",
+            "required": true,
+            "status": "ready",
+            "path": "C:\\private"
+          },
+          {
+            "id": "index",
+            "required": true,
+            "status": "ready"
+          },
+          {
+            "id": "corpus_paths",
+            "required": true,
+            "status": "ready"
+          }
+        ]
+      },
+      "unknown_state": {
+        "ok": true,
+        "contract": "ryan.suite.health",
+        "version": 1,
+        "service_id": "uoink",
+        "service_version": "3.6.0",
+        "state": "starting",
+        "checks": [
+          {
+            "id": "core",
+            "required": true,
+            "status": "ready"
+          },
+          {
+            "id": "index",
+            "required": true,
+            "status": "ready"
+          },
+          {
+            "id": "corpus_paths",
+            "required": true,
+            "status": "ready"
+          }
+        ]
+      }
+    },
+    "media_handoff": {
+      "traversal": {
+        "ok": false,
+        "contract": "uoink.media.handoff",
+        "version": 1,
+        "operation": "resolve",
+        "error": {
+          "code": "provider_nonconformant",
+          "message": "kept media sidecar is nonconformant",
+          "retryable": false
+        }
+      },
+      "unknown_item": {
+        "ok": false,
+        "contract": "uoink.media.handoff",
+        "version": 1,
+        "operation": "resolve",
+        "error": {
+          "code": "not_found",
+          "message": "corpus item not found",
+          "retryable": false
+        }
+      }
+    },
+    "engagement": {
+      "unsupported_version": {
+        "contract": "uoink.engagement.ingest",
+        "version": 2,
+        "events": [
+          {
+            "event_id": "writer-fixture-accepted",
+            "item_ref": "uoink://item/short-123",
+            "event_type": "cite",
+            "source_product": "writer",
+            "occurred_at": "2026-07-19T12:00:00Z"
+          },
+          {
+            "event_id": "writer-fixture-missing",
+            "item_ref": "uoink://item/unknown",
+            "event_type": "cite",
+            "source_product": "writer",
+            "occurred_at": "2026-07-19T12:00:00Z"
+          }
+        ]
+      },
+      "retryable_rejection": {
+        "ok": true,
+        "contract": "uoink.engagement.ingest",
+        "version": 1,
+        "data": {
+          "submitted": 1,
+          "accepted": 0,
+          "duplicates": 0,
+          "rejected": [
+            {
+              "event_id": "writer-retryable",
+              "code": "unavailable",
+              "message": "engagement target is temporarily unavailable",
+              "retryable": true
+            }
+          ]
+        }
+      },
+      "transaction_failure": {
+        "ok": false,
+        "contract": "uoink.engagement.ingest",
+        "version": 1,
+        "error": {
+          "code": "unavailable",
+          "message": "engagement ingestion is unavailable",
+          "retryable": true
+        }
+      }
+    }
+  }
+}
