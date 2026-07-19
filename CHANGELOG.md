@@ -32,6 +32,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Engagement from Writer and Zing now ages correctly.** Their RFC 3339 UTC
   timestamps follow the same 30-day half-life as Uoink's native engagement
   events instead of remaining at full weight forever.
+- **Cross-product source links now enforce the suite contract.** Corpus and
+  kept-media responses reject file URLs, filesystem paths, and non-HTTP
+  schemes instead of passing them to Writer or Zing.
 
 ## [3.6.0] - 2026-07-08
 

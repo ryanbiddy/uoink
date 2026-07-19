@@ -194,8 +194,11 @@ def resolve(idx, item_id: str) -> dict:
         or metadata.get("source_url")
         or None
     )
-    if source_url is not None and not isinstance(source_url, str):
-        source_url = None
+    try:
+        corpus_contract.validate_source_url(
+            source_url, "kept media source_url")
+    except corpus_contract.ContractError as error:
+        raise _provider_error(error) from error
     schema_version = sidecar.get("schema_version", 1)
     if not isinstance(schema_version, int) or isinstance(schema_version, bool):
         raise _unsafe()

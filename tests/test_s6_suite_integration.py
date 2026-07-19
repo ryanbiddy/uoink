@@ -337,6 +337,35 @@ def test_kept_media_resolver_available_not_kept_and_missing(tmp_path):
         idx.close()
 
 
+@pytest.mark.parametrize("source_url", [
+    "file:///tmp/source.mp4",
+    "C:\\Users\\Ryan\\source.mp4",
+    "/tmp/source.mp4",
+    "ftp://example.test/source.mp4",
+    "https://",
+    {"not": "a URL"},
+])
+def test_kept_media_rejects_non_http_source_url(tmp_path, source_url):
+    idx = index_mod.Index.open(tmp_path / "index.db")
+    try:
+        item_id = "bad-source-" + hashlib.sha256(
+            repr(source_url).encode()).hexdigest()[:8]
+        _insert_item(
+            idx,
+            tmp_path,
+            item_id,
+            sidecar={"schema_version": 2, "url": source_url},
+        )
+        payload, status = media_handoff.resolve_http(idx, item_id)
+        assert status == 500
+        assert payload["error"]["code"] == "provider_nonconformant"
+        assert payload["error"]["retryable"] is False
+        assert payload["error"]["message"] == (
+            "kept media source_url must be null or an HTTP(S) URL")
+    finally:
+        idx.close()
+
+
 @pytest.mark.parametrize(
     "media_file",
     ("../outside.mp4", "C:\\outside.mp4", "/tmp/outside.mp4"),
