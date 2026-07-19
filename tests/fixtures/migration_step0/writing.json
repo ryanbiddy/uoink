@@ -1,0 +1,315 @@
+{
+  "_fixture": {
+    "surface": "writing_studio.py through /writing/*",
+    "regenerate": "python tests/regenerate_migration_step0_fixtures.py --fixture writing",
+    "check": "python tests/regenerate_migration_step0_fixtures.py --check --fixture writing",
+    "data": "synthetic",
+    "network": "loopback only"
+  },
+  "interactions": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/writing/style-anchors",
+        "json": {
+          "name": "Fixture voice",
+          "source_type": "text",
+          "source_value": "Short sentences. Concrete nouns. Show the mechanism."
+        }
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "anchor": {
+          "id": 1,
+          "name": "Fixture voice",
+          "source_type": "text",
+          "source_url": null,
+          "raw_text": "Short sentences. Concrete nouns. Show the mechanism.",
+          "active": 1,
+          "added_at": "2030-01-02T03:04:01Z",
+          "default": false
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/writing/style-anchors?active_only=1"
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "anchors": [
+          {
+            "id": 1,
+            "name": "Fixture voice",
+            "source_type": "text",
+            "source_url": null,
+            "raw_text": "Short sentences. Concrete nouns. Show the mechanism.",
+            "active": 1,
+            "added_at": "2030-01-02T03:04:01Z",
+            "default": false
+          }
+        ],
+        "count": 1,
+        "cap": 10,
+        "active_count": 1
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/writing/tweet",
+        "json": {
+          "source_yoink_id": "video-over",
+          "style_anchor_ids": [
+            1
+          ]
+        }
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "mode": "grounding_only",
+        "kind": "tweet",
+        "context": {
+          "source_yoink": {
+            "video_id": "video-over",
+            "slug": "fixture-video-over",
+            "channel": "Synthetic Creator",
+            "title": "The concrete opener",
+            "topic": "AI workflows",
+            "hook_type": "curiosity_gap",
+            "yoinked_at": "2029-12-31T00:00:00Z",
+            "corpus_path": "fixtures/video-over/corpus.md",
+            "sidecar_path": "fixtures/video-over/sidecar.json",
+            "health_score_json": null,
+            "metadata_json": "{\"comments\": [{\"text\": \"Which step saves the most time?\", \"likes\": 12}, {\"text\": \"This worked for me.\", \"likes\": 4}]}",
+            "deleted_at": null,
+            "schema_version": 2,
+            "format": "talking_head",
+            "performance_tier": "over",
+            "production_style": null,
+            "length_bucket": "short",
+            "source_type": "youtube",
+            "platform": "youtube",
+            "author": "Synthetic Creator"
+          },
+          "source_credit": {
+            "tweet": "via Synthetic Creator",
+            "thread": "via Synthetic Creator",
+            "blog": "Source: The concrete opener by Synthetic Creator"
+          },
+          "style_anchors": [
+            {
+              "id": 1,
+              "name": "Fixture voice",
+              "source_type": "text",
+              "raw_text": "Short sentences. Concrete nouns. Show the mechanism."
+            }
+          ],
+          "hook_lens": null,
+          "voice_dna_prompt": "# Voice DNA\n\nRyan's canonical voice spec for ALL written output Uoink produces. This is injected as system-prompt PREPEND on every Script Studio, Writing Studio, and future text-generation API call. Violations trigger the banned-phrase guard (one regenerate attempt with violations highlighted).\n\n## Writing Rules\n- Write like a sharp human, not a language model.\n- Use contractions naturally (don't, can't, won't).\n- Short paragraphs. 1-3 sentences max.\n- Get to the point. No throat-clearing, no preamble.\n- If making a claim, be specific. Use numbers, names, concrete details.\n- Vary sentence length. Mix short punchy lines with longer ones.\n- Use natural transitions, not mechanical ones (\"Furthermore,\" \"Additionally\").\n- When uncertain, say so plainly (\"I think,\" \"probably,\" \"kinda\"). Hedging is human.\n- Never pad output to seem more thorough. Shorter and accurate beats longer and fluffy.\n- Use physical verbs for abstract processes: \"sanded down\" not \"improved,\" \"bolted on\" not \"added,\" \"stripped back\" not \"simplified.\"\n- Humor comes from specificity, not from jokes. Be unexpectedly precise.\n- Parenthetical asides are good. Use them for editorial commentary, honest reactions, quick tangents, and deflating your own seriousness (like this).\n\n## Formatting Rules\n- Short paragraphs (1-2 sentences default, 3 max).\n- Numbers as digits.\n- Contractions always.\n- NO em dashes ever. Use commas, periods, colons, semicolons, or parentheses.\n- Bold sparingly, 1-2 key moments per section.\n- Code blocks for specific prompts, commands, or tool outputs.\n\n## Banned Phrases (never use these, ever)\n\n### Dead AI Language\n- \"In today's [anything]...\"\n- \"It's important to note that...\" / \"It's worth noting...\"\n- \"Delve\" / \"Dive into\" / \"Unpack\"\n- \"Harness\" / \"Leverage\" / \"Utilize\"\n- \"Landscape\" / \"Realm\" / \"Robust\"\n- \"Game-changer\" / \"Cutting-edge\"\n- \"Straightforward\"\n- \"I'd be happy to help\"\n- \"In order to\"\n\n### Dead Transitions\n- \"Furthermore\" / \"Additionally\" / \"Moreover\"\n- \"Moving forward\" / \"At the end of the day\"\n- \"To put this in perspective...\"\n- \"What makes this particularly interesting is...\"\n- \"The implications here are...\"\n- \"In other words...\"\n- \"It goes without saying...\"\n\n### Engagement Bait\n- \"Let that sink in\" / \"Read that again\" / \"Full stop\"\n- \"This changes everything\"\n- \"Are you paying attention?\"\n- \"You're not ready for this\"\n\n### AI Cringe\n- \"Supercharge\" / \"Unlock\" / \"Future-proof\"\n- \"10x your productivity\"\n- \"The AI revolution\"\n- \"In the age of AI\"\n\n### Generic Insider Claims\n- \"Here's the part nobody's talking about\"\n- \"What nobody tells you\"\n- Anything with \"nobody\" or \"most people don't realize\"\n\n### The Big One (FATAL)\n- \"This isn't X. This is Y.\" and ALL variations.\n- \"Not X. Y.\"\n- \"Forget X. This is Y.\"\n- \"Less X, more Y.\"\n- ANY sentence that negates one framing then asserts a corrected one.\n- If even ONE of these appears, the output fails. Delete the negation, just state the positive claim.\n\n---\n\n## Implementation contract\n\n### For agents writing copy directly\nRead this entire file before writing any user-facing prose. After drafting, self-audit against the banned list. If any violations slip through, regenerate that specific sentence/paragraph stating the positive claim only.\n\n### For backend code (CC's writing_studio + scripts modules)\n- This file's content is loaded at server boot and stored as `VOICE_DNA_PROMPT` constant.\n- Prepended to system prompts for any LLM generation call (Script Studio, Writing Studio, future surfaces).\n- Banned-phrase guard runs against the LLM output: if any banned phrase appears, return a structured `{warning, violations[], retry_recommended}` response and re-call the LLM once with the violations highlighted in a prefix to the original prompt: \"PREVIOUS ATTEMPT VIOLATED VOICE DNA: [list]. Regenerate the output strictly avoiding these patterns.\"\n\n### For Voice DNA evolution\nThis file is canonical. Updates flow from Ryan only. Agents may suggest additions to the banned list in their `RECOMMENDATIONS-{AGENT}.md` files; Ryan decides whether to fold them in.\n\n### For testing\nAG's `PRE-LAUNCH-QA-v3.md` (and future QA passes) should include a Voice DNA audit step: take 5 random AI-generated outputs (one Script Studio, one tweet, one blog, two scrambled), grep each for any banned phrase, report violations.\n",
+          "warning_copy": "Heads up — Uoink spotted some patterns that often read as AI-slop in your output. We just want you not to sound like a robot — up to you whether to keep them. Regenerate to try again, or toggle Voice DNA warnings off for this generation or forever in Settings."
+        },
+        "next": "Produce the structured tweet (including the source_credit_line verbatim in the body) and POST again with `body` (and `title` + `dek` + `tags` for blogs) to persist."
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/writing/tweet",
+        "json": {
+          "source_yoink_id": "video-over",
+          "style_anchor_ids": [
+            1
+          ],
+          "body": "One repeated task cost an hour. Three steps fixed it.\n\nvia Synthetic Creator",
+          "source_credit_line": "via Synthetic Creator",
+          "angle": "saved time",
+          "target_length": 180
+        }
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "id": 1,
+        "kind": "tweet",
+        "body": "One repeated task cost an hour. Three steps fixed it.\n\nvia Synthetic Creator",
+        "title": null,
+        "dek": null,
+        "tags": [],
+        "source_credit_line": "via Synthetic Creator",
+        "voice_warnings": [],
+        "warning_copy": null,
+        "mode": "persisted",
+        "parent_id": null,
+        "yoink_id": "video-over"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/writing/1"
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "piece": {
+          "id": 1,
+          "yoink_id": "video-over",
+          "kind": "tweet",
+          "version": 1,
+          "parent_id": null,
+          "title": null,
+          "dek": null,
+          "body": "One repeated task cost an hour. Three steps fixed it.\n\nvia Synthetic Creator",
+          "tags": [],
+          "source_credit_line": "via Synthetic Creator",
+          "voice_warnings": [],
+          "style_anchor_ids": [
+            1
+          ],
+          "mode": "agent",
+          "generated_at": "2030-01-02T03:04:02Z",
+          "angle": "saved time",
+          "target_length": 180
+        },
+        "body": "One repeated task cost an hour. Three steps fixed it.\n\nvia Synthetic Creator"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/writing/compose/validate",
+        "json": {
+          "source_yoink_id": "video-over",
+          "kind": "tweet",
+          "tweets": [
+            "One repeated task cost an hour."
+          ],
+          "attribution_enabled": true
+        }
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "kind": "tweet",
+        "limit": 280,
+        "credit_line": "via Synthetic Creator",
+        "attribution_enabled": true,
+        "footer_text": "via Synthetic Creator · uoink.app",
+        "total_tweets": 1,
+        "tweets": [
+          {
+            "index": 0,
+            "char_count": 31,
+            "over_limit": false,
+            "remaining": 249,
+            "char_count_with_footer": 66,
+            "remaining_with_footer": 214,
+            "over_limit_with_footer": false
+          }
+        ],
+        "footer_target_index": 0,
+        "footer_char_count": 33,
+        "over_limit_any": false
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/writing/draft",
+        "json": {
+          "source_yoink_id": "video-over",
+          "kind": "tweet",
+          "body": "A synthetic work in progress.",
+          "source_credit_line": "via Synthetic Creator"
+        }
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "draft": {
+          "id": 1,
+          "yoink_id": "video-over",
+          "kind": "tweet",
+          "title": null,
+          "body": "A synthetic work in progress.",
+          "source_credit_line": "via Synthetic Creator",
+          "created_at": "2030-01-02T03:04:03Z",
+          "updated_at": "2030-01-02T03:04:03Z"
+        },
+        "id": 1
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/writing/draft/1"
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "draft": {
+          "id": 1,
+          "yoink_id": "video-over",
+          "kind": "tweet",
+          "title": null,
+          "body": "A synthetic work in progress.",
+          "source_credit_line": "via Synthetic Creator",
+          "created_at": "2030-01-02T03:04:03Z",
+          "updated_at": "2030-01-02T03:04:03Z"
+        },
+        "body": "A synthetic work in progress."
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/writing/1/revise",
+        "json": {
+          "revision_target": "Make the proof concrete.",
+          "body": "One repeated task cost an hour. The first step removed half of it.\n\nvia Synthetic Creator",
+          "source_credit_line": "via Synthetic Creator"
+        }
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "id": 2,
+        "kind": "tweet",
+        "body": "One repeated task cost an hour. The first step removed half of it.\n\nvia Synthetic Creator",
+        "title": null,
+        "dek": null,
+        "tags": [],
+        "source_credit_line": "via Synthetic Creator",
+        "voice_warnings": [],
+        "warning_copy": null,
+        "mode": "persisted",
+        "parent_id": 1,
+        "yoink_id": "video-over"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/writing/tweet",
+        "json": {
+          "source_yoink_id": "video-over",
+          "style_anchor_ids": [
+            1
+          ],
+          "body": "This omits the required credit.",
+          "source_credit_line": "via Synthetic Creator"
+        }
+      },
+      "status": 400,
+      "body": {
+        "ok": false,
+        "error": "body does not contain the creator credit. Per the locked Voice DNA spec, the credit MUST appear in the output. Add the credit line ('via Synthetic Creator') to the body and re-submit, or include it via the agent's writing."
+      }
+    }
+  ]
+}
