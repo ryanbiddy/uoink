@@ -17,6 +17,7 @@ Endpoints:
 
 import json
 import logging
+import math
 import os
 import queue
 import re
@@ -395,6 +396,7 @@ COMMENTS_TIMEOUT_SEC = 5 * 60
 # than a 5-minute one even at the same shot interval.
 FFMPEG_TIMEOUT_SEC = 15 * 60           # screenshot timeout FLOOR
 FFMPEG_TIMEOUT_PER_VIDEO_SEC = 0.25
+SCREENSHOT_SAMPLE_TARGET = 8
 CLIPBOARD_SCREENSHOT_CAP_DEFAULT = 4
 CLIPBOARD_SCREENSHOT_CAP_MAX = 12
 RELIABILITY_MODEL_NAME = "tiny"
@@ -2339,6 +2341,42 @@ def _estimated_screenshot_count(durations: list[float], interval: int) -> int:
     )
 
 
+def _screenshot_interval_for(duration_seconds: float,
+                             requested_interval: int) -> int:
+    """Keep the requested density while ensuring short clips yield frames.
+
+    ffmpeg's fps filter can emit no useful screenshots when its interval is
+    longer than a short source. Cap the interval at roughly one eighth of the
+    duration, rounded up to an integer second. Unknown durations retain the
+    caller's interval.
+    """
+    interval = max(1, int(requested_interval))
+    try:
+        duration = max(0.0, float(duration_seconds or 0))
+    except (TypeError, ValueError):
+        duration = 0.0
+    if duration <= 0:
+        return interval
+    eight_frame_interval = max(
+        1, int(math.ceil(duration / SCREENSHOT_SAMPLE_TARGET)))
+    return min(interval, eight_frame_interval)
+
+
+def _screenshot_ffmpeg_command(video_file: Path, interval: int,
+                               output_pattern: Path) -> list[str]:
+    """Build the screenshot command with an explicit full-range JPEG format."""
+    return [
+        "ffmpeg", "-loglevel", "error", "-y",
+        "-i", str(video_file),
+        "-vf", f"fps=1/{max(1, int(interval))}",
+        # MJPEG requires full-range YUV. Without this, limited-range yuv420p(tv)
+        # inputs can fail with "Non full-range YUV is non-standard".
+        "-pix_fmt", "yuvj420p",
+        "-q:v", "2",
+        str(output_pattern),
+    ]
+
+
 def _failure_phase(e: BaseException, fallback: str | None = None) -> str | None:
     phase = getattr(e, "phase", None)
     return phase if isinstance(phase, str) and phase else fallback
@@ -3866,6 +3904,8 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
     # produce thousands of jpgs. Recompute interval upward when needed and
     # surface the change in the corpus md.
     duration = float(metadata.get("duration") or 0)
+    requested_interval = interval
+    notes: list[str] = []
     if duration > LONG_VIDEO_SECONDS:
         log.warning("Long video: %.0f minutes -- yoink may take a while",
                     duration / 60.0)
@@ -3893,8 +3933,14 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         else [duration]
     )
     processed_media_seconds = int(sum(work_durations))
-    requested_interval = interval
-    notes: list[str] = []
+    clamped_interval = _screenshot_interval_for(duration, interval)
+    if clamped_interval < interval:
+        notes.append(
+            f"Screenshot interval lowered from {interval}s to "
+            f"{clamped_interval}s so this source can yield about "
+            f"{SCREENSHOT_SAMPLE_TARGET} frames."
+        )
+        interval = clamped_interval
     if effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
         notes.append(
             f"Chunked mode sampled {len(long_video_chunks)} media sections "
@@ -3907,9 +3953,14 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "Uoink used the full-media path."
         )
     if is_lite:
+        spacing = (
+            f"{interval // 60} minutes"
+            if interval >= 60
+            else f"{interval} seconds"
+        )
         notes.append(
             "Lite recovery mode: kept the full transcript, took a screenshot "
-            f"about every {interval // 60} minutes, and skipped the comments "
+            f"about every {spacing}, and skipped the comments "
             "fetch. Re-yoink in full mode for dense screenshots and comments."
         )
 
@@ -4080,13 +4131,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
                     phase_callback(chunk_phase)
                 prefix = f"chunk_{i + 1:03d}_shot_"
                 _run_subprocess(
-                    [
-                        "ffmpeg", "-loglevel", "error", "-y",
-                        "-i", str(video_file),
-                        "-vf", f"fps=1/{interval}",
-                        "-q:v", "2",
-                        str(shots_dir / f"{prefix}%04d.jpg"),
-                    ],
+                    _screenshot_ffmpeg_command(
+                        video_file,
+                        interval,
+                        shots_dir / f"{prefix}%04d.jpg",
+                    ),
                     cancel_event=cancel_event,
                     check=True,
                     stdout=subprocess.DEVNULL,
@@ -4118,13 +4167,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             if phase_callback:
                 phase_callback("screenshots")
             _run_subprocess(
-                [
-                    "ffmpeg", "-loglevel", "error", "-y",
-                    "-i", str(video_file),
-                    "-vf", f"fps=1/{interval}",
-                    "-q:v", "2",
-                    str(shots_dir / "shot_%04d.jpg"),
-                ],
+                _screenshot_ffmpeg_command(
+                    video_file,
+                    interval,
+                    shots_dir / "shot_%04d.jpg",
+                ),
                 cancel_event=cancel_event,
                 check=True,
                 stdout=subprocess.DEVNULL,

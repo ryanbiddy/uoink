@@ -124,6 +124,8 @@ def test_lite_extraction_path(tmp: Path):
     # Sparse screenshots: exactly one ffmpeg pass, at >= 5-min interval.
     ffmpeg_calls = [c for c in calls if c and c[0] == "ffmpeg"]
     _assert(len(ffmpeg_calls) == 1, f"single screenshot pass: {ffmpeg_calls}")
+    _assert(ffmpeg_calls[0][ffmpeg_calls[0].index("-pix_fmt") + 1]
+            == "yuvj420p", "screenshot output must be full-range JPEG YUV")
     vf = ffmpeg_calls[0][ffmpeg_calls[0].index("-vf") + 1]
     # fps=1/<interval>
     used_interval = int(vf.split("/")[1])

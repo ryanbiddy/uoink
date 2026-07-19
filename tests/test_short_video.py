@@ -209,6 +209,10 @@ def test_mocked_extraction_persists_and_surfaces(monkeypatch):
         _assert(sc["platform"] == "tiktok", f"sidecar platform: {sc['platform']}")
         _assert(sc["source_type"] == "short_video",
                 f"sidecar source_type: {sc.get('source_type')}")
+        _assert(sc["requested_interval_seconds"] == 30,
+                f"requested interval lost: {sc.get('requested_interval_seconds')}")
+        _assert(sc["interval_seconds"] == 3,
+                f"22s short should clamp to a 3s interval: {sc.get('interval_seconds')}")
         # Transcript captured from the SRT the mocked yt-dlp produced.
         _assert((folder / "transcript.txt").exists(), "transcript.txt missing")
         _assert(len(sc.get("transcript") or []) == 2,
