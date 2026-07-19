@@ -1,8 +1,9 @@
-"""Transcript reliability detection for Uoink.
+"""Local faster-whisper support for Uoink transcripts.
 
-Scope is detection only: surface low-confidence word spans in a saved
-transcript so the reader knows where the ASR was unsure. Re-transcription
-and diarization are out of scope here.
+The module owns two bounded jobs: surface low-confidence word spans in a
+saved transcript, and produce a local transcript when a captured video has
+no platform captions. Diarization and cloud transcription remain out of
+scope.
 
 C-02 (CRIT-2, license compliance): the confidence source is now
 faster-whisper's per-word ``probability`` (faster-whisper is MIT, and
@@ -70,9 +71,14 @@ def _import_faster_whisper():
 _COMPUTE_TYPE = "int8"
 
 
-def _load_model(model_name: str, model_root: str | Path | None):
+def _load_model(model_name: str, model_root: str | Path | None, *,
+                local_files_only: bool = False):
     WhisperModel = _import_faster_whisper()
-    kwargs: dict[str, Any] = {"device": "cpu", "compute_type": _COMPUTE_TYPE}
+    kwargs: dict[str, Any] = {
+        "device": "cpu",
+        "compute_type": _COMPUTE_TYPE,
+        "local_files_only": bool(local_files_only),
+    }
     if model_root:
         Path(model_root).mkdir(parents=True, exist_ok=True)
         kwargs["download_root"] = str(model_root)
@@ -83,11 +89,80 @@ def ensure_model(model_name: str = DEFAULT_MODEL,
                  model_root: str | Path | None = None) -> dict[str, Any]:
     """Load the model once so faster-whisper downloads it if missing."""
     _load_model(model_name, model_root)
+    ready_marker: Path | None = None
+    if model_root:
+        # The model itself is a Hugging Face snapshot directory managed by
+        # faster-whisper. This tiny sentinel is the explicit-consent signal
+        # consumed by server._reliability_model_status; it is written only
+        # after the user-triggered model load succeeds.
+        ready_marker = Path(model_root) / f"{model_name}.pt"
+        ready_marker.write_text(
+            "Uoink faster-whisper model ready\n",
+            encoding="utf-8",
+        )
     return {
         "ok": True,
         "model": model_name,
         "model_root": str(model_root) if model_root else None,
+        "ready_marker": str(ready_marker) if ready_marker else None,
     }
+
+
+def _transcript_entries_from_segments(
+        segments) -> list[tuple[float, float, str]]:
+    """Normalize faster-whisper segments into Uoink transcript entries."""
+    entries: list[tuple[float, float, str]] = []
+    for segment in segments:
+        if isinstance(segment, dict):
+            start = segment.get("start")
+            end = segment.get("end")
+            text = segment.get("text")
+        else:
+            start = getattr(segment, "start", None)
+            end = getattr(segment, "end", None)
+            text = getattr(segment, "text", None)
+        clean_text = str(text or "").strip()
+        if not clean_text:
+            continue
+        try:
+            start_value = max(0.0, float(start or 0.0))
+            end_value = max(start_value, float(end or start_value))
+        except (TypeError, ValueError):
+            continue
+        entries.append((start_value, end_value, clean_text))
+    return entries
+
+
+def transcribe_media(media_path: str | Path, *,
+                     model_name: str = DEFAULT_MODEL,
+                     model_root: str | Path | None = None,
+                     _transcribe=None) -> list[tuple[float, float, str]]:
+    """Transcribe local media with an already-cached faster-whisper model.
+
+    This path is used only as a fallback when a video source exposes no
+    captions. ``local_files_only=True`` is intentional: capture must not
+    become an implicit model download. ``ensure_model`` remains the explicit
+    user-triggered download path.
+    """
+    media = Path(media_path)
+    if not media.is_file():
+        raise FileNotFoundError(f"media file not found: {media}")
+
+    if _transcribe is not None:
+        segments = _transcribe(str(media))
+    else:
+        model = _load_model(
+            model_name,
+            model_root,
+            local_files_only=True,
+        )
+        segments, _info = model.transcribe(
+            str(media),
+            beam_size=1,
+            best_of=1,
+            vad_filter=True,
+        )
+    return _transcript_entries_from_segments(segments)
 
 
 def _words_from_segments(segments) -> list[dict[str, Any]]:
