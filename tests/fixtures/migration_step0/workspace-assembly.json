@@ -1,0 +1,290 @@
+{
+  "_fixture": {
+    "surface": "workspaces.py through /workspaces and /workspace/*",
+    "regenerate": "python tests/regenerate_migration_step0_fixtures.py --fixture workspace-assembly",
+    "check": "python tests/regenerate_migration_step0_fixtures.py --check --fixture workspace-assembly",
+    "data": "synthetic",
+    "network": "loopback only"
+  },
+  "interactions": [
+    {
+      "request": {
+        "method": "POST",
+        "path": "/workspaces",
+        "json": {
+          "format": "talking_head",
+          "topic": "AI",
+          "hook_target": "curiosity_gap",
+          "n_examples": 2,
+          "notes": "Synthetic migration fixture"
+        }
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "workspace": {
+          "id": "ws_fixture",
+          "created_at": "2030-01-02T03:04:01Z",
+          "updated_at": "2030-01-02T03:04:01Z",
+          "format": "talking_head",
+          "topic": "AI",
+          "hook_target": "curiosity_gap",
+          "your_channel": null,
+          "n_examples": 2,
+          "assembled_yoinks": [],
+          "notes": "Synthetic migration fixture"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/workspace/assemble",
+        "json": {
+          "workspace_id": "ws_fixture",
+          "format": "talking_head",
+          "topic": "AI",
+          "hook_target": "curiosity_gap",
+          "n_examples": 2
+        }
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "workspace_id": "ws_fixture",
+        "filters": {
+          "format": "talking_head",
+          "topic": "AI",
+          "hook_target": "curiosity_gap",
+          "your_channel": null,
+          "n_examples": 2
+        },
+        "assembled": [
+          {
+            "video_id": "video-over",
+            "slug": "fixture-video-over",
+            "title": "The concrete opener",
+            "channel": "Synthetic Creator",
+            "topic": "AI workflows",
+            "hook_type": "curiosity_gap",
+            "format": "talking_head",
+            "performance_tier": "over",
+            "length_bucket": "short",
+            "yoinked_at": "2029-12-31T00:00:00Z"
+          },
+          {
+            "video_id": "video-average",
+            "slug": "fixture-video-average",
+            "title": "A second useful example",
+            "channel": "Synthetic Creator",
+            "topic": "AI systems",
+            "hook_type": "informative",
+            "format": "talking_head",
+            "performance_tier": "average",
+            "length_bucket": "short",
+            "yoinked_at": "2029-12-31T00:00:00Z"
+          }
+        ],
+        "audience_questions": [
+          {
+            "video_id": "video-over",
+            "question": "Which step saves the most time?",
+            "likes": 12
+          },
+          {
+            "video_id": "video-average",
+            "question": "Can this run locally?",
+            "likes": 8
+          }
+        ],
+        "self_snapshot": null,
+        "taste_anchors": {
+          "anchors": [
+            "specific mechanisms",
+            "plain claims"
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/workspace/critique",
+        "json": {
+          "workspace_id": "ws_fixture",
+          "draft_text": "Open on the saved hour, then show the three steps."
+        }
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "mode": "context_only",
+        "workspace": {
+          "id": "ws_fixture",
+          "created_at": "2030-01-02T03:04:01Z",
+          "updated_at": "2030-01-02T03:04:02Z",
+          "format": "talking_head",
+          "topic": "AI",
+          "hook_target": "curiosity_gap",
+          "your_channel": null,
+          "n_examples": 2,
+          "assembled_yoinks": [
+            "video-over",
+            "video-average"
+          ],
+          "notes": "Synthetic migration fixture"
+        },
+        "context": {
+          "ok": true,
+          "workspace_id": null,
+          "filters": {
+            "format": "talking_head",
+            "topic": "AI",
+            "hook_target": "curiosity_gap",
+            "your_channel": null,
+            "n_examples": 2
+          },
+          "assembled": [
+            {
+              "video_id": "video-over",
+              "slug": "fixture-video-over",
+              "title": "The concrete opener",
+              "channel": "Synthetic Creator",
+              "topic": "AI workflows",
+              "hook_type": "curiosity_gap",
+              "format": "talking_head",
+              "performance_tier": "over",
+              "length_bucket": "short",
+              "yoinked_at": "2029-12-31T00:00:00Z"
+            },
+            {
+              "video_id": "video-average",
+              "slug": "fixture-video-average",
+              "title": "A second useful example",
+              "channel": "Synthetic Creator",
+              "topic": "AI systems",
+              "hook_type": "informative",
+              "format": "talking_head",
+              "performance_tier": "average",
+              "length_bucket": "short",
+              "yoinked_at": "2029-12-31T00:00:00Z"
+            }
+          ],
+          "audience_questions": [
+            {
+              "video_id": "video-over",
+              "question": "Which step saves the most time?",
+              "likes": 12
+            },
+            {
+              "video_id": "video-average",
+              "question": "Can this run locally?",
+              "likes": 8
+            }
+          ],
+          "self_snapshot": null,
+          "taste_anchors": {
+            "anchors": [
+              "specific mechanisms",
+              "plain claims"
+            ]
+          }
+        },
+        "draft_text": "Open on the saved hour, then show the three steps.",
+        "next": "Produce findings JSON and POST again with `findings` to persist them."
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "path": "/workspace/critique",
+        "json": {
+          "workspace_id": "ws_fixture",
+          "draft_text": "Open on the saved hour, then show the three steps.",
+          "findings": {
+            "hook_strength": "specific",
+            "pacing_issues": [
+              "The middle repeats the setup."
+            ],
+            "missing_audience_hooks": [
+              "Answer the local-run question."
+            ]
+          }
+        }
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "mode": "persisted",
+        "id": 1,
+        "workspace_id": "ws_fixture"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/workspace/ws_fixture"
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "workspace": {
+          "id": "ws_fixture",
+          "created_at": "2030-01-02T03:04:01Z",
+          "updated_at": "2030-01-02T03:04:04Z",
+          "format": "talking_head",
+          "topic": "AI",
+          "hook_target": "curiosity_gap",
+          "your_channel": null,
+          "n_examples": 2,
+          "assembled_yoinks": [
+            "video-over",
+            "video-average"
+          ],
+          "notes": "Synthetic migration fixture"
+        },
+        "critique_log": [
+          {
+            "id": 1,
+            "workspace_id": "ws_fixture",
+            "ts_utc": "2030-01-02T03:04:03Z",
+            "mode": "agent",
+            "draft_text": "Open on the saved hour, then show the three steps.",
+            "findings": {
+              "hook_strength": "specific",
+              "pacing_issues": [
+                "The middle repeats the setup."
+              ],
+              "missing_audience_hooks": [
+                "Answer the local-run question."
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "path": "/workspaces?limit=5"
+      },
+      "status": 200,
+      "body": {
+        "ok": true,
+        "workspaces": [
+          {
+            "id": "ws_fixture",
+            "created_at": "2030-01-02T03:04:01Z",
+            "updated_at": "2030-01-02T03:04:04Z",
+            "format": "talking_head",
+            "topic": "AI",
+            "hook_target": "curiosity_gap",
+            "your_channel": null,
+            "n_examples": 2
+          }
+        ],
+        "count": 1
+      }
+    }
+  ]
+}
