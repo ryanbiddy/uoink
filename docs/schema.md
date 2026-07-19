@@ -239,7 +239,7 @@ Uniqueness:
 MCP surfaces:
 
 - `get_citation_map(slug)` returns transcript citations and screenshot citations separately.
-- `get_yoink_corpus(slug)` also includes the raw citations list as an additive optional field.
+- `get_uoink_corpus(slug)` also includes the raw citations list as an additive optional field.
 
 ### Entity graph (Sprint 16, migration 0002)
 

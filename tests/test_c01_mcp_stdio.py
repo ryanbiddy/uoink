@@ -48,6 +48,33 @@ except ImportError:
     HAVE_MCP_SDK = False
 
 
+CANONICAL_STDIO_TOOLS = {
+    "uoink_video",
+    "uoink_playlist",
+    "get_job_status",
+    "cancel_job",
+    "list_recent_uoinks",
+    "search_uoinks",
+    "get_uoink_corpus",
+    "analyze_comments",
+    "classify_hook",
+    "get_taxonomy",
+    "get_citation_map",
+    "get_uoink_health",
+    "find_mentions",
+    "get_transcript_reliability",
+}
+
+REMOVED_STDIO_ALIASES = {
+    "yoink_video",
+    "yoink_playlist",
+    "list_recent_yoinks",
+    "search_yoinks",
+    "get_yoink_corpus",
+    "get_yoink_health",
+}
+
+
 def _assert(cond, msg):
     if not cond:
         raise AssertionError(msg)
@@ -150,10 +177,13 @@ def test_stdio_handshake_under_embeddable_path_rules():
             client.send({"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
             tools = client.wait_for(2)
             names = [t["name"] for t in tools["result"]["tools"]]
-            _assert(len(names) >= 14,
-                    f"expected the full tool surface, got {len(names)}: {names}")
-            _assert("list_recent_uoinks" in names, f"tools: {names}")
-            print(f"ok  tools/list returns {len(names)} tools")
+            _assert(set(names) == CANONICAL_STDIO_TOOLS,
+                    "stdio tool surface drift: "
+                    f"missing={sorted(CANONICAL_STDIO_TOOLS - set(names))}, "
+                    f"extra={sorted(set(names) - CANONICAL_STDIO_TOOLS)}")
+            _assert(not REMOVED_STDIO_ALIASES.intersection(names),
+                    f"removed aliases returned by tools/list: {names}")
+            print("ok  tools/list returns exactly 14 canonical tools")
 
             client.send({"jsonrpc": "2.0", "id": 3, "method": "tools/call",
                          "params": {"name": "list_recent_uoinks",
@@ -192,9 +222,29 @@ def test_entry_point_pins_the_app_dir():
     print("ok  entry point pins the app dir before importing server")
 
 
+def test_removed_aliases_are_rejected_and_manifest_matches():
+    import uoink_mcp_tools
+
+    for name in REMOVED_STDIO_ALIASES:
+        result = uoink_mcp_tools.call_tool(name, {})
+        _assert(result == {"ok": False, "error": "tool not found"},
+                f"removed alias still resolves: {name} -> {result}")
+
+    manifest = json.loads(
+        (ROOT / ".mcpb" / "manifest.json").read_text(encoding="utf-8")
+    )
+    manifest_names = {tool["name"] for tool in manifest["tools"]}
+    _assert(manifest_names == CANONICAL_STDIO_TOOLS,
+            "MCPB manifest tool inventory drift: "
+            f"missing={sorted(CANONICAL_STDIO_TOOLS - manifest_names)}, "
+            f"extra={sorted(manifest_names - CANONICAL_STDIO_TOOLS)}")
+    print("ok  removed aliases reject and MCPB lists the same 14 tools")
+
+
 def main():
     test_entry_point_pins_the_app_dir()
     test_doctor_carries_the_selfcheck()
+    test_removed_aliases_are_rejected_and_manifest_matches()
     test_stdio_handshake_under_embeddable_path_rules()
     print("\nall green")
 

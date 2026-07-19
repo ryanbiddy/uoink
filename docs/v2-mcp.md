@@ -9,11 +9,14 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink exposes 14 MCP tools covering extraction, playlist jobs, search, corpus retrieval, citation maps, health scores, transcript reliability, Comment Intelligence, Hook Type, hook taxonomy, and entity mentions. The tool implementation lives in `uoink_mcp_tools.py`; stdio (`uoink_mcp.py`) is the officially supported MCP transport, and the local HTTP JSON-RPC helper (`server.py` under `/mcp/v1`) wraps the same registry for clients that can use direct POST calls.
 
-## Tool naming & deprecation (v2.1 rename)
+## Tool naming
 
-In v2.1 the six brand-carrying tools were renamed `yoink_*` → `uoink_*`. The old names still work as **deprecated aliases** through Uoink **v2.5** and are **removed in v3** (a ~6-month soft-alias window). Calling a legacy name returns the same result as the canonical name and emits a one-shot `DeprecationWarning` to **stderr** (never stdout — stdout is the JSON-RPC transport), deduplicated to once per process per tool. The deprecated tool's description carries an inline `[DEPRECATED — use <new_name>]` prefix so it is flagged in client tool lists.
+In v2.1 the six brand-carrying tools were renamed `yoink_*` → `uoink_*`.
+Their compatibility window ended with v2.5. Uoink v3 registers and accepts
+only the canonical names, so clients using an old name receive
+`tool not found`.
 
-| Old (deprecated alias) | New (canonical) |
+| Removed name | Canonical name |
 |---|---|
 | `yoink_video` | `uoink_video` |
 | `yoink_playlist` | `uoink_playlist` |
@@ -22,17 +25,14 @@ In v2.1 the six brand-carrying tools were renamed `yoink_*` → `uoink_*`. The o
 | `get_yoink_corpus` | `get_uoink_corpus` |
 | `get_yoink_health` | `get_uoink_health` |
 
-The seven brand-neutral tools are unchanged: `get_job_status`, `cancel_job`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `find_mentions`.
+The eight brand-neutral tools are unchanged: `get_job_status`, `cancel_job`,
+`analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`,
+`find_mentions`, and `get_transcript_reliability`.
 
-Verbatim deprecation warning (tool name interpolated, written to stderr):
-
-```text
-DeprecationWarning: MCP tool `yoink_video` is renamed to `uoink_video`.
-The old name still works through Uoink v2.5 and is removed in v3.
-Update your agent config to `uoink_video`. Details: https://uoink.video/docs/v2-mcp
-```
-
-**HTTP auth header:** the canonical header is `X-Uoink-Token`. The legacy `X-Yoink-Token` header is still accepted on the experimental HTTP JSON-RPC transport for the same v2.5→v3 alias window, so existing community HTTP clients keep working without an immediate config change.
+**HTTP auth header:** the canonical header is `X-Uoink-Token`. The legacy
+`X-Yoink-Token` header is still accepted on the experimental HTTP JSON-RPC
+transport because installed extension builds still use it. That header
+compatibility is separate from the removed MCP tool aliases.
 
 ## Compatibility matrix
 
@@ -91,7 +91,11 @@ The existing helper server also exposes an experimental local HTTP JSON-RPC help
 http://127.0.0.1:5179/mcp/v1
 ```
 
-Auth: `X-Uoink-Token: <token>` (legacy `X-Yoink-Token` accepted through the v2.5→v3 alias window) required on every HTTP JSON-RPC request. `GET /mcp/v1/config` returns config metadata for setup.html; it is also token-gated.
+Auth: `X-Uoink-Token: <token>` is required on every HTTP JSON-RPC request.
+The helper still accepts the legacy `X-Yoink-Token` header for installed
+extension compatibility; this does not restore removed tool names.
+`GET /mcp/v1/config` returns config metadata for setup.html and is also
+token-gated.
 
 HTTP endpoints:
 
@@ -641,7 +645,10 @@ Rate-limit errors return friendly tool payloads, for example:
 { "ok": false, "error": "rate limit exceeded: max 5/minute" }
 ```
 
-HTTP JSON-RPC remains protected by `X-Uoink-Token` (legacy `X-Yoink-Token` accepted through the alias window); stdio MCP relies on the spawning client trust boundary. All tools keep v1/v2 URL, slug, and job validation.
+HTTP JSON-RPC remains protected by `X-Uoink-Token`; the helper still accepts
+the legacy `X-Yoink-Token` header for installed extension compatibility.
+Stdio MCP relies on the spawning client trust boundary. All tools keep v1/v2
+URL, slug, and job validation.
 
 ## Compatibility notes
 

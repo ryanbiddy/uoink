@@ -8,12 +8,9 @@ MCP clients launch this process and speak JSON-RPC over stdin/stdout. Keep
 stdout reserved for the protocol; server.py logging is redirected to stderr
 while importing the backend.
 
-v2.1 rename: the canonical tools are the uoink_* names below. The six
-brand-carrying tools that were renamed from yoink_* also register their old
-names as deprecated aliases (via ``mcp.add_tool`` so the canonical
-``@mcp.tool`` count stays at 13). Calling an alias emits a one-shot
-DeprecationWarning to stderr; the old names work through Uoink v2.5 and are
-removed in v3. See docs/v2-mcp.md.
+The stdio surface is exactly the 14 canonical tools below. The six Yoink-era
+aliases completed their deprecation window in Uoink v2.5 and are not
+registered in v3. See docs/v2-mcp.md.
 """
 
 from __future__ import annotations
@@ -205,58 +202,6 @@ def get_transcript_reliability(video_id: str) -> dict:
     return uoink_mcp_tools.call_tool(
         "get_transcript_reliability", {"video_id": video_id}
     )
-
-
-# --------------------------------------------------------------------------
-# Deprecated aliases (Yoink era). Registered with mcp.add_tool rather than the
-# @mcp.tool decorator so they do NOT inflate the canonical 13-tool count the CI
-# guard checks. Each wrapper calls call_tool with the OLD name, which resolves
-# to the canonical handler AND emits the one-shot deprecation warning. The
-# description carries an inline [DEPRECATED] prefix so it shows in client tool
-# lists. Removed in Uoink v3 (work through v2.5).
-# --------------------------------------------------------------------------
-def _yoink_video(url: str, interval: int = 30) -> dict:
-    return uoink_mcp_tools.call_tool("yoink_video", {"url": url, "interval": interval})
-
-
-def _yoink_playlist(url: str, interval: int = 30) -> dict:
-    return uoink_mcp_tools.call_tool("yoink_playlist", {"url": url, "interval": interval})
-
-
-def _list_recent_yoinks(limit: int = 20) -> dict:
-    return uoink_mcp_tools.call_tool("list_recent_yoinks", {"limit": limit})
-
-
-def _search_yoinks(query: str, limit: int = 10) -> dict:
-    return uoink_mcp_tools.call_tool("search_yoinks", {"query": query, "limit": limit})
-
-
-def _get_yoink_corpus(slug: str) -> dict:
-    return uoink_mcp_tools.call_tool("get_yoink_corpus", {"slug": slug})
-
-
-def _get_yoink_health(slug: str) -> dict:
-    return uoink_mcp_tools.call_tool("get_yoink_health", {"slug": slug})
-
-
-_DEPRECATED_ALIASES = (
-    (_yoink_video, "yoink_video",
-     "[DEPRECATED — use uoink_video] Extract a single YouTube video into a Uoink corpus."),
-    (_yoink_playlist, "yoink_playlist",
-     "[DEPRECATED — use uoink_playlist] Start asynchronous extraction for a YouTube playlist."),
-    (_list_recent_yoinks, "list_recent_yoinks",
-     "[DEPRECATED — use list_recent_uoinks] List recent saved Uoink corpora."),
-    (_search_yoinks, "search_yoinks",
-     "[DEPRECATED — use search_uoinks] Keyword search across saved Uoink markdown corpora."),
-    (_get_yoink_corpus, "get_yoink_corpus",
-     "[DEPRECATED — use get_uoink_corpus] Return the full markdown corpus for a saved uoink by slug."),
-    (_get_yoink_health, "get_yoink_health",
-     "[DEPRECATED — use get_uoink_health] Return the per-section extraction health score for a saved uoink."),
-)
-
-for _fn, _alias_name, _alias_desc in _DEPRECATED_ALIASES:
-    mcp.add_tool(_fn, name=_alias_name, description=_alias_desc)
-
 
 if __name__ == "__main__":
     # `uoink doctor` / dry-run support: `python uoink_mcp.py --doctor` and

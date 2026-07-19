@@ -36,9 +36,9 @@ working as-is.
 2. Import the `mcp` SDK (exit 1 with an actionable message if absent).
 3. Swap `sys.stdout` to stderr while importing `server` (server.py wires a
    stdout log handler at import time; stdout belongs to the protocol).
-4. `uoink_mcp_tools.bind_backend(server)`, build the FastMCP app, register
-   the 14 canonical `@mcp.tool`s plus 6 deprecated `yoink_*` aliases
-   (20 total on the wire).
+4. `uoink_mcp_tools.bind_backend(server)`, build the FastMCP app, and
+   register exactly the 14 canonical `@mcp.tool`s. The six Yoink-era aliases
+   completed their compatibility window in v2.5 and are absent in v3.
 
 ## How it can never silently regress
 
@@ -46,7 +46,8 @@ working as-is.
   any interpreter with `python -P` (PYTHONSAFEPATH withholds the script
   dir, same effect as the `._pth`), from a non-repo cwd, and drives the
   real client handshake: initialize -> notifications/initialized ->
-  tools/list (>= 14 tools) -> tools/call `list_recent_uoinks` against an
+  tools/list (exactly 14 canonical tools) -> tools/call
+  `list_recent_uoinks` against an
   isolated data root (`LOCALAPPDATA`/`XDG_DATA_HOME`/`UOINK_OUTPUT_DIR`
   pointed at a temp dir; the test never touches a real index). CI's
   stdlib-tests job now installs the `mcp` SDK so this runs, and the test
@@ -76,6 +77,9 @@ drop late responses (observed with tools/call in a 4-message batch).
 Gate run 2026-07-04/05 against the installed embeddable interpreter
 (`%LOCALAPPDATA%\Uoink\python\python.exe`) driving this repo's
 `uoink_mcp.py`: initialize answered (`serverInfo.name: "uoink"`),
-tools/list returned 20, `tools/call list_recent_uoinks` returned
-`{"ok": true, "yoinks": []}` against an isolated temp index. The same
-sequence on the unpatched file exits 1 with the ModuleNotFoundError.
+tools/list returned 20 at the time because six deprecated aliases were still
+registered; `tools/call list_recent_uoinks` returned
+`{"ok": true, "yoinks": []}` against an isolated temp index. The v3
+regression gate now requires exactly 14 canonical names and rejects the six
+removed names. The same sequence on the original C-01 file exits 1 with the
+ModuleNotFoundError.

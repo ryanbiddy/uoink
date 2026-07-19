@@ -86,8 +86,6 @@ def test_http_bridge():
         "echo": _FakeSpec("echo", "Echo the arguments back. Test tool.",
                           {"type": "object", "properties": {"x": {"type": "integer"}}}),
     }
-    fake.MCP_TOOL_ALIASES = {}
-
     def _call_tool(name, args=None):
         spec = fake.TOOL_REGISTRY.get(name)
         if not spec:

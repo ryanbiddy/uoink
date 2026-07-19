@@ -6520,7 +6520,7 @@ def _list_public_jobs(kind: str | None = None) -> list[dict]:
 def _create_playlist_job(playlist: dict, interval: int) -> tuple[str, dict]:
     """Create + start a playlist job from an already-previewed playlist.
 
-    Shared by the HTTP `/playlist/start` route and the MCP `yoink_playlist`
+    Shared by the HTTP `/playlist/start` route and the MCP `uoink_playlist`
     tool so both entry points get identical job shapes and lifecycle.
     """
     job_id = _make_job_id()
@@ -12089,8 +12089,7 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {"ok": False,
                                          "error": "tool name required"})
         tools = _mcp_tools_module()
-        aliases = getattr(tools, "MCP_TOOL_ALIASES", {})
-        if name not in tools.TOOL_REGISTRY and name not in aliases:
+        if name not in tools.TOOL_REGISTRY:
             return self._send_json(404, {"ok": False,
                                          "error": "tool not found"})
         try:

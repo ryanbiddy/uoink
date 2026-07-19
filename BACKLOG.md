@@ -34,7 +34,7 @@ This is the canonical list of what's shipped, what's planned, and what's been ru
 ### v2.0 — built (awaiting smoke test then public launch)
 
 **Core v2 product**
-- **MCP server** with 13 tools (`yoink_video`, `yoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_yoinks`, `search_yoinks`, `get_yoink_corpus`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `get_yoink_health`, `find_mentions`). Stdio transport officially tested with Claude Desktop and Cursor; community-reported support for ChatGPT Desktop, Continue, Cline; generic stdio fallback for any MCP-compatible client.
+- **MCP server** with 14 canonical tools (`uoink_video`, `uoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `get_uoink_health`, `find_mentions`, `get_transcript_reliability`). Stdio transport officially tested with Claude Desktop and Cursor; community-reported support for ChatGPT Desktop, Continue, Cline; generic stdio fallback for any MCP-compatible client.
 - **Playlist Mode** — yoink up to 10 videos per job, async with live progress, cancel mid-flight, partial-failure tolerance, combined corpus to clipboard (text-only)
 - **Comment Intelligence** — Anthropic-powered theme clustering, mentioned-product extraction, disagreement flagging (BYO key)
 - **Hook Type classification** — 9-category per-video classifier with brief explanation, confidence score, and self-calibrating user corrections
@@ -49,7 +49,7 @@ This is the canonical list of what's shipped, what's planned, and what's been ru
 - Continue-on-failure policy (fails only when zero videos succeed)
 - `_corpus_update_lock` prevents CI/Hook/comments stomping each other's `.md` writes
 - `MCP yoink_video` records single-video jobs to `/jobs` (matches `/extract` flow for consistency across both adoption funnels)
-- `get_yoink_corpus` returns `video_id` and `video_url` for downstream tool composition
+- `get_uoink_corpus` returns `video_id` and `video_url` for downstream tool composition
 - YouTube Shorts support (`/shorts/` URLs normalize correctly, UI and extraction handle them seamlessly)
 
 **v2 reliability + UX polish**
@@ -333,7 +333,7 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 
 ### Pin / favorite specific yoinks
 - **Destination:** v2.5
-- **Rationale:** Mark a session as pinned so it always appears in `list_recent_yoinks` MCP results regardless of recency. Useful for reference yoinks the user keeps coming back to.
+- **Rationale:** Mark a session as pinned so it always appears in `list_recent_uoinks` MCP results regardless of recency. Useful for reference uoinks the user keeps coming back to.
 - **Trigger:** v2.5 cycle
 
 ### Multi-language support

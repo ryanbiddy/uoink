@@ -18,6 +18,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **One clear detail action.** A saved uoink now keeps "Write from this" primary and moves folder, transcript, retry, transcription, and evidence controls into a More actions menu.
 - **Reading stays primary on Library cards.** "Write from this" remains available as a compact secondary action instead of filling the card width.
 - **A shorter Library filter row.** Search, source, author, topic, and sort stay visible. Video-analysis and date controls now sit behind Filters, and every applied filter appears as a removable chip.
+- **The stdio MCP surface is exactly 14 canonical tools.** The six deprecated
+  `yoink_*` aliases reached the removal point announced for Uoink v3 and are
+  no longer listed or accepted. Clients must use the corresponding `uoink_*`
+  names.
 
 ## [3.6.0] - 2026-07-08
 
