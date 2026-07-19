@@ -30,9 +30,9 @@ _ASYNC_TOOLS = {"uoink_playlist"}
 
 _RESULT_SCHEMA = {
     "type": "object",
-    "description": ("Uniform envelope. `ok` is false for tool or validation "
-                    "errors (HTTP stays 200); `result` carries the tool's "
-                    "payload on success."),
+    "description": ("Uniform envelope. `ok` is false for tool errors; "
+                    "`result` carries the tool's payload on success. Request "
+                    "schema errors use the same envelope with HTTP 400."),
     "properties": {
         "ok": {"type": "boolean"},
         "result": {"description": "Tool payload on success (shape varies per tool)."},
@@ -40,6 +40,113 @@ _RESULT_SCHEMA = {
     },
     "required": ["ok"],
 }
+
+
+def _matches_type(value: Any, expected: str) -> bool:
+    """Match the JSON types used by TOOL_REGISTRY schemas.
+
+    bool is deliberately excluded from integer/number even though Python's
+    bool subclasses int: JSON Schema treats them as distinct types.
+    """
+    if expected == "string":
+        return isinstance(value, str)
+    if expected == "integer":
+        return isinstance(value, int) and not isinstance(value, bool)
+    if expected == "number":
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
+    if expected == "boolean":
+        return isinstance(value, bool)
+    if expected == "array":
+        return isinstance(value, list)
+    if expected == "object":
+        return isinstance(value, dict)
+    if expected == "null":
+        return value is None
+    return True
+
+
+def _validate_value(value: Any, schema: dict, field: str) -> str | None:
+    expected = schema.get("type")
+    expected_types = expected if isinstance(expected, list) else [expected]
+    expected_types = [item for item in expected_types if isinstance(item, str)]
+    if expected_types and not any(_matches_type(value, item)
+                                  for item in expected_types):
+        labels = {
+            "string": "a string",
+            "integer": "an integer",
+            "number": "a number",
+            "boolean": "a boolean",
+            "array": "an array",
+            "object": "an object",
+            "null": "null",
+        }
+        label = " or ".join(labels.get(item, item) for item in expected_types)
+        return f"{field} must be {label}"
+
+    enum = schema.get("enum")
+    if isinstance(enum, list) and value not in enum:
+        choices = ", ".join(str(item) for item in enum)
+        return f"{field} must be one of: {choices}"
+
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        minimum = schema.get("minimum")
+        maximum = schema.get("maximum")
+        if isinstance(minimum, (int, float)) and value < minimum:
+            return f"{field} must be at least {minimum}"
+        if isinstance(maximum, (int, float)) and value > maximum:
+            return f"{field} must be at most {maximum}"
+
+    if isinstance(value, str):
+        max_length = schema.get("maxLength")
+        if isinstance(max_length, int) and len(value) > max_length:
+            return f"{field} must be at most {max_length} characters"
+
+    if isinstance(value, list):
+        max_items = schema.get("maxItems")
+        if isinstance(max_items, int) and len(value) > max_items:
+            return f"{field} must contain at most {max_items} items"
+        item_schema = schema.get("items")
+        if isinstance(item_schema, dict):
+            for index, item in enumerate(value):
+                error = _validate_value(item, item_schema, f"{field}[{index}]")
+                if error:
+                    return error
+    return None
+
+
+def validate_arguments(arguments: Any, input_schema: dict | None) -> str | None:
+    """Return the first request-contract error, or None when arguments match.
+
+    TOOL_REGISTRY uses a deliberately small JSON Schema subset: object
+    properties, required fields, closed objects, primitive types, enums,
+    numeric bounds, string length, and homogeneous arrays. Keeping this
+    validator beside the OpenAPI builder makes the published request contract
+    executable without adding a runtime jsonschema dependency.
+    """
+    schema = input_schema or {"type": "object"}
+    if not isinstance(arguments, dict):
+        return "request body must be an object"
+
+    required = schema.get("required")
+    if isinstance(required, list):
+        for field in required:
+            if isinstance(field, str) and field not in arguments:
+                return f"missing required field: {field}"
+
+    properties = schema.get("properties")
+    properties = properties if isinstance(properties, dict) else {}
+    if schema.get("additionalProperties") is False:
+        for field in arguments:
+            if field not in properties:
+                return f"unexpected field: {field}"
+
+    for field, value in arguments.items():
+        field_schema = properties.get(field)
+        if isinstance(field_schema, dict):
+            error = _validate_value(value, field_schema, field)
+            if error:
+                return error
+    return None
 
 
 def _summary(description: str) -> str:
@@ -82,7 +189,10 @@ def build_spec(base_url: str, *, tool_registry: dict, version: str) -> dict:
                         "description": "Tool result envelope.",
                         "content": {"application/json": {"schema": _RESULT_SCHEMA}},
                     },
-                    "401": {"description": "Missing or invalid X-Uoink-Token."},
+                    "400": {
+                        "description": "Request body does not match the tool input schema."
+                    },
+                    "403": {"description": "Missing or invalid X-Uoink-Token."},
                     "404": {"description": "Unknown tool name."},
                 },
                 "security": [{"UoinkToken": []}],

@@ -1,6 +1,6 @@
 """Tests for the OpenAPI bridge (V3.3-SOURCE-EXPANSION-SPEC.md).
 
-- build_spec against the REAL 63-tool registry (proves the whole registry
+- build_spec against the real tool registry (proves the whole registry
   maps to a valid OpenAPI 3.1 doc).
 - build_well_known shape.
 - Live HTTP smoke for GET /openapi/v1/spec.json, GET /.well-known/uoink-mcp.json,
@@ -45,7 +45,7 @@ class _FakeSpec:
 
 
 def test_build_spec_real_registry():
-    import uoink_mcp_tools as m  # real 63-tool registry
+    import uoink_mcp_tools as m
     spec = ob.build_spec("http://127.0.0.1:5179",
                          tool_registry=m.TOOL_REGISTRY, version="3.2.1")
     _assert(spec["openapi"] == "3.1.0", "openapi version wrong")
@@ -57,11 +57,17 @@ def test_build_spec_real_registry():
     _assert("requestBody" in op and "application/json" in op["requestBody"]["content"],
             "requestBody missing")
     _assert(op["security"] == [{"UoinkToken": []}], "security missing")
-    _assert("200" in op["responses"] and "404" in op["responses"], "responses missing")
+    _assert({"200", "400", "403", "404"} <= set(op["responses"]),
+            "responses missing")
+    _assert("401" not in op["responses"], "spec contradicts the HTTP 403 auth gate")
     # input_schema passed through verbatim
     schema = op["requestBody"]["content"]["application/json"]["schema"]
     _assert(schema is m.TOOL_REGISTRY["uoink_video"].input_schema,
             "input_schema not passed through")
+    health_schema = m.TOOL_REGISTRY["get_uoink_health"].input_schema
+    _assert(ob.validate_arguments({}, health_schema)
+            == "missing required field: slug",
+            "real health contract accepted a request without slug")
     _assert(spec["components"]["securitySchemes"]["UoinkToken"]["name"] == "X-Uoink-Token",
             "security scheme header wrong")
     # the whole thing must be JSON-serializable
@@ -78,18 +84,50 @@ def test_build_well_known():
     print("ok  build_well_known: spec/mcp/auth fields")
 
 
+def test_validate_arguments():
+    schema = {
+        "type": "object",
+        "properties": {
+            "slug": {"type": "string", "maxLength": 8},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 10},
+            "tags": {"type": "array", "items": {"type": "string"},
+                     "maxItems": 2},
+        },
+        "required": ["slug"],
+        "additionalProperties": False,
+    }
+    _assert(ob.validate_arguments({}, schema) == "missing required field: slug",
+            "required field was not enforced")
+    _assert(ob.validate_arguments({"slug": "ok", "extra": 1}, schema)
+            == "unexpected field: extra", "closed object was not enforced")
+    _assert(ob.validate_arguments({"slug": "ok", "limit": True}, schema)
+            == "limit must be an integer", "boolean passed as an integer")
+    _assert(ob.validate_arguments({"slug": "ok", "limit": 11}, schema)
+            == "limit must be at most 10", "numeric bound was not enforced")
+    _assert(ob.validate_arguments({"slug": "ok", "tags": ["x", 2]}, schema)
+            == "tags[1] must be a string", "array item type was not enforced")
+    _assert(ob.validate_arguments({"slug": "ok", "limit": 7}, schema) is None,
+            "valid arguments were rejected")
+    print("ok  validate_arguments: required/closed/type/bounds/array contracts")
+
+
 def test_http_bridge():
     import server  # noqa: E402
 
     fake = types.SimpleNamespace()
+    fake.calls = []
     fake.TOOL_REGISTRY = {
         "echo": _FakeSpec("echo", "Echo the arguments back. Test tool.",
-                          {"type": "object", "properties": {"x": {"type": "integer"}}}),
+                          {"type": "object",
+                           "properties": {"x": {"type": "integer"}},
+                           "required": ["x"],
+                           "additionalProperties": False}),
     }
     def _call_tool(name, args=None):
         spec = fake.TOOL_REGISTRY.get(name)
         if not spec:
             return {"ok": False, "error": "tool not found"}
+        fake.calls.append((name, args))
         return spec.handler(args or {})
     fake.call_tool = _call_tool
 
@@ -117,6 +155,23 @@ def test_http_bridge():
             raise AssertionError("expected 403 without token")
         except urllib.error.HTTPError as e:
             _assert(e.code == 403, f"expected 403, got {e.code}")
+
+        # Published required fields are enforced before the tool is called.
+        req = urllib.request.Request(
+            f"{BASE}/tools/echo", data=b"{}",
+            headers={"Content-Type": "application/json",
+                     "X-Uoink-Token": server.TOKEN},
+            method="POST")
+        try:
+            urllib.request.urlopen(req, timeout=5)
+            raise AssertionError("expected 400 for missing required field")
+        except urllib.error.HTTPError as e:
+            payload = json.loads(e.read().decode())
+            _assert(e.code == 400, f"expected 400, got {e.code}")
+            _assert(payload == {"ok": False,
+                                "error": "missing required field: x"},
+                    f"validation envelope wrong: {payload}")
+        _assert(fake.calls == [], "invalid request reached the tool handler")
 
         # POST /tools/echo with token -> 200 envelope
         req = urllib.request.Request(
@@ -164,6 +219,7 @@ def test_no_version_tags_in_catalog():
 def main():
     test_build_spec_real_registry()
     test_build_well_known()
+    test_validate_arguments()
     test_http_bridge()
     test_no_version_tags_in_catalog()
     print("\nALL OPENAPI BRIDGE TESTS PASSED")

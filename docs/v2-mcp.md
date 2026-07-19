@@ -260,6 +260,10 @@ Return shape:
 }
 ```
 
+`yoinks` and each item's `yoinked_at` are frozen legacy wire names retained
+for client compatibility. New integrations should treat them as stable,
+opaque response keys; product copy and human-readable messages use Uoink.
+
 ### search_uoinks
 
 Keyword search across saved Uoink markdown corpora.
@@ -328,7 +332,7 @@ Return shape:
 
 Errors:
 
-- `{ "ok": false, "error": "yoink not found" }`
+- `{ "ok": false, "error": "uoink not found" }`
 - `{ "ok": false, "error": "corpus read failed: ..." }`
 
 ### analyze_comments
@@ -355,7 +359,7 @@ Return shape:
 Errors:
 
 - `{ "ok": false, "error": "anthropic key not configured" }`
-- `{ "ok": false, "error": "yoink not found" }`
+- `{ "ok": false, "error": "uoink not found" }`
 - `{ "ok": false, "error": "not enough comments to analyze" }`
 - `{ "ok": false, "error": "<Anthropic or parsing error>" }`
 
@@ -390,7 +394,7 @@ After the user corrects a classification through `POST /taxonomy/correct`, futur
 Errors:
 
 - `{ "ok": false, "error": "anthropic key not configured" }`
-- `{ "ok": false, "error": "yoink not found" }`
+- `{ "ok": false, "error": "uoink not found" }`
 - `{ "ok": false, "error": "<Anthropic or parsing error>" }`
 
 Rate limit: 10 calls/minute per process.
@@ -482,8 +486,8 @@ Fields:
 
 Errors:
 
-- `{ "ok": false, "error": "yoink not found" }`
-- `{ "ok": false, "error": "yoink has no video_id" }`
+- `{ "ok": false, "error": "uoink not found" }`
+- `{ "ok": false, "error": "uoink has no video_id" }`
 - `{ "ok": false, "error": "rate limit exceeded: max 60/minute" }`
 
 Rate limit: 60 calls/minute per process.
@@ -528,8 +532,8 @@ Status strings are intentionally compact (`ok`, `missing`, `skipped`, `pending`,
 
 Errors:
 
-- `{ "ok": false, "error": "yoink not found" }`
-- `{ "ok": false, "error": "no health data for this yoink" }`
+- `{ "ok": false, "error": "uoink not found" }`
+- `{ "ok": false, "error": "no health data for this uoink" }`
 - `{ "ok": false, "error": "rate limit exceeded: max 60/minute" }`
 
 Rate limit: 60 calls/minute per process.
@@ -620,7 +624,7 @@ Return shape:
 Errors:
 
 - `{ "ok": false, "error": "video_id required" }`
-- `{ "ok": false, "error": "yoink not found" }`
+- `{ "ok": false, "error": "uoink not found" }`
 - `{ "ok": false, "error": "rate limit exceeded: max 60/minute" }`
 
 Rate limit: 60 calls/minute per process.
