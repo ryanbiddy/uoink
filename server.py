@@ -100,6 +100,7 @@ import x_extractor  # noqa: E402  -- U-15 X text/thread capture (syndication)
 import x_article_extractor  # noqa: E402  -- V-2c X Article (DOM) capture
 import notes  # noqa: E402  -- context-layer item 1: quick notes / musings capture
 import images  # noqa: E402  -- context-layer item 3: image / meme capture
+import writer_peer  # noqa: E402  -- optional Writer readiness, no shared files
 
 
 def _extract_page_to_prose(url: str) -> str | None:
@@ -8821,6 +8822,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_session_active()
         if bare == "/settings":
             return self._handle_settings_get()
+        if bare == "/api/writer-peer/v1/status":
+            return self._send_json(200, writer_peer.status())
         if bare == "/settings/pricing":
             return self._handle_settings_pricing()
         if bare == "/role/emphasis":
