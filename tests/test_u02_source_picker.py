@@ -7,8 +7,8 @@ search input with the newest uoink's title, filtered the dropdown against
 that title (1 of 31 sources visible), auto-reselected on clear, and capped
 the rendered list at 20. The rebuild's contract:
 
-1. Dedicated corpus-wide list, newest-first: the picker fetches
-   /memory/search?limit=200 itself instead of leaning on the paged,
+1. Dedicated corpus-wide list, newest-first: the picker fetches the
+   versioned corpus read contract itself instead of leaning on the paged,
    filter-shaped state.library.
 2. No prefill, no auto-select: the render pass never writes the hidden
    source id or the input value; browsing starts empty and shows everything.
@@ -44,8 +44,8 @@ def section(start: str, end: str) -> str:
 
 
 def test_dedicated_corpus_list() -> None:
-    require("/memory/search?limit=200" in DASHBOARD,
-            "picker must fetch its own corpus-wide source list")
+    require("/api/corpus/v1/search?limit=200" in DASHBOARD,
+            "picker must fetch its own versioned corpus-wide source list")
     require("writingSourceRows: []" in DASHBOARD,
             "dedicated picker rows missing from state")
     require("function writingSourceRowsAll()" in DASHBOARD,
