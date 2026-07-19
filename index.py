@@ -799,6 +799,80 @@ class Index:
             self._conn.commit()
             return cur.lastrowid or 0
 
+    def ingest_suite_engagement(self, events: list[dict]) -> dict:
+        """Ingest one validated cross-product batch atomically.
+
+        The caller validates the exact wire envelope before this method.
+        Item resolution and event-id idempotency happen under the same
+        database lock and transaction as the accepted inserts.
+        """
+        import engagement_contract
+
+        submitted = len(events)
+        accepted = 0
+        duplicates = 0
+        rejected: list[dict] = []
+        with self._lock:
+            saved_level = self._conn.isolation_level
+            try:
+                self._conn.isolation_level = None
+                self._conn.execute("BEGIN IMMEDIATE")
+                for event in events:
+                    event_id = event["event_id"]
+                    duplicate = self._conn.execute(
+                        "SELECT 1 FROM engagement_events WHERE event_id=?",
+                        (event_id,),
+                    ).fetchone()
+                    if duplicate is not None:
+                        duplicates += 1
+                        continue
+                    item_id = engagement_contract.item_id_from_ref(
+                        event["item_ref"]
+                    )
+                    item = self._conn.execute(
+                        "SELECT 1 FROM yoinks "
+                        "WHERE video_id=? AND deleted_at IS NULL",
+                        (item_id,),
+                    ).fetchone()
+                    if item is None:
+                        rejected.append(
+                            {
+                                "event_id": event_id,
+                                "code": "not_found",
+                                "message": "corpus item not found",
+                                "retryable": False,
+                            }
+                        )
+                        continue
+                    self._conn.execute(
+                        "INSERT INTO engagement_events "
+                        "(event_id, video_id, event_type, ts_utc, source) "
+                        "VALUES (?, ?, ?, ?, ?)",
+                        (
+                            event_id,
+                            item_id,
+                            event["event_type"],
+                            event["occurred_at"],
+                            event["source_product"],
+                        ),
+                    )
+                    accepted += 1
+                self._conn.execute("COMMIT")
+            except Exception:
+                try:
+                    self._conn.execute("ROLLBACK")
+                except sqlite3.Error:
+                    pass
+                raise
+            finally:
+                self._conn.isolation_level = saved_level
+        return {
+            "submitted": submitted,
+            "accepted": accepted,
+            "duplicates": duplicates,
+            "rejected": rejected,
+        }
+
     def _decayed(self, weight: float, age_days: float) -> float:
         import math
         return weight * math.exp(-math.log(2.0) * max(age_days, 0.0)

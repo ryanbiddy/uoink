@@ -101,6 +101,9 @@ import x_article_extractor  # noqa: E402  -- V-2c X Article (DOM) capture
 import notes  # noqa: E402  -- context-layer item 1: quick notes / musings capture
 import images  # noqa: E402  -- context-layer item 3: image / meme capture
 import writer_peer  # noqa: E402  -- optional Writer readiness, no shared files
+import engagement_contract  # noqa: E402  -- suite engagement batch boundary
+import media_handoff  # noqa: E402  -- authenticated kept-media boundary
+import suite_service  # noqa: E402  -- suite discovery/health/runtime lease
 
 
 def _extract_page_to_prose(url: str) -> str | None:
@@ -8799,6 +8802,21 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_openapi_spec()
         if bare == "/.well-known/uoink-mcp.json":
             return self._handle_well_known_mcp()
+        if bare == suite_service.MANIFEST_PATH:
+            return self._send_json(
+                200,
+                suite_service.service_manifest(VERSION),
+            )
+        if bare == suite_service.HEALTH_PATH:
+            integrity = _path_integrity_status()
+            return self._send_json(
+                200,
+                suite_service.health_payload(
+                    VERSION,
+                    index_recovering=_index_recovering,
+                    corpus_paths_ok=bool(integrity.get("ok")),
+                ),
+            )
         if bare == "/dashboard" or bare == "/dashboard/":
             # Public local UI shell. The page itself performs the same token
             # handshake as the extension before reading recent yoinks or
@@ -8876,6 +8894,9 @@ class Handler(BaseHTTPRequestHandler):
         if bare.startswith("/api/corpus/v1/items/") \
                 and "/attachments/" in bare:
             return self._handle_corpus_v1_attachment(bare)
+        if bare.startswith("/api/corpus/v1/items/") \
+                and bare.endswith("/kept-media"):
+            return self._handle_corpus_v1_kept_media(bare)
         if bare.startswith("/api/corpus/v1/items/"):
             return self._handle_corpus_v1_get(bare)
         if bare == "/library/facets":
@@ -9114,6 +9135,31 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(500, {"ok": False, "error": str(e)})
         return self._send_json(200, {"ok": True, "id": row_id})
 
+    def _handle_suite_engagement_ingest(self, body):
+        """POST the exact, idempotent suite engagement batch contract."""
+        try:
+            events = engagement_contract.parse_request(body)
+        except engagement_contract.ContractError as error:
+            return self._send_json(
+                error.status,
+                engagement_contract.failure(error),
+            )
+        try:
+            result = _get_index().ingest_suite_engagement(events)
+        except Exception:
+            log.exception("/api/engagement/v1/events failed")
+            error = engagement_contract.ContractError(
+                "unavailable",
+                "engagement ingestion is unavailable",
+                status=503,
+                retryable=True,
+            )
+            return self._send_json(
+                error.status,
+                engagement_contract.failure(error),
+            )
+        return self._send_json(200, engagement_contract.success(result))
+
     def _handle_engagement_scores(self):
         """GET /engagement/scores?limit=N -- top-N videos by value_score.
         Token-gated. Pure read; the score is computed from local events with
@@ -9284,6 +9330,20 @@ class Handler(BaseHTTPRequestHandler):
             )
             return self._send_corpus_v1_error("get", error)
         return self._send_file(path, mime)
+
+    def _handle_corpus_v1_kept_media(self, bare: str):
+        from urllib.parse import unquote
+        prefix = "/api/corpus/v1/items/"
+        suffix = "/kept-media"
+        item_id = unquote(bare[len(prefix):-len(suffix)]).strip("/")
+        payload, status = media_handoff.resolve_http(_get_index(), item_id)
+        if status >= 500:
+            log.warning(
+                "kept media resolve failed for %s: %s",
+                item_id,
+                payload.get("error", {}).get("code"),
+            )
+        return self._send_json(status, payload)
 
     def _handle_library_facets(self):
         """GET /library/facets -- corpus-wide filter facets (G-12 / QA #14).
@@ -12435,6 +12495,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_move_desktop_corpus(body)
         if bare == "/engagement/log":
             return self._handle_engagement_log(body)
+        if bare == "/api/engagement/v1/events":
+            return self._handle_suite_engagement_ingest(body)
         if bare == "/taste/anchors":
             return self._handle_taste_anchors_post(body)
         if bare == "/channels":
@@ -13869,6 +13931,30 @@ def main(*, show_dashboard: bool = False):
     import atexit
     atexit.register(lambda: pid_file.unlink(missing_ok=True))
 
+    # S6: advertise only the resident address and bounded capabilities.
+    # The lease is deliberately token-free and non-executable; credentials
+    # remain under Uoink's existing token custody.
+    suite_started_at = suite_service.utc_now()
+    suite_lease_path = None
+    try:
+        suite_lease_path = suite_service.write_runtime_lease(
+            service_version=VERSION,
+            pid=os.getpid(),
+            started_at=suite_started_at,
+        )
+    except OSError as e:
+        log.warning("suite runtime lease unavailable (non-fatal): %s", e)
+
+    def _remove_suite_lease():
+        if suite_lease_path is not None:
+            suite_service.remove_runtime_lease(
+                suite_lease_path,
+                pid=os.getpid(),
+                started_at=suite_started_at,
+            )
+
+    atexit.register(_remove_suite_lease)
+
     # Tier 1 (v2.1.1): ambient system-tray presence on installed Windows
     # builds. Guarded by the installed-layout check (bundled pythonw next to
     # server.py, same guard migrate uses) so a dev run from the repo never
@@ -13941,6 +14027,8 @@ def main(*, show_dashboard: bool = False):
         server.serve_forever()
     except KeyboardInterrupt:
         log.info("Shutting down.")
+    finally:
+        _remove_suite_lease()
         server.server_close()
 
 
