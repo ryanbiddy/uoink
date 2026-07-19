@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Mapping, Protocol, runtime_checkable
+from urllib.parse import urlsplit
 
 CONTRACT_NAME = "uoink.corpus.read"
 CONTRACT_VERSION = 1
@@ -295,6 +296,39 @@ def _nullable_string(value: Any, label: str) -> None:
         )
 
 
+def validate_source_url(value: Any, label: str) -> None:
+    """Enforce the suite rule: source URLs are null or absolute HTTP(S)."""
+    if value is None:
+        return
+    if not isinstance(value, str) or not value or "\\" in value or any(
+            character.isspace() for character in value):
+        raise ContractError(
+            "provider_nonconformant",
+            f"{label} must be null or an HTTP(S) URL",
+            status=500,
+        )
+    try:
+        parsed = urlsplit(value)
+        # Accessing port also rejects malformed netlocs such as `:abc`.
+        parsed.port
+    except ValueError as error:
+        raise ContractError(
+            "provider_nonconformant",
+            f"{label} must be null or an HTTP(S) URL",
+            status=500,
+        ) from error
+    if (
+        parsed.scheme.lower() not in {"http", "https"}
+        or not parsed.netloc
+        or parsed.hostname is None
+    ):
+        raise ContractError(
+            "provider_nonconformant",
+            f"{label} must be null or an HTTP(S) URL",
+            status=500,
+        )
+
+
 def validate_item_ref(item: Any) -> None:
     item = _exact_keys(item, _ITEM_KEYS, "item")
     if not isinstance(item["id"], str) or not item["id"]:
@@ -309,10 +343,9 @@ def validate_item_ref(item: Any) -> None:
             "item.title must be a string",
             status=500,
         )
-    for name in (
-        "author", "source_url", "captured_at", "source_type", "platform",
-    ):
+    for name in ("author", "captured_at", "source_type", "platform"):
         _nullable_string(item[name], f"item.{name}")
+    validate_source_url(item["source_url"], "item.source_url")
     duration = item["duration_seconds"]
     if duration is not None and (
             isinstance(duration, bool)
@@ -323,8 +356,11 @@ def validate_item_ref(item: Any) -> None:
             status=500,
         )
     credit = _exact_keys(item["credit"], _CREDIT_KEYS, "item.credit")
-    for name, value in credit.items():
+    for name in ("creator", "handle"):
+        value = credit[name]
         _nullable_string(value, f"item.credit.{name}")
+    validate_source_url(
+        credit["source_url"], "item.credit.source_url")
     facets = _exact_keys(item["facets"], _ITEM_FACET_KEYS, "item.facets")
     for name, value in facets.items():
         _nullable_string(value, f"item.facets.{name}")

@@ -61,6 +61,31 @@ def test_contract_rejects_unknown_provider_fields():
     assert "unknown corpus_path" in raised.value.message
 
 
+@pytest.mark.parametrize("field", [
+    ("item", "source_url"),
+    ("credit", "source_url"),
+])
+@pytest.mark.parametrize("source_url", [
+    "file:///tmp/source.mp4",
+    "C:\\Users\\Ryan\\source.mp4",
+    "/tmp/source.mp4",
+    "ftp://example.test/source.mp4",
+    "https://",
+    "https://example.test/bad path",
+])
+def test_contract_rejects_non_http_source_urls(field, source_url):
+    fixture = regenerate.generate_fixture()
+    data = copy.deepcopy(fixture["operations"]["get"]["data"])
+    if field[0] == "item":
+        data["item"][field[1]] = source_url
+    else:
+        data["item"]["credit"][field[1]] = source_url
+    with pytest.raises(corpus_contract.ContractError) as raised:
+        corpus_contract.success("get", data)
+    assert raised.value.code == "provider_nonconformant"
+    assert "must be null or an HTTP(S) URL" in raised.value.message
+
+
 @pytest.mark.parametrize("query,message", [
     ({"limit": ["0"]}, "limit must be between 1 and 200"),
     ({"offset": ["-1"]}, "offset must be between 0 and 1000000"),
