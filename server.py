@@ -725,6 +725,11 @@ def _default_settings() -> dict:
         "smart_screenshot_picker_enabled": False,
         "clipboard_screenshot_cap": CLIPBOARD_SCREENSHOT_CAP_DEFAULT,
         "transcript_reliability_auto_check": False,
+        # CM-11: when a downloaded video exposes no subtitle track, use an
+        # already-downloaded local faster-whisper model. Default ON because
+        # caption-less X clips otherwise become unqueryable; users can opt
+        # out in Settings. This flag never authorizes a model download.
+        "asr_fallback_enabled": True,
         "claim_verification_enabled": False,   # v3 A2 -- opt-in
         # v3.1 P2 role inference -- one of: creator, researcher, marketer,
         # mixed. Default "mixed" so the dashboard surfaces every facet
@@ -801,6 +806,9 @@ def _normalize_settings(data: dict) -> dict:
     )
     clean["transcript_reliability_auto_check"] = bool(
         clean.get("transcript_reliability_auto_check")
+    )
+    clean["asr_fallback_enabled"] = bool(
+        clean.get("asr_fallback_enabled", True)
     )
     clean["voice_dna_warnings_enabled"] = bool(
         clean.get("voice_dna_warnings_enabled", True)
@@ -1060,6 +1068,9 @@ def _public_settings(data: dict | None = None) -> dict:
         ),
         "transcript_reliability_auto_check": bool(
             data.get("transcript_reliability_auto_check")
+        ),
+        "asr_fallback_enabled": bool(
+            data.get("asr_fallback_enabled", True)
         ),
         "transcript_reliability_model": _reliability_model_status(
             data.get("whisper_model")
@@ -1638,6 +1649,85 @@ def _reliability_model_status(model_name: object | None = None) -> dict:
         "cached": bool(cached),
         "estimated_download_mb": 150,
     }
+
+
+def _asr_duration_expectation(duration_seconds: object) -> dict:
+    """Return the documented local-ASR runtime range scaled to duration.
+
+    Uoink's existing Whisper guidance budgets roughly 10-15 minutes per hour
+    on a typical laptop. This is an expectation, not a deadline: hardware and
+    model choice can move the real runtime in either direction.
+    """
+    try:
+        duration = max(0.0, float(duration_seconds or 0))
+    except (TypeError, ValueError):
+        duration = 0.0
+    hours = duration / 3600.0
+    estimate_min = round(hours * 10.0, 1) if duration > 0 else None
+    estimate_max = round(hours * 15.0, 1) if duration > 0 else None
+    return {
+        "duration_seconds": round(duration, 3),
+        "estimated_minutes_min": estimate_min,
+        "estimated_minutes_max": estimate_max,
+        "basis": (
+            "About 10-15 minutes per source hour on a typical laptop; "
+            "larger models may take longer."
+        ),
+    }
+
+
+def _resolve_video_transcript(
+        caption_entries: list[tuple[float, float, str]],
+        media_path: Path,
+        duration_seconds: object,
+        *,
+        settings: dict | None = None,
+) -> tuple[list[tuple[float, float, str]], str | None, dict]:
+    """Prefer platform captions, then try cache-only local ASR.
+
+    The returned source is ``captions`` or ``asr`` only when transcript rows
+    exist. Fallback skips and failures are structured separately so a
+    caption-less capture still succeeds without pretending it has words.
+    """
+    if caption_entries:
+        return list(caption_entries), "captions", {"status": "not_needed"}
+
+    current_settings = settings if settings is not None else _read_settings()
+    if not bool(current_settings.get("asr_fallback_enabled", True)):
+        return [], None, {"status": "disabled"}
+
+    model_name = _selected_reliability_model(current_settings)
+    expectation = _asr_duration_expectation(duration_seconds)
+    if not _reliability_model_status(model_name).get("cached"):
+        return [], None, {
+            "status": "model_not_downloaded",
+            "model": model_name,
+            **expectation,
+        }
+
+    try:
+        entries = uoink_reliability.transcribe_media(
+            media_path,
+            model_name=model_name,
+            model_root=RELIABILITY_MODEL_ROOT,
+        )
+    except Exception as e:
+        log.warning("local ASR fallback failed: %s", e)
+        return [], None, {
+            "status": "failed",
+            "model": model_name,
+            "error": _sanitize_error(str(e)),
+            **expectation,
+        }
+
+    completed = {
+        "status": "completed",
+        "model": model_name,
+        "segment_count": len(entries),
+        "generated_at": _now_iso(),
+        **expectation,
+    }
+    return entries, ("asr" if entries else None), completed
 
 
 def _transcript_text_from_sidecar(sidecar: dict) -> str:
@@ -4193,6 +4283,26 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         shot_times = [i * interval for i in range(len(shots))]
 
     entries = list(parse_srt(srt_files[0])) if srt_files else []
+    platform_caption_count = len(entries)
+    transcript_source: str | None
+    asr_fallback: dict
+    if not entries and effective_long_video_mode == LONG_VIDEO_MODE_CHUNKED:
+        # Chunked media contains representative windows, not the full source.
+        # Calling the result a transcript would be misleading, so retain the
+        # caption-less capture and record why ASR did not run.
+        transcript_source = None
+        asr_fallback = {
+            "status": "skipped_chunked_mode",
+            **_asr_duration_expectation(duration),
+        }
+    else:
+        if not entries and phase_callback:
+            phase_callback("transcript")
+        entries, transcript_source, asr_fallback = _resolve_video_transcript(
+            entries,
+            video_files[0],
+            duration,
+        )
 
     if entries:
         plain = "\n".join(text for _, _, text in entries)
@@ -4281,6 +4391,12 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "transcript": [
                 {"start": s, "end": e, "text": t} for s, e, t in entries
             ],
+            # CM-11: provenance is explicit whenever transcript rows exist.
+            # A null source means the capture honestly remains caption-less;
+            # asr_fallback carries the reason (disabled, model absent, failed,
+            # or chunked media that cannot represent the complete source).
+            "transcript_source": transcript_source,
+            "asr_fallback": asr_fallback,
             # Structured shape: timestamp + relative path + bare filename so
             # consumers don't have to parse paths or recompute timestamps.
             "screenshots": [
@@ -4452,7 +4568,11 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
         "screenshot_count": len(shots),
         "title": title,
         "video_slug": video_slug,
-        "caption_count": len(entries),
+        # Keep caption_count literal for session/UI compatibility; ASR rows
+        # are exposed separately instead of being mislabeled as captions.
+        "caption_count": platform_caption_count,
+        "transcript_segment_count": len(entries),
+        "transcript_source": transcript_source,
         "topic": topic,
         "requested_long_video_mode": requested_long_video_mode,
         "long_video_mode": effective_long_video_mode,
@@ -11078,6 +11198,7 @@ class Handler(BaseHTTPRequestHandler):
             "hook_type_enabled",
             "smart_screenshot_picker_enabled",
             "transcript_reliability_auto_check",
+            "asr_fallback_enabled",          # CM-11 caption-less video ASR
             "claim_verification_enabled",  # v3 A2 -- default OFF (claims
                                             # extracted on yoink only when on)
             "diarization_default",          # v3.1 track B/D -- WhisperX

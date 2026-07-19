@@ -217,6 +217,10 @@ def test_mocked_extraction_persists_and_surfaces(monkeypatch):
         _assert((folder / "transcript.txt").exists(), "transcript.txt missing")
         _assert(len(sc.get("transcript") or []) == 2,
                 f"transcript segments: {sc.get('transcript')}")
+        _assert(sc.get("transcript_source") == "captions",
+                f"caption provenance missing: {sc.get('transcript_source')}")
+        _assert(sc.get("asr_fallback", {}).get("status") == "not_needed",
+                f"captioned capture must bypass ASR: {sc.get('asr_fallback')}")
 
         # Row carries the full taxonomy.
         row = idx.get_yoink("tiktok_7300000000000000000")

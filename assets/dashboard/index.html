@@ -4337,6 +4337,7 @@
               <h2>Transcript checker</h2>
               <p class="setting-copy" id="reliabilityStatus">Checking transcript checker...</p>
               <label class="inline-row"><input id="reliabilityAutoCheck" type="checkbox"> Auto-check transcript quality</label>
+              <label class="inline-row"><input id="asrFallbackEnabled" type="checkbox" checked> Transcribe videos locally when captions are missing</label>
               <div class="inline-row">
                 <select class="field" id="whisperModel" aria-label="Transcript checker model"></select>
                 <button class="button ghost" type="button" id="saveWhisperModel">Save choice</button>
@@ -4344,7 +4345,7 @@
               <div class="inline-row">
                 <button class="button" type="button" id="downloadReliabilityModel">Download selected model</button>
               </div>
-              <p class="setting-copy">Runs locally to flag low-confidence transcript spans. Downloads only after you ask and stays in your Uoink data folder.</p>
+              <p class="setting-copy">Runs locally. When captions are missing, the selected model can take about 10–15 minutes per hour of video on a typical laptop; larger models may take longer. Downloads only after you ask and stays in your Uoink data folder.</p>
             </div>
           </div>
         </section>
@@ -4887,6 +4888,7 @@
       saveWhisperModel: document.getElementById("saveWhisperModel"),
       reliabilityStatus: document.getElementById("reliabilityStatus"),
       reliabilityAutoCheck: document.getElementById("reliabilityAutoCheck"),
+      asrFallbackEnabled: document.getElementById("asrFallbackEnabled"),
       downloadReliabilityModel: document.getElementById("downloadReliabilityModel"),
       featuresStatus: document.getElementById("featuresStatus"),
       featureCount: document.getElementById("featureCount"),
@@ -8829,6 +8831,7 @@
         els.screenshotCount.value = String(state.settings.screenshot_count ?? state.settings.clipboard_screenshot_cap ?? 4);
         els.claimVerificationToggle.checked = Boolean(state.settings.claim_verification_enabled);
         els.reliabilityAutoCheck.checked = Boolean(state.settings.transcript_reliability_auto_check);
+        els.asrFallbackEnabled.checked = state.settings.asr_fallback_enabled !== false;
         els.voiceWarningsEnabled.checked = state.settings.voice_dna_warnings_enabled !== false;
         els.voiceWarningsPerGeneration.checked = state.settings.voice_dna_show_per_generation_toggle !== false;
         els.writingScreenshotPickerToggle.checked = state.settings.writing_show_screenshot_picker !== false;
@@ -11122,6 +11125,7 @@
       }
       if (els.autoUoinkScan) els.autoUoinkScan.addEventListener("click", runAutoUoinkScan);
       els.reliabilityAutoCheck.addEventListener("change", () => saveSettingsPatch({ transcript_reliability_auto_check: els.reliabilityAutoCheck.checked }, "Transcript reliability setting updated."));
+      els.asrFallbackEnabled.addEventListener("change", () => saveSettingsPatch({ asr_fallback_enabled: els.asrFallbackEnabled.checked }, els.asrFallbackEnabled.checked ? "Caption-less video transcription is on." : "Caption-less video transcription is off."));
       els.downloadReliabilityModel.addEventListener("click", async () => {
         const modelLabel = transcriptModelLabel(els.whisperModel.value);
         if (!confirm(`Download the ${modelLabel} transcript checker now? It's about 150 MB and stays on this machine.`)) return;
