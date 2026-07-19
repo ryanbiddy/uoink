@@ -2094,7 +2094,7 @@ function renderHookCalibration(row) {
 async function fetchHookText(slug) {
   if (!slug) return null;
   try {
-    let res = await globalThis.UoinkUI.authedJson("/mcp/v1/tools/call", {
+    const res = await globalThis.UoinkUI.authedJson("/mcp/v1/tools/call", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -2102,16 +2102,6 @@ async function fetchHookText(slug) {
         arguments: { slug }
       })
     });
-    if (!res || res.error) {
-      res = await globalThis.UoinkUI.authedJson("/mcp/v1/tools/call", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: "get_yoink_corpus",
-          arguments: { slug }
-        })
-      });
-    }
     const data = res && res.result && res.result.structuredContent;
     const md = data && data.corpus_md;
     if (md) {
@@ -2319,16 +2309,10 @@ async function loadRecentUoinks() {
           copyMDBtn.textContent = "Copying...";
           
           try {
-            let res = await STC._postJson("/mcp/v1/tools/call", {
+            const res = await STC._postJson("/mcp/v1/tools/call", {
               name: "get_uoink_corpus",
               arguments: { slug: last.slug }
             });
-            if (!res || res.error) {
-              res = await STC._postJson("/mcp/v1/tools/call", {
-                name: "get_yoink_corpus",
-                arguments: { slug: last.slug }
-              });
-            }
             const data = res && res.result && res.result.structuredContent;
             if (data && data.ok && data.corpus_md) {
               const copied = await writeClipboardText(data.corpus_md);

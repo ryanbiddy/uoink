@@ -8,70 +8,23 @@ Both transports use this module:
 The registry intentionally owns no extraction business logic. It binds to the
 loaded server module and calls the same helpers used by Uoink's v1/v2 HTTP API.
 
-v2.1 rename: the six brand-carrying tools were renamed yoink_* -> uoink_*.
-``call_tool`` accepts the legacy names as deprecated aliases (resolved to the
-canonical name + a one-shot DeprecationWarning to stderr) through Uoink v2.5;
-they are removed in v3. See ``MCP_TOOL_ALIASES`` / ``_warn_deprecated_tool``.
+The six brand-carrying tools were renamed from yoink_* to uoink_* in v2.1.
+Their compatibility window ended in v2.5; v3 accepts canonical tool names
+only.
 """
 
 from __future__ import annotations
 
 import json
 import re
-import sys
 import threading
 import time
-import warnings
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
 
 _backend = None
-
-# Deprecated (Yoink-era) tool name -> canonical (Uoink) name. Old names keep
-# working through Uoink v2.5 and are removed in v3. The 7 brand-neutral tools
-# (get_job_status, cancel_job, analyze_comments, classify_hook, get_taxonomy,
-# get_citation_map, find_mentions) are unchanged and absent here.
-MCP_TOOL_ALIASES: dict[str, str] = {
-    "yoink_video": "uoink_video",
-    "yoink_playlist": "uoink_playlist",
-    "list_recent_yoinks": "list_recent_uoinks",
-    "search_yoinks": "search_uoinks",
-    "get_yoink_corpus": "get_uoink_corpus",
-    "get_yoink_health": "get_uoink_health",
-}
-
-# Dedupe so an agent calling a deprecated tool in a loop emits the warning
-# once per process per tool rather than spamming stderr.
-_warned_aliases: set[str] = set()
-_warned_lock = threading.Lock()
-
-
-def _warn_deprecated_tool(old_name: str, new_name: str) -> None:
-    """Emit a one-shot DeprecationWarning to stderr when a legacy tool name is
-    called. stdout is the JSON-RPC transport for the stdio MCP server, so the
-    warning must go to stderr only."""
-    with _warned_lock:
-        if old_name in _warned_aliases:
-            return
-        _warned_aliases.add(old_name)
-    message = (
-        f"DeprecationWarning: MCP tool `{old_name}` is renamed to `{new_name}`.\n"
-        f"The old name still works through Uoink v2.5 and is removed in v3.\n"
-        f"Update your agent config to `{new_name}`. "
-        f"Details: https://uoink.video/docs/v2-mcp"
-    )
-    # Raise a real DeprecationWarning (for programmatic warning filters) and
-    # also write the message to stderr unconditionally, since DeprecationWarning
-    # is hidden by Python's default filters outside __main__.
-    warnings.warn(
-        f"MCP tool `{old_name}` is renamed to `{new_name}`; "
-        f"use `{new_name}` (removed in Uoink v3).",
-        DeprecationWarning,
-        stacklevel=3,
-    )
-    print(message, file=sys.stderr, flush=True)
 
 
 def bind_backend(backend_module) -> None:
@@ -209,8 +162,8 @@ def _find_yoink(slug: str) -> tuple[Path, Path] | tuple[None, None]:
     then -- only on a miss -- the pre-Sprint-19.6 disk-walk fallback runs
     so a corpus that exists on disk but has not been backfilled yet
     (or a folder dropped in by hand) still resolves. Every MCP tool that
-    takes a slug benefits: get_yoink_corpus, get_citation_map,
-    get_yoink_health, analyze_comments, classify_hook."""
+    takes a slug benefits: get_uoink_corpus, get_citation_map,
+    get_uoink_health, analyze_comments, classify_hook."""
     if not isinstance(slug, str) or not re.match(r"^[A-Za-z0-9_-]{1,160}$", slug):
         return None, None
     # Fast path: index lookup. get_by_slug filters deleted_at IS NULL so a
@@ -3284,14 +3237,6 @@ def list_tools() -> list[dict[str, Any]]:
 
 
 def call_tool(name: str, arguments: dict[str, Any] | None = None) -> dict[str, Any]:
-    # v2.1 alias window: map a legacy yoink_* name onto its canonical uoink_*
-    # name and emit a one-shot deprecation warning to stderr. Both transports
-    # (stdio MCP and HTTP JSON-RPC) route through here, so this is the single
-    # place the deprecation is surfaced.
-    canonical = MCP_TOOL_ALIASES.get(name)
-    if canonical:
-        _warn_deprecated_tool(name, canonical)
-        name = canonical
     spec = TOOL_REGISTRY.get(name)
     if not spec:
         return _err("tool not found")

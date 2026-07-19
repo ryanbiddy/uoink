@@ -28,7 +28,7 @@ Handled application failures use the v1 pattern: HTTP 200 with `{"ok": false, "e
 
 ## URL formats supported
 
-Single-video entry points (`/extract`, MCP `yoink_video`, and v1 session adds) accept these YouTube video URL shapes and canonicalize them to `https://www.youtube.com/watch?v=<id>` before extraction:
+Single-video entry points (`/extract`, MCP `uoink_video`, and v1 session adds) accept these YouTube video URL shapes and canonicalize them to `https://www.youtube.com/watch?v=<id>` before extraction:
 
 - `https://www.youtube.com/watch?v=<id>`
 - `https://youtu.be/<id>`
@@ -988,7 +988,7 @@ Behavior:
 - Results use the same enriched row shape as `/recent`.
 - Soft-deleted rows are filtered out with `deleted_at IS NULL`.
 - `thumbnail_path` is an absolute local path. The extension loads it through token-gated `GET /file?path=<absolute-path>`.
-- The endpoint does not return corpus markdown; use MCP `get_yoink_corpus` or open the folder for the full corpus.
+- The endpoint does not return corpus markdown; use MCP `get_uoink_corpus` or open the folder for the full corpus.
 
 Error responses:
 
@@ -1341,7 +1341,7 @@ Success response:
   "result": {
     "tools": [
       {
-        "name": "yoink_video",
+        "name": "uoink_video",
         "description": "Extract a single YouTube video into a Uoink corpus. Returns the saved folder, markdown corpus, and screenshot paths.",
         "inputSchema": {
           "type": "object",
@@ -1360,16 +1360,20 @@ Success response:
 
 Tools currently exposed:
 
-- `yoink_video`
-- `yoink_playlist`
+- `uoink_video`
+- `uoink_playlist`
 - `get_job_status`
 - `cancel_job`
-- `list_recent_yoinks`
-- `search_yoinks`
-- `get_yoink_corpus`
+- `list_recent_uoinks`
+- `search_uoinks`
+- `get_uoink_corpus`
 - `analyze_comments`
 - `classify_hook`
 - `get_taxonomy`
+- `get_citation_map`
+- `get_uoink_health`
+- `find_mentions`
+- `get_transcript_reliability`
 
 Full schemas and return shapes live in `docs/v2-mcp.md`.
 
@@ -1385,7 +1389,7 @@ Request body:
   "id": 3,
   "method": "tools/call",
   "params": {
-    "name": "search_yoinks",
+    "name": "search_uoinks",
     "arguments": {
       "query": "creator strategy",
       "limit": 5
@@ -1806,7 +1810,7 @@ Completed single-video `result` shape:
 }
 ```
 
-Single-video `combined_md_text` is intentionally empty in persisted job records. The full multimodal clipboard payload with base64 screenshots is not stored in `index.db` or returned by `/jobs`; clients that need the full saved corpus should open `combined_md_path` or call `get_yoink_corpus`.
+Single-video `combined_md_text` is intentionally empty in persisted job records. The full multimodal clipboard payload with base64 screenshots is not stored in `index.db` or returned by `/jobs`; clients that need the full saved corpus should open `combined_md_path` or call `get_uoink_corpus`.
 
 ## Combined corpus delivery
 

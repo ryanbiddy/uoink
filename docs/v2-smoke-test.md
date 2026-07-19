@@ -75,15 +75,15 @@ Total checkpoints: 127.
 ## 6. MCP - stdio and HTTP
 
 54. [ ] Copy Claude Desktop stdio config from setup - success: command points to installed `python.exe` and `uoink_mcp.py`.
-55. [ ] Smoke-test Claude Desktop stdio - success: client lists all 13 tools and `list_recent_yoinks` works.
-56. [ ] Smoke-test Cursor stdio - success: client lists all 13 tools and `search_yoinks` works.
-57. [ ] Call `yoink_video` through MCP - success: returns `ok`, `slug`, `folder`, `corpus_md`, and screenshots.
-58. [ ] Call `yoink_playlist` then `get_job_status` - success: job appears in `/jobs` and completes/cancels consistently.
-59. [ ] Call `get_yoink_corpus` on a sidecar-backed yoink - success: returns `video_id` and `video_url`.
-60. [ ] Call `get_yoink_corpus` on legacy/missing sidecar - success: returns `video_id:null` and `video_url:null` without crashing.
+55. [ ] Smoke-test Claude Desktop stdio - success: client lists exactly 14 canonical tools and `list_recent_uoinks` works.
+56. [ ] Smoke-test Cursor stdio - success: client lists exactly 14 canonical tools and `search_uoinks` works.
+57. [ ] Call `uoink_video` through MCP - success: returns `ok`, `slug`, `folder`, `corpus_md`, and screenshots.
+58. [ ] Call `uoink_playlist` then `get_job_status` - success: job appears in `/jobs` and completes/cancels consistently.
+59. [ ] Call `get_uoink_corpus` on a sidecar-backed uoink - success: returns `video_id` and `video_url`.
+60. [ ] Call `get_uoink_corpus` on a legacy/missing sidecar - success: returns `video_id:null` and `video_url:null` without crashing.
 61. [ ] Call `get_taxonomy` through MCP - success: no-arg, `channel`, `hook_type`, and combined filters match `/taxonomy`.
 62. [ ] Call `get_citation_map` through MCP - success: `transcript_citations` and `screenshot_citations` are both non-empty for a yoink with screenshots.
-63. [ ] Call `get_yoink_health` through MCP - success: returns a dict with five status fields, none null.
+63. [ ] Call `get_uoink_health` through MCP - success: returns a dict with five status fields, none null.
 64. [ ] Trigger MCP rate limits - success: extraction tools fail friendly after 5/minute, AI tools after 10/minute, and citation/health tools after 60/minute.
 65. [ ] Smoke-test HTTP JSON-RPC helper - success: token-gated initialize/tools/list/tools/call return MCP-style envelopes.
 
@@ -191,7 +191,7 @@ Total checkpoints: 127.
 #### FTS5 Search and Calibration (A3)
 1. In the Memory tab, type a unique keyword from a recently yoinked transcript.
 2. Verify the search filters the library list instantly using SQLite FTS5.
-3. Verify search works via the MCP tool `search_yoinks(query="...")`.
+3. Verify search works via the MCP tool `search_uoinks(query="...")`.
 4. In the popup, change a Hook Type classification (e.g., change "Curiosity Gap" to "Stakes").
 5. Verify the correction is saved.
 6. Open the setup page and scroll to the **Hook Calibration** section. Verify your correction is listed.
