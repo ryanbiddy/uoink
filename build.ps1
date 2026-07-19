@@ -487,7 +487,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py writer_peer.py page_extractor.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
