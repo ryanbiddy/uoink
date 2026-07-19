@@ -229,6 +229,7 @@ foreach ($f in @(
     'corpus_contract.py',
     'corpus_provider.py',
     'corpus_intelligence.py',
+    'writer_peer.py',
     'memory_layer.py',
     'podcasts.py',
     'mobile_playlists.py',
@@ -408,6 +409,7 @@ Copy-Item (Join-Path $RepoRoot 'writing_studio.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'corpus_contract.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'corpus_provider.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'corpus_intelligence.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'writer_peer.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'page_extractor.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'source_manifest.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'openapi_bridge.py') $StagingDir -Force
@@ -485,7 +487,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py writer_peer.py page_extractor.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
