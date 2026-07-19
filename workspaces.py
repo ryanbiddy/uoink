@@ -1,9 +1,8 @@
-"""v3 P4 Build Workspace backend.
+"""v3 P4 Build Workspace persistence and critique compatibility.
 
-A workspace is one act of planning a video. The helper assembles a corpus
-slice (overperformer yoinks ranked by S1 facets + S2 engagement value_score
-+ optional S4 taste anchors + optional self-channel past performance) and
-records a critique log as the user iterates on a draft.
+A workspace is one act of planning a video. Corpus selection belongs to
+corpus_intelligence; this module preserves workspace CRUD, assembled-ID
+persistence, and the legacy workspace/critique behavior.
 
 Locked compute policy: model-agnostic by default. Primary path is the
 calling agent doing the LLM work via MCP (`assemble_workspace` returns the
@@ -14,7 +13,7 @@ the BYO worker pool lands — same posture as S1 `/facets/backfill`).
 
 This module owns:
   - Workspace CRUD against the v3 `workspaces` SQLite table
-  - The assembler -- pure local read that filters + ranks yoinks
+  - A compatibility wrapper around the corpus-intelligence query
   - The critique log writer
 
 Transport (HTTP + MCP) is owned by server.py + uoink_mcp_tools.py."""
@@ -22,11 +21,11 @@ Transport (HTTP + MCP) is owned by server.py + uoink_mcp_tools.py."""
 from __future__ import annotations
 
 import json
-import logging
 import secrets
 from datetime import datetime
 
-log = logging.getLogger("uoink.workspaces")
+import corpus_contract
+import corpus_intelligence
 
 # ---- compute mode --------------------------------------------------------
 # The critique path can produce findings via the agent (calling agent
@@ -106,139 +105,35 @@ def _save_assembled(idx, workspace_id: str, video_ids: list[str]) -> None:
             (json.dumps(video_ids), _now_iso(), workspace_id))
 
 
-# ---- assembler (the heart of P4) ----------------------------------------
+# ---- legacy assembly compatibility -------------------------------------
 def assemble_workspace(idx, *, format: str | None = None,
                         topic: str | None = None,
                         hook_target: str | None = None,
                         your_channel: str | None = None,
                         n_examples: int = 10,
                         workspace_id: str | None = None) -> dict:
-    """Pull a corpus slice ranked by S1 + S2 + optional S4/P3 signals.
-
-    Ranking (deterministic + reproducible):
-
-      1. Filter by facets: format (if specified) AND
-         (hook_type == hook_target OR topic LIKE %topic%).
-      2. Prefer performance_tier='over' > 'average' > 'under' > NULL.
-      3. Within the same tier, sort by S2 value_score (descending).
-      4. Cap at n_examples.
-
-    Audience-questions surface is intentionally lightweight here -- we read
-    the `comments_json` column when present and pull top up-vote questions
-    on each surfaced yoink so the agent has the raw audience signals
-    without doing a separate fetch.
-
-    Self-channel block (when `your_channel` is set) calls into channels.py
-    for a tightly-scoped recent-performance snapshot.
-
-    Pure local read -- no model, no outbound."""
+    """Preserve the legacy workspace response around the core query."""
     n_examples = max(1, min(int(n_examples), 100))
-
-    # ---- 1. Facet-filtered candidate set ---------------------------------
-    wheres: list[str] = ["y.deleted_at IS NULL"]
-    params: list = []
-    if format:
-        wheres.append("y.format = ?")
-        params.append(format)
-    sub_clauses: list[str] = []
-    if hook_target:
-        sub_clauses.append("y.hook_type = ?")
-        params.append(hook_target)
-    if topic:
-        sub_clauses.append("y.topic LIKE ?")
-        params.append(f"%{topic}%")
-    if sub_clauses:
-        wheres.append("(" + " OR ".join(sub_clauses) + ")")
-
-    sql = (
-        "SELECT y.video_id, y.slug, y.title, y.channel, y.topic, "
-        "y.hook_type, y.format, y.performance_tier, y.length_bucket, "
-        "y.yoinked_at "
-        "FROM yoinks y "
-        "WHERE " + " AND ".join(wheres))
-    rows = idx._conn.execute(sql, params).fetchall()
-
-    # ---- 2. Score each candidate -----------------------------------------
-    tier_score = {"over": 3, "average": 2, "under": 1}
-
-    def _score(row: dict) -> tuple[int, float]:
-        tier = (row.get("performance_tier") or "").strip()
-        t = tier_score.get(tier, 0)
-        try:
-            sig = idx.engagement_signal(row["video_id"])
-            return (t, float(sig.get("value_score") or 0.0))
-        except Exception:
-            return (t, 0.0)
-
-    scored = [(_score(dict(r)), dict(r)) for r in rows]
-    scored.sort(key=lambda pair: pair[0], reverse=True)
-    top = [r for _, r in scored[:n_examples]]
-
-    # ---- 3. Audience questions from comments_json ------------------------
-    # comments_json is the sidecar field stored by Comment Intelligence.
-    # We don't require it to be present -- empty list if not.
-    audience_questions: list[dict] = []
-    for r in top:
-        try:
-            row = idx._conn.execute(
-                "SELECT metadata_json FROM yoinks WHERE video_id=?",
-                (r["video_id"],)).fetchone()
-            if not row:
-                continue
-            meta = json.loads(row["metadata_json"] or "{}")
-        except (json.JSONDecodeError, TypeError):
-            meta = {}
-        for c in (meta.get("comments") or [])[:5]:
-            text = (c.get("text") or "").strip()
-            if "?" in text and len(text) <= 280:
-                audience_questions.append({
-                    "video_id": r["video_id"],
-                    "question": text,
-                    "likes": int(c.get("likes") or 0),
-                })
-
-    # ---- 4. Self-channel past performance (optional) ---------------------
-    self_snapshot = None
-    if your_channel:
-        try:
-            import channels as _channels_mod
-            self_snapshot = _channels_mod.self_analysis(
-                idx, handle=your_channel, top_n=5)
-        except Exception as e:
-            log.warning("workspace self_analysis skipped: %s", e)
-            self_snapshot = {"ok": False, "error": str(e)}
-
-    # ---- 5. Optional taste anchors (S4) ----------------------------------
-    # Gracefully degrades when S4 hasn't landed yet -- the calling agent
-    # gets a key present in the payload regardless so it can decide how
-    # heavily to weight that signal.
-    taste = None
-    try:
-        import memory_layer as _ml
-        taste_payload = _ml.read_taste(idx, _data_root_for_taste())
-        if taste_payload.get("ok"):
-            taste = taste_payload.get("content")
-    except ImportError:
-        taste = None
-    except Exception as e:
-        log.warning("workspace taste pull skipped: %s", e)
-        taste = None
-
-    # ---- 6. Persist assembled list onto the workspace row ----------------
+    request = corpus_contract.AssemblyRequest(
+        format=format,
+        topic=topic,
+        hook_target=hook_target,
+        your_channel=your_channel,
+        n_examples=n_examples,
+    )
+    data = corpus_intelligence.assemble(
+        idx, request, data_root=_data_root_for_taste())
     if workspace_id:
-        _save_assembled(idx, workspace_id, [r["video_id"] for r in top])
+        _save_assembled(
+            idx,
+            workspace_id,
+            [row["video_id"] for row in data["assembled"]],
+        )
 
     return {
         "ok": True,
         "workspace_id": workspace_id,
-        "filters": {
-            "format": format, "topic": topic, "hook_target": hook_target,
-            "your_channel": your_channel, "n_examples": n_examples,
-        },
-        "assembled": top,
-        "audience_questions": audience_questions[:20],
-        "self_snapshot": self_snapshot,
-        "taste_anchors": taste,
+        **data,
     }
 
 

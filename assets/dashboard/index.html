@@ -10112,6 +10112,17 @@
       };
     }
 
+    async function requestCorpusAssembly(body) {
+      const response = await authFetch("/api/corpus/v1/assemble", {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
+      if (!response || !response.data) {
+        throw new Error("The corpus assembly response was incomplete.");
+      }
+      return response.data;
+    }
+
     function selectGenerateChannel(value, label) {
       els.generateChannel.value = value || "";
       els.generateChannelInput.value = label || value || "";
@@ -10128,10 +10139,7 @@
       const row = state.writingSelectedSourceRow;
       if (!row) throw new Error("Choose a source uoink first.");
       const body = await generateAssemblyBody();
-      const data = await authFetch("/workspace/assemble", {
-        method: "POST",
-        body: JSON.stringify(body),
-      });
+      const data = await requestCorpusAssembly(body);
       const assembled = Array.isArray(data.assembled) ? data.assembled : [];
       showGenerateResearch(
         "Script grounding",
@@ -10158,10 +10166,8 @@
     async function surfaceAudienceQuestions() {
       showGenerateResearch("Audience questions", `<span class="soft-note">Reading questions from the local corpus...</span>`);
       try {
-        const data = await authFetch("/workspace/assemble", {
-          method: "POST",
-          body: JSON.stringify(await generateAssemblyBody()),
-        });
+        const data = await requestCorpusAssembly(
+          await generateAssemblyBody());
         const questions = Array.isArray(data.audience_questions) ? data.audience_questions : [];
         showGenerateResearch(
           "Audience questions",
@@ -10215,10 +10221,8 @@
       if (!draft) return showToast("Generate or write a draft before critique.");
       showGenerateResearch("Critique against corpus", `<span class="soft-note">Preparing a grounded critique brief...</span>`);
       try {
-        const data = await authFetch("/workspace/assemble", {
-          method: "POST",
-          body: JSON.stringify(await generateAssemblyBody()),
-        });
+        const data = await requestCorpusAssembly(
+          await generateAssemblyBody());
         showGenerateResearch("Critique against corpus", renderLocalCorpusCritique(data, draft));
       } catch (err) {
         showGenerateResearch("Critique against corpus", degradedState("Critique needs another pass.", "The local corpus brief couldn't be prepared.", err.message));

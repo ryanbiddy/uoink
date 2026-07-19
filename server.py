@@ -9246,6 +9246,16 @@ class Handler(BaseHTTPRequestHandler):
             lambda: self._corpus_v1_provider().taste(),
         )
 
+    def _handle_corpus_v1_assemble(self, body):
+        try:
+            request = corpus_contract.AssemblyRequest.from_body(body)
+        except corpus_contract.ContractError as error:
+            return self._send_corpus_v1_error("assemble", error)
+        return self._corpus_v1_call(
+            "assemble",
+            lambda: self._corpus_v1_provider().assemble(request),
+        )
+
     def _handle_corpus_v1_attachment(self, bare: str):
         from urllib.parse import unquote
         tail = bare[len("/api/corpus/v1/items/"):]
@@ -12432,6 +12442,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_channels_verify(body)
         if bare == "/channels/recognize-now":
             return self._handle_channels_recognize_now()
+        if bare == "/api/corpus/v1/assemble":
+            return self._handle_corpus_v1_assemble(body)
         if bare == "/workspaces":
             return self._handle_workspaces_create(body)
         if bare == "/workspace/assemble":
