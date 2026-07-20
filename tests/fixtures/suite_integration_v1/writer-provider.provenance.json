@@ -1,0 +1,9 @@
+{
+  "repository": "ryanbiddy/writer",
+  "commit": "1d2ce1abf1a8db631e5b694c7db4f4f6aacae53e",
+  "fixture": "tests/fixtures/suite_integration_v1/writer-provider.json",
+  "git_blob_sha": "6c9a7f2743beddfbfe59d094d67c100d55fedf2b",
+  "fixture_sha256": "CD653E76CCC991E2AB8176C8641CEC82C1C9C4DA31782ABE2633CF9FDF8809F2",
+  "local_copy_sha256": "CD653E76CCC991E2AB8176C8641CEC82C1C9C4DA31782ABE2633CF9FDF8809F2",
+  "copy_note": "The local copy is byte-for-byte identical to the pinned Writer blob."
+}
