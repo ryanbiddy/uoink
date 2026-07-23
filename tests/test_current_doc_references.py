@@ -44,3 +44,20 @@ def test_mcpb_guide_uses_inbox_windows_powershell() -> None:
         assert re.search(r"\bpwsh\b", current_doc) is None
     assert bundle.count(command) == 2
     assert surface_map.count(command) == 1
+
+
+def test_readme_first_run_extension_steps_match_the_splash() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    splash = (ROOT / "assets" / "splash" / "index.html").read_text(
+        encoding="utf-8"
+    )
+
+    false_automatic_step = (
+        "Uoink opens `chrome://extensions/` and shows the extension folder"
+    )
+    assert false_automatic_step not in readme
+    assert "one-time setup splash" in readme
+    assert "open your browser's extensions page" in readme
+    assert "copy the installed extension path" in readme
+    assert 'primary: { text: `Open ${browserName} extensions`' in splash
+    assert 'secondary: { text: "Copy path"' in splash
