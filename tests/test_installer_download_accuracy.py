@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 
@@ -37,6 +38,19 @@ def test_current_install_docs_name_the_published_asset() -> None:
     assert f"Download `{PUBLISHED_ASSET}`" in readme
     assert "Uoink-Setup-3.6.0.exe" not in readme
     assert "dist/uoink-3.3.0.mcpb" not in bundle_doc
+
+
+def test_manual_setup_is_a_current_source_install_path() -> None:
+    manual = (ROOT / "REQUIREMENTS.md").read_text(encoding="utf-8")
+    build = (ROOT / "build.ps1").read_text(encoding="utf-8")
+    match = re.search(r"\$YTDLP_VERSION\s*=\s*'([^']+)'", build)
+
+    assert "published v3.4.0 installer" in manual
+    assert "python -m pip install -r requirements.txt" in manual
+    assert match is not None
+    assert f'python -m pip install "yt-dlp=={match.group(1)}"' in manual
+    assert "python server.py" in manual
+    assert "Until then" not in manual
 
 
 def test_current_release_checklists_name_real_controls() -> None:
