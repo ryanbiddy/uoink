@@ -96,6 +96,31 @@ def test_security_model_names_public_probe_disclosure() -> None:
         assert field in security.lower()
 
 
+def test_security_model_lists_every_public_get_surface() -> None:
+    security = (ROOT / "docs" / "security.md").read_text(encoding="utf-8")
+    public = security.split("## Public endpoints", 1)[1].split(
+        "## Token-gated endpoints", 1
+    )[0]
+    for route in (
+        "/health",
+        "/ping",
+        "/index/backfill-status",
+        "/diagnose",
+        "/sources/manifest",
+        "/creators/manifest",
+        "/hooks/guide",
+        "/developers/manifest",
+        "/openapi/v1/spec.json",
+        "/.well-known/uoink-mcp.json",
+        "/.well-known/suite-service.json",
+        "/api/suite/v1/health",
+        "/dashboard",
+        "/splash",
+        "/token",
+    ):
+        assert f"`GET {route}`" in public
+
+
 def test_security_model_does_not_promise_removed_live_aliases() -> None:
     security = (ROOT / "docs" / "security.md").read_text(encoding="utf-8")
     server_source = (ROOT / "server.py").read_text(encoding="utf-8")
@@ -110,6 +135,25 @@ def test_security_model_does_not_promise_removed_live_aliases() -> None:
     for identifier in ("X-Yoink-Token", "X-Yoink-Client"):
         assert identifier in server_source
         assert identifier in extension_source
+
+
+def test_security_docs_do_not_claim_unbuilt_macos_or_removed_asr() -> None:
+    security = (ROOT / "docs" / "security.md").read_text(encoding="utf-8")
+    mac_map = (
+        ROOT / "docs" / "surface-maps" / "mac-build.md"
+    ).read_text(encoding="utf-8")
+    mac_plan = (ROOT / "docs" / "MAC-BUILD-PLAN.md").read_text(
+        encoding="utf-8"
+    )
+    reliability = (ROOT / "uoink_reliability.py").read_text(encoding="utf-8")
+
+    assert "`whisper-timestamped`" not in security
+    assert "`faster-whisper`" in security
+    assert "There is no current macOS build" in security
+    assert "The `.dmg` packaging pipeline codesigns" not in security
+    assert "macOS product ships" not in mac_map
+    assert "describes the intended shipped experience" not in mac_plan
+    assert "from faster_whisper import WhisperModel" in reliability
 
 
 def test_documented_path_integrity_variants_match_live_code(

@@ -7,8 +7,8 @@ inventory of the scaffolding added on branch `cc/mac-prep`, and an honest list
 of what still requires a Mac and an Apple Developer account to finish.
 
 Read this alongside `docs/surface-maps/mac-build.md` (the packaging surface
-map) and `docs/mac-install.md` (the end-user install guide, which already
-exists and describes the intended shipped experience).
+map) and `docs/mac-install.md` (the current user-facing status, which explicitly
+states that no macOS artifact exists).
 
 ## The Good News First
 

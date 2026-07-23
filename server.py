@@ -8785,7 +8785,7 @@ class Handler(BaseHTTPRequestHandler):
         if bare == "/sources/manifest":
             # Public product metadata (no user data) so the static site can
             # bake it at build time and the dashboard Sources tab can read it
-            # live. Same posture as /mcp/v1/config.
+            # live. Same posture as the other public manifest routes.
             return self._handle_sources_manifest()
         if bare == "/creators/manifest":
             return self._handle_creators_manifest()
