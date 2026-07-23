@@ -1,5 +1,10 @@
 """Voice DNA — banned-phrase guard + system-prompt prepend.
 
+Suite-split ownership: this is a live Uoink product surface. `server.py`,
+`writing_studio.py`, and `uoink_mcp_tools.py` call it, and `build.ps1` stages
+it into the installer. Writer has its own Voice DNA copy; removing this module
+requires a decision to remove Uoink's writing surfaces.
+
 Per `voice_dna/VOICE-DNA.md` (the canonical spec) + Ryan's locked answer #3
 in PROMPT-V3.2-CC-BACKEND.md: voice DNA is a SOFT WARN, not an auto-block.
 The agent path returns generated output AND a structured warning when

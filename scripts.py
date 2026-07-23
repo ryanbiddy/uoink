@@ -1,5 +1,10 @@
 """v3 P5 Script Studio backend.
 
+Suite-split ownership: this is a live Uoink product surface. `server.py` and
+`uoink_mcp_tools.py` call it, and `build.ps1` stages it into the installer.
+Writer is a separate product; removing this module requires an explicit
+decision to remove Uoink's P5 Script Studio and its HTTP/MCP callers.
+
 Generate structured video scripts grounded in corpus + taste anchors.
 Sits on top of P4 (Build Workspace) -- a script is always tied to a
 workspace_id so the helper can resolve the workspace's assembled
