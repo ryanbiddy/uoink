@@ -31,8 +31,9 @@ an incomplete scaffold: its Mac-only build, signing, notarization, and
 packaging steps are marked `TODO(mac)`, and the script finishes by stating
 that it produced no artifact. Do not use it to prepare an install.
 
-See [MAC-BUILD-PLAN.md](MAC-BUILD-PLAN.md) for the verified gaps, required
-Mac hardware and signing setup, and the remaining implementation work.
+See [mac-install.md](mac-install.md) for the current user-facing status.
+[MAC-BUILD-PLAN.md](MAC-BUILD-PLAN.md) records the verified gaps, required Mac
+hardware and signing setup, and the remaining implementation work.
 
 ## Architecture: why Python embeddable + Inno Setup
 
