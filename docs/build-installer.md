@@ -143,9 +143,10 @@ artifacts are not hash-locked yet; a future `--require-hashes` control must be
 generated and reviewed separately.
 
 Pip, setuptools, wheel, and packaging are separately pinned build tooling.
-Runtime sdists build without isolated floating tools. The final staging pass
-removes unused console launchers, their dead RECORD rows, and bytecode caches
-that otherwise contain temporary worktree paths or build-time metadata.
+The build does not reuse pip's wheel cache, and runtime sdists build without
+isolated floating tools. The final staging pass removes unused console
+launchers, their dead RECORD rows, bytecode caches, and the temporary token
+created by staged smoke.
 
 ## Updating versions
 

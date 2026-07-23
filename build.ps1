@@ -319,7 +319,7 @@ $pthContent = $pthContent -replace '#\s*import\s+site', 'import site'
 # 2c. Bootstrap pip into the embeddable
 Write-Host '    bootstrapping pip in embeddable Python...'
 $embedPython = "$StagingDir\python\python.exe"
-& $embedPython $getPipPy --no-warn-script-location --no-compile `
+& $embedPython $getPipPy --no-warn-script-location --no-compile --no-cache-dir `
     "pip==$PIP_VERSION" "setuptools==$SETUPTOOLS_VERSION" `
     "wheel==$WHEEL_VERSION" "packaging==$PACKAGING_VERSION"
 if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
@@ -332,7 +332,7 @@ if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 #     MCP powers uoink_mcp.py for stdio agent integrations. keyring stores
 #     the user's Anthropic API key in Windows Credential Manager.
 Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION + faster-whisper==$FASTER_WHISPER_VERSION + whisperx==$WHISPERX_VERSION..."
-& $embedPython -m pip install --no-warn-script-location --no-compile `
+& $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
     --no-build-isolation `
     --constraint $InstallerLock `
     "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "faster-whisper==$FASTER_WHISPER_VERSION" "whisperx==$WHISPERX_VERSION"
@@ -344,7 +344,7 @@ if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring +
 # pip-licenses (offline dev build) warns but doesn't fail the build; the
 # committed file is the fallback.
 Write-Step 'Generating THIRD-PARTY-NOTICES.md'
-& $embedPython -m pip install --no-warn-script-location --no-compile `
+& $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
     --no-build-isolation `
     --constraint $InstallerLock "pip-licenses==5.0.0" 2>$null
 if ($LASTEXITCODE -eq 0) {
@@ -609,15 +609,23 @@ Write-Step 'Generating wizard bitmaps'
 if ($LASTEXITCODE -ne 0) { throw 'wizard bitmap generation failed' }
 
 # py_compile, staged imports, and bitmap generation all recreate bytecode after
-# the earlier pip cleanup. Prune once more at the final packaging boundary so
-# no worktree path or build timestamp enters the installer through .pyc files.
-Get-ChildItem -Path "$StagingDir\python" -Filter '__pycache__' -Recurse -Directory -ErrorAction SilentlyContinue |
+# the earlier pip cleanup. The staged server import also creates a local token.
+# Prune both side effects at the final packaging boundary so no worktree path,
+# build timestamp, or build-time credential remains in the staged payload.
+Get-ChildItem -Path $StagingDir -Filter '__pycache__' -Recurse -Directory -ErrorAction SilentlyContinue |
     ForEach-Object { Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $_.FullName }
-Get-ChildItem -Path "$StagingDir\python" -Filter '*.pyc' -Recurse -File -ErrorAction SilentlyContinue |
+Get-ChildItem -Path $StagingDir -Filter '*.pyc' -Recurse -File -ErrorAction SilentlyContinue |
     ForEach-Object { Remove-Item -Force -ErrorAction SilentlyContinue $_.FullName }
-$remainingBytecode = Get-ChildItem -Path "$StagingDir\python" -Filter '*.pyc' -Recurse -File -ErrorAction SilentlyContinue
+$stagedToken = Join-Path $StagingDir 'token.txt'
+if (Test-Path $stagedToken) {
+    Remove-Item -Force $stagedToken
+}
+$remainingBytecode = Get-ChildItem -Path $StagingDir -Filter '*.pyc' -Recurse -File -ErrorAction SilentlyContinue
 if ($remainingBytecode) {
     throw "Final staging cleanup left $($remainingBytecode.Count) .pyc files"
+}
+if (Test-Path $stagedToken) {
+    throw 'Final staging cleanup left token.txt'
 }
 
 # ---- 3. Compile installer ----------------------------------------------
