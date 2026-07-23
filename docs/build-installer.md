@@ -95,7 +95,11 @@ The helper runs under `pythonw.exe`, so there's no console window. `server.py` w
   `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-31-12-58/ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip`.
   The build script extracts only `ffmpeg.exe` and `ffprobe.exe`; the rest of
   the archive is discarded.
-- **get-pip.py** — `https://bootstrap.pypa.io/get-pip.py`. Used once during the build to bootstrap pip into the embeddable.
+- **get-pip.py** — PyPA `get-pip` commit
+  `5e84c8360eaf92009551b3eec69d734137f31cec` (the upstream 26.1.2 update),
+  fetched through that immutable GitHub revision rather than the mutable
+  `bootstrap.pypa.io/get-pip.py` alias. Used once during the build to
+  bootstrap pip into the embeddable.
 
 These three direct downloads are cached under `build\cache\`. Delete the cache
 or pass `-Clean` to force a refresh. The remaining runtime packages are
@@ -129,15 +133,29 @@ When bumping a directly-downloaded component:
 
 1. Run `.\build.ps1` once on a network-connected machine.
 2. If the version changed, copy the computed hash from the warning/error output after verifying the artifact source.
-3. Paste them into the matching `$PYTHON_SHA256`, `$FFMPEG_SHA256`, `$GETPIP_SHA256` constants in `build.ps1`.
+3. Paste them into the matching `$PYTHON_SHA256`, `$FFMPEG_SHA256`,
+   `$GETPIP_COMMIT`, and `$GETPIP_SHA256` constants in `build.ps1`. For
+   `get-pip.py`, use the reviewed upstream commit that generated the desired
+   pip bootstrap rather than the mutable bootstrap alias.
 4. Re-run `.\build.ps1` -- it should now print `<component> hash OK` instead of the warnings.
 5. Commit the version bump and matching hash update together.
 
-Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`, `pystray`,
-`pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) are version-pinned
-but not hash-locked yet. Full pip hash-locking would require a
-`requirements.txt` with `--require-hashes`; for now the installer accepts the
-trust-pip-itself model while keeping exact package versions stable.
+The direct pip dependencies (`yt-dlp`, `Pillow`, `mcp`, `keyring`, `pystray`,
+`pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) and their complete
+Windows/CPython 3.11 transitive graph are exact-version constrained by
+`requirements-installer-lock.txt`. After build-only tooling is removed,
+`scripts/verify_installer_lock.py` compares the final installed inventory to
+that lock and fails on a missing, unexpected, or changed package. Distribution
+artifacts are not hash-locked yet; a future `--require-hashes` control must be
+generated and reviewed separately.
+
+Pip, setuptools, wheel, and packaging are separately pinned build tooling.
+The build does not reuse pip's wheel cache, and runtime sdists build without
+isolated floating tools. The final staging pass removes unused console
+launchers, their dead RECORD rows, bytecode caches, and the temporary token
+created by staged smoke. It also normalizes compiler-input timestamps to
+`SOURCE_DATE_EPOCH`, the Git commit time, or a fixed source-archive fallback,
+so checkout times do not change the installer wrapper.
 
 ## Updating versions
 
@@ -196,7 +214,11 @@ candidate on the supported Windows matrix and record what happened.
 
 ### Pip bootstrap pulls files we don't ship
 
-`get-pip.py` installs pip + setuptools + wheel into the embeddable. We strip those after runtime packages are installed (see step 2e in `build.ps1`) so the shipped install only contains what the server actually imports. If a future package adds a transitive dependency, it'll land in `site-packages` automatically and get included.
+`get-pip.py` installs pip + setuptools + wheel into the embeddable. We strip
+those after runtime packages are installed (see step 2e in `build.ps1`) so the
+shipped install only contains the reviewed runtime inventory. If a future
+package adds or removes a transitive dependency, the final lock verification
+fails instead of silently shipping a different graph.
 
 ### Installed prompts have no in-product editor
 

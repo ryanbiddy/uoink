@@ -41,6 +41,8 @@ $CacheDir     = Join-Path $BuildDir 'cache'
 $StagingDir   = Join-Path $InstallerDir 'staging'
 $TemplatesDir = Join-Path $InstallerDir 'templates'
 $IconSrc      = Join-Path $InstallerDir 'uoink.ico'
+$InstallerLock = Join-Path $RepoRoot 'requirements-installer-lock.txt'
+$verifyInstallerLock = Join-Path $RepoRoot 'scripts\verify_installer_lock.py'
 
 # ---- Versions (pinned for v2 ship) --------------------------------------
 $VersionSourceFile = Join-Path $RepoRoot 'helper\_version.py'
@@ -78,7 +80,15 @@ if ($ManifestVersion -ne $VERSION) {
 # source-only security releases. v2 accepts this; v2.1 plan: move to 3.12.
 $PYTHON_VERSION = '3.11.9'
 $PYTHON_URL     = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"
-$GETPIP_URL     = 'https://bootstrap.pypa.io/get-pip.py'
+$GETPIP_COMMIT  = '5e84c8360eaf92009551b3eec69d734137f31cec'
+$GETPIP_URL     = "https://raw.githubusercontent.com/pypa/get-pip/$GETPIP_COMMIT/public/get-pip.py"
+# Build tooling affects generated console launchers, RECORD metadata, and
+# locally built wheels even though the tools themselves are stripped. Pin it
+# just as strictly as the final runtime graph.
+$PIP_VERSION        = '26.1.2'
+$SETUPTOOLS_VERSION = '83.0.0'
+$WHEEL_VERSION      = '0.47.0'
+$PACKAGING_VERSION  = '26.2'
 # C-02 (license compliance): ffmpeg is now BtbN's win64-LGPL build, not the
 # gyan.dev "essentials" GPLv3 build. The essentials build links GPL
 # components (x264/x265) and its GPL redistribution obligations (offer of
@@ -135,7 +145,7 @@ $WHISPERX_VERSION = '3.8.6'
 # file so a re-run pulls fresh.
 $PYTHON_SHA256 = "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b"
 $FFMPEG_SHA256 = "1475187ddaf367c6702856fe37bb00e8b3ce69963e9b453a9de78396846ff38c"
-$GETPIP_SHA256 = "66904bccb878e363db6236ea900e6935e507dcb887e9f178f6212edfe7f46a76"
+$GETPIP_SHA256 = "a341e1a43e38001c551a1508a73ff23636a11970b61d901d9a1cad2a18f57055"
 
 # ---- Helpers ------------------------------------------------------------
 function Write-Step($msg) {
@@ -185,6 +195,36 @@ function Confirm-Hash($path, $expected, $label) {
         throw "$label SHA256 mismatch.`nExpected: $expected`nActual:   $actual"
     }
     Write-Host "    $label hash OK"
+}
+
+function Get-PackageTimestampUtc {
+    # SOURCE_DATE_EPOCH is the explicit release-build override. A Git
+    # checkout otherwise gets a stable, source-bound timestamp from HEAD; a
+    # source archive without Git uses 2000-01-01 rather than wall-clock time.
+    $epochText = $env:SOURCE_DATE_EPOCH
+    if ([string]::IsNullOrWhiteSpace($epochText)) {
+        $git = Get-Command git -ErrorAction SilentlyContinue
+        if ($git) {
+            $candidate = & $git.Source -C $RepoRoot show -s --format=%ct HEAD 2>$null |
+                Select-Object -First 1
+            if ($candidate -and "$candidate" -match '^\d+$') {
+                $epochText = "$candidate".Trim()
+            }
+        }
+    }
+    if ([string]::IsNullOrWhiteSpace($epochText)) {
+        $epochText = '946684800'
+    }
+
+    [long]$epoch = 0
+    if (-not [long]::TryParse($epochText, [ref]$epoch) -or $epoch -lt 315532800) {
+        throw "SOURCE_DATE_EPOCH must be an integer at or after 1980-01-01 (got '$epochText')"
+    }
+    try {
+        return [DateTimeOffset]::FromUnixTimeSeconds($epoch).UtcDateTime
+    } catch {
+        throw "SOURCE_DATE_EPOCH is outside the supported range (got '$epochText')"
+    }
 }
 
 # ---- Optional clean -----------------------------------------------------
@@ -248,6 +288,8 @@ foreach ($f in @(
     'defaults\style_anchors.json',
     'yt_extract.py',
     'topics.json',
+    'requirements-installer-lock.txt',
+    'scripts\verify_installer_lock.py',
     'installer\verify_install.ps1',
     'uoink_core\storage.py'
 )) {
@@ -308,19 +350,22 @@ $pthContent = $pthContent -replace '#\s*import\s+site', 'import site'
 # 2c. Bootstrap pip into the embeddable
 Write-Host '    bootstrapping pip in embeddable Python...'
 $embedPython = "$StagingDir\python\python.exe"
-& $embedPython $getPipPy --no-warn-script-location
+& $embedPython $getPipPy --no-warn-script-location --no-compile --no-cache-dir `
+    "pip==$PIP_VERSION" "setuptools==$SETUPTOOLS_VERSION" `
+    "wheel==$WHEEL_VERSION" "packaging==$PACKAGING_VERSION"
 if ($LASTEXITCODE -ne 0) { throw 'pip bootstrap failed' }
 
-# 2d. Install yt-dlp + Pillow + MCP + keyring at pinned versions. Pip's hash-locking would
-#     require a requirements file with --require-hashes; for v2 we accept
-#     the trust-pip-itself model since the version pins are the
-#     load-bearing part (a compromised release on PyPI affects everyone,
-#     not just us). Pillow drives the multimodal paste-corpus generator
+# 2d. Install the direct runtime dependencies while constraining the complete
+#     transitive graph to the reviewed Windows/CPython 3.11 lock. Artifact
+#     hashes remain a separate release control. Pillow drives the multimodal
+#     paste-corpus generator
 #     (resize / re-encode / base64 screenshots for clipboard embedding).
 #     MCP powers uoink_mcp.py for stdio agent integrations. keyring stores
 #     the user's Anthropic API key in Windows Credential Manager.
 Write-Host "    installing yt-dlp==$YTDLP_VERSION + Pillow==$PILLOW_VERSION + mcp==$MCP_VERSION + keyring==$KEYRING_VERSION + pystray==$PYSTRAY_VERSION + pywebview==$PYWEBVIEW_VERSION + pythonnet==$PYTHONNET_VERSION + faster-whisper==$FASTER_WHISPER_VERSION + whisperx==$WHISPERX_VERSION..."
-& $embedPython -m pip install --no-warn-script-location --no-compile `
+& $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
+    --no-build-isolation `
+    --constraint $InstallerLock `
     "yt-dlp==$YTDLP_VERSION" "Pillow==$PILLOW_VERSION" "mcp==$MCP_VERSION" "keyring==$KEYRING_VERSION" "pystray==$PYSTRAY_VERSION" "pywebview==$PYWEBVIEW_VERSION" "pythonnet==$PYTHONNET_VERSION" "faster-whisper==$FASTER_WHISPER_VERSION" "whisperx==$WHISPERX_VERSION"
 if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring + pystray + faster-whisper + whisperx) failed' }
 
@@ -330,13 +375,17 @@ if ($LASTEXITCODE -ne 0) { throw 'pip install (yt-dlp + Pillow + MCP + keyring +
 # pip-licenses (offline dev build) warns but doesn't fail the build; the
 # committed file is the fallback.
 Write-Step 'Generating THIRD-PARTY-NOTICES.md'
-& $embedPython -m pip install --no-warn-script-location --no-compile "pip-licenses==5.0.0" 2>$null
+& $embedPython -m pip install --no-warn-script-location --no-compile --no-cache-dir `
+    --no-build-isolation `
+    --constraint $InstallerLock "pip-licenses==5.0.0" 2>$null
 if ($LASTEXITCODE -eq 0) {
     $noticesPath = Join-Path $RepoRoot 'THIRD-PARTY-NOTICES.md'
     & $embedPython (Join-Path $RepoRoot 'scripts\gen_third_party_notices.py') $noticesPath
     if ($LASTEXITCODE -ne 0) { Write-Warning 'THIRD-PARTY-NOTICES generation failed; committed file kept.' }
     # pip-licenses is a build-time tool, not a runtime dep -- strip it back out.
-    & $embedPython -m pip uninstall -y pip-licenses prettytable 2>$null
+    # Remove the tool and its tool-only dependencies. tomli is not required by
+    # the runtime graph on Python 3.11; wcwidth arrives only through prettytable.
+    & $embedPython -m pip uninstall -y pip-licenses prettytable tomli wcwidth 2>$null
 } else {
     Write-Warning 'pip-licenses unavailable; THIRD-PARTY-NOTICES.md not regenerated.'
 }
@@ -371,6 +420,33 @@ foreach ($g in $stripGlobs) {
 # Strip any stray .pyc caches generated by pip's bootstrap.
 Get-ChildItem -Path "$StagingDir\python" -Filter '__pycache__' -Recurse -Directory -ErrorAction SilentlyContinue |
     ForEach-Object { Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $_.FullName }
+
+# Console entry points are not part of Uoink's runtime surface and their
+# launchers embed the temporary staging path. Remove them, then remove their
+# now-dead RECORD rows so two clean worktrees have the same metadata bytes.
+$pythonScripts = Join-Path "$StagingDir\python" 'Scripts'
+if (Test-Path $pythonScripts) {
+    Remove-Item -Recurse -Force $pythonScripts
+}
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+Get-ChildItem -Path "$StagingDir\python\Lib\site-packages" -Filter 'RECORD' -Recurse -File |
+    ForEach-Object {
+        $recordLines = [System.IO.File]::ReadAllLines($_.FullName)
+        $keptLines = @($recordLines | Where-Object {
+            $_ -notmatch '^(?:\.\./)+Scripts/'
+        })
+        [System.IO.File]::WriteAllText(
+            $_.FullName,
+            (($keptLines -join "`n") + "`n"),
+            $utf8NoBom
+        )
+    }
+
+# The constraints make resolution deterministic; this exact-set check also
+# fails if a dependency disappears, appears, or changes version.
+Write-Host '    verifying final dependency inventory...'
+& $embedPython $verifyInstallerLock $InstallerLock
+if ($LASTEXITCODE -ne 0) { throw 'installer dependency lock verification failed' }
 
 # 2f. ffmpeg -- pull just ffmpeg.exe (and ffprobe.exe if present)
 Write-Host '    extracting ffmpeg...'
@@ -450,6 +526,7 @@ Copy-Item (Join-Path $RepoRoot 'topics.json')    $StagingDir -Force
 Set-Content -Path (Join-Path $StagingDir 'VERSION') -Value $VERSION -Encoding ASCII
 Copy-Item (Join-Path $RepoRoot 'helper') (Join-Path $StagingDir 'helper') -Recurse -Force
 Copy-Item (Join-Path $InstallerDir 'verify_install.ps1') $StagingDir -Force
+Copy-Item (Join-Path $InstallerDir 'upgrade_prep.ps1') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.bat') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.ps1') $StagingDir -Force
 Copy-Item $IconSrc (Join-Path $StagingDir 'uoink.ico') -Force
@@ -562,6 +639,39 @@ print("smoke: import whisperx OK")
 Write-Step 'Generating wizard bitmaps'
 & $embedPython (Join-Path $InstallerDir 'generate_bitmaps.py')
 if ($LASTEXITCODE -ne 0) { throw 'wizard bitmap generation failed' }
+$stagedInstallerAssets = Join-Path $StagingDir 'installer-assets'
+New-Item -ItemType Directory -Force -Path $stagedInstallerAssets | Out-Null
+Get-ChildItem -Path (Join-Path $InstallerDir 'assets') -Filter 'wizard-*.bmp' -File |
+    ForEach-Object { Copy-Item $_.FullName $stagedInstallerAssets -Force }
+
+# py_compile, staged imports, and bitmap generation all recreate bytecode after
+# the earlier pip cleanup. The staged server import also creates a local token.
+# Prune both side effects at the final packaging boundary so no worktree path,
+# build timestamp, or build-time credential remains in the staged payload.
+Get-ChildItem -Path $StagingDir -Filter '__pycache__' -Recurse -Directory -ErrorAction SilentlyContinue |
+    ForEach-Object { Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $_.FullName }
+Get-ChildItem -Path $StagingDir -Filter '*.pyc' -Recurse -File -ErrorAction SilentlyContinue |
+    ForEach-Object { Remove-Item -Force -ErrorAction SilentlyContinue $_.FullName }
+$stagedToken = Join-Path $StagingDir 'token.txt'
+if (Test-Path $stagedToken) {
+    Remove-Item -Force $stagedToken
+}
+$remainingBytecode = Get-ChildItem -Path $StagingDir -Filter '*.pyc' -Recurse -File -ErrorAction SilentlyContinue
+if ($remainingBytecode) {
+    throw "Final staging cleanup left $($remainingBytecode.Count) .pyc files"
+}
+if (Test-Path $stagedToken) {
+    throw 'Final staging cleanup left token.txt'
+}
+
+# Inno records source mtimes in setup data. Worktree checkout times made two
+# byte-identical staged trees produce different installer wrappers. Normalize
+# every compiler input under staging to one source-bound timestamp.
+$packageTimestampUtc = Get-PackageTimestampUtc
+Get-ChildItem -Path $StagingDir -Recurse -Force |
+    ForEach-Object { $_.LastWriteTimeUtc = $packageTimestampUtc }
+(Get-Item $StagingDir).LastWriteTimeUtc = $packageTimestampUtc
+Write-Host "    normalized package timestamps to $($packageTimestampUtc.ToString('o'))"
 
 # ---- 3. Compile installer ----------------------------------------------
 Write-Step 'Compiling installer'

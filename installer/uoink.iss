@@ -51,9 +51,9 @@ WizardStyle=modern
 ; Branded wizard bitmaps (Variant A magnet-U), regenerated each build by
 ; ../generate_bitmaps.py into installer/assets/. Compile-time only (baked into
 ; Setup.exe, not installed to {app}). 24-bit BMP per Inno's requirement.
-WizardImageFile=assets\wizard-large-100.bmp,assets\wizard-large-125.bmp,assets\wizard-large-150.bmp,assets\wizard-large-200.bmp
-WizardSmallImageFile=assets\wizard-small-100.bmp,assets\wizard-small-125.bmp,assets\wizard-small-150.bmp,assets\wizard-small-200.bmp
-SetupIconFile=uoink.ico
+WizardImageFile=staging\installer-assets\wizard-large-100.bmp,staging\installer-assets\wizard-large-125.bmp,staging\installer-assets\wizard-large-150.bmp,staging\installer-assets\wizard-large-200.bmp
+WizardSmallImageFile=staging\installer-assets\wizard-small-100.bmp,staging\installer-assets\wizard-small-125.bmp,staging\installer-assets\wizard-small-150.bmp,staging\installer-assets\wizard-small-200.bmp
+SetupIconFile=staging\uoink.ico
 UninstallDisplayIcon={app}\uoink.ico
 UninstallDisplayName={#AppName}
 ArchitecturesAllowed=x64compatible
@@ -194,7 +194,7 @@ Source: "staging\uoink.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; v2.2.0 upgrade-prep PowerShell. Flags: dontcopy keeps it out of {app} --
 ; ExtractTemporaryFile() drops it into {tmp} during PrepareToInstall, runs
 ; it once, and the wizard's normal {tmp} cleanup deletes it after.
-Source: "upgrade_prep.ps1"; Flags: dontcopy
+Source: "staging\upgrade_prep.ps1"; Flags: dontcopy
 
 [Icons]
 ; The launcher entry is plain "Uoink" (not "Uoink Server") -- users don't
