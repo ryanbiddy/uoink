@@ -28,3 +28,14 @@ def test_current_install_docs_do_not_name_retired_internal_files() -> None:
     assert "[MAC-BUILD-PLAN.md](MAC-BUILD-PLAN.md)" in mac
     assert "handoff/DISTRIBUTION-CHECKLIST-2026-07-07.md" not in bundle
     assert "does not ship one today" in bundle
+
+
+def test_mcpb_guide_uses_inbox_windows_powershell() -> None:
+    bundle = (ROOT / "docs" / "mcpb-bundle.md").read_text(encoding="utf-8")
+    command = (
+        "powershell -NoProfile -ExecutionPolicy Bypass "
+        "-File .\\scripts\\build-mcpb.ps1"
+    )
+
+    assert "pwsh scripts\\build-mcpb.ps1" not in bundle
+    assert bundle.count(command) == 2

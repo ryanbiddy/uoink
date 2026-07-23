@@ -54,7 +54,7 @@ already requires the helper — so it's not a new ask.
 
 ```powershell
 # Windows (primary)
-pwsh scripts\build-mcpb.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-mcpb.ps1
 ```
 ```bash
 # POSIX
@@ -79,7 +79,8 @@ this repository does not ship one today.
 
 ## Verifying an install
 
-1. `pwsh scripts\build-mcpb.ps1` → confirm `dist/uoink-<VERSION>.mcpb` exists
+1. `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\build-mcpb.ps1`
+   → confirm `dist/uoink-<VERSION>.mcpb` exists
    (the script derives `<VERSION>` from the repo `VERSION` file).
 2. Double-click it in Claude Desktop → accept the install dir → restart.
 3. In Claude, confirm Uoink tools list and run `list_recent_uoinks`.
