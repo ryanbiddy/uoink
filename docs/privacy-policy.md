@@ -48,13 +48,17 @@ files are written only to folders on your own computer.
 
 ### Local data persistence
 
-Uoink stores the following on your machine:
+Uoink currently ships only for Windows. There is no current macOS build,
+`.dmg`, or `Uoink.app`; macOS paths and Keychain support described in planning
+documents are not deployed storage.
 
-- **Uoinked corpora** — `~/Desktop/Uoink/<topic>/<slug>/` on both Windows and macOS (an upgraded install may keep a pre-rename `~/Desktop/Yoink/` until you opt in to move it). Plain markdown + JSON + screenshots. Yours to read, edit, delete.
-- **Library index** — `%LOCALAPPDATA%\Uoink\index.db` (Windows) or `~/Library/Application Support/Uoink/index.db` (macOS). SQLite database with FTS5 search index, taxonomy classifications, entity graph, queue, and corrections. Local-only; never transmitted.
-- **Anthropic API key** — Windows Credential Manager (Windows) or Keychain (macOS), via Python `keyring`. Service `Uoink` (migrated from the legacy `Yoink` service on first launch), username `anthropic_key`. Never stored in plaintext in any settings file.
-- **Soft-deleted uoinks** — when you delete a uoink from the Memory page, the folder moves to `~/Desktop/Uoink/_yoink-trash/<topic>/<slug>__deleted-<timestamp>/`. The content remains readable on disk for 30 days, then is automatically purged by the helper on startup or every 24 hours thereafter. To delete immediately, manually remove the folder from `_yoink-trash/`.
-- **Helper state** — `server.log`, `token.txt`, `server.pid`, the v2.1 migration markers (`.migration-complete`, `.migrated-from-yoink`), and migrated legacy files (`jobs.json.migrated`, `taxonomy.json.migrated`) live alongside `index.db` in the same Application Support / LOCALAPPDATA directory.
+Uoink stores the following on your Windows machine:
+
+- **Uoinked corpora** — `%USERPROFILE%\Desktop\Uoink\<topic>\<slug>\` (an upgraded install may keep a pre-rename `%USERPROFILE%\Desktop\Yoink\` until you opt in to move it). Plain markdown + JSON + screenshots. Yours to read, edit, delete.
+- **Library index** — `%LOCALAPPDATA%\Uoink\index.db`. SQLite database with FTS5 search index, taxonomy classifications, entity graph, queue, and corrections. Local-only; never transmitted.
+- **Anthropic API key** — Windows Credential Manager, via Python `keyring`. Service `Uoink` (migrated from the legacy `Yoink` service on first launch), username `anthropic_key`. Never stored in plaintext in any settings file.
+- **Soft-deleted uoinks** — when you delete a uoink from the Memory page, the folder moves to `%USERPROFILE%\Desktop\Uoink\_yoink-trash\<topic>\<slug>__deleted-<timestamp>\`. The content remains readable on disk for 30 days, then is automatically purged by the helper on startup or every 24 hours thereafter. To delete immediately, manually remove the folder from `_yoink-trash`.
+- **Helper state** — `server.log`, `token.txt`, `server.pid`, the v2.1 migration markers (`.migration-complete`, `.migrated-from-yoink`), and migrated legacy files (`jobs.json.migrated`, `taxonomy.json.migrated`) live alongside `index.db` under `%LOCALAPPDATA%\Uoink\`.
 
 None of this data leaves your machine unless you explicitly enable an optional AI feature that calls the Anthropic API with your key.
 
@@ -80,8 +84,12 @@ any server — there is no Uoink server to receive it.
 - **Uninstall Uoink at any time.**
   To fully remove Uoink and its data:
   1. Remove the extension from `chrome://extensions/`.
-  2. Uninstall the helper from Windows Settings → Apps (Windows) or drag Uoink.app to Trash (macOS).
-  3. Optionally delete `%LOCALAPPDATA%\Uoink\` (Windows) or `~/Library/Application Support/Uoink/` (macOS) and `~/Desktop/Uoink/` to remove all Uoink-managed data including the index, trash, and uoinked corpora. (A pre-rename install may also leave `\Yoink\` copies for up to 7 days before the helper removes them.)
+  2. Uninstall the helper from Windows Settings → Apps.
+  3. Optionally delete `%LOCALAPPDATA%\Uoink\` and
+     `%USERPROFILE%\Desktop\Uoink\` to remove all Uoink-managed data,
+     including the index, trash, and uoinked corpora. (A pre-rename install
+     may also leave `Yoink` copies for up to 7 days before the helper removes
+     them.)
 
 ## 5. Third parties
 

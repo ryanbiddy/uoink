@@ -47,3 +47,23 @@ def test_build_guide_does_not_promise_an_absent_mac_artifact() -> None:
         assert present == [], f"unverified macOS build claims remain: {present}"
         assert "There is no working macOS build command" in text
         assert "[mac-install.md](mac-install.md)" in text
+
+
+def test_public_docs_do_not_claim_an_unshipped_macos_app() -> None:
+    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+    privacy = (ROOT / "docs" / "privacy-policy.md").read_text(
+        encoding="utf-8"
+    )
+
+    for stale_claim in (
+        "**macOS universal build**",
+        "Stage 2 ships the actual `.dmg` build pipeline",
+    ):
+        assert stale_claim not in changelog
+
+    for stale_claim in (
+        "on both Windows and macOS",
+        "drag Uoink.app to Trash",
+    ):
+        assert stale_claim not in privacy
+    assert "There is no current macOS build" in privacy
