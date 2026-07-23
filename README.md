@@ -10,8 +10,6 @@
 
 Free, open source (MIT), and local-first: no account, no Uoink cloud, no required telemetry. One click saves a source — full transcript, timestamped screenshots, comments, and metadata — as a structured Markdown corpus on *your* machine, then makes it available to your AI three ways: the clipboard, a local MCP server, and an OpenAPI bridge.
 
-![Uoink: the rust U button under a YouTube video](assets/readme-hero-v3.1.png)
-
 - **Website:** https://uoink.app · **Install:** https://uoink.app/install · **Developers:** https://uoink.app/developers
 - **Status:** Windows 10/11 today; Mac build queued after Windows stabilizes. Chrome Web Store listing pending — for now the extension sideloads from the release.
 

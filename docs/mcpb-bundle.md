@@ -73,9 +73,9 @@ Output: `dist/uoink-<version>.mcpb`.
 
 ## Releasing
 
-Attach `dist/uoink-<version>.mcpb` to the GitHub release. This same file is also
-referenceable from the MCP Registry `server.json` as an `mcpb` package (see
-`handoff/DISTRIBUTION-CHECKLIST-2026-07-07.md`).
+Attach `dist/uoink-<version>.mcpb` only after release approval. MCP Registry
+publication is separate launch work and requires a reviewed `server.json`;
+this repository does not ship one today.
 
 ## Verifying an install
 
