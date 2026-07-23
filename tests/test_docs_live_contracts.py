@@ -96,6 +96,22 @@ def test_security_model_names_public_probe_disclosure() -> None:
         assert field in security.lower()
 
 
+def test_security_model_does_not_promise_removed_live_aliases() -> None:
+    security = (ROOT / "docs" / "security.md").read_text(encoding="utf-8")
+    server_source = (ROOT / "server.py").read_text(encoding="utf-8")
+    extension_source = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in (ROOT / "extension").rglob("*.js")
+    )
+
+    assert "removed in v3" not in security
+    assert "through Uoink v2.5" not in security
+    assert "No removal version is promised" in security
+    for identifier in ("X-Yoink-Token", "X-Yoink-Client"):
+        assert identifier in server_source
+        assert identifier in extension_source
+
+
 def test_documented_path_integrity_variants_match_live_code(
     monkeypatch, tmp_path
 ) -> None:
