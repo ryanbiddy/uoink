@@ -26,7 +26,7 @@ The helper never binds to a public network interface. The main security boundary
 | Another installed browser extension calls `/token` | Not fully | v2 accepts `chrome-extension://*` origins so Chromium forks and dev installs work. Published Chrome Web Store extension ID pinning is deferred until the final ID is known and stable. |
 | Network attacker | Mostly not applicable | The helper listens only on `127.0.0.1`, not LAN/public interfaces. |
 | Anthropic API key disclosure through settings | Mitigated | The key is stored in the OS credential store via `keyring` (service `Uoink`; the v2.1 install migration moves it from the legacy `Yoink` service), not in `settings.json`, and is never returned by `GET /settings`. |
-| Dependency compromise | Partially | Direct downloads are SHA256-checked in `build.ps1`; pip packages are version-pinned but not hash-locked. |
+| Dependency compromise | Partially | Direct downloads are SHA256-checked in `build.ps1`; the full installer pip graph is exact-version locked and inventory-verified, but distribution artifacts are not hash-locked. |
 
 ## Public endpoints
 
@@ -191,9 +191,11 @@ MCP tools reuse the same backend validation for URLs, slugs, job IDs, file paths
 - `get-pip.py`
 
 Installer-installed Python packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`,
-`pystray`, `pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) are
-version-pinned but not hash-locked yet. Full pip `--require-hashes` is a future
-hardening item.
+`pystray`, `pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) and
+their complete transitive graph are exact-version constrained by
+`requirements-installer-lock.txt`. The build verifies the final installed
+inventory against that lock after removing build-only tooling. Full pip
+distribution hash locking remains a future hardening item.
 
 Transcript reliability detection is local-only and uses `faster-whisper` word
 probabilities. Model weights are not bundled. The automatic capture-time check
