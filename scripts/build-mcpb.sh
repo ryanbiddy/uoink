@@ -72,9 +72,23 @@ rm -f "$OUT_FILE"
 if command -v mcpb >/dev/null 2>&1; then
   echo "Packing with official mcpb CLI..."
   mcpb pack "$BUILD_DIR" "$OUT_FILE"
-else
+elif command -v zip >/dev/null 2>&1; then
   echo "mcpb CLI not found; packing with zip (ZIP -> .mcpb)..."
   ( cd "$BUILD_DIR" && zip -r -q "$OUT_FILE" . )
+else
+  echo "mcpb CLI and zip not found; packing with Python stdlib (ZIP -> .mcpb)..."
+  "$PY" - "$BUILD_DIR" "$OUT_FILE" <<'PYEOF'
+import pathlib
+import sys
+import zipfile
+
+source = pathlib.Path(sys.argv[1])
+output = pathlib.Path(sys.argv[2])
+with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+    for path in sorted(source.rglob("*")):
+        if path.is_file():
+            archive.write(path, path.relative_to(source).as_posix())
+PYEOF
 fi
 [ -f "$OUT_FILE" ] || { echo "Failed to produce $OUT_FILE" >&2; exit 1; }
 echo "Built $OUT_FILE"

@@ -32,10 +32,15 @@ def test_current_install_docs_do_not_name_retired_internal_files() -> None:
 
 def test_mcpb_guide_uses_inbox_windows_powershell() -> None:
     bundle = (ROOT / "docs" / "mcpb-bundle.md").read_text(encoding="utf-8")
+    surface_map = (
+        ROOT / "docs" / "surface-maps" / "mcpb-bundle.md"
+    ).read_text(encoding="utf-8")
     command = (
         "powershell -NoProfile -ExecutionPolicy Bypass "
         "-File .\\scripts\\build-mcpb.ps1"
     )
 
-    assert "pwsh scripts\\build-mcpb.ps1" not in bundle
+    for current_doc in (bundle, surface_map):
+        assert re.search(r"\bpwsh\b", current_doc) is None
     assert bundle.count(command) == 2
+    assert surface_map.count(command) == 1
