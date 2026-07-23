@@ -91,6 +91,12 @@ def test_build_uses_and_verifies_the_installer_lock() -> None:
         assert tool_pin in build
     assert build.count("--no-build-isolation") == 2
     assert build.count("--no-cache-dir") == 3
+    assert "$GETPIP_COMMIT  = '5e84c8360eaf92009551b3eec69d734137f31cec'" in build
+    assert (
+        '"https://raw.githubusercontent.com/pypa/get-pip/'
+        '$GETPIP_COMMIT/public/get-pip.py"'
+    ) in build
+    assert "a341e1a43e38001c551a1508a73ff23636a11970b61d901d9a1cad2a18f57055" in build
     assert "Remove-Item -Recurse -Force $pythonScripts" in build
     assert "'^(?:\\.\\./)+Scripts/'" in build
     assert build.index("Staged smoke OK") < build.index(

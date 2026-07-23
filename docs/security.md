@@ -188,7 +188,7 @@ MCP tools reuse the same backend validation for URLs, slugs, job IDs, file paths
 
 - Python embeddable
 - ffmpeg
-- `get-pip.py`
+- `get-pip.py` from an immutable reviewed PyPA `get-pip` commit
 
 Installer-installed Python packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`,
 `pystray`, `pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) and
