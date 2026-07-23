@@ -238,6 +238,8 @@ def test_installer_guide_dependency_snapshot_matches_build_script() -> None:
     assert "%LOCALAPPDATA%\\Uoink\\extension\\prompts.json" in guide
     assert "do not have that extension source tree" not in guide
     assert "therefore remains dev-only" not in guide
+    assert "Packaged prompts are read-only" not in guide
+    assert "Installed prompts have no in-product editor" in guide
 
 
 def test_security_docs_do_not_claim_unbuilt_macos_or_removed_asr() -> None:
