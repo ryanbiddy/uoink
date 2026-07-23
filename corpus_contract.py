@@ -321,6 +321,8 @@ def validate_source_url(value: Any, label: str) -> None:
         parsed.scheme.lower() not in {"http", "https"}
         or not parsed.netloc
         or parsed.hostname is None
+        or parsed.username is not None
+        or parsed.password is not None
     ):
         raise ContractError(
             "provider_nonconformant",
