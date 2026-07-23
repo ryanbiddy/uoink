@@ -61,3 +61,29 @@ def test_readme_first_run_extension_steps_match_the_splash() -> None:
     assert "copy the installed extension path" in readme
     assert 'primary: { text: `Open ${browserName} extensions`' in splash
     assert 'secondary: { text: "Copy path"' in splash
+
+
+def test_readme_mcp_client_claim_matches_the_compatibility_matrix() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    matrix = (ROOT / "docs" / "v2-mcp.md").read_text(encoding="utf-8")
+    server = (ROOT / "server.py").read_text(encoding="utf-8")
+
+    false_tested_claim = (
+        "tested with **Claude Desktop, Cursor, Cline, and Continue**"
+    )
+    assert false_tested_claim not in readme
+    assert "tested with **Claude Desktop and Cursor**" in readme
+    assert "Cline and Continue are standard-stdio compatibility paths" in readme
+    for client in ("Cline", "Continue"):
+        assert (
+            f"| {client} | Should work, community-reported | stdio | "
+            "Standard stdio MCP; not smoke-tested by Ryan. |"
+        ) in matrix
+    assert "Gemini, Grok, Perplexity, and scripts can drive" not in readme
+    assert "Local OpenAPI-capable agents and scripts can drive" in readme
+    assert 'HOST = "127.0.0.1"' in server
+    assert 'bare == "/openapi/v1/spec.json"' in server
+    assert 'bare.startswith("/tools/")' in server
+    assert "It works across Claude, Cursor, OpenClaw, Hermes" not in readme
+    assert "Clients that support Agent Skills can load the same file" in readme
+    assert (ROOT / "skills" / "uoink" / "SKILL.md").is_file()

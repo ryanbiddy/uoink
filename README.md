@@ -37,11 +37,11 @@ Everything files into one local library, auto-sorted into topic folders under yo
 
 **1. Clipboard (the creator path)** — Click Uoink, paste into Claude / ChatGPT. Transcript plus a paste-safe subset of screenshots inlined as images so the model sees text *and* frames in one paste.
 
-**2. MCP server (the agent path)** — A local Model Context Protocol server exposing 14 tools over stdio (the curated everyday set), tested with **Claude Desktop, Cursor, Cline, and Continue**, and usable from any MCP-capable client. Two surfaces, on purpose:
+**2. MCP server (the agent path)** — A local Model Context Protocol server exposing 14 tools over stdio (the curated everyday set), tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested. Two surfaces, on purpose:
 - **stdio** exposes the curated everyday set most agents need (`uoink_video`, `uoink_playlist`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_citation_map`, `get_uoink_health`, `find_mentions`, and more).
 - **HTTP JSON-RPC** at `/mcp/v1` exposes the full local tool registry (Writing Studio, workspaces, podcasts, monitored playlists, taste/engagement memory, source capture) — the same handlers, same auth token.
 
-**3. OpenAPI bridge (for agents that don't speak MCP)** — Gemini, Grok, Perplexity, and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
+**3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
 
 ### MCP setup (Claude Desktop, Cursor, Cline)
 
@@ -66,7 +66,7 @@ After installing Uoink, open the setup page from the extension popup's **Setting
 
 ### Uoink Operator Skill
 
-Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPPDATA%\Uoink\skills\uoink\`) that gives MCP-capable agents the operating frame for Uoink corpora: timestamp-citation discipline, decode-don't-dunk analysis, and the Uoink Hook Type taxonomy. It works across Claude, Cursor, OpenClaw, Hermes, and other clients via the agentskills.io open standard.
+Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPPDATA%\Uoink\skills\uoink\`) that gives MCP-capable agents the operating frame for Uoink corpora: timestamp-citation discipline, decode-don't-dunk analysis, and the Uoink Hook Type taxonomy. Clients that support Agent Skills can load the same file alongside Uoink's MCP tools.
 
 ## Install
 
