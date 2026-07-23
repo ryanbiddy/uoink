@@ -1,5 +1,10 @@
 """v3.2 Writing Studio — tweets, threads, blogs grounded in any uoink.
 
+Suite-split ownership: this is a live Uoink product surface. `server.py` and
+`uoink_mcp_tools.py` call it, and `build.ps1` stages it into the installer.
+Writer is a separate product; removing this module requires an explicit
+decision to remove Uoink's in-app Writing Studio and its HTTP/MCP callers.
+
 Per PROMPT-V3.2-CC-BACKEND.md Deliverable 1. Sibling of scripts.py;
 shares the same two-phase contract pattern (Phase 1 = grounding, Phase 2
 = persist agent output) and the same Voice DNA enforcement (prepend at
