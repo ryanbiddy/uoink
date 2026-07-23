@@ -142,6 +142,11 @@ that lock and fails on a missing, unexpected, or changed package. Distribution
 artifacts are not hash-locked yet; a future `--require-hashes` control must be
 generated and reviewed separately.
 
+Pip, setuptools, wheel, and packaging are separately pinned build tooling.
+Runtime sdists build without isolated floating tools. The final staging pass
+removes unused console launchers, their dead RECORD rows, and bytecode caches
+that otherwise contain temporary worktree paths or build-time metadata.
+
 ## Updating versions
 
 | Component | Where to change |

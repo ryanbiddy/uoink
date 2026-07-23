@@ -81,8 +81,28 @@ def test_build_uses_and_verifies_the_installer_lock() -> None:
     )
     assert "requirements-installer-lock.txt" in build
     assert "pip-licenses prettytable tomli wcwidth" in build
+    for tool_pin in (
+        "$PIP_VERSION",
+        "$SETUPTOOLS_VERSION",
+        "$WHEEL_VERSION",
+        "$PACKAGING_VERSION",
+    ):
+        assert tool_pin in build
+    assert build.count("--no-build-isolation") == 2
+    assert "Remove-Item -Recurse -Force $pythonScripts" in build
+    assert "'^(?:\\.\\./)+Scripts/'" in build
+    assert build.index("Staged smoke OK") < build.index(
+        "Final staging cleanup left"
+    )
+    assert build.index("generate_bitmaps.py") < build.index(
+        "Final staging cleanup left"
+    )
+    assert build.index("Final staging cleanup left") < build.index(
+        "Write-Step 'Compiling installer'"
+    )
     for current_doc in (build_doc, security):
         assert "transitive graph" in current_doc
         assert "not hash-locked" in current_doc
+        assert "build tooling" in current_doc
     assert "version-pinned but not hash-locked yet" not in build_doc
     assert "version-pinned but not hash-locked yet" not in security
