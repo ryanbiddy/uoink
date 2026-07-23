@@ -7,7 +7,19 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 ## Overview
 
-Uoink exposes 14 MCP tools covering extraction, playlist jobs, search, corpus retrieval, citation maps, health scores, transcript reliability, Comment Intelligence, Hook Type, hook taxonomy, and entity mentions. The tool implementation lives in `uoink_mcp_tools.py`; stdio (`uoink_mcp.py`) is the officially supported MCP transport, and the local HTTP JSON-RPC helper (`server.py` under `/mcp/v1`) wraps the same registry for clients that can use direct POST calls.
+Uoink has two deliberately different tool surfaces:
+
+- Supported stdio registry: **14 tools**.
+- Local HTTP/OpenAPI registry: **64 tools**.
+
+The supported stdio MCP surface covers extraction, playlist jobs, search,
+corpus retrieval, citation maps, health scores, transcript reliability,
+Comment Intelligence, Hook Type, hook taxonomy, and entity mentions. The
+authenticated local HTTP helper exposes that set plus a broader collection of
+legacy and application operations. Overlapping tools share the handlers in
+`uoink_mcp_tools.py`, but the two transports do not expose the same registry.
+For MCP clients, use stdio (`uoink_mcp.py`). The HTTP JSON-RPC surface at
+`/mcp/v1` remains experimental.
 
 ## Tool naming
 
