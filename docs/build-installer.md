@@ -198,11 +198,14 @@ candidate on the supported Windows matrix and record what happened.
 
 `get-pip.py` installs pip + setuptools + wheel into the embeddable. We strip those after runtime packages are installed (see step 2e in `build.ps1`) so the shipped install only contains what the server actually imports. If a future package adds a transitive dependency, it'll land in `site-packages` automatically and get included.
 
-### Prompts library is read-only in v1
+### Packaged prompts are read-only
 
-The popup ships with 11 starter prompts loaded from `extension/prompts.json` inside the extension package. The original "Edit prompts" link was removed in v1 because its on-disk path (`<HERE>\extension\prompts.json`) only exists in dev mode -- installed users have no `extension\` folder next to the server. The `/open-prompts` server endpoint still exists for dev-mode use but isn't surfaced in the UI.
-
-Tracked as a v1.1 task: store user-overridden prompts in `chrome.storage.local` and add an inline editor in the popup, so the prompt set is portable across installs and editable without touching the filesystem.
+The popup ships with 11 starter prompts loaded from `extension/prompts.json`
+inside the browser-extension package. Installed helper users do not have that
+extension source tree beside `server.py`. The helper's `/open-prompts` endpoint
+therefore remains dev-only and is not surfaced in the UI. There is no portable
+prompt editor in the current product, and this guide does not promise one for a
+specific release.
 
 ### `topics.json` is read-only after install
 
