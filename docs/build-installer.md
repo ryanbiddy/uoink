@@ -184,13 +184,15 @@ If the env var is missing, points at a non-existent path, or is not writable, Uo
 
 ### Antivirus warnings on unsigned builds
 
-`Uoink-Setup-<VERSION>.exe` is unsigned. SmartScreen will show "Windows protected your PC" the first time a user runs it, and some AV products may quarantine it. There are three mitigations, in order of cost:
+`Uoink-Setup-<VERSION>.exe` is currently unsigned. SmartScreen or antivirus
+software may warn, block, or quarantine an unsigned candidate; behavior varies
+by machine, policy, reputation, and scanner.
 
-1. **None** — accept the SmartScreen click-through ("More info" → "Run anyway"). Document it on `setup.html` so users know what to expect. Acceptable for v2 if launch volume is small.
-2. **Code signing** — buy an OV cert (~$70/yr from one of the few remaining issuers) and sign the installer + `pythonw.exe` with `signtool.exe`. Removes most AV friction but doesn't fully clear SmartScreen until reputation builds.
-3. **EV cert** — clears SmartScreen instantly but requires a hardware token and ~$300/yr.
-
-Add signing to `build.ps1` after step 3 (compile) — see `signtool sign /fd SHA256 /tr <ts-url> /td SHA256 /a $exe`.
+There is no signing step in `build.ps1` today. Any release-signing change needs
+an explicit release-owner decision, secure certificate/key handling,
+timestamping, and verification of the installer and shipped executables. Do
+not promise that a certificate will suppress every warning. Test the exact
+candidate on the supported Windows matrix and record what happened.
 
 ### Pip bootstrap pulls files we don't ship
 

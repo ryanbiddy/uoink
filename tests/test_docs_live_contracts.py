@@ -222,6 +222,10 @@ def test_installer_guide_dependency_snapshot_matches_build_script() -> None:
     assert "`installer\\staging`" in guide
     assert "measure" in guide.lower()
     assert "explicit build.ps1 subset" in guide
+    assert 'SmartScreen will show "Windows protected your PC"' not in guide
+    assert "clears SmartScreen instantly" not in guide
+    assert "~$" not in guide
+    assert "Acceptable for v2" not in guide
 
 
 def test_security_docs_do_not_claim_unbuilt_macos_or_removed_asr() -> None:
