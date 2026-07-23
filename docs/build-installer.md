@@ -39,32 +39,38 @@ hardware and signing setup, and the remaining implementation work.
 
 ## Architecture: why Python embeddable + Inno Setup
 
-The spec offered two options. We picked **Option B (Python embeddable + Inno Setup)** for the v2 ship.
+The original packaging review considered two options. The current Windows
+installer uses **Option B (Python embeddable + Inno Setup)**.
 
 | Concern | Option A (PyInstaller) | Option B (embeddable) |
 |---|---|---|
-| Antivirus false positives | High — PyInstaller bootloader is a known heuristic trip | Low — install is just `python.exe` + `.py` files |
-| Build complexity | Spec file tuning, hidden imports | Plain `pip install --target` |
-| Hotfix path | Rebuild + redownload entire bundle | Edit `.py` files in place |
-| Install size | Smaller (~30 MB) | Larger (~120 MB) |
-| Startup time | Slightly faster (already-frozen) | Negligible difference for our HTTP server |
-| Update mechanism | Replace `.exe` | Replace `.py` files |
+| Antivirus behavior | Adds a PyInstaller bootloader | No PyInstaller bootloader; the unsigned installer is still subject to SmartScreen and AV checks |
+| Build complexity | Spec file tuning, hidden imports | Embeddable-Python bootstrap, pinned pip install, staging, and Inno Setup |
+| Hotfix path | Rebuild the frozen package | Rebuild the installer; manual edits inside an installed copy are unsupported |
+| Install size | Measure the frozen candidate | Measure `installer\staging` and the compiled installer; the current shape includes local ASR and desktop dependencies |
+| Startup time | Requires candidate measurement | Requires candidate measurement |
+| Update mechanism | Replace the frozen application | Re-run the installer to replace the staged runtime |
 
-The deciding factor is AV reliability. v2 ships unsigned (we can't justify a code-signing certificate before launch validates the product), so anything that flags antivirus is a death sentence for the activation funnel — the user we just walked through `setup.html` is exactly the user who'll abandon if SmartScreen blocks the install. PyInstaller bootloaders trigger heuristic flags often enough that we'd be debugging false positives instead of bugs.
+The current Windows candidate is unsigned. Avoiding a PyInstaller bootloader
+removes one packaging-specific heuristic surface, but it does not make an
+unsigned installer trusted or exempt from SmartScreen and antivirus checks.
 
-The 120 MB install footprint is acceptable; the extension already implies users are doing meaningful work with YouTube videos and they have disk.
+Do not copy a fixed install-size claim forward. Measure both
+`installer\staging` and the compiled installer for every release candidate;
+the local ASR and desktop runtime set makes size sensitive to dependency
+changes.
 
 ## What gets bundled
 
 The installer lays out `%LOCALAPPDATA%\Uoink\`:
 
 ```
-python\           Python 3.11 embeddable + Lib\site-packages with yt-dlp/Pillow/MCP/keyring
+python\           Python 3.11 embeddable + the pinned runtime packages listed below
 bin\              ffmpeg.exe, ffprobe.exe (PATH-prepended by server.py)
 server.py         The local HTTP helper
 uoink_mcp.py      MCP stdio entry point for agent clients
 uoink_mcp_tools.py Shared MCP tool registry
-requirements.txt  Dev/runtime MCP SDK + keyring pins
+requirements.txt  Source-install pins; the installer uses an explicit build.ps1 subset
 yt_extract.py     Imported by server.py (parse_srt, slugify, fmt_time)
 topics.json       Topic-folder routing rules
 stop-server.bat   Reads server.pid and kills the helper

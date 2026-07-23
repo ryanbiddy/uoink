@@ -217,6 +217,11 @@ def test_installer_guide_dependency_snapshot_matches_build_script() -> None:
         "whisperx",
     ):
         assert f"`{package}`" in guide, package
+    assert "120 MB" not in guide
+    assert "yt-dlp/Pillow/MCP/keyring" not in guide
+    assert "`installer\\staging`" in guide
+    assert "measure" in guide.lower()
+    assert "explicit build.ps1 subset" in guide
 
 
 def test_security_docs_do_not_claim_unbuilt_macos_or_removed_asr() -> None:
