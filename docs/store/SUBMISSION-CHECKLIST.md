@@ -19,9 +19,10 @@ package. Nothing here submits anything; it's copy, images, and a checklist.
 - [ ] `hi@uoink.app` mailbox receives mail.
 - [ ] `https://uoink.app/privacy` resolves and is current.
 - [ ] `https://uoink.app` resolves.
-- [ ] `extension/manifest.json` version matches the release tag (currently **3.2.8**).
+- [ ] `extension/manifest.json` version matches the explicitly approved submission tag.
 - [ ] `USE_MOCK_API = false` in `extension/popup.js`.
-- [ ] `INSTALLER_PUBLISHED = true` in `extension/setup.js`.
+- [ ] `PUBLISHED_INSTALLER_VERSION` in `extension/setup.js` matches a
+  non-draft GitHub release whose `Uoink-Setup-<version>.exe` asset resolves.
 - [ ] License compliance clean (CRIT-2): confirm the shipped build no longer bundles AGPL/GPL deps and `THIRD-PARTY-NOTICES.md` is current — CWS rejects license-mismatched extensions.
 - [ ] Final extension `.zip` produced from a clean checkout (`build.ps1` zips `extension/`).
 - [ ] Tested in a clean Chrome profile with the helper running: in-page button, `Alt+U`, and right-click all work on a real YouTube video.
@@ -29,7 +30,8 @@ package. Nothing here submits anything; it's copy, images, and a checklist.
 ## Submission steps
 
 1. Log in at https://chrome.google.com/webstore/devconsole/.
-2. Select the existing Uoink listing (or create a new item) and upload the new `extension-uoink-3.2.8.zip`.
+2. Select the existing Uoink listing (or create a new item) and upload the
+   clean `extension-uoink-<approved-version>.zip`.
 3. Confirm the store title is `Uoink — Local corpus for AI` (or `Uoink` if the long title is rejected).
 4. Paste from `listing.md`: summary, detailed description, single purpose statement, category (Productivity), language (English US), support email, privacy URL, website.
 5. Paste from `permissions-justification.md`: each permission justification + the data-use affirmations.

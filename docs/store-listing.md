@@ -1,5 +1,8 @@
 # Chrome Web Store Listing: Uoink
 
+> Status: historical. Do not use this superseded `uoink.video` listing or its
+> v2 launch checklist. The current store package is under `docs/store/`.
+
 ## Title (45 chars max)
 Uoink - Local corpus for AI
 
@@ -120,7 +123,8 @@ Uoink saves supported source pages, starting with YouTube videos, into a structu
 - [ ] Website live at `https://uoink.video`
 - [ ] `extension/manifest.json` version matches the release tag
 - [ ] `USE_MOCK_API = false` in `extension/popup.js`
-- [ ] `INSTALLER_PUBLISHED = true` in `extension/setup.js`
+- [ ] `PUBLISHED_INSTALLER_VERSION` in `extension/setup.js` matches an
+  already-published Windows installer asset
 - [ ] Final extension zip produced from a clean checkout
 - [ ] Clean Chrome profile tested with the helper running
 - [ ] Right-click, Alt+U, and the in-page button tested on a real YouTube video
