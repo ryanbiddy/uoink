@@ -133,11 +133,14 @@ When bumping a directly-downloaded component:
 4. Re-run `.\build.ps1` -- it should now print `<component> hash OK` instead of the warnings.
 5. Commit the version bump and matching hash update together.
 
-Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`, `pystray`,
-`pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) are version-pinned
-but not hash-locked yet. Full pip hash-locking would require a
-`requirements.txt` with `--require-hashes`; for now the installer accepts the
-trust-pip-itself model while keeping exact package versions stable.
+The direct pip dependencies (`yt-dlp`, `Pillow`, `mcp`, `keyring`, `pystray`,
+`pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) and their complete
+Windows/CPython 3.11 transitive graph are exact-version constrained by
+`requirements-installer-lock.txt`. After build-only tooling is removed,
+`scripts/verify_installer_lock.py` compares the final installed inventory to
+that lock and fails on a missing, unexpected, or changed package. Distribution
+artifacts are not hash-locked yet; a future `--require-hashes` control must be
+generated and reviewed separately.
 
 ## Updating versions
 
@@ -196,7 +199,11 @@ candidate on the supported Windows matrix and record what happened.
 
 ### Pip bootstrap pulls files we don't ship
 
-`get-pip.py` installs pip + setuptools + wheel into the embeddable. We strip those after runtime packages are installed (see step 2e in `build.ps1`) so the shipped install only contains what the server actually imports. If a future package adds a transitive dependency, it'll land in `site-packages` automatically and get included.
+`get-pip.py` installs pip + setuptools + wheel into the embeddable. We strip
+those after runtime packages are installed (see step 2e in `build.ps1`) so the
+shipped install only contains the reviewed runtime inventory. If a future
+package adds or removes a transitive dependency, the final lock verification
+fails instead of silently shipping a different graph.
 
 ### Installed prompts have no in-product editor
 

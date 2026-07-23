@@ -1,7 +1,7 @@
 # Third-Party Notices
 
 Uoink is MIT-licensed. It bundles the third-party components below.
-This file is generated from the installed dependency tree (source: pip-licenses) on 2026-07-25; regenerate with `python scripts/gen_third_party_notices.py`.
+This file is generated from the installed dependency tree (source: pip-licenses) on 2026-07-23; regenerate with `python scripts/gen_third_party_notices.py`.
 
 | Package | Version | License | Project |
 |---|---|---|---|
@@ -9,7 +9,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | aiohttp | 3.14.3 | Apache-2.0 AND MIT | https://github.com/aio-libs/aiohttp |
 | aiosignal | 1.4.0 | Apache Software License | https://github.com/aio-libs/aiosignal |
 | alembic | 1.18.5 | UNKNOWN | https://alembic.sqlalchemy.org |
-| annotated-types | 0.8.0 | MIT License | https://github.com/annotated-types/annotated-types |
+| annotated-types | 0.7.0 | MIT License | https://github.com/annotated-types/annotated-types |
 | antlr4-python3-runtime | 4.9.3 | BSD | http://www.antlr.org |
 | anyio | 4.14.2 | UNKNOWN | https://anyio.readthedocs.io/en/stable/versionhistory.html |
 | asteroid-filterbanks | 0.4.0 | MIT License | https://github.com/asteroid-team/asteroid-filterbanks |
@@ -23,7 +23,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | click | 8.4.2 | UNKNOWN | https://github.com/pallets/click/ |
 | clr_loader | 0.2.10 | MIT License | UNKNOWN |
 | colorama | 0.4.6 | BSD License | https://github.com/tartley/colorama |
-| colorlog | 6.12.0 | MIT License | https://github.com/borntyping/python-colorlog |
+| colorlog | 6.11.0 | MIT License | https://github.com/borntyping/python-colorlog |
 | contourpy | 1.3.3 | BSD License | https://github.com/contourpy/contourpy |
 | cryptography | 49.0.0 | UNKNOWN | https://github.com/pyca/cryptography |
 | ctranslate2 | 4.8.1 | MIT | https://opennmt.net |
@@ -38,7 +38,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | fsspec | 2026.6.0 | UNKNOWN | https://github.com/fsspec/filesystem_spec |
 | googleapis-common-protos | 1.75.0 | Apache Software License | https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos |
 | greenlet | 3.5.4 | UNKNOWN | https://greenlet.readthedocs.io |
-| grpcio | 1.83.0 | UNKNOWN | https://grpc.io |
+| grpcio | 1.82.1 | UNKNOWN | https://grpc.io |
 | h11 | 0.16.0 | MIT License | https://github.com/python-hyper/h11 |
 | httpcore | 1.0.9 | BSD License | https://www.encode.io/httpcore/ |
 | httpx | 0.28.1 | BSD License | https://github.com/encode/httpx |
@@ -72,7 +72,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | nltk | 3.10.0 | Apache Software License | https://www.nltk.org/ |
 | numpy | 2.4.6 | UNKNOWN | https://numpy.org |
 | omegaconf | 2.3.1 | BSD License | https://github.com/omry/omegaconf |
-| onnxruntime | 1.28.0 | MIT License | https://onnxruntime.ai |
+| onnxruntime | 1.27.0 | MIT License | https://onnxruntime.ai |
 | opentelemetry-api | 1.44.0 | UNKNOWN | https://github.com/open-telemetry/opentelemetry-python/tree/main/opentelemetry-api |
 | opentelemetry-exporter-otlp | 1.44.0 | UNKNOWN | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp |
 | opentelemetry-exporter-otlp-proto-common | 1.44.0 | UNKNOWN | https://github.com/open-telemetry/opentelemetry-python/tree/main/exporter/opentelemetry-exporter-otlp-proto-common |
@@ -136,7 +136,7 @@ This file is generated from the installed dependency tree (source: pip-licenses)
 | torchcodec | 0.7.0 | UNKNOWN | UNKNOWN |
 | torchmetrics | 1.9.0 | Apache Software License | https://github.com/Lightning-AI/torchmetrics |
 | torchvision | 0.23.0 | BSD | https://github.com/pytorch/vision |
-| tqdm | 4.69.1 | MPL-2.0 AND MIT | https://tqdm.github.io |
+| tqdm | 4.69.0 | MPL-2.0 AND MIT | https://tqdm.github.io |
 | transformers | 4.57.6 | Apache Software License | https://github.com/huggingface/transformers |
 | typing-inspection | 0.4.2 | UNKNOWN | https://github.com/pydantic/typing-inspection |
 | typing_extensions | 4.16.0 | UNKNOWN | https://github.com/python/typing_extensions |
