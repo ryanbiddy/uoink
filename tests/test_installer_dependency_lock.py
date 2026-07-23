@@ -89,6 +89,7 @@ def test_build_uses_and_verifies_the_installer_lock() -> None:
     ):
         assert tool_pin in build
     assert build.count("--no-build-isolation") == 2
+    assert build.count("--no-cache-dir") == 3
     assert "Remove-Item -Recurse -Force $pythonScripts" in build
     assert "'^(?:\\.\\./)+Scripts/'" in build
     assert build.index("Staged smoke OK") < build.index(
@@ -97,6 +98,8 @@ def test_build_uses_and_verifies_the_installer_lock() -> None:
     assert build.index("generate_bitmaps.py") < build.index(
         "Final staging cleanup left"
     )
+    assert "Join-Path $StagingDir 'token.txt'" in build
+    assert "Final staging cleanup left token.txt" in build
     assert build.index("Final staging cleanup left") < build.index(
         "Write-Step 'Compiling installer'"
     )
