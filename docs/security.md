@@ -32,10 +32,16 @@ The helper never binds to a public network interface. The main security boundary
 
 These do not require `X-Uoink-Token`:
 
-- `GET /health`
-- `GET /ping`
-- `GET /token`
-- `GET /index/backfill-status`
+- Liveness and recovery: `GET /health`, `GET /ping`,
+  `GET /index/backfill-status`, and `GET /diagnose`
+- Product metadata: `GET /sources/manifest`, `GET /creators/manifest`,
+  `GET /hooks/guide`, `GET /developers/manifest`,
+  `GET /openapi/v1/spec.json`, and `GET /.well-known/uoink-mcp.json`
+- Suite discovery: `GET /.well-known/suite-service.json` and
+  `GET /api/suite/v1/health`
+- Local UI shells: `GET /dashboard` and `GET /splash`
+- Credential bootstrap: `GET /token`, with the separate custom-header and
+  origin checks described below
 
 `/health` and `/ping` are intentionally public because the extension, setup
 page, and YouTube button need to detect whether the helper is running before
@@ -43,6 +49,12 @@ auth/token refresh completes. Their response includes the selected Whisper
 model and availability/load state, index recovery, output-root fallback,
 aggregate path-integrity counts, and a generic path-integrity hint or error.
 It does not include the helper token or raw exception text.
+
+`/diagnose` is a broader bounded recovery report used by the popup and splash.
+The manifest, OpenAPI, well-known, and suite-discovery routes expose product
+and protocol metadata, not corpus content or credentials. `/dashboard` and
+`/splash` serve local UI shells; their user-data requests still complete the
+normal token handshake.
 
 `/index/backfill-status` is intentionally public for the same UI bootstrapping reason. It exposes only `state`, `current`, and `total` counts, not corpus content or file paths.
 
@@ -178,18 +190,27 @@ MCP tools reuse the same backend validation for URLs, slugs, job IDs, file paths
 - ffmpeg
 - `get-pip.py`
 
-Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`, `whisper-timestamped`) are version-pinned but not hash-locked yet. Full pip `--require-hashes` is a future hardening item.
+Installer-installed Python packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`,
+`pystray`, `pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) are
+version-pinned but not hash-locked yet. Full pip `--require-hashes` is a future
+hardening item.
 
-Transcript reliability detection is local-only. The optional `whisper-timestamped` path downloads the Whisper `tiny` model only after the user explicitly asks for it from the dashboard; it caches under `%LOCALAPPDATA%\Uoink\models\whisper` and is never uploaded. The installer bundles the Python library but not the model weights, keeping the default installer smaller.
+Transcript reliability detection is local-only and uses `faster-whisper` word
+probabilities. Model weights are not bundled. The automatic capture-time check
+uses cached files only and never authorizes a download; `ensure_model` is the
+explicit user-triggered download path. On Windows the selected model is cached
+under `%LOCALAPPDATA%\Uoink\models\whisper` and is never uploaded.
 
 The installer is unsigned for launch unless a code-signing certificate is added. Windows SmartScreen warnings are expected for unsigned builds.
 
-## macOS-specific security posture
+## macOS status
 
-- **Keychain Storage:** The Anthropic API key is stored securely in the macOS Keychain under the service name `Uoink` (username `anthropic_key`; migrated from the legacy `Yoink` service on first launch), mirroring the security posture of Windows Credential Manager.
-- **Gatekeeper & Notarization:** The `.dmg` packaging pipeline codesigns `Uoink.app` and notarizes the installer with Apple's developer notarization service to prevent Gatekeeper warnings and protect against tampered downloads.
-- **LaunchAgent Isolation:** Auto-start behavior is handled by a standard LaunchAgent running in user-space (`~/Library/LaunchAgents/com.ryanbiddy.uoink.plist`). The helper runs under the active user's standard permissions, requiring no root or administrator privilege escalation.
-- **Cross-Platform Sandbox:** The `/file` sandbox boundary behaves identically on macOS, resolving paths cross-platform via Python `Path` and restricting file access exclusively to the configured `~/Desktop/Uoink/` output root directory.
+There is no current macOS build, `.dmg`, or `Uoink.app`, so Uoink has no
+deployed macOS signing, notarization, Keychain, LaunchAgent, or file-sandbox
+posture to claim. The repository contains planning and scaffolding for those
+surfaces, but none has been compiled, signed, notarized, or run on a Mac.
+`docs/mac-install.md` records the current user-facing status, and
+`docs/MAC-BUILD-PLAN.md` records the unverified implementation plan.
 
 ## Install migration (v2.1)
 

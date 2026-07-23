@@ -10,10 +10,11 @@ authoritative plan, effort estimate, and blocker list live in
 ## Scope
 
 The Windows product ships as an Inno Setup `.exe` that installs a bundled
-Python, ffmpeg, and the helper source under `%LOCALAPPDATA%\Uoink`. The macOS
-product ships the same helper as a `Uoink.app` bundle inside a `.dmg`. The
-helper code, the loopback HTTP API, the MCP server, the dashboard, and the
-Chrome extension are cross-platform and do not change between the two.
+Python, ffmpeg, and the helper source under `%LOCALAPPDATA%\Uoink`. The planned
+macOS product would package the same helper as a `Uoink.app` bundle inside a
+`.dmg`. The intent is to reuse the helper code, loopback HTTP API, MCP server,
+dashboard, and Chrome extension, but that equivalence is not verified until a
+real Mac build and test pass exist.
 
 ## Files In This Repo
 
