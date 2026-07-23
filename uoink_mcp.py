@@ -64,6 +64,14 @@ mcp = FastMCP(
         "Use the tools to extract, search, inspect, and analyze saved uoinks."
     ),
 )
+# FastMCP defaults initialize.serverInfo.version to the MCP SDK's version,
+# which makes client logs identify the dependency rather than this product.
+# The v1 SDK exposes the low-level server here; if a future SDK reshapes that
+# internal, keep serving with its fallback identity instead of failing startup.
+try:
+    mcp._mcp_server.version = server.VERSION
+except AttributeError:
+    pass
 
 
 # --------------------------------------------------------------------------
