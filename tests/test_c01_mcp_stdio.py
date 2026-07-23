@@ -170,6 +170,11 @@ def test_stdio_handshake_under_embeddable_path_rules():
             _assert("result" in init, f"initialize failed: {init}")
             _assert(init["result"]["serverInfo"]["name"] == "uoink",
                     f"server identity: {init['result'].get('serverInfo')}")
+            product_version = (ROOT / "VERSION").read_text(
+                encoding="utf-8").strip()
+            _assert(init["result"]["serverInfo"]["version"] == product_version,
+                    "initialize must report the Uoink product version, not "
+                    f"the MCP SDK version: {init['result'].get('serverInfo')}")
             print("ok  initialize answers under -P (embeddable path rules)")
 
             client.send({"jsonrpc": "2.0",
