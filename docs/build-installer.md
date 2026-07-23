@@ -198,7 +198,7 @@ candidate on the supported Windows matrix and record what happened.
 
 `get-pip.py` installs pip + setuptools + wheel into the embeddable. We strip those after runtime packages are installed (see step 2e in `build.ps1`) so the shipped install only contains what the server actually imports. If a future package adds a transitive dependency, it'll land in `site-packages` automatically and get included.
 
-### Packaged prompts are read-only
+### Installed prompts have no in-product editor
 
 The popup ships with 11 starter prompts loaded from `extension/prompts.json`
 inside the browser-extension package. The Windows installer copies that
