@@ -196,6 +196,36 @@ function Confirm-Hash($path, $expected, $label) {
     Write-Host "    $label hash OK"
 }
 
+function Get-PackageTimestampUtc {
+    # SOURCE_DATE_EPOCH is the explicit release-build override. A Git
+    # checkout otherwise gets a stable, source-bound timestamp from HEAD; a
+    # source archive without Git uses 2000-01-01 rather than wall-clock time.
+    $epochText = $env:SOURCE_DATE_EPOCH
+    if ([string]::IsNullOrWhiteSpace($epochText)) {
+        $git = Get-Command git -ErrorAction SilentlyContinue
+        if ($git) {
+            $candidate = & $git.Source -C $RepoRoot show -s --format=%ct HEAD 2>$null |
+                Select-Object -First 1
+            if ($candidate -and "$candidate" -match '^\d+$') {
+                $epochText = "$candidate".Trim()
+            }
+        }
+    }
+    if ([string]::IsNullOrWhiteSpace($epochText)) {
+        $epochText = '946684800'
+    }
+
+    [long]$epoch = 0
+    if (-not [long]::TryParse($epochText, [ref]$epoch) -or $epoch -lt 315532800) {
+        throw "SOURCE_DATE_EPOCH must be an integer at or after 1980-01-01 (got '$epochText')"
+    }
+    try {
+        return [DateTimeOffset]::FromUnixTimeSeconds($epoch).UtcDateTime
+    } catch {
+        throw "SOURCE_DATE_EPOCH is outside the supported range (got '$epochText')"
+    }
+}
+
 # ---- Optional clean -----------------------------------------------------
 if ($Clean) {
     Write-Step 'Cleaning build/ and staging/'
@@ -495,6 +525,7 @@ Copy-Item (Join-Path $RepoRoot 'topics.json')    $StagingDir -Force
 Set-Content -Path (Join-Path $StagingDir 'VERSION') -Value $VERSION -Encoding ASCII
 Copy-Item (Join-Path $RepoRoot 'helper') (Join-Path $StagingDir 'helper') -Recurse -Force
 Copy-Item (Join-Path $InstallerDir 'verify_install.ps1') $StagingDir -Force
+Copy-Item (Join-Path $InstallerDir 'upgrade_prep.ps1') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.bat') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.ps1') $StagingDir -Force
 Copy-Item $IconSrc (Join-Path $StagingDir 'uoink.ico') -Force
@@ -607,6 +638,10 @@ print("smoke: import whisperx OK")
 Write-Step 'Generating wizard bitmaps'
 & $embedPython (Join-Path $InstallerDir 'generate_bitmaps.py')
 if ($LASTEXITCODE -ne 0) { throw 'wizard bitmap generation failed' }
+$stagedInstallerAssets = Join-Path $StagingDir 'installer-assets'
+New-Item -ItemType Directory -Force -Path $stagedInstallerAssets | Out-Null
+Get-ChildItem -Path (Join-Path $InstallerDir 'assets') -Filter 'wizard-*.bmp' -File |
+    ForEach-Object { Copy-Item $_.FullName $stagedInstallerAssets -Force }
 
 # py_compile, staged imports, and bitmap generation all recreate bytecode after
 # the earlier pip cleanup. The staged server import also creates a local token.
@@ -627,6 +662,15 @@ if ($remainingBytecode) {
 if (Test-Path $stagedToken) {
     throw 'Final staging cleanup left token.txt'
 }
+
+# Inno records source mtimes in setup data. Worktree checkout times made two
+# byte-identical staged trees produce different installer wrappers. Normalize
+# every compiler input under staging to one source-bound timestamp.
+$packageTimestampUtc = Get-PackageTimestampUtc
+Get-ChildItem -Path $StagingDir -Recurse -Force |
+    ForEach-Object { $_.LastWriteTimeUtc = $packageTimestampUtc }
+(Get-Item $StagingDir).LastWriteTimeUtc = $packageTimestampUtc
+Write-Host "    normalized package timestamps to $($packageTimestampUtc.ToString('o'))"
 
 # ---- 3. Compile installer ----------------------------------------------
 Write-Step 'Compiling installer'
