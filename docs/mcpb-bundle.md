@@ -80,8 +80,7 @@ referenceable from the MCP Registry `server.json` as an `mcpb` package (see
 ## Verifying an install
 
 1. `pwsh scripts\build-mcpb.ps1` → confirm `dist/uoink-<VERSION>.mcpb` exists
-   (the script derives the version from the repo `VERSION` file, e.g.
-   `dist/uoink-3.3.0.mcpb`).
+   (the script derives `<VERSION>` from the repo `VERSION` file).
 2. Double-click it in Claude Desktop → accept the install dir → restart.
 3. In Claude, confirm Uoink tools list and run `list_recent_uoinks`.
 4. If it fails, run `python.exe uoink_mcp.py --doctor` from the install dir; the
