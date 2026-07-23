@@ -1,12 +1,13 @@
 # Uoink security model
 
-Status: launch-facing for v2.1 (the Yoink → Uoink rename)
+Status: launch-facing for the current helper and extension
 
-> v2.1 alias-window note: the auth header is now `X-Uoink-Token` and the
-> `/token` gate header is `X-Uoink-Client: uoink-extension`. The legacy
-> `X-Yoink-Token` / `X-Yoink-Client: yoink-extension` names are still accepted
-> through Uoink v2.5 (removed in v3) so a not-yet-updated extension keeps
-> working. Both forms appear below where relevant.
+> Compatibility note: the canonical auth header is `X-Uoink-Token` and the
+> `/token` gate is `X-Uoink-Client: uoink-extension`. The shipped extension
+> still has compatibility paths that emit `X-Yoink-Token` or
+> `X-Yoink-Client: yoink-extension`, so the helper still accepts both legacy
+> forms. No removal version is promised until those callers migrate and a
+> compatibility release is ratified.
 
 Uoink is local-first software with two pieces:
 
@@ -20,7 +21,7 @@ The helper never binds to a public network interface. The main security boundary
 | Threat | Defended? | Notes |
 |---|---:|---|
 | Malicious webpage tries to call `127.0.0.1:5179` | Yes | Token-gated endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accepted); `/token` requires a custom `X-Uoink-Client` header (legacy `X-Yoink-Client` accepted) and browser CORS/PNA preflight blocks normal webpages from setting it cross-origin. |
-| Malicious webpage probes whether Uoink is running | Not treated as secret | `/health` and `/ping` are public liveness probes. They reveal only `{ok:true, version}`. |
+| Malicious webpage probes whether Uoink is running | Not treated as secret | `/health` and `/ping` are public liveness probes. They disclose the helper version and coarse readiness: Whisper model availability/load state, index recovery, output-root fallback, aggregate path-integrity counts, and a generic path-integrity hint or error. Raw exception details stay in `server.log`. |
 | Local malware reads files or calls localhost | No | Malware already running as the user can read local files, call local ports, and modify output. Uoink does not try to sandbox against same-user malware. |
 | Another installed browser extension calls `/token` | Not fully | v2 accepts `chrome-extension://*` origins so Chromium forks and dev installs work. Published Chrome Web Store extension ID pinning is deferred until the final ID is known and stable. |
 | Network attacker | Mostly not applicable | The helper listens only on `127.0.0.1`, not LAN/public interfaces. |
@@ -36,13 +37,18 @@ These do not require `X-Uoink-Token`:
 - `GET /token`
 - `GET /index/backfill-status`
 
-`/health` and `/ping` are intentionally public because the extension, setup page, and YouTube button need to detect whether the helper is running before auth/token refresh completes.
+`/health` and `/ping` are intentionally public because the extension, setup
+page, and YouTube button need to detect whether the helper is running before
+auth/token refresh completes. Their response includes the selected Whisper
+model and availability/load state, index recovery, output-root fallback,
+aggregate path-integrity counts, and a generic path-integrity hint or error.
+It does not include the helper token or raw exception text.
 
 `/index/backfill-status` is intentionally public for the same UI bootstrapping reason. It exposes only `state`, `current`, and `total` counts, not corpus content or file paths.
 
 `/token` returns the per-install helper token and is guarded by:
 
-- `X-Uoink-Client: uoink-extension` (legacy `X-Yoink-Client: yoink-extension` accepted through the alias window)
+- `X-Uoink-Client: uoink-extension` (legacy `X-Yoink-Client: yoink-extension` remains accepted for shipped-extension compatibility)
 - `Origin` that is empty or `chrome-extension://*`
 - A server-wide 10 requests/minute rate limit
 
@@ -59,7 +65,10 @@ All other helper endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accep
 - Local files, folders, Skill prompt, and hook taxonomy: `GET /file`, `GET /skill/system-prompt`, `GET /taxonomy`, `GET /recent`, `GET /open-folder`, `GET /open-index`, `GET /open-prompts`
 - MCP HTTP JSON-RPC helper: `GET /mcp/v1/config`, `GET /mcp/v1/sse`, `POST /mcp/v1`, `POST /mcp/v1/initialize`, `POST /mcp/v1/tools/list`, `POST /mcp/v1/tools/call`
 
-The token is accepted only in the `X-Uoink-Token` header (or the legacy `X-Yoink-Token` header during the alias window). Query-string token auth is intentionally unsupported so tokens do not leak into browser history, server logs, or HTTP debug tools that capture URLs.
+The token is accepted only in the `X-Uoink-Token` header (or the legacy
+`X-Yoink-Token` compatibility header). Query-string token auth is intentionally
+unsupported so tokens do not leak into browser history, server logs, or HTTP
+debug tools that capture URLs.
 
 ## CORS and Private Network Access
 
