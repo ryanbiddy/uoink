@@ -34,10 +34,16 @@ def test_setup_page_points_to_the_verified_published_installer() -> None:
 def test_current_install_docs_name_the_published_asset() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     bundle_doc = (ROOT / "docs" / "mcpb-bundle.md").read_text(encoding="utf-8")
+    bundle_map = (
+        ROOT / "docs" / "surface-maps" / "mcpb-bundle.md"
+    ).read_text(encoding="utf-8")
 
     assert f"Download `{PUBLISHED_ASSET}`" in readme
     assert "Uoink-Setup-3.6.0.exe" not in readme
     assert "dist/uoink-3.3.0.mcpb" not in bundle_doc
+    assert "currently 3.3.0" not in bundle_map
+    assert "test_release_version_v330.py" not in bundle_map
+    assert "tests/test_release_version_v360.py" in bundle_map
 
 
 def test_manual_setup_is_a_current_source_install_path() -> None:
