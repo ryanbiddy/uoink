@@ -64,6 +64,17 @@ def test_public_docs_do_not_claim_an_unshipped_macos_app() -> None:
     for stale_claim in (
         "on both Windows and macOS",
         "drag Uoink.app to Trash",
+        "Two things, and only two:",
+        "Nothing else leaves your machine",
+        "exactly one third party",
+        "2026-XX-XX",
     ):
         assert stale_claim not in privacy
-    assert "There is no current macOS build" in privacy
+    for required_claim in (
+        "There is no current macOS build",
+        "cdn.syndication.twimg.com",
+        "api.github.com",
+        "user-supplied web page or podcast feed",
+        "only when you click **Check now**",
+    ):
+        assert required_claim in privacy
