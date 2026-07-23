@@ -202,11 +202,20 @@ Success response: HTTP 200
 
 ### POST /reliability/model/download
 
-Download/cache the local Whisper `tiny` model used by `whisper-timestamped`. This is user-triggered from the dashboard; the installer does not bundle model weights.
+Download/cache the selected local model used by `faster-whisper`. This is user-triggered from the dashboard; the installer does not bundle model weights.
 
 Auth: `X-Uoink-Token` required.
 
-Request body: `{}`.
+Optional request body:
+
+```json
+{
+  "model": "tiny"
+}
+```
+
+`model` may be `tiny`, `base`, `small`, `medium`, or `large`. When it is
+omitted, Uoink uses the model selected in Settings.
 
 Success response: HTTP 200
 

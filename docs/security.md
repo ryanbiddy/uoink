@@ -180,7 +180,7 @@ Uoink supports MCP over stdio and an experimental local HTTP JSON-RPC helper.
 - Stdio MCP is the officially supported launch transport. The MCP client launches `uoink_mcp.py` (a back-compat `yoink_mcp.py` shim re-exports it through the alias window) as a local subprocess, so the trust boundary is the spawning local client.
 - HTTP JSON-RPC under `/mcp/v1` is token-gated with `X-Uoink-Token` (legacy `X-Yoink-Token` accepted). It supports direct JSON-RPC POST calls but is not a spec-complete SSE or Streamable HTTP MCP implementation.
 
-MCP tools reuse the same backend validation for URLs, slugs, job IDs, file paths, and Anthropic key behavior. Deprecated `yoink_*` tool aliases resolve to the canonical `uoink_*` handlers with no change in validation.
+MCP tools reuse the same backend validation for URLs, slugs, job IDs, file paths, and Anthropic key behavior. The six deprecated `yoink_*` tool aliases are no longer listed or accepted; clients must use the canonical `uoink_*` names.
 
 ## Dependency and installer integrity
 
