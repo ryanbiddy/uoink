@@ -15,14 +15,6 @@ To wipe everything and rebuild from scratch:
 .\build.ps1 -Clean
 ```
 
-## Quick start (macOS)
-
-```bash
-# From the repo root, on macOS with bash/zsh:
-# (Note: full build script implementation is sequenced in Stage 2)
-./build.sh
-```
-
 ## Windows build prerequisites
 
 You need both of these installed on the Windows build machine:
@@ -32,36 +24,16 @@ You need both of these installed on the Windows build machine:
 
 You do *not* need a system Python installed; the build downloads and uses an embeddable Python distribution exclusively.
 
-## macOS build prerequisites
+## macOS status
 
-You need the following installed on the macOS build machine:
+There is no working macOS build command or `.dmg` artifact. `build-mac.sh` is
+an incomplete scaffold: its Mac-only build, signing, notarization, and
+packaging steps are marked `TODO(mac)`, and the script finishes by stating
+that it produced no artifact. Do not use it to prepare an install.
 
-- **Xcode Command Line Tools** — run `xcode-select --install` to install.
-- **create-dmg** — Homebrew utility (`brew install create-dmg`) or npm package.
-- **Apple Developer ID Application Certificate** — installed in your macOS Keychain for app signing.
-
-## macOS build sequence (Stage 1 — expected workflow)
-
-The build script `build.sh` (to be fully implemented in Stage 2) automates the macOS packaging process:
-
-1. **Clean and Prepare:**
-   - Cleans the build directory.
-   - Downloads/embeds Python (macOS universal binary release).
-   - Installs runtime dependencies (`yt-dlp`, `Pillow`, `mcp`, `keyring`, etc.) into `site-packages`.
-   - Embeds native `ffmpeg` and `ffprobe` binaries for macOS.
-
-2. **Package Application:**
-   - Packages the Python server code and dependencies into a standard `Uoink.app` bundle layout.
-   - Configures the LaunchAgent plist (`com.ryanbiddy.uoink.plist`) for login auto-start behavior.
-
-3. **Code Sign and Notarize:**
-   - Signs the `Uoink.app` bundle and all internal binaries (`ffmpeg`, `python`, etc.) using `codesign` with your Developer ID Application identity.
-   - Archives the application into `Uoink-Setup-2.1.0.dmg` using `create-dmg`.
-   - Code-signs the `.dmg` container.
-   - Submits the `.dmg` to Apple's Notarization Service using `xcrun notarytool`.
-   - Staples the notarization ticket to the `.dmg` using `xcrun stapler staple`.
-
-The resulting artifact is output as `build/Uoink-Setup-2.1.0.dmg`.
+See [mac-install.md](mac-install.md) for the current user-facing status.
+[MAC-BUILD-PLAN.md](MAC-BUILD-PLAN.md) records the verified gaps, required Mac
+hardware and signing setup, and the remaining implementation work.
 
 ## Architecture: why Python embeddable + Inno Setup
 
