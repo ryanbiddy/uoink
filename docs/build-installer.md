@@ -201,11 +201,15 @@ candidate on the supported Windows matrix and record what happened.
 ### Packaged prompts are read-only
 
 The popup ships with 11 starter prompts loaded from `extension/prompts.json`
-inside the browser-extension package. Installed helper users do not have that
-extension source tree beside `server.py`. The helper's `/open-prompts` endpoint
-therefore remains dev-only and is not surfaced in the UI. There is no portable
-prompt editor in the current product, and this guide does not promise one for a
-specific release.
+inside the browser-extension package. The Windows installer copies that
+package to `%LOCALAPPDATA%\Uoink\extension`, so the installed prompt file is
+`%LOCALAPPDATA%\Uoink\extension\prompts.json`. When that directory is loaded as
+an unpacked extension, the popup reads the file each time it opens.
+
+There is no in-product prompt editor. The helper's `/open-prompts` endpoint can
+open the installed JSON file but is not surfaced in the current UI. Manual
+edits are local power-user changes and may be overwritten by a later installer;
+this guide does not promise a portable editor for a specific release.
 
 ### `topics.json` is read-only after install
 
