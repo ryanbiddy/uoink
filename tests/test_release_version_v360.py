@@ -1,7 +1,9 @@
-"""Cross-file release version contract for v3.6.0.
+"""Cross-file source-build version contract for v3.6.0.
 
-Run: python tests/test_release_version_v330.py
-     (or via pytest -- test_release_version() enforces the same contract)
+Run: python -m pytest tests/test_release_version_v360.py
+
+The published installer can lag the source build. Its exact live asset is
+guarded separately by test_installer_download_accuracy.py.
 """
 from __future__ import annotations
 
@@ -33,7 +35,6 @@ def collect() -> dict:
         "tauri-ui/src-tauri/src/main.rs": match(
             "tauri-ui/src-tauri/src/main.rs", r"Uoink-Setup-([0-9.]+)\.exe"
         ),
-        "README.md": match("README.md", r"Uoink-Setup-([0-9.]+)\.exe"),
         # M-2: the .mcpb bundle is a shipped distribution surface too. Enforce
         # it here so it can't drift the way it did into the 3.6.0 cycle (it was
         # left at 3.2.8). build-mcpb.* also derives the bundle version from

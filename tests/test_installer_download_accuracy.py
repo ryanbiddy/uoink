@@ -30,6 +30,15 @@ def test_setup_page_points_to_the_verified_published_installer() -> None:
     assert "Uoink-Setup-3.2.2.exe" not in script + html
 
 
+def test_current_install_docs_name_the_published_asset() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    bundle_doc = (ROOT / "docs" / "mcpb-bundle.md").read_text(encoding="utf-8")
+
+    assert f"Download `{PUBLISHED_ASSET}`" in readme
+    assert "Uoink-Setup-3.6.0.exe" not in readme
+    assert "dist/uoink-3.3.0.mcpb" not in bundle_doc
+
+
 def test_current_release_checklists_name_real_controls() -> None:
     current = "\n".join(
         path.read_text(encoding="utf-8")
