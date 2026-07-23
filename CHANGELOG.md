@@ -249,8 +249,9 @@ installs migrate themselves on first launch, and old MCP tool names keep working
 
 ### Added
 
-- **macOS universal build** (Apple Silicon + Intel) — the `.dmg` pipeline from
-  Sprint 19.5 Stage 2.
+- **macOS packaging remains planned, not shipped.** Sprint 19.5 Stage 2 added
+  scaffolding only; no `.dmg` pipeline or macOS artifact shipped in this
+  release.
 - **Automatic install migration.** On first launch the helper copies
   `%LOCALAPPDATA%\Yoink\` → `\Uoink\`, migrates the autostart entry, moves the
   Anthropic key in Credential Manager, and leaves a `MIGRATED_TO_UOINK.txt`
@@ -288,7 +289,9 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 
 ### Added
 
-- **macOS native — Stage 1 (cross-platform Python).** Helper code now runs identically on Windows and macOS via cross-platform path resolution. Sprint 19.5 Stage 2 ships the actual `.dmg` build pipeline.
+- **macOS Stage 1 portability prep only.** Helper code gained cross-platform
+  path resolution, but Stage 2 remained planned; no `.dmg` pipeline or macOS
+  artifact shipped.
 - **/diagnose adds `platform` field** — UIs can render platform-appropriate hints and status checks.
 - **Platform-aware extension setup page** — install instructions dynamically adjust based on `chrome.runtime.getPlatformInfo` to show Windows- or macOS-specific commands and files.
 - **Entity Extraction disclosures (store listing + README).** Added clear disclosures detailing opt-in Entity Extraction calling the Anthropic API via user-provided API key stored securely in Credential Manager. Touched `docs/store-listing.md` and `README.md`.
