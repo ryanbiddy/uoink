@@ -172,6 +172,53 @@ def test_reliability_download_docs_name_the_live_backend_and_request() -> None:
         assert f"`{model}`" in section
 
 
+def test_installer_guide_dependency_snapshot_matches_build_script() -> None:
+    build = (ROOT / "build.ps1").read_text(encoding="utf-8")
+    guide = (ROOT / "docs" / "build-installer.md").read_text(encoding="utf-8")
+
+    ffmpeg_url = re.search(
+        r'^\$FFMPEG_URL\s*=\s*"([^"]+)"$', build, re.MULTILINE
+    )
+    assert ffmpeg_url is not None
+    assert ffmpeg_url.group(1) in guide
+    assert "BtbN" in guide
+    assert "win64 LGPL" in guide
+    assert 'gyan.dev "release essentials"' not in guide
+    assert "~80 MB" not in guide
+
+    for variable in (
+        "PYTHON_VERSION",
+        "FFMPEG_VERSION",
+        "YTDLP_VERSION",
+        "PILLOW_VERSION",
+        "MCP_VERSION",
+        "KEYRING_VERSION",
+        "PYSTRAY_VERSION",
+        "PYWEBVIEW_VERSION",
+        "PYTHONNET_VERSION",
+        "FASTER_WHISPER_VERSION",
+        "WHISPERX_VERSION",
+    ):
+        match = re.search(
+            rf"^\${variable}\s*=\s*'([^']+)'$", build, re.MULTILINE
+        )
+        assert match is not None, variable
+        assert match.group(1) in guide, variable
+
+    for package in (
+        "yt-dlp",
+        "Pillow",
+        "mcp",
+        "keyring",
+        "pystray",
+        "pywebview",
+        "pythonnet",
+        "faster-whisper",
+        "whisperx",
+    ):
+        assert f"`{package}`" in guide, package
+
+
 def test_security_docs_do_not_claim_unbuilt_macos_or_removed_asr() -> None:
     security = (ROOT / "docs" / "security.md").read_text(encoding="utf-8")
     mac_map = (

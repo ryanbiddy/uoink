@@ -7,7 +7,9 @@
 .\build.ps1
 ```
 
-The script downloads dependencies on first run (~80 MB cached under `build\cache\`), stages the install layout, and compiles `build\Uoink-Setup-<VERSION>.exe`.
+The script downloads and caches the pinned runtime dependency set under
+`build\cache\`, stages the install layout, and compiles
+`build\Uoink-Setup-<VERSION>.exe`.
 
 To wipe everything and rebuild from scratch:
 
@@ -83,22 +85,31 @@ The helper runs under `pythonw.exe`, so there's no console window. `server.py` w
 ## Where dependencies come from
 
 - **Python embeddable** — `https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip`. Update the `$PYTHON_VERSION` constant in `build.ps1` to bump.
-- **yt-dlp** — installed via `pip install yt-dlp==$YTDLP_VERSION` into the embeddable's `site-packages`. Bump `$YTDLP_VERSION` in `build.ps1` after compatibility-testing a new release.
-- **ffmpeg** — gyan.dev "release essentials" build (Windows static, GPL): `https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip`. The build script extracts only `ffmpeg.exe` and `ffprobe.exe`; the rest of the archive is discarded.
+- **ffmpeg** — BtbN `n7.1` Windows static win64 LGPL build:
+  `https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2025-01-31-12-58/ffmpeg-n7.1-184-gdc07f98934-win64-lgpl-7.1.zip`.
+  The build script extracts only `ffmpeg.exe` and `ffprobe.exe`; the rest of
+  the archive is discarded.
 - **get-pip.py** — `https://bootstrap.pypa.io/get-pip.py`. Used once during the build to bootstrap pip into the embeddable.
 
-All three are cached under `build\cache\` after the first download. Delete the cache or pass `-Clean` to force a refresh.
+These three direct downloads are cached under `build\cache\`. Delete the cache
+or pass `-Clean` to force a refresh. The remaining runtime packages are
+installed into the embeddable Python with the exact pip versions below.
 
-## v2 release notes
+## Current pin snapshot
 
 | Component | Version | SHA256 | Notes |
 |---|---|---|---|
-| Python embeddable | 3.11.9 (amd64) | Locked in `build.ps1` | Acceptance: 3.11.9 is the last 3.11.x with binary installers from python.org. Later 3.11.x are source-only security releases that we'd have to build ourselves. v2 ships 3.11.9 knowing the gap; v2.1 plan: move to the latest 3.12 embeddable. |
-| ffmpeg | 7.1 essentials build | Locked in `build.ps1` | Pulled from `github.com/GyanD/codexffmpeg/releases` (gyan.dev's GitHub mirror) for stable URLs. |
+| Python embeddable | 3.11.9 (amd64) | Locked in `build.ps1` | Current embedded runtime; any bump requires a clean installer build and smoke test. |
+| ffmpeg | n7.1 BtbN win64 LGPL | Locked in `build.ps1` | Pinned to one versioned BtbN archive and SHA256. |
 | yt-dlp | 2026.07.04 | (pip) | Pinned via `pip install yt-dlp==2026.07.04`. Bump after compatibility-testing a new release. |
 | Pillow | 10.4.0 | (pip) | Drives the multimodal paste-corpus generator (resize + JPEG-recompress + base64-encode screenshots for clipboard embedding). Pinned via `pip install Pillow==10.4.0`. |
 | MCP Python SDK | 1.27.1 | (pip) | Official Model Context Protocol Python SDK. Powers the stdio MCP server. Pinned via `pip install mcp==1.27.1` and `requirements.txt`. |
 | keyring | 25.7.0 | (pip) | Stores the BYO Anthropic API key in Windows Credential Manager. Pinned via `pip install keyring==25.7.0` and `requirements.txt`. |
+| pystray | 0.19.5 | (pip) | Windows tray integration. |
+| pywebview | 5.4 | (pip) | Local desktop shell. |
+| pythonnet | 3.0.5 | (pip) | Runtime bridge used by the Windows desktop shell. |
+| faster-whisper | 1.2.1 | (pip) | Local transcript reliability backend. |
+| whisperx | 3.8.6 | (pip) | Optional local transcription and diarization runtime. |
 
 ### SHA256 hashes
 
@@ -116,7 +127,11 @@ When bumping a directly-downloaded component:
 4. Re-run `.\build.ps1` -- it should now print `<component> hash OK` instead of the warnings.
 5. Commit the version bump and matching hash update together.
 
-Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`) are version-pinned but not hash-locked yet. Full pip hash-locking would require a `requirements.txt` with `--require-hashes`; for now the installer accepts the trust-pip-itself model while keeping exact package versions stable.
+Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`, `pystray`,
+`pywebview`, `pythonnet`, `faster-whisper`, and `whisperx`) are version-pinned
+but not hash-locked yet. Full pip hash-locking would require a
+`requirements.txt` with `--require-hashes`; for now the installer accepts the
+trust-pip-itself model while keeping exact package versions stable.
 
 ## Updating versions
 
@@ -126,7 +141,9 @@ Pip-installed packages (`yt-dlp`, `Pillow`, `mcp`, `keyring`) are version-pinned
 | yt-dlp | Update `$YTDLP_VERSION` in `build.ps1`. |
 | MCP Python SDK | Update `$MCP_VERSION` in `build.ps1` and the matching `mcp==...` pin in `requirements.txt`. |
 | keyring | Update `$KEYRING_VERSION` in `build.ps1` and the matching `keyring==...` pin in `requirements.txt`. |
-| ffmpeg | gyan.dev rolls the static "release essentials" build forward; the URL stays the same. To pin, swap to a versioned URL from the same site. |
+| Pillow, pystray, pywebview, pythonnet | Update `$PILLOW_VERSION`, `$PYSTRAY_VERSION`, `$PYWEBVIEW_VERSION`, or `$PYTHONNET_VERSION` in `build.ps1` and the matching `requirements.txt` pin. |
+| faster-whisper, whisperx | Update `$FASTER_WHISPER_VERSION` or `$WHISPERX_VERSION` in `build.ps1` and the matching `requirements.txt` pin; verify their shared dependency resolution together. |
+| ffmpeg | Update `$FFMPEG_VERSION`, `$FFMPEG_URL`, and `$FFMPEG_SHA256` together after verifying the replacement is still a BtbN win64 LGPL build. |
 | Uoink itself | Update `helper\_version.py`, then mirror the same value into the repo-root `VERSION` file and `extension\manifest.json`. `build.ps1` rewrites `installer\uoink.generated.iss`, stages `VERSION` from the helper constant, and fails if any version value drifts. |
 
 ## How `server.py` finds bundled binaries
