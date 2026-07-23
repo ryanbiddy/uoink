@@ -80,7 +80,8 @@ if ($ManifestVersion -ne $VERSION) {
 # source-only security releases. v2 accepts this; v2.1 plan: move to 3.12.
 $PYTHON_VERSION = '3.11.9'
 $PYTHON_URL     = "https://www.python.org/ftp/python/$PYTHON_VERSION/python-$PYTHON_VERSION-embed-amd64.zip"
-$GETPIP_URL     = 'https://bootstrap.pypa.io/get-pip.py'
+$GETPIP_COMMIT  = '5e84c8360eaf92009551b3eec69d734137f31cec'
+$GETPIP_URL     = "https://raw.githubusercontent.com/pypa/get-pip/$GETPIP_COMMIT/public/get-pip.py"
 # Build tooling affects generated console launchers, RECORD metadata, and
 # locally built wheels even though the tools themselves are stripped. Pin it
 # just as strictly as the final runtime graph.
@@ -144,7 +145,7 @@ $WHISPERX_VERSION = '3.8.6'
 # file so a re-run pulls fresh.
 $PYTHON_SHA256 = "009d6bf7e3b2ddca3d784fa09f90fe54336d5b60f0e0f305c37f400bf83cfd3b"
 $FFMPEG_SHA256 = "1475187ddaf367c6702856fe37bb00e8b3ce69963e9b453a9de78396846ff38c"
-$GETPIP_SHA256 = "66904bccb878e363db6236ea900e6935e507dcb887e9f178f6212edfe7f46a76"
+$GETPIP_SHA256 = "a341e1a43e38001c551a1508a73ff23636a11970b61d901d9a1cad2a18f57055"
 
 # ---- Helpers ------------------------------------------------------------
 function Write-Step($msg) {
