@@ -311,8 +311,8 @@ def normalize_page_url(raw: str) -> str | None:
     https://host[:port]/path?query form, or None if the input is bad.
 
     Rejects javascript: data: file: ftp: vbscript: mailto: blob: per
-    same posture as v3.1 universal extractor; rejects IP literals and
-    bracketed IPv6 to keep attacker-shaped URLs out of urlopen."""
+    same posture as v3.1 universal extractor. Embedded credentials and
+    bracketed IPv6 are rejected; IP literals are currently permitted."""
     if not raw or not isinstance(raw, str):
         return None
     raw = raw.strip()
@@ -331,14 +331,20 @@ def normalize_page_url(raw: str) -> str | None:
         return None
     if u.scheme not in ("http", "https"):
         return None
+    if u.username is not None or u.password is not None:
+        return None
     host = (u.hostname or "")
     if not host or len(host) > 253:
         return None
     if not _GENERIC_HOST_RE.match(host):
         return None
+    try:
+        port = u.port
+    except ValueError:
+        return None
     netloc = host.lower()
-    if u.port:
-        netloc = f"{netloc}:{u.port}"
+    if port is not None:
+        netloc = f"{netloc}:{port}"
     query = f"?{u.query}" if u.query else ""
     return f"{u.scheme}://{netloc}{u.path}{query}"
 
