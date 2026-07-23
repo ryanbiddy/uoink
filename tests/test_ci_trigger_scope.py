@@ -1,8 +1,14 @@
+import re
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "ci.yml"
+NODE24_ACTION_MAJORS = {
+    "actions/checkout": 5,
+    "actions/setup-node": 5,
+    "actions/setup-python": 6,
+}
 
 
 def _yaml_block(lines: list[str], header: str) -> list[str]:
@@ -14,6 +20,21 @@ def _yaml_block(lines: list[str], header: str) -> list[str]:
             break
         block.append(line)
     return block
+
+
+def test_ci_uses_node24_action_runtimes():
+    text = WORKFLOW.read_text(encoding="utf-8")
+    seen: set[str] = set()
+    for action, major_text in re.findall(
+        r"uses:\s+(actions/(?:checkout|setup-node|setup-python))@v(\d+)",
+        text,
+    ):
+        seen.add(action)
+        assert int(major_text) >= NODE24_ACTION_MAJORS[action], (
+            f"CI uses Node 20 action {action}@v{major_text}"
+        )
+
+    assert seen == set(NODE24_ACTION_MAJORS)
 
 
 def test_feature_branches_run_once_via_pull_request():
