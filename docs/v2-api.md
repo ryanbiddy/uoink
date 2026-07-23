@@ -62,9 +62,17 @@ Success response: HTTP 200
 ```json
 {
   "ok": true,
-  "version": "2.0.0",
+  "version": "<current version>",
+  "whisperx_available": false,
+  "whisper_model": "base",
+  "whisperx_model_loaded": false,
   "index_recovering": false,
-  "output_root_fallback": false
+  "output_root_fallback": false,
+  "path_integrity": {
+    "ok": true,
+    "checked": 0,
+    "missing": 0
+  }
 }
 ```
 
@@ -74,8 +82,12 @@ Fields:
 |---|---:|---|
 | `ok` | boolean | Always `true` for a healthy helper. |
 | `version` | string | Helper version from the top-level `VERSION` file. |
+| `whisperx_available` | boolean | Whether the Whisper transcription runtime can be imported. |
+| `whisper_model` | string | Normalized model selected in settings. |
+| `whisperx_model_loaded` | boolean | Whether the selected model is already present locally. |
 | `index_recovering` | boolean | `true` while a corrupt `index.db` has been quarantined and the replacement database is being backfilled from disk. |
 | `output_root_fallback` | boolean | `true` if the helper fell back to writing outputs to `%LOCALAPPDATA%\Uoink\output` because the primary `DESKTOP_ROOT` was unwritable. |
+| `path_integrity` | object | Aggregate `ok`, `checked`, and `missing` values for indexed corpus paths. Missing files add a generic `hint`; a failed scan adds the generic `error` value `index unavailable; see server.log`. |
 
 ### GET /index/backfill-status
 

@@ -62,20 +62,38 @@ def test_documented_ping_keys_match_the_real_handler(monkeypatch) -> None:
     probe = Probe()
     server.Handler.do_GET(probe)
 
-    readme = (ROOT / "README_server.md").read_text(encoding="utf-8")
-    match = re.search(
-        r"### `GET /ping`.*?```json\s*(\{.*?\})\s*```",
-        readme,
-        re.DOTALL,
-    )
-    assert match is not None, "README_server.md has no /ping JSON schema"
-    documented = json.loads(match.group(1))
-
     assert probe.status == 200
-    assert set(documented) == set(probe.payload)
-    assert set(documented["path_integrity"]) == set(
-        probe.payload["path_integrity"]
+    documents = (
+        (
+            ROOT / "README_server.md",
+            r"### `GET /ping`.*?```json\s*(\{.*?\})\s*```",
+        ),
+        (
+            ROOT / "docs" / "v2-api.md",
+            r"### GET /health and GET /ping.*?```json\s*(\{.*?\})\s*```",
+        ),
     )
+    for path, pattern in documents:
+        text = path.read_text(encoding="utf-8")
+        match = re.search(pattern, text, re.DOTALL)
+        assert match is not None, f"{path.name} has no public-probe JSON schema"
+        documented = json.loads(match.group(1))
+        assert set(documented) == set(probe.payload), path
+        assert set(documented["path_integrity"]) == set(
+            probe.payload["path_integrity"]
+        ), path
+
+
+def test_security_model_names_public_probe_disclosure() -> None:
+    security = (ROOT / "docs" / "security.md").read_text(encoding="utf-8")
+    assert "They reveal only `{ok:true, version}`." not in security
+    for field in (
+        "whisper model",
+        "index recovery",
+        "output-root fallback",
+        "path-integrity counts",
+    ):
+        assert field in security.lower()
 
 
 def test_documented_path_integrity_variants_match_live_code(
@@ -102,4 +120,6 @@ def test_documented_path_integrity_variants_match_live_code(
 
     assert set(missing) == {"ok", "checked", "missing", "hint"}
     assert set(unavailable) == {"ok", "checked", "missing", "error"}
+    assert unavailable["error"] == "index unavailable; see server.log"
+    assert "synthetic" not in unavailable["error"]
     assert all(f"`{key}`" in ping_section for key in ("hint", "error"))

@@ -14150,9 +14150,10 @@ def _path_integrity_status(force: bool = False) -> dict:
         return cached
     try:
         rows = _get_index().list_content_paths()
-    except Exception as e:
+    except Exception:
+        log.exception("path-integrity scan failed")
         result = {"ok": False, "checked": 0, "missing": 0,
-                  "error": f"index unavailable: {e}"}
+                  "error": "index unavailable; see server.log"}
     else:
         missing = sum(
             1 for row in rows

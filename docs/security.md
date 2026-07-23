@@ -20,7 +20,7 @@ The helper never binds to a public network interface. The main security boundary
 | Threat | Defended? | Notes |
 |---|---:|---|
 | Malicious webpage tries to call `127.0.0.1:5179` | Yes | Token-gated endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accepted); `/token` requires a custom `X-Uoink-Client` header (legacy `X-Yoink-Client` accepted) and browser CORS/PNA preflight blocks normal webpages from setting it cross-origin. |
-| Malicious webpage probes whether Uoink is running | Not treated as secret | `/health` and `/ping` are public liveness probes. They reveal only `{ok:true, version}`. |
+| Malicious webpage probes whether Uoink is running | Not treated as secret | `/health` and `/ping` are public liveness probes. They disclose the helper version and coarse readiness: Whisper model availability/load state, index recovery, output-root fallback, aggregate path-integrity counts, and a generic path-integrity hint or error. Raw exception details stay in `server.log`. |
 | Local malware reads files or calls localhost | No | Malware already running as the user can read local files, call local ports, and modify output. Uoink does not try to sandbox against same-user malware. |
 | Another installed browser extension calls `/token` | Not fully | v2 accepts `chrome-extension://*` origins so Chromium forks and dev installs work. Published Chrome Web Store extension ID pinning is deferred until the final ID is known and stable. |
 | Network attacker | Mostly not applicable | The helper listens only on `127.0.0.1`, not LAN/public interfaces. |
@@ -36,7 +36,12 @@ These do not require `X-Uoink-Token`:
 - `GET /token`
 - `GET /index/backfill-status`
 
-`/health` and `/ping` are intentionally public because the extension, setup page, and YouTube button need to detect whether the helper is running before auth/token refresh completes.
+`/health` and `/ping` are intentionally public because the extension, setup
+page, and YouTube button need to detect whether the helper is running before
+auth/token refresh completes. Their response includes the selected Whisper
+model and availability/load state, index recovery, output-root fallback,
+aggregate path-integrity counts, and a generic path-integrity hint or error.
+It does not include the helper token or raw exception text.
 
 `/index/backfill-status` is intentionally public for the same UI bootstrapping reason. It exposes only `state`, `current`, and `total` counts, not corpus content or file paths.
 
