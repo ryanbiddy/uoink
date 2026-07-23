@@ -137,6 +137,41 @@ def test_security_model_does_not_promise_removed_live_aliases() -> None:
         assert identifier in extension_source
 
 
+def test_mcp_docs_do_not_restore_removed_tool_aliases() -> None:
+    security = (ROOT / "docs" / "security.md").read_text(encoding="utf-8")
+    removed = {
+        "yoink_video",
+        "yoink_playlist",
+        "list_recent_yoinks",
+        "search_yoinks",
+        "get_yoink_corpus",
+        "get_yoink_health",
+    }
+
+    assert removed.isdisjoint(uoink_mcp_tools.TOOL_REGISTRY)
+    for name in removed:
+        assert uoink_mcp_tools.call_tool(name, {}) == {
+            "ok": False,
+            "error": "tool not found",
+        }
+    assert "no longer listed or accepted" in security
+    assert "aliases resolve to the canonical" not in security
+
+
+def test_reliability_download_docs_name_the_live_backend_and_request() -> None:
+    api = (ROOT / "docs" / "v2-api.md").read_text(encoding="utf-8")
+    section = api.split("### POST /reliability/model/download", 1)[1].split(
+        "### GET /reliability/<video_id>", 1
+    )[0]
+
+    assert "`faster-whisper`" in section
+    assert "`whisper-timestamped`" not in section
+    assert '"model": "tiny"' in section
+    assert "omitted" in section
+    for model in server._WHISPER_MODELS:
+        assert f"`{model}`" in section
+
+
 def test_security_docs_do_not_claim_unbuilt_macos_or_removed_asr() -> None:
     security = (ROOT / "docs" / "security.md").read_text(encoding="utf-8")
     mac_map = (
