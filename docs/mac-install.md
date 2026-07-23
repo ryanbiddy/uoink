@@ -37,8 +37,8 @@ dependencies, and ships a tray application. Porting it means solving:
   ship GPL builds. This is an unresolved licensing question, not just a
   packaging one.
 
-The full analysis, with sources, lives in the project's internal Mac
-plan (`RB-4-mac-plan.md`).
+The full analysis, with sources, lives in
+[MAC-BUILD-PLAN.md](MAC-BUILD-PLAN.md).
 
 ## If you want macOS support
 
