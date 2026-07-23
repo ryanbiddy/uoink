@@ -4999,24 +4999,21 @@ def _detect_platform_from_url(url: str) -> str:
 
 
 # v3.1: the only relaxed-validation entry point. /extract/any uses this;
-# the original /extract still goes through the strict YouTube validator.
-# Why this is safe: we ONLY accept http(s) URLs with a real-looking
-# hostname and hand the result straight to yt-dlp. The dispatcher does
-# NOT itself fetch anything. Same posture as Twitter -- yt-dlp's site
-# list does the heavy lifting; we just guard the inputs.
-_GENERIC_HOST_RE = re.compile(
-    r"^[A-Za-z0-9]([A-Za-z0-9.-]{0,253}[A-Za-z0-9])?$")
+# /extract still goes through the strict per-platform video validators.
+# After the known-platform canonicalizers, reuse the page-capture authority
+# validator. /extract/any hands that canonical URL to yt-dlp; the universal
+# classifier only uses it to choose an endpoint. This function does no network
+# work itself.
 
 
 def _normalize_any_url(raw: str) -> tuple[str | None, str | None]:
     """Validate an arbitrary URL for /extract/any. Returns (canonical, platform).
 
-    Acceptance gates:
-      1. Parses with urlparse (no shape errors).
-      2. Scheme is http or https (no file:, ftp:, javascript:, data: ...)
-      3. Hostname matches the conservative hostname regex (DNS label
-         shape; rejects IP literals, bracketed IPv6, and weird unicode).
-    Returns None on failure. Platform is best-effort from the host.
+    Known YouTube and X/Twitter URLs use their platform canonicalizers.
+    Everything else reuses page_extractor.normalize_page_url, which accepts
+    http(s), rejects embedded credentials and malformed ports, preserves
+    explicit ports, and rejects bracketed IPv6. IP literals are currently
+    permitted. Returns None on failure. Platform is best-effort from the host.
 
     This deliberately does NOT call yt-dlp -- that's the extraction step.
     The dispatcher's job is to keep attacker-shaped URLs from reaching
@@ -5042,25 +5039,9 @@ def _normalize_any_url(raw: str) -> tuple[str | None, str | None]:
     tw = _normalize_twitter_url(raw)
     if tw:
         return tw, PLATFORM_TWITTER
-    if "://" not in raw:
-        raw = "https://" + raw
-    try:
-        u = urlparse(raw)
-    except ValueError:
+    canonical = page_extractor.normalize_page_url(raw)
+    if not canonical:
         return None, None
-    if u.scheme not in ("http", "https"):
-        return None, None
-    host = (u.hostname or "")
-    if not host or len(host) > 253:
-        return None, None
-    if not _GENERIC_HOST_RE.match(host):
-        return None, None
-    # Canonical = scheme://host[:port]/path?query  (drops fragment + auth)
-    netloc = host.lower()
-    if u.port:
-        netloc = f"{netloc}:{u.port}"
-    query = f"?{u.query}" if u.query else ""
-    canonical = f"{u.scheme}://{netloc}{u.path}{query}"
     return canonical, _detect_platform_from_url(canonical)
 
 

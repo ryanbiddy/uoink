@@ -115,8 +115,21 @@ Protocol validation failures return `4xx` JSON errors. Handled application failu
 
 ## URL and identifier validation
 
-- Video URLs are parsed with `urllib.parse.urlparse`, checked against an explicit YouTube host allowlist, and canonicalized to `https://www.youtube.com/watch?v=<id>`.
-- Video IDs must match ASCII `^[A-Za-z0-9_-]{6,}$`.
+- Strict video capture recognizes YouTube, X/Twitter, TikTok, and Instagram
+  host and path shapes. Each accepted URL is canonicalized before it reaches
+  the extraction pipeline.
+- YouTube video IDs must match ASCII `^[A-Za-z0-9_-]{6,}$`; X status IDs and
+  handles, Instagram Reel/post paths, and TikTok hosts are checked by their
+  platform-specific validators.
+- Generic video, web-page, and podcast capture accepts HTTP(S) only. Embedded
+  credentials and malformed ports are rejected, explicit ports are preserved,
+  and bracketed IPv6 is rejected for generic video and page capture. Podcast
+  feeds preserve valid bracketed IPv6.
+- IP literals are currently permitted. Hostnames are not restricted to
+  public-network resolutions, and redirect targets are not revalidated by
+  Uoink before the active fetcher follows them. Page, feed, and generic-video
+  capture are token-gated and user-directed, but a public-network-only fetch
+  policy remains an explicit hardening decision rather than a shipped claim.
 - Playlist IDs must match ASCII `^[A-Za-z0-9_-]{2,}$`; playlist processing is capped at 10 videos.
 - Session IDs must match `^[A-Za-z0-9_-]{1,64}$`.
 - Job IDs must match `^job_[A-Za-z0-9_-]{1,96}$`.
