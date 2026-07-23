@@ -38,11 +38,8 @@ PowerShell equivalent:
 .\start_server.ps1
 ```
 
-Verify it's alive — `http://127.0.0.1:5179/ping` should return:
-
-```json
-{"ok": true, "version": "2.1.0"}
-```
+Verify it's alive at `http://127.0.0.1:5179/ping`. A live helper returns HTTP
+200 with `"ok": true`; the full response shape is documented below.
 
 Logs are written to `server.log` next to `server.py`.
 
@@ -59,9 +56,29 @@ running the GUI's launcher and then closing it; cleaner: leave it running.
 
 ### `GET /ping`
 
+Values vary with the installed version, selected Whisper model, downloaded
+models, output-root recovery, and corpus state. The response shape is:
+
 ```json
-{"ok": true, "version": "2.1.0"}
+{
+  "ok": true,
+  "version": "<current version>",
+  "whisperx_available": false,
+  "whisper_model": "base",
+  "whisperx_model_loaded": false,
+  "index_recovering": false,
+  "output_root_fallback": false,
+  "path_integrity": {
+    "ok": true,
+    "checked": 0,
+    "missing": 0
+  }
+}
 ```
+
+`path_integrity` always contains `ok`, `checked`, and `missing`. When indexed
+files are missing it also contains a human-readable `hint`; if the index scan
+itself fails it instead contains an `error` string.
 
 ### `POST /extract`
 
