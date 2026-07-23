@@ -146,7 +146,9 @@ Pip, setuptools, wheel, and packaging are separately pinned build tooling.
 The build does not reuse pip's wheel cache, and runtime sdists build without
 isolated floating tools. The final staging pass removes unused console
 launchers, their dead RECORD rows, bytecode caches, and the temporary token
-created by staged smoke.
+created by staged smoke. It also normalizes compiler-input timestamps to
+`SOURCE_DATE_EPOCH`, the Git commit time, or a fixed source-archive fallback,
+so checkout times do not change the installer wrapper.
 
 ## Updating versions
 

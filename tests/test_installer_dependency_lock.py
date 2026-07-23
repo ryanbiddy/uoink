@@ -69,6 +69,7 @@ def test_inventory_diff_detects_every_drift_shape() -> None:
 
 def test_build_uses_and_verifies_the_installer_lock() -> None:
     build = (ROOT / "build.ps1").read_text(encoding="utf-8")
+    installer = (ROOT / "installer" / "uoink.iss").read_text(encoding="utf-8")
     build_doc = (ROOT / "docs" / "build-installer.md").read_text(encoding="utf-8")
     security = (ROOT / "docs" / "security.md").read_text(encoding="utf-8")
 
@@ -100,7 +101,19 @@ def test_build_uses_and_verifies_the_installer_lock() -> None:
     )
     assert "Join-Path $StagingDir 'token.txt'" in build
     assert "Final staging cleanup left token.txt" in build
+    assert "SOURCE_DATE_EPOCH" in build
+    assert "--format=%ct HEAD" in build
+    assert "\"$candidate\" -match '^\\d+$'" in build
+    assert "$epochText = '946684800'" in build
+    assert "LastWriteTimeUtc = $packageTimestampUtc" in build
+    assert "Copy-Item (Join-Path $InstallerDir 'upgrade_prep.ps1')" in build
+    assert "staging\\upgrade_prep.ps1" in installer
+    assert "staging\\installer-assets\\wizard-large-100.bmp" in installer
+    assert "SetupIconFile=staging\\uoink.ico" in installer
     assert build.index("Final staging cleanup left") < build.index(
+        "Write-Step 'Compiling installer'"
+    )
+    assert build.index("LastWriteTimeUtc = $packageTimestampUtc") < build.index(
         "Write-Step 'Compiling installer'"
     )
     for current_doc in (build_doc, security):
