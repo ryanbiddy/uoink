@@ -39,32 +39,38 @@ hardware and signing setup, and the remaining implementation work.
 
 ## Architecture: why Python embeddable + Inno Setup
 
-The spec offered two options. We picked **Option B (Python embeddable + Inno Setup)** for the v2 ship.
+The original packaging review considered two options. The current Windows
+installer uses **Option B (Python embeddable + Inno Setup)**.
 
 | Concern | Option A (PyInstaller) | Option B (embeddable) |
 |---|---|---|
-| Antivirus false positives | High — PyInstaller bootloader is a known heuristic trip | Low — install is just `python.exe` + `.py` files |
-| Build complexity | Spec file tuning, hidden imports | Plain `pip install --target` |
-| Hotfix path | Rebuild + redownload entire bundle | Edit `.py` files in place |
-| Install size | Smaller (~30 MB) | Larger (~120 MB) |
-| Startup time | Slightly faster (already-frozen) | Negligible difference for our HTTP server |
-| Update mechanism | Replace `.exe` | Replace `.py` files |
+| Antivirus behavior | Adds a PyInstaller bootloader | No PyInstaller bootloader; the unsigned installer is still subject to SmartScreen and AV checks |
+| Build complexity | Spec file tuning, hidden imports | Embeddable-Python bootstrap, pinned pip install, staging, and Inno Setup |
+| Hotfix path | Rebuild the frozen package | Rebuild the installer; manual edits inside an installed copy are unsupported |
+| Install size | Measure the frozen candidate | Measure `installer\staging` and the compiled installer; the current shape includes local ASR and desktop dependencies |
+| Startup time | Requires candidate measurement | Requires candidate measurement |
+| Update mechanism | Replace the frozen application | Re-run the installer to replace the staged runtime |
 
-The deciding factor is AV reliability. v2 ships unsigned (we can't justify a code-signing certificate before launch validates the product), so anything that flags antivirus is a death sentence for the activation funnel — the user we just walked through `setup.html` is exactly the user who'll abandon if SmartScreen blocks the install. PyInstaller bootloaders trigger heuristic flags often enough that we'd be debugging false positives instead of bugs.
+The current Windows candidate is unsigned. Avoiding a PyInstaller bootloader
+removes one packaging-specific heuristic surface, but it does not make an
+unsigned installer trusted or exempt from SmartScreen and antivirus checks.
 
-The 120 MB install footprint is acceptable; the extension already implies users are doing meaningful work with YouTube videos and they have disk.
+Do not copy a fixed install-size claim forward. Measure both
+`installer\staging` and the compiled installer for every release candidate;
+the local ASR and desktop runtime set makes size sensitive to dependency
+changes.
 
 ## What gets bundled
 
 The installer lays out `%LOCALAPPDATA%\Uoink\`:
 
 ```
-python\           Python 3.11 embeddable + Lib\site-packages with yt-dlp/Pillow/MCP/keyring
+python\           Python 3.11 embeddable + the pinned runtime packages listed below
 bin\              ffmpeg.exe, ffprobe.exe (PATH-prepended by server.py)
 server.py         The local HTTP helper
 uoink_mcp.py      MCP stdio entry point for agent clients
 uoink_mcp_tools.py Shared MCP tool registry
-requirements.txt  Dev/runtime MCP SDK + keyring pins
+requirements.txt  Source-install pins; the installer uses an explicit build.ps1 subset
 yt_extract.py     Imported by server.py (parse_srt, slugify, fmt_time)
 topics.json       Topic-folder routing rules
 stop-server.bat   Reads server.pid and kills the helper
@@ -178,23 +184,28 @@ If the env var is missing, points at a non-existent path, or is not writable, Uo
 
 ### Antivirus warnings on unsigned builds
 
-`Uoink-Setup-<VERSION>.exe` is unsigned. SmartScreen will show "Windows protected your PC" the first time a user runs it, and some AV products may quarantine it. There are three mitigations, in order of cost:
+`Uoink-Setup-<VERSION>.exe` is currently unsigned. SmartScreen or antivirus
+software may warn, block, or quarantine an unsigned candidate; behavior varies
+by machine, policy, reputation, and scanner.
 
-1. **None** — accept the SmartScreen click-through ("More info" → "Run anyway"). Document it on `setup.html` so users know what to expect. Acceptable for v2 if launch volume is small.
-2. **Code signing** — buy an OV cert (~$70/yr from one of the few remaining issuers) and sign the installer + `pythonw.exe` with `signtool.exe`. Removes most AV friction but doesn't fully clear SmartScreen until reputation builds.
-3. **EV cert** — clears SmartScreen instantly but requires a hardware token and ~$300/yr.
-
-Add signing to `build.ps1` after step 3 (compile) — see `signtool sign /fd SHA256 /tr <ts-url> /td SHA256 /a $exe`.
+There is no signing step in `build.ps1` today. Any release-signing change needs
+an explicit release-owner decision, secure certificate/key handling,
+timestamping, and verification of the installer and shipped executables. Do
+not promise that a certificate will suppress every warning. Test the exact
+candidate on the supported Windows matrix and record what happened.
 
 ### Pip bootstrap pulls files we don't ship
 
 `get-pip.py` installs pip + setuptools + wheel into the embeddable. We strip those after runtime packages are installed (see step 2e in `build.ps1`) so the shipped install only contains what the server actually imports. If a future package adds a transitive dependency, it'll land in `site-packages` automatically and get included.
 
-### Prompts library is read-only in v1
+### Packaged prompts are read-only
 
-The popup ships with 11 starter prompts loaded from `extension/prompts.json` inside the extension package. The original "Edit prompts" link was removed in v1 because its on-disk path (`<HERE>\extension\prompts.json`) only exists in dev mode -- installed users have no `extension\` folder next to the server. The `/open-prompts` server endpoint still exists for dev-mode use but isn't surfaced in the UI.
-
-Tracked as a v1.1 task: store user-overridden prompts in `chrome.storage.local` and add an inline editor in the popup, so the prompt set is portable across installs and editable without touching the filesystem.
+The popup ships with 11 starter prompts loaded from `extension/prompts.json`
+inside the browser-extension package. Installed helper users do not have that
+extension source tree beside `server.py`. The helper's `/open-prompts` endpoint
+therefore remains dev-only and is not surfaced in the UI. There is no portable
+prompt editor in the current product, and this guide does not promise one for a
+specific release.
 
 ### `topics.json` is read-only after install
 

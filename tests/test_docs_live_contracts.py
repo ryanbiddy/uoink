@@ -217,6 +217,21 @@ def test_installer_guide_dependency_snapshot_matches_build_script() -> None:
         "whisperx",
     ):
         assert f"`{package}`" in guide, package
+    assert "120 MB" not in guide
+    assert "yt-dlp/Pillow/MCP/keyring" not in guide
+    assert "`installer\\staging`" in guide
+    assert "measure" in guide.lower()
+    assert "explicit build.ps1 subset" in guide
+    assert 'SmartScreen will show "Windows protected your PC"' not in guide
+    assert "clears SmartScreen instantly" not in guide
+    assert "~$" not in guide
+    assert "Acceptable for v2" not in guide
+    prompts = json.loads(
+        (ROOT / "extension" / "prompts.json").read_text(encoding="utf-8")
+    )
+    assert f"{len(prompts)} starter prompts" in guide
+    assert "Prompts library is read-only in v1" not in guide
+    assert "Tracked as a v1.1 task" not in guide
 
 
 def test_security_docs_do_not_claim_unbuilt_macos_or_removed_asr() -> None:
