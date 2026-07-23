@@ -5,3 +5,7 @@
 # CRLF shebang ("bad interpreter: /usr/bin/env bash^M"). Covers build-mac.sh
 # and the macOS bundle launcher (installer/mac/launcher.sh).
 *.sh text eol=lf
+
+# Cross-repository contract fixtures are hashed byte-for-byte. Keep their
+# materialized bytes identical on Windows, macOS, and Linux.
+tests/fixtures/suite_integration_v1/*.json text eol=lf
