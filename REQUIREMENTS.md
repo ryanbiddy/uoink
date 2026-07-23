@@ -1,6 +1,8 @@
-# Uoink — Manual Setup
+# Uoink — Manual source setup
 
-The one-click installer is shipping in v1 launch. Until then, here's the manual setup.
+Most Windows users should use the
+[published v3.4.0 installer](https://github.com/ryanbiddy/uoink/releases/tag/v3.4.0).
+Use this path when developing Uoink or testing the current source checkout.
 
 ## Prerequisites
 
@@ -17,47 +19,54 @@ The one-click installer is shipping in v1 launch. Until then, here's the manual 
    cd uoink
    ```
 
-2. Install yt-dlp:
-   ```
-   pip install yt-dlp
+2. Create and activate a virtual environment:
+   ```powershell
+   python -m venv .venv
+   .\.venv\Scripts\Activate.ps1
    ```
 
-3. Install ffmpeg:
+3. Install the pinned Python runtime dependencies:
+   ```
+   python -m pip install -r requirements.txt
+   python -m pip install "yt-dlp==2026.07.04"
+   ```
+   The second pin matches the version bundled by `build.ps1`.
+
+4. Install ffmpeg:
    ```
    winget install Gyan.FFmpeg
    ```
    Restart your terminal so the new PATH takes effect.
 
-4. Verify both tools are available:
+5. Reactivate the virtual environment and verify both tools are available:
    ```
+   .\.venv\Scripts\Activate.ps1
    yt-dlp --version
    ffmpeg -version
    ```
 
-5. Start the Uoink server:
+6. Start the Uoink server:
    ```
-   double-click start_server.bat
+   python server.py
    ```
-   Or from PowerShell:
-   ```
-   pythonw server.py
-   ```
+   Keep that terminal open while testing. `start_server.bat` is the
+   double-click alternative.
 
-6. Verify the server is running:
+7. Verify the server is running from a second PowerShell window:
    ```
    Invoke-RestMethod http://127.0.0.1:5179/ping
    ```
    Should return `ok : True`.
 
-7. Load the extension in your browser:
+8. Load the extension in your browser:
    - Open `chrome://extensions/` (or `comet://extensions/`)
    - Toggle Developer mode on
    - Click "Load unpacked"
    - Select the `extension/` folder
 
-8. Pin the Uoink extension to your toolbar.
+9. Pin the Uoink extension to your toolbar.
 
-9. Open any YouTube video. Click the Uoink button under the video.
+10. Open any YouTube video. Click the Uoink button under the video.
 
 ## Known caveats
 
