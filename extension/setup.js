@@ -26,6 +26,9 @@ const SERVER = "http://127.0.0.1:5179";
 const PING_PATH = "/health";
 const POLL_MS = 2000;
 const AUTO_YOINK_TTL_MS = 60_000;
+// Latest published, non-prerelease Windows asset. Update only after the
+// matching GitHub release asset exists.
+const PUBLISHED_INSTALLER_VERSION = "3.4.0";
 let platformOs = "win";
 
 // ---- DOM handles ---------------------------------------------------------
@@ -1101,10 +1104,14 @@ function preventDefaultClick(ev) {
 function applyDownloadState() {
   if (!downloadBtn) return;
   if (currentPlatform() === "win") {
+    const installerName = `Uoink-Setup-${PUBLISHED_INSTALLER_VERSION}.exe`;
     downloadBtn.classList.remove("disabled");
     downloadBtn.removeAttribute("aria-disabled");
     downloadBtn.title = "";
-    downloadBtn.href = "https://github.com/ryanbiddy/uoink/releases/download/v3.2.2/Uoink-Setup-3.2.2.exe";
+    downloadBtn.href =
+      `https://github.com/ryanbiddy/uoink/releases/download/v${PUBLISHED_INSTALLER_VERSION}/${installerName}`;
+    const winSpan = downloadBtn.querySelector("[data-win-only]");
+    if (winSpan) winSpan.textContent = installerName;
     downloadBtn.removeEventListener("click", preventDefaultClick);
   } else {
     downloadBtn.classList.add("disabled");

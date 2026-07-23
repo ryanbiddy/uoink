@@ -185,24 +185,30 @@ Tracked as a v1.1 task: store user-overridden prompts in `chrome.storage.local` 
 
 ## Launch checklist
 
-Before flipping the extension's download button live:
+Before updating the extension's download button for a new release:
 
 1. **Build a release artifact:** `.\build.ps1` → produces `build\Uoink-Setup-<VERSION>.exe`.
 2. **Smoke-test on a clean Windows VM** (see Testing matrix below).
-3. **Tag the release in git:** `git tag v2.0.0 && git push --tags`.
-4. **Publish to GitHub releases:**
+3. **Set the approved version from the repository:** in PowerShell, run
+   `$version = (Get-Content VERSION -Raw).Trim()` and confirm the approved
+   release tag will be `v$version`. Tagging and pushing happen only after the
+   release owner approves the build.
+4. **Prepare the GitHub release as a draft:**
    - Create a new release at `https://github.com/ryanbiddy/uoink/releases/new`.
-   - Tag: `v2.0.0`. Title: `Uoink 2.0.0`.
-   - Attach `build\Uoink-Setup-<VERSION>.exe` as the release asset.
-   - Publish (not draft).
-   - Verify `https://github.com/ryanbiddy/uoink/releases/latest/download/Uoink-Setup-<VERSION>.exe` resolves to the file.
-5. **Flip the extension's `INSTALLER_PUBLISHED` flag:**
-   - Edit `extension/setup.js` and set `const INSTALLER_PUBLISHED = true;`.
-   - Reload the extension and visit `setup.html` -- the **Download Uoink Setup for Windows** button should now be active and link to the latest release.
-   - Commit + push: `git commit -am "Enable installer download button (release published)"`.
-6. **Publish the extension** to the Chrome Web Store with the updated `setup.js`.
+   - Tag: `v$version`. Title: `Uoink v$version`.
+   - Attach `build\Uoink-Setup-$version.exe`.
+   - Keep the release in draft until the release owner approves publication.
+5. **After the non-draft release asset exists, update the extension link:**
+   - Set `PUBLISHED_INSTALLER_VERSION` in `extension/setup.js` to the published
+     version.
+   - Reload the extension, visit `setup.html`, and verify the Windows button
+     resolves to
+     `https://github.com/ryanbiddy/uoink/releases/download/v$version/Uoink-Setup-$version.exe`.
+6. **Publish the extension** only as a separate, explicit release-owner action.
 
-The flag exists so the extension can ship to early users *before* the installer is uploaded -- they see "Coming soon" instead of clicking through to a 404. Forgetting to flip it after publishing the release is recoverable but visible: the download button stays "Coming soon" until the next extension release.
+There is no separate boolean publication switch. The versioned asset URL is
+the control: update it only after that exact public asset exists, so the
+shipped extension never points users at a draft or missing installer.
 
 ## Testing matrix
 

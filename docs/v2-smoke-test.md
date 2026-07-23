@@ -1,6 +1,10 @@
 # Uoink v2 definitive smoke-test checklist
 
-Use this as the one pre-launch checklist. Run on a clean Windows user profile if possible, then repeat the core extraction subset on the normal dev machine.
+> Status: historical. Do not use this v2 checklist as a current release gate;
+> its version numbers and launch controls predate the shipped v3 extension.
+
+This is preserved as v2 test history. Use the current CI, installer guide, and
+`docs/store/SUBMISSION-CHECKLIST.md` for present-day release work.
 
 Total checkpoints: 127.
 
@@ -53,7 +57,8 @@ Total checkpoints: 127.
 
 37. [ ] First-run install path - success: extension opens `setup.html?source=install`, shows intro/install/verify/try steps.
 38. [ ] Offline path - success: stop helper, click Uoink, setup opens at verify step and does not require user to understand Python.
-39. [ ] Installer download gate before publication - success: if `INSTALLER_PUBLISHED=false`, download button cannot send users to a 404.
+39. [ ] Historical installer gate (retired) - current releases instead update
+    `PUBLISHED_INSTALLER_VERSION` only after the exact public asset exists.
 40. [ ] Installer download gate after publication - success: after flip, button downloads the exact release asset.
 41. [ ] Clear key button - success: confirmation appears, key clears from Credential Manager/keyring, input empties, status says key not set.
 42. [ ] Keyring fresh install - success: with no settings key and no credential entry, settings works and reports `anthropic_key_set=false`.
@@ -140,10 +145,13 @@ Total checkpoints: 127.
 ## 12. Pre-launch packaging gates
 
 101. [ ] `USE_MOCK_API` / mock mode is off for production extension - success: popup talks to real helper, not fixtures.
-102. [ ] `INSTALLER_PUBLISHED` is flipped only after GitHub release asset exists - success: setup download URL resolves to `Uoink-Setup-2.1.0.exe`.
+102. [ ] Published-installer version is updated only after the GitHub release
+     asset exists - success: the setup URL resolves to the approved
+     `Uoink-Setup-<VERSION>.exe`.
 103. [ ] Manifest version and installer version are aligned - success: Chrome Web Store package, installer, and `server.py VERSION` match launch plan.
 104. [ ] Direct-download hashes are locked - success: Python, ffmpeg, and get-pip hashes in `build.ps1` are non-empty and verified during build.
-105. [ ] Build installer from clean cache - success: `.\build.ps1 -Clean` outputs `build\Uoink-Setup-2.1.0.exe` and hash checks pass.
+105. [ ] Build installer from clean cache - success: `.\build.ps1 -Clean`
+     outputs `build\Uoink-Setup-<VERSION>.exe` and hash checks pass.
 106. [ ] Clean Windows VM install - success: unsigned SmartScreen path is understandable, installer runs without admin, helper starts hidden.
 107. [ ] Chrome Web Store package uses production domain/copy - success: footer, setup, README, store listing, and landing links point at `uoink.video` or the chosen canonical URL.
 108. [ ] Final docs pass - success: README, security, build-installer, v2 docs, and store listing no longer describe pre-Sprint-7 behavior.
