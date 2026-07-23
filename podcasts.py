@@ -93,10 +93,20 @@ def _validate_feed_url(raw: str) -> str | None:
         return None
     if u.scheme not in ("http", "https"):
         return None
+    if u.username is not None or u.password is not None:
+        return None
     host = (u.hostname or "")
     if not host or len(host) > 253:
         return None
-    return f"{u.scheme}://{host.lower()}" + (u.path or "/") + (
+    try:
+        port = u.port
+    except ValueError:
+        return None
+    host = host.lower()
+    netloc = f"[{host}]" if ":" in host else host
+    if port is not None:
+        netloc += f":{port}"
+    return f"{u.scheme}://{netloc}" + (u.path or "/") + (
         f"?{u.query}" if u.query else "")
 
 
