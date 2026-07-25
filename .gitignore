@@ -63,3 +63,8 @@ installer/assets/*.bmp
 # v2.2.0: installer/uoink.ico is regenerated each build by
 # installer/generate_icon.py from assets/logo-mark-color.png -- never commit it.
 installer/uoink.ico
+
+# build.ps1 rewrites installer/uoink.generated.iss from installer/uoink.iss with
+# the version stamped in from helper/_version.py -- the committed source is
+# uoink.iss; the generated copy is a build artifact.
+installer/uoink.generated.iss

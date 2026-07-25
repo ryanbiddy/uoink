@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.7.0] - 2026-07-24
+
+A hardening and polish release. The Library and Sources surfaces got quieter and
+easier to scan, video extraction picked up current site fixes, and a focused
+security pass tightened every place Uoink accepts a URL or hands one to another
+product in the suite.
+
 ### Changed
 
 - **Refreshed video extraction.** The bundled yt-dlp moved from 2026.03.17 to 2026.07.04, picking up current Instagram and YouTube extractor fixes.
@@ -35,6 +42,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Cross-product source links now enforce the suite contract.** Corpus and
   kept-media responses reject file URLs, filesystem paths, and non-HTTP
   schemes instead of passing them to Writer or Zing.
+- **Capture URLs are checked against their real authority.** Generic page,
+  article, and podcast-feed captures now reject malformed or ambiguous URL
+  authorities instead of trusting the string they were handed, closing a class
+  of requests that could point a capture somewhere other than where it looked.
+- **Peer UI paths must be same-origin.** Writer UI paths offered by a peer are
+  rejected when they cross origin, so a misconfigured or hostile peer cannot
+  steer Uoink's UI at another host.
+- **MCP slug handling no longer accepts traversal.** Corpus slugs that try to
+  escape their directory are refused at the boundary.
+- **The health surface stops over-sharing.** Public health output and the docs
+  that describe it now agree, and the response no longer discloses more about
+  the local environment than the endpoint is meant to expose.
+- **MCP clients can see what they're talking to.** The stdio server now reports
+  the Uoink version in its `initialize` response.
+- **Setup points at the published installer.** The extension's setup page
+  resolves the installer version that actually exists publicly, separated from
+  the in-repo source version, so it can never link at a draft or missing asset.
+
+### Documentation
+
+- **macOS status is stated honestly.** The fictional macOS install guide and
+  the imaginary macOS security posture are gone. `mac-install.md` now records
+  the real status: there is no working macOS build or `.dmg`, and
+  `MAC-BUILD-PLAN.md` records the verified gaps and remaining work.
 
 ## [3.6.0] - 2026-07-08
 
