@@ -3,10 +3,33 @@
 from __future__ import annotations
 
 import re
+import subprocess
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _tracked_docs() -> list[Path]:
+    """Markdown under docs/ that is actually committed.
+
+    Walking the filesystem instead picks up gitignored local files -- docs/launch/
+    is ignored, so a real working checkout has scratch files there that a fresh
+    clone does not. That made this guard fail locally while passing in CI, which
+    is the worst failure mode for a guard: it trains you to ignore it.
+
+    Fall back to a filesystem walk outside a git checkout, e.g. an unpacked sdist.
+    """
+    try:
+        listing = subprocess.run(
+            ["git", "-C", str(ROOT), "ls-files", "-z", "--", "docs"],
+            capture_output=True,
+            check=True,
+            text=True,
+        ).stdout
+    except (OSError, subprocess.SubprocessError):
+        return sorted((ROOT / "docs").rglob("*.md"))
+    return [ROOT / name for name in listing.split("\0") if name.endswith(".md")]
 PUBLISHED_VERSION = "3.4.0"
 PUBLISHED_ASSET = f"Uoink-Setup-{PUBLISHED_VERSION}.exe"
 
@@ -77,9 +100,10 @@ def test_current_release_checklists_name_real_controls() -> None:
     assert "INSTALLER_PUBLISHED" not in current
     assert "git tag v2.0.0" not in current
     assert "PUBLISHED_INSTALLER_VERSION" in current
+    docs = _tracked_docs()
+    assert docs, "no tracked docs found -- the listing is broken, not the docs"
     tracked_docs = "\n".join(
-        path.read_text(encoding="utf-8")
-        for path in (ROOT / "docs").rglob("*.md")
+        path.read_text(encoding="utf-8") for path in docs
     )
     assert "INSTALLER_PUBLISHED" not in tracked_docs
     assert "Uoink-Setup-2.1.0.exe" not in tracked_docs
