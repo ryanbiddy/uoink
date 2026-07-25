@@ -28,7 +28,7 @@ const POLL_MS = 2000;
 const AUTO_YOINK_TTL_MS = 60_000;
 // Latest published, non-prerelease Windows asset. Update only after the
 // matching GitHub release asset exists.
-const PUBLISHED_INSTALLER_VERSION = "3.4.0";
+const PUBLISHED_INSTALLER_VERSION = "3.7.0";
 let platformOs = "win";
 
 // ---- DOM handles ---------------------------------------------------------
