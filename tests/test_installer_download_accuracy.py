@@ -30,7 +30,7 @@ def _tracked_docs() -> list[Path]:
     except (OSError, subprocess.SubprocessError):
         return sorted((ROOT / "docs").rglob("*.md"))
     return [ROOT / name for name in listing.split("\0") if name.endswith(".md")]
-PUBLISHED_VERSION = "3.4.0"
+PUBLISHED_VERSION = "3.7.0"
 PUBLISHED_ASSET = f"Uoink-Setup-{PUBLISHED_VERSION}.exe"
 
 
@@ -81,7 +81,7 @@ def test_manual_setup_is_a_current_source_install_path() -> None:
     build = (ROOT / "build.ps1").read_text(encoding="utf-8")
     match = re.search(r"\$YTDLP_VERSION\s*=\s*'([^']+)'", build)
 
-    assert "published v3.4.0 installer" in manual
+    assert "published v3.7.0 installer" in manual
     assert "python -m pip install -r requirements.txt" in manual
     assert match is not None
     assert f'python -m pip install "yt-dlp=={match.group(1)}"' in manual
