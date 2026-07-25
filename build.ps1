@@ -380,7 +380,14 @@ Write-Step 'Generating THIRD-PARTY-NOTICES.md'
     --constraint $InstallerLock "pip-licenses==5.0.0" 2>$null
 if ($LASTEXITCODE -eq 0) {
     $noticesPath = Join-Path $RepoRoot 'THIRD-PARTY-NOTICES.md'
+    # Stamp the notices from the same source-bound epoch used to normalize
+    # installer input mtimes, so regenerating from unchanged source produces an
+    # identical file instead of dirtying the tree on every build.
+    $priorSourceDateEpoch = $env:SOURCE_DATE_EPOCH
+    $env:SOURCE_DATE_EPOCH = [string][DateTimeOffset]::new(
+        (Get-PackageTimestampUtc), [TimeSpan]::Zero).ToUnixTimeSeconds()
     & $embedPython (Join-Path $RepoRoot 'scripts\gen_third_party_notices.py') $noticesPath
+    $env:SOURCE_DATE_EPOCH = $priorSourceDateEpoch
     if ($LASTEXITCODE -ne 0) { Write-Warning 'THIRD-PARTY-NOTICES generation failed; committed file kept.' }
     # pip-licenses is a build-time tool, not a runtime dep -- strip it back out.
     # Remove the tool and its tool-only dependencies. tomli is not required by
