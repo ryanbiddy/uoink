@@ -39,11 +39,18 @@ def test_current_install_docs_name_the_published_asset() -> None:
     ).read_text(encoding="utf-8")
 
     assert f"Download `{PUBLISHED_ASSET}`" in readme
+    # The source build runs ahead of the published installer. Guard the current
+    # source version by reading it, so this can't rot into checking a version
+    # nobody ships anymore. Skipped when the two have converged (right after a
+    # publish), since then the asset legitimately appears in the README.
+    source_version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
+    if source_version != PUBLISHED_VERSION:
+        assert f"Uoink-Setup-{source_version}.exe" not in readme
     assert "Uoink-Setup-3.6.0.exe" not in readme
     assert "dist/uoink-3.3.0.mcpb" not in bundle_doc
     assert "currently 3.3.0" not in bundle_map
     assert "test_release_version_v330.py" not in bundle_map
-    assert "tests/test_release_version_v360.py" in bundle_map
+    assert "tests/test_release_version_v370.py" in bundle_map
 
 
 def test_manual_setup_is_a_current_source_install_path() -> None:
