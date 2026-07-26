@@ -798,6 +798,21 @@ def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
         episode_id = int(args.get("episode_id"))
     except (TypeError, ValueError):
         return _err("episode_id (integer) is required")
+    settings = server._read_settings() or {}
+    if "diarize" in args:
+        diarize_value = args["diarize"]
+    else:
+        diarize_value = settings.get("diarization_default", False)
+        if diarize_value is None:
+            diarize_value = False
+    try:
+        diarize = _wr.require_boolean(diarize_value, "diarize")
+        consent_given = _wr.require_boolean(
+            args.get("consent_given", False),
+            "consent_given",
+        )
+    except ValueError as error:
+        return _err(str(error))
     episode = _pod.get_episode(server._get_index(), episode_id)
     if episode is None:
         return _err("episode not found")
@@ -807,13 +822,8 @@ def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
     if not _wr.is_whisperx_available():
         return _err("whisperx runtime not installed; "
                      "use the Setup page to install (consent-gated dep).")
-    settings = server._read_settings() or {}
     model = _wr.normalize_model(
         args.get("model") or settings.get("whisper_model"))
-    diarize = bool(args.get("diarize")
-                     if args.get("diarize") is not None
-                     else settings.get("diarization_default"))
-    consent_given = bool(args.get("consent_given"))
     language = args.get("language")
     _wr.update_episode_transcript_state(
         server._get_index(), episode_id,

@@ -10321,6 +10321,24 @@ class Handler(BaseHTTPRequestHandler):
         except (TypeError, ValueError):
             return self._send_json(400, {
                 "ok": False, "error": "episode_id (integer) required"})
+        settings = _read_settings() or {}
+        if "diarize" in body:
+            diarize_value = body["diarize"]
+        else:
+            diarize_value = settings.get("diarization_default", False)
+            if diarize_value is None:
+                diarize_value = False
+        try:
+            diarize = whisper_runner.require_boolean(
+                diarize_value, "diarize")
+            consent_given = whisper_runner.require_boolean(
+                body.get("consent_given", False),
+                "consent_given",
+            )
+        except ValueError as error:
+            return self._send_json(400, {
+                "ok": False,
+                "error": str(error)})
 
         episode = podcasts.get_episode(_get_index(), episode_id)
         if episode is None:
@@ -10340,13 +10358,8 @@ class Handler(BaseHTTPRequestHandler):
                           "not bundled with the helper to keep the "
                           "install footprint small).")})
 
-        settings = _read_settings() or {}
         model = whisper_runner.normalize_model(
             body.get("model") or settings.get("whisper_model"))
-        diarize = bool(body.get("diarize")
-                         if body.get("diarize") is not None
-                         else settings.get("diarization_default"))
-        consent_given = bool(body.get("consent_given"))
         language = body.get("language")
 
         # Flip the row state so the dashboard's Activity tab shows the
