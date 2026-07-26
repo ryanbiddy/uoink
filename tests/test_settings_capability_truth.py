@@ -62,7 +62,19 @@ def test_claim_settings_describe_explicit_agent_work_not_automatic_scan():
 
 
 def test_explicit_evidence_workflow_remains_available():
-    assert 'id="runEvidenceClaims"' in DASHBOARD
-    assert 'authFetch("/claims/extract"' in DASHBOARD
+    # Integration note: this is CX-30's negative control -- it proves that
+    # removing the phantom claim-verification *settings* did not remove the
+    # real, explicit evidence workflow. It originally witnessed that via the
+    # dashboard's "Run claim scan" button (id="runEvidenceClaims") and its
+    # POST to /claims/extract. CX-31 (#254) subsequently proved that button
+    # was itself a no-op -- it posted an empty claim list and then reported
+    # success -- and removed it. The control is therefore re-pointed at the
+    # evidence surfaces that are genuinely live after both repairs. Both
+    # intents hold: the phantom settings are gone, the no-op action is gone,
+    # and the real agent-owned workflow is still reachable.
+    assert 'id="reloadEvidence"' in DASHBOARD
+    assert "authFetch(`/claims/${encodeURIComponent(videoId)}`)" in DASHBOARD
+    assert "data-verify-claim=" in DASHBOARD
+    assert "authFetch(`/claims/${encodeURIComponent(claimId)}/verify`" in DASHBOARD
     assert '"extract_claims": ToolSpec(' in MCP
     assert '"verify_claim": ToolSpec(' in MCP
