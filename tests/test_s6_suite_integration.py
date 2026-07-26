@@ -530,6 +530,45 @@ def test_engagement_validation_is_exact_and_bounded():
         assert raised.value.retryable is False
 
 
+@pytest.mark.parametrize(
+    "item_ref",
+    (
+        "uoink://item/a b",
+        "uoink://item/bad%ZZ",
+        "uoink://item/%e2%9c%93",
+        "uoink://item/%41",
+    ),
+)
+def test_engagement_rejects_noncanonical_item_references(item_ref):
+    payload = {
+        "contract": "uoink.engagement.ingest",
+        "version": 1,
+        "events": [{**_event("bad-ref"), "item_ref": item_ref}],
+    }
+
+    with pytest.raises(
+        engagement_contract.ContractError,
+        match="identify one corpus item",
+    ):
+        engagement_contract.parse_request(payload)
+
+
+def test_engagement_accepts_and_decodes_a_canonical_item_reference():
+    payload = {
+        "contract": "uoink.engagement.ingest",
+        "version": 1,
+        "events": [{
+            **_event("encoded-ref"),
+            "item_ref": "uoink://item/a%20b",
+        }],
+    }
+
+    parsed = engagement_contract.parse_request(payload)
+
+    assert engagement_contract.item_id_from_ref(
+        parsed[0]["item_ref"]) == "a b"
+
+
 def test_engagement_transaction_rolls_back_all_accepted_events(tmp_path):
     idx = index_mod.Index.open(tmp_path / "index.db")
     try:
@@ -619,3 +658,24 @@ def test_engagement_http_contract_and_auth(live_server, tmp_path):
     assert status == 400
     assert payload["contract"] == "uoink.engagement.ingest"
     assert payload["error"]["code"] == "invalid_request"
+
+    hostile = {
+        **body,
+        "events": [{
+            **_event("writer-noncanonical"),
+            "item_ref": "uoink://item/bad%ZZ",
+        }],
+    }
+    status, payload = _request(
+        port,
+        "POST",
+        "/api/engagement/v1/events",
+        body=hostile,
+    )
+    assert status == 400
+    assert payload["error"]["code"] == "invalid_request"
+    stored = idx._conn.execute(
+        "SELECT COUNT(*) FROM engagement_events "
+        "WHERE event_id = 'writer-noncanonical'"
+    ).fetchone()[0]
+    assert stored == 0
