@@ -4320,9 +4320,8 @@
             </div>
 
             <div class="setting-block">
-              <h2>Claim verification</h2>
-              <p class="setting-copy">When on, every uoink's transcript is scanned for checkable factual claims. Evidence is shown for your judgment. Uoink never auto-asserts truth.</p>
-              <label class="inline-row"><input id="claimVerificationToggle" type="checkbox"> Scan new uoinks for claims worth verifying</label>
+              <h2>Claim evidence</h2>
+              <p class="setting-copy">Claim extraction and evidence review are agent-initiated. Uoink does not search the web or automatically scan every capture; use the Evidence tab with a connected agent, then decide what submitted evidence means.</p>
             </div>
 
             <div class="setting-block">
@@ -4794,7 +4793,6 @@
       claimCount: document.getElementById("claimCount"),
       evidenceContext: document.getElementById("evidenceContext"),
       claimList: document.getElementById("claimList"),
-      claimVerificationToggle: document.getElementById("claimVerificationToggle"),
       autoUoinkToggle: document.getElementById("autoUoinkToggle"),
       autoUoinkStatus: document.getElementById("autoUoinkStatus"),
       autoUoinkScan: document.getElementById("autoUoinkScan"),
@@ -8829,7 +8827,6 @@
         renderOutputFolder(outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
         els.autostartToggle.checked = Boolean(state.settings.autostart);
         els.screenshotCount.value = String(state.settings.screenshot_count ?? state.settings.clipboard_screenshot_cap ?? 4);
-        els.claimVerificationToggle.checked = Boolean(state.settings.claim_verification_enabled);
         els.reliabilityAutoCheck.checked = Boolean(state.settings.transcript_reliability_auto_check);
         els.asrFallbackEnabled.checked = state.settings.asr_fallback_enabled !== false;
         els.voiceWarningsEnabled.checked = state.settings.voice_dna_warnings_enabled !== false;
@@ -11123,7 +11120,6 @@
       els.saveWhisperModel.addEventListener("click", () => {
         saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Transcript checker choice saved.");
       });
-      els.claimVerificationToggle.addEventListener("change", () => saveSettingsPatch({ claim_verification_enabled: els.claimVerificationToggle.checked }, "Claim verification setting updated."));
       if (els.autoUoinkToggle) {
         els.autoUoinkToggle.addEventListener("change", () => saveSettingsPatch({ auto_uoink_enabled: els.autoUoinkToggle.checked }, els.autoUoinkToggle.checked ? "Taste-aware auto-uoink is on." : "Taste-aware auto-uoink is off."));
       }

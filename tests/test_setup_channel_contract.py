@@ -144,7 +144,11 @@ def test_setup_verify_and_recognize_report_real_contract_results():
     )
     recognize = _section(
         'ycRecognizeBtn.addEventListener("click", async () =>',
-        "if (ctTargetLength)",
+        # Integration note: this section-end sentinel was `if (ctTargetLength)`
+        # until CX-30 removed the phantom Creator Tools controls. The obsidian
+        # vault-path listener is the live control that now immediately follows
+        # the recognize handler, so it is the stable end of this section.
+        "if (ctObsidianPath) {",
     )
     on_up = _section(
         "function onServerUp()",

@@ -567,20 +567,10 @@ function setCIControlsEnabled(enabled) {
     ycChannelInput,
     ycAddBtn,
     ycRecognizeBtn,
-    ctWorkspaceFormat,
-    ctTargetLength,
     ctObsidianPath,
-    ctObsidianMirror,
-    cvEnabled,
-    cvSources,
   ];
   for (const el of els) {
     if (el) el.disabled = !enabled;
-  }
-  if (ctStyleSourceRadios) {
-    for (const r of ctStyleSourceRadios) {
-      r.disabled = !enabled;
-    }
   }
   if (!enabled) setCIStatus("Start Uoink Server to manage settings.", "warn");
   if (!enabled && aiCostEstimate) aiCostEstimate.classList.add("hidden");
@@ -611,33 +601,10 @@ function renderCISettings(settings) {
               settings.anthropic_key_set ? "ok" : "warn");
   renderAICostEstimate();
 
-  // Populate Creator Tools
-  if (ctWorkspaceFormat) ctWorkspaceFormat.value = settings.default_workspace_format || "markdown";
-  if (ctTargetLength) {
-    const len = settings.default_target_length || "5m";
-    const lenToVal = { "30s": 0, "60s": 1, "5m": 2, "15m": 3, "30m": 4 };
-    ctTargetLength.value = lenToVal[len] !== undefined ? lenToVal[len] : 2;
-    updateTargetLengthDisplay(ctTargetLength.value);
-  }
-  if (ctStyleSourceRadios) {
-    const source = settings.style_anchors_source || "taste";
-    for (const r of ctStyleSourceRadios) {
-      r.checked = r.value === source;
-    }
-  }
+  // Populate the live memory-mirror setting. Your Channels no longer come from
+  // this settings payload; they load from the persisted /channels registry via
+  // loadYourChannels().
   if (ctObsidianPath) ctObsidianPath.value = settings.obsidian_vault_path || "";
-  if (ctObsidianMirror) ctObsidianMirror.checked = !!settings.mirror_scripts_to_obsidian;
-  
-  // Populate Claim Verification
-  if (cvEnabled) cvEnabled.checked = !!settings.claim_verification_enabled;
-  if (cvSources) {
-    const sources = Array.isArray(settings.default_evidence_sources)
-      ? settings.default_evidence_sources.join("\n")
-      : (settings.default_evidence_sources || "");
-    cvSources.value = sources;
-  }
-  
-  updateCreatorToolsVisibility();
 }
 
 async function fetchPricingWithToken(token) {
@@ -1424,17 +1391,8 @@ const ycList = document.getElementById("yc-list");
 const ycRecognizeBtn = document.getElementById("yc-recognize-btn");
 const ycStatus = document.getElementById("yc-status");
 
-const creatorToolsSection = document.getElementById("creator-tools-settings");
-const ctWorkspaceFormat = document.getElementById("ct-workspace-format");
-const ctTargetLength = document.getElementById("ct-target-length");
-const ctLengthDisplay = document.getElementById("ct-length-display");
-const ctStyleSourceRadios = document.getElementsByName("ct-style-source");
-const ctScriptsPath = document.getElementById("ct-scripts-path");
 const ctObsidianPath = document.getElementById("ct-obsidian-path");
-const ctObsidianMirror = document.getElementById("ct-obsidian-mirror");
 
-const cvEnabled = document.getElementById("cv-enabled");
-const cvSources = document.getElementById("cv-sources");
 const cvOverrideInfo = document.getElementById("cv-override-info");
 
 const settingsPendingBanner = document.getElementById("settings-pending-banner");
@@ -1463,7 +1421,6 @@ async function loadYourChannels() {
     }
     yourChannelsList = Array.isArray(data.channels) ? data.channels : [];
     renderYcList();
-    updateCreatorToolsVisibility();
   } catch (err) {
     if (ycStatus) {
       ycStatus.textContent = "Channels unavailable (helper offline)";
@@ -1566,22 +1523,6 @@ function renderYcList() {
   });
 }
 
-function updateCreatorToolsVisibility() {
-  if (creatorToolsSection) {
-    if (yourChannelsList.length >= 1) {
-      creatorToolsSection.classList.remove("hidden");
-    } else {
-      creatorToolsSection.classList.add("hidden");
-    }
-  }
-}
-
-function updateTargetLengthDisplay(val) {
-  if (!ctLengthDisplay) return;
-  const lenVals = { 0: "30s", 1: "60s", 2: "5m", 3: "15m", 4: "30m" };
-  ctLengthDisplay.textContent = lenVals[val] || "5m";
-}
-
 async function verifyChannel(handle, statusEl, btnEl) {
   statusEl.textContent = "Verifying...";
   statusEl.style.color = "var(--text-mute)";
@@ -1616,25 +1557,8 @@ async function verifyChannel(handle, statusEl, btnEl) {
 }
 
 async function saveV3Settings() {
-  const lenVals = { 0: "30s", 1: "60s", 2: "5m", 3: "15m", 4: "30m" };
-  let selectedStyleSource = "taste";
-  if (ctStyleSourceRadios) {
-    for (const r of ctStyleSourceRadios) {
-      if (r.checked) selectedStyleSource = r.value;
-    }
-  }
-  
-  const sourcesText = cvSources ? cvSources.value.trim() : "";
-  const sourcesArray = sourcesText ? sourcesText.split(/\r?\n/).map(s => s.trim()).filter(Boolean) : [];
-
   const body = {
-    default_workspace_format: ctWorkspaceFormat ? ctWorkspaceFormat.value : "markdown",
-    default_target_length: ctTargetLength ? (lenVals[ctTargetLength.value] || "5m") : "5m",
-    style_anchors_source: selectedStyleSource,
-    obsidian_vault_path: ctObsidianPath ? ctObsidianPath.value.trim() : "",
-    mirror_scripts_to_obsidian: ctObsidianMirror ? !!ctObsidianMirror.checked : false,
-    claim_verification_enabled: cvEnabled ? !!cvEnabled.checked : false,
-    default_evidence_sources: sourcesArray
+    obsidian_vault_path: ctObsidianPath ? ctObsidianPath.value.trim() : ""
   };
 
   if (aiSettings) {
@@ -1671,34 +1595,9 @@ async function loadPendingV3Settings() {
     const pending = items.uoink_settings_pending;
     if (pending) {
       if (settingsPendingBanner) settingsPendingBanner.classList.remove("hidden");
-      if (pending.default_workspace_format !== undefined && ctWorkspaceFormat) {
-        ctWorkspaceFormat.value = pending.default_workspace_format;
-      }
-      if (pending.default_target_length !== undefined && ctTargetLength) {
-        const lenToVal = { "30s": 0, "60s": 1, "5m": 2, "15m": 3, "30m": 4 };
-        ctTargetLength.value = lenToVal[pending.default_target_length] !== undefined ? lenToVal[pending.default_target_length] : 2;
-        updateTargetLengthDisplay(ctTargetLength.value);
-      }
-      if (pending.style_anchors_source !== undefined && ctStyleSourceRadios) {
-        for (const r of ctStyleSourceRadios) {
-          r.checked = r.value === pending.style_anchors_source;
-        }
-      }
       if (pending.obsidian_vault_path !== undefined && ctObsidianPath) {
         ctObsidianPath.value = pending.obsidian_vault_path;
       }
-      if (pending.mirror_scripts_to_obsidian !== undefined && ctObsidianMirror) {
-        ctObsidianMirror.checked = !!pending.mirror_scripts_to_obsidian;
-      }
-      if (pending.claim_verification_enabled !== undefined && cvEnabled) {
-        cvEnabled.checked = !!pending.claim_verification_enabled;
-      }
-      if (pending.default_evidence_sources !== undefined && cvSources) {
-        cvSources.value = Array.isArray(pending.default_evidence_sources)
-          ? pending.default_evidence_sources.join("\n")
-          : pending.default_evidence_sources;
-      }
-      updateCreatorToolsVisibility();
     }
   });
 }
@@ -1784,37 +1683,8 @@ if (ycRecognizeBtn) {
   });
 }
 
-if (ctTargetLength) {
-  ctTargetLength.addEventListener("input", (ev) => {
-    updateTargetLengthDisplay(ev.target.value);
-    saveV3Settings();
-  });
-}
-
-if (ctWorkspaceFormat) {
-  ctWorkspaceFormat.addEventListener("change", () => saveV3Settings());
-}
-
-if (ctStyleSourceRadios) {
-  for (const r of ctStyleSourceRadios) {
-    r.addEventListener("change", () => saveV3Settings());
-  }
-}
-
 if (ctObsidianPath) {
   ctObsidianPath.addEventListener("change", () => saveV3Settings());
-}
-
-if (ctObsidianMirror) {
-  ctObsidianMirror.addEventListener("change", () => saveV3Settings());
-}
-
-if (cvEnabled) {
-  cvEnabled.addEventListener("change", () => saveV3Settings());
-}
-
-if (cvSources) {
-  cvSources.addEventListener("change", () => saveV3Settings());
 }
 
 if (cvOverrideInfo) {
