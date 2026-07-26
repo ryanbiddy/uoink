@@ -4638,7 +4638,7 @@
       ["Capture", "mobile-playlist-bridge", "Mobile playlist bridge", "Save on mobile, let the local app pick it up.", "https://uoink.app/features/mobile-playlist-bridge"],
       ["Capture", "universal-page-uoink", "Universal page uoink", "Turn an allowed web page into local markdown and metadata.", "https://uoink.app/features/universal-page-uoink"],
       ["Capture", "twitter-video", "Twitter video", "Capture X videos with creator credit kept close.", "https://uoink.app/twitter"],
-      ["Capture", "podcast-feeds", "Podcast feeds", "Watch RSS feeds and transcribe episodes locally.", "https://uoink.app/features/podcast-feeds"],
+      ["Capture", "podcast-feeds", "Podcast feeds", "Save RSS feeds, then poll, download, and transcribe episodes on demand through local tools.", "https://uoink.app/features/podcast-feeds"],
       ["Library", "memory-search", "Memory search", "Search transcripts, comments, topics, and saved context.", "https://uoink.app/features/memory-search"],
       ["Library", "faceted-classification", "Faceted classification", "Filter by channel, hook, topic, format, performance, and length.", "https://uoink.app/features/faceted-classification"],
       ["Library", "your-channel", "Your Channel", "Mark your own channel and compare against your corpus.", "https://uoink.app/features/your-channel"],
@@ -4661,7 +4661,7 @@
     const SOURCE_CAPABILITIES = [
       ["YouTube video", "shipped", "In-page button, right-click link, playlist bridge", "Transcript, screenshots, comments, facets, hooks", "Library cards, drafts, scripts, and evidence notes"],
       ["X video", "shipped", "Right-click or paste supported X links", "Creator handle, media metadata, transcript when available", "Writing attribution, Library search, source credit in exports"],
-      ["Podcasts / RSS", "shipped", "Feed monitor or one-off episode URL", "Local transcript, speakers, waveform preview, episode facts", "Research packets, scripts, and long-form source memory"],
+      ["Podcasts / RSS", "shipped", "Saved RSS feed; on-demand poll, download, and transcribe tools", "Local transcript, speakers, waveform preview, episode facts", "Research packets, scripts, and long-form source memory"],
       ["Substack", "planned", "Universal page uoink from allowed site", "Article text, author, publication URL, highlights", "Writing citations, quote bank, topic memory"],
       ["LinkedIn videos", "planned", "Universal page uoink once enabled", "Video metadata, creator, transcript where exposed", "B2B source memory and creator attribution"],
       ["Reddit threads", "shipped", "Paste or right-click a Reddit thread URL", "Post, top comments, community, score signals", "Audience questions and research objections"],
@@ -6469,7 +6469,7 @@
           body: JSON.stringify(body),
         });
         if (universalState.source === "podcast_feed") {
-          showToast("Podcast feed added. New episodes transcribe locally.");
+          showToast("Podcast feed saved. Poll, download, and transcribe on demand.");
         } else {
           showToast(`Uoinking that ${label.toLowerCase()}. Track it in Activity.`);
         }
@@ -10504,7 +10504,7 @@
       if (!rows.length) {
         els.podcastFeedList.innerHTML = emptyPanelRow(
           "No podcast feeds yet.",
-          "Paste an RSS feed URL to track new episodes locally."
+          "Paste an RSS feed URL to save it for on-demand processing."
         );
         return;
       }
@@ -10564,7 +10564,7 @@
           body: JSON.stringify({ feed_url: feedUrl }),
         });
         els.podcastFeedUrl.value = "";
-        showToast("Podcast feed added.");
+        showToast("Podcast feed saved. Poll, download, and transcribe on demand.");
         loadPodcastFeedSettings();
       } catch (err) {
         showToast("Couldn't add that feed.");

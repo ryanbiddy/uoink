@@ -887,7 +887,7 @@
     },
     podcast_feed: {
       label: "podcast", endpoint: "/podcasts/feeds", action: "podcast",
-      note: "Adds the RSS feed so new episodes transcribe locally.",
+      note: "Adds the RSS feed. Poll, download, and transcribe episodes on demand.",
     },
     web_page: {
       label: "page", endpoint: "/extract/page", action: "page", note: "",
