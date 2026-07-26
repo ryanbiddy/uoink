@@ -202,6 +202,12 @@ def _shape_segments(segments) -> list[dict]:
     return out
 
 
+def require_boolean(value, field: str) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError(f"{field} must be a boolean")
+    return value
+
+
 def transcribe_audio(audio_path: Path, *,
                       data_root: Path,
                       model_size: str = MODEL_BASE,
@@ -218,6 +224,11 @@ def transcribe_audio(audio_path: Path, *,
     flag is verified before the load_model call -- on first use the
     model dir is empty, and we refuse without consent. The dashboard
     consent dialog records the user's opt-in and re-issues the call."""
+    for field, value in (
+        ("diarize", diarize),
+        ("consent_given", consent_given),
+    ):
+        require_boolean(value, field)
     audio_path = Path(audio_path)
     if not audio_path.exists():
         raise FileNotFoundError(f"audio file missing: {audio_path}")
