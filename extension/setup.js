@@ -1286,7 +1286,7 @@ if (tcSaveBtn) {
       // Fallback to local storage
       console.warn("Failed to POST taste profile, falling back to local storage", e);
       chrome.storage.local.set({ uoink_taste_pending: profile }, () => {
-        tcStatus.textContent = "Taste profile saved locally (syncs later) ✓";
+        tcStatus.textContent = "Taste calibration stored only in this browser; it is not synced to the helper.";
         tcStatus.className = "settings-status ok";
         if (tcPendingNote) tcPendingNote.classList.remove("hidden");
         scrollToNext();

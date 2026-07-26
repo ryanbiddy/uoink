@@ -653,7 +653,7 @@
 
     <!-- Settings will sync banner -->
     <div id="settings-pending-banner" class="cost-estimate hidden" style="margin-bottom:20px; border-color:var(--rust-bright); background:rgba(249, 115, 22, 0.08); color:var(--rust-bright); font-weight:600;">
-      ⚠️ Settings will sync once helper updates (currently stored locally).
+      ⚠️ Settings are stored only in this browser. They are not synced to the helper; start Uoink, then change a setting again to apply it.
     </div>
 
     <section id="helper-status-section" class="step">
@@ -839,8 +839,10 @@
       </div>
     </section>
 
-    <!-- Taste calibration onboarding step (Sprint 3) -->
-    <section id="taste-calibration-onboarding" class="step">
+    <!-- The calibration UI's legacy payload does not match the helper's
+         section/content taste contract. Keep it unavailable until one
+         end-to-end contract owns admired channels, hook ratings, and avoids. -->
+    <section id="taste-calibration-onboarding" class="step hidden">
       <div class="step-head">
         <div class="step-num"><span class="step-num-text">TC</span></div>
         <h2>60-second Taste Calibration</h2>
@@ -914,7 +916,7 @@
 
       <div id="tc-status" class="settings-status" style="margin-top:14px; min-height:20px; font-weight:600;"></div>
       <div id="tc-pending-note" class="cost-estimate hidden" style="margin-top:12px; border-color:var(--rust-bright); background:rgba(249, 115, 22, 0.08); color:var(--rust-bright); font-weight:600;">
-        Will sync to your helper after v2.5 lands
+        Taste calibration is stored only in this browser and is not synced to the helper.
       </div>
 
       <div class="button-row" style="margin-top:16px;">
@@ -974,7 +976,7 @@
       </div>
       <div id="ta-status" class="settings-status" style="margin-top:14px; min-height:20px; font-weight:600;"></div>
       <div id="ta-pending-note" class="cost-estimate hidden" style="margin-top:12px; border-color:var(--rust-bright); background:rgba(249, 115, 22, 0.08); color:var(--rust-bright); font-weight:600;">
-        Will sync to your helper after v2.5 lands
+        Showing browser-only fallback data; it is not synced to the helper.
       </div>
     </section>
 
