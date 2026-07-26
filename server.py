@@ -14306,6 +14306,42 @@ def doctor_payload() -> dict:
     }
 
 
+_CLI_USAGE = (
+    "usage: python server.py "
+    "[--show-dashboard | --doctor | --migrate-dry-run | "
+    "--heal-paths [folder] | --export-corpus | --import-corpus <file> | "
+    "--rebuild-index [folder] | --backfill-authors [--dry-run]]"
+)
+_CLI_SINGLE_FLAGS = {
+    "--show-dashboard",
+    "--doctor",
+    "--migrate-dry-run",
+    "--heal-paths",
+    "--export-corpus",
+    "--import-corpus",
+    "--rebuild-index",
+    "--backfill-authors",
+}
+_CLI_KNOWN_FLAGS = _CLI_SINGLE_FLAGS | {"-h", "--help", "--dry-run"}
+_CLI_OPTIONAL_PATH_FLAGS = {"--heal-paths", "--rebuild-index"}
+
+
+def _cli_arguments_valid(argv: list[str]) -> bool:
+    if not argv:
+        return True
+    if len(argv) == 1 and argv[0] in _CLI_SINGLE_FLAGS:
+        return True
+    if argv == ["--backfill-authors", "--dry-run"]:
+        return True
+    if (
+        len(argv) == 2
+        and argv[0] in _CLI_OPTIONAL_PATH_FLAGS | {"--import-corpus"}
+        and not argv[1].startswith("--")
+    ):
+        return True
+    return False
+
+
 def run_cli(argv: list[str]) -> int:
     """Tiny CLI dispatcher for the helper. Returns a process exit code.
 
@@ -14326,6 +14362,21 @@ def run_cli(argv: list[str]) -> int:
     - --show-dashboard  : run the server, then open the dashboard window.
     (no flag)           : run the server.
     """
+    if argv in (["-h"], ["--help"]):
+        print(_CLI_USAGE)
+        return 0
+    if not _cli_arguments_valid(argv):
+        unknown = next(
+            (arg for arg in argv if arg.startswith("-")
+             and arg not in _CLI_KNOWN_FLAGS),
+            None,
+        )
+        if unknown is not None:
+            detail = f"unknown argument {unknown!r}"
+        else:
+            detail = f"unsupported argument combination: {argv!r}"
+        print(f"{detail}\n{_CLI_USAGE}", file=sys.stderr)
+        return 2
     if "--backfill-authors" in argv:
         # Phase 2 (categorization): the SQL migration set platform + YouTube
         # author; this reads each non-YouTube sidecar for the real author and
