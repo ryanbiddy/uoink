@@ -3539,8 +3539,8 @@
                   <div class="workspace-pane" data-workspace-pane="critique">
                     <textarea class="field draft-box" id="workspaceDraft" placeholder="Paste a draft hook, outline, or rough script."></textarea>
                     <div class="inline-row">
-                      <button class="button primary" type="button" id="runWorkspaceCritique">Run critique</button>
-                      <span class="soft-note">Any agent can post findings back; Uoink stores them here.</span>
+                      <button class="button primary" type="button" id="prepareWorkspaceCritiqueContext">Prepare critique context</button>
+                      <span class="soft-note">This prepares corpus context for a connected agent; Uoink does not run the critique itself.</span>
                     </div>
                     <div id="workspaceCritiqueResult"></div>
                   </div>
@@ -6913,19 +6913,19 @@
       }
     }
 
-    async function runWorkspaceCritique() {
+    async function prepareWorkspaceCritiqueContext() {
       const ws = state.currentWorkspace;
       const draft = els.workspaceDraft.value.trim();
       if (!ws || !ws.id) return showToast("Select a workspace first.");
-      if (!draft) return showToast("Paste a draft before running critique.");
+      if (!draft) return showToast("Paste a draft before preparing critique context.");
       try {
         const data = await authFetch("/workspace/critique", {
           method: "POST",
           body: JSON.stringify({ workspace_id: ws.id, draft_text: draft }),
         });
-        els.workspaceCritiqueResult.innerHTML = `<div class="job-row"><div class="job-title">${htmlEscape(data.mode || "Critique context ready")}</div>${markdownBox(objectToMarkdown(data))}</div>`;
+        els.workspaceCritiqueResult.innerHTML = `<div class="job-row"><div class="job-title">Context ready for a connected agent</div>${markdownBox(objectToMarkdown(data))}</div>`;
       } catch (err) {
-        showToast("Couldn't run critique yet.");
+        showToast("Couldn't prepare critique context yet.");
       }
     }
 
@@ -10856,7 +10856,7 @@
       });
       els.workspaceForm.addEventListener("submit", createWorkspaceFromForm);
       document.getElementById("assembleCurrentWorkspace").addEventListener("click", assembleCurrentWorkspace);
-      document.getElementById("runWorkspaceCritique").addEventListener("click", runWorkspaceCritique);
+      document.getElementById("prepareWorkspaceCritiqueContext").addEventListener("click", prepareWorkspaceCritiqueContext);
       document.getElementById("reloadScripts").addEventListener("click", loadScripts);
       document.getElementById("reviseScript").addEventListener("click", () => reviseCurrentScript({ persist: false }));
       document.getElementById("saveScriptRevision").addEventListener("click", () => reviseCurrentScript({ persist: Boolean(els.scriptRevisionDraft.value.trim()) }));
