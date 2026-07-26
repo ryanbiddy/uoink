@@ -2,9 +2,9 @@
 
 Per ROADMAP + PROMPT-V3.1: branding decision -- expand Uoink to cover
 podcasts (one tool, one corpus). This module ships the RSS feed
-registry + the polling pipeline that materialises new episodes. The
-audio download + Whisper transcription layers land in subsequent PRs
-in CC's queue (track B step 2 + step 3).
+registry, on-demand polling that materialises episodes, and the
+opt-in audio-download pipeline. WhisperX transcription is implemented
+in whisper_runner.py and exposed through the HTTP and MCP surfaces.
 
 Compute (locked policy: model-agnostic + local-first):
 - RSS XML parsing uses Python's stdlib xml.etree.ElementTree -- no
@@ -14,9 +14,9 @@ Compute (locked policy: model-agnostic + local-first):
   headers when the feed previously returned them, so a daily news
   podcast doesn't re-download an unchanged feed body on every poll.
 
-The polling worker lives in server.py (consumes _maybe_poll_feeds);
-this module owns the parse + persistence layer + helper functions.
-Transport (HTTP + MCP) is owned by server.py + uoink_mcp_tools.py."""
+Polling is invoked on demand through the HTTP and MCP surfaces; this
+module owns the parse, persistence, and audio-download helpers.
+Transport is owned by server.py + uoink_mcp_tools.py."""
 
 from __future__ import annotations
 
@@ -34,10 +34,10 @@ from urllib.parse import urlparse
 
 log = logging.getLogger("uoink.podcasts")
 
-# Bounded enum for the episode status flow. The dashboard renders
-# 'new' as an unread chip; 'queued' once the user opts in to download
-# (next PR); 'downloaded' + 'transcribed' as the audio + transcript
-# pipeline progresses; 'ignored' if the user dismisses.
+# Bounded enum for the episode status flow. 'new' means discovered;
+# 'queued' means a caller opted in to download through HTTP or MCP;
+# 'downloaded' + 'transcribed' track the audio + transcript pipeline;
+# 'ignored' means a caller dismissed the episode.
 EPISODE_STATUS_NEW = "new"
 EPISODE_STATUS_QUEUED = "queued"
 EPISODE_STATUS_DOWNLOADED = "downloaded"
@@ -49,8 +49,9 @@ _EPISODE_STATUSES = (
 )
 
 # Cap how many episodes we materialise per poll so a freshly-added feed
-# with 800 back-episodes doesn't flood the dashboard. The user opts
-# in via "load more" (a follow-up endpoint not in this PR).
+# with 800 back-episodes doesn't flood local storage. The current
+# on-demand poll has no load-more path, so older back-catalog entries
+# beyond this cap are not materialised.
 _EPISODES_PER_POLL_CAP = 50
 
 # Polite HTTP timeout for feed GETs. Most podcasts host on Libsyn /

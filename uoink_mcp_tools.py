@@ -747,8 +747,8 @@ def download_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
     Synchronous. Returns when the file lands at
     <data_root>/Podcasts/<feed-slug>/<episode-slug>.mp3 or yt-dlp
     errors. Idempotent -- skips re-download when the canonical path
-    already has a non-zero file. The transcription pipeline (next
-    PR in CC's queue) reads audio_local_path to feed WhisperX."""
+    already has a non-zero file. The live transcription pipeline reads
+    audio_local_path to feed WhisperX."""
     server = _b()
     import podcasts as _pod
     try:
