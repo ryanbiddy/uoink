@@ -9744,11 +9744,9 @@ class Handler(BaseHTTPRequestHandler):
     def _handle_claims_verify(self, bare: str, body):
         """POST /claims/<id>/verify  -- record evidence for one claim.
 
-        Opt-in per claim: the user (or the agent acting on the user's
-        behalf) explicitly verifies a claim. The /settings flag
-        `claim_verification_enabled` gates batch / auto-verify flows
-        upstream of this endpoint, but the endpoint itself is always
-        available -- a single explicit verification is consent enough."""
+        Verification is explicit: the user or calling agent submits the
+        evidence. This endpoint records that supplied evidence; it does not
+        retrieve sources or launch automatic verification."""
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})

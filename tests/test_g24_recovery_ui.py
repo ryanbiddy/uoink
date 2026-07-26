@@ -20,13 +20,11 @@ def test_recovery_actions_exist() -> None:
     for marker in (
         'id="yoinkOpenMarkdown"',
         'id="yoinkRetryCapture"',
-        'id="runEvidenceClaims"',
         "Open transcript file",
         "Re-capture source",
-        "Run claim scan",
     ):
         require(marker in DASHBOARD, f"missing recovery UI marker: {marker}")
-    print("ok  detail and Evidence recovery actions render")
+    print("ok  detail recovery actions render")
 
 
 def test_backend_contracts_are_wired() -> None:
@@ -34,12 +32,11 @@ def test_backend_contracts_are_wired() -> None:
         "/markdown`)",
         "/open-markdown`)",
         "/reyoink`",
-        'authFetch("/claims/extract"',
     ):
         require(marker in DASHBOARD, f"missing recovery endpoint wiring: {marker}")
     require("state.selectedYoinkMarkdown" in DASHBOARD,
             "detail view does not keep markdown preview state")
-    print("ok  markdown, re-capture, and claim-scan endpoints are wired")
+    print("ok  markdown and re-capture endpoints are wired")
 
 
 def test_dead_end_copy_removed() -> None:
