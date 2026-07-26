@@ -121,6 +121,25 @@ def test_security_model_lists_every_public_get_surface() -> None:
         assert f"`GET {route}`" in public
 
 
+def test_historical_auth_docs_do_not_claim_stale_exclusive_route_lists() -> None:
+    tier_2 = (ROOT / "docs" / "tier-2-contracts.md").read_text(encoding="utf-8")
+    prelaunch = (ROOT / "docs" / "v2-prelaunch-review.md").read_text(
+        encoding="utf-8"
+    )
+    tier_2_words = " ".join(tier_2.split())
+    prelaunch_words = " ".join(prelaunch.split())
+
+    assert "**except** the public" not in tier_2_words
+    assert "Status: **HISTORICAL**" in tier_2
+    assert "complete public-route inventory" in tier_2_words
+    assert "[`docs/security.md`](security.md)" in tier_2
+
+    assert "are the only unauthenticated GET paths" not in prelaunch
+    assert "At the time of this v2 review" in prelaunch_words
+    assert "current, tested inventory" in prelaunch_words
+    assert "[`docs/security.md`](security.md)" in prelaunch
+
+
 def test_security_model_does_not_promise_removed_live_aliases() -> None:
     security = (ROOT / "docs" / "security.md").read_text(encoding="utf-8")
     server_source = (ROOT / "server.py").read_text(encoding="utf-8")
