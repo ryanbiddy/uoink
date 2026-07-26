@@ -1550,7 +1550,9 @@ def uoink_page(args: dict[str, Any]) -> dict[str, Any]:
         return _err("url (string) is required")
     render_mode = (args.get("render_mode")
                     or _pe.RENDER_MODE_JS).strip().lower()
-    include_screenshot = bool(args.get("include_screenshot", True))
+    include_screenshot = args.get("include_screenshot", True)
+    if not isinstance(include_screenshot, bool):
+        return _err("include_screenshot must be a boolean")
     try:
         follow_depth = int(args.get("follow_links_depth", 0))
     except (TypeError, ValueError):
