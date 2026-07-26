@@ -3876,7 +3876,6 @@
               <p class="lede">Assistance only. Uoink surfaces checkable claims and evidence signals; you decide what the evidence means.</p>
             </div>
             <div class="inline-row">
-              <button class="button ghost" type="button" id="runEvidenceClaims" disabled>Run claim scan</button>
               <button class="button ghost" type="button" id="reloadEvidence">Reload</button>
             </div>
           </div>
@@ -4796,7 +4795,6 @@
       autoUoinkToggle: document.getElementById("autoUoinkToggle"),
       autoUoinkStatus: document.getElementById("autoUoinkStatus"),
       autoUoinkScan: document.getElementById("autoUoinkScan"),
-      runEvidenceClaims: document.getElementById("runEvidenceClaims"),
       yoinkHeading: document.getElementById("yoinkHeading"),
       yoinkSubhead: document.getElementById("yoinkSubhead"),
       yoinkTitle: document.getElementById("yoinkTitle"),
@@ -6093,21 +6091,6 @@
         showToast(err.message.includes("source link")
           ? "No source link is stored for this uoink."
           : "Couldn't queue a fresh capture.");
-      }
-    }
-
-    async function runClaimsForSelectedEvidence() {
-      const videoId = state.selectedEvidenceVideo || evidenceVideoIdOf(state.selectedYoink, state.selectedYoinkSidecar || {});
-      if (!videoId) return showToast("Pick a uoink before running a claim scan.");
-      try {
-        await authFetch("/claims/extract", {
-          method: "POST",
-          body: JSON.stringify({ video_id: videoId, claims: [], mode: "agent" }),
-        });
-        showToast("Claim scan ready for an agent pass.");
-        await loadEvidence();
-      } catch (err) {
-        showToast("Couldn't prepare the claim scan.");
       }
     }
 
@@ -7420,7 +7403,6 @@
 
     async function loadEvidence() {
       const videoId = state.selectedEvidenceVideo;
-      els.runEvidenceClaims.disabled = !videoId;
       if (!videoId) {
         renderEvidenceEmpty();
         return;
@@ -7428,10 +7410,7 @@
       els.evidenceContext.innerHTML = `
         <div class="job-row">
           <div class="job-title">${htmlEscape(state.selectedEvidenceTitle || videoId)}</div>
-          <div class="job-sub">Ready for an evidence review. Uoink stores signals here for your judgment.</div>
-          <div class="inline-row">
-            <button class="button ghost" type="button" data-run-claims>Run claim scan</button>
-          </div>
+          <div class="job-sub">A connected agent must submit claims before they appear here. Reload after the agent finishes.</div>
         </div>
       `;
       try {
@@ -7449,7 +7428,6 @@
       state.claims = [];
       if (els.evidenceNavCount) els.evidenceNavCount.textContent = "0";
       els.claimCount.textContent = "0";
-      els.runEvidenceClaims.disabled = true;
       els.evidenceContext.innerHTML = `<div class="teach-card"><div class="teach-kicker">Evidence</div><strong>Pick a uoink to inspect claims.</strong><p>Library, For You, and workspace cards can load their evidence notes into this panel.</p></div>`;
       els.claimList.innerHTML = `<div class="teach-card"><div class="teach-kicker">Evidence notes</div><strong>Evidence signals appear after selection.</strong><p>Uoink records signals for your review. You still decide what the evidence means.</p></div>`;
     }
@@ -7493,10 +7471,7 @@
         : `
           <div class="job-row">
             <div class="job-title">No claims saved for this uoink yet.</div>
-            <div class="job-sub">Run a claim scan with an agent, then Uoink will store evidence notes here.</div>
-            <div class="inline-row">
-              <button class="button" type="button" data-run-claims>Run claim scan</button>
-            </div>
+            <div class="job-sub">A connected agent must submit claims before they appear here. Reload after the agent finishes.</div>
           </div>
         `;
     }
@@ -10995,7 +10970,6 @@
       });
       els.defaultAnchorsModal.addEventListener("keydown", (event) => trapModalFocus(event, els.defaultAnchorsModal, closeDefaultAnchorsModal));
       document.getElementById("reloadEvidence").addEventListener("click", loadEvidence);
-      els.runEvidenceClaims.addEventListener("click", runClaimsForSelectedEvidence);
       els.yoinkOpenFolder.addEventListener("click", () => {
         const folder = folderPathOf(state.selectedYoink);
         if (folder) authFetch(`/open-folder?path=${encodeURIComponent(folder)}`).catch(() => showToast("Couldn't open that folder."));
@@ -11368,11 +11342,6 @@
         const verifyClaim = event.target.closest("[data-verify-claim]");
         if (verifyClaim) {
           recordClaimEvidence(verifyClaim.dataset.verifyClaim);
-          return;
-        }
-        const runClaims = event.target.closest("[data-run-claims]");
-        if (runClaims) {
-          runClaimsForSelectedEvidence();
           return;
         }
         const skipClaimButton = event.target.closest("[data-skip-claim]");
