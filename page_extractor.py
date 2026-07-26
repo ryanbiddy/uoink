@@ -447,6 +447,11 @@ def extract_page(idx, url: str, *,
     The allowlist gate runs by default. Callers that need to bypass
     (e.g., the Writing Studio URL anchor ingestion that wraps this
     function) pass enforce_allowlist=False."""
+    if not isinstance(include_screenshot, bool):
+        return {
+            "ok": False,
+            "error": "include_screenshot must be a boolean",
+        }
     canonical = normalize_page_url(url)
     if not canonical:
         return {"ok": False,
