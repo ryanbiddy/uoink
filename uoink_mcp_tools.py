@@ -1288,8 +1288,8 @@ def _byo_generate(kind, args):
             angle=args.get("angle"),
             target_length=target_length,
             parent_id=args.get("parent_id"),
-            skip_voice_dna_this_time=bool(
-                args.get("skip_voice_dna_this_time")),
+            skip_voice_dna_this_time=args.get(
+                "skip_voice_dna_this_time", False),
             source_credit_line=credit or args.get("source_credit_line"),
             mode=_ws.COMPUTE_MODE_BYO_KEY)
     except ValueError as e:
@@ -1333,9 +1333,23 @@ def _byo_extract_json(text):
 def _byo_requested(args) -> bool:
     """True when the caller asked the helper to generate server-side (Path C)
     rather than just return grounding for an agent to write."""
-    if args.get("generate") in (True, "true", "1", 1):
+    if args.get("generate") is True:
         return True
     return args.get("compute_mode") == "byo_key"
+
+
+def _writing_boolean_defect(args, ws) -> str | None:
+    try:
+        for field in (
+            "generate",
+            "skip_voice_dna_this_time",
+            "suppress_credit",
+        ):
+            if field in args:
+                ws._require_boolean(args[field], field)
+    except ValueError as error:
+        return str(error)
+    return None
 
 
 def write_tweet(args: dict[str, Any]) -> dict[str, Any]:
@@ -1346,6 +1360,9 @@ def write_tweet(args: dict[str, Any]) -> dict[str, Any]:
     `body` present -> persists + scans + returns warnings (NEVER
     auto-blocks; see VOICE-DNA.md soft-warn policy)."""
     import writing_studio as _ws  # noqa: WPS433
+    boolean_defect = _writing_boolean_defect(args, _ws)
+    if boolean_defect is not None:
+        return _err(boolean_defect)
     kind = args.get("kind") or _ws.KIND_TWEET
     if kind not in (_ws.KIND_TWEET, _ws.KIND_THREAD):
         return _err("kind must be tweet or thread")
@@ -1379,9 +1396,9 @@ def write_tweet(args: dict[str, Any]) -> dict[str, Any]:
             angle=args.get("angle"),
             target_length=args.get("target_length_chars"),
             parent_id=args.get("parent_id"),
-            suppress_credit=bool(args.get("suppress_credit")),
-            skip_voice_dna_this_time=bool(
-                args.get("skip_voice_dna_this_time")),
+            suppress_credit=args.get("suppress_credit", False),
+            skip_voice_dna_this_time=args.get(
+                "skip_voice_dna_this_time", False),
             source_credit_line=args.get("source_credit_line"))
     except ValueError as e:
         return _err(str(e))
@@ -1399,6 +1416,9 @@ def write_blog(args: dict[str, Any]) -> dict[str, Any]:
     """v3.2 Writing Studio (blog): same two-phase contract as
     write_tweet. Phase 2 also accepts `title`, `dek`, `tags`."""
     import writing_studio as _ws  # noqa: WPS433
+    boolean_defect = _writing_boolean_defect(args, _ws)
+    if boolean_defect is not None:
+        return _err(boolean_defect)
     if args.get("kind") not in (None, "", _ws.KIND_BLOG):
         return _err("kind must be blog")
     yoink_id = (args.get("source_yoink_id")
@@ -1431,9 +1451,9 @@ def write_blog(args: dict[str, Any]) -> dict[str, Any]:
             angle=args.get("angle"),
             target_length=args.get("target_length_words"),
             parent_id=args.get("parent_id"),
-            suppress_credit=bool(args.get("suppress_credit")),
-            skip_voice_dna_this_time=bool(
-                args.get("skip_voice_dna_this_time")),
+            suppress_credit=args.get("suppress_credit", False),
+            skip_voice_dna_this_time=args.get(
+                "skip_voice_dna_this_time", False),
             source_credit_line=args.get("source_credit_line"))
     except ValueError as e:
         return _err(str(e))

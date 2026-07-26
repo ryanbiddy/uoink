@@ -10869,6 +10869,18 @@ class Handler(BaseHTTPRequestHandler):
         line included -> persist + scan + return."""
         if not isinstance(body, dict):
             return 400, {"ok": False, "error": "json object required"}
+        try:
+            for field in (
+                "skip_voice_dna_this_time",
+                "suppress_credit",
+            ):
+                if field in body:
+                    writing_studio._require_boolean(body[field], field)
+        except ValueError as e:
+            return getattr(e, "http_status", 400), {
+                "ok": False,
+                "error": str(e),
+            }
         yoink_id = (body.get("source_yoink_id")
                       or body.get("yoink_id") or "").strip() or None
         style_anchor_ids = body.get("style_anchor_ids") or []
@@ -10936,9 +10948,9 @@ class Handler(BaseHTTPRequestHandler):
                 parent_id=body.get("parent_id"),
                 voice_dna_warnings_enabled=bool(
                     settings.get("voice_dna_warnings_enabled", True)),
-                skip_voice_dna_this_time=bool(
-                    body.get("skip_voice_dna_this_time")),
-                suppress_credit=bool(body.get("suppress_credit")),
+                skip_voice_dna_this_time=body.get(
+                    "skip_voice_dna_this_time", False),
+                suppress_credit=body.get("suppress_credit", False),
             )
         except ValueError as e:
             status = getattr(e, "http_status", 400)

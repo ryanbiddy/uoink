@@ -403,6 +403,14 @@ def _check_credit_present(body: str, credit_line: str) -> bool:
     return False
 
 
+def _require_boolean(value, field: str) -> bool:
+    if not isinstance(value, bool):
+        e = ValueError(f"{field} must be a boolean")
+        e.http_status = 400
+        raise e
+    return value
+
+
 def persist_piece(idx, *, yoink_id: str | None,
                     kind: str,
                     body: str,
@@ -434,6 +442,12 @@ def persist_piece(idx, *, yoink_id: str | None,
       - Otherwise, run voice_dna.scan(body), persist the warnings JSON,
         return them alongside the body. NEVER auto-block.
     """
+    for field, value in (
+        ("voice_dna_warnings_enabled", voice_dna_warnings_enabled),
+        ("skip_voice_dna_this_time", skip_voice_dna_this_time),
+        ("suppress_credit", suppress_credit),
+    ):
+        _require_boolean(value, field)
     if kind not in _KINDS:
         e = ValueError(f"kind must be one of {list(_KINDS)}")
         e.http_status = 400
