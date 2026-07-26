@@ -23,6 +23,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
+import record_id_contract as _record_id_contract
+
 
 _backend = None
 
@@ -683,12 +685,14 @@ def list_podcast_feeds(args: dict[str, Any]) -> dict[str, Any]:
 
 def remove_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
     """v3.1 podcast: delete a feed + cascade its episodes."""
+    # Identity is validated before the backend is touched: int() would
+    # coerce true/"1"/1.0 to feed 1 and cascade-delete its episodes.
+    feed_id, id_error = _record_id_contract.parse_record_id(
+        args.get("feed_id"), "feed_id")
+    if id_error:
+        return _err(id_error)
     server = _b()
     import podcasts as _pod
-    try:
-        feed_id = int(args.get("feed_id"))
-    except (TypeError, ValueError):
-        return _err("feed_id (integer) is required")
     try:
         removed = _pod.remove_feed(server._get_index(), feed_id)
     except Exception as e:
@@ -886,12 +890,14 @@ def list_monitored_playlists(args: dict[str, Any]) -> dict[str, Any]:
 def remove_monitored_playlist(args: dict[str, Any]) -> dict[str, Any]:
     """v3.1 mobile bridge: delete a playlist + cascade its discovery
     events."""
+    # Identity is validated before the backend is touched: int() would
+    # coerce true/"1"/1.0 to playlist 1 and cascade-delete its events.
+    playlist_id, id_error = _record_id_contract.parse_record_id(
+        args.get("playlist_id"), "playlist_id")
+    if id_error:
+        return _err(id_error)
     server = _b()
     import mobile_playlists as _mp
-    try:
-        playlist_id = int(args.get("playlist_id"))
-    except (TypeError, ValueError):
-        return _err("playlist_id (integer) is required")
     try:
         removed = _mp.remove_playlist(server._get_index(), playlist_id)
     except Exception as e:
