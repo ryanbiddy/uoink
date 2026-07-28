@@ -193,7 +193,7 @@ Success response: HTTP 200
   "ok": true,
   "model": {
     "model": "tiny",
-    "model_root": "C:\\Users\\hello\\AppData\\Local\\Uoink\\models\\whisper",
+    "model_root": "C:\\Users\\<you>\\AppData\\Local\\Uoink\\models\\whisper",
     "cached": false,
     "estimated_download_mb": 150
   }
@@ -225,7 +225,7 @@ Success response: HTTP 200
   "downloaded": true,
   "model": {
     "model": "tiny",
-    "model_root": "C:\\Users\\hello\\AppData\\Local\\Uoink\\models\\whisper",
+    "model_root": "C:\\Users\\<you>\\AppData\\Local\\Uoink\\models\\whisper",
     "cached": true,
     "estimated_download_mb": 150
   }
@@ -1511,7 +1511,7 @@ Success response (immediate): HTTP 200
 ```json
 {
   "ok": true,
-  "folder": "C:\\Users\\hello\\Desktop\\Uoink\\Music\\rick-astley-never-gonna-give-you-up",
+  "folder": "C:\\Users\\<you>\\Desktop\\Uoink\\Music\\rick-astley-never-gonna-give-you-up",
   "slug": "rick-astley-never-gonna-give-you-up"
 }
 ```

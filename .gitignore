@@ -4,7 +4,26 @@ __pycache__/
 server.log
 server.pid
 token.txt
+
+# Secrets and local credential material. `.env` alone missed variants like
+# `.env.local` / `.env.production`, and nothing covered key material, local
+# databases, or logs beyond `server.log`. These are belt-and-braces: none of
+# these have ever been committed and it should stay that way.
 .env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+credentials.json
+*.log
+*.db
+*.sqlite
+*.sqlite3
+index.db
+
 dist/
 build/
 installer/staging/

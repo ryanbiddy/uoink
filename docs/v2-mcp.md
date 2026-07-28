@@ -87,7 +87,7 @@ Dev command:
   "mcpServers": {
     "uoink": {
       "command": "python",
-      "args": ["C:\\Users\\hello\\OneDrive\\Desktop\\Yoink-codex-v2\\uoink_mcp.py"]
+      "args": ["C:\\Users\\<you>\\OneDrive\\Desktop\\Yoink-codex-v2\\uoink_mcp.py"]
     }
   }
 }
