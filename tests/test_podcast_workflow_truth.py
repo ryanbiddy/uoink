@@ -63,3 +63,25 @@ def test_developer_docs_and_code_describe_the_live_scheduler():
     assert "defaults off" in mcp_tools
     assert "every 30 seconds" in api_docs
     assert "defaults to `false`" in mcp_docs
+
+
+def test_podcast_timestamp_docs_do_not_promise_player_seeking():
+    schema_docs = _text("docs/schema.md")
+    normalized_schema = " ".join(schema_docs.split())
+    assert (
+        "Fragment seeking depends on the target player; the visible "
+        "`HH:MM:SS` label is the authoritative reference."
+    ) in normalized_schema
+
+    developer_docs = "\n".join([
+        schema_docs,
+        _text("docs/v2-api.md"),
+        _text("docs/v2-mcp.md"),
+        _text("docs/surface-maps/source-taxonomy.md"),
+    ]).lower()
+    for unsupported_claim in (
+        "opens at the exact timestamp",
+        "jumps to the timestamp",
+        "seeks directly to",
+    ):
+        assert unsupported_claim not in developer_docs

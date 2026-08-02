@@ -138,6 +138,75 @@ def test_transcription_preflight_observes_consent_and_restart_requeues(
     idx.close()
 
 
+def test_restarted_job_reuses_a_completed_transcript(tmp_path, monkeypatch):
+    idx = index_mod.Index.open(tmp_path / "index.db")
+    episode_id = _seed_downloaded_episodes(idx, tmp_path, count=1)[0]
+    episode = podcasts.get_episode(idx, episode_id)
+    audio_path = Path(episode["audio_local_path"])
+    transcript = {
+        "model": "base",
+        "language": "en",
+        "diarization_ran": False,
+        "segments": [
+            {"start": 0.0, "end": 1.0, "text": "Already complete"}
+        ],
+    }
+    transcript_path = server.whisper_runner.write_transcript(
+        transcript, audio_path=audio_path)
+    server.whisper_runner.update_episode_transcript_state(
+        idx,
+        episode_id,
+        status=server.whisper_runner.STATUS_DONE,
+        transcript_path=transcript_path,
+        model_used="base",
+    )
+    restored = server._validate_persisted_job({
+        "id": "job_restart_reuse",
+        "kind": "podcast_transcribe",
+        "state": "running",
+        "episode_id": episode_id,
+        "model": "base",
+        "audio_path": str(audio_path),
+        "consent_given": True,
+        "progress": 95,
+    })
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(
+        server.whisper_runner,
+        "transcribe_audio",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("a reusable DONE transcript must skip Whisper")
+        ),
+    )
+    monkeypatch.setattr(
+        server.whisper_runner,
+        "write_transcript",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("a reusable transcript must not be rewritten")
+        ),
+    )
+    with server._jobs_lock:
+        server._jobs[restored["id"]] = restored
+        server._persist_jobs_locked(restored)
+
+    server._podcast_transcription_queue.put(restored["id"])
+    server._ensure_podcast_transcription_worker()
+    deadline = time.time() + 5
+    while time.time() < deadline:
+        job = server._get_public_job(restored["id"])
+        if job and job["state"] == "completed":
+            break
+        time.sleep(0.02)
+
+    assert job["state"] == "completed"
+    assert job["result"]["transcript_reused"] is True
+    assert job["result"]["transcript_path"] == str(transcript_path)
+    assert job["result"]["segments"] == 1
+    assert podcasts.get_episode(idx, episode_id)["transcript_status"] == "done"
+    idx.close()
+
+
 def test_auto_transcription_publishes_and_toasts_after_corpus_commit(
         tmp_path, monkeypatch):
     idx = index_mod.Index.open(tmp_path / "index.db")

@@ -233,6 +233,9 @@ Pre-computed timestamp citation map for each indexed yoink.
 | `source_url` | TEXT | nullable | Public HTTP(S) source page used for credit. |
 | `source_deep_link` | TEXT | nullable | Source-aware timestamp URL. Podcasts use `source_url#t=<seconds>`. |
 
+Fragment seeking depends on the target player; the visible `HH:MM:SS` label is
+the authoritative reference.
+
 Uniqueness:
 
 - `idx_citations_unique` enforces one row per `(video_id, kind, seq)`.
@@ -257,6 +260,11 @@ YouTube-required citation shape with the compatible source-aware fields above.
 Existing YouTube links are copied into all three link columns during migration.
 Migration `0023_podcast_watch.sql` adds the per-feed opt-in and episode-level
 request marker used by the 30-second due-feed scheduler.
+
+`python server.py --doctor` reports podcast corpus rows that were indexed before
+their episode's `yoink_video_id` completion link was stored. Run
+`python server.py --reconcile-podcast-corpus` to re-run the deterministic bridge
+for every repairable row; the command does not transcribe audio again.
 
 ### Entity graph (Sprint 16, migration 0002)
 

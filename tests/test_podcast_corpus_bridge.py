@@ -239,12 +239,32 @@ def test_bridge_repairs_a_crash_between_index_and_episode_link(
     assert idx.count_corpus() == 1
     assert podcasts.get_episode(idx, episode_id)["yoink_video_id"] is None
 
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(server, "_diagnose_payload", lambda: {"ok": True})
+    monkeypatch.setattr(
+        server.migrate_install, "migration_status", lambda: {"ok": True})
+    monkeypatch.setattr(server, "_mcp_stdio_selfcheck", lambda: {"ok": True})
+    monkeypatch.setattr(
+        server, "_path_integrity_status", lambda force=False: {"ok": True})
+    doctor = server.doctor_payload()
+    reconciliation = doctor["podcast_corpus"]
+    assert reconciliation["ok"] is False
+    assert (reconciliation["checked"], reconciliation["orphaned"]) == (1, 1)
+    assert reconciliation["repairable"] == 1
+    assert reconciliation["items"][0]["episode_id"] == episode_id
+
     monkeypatch.setattr(podcasts, "_link_episode_to_yoink", real_link)
-    repaired = podcasts.episode_to_corpus(idx, episode_id, data_root=tmp_path)
+    printed = []
+    monkeypatch.setattr(server, "_print_json", printed.append)
+    assert server.run_cli(["--reconcile-podcast-corpus"]) == 0
+    repaired = printed[0]
+    assert repaired["ok"] is True
+    assert (repaired["repaired"], repaired["remaining"]) == (1, 0)
     assert idx.count_corpus() == 1
     assert podcasts.get_episode(idx, episode_id)["yoink_video_id"] == (
-        repaired["video_id"])
-    assert len(idx.get_citations(repaired["video_id"])) == 2
+        repaired["items"][0]["video_id"])
+    assert len(idx.get_citations(repaired["items"][0]["video_id"])) == 2
     idx.close()
 
 

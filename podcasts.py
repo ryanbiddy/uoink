@@ -728,6 +728,25 @@ def _load_transcript(path: Path) -> tuple[dict, list[dict]]:
     return raw, shaped
 
 
+def load_completed_episode_transcript(idx, episode_id: int) -> dict | None:
+    """Load a reusable DONE transcript, or return None when none is recorded.
+
+    A recorded path that no longer loads is an integrity failure, not a cache
+    miss. Callers may catch that failure and deliberately transcribe again.
+    """
+    episode = get_episode(idx, episode_id)
+    if episode is None:
+        raise LookupError(f"episode not found: {episode_id}")
+    path_raw = episode.get("transcript_local_path")
+    if episode.get("transcript_status") != "done" or not path_raw:
+        return None
+    path = Path(path_raw)
+    transcript, segments = _load_transcript(path)
+    normalized = dict(transcript)
+    normalized["segments"] = segments
+    return {"path": path, "transcript": normalized}
+
+
 def _atomic_write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temp_name = None
@@ -872,6 +891,77 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
         "sidecar_path": str(sidecar_path), "source_url": source_url,
         "citations": len(transcript_citations), "segments": len(segments),
         "speakers": speakers,
+    }
+
+
+def reconcile_episode_corpus_links(
+        idx, *, data_root: Path, repair: bool = False) -> dict:
+    """Find podcast corpus rows whose source episode lacks its completion link.
+
+    The deterministic episode video ID lets this detect the narrow crash window
+    after corpus upsert but before ``yoink_video_id`` is stored. With ``repair``
+    enabled, the normal idempotent bridge is run again for every loadable item.
+    """
+    corpus_ids = {
+        str(row["video_id"])
+        for row in idx._conn.execute(
+            "SELECT video_id FROM yoinks "
+            "WHERE platform='podcast' AND source_type='episode'"
+        ).fetchall()
+    }
+    episode_rows = idx._conn.execute(
+        "SELECT e.*, f.feed_url, f.title AS podcast_title, "
+        "f.homepage AS podcast_homepage "
+        "FROM podcast_episodes e JOIN podcast_feeds f ON f.id=e.feed_id "
+        "WHERE e.yoink_video_id IS NULL ORDER BY e.id"
+    ).fetchall()
+    items: list[dict] = []
+    repaired = 0
+    for raw in episode_rows:
+        episode = dict(raw)
+        video_id, _suffix = _episode_corpus_id(episode)
+        if video_id not in corpus_ids:
+            continue
+        transcript_path = episode.get("transcript_local_path")
+        repairable = False
+        reason = None
+        if not transcript_path:
+            reason = "episode has no transcript_local_path"
+        else:
+            try:
+                _load_transcript(Path(transcript_path))
+                repairable = True
+            except (FileNotFoundError, ValueError) as exc:
+                reason = str(exc)
+        item = {
+            "episode_id": int(episode["id"]),
+            "video_id": video_id,
+            "title": episode.get("title") or "Untitled episode",
+            "transcript_status": episode.get("transcript_status"),
+            "repairable": repairable,
+            "repaired": False,
+            "error": reason,
+        }
+        if repair and repairable:
+            try:
+                result = episode_to_corpus(
+                    idx, int(episode["id"]), data_root=Path(data_root))
+                item["repaired"] = True
+                item["result"] = result
+                repaired += 1
+            except Exception as exc:  # report every repair failure to doctor
+                item["error"] = f"{type(exc).__name__}: {exc}"
+        items.append(item)
+    remaining = len(items) - repaired
+    return {
+        "ok": remaining == 0,
+        "checked": len(corpus_ids),
+        "orphaned": len(items),
+        "repairable": sum(1 for item in items if item["repairable"]),
+        "repaired": repaired,
+        "remaining": remaining,
+        "repair_command": "python server.py --reconcile-podcast-corpus",
+        "items": items,
     }
 
 

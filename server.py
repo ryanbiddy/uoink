@@ -6569,27 +6569,47 @@ def _podcast_transcription_worker() -> None:
             episode_id = int(job["episode_id"])
             model = whisper_runner.normalize_model(job.get("model"))
             audio_path = Path(job["audio_path"])
-            _update_job(
-                job_id, state="running", current_video_phase="transcribing",
-                progress=10, priority=priority, started_at=_now_iso(),
-                message="Transcribing the episode locally.")
-            whisper_runner.update_episode_transcript_state(
-                _get_index(), episode_id,
-                status=whisper_runner.STATUS_RUNNING, model_used=model)
-            transcript = whisper_runner.transcribe_audio(
-                audio_path, data_root=DATA_ROOT, model_size=model,
-                language=job.get("language"), diarize=bool(job.get("diarize")),
-                consent_given=bool(job.get("consent_given")))
-            _update_job(
-                job_id, current_video_phase="writing", progress=90,
-                message="Writing the transcript to disk.")
-            out_path = whisper_runner.write_transcript(
-                transcript, audio_path=audio_path)
-            whisper_runner.update_episode_transcript_state(
-                _get_index(), episode_id,
-                status=whisper_runner.STATUS_DONE,
-                transcript_path=out_path, model_used=model,
-                diarization_ran=transcript.get("diarization_ran", False))
+            reusable = None
+            try:
+                reusable = podcasts.load_completed_episode_transcript(
+                    _get_index(), episode_id)
+            except (FileNotFoundError, ValueError) as exc:
+                log.warning(
+                    "podcast job %s could not reuse its DONE transcript; "
+                    "transcribing again: %s", job_id, exc)
+            transcript_reused = reusable is not None
+            if reusable is not None:
+                transcript = reusable["transcript"]
+                out_path = reusable["path"]
+                _update_job(
+                    job_id, state="running", current_video_phase="writing",
+                    progress=90, priority=priority, started_at=_now_iso(),
+                    message="Reusing the completed transcript on disk.")
+            else:
+                _update_job(
+                    job_id, state="running",
+                    current_video_phase="transcribing", progress=10,
+                    priority=priority, started_at=_now_iso(),
+                    message="Transcribing the episode locally.")
+                whisper_runner.update_episode_transcript_state(
+                    _get_index(), episode_id,
+                    status=whisper_runner.STATUS_RUNNING, model_used=model)
+                transcript = whisper_runner.transcribe_audio(
+                    audio_path, data_root=DATA_ROOT, model_size=model,
+                    language=job.get("language"),
+                    diarize=bool(job.get("diarize")),
+                    consent_given=bool(job.get("consent_given")))
+                _update_job(
+                    job_id, current_video_phase="writing", progress=90,
+                    message="Writing the transcript to disk.")
+                out_path = whisper_runner.write_transcript(
+                    transcript, audio_path=audio_path)
+                whisper_runner.update_episode_transcript_state(
+                    _get_index(), episode_id,
+                    status=whisper_runner.STATUS_DONE,
+                    transcript_path=out_path, model_used=model,
+                    diarization_ran=transcript.get(
+                        "diarization_ran", False))
             podcasts.set_episode_status(
                 _get_index(), episode_id, podcasts.EPISODE_STATUS_TRANSCRIBED)
             corpus_result = None
@@ -6624,6 +6644,7 @@ def _podcast_transcription_worker() -> None:
                     "language": transcript.get("language"),
                     "segments": len(transcript.get("segments") or []),
                     "diarization_ran": bool(transcript.get("diarization_ran")),
+                    "transcript_reused": transcript_reused,
                     "corpus": corpus_result,
                     "corpus_error": corpus_error,
                 }, message=(
@@ -14680,6 +14701,26 @@ def rebuild_index_from_disk(*, root: Path | None = None) -> dict:
             "indexed": after - before, "restored": restored}
 
 
+def _podcast_corpus_reconciliation_status(*, repair: bool = False) -> dict:
+    """Return the podcast bridge crash-window check without crashing doctor."""
+    try:
+        return podcasts.reconcile_episode_corpus_links(
+            _get_index(), data_root=DATA_ROOT, repair=repair)
+    except Exception as exc:
+        log.exception("podcast corpus reconciliation check failed")
+        return {
+            "ok": False,
+            "checked": 0,
+            "orphaned": None,
+            "repairable": 0,
+            "repaired": 0,
+            "remaining": None,
+            "repair_command": "python server.py --reconcile-podcast-corpus",
+            "items": [],
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+
+
 def doctor_payload() -> dict:
     """`uoink doctor`: the /diagnose self-check plus the install-migration
     status, for support triage from the console without the popup. C-01
@@ -14692,6 +14733,7 @@ def doctor_payload() -> dict:
         "migration": migrate_install.migration_status(),
         "mcp_stdio": _mcp_stdio_selfcheck(),
         "path_integrity": _path_integrity_status(force=True),
+        "podcast_corpus": _podcast_corpus_reconciliation_status(),
     }
 
 
@@ -14709,6 +14751,8 @@ def run_cli(argv: list[str]) -> int:
     - --import-corpus <file> : restore an export (conservative merge).
     - --rebuild-index [root] : re-index every on-disk sidecar folder, then
       restore the newest export found under <root>/_exports (C-03).
+    - --reconcile-podcast-corpus : re-run the idempotent episode bridge for
+      podcast corpus rows whose episode completion link is missing.
     - --backfill-authors [--dry-run] : Phase 2 sidecar backfill -- fill the
       `author` column + correct hostname `channel` values for X / Reddit / web
       rows from their sidecars. Idempotent; prints before/after counts.
@@ -14727,6 +14771,10 @@ def run_cli(argv: list[str]) -> int:
     if "--migrate-dry-run" in argv:
         _print_json(migrate_install.run_migration(dry_run=True, app_dir=HERE))
         return 0
+    if "--reconcile-podcast-corpus" in argv:
+        result = _podcast_corpus_reconciliation_status(repair=True)
+        _print_json(result)
+        return 0 if result.get("ok") else 1
     if "--doctor" in argv:
         _print_json(doctor_payload())
         return 0
