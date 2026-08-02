@@ -27,7 +27,7 @@ The corpus compounds. Every source you save lands in one local library your AI c
 |---|---|
 | **YouTube** (flagship) | Timestamped transcript, screenshots, top comments, channel context, full metadata, JSON sidecar |
 | **X / Twitter video + text** | Video transcript and post text, author credit, thread context |
-| **Podcasts** | Metadata-only RSS/Atom subscriptions; on-demand MP3 download, local WhisperX transcription, optional speaker diarization, and manual corpus publishing |
+| **Podcasts** | Automatic RSS/Atom metadata watching; optional per-feed Auto-ingest for local MP3 download, WhisperX transcription, and corpus publishing |
 | **Web pages / articles** | Readable text extraction into the same corpus format |
 | **Reddit** | Thread + top comments as Markdown |
 

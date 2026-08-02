@@ -110,7 +110,7 @@
     },
     {
       "name": "add_podcast_feed",
-      "description": "Register a podcast RSS or Atom feed without downloading audio."
+      "description": "Register a podcast RSS or Atom feed for metadata watching, with optional per-feed Auto-ingest."
     },
     {
       "name": "list_podcast_feeds",

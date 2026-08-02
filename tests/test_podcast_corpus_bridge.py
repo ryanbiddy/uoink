@@ -94,7 +94,7 @@ def test_migration_preserves_legacy_youtube_citations_and_relaxes_link(
     }])
     assert idx.get_citations("legacy-video")[1]["youtube_deep_link"] is None
     assert idx._conn.execute(
-        "SELECT MAX(version) FROM schema_version").fetchone()[0] == 22
+        "SELECT MAX(version) FROM schema_version").fetchone()[0] == 23
     idx.close()
 
 

@@ -1,10 +1,9 @@
 """Podcast feed, episode, audio, and corpus support.
 
-Per ROADMAP + PROMPT-V3.1: branding decision -- expand Uoink to cover
-podcasts (one tool, one corpus). This module ships the RSS feed
-registry + the polling pipeline that materialises new episodes. The
-audio download + Whisper transcription layers land in subsequent PRs
-in CC's queue (track B step 2 + step 3).
+Uoink watches registered RSS feeds for episode metadata. Feed registration
+does not authorize audio processing: ``auto_ingest`` is a separate per-feed
+opt-in, off by default, for downloading, transcribing, and publishing episodes
+discovered while that flag is enabled.
 
 Compute (locked policy: model-agnostic + local-first):
 - RSS XML parsing uses Python's stdlib xml.etree.ElementTree -- no
@@ -14,9 +13,9 @@ Compute (locked policy: model-agnostic + local-first):
   headers when the feed previously returned them, so a daily news
   podcast doesn't re-download an unchanged feed body on every poll.
 
-Feed polling is manual unless the caller explicitly schedules it. This module
-owns parsing, persistence, audio download, and the transcript-to-corpus bridge.
-Transport (HTTP + MCP) is owned by server.py + uoink_mcp_tools.py."""
+This module owns parsing, persistence, due-feed selection, audio download, and
+the transcript-to-corpus bridge. The 30-second scheduler and HTTP/MCP
+transports live in server.py and uoink_mcp_tools.py."""
 
 from __future__ import annotations
 
@@ -30,7 +29,7 @@ import tempfile
 import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -38,8 +37,8 @@ from urllib.parse import urlparse
 log = logging.getLogger("uoink.podcasts")
 
 # Bounded enum for the episode status flow. The dashboard renders
-# 'new' as an unread chip; 'queued' once the user opts in to download
-# (next PR); 'downloaded' + 'transcribed' as the audio + transcript
+# 'new' as an unread chip; 'queued' once the user opts in to download;
+# 'downloaded' + 'transcribed' as the audio + transcript
 # pipeline progresses; 'ignored' if the user dismisses.
 EPISODE_STATUS_NEW = "new"
 EPISODE_STATUS_QUEUED = "queued"
@@ -51,9 +50,9 @@ _EPISODE_STATUSES = (
     EPISODE_STATUS_TRANSCRIBED, EPISODE_STATUS_IGNORED,
 )
 
-# Cap how many episodes we materialise per poll so a freshly-added feed
-# with 800 back-episodes doesn't flood the dashboard. The user opts
-# in via "load more" (a follow-up endpoint not in this PR).
+# Cap how many episodes we materialise per poll so a freshly-added feed with
+# 800 back-episodes cannot flood local storage. The feed's latest 50 entries
+# are retained; this release has no back-catalog load-more path.
 _EPISODES_PER_POLL_CAP = 50
 
 # Polite HTTP timeout for feed GETs. Most podcasts host on Libsyn /
@@ -114,7 +113,8 @@ def _validate_feed_url(raw: str) -> str | None:
 
 
 # ---- feed CRUD ----------------------------------------------------------
-def add_feed(idx, feed_url: str, *, poll_interval_min: int = 60) -> dict:
+def add_feed(idx, feed_url: str, *, poll_interval_min: int = 60,
+             auto_ingest: bool = False) -> dict:
     """Insert + return a fresh feed row. UNIQUE constraint on feed_url
     prevents duplicate registration. Returns an existing row's dict
     when the URL is already in the table -- idempotent add."""
@@ -125,8 +125,9 @@ def add_feed(idx, feed_url: str, *, poll_interval_min: int = 60) -> dict:
     with idx.write_transaction() as conn:
         cur = conn.execute(
             "INSERT OR IGNORE INTO podcast_feeds "
-            "(feed_url, poll_interval_min, added_at) VALUES (?, ?, ?)",
-            (canonical, interval, _now_iso()))
+            "(feed_url, poll_interval_min, auto_ingest, added_at) "
+            "VALUES (?, ?, ?, ?)",
+            (canonical, interval, 1 if auto_ingest else 0, _now_iso()))
         if cur.rowcount == 0:
             # Already present; return that row.
             row = conn.execute(
@@ -179,6 +180,50 @@ def set_feed_enabled(idx, feed_id: int, enabled: bool) -> bool:
             "UPDATE podcast_feeds SET enabled=? WHERE id=?",
             (1 if enabled else 0, feed_id))
         return cur.rowcount > 0
+
+
+def set_feed_auto_ingest(idx, feed_id: int, auto_ingest: bool) -> bool:
+    """Set the explicit audio/transcription opt-in for one feed.
+
+    Existing episode rows keep their current request marker. Turning the flag
+    on therefore applies to episodes discovered from that point forward, not
+    to the feed's historical backlog.
+    """
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
+            "UPDATE podcast_feeds SET auto_ingest=? WHERE id=?",
+            (1 if auto_ingest else 0, feed_id))
+        return cur.rowcount > 0
+
+
+def _parse_poll_timestamp(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
+
+
+def list_due_feeds(idx, *, now: datetime | None = None) -> list[dict]:
+    """Return enabled feeds whose persisted poll interval has elapsed."""
+    current = now or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+    current = current.astimezone(timezone.utc)
+    due: list[tuple[datetime, dict]] = []
+    for feed in list_feeds(idx, enabled_only=True):
+        last = _parse_poll_timestamp(feed.get("last_polled_at"))
+        interval = max(15, min(int(feed.get("poll_interval_min") or 60), 1440))
+        due_at = (last + timedelta(minutes=interval)
+                  if last else datetime.min.replace(tzinfo=timezone.utc))
+        if due_at <= current:
+            due.append((due_at, feed))
+    due.sort(key=lambda item: (item[0], int(item[1].get("id") or 0)))
+    return [feed for _, feed in due]
 
 
 # ---- RSS / Atom parsing ------------------------------------------------
@@ -364,12 +409,18 @@ def fetch_feed(feed_row: dict) -> tuple[bytes | None, dict | None]:
 
 
 # ---- end-to-end poll ----------------------------------------------------
-def upsert_episodes(idx, feed_id: int, episodes: list[dict]) -> tuple[int, int]:
-    """Insert new + return (inserted_count, already_seen_count)."""
+def _upsert_episodes_with_ids(
+        idx, feed_id: int, episodes: list[dict]) -> tuple[int, int, list[int]]:
+    """Insert episodes and retain the ids created by this exact poll."""
     inserted = 0
     seen = 0
+    inserted_ids: list[int] = []
     now = _now_iso()
     with idx.write_transaction() as conn:
+        feed = conn.execute(
+            "SELECT auto_ingest FROM podcast_feeds WHERE id=?", (feed_id,)
+        ).fetchone()
+        auto_ingest_requested = 1 if feed and feed["auto_ingest"] else 0
         for ep in episodes:
             guid = (ep.get("guid") or "").strip()
             if not guid:
@@ -378,13 +429,15 @@ def upsert_episodes(idx, feed_id: int, episodes: list[dict]) -> tuple[int, int]:
                 "INSERT OR IGNORE INTO podcast_episodes "
                 "(feed_id, guid, title, audio_url, episode_page_url, "
                 " duration_seconds, published_at, description, status, "
-                " discovered_at) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', ?)",
+                " discovered_at, auto_ingest_requested) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', ?, ?)",
                 (feed_id, guid, ep.get("title"), ep.get("audio_url"),
                  ep.get("episode_page_url"), ep.get("duration_seconds"),
-                 ep.get("published_at"), ep.get("description"), now))
+                 ep.get("published_at"), ep.get("description"), now,
+                 auto_ingest_requested))
             if cur.rowcount:
                 inserted += 1
+                inserted_ids.append(int(cur.lastrowid))
             else:
                 seen += 1
                 # Migration 0022 added this field after feeds could already
@@ -396,6 +449,12 @@ def upsert_episodes(idx, feed_id: int, episodes: list[dict]) -> tuple[int, int]:
                         "COALESCE(episode_page_url, ?) "
                         "WHERE feed_id=? AND guid=?",
                         (ep.get("episode_page_url"), feed_id, guid))
+    return inserted, seen, inserted_ids
+
+
+def upsert_episodes(idx, feed_id: int, episodes: list[dict]) -> tuple[int, int]:
+    """Insert new + return (inserted_count, already_seen_count)."""
+    inserted, seen, _ = _upsert_episodes_with_ids(idx, feed_id, episodes)
     return inserted, seen
 
 
@@ -452,7 +511,7 @@ def poll_feed(idx, feed_id: int) -> dict:
                           last_modified=(headers or {}).get("Last-Modified"),
                           ok=True)
         return {"ok": True, "feed_id": feed_id, "not_modified": True,
-                "inserted": 0, "seen": 0}
+                "inserted": 0, "seen": 0, "new_episode_ids": []}
     try:
         parsed = parse_feed_body(body)
     except (ET.ParseError, ValueError) as e:
@@ -460,7 +519,8 @@ def poll_feed(idx, feed_id: int) -> dict:
                           homepage=None, etag=None, last_modified=None,
                           ok=False, error=f"parse: {e}")
         return {"ok": False, "feed_id": feed_id, "error": f"parse: {e}"}
-    inserted, seen = upsert_episodes(idx, feed_id, parsed["episodes"])
+    inserted, seen, inserted_ids = _upsert_episodes_with_ids(
+        idx, feed_id, parsed["episodes"])
     record_feed_meta(idx, feed_id,
                       title=parsed["feed"]["title"],
                       description=parsed["feed"]["description"],
@@ -470,6 +530,7 @@ def poll_feed(idx, feed_id: int) -> dict:
                       ok=True)
     return {"ok": True, "feed_id": feed_id,
             "inserted": inserted, "seen": seen,
+            "new_episode_ids": inserted_ids,
             "title": parsed["feed"]["title"]}
 
 
@@ -495,6 +556,37 @@ def list_episodes(idx, *, feed_id: int | None = None,
         " ORDER BY published_at DESC NULLS LAST, id DESC LIMIT ?",
         params).fetchall()
     return [dict(r) for r in rows]
+
+
+def list_auto_ingest_candidates(
+        idx, *, feed_id: int | None = None, limit: int = 1) -> list[dict]:
+    """Return explicitly marked, unpublished episodes for enabled watch feeds.
+
+    The default of one episode per feed poll keeps a newly enabled archive from
+    monopolizing the scheduler. Remaining marked episodes stay durable and are
+    picked up on later due polls.
+    """
+    wheres = [
+        "e.auto_ingest_requested = 1",
+        "e.yoink_video_id IS NULL",
+        "e.status != ?",
+        "f.enabled = 1",
+        "f.auto_ingest = 1",
+    ]
+    params: list[Any] = [EPISODE_STATUS_IGNORED]
+    if feed_id is not None:
+        wheres.append("e.feed_id = ?")
+        params.append(int(feed_id))
+    params.append(max(1, min(int(limit), 50)))
+    rows = idx._conn.execute(
+        "SELECT e.*, f.title AS podcast_title, f.feed_url "
+        "FROM podcast_episodes e "
+        "JOIN podcast_feeds f ON f.id=e.feed_id "
+        "WHERE " + " AND ".join(wheres) + " "
+        "ORDER BY e.published_at DESC NULLS LAST, e.id DESC LIMIT ?",
+        params,
+    ).fetchall()
+    return [dict(row) for row in rows]
 
 
 def get_episode(idx, episode_id: int) -> dict | None:

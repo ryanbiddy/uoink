@@ -670,17 +670,21 @@ def check_live_status(args: dict[str, Any]) -> dict[str, Any]:
 def add_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
     """v3.1 podcast: register an RSS feed URL. Idempotent -- existing
     URL returns the same row. Default poll interval 60 min, range
-    15-1440."""
+    15-1440. Audio auto-ingest is a separate opt-in and defaults off."""
     server = _b()
     import podcasts as _pod
     feed_url = args.get("feed_url")
     if not isinstance(feed_url, str) or not feed_url.strip():
         return _err("feed_url (string) is required")
     interval = args.get("poll_interval_min") or 60
+    auto_ingest = args.get("auto_ingest", False)
+    if not isinstance(auto_ingest, bool):
+        return _err("auto_ingest must be a boolean when provided")
     try:
         return _ok(feed=_pod.add_feed(server._get_index(),
                                         feed_url.strip(),
-                                        poll_interval_min=int(interval)))
+                                        poll_interval_min=int(interval),
+                                        auto_ingest=auto_ingest))
     except ValueError as e:
         return _err(str(e))
     except Exception as e:
@@ -716,18 +720,14 @@ def remove_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
 
 
 def poll_podcast_feed(args: dict[str, Any]) -> dict[str, Any]:
-    """v3.1 podcast: trigger one feed poll. Returns the parsed result.
-
-    This is the on-demand path; a background poller would call the same
-    function on a schedule (left for a follow-up that needs a thread)."""
+    """Trigger the same feed-poll path used by the 30-second scheduler."""
     server = _b()
-    import podcasts as _pod
     try:
         feed_id = int(args.get("feed_id"))
     except (TypeError, ValueError):
         return _err("feed_id (integer) is required")
     try:
-        return _pod.poll_feed(server._get_index(), feed_id)
+        return server._poll_podcast_feed_for_watch(feed_id)
     except Exception as e:
         return _err(f"poll_podcast_feed failed: {e}")
 
@@ -762,8 +762,8 @@ def download_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
     Synchronous. Returns when the file lands at
     <data_root>/Podcasts/<feed-slug>/<episode-slug>.mp3 or yt-dlp
     errors. Idempotent -- skips re-download when the canonical path
-    already has a non-zero file. The transcription pipeline (next
-    PR in CC's queue) reads audio_local_path to feed WhisperX."""
+    already has a non-zero file. The live transcription pipeline reads
+    audio_local_path to feed WhisperX."""
     server = _b()
     import podcasts as _pod
     try:
@@ -825,8 +825,13 @@ def episode_to_corpus(args: dict[str, Any]) -> dict[str, Any]:
     except (TypeError, ValueError):
         return _err("episode_id (integer) is required")
     try:
-        return _pod.episode_to_corpus(
+        result = _pod.episode_to_corpus(
             server._get_index(), episode_id, data_root=server.DATA_ROOT)
+        episode = _pod.get_episode(server._get_index(), episode_id) or {}
+        server.maybe_toast(
+            "Podcast added to Uoink",
+            f"{episode.get('title') or 'The episode'} is ready in your library.")
+        return result
     except (LookupError, FileNotFoundError, ValueError) as exc:
         return _err(str(exc))
     except Exception as exc:
@@ -2414,13 +2419,15 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         description=(
             "Register an RSS feed URL. Idempotent -- "
             "existing URL returns the same row. poll_interval_min "
-            "default 60, range 15-1440."
+            "default 60, range 15-1440. Metadata is watched automatically; "
+            "auto_ingest is an explicit per-feed opt-in and defaults false."
         ),
         input_schema=_schema({
             "feed_url": {"type": "string"},
             "poll_interval_min": {"type": "integer",
                                     "minimum": 15, "maximum": 1440,
                                     "default": 60},
+            "auto_ingest": {"type": "boolean", "default": False},
         }, ["feed_url"]),
         handler=add_podcast_feed,
         rate_limiter=_RateLimiter(30),

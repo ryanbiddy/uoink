@@ -114,8 +114,9 @@ Before / after, the three canonical sources:
   read `channel`). The two columns hold the same value going forward.
 - **Podcast episodes** remain tracked in `podcast_episodes` until a completed
   transcript is published. `episode_to_corpus` then creates a linked yoinks row
-  with `platform='podcast'` and `source_type='episode'`; the operation is manual
-  and idempotent.
+  with `platform='podcast'` and `source_type='episode'`. Publication is manual
+  by default or automatic for episodes discovered while that feed's explicit
+  Auto-ingest flag is on; both paths are idempotent.
 
 ## Tests / proof
 

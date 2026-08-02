@@ -4243,6 +4243,8 @@
                 <input class="field" style="flex:1;min-width:240px" id="podcastFeedUrl" type="url" placeholder="RSS feed URL" aria-label="Podcast RSS feed URL">
                 <button class="button" type="button" id="addPodcastFeed">Add</button>
               </div>
+              <label class="inline-row"><input id="podcastAutoIngest" type="checkbox"> Auto-ingest new episodes: download, transcribe, and publish locally</label>
+              <p class="setting-copy">Feed watching saves metadata only by default. Auto-ingest uses the selected local transcription model; a first-time model download still needs approval.</p>
             </div>
 
             <div class="setting-block">
@@ -4638,7 +4640,7 @@
       ["Capture", "mobile-playlist-bridge", "Mobile playlist bridge", "Save on mobile, let the local app pick it up.", "https://uoink.app/features/mobile-playlist-bridge"],
       ["Capture", "universal-page-uoink", "Universal page uoink", "Turn an allowed web page into local markdown and metadata.", "https://uoink.app/features/universal-page-uoink"],
       ["Capture", "twitter-video", "Twitter video", "Capture X videos with creator credit kept close.", "https://uoink.app/twitter"],
-      ["Capture", "podcast-feeds", "Podcast feeds", "Watch RSS feeds and transcribe episodes locally.", "https://uoink.app/features/podcast-feeds"],
+      ["Capture", "podcast-feeds", "Podcast feeds", "Watch RSS feeds for new episodes. Per-feed Auto-ingest can download, transcribe, and publish locally.", "https://uoink.app/features/podcast-feeds"],
       ["Library", "memory-search", "Memory search", "Search transcripts, comments, topics, and saved context.", "https://uoink.app/features/memory-search"],
       ["Library", "faceted-classification", "Faceted classification", "Filter by channel, hook, topic, format, performance, and length.", "https://uoink.app/features/faceted-classification"],
       ["Library", "your-channel", "Your Channel", "Mark your own channel and compare against your corpus.", "https://uoink.app/features/your-channel"],
@@ -4661,7 +4663,7 @@
     const SOURCE_CAPABILITIES = [
       ["YouTube video", "shipped", "In-page button, right-click link, playlist bridge", "Transcript, screenshots, comments, facets, hooks", "Library cards, drafts, scripts, and evidence notes"],
       ["X video", "shipped", "Right-click or paste supported X links", "Creator handle, media metadata, transcript when available", "Writing attribution, Library search, source credit in exports"],
-      ["Podcasts / RSS", "shipped", "Feed monitor or one-off episode URL", "Local transcript, speakers, waveform preview, episode facts", "Research packets, scripts, and long-form source memory"],
+      ["Podcasts / RSS", "shipped", "Saved RSS feed with automatic metadata polling; optional per-feed Auto-ingest", "Local transcript, speakers, waveform preview, episode facts", "Cited Library item, research packets, scripts, and long-form source memory"],
       ["Substack", "planned", "Universal page uoink from allowed site", "Article text, author, publication URL, highlights", "Writing citations, quote bank, topic memory"],
       ["LinkedIn videos", "planned", "Universal page uoink once enabled", "Video metadata, creator, transcript where exposed", "B2B source memory and creator attribution"],
       ["Reddit threads", "shipped", "Paste or right-click a Reddit thread URL", "Post, top comments, community, score signals", "Audience questions and research objections"],
@@ -4878,6 +4880,7 @@
       podcastFeedStatus: document.getElementById("podcastFeedStatus"),
       podcastFeedList: document.getElementById("podcastFeedList"),
       podcastFeedUrl: document.getElementById("podcastFeedUrl"),
+      podcastAutoIngest: document.getElementById("podcastAutoIngest"),
       allowedSitesStatus: document.getElementById("allowedSitesStatus"),
       defaultSitesList: document.getElementById("defaultSitesList"),
       allowedSitesList: document.getElementById("allowedSitesList"),
@@ -6469,7 +6472,7 @@
           body: JSON.stringify(body),
         });
         if (universalState.source === "podcast_feed") {
-          showToast("Podcast feed added. New episodes transcribe locally.");
+          showToast("Podcast feed saved. Uoink will watch for new episodes; audio stays off by default.");
         } else {
           showToast(`Uoinking that ${label.toLowerCase()}. Track it in Activity.`);
         }
@@ -10504,15 +10507,34 @@
       if (!rows.length) {
         els.podcastFeedList.innerHTML = emptyPanelRow(
           "No podcast feeds yet.",
-          "Paste an RSS feed URL to track new episodes locally."
+          "Paste an RSS feed URL to watch for new episodes. Audio stays off by default."
         );
         return;
       }
-      els.podcastFeedList.innerHTML = rows.map((row) => settingsListRow(
-        row,
-        ["title", "podcast_title", "feed_url", "url"],
-        ["episode_count", "last_polled_at", "last_episode_title"]
-      )).join("");
+      els.podcastFeedList.innerHTML = rows.map((row) => {
+        const title = firstValue(row.title, row.podcast_title, row.feed_url, row.url, "Untitled feed");
+        const episodeCount = Number(row.episode_count || 0);
+        const autoIngest = Number(row.auto_ingest || 0) === 1;
+        const meta = [
+          `${episodeCount} episode${episodeCount === 1 ? "" : "s"}`,
+          `poll every ${Number(row.poll_interval_min || 60)} min`,
+          row.last_polled_at || "waiting for first poll",
+        ].join(" | ");
+        return `
+          <div class="settings-list-row">
+            <div style="min-width:0">
+              <strong>${htmlEscape(title)}</strong>
+              <div class="job-sub">${htmlEscape(meta)}</div>
+            </div>
+            <span class="phase-chip">${autoIngest ? "Auto-ingest on" : "Metadata only"}</span>
+            <button class="button ghost" type="button"
+              data-toggle-podcast-auto-ingest="${htmlEscape(String(row.id))}"
+              data-auto-ingest="${autoIngest ? "true" : "false"}">
+              ${autoIngest ? "Turn off" : "Turn on"}
+            </button>
+          </div>
+        `;
+      }).join("");
     }
 
     async function loadPlaylistSettings() {
@@ -10558,16 +10580,36 @@
     async function addPodcastFeed() {
       const feedUrl = els.podcastFeedUrl.value.trim();
       if (!feedUrl) return showToast("Paste an RSS feed URL first.");
+      const autoIngest = Boolean(els.podcastAutoIngest && els.podcastAutoIngest.checked);
       try {
         await authFetch("/podcasts/feeds", {
           method: "POST",
-          body: JSON.stringify({ feed_url: feedUrl }),
+          body: JSON.stringify({ feed_url: feedUrl, auto_ingest: autoIngest }),
         });
         els.podcastFeedUrl.value = "";
-        showToast("Podcast feed added.");
+        if (els.podcastAutoIngest) els.podcastAutoIngest.checked = false;
+        showToast(autoIngest
+          ? "Podcast feed saved. Auto-ingest is on for newly discovered episodes."
+          : "Podcast feed saved. Uoink will watch metadata; audio stays off.");
         loadPodcastFeedSettings();
       } catch (err) {
         showToast("Couldn't add that feed.");
+      }
+    }
+
+    async function setPodcastAutoIngest(feedId, currentValue) {
+      const nextValue = !currentValue;
+      try {
+        await authFetch("/podcasts/feeds/set-auto-ingest", {
+          method: "POST",
+          body: JSON.stringify({ feed_id: Number(feedId), auto_ingest: nextValue }),
+        });
+        showToast(nextValue
+          ? "Auto-ingest is on for episodes discovered from now on."
+          : "Auto-ingest is off. Feed metadata will keep updating.");
+        await loadPodcastFeedSettings();
+      } catch (err) {
+        showToast("Couldn't change Auto-ingest for that feed.");
       }
     }
 
@@ -11454,6 +11496,12 @@
         if (removeChannelButton) removeChannel(removeChannelButton.dataset.removeChannel);
         const removeAllowedSiteButton = event.target.closest("[data-remove-allowed-site]");
         if (removeAllowedSiteButton) removeAllowedSite(removeAllowedSiteButton.dataset.removeAllowedSite);
+        const podcastAutoIngestButton = event.target.closest("[data-toggle-podcast-auto-ingest]");
+        if (podcastAutoIngestButton) {
+          setPodcastAutoIngest(
+            podcastAutoIngestButton.dataset.togglePodcastAutoIngest,
+            podcastAutoIngestButton.dataset.autoIngest === "true");
+        }
         const cancel = event.target.closest("[data-cancel]");
         if (cancel) postHelper("/queue/cancel", { pending_id: cancel.dataset.cancel });
         const cancelJob = event.target.closest("[data-cancel-job]");

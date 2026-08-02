@@ -1529,6 +1529,11 @@ _JOB_TERMINAL_STATES = {"completed", "cancelled", "failed"}
 _podcast_transcription_queue: queue.Queue[str] = queue.Queue()
 _podcast_transcription_worker_lock = threading.Lock()
 _podcast_transcription_worker_thread: threading.Thread | None = None
+# Feed HTTP polls are short compared with media work, but a manual refresh can
+# overlap the 30-second watch tick. Serialize the fetch/upsert boundary so the
+# same feed is never polled twice at once.
+_podcast_feed_poll_lock = threading.Lock()
+_PODCAST_FEED_TICK_SEC = 30
 
 # ---- /jobs/stream SSE (Tier 2) -------------------------------------------
 # Live job/queue push for the dashboard Activity tab + the extension popup
@@ -5227,7 +5232,8 @@ _CAPTURE_SOURCES = {
         "label": "Podcast feed",
         "endpoint": "/podcasts/feeds",
         "payload_key": "feed_url",
-        "note": "Adds the RSS feed so new episodes transcribe locally.",
+        "note": ("Adds the RSS feed and watches for new episode metadata. "
+                 "Audio processing stays off until Auto-ingest is enabled."),
     },
     "web_page": {
         "label": "Article / web page",
@@ -6264,6 +6270,7 @@ def _public_job(job: dict) -> dict:
             "audio_path": job.get("audio_path"),
             "progress": job.get("progress"),
             "priority": job.get("priority"),
+            "publish_to_corpus": bool(job.get("publish_to_corpus")),
         })
     return public
 
@@ -6585,6 +6592,26 @@ def _podcast_transcription_worker() -> None:
                 diarization_ran=transcript.get("diarization_ran", False))
             podcasts.set_episode_status(
                 _get_index(), episode_id, podcasts.EPISODE_STATUS_TRANSCRIBED)
+            corpus_result = None
+            corpus_error = None
+            if job.get("publish_to_corpus"):
+                _update_job(
+                    job_id, current_video_phase="publishing", progress=95,
+                    message="Publishing the episode to your local corpus.")
+                try:
+                    corpus_result = podcasts.episode_to_corpus(
+                        _get_index(), episode_id, data_root=DATA_ROOT)
+                    maybe_toast(
+                        "Podcast added to Uoink",
+                        f"{job.get('title') or 'A new episode'} is ready in your library.")
+                except Exception as exc:
+                    # The transcript is complete and durable. Leave it done so
+                    # the next feed tick retries only the idempotent publisher,
+                    # not an expensive transcription that already succeeded.
+                    corpus_error = str(exc)
+                    log.warning(
+                        "podcast watch: deferred corpus publish for episode "
+                        "%d after error: %s", episode_id, exc)
             now = _now_iso()
             _update_job(
                 job_id, state="completed", current_video_phase=None,
@@ -6597,7 +6624,14 @@ def _podcast_transcription_worker() -> None:
                     "language": transcript.get("language"),
                     "segments": len(transcript.get("segments") or []),
                     "diarization_ran": bool(transcript.get("diarization_ran")),
-                }, message="Podcast transcription complete.")
+                    "corpus": corpus_result,
+                    "corpus_error": corpus_error,
+                }, message=(
+                    "Podcast episode published to the local corpus."
+                    if corpus_result else
+                    "Podcast transcription complete; corpus publish will retry."
+                    if corpus_error else
+                    "Podcast transcription complete."))
         except BaseException as exc:  # keep the one long-lived worker alive
             log.exception("podcast transcription job %s failed", job_id)
             episode_id = job.get("episode_id") if isinstance(job, dict) else None
@@ -6635,7 +6669,8 @@ def _ensure_podcast_transcription_worker() -> threading.Thread:
 def _queue_podcast_transcription(
         episode_id: int, *, model: str | None = None,
         language: str | None = None, diarize: bool = False,
-        consent_given: bool = False) -> tuple[dict, int]:
+        consent_given: bool = False,
+        publish_to_corpus: bool = False) -> tuple[dict, int]:
     """Validate, persist, and enqueue one local podcast transcription."""
     episode = podcasts.get_episode(_get_index(), episode_id)
     if episode is None:
@@ -6658,6 +6693,10 @@ def _queue_podcast_transcription(
             and job.get("state") not in _JOB_TERMINAL_STATES
         ), None)
     if existing:
+        if publish_to_corpus and not existing.get("publish_to_corpus"):
+            existing = _update_job(
+                existing["id"], publish_to_corpus=True,
+                message="Podcast transcription queued for corpus publish.")
         return {
             "ok": True, "job_id": existing["id"], "job": existing,
             "reused_existing": True,
@@ -6695,6 +6734,7 @@ def _queue_podcast_transcription(
         "language": language, "diarize": bool(diarize),
         "consent_given": bool(consent_given), "audio_path": str(audio_path),
         "progress": 0, "priority": "pending",
+        "publish_to_corpus": bool(publish_to_corpus),
     }
     whisper_runner.update_episode_transcript_state(
         _get_index(), episode_id, status=whisper_runner.STATUS_QUEUED,
@@ -6718,6 +6758,123 @@ def _resume_podcast_transcription_jobs() -> int:
     if job_ids:
         _ensure_podcast_transcription_worker()
     return len(job_ids)
+
+
+def _auto_ingest_podcast_feed(feed_id: int) -> list[dict]:
+    """Advance one durable auto-ingest candidate for a watched feed.
+
+    One candidate per due poll bounds disk, network, and transcription load.
+    The episode-level request marker keeps the remaining work durable.
+    """
+    candidates = podcasts.list_auto_ingest_candidates(
+        _get_index(), feed_id=feed_id, limit=1)
+    outcomes: list[dict] = []
+    settings = _read_settings() or {}
+    model = whisper_runner.normalize_model(settings.get("whisper_model"))
+    diarize = bool(settings.get("diarization_default"))
+    for episode in candidates:
+        episode_id = int(episode["id"])
+        if (episode.get("transcript_status") == whisper_runner.STATUS_DONE
+                and episode.get("transcript_local_path")):
+            try:
+                published = podcasts.episode_to_corpus(
+                    _get_index(), episode_id, data_root=DATA_ROOT)
+                maybe_toast(
+                    "Podcast added to Uoink",
+                    f"{episode.get('title') or 'A new episode'} is ready in your library.")
+                outcomes.append({"episode_id": episode_id,
+                                 "published": published})
+            except Exception as exc:
+                log.warning("podcast watch: publish failed for episode %d: %s",
+                            episode_id, exc)
+                outcomes.append({"episode_id": episode_id,
+                                 "ok": False, "error": str(exc)})
+            continue
+
+        try:
+            audio_path = episode.get("audio_local_path")
+            if not audio_path or not Path(audio_path).is_file():
+                downloaded = podcasts.download_episode_audio(
+                    _get_index(), episode_id, data_root=DATA_ROOT)
+                if not downloaded.get("ok"):
+                    log.warning(
+                        "podcast watch: download failed for episode %d: %s",
+                        episode_id, downloaded.get("error"))
+                    outcomes.append(downloaded)
+                    continue
+
+            queued, status = _queue_podcast_transcription(
+                episode_id, model=model, diarize=diarize,
+                # Auto-ingest authorizes episode processing, not an unprompted
+                # first-time model download. A downloaded model works
+                # unattended; otherwise Settings/manual transcribe must record
+                # consent once.
+                consent_given=False, publish_to_corpus=True)
+            outcomes.append({**queued, "status": status,
+                             "episode_id": episode_id})
+            if status == 412:
+                maybe_toast(
+                    "Podcast needs transcription setup",
+                    "Audio is saved. Open Uoink Settings to approve the local "
+                    f"{model} model download.")
+        except Exception as exc:
+            log.exception(
+                "podcast watch: auto-ingest failed for episode %d", episode_id)
+            outcomes.append({"ok": False, "episode_id": episode_id,
+                             "error": str(exc)})
+    return outcomes
+
+
+def _poll_podcast_feed_for_watch(feed_id: int) -> dict:
+    """Poll one feed, notify on discoveries, then honor its opt-in."""
+    with _podcast_feed_poll_lock:
+        result = podcasts.poll_feed(_get_index(), feed_id)
+    feed = podcasts.get_feed(_get_index(), feed_id) or {}
+    inserted = int(result.get("inserted") or 0)
+    if result.get("ok") and inserted:
+        show = result.get("title") or feed.get("title") or "a watched feed"
+        if inserted == 1:
+            ids = result.get("new_episode_ids") or []
+            episode = (podcasts.get_episode(_get_index(), int(ids[0]))
+                       if ids else None)
+            episode_title = (episode or {}).get("title") or "New episode"
+            body = f"{show}: {episode_title}."
+        else:
+            body = f"{inserted} new episodes from {show}."
+        maybe_toast("New podcast episode", body)
+    if feed.get("enabled") and feed.get("auto_ingest"):
+        result["auto_ingest"] = _auto_ingest_podcast_feed(feed_id)
+    return result
+
+
+def _podcast_feed_scheduler_tick() -> list[dict]:
+    """Poll every enabled feed whose configured interval has elapsed."""
+    results: list[dict] = []
+    for feed in podcasts.list_due_feeds(_get_index()):
+        feed_id = int(feed["id"])
+        try:
+            results.append(_poll_podcast_feed_for_watch(feed_id))
+        except Exception as exc:
+            log.exception("podcast watch tick failed for feed %d", feed_id)
+            results.append({"ok": False, "feed_id": feed_id,
+                            "error": str(exc)})
+    return results
+
+
+def _start_podcast_feed_scheduler_thread() -> threading.Thread:
+    """Run due-feed checks every 30 seconds on a daemon thread."""
+    def _runner():
+        while True:
+            try:
+                _podcast_feed_scheduler_tick()
+            except Exception:
+                log.exception("podcast watch tick crashed")
+            time.sleep(_PODCAST_FEED_TICK_SEC)
+
+    thread = threading.Thread(
+        target=_runner, name="podcast-feed-watch", daemon=True)
+    thread.start()
+    return thread
 
 
 def _job_cancel_event(job_id: str) -> threading.Event | None:
@@ -10359,11 +10516,9 @@ class Handler(BaseHTTPRequestHandler):
             "idle_days": self._RESURFACE_TODAY_IDLE_DAYS})
 
     # ---- v3.1 podcast RSS feeds ---------------------------------------
-    # Feed registry + polling. Episode rows materialise as metadata-only
-    # rows when a feed is polled; the audio download + WhisperX
-    # transcription pipelines land in subsequent PRs (CC's queue track B
-    # step 2 + step 3). User opts in to download per-episode by moving
-    # the row from 'new' -> 'queued' via /podcasts/episodes/set-status.
+    # Feed registration authorizes automatic metadata polling. Audio download,
+    # local transcription, and corpus publishing require the separate
+    # per-feed auto_ingest flag, which defaults off.
 
     def _parse_feed_id(self, body):
         try:
@@ -10391,9 +10546,14 @@ class Handler(BaseHTTPRequestHandler):
                                           "error": "json object required"})
         feed_url = (body.get("feed_url") or "").strip()
         interval = body.get("poll_interval_min") or 60
+        auto_ingest = body.get("auto_ingest", False)
+        if not isinstance(auto_ingest, bool):
+            return self._send_json(400, {
+                "ok": False, "error": "auto_ingest (boolean) required"})
         try:
             row = podcasts.add_feed(_get_index(), feed_url,
-                                       poll_interval_min=int(interval))
+                                       poll_interval_min=int(interval),
+                                       auto_ingest=auto_ingest)
         except ValueError as e:
             return self._send_json(400, {"ok": False, "error": str(e)})
         except Exception as e:
@@ -10435,10 +10595,28 @@ class Handler(BaseHTTPRequestHandler):
         return self._send_json(200, {"ok": True, "changed": changed,
                                       "enabled": enabled})
 
+    def _handle_podcasts_feed_set_auto_ingest(self, body):
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
+        feed_id, err = self._parse_feed_id(body)
+        if err:
+            return self._send_json(400, {"ok": False, "error": err})
+        auto_ingest = body.get("auto_ingest")
+        if not isinstance(auto_ingest, bool):
+            return self._send_json(400, {"ok": False,
+                "error": "auto_ingest (boolean) required"})
+        try:
+            changed = podcasts.set_feed_auto_ingest(
+                _get_index(), feed_id, auto_ingest)
+        except Exception as exc:
+            log.exception("/podcasts/feeds/set-auto-ingest failed")
+            return self._send_json(500, {"ok": False, "error": str(exc)})
+        return self._send_json(200, {
+            "ok": True, "changed": changed, "auto_ingest": auto_ingest})
+
     def _handle_podcasts_feed_poll(self, body):
-        """Manual poll. Body: {feed_id}. Returns the structured
-        per-feed result -- used by the dashboard's "refresh" button +
-        the future background poller can call the same function."""
+        """Manual poll. Body: {feed_id}. Uses the same path as watch mode."""
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
@@ -10446,7 +10624,7 @@ class Handler(BaseHTTPRequestHandler):
         if err:
             return self._send_json(400, {"ok": False, "error": err})
         try:
-            result = podcasts.poll_feed(_get_index(), feed_id)
+            result = _poll_podcast_feed_for_watch(feed_id)
         except Exception as e:
             log.exception("/podcasts/feeds/poll failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
@@ -10590,6 +10768,10 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as exc:
             log.exception("/podcasts/episodes/to-corpus failed")
             return self._send_json(500, {"ok": False, "error": str(exc)})
+        episode = podcasts.get_episode(_get_index(), episode_id) or {}
+        maybe_toast(
+            "Podcast added to Uoink",
+            f"{episode.get('title') or 'The episode'} is ready in your library.")
         return self._send_json(200, result)
 
     # ---- v3.1 mobile playlist monitor --------------------------------
@@ -12719,6 +12901,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_feed_poll(body)
         if bare == "/podcasts/feeds/set-enabled":
             return self._handle_podcasts_feed_set_enabled(body)
+        if bare == "/podcasts/feeds/set-auto-ingest":
+            return self._handle_podcasts_feed_set_auto_ingest(body)
         if bare == "/podcasts/episodes/set-status":
             return self._handle_podcasts_episode_set_status(body)
         if bare == "/podcasts/episodes/download":
@@ -14107,6 +14291,9 @@ def main(*, show_dashboard: bool = False):
     except Exception as e:
         log.warning("retry worker: reset_running_pending failed: %s", e)
     _start_retry_pending_thread()
+    # Podcast watch mode: registration polls metadata automatically; the
+    # per-feed auto_ingest flag separately controls media work.
+    _start_podcast_feed_scheduler_thread()
 
     # Bind succeeded -- now safe to claim the PID file.
     pid_file = HERE / "server.pid"

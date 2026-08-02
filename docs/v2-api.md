@@ -1280,16 +1280,20 @@ Error responses:
 
 ### Podcast feed and episode endpoints
 
-All podcast routes require `X-Uoink-Token`. Adding a feed is metadata-only and
-does not trigger polling, audio download, transcription, or model download.
-There is no automatic feed scheduler in this release.
+All podcast routes require `X-Uoink-Token`. The helper checks for due feeds
+every 30 seconds and polls each enabled feed when its `poll_interval_min` has
+elapsed. Registration authorizes metadata polling only. Audio download,
+transcription, and corpus publishing stay off unless that feed's `auto_ingest`
+flag is explicitly enabled. A first-time Whisper model download still needs
+separate consent.
 
 | Method | Route | Purpose |
 |---|---|---|
 | GET | `/podcasts/feeds` | List registered feeds. |
-| POST | `/podcasts/feeds` | Register `{feed_url, poll_interval_min?}`. |
+| POST | `/podcasts/feeds` | Register `{feed_url, poll_interval_min?, auto_ingest?}`; `auto_ingest` defaults to `false`. |
 | POST | `/podcasts/feeds/remove` | Remove `{feed_id}` and tracked episodes. |
 | POST | `/podcasts/feeds/set-enabled` | Set `{feed_id, enabled}`. |
+| POST | `/podcasts/feeds/set-auto-ingest` | Set `{feed_id, auto_ingest}` for episodes discovered after opt-in. |
 | POST | `/podcasts/feeds/poll` | Fetch one feed now with `{feed_id}`. |
 | GET | `/podcasts/episodes` | List episodes; accepts `feed_id`, `status`, and `limit`. |
 | POST | `/podcasts/episodes/set-status` | Set `{episode_id, status}`. |
@@ -1328,6 +1332,13 @@ labels. The publisher writes a per-episode folder while leaving the MP3 flat in
 the feed folder. Repeating the operation is idempotent and repairs a prior
 partial write. Podcast citations use the retained episode page URL with
 `#t=<seconds>`; an opaque GUID is never turned into a fabricated URL.
+
+When Auto-ingest is on, the watch tick advances one durable episode candidate
+per due feed poll. It downloads the MP3, queues the same serialized
+transcription worker, and publishes the finished transcript. Remaining marked
+episodes wait for later polls, so subscribing to a large archive cannot start
+dozens of media jobs at once. Turning Auto-ingest on does not sweep episode
+rows that were discovered before the opt-in.
 
 ### MCP HTTP JSON-RPC helper endpoints
 

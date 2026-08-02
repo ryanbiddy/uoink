@@ -38,7 +38,7 @@ Uoink captures more than YouTube:
 
 - **YouTube** — timestamped transcript, timestamped screenshots (a paste-safe subset in the clipboard), top comments with authors and like counts, title, channel, description, tags, views, upload date, thumbnail, and a JSON sidecar for agents and scripts.
 - **X / Twitter** — video transcripts and post text with author credit.
-- **Podcasts** — metadata-only RSS/Atom subscriptions, with on-demand local audio download and WhisperX transcription. Speaker labels appear only when optional diarization succeeds; publishing to the corpus is a separate manual action.
+- **Podcasts** — automatic RSS/Atom metadata watching, with optional per-feed Auto-ingest for local audio download, WhisperX transcription, and corpus publishing. Audio work is off by default. Speaker labels appear only when optional diarization succeeds.
 - **Web pages and articles** — readable text into the same corpus format.
 - **Reddit** — threads and top comments as clean Markdown.
 
@@ -92,7 +92,7 @@ Uoink is completely free and open source (MIT). Users are responsible for ensuri
 
 ## Single purpose statement (1,000 chars max)
 ```
-Uoink saves supported sources — starting with YouTube videos, plus X posts, podcasts, and web pages — into a structured local corpus and makes it available through the clipboard, a local dashboard, and local MCP tools for AI agents. The saved material follows the source: YouTube includes transcripts, screenshots, comments, and metadata; podcast episodes use on-demand local transcripts and retained source links.
+Uoink saves supported sources — starting with YouTube videos, plus X posts, podcasts, and web pages — into a structured local corpus and makes it available through the clipboard, a local dashboard, and local MCP tools for AI agents. The saved material follows the source: YouTube includes transcripts, screenshots, comments, and metadata; podcast feeds update metadata automatically, while local episode transcription and publishing remain an explicit per-feed choice.
 ```
 
 ## Support email

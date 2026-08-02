@@ -215,12 +215,18 @@ def get_transcript_reliability(video_id: str) -> dict:
 
 @mcp.tool(
     name="add_podcast_feed",
-    description="Register a podcast RSS or Atom feed without downloading audio.",
+    description=("Register a podcast RSS or Atom feed for metadata watching, "
+                 "with optional per-feed Auto-ingest."),
 )
-def add_podcast_feed(feed_url: str, poll_interval_min: int = 60) -> dict:
+def add_podcast_feed(
+    feed_url: str,
+    poll_interval_min: int = 60,
+    auto_ingest: bool = False,
+) -> dict:
     return uoink_mcp_tools.call_tool(
         "add_podcast_feed",
-        {"feed_url": feed_url, "poll_interval_min": poll_interval_min},
+        {"feed_url": feed_url, "poll_interval_min": poll_interval_min,
+         "auto_ingest": auto_ingest},
     )
 
 

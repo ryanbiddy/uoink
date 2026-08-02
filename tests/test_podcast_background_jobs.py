@@ -136,3 +136,88 @@ def test_transcription_preflight_observes_consent_and_restart_requeues(
     assert restored["episode_id"] == episode_id
     assert "restarted" in restored["message"]
     idx.close()
+
+
+def test_auto_transcription_publishes_and_toasts_after_corpus_commit(
+        tmp_path, monkeypatch):
+    idx = index_mod.Index.open(tmp_path / "index.db")
+    episode_id = _seed_downloaded_episodes(idx, tmp_path, count=1)[0]
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(
+        server.whisper_runner, "is_whisperx_available", lambda: True)
+    monkeypatch.setattr(
+        server.whisper_runner, "is_model_downloaded", lambda *_args: True)
+    monkeypatch.setattr(
+        server.whisper_runner, "set_current_thread_below_normal", lambda: True)
+    monkeypatch.setattr(server.whisper_runner, "transcribe_audio", lambda *_a, **_k: {
+        "model": "base", "language": "en", "diarization_ran": False,
+        "segments": [{"start": 0.0, "end": 1.0, "text": "Published"}],
+    })
+    monkeypatch.setattr(
+        podcasts, "episode_to_corpus",
+        lambda _idx, requested_id, **_kwargs: {
+            "ok": True, "video_id": f"episode-{requested_id}"})
+    toasts = []
+    monkeypatch.setattr(
+        server, "maybe_toast",
+        lambda title, body, **_kwargs: toasts.append((title, body)))
+
+    result, status = server._queue_podcast_transcription(
+        episode_id, model="base", publish_to_corpus=True)
+    assert status == 202
+    deadline = time.time() + 5
+    while time.time() < deadline:
+        job = server._get_public_job(result["job_id"])
+        if job and job["state"] == "completed":
+            break
+        time.sleep(0.02)
+
+    assert job["state"] == "completed"
+    assert job["publish_to_corpus"] is True
+    assert job["result"]["corpus"] == {
+        "ok": True, "video_id": f"episode-{episode_id}"}
+    assert toasts == [
+        ("Podcast added to Uoink", "Episode 0 is ready in your library.")]
+    idx.close()
+
+
+def test_auto_publish_failure_preserves_completed_transcript_for_retry(
+        tmp_path, monkeypatch):
+    idx = index_mod.Index.open(tmp_path / "index.db")
+    episode_id = _seed_downloaded_episodes(idx, tmp_path, count=1)[0]
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    monkeypatch.setattr(server, "DATA_ROOT", tmp_path)
+    monkeypatch.setattr(
+        server.whisper_runner, "is_whisperx_available", lambda: True)
+    monkeypatch.setattr(
+        server.whisper_runner, "is_model_downloaded", lambda *_args: True)
+    monkeypatch.setattr(
+        server.whisper_runner, "set_current_thread_below_normal", lambda: True)
+    monkeypatch.setattr(server.whisper_runner, "transcribe_audio", lambda *_a, **_k: {
+        "model": "base", "language": "en", "diarization_ran": False,
+        "segments": [{"start": 0.0, "end": 1.0, "text": "Durable"}],
+    })
+    monkeypatch.setattr(
+        podcasts, "episode_to_corpus",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            OSError("temporary publish failure")))
+
+    result, status = server._queue_podcast_transcription(
+        episode_id, model="base", publish_to_corpus=True)
+    assert status == 202
+    deadline = time.time() + 5
+    while time.time() < deadline:
+        job = server._get_public_job(result["job_id"])
+        if job and job["state"] == "completed":
+            break
+        time.sleep(0.02)
+
+    assert job["state"] == "completed"
+    assert job["result"]["corpus"] is None
+    assert job["result"]["corpus_error"] == "temporary publish failure"
+    assert "publish will retry" in job["message"]
+    episode = podcasts.get_episode(idx, episode_id)
+    assert episode["transcript_status"] == "done"
+    assert episode["status"] == podcasts.EPISODE_STATUS_TRANSCRIBED
+    idx.close()

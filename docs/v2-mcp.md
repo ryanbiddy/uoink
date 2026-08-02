@@ -656,17 +656,26 @@ Rate limit: 60 calls/minute per process.
 
 ### add_podcast_feed
 
-Register an RSS or Atom feed. Registration stores feed metadata only: it does
-not poll, download audio, transcribe, or publish episodes automatically.
+Register an RSS or Atom feed. The helper automatically polls enabled feeds for
+metadata after their stored interval elapses. Audio processing stays off unless
+`auto_ingest` is explicitly set for that feed; it defaults to `false`.
 
 Parameters:
 
 ```json
-{ "feed_url": "https://show.example/feed.xml", "poll_interval_min": 60 }
+{
+  "feed_url": "https://show.example/feed.xml",
+  "poll_interval_min": 60,
+  "auto_ingest": false
+}
 ```
 
-The interval is retained for feed policy and must be between 15 and 1440
-minutes. Automatic scheduling is not part of this surface.
+The interval must be between 15 and 1440 minutes. The scheduler checks for due
+feeds every 30 seconds. `auto_ingest: true` applies to episodes discovered
+after opt-in and authorizes automatic MP3 download, local transcription, and
+corpus publishing. It does not authorize a first-time Whisper model download.
+Use the dashboard or `POST /podcasts/feeds/set-auto-ingest` to change the flag
+for an existing feed.
 
 ### list_podcast_feeds
 
@@ -686,8 +695,9 @@ this operation.
 
 ### poll_podcast_feed
 
-Fetch and parse one feed now, retaining up to 50 new episode records. The
-request uses stored ETag and Last-Modified values on later polls.
+Fetch and parse one feed now through the same path used by watch mode, retaining
+up to 50 new episode records. The request uses stored ETag and Last-Modified
+values on later polls.
 
 ```json
 { "feed_id": 12 }

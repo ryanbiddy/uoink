@@ -245,15 +245,18 @@ MCP surfaces:
 
 ### `podcast_feeds` and `podcast_episodes`
 
-Podcast subscriptions store metadata only by default. `podcast_feeds` holds
-the RSS/Atom URL, title, public homepage, conditional-request headers, and poll
-state. `podcast_episodes` holds the feed-scoped GUID, retained public episode
-page URL, enclosure URL, download/transcript paths and status, plus
-`yoink_video_id` after manual corpus publication.
+Podcast subscriptions poll metadata automatically but store metadata only by
+default. `podcast_feeds` holds the RSS/Atom URL, title, public homepage,
+conditional-request headers, poll state, and default-off `auto_ingest` flag.
+`podcast_episodes` holds the feed-scoped GUID, retained public episode page
+URL, enclosure URL, download/transcript paths and status, a durable
+`auto_ingest_requested` marker, plus `yoink_video_id` after corpus publication.
 
 Migration `0022_podcast_corpus.sql` adds `episode_page_url` and replaces the
 YouTube-required citation shape with the compatible source-aware fields above.
 Existing YouTube links are copied into all three link columns during migration.
+Migration `0023_podcast_watch.sql` adds the per-feed opt-in and episode-level
+request marker used by the 30-second due-feed scheduler.
 
 ### Entity graph (Sprint 16, migration 0002)
 
