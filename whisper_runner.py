@@ -319,8 +319,8 @@ def update_episode_transcript_state(idx, episode_id: int, *,
     """Single UPDATE that lands all transcript_* fields atomically."""
     if status not in _STATUSES:
         raise ValueError(f"status must be one of {list(_STATUSES)}")
-    with idx._lock:
-        idx._conn.execute(
+    with idx.write_transaction() as conn:
+        conn.execute(
             "UPDATE podcast_episodes SET "
             "  transcript_status = ?, "
             "  transcript_local_path = COALESCE(?, transcript_local_path), "

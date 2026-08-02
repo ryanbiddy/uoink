@@ -119,19 +119,21 @@ def add_feed(idx, feed_url: str, *, poll_interval_min: int = 60) -> dict:
     if not canonical:
         raise ValueError("feed_url must be a valid http(s) URL")
     interval = max(15, min(int(poll_interval_min or 60), 1440))
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "INSERT OR IGNORE INTO podcast_feeds "
             "(feed_url, poll_interval_min, added_at) VALUES (?, ?, ?)",
             (canonical, interval, _now_iso()))
         if cur.rowcount == 0:
             # Already present; return that row.
-            row = idx._conn.execute(
+            row = conn.execute(
                 "SELECT * FROM podcast_feeds WHERE feed_url=?",
                 (canonical,)).fetchone()
-            return dict(row) if row else {}
-        feed_id = cur.lastrowid
-    return get_feed(idx, feed_id) or {}
+        else:
+            row = conn.execute(
+                "SELECT * FROM podcast_feeds WHERE id=?",
+                (cur.lastrowid,)).fetchone()
+    return dict(row) if row else {}
 
 
 def get_feed(idx, feed_id: int) -> dict | None:
@@ -162,15 +164,15 @@ def list_feeds(idx, *, enabled_only: bool = False) -> list[dict]:
 
 def remove_feed(idx, feed_id: int) -> bool:
     """Delete a feed + its episodes (FK cascade)."""
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "DELETE FROM podcast_feeds WHERE id=?", (feed_id,))
         return cur.rowcount > 0
 
 
 def set_feed_enabled(idx, feed_id: int, enabled: bool) -> bool:
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "UPDATE podcast_feeds SET enabled=? WHERE id=?",
             (1 if enabled else 0, feed_id))
         return cur.rowcount > 0
@@ -358,12 +360,12 @@ def upsert_episodes(idx, feed_id: int, episodes: list[dict]) -> tuple[int, int]:
     inserted = 0
     seen = 0
     now = _now_iso()
-    with idx._lock:
+    with idx.write_transaction() as conn:
         for ep in episodes:
             guid = (ep.get("guid") or "").strip()
             if not guid:
                 continue
-            cur = idx._conn.execute(
+            cur = conn.execute(
                 "INSERT OR IGNORE INTO podcast_episodes "
                 "(feed_id, guid, title, audio_url, duration_seconds, "
                 " published_at, description, status, discovered_at) "
@@ -382,9 +384,9 @@ def record_feed_meta(idx, feed_id: int, *, title: str | None,
                       description: str | None, homepage: str | None,
                       etag: str | None, last_modified: str | None,
                       ok: bool, error: str | None = None) -> None:
-    with idx._lock:
+    with idx.write_transaction() as conn:
         if ok:
-            idx._conn.execute(
+            conn.execute(
                 "UPDATE podcast_feeds SET "
                 "  title = COALESCE(?, title), "
                 "  description = COALESCE(?, description), "
@@ -397,7 +399,7 @@ def record_feed_meta(idx, feed_id: int, *, title: str | None,
                 (title, description, homepage, _now_iso(),
                  etag, last_modified, feed_id))
         else:
-            idx._conn.execute(
+            conn.execute(
                 "UPDATE podcast_feeds SET "
                 "  last_polled_at = ?, "
                 "  error_count = error_count + 1, "
@@ -487,8 +489,8 @@ def set_episode_status(idx, episode_id: int, status: str) -> bool:
     if status not in _EPISODE_STATUSES:
         raise ValueError(
             f"status must be one of {list(_EPISODE_STATUSES)}")
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "UPDATE podcast_episodes SET status=? WHERE id=?",
             (status, episode_id))
         return cur.rowcount > 0
@@ -537,8 +539,8 @@ def _record_audio_result(idx, episode_id: int, *,
                           size_bytes: int | None,
                           error: str | None,
                           status: str) -> None:
-    with idx._lock:
-        idx._conn.execute(
+    with idx.write_transaction() as conn:
+        conn.execute(
             "UPDATE podcast_episodes SET "
             "  audio_local_path = COALESCE(?, audio_local_path), "
             "  audio_downloaded_at = ?, "
@@ -587,10 +589,7 @@ def download_episode_audio(idx, episode_id: int, *,
     # show up in the in-flight section of the dashboard during the
     # download (which can take several minutes for an hour-long pod).
     if episode["status"] != EPISODE_STATUS_QUEUED:
-        with idx._lock:
-            idx._conn.execute(
-                "UPDATE podcast_episodes SET status=? WHERE id=?",
-                (EPISODE_STATUS_QUEUED, episode_id))
+        set_episode_status(idx, episode_id, EPISODE_STATUS_QUEUED)
 
     # Output template: drop the extension; yt-dlp adds .mp3 after
     # ffmpeg converts. Pass the bare stem.

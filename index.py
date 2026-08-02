@@ -31,6 +31,7 @@ import re
 import sqlite3
 import threading
 import time
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -363,6 +364,30 @@ class Index:
 
     def __exit__(self, *exc) -> None:
         self.close()
+
+    @contextmanager
+    def write_transaction(self):
+        """Run one durable write unit without absorbing unrelated state.
+
+        Helper modules share this connection. Refuse to enter while another
+        caller has left a transaction open instead of accidentally committing
+        that caller's work. The re-entrant Index lock keeps the boundary
+        exclusive across worker threads.
+        """
+        with self._lock:
+            if self._conn.in_transaction:
+                raise RuntimeError(
+                    "cannot start a write transaction while another "
+                    "transaction is active"
+                )
+            try:
+                self._conn.execute("BEGIN IMMEDIATE")
+                yield self._conn
+                self._conn.commit()
+            except BaseException:
+                if self._conn.in_transaction:
+                    self._conn.rollback()
+                raise
 
     # ---- yoinks ----------------------------------------------------------
     def upsert_yoink(self, record: dict, *, content: str = "") -> None:
