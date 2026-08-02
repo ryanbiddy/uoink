@@ -4195,6 +4195,8 @@
                 <button class="button danger" type="button" id="stopHelperSettings">Stop Uoink</button>
                 <label class="inline-row"><input id="autostartToggle" type="checkbox" checked> Autostart on login</label>
               </div>
+              <label class="inline-row"><input id="notificationsEnabled" type="checkbox" checked> Show desktop notifications</label>
+              <p class="setting-copy">When off, updates stay in Activity without opening a balloon. Fullscreen apps also receive this courtesy automatically.</p>
             </div>
 
             <div class="setting-block">
@@ -4869,6 +4871,7 @@
       topicUndoText: document.getElementById("topicUndoText"),
       undoTopicRemove: document.getElementById("undoTopicRemove"),
       autostartToggle: document.getElementById("autostartToggle"),
+      notificationsEnabled: document.getElementById("notificationsEnabled"),
       screenshotCount: document.getElementById("screenshotCount"),
       rolePicker: document.getElementById("rolePicker"),
       channelsStatus: document.getElementById("channelsStatus"),
@@ -8724,6 +8727,7 @@
         : "";
       const liteRetry = failed && shouldOfferChunkedRetry(rawError, phase);
       const cookieRetry = failed && shouldOfferCookieRetry(rawError);
+      const notificationBody = job.kind === "notification" ? (job.message || "") : "";
       const sub = [
         job.kind || "job",
         stateValue,
@@ -8736,6 +8740,7 @@
             <div>
               <div class="job-title">${htmlEscape(title)}</div>
               <div class="job-sub">${htmlEscape(sub)}</div>
+              ${notificationBody ? `<div class="job-sub">${htmlEscape(notificationBody)}</div>` : ""}
               ${sourceChip}
             </div>
             <div class="inline-row">
@@ -8831,6 +8836,7 @@
           : "No key saved yet. Local capture still works; optional AI features stay off.";
         renderOutputFolder(outputFolderPathFromSettings(), Boolean(state.settings.output_dir_pending_restart));
         els.autostartToggle.checked = Boolean(state.settings.autostart);
+        els.notificationsEnabled.checked = state.settings.notifications_enabled !== false;
         els.screenshotCount.value = String(state.settings.screenshot_count ?? state.settings.clipboard_screenshot_cap ?? 4);
         els.claimVerificationToggle.checked = Boolean(state.settings.claim_verification_enabled);
         els.reliabilityAutoCheck.checked = Boolean(state.settings.transcript_reliability_auto_check);
@@ -11136,6 +11142,12 @@
         openYoinkDetail(rowFromCard(card));
       });
       els.autostartToggle.addEventListener("change", () => saveSettingsPatch({ autostart: els.autostartToggle.checked }, "Autostart updated."));
+      els.notificationsEnabled.addEventListener("change", () => saveSettingsPatch(
+        { notifications_enabled: els.notificationsEnabled.checked },
+        els.notificationsEnabled.checked
+          ? "Desktop notifications are on."
+          : "Desktop notifications are off; updates stay in Activity.",
+      ));
       els.rolePicker.addEventListener("change", (event) => {
         const input = event.target.closest('input[name="role"]');
         if (input) saveSettingsPatch({ role: input.value }, "Role updated.");

@@ -6,14 +6,9 @@ endpoints with CORS allowed for youtube.com.
 
 ## Dependencies
 
-Pure Python stdlib — **no fastapi/flask/uvicorn install required**.
-
-The optional `win11toast` package is used for a friendly startup toast; if
-it's missing, the server still runs (silently).
-
-```
-pip install win11toast      # optional
-```
+Pure Python stdlib — **no fastapi/flask/uvicorn install required**. Windows
+desktop notifications use the built-in PowerShell/NotifyIcon path; no optional
+toast package is required.
 
 You also still need the same external tools as the GUI:
 
@@ -51,6 +46,12 @@ Logs are written to `server.log` next to `server.py`.
 The server launches with `pythonw`, so it sits silently in the background — no
 console window. Stop it via Task Manager (kill the `pythonw.exe` process) or by
 running the GUI's launcher and then closing it; cleaner: leave it running.
+
+Desktop notifications default on. Turn off **Show desktop notifications** in
+Dashboard → Settings → Local app to keep background work invisible. Suppressed
+events remain in Activity, and Uoink suppresses balloons automatically while a
+foreground window covers its monitor. The authenticated settings equivalent is
+`POST /settings` with `{"notifications_enabled": false}`; no restart is needed.
 
 ## Endpoints
 
@@ -100,8 +101,8 @@ Response on success:
 }
 ```
 
-The server also calls `os.startfile(folder)` on success so File Explorer pops
-open at the result folder automatically.
+The result folder remains available from the dashboard and tray menu; a
+background capture does not pop File Explorer open.
 
 Response on failure:
 

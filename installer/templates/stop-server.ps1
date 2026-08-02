@@ -14,6 +14,21 @@
 $installDir = $PSScriptRoot
 $pidFile = Join-Path $installDir 'server.pid'
 $stoppedAny = $false
+$notificationsEnabled = $true
+try {
+    $settingsPath = Join-Path $installDir 'settings.json'
+    if (Test-Path $settingsPath) {
+        $settings = Get-Content -Raw -LiteralPath $settingsPath | ConvertFrom-Json
+        if ($null -ne $settings.notifications_enabled) {
+            $notificationsEnabled = [bool]$settings.notifications_enabled
+        }
+    }
+} catch {
+    # A malformed settings file must not block shutdown. Preserve the
+    # historical default-on behavior and let the helper surface the settings
+    # problem on its next start.
+    $notificationsEnabled = $true
+}
 
 # NOTE: $pid is a PowerShell automatic variable holding the *current*
 # process id, so we use $serverPid to avoid clobbering it. The previous
@@ -45,7 +60,7 @@ foreach ($p in $swept) {
 # Confirmation balloon. Symmetric with the start-up notification so the
 # user knows the click did something. Skipped if nothing was actually
 # running (no need to tell them about a no-op).
-if ($stoppedAny) {
+if ($stoppedAny -and $notificationsEnabled) {
     try {
         Add-Type -AssemblyName System.Windows.Forms
         Add-Type -AssemblyName System.Drawing

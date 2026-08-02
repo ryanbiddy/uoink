@@ -76,6 +76,20 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 For developers running from source, see [REQUIREMENTS.md](./REQUIREMENTS.md). Build the installer locally with `./build.ps1` (see [docs/build-installer.md](./docs/build-installer.md)).
 
+### Quiet desktop notifications
+
+Desktop notifications are on by default. To keep background feed watches and
+captures invisible, open **Dashboard → Settings → Local app** and turn off
+**Show desktop notifications**. Uoink keeps suppressed updates in the
+dashboard's **Activity** view, so silence does not discard the event. Uoink
+also applies the same courtesy automatically while a foreground app covers its
+monitor, including borderless and exclusive-fullscreen games.
+
+The persisted setting is `notifications_enabled` in `settings.json`. Local
+clients can read it through `GET /settings` or update it with an authenticated
+`POST /settings` body such as `{"notifications_enabled": false}`. Restart is
+not required.
+
 ## How it works
 
 **Extension flow:** click Uoink under a video → Uoink extracts transcript, screenshots, comments, metadata → Markdown corpus lands on your clipboard (screenshots embedded) and the full set saves to disk → paste, run a prompt, get analysis.

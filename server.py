@@ -778,6 +778,10 @@ def _default_settings() -> dict:
         # path as a manual save. Reversible: turn it off any time; captured
         # uoinks are ordinary uoinks you can delete.
         "auto_uoink_enabled": False,
+        # Desktop balloons are useful when explicitly wanted, but background
+        # feed work must be able to stay invisible. Suppressed notifications
+        # remain available in the dashboard Activity stream.
+        "notifications_enabled": True,
         "anthropic_key_invalid": False,
         # v2.1 rename: set True after the one-time post-migration
         # post-migration toast has fired, so it never repeats.
@@ -829,6 +833,9 @@ def _normalize_settings(data: dict) -> dict:
         clean.get("writing_default_attach_all_screenshots", False)
     )
     clean["auto_uoink_enabled"] = bool(clean.get("auto_uoink_enabled"))
+    clean["notifications_enabled"] = bool(
+        clean.get("notifications_enabled", True)
+    )
     try:
         cap = int(clean.get("clipboard_screenshot_cap"))
     except (TypeError, ValueError):
@@ -1130,6 +1137,9 @@ def _public_settings(data: dict | None = None) -> dict:
         # the Settings + digest copy can state the bar honestly.
         "auto_uoink_enabled": bool(data.get("auto_uoink_enabled")),
         "auto_uoink_threshold": taste_scoring.DEFAULT_THRESHOLD,
+        "notifications_enabled": bool(
+            data.get("notifications_enabled", True)
+        ),
         # E-1 (Zing enabler): opt-in short-video media retention, default
         # OFF. Backend setting only for now -- no dashboard control yet.
         "keep_media": bool(data.get("keep_media")),
@@ -6323,7 +6333,12 @@ def _validate_persisted_job(raw: dict) -> dict | None:
     state = raw.get("state")
     if not isinstance(job_id, str) or not job_id:
         return None
-    if kind not in ("playlist", "single", "podcast_transcribe"):
+    if kind not in (
+        "playlist",
+        "single",
+        "podcast_transcribe",
+        "notification",
+    ):
         return None
     if state not in ("queued", "running", "completed", "cancelled", "failed"):
         return None
@@ -6459,6 +6474,39 @@ def _add_job_record(job: dict) -> dict:
                 job.get("source_url") or "", job["id"])
         _persist_jobs_locked(job)
         return _public_job(job)
+
+
+def _queue_dashboard_notification(
+        title: str, body: str, *, reason: str) -> dict:
+    """Persist a suppressed desktop balloon into dashboard Activity."""
+    now = _now_iso()
+    safe_title = str(title or "Uoink notification").strip()[:160]
+    safe_body = str(body or "").strip()[:1000]
+    job = {
+        "id": _make_job_id(),
+        "kind": "notification",
+        "state": "completed",
+        "source_url": None,
+        "title": safe_title,
+        "playlist_title": None,
+        "session_folder": None,
+        "videos_total": 0,
+        "videos_done": 0,
+        "videos_failed": 0,
+        "current_video": None,
+        "current_video_phase": None,
+        "started_at": now,
+        "updated_at": now,
+        "completed_at": now,
+        "error": None,
+        "error_detail": None,
+        "result": {"suppressed_reason": str(reason)},
+        "warnings": [],
+        "message": safe_body,
+        "retry_exhausted": False,
+        "attempt_count": None,
+    }
+    return _add_job_record(job)
 
 
 def _record_single_extract_job(url: str, started_at: str, *,
@@ -11662,6 +11710,7 @@ class Handler(BaseHTTPRequestHandler):
             "writing_show_screenshot_picker",  # v3.3 D-20
             "writing_default_attach_all_screenshots",  # v3.3 D-20
             "auto_uoink_enabled",           # V-3 taste-aware auto-uoink
+            "notifications_enabled",        # Desktop balloons; default ON
             "keep_media",                   # E-1 Zing enabler -- keep
                                             # short-video media after
                                             # extraction (default OFF)
@@ -13106,11 +13155,20 @@ class Handler(BaseHTTPRequestHandler):
     def _handle_jobs_list(self):
         qs = parse_qs(urlparse(self.path).query)
         kind = (qs.get("kind") or [None])[0]
-        if kind not in (None, "", "playlist", "single", "podcast_transcribe"):
+        if kind not in (
+            None,
+            "",
+            "playlist",
+            "single",
+            "podcast_transcribe",
+            "notification",
+        ):
             return self._send_json(400, {
                 "ok": False,
-                "error": ("kind must be playlist, single, or "
-                          "podcast_transcribe"),
+                "error": (
+                    "kind must be playlist, single, podcast_transcribe, "
+                    "or notification"
+                ),
             })
         self._send_json(200, {
             "ok": True,
@@ -14102,8 +14160,8 @@ def _bundled_icon_path() -> str | None:
     return str(candidate) if candidate.is_file() else None
 
 
-def maybe_toast(title: str, body: str, icon_path: str | None = None):
-    """Best-effort transient notification when the helper finishes booting.
+def maybe_toast(title: str, body: str, icon_path: str | None = None) -> bool:
+    """Show a courteous desktop notification or queue it in Activity.
 
     Sprint 19.5 Stage 1: now delegated to _platform.show_toast. Windows
     uses System.Windows.Forms.NotifyIcon via PowerShell, macOS uses
@@ -14113,10 +14171,34 @@ def maybe_toast(title: str, body: str, icon_path: str | None = None):
 
     v2.1: ``icon_path`` (Windows only) points the balloon at the bundled
     uoink.ico so the notification carries the brand mark; defaults to the
-    bundled icon when one is present."""
+    bundled icon when one is present.
+
+    Desktop notifications default on, but the persisted setting can disable
+    them. A foreground fullscreen window also suppresses them for that moment.
+    Suppression is never data loss: the same title/body becomes a completed
+    ``notification`` record in the dashboard Activity stream.
+    """
+    settings = _read_settings()
+    suppressed_reason = None
+    if not settings.get("notifications_enabled", True):
+        suppressed_reason = "notifications disabled"
+    elif _platform.is_foreground_fullscreen():
+        suppressed_reason = "foreground fullscreen"
+    if suppressed_reason:
+        try:
+            _queue_dashboard_notification(
+                title,
+                body,
+                reason=suppressed_reason,
+            )
+        except Exception as exc:
+            log.warning("notification could not be queued: %s", exc)
+        log.info("desktop notification queued: %s", suppressed_reason)
+        return False
     if icon_path is None:
         icon_path = _bundled_icon_path()
     _platform.show_toast(title, body, icon_path=icon_path)
+    return True
 
 
 def _maybe_post_migration_toast() -> bool:
