@@ -185,7 +185,10 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         # mcp: the stdio entry point's SDK, required so the C-01 regression
-        # test actually drives uoink_mcp.py instead of skipping.
-        run: pip install pytest Pillow mcp
+        # test actually drives uoink_mcp.py instead of skipping. Pinned <2:
+        # mcp 2.0.0 (2026-08) removed the mcp.server.fastmcp import path
+        # uoink_mcp.py is written against; migrating to the 2.x API is a
+        # separate ticket.
+        run: pip install pytest Pillow "mcp<2"
       - name: Run tests
         run: pytest tests/
