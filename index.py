@@ -269,14 +269,24 @@ def normalize_entity_name(name: str) -> str:
     return "".join(ch for ch in str(name or "").lower() if ch.isalnum())
 
 
-def _entity_deep_link(video_id: str, seconds) -> str:
-    """A timestamped watch URL for an entity mention. Mirrors server.py's
-    _youtube_deep_link; duplicated here so index.py stays self-contained."""
+def _entity_deep_link(video_id: str, seconds, *, platform: str | None = None,
+                      metadata_json: str | None = None) -> str | None:
+    """Return a source-aware timestamp link for an entity mention."""
     vid = (video_id or "").strip()
     try:
         t = max(0, int(float(seconds)))
     except (TypeError, ValueError):
         t = 0
+    metadata = {}
+    try:
+        metadata = json.loads(metadata_json or "{}")
+    except (TypeError, json.JSONDecodeError):
+        pass
+    source_url = metadata.get("url") if isinstance(metadata, dict) else None
+    if platform and platform != "youtube":
+        if isinstance(source_url, str) and source_url.startswith(("http://", "https://")):
+            return f"{source_url.split('#', 1)[0]}#t={t}"
+        return None
     return f"https://youtube.com/watch?v={vid}&t={t}s"
 
 
@@ -1492,7 +1502,8 @@ class Index:
         rows = [
             (video_id, c.get("kind"), c.get("seq"),
              c.get("timestamp_start"), c.get("timestamp_end"),
-             c.get("text"), c.get("file_path"), c.get("youtube_deep_link"))
+             c.get("text"), c.get("file_path"), c.get("youtube_deep_link"),
+             c.get("source_url"), c.get("source_deep_link"))
             for c in citations
         ]
         if not rows:
@@ -1501,8 +1512,9 @@ class Index:
             self._conn.executemany(
                 "INSERT OR REPLACE INTO citations "
                 "(video_id, kind, seq, timestamp_start, timestamp_end, "
-                " text, file_path, youtube_deep_link) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                " text, file_path, youtube_deep_link, source_url, "
+                " source_deep_link) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 rows,
             )
             self._conn.commit()
@@ -1860,7 +1872,8 @@ class Index:
             return []
         sql = (
             "SELECT y.video_id AS video_id, y.slug AS slug, y.title AS title, "
-            "       y.channel AS channel, em.source AS source, "
+            "       y.channel AS channel, y.platform AS platform, "
+            "       y.metadata_json AS metadata_json, em.source AS source, "
             "       em.timestamp AS timestamp, em.context AS context "
             "FROM entity_mentions em "
             "JOIN entities e ON e.entity_id = em.entity_id "
@@ -1873,7 +1886,11 @@ class Index:
         out = []
         for r in rows:
             d = dict(r)
-            d["deep_link"] = _entity_deep_link(d.get("video_id"), d.get("timestamp"))
+            d["deep_link"] = _entity_deep_link(
+                d.get("video_id"), d.get("timestamp"),
+                platform=d.get("platform"),
+                metadata_json=d.get("metadata_json"))
+            d.pop("metadata_json", None)
             out.append(d)
         return out
 

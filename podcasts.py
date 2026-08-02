@@ -1,4 +1,4 @@
-"""v3.1 podcast support -- RSS feed polling + episode tracking.
+"""Podcast feed, episode, audio, and corpus support.
 
 Per ROADMAP + PROMPT-V3.1: branding decision -- expand Uoink to cover
 podcasts (one tool, one corpus). This module ships the RSS feed
@@ -14,16 +14,19 @@ Compute (locked policy: model-agnostic + local-first):
   headers when the feed previously returned them, so a daily news
   podcast doesn't re-download an unchanged feed body on every poll.
 
-The polling worker lives in server.py (consumes _maybe_poll_feeds);
-this module owns the parse + persistence layer + helper functions.
+Feed polling is manual unless the caller explicitly schedules it. This module
+owns parsing, persistence, audio download, and the transcript-to-corpus bridge.
 Transport (HTTP + MCP) is owned by server.py + uoink_mcp_tools.py."""
 
 from __future__ import annotations
 
+import hashlib
+import json
 import logging
 import os
 import re
 import subprocess
+import tempfile
 import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -237,7 +240,8 @@ def parse_feed_body(body: bytes | str) -> dict:
         {
           'feed': {'title': ..., 'description': ..., 'homepage': ...},
           'episodes': [
-            {'guid': ..., 'title': ..., 'audio_url': ..., 'published_at': ...,
+            {'guid': ..., 'title': ..., 'audio_url': ...,
+             'episode_page_url': ..., 'published_at': ...,
              'description': ..., 'duration_seconds': ...},
             ...
           ],
@@ -268,7 +272,8 @@ def parse_feed_body(body: bytes | str) -> dict:
             for item in channel:
                 if _localname(item.tag) != "item":
                     continue
-                guid = _findtext(item, "guid") or _findtext(item, "link")
+                episode_page_url = _findtext(item, "link")
+                guid = _findtext(item, "guid") or episode_page_url
                 if not guid:
                     continue
                 audio = _findattr(item, "enclosure", "url")
@@ -277,6 +282,7 @@ def parse_feed_body(body: bytes | str) -> dict:
                     "guid": guid,
                     "title": _findtext(item, "title"),
                     "audio_url": audio,
+                    "episode_page_url": episode_page_url,
                     "duration_seconds": duration,
                     "published_at": _findtext(item, "pubDate", "published"),
                     "description": _findtext(item, "description", "summary"),
@@ -299,16 +305,19 @@ def parse_feed_body(body: bytes | str) -> dict:
                 continue
             # Atom <link rel="enclosure" type="audio/...">
             audio = None
+            episode_page_url = None
             for child in entry:
                 if _localname(child.tag) == "link":
                     rel = child.attrib.get("rel") or ""
                     if rel == "enclosure":
                         audio = child.attrib.get("href")
-                        break
+                    elif rel in ("", "alternate") and not episode_page_url:
+                        episode_page_url = child.attrib.get("href")
             episodes.append({
                 "guid": guid,
                 "title": _findtext(entry, "title"),
                 "audio_url": audio,
+                "episode_page_url": episode_page_url,
                 "duration_seconds": None,
                 "published_at": _findtext(entry, "published", "updated"),
                 "description": _findtext(entry, "summary", "content"),
@@ -367,16 +376,26 @@ def upsert_episodes(idx, feed_id: int, episodes: list[dict]) -> tuple[int, int]:
                 continue
             cur = conn.execute(
                 "INSERT OR IGNORE INTO podcast_episodes "
-                "(feed_id, guid, title, audio_url, duration_seconds, "
-                " published_at, description, status, discovered_at) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, 'new', ?)",
+                "(feed_id, guid, title, audio_url, episode_page_url, "
+                " duration_seconds, published_at, description, status, "
+                " discovered_at) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'new', ?)",
                 (feed_id, guid, ep.get("title"), ep.get("audio_url"),
-                 ep.get("duration_seconds"), ep.get("published_at"),
-                 ep.get("description"), now))
+                 ep.get("episode_page_url"), ep.get("duration_seconds"),
+                 ep.get("published_at"), ep.get("description"), now))
             if cur.rowcount:
                 inserted += 1
             else:
                 seen += 1
+                # Migration 0022 added this field after feeds could already
+                # contain episodes. A later poll repairs those older rows
+                # without changing their feed-scoped identity or status.
+                if ep.get("episode_page_url"):
+                    conn.execute(
+                        "UPDATE podcast_episodes SET episode_page_url="
+                        "COALESCE(episode_page_url, ?) "
+                        "WHERE feed_id=? AND guid=?",
+                        (ep.get("episode_page_url"), feed_id, guid))
     return inserted, seen
 
 
@@ -485,6 +504,16 @@ def get_episode(idx, episode_id: int) -> dict | None:
     return dict(row) if row else None
 
 
+def get_episode_with_feed(idx, episode_id: int) -> dict | None:
+    """Return one episode together with the feed fields needed to publish it."""
+    row = idx._conn.execute(
+        "SELECT e.*, f.feed_url, f.title AS podcast_title, "
+        "f.homepage AS podcast_homepage "
+        "FROM podcast_episodes e JOIN podcast_feeds f ON f.id=e.feed_id "
+        "WHERE e.id=?", (episode_id,)).fetchone()
+    return dict(row) if row else None
+
+
 def set_episode_status(idx, episode_id: int, status: str) -> bool:
     if status not in _EPISODE_STATUSES:
         raise ValueError(
@@ -521,6 +550,237 @@ def _podcast_root(data_root: Path) -> Path:
     root = Path(data_root) / "Podcasts"
     root.mkdir(parents=True, exist_ok=True)
     return root
+
+
+# ---- transcript -> corpus bridge --------------------------------------
+def _http_source_url(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    value = value.strip()
+    try:
+        parsed = urlparse(value)
+    except ValueError:
+        return None
+    return value if parsed.scheme in ("http", "https") and parsed.netloc else None
+
+
+def _episode_source_url(row: dict) -> str:
+    """Prefer the episode page; never use an opaque GUID as a fake URL."""
+    for value in (
+        row.get("episode_page_url"), row.get("guid"),
+        row.get("podcast_homepage"), row.get("feed_url"),
+    ):
+        url = _http_source_url(value)
+        if url:
+            return url
+    raise ValueError("episode and feed have no valid http(s) source URL")
+
+
+def _episode_corpus_id(row: dict) -> tuple[str, str]:
+    identity = f"{row.get('feed_url') or ''}\n{row.get('guid') or ''}"
+    suffix = hashlib.sha1(identity.encode("utf-8")).hexdigest()[:11]
+    return f"episode_{suffix}", suffix
+
+
+def _timestamp_label(seconds: float) -> str:
+    total = max(0, int(seconds))
+    hours, rem = divmod(total, 3600)
+    minutes, secs = divmod(rem, 60)
+    return f"{hours:02d}:{minutes:02d}:{secs:02d}"
+
+
+def _source_deep_link(source_url: str, seconds: float | int | None) -> str:
+    try:
+        timestamp = max(0, int(float(seconds or 0)))
+    except (TypeError, ValueError):
+        timestamp = 0
+    return f"{source_url.split('#', 1)[0]}#t={timestamp}"
+
+
+def _load_transcript(path: Path) -> tuple[dict, list[dict]]:
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise FileNotFoundError(f"transcript file missing: {path}") from None
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"transcript is not readable JSON: {exc}") from exc
+    if not isinstance(raw, dict) or not isinstance(raw.get("segments"), list):
+        raise ValueError("transcript must be an object with a segments array")
+    shaped: list[dict] = []
+    for seq, segment in enumerate(raw["segments"]):
+        if not isinstance(segment, dict):
+            raise ValueError(f"transcript segment {seq} must be an object")
+        try:
+            start = float(segment["start"])
+            end = float(segment["end"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise ValueError(
+                f"transcript segment {seq} requires numeric start and end"
+            ) from exc
+        text = segment.get("text")
+        if start < 0 or end < start or not isinstance(text, str) or not text.strip():
+            raise ValueError(
+                f"transcript segment {seq} has invalid timing or text")
+        item: dict[str, Any] = {
+            "start": start, "end": end, "text": text.strip(),
+        }
+        speaker = segment.get("speaker")
+        if speaker is not None:
+            if not isinstance(speaker, str):
+                raise ValueError(f"transcript segment {seq} speaker must be text")
+            if speaker.strip():
+                item["speaker"] = speaker.strip()
+        shaped.append(item)
+    if not shaped:
+        raise ValueError("transcript segments array is empty")
+    return raw, shaped
+
+
+def _atomic_write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_name = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", newline="\n", delete=False,
+            dir=path.parent, prefix=f".{path.name}.", suffix=".tmp",
+        ) as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+            temp_name = handle.name
+        os.replace(temp_name, path)
+    finally:
+        if temp_name:
+            try:
+                Path(temp_name).unlink(missing_ok=True)
+            except OSError:
+                pass
+
+
+def _link_episode_to_yoink(idx, episode_id: int, video_id: str) -> None:
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
+            "UPDATE podcast_episodes SET yoink_video_id=?, status=? WHERE id=?",
+            (video_id, EPISODE_STATUS_TRANSCRIBED, episode_id))
+        if cur.rowcount != 1:
+            raise LookupError(f"episode not found: {episode_id}")
+
+
+def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
+    """Publish a completed episode transcript into the shared corpus.
+
+    Identity and file paths are deterministic, so retrying repairs a partial
+    write without duplicating the yoink, FTS row, citations, or episode link.
+    The MP3 remains flat in the feed directory; Markdown and its sidecar live
+    together in a per-episode folder.
+    """
+    row = get_episode_with_feed(idx, episode_id)
+    if row is None:
+        raise LookupError(f"episode not found: {episode_id}")
+    transcript_path_raw = row.get("transcript_local_path")
+    if not transcript_path_raw:
+        raise FileNotFoundError("episode has no transcript_local_path")
+    transcript_raw, segments = _load_transcript(Path(transcript_path_raw))
+    source_url = _episode_source_url(row)
+    video_id, suffix = _episode_corpus_id(row)
+    podcast_title = row.get("podcast_title") or "Untitled podcast"
+    episode_title = row.get("title") or "Untitled episode"
+    feed_slug = _slugify(podcast_title, fallback=f"feed-{row['feed_id']}")
+    episode_slug = _slugify(episode_title, fallback=f"ep-{episode_id}")
+    folder = _podcast_root(Path(data_root)) / feed_slug / f"{episode_slug}-{suffix}"
+    corpus_path = folder / f"{folder.name}.md"
+    sidecar_path = folder / f"{folder.name}.json"
+
+    speakers = list(dict.fromkeys(
+        segment["speaker"] for segment in segments if segment.get("speaker")
+    ))
+    transcript_citations: list[dict] = []
+    markdown_lines = [
+        f"# {episode_title}", "", f"**Podcast:** {podcast_title}",
+        f"**Source:** {source_url}",
+    ]
+    if row.get("published_at"):
+        markdown_lines.append(f"**Published:** {row['published_at']}")
+    markdown_lines.extend(["", "## Transcript", ""])
+    for seq, segment in enumerate(segments):
+        deep_link = _source_deep_link(source_url, segment["start"])
+        speaker = f" — {segment['speaker']}" if segment.get("speaker") else ""
+        markdown_lines.extend([
+            f"### [{_timestamp_label(segment['start'])}]({deep_link}){speaker}",
+            "", segment["text"], "",
+        ])
+        transcript_citations.append({
+            "kind": "transcript_chunk", "seq": seq,
+            "timestamp_start": segment["start"],
+            "timestamp_end": segment["end"], "text": segment["text"],
+            "file_path": None, "youtube_deep_link": None,
+            "source_url": source_url, "source_deep_link": deep_link,
+        })
+    markdown = "\n".join(markdown_lines).rstrip() + "\n"
+
+    existing = idx.get_yoink(video_id)
+    captured_at = (existing or {}).get("yoinked_at") or _now_iso()
+    sidecar = {
+        "schema_version": 2,
+        "video_id": video_id,
+        "slug": folder.name,
+        "source_type": "episode",
+        "platform": "podcast",
+        "url": source_url,
+        "source_url": source_url,
+        "podcast_title": podcast_title,
+        "episode_title": episode_title,
+        "title": episode_title,
+        "channel": podcast_title,
+        "author": podcast_title,
+        # RSS core metadata identifies the show, not necessarily its host.
+        # Keep the dashboard field explicit and null instead of presenting
+        # the show title as a person.
+        "host": None,
+        "duration_seconds": row.get("duration_seconds"),
+        "published_at": row.get("published_at"),
+        "upload_date": row.get("published_at"),
+        "yoinked_at": captured_at,
+        "transcript_model": (
+            row.get("transcript_model_used") or transcript_raw.get("model")),
+        "language": transcript_raw.get("language"),
+        "diarization_ran": bool(
+            row.get("diarization_ran") or transcript_raw.get("diarization_ran")),
+        "speakers": speakers,
+        "transcript": segments,
+    }
+    _atomic_write(corpus_path, markdown)
+    _atomic_write(
+        sidecar_path, json.dumps(sidecar, indent=2, ensure_ascii=False) + "\n")
+
+    record = {
+        "video_id": video_id, "slug": folder.name,
+        "channel": podcast_title, "author": podcast_title,
+        "title": episode_title, "topic": "Uncategorized",
+        "hook_type": None, "yoinked_at": captured_at,
+        "corpus_path": str(corpus_path), "sidecar_path": str(sidecar_path),
+        "health_score_json": None,
+        "metadata_json": json.dumps({
+            "url": source_url, "platform": "podcast",
+            "content_type": "episode",
+            "duration_seconds": row.get("duration_seconds"),
+            "upload_date": row.get("published_at"),
+            "podcast_title": podcast_title,
+            "episode_id": episode_id,
+        }, ensure_ascii=False),
+        "schema_version": 2, "source_type": "episode",
+        "platform": "podcast",
+    }
+    idx.upsert_yoink(record, content=markdown)
+    idx.insert_citations(video_id, transcript_citations)
+    _link_episode_to_yoink(idx, episode_id, video_id)
+    return {
+        "ok": True, "episode_id": episode_id, "video_id": video_id,
+        "slug": folder.name, "corpus_path": str(corpus_path),
+        "sidecar_path": str(sidecar_path), "source_url": source_url,
+        "citations": len(transcript_citations), "segments": len(segments),
+        "speakers": speakers,
+    }
 
 
 def _episode_audio_path(data_root: Path, feed_row: dict,

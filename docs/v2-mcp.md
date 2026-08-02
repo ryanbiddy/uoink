@@ -9,12 +9,13 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink has two deliberately different tool surfaces:
 
-- Supported stdio registry: **14 tools**.
-- Local HTTP/OpenAPI registry: **64 tools**.
+- Supported stdio registry: **23 tools**.
+- Local HTTP/OpenAPI registry: **65 tools**.
 
 The supported stdio MCP surface covers extraction, playlist jobs, search,
 corpus retrieval, citation maps, health scores, transcript reliability,
-Comment Intelligence, Hook Type, hook taxonomy, and entity mentions. The
+Comment Intelligence, Hook Type, hook taxonomy, entity mentions, and manual
+podcast feed-to-corpus operations. The
 authenticated local HTTP helper exposes that set plus a broader collection of
 legacy and application operations. Overlapping tools share the handlers in
 `uoink_mcp_tools.py`, but the two transports do not expose the same registry.
@@ -37,7 +38,7 @@ only the canonical names, so clients using an old name receive
 | `get_yoink_corpus` | `get_uoink_corpus` |
 | `get_yoink_health` | `get_uoink_health` |
 
-The eight brand-neutral tools are unchanged: `get_job_status`, `cancel_job`,
+The original eight brand-neutral tools are unchanged: `get_job_status`, `cancel_job`,
 `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`,
 `find_mentions`, and `get_transcript_reliability`.
 
@@ -325,6 +326,7 @@ Return shape:
   "folder": "C:\\Users\\Ryan\\Desktop\\Uoink\\Topic\\video-slug",
   "video_id": "abc123DEF45",
   "video_url": "https://www.youtube.com/watch?v=abc123DEF45",
+  "source_url": "https://www.youtube.com/watch?v=abc123DEF45",
   "citations": [
     {
       "video_id": "abc123DEF45",
@@ -334,13 +336,19 @@ Return shape:
       "timestamp_end": 6.2,
       "text": "Opening transcript chunk...",
       "file_path": null,
-      "youtube_deep_link": "https://youtube.com/watch?v=abc123DEF45&t=0s"
+      "youtube_deep_link": "https://youtube.com/watch?v=abc123DEF45&t=0s",
+      "source_url": "https://youtube.com/watch?v=abc123DEF45&t=0s",
+      "source_deep_link": "https://youtube.com/watch?v=abc123DEF45&t=0s"
     }
   ]
 }
 ```
 
-`video_id`, `video_url`, and `citations` are additive fields. `video_id` and `video_url` are populated from the per-video JSON sidecar when available and are `null` for legacy/malformed uoinks without sidecar metadata. `citations` is best-effort and may be empty if the uoink has not been indexed yet.
+`video_id`, `video_url`, `source_url`, and `citations` are additive fields.
+`video_url` is populated only for YouTube items. `source_url` carries the real
+public source page for any supported source type. These fields are `null` when
+the sidecar does not identify a usable source. `citations` is best-effort and
+may be empty if the uoink has not been indexed yet.
 
 Errors:
 
@@ -455,7 +463,9 @@ Errors:
 
 ### get_citation_map
 
-Return pre-computed transcript and screenshot citations for a saved uoink. Each citation includes a timestamped YouTube deep link so agents can cite the source without reparsing markdown.
+Return pre-computed transcript and screenshot citations for a saved uoink.
+Each citation includes its public source URL and a source-aware timestamp link
+when one is available, so agents can cite the source without reparsing Markdown.
 
 Parameters:
 
@@ -475,6 +485,7 @@ Return shape:
       "timestamp_start": 0.0,
       "timestamp_end": 6.2,
       "text": "Opening transcript chunk...",
+      "source_url": "https://www.youtube.com/watch?v=abc123DEF45",
       "deep_link": "https://youtube.com/watch?v=abc123DEF45&t=0s"
     }
   ],
@@ -483,6 +494,7 @@ Return shape:
       "seq": 0,
       "timestamp": 30.0,
       "file_path": "C:\\Users\\Ryan\\Desktop\\Uoink\\Topic\\video-slug\\screenshots\\shot_0001.jpg",
+      "source_url": "https://www.youtube.com/watch?v=abc123DEF45",
       "deep_link": "https://youtube.com/watch?v=abc123DEF45&t=30s"
     }
   ]
@@ -494,7 +506,8 @@ Fields:
 - `transcript_citations` contains one entry per transcript chunk from the sidecar.
 - `screenshot_citations` contains one entry per screenshot from the sidecar.
 - `seq` preserves original order within each citation kind.
-- `deep_link` is a YouTube `watch?v=<id>&t=<seconds>s` URL.
+- `deep_link` preserves the YouTube watch URL for YouTube items. Podcast
+  episodes use the retained episode page with `#t=<seconds>`.
 
 Errors:
 
@@ -641,6 +654,115 @@ Errors:
 
 Rate limit: 60 calls/minute per process.
 
+### add_podcast_feed
+
+Register an RSS or Atom feed. Registration stores feed metadata only: it does
+not poll, download audio, transcribe, or publish episodes automatically.
+
+Parameters:
+
+```json
+{ "feed_url": "https://show.example/feed.xml", "poll_interval_min": 60 }
+```
+
+The interval is retained for feed policy and must be between 15 and 1440
+minutes. Automatic scheduling is not part of this surface.
+
+### list_podcast_feeds
+
+List registered feeds, their latest discovered episode, poll state, and error
+state. Pass `{ "enabled_only": true }` to omit disabled feeds.
+
+### remove_podcast_feed
+
+Delete a feed and its tracked episode rows.
+
+```json
+{ "feed_id": 12 }
+```
+
+Local MP3, transcript, and already-published corpus files are not deleted by
+this operation.
+
+### poll_podcast_feed
+
+Fetch and parse one feed now, retaining up to 50 new episode records. The
+request uses stored ETag and Last-Modified values on later polls.
+
+```json
+{ "feed_id": 12 }
+```
+
+RSS and Atom episode page URLs are retained separately from opaque GUIDs and
+audio enclosure URLs.
+
+### list_podcast_episodes
+
+List tracked episodes, newest first.
+
+```json
+{ "feed_id": 12, "status": "downloaded", "limit": 100 }
+```
+
+All fields are optional. `status` may be `new`, `queued`, `downloaded`,
+`transcribed`, or `ignored`.
+
+### download_podcast_episode
+
+Download one episode enclosure as an MP3 with the local yt-dlp and ffmpeg
+runtime. The call is synchronous and idempotent when the canonical MP3 already
+exists.
+
+```json
+{ "episode_id": 42 }
+```
+
+Audio stays flat under `<data_root>/Podcasts/<feed-slug>/`.
+
+### get_whisperx_status
+
+Report whether the local WhisperX runtime is available, the selected model,
+supported models, and the diarization default. This read-only call neither
+downloads a model nor starts transcription.
+
+### transcribe_podcast_episode
+
+Queue one downloaded episode for local transcription and return immediately
+with a durable job ID.
+
+```json
+{
+  "episode_id": 42,
+  "model": "base",
+  "language": "en",
+  "diarize": false,
+  "consent_given": false
+}
+```
+
+Models are `tiny`, `base`, `small`, `medium`, `large`, and
+`large-v3-turbo`; `base` is the default. CPU inference uses int8. Exactly one
+podcast transcription runs at a time, on a below-normal-priority worker on
+Windows. Call `get_job_status` with the returned `job_id` for queued, running,
+writing, completed, or failed progress. An interrupted non-terminal podcast
+job queues again after helper restart. A first model download returns
+`consent_required: true` unless `consent_given` is explicit.
+
+### episode_to_corpus
+
+Publish a completed transcript into the shared local corpus.
+
+```json
+{ "episode_id": 42 }
+```
+
+The operation writes Markdown and a dashboard-readable sidecar into a stable
+per-episode folder, indexes the transcript for FTS and corpus-contract reads,
+adds `source_url#t=<seconds>` citations, and stores the
+`podcast_episodes.yoink_video_id` link. The stable ID is
+`episode_<sha1(feed URL + GUID)[:11]>`. Repeating the call returns the same
+identity and repairs partial prior writes without duplicating rows or files.
+
 ## Rate limits and abuse mitigations
 
 - `uoink_video`: 5 calls/minute per process.
@@ -653,6 +775,10 @@ Rate limit: 60 calls/minute per process.
 - `get_uoink_health`: 60 calls/minute per process.
 - `find_mentions`: 60 calls/minute per process.
 - `get_transcript_reliability`: 60 calls/minute per process.
+- Podcast feed mutations and `episode_to_corpus`: 30 calls/minute per process.
+- `list_podcast_feeds`, `list_podcast_episodes`, and `get_whisperx_status`: 60 calls/minute per process.
+- `download_podcast_episode`: 10 calls/minute per process.
+- `transcribe_podcast_episode`: 5 calls/minute per process.
 - Other read-only tools (`get_uoink_corpus`, `get_job_status`, `get_taxonomy`) are not rate-limited.
 
 Rate-limit errors return friendly tool payloads, for example:

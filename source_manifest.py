@@ -64,8 +64,10 @@ _SOURCES: list[dict] = [
     },
     {
         "slug": "podcasts", "name": "Podcasts", "category": "audio", "status": SHIPPED,
-        "capture": "Add an RSS feed; episodes transcribe on demand.",
-        "lands": "Speaker-labeled transcript (WhisperX diarization), episode metadata.",
+        "capture": ("Add an RSS feed for metadata only; poll, download, "
+                    "transcribe, and publish individual episodes on demand."),
+        "lands": ("Episode metadata plus a local transcript; speaker labels "
+                  "appear only when optional diarization succeeds."),
         "best_for": "Pulling a quote from a long interview.",
     },
     {
@@ -132,7 +134,7 @@ _SOURCES: list[dict] = [
 
 # The 5-step Uoink story (POSITIONING-LOCK Ryan final-pass #3).
 _CREATOR_STEPS: list[dict] = [
-    {"step": 1, "name": "Capture", "copy": "One click on any video, podcast, or post. The source lands on your disk."},
+    {"step": 1, "name": "Capture", "copy": "Save supported videos and posts in one click, or add a podcast feed and choose which episodes to process."},
     {"step": 2, "name": "Library", "copy": "Everything you study, searchable, with hook and topic facets."},
     {"step": 3, "name": "Workspace", "copy": "Assemble the source material for the thing you're about to make."},
     {"step": 4, "name": "Iterate", "copy": "Draft in your voice with Voice DNA, grounded in the real transcript."},

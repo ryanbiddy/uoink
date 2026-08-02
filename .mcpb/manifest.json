@@ -107,6 +107,42 @@
     {
       "name": "get_transcript_reliability",
       "description": "Return stored transcript reliability spans for a saved uoink."
+    },
+    {
+      "name": "add_podcast_feed",
+      "description": "Register a podcast RSS or Atom feed without downloading audio."
+    },
+    {
+      "name": "list_podcast_feeds",
+      "description": "List registered podcast feeds."
+    },
+    {
+      "name": "remove_podcast_feed",
+      "description": "Remove a podcast feed and its tracked episode rows."
+    },
+    {
+      "name": "poll_podcast_feed",
+      "description": "Fetch one podcast feed now and retain newly discovered episodes."
+    },
+    {
+      "name": "list_podcast_episodes",
+      "description": "List tracked podcast episodes with optional feed and status filters."
+    },
+    {
+      "name": "download_podcast_episode",
+      "description": "Download one episode's MP3 locally with yt-dlp and ffmpeg."
+    },
+    {
+      "name": "get_whisperx_status",
+      "description": "Report local WhisperX availability and supported models."
+    },
+    {
+      "name": "transcribe_podcast_episode",
+      "description": "Queue one local podcast transcription and return its durable job id."
+    },
+    {
+      "name": "episode_to_corpus",
+      "description": "Publish a completed podcast transcript into the local corpus."
     }
   ],
   "compatibility": {

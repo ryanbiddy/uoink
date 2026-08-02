@@ -8,7 +8,7 @@ MCP clients launch this process and speak JSON-RPC over stdin/stdout. Keep
 stdout reserved for the protocol; server.py logging is redirected to stderr
 while importing the backend.
 
-The stdio surface is exactly the 14 canonical tools below. The six Yoink-era
+The stdio surface is exactly the 23 canonical tools below. The six Yoink-era
 aliases completed their deprecation window in Uoink v2.5 and are not
 registered in v3. See docs/v2-mcp.md.
 """
@@ -60,8 +60,9 @@ uoink_mcp_tools.bind_backend(server)
 mcp = FastMCP(
     "uoink",
     instructions=(
-        "Uoink turns YouTube videos and playlists into local AI-ready corpora. "
-        "Use the tools to extract, search, inspect, and analyze saved uoinks."
+        "Uoink turns videos, playlists, and podcast episodes into local "
+        "AI-ready corpora. Use the tools to capture, transcribe, publish, "
+        "search, inspect, and analyze saved uoinks."
     ),
 )
 # FastMCP defaults initialize.serverInfo.version to the MCP SDK's version,
@@ -75,7 +76,7 @@ except AttributeError:
 
 
 # --------------------------------------------------------------------------
-# Canonical tools (14). The CI doc-accuracy + backend-static jobs count these
+# Canonical tools (23). The CI doc-accuracy + backend-static jobs count these
 # @mcp.tool decorators against the ### headings in docs/v2-mcp.md, so keep the
 # decorator count and the documented tool count in lock-step.
 # --------------------------------------------------------------------------
@@ -173,7 +174,7 @@ def get_taxonomy(
     name="get_citation_map",
     description=(
         "Return the transcript + screenshot citation map for a saved "
-        "uoink, each entry with a timestamped YouTube deep link."
+        "uoink, each entry with a source-aware timestamp link."
     ),
 )
 def get_citation_map(slug: str) -> dict:
@@ -192,8 +193,8 @@ def get_uoink_health(slug: str) -> dict:
     name="find_mentions",
     description=(
         "Find every mention of an entity (person, tool, product, company, "
-        "or topic) across saved uoinks, each with a timestamped YouTube "
-        "deep link."
+        "or topic) across saved uoinks, each with a source-aware timestamp "
+        "link when the source has a public URL."
     ),
 )
 def find_mentions(entity: str, limit: int = 50) -> dict:
@@ -209,6 +210,106 @@ def find_mentions(entity: str, limit: int = 50) -> dict:
 def get_transcript_reliability(video_id: str) -> dict:
     return uoink_mcp_tools.call_tool(
         "get_transcript_reliability", {"video_id": video_id}
+    )
+
+
+@mcp.tool(
+    name="add_podcast_feed",
+    description="Register a podcast RSS or Atom feed without downloading audio.",
+)
+def add_podcast_feed(feed_url: str, poll_interval_min: int = 60) -> dict:
+    return uoink_mcp_tools.call_tool(
+        "add_podcast_feed",
+        {"feed_url": feed_url, "poll_interval_min": poll_interval_min},
+    )
+
+
+@mcp.tool(name="list_podcast_feeds", description="List registered podcast feeds.")
+def list_podcast_feeds(enabled_only: bool = False) -> dict:
+    return uoink_mcp_tools.call_tool(
+        "list_podcast_feeds", {"enabled_only": enabled_only}
+    )
+
+
+@mcp.tool(
+    name="remove_podcast_feed",
+    description="Remove a podcast feed and its tracked episode rows.",
+)
+def remove_podcast_feed(feed_id: int) -> dict:
+    return uoink_mcp_tools.call_tool("remove_podcast_feed", {"feed_id": feed_id})
+
+
+@mcp.tool(
+    name="poll_podcast_feed",
+    description="Fetch one podcast feed now and retain newly discovered episodes.",
+)
+def poll_podcast_feed(feed_id: int) -> dict:
+    return uoink_mcp_tools.call_tool("poll_podcast_feed", {"feed_id": feed_id})
+
+
+@mcp.tool(
+    name="list_podcast_episodes",
+    description="List tracked podcast episodes with optional feed and status filters.",
+)
+def list_podcast_episodes(
+    feed_id: int | None = None,
+    status: str | None = None,
+    limit: int = 100,
+) -> dict:
+    return uoink_mcp_tools.call_tool(
+        "list_podcast_episodes",
+        {"feed_id": feed_id, "status": status, "limit": limit},
+    )
+
+
+@mcp.tool(
+    name="download_podcast_episode",
+    description="Download one episode's MP3 locally with yt-dlp and ffmpeg.",
+)
+def download_podcast_episode(episode_id: int) -> dict:
+    return uoink_mcp_tools.call_tool(
+        "download_podcast_episode", {"episode_id": episode_id}
+    )
+
+
+@mcp.tool(
+    name="get_whisperx_status",
+    description="Report local WhisperX availability and supported models.",
+)
+def get_whisperx_status() -> dict:
+    return uoink_mcp_tools.call_tool("get_whisperx_status", {})
+
+
+@mcp.tool(
+    name="transcribe_podcast_episode",
+    description="Queue one local podcast transcription and return its durable job id.",
+)
+def transcribe_podcast_episode(
+    episode_id: int,
+    model: str = "base",
+    language: str | None = None,
+    diarize: bool = False,
+    consent_given: bool = False,
+) -> dict:
+    return uoink_mcp_tools.call_tool(
+        "transcribe_podcast_episode",
+        {
+            "episode_id": episode_id,
+            "model": model,
+            "language": language,
+            "diarize": diarize,
+            "consent_given": consent_given,
+        },
+    )
+
+
+@mcp.tool(
+    name="episode_to_corpus",
+    description="Publish a completed podcast transcript into the local corpus.",
+)
+def episode_to_corpus(episode_id: int) -> dict:
+    return uoink_mcp_tools.call_tool(
+        "episode_to_corpus", {"episode_id": episode_id}
     )
 
 if __name__ == "__main__":

@@ -10,6 +10,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Podcast episodes can enter the shared corpus.** After an on-demand local
+  transcription completes, `episode_to_corpus` writes deterministic Markdown
+  and a sidecar, indexes the transcript for search, adds source-aware timestamp
+  citations, and links the episode to its stable `episode_<hash>` corpus ID.
+- **Podcast transcription now runs as durable background work.** One local
+  worker processes jobs sequentially at below-normal priority on Windows;
+  `get_job_status` reports progress, and interrupted jobs queue again when the
+  helper restarts. Model downloads still require explicit consent.
+
+### Changed
+
+- **The stdio MCP surface now has 23 tools.** Podcast feed, episode, WhisperX,
+  transcription-job, and corpus-publishing operations join the curated stdio
+  surface. The full HTTP/OpenAPI registry now has 65 tools.
+- **Citations are source-aware.** Podcast citations use the retained episode
+  page URL with `#t=<seconds>` instead of inventing YouTube watch URLs. Legacy
+  YouTube citation fields remain available for compatibility.
+
 ## [3.7.0] - 2026-07-24
 
 A hardening and polish release. The Library and Sources surfaces got quieter and
@@ -333,7 +353,7 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 - **`LOCALAPPDATA` output fallback.** The helper automatically falls back to writing outputs to `%LOCALAPPDATA%\Yoink\output` if `DESKTOP_ROOT` is read-only or unwritable.
 - **`pending_yoinks` schema (migration 0005).** Adds a new table in `index.db` to track rate-limited yoinks, attempts, and errors.
 
-- **MCP server** with 14 tools (`uoink_video`, `uoink_playlist`, `get_job_status`, `cancel_job`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_taxonomy`, `get_citation_map`, `get_uoink_health`, `find_mentions`, `get_transcript_reliability`). Stdio transport officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport available, marked experimental.
+- **MCP server** with 23 tools. The current curated surface includes the original video/library tools plus podcast feed, episode, local transcription, and corpus-publishing operations. Stdio transport is officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport is available and marked experimental.
 - **Library Index (SQLite FTS5).** `%LOCALAPPDATA%\Yoink\index.db` replaces scan-based search/recent/get-taxonomy code paths where indexed consumers need fast library access. First boot backfills existing corpora; subsequent yoinks update incrementally.
 - **Migration framework.** `schema_version` table plus numbered `migrations/NNNN_*.sql` scripts for future schema changes.
 - **Yoink Memory page.** New corpus gallery at `chrome-extension://<id>/yoink-memory.html`, opened from the popup's "View all yoinks" link. Filters by search text, channel, topic, Hook Type, and date range, with pagination at 50 results/page.

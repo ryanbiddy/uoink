@@ -40,6 +40,7 @@ import json
 import logging
 import os
 import inspect
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -64,7 +65,11 @@ MODEL_BASE = "base"
 MODEL_SMALL = "small"
 MODEL_MEDIUM = "medium"
 MODEL_LARGE = "large"
-_MODELS = (MODEL_TINY, MODEL_BASE, MODEL_SMALL, MODEL_MEDIUM, MODEL_LARGE)
+MODEL_LARGE_V3_TURBO = "large-v3-turbo"
+_MODELS = (
+    MODEL_TINY, MODEL_BASE, MODEL_SMALL, MODEL_MEDIUM, MODEL_LARGE,
+    MODEL_LARGE_V3_TURBO,
+)
 
 
 def normalize_model(value) -> str:
@@ -147,6 +152,23 @@ def _runtime_device() -> str:
 
 def _compute_type(device: str) -> str:
     return "float16" if device == "cuda" else "int8"
+
+
+def set_current_thread_below_normal() -> bool:
+    """Lower only the transcription worker on Windows.
+
+    The server, dashboard, and search request threads retain normal priority.
+    Other platforms keep their default scheduling priority.
+    """
+    if sys.platform != "win32":
+        return False
+    try:
+        import ctypes
+        kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        thread = kernel32.GetCurrentThread()
+        return bool(kernel32.SetThreadPriority(thread, -1))
+    except (AttributeError, OSError):
+        return False
 
 
 def _hf_token() -> str | None:

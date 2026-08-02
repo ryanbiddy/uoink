@@ -112,8 +112,10 @@ Before / after, the three canonical sources:
 - **`channel` is kept and set equal to `author`** for backward compatibility
   (search FTS, the performance-tier heuristic, and the channel picker all still
   read `channel`). The two columns hold the same value going forward.
-- **Podcast** is in the platform vocabulary but podcast episodes live in their
-  own table, so no yoinks row carries `platform='podcast'` today.
+- **Podcast episodes** remain tracked in `podcast_episodes` until a completed
+  transcript is published. `episode_to_corpus` then creates a linked yoinks row
+  with `platform='podcast'` and `source_type='episode'`; the operation is manual
+  and idempotent.
 
 ## Tests / proof
 

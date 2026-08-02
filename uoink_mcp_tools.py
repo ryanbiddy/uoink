@@ -379,7 +379,21 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
     video_id = sidecar.get("video_id")
     if not isinstance(video_id, str) or not video_id.strip():
         video_id = None
-    video_url = f"https://www.youtube.com/watch?v={video_id}" if video_id else None
+    source_url = sidecar.get("source_url") or sidecar.get("url")
+    platform = sidecar.get("platform")
+    source_type = sidecar.get("source_type")
+    source_lower = source_url.lower() if isinstance(source_url, str) else ""
+    is_youtube = (
+        platform == "youtube"
+        or "youtube.com/" in source_lower
+        or "youtu.be/" in source_lower
+        or (platform is None and source_type in (None, "video"))
+    )
+    video_url = (
+        f"https://www.youtube.com/watch?v={video_id}"
+        if video_id and is_youtube
+        else None
+    )
     # Sprint 15: include the citation map alongside the markdown. Optional
     # field -- markdown-only consumers are unaffected.
     citations: list[dict[str, Any]] = []
@@ -414,6 +428,7 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
         folder=str(folder),
         video_id=video_id,
         video_url=video_url,
+        source_url=source_url,
         citations=citations,
         **extra,
     )
@@ -421,7 +436,7 @@ def get_uoink_corpus(args: dict[str, Any]) -> dict[str, Any]:
 
 def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
     """Return the transcript + screenshot citation map for a saved yoink,
-    each entry carrying a timestamped YouTube deep link."""
+    each entry carrying a source-aware timestamp link."""
     slug = args.get("slug")
     folder, corpus = _find_yoink(slug)
     if not folder or not corpus:
@@ -437,7 +452,9 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
                 "seq": r.get("seq"),
                 "timestamp": r.get("timestamp_start"),
                 "file_path": r.get("file_path"),
-                "deep_link": r.get("youtube_deep_link"),
+                "source_url": r.get("source_url"),
+                "deep_link": (r.get("source_deep_link")
+                              or r.get("youtube_deep_link")),
             })
         else:
             transcript.append({
@@ -445,7 +462,9 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
                 "timestamp_start": r.get("timestamp_start"),
                 "timestamp_end": r.get("timestamp_end"),
                 "text": r.get("text"),
-                "deep_link": r.get("youtube_deep_link"),
+                "source_url": r.get("source_url"),
+                "deep_link": (r.get("source_deep_link")
+                              or r.get("youtube_deep_link")),
             })
     return _ok(
         video_id=video_id,
@@ -776,33 +795,13 @@ def get_whisperx_status(_args: dict[str, Any]) -> dict[str, Any]:
 
 
 def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
-    """v3.1 podcast: run WhisperX on a downloaded podcast episode.
-
-    Synchronous. The audio at episode.audio_local_path is the input;
-    transcript JSON lands next to it. Returns the structured
-    transcript metadata or:
-      - 'whisperx runtime not installed' err when the runtime isn't
-        importable.
-      - consent_required=True when the user hasn't agreed to the
-        first-time model download yet (200 MB - 2 GB). Re-issue with
-        consent_given=True after the dashboard prompt records the
-        opt-in."""
+    """Queue local WhisperX work and return a durable job id."""
     server = _b()
     import whisper_runner as _wr
-    import podcasts as _pod
     try:
         episode_id = int(args.get("episode_id"))
     except (TypeError, ValueError):
         return _err("episode_id (integer) is required")
-    episode = _pod.get_episode(server._get_index(), episode_id)
-    if episode is None:
-        return _err("episode not found")
-    if not episode.get("audio_local_path"):
-        return _err("episode has no audio_local_path -- "
-                     "download_podcast_episode first")
-    if not _wr.is_whisperx_available():
-        return _err("whisperx runtime not installed; "
-                     "use the Setup page to install (consent-gated dep).")
     settings = server._read_settings() or {}
     model = _wr.normalize_model(
         args.get("model") or settings.get("whisper_model"))
@@ -811,40 +810,27 @@ def transcribe_podcast_episode(args: dict[str, Any]) -> dict[str, Any]:
                      else settings.get("diarization_default"))
     consent_given = bool(args.get("consent_given"))
     language = args.get("language")
-    _wr.update_episode_transcript_state(
-        server._get_index(), episode_id,
-        status=_wr.STATUS_RUNNING, model_used=model)
-    from pathlib import Path as _P
+    result, _status = server._queue_podcast_transcription(
+        episode_id, model=model, language=language, diarize=diarize,
+        consent_given=consent_given)
+    return result
+
+
+def episode_to_corpus(args: dict[str, Any]) -> dict[str, Any]:
+    """Publish a completed podcast transcript into the shared corpus."""
+    server = _b()
+    import podcasts as _pod
     try:
-        transcript = _wr.transcribe_audio(
-            _P(episode["audio_local_path"]),
-            data_root=server.DATA_ROOT,
-            model_size=model, language=language,
-            diarize=diarize, consent_given=consent_given)
-    except PermissionError as e:
-        _wr.update_episode_transcript_state(
-            server._get_index(), episode_id,
-            status=_wr.STATUS_QUEUED, error=str(e))
-        return {"ok": False, "consent_required": True,
-                "model": model, "error": str(e)}
-    except Exception as e:
-        _wr.update_episode_transcript_state(
-            server._get_index(), episode_id,
-            status=_wr.STATUS_FAILED, error=str(e))
-        return _err(f"transcribe failed: {e}")
-    out_path = _wr.write_transcript(
-        transcript, audio_path=_P(episode["audio_local_path"]))
-    _wr.update_episode_transcript_state(
-        server._get_index(), episode_id,
-        status=_wr.STATUS_DONE, transcript_path=out_path,
-        model_used=model,
-        diarization_ran=transcript.get("diarization_ran", False))
-    return _ok(episode_id=episode_id,
-                transcript_path=str(out_path),
-                model=transcript["model"],
-                language=transcript["language"],
-                segments=len(transcript["segments"]),
-                diarization_ran=transcript["diarization_ran"])
+        episode_id = int(args.get("episode_id"))
+    except (TypeError, ValueError):
+        return _err("episode_id (integer) is required")
+    try:
+        return _pod.episode_to_corpus(
+            server._get_index(), episode_id, data_root=server.DATA_ROOT)
+    except (LookupError, FileNotFoundError, ValueError) as exc:
+        return _err(str(exc))
+    except Exception as exc:
+        return _err(f"episode_to_corpus failed: {exc}")
 
 
 # ---- v3.1 mobile playlist monitor ------------------------------------
@@ -2521,10 +2507,10 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "transcribe_podcast_episode": ToolSpec(
         name="transcribe_podcast_episode",
         description=(
-            "Run WhisperX on a downloaded episode. "
-            "Synchronous. Reads audio_local_path; writes the JSON "
-            "transcript next to the MP3. Returns the structured "
-            "transcript metadata, OR consent_required=True when the "
+            "Queue WhisperX for a downloaded episode. A single "
+            "below-normal-priority worker writes the JSON transcript next "
+            "to the MP3; get_job_status reports durable progress. Returns "
+            "consent_required=True when the "
             "first-time model download (200 MB - 2 GB) needs the user "
             "to opt in (re-issue with consent_given=True after the "
             "dashboard prompt records the opt-in), OR a runtime-not-"
@@ -2533,13 +2519,28 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         input_schema=_schema({
             "episode_id": {"type": "integer"},
             "model": {"type": "string",
-                       "enum": ["tiny", "base", "small", "medium", "large"]},
+                       "enum": ["tiny", "base", "small", "medium", "large",
+                                "large-v3-turbo"]},
             "language": {"type": "string"},
             "diarize": {"type": "boolean"},
             "consent_given": {"type": "boolean"},
         }, ["episode_id"]),
         handler=transcribe_podcast_episode,
         rate_limiter=_RateLimiter(5),
+    ),
+    "episode_to_corpus": ToolSpec(
+        name="episode_to_corpus",
+        description=(
+            "Publish a completed podcast transcript into the local Uoink "
+            "corpus. Writes deterministic Markdown and sidecar files, "
+            "indexes full text and source-aware citations, and safely "
+            "repairs partial prior attempts."
+        ),
+        input_schema=_schema({
+            "episode_id": {"type": "integer"},
+        }, ["episode_id"]),
+        handler=episode_to_corpus,
+        rate_limiter=_RateLimiter(30),
     ),
     "add_monitored_playlist": ToolSpec(
         name="add_monitored_playlist",

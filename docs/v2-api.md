@@ -214,7 +214,8 @@ Optional request body:
 }
 ```
 
-`model` may be `tiny`, `base`, `small`, `medium`, or `large`. When it is
+`model` may be `tiny`, `base`, `small`, `medium`, `large`, or
+`large-v3-turbo`. When it is
 omitted, Uoink uses the model selected in Settings.
 
 Success response: HTTP 200
@@ -730,11 +731,11 @@ Query params:
 
 | Field | Type | Required | Notes |
 |---|---:|---:|---|
-| `kind` | string | no | Optional filter: `playlist` or `single`. Omit to return both. |
+| `kind` | string | no | Optional filter: `playlist`, `single`, or `podcast_transcribe`. Omit to return all kinds. |
 
 Request body: none.
 
-Persistence: jobs persist across helper restarts via `%LOCALAPPDATA%\Uoink\index.db` on Windows. Legacy `%LOCALAPPDATA%\Uoink\jobs.json` is imported once on first Sprint 15 boot, then renamed to `jobs.json.migrated`. In-flight jobs from a previous helper process are restored as records with `state: "failed"` and `error: "server restarted"`; users restart them manually. Jobs are returned sorted by `updated_at` descending. Single-video job records keep only paths and small metadata so `/jobs` stays small; full corpus text and base64 clipboard payloads are never persisted in the index job row.
+Persistence: jobs persist across helper restarts via `%LOCALAPPDATA%\Uoink\index.db` on Windows. Legacy `%LOCALAPPDATA%\Uoink\jobs.json` is imported once on first Sprint 15 boot, then renamed to `jobs.json.migrated`. Interrupted playlist and single-video records become failed because those workers cannot resume. Interrupted `podcast_transcribe` jobs return to `queued` and start again from their local MP3. Jobs are returned sorted by `updated_at` descending. Job records keep only paths and small metadata; full corpus text and base64 clipboard payloads are never persisted in the index row.
 
 Success response: HTTP 200
 
@@ -1277,6 +1278,57 @@ Error responses:
 | 403 | `missing or invalid token` | `X-Uoink-Token` missing or stale. |
 | 404 | `skill system prompt not found` | Skill files are missing from the install layout. |
 
+### Podcast feed and episode endpoints
+
+All podcast routes require `X-Uoink-Token`. Adding a feed is metadata-only and
+does not trigger polling, audio download, transcription, or model download.
+There is no automatic feed scheduler in this release.
+
+| Method | Route | Purpose |
+|---|---|---|
+| GET | `/podcasts/feeds` | List registered feeds. |
+| POST | `/podcasts/feeds` | Register `{feed_url, poll_interval_min?}`. |
+| POST | `/podcasts/feeds/remove` | Remove `{feed_id}` and tracked episodes. |
+| POST | `/podcasts/feeds/set-enabled` | Set `{feed_id, enabled}`. |
+| POST | `/podcasts/feeds/poll` | Fetch one feed now with `{feed_id}`. |
+| GET | `/podcasts/episodes` | List episodes; accepts `feed_id`, `status`, and `limit`. |
+| POST | `/podcasts/episodes/set-status` | Set `{episode_id, status}`. |
+| POST | `/podcasts/episodes/download` | Download one episode MP3 synchronously. |
+| POST | `/podcasts/episodes/transcribe` | Queue local transcription and return HTTP 202. |
+| POST | `/podcasts/episodes/to-corpus` | Publish a completed transcript into the corpus. |
+| GET | `/transcribe/status` | Read WhisperX/model/diarization availability. |
+
+Transcription request:
+
+```json
+{
+  "episode_id": 42,
+  "model": "base",
+  "language": "en",
+  "diarize": false,
+  "consent_given": false
+}
+```
+
+The accepted response contains `job_id` and a durable job snapshot. Use
+`GET /jobs/<job_id>` for progress. One below-normal-priority worker processes
+podcast transcription jobs sequentially on Windows; CPU inference uses int8.
+If the selected model is absent, the endpoint returns HTTP 412 with
+`consent_required: true` until the caller explicitly authorizes the download.
+
+Publishing request:
+
+```json
+{ "episode_id": 42 }
+```
+
+The success response contains the stable `episode_<hash>` ID, slug, Markdown
+and sidecar paths, source URL, citation count, segment count, and any speaker
+labels. The publisher writes a per-episode folder while leaving the MP3 flat in
+the feed folder. Repeating the operation is idempotent and repairs a prior
+partial write. Podcast citations use the retained episode page URL with
+`#t=<seconds>`; an opaque GUID is never turned into a fabricated URL.
+
 ### MCP HTTP JSON-RPC helper endpoints
 
 Uoink v2 Sprint 4 adds MCP over stdio plus an experimental local HTTP JSON-RPC helper. Stdio clients launch `uoink_mcp.py` and are the officially supported MCP transport for launch. HTTP clients can use the existing helper server under `/mcp/v1` for direct JSON-RPC POST calls, but this is not a spec-complete SSE or Streamable HTTP implementation.
@@ -1777,7 +1829,9 @@ Every job object returned by `/playlist/start`, `/jobs/<id>`, `/jobs/<id>/cancel
 Field rules:
 
 - `state` is always one of `queued`, `running`, `completed`, `cancelled`, `failed`.
-- `kind` is `playlist` for async playlist jobs and `single` for synchronous `/extract` side-effect records.
+- `kind` is `playlist` for async playlist jobs, `single` for synchronous
+  `/extract` side-effect records, and `podcast_transcribe` for queued local
+  episode transcription.
 - `title` is populated for `single` jobs; `playlist_title` is populated for `playlist` jobs.
 - `session_folder` is the absolute path to the output folder on disk. Playlist jobs populate it from `queued` onwards; single jobs populate it when a folder is known.
 - `videos_total` is the number of videos selected for processing after the 10-video cap for playlists, or `1` for single jobs.

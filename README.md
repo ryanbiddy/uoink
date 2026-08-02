@@ -8,7 +8,7 @@
 
 **Uoink keeps the videos, podcasts, and articles creators and AI developers study on their own disk, then hands them to Claude, ChatGPT, Cursor, or a local MCP agent as a cited corpus.**
 
-Free, open source (MIT), and local-first: no account, no Uoink cloud, no required telemetry. One click saves a source — full transcript, timestamped screenshots, comments, and metadata — as a structured Markdown corpus on *your* machine, then makes it available to your AI three ways: the clipboard, a local MCP server, and an OpenAPI bridge.
+Free, open source (MIT), and local-first: no account, no Uoink cloud, no required telemetry. Uoink saves supported sources as structured Markdown on *your* machine, then makes the corpus available to your AI through the clipboard, a local MCP server, and an OpenAPI bridge. YouTube capture includes the transcript, timestamped screenshots, comments, and metadata; other source types keep the material their publishers expose.
 
 - **Website:** https://uoink.app · **Install:** https://uoink.app/install · **Developers:** https://uoink.app/developers
 - **Status:** Windows 10/11 today; Mac build queued after Windows stabilizes. Chrome Web Store listing pending — for now the extension sideloads from the release.
@@ -27,18 +27,18 @@ The corpus compounds. Every source you save lands in one local library your AI c
 |---|---|
 | **YouTube** (flagship) | Timestamped transcript, screenshots, top comments, channel context, full metadata, JSON sidecar |
 | **X / Twitter video + text** | Video transcript and post text, author credit, thread context |
-| **Podcasts** | RSS feeds and episodes, local Whisper transcription, speaker diarization |
+| **Podcasts** | Metadata-only RSS/Atom subscriptions; on-demand MP3 download, local WhisperX transcription, optional speaker diarization, and manual corpus publishing |
 | **Web pages / articles** | Readable text extraction into the same corpus format |
 | **Reddit** | Thread + top comments as Markdown |
 
-Everything files into one local library, auto-sorted into topic folders under your Uoink output folder (default `Desktop\Uoink\`).
+Published sources are indexed in one local library. Podcast audio and transcripts stay under Uoink's local data folder; publishing an episode adds its Markdown and sidecar to that same searchable index.
 
 ## Three ways your AI reads the corpus
 
 **1. Clipboard (the creator path)** — Click Uoink, paste into Claude / ChatGPT. Transcript plus a paste-safe subset of screenshots inlined as images so the model sees text *and* frames in one paste.
 
-**2. MCP server (the agent path)** — A local Model Context Protocol server exposing 14 tools over stdio (the curated everyday set), tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested. Two surfaces, on purpose:
-- **stdio** exposes the curated everyday set most agents need (`uoink_video`, `uoink_playlist`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_citation_map`, `get_uoink_health`, `find_mentions`, and more).
+**2. MCP server (the agent path)** — A local Model Context Protocol server exposing 23 tools over stdio (the curated everyday set), tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested. Two surfaces, on purpose:
+- **stdio** exposes the curated everyday set most agents need, including video capture, podcast feed/episode operations, local transcription jobs, corpus publishing, search, citation maps, and analysis.
 - **HTTP JSON-RPC** at `/mcp/v1` exposes the full local tool registry (Writing Studio, workspaces, podcasts, monitored playlists, taste/engagement memory, source capture) — the same handlers, same auth token.
 
 **3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.

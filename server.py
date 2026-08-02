@@ -677,7 +677,9 @@ _LIVE_STATES = (
 LIVE_BEHAVIOR_WAIT = "wait_for_end"
 LIVE_BEHAVIOR_NOW = "extract_when_recorded"
 _LIVE_BEHAVIORS = (LIVE_BEHAVIOR_WAIT, LIVE_BEHAVIOR_NOW)
-_WHISPER_MODELS = ("tiny", "base", "small", "medium", "large")
+_WHISPER_MODELS = (
+    "tiny", "base", "small", "medium", "large", "large-v3-turbo",
+)
 
 # How long to wait between live-stream retry attempts. Conservative -- a
 # 2-hour broadcast doesn't need a 1-minute poll. Lined up with the
@@ -1521,6 +1523,13 @@ _jobs: dict[str, dict] = {}
 _jobs_lock = threading.Lock()
 _JOB_TERMINAL_STATES = {"completed", "cancelled", "failed"}
 
+# Podcast transcription is intentionally serialized: one local WhisperX job
+# at a time, on a below-normal-priority worker thread. Queue state is mirrored
+# into the durable jobs table through the ordinary job helpers below.
+_podcast_transcription_queue: queue.Queue[str] = queue.Queue()
+_podcast_transcription_worker_lock = threading.Lock()
+_podcast_transcription_worker_thread: threading.Thread | None = None
+
 # ---- /jobs/stream SSE (Tier 2) -------------------------------------------
 # Live job/queue push for the dashboard Activity tab + the extension popup
 # queue (one stream, two consumers). Header-gated like every other read
@@ -1604,6 +1613,15 @@ def _youtube_deep_link(video_id: str, seconds) -> str:
     except (TypeError, ValueError):
         t = 0
     return f"https://youtube.com/watch?v={vid}&t={t}s"
+
+
+def _source_deep_link(source_url: str, seconds) -> str:
+    """A generic timestamp fragment for sources without a native URL form."""
+    try:
+        t = max(0, int(float(seconds)))
+    except (TypeError, ValueError):
+        t = 0
+    return f"{source_url.split('#', 1)[0]}#t={t}"
 
 
 def compute_health(sidecar: dict) -> dict:
@@ -1950,14 +1968,32 @@ def _compute_transcript_reliability(
 
 def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
     """Build the citation map (A4) from a parsed sidecar: one row per
-    transcript chunk and one per screenshot, each with a timestamped
-    YouTube deep link."""
+    transcript chunk and one per screenshot, each linked to its real source."""
     video_id = (sidecar.get("video_id") or "").strip()
+    source_url = sidecar.get("source_url") or sidecar.get("url")
+    is_youtube = page_extractor.platform_for(
+        sidecar.get("source_type"), source_url or ""
+    ) == page_extractor.PLATFORM_YOUTUBE
+
+    def links(timestamp):
+        if is_youtube:
+            deep = _youtube_deep_link(video_id, timestamp)
+            base = (
+                source_url if isinstance(source_url, str)
+                and source_url.startswith(("http://", "https://"))
+                else f"https://youtube.com/watch?v={video_id}"
+            )
+            return deep, base, deep
+        if isinstance(source_url, str) and source_url.startswith(("http://", "https://")):
+            return None, source_url, _source_deep_link(source_url, timestamp)
+        return None, None, None
+
     out: list[dict] = []
     for i, seg in enumerate(sidecar.get("transcript") or []):
         if not isinstance(seg, dict):
             continue
         start = _as_float(seg.get("start"))
+        youtube_link, citation_source, deep_link = links(start)
         out.append({
             "kind": "transcript_chunk",
             "seq": i,
@@ -1965,13 +2001,16 @@ def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
             "timestamp_end": _as_float(seg.get("end")),
             "text": seg.get("text"),
             "file_path": None,
-            "youtube_deep_link": _youtube_deep_link(video_id, start),
+            "youtube_deep_link": youtube_link,
+            "source_url": citation_source,
+            "source_deep_link": deep_link,
         })
     for i, shot in enumerate(sidecar.get("screenshots") or []):
         if not isinstance(shot, dict):
             continue
         ts = _parse_hms(shot.get("timestamp"))
         rel = shot.get("path") or shot.get("filename") or ""
+        youtube_link, citation_source, deep_link = links(ts)
         out.append({
             "kind": "screenshot",
             "seq": i,
@@ -1979,7 +2018,9 @@ def _citations_from_sidecar(sidecar: dict, folder: Path) -> list[dict]:
             "timestamp_end": None,
             "text": None,
             "file_path": str(folder / rel) if rel else None,
-            "youtube_deep_link": _youtube_deep_link(video_id, ts),
+            "youtube_deep_link": youtube_link,
+            "source_url": citation_source,
+            "source_deep_link": deep_link,
         })
     return out
 
@@ -6185,7 +6226,7 @@ def _public_job(job: dict) -> dict:
     result = job.get("result")
     if kind == "single":
         result = _sanitize_single_job_result(result)
-    return {
+    public = {
         "id": job.get("id"),
         "kind": kind,
         "state": job.get("state") or "failed",
@@ -6213,6 +6254,18 @@ def _public_job(job: dict) -> dict:
         "retry_exhausted": bool(job.get("retry_exhausted")),
         "attempt_count": job.get("attempt_count"),
     }
+    if kind == "podcast_transcribe":
+        public.update({
+            "episode_id": job.get("episode_id"),
+            "model": job.get("model"),
+            "language": job.get("language"),
+            "diarize": job.get("diarize"),
+            "consent_given": job.get("consent_given"),
+            "audio_path": job.get("audio_path"),
+            "progress": job.get("progress"),
+            "priority": job.get("priority"),
+        })
+    return public
 
 
 def _index_job_row(job: dict) -> dict:
@@ -6263,13 +6316,26 @@ def _validate_persisted_job(raw: dict) -> dict | None:
     state = raw.get("state")
     if not isinstance(job_id, str) or not job_id:
         return None
-    if kind not in ("playlist", "single"):
+    if kind not in ("playlist", "single", "podcast_transcribe"):
         return None
     if state not in ("queued", "running", "completed", "cancelled", "failed"):
         return None
 
     job = _public_job(raw)
-    if job["state"] not in _JOB_TERMINAL_STATES:
+    if job["state"] not in _JOB_TERMINAL_STATES and kind == "podcast_transcribe":
+        now = _now_iso()
+        job.update({
+            "state": "queued",
+            "current_video_phase": "queued",
+            "completed_at": None,
+            "updated_at": now,
+            "error": None,
+            "error_detail": None,
+            "result": None,
+            "progress": 0,
+            "message": "Queued again after the Uoink helper restarted.",
+        })
+    elif job["state"] not in _JOB_TERMINAL_STATES:
         now = _now_iso()
         job.update({
             "state": "failed",
@@ -6294,8 +6360,8 @@ def _start_fresh_jobs(reason: str) -> None:
 
 def _restore_jobs_from_disk() -> None:
     """Hydrate the in-memory _jobs dict from the library index at startup.
-    Non-terminal jobs are flipped to failed (their worker thread did not
-    survive the restart) and the corrected state is written back.
+    Non-terminal playlist/single jobs become failed because their workers did
+    not survive. Podcast transcription jobs return to the durable queue.
 
     Named for historical continuity; the source is now index.db, not
     jobs.json (which _migrate_jobs_json_to_index folds in once)."""
@@ -6319,8 +6385,8 @@ def _restore_jobs_from_disk() -> None:
     with _jobs_lock:
         _jobs.clear()
         _jobs.update(restored)
-        # _validate_persisted_job flipped non-terminal jobs to failed; write
-        # those corrected states back so the index matches memory.
+        # _validate_persisted_job reconciled non-terminal states; write those
+        # corrected snapshots back so the index matches memory.
         _persist_jobs_locked()
     log.info("Restored %d job record(s) from the library index", len(restored))
 
@@ -6480,6 +6546,178 @@ def _update_job(job_id: str, **updates) -> dict | None:
         job["updated_at"] = _now_iso()
         _persist_jobs_locked(job)
         return _public_job(job)
+
+
+def _podcast_transcription_worker() -> None:
+    """Process podcast transcription jobs sequentially for this process."""
+    priority_lowered = whisper_runner.set_current_thread_below_normal()
+    priority = "below_normal" if priority_lowered else "default"
+    while True:
+        job_id = _podcast_transcription_queue.get()
+        try:
+            with _jobs_lock:
+                job = dict(_jobs.get(job_id) or {})
+            if not job or job.get("state") in _JOB_TERMINAL_STATES:
+                continue
+            episode_id = int(job["episode_id"])
+            model = whisper_runner.normalize_model(job.get("model"))
+            audio_path = Path(job["audio_path"])
+            _update_job(
+                job_id, state="running", current_video_phase="transcribing",
+                progress=10, priority=priority, started_at=_now_iso(),
+                message="Transcribing the episode locally.")
+            whisper_runner.update_episode_transcript_state(
+                _get_index(), episode_id,
+                status=whisper_runner.STATUS_RUNNING, model_used=model)
+            transcript = whisper_runner.transcribe_audio(
+                audio_path, data_root=DATA_ROOT, model_size=model,
+                language=job.get("language"), diarize=bool(job.get("diarize")),
+                consent_given=bool(job.get("consent_given")))
+            _update_job(
+                job_id, current_video_phase="writing", progress=90,
+                message="Writing the transcript to disk.")
+            out_path = whisper_runner.write_transcript(
+                transcript, audio_path=audio_path)
+            whisper_runner.update_episode_transcript_state(
+                _get_index(), episode_id,
+                status=whisper_runner.STATUS_DONE,
+                transcript_path=out_path, model_used=model,
+                diarization_ran=transcript.get("diarization_ran", False))
+            podcasts.set_episode_status(
+                _get_index(), episode_id, podcasts.EPISODE_STATUS_TRANSCRIBED)
+            now = _now_iso()
+            _update_job(
+                job_id, state="completed", current_video_phase=None,
+                current_video=None, progress=100, completed_at=now,
+                videos_done=1, error=None,
+                result={
+                    "episode_id": episode_id,
+                    "transcript_path": str(out_path),
+                    "model": transcript.get("model"),
+                    "language": transcript.get("language"),
+                    "segments": len(transcript.get("segments") or []),
+                    "diarization_ran": bool(transcript.get("diarization_ran")),
+                }, message="Podcast transcription complete.")
+        except BaseException as exc:  # keep the one long-lived worker alive
+            log.exception("podcast transcription job %s failed", job_id)
+            episode_id = job.get("episode_id") if isinstance(job, dict) else None
+            if episode_id is not None:
+                try:
+                    whisper_runner.update_episode_transcript_state(
+                        _get_index(), int(episode_id),
+                        status=whisper_runner.STATUS_FAILED,
+                        model_used=(job or {}).get("model"), error=str(exc))
+                except Exception:
+                    log.exception("podcast transcript failure state write failed")
+            _update_job(
+                job_id, state="failed", current_video_phase=None,
+                current_video=None, videos_failed=1,
+                completed_at=_now_iso(), error=str(exc),
+                error_detail=f"{type(exc).__name__}: {exc}",
+                message="Podcast transcription failed.")
+        finally:
+            _podcast_transcription_queue.task_done()
+
+
+def _ensure_podcast_transcription_worker() -> threading.Thread:
+    global _podcast_transcription_worker_thread
+    with _podcast_transcription_worker_lock:
+        thread = _podcast_transcription_worker_thread
+        if thread is None or not thread.is_alive():
+            thread = threading.Thread(
+                target=_podcast_transcription_worker,
+                name="uoink-podcast-transcription", daemon=True)
+            _podcast_transcription_worker_thread = thread
+            thread.start()
+        return thread
+
+
+def _queue_podcast_transcription(
+        episode_id: int, *, model: str | None = None,
+        language: str | None = None, diarize: bool = False,
+        consent_given: bool = False) -> tuple[dict, int]:
+    """Validate, persist, and enqueue one local podcast transcription."""
+    episode = podcasts.get_episode(_get_index(), episode_id)
+    if episode is None:
+        return {"ok": False, "error": "episode not found"}, 404
+    audio_path_raw = episode.get("audio_local_path")
+    if not audio_path_raw:
+        return {
+            "ok": False,
+            "error": ("episode has no audio_local_path -- run "
+                      "/podcasts/episodes/download first"),
+        }, 400
+    audio_path = Path(audio_path_raw)
+    if not audio_path.is_file():
+        return {"ok": False, "error": f"audio file missing: {audio_path}"}, 404
+    with _jobs_lock:
+        existing = next((
+            _public_job(job) for job in _jobs.values()
+            if job.get("kind") == "podcast_transcribe"
+            and job.get("episode_id") == episode_id
+            and job.get("state") not in _JOB_TERMINAL_STATES
+        ), None)
+    if existing:
+        return {
+            "ok": True, "job_id": existing["id"], "job": existing,
+            "reused_existing": True,
+        }, 202
+    if not whisper_runner.is_whisperx_available():
+        return {
+            "ok": False, "whisperx_available": False,
+            "error": "whisperx runtime is unavailable or damaged",
+        }, 503
+    selected_model = whisper_runner.normalize_model(model)
+    if (not whisper_runner.is_model_downloaded(DATA_ROOT, selected_model)
+            and not consent_given):
+        return {
+            "ok": False, "consent_required": True, "model": selected_model,
+            "error": (f"Whisper model '{selected_model}' has not been "
+                      "downloaded; explicit consent is required."),
+        }, 412
+    if language is not None and not isinstance(language, str):
+        return {"ok": False, "error": "language must be text when provided"}, 400
+
+    now = _now_iso()
+    job_id = _make_job_id()
+    job = {
+        "id": job_id, "kind": "podcast_transcribe", "state": "queued",
+        "source_url": episode.get("episode_page_url"),
+        "title": episode.get("title") or "Untitled episode",
+        "playlist_title": None, "session_folder": None,
+        "videos_total": 1, "videos_done": 0, "videos_failed": 0,
+        "current_video": episode.get("title"),
+        "current_video_phase": "queued", "started_at": None,
+        "updated_at": now, "completed_at": None, "error": None,
+        "error_detail": None, "result": None, "warnings": [],
+        "message": "Podcast transcription queued.",
+        "episode_id": episode_id, "model": selected_model,
+        "language": language, "diarize": bool(diarize),
+        "consent_given": bool(consent_given), "audio_path": str(audio_path),
+        "progress": 0, "priority": "pending",
+    }
+    whisper_runner.update_episode_transcript_state(
+        _get_index(), episode_id, status=whisper_runner.STATUS_QUEUED,
+        model_used=selected_model)
+    public = _add_job_record(job)
+    _podcast_transcription_queue.put(job_id)
+    _ensure_podcast_transcription_worker()
+    return {"ok": True, "job_id": job_id, "job": public}, 202
+
+
+def _resume_podcast_transcription_jobs() -> int:
+    """Requeue durable non-terminal podcast jobs after process restart."""
+    with _jobs_lock:
+        job_ids = [
+            job_id for job_id, job in _jobs.items()
+            if job.get("kind") == "podcast_transcribe"
+            and job.get("state") == "queued"
+        ]
+    for job_id in job_ids:
+        _podcast_transcription_queue.put(job_id)
+    if job_ids:
+        _ensure_podcast_transcription_worker()
+    return len(job_ids)
 
 
 def _job_cancel_event(job_id: str) -> threading.Event | None:
@@ -10304,8 +10542,8 @@ class Handler(BaseHTTPRequestHandler):
         """POST /podcasts/episodes/transcribe {episode_id, model?,
         diarize?, consent_given?, language?}.
 
-        Synchronous. Runs WhisperX (lazy) on the downloaded MP3, writes
-        the transcript JSON next to it, persists the per-episode state.
+        Queues one durable background job. The single below-normal-priority
+        worker runs WhisperX on the downloaded MP3 and persists progress.
         Returns 503 with install hints when whisperx isn't importable.
         Returns 412 when first-time model download needs consent."""
         if not isinstance(body, dict):
@@ -10317,24 +10555,6 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(400, {
                 "ok": False, "error": "episode_id (integer) required"})
 
-        episode = podcasts.get_episode(_get_index(), episode_id)
-        if episode is None:
-            return self._send_json(404, {"ok": False,
-                                          "error": "episode not found"})
-        if not episode.get("audio_local_path"):
-            return self._send_json(400, {
-                "ok": False,
-                "error": ("episode has no audio_local_path -- run "
-                          "/podcasts/episodes/download first")})
-        if not whisper_runner.is_whisperx_available():
-            return self._send_json(503, {
-                "ok": False,
-                "whisperx_available": False,
-                "error": ("whisperx runtime not installed. Install via "
-                          "the Setup page (consent-gated dependency; "
-                          "not bundled with the helper to keep the "
-                          "install footprint small).")})
-
         settings = _read_settings() or {}
         model = whisper_runner.normalize_model(
             body.get("model") or settings.get("whisper_model"))
@@ -10343,58 +10563,34 @@ class Handler(BaseHTTPRequestHandler):
                          else settings.get("diarization_default"))
         consent_given = bool(body.get("consent_given"))
         language = body.get("language")
+        result, status = _queue_podcast_transcription(
+            episode_id, model=model, language=language, diarize=diarize,
+            consent_given=consent_given)
+        return self._send_json(status, result)
 
-        # Flip the row state so the dashboard's Activity tab shows the
-        # transcription as in-flight while we work.
-        whisper_runner.update_episode_transcript_state(
-            _get_index(), episode_id,
-            status=whisper_runner.STATUS_RUNNING,
-            model_used=model)
-
-        from pathlib import Path as _P
-        audio_path = _P(episode["audio_local_path"])
+    def _handle_podcasts_episode_to_corpus(self, body):
+        """POST /podcasts/episodes/to-corpus {episode_id}."""
+        if not isinstance(body, dict):
+            return self._send_json(400, {"ok": False,
+                                          "error": "json object required"})
         try:
-            transcript = whisper_runner.transcribe_audio(
-                audio_path, data_root=DATA_ROOT,
-                model_size=model, language=language,
-                diarize=diarize, consent_given=consent_given)
-        except PermissionError as e:
-            whisper_runner.update_episode_transcript_state(
-                _get_index(), episode_id,
-                status=whisper_runner.STATUS_QUEUED,  # awaiting consent
-                error=str(e))
-            return self._send_json(412, {
-                "ok": False, "consent_required": True,
-                "model": model, "error": str(e)})
-        except RuntimeError as e:
-            whisper_runner.update_episode_transcript_state(
-                _get_index(), episode_id,
-                status=whisper_runner.STATUS_FAILED,
-                error=str(e))
-            return self._send_json(500, {"ok": False, "error": str(e)})
-        except FileNotFoundError as e:
-            whisper_runner.update_episode_transcript_state(
-                _get_index(), episode_id,
-                status=whisper_runner.STATUS_FAILED,
-                error=str(e))
-            return self._send_json(404, {"ok": False, "error": str(e)})
-
-        out_path = whisper_runner.write_transcript(
-            transcript, audio_path=audio_path)
-        whisper_runner.update_episode_transcript_state(
-            _get_index(), episode_id,
-            status=whisper_runner.STATUS_DONE,
-            transcript_path=out_path,
-            model_used=model,
-            diarization_ran=transcript.get("diarization_ran", False))
-        return self._send_json(200, {
-            "ok": True, "episode_id": episode_id,
-            "transcript_path": str(out_path),
-            "model": transcript["model"],
-            "language": transcript["language"],
-            "segments": len(transcript["segments"]),
-            "diarization_ran": transcript["diarization_ran"],
-        })
+            episode_id = int(body.get("episode_id"))
+        except (TypeError, ValueError):
+            return self._send_json(400, {
+                "ok": False, "error": "episode_id (integer) required"})
+        try:
+            result = podcasts.episode_to_corpus(
+                _get_index(), episode_id, data_root=DATA_ROOT)
+        except LookupError as exc:
+            return self._send_json(404, {"ok": False, "error": str(exc)})
+        except FileNotFoundError as exc:
+            return self._send_json(409, {"ok": False, "error": str(exc)})
+        except ValueError as exc:
+            return self._send_json(422, {"ok": False, "error": str(exc)})
+        except Exception as exc:
+            log.exception("/podcasts/episodes/to-corpus failed")
+            return self._send_json(500, {"ok": False, "error": str(exc)})
+        return self._send_json(200, result)
 
     # ---- v3.1 mobile playlist monitor --------------------------------
     # Track C from the v3.1 build plan. User maintains a YouTube
@@ -12529,6 +12725,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_episode_download(body)
         if bare == "/podcasts/episodes/transcribe":
             return self._handle_podcasts_episode_transcribe(body)
+        if bare == "/podcasts/episodes/to-corpus":
+            return self._handle_podcasts_episode_to_corpus(body)
         if bare == "/playlists/monitored":
             return self._handle_monitored_playlist_add(body)
         if bare == "/playlists/monitored/remove":
@@ -12703,10 +12901,11 @@ class Handler(BaseHTTPRequestHandler):
     def _handle_jobs_list(self):
         qs = parse_qs(urlparse(self.path).query)
         kind = (qs.get("kind") or [None])[0]
-        if kind not in (None, "", "playlist", "single"):
+        if kind not in (None, "", "playlist", "single", "podcast_transcribe"):
             return self._send_json(400, {
                 "ok": False,
-                "error": "kind must be playlist or single",
+                "error": ("kind must be playlist, single, or "
+                          "podcast_transcribe"),
             })
         self._send_json(200, {
             "ok": True,
@@ -13888,6 +14087,9 @@ def main(*, show_dashboard: bool = False):
     _heal_stale_corpus_paths_at_boot()
     # Hydrate the in-memory job dict from the index.
     _restore_jobs_from_disk()
+    resumed_podcast_jobs = _resume_podcast_transcription_jobs()
+    if resumed_podcast_jobs:
+        log.info("Resumed %d podcast transcription job(s)", resumed_podcast_jobs)
     # Backfill the index from disk in the background so a missing index
     # never delays the bind or /health.
     _start_backfill_thread()

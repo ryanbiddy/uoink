@@ -63,6 +63,15 @@ CANONICAL_STDIO_TOOLS = {
     "get_uoink_health",
     "find_mentions",
     "get_transcript_reliability",
+    "add_podcast_feed",
+    "list_podcast_feeds",
+    "remove_podcast_feed",
+    "poll_podcast_feed",
+    "list_podcast_episodes",
+    "download_podcast_episode",
+    "get_whisperx_status",
+    "transcribe_podcast_episode",
+    "episode_to_corpus",
 }
 
 REMOVED_STDIO_ALIASES = {
@@ -188,7 +197,7 @@ def test_stdio_handshake_under_embeddable_path_rules():
                     f"extra={sorted(set(names) - CANONICAL_STDIO_TOOLS)}")
             _assert(not REMOVED_STDIO_ALIASES.intersection(names),
                     f"removed aliases returned by tools/list: {names}")
-            print("ok  tools/list returns exactly 14 canonical tools")
+            print("ok  tools/list returns exactly 23 canonical tools")
 
             client.send({"jsonrpc": "2.0", "id": 3, "method": "tools/call",
                          "params": {"name": "list_recent_uoinks",
@@ -243,7 +252,7 @@ def test_removed_aliases_are_rejected_and_manifest_matches():
             "MCPB manifest tool inventory drift: "
             f"missing={sorted(CANONICAL_STDIO_TOOLS - manifest_names)}, "
             f"extra={sorted(manifest_names - CANONICAL_STDIO_TOOLS)}")
-    print("ok  removed aliases reject and MCPB lists the same 14 tools")
+    print("ok  removed aliases reject and MCPB lists the same 23 tools")
 
 
 def main():
