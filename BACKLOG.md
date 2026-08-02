@@ -287,6 +287,13 @@ Tier-1 small wins first (Codex's review reordering: low-risk, high-leverage). La
 - **Approach:** decompose into `yoink_core/extraction.py` (`run_single_extraction`, `build_sidecar`, `build_markdown`), `yoink_core/workers.py` (comments, CI, hook, entities, retry queue), `yoink_core/http.py` (route table + auth/body wrappers), `yoink_core/storage.py` (paths, atomic writes, sidecar helpers). HTTP contract + MCP tool signatures stable throughout.
 - **Trigger:** v2.1 cycle, after real user feedback identifies the highest-friction code paths.
 
+### Migrate uoink_mcp.py to the mcp 2.x SDK
+
+- **Destination:** next maintenance cycle
+- **Rationale:** mcp 2.0.0 (PyPI, 2026-08) removed the `mcp.server.fastmcp` import path `uoink_mcp.py` is written against; CI now pins `"mcp<2"` so unpinned installs stopped breaking the stdlib test legs. The pin is a stopgap — 1.x will stop receiving upstream protocol fixes.
+- **Approach:** port `uoink_mcp.py` (and the C-01 regression test's driver) to the 2.x server API, then drop the CI pin in the same PR. Installer dependency lock (#233) picks up the new version at the next release build.
+- **Trigger:** first release cycle after the suite integration branches land, or sooner if an MCP client requires a 2.x-only protocol feature.
+
 ---
 
 ## v2.5 candidates (build if v2 hits traction signal)
