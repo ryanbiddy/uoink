@@ -198,7 +198,7 @@ def test_mocked_extraction_persists_and_surfaces(monkeypatch):
         expected_topic = server._classify_topic(metadata)
 
         result = server._run_extraction(
-            url, 30, folder, open_explorer=False, metadata=metadata,
+            url, 30, folder, notify=False, metadata=metadata,
             source_type=server.SOURCE_TYPE_SHORT_VIDEO, generate_paste=False)
         _assert(result["ok"] is True, f"extraction failed: {result}")
 

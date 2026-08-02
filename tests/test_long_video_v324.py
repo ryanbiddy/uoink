@@ -129,7 +129,7 @@ def test_chunked_extraction_path(tmp: Path):
             "https://www.youtube.com/watch?v=abcdef",
             30,
             tmp,
-            open_explorer=False,
+            notify=False,
             metadata={
                 "id": "abcdef",
                 "title": "Long source",
