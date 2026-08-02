@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Captures notify instead of opening Explorer.** Finishing a uoink (and
+  closing a session) now shows a branded toast with the title and destination
+  folder instead of popping a File Explorer window per capture — batch grabs
+  no longer bury the desktop in open folders. Opening the folder stays one
+  click away via the tray menu, the Recent list, and the dashboard.
+
 ## [3.7.0] - 2026-07-24
 
 A hardening and polish release. The Library and Sources surfaces got quieter and
