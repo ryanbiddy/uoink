@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [3.8.0] - 2026-08-02
+
+Podcast subscriptions can now keep themselves current and publish selected
+episodes into the local corpus. The helper also gained controls for keeping
+background work quiet without losing its history.
+
 ### Added
 
 - **Podcast episodes can enter the shared corpus.** After an on-demand local
@@ -20,6 +26,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   worker processes jobs sequentially at below-normal priority on Windows;
   `get_job_status` reports progress, and interrupted jobs queue again when the
   helper restarts. Model downloads still require explicit consent.
+- **Podcast feeds update automatically.** A lightweight scheduler checks due
+  RSS and Atom subscriptions for new episode metadata. Audio stays off by
+  default; each feed has a separate Auto-ingest switch for downloading,
+  transcribing, and publishing one new episode at a time.
+- **Desktop notifications can be silenced.** A Local app setting disables
+  balloons without discarding the event from Activity. Uoink also suppresses
+  notifications while a foreground window covers its monitor, including
+  borderless and exclusive-fullscreen apps.
 
 ### Changed
 
@@ -29,6 +43,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Citations are source-aware.** Podcast citations use the retained episode
   page URL with `#t=<seconds>` instead of inventing YouTube watch URLs. Legacy
   YouTube citation fields remain available for compatibility.
+- **Podcast state survives helper restarts.** Feed polling, downloads,
+  transcription progress, and corpus links are committed as state changes
+  happen. Interrupted transcription jobs return to the queue, and completed
+  transcripts are reused instead of running again.
+- **Background captures stay in the background.** Successful unattended work
+  remains available from the dashboard and tray menu instead of opening File
+  Explorer.
+
+### Fixed
+
+- **Interrupted podcast publishing can be repaired without retranscription.**
+  Startup recovery finishes pending corpus publication, `--doctor` reports
+  incomplete episode links, and `--reconcile-podcast-corpus` repairs them
+  through the deterministic bridge.
 
 ## [3.7.0] - 2026-07-24
 

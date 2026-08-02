@@ -1,6 +1,6 @@
-"""Cross-file source-build version contract for v3.7.0.
+"""Cross-file source-build version contract for v3.8.0.
 
-Run: python -m pytest tests/test_release_version_v370.py
+Run: python -m pytest tests/test_release_version_v380.py
 
 The published installer can lag the source build. Its exact live asset is
 guarded separately by test_installer_download_accuracy.py.
@@ -13,7 +13,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
-EXPECTED = "3.7.0"
+EXPECTED = "3.8.0"
 
 
 def match(path: str, pattern: str) -> str:

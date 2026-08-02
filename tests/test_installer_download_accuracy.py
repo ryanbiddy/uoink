@@ -73,7 +73,7 @@ def test_current_install_docs_name_the_published_asset() -> None:
     assert "dist/uoink-3.3.0.mcpb" not in bundle_doc
     assert "currently 3.3.0" not in bundle_map
     assert "test_release_version_v330.py" not in bundle_map
-    assert "tests/test_release_version_v370.py" in bundle_map
+    assert "tests/test_release_version_v380.py" in bundle_map
 
 
 def test_manual_setup_is_a_current_source_install_path() -> None:
