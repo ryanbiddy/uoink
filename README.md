@@ -10,8 +10,10 @@
 
 Free, open source (MIT), and local-first: no account, no Uoink cloud, no required telemetry. One click saves a source — full transcript, timestamped screenshots, comments, and metadata — as a structured Markdown corpus on *your* machine, then makes it available to your AI three ways: the clipboard, a local MCP server, and an OpenAPI bridge.
 
+![The Uoink button in the YouTube action bar](docs/store/screenshots/01-uoink-button-on-youtube.png)
+
 - **Website:** https://uoink.app · **Install:** https://uoink.app/install · **Developers:** https://uoink.app/developers
-- **Status:** Windows 10/11 today; Mac build queued after Windows stabilizes. Chrome Web Store listing pending — for now the extension sideloads from the release.
+- **Status:** Windows 10/11 only. There is no Mac build. The extension sideloads from the release — it is not on the Chrome Web Store. The installer is unsigned, so Windows SmartScreen will warn on first run.
 
 ## Why Uoink
 
@@ -70,7 +72,7 @@ Uoink ships a portable Skill at `skills/uoink/SKILL.md` (installed to `%LOCALAPP
 
 ## Install
 
-1. **Download the installer.** Download `Uoink-Setup-3.7.0.exe` from the [published v3.7.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.7.0). Windows 10/11 is available now; the Mac `.dmg` is queued after Windows stabilizes.
+1. **Download the installer.** Download `Uoink-Setup-3.7.0.exe` from the [published v3.7.0 release](https://github.com/ryanbiddy/uoink/releases/tag/v3.7.0). Windows 10/11 only — there is no Mac build today.
 2. **Run it.** Defaults install to `%LOCALAPPDATA%\Uoink\` (no admin required). The finish page can launch the helper immediately, and an autostart entry runs it on each login.
 3. **Load the bundled extension.** On first launch, Uoink shows a one-time setup splash. Use it to open your browser's extensions page and copy the installed extension path; then enable Developer mode, click **Load unpacked**, and select that folder. (The Chrome Web Store listing is pending; sideload is the current path.)
 
@@ -100,4 +102,4 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and [ROADMAP.md](./ROADMA
 
 ---
 
-*Uoink is part of the [ReplayRyan](https://replayryan.com) family of tools.*
+*Built by [Ryan Biddy](https://github.com/ryanbiddy).*
