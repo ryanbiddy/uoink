@@ -39,7 +39,7 @@ Published sources are indexed in one local library. Podcast audio and transcript
 
 **2. MCP server (the agent path)** — A local Model Context Protocol server exposing 23 tools over stdio (the curated everyday set), tested with **Claude Desktop and Cursor**. Cline and Continue are standard-stdio compatibility paths, not individually smoke-tested. Two surfaces, on purpose:
 - **stdio** exposes the curated everyday set most agents need, including video capture, podcast feed/episode operations, local transcription jobs, corpus publishing, search, citation maps, and analysis.
-- **HTTP JSON-RPC** at `/mcp/v1` exposes the full local tool registry (Writing Studio, workspaces, podcasts, monitored playlists, taste/engagement memory, source capture) — the same handlers, same auth token.
+- **HTTP JSON-RPC** at `/mcp/v1` exposes the 67-tool local registry (Writing Studio, workspaces, podcasts, monitored playlists, taste/engagement memory, source capture, clip search, and evidence cards) — the same handlers, same auth token. `search_clips` and `get_evidence_card` are registry-only in Phase 1 and do not expand stdio's 23 tools.
 
 **3. OpenAPI bridge (for local agents that don't speak MCP)** — Local OpenAPI-capable agents and scripts can drive the same tools over an OpenAPI 3.1 surface at `/openapi/v1/spec.json` + `POST /tools/<name>`.
 

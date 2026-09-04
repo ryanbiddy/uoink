@@ -94,7 +94,7 @@ def test_migration_preserves_legacy_youtube_citations_and_relaxes_link(
     }])
     assert idx.get_citations("legacy-video")[1]["youtube_deep_link"] is None
     assert idx._conn.execute(
-        "SELECT MAX(version) FROM schema_version").fetchone()[0] == 23
+        "SELECT MAX(version) FROM schema_version").fetchone()[0] == 24
     idx.close()
 
 
@@ -306,5 +306,5 @@ def test_bridge_is_available_through_http_and_full_mcp(tmp_path, monkeypatch):
     assert citation_map["transcript_citations"][1]["deep_link"] == (
         "https://show.example/episodes/42#t=64")
     assert "youtube.com" not in json.dumps(citation_map).lower()
-    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 65
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 67
     idx.close()

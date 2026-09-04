@@ -10,7 +10,7 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 Uoink has two deliberately different tool surfaces:
 
 - Supported stdio registry: **23 tools**.
-- Local HTTP/OpenAPI registry: **65 tools**.
+- Local HTTP/OpenAPI registry: **67 tools**.
 
 The supported stdio MCP surface covers extraction, playlist jobs, search,
 corpus retrieval, citation maps, health scores, transcript reliability,
@@ -19,6 +19,8 @@ podcast feed-to-corpus operations. The
 authenticated local HTTP helper exposes that set plus a broader collection of
 legacy and application operations. Overlapping tools share the handlers in
 `uoink_mcp_tools.py`, but the two transports do not expose the same registry.
+Clip search and evidence cards are HTTP/OpenAPI-only in Phase 1; they do not
+expand the 23-tool stdio set.
 For MCP clients, use stdio (`uoink_mcp.py`). The HTTP JSON-RPC surface at
 `/mcp/v1` remains experimental.
 
@@ -306,6 +308,63 @@ Return shape:
 Errors:
 
 - `{ "ok": false, "error": "query required" }`
+
+### search_clips (HTTP/OpenAPI only)
+
+Search merged 45-120 second transcript windows and return a deep link to each
+matching moment. Optional `video_id` and `channel` fields narrow the search.
+
+Parameters:
+
+```json
+{ "query": "loop engineering", "limit": 20, "channel": "Example channel" }
+```
+
+Return shape:
+
+```json
+{
+  "ok": true,
+  "results": [
+    {
+      "video_id": "abc123DEF45",
+      "slug": "video-slug",
+      "title": "Video title",
+      "channel": "Example channel",
+      "start": 64.2,
+      "end": 112.0,
+      "text": "The matching transcript window...",
+      "deep_link": "https://youtube.com/watch?v=abc123DEF45&t=64s",
+      "score": 7.3021
+    }
+  ]
+}
+```
+
+Errors:
+
+- `{ "ok": false, "error": "query required" }`
+
+### get_evidence_card (HTTP/OpenAPI only)
+
+Return one item's metadata and up to 20 clips spread across its timeline.
+Resolve the item by `slug` or `video_id`; `n_clips` defaults to 10.
+
+Parameters:
+
+```json
+{ "slug": "video-slug", "n_clips": 10 }
+```
+
+The result includes `video_id`, `slug`, `title`, `channel`, `platform`,
+`source_type`, `topic`, `yoinked_at`, `url`, `summary_hint`, `clips`,
+`clip_count`, and the total character count across all clips. Every returned
+clip has `start`, `end`, `text`, and `deep_link`.
+
+Errors:
+
+- `{ "ok": false, "error": "slug or video_id required" }`
+- `{ "ok": false, "error": "uoink not found" }`
 
 ### get_uoink_corpus
 
@@ -781,6 +840,7 @@ identity and repairs partial prior writes without duplicating rows or files.
 - `classify_hook`: 10 calls/minute per process.
 - `list_recent_uoinks`: 60 calls/minute per process.
 - `search_uoinks`: 30 calls/minute per process.
+- `search_clips` and `get_evidence_card`: 30 calls/minute per process.
 - `get_citation_map`: 60 calls/minute per process.
 - `get_uoink_health`: 60 calls/minute per process.
 - `find_mentions`: 60 calls/minute per process.
