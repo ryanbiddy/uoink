@@ -1,0 +1,31 @@
+{
+  "tweet_id": "1234567890123456789",
+  "syndication": {
+    "id_str": "1234567890123456789",
+    "text": "This is the beginning of a long post whose public syndication copy stops before the author reaches the useful conclusion. The captured version should keep going through the concrete details, examples, and final recommendation, but this fixture's syndication payload ends here…",
+    "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+    "user": {
+      "name": "Example Author",
+      "screen_name": "example"
+    },
+    "photos": []
+  },
+  "fxtwitter": {
+    "code": 200,
+    "status": {
+      "type": "status",
+      "id": "1234567890123456789",
+      "url": "https://x.com/example/status/1234567890123456789",
+      "text": "This is the beginning of a long post whose public syndication copy stops before the author reaches the useful conclusion. The captured version should keep going through the concrete details, examples, and final recommendation. The final paragraph survives because FxTwitter API v2 returns the complete long-post text. FULL-TEXT-END",
+      "created_at": "Thu Sep 03 12:00:00 +0000 2026",
+      "author": {
+        "name": "Example Author",
+        "screen_name": "example"
+      },
+      "media": {
+        "photos": [],
+        "videos": []
+      }
+    }
+  }
+}

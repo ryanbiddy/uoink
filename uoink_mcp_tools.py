@@ -15,6 +15,7 @@ only.
 
 from __future__ import annotations
 
+import base64
 import json
 import re
 import threading
@@ -1657,6 +1658,155 @@ def remove_style_anchor(args: dict[str, Any]) -> dict[str, Any]:
     except Exception as e:
         return _err(f"remove_style_anchor failed: {e}")
     return _ok(removed=removed, id=anchor_id)
+
+
+# ---- registry-only capture parity ------------------------------------
+def uoink_url(args: dict[str, Any]) -> dict[str, Any]:
+    """Capture any URL through the helper's existing /extract/any logic."""
+    server = _b()
+    raw_url = args.get("url")
+    if not isinstance(raw_url, str) or not raw_url.strip():
+        return _err("url (string) is required")
+
+    class RegistryCaptureHandler(server.Handler):
+        def __init__(self):
+            self.status = None
+            self.payload = None
+
+        def _send_json(self, status: int, payload: dict) -> dict:
+            self.status = status
+            self.payload = payload
+            return payload
+
+    probe = RegistryCaptureHandler()
+    try:
+        server.Handler._handle_extract_any(probe, dict(args))
+    except Exception as exc:
+        return _err(f"uoink_url failed: {exc}")
+    if isinstance(probe.payload, dict):
+        return probe.payload
+    return _err("uoink_url returned no result")
+
+
+def uoink_note(args: dict[str, Any]) -> dict[str, Any]:
+    """Persist a text note through the same builders as POST /notes."""
+    server = _b()
+    import notes as _notes  # noqa: WPS433
+
+    note = _notes.build_note(
+        text=args.get("text"), title=args.get("title"), author=args.get("author")
+    )
+    if not note.get("ok"):
+        return note
+    try:
+        video_id = _notes.persist_note(
+            server._get_index(),
+            note,
+            data_root=server.DESKTOP_ROOT,
+            topic_classifier=server._classify_topic,
+        )
+    except Exception as exc:
+        return _err(f"uoink_note failed: {exc}")
+    if not video_id:
+        return _err("couldn't save the note")
+    return _ok(
+        video_id=video_id,
+        slug=note["slug"],
+        title=note["title"],
+        author=note["author"],
+        source_type=_notes.SOURCE_TYPE,
+        platform=_notes.PLATFORM,
+    )
+
+
+def uoink_image(args: dict[str, Any]) -> dict[str, Any]:
+    """Persist a base64 PNG, JPEG, or WebP through POST /images logic."""
+    server = _b()
+    import images as _images  # noqa: WPS433
+
+    encoded = args.get("image_base64")
+    if not isinstance(encoded, str) or not encoded.strip():
+        return _err("image_base64 (string) is required")
+    encoded = encoded.strip()
+    if encoded.lower().startswith("data:") and "," in encoded:
+        encoded = encoded.split(",", 1)[1]
+    try:
+        image_bytes = base64.b64decode(encoded, validate=True)
+    except (ValueError, TypeError) as exc:
+        return _err(f"image_base64 is invalid: {exc}")
+    built = _images.build_image(
+        image_bytes,
+        mime=args.get("mime"),
+        filename=args.get("filename"),
+        caption=args.get("caption"),
+        source_url=args.get("source_url"),
+        author=args.get("author"),
+    )
+    if not built.get("ok"):
+        return built
+    try:
+        video_id = _images.persist_image(
+            server._get_index(),
+            built,
+            image_bytes,
+            data_root=server.DESKTOP_ROOT,
+            topic_classifier=server._classify_topic,
+        )
+    except Exception as exc:
+        return _err(f"uoink_image failed: {exc}")
+    if not video_id:
+        return _err("couldn't save the image")
+    return _ok(
+        video_id=video_id,
+        slug=built["slug"],
+        title=built["title"],
+        author=built["author"],
+        source_type=_images.SOURCE_TYPE,
+        platform=_images.PLATFORM,
+    )
+
+
+def uoink_x(args: dict[str, Any]) -> dict[str, Any]:
+    """Capture an X post through the same extractor as POST /extract/x."""
+    server = _b()
+    import page_extractor as _pages  # noqa: WPS433
+    import x_extractor as _x  # noqa: WPS433
+
+    if not (server._read_settings() or {}).get("x_text_capture_enabled"):
+        return {
+            "ok": False,
+            "code": "disabled",
+            "error": (
+                "X text capture is off. Set x_text_capture_enabled to true "
+                "in settings to try it."
+            ),
+        }
+    raw_url = args.get("url")
+    if not isinstance(raw_url, str) or not raw_url.strip():
+        return _err("url (string) is required")
+    result = _x.extract_x_thread(raw_url.strip())
+    if not result.get("ok"):
+        return result
+    try:
+        video_id = _pages.persist_page_yoink(
+            server._get_index(),
+            result,
+            data_root=server.DESKTOP_ROOT,
+            source_type=_x.SOURCE_TYPE,
+            subfolder="X",
+            slug_prefix="x",
+            topic_classifier=server._classify_topic,
+        )
+    except Exception as exc:
+        return _err(f"uoink_x failed: {exc}")
+    if not video_id:
+        return _err("couldn't save the X post")
+    return _ok(
+        video_id=video_id,
+        title=result["title"],
+        tweets_captured=result.get("tweets_captured", 0),
+        metadata=result.get("metadata", {}),
+    )
 
 
 # ---- v3.2 Universal Site Uoinking ------------------------------------
@@ -3319,6 +3469,63 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, []),
         handler=remove_style_anchor,
         rate_limiter=_RateLimiter(30),
+    ),
+    # Phase 0 registry-only capture parity (4 tools)
+    "uoink_url": ToolSpec(
+        name="uoink_url",
+        description=(
+            "Capture any http(s) URL through the helper's universal extractor. "
+            "Known video platforms use the full media pipeline; other sites "
+            "use the metadata and transcript fallback."
+        ),
+        input_schema=_schema({
+            "url": {"type": "string"},
+            "interval": {"type": "integer", "minimum": 5, "maximum": 300,
+                         "default": 30},
+            "long_video_mode": {"type": "string", "enum": ["full", "lite"]},
+        }, ["url"]),
+        handler=uoink_url,
+        rate_limiter=_RateLimiter(5),
+    ),
+    "uoink_note": ToolSpec(
+        name="uoink_note",
+        description="Save a text note as a first-class local corpus item.",
+        input_schema=_schema({
+            "text": {"type": "string"},
+            "title": {"type": "string"},
+            "author": {"type": "string"},
+        }, ["text"]),
+        handler=uoink_note,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "uoink_image": ToolSpec(
+        name="uoink_image",
+        description=(
+            "Save a base64 PNG, JPEG, or WebP as a local image corpus item. "
+            "No cloud OCR or vision service runs."
+        ),
+        input_schema=_schema({
+            "image_base64": {"type": "string"},
+            "mime": {"type": "string"},
+            "filename": {"type": "string"},
+            "caption": {"type": "string"},
+            "source_url": {"type": "string"},
+            "author": {"type": "string"},
+        }, ["image_base64"]),
+        handler=uoink_image,
+        rate_limiter=_RateLimiter(10),
+    ),
+    "uoink_x": ToolSpec(
+        name="uoink_x",
+        description=(
+            "Capture an X post and the author's earlier chain as a local corpus "
+            "item. Requires the default-off x_text_capture_enabled setting."
+        ),
+        input_schema=_schema({
+            "url": {"type": "string"},
+        }, ["url"]),
+        handler=uoink_x,
+        rate_limiter=_RateLimiter(10),
     ),
     # v3.2 Universal Site Uoinking (4 tools)
     "uoink_page": ToolSpec(

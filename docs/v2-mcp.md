@@ -10,14 +10,15 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 Uoink has two deliberately different tool surfaces:
 
 - Supported stdio registry: **23 tools**.
-- Local HTTP/OpenAPI registry: **65 tools**.
+- Local HTTP/OpenAPI registry: **71 tools**.
 
 The supported stdio MCP surface covers extraction, playlist jobs, search,
 corpus retrieval, citation maps, health scores, transcript reliability,
 Comment Intelligence, Hook Type, hook taxonomy, entity mentions, and manual
 podcast feed-to-corpus operations. The
 authenticated local HTTP helper exposes that set plus a broader collection of
-legacy and application operations. Overlapping tools share the handlers in
+legacy and application operations, including registry-only URL, note, image,
+and X capture. Overlapping tools share the handlers in
 `uoink_mcp_tools.py`, but the two transports do not expose the same registry.
 For MCP clients, use stdio (`uoink_mcp.py`). The HTTP JSON-RPC surface at
 `/mcp/v1` remains experimental.

@@ -30,6 +30,7 @@ import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -54,6 +55,12 @@ _EPISODE_STATUSES = (
 # 800 back-episodes cannot flood local storage. The feed's latest 50 entries
 # are retained; this release has no back-catalog load-more path.
 _EPISODES_PER_POLL_CAP = 50
+
+# Per-source safety caps from the Living Library decision record. The first
+# opt-in may enroll at most 25 already-known episodes, and no source may start
+# more than 10 new ingests on one UTC day.
+AUTO_INGEST_BACK_CATALOG_CAP = 25
+AUTO_INGEST_DAILY_CAP = 10
 
 # Polite HTTP timeout for feed GETs. Most podcasts host on Libsyn /
 # Megaphone / direct hosting; 8 seconds is generous for an XML body.
@@ -185,9 +192,8 @@ def set_feed_enabled(idx, feed_id: int, enabled: bool) -> bool:
 def set_feed_auto_ingest(idx, feed_id: int, auto_ingest: bool) -> bool:
     """Set the explicit audio/transcription opt-in for one feed.
 
-    Existing episode rows keep their current request marker. Turning the flag
-    on therefore applies to episodes discovered from that point forward, not
-    to the feed's historical backlog.
+    Back-catalog eligibility is evaluated by the scheduler, from the current
+    feed flag, instead of being frozen into every episode at insert time.
     """
     with idx.write_transaction() as conn:
         cur = conn.execute(
@@ -420,7 +426,16 @@ def _upsert_episodes_with_ids(
         feed = conn.execute(
             "SELECT auto_ingest FROM podcast_feeds WHERE id=?", (feed_id,)
         ).fetchone()
-        auto_ingest_requested = 1 if feed and feed["auto_ingest"] else 0
+        existing_episode_count = int(conn.execute(
+            "SELECT COUNT(*) FROM podcast_episodes WHERE feed_id=?", (feed_id,)
+        ).fetchone()[0])
+        # The first feed response is a back catalog even when registration was
+        # opted in. Leave it unmarked for the scheduler's 25-item repair. Once
+        # a feed already has episodes, newly discovered rows are future items
+        # and retain durable eligibility across helper restarts.
+        auto_ingest_requested = (
+            1 if feed and feed["auto_ingest"] and existing_episode_count else 0
+        )
         for ep in episodes:
             guid = (ep.get("guid") or "").strip()
             if not guid:
@@ -559,12 +574,13 @@ def list_episodes(idx, *, feed_id: int | None = None,
 
 
 def list_auto_ingest_candidates(
-        idx, *, feed_id: int | None = None, limit: int = 1) -> list[dict]:
-    """Return explicitly marked, unpublished episodes for enabled watch feeds.
+        idx, *, feed_id: int | None = None, limit: int = 1,
+        now: datetime | None = None) -> list[dict]:
+    """Return eligible episodes from feeds that are opted in right now.
 
-    The default of one episode per feed poll keeps a newly enabled archive from
-    monopolizing the scheduler. Remaining marked episodes stay durable and are
-    picked up on later due polls.
+    Already-started episodes may finish regardless of the daily cap. New work
+    is bounded to 10 starts per UTC day per source. The default of one episode
+    per feed poll still prevents a source from monopolizing the scheduler.
     """
     wheres = [
         "e.auto_ingest_requested = 1",
@@ -577,16 +593,178 @@ def list_auto_ingest_candidates(
     if feed_id is not None:
         wheres.append("e.feed_id = ?")
         params.append(int(feed_id))
-    params.append(max(1, min(int(limit), 50)))
+    requested_limit = max(1, min(int(limit), 50))
     rows = idx._conn.execute(
         "SELECT e.*, f.title AS podcast_title, f.feed_url "
         "FROM podcast_episodes e "
         "JOIN podcast_feeds f ON f.id=e.feed_id "
         "WHERE " + " AND ".join(wheres) + " "
-        "ORDER BY e.published_at DESC NULLS LAST, e.id DESC LIMIT ?",
+        "ORDER BY CASE WHEN e.status='new' THEN 1 ELSE 0 END, "
+        "e.published_at DESC NULLS LAST, e.id DESC",
         params,
     ).fetchall()
-    return [dict(row) for row in rows]
+    shaped = [dict(row) for row in rows]
+    selected: list[dict] = []
+    starts_by_feed: dict[int, int] = {}
+    for row in shaped:
+        if len(selected) >= requested_limit:
+            break
+        if row.get("status") != EPISODE_STATUS_NEW:
+            selected.append(row)
+            continue
+        source_id = int(row["feed_id"])
+        if source_id not in starts_by_feed:
+            starts_by_feed[source_id] = count_daily_ingest_starts(
+                idx, source_id, now=now)
+        if starts_by_feed[source_id] >= AUTO_INGEST_DAILY_CAP:
+            continue
+        selected.append(row)
+        starts_by_feed[source_id] += 1
+    return selected
+
+
+def count_daily_ingest_starts(
+        idx, feed_id: int, *, now: datetime | None = None) -> int:
+    """Count durable evidence that this source started ingest today."""
+    current = now or datetime.now(timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+    day = current.astimezone(timezone.utc).date().isoformat()
+    row = idx._conn.execute(
+        "SELECT COUNT(DISTINCT e.id) "
+        "FROM podcast_episodes e "
+        "WHERE e.feed_id=? AND ("
+        "  substr(coalesce(e.audio_downloaded_at, ''), 1, 10)=? "
+        "  OR substr(coalesce(e.transcript_finished_at, ''), 1, 10)=? "
+        "  OR EXISTS ("
+        "    SELECT 1 FROM jobs j "
+        "    WHERE j.kind='podcast_transcribe' "
+        "      AND substr(j.updated_at, 1, 10)=? "
+        "      AND json_valid(j.metadata_json) "
+        "      AND CAST(json_extract(j.metadata_json, '$.episode_id') AS INTEGER)=e.id"
+        "  )"
+        ")",
+        (int(feed_id), day, day, day),
+    ).fetchone()
+    return int(row[0]) if row else 0
+
+
+def _published_sort_key(row: dict) -> tuple[float, int]:
+    raw = str(row.get("published_at") or "").strip()
+    parsed = None
+    if raw:
+        try:
+            parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        except ValueError:
+            try:
+                parsed = parsedate_to_datetime(raw)
+            except (TypeError, ValueError, OverflowError):
+                parsed = None
+    if parsed is not None:
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        stamp = parsed.astimezone(timezone.utc).timestamp()
+    else:
+        stamp = 0.0
+    return stamp, int(row.get("id") or 0)
+
+
+def repair_stranded_auto_ingest(
+        idx, *, feed_id: int | None = None, dry_run: bool = False,
+        now: datetime | None = None) -> dict:
+    """Enroll a bounded backlog for currently opted-in feeds, once.
+
+    ``auto_ingest_requested`` remains the durable cohort marker, but the
+    scheduler computes that cohort from the feed's current consent flag. Once
+    25 rows have ever been marked for a source, later repair passes do not pull
+    progressively older episodes into the queue.
+    """
+    params: list[Any] = []
+    feed_filter = ""
+    if feed_id is not None:
+        feed_filter = " AND f.id=?"
+        params.append(int(feed_id))
+    feeds = idx._conn.execute(
+        "SELECT f.id, f.title FROM podcast_feeds f "
+        "WHERE f.enabled=1 AND f.auto_ingest=1" + feed_filter,
+        params,
+    ).fetchall()
+    stranded_before = int(idx._conn.execute(
+        "SELECT COUNT(*) FROM podcast_episodes "
+        "WHERE status='new' AND auto_ingest_requested=0"
+    ).fetchone()[0])
+
+    selected_by_feed: dict[int, list[int]] = {}
+    detail: dict[str, int] = {}
+    for feed_raw in feeds:
+        source_id = int(feed_raw["id"])
+        requested = int(idx._conn.execute(
+            "SELECT COUNT(*) FROM podcast_episodes "
+            "WHERE feed_id=? AND auto_ingest_requested=1",
+            (source_id,),
+        ).fetchone()[0])
+        remaining = max(0, AUTO_INGEST_BACK_CATALOG_CAP - requested)
+        candidates = [dict(row) for row in idx._conn.execute(
+            "SELECT id, published_at FROM podcast_episodes "
+            "WHERE feed_id=? AND status='new' "
+            "AND auto_ingest_requested=0 AND yoink_video_id IS NULL",
+            (source_id,),
+        ).fetchall()]
+        candidates.sort(key=_published_sort_key, reverse=True)
+        selected = [int(row["id"]) for row in candidates[:remaining]]
+        selected_by_feed[source_id] = selected
+        detail[str(source_id)] = len(selected)
+
+    marked = sum(len(ids) for ids in selected_by_feed.values())
+    if marked and not dry_run:
+        with idx.write_transaction() as conn:
+            for source_id, ids in selected_by_feed.items():
+                conn.executemany(
+                    "UPDATE podcast_episodes SET auto_ingest_requested=1 "
+                    "WHERE id=? AND feed_id=? AND status='new' "
+                    "AND auto_ingest_requested=0",
+                    [(episode_id, source_id) for episode_id in ids],
+                )
+
+    eligible_after = int(idx._conn.execute(
+        "SELECT COUNT(*) FROM podcast_episodes e "
+        "JOIN podcast_feeds f ON f.id=e.feed_id "
+        "WHERE f.enabled=1 AND f.auto_ingest=1 "
+        "AND e.status!='ignored' AND e.yoink_video_id IS NULL "
+        "AND e.auto_ingest_requested=1"
+    ).fetchone()[0])
+    if dry_run:
+        eligible_after += marked
+    schedulable_today = 0
+    for feed_raw in feeds:
+        source_id = int(feed_raw["id"])
+        existing = int(idx._conn.execute(
+            "SELECT COUNT(*) FROM podcast_episodes "
+            "WHERE feed_id=? AND status='new' AND yoink_video_id IS NULL "
+            "AND auto_ingest_requested=1",
+            (source_id,),
+        ).fetchone()[0])
+        if dry_run:
+            existing += len(selected_by_feed[source_id])
+        remaining_today = max(
+            0,
+            AUTO_INGEST_DAILY_CAP - count_daily_ingest_starts(
+                idx, source_id, now=now),
+        )
+        schedulable_today += min(existing, remaining_today)
+
+    return {
+        "stranded_before": stranded_before,
+        "feeds_considered": len(feeds),
+        "marked_eligible": 0 if dry_run else marked,
+        "would_mark_eligible": marked,
+        "eligible_after": eligible_after,
+        "schedulable_today": schedulable_today,
+        "back_catalog_cap": AUTO_INGEST_BACK_CATALOG_CAP,
+        "daily_cap": AUTO_INGEST_DAILY_CAP,
+        "by_feed": detail,
+        "dry_run": dry_run,
+    }
 
 
 def get_episode(idx, episode_id: int) -> dict | None:

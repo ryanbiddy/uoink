@@ -1576,6 +1576,14 @@ _index_open_lock = threading.Lock()
 # True from an index.db corruption-recovery (open_or_recover) until the
 # rebuilding backfill scan finishes. Surfaced in /health as index_recovering.
 _index_recovering = False
+# The process only starts serving after _get_index() applies every migration.
+# Initialising from the shipped files keeps direct Handler tests side-effect
+# free; main() replaces it with the version actually opened on disk.
+_active_migration_version = index.latest_schema_version()
+
+# Updated only after the podcast/watch scheduler completes a whole pass. A
+# null value means no successful pass has happened since this process started.
+_last_successful_tick_at: str | None = None
 
 # Backfill scan progress, polled via GET /index/backfill-status.
 _backfill_state = {"state": "idle", "current": 0, "total": 0}
@@ -6835,8 +6843,10 @@ def _auto_ingest_podcast_feed(feed_id: int) -> list[dict]:
     One candidate per due poll bounds disk, network, and transcription load.
     The episode-level request marker keeps the remaining work durable.
     """
+    idx = _get_index()
+    podcasts.repair_stranded_auto_ingest(idx, feed_id=feed_id)
     candidates = podcasts.list_auto_ingest_candidates(
-        _get_index(), feed_id=feed_id, limit=1)
+        idx, feed_id=feed_id, limit=1)
     outcomes: list[dict] = []
     settings = _read_settings() or {}
     model = whisper_runner.normalize_model(settings.get("whisper_model"))
@@ -6918,6 +6928,7 @@ def _poll_podcast_feed_for_watch(feed_id: int) -> dict:
 
 def _podcast_feed_scheduler_tick() -> list[dict]:
     """Poll every enabled feed whose configured interval has elapsed."""
+    global _last_successful_tick_at
     results: list[dict] = []
     for feed in podcasts.list_due_feeds(_get_index()):
         feed_id = int(feed["id"])
@@ -6927,6 +6938,7 @@ def _podcast_feed_scheduler_tick() -> list[dict]:
             log.exception("podcast watch tick failed for feed %d", feed_id)
             results.append({"ok": False, "feed_id": feed_id,
                             "error": str(exc)})
+    _last_successful_tick_at = suite_service.utc_now()
     return results
 
 
@@ -9198,9 +9210,15 @@ class Handler(BaseHTTPRequestHandler):
             settings = _read_settings() or {}
             whisper_model = whisper_runner.normalize_model(
                 settings.get("whisper_model"))
+            latest_migration = index.latest_schema_version()
             return self._send_json(200, {
                 "ok": True,
                 "version": VERSION,
+                "migration_version": _active_migration_version,
+                "migration_pending": (
+                    _active_migration_version < latest_migration
+                ),
+                "last_successful_tick_at": _last_successful_tick_at,
                 "whisperx_available": whisper_runner.is_whisperx_available(),
                 "whisper_model": whisper_model,
                 "whisperx_model_loaded": whisper_runner.is_model_downloaded(
@@ -14314,6 +14332,7 @@ class _YoinkHTTPServer(ThreadingHTTPServer):
 
 
 def main(*, show_dashboard: bool = False):
+    global _active_migration_version
     # Output directories are created lazily by the write paths themselves
     # (_run_extraction, _atomic_write_text, and the jobs/taxonomy/settings
     # writers all mkdir(parents=True, exist_ok=True) their own parents).
@@ -14352,15 +14371,21 @@ def main(*, show_dashboard: bool = False):
         server = _YoinkHTTPServer((HOST, PORT), Handler)
     except OSError as e:
         # Port held by something we couldn't probe via /health (different
-        # app, half-open socket, etc). Exit 0 so the Windows autostart
-        # mechanism doesn't surface an error dialog to the user.
+        # app, half-open socket, etc). A non-zero exit lets Task Scheduler's
+        # restart-on-failure policy recover or surface the outage.
         log.error("Failed to bind %s:%d -- %s", HOST, PORT, e)
-        sys.exit(0)
+        sys.exit(1)
 
     _migrate_plaintext_anthropic_key()
     # Sprint 15: open the library index (quarantining + rebuilding a corrupt
     # index.db if needed) before anything reads from or migrates into it.
-    _get_index()
+    _active_migration_version = _get_index().schema_version()
+    podcast_repair = podcasts.repair_stranded_auto_ingest(_get_index())
+    if podcast_repair["marked_eligible"]:
+        log.info(
+            "podcast watch: repaired %d stranded episode eligibility marker(s)",
+            podcast_repair["marked_eligible"],
+        )
     # One-time: fold any pre-index jobs.json / taxonomy.json into index.db.
     _migrate_jobs_json_to_index()
     _migrate_taxonomy_json_to_index()
@@ -14803,6 +14828,90 @@ def _podcast_corpus_reconciliation_status(*, repair: bool = False) -> dict:
         }
 
 
+def _helper_health_status() -> dict:
+    """Probe the resident helper instead of assuming this CLI is the helper."""
+    url = f"http://{HOST}:{PORT}/health"
+    try:
+        with urllib.request.urlopen(url, timeout=1.0) as response:
+            status = int(response.status)
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception as exc:
+        return {
+            "ok": False,
+            "url": url,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+
+    if not isinstance(payload, dict):
+        return {
+            "ok": False,
+            "url": url,
+            "status": status,
+            "error": "health response was not a JSON object",
+        }
+    return {
+        "ok": status == 200 and payload.get("ok") is True,
+        "url": url,
+        "status": status,
+        "payload": payload,
+    }
+
+
+def _call_http_registry_tool(name: str, arguments: dict,
+                             *, timeout: float = 30.0) -> dict:
+    """Call one tool on the resident helper's authenticated HTTP registry."""
+    url = f"http://{HOST}:{PORT}/tools/{name}"
+    request = urllib.request.Request(
+        url,
+        data=json.dumps(arguments).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "X-Uoink-Token": TOKEN,
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            status = int(response.status)
+            raw = response.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as exc:
+        status = int(exc.code)
+        raw = exc.read().decode("utf-8", errors="replace")
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            payload = None
+        if isinstance(payload, dict):
+            payload.setdefault("status", status)
+            return payload
+        return {
+            "ok": False,
+            "status": status,
+            "error": f"helper returned HTTP {status}",
+        }
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        return {
+            "ok": False,
+            "error": f"could not reach the Uoink helper at {url}: {exc}",
+        }
+
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        return {
+            "ok": False,
+            "status": status,
+            "error": "helper returned invalid JSON",
+        }
+    if not isinstance(payload, dict):
+        return {
+            "ok": False,
+            "status": status,
+            "error": "helper response was not a JSON object",
+        }
+    return payload
+
+
 def doctor_payload() -> dict:
     """`uoink doctor`: the /diagnose self-check plus the install-migration
     status, for support triage from the console without the popup. C-01
@@ -14810,13 +14919,23 @@ def doctor_payload() -> dict:
     months while every other check reported green) and C-05 added
     path_integrity (a green doctor while every content action 404s was the
     exact failure mode on the machine that motivated the fix)."""
-    return {
+    helper_health = _helper_health_status()
+    schema_migration = index.schema_migration_status(INDEX_PATH)
+    payload = {
+        "ok": bool(
+            helper_health.get("ok")
+            and not schema_migration.get("pending")
+            and not schema_migration.get("error")
+        ),
+        "helper_health": helper_health,
+        "schema_migration": schema_migration,
         "diagnose": _diagnose_payload(),
         "migration": migrate_install.migration_status(),
         "mcp_stdio": _mcp_stdio_selfcheck(),
         "path_integrity": _path_integrity_status(force=True),
         "podcast_corpus": _podcast_corpus_reconciliation_status(),
     }
+    return payload
 
 
 def run_cli(argv: list[str]) -> int:
@@ -14825,7 +14944,10 @@ def run_cli(argv: list[str]) -> int:
     - --migrate-dry-run : print exactly what the Yoink->Uoink migration would
       copy / move / delete and the keyring entry it'd rewrite, changing
       nothing. De-risks the clean-VM upgrade test.
-    - --doctor          : print the /diagnose payload + migration status.
+    - doctor / --doctor: print the /diagnose payload + migration status.
+    - rebuild-index     : rebuild from the on-disk corpus; optional root.
+    - search <query>    : call search_uoinks on the running HTTP helper.
+    - clips <query>     : call search_clips on the running HTTP helper.
     - --heal-paths      : relink index rows whose saved files moved with
       the output folder (C-05); prints the relink report.
     - --export-corpus   : write engagement/tags/taste/drafts/workspaces/
@@ -14841,6 +14963,22 @@ def run_cli(argv: list[str]) -> int:
     - --show-dashboard  : run the server, then open the dashboard window.
     (no flag)           : run the server.
     """
+    if argv and argv[0] == "doctor":
+        argv = ["--doctor", *argv[1:]]
+    elif argv and argv[0] == "rebuild-index":
+        argv = ["--rebuild-index", *argv[1:]]
+    elif argv and argv[0] in {"search", "clips"}:
+        command = argv[0]
+        query = " ".join(argv[1:]).strip()
+        if not query:
+            _print_json({"ok": False,
+                         "error": f"{command} needs a query"})
+            return 1
+        tool_name = "search_uoinks" if command == "search" else "search_clips"
+        payload = _call_http_registry_tool(tool_name, {"query": query})
+        _print_json(payload)
+        return 0 if payload.get("ok") else 1
+
     if "--backfill-authors" in argv:
         # Phase 2 (categorization): the SQL migration set platform + YouTube
         # author; this reads each non-YouTube sidecar for the real author and
@@ -14858,8 +14996,9 @@ def run_cli(argv: list[str]) -> int:
         _print_json(result)
         return 0 if result.get("ok") else 1
     if "--doctor" in argv:
-        _print_json(doctor_payload())
-        return 0
+        payload = doctor_payload()
+        _print_json(payload)
+        return 0 if payload.get("ok") else 1
     if "--heal-paths" in argv:
         # C-05: relink index rows whose files moved with the output folder.
         # An optional path argument searches a different root, for a corpus

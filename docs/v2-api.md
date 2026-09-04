@@ -63,6 +63,9 @@ Success response: HTTP 200
 {
   "ok": true,
   "version": "<current version>",
+  "migration_version": 25,
+  "migration_pending": false,
+  "last_successful_tick_at": "2026-09-04T16:30:00Z",
   "whisperx_available": false,
   "whisper_model": "base",
   "whisperx_model_loaded": false,
@@ -82,6 +85,9 @@ Fields:
 |---|---:|---|
 | `ok` | boolean | Always `true` for a healthy helper. |
 | `version` | string | Helper version from the top-level `VERSION` file. |
+| `migration_version` | integer | Newest SQLite schema migration opened by this helper process. |
+| `migration_pending` | boolean | `true` if the checkout contains a newer migration than the running helper opened. |
+| `last_successful_tick_at` | string or null | RFC 3339 UTC time of the last completed source-scheduler pass; `null` before the first pass. |
 | `whisperx_available` | boolean | Whether the Whisper transcription runtime can be imported. |
 | `whisper_model` | string | Normalized model selected in settings. |
 | `whisperx_model_loaded` | boolean | Whether the selected model is already present locally. |
