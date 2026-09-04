@@ -1,0 +1,7 @@
+{
+  "path": ["AI and ML", "Agent harnesses", "Loop engineering"],
+  "definition": "Putting an AI coding agent on repeat: the practice of designing the loop an agent runs in (discovery, handoff, verification, persistence, scheduling) rather than the single prompt, so work continues across sessions, checks itself, and runs unattended.",
+  "include": ["loop engineering", "run the agent in a loop", "put the agent on repeat", "agent loop", "ralph loop", "harness engineering", "scheduled agent runs", "cron for agents", "long-running agent", "verification step in the loop", "persistence across context windows", "autonomous overnight run"],
+  "exclude": ["single-shot prompting tips", "prompt engineering without a loop", "for loops in code tutorials"],
+  "coined": "Addy Osmani, 2026-06-07 (addyosmani.com/blog/loop-engineering; O'Reilly republish 2026-06-22)"
+}

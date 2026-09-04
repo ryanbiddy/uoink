@@ -495,11 +495,21 @@ class Index:
             rows = self._conn.execute("SELECT video_id FROM yoinks").fetchall()
         return {r["video_id"] for r in rows}
 
+    # bm25() column weights for yoinks_fts, in column order
+    # (0:video_id 1:slug 2:channel 3:title 4:topic 5:hook_type 6:content).
+    # Living library phase 1: a term in the title says far more about what
+    # an item *is* than the same term buried once in a long transcript, so
+    # title dominates (8), channel and topic are strong identity signals (3),
+    # slug is a lossy copy of the title (2), hook_type and the body count
+    # once (1), and video_id -- an opaque id -- never matches on purpose (0).
+    _YOINKS_BM25_WEIGHTS = "0.0, 2.0, 3.0, 8.0, 3.0, 1.0, 1.0"
+
     def search(self, query: str, limit: int = 10, *,
                channel: str | None = None,
                hook_type: str | None = None) -> list[dict]:
         """Full-text search across indexed corpora. Returns yoink rows ranked
-        by FTS5 bm25 (best first), optionally filtered by channel/hook_type."""
+        by weighted FTS5 bm25 (best first; see _YOINKS_BM25_WEIGHTS),
+        optionally filtered by channel/hook_type."""
         match = _fts_query(query)
         if not match:
             return []
@@ -507,9 +517,10 @@ class Index:
         # (0:video_id 1:slug 2:channel 3:title 4:topic 5:hook_type 6:content).
         # Each result row carries `_snippet` (a match excerpt) and `_score`
         # (bm25; lower is a better match) alongside the yoinks columns.
+        rank = f"bm25(yoinks_fts, {self._YOINKS_BM25_WEIGHTS})"
         sql = ("SELECT y.*, "
                "snippet(yoinks_fts, 6, '', '', '…', 12) AS _snippet, "
-               "bm25(yoinks_fts) AS _score "
+               f"{rank} AS _score "
                "FROM yoinks_fts f "
                "JOIN yoinks y ON y.video_id = f.video_id "
                "WHERE yoinks_fts MATCH ? AND y.deleted_at IS NULL ")
@@ -520,7 +531,7 @@ class Index:
         if hook_type:
             sql += "AND y.hook_type = ? "
             params.append(hook_type)
-        sql += "ORDER BY bm25(yoinks_fts) LIMIT ?"
+        sql += f"ORDER BY {rank} LIMIT ?"
         params.append(max(1, int(limit)))
         with self._lock:
             try:
@@ -530,6 +541,65 @@ class Index:
                 log.warning("FTS search rejected query %r", query)
                 return []
         return [dict(r) for r in rows]
+
+    # ---- clips (living library phase 1; see clips.py) --------------------
+    def search_clips(self, query: str, limit: int = 20, *,
+                     video_id: str | None = None,
+                     channel: str | None = None) -> list[dict]:
+        """Full-text search over clips (merged transcript windows). Returns
+        one row per clip -- ``{clip_id, video_id, slug, title, channel,
+        start, end, text, source_deep_link, _score, _snippet}`` -- ranked by
+        bm25(clips_fts), best first, restricted to live items."""
+        match = _fts_query(query)
+        if not match:
+            return []
+        sql = ("SELECT c.clip_id, c.video_id, y.slug, y.title, y.channel, "
+               "c.start, c.\"end\", c.text, c.source_deep_link, "
+               "bm25(clips_fts) AS _score, "
+               "snippet(clips_fts, 0, '', '', '…', 16) AS _snippet "
+               "FROM clips_fts f "
+               "JOIN clips c ON c.clip_id = f.rowid "
+               "JOIN yoinks y ON y.video_id = c.video_id "
+               "WHERE clips_fts MATCH ? AND y.deleted_at IS NULL ")
+        params: list = [match]
+        if video_id:
+            sql += "AND c.video_id = ? "
+            params.append(video_id)
+        if channel:
+            sql += "AND y.channel = ? "
+            params.append(channel)
+        # Tie-break on (video_id, seq) so equal scores order deterministically.
+        sql += "ORDER BY bm25(clips_fts), c.video_id, c.seq LIMIT ?"
+        params.append(max(1, int(limit)))
+        with self._lock:
+            try:
+                rows = self._conn.execute(sql, params).fetchall()
+            except sqlite3.OperationalError:
+                log.warning("clips FTS search rejected query %r", query)
+                return []
+        return [dict(r) for r in rows]
+
+    def get_clips(self, video_id: str) -> list[dict]:
+        """Every clip for one item, in timeline order."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT clip_id, video_id, seq, start, \"end\", text, speaker, "
+                "source_deep_link, cue_count FROM clips WHERE video_id=? "
+                "ORDER BY seq", (video_id,)).fetchall()
+        return [dict(r) for r in rows]
+
+    def rebuild_clips(self) -> dict:
+        """Re-derive every item's clips from its citations (clips.py)."""
+        import clips as _clips  # noqa: WPS433 -- keeps index importable alone
+        with self._lock:
+            return _clips.rebuild_all_clips(self._conn)
+
+    def clip_coverage(self) -> dict:
+        """``{items_with_clips, items_without_clips, clip_count}`` over the
+        live (non-deleted) library."""
+        import clips as _clips  # noqa: WPS433
+        with self._lock:
+            return _clips.clip_coverage(self._conn)
 
     def count_corpus(self) -> int:
         """Total non-deleted yoinks in the library, ignoring every filter.
@@ -1498,7 +1568,16 @@ class Index:
     def insert_citations(self, video_id: str, citations: list[dict]) -> int:
         """Bulk insert citation rows. Idempotent per (video_id, kind, seq):
         re-yoinking a video rewrites its rows via INSERT OR REPLACE. Returns
-        the number of rows written."""
+        the number of rows written.
+
+        Callers pass a kind's complete, contiguous seq range, so any row of
+        that kind with a seq past the batch's highest is a leftover from an
+        earlier, longer extraction (a raw caption track re-yoinked into a
+        few long paragraph chunks left ~700 stale cues behind on two live
+        items). Those are removed so the citation map stays time-ordered.
+
+        Living library phase 1: the video's clips are re-derived from the
+        fresh citations in the same commit (clips.build_clips_for_video)."""
         rows = [
             (video_id, c.get("kind"), c.get("seq"),
              c.get("timestamp_start"), c.get("timestamp_end"),
@@ -1508,6 +1587,12 @@ class Index:
         ]
         if not rows:
             return 0
+        max_seq_by_kind: dict = {}
+        for r in rows:
+            kind, seq = r[1], r[2]
+            if isinstance(seq, int) and kind is not None:
+                max_seq_by_kind[kind] = max(max_seq_by_kind.get(kind, -1), seq)
+        import clips as _clips  # noqa: WPS433 -- keeps index importable alone
         with self._lock:
             self._conn.executemany(
                 "INSERT OR REPLACE INTO citations "
@@ -1517,6 +1602,16 @@ class Index:
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 rows,
             )
+            for kind, max_seq in max_seq_by_kind.items():
+                self._conn.execute(
+                    "DELETE FROM citations WHERE video_id=? AND kind=? "
+                    "AND seq > ?", (video_id, kind, max_seq))
+            try:
+                _clips.build_clips_for_video(self._conn, video_id, commit=False)
+            except sqlite3.Error:
+                # Clips are derived data; never let them block a citation
+                # write. --build-clips re-derives everything.
+                log.exception("clip build failed for %s", video_id)
             self._conn.commit()
         return len(rows)
 

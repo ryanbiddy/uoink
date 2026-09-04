@@ -473,6 +473,143 @@ def get_citation_map(args: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+# ---- living library phase 1: clips + evidence cards ------------------------
+# Both tools read only from the index (clips.py derives clips from the
+# citation map) and, like corpus-read contract v1, never expose a filesystem
+# path: no corpus_path, sidecar_path, folder, or file_path in any response.
+
+_SLUG_RE = re.compile(r"^[A-Za-z0-9_-]{1,160}$")
+_SUMMARY_HINT_CHARS = 600
+_SUMMARY_HINT_READ_BYTES = 8192
+_MD_META_LINE_RE = re.compile(r"^\s*(\*\*[^*]+:\*\*|#\s|---\s*$|!\[|## Thumbnail)")
+
+
+def _clean_text(value: Any) -> str | None:
+    return value.strip() if isinstance(value, str) and value.strip() else None
+
+
+def _summary_hint(corpus_path: Any) -> str | None:
+    """First ~600 characters of the item's markdown *body*: the title line,
+    the bold ``**Key:** value`` metadata block, rules, and image embeds are
+    skipped so the hint reads as prose. Best-effort: None when the corpus
+    file is missing or unreadable. Reads at most 8 KB."""
+    if not isinstance(corpus_path, str) or not corpus_path:
+        return None
+    try:
+        with open(corpus_path, "r", encoding="utf-8", errors="replace") as fh:
+            head = fh.read(_SUMMARY_HINT_READ_BYTES)
+    except OSError:
+        return None
+    kept = [line.strip() for line in head.splitlines()
+            if line.strip() and not _MD_META_LINE_RE.match(line)]
+    body = " ".join(kept).strip()
+    if not body:
+        return None
+    if len(body) > _SUMMARY_HINT_CHARS:
+        body = body[:_SUMMARY_HINT_CHARS].rsplit(" ", 1)[0] + "…"
+    return body
+
+
+def _clip_public(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "start": row.get("start"),
+        "end": row.get("end"),
+        "text": row.get("text"),
+        "deep_link": row.get("source_deep_link"),
+    }
+
+
+def _spread_clips(rows: list[dict[str, Any]], n: int) -> list[dict[str, Any]]:
+    """Pick ``n`` clips spread across the timeline: split the (timeline-
+    ordered) clips into ``n`` consecutive buckets and take the longest clip
+    in each, so the card covers the whole item rather than its opening
+    minutes. Deterministic; ties break toward the earlier clip."""
+    if len(rows) <= n:
+        return list(rows)
+    picked = []
+    for i in range(n):
+        lo = (i * len(rows)) // n
+        hi = ((i + 1) * len(rows)) // n
+        bucket = rows[lo:hi] or rows[lo:lo + 1]
+        picked.append(max(bucket, key=lambda r: (len(r.get("text") or ""),
+                                                 -(r.get("start") or 0))))
+    picked.sort(key=lambda r: (r.get("start") or 0, r.get("seq") or 0))
+    return picked
+
+
+def search_clips(args: dict[str, Any]) -> dict[str, Any]:
+    """Full-text search over clips: merged 45-120 s transcript windows with
+    a deep link to the moment in the source."""
+    query = args.get("query")
+    if not isinstance(query, str) or not query.strip():
+        return _err("query required")
+    limit = _limit_int(args.get("limit"), default=20, low=1, high=50)
+    video_id = _clean_text(args.get("video_id"))
+    channel = _clean_text(args.get("channel"))
+    rows = _b()._get_index().search_clips(
+        query, limit, video_id=video_id, channel=channel)
+    results = []
+    for r in rows:
+        score = r.get("_score")
+        results.append({
+            "slug": r.get("slug"),
+            "title": r.get("title"),
+            "channel": r.get("channel"),
+            "start": r.get("start"),
+            "end": r.get("end"),
+            "text": r.get("text"),
+            "deep_link": r.get("source_deep_link"),
+            # bm25 is lower-is-better; negate so higher means better, the
+            # same direction search_uoinks reports.
+            "score": round(-score, 4) if isinstance(score, (int, float)) else 0.0,
+        })
+    return _ok(results=results)
+
+
+def get_evidence_card(args: dict[str, Any]) -> dict[str, Any]:
+    """One item's identity plus its most quotable clips, spread across the
+    timeline, ready to cite. Resolves by slug or video_id."""
+    slug = args.get("slug")
+    video_id = args.get("video_id")
+    if not slug and not video_id:
+        return _err("slug or video_id required")
+    idx = _b()._get_index()
+    row = None
+    # Same identifier grammar as _find_yoink: anything else never reaches
+    # the index. get_by_slug already excludes soft-deleted rows.
+    if isinstance(slug, str) and _SLUG_RE.match(slug):
+        row = idx.get_by_slug(slug)
+    if row is None and isinstance(video_id, str) and video_id.strip():
+        candidate = idx.get_yoink(video_id.strip())
+        if candidate and candidate.get("deleted_at") is None:
+            row = candidate
+    if not row:
+        return _err("uoink not found")
+    n_clips = _limit_int(args.get("n_clips"), default=10, low=1, high=20)
+    try:
+        metadata = json.loads(row.get("metadata_json") or "{}")
+    except (TypeError, json.JSONDecodeError):
+        metadata = {}
+    if not isinstance(metadata, dict):
+        metadata = {}
+    all_clips = idx.get_clips(row["video_id"])
+    chosen = _spread_clips(all_clips, n_clips)
+    return _ok(
+        slug=row.get("slug"),
+        title=row.get("title"),
+        channel=row.get("channel"),
+        platform=row.get("platform"),
+        source_type=row.get("source_type"),
+        topic=row.get("topic"),
+        yoinked_at=row.get("yoinked_at"),
+        url=_clean_text(metadata.get("url")),
+        summary_hint=_summary_hint(row.get("corpus_path")),
+        clips=[_clip_public(c) for c in chosen],
+        clip_count=len(all_clips),
+        chars=sum(len(c.get("text") or "") for c in all_clips),
+    )
+
+
 def get_uoink_health(args: dict[str, Any]) -> dict[str, Any]:
     """Return the per-section extraction health score for a saved uoink."""
     slug = args.get("slug")
@@ -2219,6 +2356,45 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         handler=search_uoinks,
         # Backed by the SQLite FTS5 index; rate-limited anyway so an agent
         # loop can't hammer it.
+        rate_limiter=_RateLimiter(30),
+    ),
+    "search_clips": ToolSpec(
+        name="search_clips",
+        description=(
+            "Full-text search over clips: merged 45-120 second transcript "
+            "windows from saved uoinks, each with a deep link to that moment "
+            "in the source. Use this to find the exact quotable passage; use "
+            "search_uoinks to find whole items."
+        ),
+        input_schema=_schema({
+            "query": {"type": "string"},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 20},
+            "video_id": {
+                "type": "string",
+                "description": "Restrict results to one item by video_id. Optional.",
+            },
+            "channel": {
+                "type": "string",
+                "description": "Filter results to one channel. Optional.",
+            },
+        }, ["query"]),
+        handler=search_clips,
+        rate_limiter=_RateLimiter(30),
+    ),
+    "get_evidence_card": ToolSpec(
+        name="get_evidence_card",
+        description=(
+            "Return an evidence card for one saved uoink: title, channel, "
+            "platform, topic, source URL, a short summary hint, and its most "
+            "quotable clips spread across the timeline, each with a deep "
+            "link. Resolve by slug or video_id."
+        ),
+        input_schema=_schema({
+            "slug": {"type": "string", "description": "Folder slug of the saved uoink."},
+            "video_id": {"type": "string", "description": "Alternative to slug."},
+            "n_clips": {"type": "integer", "minimum": 1, "maximum": 20, "default": 10},
+        }),
+        handler=get_evidence_card,
         rate_limiter=_RateLimiter(30),
     ),
     "get_uoink_corpus": ToolSpec(
