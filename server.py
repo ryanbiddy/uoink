@@ -14770,6 +14770,7 @@ def rebuild_index_from_disk(*, root: Path | None = None) -> dict:
     idx = _get_index()
     before = idx.count_corpus()
     _run_backfill(scan_root)
+    clips = idx.rebuild_clips()
     after = idx.count_corpus()
     restored = None
     exports_dir = scan_root / EXPORTS_DIRNAME
@@ -14780,7 +14781,8 @@ def rebuild_index_from_disk(*, root: Path | None = None) -> dict:
             restored = import_corpus_data(newest)
     return {"ok": True, "scanned_root": str(scan_root),
             "rows_before": before, "rows_after": after,
-            "indexed": after - before, "restored": restored}
+            "indexed": after - before, "clips": clips,
+            "restored": restored}
 
 
 def _podcast_corpus_reconciliation_status(*, repair: bool = False) -> dict:

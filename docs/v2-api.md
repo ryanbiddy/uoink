@@ -1459,6 +1459,10 @@ Tools currently exposed:
 - `find_mentions`
 - `get_transcript_reliability`
 
+The full HTTP/OpenAPI registry is generated from `TOOL_REGISTRY` and contains
+67 tools. Its Phase 1 registry-only additions are `search_clips` and
+`get_evidence_card`; neither is part of the 23-tool stdio set.
+
 Full schemas and return shapes live in `docs/v2-mcp.md`.
 
 #### POST /mcp/v1/tools/call

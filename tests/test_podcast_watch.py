@@ -52,7 +52,7 @@ def test_watch_migration_defaults_off_and_marks_only_future_opt_in_rows(
     assert podcasts.list_auto_ingest_candidates(
         idx, feed_id=feed["id"], limit=10)[0]["guid"] == "after"
     assert idx._conn.execute(
-        "SELECT MAX(version) FROM schema_version").fetchone()[0] == 23
+        "SELECT MAX(version) FROM schema_version").fetchone()[0] == 24
     idx.close()
 
 

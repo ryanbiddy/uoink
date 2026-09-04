@@ -552,6 +552,7 @@ def search_clips(args: dict[str, Any]) -> dict[str, Any]:
     for r in rows:
         score = r.get("_score")
         results.append({
+            "video_id": r.get("video_id"),
             "slug": r.get("slug"),
             "title": r.get("title"),
             "channel": r.get("channel"),
@@ -595,6 +596,7 @@ def get_evidence_card(args: dict[str, Any]) -> dict[str, Any]:
     all_clips = idx.get_clips(row["video_id"])
     chosen = _spread_clips(all_clips, n_clips)
     return _ok(
+        video_id=row.get("video_id"),
         slug=row.get("slug"),
         title=row.get("title"),
         channel=row.get("channel"),

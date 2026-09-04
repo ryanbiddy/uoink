@@ -224,6 +224,39 @@ def _run_migrations(conn: sqlite3.Connection) -> int:
     return applied
 
 
+def _backfill_clips_if_needed(conn: sqlite3.Connection, schema_version: int) -> None:
+    """Build the derived clip index once for an upgraded library.
+
+    Migration 0024 creates the tables but deliberately does not run Python
+    from SQL. Existing installs can already have thousands of transcript
+    citations, so the first open on schema 24 fills an empty clip table from
+    those rows. Fresh databases and test fixtures pinned before 0024 skip the
+    check entirely.
+    """
+    if schema_version < 24:
+        return
+    clip_count = conn.execute("SELECT COUNT(*) FROM clips").fetchone()[0]
+    if clip_count:
+        return
+    citation_count = conn.execute(
+        "SELECT COUNT(*) FROM citations WHERE kind='transcript_chunk'"
+    ).fetchone()[0]
+    if not citation_count:
+        return
+
+    import clips as _clips  # noqa: WPS433 -- only needed for schema 24+
+    report = _clips.rebuild_all_clips(conn)
+    log.info(
+        "clip upgrade backfill: %d transcript citations -> %d clips "
+        "across %d/%d items in %.3fs",
+        citation_count,
+        report["clip_count"],
+        report["items_with_clips"],
+        report["items"],
+        report["seconds"],
+    )
+
+
 # --------------------------------------------------------------------------
 # FTS query sanitisation
 # --------------------------------------------------------------------------
@@ -323,7 +356,8 @@ class Index:
             conn.row_factory = sqlite3.Row
             conn.execute("PRAGMA journal_mode=WAL")
             conn.execute("PRAGMA foreign_keys=ON")
-            _run_migrations(conn)
+            schema_version = _run_migrations(conn)
+            _backfill_clips_if_needed(conn, schema_version)
         except Exception:
             conn.close()
             raise

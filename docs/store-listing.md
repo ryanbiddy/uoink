@@ -41,7 +41,7 @@ One click on a video page (or Alt+U, or right-click). Uoink saves the source, lo
 Search your Library, filter by topic or channel, inspect Evidence, and turn saved videos, podcasts, and articles into credited tweets, threads, blog drafts, or scripts.
 
 **MCP and agent tools**
-Connect Claude Desktop, Cursor, or another MCP-capable client to the local Uoink helper. Tools include `uoink_video`, `uoink_playlist`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_citation_map`, `get_uoink_health`, and `find_mentions`.
+Connect Claude Desktop, Cursor, or another MCP-capable client to the local Uoink helper. Tools include `uoink_video`, `uoink_playlist`, `list_recent_uoinks`, `search_uoinks`, `get_uoink_corpus`, `analyze_comments`, `classify_hook`, `get_citation_map`, `get_uoink_health`, and `find_mentions`. The broader HTTP/OpenAPI catalog also includes `search_clips` and `get_evidence_card` for timestamped passages.
 
 ### Why Creators Use It
 
