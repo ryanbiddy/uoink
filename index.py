@@ -121,6 +121,12 @@ def _discover_migrations() -> list[tuple[int, Path]]:
     return out
 
 
+def latest_schema_version() -> int:
+    """Return the newest migration version shipped with this checkout."""
+    migrations = _discover_migrations()
+    return migrations[-1][0] if migrations else 0
+
+
 def _current_schema_version(conn: sqlite3.Connection) -> int:
     """Return the highest applied schema version, or 0 on a fresh database."""
     row = conn.execute(
@@ -130,6 +136,47 @@ def _current_schema_version(conn: sqlite3.Connection) -> int:
         return 0
     row = conn.execute("SELECT MAX(version) AS v FROM schema_version").fetchone()
     return int(row["v"]) if row and row["v"] is not None else 0
+
+
+def schema_migration_status(path) -> dict:
+    """Inspect an existing index without creating or migrating it.
+
+    Doctor uses this read-only path so asking whether an upgrade is pending
+    cannot silently perform the upgrade it is meant to report.
+    """
+    db_path = Path(path)
+    latest = latest_schema_version()
+    if not db_path.is_file():
+        return {
+            "database_exists": False,
+            "current": 0,
+            "latest": latest,
+            "pending": False,
+        }
+
+    conn = None
+    try:
+        uri = f"{db_path.resolve().as_uri()}?mode=ro"
+        conn = sqlite3.connect(uri, uri=True)
+        conn.row_factory = sqlite3.Row
+        current = _current_schema_version(conn)
+        return {
+            "database_exists": True,
+            "current": current,
+            "latest": latest,
+            "pending": current < latest,
+        }
+    except sqlite3.Error as exc:
+        return {
+            "database_exists": True,
+            "current": None,
+            "latest": latest,
+            "pending": True,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 # ``ALTER TABLE ... ADD COLUMN`` has no IF NOT EXISTS form, so the runner
@@ -361,7 +408,13 @@ class Index:
         except Exception:
             conn.close()
             raise
-        return cls(conn, path)
+        idx = cls(conn, path)
+        try:
+            from provenance import backfill_source_types
+            backfill_source_types(idx)
+        except Exception:
+            log.exception("source_type provenance backfill failed")
+        return idx
 
     @classmethod
     def open_or_recover(cls, path) -> tuple["Index", bool]:
@@ -402,6 +455,11 @@ class Index:
     def close(self) -> None:
         with self._lock:
             self._conn.close()
+
+    def schema_version(self) -> int:
+        """Return the newest migration applied to this open index."""
+        with self._lock:
+            return _current_schema_version(self._conn)
 
     def __enter__(self) -> "Index":
         return self
@@ -448,6 +506,16 @@ class Index:
         # the NOT NULL column always has a value.
         if record.get("schema_version") is None:
             record = {**record, "schema_version": CURRENT_YOINK_SCHEMA}
+        if not str(record.get("source_type") or "").strip():
+            from provenance import derive_source_type
+            record = {
+                **record,
+                "source_type": derive_source_type(
+                    platform=record.get("platform"),
+                    metadata_json=record.get("metadata_json"),
+                    sidecar_path=record.get("sidecar_path"),
+                ),
+            }
         values = [record.get(col) for col in _YOINK_COLUMNS]
         placeholders = ", ".join("?" * len(_YOINK_COLUMNS))
         update_set = ", ".join(

@@ -1,9 +1,9 @@
 """X (Twitter) post text + self-thread extractor (U-15, v3.2.6).
 
-Captures the TEXT of an X post, plus the earlier posts in the author's own
-reply chain, via the same public syndication endpoint the video path
-already leans on (yt-dlp is invoked with twitter:api=syndication). No API
-key, no login. Renders to markdown and returns an `extract_result` in
+Captures the text of an X post, plus the earlier posts in the author's own
+reply chain. The public syndication endpoint supplies the chain links and
+FxTwitter API v2 supplies full long-post text when syndication truncates it.
+No API key or login is required. Renders to markdown and returns an `extract_result` in
 page_extractor's shape so page_extractor.persist_page_yoink can land it as
 a yoink with source_type='x_thread'.
 
@@ -32,8 +32,10 @@ import x_article_extractor
 
 SOURCE_TYPE = "x_thread"
 SYNDICATION_URL = "https://cdn.syndication.twimg.com/tweet-result"
+FXTWITTER_STATUS_URL = "https://api.fxtwitter.com/2/status/{tweet_id}"
 # The endpoint answers this UA reliably; same choice yt-dlp ships.
 USER_AGENT = "Googlebot"
+FXTWITTER_USER_AGENT = "Uoink (+https://uoink.app)"
 MAX_THREAD_HOPS = 25  # ancestor cap so a hostile chain can't loop us
 
 _STATUS_RE = re.compile(
@@ -151,7 +153,56 @@ def fetch_tweet_json(tweet_id: str, *, timeout: int = 20) -> dict:
     if data.get("__typename") == "TweetTombstone":
         raise ValueError("X served a tombstone: this post is unavailable "
                          "(deleted, restricted, or withheld).")
-    return data
+    return _merge_fxtwitter_full_text(
+        data, fetch_fxtwitter_status_json(tweet_id, timeout=timeout))
+
+
+def fetch_fxtwitter_status_json(tweet_id: str, *, timeout: int = 20) -> dict | None:
+    """Fetch FxTwitter API v2 as a best-effort full-text supplement.
+
+    Syndication remains the availability and reply-chain source. A failed
+    supplement therefore returns ``None`` and leaves the existing capture
+    path intact.
+    """
+    req = urllib.request.Request(
+        FXTWITTER_STATUS_URL.format(tweet_id=str(int(tweet_id))),
+        headers={
+            "User-Agent": FXTWITTER_USER_AGENT,
+            "Accept": "application/json",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            raw = resp.read().decode("utf-8", errors="replace")
+    except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, OSError):
+        return None
+    try:
+        payload = json.loads(raw)
+    except (json.JSONDecodeError, TypeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _merge_fxtwitter_full_text(syndication: dict,
+                               fxtwitter: dict | None) -> dict:
+    """Prefer a longer, matching v2 status text over syndication text."""
+    if not isinstance(fxtwitter, dict) or fxtwitter.get("code") != 200:
+        return syndication
+    status = fxtwitter.get("status")
+    if not isinstance(status, dict):
+        return syndication
+    expected_id = str(syndication.get("id_str") or syndication.get("id") or "")
+    received_id = str(status.get("id") or "")
+    if expected_id and received_id != expected_id:
+        return syndication
+    current = str(syndication.get("text") or "").strip()
+    full = str(status.get("text") or "").strip()
+    if len(full) <= len(current):
+        return syndication
+    enriched = dict(syndication)
+    enriched["text"] = full
+    enriched["_uoink_full_text_source"] = "fxtwitter-v2"
+    return enriched
 
 
 def _shape_tweet(payload: dict) -> dict:
@@ -167,6 +218,7 @@ def _shape_tweet(payload: dict) -> dict:
         "in_reply_to_handle": (payload.get("in_reply_to_screen_name") or "").strip(),
         "photo_count": len(photos) if isinstance(photos, list) else 0,
         "has_video": bool(payload.get("video")),
+        "full_text_source": payload.get("_uoink_full_text_source"),
         "parent_payload": payload.get("parent") if isinstance(payload.get("parent"), dict) else None,
     }
 
@@ -259,6 +311,8 @@ def extract_x_thread(url: str, *, timeout: int = 20, _fetch=None) -> dict:
                          "post, use the regular Uoink button."}
 
     root = tweets[0]
+    full_text_posts = sum(
+        1 for tweet in tweets if tweet.get("full_text_source") == "fxtwitter-v2")
     canonical = (f"https://x.com/{root['author_handle']}/status/{tweet_id}"
                  if root["author_handle"] else f"https://x.com/i/status/{tweet_id}")
     markdown = render_markdown(tweets, canonical)
@@ -275,8 +329,12 @@ def extract_x_thread(url: str, *, timeout: int = 20, _fetch=None) -> dict:
             "capture_scope": "shared post + earlier same-author chain",
             "photo_count": sum(t["photo_count"] for t in tweets),
             "has_video": any(t["has_video"] for t in tweets),
+            "full_text_posts": full_text_posts,
         },
-        "extraction_engine": "x-syndication",
+        "extraction_engine": (
+            "x-syndication+fxtwitter-v2" if full_text_posts
+            else "x-syndication"
+        ),
         "extracted_at": _now_iso(),
         "links": [],
         "images": [],

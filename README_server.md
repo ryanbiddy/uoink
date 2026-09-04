@@ -38,14 +38,35 @@ Verify it's alive at `http://127.0.0.1:5179/ping`. A live helper returns HTTP
 
 Logs are written to `server.log` next to `server.py`.
 
-## Auto-start at login
+## Command line
 
-1. Press <kbd>Win</kbd>+<kbd>R</kbd>, type `shell:startup`, press Enter.
-2. Drop a shortcut to `start_server.bat` into that folder.
+The repository includes a small `uoink` wrapper. On Windows, replace `uoink`
+below with `.\uoink.cmd`; on macOS or Linux, use `./uoink`.
 
-The server launches with `pythonw`, so it sits silently in the background — no
-console window. Stop it via Task Manager (kill the `pythonw.exe` process) or by
-running the GUI's launcher and then closing it; cleaner: leave it running.
+```text
+uoink doctor
+uoink rebuild-index
+uoink search <query>
+uoink clips <query>
+```
+
+`doctor` prints helper health, schema-migration state, and the existing
+diagnostics as JSON. `rebuild-index` runs the existing on-disk rebuild and
+accepts an optional corpus root. `search` and `clips` send the query to the
+running helper's authenticated HTTP tool registry and print its JSON response.
+
+## Install the Windows watchdog
+
+From the repository or installed Uoink directory, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-watchdog.ps1
+```
+
+The script creates or updates the current user's `Uoink Helper` Scheduled Task.
+It starts the helper at logon and, if the process fails, retries three times at
+one-minute intervals. Re-run the same command after moving the install folder.
+Use `-WhatIf` to inspect the intended registration without changing the task.
 
 Desktop notifications default on. Turn off **Show desktop notifications** in
 Dashboard → Settings → Local app to keep background work invisible. Suppressed
@@ -64,6 +85,9 @@ models, output-root recovery, and corpus state. The response shape is:
 {
   "ok": true,
   "version": "<current version>",
+  "migration_version": 25,
+  "migration_pending": false,
+  "last_successful_tick_at": "2026-09-04T16:30:00Z",
   "whisperx_available": false,
   "whisper_model": "base",
   "whisperx_model_loaded": false,
@@ -80,6 +104,11 @@ models, output-root recovery, and corpus state. The response shape is:
 `path_integrity` always contains `ok`, `checked`, and `missing`. When indexed
 files are missing it also contains a human-readable `hint`; if the index scan
 itself fails it instead contains an `error` string.
+
+`migration_version` is the newest schema migration opened by this helper.
+`migration_pending` becomes `true` if newer migration files appear while it is
+running. `last_successful_tick_at` is an RFC 3339 UTC timestamp; it is `null`
+until the background source scheduler completes its first pass.
 
 ### `POST /extract`
 

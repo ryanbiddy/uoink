@@ -222,9 +222,13 @@ def test_g0_populated_pre_0024_upgrade_is_idempotent_and_rebuilds_fts(
     caplog.set_level(logging.INFO, logger="uoink.index")
     upgraded = index_mod.Index.open(db_path)
     try:
+        # The upgrade lands on whatever the newest shipped migration is
+        # (0024 introduced clips; later migrations must not break this path).
+        newest = max(v for v, _ in index_mod._discover_migrations())
+        assert newest >= 24
         assert upgraded._conn.execute(
             "SELECT MAX(version) FROM schema_version"
-        ).fetchone()[0] == 24
+        ).fetchone()[0] == newest
         assert upgraded.search_clips("upgrade sentinel")[0][
             "source_deep_link"
         ].endswith("&t=5s")
@@ -247,7 +251,10 @@ def test_g0_populated_pre_0024_upgrade_is_idempotent_and_rebuilds_fts(
     # Simulate a crash after 0024's DDL but before its version marker. Every
     # statement in the migration must tolerate the replay.
     conn = sqlite3.connect(db_path)
-    conn.execute("DELETE FROM schema_version WHERE version=24")
+    # Drop 0024's marker and every later one: the runner keys off MAX(version),
+    # so 0024 only replays when nothing newer is recorded; later migrations
+    # replay too and must cope.
+    conn.execute("DELETE FROM schema_version WHERE version>=24")
     conn.commit()
     conn.close()
 

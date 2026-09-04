@@ -29,7 +29,7 @@ def test_documented_transport_counts_match_both_live_registries() -> None:
     assert _documented_count("Local HTTP/OpenAPI registry") == len(
         uoink_mcp_tools.TOOL_REGISTRY
     )
-    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 67
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 71
 
 
 def test_documented_ping_keys_match_the_real_handler(monkeypatch) -> None:
@@ -47,6 +47,11 @@ def test_documented_ping_keys_match_the_real_handler(monkeypatch) -> None:
     )
     monkeypatch.setattr(server, "_index_recovering", False)
     monkeypatch.setattr(server, "_OUTPUT_ROOT_FALLBACK", False)
+    monkeypatch.setattr(server, "_active_migration_version", 25)
+    monkeypatch.setattr(server.index, "latest_schema_version", lambda: 25)
+    monkeypatch.setattr(
+        server, "_last_successful_tick_at", "2026-09-04T16:30:00Z"
+    )
 
     class Probe:
         path = "/ping"
