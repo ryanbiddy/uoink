@@ -175,7 +175,7 @@ Success response: HTTP 200
       "both": 0.0091
     },
     "source": "https://docs.claude.com/en/docs/about-claude/pricing",
-    "source_checked": "2026-05-12"
+    "source_checked": "2026-09-04"
   }
 }
 ```
