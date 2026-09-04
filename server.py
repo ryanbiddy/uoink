@@ -448,8 +448,10 @@ KEYRING_ANTHROPIC_USERNAME = "anthropic_key"
 ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 ANTHROPIC_MODEL = "claude-haiku-4-5-20251001"
 ANTHROPIC_VERSION = "2023-06-01"
-# Pricing source: Anthropic Claude pricing docs, verified 2026-05-12:
+# Pricing source: Anthropic Claude pricing docs, re-verified 2026-09-04:
 # https://docs.claude.com/en/docs/about-claude/pricing
+# (canonical table: https://platform.claude.com/docs/en/about-claude/pricing)
+# Claude Haiku 4.5 is still $1 / $5 per MTok; batch 50%; cache read 0.1×.
 ANTHROPIC_PRICING_INPUT_PER_MILLION = 1.00
 ANTHROPIC_PRICING_OUTPUT_PER_MILLION = 5.00
 ANTHROPIC_CI_EST_INPUT_TOKENS = 5_000
@@ -1184,7 +1186,7 @@ def _anthropic_pricing_payload() -> dict:
             "both": round(ci + hook, 6),
         },
         "source": "https://docs.claude.com/en/docs/about-claude/pricing",
-        "source_checked": "2026-05-12",
+        "source_checked": "2026-09-04",
     }
 
 
