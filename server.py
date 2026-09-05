@@ -102,6 +102,7 @@ import notes  # noqa: E402  -- context-layer item 1: quick notes / musings captu
 import images  # noqa: E402  -- context-layer item 3: image / meme capture
 import writer_peer  # noqa: E402  -- optional Writer readiness, no shared files
 import engagement_contract  # noqa: E402  -- suite engagement batch boundary
+import record_id_contract  # noqa: E402  -- strict IDs at destructive boundaries
 import media_handoff  # noqa: E402  -- authenticated kept-media boundary
 import suite_service  # noqa: E402  -- suite discovery/health/runtime lease
 
@@ -10170,7 +10171,11 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
-        feed_id, err = self._parse_feed_id(body)
+        # Destructive: identity is validated before the index is touched.
+        # _parse_feed_id's int() would coerce true/"1"/1.0 to feed 1 and
+        # cascade-delete its episodes.
+        feed_id, err = record_id_contract.parse_record_id(
+            body.get("feed_id"), "feed_id")
         if err:
             return self._send_json(400, {"ok": False, "error": err})
         try:
@@ -10454,7 +10459,11 @@ class Handler(BaseHTTPRequestHandler):
         if not isinstance(body, dict):
             return self._send_json(400, {"ok": False,
                                           "error": "json object required"})
-        playlist_id, err = self._parse_monitored_playlist_id(body)
+        # Destructive: identity is validated before the index is touched.
+        # _parse_monitored_playlist_id's int() would coerce true/"1"/1.0
+        # to playlist 1 and cascade-delete its discovery events.
+        playlist_id, err = record_id_contract.parse_record_id(
+            body.get("playlist_id"), "playlist_id")
         if err:
             return self._send_json(400, {"ok": False, "error": err})
         try:
