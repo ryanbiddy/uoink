@@ -105,6 +105,17 @@ Success response: HTTP 200
     "ok": true,
     "checked": 0,
     "missing": 0
+  },
+  "library": {
+    "status": "idle",
+    "waiting_for_client": false,
+    "ready": 0,
+    "leased": 0,
+    "run_revision": null,
+    "recovery_state": null,
+    "error_code": null,
+    "apply_enabled": false,
+    "contract_version": "phase2-v1-2026-09-04"
   }
 }
 ```
@@ -125,6 +136,7 @@ Fields:
 | `index_recovering` | boolean | `true` while a corrupt `index.db` has been quarantined and the replacement database is being backfilled from disk. |
 | `output_root_fallback` | boolean | `true` if the helper fell back to writing outputs to `%LOCALAPPDATA%\Uoink\output` because the primary `DESKTOP_ROOT` was unwritable. |
 | `path_integrity` | object | Aggregate `ok`, `checked`, and `missing` values for indexed corpus paths. Missing files add a generic `hint`; a failed scan adds the generic `error` value `index unavailable; see server.log`. |
+| `library` | object | Living Library work-queue status (Phase 2 contract `phase2-v1-2026-09-04`). `status` is `waiting_for_client` (staged Librarian work and no connected client holds a lease; the helper never runs the Librarian itself), `collecting`, `idle`, `recovery_pending`, `unavailable` (the `library_work` service is not installed), `unknown` (index not opened yet) or `error`. `waiting_for_client` repeats the first case as a boolean. `ready` / `leased` are work-row counts, `run_revision` the current run's revision or `null`, `recovery_state` the journal replay state or `null`, `error_code` the service error code when `status` is `error`, `apply_enabled` the default-off `librarian_apply_enabled` setting. Counts only, never item titles or evidence text. |
 
 ### GET /index/backfill-status
 
@@ -1552,9 +1564,68 @@ Tools currently exposed:
 - `get_transcript_reliability`
 
 The full HTTP/OpenAPI registry is generated from `TOOL_REGISTRY` and contains
-71 tools. `search_clips` and `get_evidence_card` were Phase 1 registry-only
+77 tools. `search_clips` and `get_evidence_card` were Phase 1 registry-only
 additions; since 2026-09-04 (run E) they are also part of the 25-tool stdio
 set, sharing the same handlers.
+
+The six Living Library work-queue tools added on 2026-09-04 (Phase 2 stage 1,
+contract `phase2-v1-2026-09-04`) are registry-only and not on stdio:
+`list_library_work`, `claim_library_work`, `submit_library_result`,
+`apply_reshelving`, `pin_shelf` and `undo_library_apply`. Their input schemas
+are the frozen `docs/library/phase2-contract/tool-schemas.json` (JSON Schema
+2020-12 with `$defs`, `$ref`, `oneOf` and `const`), embedded verbatim in
+`uoink_mcp_tools.py`. Every response carries `schema_version: 1`; errors use
+`{"ok": false, "schema_version": 1, "error": {"code", "message", "retryable",
+"details"}}` rather than the plain string `error` the older tools return.
+Requests on `/tools/<name>` and `/mcp/v1` are decoded strictly (NaN, Infinity
+and duplicate object keys are HTTP 400), then checked against the frozen
+schema before the `library_work` service is asked anything; a malformed
+request gets the same `invalid_request` envelope on every transport (HTTP 400
+on `/tools/<name>`, inside the JSON-RPC result on `/mcp/v1`). When the
+`library_work` module is not installed the tools answer
+`service_unavailable`; `apply_reshelving` with `mode: "apply"` answers
+`apply_disabled` while the default-off `librarian_apply_enabled` setting is
+off. `pin_shelf` and `undo_library_apply` also need a `user_intent_token`
+from `POST /library/intent` (below); no registry tool can mint one.
+
+### POST /library/intent
+
+Mint a five-minute `user_intent_token` for exactly one pin/move/unpin or undo
+(Phase 2 contract, "Pins and authoritative recovery"). The dashboard calls
+this from the confirmation control of a displayed delta; the token binds the
+canonical operation, the expected projection revision and the dashboard
+session, and the service consumes it atomically with the operation.
+
+Auth: `X-Uoink-Token`, plus an origin gate: `Origin`, when present, must be a
+loopback `http` origin on the helper's own port, and `Sec-Fetch-Site`, when
+present, must be `same-origin` or `none`. Extension and web origins are
+refused even with a valid token. Bodies are decoded strictly (no NaN,
+Infinity or duplicate keys). Rate limit: 30 per minute.
+
+Request body: `kind` is `pin` or `undo`; `operation` is the `pin_shelf` or
+`undo_library_apply` request without its `user_intent_token`; `confirmed` must
+be the JSON boolean `true`.
+
+```json
+{
+  "kind": "pin",
+  "operation": {
+    "video_id": "dQw4w9WgXcQ",
+    "shelf_id": "shelf-ai-agents",
+    "action": "pin",
+    "expected_projection_revision": 4,
+    "operation_key": "pin-2026-09-04T16:30:00Z-1"
+  },
+  "confirmed": true
+}
+```
+
+Success response: HTTP 200 with `{"ok": true, "schema_version": 1,
+"user_intent_token": "<43-128 url-safe chars>", "expires_ms": <server epoch
+ms>, "kind": "pin", "request_hash": "<sha256 hex>"}` as returned by the
+service. A malformed body is HTTP 400 with the `invalid_request` envelope,
+a wrong origin HTTP 403, a throttled caller HTTP 429, and a helper without
+the `library_work` service HTTP 200 with `service_unavailable`.
 
 Full schemas and return shapes live in `docs/v2-mcp.md`.
 

@@ -295,6 +295,11 @@ foreach ($f in @(
     'whisper_runner.py',
     'source_manifest.py',
     'openapi_bridge.py',
+    # Living Library Phase 2 substrate service (Astra). uoink_mcp_tools.py
+    # imports it lazily through one seam; without it every library tool
+    # answers service_unavailable, so a build must fail loudly if it is
+    # missing rather than ship that state.
+    'library_work.py',
     'reddit_extractor.py',
     'x_extractor.py',
     'x_article_extractor.py',
@@ -502,6 +507,10 @@ Copy-Item (Join-Path $RepoRoot 'index.py')       $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'clips.py')       $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'provenance.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'library_cards.py') $StagingDir -Force
+# Living Library Phase 2: the work-queue service behind the six library
+# registry tools (leases, submissions, previews, apply/undo, pins, recovery).
+# Installed imports must work without a checkout (gate P2-0).
+Copy-Item (Join-Path $RepoRoot 'library_work.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'usage_meter.py')   $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink.cmd')      $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink')          $StagingDir -Force

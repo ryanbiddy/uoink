@@ -29,7 +29,8 @@ def test_documented_transport_counts_match_both_live_registries() -> None:
     assert _documented_count("Local HTTP/OpenAPI registry") == len(
         uoink_mcp_tools.TOOL_REGISTRY
     )
-    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 71
+    # 71 + the six Living Library work-queue tools (Phase 2 stage 1).
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 77
 
 
 def test_documented_ping_keys_match_the_real_handler(monkeypatch) -> None:

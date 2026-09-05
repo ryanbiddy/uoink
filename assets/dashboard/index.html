@@ -4426,6 +4426,7 @@
               <h2>Runtime</h2>
               <p class="setting-copy" id="aboutVersion">Version: checking...</p>
               <p class="setting-copy">Dashboard, capture, and agent tools are running on this computer.</p>
+              <p class="setting-copy" id="librarianStatus" data-library-status="unknown">Librarian: checking...</p>
               <details>
                 <summary>Advanced: local address</summary>
                 <p class="setting-copy" id="aboutPort">Local address loading...</p>
@@ -4911,6 +4912,7 @@
       aboutStatus: document.getElementById("aboutStatus"),
       aboutVersion: document.getElementById("aboutVersion"),
       aboutPort: document.getElementById("aboutPort"),
+      librarianStatus: document.getElementById("librarianStatus"),
       sourcesNavCount: document.getElementById("sourcesNavCount"),
       sourceMap: document.getElementById("sourceMap"),
       universalCapture: document.getElementById("universalCapture"),
@@ -8497,6 +8499,40 @@
       return Number.isFinite(n) ? n : fallback;
     }
 
+    // Living Library Phase 2 (2026-09-04): the `library` block of /health.
+    // "Waiting for a client" is the honest state when staged Librarian work
+    // exists and no subscribed client holds a lease -- uoink never runs the
+    // Librarian itself, so the dashboard says so instead of spinning.
+    function librarianStatusText(library) {
+      if (!library || typeof library !== "object") return "Librarian: status unavailable.";
+      const ready = countValue(library.ready, 0);
+      const leased = countValue(library.leased, 0);
+      const applyNote = library.apply_enabled ? "" : " Applying labels is off.";
+      switch (library.status) {
+        case "waiting_for_client":
+          return `Librarian: ${ready} item${ready === 1 ? "" : "s"} staged, waiting for a connected client to claim them.${applyNote}`;
+        case "collecting":
+          return `Librarian: a client is working (${leased} leased, ${ready} still waiting).${applyNote}`;
+        case "idle":
+          return `Librarian: no staged work.${applyNote}`;
+        case "recovery_pending":
+          return "Librarian: recovery pending; the queue is paused until the journal is replayed.";
+        case "unavailable":
+          return "Librarian: not installed in this build.";
+        case "error":
+          return "Librarian: status could not be read; see the helper log.";
+        default:
+          return "Librarian: status unknown.";
+      }
+    }
+
+    function renderLibrarianStatus(library) {
+      if (!els.librarianStatus) return;
+      els.librarianStatus.textContent = librarianStatusText(library);
+      els.librarianStatus.dataset.libraryStatus = (library && library.status) || "unknown";
+      els.librarianStatus.dataset.waitingForClient = library && library.waiting_for_client ? "true" : "false";
+    }
+
     async function refreshHealth() {
       try {
         const res = await fetch("/health");
@@ -8511,11 +8547,13 @@
         els.aboutStatus.querySelector("span:last-child").textContent = ok ? "Uoink ready" : "Uoink offline";
         els.aboutVersion.textContent = `Version: ${data.version || "unknown"}`;
         els.aboutPort.textContent = `http://127.0.0.1:${data.port || 5179}`;
+        renderLibrarianStatus(data.library);
       } catch (_) {
         els.runningPill.classList.add("offline");
         els.runningPill.querySelector("span:last-child").textContent = "Uoink is offline";
         els.aboutStatus.classList.add("offline");
         els.aboutStatus.querySelector("span:last-child").textContent = "Uoink offline";
+        renderLibrarianStatus(null);
       }
     }
 

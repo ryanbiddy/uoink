@@ -51,8 +51,14 @@ aggregate path-integrity counts, a generic path-integrity hint or error, and
 the scheduler `heartbeat` block (UTC timestamps of the last completed pass,
 last successful and failed feed poll, last corpus ingest, tallies, and a
 freshness state; the last poll failure is reported as an exception class name
-or a fixed phrase only). It does not include the helper token or raw
-exception text.
+or a fixed phrase only). Since 2026-09-04 it also includes the Living Library
+`library` block: a coarse work-queue status (`waiting_for_client`,
+`collecting`, `idle`, `recovery_pending`, `unavailable`, `unknown` or
+`error`), ready/leased work-row counts, the run revision, the journal recovery
+state, a service error code and whether the default-off
+`librarian_apply_enabled` setting is on. Counts and states only: no item
+titles, shelf names, evidence text or paths. It does not include the helper
+token or raw exception text.
 
 `/diagnose` is a broader bounded recovery report used by the popup and splash.
 The manifest, OpenAPI, well-known, and suite-discovery routes expose product
@@ -80,6 +86,9 @@ All other helper endpoints require `X-Uoink-Token` (legacy `X-Yoink-Token` accep
 - Settings, AI key testing, and local cost estimates: `GET /settings`, `GET /settings/pricing`, `POST /settings`, `POST /settings/test-key`
 - Local files, folders, Skill prompt, and hook taxonomy: `GET /file`, `GET /skill/system-prompt`, `GET /taxonomy`, `GET /recent`, `GET /open-folder`, `GET /open-index`, `GET /open-prompts`
 - MCP HTTP JSON-RPC helper: `GET /mcp/v1/config`, `GET /mcp/v1/sse`, `POST /mcp/v1`, `POST /mcp/v1/initialize`, `POST /mcp/v1/tools/list`, `POST /mcp/v1/tools/call`
+- Living Library user-intent confirmation: `POST /library/intent`. Mints the five-minute `user_intent_token` that `pin_shelf` and `undo_library_apply` require. Beyond the token it enforces an origin gate (`Origin`, when present, must be a loopback `http` origin on the helper's own port; `Sec-Fetch-Site`, when present, must be `same-origin` or `none`; extension and web origins are refused), strict JSON decoding (no NaN, Infinity or duplicate keys) and a 30 requests/minute limit. No registry tool, MCP client or client-supplied actor string can mint this token; it exists so a pin or undo is a user's own confirmation of a displayed delta.
+
+Requests to `POST /tools/<name>`, `POST /mcp/v1*` and `POST /library/intent` are decoded strictly: NaN, Infinity and duplicate object keys are rejected with HTTP 400 before any argument is used. The six Living Library tools additionally validate every request against their frozen JSON Schema on every transport and return only the contract's error envelope, never raw database exceptions or local paths.
 
 The token is accepted only in the `X-Uoink-Token` header (or the legacy
 `X-Yoink-Token` compatibility header). Query-string token auth is intentionally

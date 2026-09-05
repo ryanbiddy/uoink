@@ -15,6 +15,7 @@ Endpoints:
     GET  /dashboard          helper-served local dashboard
 """
 
+import hashlib
 import json
 import logging
 import math
@@ -582,6 +583,41 @@ def _check_memory_search_rate_limit() -> bool:
     return True
 
 
+# ---- Strict JSON decoding (Living Library Phase 2, 2026-09-04) -------------
+# Python's json module accepts NaN, Infinity and duplicate object keys (the
+# last duplicate silently wins). The Phase 2 contract requires all three to be
+# rejected before any library argument is used as an SQL value or hash key;
+# Handler._read_json_body(strict=True) installs these hooks on the tool
+# transports (/tools/<name>, /mcp/v1*) and the intent route.
+_STRICT_JSON_ROUTE_PREFIXES = ("/tools/", "/mcp/v1")
+LIBRARY_INTENT_ROUTE = "/library/intent"
+
+
+def _reject_json_constant(name: str):
+    raise ValueError(f"{name} is not valid JSON")
+
+
+def _reject_duplicate_json_keys(pairs):
+    out: dict = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError(f"duplicate object key: {key!r}")
+        out[key] = value
+    return out
+
+
+def _strict_json_route(bare: str) -> bool:
+    return bare == LIBRARY_INTENT_ROUTE or bare.startswith(_STRICT_JSON_ROUTE_PREFIXES)
+
+
+def _library_session_hash() -> str:
+    """The dashboard session a user-intent capability binds to. The dashboard
+    has no session of its own beyond holding the per-install token, so the
+    session is that token: rotating it (a reinstall, a token reset) orphans
+    every unconsumed intent. Only a hash ever leaves this process."""
+    return hashlib.sha256(("uoink-dashboard-intent:" + TOKEN).encode("utf-8")).hexdigest()
+
+
 # /queue/* rate limits (Sprint 19 / C4). /queue/status is poll-friendly
 # (60/min) so the popup can refresh a queue banner; the mutating endpoints
 # are 30/min, matching /taxonomy/correct.
@@ -826,6 +862,14 @@ def _default_settings() -> dict:
         # source_type='short_video' ONLY; long-form captures always delete
         # their media regardless of this flag.
         "keep_media": False,
+        # Living Library Phase 2 (2026-09-04, brief reservation 10): whether
+        # apply_reshelving(mode=apply) may write labels. Shipping default OFF
+        # and deliberately absent from the /settings POST field list: turning
+        # it on requires the completed preview, quality and recovery gates
+        # with the evidence recorded, so it is an operator edit of
+        # settings.json, not a dashboard toggle. Preview, claim and submit
+        # work regardless. Clean default-off, no grandfathering.
+        "librarian_apply_enabled": False,
         "updated_at": None,
     }
 
@@ -835,6 +879,8 @@ def _normalize_settings(data: dict) -> dict:
     if isinstance(data, dict):
         clean.update(data)
     clean.pop("anthropic_key", None)
+    # Only the JSON boolean true enables apply; "true", 1 or "yes" stay off.
+    clean["librarian_apply_enabled"] = clean.get("librarian_apply_enabled") is True
     clean["comment_intelligence_enabled"] = bool(
         clean.get("comment_intelligence_enabled")
     )
@@ -1177,6 +1223,8 @@ def _public_settings(data: dict | None = None) -> dict:
         # E-1 (Zing enabler): opt-in short-video media retention, default
         # OFF. Backend setting only for now -- no dashboard control yet.
         "keep_media": bool(data.get("keep_media")),
+        # Living Library Phase 2: read-only here; see _default_settings.
+        "librarian_apply_enabled": data.get("librarian_apply_enabled") is True,
     }
 
 
@@ -1726,6 +1774,37 @@ def _get_index() -> "index.Index":
             if recovered:
                 _index_recovering = True
         return _index_singleton
+
+
+def _library_health_payload() -> dict:
+    """The `library` block of /health (Phase 2 contract, "Dispatch
+    boundaries": no subscribed client running means a visible
+    `waiting_for_client`). Public and polled, so it is cheap and side-effect
+    free: it reads the already-open index handle and never opens one --
+    before main() has opened the index (and in direct Handler tests) it
+    reports `unknown`. It never raises."""
+    settings = _read_settings() or {}
+    apply_enabled = settings.get("librarian_apply_enabled") is True
+    base = {
+        "status": "unknown",
+        "waiting_for_client": False,
+        "ready": 0,
+        "leased": 0,
+        "run_revision": None,
+        "recovery_state": None,
+        "error_code": None,
+        "apply_enabled": apply_enabled,
+        "contract_version": None,
+    }
+    try:
+        tools = _mcp_tools_module()
+        base["contract_version"] = tools.LIBRARY_CONTRACT_VERSION
+        if _index_singleton is None:
+            return base
+        return {**base, **tools.library_status(_index_singleton, apply_enabled=apply_enabled)}
+    except Exception:
+        log.exception("health: library status unavailable")
+        return {**base, "status": "error"}
 
 
 def _as_float(value) -> float | None:
@@ -9406,12 +9485,18 @@ class Handler(BaseHTTPRequestHandler):
             self.status = status
             self.message = message
 
-    def _read_json_body(self) -> dict:
+    def _read_json_body(self, *, strict: bool = False) -> dict:
         # P1-3: bound everything we trust from the network. Without these
         # checks Content-Length was unbounded (memory exhaustion via large
         # POST), Content-Type was unchecked (HTML form posts could trigger
         # mutations), and a JSON array body would blow up later code that
         # called body.get(...).
+        #
+        # strict=True (the tool transports and the library intent route)
+        # additionally refuses NaN/Infinity and duplicate object keys, which
+        # Python's decoder otherwise accepts although RFC 8259 does not. The
+        # Phase 2 contract requires this for every library request; applying
+        # it to the whole tool surface keeps one decoder per transport.
         ctype = (self.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
         if ctype != "application/json":
             raise Handler._BodyError(415, "Content-Type must be application/json")
@@ -9425,8 +9510,14 @@ class Handler(BaseHTTPRequestHandler):
             raise Handler._BodyError(413, f"Body too large (>{MAX_BODY_BYTES} bytes)")
         raw = self.rfile.read(length) if length else b"{}"
         try:
-            parsed = json.loads(raw.decode("utf-8") or "{}")
-        except (UnicodeDecodeError, json.JSONDecodeError) as e:
+            text = raw.decode("utf-8") or "{}"
+            if strict:
+                parsed = json.loads(text, parse_constant=_reject_json_constant,
+                                    object_pairs_hook=_reject_duplicate_json_keys)
+            else:
+                parsed = json.loads(text)
+        except (UnicodeDecodeError, ValueError) as e:
+            # json.JSONDecodeError is a ValueError; so are the strict hooks'.
             raise Handler._BodyError(400, f"Bad JSON: {e}")
         if not isinstance(parsed, dict):
             raise Handler._BodyError(400, "Top-level JSON must be an object")
@@ -9488,6 +9579,12 @@ class Handler(BaseHTTPRequestHandler):
                 # corpus_path (cached ~60s). "ok": true above means the
                 # process answers; a healthy install also needs this ok.
                 "path_integrity": _path_integrity_status(),
+                # Living Library Phase 2: {status, waiting_for_client, ready,
+                # leased, run_revision, recovery_state, error_code,
+                # apply_enabled, contract_version}. `waiting_for_client`
+                # means staged Librarian work exists and no client holds a
+                # lease; the server never runs the Librarian itself.
+                "library": _library_health_payload(),
             })
         if bare == "/index/backfill-status":
             # Public, read-only progress counts (same posture as /health) so
@@ -12796,11 +12893,22 @@ class Handler(BaseHTTPRequestHandler):
         if name not in tools.TOOL_REGISTRY:
             return self._send_json(404, {"ok": False,
                                          "error": "tool not found"})
-        validation_error = openapi_bridge.validate_arguments(
-            body, tools.TOOL_REGISTRY[name].input_schema)
-        if validation_error:
-            return self._send_json(400, {"ok": False,
-                                         "error": validation_error})
+        if name in tools.LIBRARY_TOOL_NAMES:
+            # Living Library Phase 2: the frozen schemas use $ref/oneOf/
+            # const/pattern, which openapi_bridge.validate_arguments skips.
+            # The adapters' validator is the common input contract on every
+            # transport; run it here so the HTTP 400 body is the same
+            # contract envelope /mcp/v1 and the registry return (there at
+            # HTTP 200 inside the JSON-RPC result).
+            schema_error = tools.library_validate_arguments(name, body)
+            if schema_error is not None:
+                return self._send_json(400, tools.library_invalid_request(schema_error))
+        else:
+            validation_error = openapi_bridge.validate_arguments(
+                body, tools.TOOL_REGISTRY[name].input_schema)
+            if validation_error:
+                return self._send_json(400, {"ok": False,
+                                             "error": validation_error})
         try:
             result = tools.call_tool(name, body if isinstance(body, dict) else {})
         except Exception:
@@ -12812,6 +12920,66 @@ class Handler(BaseHTTPRequestHandler):
         if isinstance(result, dict) and result.get("ok") is False:
             return self._send_json(200, result)
         return self._send_json(200, {"ok": True, "result": result})
+
+    # ---- Living Library: user-intent confirmation (Phase 2, 2026-09-04) ----
+    def _is_dashboard_origin(self) -> bool:
+        """CSRF/origin gate for dashboard confirmation routes. The request
+        must come from the helper's own page: Origin, when present, must be
+        a loopback http origin on the bound port, and Sec-Fetch-Site, when
+        present, must be same-origin or none. Extension and web origins are
+        refused even with a valid token -- a pin or undo is a user's own
+        decision made on a displayed delta, not something a page script or
+        an agent may confirm on the user's behalf. Absent Origin is accepted
+        (same-process WebView fetches), behind the Host and token gates."""
+        origin = (self.headers.get("Origin") or "").strip()
+        if origin:
+            try:
+                parsed = urlparse(origin.lower())
+                hostname = parsed.hostname
+                port = parsed.port
+            except ValueError:
+                return False
+            if parsed.scheme != "http" or hostname not in ALLOWED_HOST_NAMES:
+                return False
+            try:
+                bound_port = self.server.server_address[1]
+            except Exception:
+                bound_port = PORT
+            if (port or 80) != bound_port:
+                return False
+        site = (self.headers.get("Sec-Fetch-Site") or "").strip().lower()
+        if site and site not in ("same-origin", "none"):
+            return False
+        return True
+
+    def _handle_library_intent(self, body: dict):
+        """POST /library/intent -- mint a user_intent_token for one pin/move/
+        unpin or undo (Phase 2 contract, "Pins and authoritative recovery";
+        brief reservation 8). Token gate already cleared by do_POST; this adds
+        the origin gate and a rate limit, then hands the confirmation body to
+        uoink_mcp_tools.library_mint_user_intent, which validates the canonical
+        operation against the frozen tool schema and asks the service to mint,
+        store and return the five-minute capability bound to that operation,
+        the expected revision and this dashboard session. No registry tool
+        can reach this route's authority."""
+        if not self._is_dashboard_origin():
+            log.info("POST %s rejected (origin=%r, sec-fetch-site=%r)",
+                     LIBRARY_INTENT_ROUTE, self.headers.get("Origin"),
+                     self.headers.get("Sec-Fetch-Site"))
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        tools = _mcp_tools_module()
+        try:
+            result = tools.library_mint_user_intent(
+                body, session_hash=_library_session_hash())
+        except Exception:
+            log.exception("%s failed", LIBRARY_INTENT_ROUTE)
+            return self._send_json(500, {"ok": False, "error": "intent minting failed"})
+        code = (result.get("error") or {}).get("code") if result.get("ok") is False else None
+        if code == "invalid_request":
+            return self._send_json(400, result)
+        if code == "rate_limited":
+            return self._send_json(429, result)
+        return self._send_json(200, result)
 
     def _handle_sources_manifest(self):
         return self._send_json(
@@ -13115,12 +13283,14 @@ class Handler(BaseHTTPRequestHandler):
         # the raw body itself.
         if self.path.split("?", 1)[0] == "/images":
             return self._handle_create_image()
+        bare = self.path.split("?", 1)[0]
         try:
-            body = self._read_json_body()
+            body = self._read_json_body(strict=_strict_json_route(bare))
         except Handler._BodyError as e:
             return self._send_json(e.status, {"ok": False, "error": e.message})
 
-        bare = self.path.split("?", 1)[0]
+        if bare == LIBRARY_INTENT_ROUTE:
+            return self._handle_library_intent(body)
         if bare == "/settings":
             return self._handle_settings_post(body)
         if bare == "/settings/output-folder/pick":

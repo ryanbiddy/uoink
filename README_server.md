@@ -109,6 +109,17 @@ models, output-root recovery, and corpus state. The response shape is:
     "ok": true,
     "checked": 0,
     "missing": 0
+  },
+  "library": {
+    "status": "idle",
+    "waiting_for_client": false,
+    "ready": 0,
+    "leased": 0,
+    "run_revision": null,
+    "recovery_state": null,
+    "error_code": null,
+    "apply_enabled": false,
+    "contract_version": "phase2-v1-2026-09-04"
   }
 }
 ```
@@ -116,6 +127,18 @@ models, output-root recovery, and corpus state. The response shape is:
 `path_integrity` always contains `ok`, `checked`, and `missing`. When indexed
 files are missing it also contains a human-readable `hint`; if the index scan
 itself fails it instead contains an `error` string.
+
+`library` is the Living Library work-queue status (Phase 2 contract
+`phase2-v1-2026-09-04`). `status` is one of `waiting_for_client` (staged
+Librarian work exists and no connected client holds a lease; the helper never
+runs the Librarian itself), `collecting` (a client holds leases), `idle` (no
+staged work), `recovery_pending` (the authoritative journal must be replayed
+before the queue mutates again), `unavailable` (the `library_work` service is
+not installed in this build), `unknown` (the index has not been opened yet) or
+`error` (the status read failed; see `server.log`). `ready` and `leased` are
+work-row counts, `run_revision` is the current run's revision or `null`, and
+`apply_enabled` mirrors the default-off `librarian_apply_enabled` setting.
+Counts only; no item titles or evidence text are disclosed.
 
 `migration_version` is the newest schema migration opened by this helper.
 `migration_pending` becomes `true` if newer migration files appear while it is
