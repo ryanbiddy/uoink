@@ -202,6 +202,8 @@ Success response: HTTP 200
     "display_model": "Claude Haiku 4.5",
     "input_per_million": 1.0,
     "output_per_million": 5.0,
+    "cache_read_per_million": 0.1,
+    "cache_create_per_million": 1.25,
     "est_tokens": {
       "ci": { "input": 5000, "output": 500 },
       "hook": { "input": 1200, "output": 80 }
@@ -215,12 +217,25 @@ Success response: HTTP 200
       "month": "2026-09",
       "by_feature": {
         "hook_type": {
-          "calls": 41, "input_tokens": 48200, "output_tokens": 3100,
-          "cache_read": 0, "cache_create": 0, "usd": 0.0637,
+          "calls": 41, "unavailable_calls": 1,
+          "input_tokens": 48200, "output_tokens": 3100,
+          "cache_read": 1000, "cache_create": 0, "usd": 0.0638,
           "models": ["claude-haiku-4-5-20251001"]
         }
       },
-      "total_usd": 0.0637
+      "total_usd": 0.0638,
+      "unavailable_calls": 1,
+      "estimate": true,
+      "rates": {
+        "input_per_million": 1.0, "output_per_million": 5.0,
+        "cache_read_per_million": 0.1, "cache_create_per_million": 1.25,
+        "source": "https://docs.claude.com/en/docs/about-claude/pricing",
+        "source_checked": "2026-09-04"
+      },
+      "status": {
+        "ok": true, "write_failures": 0, "last_error": null,
+        "last_failure_at": null, "last_failed_feature": null
+      }
     },
     "source": "https://docs.claude.com/en/docs/about-claude/pricing",
     "source_checked": "2026-09-04"
@@ -232,10 +247,28 @@ Success response: HTTP 200
 `actual` is the meter: the `usage` block of every Comment Intelligence, Hook
 Type, and entity-extraction response is accumulated into the local index
 (`memory_layer` rows keyed `usage.anthropic.<feature>.<model>.<YYYY-MM>`), one
-row per feature, model, and month, and priced with the same constants. The
-4-token key probe in `POST /settings/test-key` is excluded on purpose. When the
-index cannot be read, `actual.by_feature` is empty and `actual.error` is
-`usage unavailable`.
+row per feature, model, and month. The 4-token key probe in
+`POST /settings/test-key` is excluded on purpose.
+
+The meter hides nothing (run F acceptance, case 3, 2026-09-04):
+
+- `usd` and `total_usd` are estimates (`estimate: true`): list price applied to
+  the reported counters, including cache reads and cache writes, never an
+  invoice. `rates` is the table used, with the page it was read from and the
+  date it was checked; the same record is stored next to every bucket's
+  `est_usd`. Cache writes are priced at the 5-minute-TTL rate because the
+  response counter does not distinguish the 1-hour TTL.
+- `unavailable_calls` (per feature, and the month total) counts successful
+  responses whose `usage` block was missing, malformed, or all-zero. Those
+  calls happened and are not in `calls`, `usd`, or the token counters.
+- `status` reports meter writes that failed since the helper started
+  (`write_failures`, the last error type, time, and feature). `ok` is `false`
+  as soon as one write was lost, so an empty meter cannot be read as
+  "nothing was spent". Successful inference and meter failure are reported
+  separately: the call's own result is never affected.
+- When the index itself cannot be read, `by_feature` is empty,
+  `unavailable_calls` is `null` (unknown, not zero), `status` is still
+  present, and `error` is `usage unavailable`.
 
 ### GET /reliability/model/status
 

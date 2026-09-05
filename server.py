@@ -455,6 +455,26 @@ ANTHROPIC_VERSION = "2023-06-01"
 # Claude Haiku 4.5 is still $1 / $5 per MTok; batch 50%; cache read 0.1×.
 ANTHROPIC_PRICING_INPUT_PER_MILLION = 1.00
 ANTHROPIC_PRICING_OUTPUT_PER_MILLION = 5.00
+# Prompt-caching rates from the same page and date, as multiples of the
+# input rate: a cache read is 0.1×; a cache write is 1.25× for the 5-minute
+# TTL and 2× for the 1-hour TTL. The response's cache_creation_input_tokens
+# counter does not say which TTL wrote it, so the meter prices every cache
+# write at the 5-minute rate and labels the total an estimate (run F
+# acceptance, case 3: cache-only usage used to price to $0.0).
+ANTHROPIC_PRICING_CACHE_READ_PER_MILLION = 0.10
+ANTHROPIC_PRICING_CACHE_CREATE_PER_MILLION = 1.25
+ANTHROPIC_PRICING_SOURCE = "https://docs.claude.com/en/docs/about-claude/pricing"
+ANTHROPIC_PRICING_SOURCE_CHECKED = "2026-09-04"
+# The rate table the meter stores next to every estimate (usage_meter
+# ``rates``): the four per-million prices and where/when they were read.
+ANTHROPIC_RATES = {
+    "input_per_million": ANTHROPIC_PRICING_INPUT_PER_MILLION,
+    "output_per_million": ANTHROPIC_PRICING_OUTPUT_PER_MILLION,
+    "cache_read_per_million": ANTHROPIC_PRICING_CACHE_READ_PER_MILLION,
+    "cache_create_per_million": ANTHROPIC_PRICING_CACHE_CREATE_PER_MILLION,
+    "source": ANTHROPIC_PRICING_SOURCE,
+    "source_checked": ANTHROPIC_PRICING_SOURCE_CHECKED,
+}
 ANTHROPIC_CI_EST_INPUT_TOKENS = 5_000
 ANTHROPIC_CI_EST_OUTPUT_TOKENS = 500
 ANTHROPIC_HOOK_EST_INPUT_TOKENS = 1_200
@@ -1171,32 +1191,50 @@ def _anthropic_estimated_cost(input_tokens: int, output_tokens: int) -> float:
 def _record_anthropic_usage(feature: str, resp: dict) -> None:
     """D-17 meter: accumulate the real ``usage`` block of one Messages
     response into the KV rollup (``usage_meter``). Best-effort -- metering
-    must never fail a call that already succeeded. Call sites: Comment
-    Intelligence, Hook Type, entity extraction (the 4-token key probe is
-    excluded on purpose; it is noise in the meter)."""
+    must never fail a call that already succeeded -- but never silent: a
+    response without usage is counted as an unavailable call, and a write
+    that cannot happen (no index, locked index) lands in the meter status
+    the pricing payload shows. Call sites: Comment Intelligence, Hook
+    Type, entity extraction (the 4-token key probe is excluded on purpose;
+    it is noise in the meter)."""
+    try:
+        idx = _get_index()
+    except Exception as exc:
+        usage_meter.note_write_failure(feature, exc)
+        log.warning("usage meter: %s not recorded, index unavailable (%s)",
+                    feature, type(exc).__name__)
+        return
     try:
         usage_meter.record_usage(
-            _get_index(), feature, resp,
+            idx, feature, resp,
             default_model=ANTHROPIC_MODEL,
-            price=_anthropic_estimated_cost,
+            rates=ANTHROPIC_RATES,
         )
-    except Exception as exc:
+    except Exception as exc:  # record_usage never raises; belt and braces
+        usage_meter.note_write_failure(feature, exc)
         log.warning("usage meter: %s not recorded (%s)",
                     feature, type(exc).__name__)
 
 
 def _anthropic_actual_usage_payload() -> dict:
-    """The ``actual`` block of the pricing payload: this month's measured
-    usage per feature. Unavailable (never raising) when the index cannot
-    be read."""
+    """The ``actual`` block of the pricing payload: this month's metered
+    usage per feature, priced as an estimate with ``ANTHROPIC_RATES`` (rate
+    provenance included), plus ``unavailable_calls`` (responses whose usage
+    could not be read) and the meter write-failure ``status``. Never
+    raises: when the index cannot be read, ``error`` says so and
+    ``unavailable_calls`` is None rather than a reassuring 0."""
     try:
         return usage_meter.month_summary(
-            _get_index(), price=_anthropic_estimated_cost)
+            _get_index(), rates=ANTHROPIC_RATES)
     except Exception as exc:
         log.warning("usage meter: summary unavailable (%s)",
                     type(exc).__name__)
         return {"month": usage_meter.month_of(), "by_feature": {},
-                "total_usd": 0.0, "error": "usage unavailable"}
+                "total_usd": 0.0, "unavailable_calls": None,
+                "estimate": True,
+                "rates": usage_meter.rates_record(ANTHROPIC_RATES),
+                "status": usage_meter.meter_status(),
+                "error": "usage unavailable"}
 
 
 def _anthropic_pricing_payload() -> dict:
@@ -1213,6 +1251,8 @@ def _anthropic_pricing_payload() -> dict:
         "display_model": "Claude Haiku 4.5",
         "input_per_million": ANTHROPIC_PRICING_INPUT_PER_MILLION,
         "output_per_million": ANTHROPIC_PRICING_OUTPUT_PER_MILLION,
+        "cache_read_per_million": ANTHROPIC_PRICING_CACHE_READ_PER_MILLION,
+        "cache_create_per_million": ANTHROPIC_PRICING_CACHE_CREATE_PER_MILLION,
         "est_tokens": {
             "ci": {
                 "input": ANTHROPIC_CI_EST_INPUT_TOKENS,
@@ -1228,12 +1268,13 @@ def _anthropic_pricing_payload() -> dict:
             "hook": hook,
             "both": round(ci + hook, 6),
         },
-        # D-17 "metered": what calls *did* cost this month, from the real
-        # usage blocks, priced with the constants above. Estimates stay
-        # estimates; this is the meter.
+        # D-17 "metered": what calls *did* use this month, from the real
+        # usage blocks, priced as an estimate with ANTHROPIC_RATES (all
+        # four counters, provenance attached). Missing usage and lost
+        # writes are visible inside it, not folded into a zero.
         "actual": _anthropic_actual_usage_payload(),
-        "source": "https://docs.claude.com/en/docs/about-claude/pricing",
-        "source_checked": "2026-09-04",
+        "source": ANTHROPIC_PRICING_SOURCE,
+        "source_checked": ANTHROPIC_PRICING_SOURCE_CHECKED,
     }
 
 
