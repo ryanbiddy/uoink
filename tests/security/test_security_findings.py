@@ -73,14 +73,11 @@ def test_sec_01_http_enclosure_url_follows_double_dash(
     assert args[-2] == "--"
 
 
-@pytest.mark.xfail(
-    reason="SEC-02: recall_hook lacks untrusted-data boundary and preface (pending Claude fix)",
-    strict=True,
-)
 def test_sec_02_recall_hook_unfenced_injection(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """SEC-02: recall_hook.main() must wrap returned hits in an untrusted-data boundary."""
+    """SEC-02 (fixed 2026-09-04, run E): recall_hook.main() wraps returned
+    hits in an untrusted-data boundary with a data-not-instructions preface."""
     import importlib.util
     import io
     spec = importlib.util.spec_from_file_location(
@@ -147,23 +144,25 @@ def test_sec_02_recall_hook_unfenced_injection(
     ), "Missing data-not-instructions preface in recall hook output"
 
 
-@pytest.mark.xfail(
-    reason="SEC-04: entity_extraction_enabled flag and spawn gate pending Claude D-17 implementation",
-    strict=True,
-)
 def test_sec_04_entity_extraction_unmetered_and_unflagged(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """SEC-04: entity extraction must have a named default-off flag in settings
-    and must not spawn background threads without explicit user opt-in."""
+    """SEC-04 (fixed 2026-09-04, run E / D-17): entity extraction has a named
+    default-off flag in settings and never spawns a background thread on
+    key presence alone."""
     defaults = server._default_settings()
     # 1. Feature flag must be defined and default to False (clean default-off)
     assert "entity_extraction_enabled" in defaults, "entity_extraction_enabled missing from default settings"
     assert defaults["entity_extraction_enabled"] is False, "entity_extraction_enabled must default to False"
 
-    # 2. When Anthropic API key is configured, the spawn gate at server.py:3778
-    # must check the entity_extraction_enabled setting and refuse to spawn if disabled.
+    # 2. When an Anthropic API key is configured and every flag is off, the
+    # spawn gate (_start_entity_extraction_thread) must refuse to spawn.
+    # The gate reads the saved key through _get_saved_anthropic_key and the
+    # flag through _read_settings; both are faked here so no real settings
+    # file or credential store is consulted.
     monkeypatch.setattr(server, "_saved_anthropic_key", lambda: "sk-ant-test-fake-key")
+    monkeypatch.setattr(server, "_get_saved_anthropic_key", lambda: "sk-ant-test-fake-key")
+    monkeypatch.setattr(server, "_read_settings", lambda: server._default_settings())
     sidecar = {"video_id": "test-vid-123"}
     t = server._start_entity_extraction_thread(tmp_path, "test-vid-123", sidecar)
     assert t is None, "entity extraction thread spawned without explicit opt-in flag"

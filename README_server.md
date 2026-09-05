@@ -88,6 +88,18 @@ models, output-root recovery, and corpus state. The response shape is:
   "migration_version": 25,
   "migration_pending": false,
   "last_successful_tick_at": "2026-09-04T16:30:00Z",
+  "heartbeat": {
+    "last_tick_completed_at": "2026-09-04T16:30:00Z",
+    "last_successful_tick_at": "2026-09-04T16:30:00Z",
+    "last_successful_poll_at": "2026-09-04T16:29:58Z",
+    "last_failed_poll_at": null,
+    "last_poll_error": null,
+    "last_ingest_completed_at": null,
+    "last_tick": {"ok": true, "polls": 1, "failed_polls": 0},
+    "counts": {"ticks": 12, "polls_ok": 3, "polls_failed": 0, "ingests": 0},
+    "tick_interval_sec": 30,
+    "freshness": {"state": "fresh", "age_sec": 4.0, "stale_after_sec": 300}
+  },
   "whisperx_available": false,
   "whisper_model": "base",
   "whisperx_model_loaded": false,
@@ -108,7 +120,20 @@ itself fails it instead contains an `error` string.
 `migration_version` is the newest schema migration opened by this helper.
 `migration_pending` becomes `true` if newer migration files appear while it is
 running. `last_successful_tick_at` is an RFC 3339 UTC timestamp; it is `null`
-until the background source scheduler completes its first pass.
+until the background source scheduler completes a pass in which no feed poll
+failed.
+
+`heartbeat` separates four things the old single timestamp conflated:
+`last_tick_completed_at` (the scheduler loop finished a pass, any outcome),
+`last_successful_tick_at` (a pass with zero failed polls),
+`last_successful_poll_at` (one feed poll returned ok) and
+`last_ingest_completed_at` (one episode was published into the corpus by the
+watch pipeline). A failed poll stamps `last_failed_poll_at` and
+`last_poll_error` and never advances a success stamp. `freshness.state` is
+`never` before the first completed pass, `fresh` while the last pass completed
+within `stale_after_sec`, and `stale` otherwise; `stale` means the scheduler
+thread is dead or hung even though the HTTP process still answers.
+`uoink doctor` reports the same block under `heartbeat` and fails on `stale`.
 
 ### `POST /extract`
 

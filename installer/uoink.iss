@@ -106,6 +106,7 @@ Source: "staging\index.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\clips.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\provenance.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_cards.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\usage_meter.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\scripts\install-watchdog.ps1"; DestDir: "{app}\scripts"; Flags: ignoreversion

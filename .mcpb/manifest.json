@@ -77,6 +77,14 @@
       "description": "Keyword search across saved Uoink markdown corpora."
     },
     {
+      "name": "search_clips",
+      "description": "Full-text search over transcript windows from saved uoinks, each hit with a deep link to the moment."
+    },
+    {
+      "name": "get_evidence_card",
+      "description": "Return an evidence card for one saved uoink: metadata, source URL, summary hint, and its most quotable clips with deep links."
+    },
+    {
       "name": "get_uoink_corpus",
       "description": "Return the full markdown corpus for a saved uoink by slug."
     },

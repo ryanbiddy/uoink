@@ -84,6 +84,7 @@ import workspaces  # noqa: E402  -- v3 P4 build-workspace state + assembler
 import claims  # noqa: E402  -- v3 A2 claim extraction + verification (Loki-inspired)
 import scripts as p5_scripts  # noqa: E402  -- v3 P5 script studio backend
 import memory_layer  # noqa: E402  -- v2.5 S4 markdown taste/user memory
+import usage_meter  # noqa: E402  -- D-17 real model-usage meter (KV rollup)
 import corpus_contract  # noqa: E402  -- versioned read boundary for consumers
 import corpus_provider  # noqa: E402  -- Uoink provider for corpus contract v1
 import podcasts  # noqa: E402  -- v3.1 podcast RSS feed registry + polling
@@ -730,6 +731,11 @@ def _default_settings() -> dict:
     return {
         "comment_intelligence_enabled": False,
         "hook_type_enabled": False,
+        # D-17 (2026-09-04): entity extraction is the third background model
+        # call and gets the same named, default-off flag as its siblings.
+        # Clean default-off, no grandfathering: an existing settings.json
+        # without this key resolves to False on the next helper start.
+        "entity_extraction_enabled": False,
         "smart_screenshot_picker_enabled": False,
         "clipboard_screenshot_cap": CLIPBOARD_SCREENSHOT_CAP_DEFAULT,
         "transcript_reliability_auto_check": False,
@@ -813,6 +819,9 @@ def _normalize_settings(data: dict) -> dict:
         clean.get("comment_intelligence_enabled")
     )
     clean["hook_type_enabled"] = bool(clean.get("hook_type_enabled"))
+    clean["entity_extraction_enabled"] = bool(
+        clean.get("entity_extraction_enabled")
+    )
     clean["smart_screenshot_picker_enabled"] = bool(
         clean.get("smart_screenshot_picker_enabled")
     )
@@ -1075,6 +1084,9 @@ def _public_settings(data: dict | None = None) -> dict:
     return {
         "comment_intelligence_enabled": bool(data.get("comment_intelligence_enabled")),
         "hook_type_enabled": bool(data.get("hook_type_enabled")),
+        "entity_extraction_enabled": bool(
+            data.get("entity_extraction_enabled")
+        ),
         "smart_screenshot_picker_enabled": bool(
             data.get("smart_screenshot_picker_enabled")
         ),
@@ -1156,6 +1168,37 @@ def _anthropic_estimated_cost(input_tokens: int, output_tokens: int) -> float:
     )
 
 
+def _record_anthropic_usage(feature: str, resp: dict) -> None:
+    """D-17 meter: accumulate the real ``usage`` block of one Messages
+    response into the KV rollup (``usage_meter``). Best-effort -- metering
+    must never fail a call that already succeeded. Call sites: Comment
+    Intelligence, Hook Type, entity extraction (the 4-token key probe is
+    excluded on purpose; it is noise in the meter)."""
+    try:
+        usage_meter.record_usage(
+            _get_index(), feature, resp,
+            default_model=ANTHROPIC_MODEL,
+            price=_anthropic_estimated_cost,
+        )
+    except Exception as exc:
+        log.warning("usage meter: %s not recorded (%s)",
+                    feature, type(exc).__name__)
+
+
+def _anthropic_actual_usage_payload() -> dict:
+    """The ``actual`` block of the pricing payload: this month's measured
+    usage per feature. Unavailable (never raising) when the index cannot
+    be read."""
+    try:
+        return usage_meter.month_summary(
+            _get_index(), price=_anthropic_estimated_cost)
+    except Exception as exc:
+        log.warning("usage meter: summary unavailable (%s)",
+                    type(exc).__name__)
+        return {"month": usage_meter.month_of(), "by_feature": {},
+                "total_usd": 0.0, "error": "usage unavailable"}
+
+
 def _anthropic_pricing_payload() -> dict:
     ci = _anthropic_estimated_cost(
         ANTHROPIC_CI_EST_INPUT_TOKENS,
@@ -1185,6 +1228,10 @@ def _anthropic_pricing_payload() -> dict:
             "hook": hook,
             "both": round(ci + hook, 6),
         },
+        # D-17 "metered": what calls *did* cost this month, from the real
+        # usage blocks, priced with the constants above. Estimates stay
+        # estimates; this is the meter.
+        "actual": _anthropic_actual_usage_payload(),
         "source": "https://docs.claude.com/en/docs/about-claude/pricing",
         "source_checked": "2026-09-04",
     }
@@ -1583,9 +1630,42 @@ _index_recovering = False
 # free; main() replaces it with the version actually opened on disk.
 _active_migration_version = index.latest_schema_version()
 
-# Updated only after the podcast/watch scheduler completes a whole pass. A
-# null value means no successful pass has happened since this process started.
+# Updated only after the podcast/watch scheduler completes a whole pass in
+# which no feed poll failed (heartbeat semantics, Astra finding 6,
+# 2026-09-04: a pass whose every poll raised used to advance this stamp). A
+# null value means no clean pass has happened since this process started.
 _last_successful_tick_at: str | None = None
+
+# Heartbeat: four separate stamps, because "the loop finished" is not "the
+# feeds were polled" is not "an episode landed in the corpus".
+#   last_tick_completed_at    the scheduler loop finished a pass (any outcome)
+#   last_successful_tick_at   (above) a pass finished with zero failed polls
+#   last_successful_poll_at   one feed poll returned ok=True
+#   last_failed_poll_at       one feed poll returned ok=False or raised
+#   last_ingest_completed_at  one episode was published into the corpus
+# Freshness is derived from last_tick_completed_at against the tick interval
+# so a dead or hung scheduler thread shows up as "stale" while the HTTP
+# process keeps answering /health. Guarded by _heartbeat_lock; every writer
+# is a background thread.
+_heartbeat_lock = threading.Lock()
+_heartbeat: dict = {
+    "last_tick_completed_at": None,
+    "last_tick_ok": None,
+    "last_tick_polls": 0,
+    "last_tick_failed_polls": 0,
+    "last_successful_poll_at": None,
+    "last_failed_poll_at": None,
+    "last_poll_error": None,
+    "last_ingest_completed_at": None,
+    "ticks_completed": 0,
+    "polls_ok": 0,
+    "polls_failed": 0,
+    "ingests_completed": 0,
+}
+# A pass that has not completed within this many seconds means the scheduler
+# thread is dead, hung, or starved. Three tick intervals would be 90 s, which a
+# slow feed set can legitimately exceed; five minutes is the operational bound.
+_HEARTBEAT_STALE_AFTER_SEC = 300
 
 # Backfill scan progress, polled via GET /index/backfill-status.
 _backfill_state = {"state": "idle", "current": 0, "total": 0}
@@ -3002,6 +3082,7 @@ def analyze_comments(comments: list[dict], *, api_key: str | None = None) -> dic
     )
     try:
         resp = _anthropic_messages(key, system=system, user=user, max_tokens=1200)
+        _record_anthropic_usage("comment_intelligence", resp)
         return _normalize_comment_analysis(
             _extract_json_object(_anthropic_text(resp), label="Comment Intelligence")
         )
@@ -3180,6 +3261,7 @@ def analyze_hook_type(context: dict, *, api_key: str | None = None) -> dict:
     )
     try:
         resp = _anthropic_messages(key, system=system, user=user, max_tokens=400)
+        _record_anthropic_usage("hook_type", resp)
         text = _anthropic_text(resp)
         analysis = _normalize_hook_analysis(
             _extract_json_object(text, label="Hook Type")
@@ -3716,6 +3798,7 @@ def extract_entities(transcript: str, *, title: str = "", channel: str = "",
     )
     try:
         resp = _anthropic_messages(key, system=system, user=user, max_tokens=2500)
+        _record_anthropic_usage("entity_extraction", resp)
         data = _extract_json_object(_anthropic_text(resp), label="Entity extraction")
     except AnthropicAPIError as e:
         if e.status == 401:
@@ -3778,10 +3861,14 @@ def _extract_entities(output_folder: Path, video_id: str, sidecar: dict) -> None
 def _start_entity_extraction_thread(output_folder: Path,
                                     video_id: str | None,
                                     sidecar: dict) -> threading.Thread | None:
-    """Spawn the entity extraction worker. Returns None (skips silently) when
-    no Anthropic key is configured or the video has no id -- mirrors the
-    Hook Type / Comment Intelligence skip pattern."""
-    if not _saved_anthropic_key() or not (video_id or "").strip():
+    """Spawn the entity extraction worker. Returns None (skips silently)
+    unless ``entity_extraction_enabled`` is on AND a valid Anthropic key is
+    saved AND the video has an id -- the same gate Hook Type / Comment
+    Intelligence use. D-17: the flag belongs on the *spawn*, which is what
+    makes the work automatic; ``extract_entities`` itself stays key-gated so
+    a user-initiated tool call can still run it."""
+    if (not _anthropic_key_for_feature("entity_extraction_enabled")
+            or not (video_id or "").strip()):
         return None
     t = threading.Thread(
         target=_extract_entities,
@@ -4503,10 +4590,13 @@ def _run_extraction(url: str, interval: int, output_folder: Path,
             "comment_intelligence_status": "not_run",
             "comment_intelligence_error": None,
             # Sprint 16: entity extraction runs in the background once the
-            # row is indexed. "pending" when a key is set, "skipped"
+            # row is indexed. D-17: "pending" only when the flag is on and
+            # a key is set (the same gate the spawn reads), "skipped"
             # otherwise; the worker flips it to completed / failed.
             "entity_extraction_status": (
-                "pending" if _saved_anthropic_key() else "skipped"
+                "pending"
+                if _anthropic_key_for_feature("entity_extraction_enabled")
+                else "skipped"
             ),
             "entity_extraction_error": None,
         }
@@ -6679,6 +6769,7 @@ def _podcast_transcription_worker() -> None:
                 try:
                     corpus_result = podcasts.episode_to_corpus(
                         _get_index(), episode_id, data_root=DATA_ROOT)
+                    _heartbeat_note_ingest()
                     maybe_toast(
                         "Podcast added to Uoink",
                         f"{job.get('title') or 'A new episode'} is ready in your library.")
@@ -6860,6 +6951,7 @@ def _auto_ingest_podcast_feed(feed_id: int) -> list[dict]:
             try:
                 published = podcasts.episode_to_corpus(
                     _get_index(), episode_id, data_root=DATA_ROOT)
+                _heartbeat_note_ingest()
                 maybe_toast(
                     "Podcast added to Uoink",
                     f"{episode.get('title') or 'A new episode'} is ready in your library.")
@@ -6928,19 +7020,134 @@ def _poll_podcast_feed_for_watch(feed_id: int) -> dict:
     return result
 
 
-def _podcast_feed_scheduler_tick() -> list[dict]:
-    """Poll every enabled feed whose configured interval has elapsed."""
+def _heartbeat_note_poll(ok: bool, *, error: str | None = None) -> None:
+    """One feed poll finished. A failure never advances the success stamp.
+    ``error`` is a short *kind* (an exception class name or a fixed
+    phrase), never raw exception text: /health is public and the security
+    model promises raw detail stays in server.log."""
+    now = suite_service.utc_now()
+    with _heartbeat_lock:
+        if ok:
+            _heartbeat["last_successful_poll_at"] = now
+            _heartbeat["polls_ok"] += 1
+        else:
+            _heartbeat["last_failed_poll_at"] = now
+            _heartbeat["last_poll_error"] = re.sub(
+                r"[^A-Za-z0-9_ =.-]", "", str(error or "poll failed"))[:80]
+            _heartbeat["polls_failed"] += 1
+
+
+def _heartbeat_note_ingest() -> None:
+    """One episode was published into the corpus (auto or manual)."""
+    now = suite_service.utc_now()
+    with _heartbeat_lock:
+        _heartbeat["last_ingest_completed_at"] = now
+        _heartbeat["ingests_completed"] += 1
+
+
+def _heartbeat_note_tick(polls: int, failed_polls: int) -> str:
+    """The scheduler finished one pass. Only a pass with zero failed polls
+    advances ``_last_successful_tick_at``; every pass advances
+    ``last_tick_completed_at`` (that is the liveness signal)."""
     global _last_successful_tick_at
+    now = suite_service.utc_now()
+    with _heartbeat_lock:
+        _heartbeat["last_tick_completed_at"] = now
+        _heartbeat["last_tick_ok"] = failed_polls == 0
+        _heartbeat["last_tick_polls"] = int(polls)
+        _heartbeat["last_tick_failed_polls"] = int(failed_polls)
+        _heartbeat["ticks_completed"] += 1
+        if failed_polls == 0:
+            _last_successful_tick_at = now
+    return now
+
+
+def _parse_utc_stamp(value) -> datetime | None:
+    if not value:
+        return None
+    text = str(value).strip()
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    try:
+        parsed = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        from datetime import timezone as _tz
+        parsed = parsed.replace(tzinfo=_tz.utc)
+    return parsed
+
+
+def _heartbeat_payload(now: str | None = None) -> dict:
+    """The ``heartbeat`` block of /health (and of ``--doctor``, which reads
+    the same fields off the helper). ``freshness.state`` is ``never`` before
+    the first completed pass, ``fresh`` while the last pass completed within
+    ``stale_after_sec``, and ``stale`` otherwise -- a stale scheduler in a
+    process that still answers /health is exactly the failure the old
+    single timestamp hid."""
+    with _heartbeat_lock:
+        snapshot = dict(_heartbeat)
+    last = _parse_utc_stamp(snapshot["last_tick_completed_at"])
+    current = _parse_utc_stamp(now or suite_service.utc_now())
+    if last is None or current is None:
+        age: float | None = None
+        state = "never"
+    else:
+        age = max(0.0, (current - last).total_seconds())
+        state = "fresh" if age <= _HEARTBEAT_STALE_AFTER_SEC else "stale"
+    return {
+        "last_tick_completed_at": snapshot["last_tick_completed_at"],
+        "last_successful_tick_at": _last_successful_tick_at,
+        "last_successful_poll_at": snapshot["last_successful_poll_at"],
+        "last_failed_poll_at": snapshot["last_failed_poll_at"],
+        "last_poll_error": snapshot["last_poll_error"],
+        "last_ingest_completed_at": snapshot["last_ingest_completed_at"],
+        "last_tick": {
+            "ok": snapshot["last_tick_ok"],
+            "polls": snapshot["last_tick_polls"],
+            "failed_polls": snapshot["last_tick_failed_polls"],
+        },
+        "counts": {
+            "ticks": snapshot["ticks_completed"],
+            "polls_ok": snapshot["polls_ok"],
+            "polls_failed": snapshot["polls_failed"],
+            "ingests": snapshot["ingests_completed"],
+        },
+        "tick_interval_sec": _PODCAST_FEED_TICK_SEC,
+        "freshness": {
+            "state": state,
+            "age_sec": age,
+            "stale_after_sec": _HEARTBEAT_STALE_AFTER_SEC,
+        },
+    }
+
+
+def _podcast_feed_scheduler_tick() -> list[dict]:
+    """Poll every enabled feed whose configured interval has elapsed.
+
+    Heartbeat semantics: every completed pass stamps
+    ``last_tick_completed_at``; ``_last_successful_tick_at`` moves only when
+    no poll in the pass failed; each poll stamps its own success / failure
+    time. A pass with zero due feeds is a clean pass."""
     results: list[dict] = []
+    failed = 0
     for feed in podcasts.list_due_feeds(_get_index()):
         feed_id = int(feed["id"])
+        kind = None
         try:
-            results.append(_poll_podcast_feed_for_watch(feed_id))
+            result = _poll_podcast_feed_for_watch(feed_id)
         except Exception as exc:
             log.exception("podcast watch tick failed for feed %d", feed_id)
-            results.append({"ok": False, "feed_id": feed_id,
-                            "error": str(exc)})
-    _last_successful_tick_at = suite_service.utc_now()
+            result = {"ok": False, "feed_id": feed_id, "error": str(exc)}
+            kind = type(exc).__name__
+        results.append(result)
+        ok = bool(isinstance(result, dict) and result.get("ok"))
+        if ok:
+            _heartbeat_note_poll(True)
+        else:
+            failed += 1
+            _heartbeat_note_poll(False, error=kind or "poll returned ok=false")
+    _heartbeat_note_tick(polls=len(results), failed_polls=failed)
     return results
 
 
@@ -9221,6 +9428,11 @@ class Handler(BaseHTTPRequestHandler):
                     _active_migration_version < latest_migration
                 ),
                 "last_successful_tick_at": _last_successful_tick_at,
+                # Heartbeat semantics (2026-09-04): tick completion, last
+                # successful poll, last ingest completion and freshness
+                # are separate fields; a failed poll never advances the
+                # success stamp. `--doctor` reads the same block.
+                "heartbeat": _heartbeat_payload(),
                 "whisperx_available": whisper_runner.is_whisperx_available(),
                 "whisper_model": whisper_model,
                 "whisperx_model_loaded": whisper_runner.is_model_downloaded(
@@ -11717,6 +11929,9 @@ class Handler(BaseHTTPRequestHandler):
         boolean_fields = (
             "comment_intelligence_enabled",
             "hook_type_enabled",
+            "entity_extraction_enabled",   # D-17 -- third background model
+                                            # call; default OFF, key alone
+                                            # never spawns the worker
             "smart_screenshot_picker_enabled",
             "transcript_reliability_auto_check",
             "asr_fallback_enabled",          # CM-11 caption-less video ASR
@@ -14916,6 +15131,23 @@ def _call_http_registry_tool(name: str, arguments: dict,
     return payload
 
 
+def _doctor_heartbeat(helper_health: dict) -> dict:
+    """Lift the resident helper's ``heartbeat`` block out of its /health
+    payload for ``uoink doctor``. Same fields, plus ``stale`` (bool) so the
+    doctor's ``ok`` can fail on a dead scheduler thread. ``available`` is
+    False when the helper did not answer or predates the block."""
+    payload = helper_health.get("payload") if isinstance(helper_health, dict) else None
+    block = payload.get("heartbeat") if isinstance(payload, dict) else None
+    if not isinstance(block, dict):
+        return {"available": False, "stale": False}
+    freshness = block.get("freshness") if isinstance(block.get("freshness"), dict) else {}
+    return {
+        "available": True,
+        "stale": freshness.get("state") == "stale",
+        **block,
+    }
+
+
 def doctor_payload() -> dict:
     """`uoink doctor`: the /diagnose self-check plus the install-migration
     status, for support triage from the console without the popup. C-01
@@ -14925,13 +15157,20 @@ def doctor_payload() -> dict:
     exact failure mode on the machine that motivated the fix)."""
     helper_health = _helper_health_status()
     schema_migration = index.schema_migration_status(INDEX_PATH)
+    # Heartbeat semantics (2026-09-04): the doctor reads the same
+    # `heartbeat` block /health serves, and a helper whose scheduler has
+    # not completed a pass within the freshness bound is not healthy even
+    # though its HTTP listener still answers.
+    heartbeat = _doctor_heartbeat(helper_health)
     payload = {
         "ok": bool(
             helper_health.get("ok")
             and not schema_migration.get("pending")
             and not schema_migration.get("error")
+            and not heartbeat.get("stale")
         ),
         "helper_health": helper_health,
+        "heartbeat": heartbeat,
         "schema_migration": schema_migration,
         "diagnose": _diagnose_payload(),
         "migration": migrate_install.migration_status(),

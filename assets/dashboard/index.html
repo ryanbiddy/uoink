@@ -4329,6 +4329,12 @@
               <label class="inline-row"><input id="claimVerificationToggle" type="checkbox"> Scan new uoinks for claims worth verifying</label>
             </div>
 
+            <div class="setting-block" id="entity-extraction">
+              <h2>Entity extraction</h2>
+              <p class="setting-copy">Pull people, tools, products and companies off each transcript into the library graph. Uses your Anthropic key (~2,500 output tokens per item). Off by default; a saved key alone never starts it.</p>
+              <label class="inline-row"><input id="entityExtractionToggle" type="checkbox"> Extract entities from new uoinks</label>
+            </div>
+
             <div class="setting-block">
               <h2>Writing Studio</h2>
               <p class="setting-copy">Voice DNA warnings flag canned phrasing without blocking the draft. The screenshot picker shows before anything opens in X.</p>
@@ -4799,6 +4805,7 @@
       evidenceContext: document.getElementById("evidenceContext"),
       claimList: document.getElementById("claimList"),
       claimVerificationToggle: document.getElementById("claimVerificationToggle"),
+      entityExtractionToggle: document.getElementById("entityExtractionToggle"),
       autoUoinkToggle: document.getElementById("autoUoinkToggle"),
       autoUoinkStatus: document.getElementById("autoUoinkStatus"),
       autoUoinkScan: document.getElementById("autoUoinkScan"),
@@ -8839,6 +8846,7 @@
         els.notificationsEnabled.checked = state.settings.notifications_enabled !== false;
         els.screenshotCount.value = String(state.settings.screenshot_count ?? state.settings.clipboard_screenshot_cap ?? 4);
         els.claimVerificationToggle.checked = Boolean(state.settings.claim_verification_enabled);
+        if (els.entityExtractionToggle) els.entityExtractionToggle.checked = Boolean(state.settings.entity_extraction_enabled);
         els.reliabilityAutoCheck.checked = Boolean(state.settings.transcript_reliability_auto_check);
         els.asrFallbackEnabled.checked = state.settings.asr_fallback_enabled !== false;
         els.voiceWarningsEnabled.checked = state.settings.voice_dna_warnings_enabled !== false;
@@ -11178,6 +11186,14 @@
         saveSettingsPatch({ whisper_model: els.whisperModel.value }, "Transcript checker choice saved.");
       });
       els.claimVerificationToggle.addEventListener("change", () => saveSettingsPatch({ claim_verification_enabled: els.claimVerificationToggle.checked }, "Claim verification setting updated."));
+      if (els.entityExtractionToggle) {
+        els.entityExtractionToggle.addEventListener("change", () => saveSettingsPatch(
+          { entity_extraction_enabled: els.entityExtractionToggle.checked },
+          els.entityExtractionToggle.checked
+            ? "Entity extraction is on for new uoinks (uses your Anthropic key)."
+            : "Entity extraction is off.",
+        ));
+      }
       if (els.autoUoinkToggle) {
         els.autoUoinkToggle.addEventListener("change", () => saveSettingsPatch({ auto_uoink_enabled: els.autoUoinkToggle.checked }, els.autoUoinkToggle.checked ? "Taste-aware auto-uoink is on." : "Taste-aware auto-uoink is off."));
       }

@@ -8,9 +8,10 @@ MCP clients launch this process and speak JSON-RPC over stdin/stdout. Keep
 stdout reserved for the protocol; server.py logging is redirected to stderr
 while importing the backend.
 
-The stdio surface is exactly the 23 canonical tools below. The six Yoink-era
+The stdio surface is exactly the 25 canonical tools below. The six Yoink-era
 aliases completed their deprecation window in Uoink v2.5 and are not
-registered in v3. See docs/v2-mcp.md.
+registered in v3. Run E (2026-09-04) added the two Phase 1 clip tools,
+`search_clips` and `get_evidence_card`, to stdio. See docs/v2-mcp.md.
 """
 
 from __future__ import annotations
@@ -76,9 +77,10 @@ except AttributeError:
 
 
 # --------------------------------------------------------------------------
-# Canonical tools (23). The CI doc-accuracy + backend-static jobs count these
+# Canonical tools (25). The CI doc-accuracy + backend-static jobs count these
 # @mcp.tool decorators against the ### headings in docs/v2-mcp.md, so keep the
-# decorator count and the documented tool count in lock-step.
+# decorator count and the documented tool count in lock-step (also
+# tests/test_c01_mcp_stdio.py CANONICAL_STDIO_TOOLS and .mcpb/manifest.json).
 # --------------------------------------------------------------------------
 @mcp.tool(
     name="uoink_video",
@@ -123,6 +125,53 @@ def list_recent_uoinks(limit: int = 20) -> dict:
 )
 def search_uoinks(query: str, limit: int = 10) -> dict:
     return uoink_mcp_tools.call_tool("search_uoinks", {"query": query, "limit": limit})
+
+
+@mcp.tool(
+    name="search_clips",
+    description=(
+        "Full-text search over transcript windows from saved uoinks; each hit "
+        "carries a deep link to the moment. Use this to find the exact "
+        "quotable passage; use search_uoinks to find whole items."
+    ),
+)
+def search_clips(
+    query: str,
+    limit: int = 20,
+    video_id: str | None = None,
+    channel: str | None = None,
+) -> dict:
+    args: dict = {"query": query, "limit": limit}
+    if video_id:
+        args["video_id"] = video_id
+    if channel:
+        args["channel"] = channel
+    return uoink_mcp_tools.call_tool("search_clips", args)
+
+
+@mcp.tool(
+    name="get_evidence_card",
+    description=(
+        "Return an evidence card for one saved uoink: metadata, source URL, "
+        "a short summary hint, and its most quotable clips spread across the "
+        "timeline, each with a deep link. Resolve by slug or video_id. "
+        "profile 'full' (default) or 'librarian' (bounded)."
+    ),
+)
+def get_evidence_card(
+    slug: str | None = None,
+    video_id: str | None = None,
+    profile: str = "full",
+    n_clips: int | None = None,
+) -> dict:
+    args: dict = {"profile": profile}
+    if slug:
+        args["slug"] = slug
+    if video_id:
+        args["video_id"] = video_id
+    if n_clips is not None:
+        args["n_clips"] = n_clips
+    return uoink_mcp_tools.call_tool("get_evidence_card", args)
 
 
 @mcp.tool(

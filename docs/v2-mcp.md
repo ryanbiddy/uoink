@@ -9,19 +9,21 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink has two deliberately different tool surfaces:
 
-- Supported stdio registry: **23 tools**.
+- Supported stdio registry: **25 tools**.
 - Local HTTP/OpenAPI registry: **71 tools**.
 
 The supported stdio MCP surface covers extraction, playlist jobs, search,
-corpus retrieval, citation maps, health scores, transcript reliability,
-Comment Intelligence, Hook Type, hook taxonomy, entity mentions, and manual
-podcast feed-to-corpus operations. The
+clip search and evidence cards, corpus retrieval, citation maps, health
+scores, transcript reliability, Comment Intelligence, Hook Type, hook
+taxonomy, entity mentions, and manual podcast feed-to-corpus operations. The
 authenticated local HTTP helper exposes that set plus a broader collection of
 legacy and application operations, including registry-only URL, note, image,
 and X capture. Overlapping tools share the handlers in
 `uoink_mcp_tools.py`, but the two transports do not expose the same registry.
-Clip search and evidence cards are HTTP/OpenAPI-only in Phase 1; they do not
-expand the 23-tool stdio set.
+Clip search (`search_clips`) and evidence cards (`get_evidence_card`) were
+HTTP/OpenAPI-only in Phase 1; the repair increment of 2026-09-04 (run E)
+added both to stdio, taking the stdio set from 23 to 25 tools. On both
+transports they call the same handlers and return the same shapes.
 For MCP clients, use stdio (`uoink_mcp.py`). The HTTP JSON-RPC surface at
 `/mcp/v1` remains experimental.
 
@@ -310,10 +312,13 @@ Errors:
 
 - `{ "ok": false, "error": "query required" }`
 
-### search_clips (HTTP/OpenAPI only)
+### search_clips
 
-Search merged 45-120 second transcript windows and return a deep link to each
+Search merged transcript windows (45-120 s; a single long source cue keeps
+coarse timing and is marked `timing: coarse`) and return a deep link to each
 matching moment. Optional `video_id` and `channel` fields narrow the search.
+Available on stdio and HTTP/OpenAPI since 2026-09-04 (run E); both call the
+same handler.
 
 Parameters:
 
@@ -336,6 +341,7 @@ Return shape:
       "end": 112.0,
       "text": "The matching transcript window...",
       "deep_link": "https://youtube.com/watch?v=abc123DEF45&t=64s",
+      "timing": "source_cues",
       "score": 7.3021
     }
   ]
@@ -346,21 +352,26 @@ Errors:
 
 - `{ "ok": false, "error": "query required" }`
 
-### get_evidence_card (HTTP/OpenAPI only)
+### get_evidence_card
 
 Return one item's metadata and up to 20 clips spread across its timeline.
-Resolve the item by `slug` or `video_id`; `n_clips` defaults to 10.
+Resolve the item by `slug` or `video_id`; `n_clips` defaults to 10 for the
+`full` profile and 6 for `librarian`. Available on stdio and HTTP/OpenAPI
+since 2026-09-04 (run E); both call the same handler.
 
 Parameters:
 
 ```json
-{ "slug": "video-slug", "n_clips": 10 }
+{ "slug": "video-slug", "profile": "full", "n_clips": 10 }
 ```
 
-The result includes `video_id`, `slug`, `title`, `channel`, `platform`,
-`source_type`, `topic`, `yoinked_at`, `url`, `summary_hint`, `clips`,
+`profile` is `full` (default: untruncated clips) or `librarian` (bounded: at
+most 6 excerpts of 240 characters plus a total serialized-byte budget, with
+truncation markers). The result includes `video_id`, `slug`, `title`,
+`channel`, `platform`, `source_type`, `topic`, `yoinked_at`, `url`,
+`summary_hint`, `profile`, `evidence_kind`, `excerpts`, `clips`,
 `clip_count`, and the total character count across all clips. Every returned
-clip has `start`, `end`, `text`, and `deep_link`.
+clip has `start`, `end`, `text`, `deep_link`, and `timing`.
 
 Errors:
 
