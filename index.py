@@ -422,6 +422,13 @@ class Index:
             backfill_source_types(idx)
         except Exception:
             log.exception("source_type provenance backfill failed")
+        # Records are local authority. Replay only an existing store; opening a
+        # fresh index does not seed a taxonomy, work, pins, or enabled apply flag.
+        has_library_meta = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE name='library_meta'").fetchone()
+        if has_library_meta and ((path.parent / "library").is_dir() or conn.execute(
+                "SELECT last_operation_sequence FROM library_meta WHERE singleton=1").fetchone()[0]):
+            idx.library_service()
         return idx
 
     @classmethod
@@ -499,6 +506,38 @@ class Index:
                     self._conn.rollback()
                 raise
 
+    def library_service(self):
+        """One service seam, shared by transports and corpus lifecycle hooks."""
+        service = getattr(self, "_library_work_service", None)
+        if service is None:
+            from library_work import LibraryWorkService
+            service = LibraryWorkService(self)
+        return service
+
+    def rebuild_library_state(self) -> dict:
+        """Call after rebuilding corpus identities/clips to restore local pins.
+
+        Missing/deleted item corrections remain authoritative orphan records.
+        This does not rebuild or resurrect any source content.
+        """
+        from library_work import RequestContext
+        return self.library_service().rebuild_library_state(
+            RequestContext(authenticated=True, operator=True), {})
+
+    def _invalidate_library_sources(self, video_ids) -> None:
+        # Keep old installed trees importable until they package the service;
+        # no service import is needed when no assignment run exists.
+        with self._lock:
+            exists = self._conn.execute(
+                "SELECT 1 FROM sqlite_master WHERE name='library_runs'").fetchone()
+            if not exists or not self._conn.execute("SELECT 1 FROM library_runs LIMIT 1").fetchone():
+                return
+        from library_work import RequestContext
+        result = self.library_service().invalidate_source_items(
+            RequestContext(authenticated=True, operator=True), {"video_ids": list(video_ids)})
+        if not result["ok"]:
+            log.error("library source invalidation failed: %s", result["error"]["code"])
+
     # ---- yoinks ----------------------------------------------------------
     def upsert_yoink(self, record: dict, *, content: str = "") -> None:
         """Insert or update one yoink row, and refresh its FTS5 entry.
@@ -558,6 +597,7 @@ class Index:
                 logging.getLogger("uoink.index").warning(
                     "self-channel recognition skipped: %s", e)
             self._conn.commit()
+        self._invalidate_library_sources([video_id])
 
     def delete_yoink(self, video_id: str) -> None:
         """Delete a yoink and its citations (FK cascade) and FTS row."""
@@ -565,6 +605,7 @@ class Index:
             self._conn.execute("DELETE FROM yoinks WHERE video_id=?", (video_id,))
             self._conn.execute("DELETE FROM yoinks_fts WHERE video_id=?", (video_id,))
             self._conn.commit()
+        self._invalidate_library_sources([video_id])
 
     def get_yoink(self, video_id: str) -> dict | None:
         with self._lock:
@@ -704,7 +745,9 @@ class Index:
         """Re-derive every item's clips from its citations (clips.py)."""
         import clips as _clips  # noqa: WPS433 -- keeps index importable alone
         with self._lock:
-            return _clips.rebuild_all_clips(self._conn)
+            result = _clips.rebuild_all_clips(self._conn)
+        self._invalidate_library_sources(self.all_video_ids())
+        return result
 
     def clip_coverage(self) -> dict:
         """``{items_with_clips, items_without_clips, clip_count}`` over the
@@ -1452,6 +1495,7 @@ class Index:
             row = self._conn.execute(
                 "SELECT * FROM yoinks WHERE video_id=?", (video_id,)
             ).fetchone()
+        self._invalidate_library_sources([video_id])
         return dict(row) if row else None
 
     def restore_yoink(self, video_id: str) -> dict | None:
@@ -1725,6 +1769,7 @@ class Index:
                 # write. --build-clips re-derives everything.
                 log.exception("clip build failed for %s", video_id)
             self._conn.commit()
+        self._invalidate_library_sources([video_id])
         return len(rows)
 
     def get_citations(self, video_id: str) -> list[dict]:
