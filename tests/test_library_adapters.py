@@ -412,7 +412,12 @@ def test_trusted_context_carries_index_clock_flag_and_no_user_authority(fake):
     assert context["contract_version"] == tools.LIBRARY_CONTRACT_VERSION
     assert context["schema_version"] == 1
     assert isinstance(context["now_ms"], int) and before <= context["now_ms"] <= before + 60_000
-    assert "session_hash" not in context
+    # Run N acceptance N-1: tool calls carry the helper's trusted session (the
+    # same one dashboard-minted capabilities bind to), derived from the
+    # backend, never from tool JSON. Authority is still absent: actor stays
+    # "registry", and no user_intent_token is invented.
+    assert context["session_hash"] == server._library_session_hash()
+    assert len(context["session_hash"]) == 64
     assert "user_intent_token" not in arguments
 
 

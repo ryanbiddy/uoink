@@ -2981,9 +2981,28 @@ def _library_context(transport: str, **extra: Any) -> dict[str, Any]:
         "now_ms": int(time.time() * 1000),
         "apply_enabled": _library_apply_enabled(backend),
         "index": backend._get_index(),
+        # Run N acceptance N-1: every transport authenticates with the same
+        # per-install helper token, so the trusted session a dashboard-minted
+        # capability binds to is the same session a tool call consumes it
+        # under. Derived here from the backend, never from tool JSON.
+        "session_hash": _library_trusted_session(backend),
     }
     context.update(extra)
     return context
+
+
+def _library_trusted_session(backend: Any) -> str | None:
+    """The helper's trusted session hash (server._library_session_hash), or
+    None for a backend that has no token-derived session (test doubles)."""
+    derive = getattr(backend, "_library_session_hash", None)
+    if not callable(derive):
+        return None
+    try:
+        value = derive()
+    except Exception:
+        _library_log.exception("library: trusted session unavailable")
+        return None
+    return value if isinstance(value, str) and value else None
 
 
 def _library_context_or_none(transport: str, **extra: Any) -> dict[str, Any] | None:
@@ -3274,6 +3293,7 @@ def library_status(index: Any, *, apply_enabled: bool, now: float | None = None)
                 "now_ms": int(time.time() * 1000),
                 "apply_enabled": bool(apply_enabled),
                 "index": index,
+                "session_hash": _library_trusted_session(_b()),
             }
             fn = getattr(service, "list_work", None)
             try:
