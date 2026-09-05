@@ -461,11 +461,41 @@ class InductionHarness:
         import concurrent.futures as cf
         workers = max(1, min(4, int(os.environ.get("UOINK_INDUCE_CONCURRENCY", "4"))))
         results: Dict[str, Tuple[dict, dict]] = {}
+        resume_from = os.environ.get("UOINK_INDUCE_RESUME_FROM")
+        if resume_from:
+            # Reuse the recorded batch calls of an earlier run whose consolidation
+            # failed. Each reused call's stdin must equal the prompt this run would
+            # send (same cards, template, taxonomy), so the record stays honest.
+            prior = json.loads(Path(resume_from).read_text(encoding="utf-8"))
+            prior_dir = Path(resume_from).resolve().parent
+            prior_calls = {c["call_id"]: c for c in prior["calls"]}
+            for cid, chunk, prompt in plan:
+                rec = prior_calls.get(cid)
+                if not rec or rec["exit_status"] != 0 or rec["attempt_ids"] != chunk:
+                    continue
+                stdin_b = (prior_dir / rec["stdin"]["path"]).read_bytes()
+                if stdin_b != prompt.encode("utf-8"):
+                    print(f"[induce] resume: {cid} prompt differs; will re-run", file=sys.stderr, flush=True)
+                    continue
+                stdout_b = (prior_dir / rec["stdout"]["path"]).read_bytes()
+                stderr_b = (prior_dir / rec["stderr"]["path"]).read_bytes()
+                for name, data in (("stdin", stdin_b), ("stdout", stdout_b), ("stderr", stderr_b)):
+                    (self.calls_dir / f"{cid}.{name}").write_bytes(data)
+                try:
+                    envelope = json.loads(stdout_b.decode("utf-8"))
+                except (UnicodeDecodeError, json.JSONDecodeError):
+                    continue
+                results[cid] = (dict(rec), envelope)
+                print(f"[induce] resume: reused {cid}", file=sys.stderr, flush=True)
+        pending = [(cid, chunk, prompt) for cid, chunk, prompt in plan if cid not in results]
         with cf.ThreadPoolExecutor(max_workers=workers) as ex:
             futures = {ex.submit(self._claude_call, cid, chunk, prompt, self.BATCH_OUTPUT_SCHEMA): cid
-                       for cid, chunk, prompt in plan}
+                       for cid, chunk, prompt in pending}
             for fut in cf.as_completed(futures):
                 results[futures[fut]] = fut.result()
+        if resume_from and results:
+            # The run's timeline starts no later than the earliest reused call.
+            t0_mono_ns = min(t0_mono_ns, min(r[0]["start_monotonic_ns"] for r in results.values()))
         for cid, chunk, prompt in plan:
             record, envelope = results[cid]
             calls.append(record)
