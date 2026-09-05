@@ -4,8 +4,9 @@ A *clip* is a merged, de-overlapped window of transcript cues derived from
 the ``citations`` rows of kind ``transcript_chunk``. Raw caption cues are
 tiny (~37 characters on the live corpus) and repeat the tail of the previous
 cue, so as search hits and as evidence they are useless. This module turns
-them into 45-120 second windows that end on a sentence boundary, carry the
-first cue's source-neutral deep link, and read as a paragraph.
+them into windows of at most 120 seconds where cue timing permits. Longer
+single cues are split into bounded text excerpts with the original coarse
+interval and source link; no word-level timestamps are invented.
 
 Clips are derived data: ``build_clips_for_video`` deletes and re-derives a
 video's clips from its citations, so a rebuild is deterministic and
@@ -20,6 +21,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import re
 import sqlite3
 import time
@@ -31,6 +33,29 @@ log = logging.getLogger("uoink.clips")
 MIN_WINDOW_SECONDS = 45.0
 # ... or once it is this long regardless of punctuation.
 MAX_WINDOW_SECONDS = 120.0
+MAX_COARSE_CHARS = 1200
+
+
+def timing_kind(clip: dict) -> str:
+    """Coarse intervals retain source bounds, including in legacy databases."""
+    try:
+        start, end = float(clip.get("start")), float(clip.get("end"))
+        if not math.isfinite(start) or not math.isfinite(end):
+            return "unknown"
+        return "coarse" if end - start > MAX_WINDOW_SECONDS else "source_cues"
+    except (TypeError, ValueError):
+        return "unknown"
+
+
+def _coarse_parts(text: str):
+    """Contiguous, lossless slices, preferably at a word boundary."""
+    while len(text) > MAX_COARSE_CHARS:
+        cut = text.rfind(" ", 0, MAX_COARSE_CHARS + 1)
+        cut = cut if cut > 0 else MAX_COARSE_CHARS
+        yield text[:cut]
+        text = text[cut:]
+    if text:
+        yield text
 
 # YouTube caption tracks emit a ~10 ms echo of the previous cue's tail
 # (seq 16 in the D_FCYsshMI4 sample: 19.91-19.92 s, text fully repeated).
@@ -183,6 +208,7 @@ def merge_cues(cues: list[dict], item: dict | None = None) -> list[dict]:
                 "text": " ".join(words),
                 "cue_count": w_cues,
                 "source_deep_link": w_link,
+                "timing": "source_cues",
             })
         words, w_start, w_end, w_cues, w_link = [], None, None, 0, None
 
@@ -196,6 +222,8 @@ def merge_cues(cues: list[dict], item: dict | None = None) -> list[dict]:
         except (TypeError, ValueError):
             end = start
         end = max(end, start)
+        if not math.isfinite(start) or not math.isfinite(end):
+            continue
         if prev_start is not None and start + _REWIND_TOLERANCE_SECONDS < prev_start:
             log.debug("clips: stale cue track at seq %s (start %.2f < %.2f); "
                       "stopping", cue.get("seq"), start, prev_start)
@@ -208,6 +236,16 @@ def merge_cues(cues: list[dict], item: dict | None = None) -> list[dict]:
         fresh = new_words(words, text)
         if not fresh and (end - start) < _DUP_CUE_SECONDS:
             continue  # the ~10 ms caption echo
+        if end - start > MAX_WINDOW_SECONDS:
+            flush()
+            for part in _coarse_parts(" ".join(fresh)):
+                clips.append({"seq": len(clips), "start": start, "end": end,
+                              "text": part, "cue_count": 1,
+                              "source_deep_link": _deep_link(cue, item),
+                              "timing": "coarse"})
+            continue
+        if w_start is not None and max(w_end, end) - w_start > MAX_WINDOW_SECONDS:
+            flush()
         if w_start is None:
             w_start = start
             w_link = _deep_link(cue, item)
@@ -225,7 +263,8 @@ def merge_cues(cues: list[dict], item: dict | None = None) -> list[dict]:
     # window still fits, so a video never ends on a three-second orphan.
     if len(clips) >= 2:
         last, prev = clips[-1], clips[-2]
-        if (last["end"] - last["start"]) < MIN_WINDOW_SECONDS and (
+        if last["timing"] != "coarse" and prev["timing"] != "coarse" and (
+                last["end"] - last["start"]) < MIN_WINDOW_SECONDS and (
                 last["end"] - prev["start"]) <= MAX_WINDOW_SECONDS:
             prev["end"] = last["end"]
             prev["text"] = f"{prev['text']} {last['text']}"

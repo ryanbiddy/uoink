@@ -123,86 +123,15 @@ def _connect(path: Path) -> sqlite3.Connection:
     return conn
 
 
-def _pick_spread(clips: list[sqlite3.Row], k: int) -> list[sqlite3.Row]:
-    """k clips spread across the timeline, preferring longer text in each bin."""
-    if len(clips) <= k:
-        return list(clips)
-    bins: list[list[sqlite3.Row]] = [[] for _ in range(k)]
-    n = len(clips)
-    for i, c in enumerate(clips):
-        bins[min(k - 1, i * k // n)].append(c)
-    out = []
-    for b in bins:
-        if b:
-            out.append(max(b, key=lambda r: len(r["text"] or "")))
-    return out
+# Shared selection, packet identity, bounds and prompt rendering.
+sys.path.insert(0, str(HERE.parents[1]))
+from library_cards import build_cards as _build_cards, card_text
 
 
-def build_cards(conn: sqlite3.Connection, *, per_item: int = 6, clip_chars: int = 240) -> list[dict]:
-    have_clips = conn.execute(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name='clips'"
-    ).fetchone() is not None
-    rows = conn.execute(
-        "SELECT video_id, slug, title, channel, topic, hook_type, yoinked_at, "
-        "source_type, platform, author, metadata_json FROM yoinks "
-        "WHERE deleted_at IS NULL ORDER BY yoinked_at"
-    ).fetchall()
-    cards = []
-    for y in rows:
-        vid = y["video_id"]
-        if have_clips:
-            clips = conn.execute(
-                "SELECT start, end, text, source_deep_link FROM clips WHERE video_id=? ORDER BY seq",
-                (vid,),
-            ).fetchall()
-        else:
-            clips = conn.execute(
-                "SELECT timestamp_start AS start, timestamp_end AS end, text, source_deep_link "
-                "FROM citations WHERE video_id=? AND kind='transcript_chunk' ORDER BY seq",
-                (vid,),
-            ).fetchall()
-        picked = _pick_spread(clips, per_item)
-        meta = {}
-        try:
-            meta = json.loads(y["metadata_json"] or "{}")
-        except json.JSONDecodeError:
-            pass
-        desc = (meta.get("description") or "") if isinstance(meta, dict) else ""
-        cards.append({
-            "video_id": vid,
-            "slug": y["slug"],
-            "title": y["title"],
-            "channel": y["channel"] or y["author"],
-            "current_topic": y["topic"],
-            "hook_type": y["hook_type"],
-            "yoinked_at": y["yoinked_at"],
-            "source_type": y["source_type"],
-            "platform": y["platform"],
-            "description": re.sub(r"\s+", " ", desc)[:300],
-            "clips": [
-                {
-                    "t": round(float(c["start"] or 0)),
-                    "text": re.sub(r"\s+", " ", c["text"] or "")[:clip_chars],
-                    "link": c["source_deep_link"],
-                }
-                for c in picked
-            ],
-            "clip_count": len(clips),
-        })
-    return cards
-
-
-def card_text(card: dict) -> str:
-    lines = [
-        f"### {card['video_id']}",
-        f"title: {card['title']}",
-        f"channel: {card['channel']} · source: {card['platform'] or card['source_type'] or 'unknown'} · saved: {str(card['yoinked_at'])[:10]}",
-    ]
-    if card["description"]:
-        lines.append(f"description: {card['description']}")
-    for c in card["clips"]:
-        lines.append(f"[{c['t']}s] {c['text']}")
-    return "\n".join(lines)
+def build_cards(conn: sqlite3.Connection, *, per_item: int = 6,
+                clip_chars: int = 240, profile: str = "librarian") -> list[dict]:
+    return _build_cards(conn, profile=profile, n_clips=per_item,
+                        clip_chars=clip_chars if profile == "librarian" else None)
 
 
 # ---------------------------------------------------------------------------

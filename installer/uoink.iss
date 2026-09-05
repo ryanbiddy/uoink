@@ -103,6 +103,12 @@ Source: "staging\uoink_tray.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_splash.py";    DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink_dashboard.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\index.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\clips.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\provenance.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\library_cards.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\uoink.cmd"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\uoink"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\scripts\install-watchdog.ps1"; DestDir: "{app}\scripts"; Flags: ignoreversion
 ; Cross-platform path/OS helpers -- server.py and migrate_install.py import
 ; this at module top. Omitting it crashes the helper before it binds the port.
 Source: "staging\_platform.py"; DestDir: "{app}"; Flags: ignoreversion

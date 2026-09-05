@@ -282,16 +282,24 @@ def _backfill_clips_if_needed(conn: sqlite3.Connection, schema_version: int) -> 
     """
     if schema_version < 24:
         return
+    import clips as _clips
     clip_count = conn.execute("SELECT COUNT(*) FROM clips").fetchone()[0]
     if clip_count:
-        return
+        # A schema-25 index may contain merged windows past the boundary or
+        # unsplit long cues. Repair once; already bounded coarse excerpts do
+        # not trigger another rebuild on the next open.
+        legacy = conn.execute(
+            'SELECT 1 FROM clips WHERE "end" - start > ? '
+            'AND (cue_count > 1 OR length(text) > ?) LIMIT 1',
+            (_clips.MAX_WINDOW_SECONDS, _clips.MAX_COARSE_CHARS)).fetchone()
+        if not legacy:
+            return
     citation_count = conn.execute(
         "SELECT COUNT(*) FROM citations WHERE kind='transcript_chunk'"
     ).fetchone()[0]
     if not citation_count:
         return
 
-    import clips as _clips  # noqa: WPS433 -- only needed for schema 24+
     report = _clips.rebuild_all_clips(conn)
     log.info(
         "clip upgrade backfill: %d transcript citations -> %d clips "
@@ -679,7 +687,8 @@ class Index:
             except sqlite3.OperationalError:
                 log.warning("clips FTS search rejected query %r", query)
                 return []
-        return [dict(r) for r in rows]
+        from clips import timing_kind
+        return [{**dict(r), "timing": timing_kind(dict(r))} for r in rows]
 
     def get_clips(self, video_id: str) -> list[dict]:
         """Every clip for one item, in timeline order."""
@@ -688,7 +697,8 @@ class Index:
                 "SELECT clip_id, video_id, seq, start, \"end\", text, speaker, "
                 "source_deep_link, cue_count FROM clips WHERE video_id=? "
                 "ORDER BY seq", (video_id,)).fetchall()
-        return [dict(r) for r in rows]
+        from clips import timing_kind
+        return [{**dict(r), "timing": timing_kind(dict(r))} for r in rows]
 
     def rebuild_clips(self) -> dict:
         """Re-derive every item's clips from its citations (clips.py)."""

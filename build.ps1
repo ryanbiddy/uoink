@@ -25,7 +25,9 @@
 
 [CmdletBinding()]
 param(
-    [switch]$Clean
+    [switch]$Clean,
+    [switch]$StageSourceOnly,
+    [string]$SourceStagePath
 )
 
 $ErrorActionPreference = 'Stop'
@@ -227,6 +229,20 @@ function Get-PackageTimestampUtc {
     }
 }
 
+# Source-only staging exercises the production copy list without downloads,
+# embedded Python, Inno Setup, task registration or an installed helper.
+if ($StageSourceOnly) {
+    if ($Clean) { throw 'StageSourceOnly cannot be combined with Clean' }
+    if (-not $SourceStagePath) { $SourceStagePath = Join-Path $InstallerDir 'staging-source' }
+    $StagingDir = [IO.Path]::GetFullPath($SourceStagePath)
+    $allowedRoot = [IO.Path]::GetFullPath($RepoRoot).TrimEnd('\') + '\'
+    if (-not $StagingDir.StartsWith($allowedRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        throw 'SourceStagePath must be inside this worktree'
+    }
+    if (Test-Path -LiteralPath $StagingDir) { throw 'SourceStagePath must be a new directory' }
+    New-Item -ItemType Directory -Path $StagingDir | Out-Null
+}
+if (-not $StageSourceOnly) {
 # ---- Optional clean -----------------------------------------------------
 if ($Clean) {
     Write-Step 'Cleaning build/ and staging/'
@@ -471,6 +487,8 @@ Remove-Item -Recurse -Force $ffmpegTmp
 
 # 2g. Server source + helpers + icon
 Write-Host '    copying server source + templates...'
+}
+
 Copy-Item (Join-Path $RepoRoot 'server.py')      $StagingDir -Force
 # System-tray module (Tier 1 v2.1.1). Imported by server.py at boot on
 # installed builds; optional at runtime (degrades if pystray is unavailable).
@@ -481,6 +499,13 @@ Copy-Item (Join-Path $RepoRoot 'uoink_tray.py')  $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_splash.py')    $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink_dashboard.py') $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'index.py')       $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'clips.py')       $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'provenance.py')  $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'library_cards.py') $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink.cmd')      $StagingDir -Force
+Copy-Item (Join-Path $RepoRoot 'uoink')          $StagingDir -Force
+New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'scripts') | Out-Null
+Copy-Item (Join-Path $RepoRoot 'scripts\install-watchdog.ps1') (Join-Path $StagingDir 'scripts') -Force
 # Cross-platform path/OS helpers (added Sprint 19.5). server.py and
 # migrate_install.py `import _platform` at module top -- omitting it ships a
 # helper that crashes with ModuleNotFoundError before binding the port.
@@ -536,7 +561,9 @@ Copy-Item (Join-Path $InstallerDir 'verify_install.ps1') $StagingDir -Force
 Copy-Item (Join-Path $InstallerDir 'upgrade_prep.ps1') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.bat') $StagingDir -Force
 Copy-Item (Join-Path $TemplatesDir 'stop-server.ps1') $StagingDir -Force
-Copy-Item $IconSrc (Join-Path $StagingDir 'uoink.ico') -Force
+if (-not $StageSourceOnly -or (Test-Path -LiteralPath $IconSrc)) {
+    Copy-Item $IconSrc (Join-Path $StagingDir 'uoink.ico') -Force
+}
 # Sprint 21: the uoink_core/ package holds modules split out of server.py.
 # server.py imports it at module top, so it must ship or the helper crashes
 # with ModuleNotFoundError before binding the port (cf. _platform.py).
@@ -569,6 +596,11 @@ Copy-Item (Join-Path $RepoRoot 'migrations') (Join-Path $StagingDir 'migrations'
 # this release exists to remove).
 Copy-Item (Join-Path $RepoRoot 'defaults') (Join-Path $StagingDir 'defaults') -Recurse -Force
 
+if ($StageSourceOnly) {
+    Write-Host "Source staging complete: $StagingDir"
+    return
+}
+
 # ---- 2h. Staged smoke (Sprint 19.6 / Fix 1) -----------------------------
 # Verifies the staged tree is actually runnable BEFORE ISCC packages it,
 # so the works-in-repo-breaks-in-installer drift class is caught here
@@ -577,7 +609,7 @@ Write-Step 'Staged smoke'
 Push-Location $StagingDir
 try {
     & '.\python\python.exe' -m py_compile `
-        server.py index.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
+        server.py index.py clips.py provenance.py library_cards.py migrate_install.py channels.py workspaces.py claims.py scripts.py voice_dna.py writing_studio.py corpus_contract.py corpus_provider.py corpus_intelligence.py page_extractor.py writer_peer.py engagement_contract.py media_handoff.py suite_service.py source_manifest.py openapi_bridge.py reddit_extractor.py x_extractor.py x_article_extractor.py notes.py images.py taste_scoring.py memory_layer.py podcasts.py mobile_playlists.py whisper_runner.py uoink_mcp.py uoink_mcp_tools.py uoink_reliability.py yoink_mcp.py yt_extract.py helper\_version.py
     if ($LASTEXITCODE -ne 0) {
         throw 'staged smoke: py_compile of staged Python files failed'
     }
