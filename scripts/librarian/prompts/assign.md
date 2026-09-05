@@ -24,29 +24,37 @@ Each item is provided as an evidence card with the following fields:
 
 ## Assignment Rules and Constraints
 
-1. **Grounded Classification**: Base assignments strictly on transcript or prose excerpts in the card. Never assign a shelf based on title or channel alone when excerpts are present.
+1. **Grounded Classification**: Base assignments strictly on transcript or prose excerpts in the card. Never assign a shelf based on title or channel alone when excerpts are present. Mere mentions of AI, a provider, a programming language, or a product do not establish a technical shelf; the primary shelf must match the central subject the excerpt establishes.
 2. **Shelf Identity by `shelf_id`**: Map items using the exact `shelf_id` defined in the approved taxonomy. Do not invent shelf IDs or paths.
 3. **Memberships**:
    - Provide 1 to 3 memberships ordered by relevance. The first membership is primary.
+   - For every membership (primary or secondary), valid evidence is mandatory.
    - For each membership, provide:
      - `shelf_id`: The exact identifier from the approved taxonomy.
      - `shelf_path`: Array of string segments matching the taxonomy node.
-     - `confidence`: Confidence score in `[0.0, 1.0]`. The service requires at least `0.60` to accept an assignment.
+     - `confidence`: Confidence score in `[0.60, 1.0]`. The service requires at least `0.60` to accept an assignment.
      - `evidence`:
        - `basis`: Always `"packet"`.
        - `kind`: Must match the excerpt's `evidence_kind` (`"timed_clip"` or `"text_only"`).
        - `excerpt_id`: Exact 64-character hash of the excerpt containing the quote.
        - `card_hash`: Exact 64-character hash from the card.
-       - `quote`: Verbatim substring (under 25 words) copied directly from the specified excerpt. Case and punctuation must match the excerpt. Never concatenate text across different excerpts. Never invent or paraphrase quotes.
-4. **Refusal and Unmapped Rules**:
-   - If confidence is below 0.60, or if the item does not fit any leaf in the approved taxonomy:
+       - `quote`: Verbatim substring (1 to 24 words maximum, NFC-normalized, case and punctuation preserved) copied directly from the specified excerpt. Never concatenate text across different excerpts. Never invent or paraphrase quotes. Quotes of 25 or more words will be rejected.
+4. **Parent Assignments Permitted**:
+   - An approved parent shelf may be assigned as primary when the excerpt evidence supports its broad scope and no specific child shelf is justified. Do not guess an unsupported leaf shelf.
+5. **Sibling Cues and Disambiguation**:
+   - Sibling cues rendered in the taxonomy definitions must be strictly respected. Use include and exclude cues to resolve neighboring boundaries (e.g., Developer Tools vs Education vs Security, Frontier Models vs general AI business).
+6. **Refusal and Unmapped Rules**:
+   - If a valid source excerpt fits no approved concept in the taxonomy:
      - Set `outcome: "unmapped"`.
      - Provide a clear `reason` explaining why the item falls outside the approved categories.
-5. **Unsupported Items**:
-   - If an item card has no excerpts or lacks sufficient evidence to ground an assignment:
+   - If confidence is below 0.60:
+     - Set `outcome: "unmapped"`.
+     - Provide a clear `reason`.
+7. **Unsupported Items**:
+   - If an item card has absent or ineligible evidence (e.g. video source without timed clips, text source not from an eligible origin, or empty excerpts):
      - Set `outcome: "unsupported"`.
-     - Provide a clear `reason` noting insufficient evidence. Do not hallucinate quotes.
-6. **Error Handling**:
+     - Provide a clear `reason` noting insufficient or ineligible evidence. Do not hallucinate quotes.
+8. **Error Handling**:
    - If a card is unparseable or corrupted:
      - Set `outcome: "error"`.
      - Provide a descriptive `reason`.

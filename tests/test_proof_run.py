@@ -12,6 +12,7 @@ Exercises:
 from __future__ import annotations
 
 from collections import Counter
+import copy
 import json
 import os
 import shutil
@@ -37,7 +38,9 @@ from proof_run import (
 )
 from proof_score import (
     COVERAGE_FLOOR,
+    MAX_QUOTE_WORDS,
     PRECISION_TARGET,
+    ProofScoreError,
     render_report_markdown,
     score_receipts,
 )
@@ -62,7 +65,9 @@ def clean_env(monkeypatch):
     monkeypatch.setenv("NO_PROXY", "127.0.0.1,localhost")
 
 
-def run_harness_subprocess(*, source, out_dir, limit, concurrency, port, scratch_dir, run_id):
+def run_harness_subprocess(
+    *, source, out_dir, limit, concurrency, port, scratch_dir, run_id, mock_reject_count: int = 0
+):
     """Run the harness as its own interpreter, the way the orchestrator runs it.
     In-process execution is only valid in a fresh interpreter: once another test
     has imported `server` against the real data root, the in-thread helper
@@ -70,16 +75,34 @@ def run_harness_subprocess(*, source, out_dir, limit, concurrency, port, scratch
     import os
     import subprocess
     import sys
-    cmd = [sys.executable, str(ROOT / "scripts" / "librarian" / "proof_run.py"),
-           "--source", str(source), "--out", str(out_dir), "--mock",
-           "--limit", str(limit), "--concurrency", str(concurrency),
-           "--port", str(port), "--scratch", str(scratch_dir),
-           "--run-id", run_id, "--skip-hash-check"]
+    cmd = [
+        sys.executable,
+        str(ROOT / "scripts" / "librarian" / "proof_run.py"),
+        "--source", str(source),
+        "--out", str(out_dir),
+        "--mock",
+        "--limit", str(limit),
+        "--concurrency", str(concurrency),
+        "--port", str(port),
+        "--scratch", str(scratch_dir),
+        "--run-id", run_id,
+        "--skip-hash-check",
+    ]
+    if mock_reject_count > 0:
+        cmd += ["--mock-reject-count", str(mock_reject_count)]
     env = dict(os.environ)
     env.pop("ANTHROPIC_API_KEY", None)
     env["PYTHONPATH"] = str(ROOT)
-    res = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8",
-                         errors="replace", timeout=600, cwd=str(ROOT), env=env)
+    res = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        timeout=600,
+        cwd=str(ROOT),
+        env=env,
+    )
     assert res.returncode == 0, (res.stdout[-2000:], res.stderr[-2000:])
     receipts_path = Path(out_dir) / "receipts.json"
     assert receipts_path.is_file(), res.stdout[-1000:]
@@ -242,7 +265,30 @@ def test_mock_run_end_to_end(tmp_path, clean_env):
             ev = mem["evidence"]
             assert ev["basis"] == "packet"
             assert ev["quote"] is not None
-            assert len(ev["quote"].split()) <= 25
+            assert len(ev["quote"].split()) <= 24
+
+    # Verify directory structure per contract: calls/, http/, state/
+    calls_dir = out_dir / "calls"
+    assert calls_dir.is_dir()
+
+    http_dir = out_dir / "http"
+    assert http_dir.is_dir()
+    http_files = list(http_dir.glob("*.json"))
+    assert len(http_files) > 0
+    for hf in http_files:
+        text = hf.read_text(encoding="utf-8")
+        if "X-Uoink-Token" in text:
+            assert "[REDACTED]" in text
+
+    state_dir = out_dir / "state"
+    assert state_dir.is_dir()
+    assert (state_dir / "before_index.db").is_file()
+    assert (state_dir / "after_index.db").is_file()
+    assert (state_dir / "registry_export.json").is_file()
+    assert (state_dir / "work.json").is_file()
+    assert (state_dir / "attempts.json").is_file()
+    assert (state_dir / "submissions.json").is_file()
+    assert (state_dir / "proposals.json").is_file()
 
 
 def test_scorer_on_fixture_receipts(tmp_path, clean_env):
@@ -285,3 +331,155 @@ def test_scorer_on_fixture_receipts(tmp_path, clean_env):
     report_file = out_dir / "report.md"
     report_file.write_text(report_md, encoding="utf-8")
     assert report_file.is_file()
+
+
+def test_error_guard_breach_stops_and_records_partial_receipts(tmp_path, clean_env):
+    """Verifies that an error rate > 10% after 20 attempts triggers the error guard, stops launching, and writes partial receipts."""
+    fixture_db = tmp_path / "source_copy.db"
+    create_fixture_database(fixture_db, n_items=25)
+
+    ephemeral_port = find_free_port()
+    out_dir = tmp_path / "proof_out_guard"
+
+    receipts_path = run_harness_subprocess(
+        source=fixture_db,
+        out_dir=out_dir,
+        limit=20,
+        concurrency=1,
+        port=ephemeral_port,
+        scratch_dir=tmp_path / "scratch_guard",
+        run_id="test-run-guard-breach",
+        mock_reject_count=3,
+    )
+    assert receipts_path.is_file()
+    receipts_data = json.loads(receipts_path.read_text(encoding="utf-8"))
+
+    assert receipts_data["status"] == "aborted"
+    assert receipts_data["abort_reason"] is not None
+    assert "Error rate limit exceeded" in receipts_data["abort_reason"]
+    assert len(receipts_data["attempts"]) == 20
+    assert receipts_data["totals"]["rejected_attempts"] == 3
+
+    state_dir = out_dir / "state"
+    assert (state_dir / "before_index.db").is_file()
+    assert (state_dir / "after_index.db").is_file()
+    assert (state_dir / "registry_export.json").is_file()
+
+
+def test_proof_score_rejects_25_word_quote(tmp_path, clean_env):
+    """Pre-scoring check must reject quotes exceeding 24 words."""
+    fixture_db = tmp_path / "source_copy.db"
+    create_fixture_database(fixture_db, n_items=12)
+
+    receipts_path = run_harness_subprocess(
+        source=fixture_db, out_dir=tmp_path / "out", limit=12, concurrency=1,
+        port=find_free_port(), scratch_dir=tmp_path / "scratch",
+        run_id="test-score-25w")
+    receipts_data = json.loads(receipts_path.read_text(encoding="utf-8"))
+
+    # Make one accepted attempt have a 25-word quote
+    for a in receipts_data["attempts"]:
+        if a["outcome"] == "accepted":
+            a["result"]["memberships"][0]["evidence"]["quote"] = "word " * 25
+            break
+
+    holdout_data = json.loads((ROOT / "docs" / "library" / "holdout-split-2026-09-04.json").read_text(encoding="utf-8"))
+    gold_data = json.loads((ROOT / "docs" / "library" / "gold-set-2026-09-04.json").read_text(encoding="utf-8"))
+
+    with pytest.raises(ProofScoreError, match="Quote exceeds 24-word cap"):
+        score_receipts(receipts_data, holdout_data, gold_data)
+
+
+def test_proof_score_rejects_foreign_card(tmp_path, clean_env):
+    """Pre-scoring check must reject attempts referencing cards outside target_ids."""
+    fixture_db = tmp_path / "source_copy.db"
+    create_fixture_database(fixture_db, n_items=12)
+
+    receipts_path = run_harness_subprocess(
+        source=fixture_db, out_dir=tmp_path / "out", limit=12, concurrency=1,
+        port=find_free_port(), scratch_dir=tmp_path / "scratch",
+        run_id="test-score-foreign")
+    receipts_data = json.loads(receipts_path.read_text(encoding="utf-8"))
+
+    foreign_attempt = copy.deepcopy(receipts_data["attempts"][0])
+    foreign_attempt["video_id"] = "foreign-unmanifested-video-999"
+    foreign_attempt["attempt_id"] = "att-foreign-999-1"
+    receipts_data["attempts"].append(foreign_attempt)
+
+    holdout_data = json.loads((ROOT / "docs" / "library" / "holdout-split-2026-09-04.json").read_text(encoding="utf-8"))
+    gold_data = json.loads((ROOT / "docs" / "library" / "gold-set-2026-09-04.json").read_text(encoding="utf-8"))
+
+    with pytest.raises(ProofScoreError, match="Foreign card detected"):
+        score_receipts(receipts_data, holdout_data, gold_data)
+
+
+def test_proof_score_rejects_missing_source_hash(tmp_path, clean_env):
+    """Pre-scoring check must reject missing source hash."""
+    fixture_db = tmp_path / "source_copy.db"
+    create_fixture_database(fixture_db, n_items=12)
+
+    receipts_path = run_harness_subprocess(
+        source=fixture_db, out_dir=tmp_path / "out", limit=12, concurrency=1,
+        port=find_free_port(), scratch_dir=tmp_path / "scratch",
+        run_id="test-score-nosrc")
+    receipts_data = json.loads(receipts_path.read_text(encoding="utf-8"))
+
+    receipts_data["database"]["copy_before_upgrade_sha256"] = ""
+    receipts_data["inputs"]["source_sha256"] = ""
+
+    holdout_data = json.loads((ROOT / "docs" / "library" / "holdout-split-2026-09-04.json").read_text(encoding="utf-8"))
+    gold_data = json.loads((ROOT / "docs" / "library" / "gold-set-2026-09-04.json").read_text(encoding="utf-8"))
+
+    with pytest.raises(ProofScoreError, match="Missing or invalid source database SHA-256"):
+        score_receipts(receipts_data, holdout_data, gold_data)
+
+
+def test_proof_score_rejects_modified_batch(tmp_path, clean_env):
+    """Pre-scoring check must reject attempt referencing an unrecorded call or unlisted video in call."""
+    fixture_db = tmp_path / "source_copy.db"
+    create_fixture_database(fixture_db, n_items=12)
+
+    receipts_path = run_harness_subprocess(
+        source=fixture_db, out_dir=tmp_path / "out", limit=12, concurrency=1,
+        port=find_free_port(), scratch_dir=tmp_path / "scratch",
+        run_id="test-score-batch")
+    receipts_data = json.loads(receipts_path.read_text(encoding="utf-8"))
+
+    valid_vid = receipts_data["attempts"][0]["video_id"]
+    receipts_data["audit_extensions"]["calls"] = [
+        {"call_id": "call-0001", "video_ids": ["other-video-id"]}
+    ]
+    receipts_data["attempts"][0]["call_id"] = "call-0001"
+    # Keep receipts_data["attempts"][0]["video_id"] as valid_vid
+
+    holdout_data = json.loads((ROOT / "docs" / "library" / "holdout-split-2026-09-04.json").read_text(encoding="utf-8"))
+    gold_data = json.loads((ROOT / "docs" / "library" / "gold-set-2026-09-04.json").read_text(encoding="utf-8"))
+
+    with pytest.raises(ProofScoreError, match="Modified batch"):
+        score_receipts(receipts_data, holdout_data, gold_data)
+
+
+def test_proof_score_rejects_invented_usage(tmp_path, clean_env):
+    """Pre-scoring check must reject invented usage in mock mode."""
+    fixture_db = tmp_path / "source_copy.db"
+    create_fixture_database(fixture_db, n_items=12)
+
+    receipts_path = run_harness_subprocess(
+        source=fixture_db, out_dir=tmp_path / "out", limit=12, concurrency=1,
+        port=find_free_port(), scratch_dir=tmp_path / "scratch",
+        run_id="test-score-usage")
+    receipts_data = json.loads(receipts_path.read_text(encoding="utf-8"))
+
+    # In mock mode, pretend tokens were consumed
+    receipts_data["attempts"][0]["usage"] = {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 120,
+    }
+
+    holdout_data = json.loads((ROOT / "docs" / "library" / "holdout-split-2026-09-04.json").read_text(encoding="utf-8"))
+    gold_data = json.loads((ROOT / "docs" / "library" / "gold-set-2026-09-04.json").read_text(encoding="utf-8"))
+
+    with pytest.raises(ProofScoreError, match="Invented usage detected"):
+        score_receipts(receipts_data, holdout_data, gold_data)
+
