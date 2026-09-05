@@ -90,6 +90,22 @@ def get_git_sha() -> str:
     return "0" * 40
 
 
+def _cli_safe_schema(schema: Dict[str, Any]) -> Dict[str, Any]:
+    """Deep copy of a JSON schema without `pattern` and `uniqueItems`."""
+    out = copy.deepcopy(schema)
+    def strip(o):
+        if isinstance(o, dict):
+            o.pop("pattern", None)
+            o.pop("uniqueItems", None)
+            for v in o.values():
+                strip(v)
+        elif isinstance(o, list):
+            for v in o:
+                strip(v)
+    strip(out)
+    return out
+
+
 class InductionHarness:
     def __init__(
         self,
@@ -510,7 +526,12 @@ class InductionHarness:
         final_id = "call-consolidation"
         if status == "completed":
             cons_prompt = cons_template.replace("{{PROPOSALS}}", library_cards.serialize_card(batch_proposals))
-            record, envelope = self._claude_call(final_id, ["consolidation"], cons_prompt, PROPOSAL_SCHEMA)
+            # Claude Code's structured output stalls indefinitely on PROPOSAL_SCHEMA's
+            # regex patterns and uniqueItems (observed 2026-09-05: zero bytes after
+            # 50 min; the same prompt returns in 3 min without them). The call uses
+            # the schema minus those two constraint kinds; the validator still checks
+            # the proposal against the full PROPOSAL_SCHEMA afterwards.
+            record, envelope = self._claude_call(final_id, ["consolidation"], cons_prompt, _cli_safe_schema(PROPOSAL_SCHEMA))
             calls.append(record)
             structured = envelope.get("structured_output") if isinstance(envelope, dict) else None
             if record["exit_status"] != 0 or not isinstance(structured, dict):

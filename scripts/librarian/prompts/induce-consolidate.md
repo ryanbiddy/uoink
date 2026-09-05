@@ -158,5 +158,12 @@ Every v1 node below MUST appear in `nodes` with `shelf_id`, `path`, `definition`
 - `pin_impact_report`: `{"silent_redirects": false, "items": []}`.
 - `rejected_proposals`: every candidate you did not adopt, `{"proposal": <path or name>, "reason": <why>}`.
 
+## Output size discipline (mandatory)
+The document must stay compact so it can be emitted in one response:
+- Each `coverage_ledger` row for a mapped disposition carries EXACTLY ONE `evidence` entry (the single strongest, copied verbatim from the batch data) and a `reason` of at most 12 words. Refusal rows carry `evidence: []` and a reason of at most 12 words.
+- Each new node's `supporting_evidence` carries EXACTLY FIVE entries from five distinct cards (copied verbatim), no more.
+- Definitions are one sentence; include and exclude cues are short phrases; `sibling_cues` fields are short phrases.
+- No prose outside the JSON.
+
 ## Batch proposals (data)
 {{PROPOSALS}}
