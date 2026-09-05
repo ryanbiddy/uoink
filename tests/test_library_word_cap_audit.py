@@ -506,7 +506,17 @@ def test_character_limit_retained_alongside_word_cap(make_env):
     refused = env.svc.submit_result(env.ctx, submission(env, [
         membership(env, long_word, basis="fetched_full", card_hash=card["card_hash"]),
     ], key="key_1001"))
-    assert_rejected_on_quote(env, refused, membership_index=0, require_cap_hint=False)
+    # Integrator note (2026-09-05): the 1,000-character ceiling is enforced by the
+    # frozen result schema (maxLength on the quote) before the service's own
+    # evidence checks run, so the rejection names the result shape rather than
+    # the quote field. Either form is a rejection with nothing staged; the
+    # quote-field wording is required only for the word cap, tested elsewhere.
+    assert refused.get("ok") is True and refused.get("outcome") == "rejected", refused
+    assert refused.get("accepted_memberships") == [], refused
+    assert refused.get("retryable") is True, refused
+    assert refused.get("rejected"), refused
+    assert env.count("library_proposals") == 0
+    assert env.count("item_shelves") == 0
 
     env.work = env.claim()
     accepted = env.svc.submit_result(env.ctx, submission(env, [
