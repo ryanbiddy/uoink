@@ -110,6 +110,7 @@ Source: "staging\usage_meter.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\scripts\install-watchdog.ps1"; DestDir: "{app}\scripts"; Flags: ignoreversion
+Source: "staging\scripts\recall_hook.py"; DestDir: "{app}\scripts"; Flags: ignoreversion
 ; Cross-platform path/OS helpers -- server.py and migrate_install.py import
 ; this at module top. Omitting it crashes the helper before it binds the port.
 Source: "staging\_platform.py"; DestDir: "{app}"; Flags: ignoreversion

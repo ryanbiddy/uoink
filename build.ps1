@@ -507,6 +507,7 @@ Copy-Item (Join-Path $RepoRoot 'uoink.cmd')      $StagingDir -Force
 Copy-Item (Join-Path $RepoRoot 'uoink')          $StagingDir -Force
 New-Item -ItemType Directory -Force -Path (Join-Path $StagingDir 'scripts') | Out-Null
 Copy-Item (Join-Path $RepoRoot 'scripts\install-watchdog.ps1') (Join-Path $StagingDir 'scripts') -Force
+Copy-Item (Join-Path $RepoRoot 'scripts\recall_hook.py') (Join-Path $StagingDir 'scripts') -Force
 # Cross-platform path/OS helpers (added Sprint 19.5). server.py and
 # migrate_install.py `import _platform` at module top -- omitting it ships a
 # helper that crashes with ModuleNotFoundError before binding the port.

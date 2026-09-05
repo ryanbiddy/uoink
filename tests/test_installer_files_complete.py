@@ -77,7 +77,10 @@ def test_import_walker_follows_deferred_and_relative_imports(tmp_path):
 
 
 def test_cli_and_watchdog_assets_are_in_both_lists():
-    required = {"uoink", "uoink.cmd", "scripts/install-watchdog.ps1"}
+    # Run F acceptance case 5: the Recall hook's own docstring points users at
+    # the installed scripts/ path, so it must ship with the app.
+    required = {"uoink", "uoink.cmd", "scripts/install-watchdog.ps1",
+                "scripts/recall_hook.py"}
     assert required <= staged_sources()
     assert required <= installed_sources()
 
