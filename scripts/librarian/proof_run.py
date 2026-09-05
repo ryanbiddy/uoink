@@ -323,7 +323,7 @@ class ProofHarness:
         self.taxonomy_nodes_by_path: Dict[Tuple[str, ...], Any] = {}
         self.prompt_template: str = ""
 
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()  # re-entrant: retry-policy HTTP calls run under it and the HTTP recorder takes it again
         self.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         self._orig_env = {
             k: os.environ.get(k)
