@@ -444,6 +444,20 @@ def _check_http(receipts, artifact_root):
     return events, bodies
 
 
+def _deserializable(image: bytes) -> bytes:
+    """A WAL-mode database image cannot be opened after Connection.deserialize
+    (SQLite reports "unable to open database file"); the named source copy is
+    WAL. Hashes are always checked on the original bytes. Only the in-memory
+    copy has header bytes 18-19 (journal mode) set to rollback so the pages can
+    be read; page content is untouched. Integrator addition, 2026-09-05."""
+    if len(image) > 20 and image[:15] == b"SQLite format 3" and image[18:20] == bytes([2, 2]):
+        patched = bytearray(image)
+        patched[18] = 1
+        patched[19] = 1
+        return bytes(patched)
+    return image
+
+
 def _check_state_artifacts(receipts, manifest, artifact_root, http):
     records = receipts["state_artifacts"]
     raw = {key: artifact_bytes(value, artifact_root) for key, value in records.items()}
@@ -451,14 +465,14 @@ def _check_state_artifacts(receipts, manifest, artifact_root, http):
     require(sha(raw["upgraded"]) == receipts["database"]["copy_after_upgrade_sha256"], "Archived upgrade hash mismatch")
     for key, schema_key in [("source", "schema_before"), ("upgraded", "schema_after")]:
         with sqlite3.connect(":memory:") as conn:
-            conn.deserialize(raw[key])
+            conn.deserialize(_deserializable(raw[key]))
             conn.execute("PRAGMA query_only=ON")
             require(conn.execute("SELECT max(version) FROM schema_version").fetchone()[0] == receipts["database"][schema_key], "Archived database schema mismatch")
     for side in ("before", "after"):
         require(decode_json(raw[side + "_snapshot"]) == receipts[side], "Independent snapshot disagrees with receipt")
         require(raw[side + "_db"].startswith(b"SQLite format 3\0"), "Missing SQLite snapshot")
         with sqlite3.connect(":memory:") as conn:
-            conn.deserialize(raw[side + "_db"])
+            conn.deserialize(_deserializable(raw[side + "_db"]))
             conn.execute("PRAGMA query_only=ON")
             conn.row_factory = sqlite3.Row
             meta = conn.execute("SELECT * FROM library_meta WHERE singleton=1").fetchone()
@@ -482,7 +496,7 @@ def _check_state_artifacts(receipts, manifest, artifact_root, http):
     required = {"library_work", "library_attempts", "library_submissions", "library_proposals", "library_manifest"}
     require(set(registry) == required and all(isinstance(v, list) for v in registry.values()), "Registry export incomplete")
     with sqlite3.connect(":memory:") as conn:
-        conn.deserialize(raw["after_db"])
+        conn.deserialize(_deserializable(raw["after_db"]))
         conn.execute("PRAGMA query_only=ON")
         conn.row_factory = sqlite3.Row
         for table in sorted(required):

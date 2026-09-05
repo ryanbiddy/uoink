@@ -903,8 +903,38 @@ class ProofHarness:
         (self.state_dir / "submissions.json").write_text(json.dumps(registry.get("library_submissions", []), indent=2, ensure_ascii=False), encoding="utf-8")
         (self.state_dir / "proposals.json").write_text(json.dumps(registry.get("library_proposals", []), indent=2, ensure_ascii=False), encoding="utf-8")
 
+        # Archive the bounded corpus heads the manifest froze: the first 8,192
+        # bytes of each target's corpus markdown, read from the disposable
+        # database's corpus_path and verified against the frozen raw_sha256.
+        # A mismatch means the frozen source changed and the run is invalid.
+        heads_dir = self.out_dir / "heads"
+        heads_dir.mkdir(parents=True, exist_ok=True)
+        corpus_paths: Dict[str, str] = {}
+        try:
+            with sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True) as head_conn:
+                for row in head_conn.execute("SELECT video_id, corpus_path FROM yoinks"):
+                    if row[1]:
+                        corpus_paths[row[0]] = row[1]
+        except sqlite3.Error as exc:
+            raise ProofRunError(f"corpus_path lookup failed: {exc}")
         heads_map = {}
         for vid, head_meta in self.manifest.get("corpus_heads", {}).items():
+            source_path = corpus_paths.get(vid)
+            if not source_path or not Path(source_path).is_file():
+                if self.mock:
+                    # Fixture databases carry no corpus files; mock receipts are
+                    # fixture evidence only and never establish a real proof.
+                    (heads_dir / f"{vid}.bin").write_bytes(b"")
+                    heads_map[vid] = {"path": f"heads/{vid}.bin", "sha256": hashlib.sha256(b"").hexdigest(), "bytes": 0}
+                    continue
+                raise ProofRunError(f"no corpus_path for frozen target {vid}")
+            with open(source_path, "rb") as stream:
+                head = stream.read(8192)
+            actual_sha = hashlib.sha256(head).hexdigest()
+            if actual_sha != head_meta["raw_sha256"] or len(head) != head_meta["bytes"]:
+                raise ProofRunError(
+                    f"frozen corpus head changed for {vid}: {len(head)} bytes, sha {actual_sha[:12]}")
+            (heads_dir / f"{vid}.bin").write_bytes(head)
             heads_map[vid] = {
                 "path": f"heads/{vid}.bin",
                 "sha256": head_meta["raw_sha256"],
