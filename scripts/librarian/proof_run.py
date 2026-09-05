@@ -1036,6 +1036,19 @@ class ProofHarness:
                     "outcome": "error",
                     "reason": call_error or f"model returned no result for {vid}",
                 }
+            elif res.get("outcome") == "assigned":
+                # Prompt contract: evidence quotes are verbatim and under 25
+                # words. The service caps quotes at 1,000 characters only, so a
+                # longer quote would be accepted there and then fail the receipt
+                # validator. Treat it as invalid model output: submit an error
+                # result (recorded as rejected) so the retry policy can re-ask.
+                too_long = [len(((m.get("evidence") or {}).get("quote") or "").split())
+                            for m in (res.get("memberships") or [])]
+                if any(n >= 25 for n in too_long):
+                    print(f"[proof] model quote over 24 words for {vid} ({max(too_long)} words); rejecting output",
+                          file=sys.stderr, flush=True)
+                    res = {"outcome": "error",
+                           "reason": f"model quote exceeds prompt contract (25 words): {max(too_long)} words"}
 
             card_text = library_cards.card_text(it["card"])
             card_bytes = len(card_text.encode("utf-8"))
