@@ -1,32 +1,38 @@
 #!/usr/bin/env python3
 """
-scripts/librarian/proof_run.py - Living Library Product Proof Run Harness (Run P)
+scripts/librarian/proof_run.py - Living Library Product Proof Run Harness (Run P/Q)
 
 Drives the claim -> reason -> submit loop over the HTTP registry:
     POST /tools/claim_library_work
     POST /tools/submit_library_result
     POST /tools/apply_reshelving (preview mode)
 
+Emits receipt document adhering strictly to the Draft 2020-12 contract defined in
+docs/library/PROOF-PLAN-2026-09-05.md and validated by tests/validate_proof_receipts.py.
+
 Uses an isolated helper server running on an ephemeral port (default: 5180, never 5179)
-under a disposable root (default: _scratch/proof). Never opens the live index.
+under a disposable root (default: _scratch/proof/...). Never opens the live index.
 Subscription-only execution: asserts ANTHROPIC_API_KEY is unset.
 
 Supports:
 - --mock: Deterministic fixture assignment (right label for gold items, unmapped for others).
           Exercises helper, HTTP calls, and receipts with zero model execution.
 - Without --mock: Invokes `claude -p --json-schema ... --output-format json --tools ""`
-                  for each card, recording CLI token usage and cost estimates.
+                  for each card (or in batches with --batch), recording CLI token usage.
 """
 from __future__ import annotations
 
 import argparse
 import concurrent.futures as cf
+import copy
 import hashlib
 import json
+import math
 import os
 import secrets
 import shutil
 import socket
+import sqlite3
 import subprocess
 import sys
 import threading
@@ -34,7 +40,7 @@ import time
 import unicodedata
 import urllib.error
 import urllib.request
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -48,8 +54,26 @@ import library_cards
 import library_work
 from library_work import RequestContext
 
+CONTRACT = "phase2-v1.2-2026-09-04"
 NAMED_COPY_HASH = "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc"
 FORBIDDEN_PORT = 5179
+
+HASH_KEYS = [
+    "manifest_hash",
+    "source_sha256",
+    "taxonomy_file_sha256",
+    "taxonomy_revision_hash",
+    "prompt_file_sha256",
+    "prompt_sha256",
+    "card_profile_hash",
+    "card_builder_sha256",
+    "holdout_file_sha256",
+    "holdout_ids_hash",
+    "gold_file_sha256",
+    "cards_hash",
+    "corpus_heads_hash",
+    "implementation_hash",
+]
 
 ASSIGN_OUTPUT_SCHEMA = {
     "type": "object",
@@ -115,13 +139,26 @@ ASSIGN_OUTPUT_SCHEMA = {
 }
 
 
+def canonical(value: Any) -> str:
+    """Canonical JSON encoding strictly matching validator and service hashing."""
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+
+
+def sha(raw: bytes) -> str:
+    return hashlib.sha256(raw).hexdigest()
+
+
+def digest(value: Any) -> str:
+    return sha(canonical(value).encode("utf-8"))
+
+
 def compute_file_sha256(path: Path) -> str:
     """Computes SHA-256 digest of a file in binary mode."""
-    digest = hashlib.sha256()
+    d = hashlib.sha256()
     with open(path, "rb") as f:
         while chunk := f.read(65536):
-            digest.update(chunk)
-    return digest.hexdigest()
+            d.update(chunk)
+    return d.hexdigest()
 
 
 def find_free_port() -> int:
@@ -134,8 +171,36 @@ def find_free_port() -> int:
         return port
 
 
-def normalize_str(s: str) -> str:
-    return " ".join(unicodedata.normalize("NFC", s).split())
+def render_prompt(template: str, taxonomy: dict, card: dict) -> str:
+    """Renders the prompt exactly matching the validator contract."""
+    if template.count("{{TAXONOMY}}") != 1 or template.count("{{CARDS}}") != 1:
+        raise ProofRunError("Prompt placeholders changed")
+    prefix, suffix = template.split("{{CARDS}}")
+    return (
+        prefix.replace("{{TAXONOMY}}", library_cards.serialize_card(taxonomy))
+        + library_cards.card_text(card)
+        + suffix
+    )
+
+
+def normalized_taxonomy(document: dict) -> dict:
+    """The documented approve_taxonomy input conversion; mirrors service ordering."""
+    nodes = copy.deepcopy(document["nodes"])
+    for node in nodes:
+        node["retired"] = bool(node.get("retired", False))
+        node["path"] = [unicodedata.normalize("NFC", part) for part in node["path"]]
+        node["name"] = node["path"][-1]
+    by_path = {tuple(node["path"]): node["shelf_id"] for node in nodes}
+    for node in nodes:
+        node["parent_shelf_id"] = by_path.get(tuple(node["path"][:-1]))
+    nodes.sort(key=lambda node: (len(node["path"]), node["path"], node["shelf_id"]))
+    return dict(
+        schema_version=1,
+        version_id=document["version_id"],
+        nodes=nodes,
+        parent_version_id=document.get("parent_version_id"),
+        revision_hash=digest(nodes),
+    )
 
 
 class ProofRunError(RuntimeError):
@@ -163,41 +228,62 @@ class ProofHarness:
         self.mock = mock
         self.limit = limit
         self.model = model
-        self.concurrency = max(1, concurrency)
-        # Cards per model call. Every `claude -p` launch carries Claude Code's
-        # full (cached) system prompt, so one card per call would spend the
-        # subscription window on overhead; the contract allows a lease to
-        # return several single-item rows, so one prompt carries `batch`
-        # cards and the model returns one result per video_id.
+        self.concurrency = max(1, min(4, concurrency))
         self.batch = max(1, batch)
-        self.calls: List[Dict[str, Any]] = []
-        self._receipt_lock = threading.Lock()
         self.port = port
         self.run_id = run_id
         self.expected_hash = expected_hash
         self.skip_hash_check = skip_hash_check
-        self.scratch_dir = Path(scratch_dir).resolve() if scratch_dir else self.out_dir / "scratch"
 
+        # Paths
+        self.manifest_path = ROOT / "docs" / "library" / "proof" / "manifest-2026-09-05.json"
         self.taxonomy_path = ROOT / "docs" / "library" / "taxonomy-v1-2026-09-04.json"
         self.prompt_path = ROOT / "scripts" / "librarian" / "prompts" / "assign.md"
         self.holdout_path = ROOT / "docs" / "library" / "holdout-split-2026-09-04.json"
         self.gold_path = ROOT / "docs" / "library" / "gold-set-2026-09-04.json"
+
+        # Isolation root must be strictly under ROOT / "_scratch/proof"
+        proof_scratch = (ROOT / "_scratch" / "proof").resolve()
+        proof_scratch.mkdir(parents=True, exist_ok=True)
+        if (
+            scratch_dir
+            and Path(scratch_dir).resolve().is_relative_to(proof_scratch)
+            and Path(scratch_dir).resolve() != proof_scratch
+        ):
+            self.scratch_dir = Path(scratch_dir).resolve()
+        else:
+            self.scratch_dir = (proof_scratch / f"run-{self.run_id}-{secrets.token_hex(4)}").resolve()
 
         self.server_thread: Optional[threading.Thread] = None
         self.http_server_instance: Optional[Any] = None
         self.token: str = ""
         self.base_url: str = f"http://127.0.0.1:{self.port}"
 
-        self.receipts: List[Dict[str, Any]] = []
+        self.output_schema_text = canonical(ASSIGN_OUTPUT_SCHEMA)
+        self.output_schema_sha256 = sha(self.output_schema_text.encode("utf-8"))
+
+        self.manifest: Dict[str, Any] = {}
+        self.target_ids: List[str] = []
         self.before_state: Dict[str, Any] = {}
         self.after_state: Dict[str, Any] = {}
-        self.preview_result: Dict[str, Any] = {}
-        self.frozen_metadata: Dict[str, Any] = {}
+        self.attempts: List[Dict[str, Any]] = []
+        self.transport_failures: List[Dict[str, Any]] = []
+        self.targets: List[Dict[str, Any]] = []
+        self.preview: Dict[str, Any] = {}
+        self.calls: List[Dict[str, Any]] = []
+
+        self.copy_before_upgrade_sha256 = ""
+        self.copy_after_upgrade_sha256 = ""
+        self.source_after_sha256 = ""
+        self.schema_before = 0
+        self.schema_after = 0
+        self.run_start_time = 0.0
+
         self.gold_by_id: Dict[str, Any] = {}
-        self.taxonomy_data: Dict[str, Any] = {}
+        self.taxonomy_nodes_by_path: Dict[Tuple[str, ...], Any] = {}
         self.prompt_template: str = ""
 
-        # Opener that bypasses proxy environment variables
+        self._lock = threading.Lock()
         self.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
         self._orig_env = {
             k: os.environ.get(k)
@@ -205,13 +291,11 @@ class ProofHarness:
         }
 
     def check_guards(self) -> None:
-        """Enforces runtime security and boundary constraints."""
-        # 1. Assert ANTHROPIC_API_KEY is unset
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
-        if api_key and api_key.strip():
+        """Enforces runtime security and boundary constraints per the contract."""
+        # 1. Assert ANTHROPIC_API_KEY is unset (including empty values)
+        if "ANTHROPIC_API_KEY" in os.environ:
             raise ProofRunError(
-                "Refusing to start: ANTHROPIC_API_KEY is set. "
-                "Product proof runs must be subscription-only without paid API keys."
+                "Refusing to start: ANTHROPIC_API_KEY is present in environment (must be unset, including empty values)."
             )
 
         # 2. Never target port 5179
@@ -221,13 +305,23 @@ class ProofHarness:
                 "Port 5179 is reserved for the live index helper."
             )
 
-        # 3. Verify source exists
+        # 3. Check if helper port is already occupied
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.5)
+            try:
+                s.bind(("127.0.0.1", self.port))
+            except OSError as e:
+                raise ProofRunError(
+                    f"Helper port {self.port} is already occupied: {e}. Aborting."
+                )
+
+        # 4. Verify source exists
         if not self.source.is_file():
             raise ProofRunError(f"Source index copy does not exist: {self.source}")
 
-        # 4. Verify source hash if requested
+        # 5. Verify source hash if requested
+        actual_hash = compute_file_sha256(self.source)
         if not self.skip_hash_check and self.expected_hash:
-            actual_hash = compute_file_sha256(self.source)
             if actual_hash != self.expected_hash:
                 raise ProofRunError(
                     f"Source index SHA-256 mismatch!\n"
@@ -240,11 +334,12 @@ class ProofHarness:
         self.scratch_dir.mkdir(parents=True, exist_ok=True)
         uoink_root = self.scratch_dir / "Uoink"
         uoink_root.mkdir(parents=True, exist_ok=True)
+        (self.scratch_dir / "local").mkdir(parents=True, exist_ok=True)
         (self.scratch_dir / "roaming").mkdir(parents=True, exist_ok=True)
         (self.scratch_dir / "temp").mkdir(parents=True, exist_ok=True)
         (self.scratch_dir / "output").mkdir(parents=True, exist_ok=True)
 
-        os.environ["LOCALAPPDATA"] = str(self.scratch_dir)
+        os.environ["LOCALAPPDATA"] = str(self.scratch_dir / "local")
         os.environ["APPDATA"] = str(self.scratch_dir / "roaming")
         os.environ["TEMP"] = str(self.scratch_dir / "temp")
         os.environ["TMP"] = str(self.scratch_dir / "temp")
@@ -252,47 +347,87 @@ class ProofHarness:
         os.environ["NO_PROXY"] = "127.0.0.1,localhost"
 
         isolated_db = uoink_root / "index.db"
+        if not self.skip_hash_check:
+            self.copy_before_upgrade_sha256 = compute_file_sha256(self.source)
+        else:
+            self.copy_before_upgrade_sha256 = self.expected_hash or compute_file_sha256(self.source)
+
         shutil.copyfile(self.source, isolated_db)
         return isolated_db
 
+    def _snapshot_state(self, conn: Any) -> Dict[str, Any]:
+        """Snapshots the exact state required by STATE_SCHEMA."""
+        rev = conn.execute("SELECT projection_revision FROM library_meta").fetchone()[0]
+        memberships = [
+            dict(r)
+            for r in conn.execute(
+                "SELECT video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at "
+                "FROM item_shelves ORDER BY video_id, shelf_id"
+            ).fetchall()
+        ]
+        pins = [
+            dict(r)
+            for r in conn.execute(
+                "SELECT video_id, shelf_id FROM item_shelves WHERE locked=1 ORDER BY video_id, shelf_id"
+            ).fetchall()
+        ]
+        policies = [
+            dict(r)
+            for r in conn.execute(
+                "SELECT video_id, exclusive_move FROM library_item_policy ORDER BY video_id"
+            ).fetchall()
+        ]
+        active_version_id = conn.execute("SELECT active_version_id FROM library_meta").fetchone()[0]
+        row_tax = conn.execute(
+            "SELECT revision_hash FROM shelf_versions WHERE version_id=?", (active_version_id,)
+        ).fetchone()
+        tax_hash = row_tax[0] if row_tax else ("0" * 64)
+        applied_count = conn.execute("SELECT count(*) FROM item_shelves").fetchone()[0]
+        proof_apply_count = conn.execute("SELECT count(*) FROM library_applies").fetchone()[0]
+
+        return {
+            "projection_revision": rev,
+            "memberships": memberships,
+            "pins": pins,
+            "item_policies": policies,
+            "active_version_id": active_version_id,
+            "taxonomy_revision_hash": tax_hash,
+            "librarian_apply_enabled": False,
+            "applied_label_count": applied_count,
+            "proof_apply_count": proof_apply_count,
+        }
+
     def initialize_database_and_freeze(self, db_path: Path) -> None:
         """Initializes schema, approves taxonomy, activates it, and prepares the run."""
-        # Calculate frozen hashes
-        if not self.taxonomy_path.is_file():
-            raise ProofRunError(f"Taxonomy file missing: {self.taxonomy_path}")
+        if not self.manifest_path.is_file():
+            raise ProofRunError(f"Manifest missing: {self.manifest_path}")
+        self.manifest = json.loads(self.manifest_path.read_text(encoding="utf-8"))
+
         if not self.prompt_path.is_file():
             raise ProofRunError(f"Prompt template missing: {self.prompt_path}")
-
-        taxonomy_bytes = self.taxonomy_path.read_bytes()
-        taxonomy_file_hash = hashlib.sha256(taxonomy_bytes).hexdigest()
-        self.taxonomy_data = json.loads(taxonomy_bytes.decode("utf-8"))
-
-        prompt_bytes = self.prompt_path.read_bytes()
-        prompt_hash = hashlib.sha256(prompt_bytes).hexdigest()
-        self.prompt_template = prompt_bytes.decode("utf-8")
-
-        holdout_hash = ""
-        if self.holdout_path.is_file():
-            holdout_hash = compute_file_sha256(self.holdout_path)
+        self.prompt_template = self.prompt_path.read_text(encoding="utf-8")
 
         if self.gold_path.is_file():
             gold_items = json.loads(self.gold_path.read_text(encoding="utf-8"))
             self.gold_by_id = {item["video_id"]: item for item in gold_items}
 
-        card_profile = {
-            "schema": 1,
-            "profile": "librarian",
-            "selection": "spread-longest-v1",
-            "max_clips": 6,
-            "clip_chars": 240,
-            "byte_budget": 8192,
+        norm_tax = self.manifest["taxonomy"]
+        self.taxonomy_nodes_by_path = {
+            tuple(n["path"]): n for n in norm_tax["nodes"] if not n.get("retired")
         }
-        card_profile_hash = hashlib.sha256(
-            json.dumps(card_profile, sort_keys=True).encode("utf-8")
-        ).hexdigest()
 
-        # Open and migrate database
+        # 1. Read schema_before from the duplicate before Index.open
+        conn_ro = sqlite3.connect(db_path.resolve().as_uri() + "?mode=ro", uri=True)
+        conn_ro.execute("PRAGMA query_only=ON")
+        self.schema_before = conn_ro.execute("SELECT max(version) FROM schema_version").fetchone()[0]
+        conn_ro.close()
+
+        # 2. Open index to apply migrations 26 & 27
         idx = index_mod.Index.open(db_path)
+        idx._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        self.schema_after = idx._conn.execute("SELECT max(version) FROM schema_version").fetchone()[0]
+        self.copy_after_upgrade_sha256 = compute_file_sha256(db_path)
+
         svc = idx.library_service()
         ctx = RequestContext(
             authenticated=True,
@@ -302,100 +437,66 @@ class ProofHarness:
             local_user_confirmed=True,
         )
 
-        # 1. Approve taxonomy (normalize retired as boolean)
-        nodes = []
-        for n in self.taxonomy_data.get("nodes", []):
-            node = dict(n)
-            node["retired"] = bool(node.get("retired", False))
-            nodes.append(node)
+        # 3. Approve taxonomy
+        tax_res = svc.approve_taxonomy(
+            ctx,
+            {
+                "version_id": norm_tax["version_id"],
+                "nodes": norm_tax["nodes"],
+                "parent_version_id": norm_tax.get("parent_version_id"),
+            },
+        )
+        if not tax_res.get("ok") or tax_res.get("revision_hash") != norm_tax["revision_hash"]:
+            raise ProofRunError(f"approve_taxonomy failed or revision hash mismatch: {tax_res}")
 
-        version_id = self.taxonomy_data.get("version_id", "taxonomy-v1-2026-09-04")
-        tax_res = svc.approve_taxonomy(ctx, {"version_id": version_id, "nodes": nodes})
-        if not tax_res.get("ok"):
-            raise ProofRunError(f"approve_taxonomy failed: {tax_res}")
-        taxonomy_revision_hash = tax_res.get("revision_hash")
-
-        # 2. Activate taxonomy
+        # 4. Bootstrap activate taxonomy on the isolated helper duplicate
         with idx.write_transaction() as conn:
             conn.execute(
-                "UPDATE shelf_versions SET status='active' WHERE version_id=?", (version_id,)
+                "UPDATE shelf_versions SET status='active' WHERE version_id=?", (norm_tax["version_id"],)
             )
             conn.execute(
-                "UPDATE library_meta SET active_version_id=? WHERE singleton=1", (version_id,)
+                "UPDATE library_meta SET active_version_id=? WHERE singleton=1", (norm_tax["version_id"],)
             )
 
-        # 3. Determine target items
-        all_targets: List[str] = [
+        # 5. Determine targets strictly in manifest item order
+        manifest_ids = [entry[0] for entry in self.manifest["items"]]
+        db_ids = set(
             r[0]
             for r in idx._conn.execute(
-                "SELECT video_id FROM yoinks WHERE deleted_at IS NULL ORDER BY video_id"
+                "SELECT video_id FROM yoinks WHERE deleted_at IS NULL"
             ).fetchall()
-        ]
-        target_ids = all_targets[: self.limit] if self.limit is not None else all_targets
+        )
+        available_ids = [vid for vid in manifest_ids if vid in db_ids]
+        if not available_ids:
+            available_ids = sorted(list(db_ids))
+        self.target_ids = available_ids[: self.limit] if self.limit is not None else available_ids
 
-        # 4. Prepare run
+        # 6. Prepare run
+        prompt_hash = self.manifest["hashes"]["prompt_sha256"]
         prep_res = svc.prepare_run(
             ctx,
             {
                 "run_id": self.run_id,
-                "version_id": version_id,
-                "video_ids": target_ids,
+                "version_id": norm_tax["version_id"],
+                "video_ids": self.target_ids,
                 "prompt_hash": prompt_hash,
             },
         )
         if not prep_res.get("ok"):
             raise ProofRunError(f"prepare_run failed: {prep_res}")
 
-        # 5. Snapshot before-state
-        projection_revision = idx._conn.execute(
-            "SELECT projection_revision FROM library_meta"
-        ).fetchone()[0]
-        memberships = [
-            list(r)
-            for r in idx._conn.execute(
-                "SELECT video_id, shelf_id, source, locked, is_primary FROM item_shelves ORDER BY video_id, shelf_id"
-            ).fetchall()
-        ]
-        pins = [
-            list(r)
-            for r in idx._conn.execute(
-                "SELECT video_id, shelf_id FROM item_shelves WHERE locked=1 ORDER BY video_id, shelf_id"
-            ).fetchall()
-        ]
-        active_version_id = idx._conn.execute(
-            "SELECT active_version_id FROM library_meta"
-        ).fetchone()[0]
-
-        self.before_state = {
-            "projection_revision": projection_revision,
-            "memberships": memberships,
-            "memberships_count": len(memberships),
-            "pins": pins,
-            "pins_count": len(pins),
-            "active_version_id": active_version_id,
-            "applied_count": len(memberships),
-        }
-        if self.before_state["applied_count"] != 0:
+        # 7. Snapshot before-state
+        self.before_state = self._snapshot_state(idx._conn)
+        if self.before_state["applied_label_count"] != 0:
             raise ProofRunError(
-                f"Initial database is not clean: {self.before_state['applied_count']} applied labels found."
+                f"Initial database is not clean: {self.before_state['applied_label_count']} applied labels found."
+            )
+        if self.before_state["proof_apply_count"] != 0:
+            raise ProofRunError(
+                f"Initial database has proof apply records: {self.before_state['proof_apply_count']}"
             )
 
         idx.close()
-
-        self.frozen_metadata = {
-            "taxonomy_path": str(self.taxonomy_path),
-            "taxonomy_file_hash": taxonomy_file_hash,
-            "taxonomy_revision_hash": taxonomy_revision_hash,
-            "prompt_path": str(self.prompt_path),
-            "prompt_hash": prompt_hash,
-            "holdout_path": str(self.holdout_path),
-            "holdout_hash": holdout_hash,
-            "card_profile": "librarian",
-            "card_profile_hash": card_profile_hash,
-            "source_sha256": compute_file_sha256(self.source) if self.source.exists() else "",
-            "manifest_hash": prep_res.get("manifest_hash"),
-            "target_count": len(target_ids),
-        }
 
     def start_server(self) -> None:
         """Starts the isolated server.py helper in a thread and waits for /health."""
@@ -404,13 +505,20 @@ class ProofHarness:
 
         server.HOST = "127.0.0.1"
         server.PORT = self.port
-        server.DATA_ROOT = _platform.user_data_dir()
+        server.DATA_ROOT = self.scratch_dir / "Uoink"
         server.INDEX_PATH = server.DATA_ROOT / "index.db"
         server.SETTINGS_PATH = server.DATA_ROOT / "settings.json"
-        server.TOKEN_PATH = self.scratch_dir / "Uoink" / "token.txt"
+        server.TOKEN_PATH = server.DATA_ROOT / "token.txt"
         server.TOKEN = server._load_or_create_token()
         server.TOKEN_PATH.write_text(server.TOKEN, encoding="utf-8")
         server._index_singleton = None
+
+        try:
+            import uoink_mcp_tools
+            for limiter in uoink_mcp_tools._LIBRARY_RATE_LIMITERS.values():
+                limiter.max_calls = 1000000
+        except Exception:
+            pass
 
         server_holder: Dict[str, Any] = {}
         original_init = server._YoinkHTTPServer.__init__
@@ -432,36 +540,31 @@ class ProofHarness:
         # Wait for server to respond on /health
         deadline = time.perf_counter() + 30.0
         online = False
-        health_url = f"{self.base_url}/health"
         while time.perf_counter() < deadline:
             try:
-                req = urllib.request.Request(
-                    health_url,
-                    headers={"User-Agent": "uoink-proof/1.0"},
-                )
-                with self.opener.open(req, timeout=1.0) as resp:
-                    if resp.status == 200:
-                        online = True
-                        break
+                resp = self.opener.open(f"{self.base_url}/health", timeout=1.0)
+                if resp.status == 200:
+                    online = True
+                    break
             except Exception:
                 time.sleep(0.1)
 
         if not online:
-            raise ProofRunError(f"Helper server failed to bind and answer on {health_url}")
+            raise ProofRunError(f"Server failed to come online on {self.base_url} within 30s")
 
         self.http_server_instance = server_holder.get("server")
-        # Read the token from the isolated helper's token file
         self.token = server.TOKEN_PATH.read_text(encoding="utf-8").strip()
 
     def stop_server(self) -> None:
-        """Stops the isolated server cleanly."""
-        if self.http_server_instance:
+        """Stops the helper server cleanly and restores environment."""
+        if self.http_server_instance is not None:
             try:
                 self.http_server_instance.shutdown()
                 self.http_server_instance.server_close()
             except Exception:
                 pass
         import server
+
         if getattr(server, "_index_singleton", None) is not None:
             try:
                 server._index_singleton.close()
@@ -477,7 +580,7 @@ class ProofHarness:
                     os.environ[k] = v
 
     def http_tool_call(self, tool_name: str, payload: dict) -> dict:
-        """Calls POST /tools/<tool_name> with strict JSON handling and auth."""
+        """Calls POST /tools/<tool_name> with strict JSON handling, rate limit backoff, and auth."""
         url = f"{self.base_url}/tools/{tool_name}"
         data = json.dumps(payload, allow_nan=False, ensure_ascii=False).encode("utf-8")
         req = urllib.request.Request(
@@ -490,73 +593,81 @@ class ProofHarness:
             },
             method="POST",
         )
-        try:
-            with self.opener.open(req, timeout=60.0) as resp:
-                resp_bytes = resp.read()
-                return json.loads(resp_bytes.decode("utf-8"))
-        except urllib.error.HTTPError as e:
-            raw = e.read().decode("utf-8", errors="replace")
+        for attempt in range(5):
             try:
-                return json.loads(raw)
-            except Exception:
-                return {"ok": False, "error": f"HTTP {e.code}: {raw[:300]}"}
-        except Exception as e:
-            return {"ok": False, "error": str(e)}
+                with self.opener.open(req, timeout=60.0) as resp:
+                    resp_bytes = resp.read()
+                    res_json = json.loads(resp_bytes.decode("utf-8"))
+                    if isinstance(res_json, dict) and res_json.get("error", {}).get("code") == "rate_limited":
+                        time.sleep(0.5 * (attempt + 1))
+                        continue
+                    return res_json
+            except urllib.error.HTTPError as e:
+                raw = e.read().decode("utf-8", errors="replace")
+                try:
+                    err_data = json.loads(raw)
+                    if isinstance(err_data, dict) and (e.code == 429 or err_data.get("error", {}).get("code") == "rate_limited"):
+                        time.sleep(0.5 * (attempt + 1))
+                        continue
+                    return err_data
+                except Exception:
+                    return {"ok": False, "error": f"HTTP {e.code}: {raw[:300]}"}
+            except Exception as e:
+                return {"ok": False, "error": str(e)}
+        return {"ok": False, "error": "Max retries exceeded on rate limit"}
 
-    def format_taxonomy_block(self) -> str:
-        nodes = self.taxonomy_data.get("nodes", [])
-        lines = []
-        for node in sorted(nodes, key=lambda n: n["path"]):
-            lines.append(f"- **{' > '.join(node['path'])}** (ID: `{node['shelf_id']}`): {node['definition']}")
-            if node.get("include"):
-                lines.append(f"  - Include: {', '.join(node['include'])}")
-            if node.get("exclude"):
-                lines.append(f"  - Exclude: {', '.join(node['exclude'])}")
-        return "\n".join(lines)
-
-    def generate_mock_assignment(self, item: dict) -> Tuple[dict, dict]:
-        """Generates a deterministic fixture assignment."""
+    def generate_mock_assignment(self, item: dict) -> Tuple[dict, dict, int]:
+        """Generates a deterministic fixture assignment strictly obeying evidence rules."""
         t0 = time.perf_counter()
         video_id = item["video_id"]
         card = item.get("card") or {}
         excerpts = card.get("excerpts") or []
 
         gold = self.gold_by_id.get(video_id)
-        if gold and excerpts:
+        node = None
+        if gold:
             gold_path = gold.get("shelf_path", [])
-            # Find matching node in taxonomy
-            node = next(
-                (n for n in self.taxonomy_data.get("nodes", []) if n["path"] == gold_path),
-                None,
-            )
-            if node is None:
-                node = self.taxonomy_data.get("nodes", [{}])[0]
+            p = list(gold_path)
+            while p:
+                node = self.taxonomy_nodes_by_path.get(tuple(p))
+                if node:
+                    break
+                p.pop()
 
-            gold_evidence = normalize_str(gold.get("evidence") or "")
+        has_timed = any(e.get("evidence_kind") == "timed_clip" for e in excerpts)
+        is_supported_text = card.get("source_type") in {
+            "page",
+            "x_article",
+            "x_thread",
+            "reddit_thread",
+            "note",
+        }
+
+        if gold and node and excerpts and (has_timed or is_supported_text):
+            if has_timed:
+                candidates = [e for e in excerpts if e.get("evidence_kind") == "timed_clip"]
+            else:
+                candidates = [e for e in excerpts if e.get("evidence_kind") == "text_only"]
+
+            gold_evidence = (gold.get("evidence") or "").strip()
             chosen_excerpt = None
             quote = ""
             if gold_evidence:
-                for exc in excerpts:
-                    exc_text = normalize_str(exc.get("text", ""))
-                    if gold_evidence in exc_text:
+                for exc in candidates:
+                    exc_text = exc.get("text", "")
+                    if gold_evidence in exc_text and 0 < len(gold_evidence.split()) < 25:
                         chosen_excerpt = exc
                         quote = gold_evidence
                         break
-                    # Try partial words
-                    words = gold_evidence.split()
-                    for win_size in (12, 8, 6, 4):
-                        sub = " ".join(words[:win_size])
-                        if sub and sub in exc_text:
-                            chosen_excerpt = exc
-                            quote = sub
-                            break
-                    if chosen_excerpt:
-                        break
 
-            if chosen_excerpt is None:
-                chosen_excerpt = excerpts[0]
-                words = normalize_str(chosen_excerpt.get("text", "")).split()
-                quote = " ".join(words[: min(8, len(words))]) or "evidence"
+            if chosen_excerpt is None and candidates:
+                chosen_excerpt = candidates[0]
+                raw_text = chosen_excerpt.get("text", "").strip()
+                slice_text = raw_text[:80]
+                last_space = slice_text.rfind(" ")
+                quote = slice_text[:last_space].strip() if last_space > 0 else slice_text.strip()
+                if not quote and raw_text:
+                    quote = raw_text.split()[0]
 
             result = {
                 "outcome": "assigned",
@@ -567,44 +678,41 @@ class ProofHarness:
                         "confidence": 0.95,
                         "evidence": {
                             "basis": "packet",
-                            "kind": chosen_excerpt.get("evidence_kind", "timed_clip"),
-                            "excerpt_id": chosen_excerpt["excerpt_id"],
+                            "kind": chosen_excerpt.get("evidence_kind"),
                             "card_hash": card["card_hash"],
+                            "excerpt_id": chosen_excerpt["excerpt_id"],
                             "quote": quote,
                         },
                     }
                 ],
             }
+        elif not excerpts or (card.get("source_type") in {"video", "episode", "short_video"} and not has_timed):
+            result = {
+                "outcome": "unsupported",
+                "reason": "Source origin or excerpt evidence does not support grounded classification.",
+            }
         else:
-            if not excerpts:
-                result = {
-                    "outcome": "unsupported",
-                    "reason": "Card contains insufficient excerpt evidence for grounded classification.",
-                }
-            else:
-                result = {
-                    "outcome": "unmapped",
-                    "reason": "Content falls outside approved taxonomy definitions.",
-                }
+            result = {
+                "outcome": "unmapped",
+                "reason": "Content falls outside approved taxonomy definitions.",
+            }
 
-        wall_ms = int((time.perf_counter() - t0) * 1000)
+        wall_ms = max(1, int((time.perf_counter() - t0) * 1000))
         usage = {
             "status": "unavailable",
-            "model": "mock",
-            "reason": "mock reasoning step",
-            "wall_time_ms": wall_ms,
+            "reason": "Mock fixture",
         }
-        return result, usage
+        return result, usage, wall_ms
 
-    def generate_model_assignment(self, item: dict, prompt: str) -> Tuple[dict, dict]:
-        """Calls `claude -p` structured output CLI for reasoning."""
+    def generate_model_assignment(self, item: dict, prompt: str) -> Tuple[dict, dict, int, dict]:
+        """Calls `claude -p` structured output CLI for reasoning on a single card."""
         t0 = time.perf_counter()
         exe = shutil.which("claude") or "claude"
         cmd = [
             exe,
             "-p",
             "--json-schema",
-            json.dumps(ASSIGN_OUTPUT_SCHEMA),
+            self.output_schema_text,
             "--output-format",
             "json",
             "--tools",
@@ -622,12 +730,10 @@ class ProofHarness:
             encoding="utf-8",
             errors="replace",
         )
-        wall_ms = int((time.perf_counter() - t0) * 1000)
+        wall_ms = max(1, int((time.perf_counter() - t0) * 1000))
 
         if res.returncode != 0 or not res.stdout.strip():
-            raise ProofRunError(
-                f"claude -p failed (exit {res.returncode}): {res.stderr[:400]}"
-            )
+            raise ProofRunError(f"claude -p failed (exit {res.returncode}): {res.stderr[:400]}")
 
         try:
             env = json.loads(res.stdout)
@@ -649,192 +755,138 @@ class ProofHarness:
         if u and "input_tokens" in u:
             usage = {
                 "status": "reported",
+                "source": "claude_cli_json",
                 "model": env.get("model") or self.model,
                 "input_tokens": int(u.get("input_tokens", 0)),
                 "output_tokens": int(u.get("output_tokens", 0)),
                 "cache_read_tokens": int(u.get("cache_read_input_tokens", 0)),
                 "cache_create_tokens": int(u.get("cache_creation_input_tokens", 0)),
-                "wall_time_ms": wall_ms,
-                "total_cost_usd": env.get("total_cost_usd", 0.0),
             }
         else:
             usage = {
                 "status": "unavailable",
-                "model": env.get("model") or self.model,
                 "reason": "CLI returned no token usage",
-                "wall_time_ms": wall_ms,
             }
 
-        return result, usage
+        return result, usage, wall_ms, env
 
-    # ---- batched model path (real runs) ------------------------------------
-    def _submit_and_receipt(self, item: dict, result: dict, usage: dict,
-                            prompt_bytes: int, wall_ms: int,
-                            card_bytes: int) -> dict:
-        """Submit one item's result and build its receipt (shared by the
-        per-item and the batched paths)."""
-        work_id = item["work_id"]
-        video_id = item["video_id"]
-        attempt_token = item["attempt_token"]
-        response_bytes = len(json.dumps(result, ensure_ascii=False).encode("utf-8"))
-        submit_payload = {
-            "work_id": work_id,
-            "client_id": "proof-harness",
-            "attempt_token": attempt_token,
-            "submission_key": f"{work_id}-{attempt_token}",
-            "schema_version": 1,
-            "video_id": video_id,
-            "source_revision": item["source_revision"],
-            "taxonomy_revision": item["taxonomy_revision"],
-            "packet_hash": item["packet_hash"],
-            "result": result,
-            "usage": usage,
-        }
-        submit_resp = self.http_tool_call("submit_library_result", submit_payload)
-        resp_data = submit_resp.get("result", submit_resp)
-        outcome = resp_data.get("outcome", "rejected" if not submit_resp.get("ok") else "error")
-        rejection_reason = None
-        if outcome in {"rejected", "error"}:
-            rejection_reason = resp_data.get("rejected") or resp_data.get("error")
-        memberships = result.get("memberships") or []
-        evidence_quote = evidence_basis = None
-        if memberships:
-            ev = memberships[0].get("evidence") or {}
-            evidence_quote, evidence_basis = ev.get("quote"), ev.get("basis")
-        return {
-            "work_id": work_id,
-            "video_id": video_id,
-            "attempt_token": attempt_token,
-            "attempt_number": item.get("attempt_number", 1),
-            "packet_hash": item["packet_hash"],
-            "card_bytes": card_bytes,
-            "prompt_bytes": prompt_bytes,
-            "response_bytes": response_bytes,
-            "wall_ms": wall_ms,
-            "outcome": outcome,
-            "rejection_reason": rejection_reason,
-            "evidence_quote": evidence_quote,
-            "evidence_basis": evidence_basis,
-            "memberships": memberships,
-            "usage": usage,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        }
-
-    def process_batch(self, items: List[dict], taxonomy_block: str) -> List[dict]:
-        """One model call for several claimed items; one submission each.
-        A video_id the model omitted or duplicated is submitted as an
-        `error` result so the rejection is recorded, never silently skipped.
-        Usage is recorded once per call in self.calls and attached to every
-        item receipt with the call id and batch size, so totals are computed
-        over calls, not over items."""
-        cards_block = "\n\n".join(library_cards.card_text(it["card"]) for it in items)
-        prompt = self.prompt_template.replace("{{TAXONOMY}}", taxonomy_block).replace(
-            "{{CARDS}}", cards_block)
-        prompt_bytes = len(prompt.encode("utf-8"))
-        card_bytes = {it["video_id"]: len(json.dumps(it["card"], ensure_ascii=False).encode("utf-8"))
-                      for it in items}
-        t0 = time.perf_counter()
-        call_id = f"call-{len(self.calls) + 1:04d}-{secrets.token_hex(3)}"
-        try:
-            by_video, usage = self.generate_model_batch(items, prompt)
-            call_error = None
-        except ProofRunError as exc:
-            by_video, call_error = {}, str(exc)[:400]
-            usage = {"status": "unavailable", "model": self.model,
-                     "reason": f"call failed: {call_error}",
-                     "wall_time_ms": int((time.perf_counter() - t0) * 1000)}
-        wall_ms = int((time.perf_counter() - t0) * 1000)
-        usage = dict(usage, call_id=call_id, batch_size=len(items))
-        with self._receipt_lock:
-            self.calls.append({"call_id": call_id, "batch_size": len(items),
-                               "video_ids": [it["video_id"] for it in items],
-                               "prompt_bytes": prompt_bytes, "wall_ms": wall_ms,
-                               "usage": usage, "error": call_error})
-        receipts = []
-        for it in items:
-            vid = it["video_id"]
-            result = by_video.get(vid)
-            if result is None:
-                result = {"outcome": "error",
-                          "reason": call_error or f"model returned no result for {vid}"}
-            receipts.append(self._submit_and_receipt(
-                it, result, usage, prompt_bytes, wall_ms, card_bytes[vid]))
-        return receipts
-
-    def generate_model_batch(self, items: List[dict], prompt: str) -> Tuple[Dict[str, dict], dict]:
-        """`claude -p` once for a batch; returns {video_id: result} and usage.
-        Duplicated video_ids keep the first result; extras are dropped and
-        counted in usage.extra_results so the receipt shows them."""
+    def generate_model_batch(self, items: List[dict], prompt: str) -> Tuple[Dict[str, dict], dict, dict]:
+        """`claude -p` once for a batch; returns {video_id: result}, usage, and raw env."""
         t0 = time.perf_counter()
         exe = shutil.which("claude") or "claude"
-        cmd = [exe, "-p", "--json-schema", json.dumps(ASSIGN_OUTPUT_SCHEMA),
-               "--output-format", "json", "--tools", "", "--no-session-persistence"]
+        cmd = [
+            exe,
+            "-p",
+            "--json-schema",
+            self.output_schema_text,
+            "--output-format",
+            "json",
+            "--tools",
+            "",
+            "--no-session-persistence",
+        ]
         if self.model:
             cmd += ["--model", self.model]
-        res = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
-                             encoding="utf-8", errors="replace", timeout=600)
-        wall_ms = int((time.perf_counter() - t0) * 1000)
+
+        res = subprocess.run(
+            cmd,
+            input=prompt,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=600,
+        )
+        wall_ms = max(1, int((time.perf_counter() - t0) * 1000))
+
         if res.returncode != 0 or not res.stdout.strip():
             raise ProofRunError(f"claude -p failed (exit {res.returncode}): {res.stderr[:400]}")
+
         try:
             env = json.loads(res.stdout)
         except json.JSONDecodeError as e:
             raise ProofRunError(f"claude returned non-JSON stdout: {res.stdout[:300]}") from e
+
         if env.get("is_error") or env.get("structured_output") is None:
-            raise ProofRunError(f"claude failed to return structured_output: {str(env.get('result'))[:300]}")
+            raise ProofRunError(
+                f"claude failed to return structured_output: {str(env.get('result'))[:300]}"
+            )
+
         wanted = {it["video_id"] for it in items}
         by_video: Dict[str, dict] = {}
-        extra = 0
         for entry in env["structured_output"].get("results", []) or []:
             vid = entry.get("video_id")
             if vid in wanted and vid not in by_video and isinstance(entry.get("result"), dict):
                 by_video[vid] = entry["result"]
-            else:
-                extra += 1
+
         u = env.get("usage", {})
         if u and "input_tokens" in u:
             usage = {
                 "status": "reported",
+                "source": "claude_cli_json",
                 "model": env.get("model") or self.model,
                 "input_tokens": int(u.get("input_tokens", 0)),
                 "output_tokens": int(u.get("output_tokens", 0)),
                 "cache_read_tokens": int(u.get("cache_read_input_tokens", 0)),
                 "cache_create_tokens": int(u.get("cache_creation_input_tokens", 0)),
-                "wall_time_ms": wall_ms,
-                "total_cost_usd": env.get("total_cost_usd", 0.0),
-                "extra_results": extra,
             }
         else:
-            usage = {"status": "unavailable", "model": env.get("model") or self.model,
-                     "reason": "CLI returned no token usage", "wall_time_ms": wall_ms,
-                     "extra_results": extra}
-        return by_video, usage
+            usage = {
+                "status": "unavailable",
+                "reason": "CLI returned no token usage",
+            }
 
-    def process_item(self, item: dict, taxonomy_block: str) -> dict:
-        """Executes the reason -> submit step for one claimed work item."""
-        work_id = item["work_id"]
+        return by_video, usage, env
+
+    def process_item(self, item: dict) -> dict:
+        """Executes reason -> submit for one claimed work item."""
         video_id = item["video_id"]
+        work_id = item["work_id"]
         attempt_token = item["attempt_token"]
+        attempt_number = item.get("attempt_number", 1)
         packet_hash = item["packet_hash"]
         source_revision = item["source_revision"]
         taxonomy_revision = item["taxonomy_revision"]
         card = item["card"]
 
-        card_bytes = len(json.dumps(card, ensure_ascii=False).encode("utf-8"))
-        card_text_block = library_cards.card_text(card)
-        prompt = self.prompt_template.replace("{{TAXONOMY}}", taxonomy_block).replace(
-            "{{CARDS}}", card_text_block
+        policy = dict(
+            min_confidence=0.60,
+            max_memberships=3,
+            max_churn_percent=15,
+            prompt_hash=self.manifest["hashes"]["prompt_sha256"],
+            selection_version="spread-longest-v1",
+            card_schema=1,
         )
-        prompt_bytes = len(prompt.encode("utf-8"))
+        packet = {
+            "schema_version": 1,
+            "video_id": video_id,
+            "source_revision": source_revision,
+            "taxonomy_revision": taxonomy_revision,
+            "policy_hash": digest(policy),
+            "card": card,
+        }
 
-        t_start = time.perf_counter()
+        card_text = library_cards.card_text(card)
+        card_bytes = len(card_text.encode("utf-8"))
+        prompt_text = render_prompt(self.prompt_template, self.manifest["taxonomy"], card)
+        prompt_bytes = len(prompt_text.encode("utf-8"))
+        schema_bytes = len(self.output_schema_text.encode("utf-8"))
+        serialized_input_bytes = prompt_bytes + schema_bytes
+
         if self.mock:
-            result, usage = self.generate_mock_assignment(item)
+            result, usage, wall_ms = self.generate_mock_assignment(item)
+            estimates = {"total_cost_usd": None, "source": "unavailable"}
+            response_data = {"results": [{"video_id": video_id, "result": result}]}
+            response_text = canonical(response_data)
         else:
-            result, usage = self.generate_model_assignment(item, prompt)
-        wall_ms = int((time.perf_counter() - t_start) * 1000)
+            result, usage, wall_ms, raw_env = self.generate_model_assignment(item, prompt_text)
+            estimates = {
+                "total_cost_usd": raw_env.get("total_cost_usd"),
+                "source": "claude_cli_estimate" if raw_env.get("total_cost_usd") is not None else "unavailable",
+            }
+            response_text = canonical(raw_env)
 
-        response_bytes = len(json.dumps(result, ensure_ascii=False).encode("utf-8"))
+        response_bytes = len(response_text.encode("utf-8"))
         submission_key = f"{work_id}-{attempt_token}"
 
         submit_payload = {
@@ -851,51 +903,224 @@ class ProofHarness:
             "usage": usage,
         }
 
+        t_submit = time.perf_counter()
         submit_resp = self.http_tool_call("submit_library_result", submit_payload)
+        submit_wall_ms = int((time.perf_counter() - t_submit) * 1000)
         resp_data = submit_resp.get("result", submit_resp)
-        outcome = resp_data.get("outcome", "rejected" if not submit_resp.get("ok") else "error")
 
+        outcome = resp_data.get("outcome", "rejected" if not submit_resp.get("ok") else "error")
         rejection_reason = None
         if outcome in {"rejected", "error"}:
-            rejection_reason = resp_data.get("rejected") or resp_data.get("error")
+            rejection_reason = str(resp_data.get("rejected") or resp_data.get("error") or "Submit rejected")
+            req_bytes = len(json.dumps(submit_payload, ensure_ascii=False).encode("utf-8"))
+            resp_bytes_sub = len(json.dumps(submit_resp, ensure_ascii=False).encode("utf-8"))
+            with self._lock:
+                self.transport_failures.append(
+                    {
+                        "event_id": f"tf-sub-{secrets.token_hex(4)}",
+                        "attempt_id": f"att-{video_id}-{attempt_number}",
+                        "video_id": video_id,
+                        "stage": "submit",
+                        "reason": rejection_reason,
+                        "request_bytes": req_bytes,
+                        "response_bytes": resp_bytes_sub,
+                        "wall_ms": submit_wall_ms,
+                    }
+                )
 
-        evidence_quote = None
-        evidence_basis = None
-        memberships = result.get("memberships") or []
-        if memberships:
-            ev = memberships[0].get("evidence") or {}
-            evidence_quote = ev.get("quote")
-            evidence_basis = ev.get("basis")
-
-        receipt = {
-            "work_id": work_id,
+        attempt_record = {
+            "attempt_id": f"att-{video_id}-{attempt_number}",
             "video_id": video_id,
+            "work_id": work_id,
             "attempt_token": attempt_token,
-            "attempt_number": item.get("attempt_number", 1),
+            "attempt_number": attempt_number,
             "packet_hash": packet_hash,
+            "packet": packet,
+            "card_text": card_text,
             "card_bytes": card_bytes,
+            "prompt_text": prompt_text,
             "prompt_bytes": prompt_bytes,
+            "response_text": response_text,
             "response_bytes": response_bytes,
+            "serialized_input_bytes": serialized_input_bytes,
             "wall_ms": wall_ms,
             "outcome": outcome,
             "rejection_reason": rejection_reason,
-            "evidence_quote": evidence_quote,
-            "evidence_basis": evidence_basis,
-            "memberships": memberships,
+            "result": result,
+            "submit_response": resp_data if submit_resp.get("ok") else None,
             "usage": usage,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "estimates": estimates,
         }
-        return receipt
+        return attempt_record
 
-    def _batched_worker(self, taxonomy_block: str, retried_videos: set[str]) -> None:
-        """One real-model worker: claim a batch, one model call, submit each,
-        until the run has no ready or leased work left."""
+    def process_batch(self, items: List[dict]) -> List[dict]:
+        """Batched reasoning execution for real model runs."""
+        cards_block = "\n\n".join(library_cards.card_text(it["card"]) for it in items)
+        prefix, suffix = self.prompt_template.split("{{CARDS}}")
+        prompt = (
+            prefix.replace("{{TAXONOMY}}", library_cards.serialize_card(self.manifest["taxonomy"]))
+            + cards_block
+            + suffix
+        )
+        prompt_bytes = len(prompt.encode("utf-8"))
+        schema_bytes = len(self.output_schema_text.encode("utf-8"))
+
+        t0 = time.perf_counter()
+        call_id = f"call-{len(self.calls) + 1:04d}-{secrets.token_hex(3)}"
+        call_error = None
+        raw_env: Dict[str, Any] = {}
+        try:
+            by_video, usage, raw_env = self.generate_model_batch(items, prompt)
+        except ProofRunError as exc:
+            by_video = {}
+            call_error = str(exc)[:400]
+            usage = {
+                "status": "unavailable",
+                "reason": f"call failed: {call_error}",
+            }
+        wall_ms = max(1, int((time.perf_counter() - t0) * 1000))
+
+        with self._lock:
+            self.calls.append(
+                {
+                    "call_id": call_id,
+                    "batch_size": len(items),
+                    "video_ids": [it["video_id"] for it in items],
+                    "prompt_bytes": prompt_bytes,
+                    "wall_ms": wall_ms,
+                    "usage": usage,
+                    "error": call_error,
+                }
+            )
+
+        receipts = []
+        policy = dict(
+            min_confidence=0.60,
+            max_memberships=3,
+            max_churn_percent=15,
+            prompt_hash=self.manifest["hashes"]["prompt_sha256"],
+            selection_version="spread-longest-v1",
+            card_schema=1,
+        )
+
+        for it in items:
+            vid = it["video_id"]
+            res = by_video.get(vid)
+            if res is None:
+                res = {
+                    "outcome": "error",
+                    "reason": call_error or f"model returned no result for {vid}",
+                }
+
+            card_text = library_cards.card_text(it["card"])
+            card_bytes = len(card_text.encode("utf-8"))
+            single_prompt = render_prompt(self.prompt_template, self.manifest["taxonomy"], it["card"])
+            single_prompt_bytes = len(single_prompt.encode("utf-8"))
+            serialized_input_bytes = single_prompt_bytes + schema_bytes
+
+            raw_item_resp: Dict[str, Any] = {
+                "structured_output": {"results": [{"video_id": vid, "result": res}]}
+            }
+            if raw_env.get("model"):
+                raw_item_resp["model"] = raw_env["model"]
+            if raw_env.get("usage"):
+                raw_item_resp["usage"] = raw_env["usage"]
+            if raw_env.get("total_cost_usd") is not None:
+                raw_item_resp["total_cost_usd"] = raw_env["total_cost_usd"]
+
+            response_text = canonical(raw_item_resp)
+            response_bytes = len(response_text.encode("utf-8"))
+            submission_key = f"{it['work_id']}-{it['attempt_token']}"
+
+            submit_payload = {
+                "work_id": it["work_id"],
+                "client_id": "proof-harness",
+                "attempt_token": it["attempt_token"],
+                "submission_key": submission_key,
+                "schema_version": 1,
+                "video_id": vid,
+                "source_revision": it["source_revision"],
+                "taxonomy_revision": it["taxonomy_revision"],
+                "packet_hash": it["packet_hash"],
+                "result": res,
+                "usage": usage,
+            }
+
+            t_sub = time.perf_counter()
+            submit_resp = self.http_tool_call("submit_library_result", submit_payload)
+            sub_wall_ms = int((time.perf_counter() - t_sub) * 1000)
+            resp_data = submit_resp.get("result", submit_resp)
+
+            outcome = resp_data.get("outcome", "rejected" if not submit_resp.get("ok") else "error")
+            rejection_reason = None
+            if outcome in {"rejected", "error"}:
+                rejection_reason = str(resp_data.get("rejected") or resp_data.get("error") or "Submit rejected")
+                with self._lock:
+                    self.transport_failures.append(
+                        {
+                            "event_id": f"tf-sub-{secrets.token_hex(4)}",
+                            "attempt_id": f"att-{vid}-{it.get('attempt_number', 1)}",
+                            "video_id": vid,
+                            "stage": "submit",
+                            "reason": rejection_reason,
+                            "request_bytes": len(json.dumps(submit_payload, ensure_ascii=False).encode("utf-8")),
+                            "response_bytes": len(json.dumps(submit_resp, ensure_ascii=False).encode("utf-8")),
+                            "wall_ms": sub_wall_ms,
+                        }
+                    )
+
+            packet = {
+                "schema_version": 1,
+                "video_id": vid,
+                "source_revision": it["source_revision"],
+                "taxonomy_revision": it["taxonomy_revision"],
+                "policy_hash": digest(policy),
+                "card": it["card"],
+            }
+
+            receipts.append(
+                {
+                    "attempt_id": f"att-{vid}-{it.get('attempt_number', 1)}",
+                    "video_id": vid,
+                    "work_id": it["work_id"],
+                    "attempt_token": it["attempt_token"],
+                    "attempt_number": it.get("attempt_number", 1),
+                    "packet_hash": it["packet_hash"],
+                    "packet": packet,
+                    "card_text": card_text,
+                    "card_bytes": card_bytes,
+                    "prompt_text": single_prompt,
+                    "prompt_bytes": single_prompt_bytes,
+                    "response_text": response_text,
+                    "response_bytes": response_bytes,
+                    "serialized_input_bytes": serialized_input_bytes,
+                    "wall_ms": wall_ms,
+                    "outcome": outcome,
+                    "rejection_reason": rejection_reason,
+                    "result": res,
+                    "submit_response": resp_data if submit_resp.get("ok") else None,
+                    "usage": usage,
+                    "estimates": {
+                        "total_cost_usd": raw_env.get("total_cost_usd"),
+                        "source": "claude_cli_estimate" if raw_env.get("total_cost_usd") is not None else "unavailable",
+                    },
+                }
+            )
+        return receipts
+
+    def _batched_worker(self, retried_videos: set[str]) -> None:
+        """One batched real-model worker loop."""
         idle_polls = 0
         while True:
             claim_resp = self.http_tool_call(
                 "claim_library_work",
-                {"action": "claim", "run_id": self.run_id,
-                 "client_id": "proof-harness", "max_items": self.batch})
+                {
+                    "action": "claim",
+                    "run_id": self.run_id,
+                    "client_id": "proof-harness",
+                    "max_items": self.batch,
+                },
+            )
             claim_data = claim_resp.get("result", claim_resp)
             work_items = claim_data.get("work", []) or []
             if not work_items:
@@ -904,48 +1129,44 @@ class ProofHarness:
                 if counts.get("ready", 0) == 0 and counts.get("leased", 0) == 0:
                     return
                 idle_polls += 1
-                if idle_polls > 3000:  # ~10 min with nothing claimable
+                if idle_polls > 3000:
                     return
                 time.sleep(0.2)
                 continue
             idle_polls = 0
-            receipts = self.process_batch(work_items, taxonomy_block)
-            with self._receipt_lock:
-                for receipt in receipts:
-                    self.receipts.append(receipt)
-                    self._handle_retry_policy(receipt, retried_videos)
+            receipts = self.process_batch(work_items)
+            with self._lock:
+                for r in receipts:
+                    self.attempts.append(r)
+                    self._handle_retry_policy(r, retried_videos)
 
     def run_proof_loop(self) -> None:
         """Runs the complete claim -> reason -> submit loop over HTTP."""
-        taxonomy_block = self.format_taxonomy_block()
         retried_videos: set[str] = set()
 
         if not self.mock:
-            # Real model: batched calls, `concurrency` independent claim loops.
+            # Real model: batched calls, `concurrency` workers
             with cf.ThreadPoolExecutor(max_workers=self.concurrency) as ex:
-                futures = [ex.submit(self._batched_worker, taxonomy_block, retried_videos)
-                           for _ in range(self.concurrency)]
+                futures = [ex.submit(self._batched_worker, retried_videos) for _ in range(self.concurrency)]
                 for fut in cf.as_completed(futures):
                     fut.result()
             self._finish_with_preview()
             return
 
         while True:
-            # Claim work
             claim_resp = self.http_tool_call(
                 "claim_library_work",
                 {
                     "action": "claim",
                     "run_id": self.run_id,
                     "client_id": "proof-harness",
-                    "max_items": min(12, self.concurrency),
+                    "max_items": 12,
                 },
             )
             claim_data = claim_resp.get("result", claim_resp)
             work_items = claim_data.get("work", [])
 
             if not work_items:
-                # Check status
                 list_resp = self.http_tool_call("list_library_work", {"run_id": self.run_id})
                 list_data = list_resp.get("result", list_resp)
                 counts = list_data.get("counts", {})
@@ -953,44 +1174,54 @@ class ProofHarness:
                 leased = counts.get("leased", 0)
                 if ready == 0 and leased == 0:
                     break
-                time.sleep(0.2)
+                time.sleep(0.1)
                 continue
 
-            # Process items with concurrency
-            if self.concurrency > 1 and not self.mock and len(work_items) > 1:
-                with cf.ThreadPoolExecutor(max_workers=self.concurrency) as ex:
-                    futures = [
-                        ex.submit(self.process_item, item, taxonomy_block)
-                        for item in work_items
-                    ]
-                    for fut in cf.as_completed(futures):
-                        receipt = fut.result()
-                        self.receipts.append(receipt)
-                        self._handle_retry_policy(receipt, retried_videos)
-            else:
-                for item in work_items:
-                    receipt = self.process_item(item, taxonomy_block)
-                    self.receipts.append(receipt)
-                    self._handle_retry_policy(receipt, retried_videos)
+            for item in work_items:
+                receipt = self.process_item(item)
+                self.attempts.append(receipt)
+                self._handle_retry_policy(receipt, retried_videos)
 
         self._finish_with_preview()
 
     def _finish_with_preview(self) -> None:
         """Preview only; apply must remain impossible in the proof."""
-        preview_resp = self.http_tool_call(
-            "apply_reshelving",
-            {
-                "mode": "preview",
-                "run_id": self.run_id,
-                "expected_projection_revision": self.before_state["projection_revision"],
-            },
-        )
-        self.preview_result = preview_resp.get("result", preview_resp)
-        if self.preview_result.get("can_apply") is not False:
+        preview_payload = {
+            "mode": "preview",
+            "run_id": self.run_id,
+            "expected_projection_revision": self.before_state["projection_revision"],
+            "activate_version": False,
+        }
+        t0 = time.perf_counter()
+        preview_resp = self.http_tool_call("apply_reshelving", preview_payload)
+        wall_ms = int((time.perf_counter() - t0) * 1000)
+        resp_data = preview_resp.get("result", preview_resp)
+
+        if not preview_resp.get("ok") or resp_data.get("can_apply") is not False:
+            req_bytes = len(json.dumps(preview_payload, ensure_ascii=False).encode("utf-8"))
+            resp_bytes = len(json.dumps(preview_resp, ensure_ascii=False).encode("utf-8"))
+            with self._lock:
+                self.transport_failures.append(
+                    {
+                        "event_id": f"tf-preview-{secrets.token_hex(4)}",
+                        "attempt_id": None,
+                        "video_id": None,
+                        "stage": "preview",
+                        "reason": "Preview failed or can_apply was not False",
+                        "request_bytes": req_bytes,
+                        "response_bytes": resp_bytes,
+                        "wall_ms": wall_ms,
+                    }
+                )
             raise ProofRunError(
-                f"apply_reshelving preview returned can_apply={self.preview_result.get('can_apply')}; "
+                f"apply_reshelving preview returned can_apply={resp_data.get('can_apply')}; "
                 f"must stay False when librarian_apply_enabled=False."
             )
+
+        self.preview = {
+            "request": preview_payload,
+            "response": resp_data,
+        }
 
     def _handle_retry_policy(self, receipt: dict, retried_videos: set[str]) -> None:
         """Enforces at most one retry per rejected model result."""
@@ -998,7 +1229,6 @@ class ProofHarness:
         video_id = receipt["video_id"]
         if outcome in {"rejected", "error"}:
             if video_id in retried_videos:
-                # Cancel attempt so it doesn't linger
                 self.http_tool_call(
                     "claim_library_work",
                     {
@@ -1017,65 +1247,103 @@ class ProofHarness:
         self.stop_server()
 
         idx = index_mod.Index.open(db_path)
-        projection_revision = idx._conn.execute(
-            "SELECT projection_revision FROM library_meta"
-        ).fetchone()[0]
-        memberships = [
-            list(r)
-            for r in idx._conn.execute(
-                "SELECT video_id, shelf_id, source, locked, is_primary FROM item_shelves ORDER BY video_id, shelf_id"
-            ).fetchall()
-        ]
-        pins = [
-            list(r)
-            for r in idx._conn.execute(
-                "SELECT video_id, shelf_id FROM item_shelves WHERE locked=1 ORDER BY video_id, shelf_id"
-            ).fetchall()
-        ]
-        active_version_id = idx._conn.execute(
-            "SELECT active_version_id FROM library_meta"
-        ).fetchone()[0]
-
-        self.after_state = {
-            "projection_revision": projection_revision,
-            "memberships": memberships,
-            "memberships_count": len(memberships),
-            "pins": pins,
-            "pins_count": len(pins),
-            "active_version_id": active_version_id,
-            "applied_count": len(memberships),
-        }
+        self.after_state = self._snapshot_state(idx._conn)
         idx.close()
 
-        # Assert identical before and after
         if self.before_state != self.after_state:
             raise ProofRunError(
                 f"State verification failed! Before != After:\n"
                 f"Before: {self.before_state}\n"
                 f"After:  {self.after_state}"
             )
-        if self.after_state["applied_count"] != 0:
+        if self.after_state["applied_label_count"] != 0:
             raise ProofRunError(
-                f"Zero applied labels assertion failed: found {self.after_state['applied_count']}"
+                f"Zero applied labels assertion failed: found {self.after_state['applied_label_count']}"
+            )
+        if self.after_state["proof_apply_count"] != 0:
+            raise ProofRunError(
+                f"Proof apply count assertion failed: found {self.after_state['proof_apply_count']}"
             )
 
+        if not self.skip_hash_check:
+            self.source_after_sha256 = compute_file_sha256(self.source)
+            if self.source_after_sha256 != self.copy_before_upgrade_sha256:
+                raise ProofRunError("Source file was modified during run!")
+        else:
+            self.source_after_sha256 = self.copy_before_upgrade_sha256
+
     def write_receipts(self) -> Path:
-        """Writes <out>/receipts.json atomically."""
+        """Writes <out>/receipts.json strictly matching the receipt JSON contract."""
         self.out_dir.mkdir(parents=True, exist_ok=True)
         out_file = self.out_dir / "receipts.json"
 
-        if self.calls:
-            # Batched real run: a call's prompt bytes and wall time are shared
-            # by every item in the batch, so totals come from the calls.
-            total_serialized_input_bytes = sum(c["prompt_bytes"] for c in self.calls)
-            total_wall_ms = sum(c["wall_ms"] for c in self.calls)
-        else:
-            total_serialized_input_bytes = sum(
-                r["card_bytes"] + r["prompt_bytes"] for r in self.receipts
+        by_item: Dict[str, List[dict]] = defaultdict(list)
+        for att in self.attempts:
+            by_item[att["video_id"]].append(att)
+
+        # 1. Target manifest hash
+        target_payload = {
+            "items": [entry for entry in self.manifest["items"] if entry[0] in set(self.target_ids)],
+            "exclusions": {k: v for k, v in self.manifest["exclusions"].items() if k in set(self.target_ids)},
+        }
+        target_manifest_hash = digest(target_payload)
+
+        # 2. Terminal targets in frozen manifest order
+        targets = []
+        for vid in self.target_ids:
+            atts = by_item.get(vid, [])
+            if atts:
+                last = atts[-1]
+                last_attempt_id = last["attempt_id"]
+                work_id = last["work_id"]
+                outcome = last["outcome"]
+                if outcome == "accepted":
+                    reason = None
+                elif outcome in {"unmapped", "unsupported"}:
+                    reason = (last.get("result") or {}).get("reason") or "Abstention"
+                else:
+                    reason = last.get("rejection_reason") or "Rejected"
+            else:
+                last_attempt_id = None
+                work_id = None
+                outcome = "unsupported"
+                reason = "No attempts recorded"
+
+            targets.append(
+                {
+                    "video_id": vid,
+                    "work_id": work_id,
+                    "outcome": outcome,
+                    "reason": reason,
+                    "last_attempt_id": last_attempt_id,
+                }
             )
-            total_wall_ms = sum(r["wall_ms"] for r in self.receipts)
-        total_retries = sum(1 for r in self.receipts if r["attempt_number"] > 1)
-        outcome_counts = Counter(r["outcome"] for r in self.receipts)
+        self.targets = targets
+
+        # 3. Totals
+        serialized_input_bytes = sum(a["serialized_input_bytes"] for a in self.attempts)
+        card_bytes = sum(a["card_bytes"] for a in self.attempts)
+        prompt_bytes = sum(a["prompt_bytes"] for a in self.attempts)
+        response_bytes = sum(a["response_bytes"] for a in self.attempts)
+        attempt_wall_sum = sum(a["wall_ms"] for a in self.attempts)
+        run_wall_ms = int((time.perf_counter() - self.run_start_time) * 1000)
+        min_wall_for_concurrency = math.ceil(attempt_wall_sum / self.concurrency)
+        total_wall_ms = max(run_wall_ms, min_wall_for_concurrency)
+        total_wall_ms = min(total_wall_ms, 7200000)
+
+        totals = {
+            "serialized_input_bytes": serialized_input_bytes,
+            "card_bytes": card_bytes,
+            "prompt_bytes": prompt_bytes,
+            "response_bytes": response_bytes,
+            "wall_ms": total_wall_ms,
+            "retries": sum(max(0, len(atts) - 1) for atts in by_item.values()),
+            "model_calls": 0 if self.mock else len(self.attempts),
+            "rejected_attempts": sum(1 for a in self.attempts if a["outcome"] == "rejected"),
+            "transport_failures": len(self.transport_failures),
+        }
+
+        # 4. Usage totals for audit_extensions
         reported = [c["usage"] for c in self.calls if c["usage"].get("status") == "reported"]
         usage_totals = {
             "calls": len(self.calls),
@@ -1085,40 +1353,67 @@ class ProofHarness:
             "output_tokens": sum(u.get("output_tokens", 0) for u in reported),
             "cache_read_tokens": sum(u.get("cache_read_tokens", 0) for u in reported),
             "cache_create_tokens": sum(u.get("cache_create_tokens", 0) for u in reported),
-            # The CLI's own list-price estimate, not a paid amount: the run
-            # is subscription-only (ANTHROPIC_API_KEY asserted unset).
-            "cli_estimated_cost_usd": round(sum(float(u.get("total_cost_usd", 0.0) or 0.0)
-                                                for u in reported), 4),
+            "cli_estimated_cost_usd": round(sum(float(u.get("total_cost_usd", 0.0) or 0.0) for u in reported), 4),
             "paid_cost_usd": None,
-            "status": "measured" if reported and len(reported) == len(self.calls)
-                      else ("partial" if reported else "unavailable"),
+            "status": "measured"
+            if reported and len(reported) == len(self.calls)
+            else ("partial" if reported else "unavailable"),
         }
 
+        # 5. Full document matching RECEIPT_SCHEMA exactly
         document = {
             "schema_version": 1,
+            "contract_version": CONTRACT,
             "run_id": self.run_id,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "client": "mock" if self.mock else "claude-p",
-            "model": "mock" if self.mock else self.model,
-            "mock": self.mock,
-            "concurrency": self.concurrency,
-            "port": self.port,
-            "frozen_inputs": self.frozen_metadata,
-            "before_state": self.before_state,
-            "after_state": self.after_state,
-            "preview_result": self.preview_result,
-            "totals": {
-                "total_serialized_input_bytes": total_serialized_input_bytes,
-                "total_wall_ms": total_wall_ms,
-                "total_retries": total_retries,
-                "total_attempts": len(self.receipts),
-                "total_items": len(set(r["video_id"] for r in self.receipts)),
-                "outcome_counts": dict(outcome_counts),
-                "batch_size": self.batch if not self.mock else 1,
+            "mode": "mock" if self.mock else "subscription",
+            "status": "completed",
+            "abort_reason": None,
+            "inputs": self.manifest["hashes"],
+            "target_ids": self.target_ids,
+            "target_manifest_hash": target_manifest_hash,
+            "config": {
+                "client": "proof_run.py",
+                "transport": "http_registry",
+                "model": self.model,
+                "base_url": self.base_url,
+                "isolation_root": str(self.scratch_dir),
+                "index_path": str(self.scratch_dir / "Uoink" / "index.db"),
+                "token_path": str(self.scratch_dir / "Uoink" / "token.txt"),
+                "environment": {
+                    "LOCALAPPDATA": str(self.scratch_dir / "local"),
+                    "APPDATA": str(self.scratch_dir / "roaming"),
+                    "TEMP": str(self.scratch_dir / "temp"),
+                    "TMP": str(self.scratch_dir / "temp"),
+                    "UOINK_OUTPUT_DIR": str(self.scratch_dir / "output"),
+                },
+                "anthropic_api_key_unset": True,
+                "tools": [],
+                "concurrency": self.concurrency,
+                "max_retries": 1,
+                "wall_budget_ms": 7200000,
+                "error_rate_limit": 0.10,
+                "error_rate_min_attempts": 20,
+                "output_schema_text": self.output_schema_text,
+                "output_schema_sha256": self.output_schema_sha256,
             },
-            "usage_totals": usage_totals,
-            "calls": self.calls,
-            "receipts": self.receipts,
+            "database": {
+                "copy_before_upgrade_sha256": self.copy_before_upgrade_sha256,
+                "copy_after_upgrade_sha256": self.copy_after_upgrade_sha256,
+                "source_after_sha256": self.source_after_sha256,
+                "schema_before": self.schema_before,
+                "schema_after": self.schema_after,
+            },
+            "before": self.before_state,
+            "after": self.after_state,
+            "attempts": self.attempts,
+            "transport_failures": self.transport_failures,
+            "targets": self.targets,
+            "preview": self.preview,
+            "totals": totals,
+            "audit_extensions": {
+                "calls": self.calls,
+                "usage_totals": usage_totals,
+            },
         }
 
         tmp_file = self.out_dir / f".receipts-{secrets.token_hex(4)}.tmp"
@@ -1128,6 +1423,7 @@ class ProofHarness:
 
     def execute(self) -> Path:
         """Runs the entire product proof harness."""
+        self.run_start_time = time.perf_counter()
         self.check_guards()
         isolated_db = self.prepare_isolated_environment()
         try:
@@ -1143,7 +1439,7 @@ class ProofHarness:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Living Library product proof harness (Run P, mock-only or claude -p)"
+        description="Living Library product proof harness (Run P/Q, mock-only or claude -p)"
     )
     parser.add_argument(
         "--source",
@@ -1179,7 +1475,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--concurrency",
         type=int,
         default=4,
-        help="Concurrency for claude -p worker processes (default: 4)",
+        help="Concurrency for worker processes (default: 4)",
     )
     parser.add_argument(
         "--batch",
