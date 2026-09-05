@@ -238,10 +238,12 @@ class ProofHarness:
         expected_hash: Optional[str] = NAMED_COPY_HASH,
         skip_hash_check: bool = False,
         batch: int = 12,
+        mock_reject_count: int = 0,
     ):
         self.source = Path(source).resolve()
         self.out_dir = Path(out_dir).resolve()
         self.mock = mock
+        self.mock_reject_count = mock_reject_count
         self.limit = limit
         self.model = model
         self.concurrency = max(1, min(4, concurrency))
@@ -253,6 +255,23 @@ class ProofHarness:
         self.run_id = run_id
         self.expected_hash = expected_hash
         self.skip_hash_check = skip_hash_check
+
+        # Directory structure per contract
+        self.calls_dir = self.out_dir / "calls"
+        self.http_dir = self.out_dir / "http"
+        self.state_dir = self.out_dir / "state"
+
+        # Shared coordinator state for error guard
+        self._http_seq = 0
+        self._mock_item_index = 0
+        self.abort_event = threading.Event()
+        self.abort_reason: Optional[str] = None
+        self._active_processes: set = set()
+        self._proc_lock = threading.Lock()
+        self._coordinator_lock = threading.Lock()
+        self.wall_budget_ms = 7200000
+        self.error_rate_limit = 0.10
+        self.error_rate_min_attempts = 20
 
         # Paths
         self.manifest_path = ROOT / "docs" / "library" / "proof" / "manifest-2026-09-05.json"
@@ -598,8 +617,72 @@ class ProofHarness:
                 else:
                     os.environ[k] = v
 
+    def _record_http_exchange(
+        self, tool_name: str, payload: dict, resp_code: int, resp_data: Any, wall_ms: int
+    ) -> None:
+        """Retains every claim/submit/release/cancel/preview request and response under <out>/http/ with secret token redacted."""
+        with self._lock:
+            self._http_seq += 1
+            seq = self._http_seq
+
+        self.http_dir.mkdir(parents=True, exist_ok=True)
+        secret = self.token
+
+        def redact(obj: Any) -> Any:
+            if not secret:
+                return obj
+            if isinstance(obj, str):
+                return obj.replace(secret, "[REDACTED]")
+            elif isinstance(obj, dict):
+                return {k: redact(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [redact(item) for item in obj]
+            return obj
+
+        headers = {
+            "Content-Type": "application/json",
+            "X-Uoink-Token": "[REDACTED]",
+            "User-Agent": "uoink-proof-harness/1.0",
+        }
+        redacted_req = redact(payload)
+        redacted_resp = redact(resp_data)
+
+        req_record = {
+            "seq": seq,
+            "url": f"{self.base_url}/tools/{tool_name}",
+            "tool": tool_name,
+            "method": "POST",
+            "headers": headers,
+            "body": redacted_req,
+        }
+        resp_record = {
+            "seq": seq,
+            "tool": tool_name,
+            "status": resp_code,
+            "wall_ms": wall_ms,
+            "body": redacted_resp,
+        }
+        combined = {
+            "seq": seq,
+            "tool": tool_name,
+            "wall_ms": wall_ms,
+            "request": req_record,
+            "response": resp_record,
+        }
+
+        (self.http_dir / f"{seq:05d}_{tool_name}_request.json").write_text(
+            json.dumps(req_record, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+        (self.http_dir / f"{seq:05d}_{tool_name}_response.json").write_text(
+            json.dumps(resp_record, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+        (self.http_dir / f"{seq:05d}_{tool_name}.json").write_text(
+            json.dumps(combined, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
+
     def http_tool_call(self, tool_name: str, payload: dict) -> dict:
-        """Calls POST /tools/<tool_name> with strict JSON handling, rate limit backoff, and auth."""
+        """Calls POST /tools/<tool_name> with strict JSON handling, rate limit backoff, auth, and audit retention."""
+        t_start = time.perf_counter()
         url = f"{self.base_url}/tools/{tool_name}"
         data = json.dumps(payload, allow_nan=False, ensure_ascii=False).encode("utf-8")
         req = urllib.request.Request(
@@ -612,32 +695,143 @@ class ProofHarness:
             },
             method="POST",
         )
+        res_json = None
+        resp_code = 200
         for attempt in range(5):
             try:
                 with self.opener.open(req, timeout=60.0) as resp:
                     resp_bytes = resp.read()
+                    resp_code = resp.status
                     res_json = json.loads(resp_bytes.decode("utf-8"))
                     if isinstance(res_json, dict) and res_json.get("error", {}).get("code") == "rate_limited":
                         time.sleep(0.5 * (attempt + 1))
                         continue
-                    return res_json
+                    break
             except urllib.error.HTTPError as e:
+                resp_code = e.code
                 raw = e.read().decode("utf-8", errors="replace")
                 try:
                     err_data = json.loads(raw)
                     if isinstance(err_data, dict) and (e.code == 429 or err_data.get("error", {}).get("code") == "rate_limited"):
                         time.sleep(0.5 * (attempt + 1))
                         continue
-                    return err_data
+                    res_json = err_data
+                    break
                 except Exception:
-                    return {"ok": False, "error": f"HTTP {e.code}: {raw[:300]}"}
+                    res_json = {"ok": False, "error": f"HTTP {e.code}: {raw[:300]}"}
+                    break
             except Exception as e:
-                return {"ok": False, "error": str(e)}
-        return {"ok": False, "error": "Max retries exceeded on rate limit"}
+                resp_code = 500
+                res_json = {"ok": False, "error": str(e)}
+                break
+
+        if res_json is None:
+            resp_code = 429
+            res_json = {"ok": False, "error": "Max retries exceeded on rate limit"}
+
+        wall_ms = max(1, int((time.perf_counter() - t_start) * 1000))
+        self._record_http_exchange(tool_name, payload, resp_code, res_json, wall_ms)
+        return res_json
+
+    def _save_before_state(self, db_path: Path) -> None:
+        """Snapshots database before execution into <out>/state/."""
+        self.state_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(db_path, self.state_dir / "before_index.db")
+        wal_path = db_path.parent / (db_path.name + "-wal")
+        if wal_path.is_file():
+            shutil.copyfile(wal_path, self.state_dir / "before_index.db-wal")
+        journal_path = db_path.parent / (db_path.name + "-journal")
+        if journal_path.is_file():
+            shutil.copyfile(journal_path, self.state_dir / "before_index.db-journal")
+
+    def _save_after_state(self, db_path: Path) -> None:
+        """Snapshots database after execution and exports registry tables into <out>/state/."""
+        self.state_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(db_path, self.state_dir / "after_index.db")
+        wal_path = db_path.parent / (db_path.name + "-wal")
+        if wal_path.is_file():
+            shutil.copyfile(wal_path, self.state_dir / "after_index.db-wal")
+        journal_path = db_path.parent / (db_path.name + "-journal")
+        if journal_path.is_file():
+            shutil.copyfile(journal_path, self.state_dir / "after_index.db-journal")
+
+        conn = sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        try:
+            work_rows = [dict(r) for r in conn.execute("SELECT * FROM library_work ORDER BY work_id").fetchall()]
+            attempts_rows = [dict(r) for r in conn.execute("SELECT * FROM library_attempts ORDER BY attempt_token").fetchall()]
+            submissions_rows = [dict(r) for r in conn.execute("SELECT * FROM library_submissions ORDER BY submission_key").fetchall()]
+            proposals_rows = [dict(r) for r in conn.execute("SELECT * FROM library_proposals ORDER BY run_id, video_id, shelf_id").fetchall()]
+        finally:
+            conn.close()
+
+        export_payload = {
+            "work": work_rows,
+            "attempts": attempts_rows,
+            "submissions": submissions_rows,
+            "proposals": proposals_rows,
+        }
+        (self.state_dir / "registry_export.json").write_text(json.dumps(export_payload, indent=2, ensure_ascii=False), encoding="utf-8")
+        (self.state_dir / "work.json").write_text(json.dumps(work_rows, indent=2, ensure_ascii=False), encoding="utf-8")
+        (self.state_dir / "attempts.json").write_text(json.dumps(attempts_rows, indent=2, ensure_ascii=False), encoding="utf-8")
+        (self.state_dir / "submissions.json").write_text(json.dumps(submissions_rows, indent=2, ensure_ascii=False), encoding="utf-8")
+        (self.state_dir / "proposals.json").write_text(json.dumps(proposals_rows, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    def _check_error_guard(self) -> None:
+        """Shared coordinator enforcing 2-hour deadline and error rate threshold (> 10% after 20 attempts)."""
+        with self._coordinator_lock:
+            if self.abort_event.is_set():
+                return
+            elapsed_ms = int((time.perf_counter() - self.run_start_time) * 1000)
+            if elapsed_ms > self.wall_budget_ms:
+                self._trigger_abort(
+                    f"Wall-time budget exceeded (2 hour deadline): {elapsed_ms} ms > {self.wall_budget_ms} ms"
+                )
+                return
+            n = len(self.attempts)
+            if n >= self.error_rate_min_attempts:
+                rejected = sum(1 for a in self.attempts if a.get("outcome") == "rejected")
+                failures = len(self.transport_failures)
+                numerator = rejected + failures
+                rate = numerator / n
+                if rate > self.error_rate_limit:
+                    self._trigger_abort(
+                        f"Error rate limit exceeded: {numerator}/{n} ({rate:.1%}) > {self.error_rate_limit:.1%} "
+                        f"after {n} completed attempts"
+                    )
+
+    def _trigger_abort(self, reason: str) -> None:
+        """Stops launching, terminates owned children, terminates helper, and signals abort."""
+        if self.abort_event.is_set():
+            return
+        print(f"[proof] ERROR GUARD BREACH: {reason}. Aborting run.", file=sys.stderr, flush=True)
+        self.abort_reason = reason
+        self.abort_event.set()
+        with self._proc_lock:
+            for proc in list(self._active_processes):
+                try:
+                    proc.terminate()
+                except Exception:
+                    pass
+        try:
+            self.stop_server()
+        except Exception:
+            pass
 
     def generate_mock_assignment(self, item: dict) -> Tuple[dict, dict, int]:
         """Generates a deterministic fixture assignment strictly obeying evidence rules."""
         t0 = time.perf_counter()
+        if self._mock_item_index < self.mock_reject_count:
+            self._mock_item_index += 1
+            result = {
+                "outcome": "error",
+                "reason": "Mock simulated rejection for error guard testing (exceeds word cap)",
+            }
+            wall_ms = max(1, int((time.perf_counter() - t0) * 1000))
+            usage = {"status": "unavailable", "reason": "Mock fixture"}
+            return result, usage, wall_ms
+
+        self._mock_item_index += 1
         video_id = item["video_id"]
         card = item.get("card") or {}
         excerpts = card.get("excerpts") or []
@@ -674,7 +868,7 @@ class ProofHarness:
             if gold_evidence:
                 for exc in candidates:
                     exc_text = exc.get("text", "")
-                    if gold_evidence in exc_text and 0 < len(gold_evidence.split()) < 25:
+                    if gold_evidence in exc_text and 0 < len(gold_evidence.split()) <= 24:
                         chosen_excerpt = exc
                         quote = gold_evidence
                         break
@@ -682,9 +876,8 @@ class ProofHarness:
             if chosen_excerpt is None and candidates:
                 chosen_excerpt = candidates[0]
                 raw_text = chosen_excerpt.get("text", "").strip()
-                slice_text = raw_text[:80]
-                last_space = slice_text.rfind(" ")
-                quote = slice_text[:last_space].strip() if last_space > 0 else slice_text.strip()
+                words = unicodedata.normalize("NFC", raw_text).split()
+                quote = " ".join(words[:min(12, len(words))])
                 if not quote and raw_text:
                     quote = raw_text.split()[0]
 
@@ -723,8 +916,16 @@ class ProofHarness:
         }
         return result, usage, wall_ms
 
-    def generate_model_assignment(self, item: dict, prompt: str) -> Tuple[dict, dict, int, dict]:
-        """Calls `claude -p` structured output CLI for reasoning on a single card."""
+    def generate_model_batch(
+        self, items: List[dict], prompt: str, call_id: str
+    ) -> Tuple[Dict[str, dict], dict, dict, dict]:
+        """`claude -p` once for a batch; writes <out>/calls/<call_id>.{stdin,stdout,stderr} and returns ({video_id: result}, usage, raw env, call_record)."""
+        self.calls_dir.mkdir(parents=True, exist_ok=True)
+        stdin_bytes = prompt.encode("utf-8")
+        stdin_sha256 = hashlib.sha256(stdin_bytes).hexdigest()
+        (self.calls_dir / f"{call_id}.stdin").write_bytes(stdin_bytes)
+
+        t_start_mono = time.monotonic()
         t0 = time.perf_counter()
         exe = shutil.which("claude") or "claude"
         cmd = [
@@ -741,104 +942,79 @@ class ProofHarness:
         if self.model:
             cmd += ["--model", self.model]
 
-        res = subprocess.run(
-            cmd,
-            input=prompt,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-        )
+        timed_out = False
+        cancelled = False
+        proc = None
+        stdout_bytes = b""
+        stderr_bytes = b""
+        returncode = -1
+
+        with self._proc_lock:
+            if self.abort_event.is_set():
+                cancelled = True
+            else:
+                try:
+                    proc = subprocess.Popen(
+                        cmd,
+                        stdin=subprocess.PIPE,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                    )
+                    self._active_processes.add(proc)
+                except Exception:
+                    returncode = -1
+
+        if proc is not None:
+            try:
+                stdout_bytes, stderr_bytes = proc.communicate(input=stdin_bytes, timeout=self.call_timeout)
+                returncode = proc.returncode
+            except subprocess.TimeoutExpired:
+                timed_out = True
+                proc.kill()
+                stdout_bytes, stderr_bytes = proc.communicate()
+                returncode = proc.returncode
+            except Exception:
+                cancelled = True
+                proc.kill()
+                stdout_bytes, stderr_bytes = proc.communicate()
+                returncode = proc.returncode
+            finally:
+                with self._proc_lock:
+                    self._active_processes.discard(proc)
+
+        t_end_mono = time.monotonic()
         wall_ms = max(1, int((time.perf_counter() - t0) * 1000))
 
-        if res.returncode != 0 or not res.stdout.strip():
-            raise ProofRunError(f"claude -p failed (exit {res.returncode}): {res.stderr[:400]}")
+        stdout_sha256 = hashlib.sha256(stdout_bytes).hexdigest()
+        stderr_sha256 = hashlib.sha256(stderr_bytes).hexdigest()
+        (self.calls_dir / f"{call_id}.stdout").write_bytes(stdout_bytes)
+        (self.calls_dir / f"{call_id}.stderr").write_bytes(stderr_bytes)
 
-        try:
-            env = json.loads(res.stdout)
-        except json.JSONDecodeError as e:
-            raise ProofRunError(f"claude returned non-JSON stdout: {res.stdout[:300]}") from e
+        print(f"[proof] model call done: {call_id} in {wall_ms} ms, exit {returncode}, "
+              f"stdout {len(stdout_bytes)} B", file=sys.stderr, flush=True)
 
-        if env.get("is_error") or env.get("structured_output") is None:
-            raise ProofRunError(
-                f"claude failed to return structured_output: {str(env.get('result'))[:300]}"
-            )
+        call_error = None
+        env: Dict[str, Any] = {}
+        if returncode != 0 or not stdout_bytes.strip():
+            call_error = f"claude -p failed (exit {returncode}): {stderr_bytes[:400].decode('utf-8', errors='replace')}"
 
-        structured = env["structured_output"]
-        results_list = structured.get("results", [])
-        if not results_list:
-            raise ProofRunError("claude returned empty results list")
+        if call_error is None:
+            try:
+                env = json.loads(stdout_bytes.decode("utf-8"))
+            except json.JSONDecodeError:
+                call_error = f"claude returned non-JSON stdout: {stdout_bytes[:300].decode('utf-8', errors='replace')}"
 
-        result = results_list[0].get("result", {})
-        u = env.get("usage", {})
-        if u and "input_tokens" in u:
-            usage = {
-                "status": "reported",
-                "source": "claude_cli_json",
-                "model": env.get("model") or self.model,
-                "input_tokens": int(u.get("input_tokens", 0)),
-                "output_tokens": int(u.get("output_tokens", 0)),
-                "cache_read_tokens": int(u.get("cache_read_input_tokens", 0)),
-                "cache_create_tokens": int(u.get("cache_creation_input_tokens", 0)),
-            }
-        else:
-            usage = {
-                "status": "unavailable",
-                "reason": "CLI returned no token usage",
-            }
-
-        return result, usage, wall_ms, env
-
-    def generate_model_batch(self, items: List[dict], prompt: str) -> Tuple[Dict[str, dict], dict, dict]:
-        """`claude -p` once for a batch; returns {video_id: result}, usage, and raw env."""
-        t0 = time.perf_counter()
-        exe = shutil.which("claude") or "claude"
-        cmd = [
-            exe,
-            "-p",
-            "--json-schema",
-            self.output_schema_text,
-            "--output-format",
-            "json",
-            "--tools",
-            "",
-            "--no-session-persistence",
-        ]
-        if self.model:
-            cmd += ["--model", self.model]
-
-        res = subprocess.run(
-            cmd,
-            input=prompt,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=self.call_timeout,
-        )
-        wall_ms = max(1, int((time.perf_counter() - t0) * 1000))
-        print(f"[proof] model call done: {wall_ms} ms, exit {res.returncode}, "
-              f"stdout {len(res.stdout)} B", file=sys.stderr, flush=True)
-
-        if res.returncode != 0 or not res.stdout.strip():
-            raise ProofRunError(f"claude -p failed (exit {res.returncode}): {res.stderr[:400]}")
-
-        try:
-            env = json.loads(res.stdout)
-        except json.JSONDecodeError as e:
-            raise ProofRunError(f"claude returned non-JSON stdout: {res.stdout[:300]}") from e
-
-        if env.get("is_error") or env.get("structured_output") is None:
-            raise ProofRunError(
-                f"claude failed to return structured_output: {str(env.get('result'))[:300]}"
-            )
+        if call_error is None:
+            if env.get("is_error") or env.get("structured_output") is None:
+                call_error = f"claude failed to return structured_output: {str(env.get('result'))[:300]}"
 
         wanted = {it["video_id"] for it in items}
         by_video: Dict[str, dict] = {}
-        for entry in env["structured_output"].get("results", []) or []:
-            vid = entry.get("video_id")
-            if vid in wanted and vid not in by_video and isinstance(entry.get("result"), dict):
-                by_video[vid] = entry["result"]
+        if call_error is None:
+            for entry in env.get("structured_output", {}).get("results", []) or []:
+                vid = entry.get("video_id")
+                if vid in wanted and vid not in by_video and isinstance(entry.get("result"), dict):
+                    by_video[vid] = entry["result"]
 
         u = env.get("usage", {})
         if u and "input_tokens" in u:
@@ -854,10 +1030,47 @@ class ProofHarness:
         else:
             usage = {
                 "status": "unavailable",
-                "reason": "CLI returned no token usage",
+                "reason": call_error or "CLI returned no token usage",
             }
 
-        return by_video, usage, env
+        ordered_attempt_ids = [f"att-{it['video_id']}-{it.get('attempt_number', 1)}" for it in items]
+        call_record = {
+            "call_id": call_id,
+            "attempt_ids": ordered_attempt_ids,
+            "video_ids": [it["video_id"] for it in items],
+            "argv": cmd,
+            "schema_sha256": self.output_schema_sha256,
+            "stdin_bytes": len(stdin_bytes),
+            "stdout_bytes": len(stdout_bytes),
+            "stderr_bytes": len(stderr_bytes),
+            "stdin_sha256": stdin_sha256,
+            "stdout_sha256": stdout_sha256,
+            "stderr_sha256": stderr_sha256,
+            "start_mono_ms": int(t_start_mono * 1000),
+            "end_mono_ms": int(t_end_mono * 1000),
+            "wall_ms": wall_ms,
+            "exit_status": returncode,
+            "timed_out": timed_out,
+            "cancelled": cancelled,
+            "usage": usage,
+            "model_usage": env.get("modelUsage"),
+            "total_cost_usd": env.get("total_cost_usd"),
+            "error": call_error,
+        }
+
+        return by_video, usage, env, call_record
+
+    def generate_model_assignment(self, item: dict, prompt: str) -> Tuple[dict, dict, int, dict, str]:
+        """Calls `claude -p` structured output CLI for reasoning on a single card."""
+        with self._lock:
+            call_id = f"call-{len(self.calls) + 1:04d}-{secrets.token_hex(3)}"
+        by_video, usage, raw_env, call_record = self.generate_model_batch([item], prompt, call_id)
+        with self._lock:
+            self.calls.append(call_record)
+        res = by_video.get(item["video_id"])
+        if res is None:
+            res = {"outcome": "error", "reason": call_record.get("error") or "No result returned"}
+        return res, usage, call_record["wall_ms"], raw_env, call_id
 
     def process_item(self, item: dict) -> dict:
         """Executes reason -> submit for one claimed work item."""
@@ -899,13 +1112,23 @@ class ProofHarness:
             estimates = {"total_cost_usd": None, "source": "unavailable"}
             response_data = {"results": [{"video_id": video_id, "result": result}]}
             response_text = canonical(response_data)
+            call_id = None
         else:
-            result, usage, wall_ms, raw_env = self.generate_model_assignment(item, prompt_text)
+            result, usage, wall_ms, raw_env, call_id = self.generate_model_assignment(item, prompt_text)
             estimates = {
                 "total_cost_usd": raw_env.get("total_cost_usd"),
                 "source": "claude_cli_estimate" if raw_env.get("total_cost_usd") is not None else "unavailable",
             }
             response_text = canonical(raw_env)
+
+        if result.get("outcome") == "assigned":
+            too_long = [len(((m.get("evidence") or {}).get("quote") or "").split())
+                        for m in (result.get("memberships") or [])]
+            if any(n > 24 for n in too_long):
+                result = {
+                    "outcome": "error",
+                    "reason": f"model quote exceeds prompt contract (24 words): {max(too_long)} words",
+                }
 
         response_bytes = len(response_text.encode("utf-8"))
         submission_key = f"{work_id}-{attempt_token}"
@@ -955,6 +1178,7 @@ class ProofHarness:
 
         attempt_record = {
             "attempt_id": f"att-{video_id}-{attempt_number}",
+            "call_id": call_id,
             "video_id": video_id,
             "work_id": work_id,
             "attempt_token": attempt_token,
@@ -990,12 +1214,10 @@ class ProofHarness:
         prompt_bytes = len(prompt.encode("utf-8"))
         schema_bytes = len(self.output_schema_text.encode("utf-8"))
 
-        t0 = time.perf_counter()
-        call_id = f"call-{len(self.calls) + 1:04d}-{secrets.token_hex(3)}"
-        call_error = None
-        raw_env: Dict[str, Any] = {}
+        with self._lock:
+            call_id = f"call-{len(self.calls) + 1:04d}-{secrets.token_hex(3)}"
         try:
-            by_video, usage, raw_env = self.generate_model_batch(items, prompt)
+            by_video, usage, raw_env, call_record = self.generate_model_batch(items, prompt, call_id)
         except (ProofRunError, subprocess.TimeoutExpired, OSError) as exc:
             by_video = {}
             call_error = str(exc)[:400]
@@ -1003,20 +1225,35 @@ class ProofHarness:
                 "status": "unavailable",
                 "reason": f"call failed: {call_error}",
             }
-        wall_ms = max(1, int((time.perf_counter() - t0) * 1000))
+            call_record = {
+                "call_id": call_id,
+                "attempt_ids": [f"att-{it['video_id']}-{it.get('attempt_number', 1)}" for it in items],
+                "video_ids": [it["video_id"] for it in items],
+                "argv": [],
+                "schema_sha256": self.output_schema_sha256,
+                "stdin_bytes": len(prompt.encode("utf-8")),
+                "stdout_bytes": 0,
+                "stderr_bytes": len(call_error.encode("utf-8")),
+                "stdin_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
+                "stdout_sha256": "0" * 64,
+                "stderr_sha256": hashlib.sha256(call_error.encode("utf-8")).hexdigest(),
+                "start_mono_ms": 0,
+                "end_mono_ms": 0,
+                "wall_ms": 1,
+                "exit_status": -1,
+                "timed_out": isinstance(exc, subprocess.TimeoutExpired),
+                "cancelled": False,
+                "usage": usage,
+                "model_usage": None,
+                "total_cost_usd": None,
+                "error": call_error,
+            }
+            raw_env = {}
 
+        wall_ms = call_record.get("wall_ms", 1)
+        call_error = call_record.get("error")
         with self._lock:
-            self.calls.append(
-                {
-                    "call_id": call_id,
-                    "batch_size": len(items),
-                    "video_ids": [it["video_id"] for it in items],
-                    "prompt_bytes": prompt_bytes,
-                    "wall_ms": wall_ms,
-                    "usage": usage,
-                    "error": call_error,
-                }
-            )
+            self.calls.append(call_record)
 
         receipts = []
         policy = dict(
@@ -1037,18 +1274,18 @@ class ProofHarness:
                     "reason": call_error or f"model returned no result for {vid}",
                 }
             elif res.get("outcome") == "assigned":
-                # Prompt contract: evidence quotes are verbatim and under 25
+                # Prompt contract: evidence quotes are verbatim and at most 24
                 # words. The service caps quotes at 1,000 characters only, so a
                 # longer quote would be accepted there and then fail the receipt
                 # validator. Treat it as invalid model output: submit an error
                 # result (recorded as rejected) so the retry policy can re-ask.
                 too_long = [len(((m.get("evidence") or {}).get("quote") or "").split())
                             for m in (res.get("memberships") or [])]
-                if any(n >= 25 for n in too_long):
+                if any(n > 24 for n in too_long):
                     print(f"[proof] model quote over 24 words for {vid} ({max(too_long)} words); rejecting output",
                           file=sys.stderr, flush=True)
                     res = {"outcome": "error",
-                           "reason": f"model quote exceeds prompt contract (25 words): {max(too_long)} words"}
+                           "reason": f"model quote exceeds prompt contract (24 words): {max(too_long)} words"}
 
             card_text = library_cards.card_text(it["card"])
             card_bytes = len(card_text.encode("utf-8"))
@@ -1146,6 +1383,7 @@ class ProofHarness:
             receipts.append(
                 {
                     "attempt_id": f"att-{vid}-{it.get('attempt_number', 1)}",
+                    "call_id": call_id,
                     "video_id": vid,
                     "work_id": it["work_id"],
                     "attempt_token": it["attempt_token"],
@@ -1180,6 +1418,8 @@ class ProofHarness:
         """One batched real-model worker loop."""
         idle_polls = 0
         while True:
+            if self.abort_event.is_set():
+                return
             claim_resp = self.http_tool_call(
                 "claim_library_work",
                 {
@@ -1220,6 +1460,11 @@ class ProofHarness:
                 for r in receipts:
                     self.attempts.append(r)
                     self._handle_retry_policy(r, retried_videos)
+                    self._check_error_guard()
+                    if self.abort_event.is_set():
+                        break
+            if self.abort_event.is_set():
+                return
 
     def run_proof_loop(self) -> None:
         """Runs the complete claim -> reason -> submit loop over HTTP."""
@@ -1231,10 +1476,13 @@ class ProofHarness:
                 futures = [ex.submit(self._batched_worker, retried_videos) for _ in range(self.concurrency)]
                 for fut in cf.as_completed(futures):
                     fut.result()
-            self._finish_with_preview()
+            if not self.abort_event.is_set():
+                self._finish_with_preview()
             return
 
         while True:
+            if self.abort_event.is_set():
+                break
             claim_resp = self.http_tool_call(
                 "claim_library_work",
                 {
@@ -1259,11 +1507,18 @@ class ProofHarness:
                 continue
 
             for item in work_items:
+                if self.abort_event.is_set():
+                    break
                 receipt = self.process_item(item)
-                self.attempts.append(receipt)
-                self._handle_retry_policy(receipt, retried_videos)
+                with self._lock:
+                    self.attempts.append(receipt)
+                    self._handle_retry_policy(receipt, retried_videos)
+                self._check_error_guard()
+                if self.abort_event.is_set():
+                    break
 
-        self._finish_with_preview()
+        if not self.abort_event.is_set():
+            self._finish_with_preview()
 
     def _finish_with_preview(self) -> None:
         """Preview only; apply must remain impossible in the proof."""
@@ -1424,13 +1679,13 @@ class ProofHarness:
             "response_bytes": response_bytes,
             "wall_ms": total_wall_ms,
             "retries": sum(max(0, len(atts) - 1) for atts in by_item.values()),
-            "model_calls": 0 if self.mock else len(self.attempts),
+            "model_calls": 0 if self.mock else len(self.calls),
             "rejected_attempts": sum(1 for a in self.attempts if a["outcome"] == "rejected"),
             "transport_failures": len(self.transport_failures),
         }
 
         # 4. Usage totals for audit_extensions
-        reported = [c["usage"] for c in self.calls if c["usage"].get("status") == "reported"]
+        reported = [c["usage"] for c in self.calls if c.get("usage", {}).get("status") == "reported"]
         usage_totals = {
             "calls": len(self.calls),
             "calls_with_reported_usage": len(reported),
@@ -1439,7 +1694,7 @@ class ProofHarness:
             "output_tokens": sum(u.get("output_tokens", 0) for u in reported),
             "cache_read_tokens": sum(u.get("cache_read_tokens", 0) for u in reported),
             "cache_create_tokens": sum(u.get("cache_create_tokens", 0) for u in reported),
-            "cli_estimated_cost_usd": round(sum(float(u.get("total_cost_usd", 0.0) or 0.0) for u in reported), 4),
+            "cli_estimated_cost_usd": round(sum(float(c.get("total_cost_usd", 0.0) or 0.0) for c in self.calls), 4),
             "paid_cost_usd": None,
             "status": "measured"
             if reported and len(reported) == len(self.calls)
@@ -1452,8 +1707,8 @@ class ProofHarness:
             "contract_version": CONTRACT,
             "run_id": self.run_id,
             "mode": "mock" if self.mock else "subscription",
-            "status": "completed",
-            "abort_reason": None,
+            "status": "aborted" if self.abort_event.is_set() else "completed",
+            "abort_reason": self.abort_reason,
             "inputs": self.manifest["hashes"],
             "target_ids": self.target_ids,
             "target_manifest_hash": target_manifest_hash,
@@ -1494,7 +1749,7 @@ class ProofHarness:
             "attempts": self.attempts,
             "transport_failures": self.transport_failures,
             "targets": self.targets,
-            "preview": self.preview,
+            "preview": self.preview or {"request": {}, "response": {}},
             "totals": totals,
             "audit_extensions": {
                 "calls": self.calls,
@@ -1512,12 +1767,18 @@ class ProofHarness:
         """Runs the entire product proof harness."""
         self.run_start_time = time.perf_counter()
         self.check_guards()
+        self.out_dir.mkdir(parents=True, exist_ok=True)
+        self.calls_dir.mkdir(parents=True, exist_ok=True)
+        self.http_dir.mkdir(parents=True, exist_ok=True)
+        self.state_dir.mkdir(parents=True, exist_ok=True)
         isolated_db = self.prepare_isolated_environment()
         try:
             self.initialize_database_and_freeze(isolated_db)
+            self._save_before_state(isolated_db)
             self.start_server()
             self.run_proof_loop()
             self.verify_after_state(isolated_db)
+            self._save_after_state(isolated_db)
             receipts_path = self.write_receipts()
             return receipts_path
         finally:
@@ -1545,6 +1806,12 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         default=False,
         help="Run in mock reasoning mode (deterministic fixture assignments, zero model calls)",
+    )
+    parser.add_argument(
+        "--mock-reject-count",
+        type=int,
+        default=0,
+        help="Simulate N rejections for error guard testing in mock mode",
     )
     parser.add_argument(
         "--limit",
@@ -1615,6 +1882,7 @@ def main() -> None:
         source=args.source,
         out_dir=args.out,
         mock=args.mock,
+        mock_reject_count=args.mock_reject_count,
         limit=args.limit,
         model=args.model,
         concurrency=args.concurrency,
