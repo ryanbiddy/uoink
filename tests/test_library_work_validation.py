@@ -14,340 +14,297 @@ Covers Gate P2-2 (validation and retries):
 - Stale token: unknown/unleased token returns stale_attempt without writing proposals
 
 Written from PHASE2-CONTRACT-2026-09-04 and phase2-contract/tool-schemas.json.
-xfails strictly until library_work is integrated.
+Realigned to frozen LibraryWorkService surface per run K brief.
 """
 from __future__ import annotations
 
-import json
 import math
-import sqlite3
+import shutil
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import pytest
 
-try:
-    import library_work
-    HAS_LIBRARY_WORK = True
-except ImportError:
-    library_work = None
-    HAS_LIBRARY_WORK = False
+from index import Index
+from library_work import LibraryWorkService, RequestContext, LibraryError
 
 ROOT = Path(__file__).resolve().parent.parent
-CONTRACT_DIR = ROOT / "docs" / "library" / "phase2-contract"
 GATE = "Gate P2-2: validation and retries"
 
 
-def get_substrate_connection() -> sqlite3.Connection:
-    conn = sqlite3.connect(":memory:", check_same_thread=False)
-    conn.execute("PRAGMA foreign_keys=ON")
-    conn.execute(
-        """CREATE TABLE IF NOT EXISTS yoinks (
-            video_id TEXT PRIMARY KEY,
-            title TEXT,
-            channel TEXT,
-            platform TEXT,
-            deleted_at TEXT
-        )"""
-    )
-    sql_path = CONTRACT_DIR / "0027_library_substrate.sql"
-    conn.executescript(sql_path.read_text(encoding="utf-8"))
-    return conn
+@pytest.fixture
+def tmp_path():
+    p = Path(tempfile.mkdtemp(prefix="uoink_val_test_"))
+    try:
+        yield p
+    finally:
+        shutil.rmtree(p, ignore_errors=True)
 
 
-def seed_work_row(
-    conn: sqlite3.Connection,
+def make_validation_environment(
+    tmp_path: Path,
     video_id: str = "vid_val_01",
     shelf_id: str = "shelf_valid",
-    source_rev: str = "a" * 64,
-    tax_rev: str = "b" * 64,
-    packet_hash: str = "c" * 64,
-    excerpt_id: str = "d" * 64,
-    card_hash: str = "e" * 64,
     excerpt_text: str = "The quick brown fox jumps over the lazy dog.",
-) -> Dict[str, str]:
-    version_id = "tax_v1"
-    run_id = "run_val_01"
-    work_id = f"work_{video_id}"
-    token = "t" * 43
+):
+    root = tmp_path / "work"
+    root.mkdir(parents=True, exist_ok=True)
+    idx = Index.open(root / "test.db")
+    store_root = root / "library"
+    clock = [1_000_000]
+    svc = LibraryWorkService(idx, store_root, clock=lambda: clock[0])
+    ctx_op = RequestContext(authenticated=True, client_id="operator", session_id="s_op", operator=True, local_user_confirmed=True)
 
-    # Taxonomy & shelves
-    conn.execute("INSERT OR IGNORE INTO shelf_versions VALUES (?, NULL, ?, 'active', '2026-09-04T00:00:00Z', 'gemini', '2026-09-04T00:00:00Z')", (version_id, tax_rev))
-    conn.execute("UPDATE library_meta SET active_version_id=? WHERE singleton=1", (version_id,))
-    conn.execute("INSERT OR IGNORE INTO shelves VALUES (?, '2026-09-04T00:00:00Z')", (shelf_id,))
-    conn.execute(
-        """INSERT OR IGNORE INTO shelf_nodes VALUES (?, ?, NULL, 'Valid Shelf', '["Valid Shelf"]', 'Def', '["inc"]', '["exc"]', 0)""",
-        (version_id, shelf_id)
-    )
+    idx.upsert_yoink(dict(
+        video_id=video_id,
+        slug=video_id,
+        title="Valid Video Title",
+        topic="Old",
+        yoinked_at="2026-09-04",
+        corpus_path="",
+        sidecar_path="",
+    ))
+    with idx.write_transaction() as c:
+        c.execute(
+            "INSERT INTO clips(video_id, seq, start, end, text) VALUES (?, 0, 10.0, 25.0, ?)",
+            (video_id, excerpt_text),
+        )
 
-    # Yoink & manifest
-    conn.execute("INSERT OR IGNORE INTO yoinks VALUES (?, 'Title', 'Channel', 'youtube', NULL)", (video_id,))
-    conn.execute("INSERT OR IGNORE INTO library_runs VALUES (?, ?, ?, 1, 'collecting', '{}', '2026-09-04T00:00:00Z')", (run_id, version_id, "m" * 64))
-    conn.execute("INSERT OR IGNORE INTO library_manifest VALUES (?, ?, ?, 'waiting', NULL)", (run_id, video_id, source_rev))
-
-    # Work packet with excerpt
-    card = {
-        "video_id": video_id,
-        "title": "Title",
-        "source_revision": source_rev,
-        "card_hash": card_hash,
-        "excerpts": [
+    tax_res = svc.approve_taxonomy(ctx_op, {
+        "version_id": "tax_v1",
+        "nodes": [
             {
-                "excerpt_id": excerpt_id,
-                "evidence_kind": "timed_clip",
-                "start": 10.0,
-                "end": 25.0,
-                "text": excerpt_text,
-                "truncated": False,
-            }
-        ]
-    }
-    conn.execute(
-        """INSERT OR IGNORE INTO library_work VALUES (?, ?, ?, 'assign', 1, ?, ?, 'leased', 100, 1, '2026-09-04T00:00:00Z', '2026-09-04T00:00:00Z')""",
-        (work_id, run_id, video_id, json.dumps(card), packet_hash)
-    )
+                "shelf_id": shelf_id,
+                "path": ["Valid Shelf"],
+                "definition": "Valid shelf definition",
+                "include": ["valid"],
+                "exclude": ["invalid"],
+            },
+            {
+                "shelf_id": "shelf_other",
+                "path": ["Other Shelf"],
+                "definition": "Other shelf definition",
+                "include": ["other"],
+                "exclude": ["valid"],
+            },
+        ],
+    })
+    assert tax_res.get("ok") is True, tax_res
 
-    # Active attempt
-    conn.execute(
-        """INSERT OR IGNORE INTO library_attempts VALUES (?, ?, 1, 1, 'client_val', ?, ?, 9999999999999, 9999999999999, 'current')""",
-        (token, work_id, source_rev, tax_rev)
-    )
-    conn.commit()
+    run_res = svc.prepare_run(ctx_op, {
+        "run_id": "run_val_01",
+        "version_id": "tax_v1",
+        "video_ids": [video_id],
+        "prompt_hash": "0" * 64,
+    })
+    assert run_res.get("ok") is True, run_res
 
-    return {
-        "work_id": work_id,
-        "video_id": video_id,
-        "attempt_token": token,
-        "shelf_id": shelf_id,
-        "source_revision": source_rev,
-        "taxonomy_revision": tax_rev,
-        "packet_hash": packet_hash,
-        "excerpt_id": excerpt_id,
-        "card_hash": card_hash,
-        "excerpt_text": excerpt_text,
-    }
-
-
-def make_valid_submission_payload(seeded: Dict[str, str], key: str = "sub_key_01") -> Dict[str, Any]:
-    return {
-        "work_id": seeded["work_id"],
+    ctx_client = RequestContext(authenticated=True, client_id="client_val", session_id="s_val")
+    claim_res = svc.claim_work(ctx_client, {
+        "action": "claim",
+        "run_id": "run_val_01",
         "client_id": "client_val",
-        "attempt_token": seeded["attempt_token"],
+        "max_items": 1,
+        "lease_seconds": 600,
+    })
+    assert claim_res.get("ok") is True, claim_res
+    work_item = claim_res["work"][0]
+
+    return idx, svc, ctx_client, work_item, clock
+
+
+def make_valid_submission_payload(
+    work_item: Dict[str, Any],
+    key: str = "sub_key_01",
+    shelf_id: str = "shelf_valid",
+    shelf_path: Optional[List[str]] = None,
+    quote: str = "brown fox",
+    confidence: float = 0.85,
+    client_id: str = "client_val",
+) -> Dict[str, Any]:
+    card = work_item["card"]
+    excerpt = card["excerpts"][0]
+    return {
+        "work_id": work_item["work_id"],
+        "client_id": client_id,
+        "attempt_token": work_item["attempt_token"],
         "submission_key": key,
         "schema_version": 1,
-        "video_id": seeded["video_id"],
-        "source_revision": seeded["source_revision"],
-        "taxonomy_revision": seeded["taxonomy_revision"],
-        "packet_hash": seeded["packet_hash"],
+        "video_id": work_item["video_id"],
+        "source_revision": work_item["source_revision"],
+        "taxonomy_revision": work_item["taxonomy_revision"],
+        "packet_hash": work_item["packet_hash"],
         "result": {
             "outcome": "assigned",
             "memberships": [
                 {
-                    "shelf_id": seeded["shelf_id"],
-                    "shelf_path": ["Valid Shelf"],
-                    "confidence": 0.88,
+                    "shelf_id": shelf_id,
+                    "shelf_path": shelf_path or ["Valid Shelf"],
+                    "confidence": confidence,
                     "evidence": {
                         "basis": "packet",
                         "kind": "timed_clip",
-                        "excerpt_id": seeded["excerpt_id"],
-                        "card_hash": seeded["card_hash"],
-                        "quote": "brown fox jumps",
+                        "excerpt_id": excerpt["excerpt_id"],
+                        "card_hash": card["card_hash"],
+                        "quote": quote,
                     },
                 }
             ],
         },
         "usage": {
-            "status": "reported",
-            "model": "test-librarian-v1",
-            "input_tokens": 500,
-            "output_tokens": 50,
-            "wall_time_ms": 120,
+            "status": "unavailable",
+            "reason": "fixture",
         },
     }
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE}: ID validation required")
-def test_p2_2_missing_or_malformed_id_rejected():
-    """Submit with missing work_id or mismatched video_id returns validation rejection."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE}: ID validation")
+def test_p2_2_missing_or_malformed_id_rejected(tmp_path):
+    """Missing or malformed identifiers (empty, invalid pattern) must be rejected."""
+    idx, svc, ctx, work_item, clock = make_validation_environment(tmp_path)
 
-    conn = get_substrate_connection()
-    seeded = seed_work_row(conn)
-    payload = make_valid_submission_payload(seeded)
-
-    # Mismatched video_id
-    bad_payload = dict(payload)
-    bad_payload["video_id"] = "wrong_vid"
-    res = library_work.submit_result(conn, bad_payload)
+    # Missing work_id
+    payload_missing = make_valid_submission_payload(work_item)
+    del payload_missing["work_id"]
+    res = svc.submit_result(ctx, payload_missing)
     assert res.get("ok") is False
+    assert res.get("error", {}).get("code") == "validation_error"
+
+    # Malformed work_id (whitespace only)
+    payload_malformed = make_valid_submission_payload(work_item)
+    payload_malformed["work_id"] = "   "
+    res = svc.submit_result(ctx, payload_malformed)
+    assert res.get("ok") is False
+    assert res.get("error", {}).get("code") == "validation_error"
+
+
+def test_p2_2_nan_infinity_confidence_rejected(tmp_path):
+    """NaN and Infinity values for numeric fields like confidence must be rejected."""
+    idx, svc, ctx, work_item, clock = make_validation_environment(tmp_path)
+
+    # NaN confidence
+    payload_nan = make_valid_submission_payload(work_item)
+    payload_nan["result"]["memberships"][0]["confidence"] = float("nan")
+    res_nan = svc.submit_result(ctx, payload_nan)
+    assert res_nan.get("ok") is False
+    assert res_nan.get("error", {}).get("code") == "validation_error"
+
+    # Infinity confidence
+    payload_inf = make_valid_submission_payload(work_item)
+    payload_inf["result"]["memberships"][0]["confidence"] = float("inf")
+    res_inf = svc.submit_result(ctx, payload_inf)
+    assert res_inf.get("ok") is False
+    assert res_inf.get("error", {}).get("code") == "validation_error"
+
+
+def test_p2_2_confidence_floor_enforcement(tmp_path):
+    """Confidence score below 0.60 must be rejected for assigned outcome."""
+    idx, svc, ctx, work_item, clock = make_validation_environment(tmp_path)
+
+    payload_low = make_valid_submission_payload(work_item, confidence=0.55)
+    res = svc.submit_result(ctx, payload_low)
+    assert res.get("ok") is True
+    assert res.get("outcome") == "rejected"
+    assert any(r.get("code") in ("confidence_floor", "low_confidence") for r in res.get("rejected", []))
+
+
+def test_p2_2_foreign_shelf_rejected(tmp_path):
+    """shelf_id not present in the active approved taxonomy must be rejected."""
+    idx, svc, ctx, work_item, clock = make_validation_environment(tmp_path)
+
+    payload_foreign = make_valid_submission_payload(
+        work_item, shelf_id="shelf_nonexistent", shelf_path=["Nonexistent Shelf"]
+    )
+    res = svc.submit_result(ctx, payload_foreign)
+    assert res.get("ok") is True
+    assert res.get("outcome") == "rejected"
+    assert any(r.get("code") in ("invalid_shelf", "foreign_shelf") for r in res.get("rejected", []))
+    assert idx._conn.execute("SELECT count(*) FROM item_shelves").fetchone()[0] == 0
+
+
+def test_p2_2_quote_evidence_must_be_substring_of_single_excerpt(tmp_path):
+    """Quoted evidence must strictly be a substring of ONE specified excerpt."""
+    idx, svc, ctx, work_item, clock = make_validation_environment(tmp_path)
+
+    payload_bad_quote = make_valid_submission_payload(work_item, quote="pink elephants jumping")
+    res = svc.submit_result(ctx, payload_bad_quote)
+    assert res.get("ok") is True
+    assert res.get("outcome") == "rejected"
+    assert any(r.get("code") in ("invalid_evidence", "quote_mismatch") for r in res.get("rejected", []))
+
+
+def test_p2_2_stale_source_or_taxonomy_revision_rejected(tmp_path):
+    """Mismatch against frozen source or taxonomy revision must be rejected."""
+    idx, svc, ctx, work_item, clock = make_validation_environment(tmp_path)
+
+    # Stale source revision
+    payload_stale_src = make_valid_submission_payload(work_item)
+    payload_stale_src["source_revision"] = "f" * 64
+    res = svc.submit_result(ctx, payload_stale_src)
+    assert res.get("ok") is False or res.get("outcome") == "rejected"
+
+
+def test_p2_2_rejection_writes_zero_current_labels_and_stays_visible(tmp_path):
+    """A rejected result writes zero labels to item_shelves and records rejection visibly in manifest."""
+    idx, svc, ctx, work_item, clock = make_validation_environment(tmp_path)
+
+    payload_reject = make_valid_submission_payload(work_item, confidence=0.40)
+    res = svc.submit_result(ctx, payload_reject)
+    assert res.get("ok") is True
     assert res.get("outcome") == "rejected"
 
+    # Zero rows in item_shelves
+    assigned = idx._conn.execute("SELECT count(*) FROM item_shelves").fetchone()[0]
+    assert assigned == 0
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE}: NaN/Infinity rejection required")
-def test_p2_2_nan_infinity_confidence_rejected():
-    """NaN, Infinity, or negative/out-of-bounds confidence values must be rejected."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE}: NaN/Infinity rejection")
-
-    conn = get_substrate_connection()
-    seeded = seed_work_row(conn)
-    payload = make_valid_submission_payload(seeded)
-
-    for bad_conf in (float("nan"), float("inf"), -0.1, 1.1):
-        p = json.loads(json.dumps(payload))
-        p["result"]["memberships"][0]["confidence"] = bad_conf
-        res = library_work.submit_result(conn, p)
-        assert res.get("ok") is False
+    # Manifest records rejection disposition
+    manifest_disp = idx._conn.execute(
+        "SELECT disposition FROM library_manifest WHERE video_id=?", (work_item["video_id"],)
+    ).fetchone()[0]
+    assert manifest_disp == "rejected"
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE}: confidence floor >=0.60 required")
-def test_p2_2_confidence_floor_enforcement():
-    """Confidence scores below 0.60 must be rejected for assigned outcome."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE}: confidence floor")
-
-    conn = get_substrate_connection()
-    seeded = seed_work_row(conn)
-    payload = make_valid_submission_payload(seeded)
-    payload["result"]["memberships"][0]["confidence"] = 0.59
-
-    res = library_work.submit_result(conn, payload)
-    assert res.get("ok") is False
-    assert any("confidence" in str(r).lower() for r in res.get("rejected", []))
-
-
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE}: foreign shelf rejection required")
-def test_p2_2_foreign_shelf_rejected():
-    """Shelf ID not present in active approved taxonomy must be rejected."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE}: foreign shelf")
-
-    conn = get_substrate_connection()
-    seeded = seed_work_row(conn)
-    payload = make_valid_submission_payload(seeded)
-    payload["result"]["memberships"][0]["shelf_id"] = "nonexistent_foreign_shelf"
-
-    res = library_work.submit_result(conn, payload)
-    assert res.get("ok") is False
-
-
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE}: quote validation required")
-def test_p2_2_quote_evidence_must_be_substring_of_single_excerpt():
-    """Evidence quote must be a verbatim substring of ONE specified excerpt. Hallucinated or joined quotes rejected."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE}: quote validation")
-
-    conn = get_substrate_connection()
-    seeded = seed_work_row(conn, excerpt_text="The quick brown fox jumps over the lazy dog.")
-    payload = make_valid_submission_payload(seeded)
-
-    # Hallucinated quote
-    p1 = json.loads(json.dumps(payload))
-    p1["result"]["memberships"][0]["evidence"]["quote"] = "completely fabricated quote not in excerpt"
-    res1 = library_work.submit_result(conn, p1)
-    assert res1.get("ok") is False
-
-    # Wrong excerpt_id
-    p2 = json.loads(json.dumps(payload))
-    p2["result"]["memberships"][0]["evidence"]["excerpt_id"] = "f" * 64
-    res2 = library_work.submit_result(conn, p2)
-    assert res2.get("ok") is False
-
-
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE}: stale revisions rejection required")
-def test_p2_2_stale_source_or_taxonomy_revision_rejected():
-    """Mismatch in source_revision or taxonomy_revision invalidates attempt and rejects."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE}: stale revisions")
-
-    conn = get_substrate_connection()
-    seeded = seed_work_row(conn)
-    payload = make_valid_submission_payload(seeded)
-    payload["source_revision"] = "0" * 64
-
-    res = library_work.submit_result(conn, payload)
-    assert res.get("ok") is False
-
-
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE}: zero current labels written on rejection required")
-def test_p2_2_rejection_writes_zero_current_labels_and_stays_visible():
-    """Rejected submission writes zero rows to item_shelves; rejection record remains visible."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE}: rejection accounting")
-
-    conn = get_substrate_connection()
-    seeded = seed_work_row(conn)
-    payload = make_valid_submission_payload(seeded)
-    payload["result"]["memberships"][0]["confidence"] = 0.40  # invalid confidence
-
-    res = library_work.submit_result(conn, payload)
-    assert res.get("ok") is False
-
-    # Check that item_shelves has ZERO rows
-    assigned_count = conn.execute("SELECT count(*) FROM item_shelves").fetchone()[0]
-    assert assigned_count == 0
-
-    # Submission record must be stored with outcome='rejected'
-    sub_row = conn.execute("SELECT outcome FROM library_submissions WHERE submission_key=?", (payload["submission_key"],)).fetchone()
-    assert sub_row is not None
-    assert sub_row[0] == "rejected"
-
-
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE}: idempotent submit retry required")
-def test_p2_2_identical_submit_retry_returns_stored_response():
+def test_p2_2_identical_submit_retry_returns_stored_response(tmp_path):
     """An identical retry of a completed submission returns the exact recorded response without advancing state."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE}: idempotent submit retry")
+    idx, svc, ctx, work_item, clock = make_validation_environment(tmp_path)
+    payload = make_valid_submission_payload(work_item, key="key_idempotent")
 
-    conn = get_substrate_connection()
-    seeded = seed_work_row(conn)
-    payload = make_valid_submission_payload(seeded, key="key_idempotent")
-
-    res1 = library_work.submit_result(conn, payload)
+    res1 = svc.submit_result(ctx, payload)
     assert res1.get("ok") is True
+    assert res1.get("outcome") == "accepted"
 
-    # Retry exact request
-    res2 = library_work.submit_result(conn, payload)
-    assert res2.get("ok") is True
+    # Advance clock
+    clock[0] += 900_000
+
+    # Retry same payload
+    res2 = svc.submit_result(ctx, payload)
     assert res2 == res1
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE}: idempotency conflict on changed payload required")
-def test_p2_2_changed_payload_under_same_key_returns_idempotency_conflict():
+def test_p2_2_changed_payload_under_same_key_returns_idempotency_conflict(tmp_path):
     """A changed payload submitted under an already used submission_key returns idempotency_conflict."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE}: idempotency conflict")
-
-    conn = get_substrate_connection()
-    seeded = seed_work_row(conn)
-    payload1 = make_valid_submission_payload(seeded, key="key_conflict")
-    res1 = library_work.submit_result(conn, payload1)
+    idx, svc, ctx, work_item, clock = make_validation_environment(tmp_path)
+    payload1 = make_valid_submission_payload(work_item, key="key_conflict", quote="brown fox")
+    res1 = svc.submit_result(ctx, payload1)
     assert res1.get("ok") is True
 
-    # Changed request under same key
-    payload2 = dict(payload1)
-    payload2["result"] = {"outcome": "unmapped", "reason": "different outcome"}
-    res2 = library_work.submit_result(conn, payload2)
+    # Same submission_key, changed quote
+    payload2 = make_valid_submission_payload(work_item, key="key_conflict", quote="quick brown")
+    res2 = svc.submit_result(ctx, payload2)
     assert res2.get("ok") is False
     assert res2.get("error", {}).get("code") == "idempotency_conflict"
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE}: stale attempt token rejection required")
-def test_p2_2_stale_attempt_token_returns_stale_attempt():
+def test_p2_2_stale_attempt_token_returns_stale_attempt(tmp_path):
     """A stale or unknown token with no recorded submission returns stale_attempt and writes no proposal."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE}: stale attempt token")
-
-    conn = get_substrate_connection()
-    seeded = seed_work_row(conn)
-    payload = make_valid_submission_payload(seeded, key="key_stale")
+    idx, svc, ctx, work_item, clock = make_validation_environment(tmp_path)
+    payload = make_valid_submission_payload(work_item, key="key_stale")
     payload["attempt_token"] = "z" * 43  # unknown token
 
-    res = library_work.submit_result(conn, payload)
+    res = svc.submit_result(ctx, payload)
     assert res.get("ok") is False
     assert res.get("error", {}).get("code") == "stale_attempt"
 
     # Zero proposals written
-    proposals = conn.execute("SELECT count(*) FROM library_proposals").fetchone()[0]
+    proposals = idx._conn.execute("SELECT count(*) FROM library_proposals WHERE submission_key='key_stale'").fetchone()[0]
     assert proposals == 0

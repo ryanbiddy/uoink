@@ -22,13 +22,8 @@ from typing import Any, Dict, List, Optional
 import pytest
 
 import tests.library_crash_runner as crash_runner
-
-try:
-    import library_work
-    HAS_LIBRARY_WORK = True
-except ImportError:
-    library_work = None
-    HAS_LIBRARY_WORK = False
+from index import Index
+from library_work import LibraryWorkService, RequestContext, LibraryError
 
 ROOT = Path(__file__).resolve().parent.parent
 GATE = "Gate P2-5: crash and reconstruction"
@@ -129,33 +124,131 @@ def test_p2_5_corrupt_authoritative_record_stops_visibly(isolated_storage_fixtur
     assert state == "conflict"
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE}: recover_operations implementation required")
 def test_p2_5_recover_operations_service_interface(isolated_storage_fixture):
     """Verify library_work.recover_operations restores projection and returns exact receipts."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE}: recover_operations")
-
     db_path, storage_root = isolated_storage_fixture
-    conn = sqlite3.connect(str(db_path))
-    conn.execute("PRAGMA foreign_keys=ON")
+    idx = Index.open(db_path)
+    idx.upsert_yoink(dict(
+        video_id="vid_rec",
+        slug="vid_rec",
+        title="Title",
+        topic="Old",
+        yoinked_at="2026-09-04",
+        corpus_path="",
+        sidecar_path="",
+    ))
+    with idx.write_transaction() as c:
+        c.execute("INSERT INTO clips(video_id, seq, start, end, text) VALUES ('vid_rec', 0, 0, 10, 'evidence')")
 
-    res = library_work.recover_operations(conn, storage_root=storage_root)
+    svc = LibraryWorkService(idx, storage_root)
+    ctx_op = RequestContext(authenticated=True, operator=True, local_user_confirmed=True, session_id="s_op")
+
+    tax_res = svc.approve_taxonomy(ctx_op, {
+        "version_id": "v1",
+        "nodes": [{"shelf_id": "s1", "path": ["S1"], "definition": "Def", "include": ["i"], "exclude": ["e"]}],
+    })
+    assert tax_res.get("ok") is True
+
+    intent = svc.mint_user_intent(ctx_op, {
+        "kind": "pin",
+        "operation": {
+            "video_id": "vid_rec",
+            "shelf_id": "s1",
+            "action": "move",
+            "expected_projection_revision": 0,
+            "operation_key": "op_rec_01",
+        },
+    })
+    assert intent.get("ok") is True
+
+    pin_res = svc.pin_shelf(ctx_op, {
+        "video_id": "vid_rec",
+        "shelf_id": "s1",
+        "action": "move",
+        "expected_projection_revision": 0,
+        "operation_key": "op_rec_01",
+        "user_intent_token": intent["user_intent_token"],
+    })
+    assert pin_res.get("ok") is True
+    assert pin_res.get("after_revision") == 1
+
+    res = svc.recover_operations(ctx_op, {})
     assert res.get("ok") is True
-    assert "replayed_count" in res
+    assert res.get("projection_revision") == 1
+    idx.close()
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE}: rebuild_library_state implementation required")
 def test_p2_5_reconstruct_db_from_authoritative_records_retains_orphan_pins(isolated_storage_fixture):
     """Deleting disposable DB and rebuilding from .uoink/library/ recovers pins, taxonomies, and retains orphan pins."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE}: rebuild_library_state")
-
     db_path, storage_root = isolated_storage_fixture
-    conn = sqlite3.connect(str(db_path))
-    conn.execute("PRAGMA foreign_keys=ON")
+    idx = Index.open(db_path)
+    old_yoink = dict(
+        video_id="vid_orphan",
+        slug="vid_orphan",
+        title="Title",
+        topic="Old",
+        yoinked_at="2026-09-04",
+        corpus_path="",
+        sidecar_path="",
+    )
+    idx.upsert_yoink(old_yoink)
+    with idx.write_transaction() as c:
+        c.execute("INSERT INTO clips(video_id, seq, start, end, text) VALUES ('vid_orphan', 0, 0, 10, 'evidence')")
 
-    # Rebuild on fresh database
-    res = library_work.rebuild_library_state(conn, storage_root=storage_root)
-    assert res.get("ok") is True
-    assert "orphan_pins_count" in res
-    assert "projection_revision" in res
+    svc = LibraryWorkService(idx, storage_root)
+    ctx_op = RequestContext(authenticated=True, operator=True, local_user_confirmed=True, session_id="s_op")
+
+    svc.approve_taxonomy(ctx_op, {
+        "version_id": "v1",
+        "nodes": [{"shelf_id": "s1", "path": ["S1"], "definition": "Def", "include": ["i"], "exclude": ["e"]}],
+    })
+
+    intent = svc.mint_user_intent(ctx_op, {
+        "kind": "pin",
+        "operation": {
+            "video_id": "vid_orphan",
+            "shelf_id": "s1",
+            "action": "move",
+            "expected_projection_revision": 0,
+            "operation_key": "op_orphan_01",
+        },
+    })
+    pin_res = svc.pin_shelf(ctx_op, {
+        "video_id": "vid_orphan",
+        "shelf_id": "s1",
+        "action": "move",
+        "expected_projection_revision": 0,
+        "operation_key": "op_orphan_01",
+        "user_intent_token": intent["user_intent_token"],
+    })
+    assert pin_res.get("ok") is True
+    idx.close()
+
+    # Total disposable DB loss: delete the database file and WAL
+    db_path.unlink()
+    for suffix in ("-wal", "-shm"):
+        sibling = db_path.with_name(db_path.name + suffix)
+        sibling.unlink(missing_ok=True)
+
+    # Reopen fresh index: yoinks not restored yet -> item is an orphan pin
+    new_idx = Index.open(db_path)
+    new_svc = LibraryWorkService(new_idx, storage_root)
+    assert new_svc.startup_status.get("orphaned_count") == 1
+    assert "vid_orphan" in new_svc.startup_status.get("orphaned_items", [])
+
+    # Reconstruct corpus identity (upsert yoink)
+    new_idx.upsert_yoink(old_yoink)
+
+    # Rebuild library state
+    rebuild_res = new_svc.rebuild_library_state(ctx_op, {})
+    assert rebuild_res.get("ok") is True
+    assert rebuild_res.get("orphaned_count") == 0
+    assert rebuild_res.get("projection_revision") == 1
+
+    # Verify pin and exclusive policy restored in database
+    row = new_idx._conn.execute("SELECT shelf_id, locked FROM item_shelves WHERE video_id='vid_orphan'").fetchone()
+    assert row[0] == "s1"
+    assert row[1] == 1
+    policy = new_idx._conn.execute("SELECT exclusive_move FROM library_item_policy WHERE video_id='vid_orphan'").fetchone()
+    assert policy[0] == 1
+    new_idx.close()

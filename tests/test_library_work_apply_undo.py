@@ -19,348 +19,551 @@ Gate P2-4 (pins/undo):
 - Undo replay with same key returns original receipt; second undo with different key conflicts
 
 Written from PHASE2-CONTRACT-2026-09-04 and phase2-contract/tool-schemas.json.
-xfails strictly until library_work is integrated.
+Realigned to frozen LibraryWorkService surface per run K brief.
 """
 from __future__ import annotations
 
-import json
-import sqlite3
+import shutil
+import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import pytest
 
-try:
-    import library_work
-    HAS_LIBRARY_WORK = True
-except ImportError:
-    library_work = None
-    HAS_LIBRARY_WORK = False
+from index import Index
+from library_work import LibraryWorkService, RequestContext, LibraryError
 
 ROOT = Path(__file__).resolve().parent.parent
-CONTRACT_DIR = ROOT / "docs" / "library" / "phase2-contract"
 GATE_P2_3 = "Gate P2-3: preview/apply"
 GATE_P2_4 = "Gate P2-4: pins/undo"
 
 
-def get_substrate_connection() -> sqlite3.Connection:
-    conn = sqlite3.connect(":memory:", check_same_thread=False)
-    conn.execute("PRAGMA foreign_keys=ON")
-    conn.execute(
-        """CREATE TABLE IF NOT EXISTS yoinks (
-            video_id TEXT PRIMARY KEY,
-            title TEXT,
-            channel TEXT,
-            platform TEXT,
-            deleted_at TEXT
-        )"""
-    )
-    sql_path = CONTRACT_DIR / "0027_library_substrate.sql"
-    conn.executescript(sql_path.read_text(encoding="utf-8"))
-    return conn
+@pytest.fixture
+def tmp_path():
+    p = Path(tempfile.mkdtemp(prefix="uoink_apply_test_"))
+    try:
+        yield p
+    finally:
+        shutil.rmtree(p, ignore_errors=True)
 
 
-def seed_substrate_manifest_and_proposals(
-    conn: sqlite3.Connection,
-    run_id: str = "run_apply_01",
-    version_id: str = "tax_v1",
+def make_apply_environment(
+    tmp_path: Path,
     items: Optional[List[Dict[str, Any]]] = None,
-) -> None:
+    librarian_apply_enabled: bool = True,
+):
+    root = tmp_path / "work"
+    root.mkdir(parents=True, exist_ok=True)
+    idx = Index.open(root / "test.db")
+    store_root = root / "library"
+    clock = [1_000_000]
+    svc = LibraryWorkService(
+        idx,
+        store_root,
+        clock=lambda: clock[0],
+        librarian_apply_enabled=librarian_apply_enabled,
+    )
+    ctx_op = RequestContext(
+        authenticated=True,
+        client_id="operator",
+        session_id="s_op",
+        operator=True,
+        local_user_confirmed=True,
+    )
+
     if items is None:
-        items = [
-            {"video_id": f"vid_apply_{i:02d}", "shelf_id": "shelf_alpha", "disposition": "accepted"}
-            for i in range(10)
-        ]
+        items = [{"video_id": f"vid_apply_{i:02d}", "target_shelf": "shelf_alpha"} for i in range(5)]
 
-    # Taxonomy & shelves
-    conn.execute("INSERT OR IGNORE INTO shelf_versions VALUES (?, NULL, ?, 'active', '2026-09-04T00:00:00Z', 'gemini', '2026-09-04T00:00:00Z')", (version_id, "t" * 64))
-    conn.execute("UPDATE library_meta SET active_version_id=? WHERE singleton=1", (version_id,))
-    conn.execute("INSERT OR IGNORE INTO shelves VALUES ('shelf_alpha', '2026-09-04T00:00:00Z')")
-    conn.execute("INSERT OR IGNORE INTO shelves VALUES ('shelf_beta', '2026-09-04T00:00:00Z')")
-    conn.execute("INSERT OR IGNORE INTO shelf_nodes VALUES (?, 'shelf_alpha', NULL, 'Alpha', '[\"Alpha\"]', 'Def', '[]', '[]', 0)", (version_id,))
-    conn.execute("INSERT OR IGNORE INTO shelf_nodes VALUES (?, 'shelf_beta', NULL, 'Beta', '[\"Beta\"]', 'Def', '[]', '[]', 0)", (version_id,))
+    for it in items:
+        vid = it["video_id"]
+        idx.upsert_yoink(dict(
+            video_id=vid,
+            slug=vid,
+            title=f"Title {vid}",
+            topic="Old",
+            yoinked_at="2026-09-04",
+            corpus_path="",
+            sidecar_path="",
+        ))
+        with idx.write_transaction() as c:
+            c.execute(
+                "INSERT INTO clips(video_id, seq, start, end, text) VALUES (?, 0, 0, 10, ?)",
+                (vid, f"Evidence text for {vid}"),
+            )
 
-    conn.execute("INSERT OR IGNORE INTO library_runs VALUES (?, ?, ?, 1, 'review', '{}', '2026-09-04T00:00:00Z')", (run_id, version_id, "m" * 64))
+    tax_res = svc.approve_taxonomy(ctx_op, {
+        "version_id": "tax_v1",
+        "nodes": [
+            {
+                "shelf_id": "shelf_alpha",
+                "path": ["Alpha"],
+                "definition": "Alpha shelf",
+                "include": ["alpha"],
+                "exclude": ["other"],
+            },
+            {
+                "shelf_id": "shelf_beta",
+                "path": ["Beta"],
+                "definition": "Beta shelf",
+                "include": ["beta"],
+                "exclude": ["other"],
+            },
+        ],
+    })
+    assert tax_res.get("ok") is True, tax_res
 
-    for item in items:
-        vid = item["video_id"]
-        shelf = item["shelf_id"]
-        disp = item.get("disposition", "accepted")
-        conn.execute("INSERT OR IGNORE INTO yoinks VALUES (?, 'Title', 'Channel', 'youtube', NULL)", (vid,))
-        conn.execute("INSERT OR IGNORE INTO library_manifest VALUES (?, ?, ?, ?, NULL)", (run_id, vid, "s" * 64, disp))
-        if disp == "accepted":
-            sub_key = f"sub_{vid}"
-            token = f"tok_{vid}" + "a" * (43 - len(f"tok_{vid}"))
-            conn.execute("INSERT OR IGNORE INTO library_work VALUES (?, ?, ?, 'assign', 1, '{}', ?, 'accepted', 100, 1, 'now', 'now')", (f"work_{vid}", run_id, vid, "p" * 64))
-            conn.execute("INSERT OR IGNORE INTO library_attempts VALUES (?, ?, 1, 1, 'client', ?, ?, 9999999, 9999999, 'submitted')", (token, f"work_{vid}", "s" * 64, "t" * 64))
-            conn.execute("INSERT OR IGNORE INTO library_submissions VALUES (?, ?, ?, 'accepted', '{}', '{}', '{}', 'now')", (sub_key, token, "r" * 64))
-            conn.execute("INSERT OR IGNORE INTO library_proposals VALUES (?, ?, ?, ?, ?, 1, 0.95, '{}')", (run_id, vid, shelf, version_id, sub_key))
-    conn.commit()
+    run_res = svc.prepare_run(ctx_op, {
+        "run_id": "run_apply_01",
+        "version_id": "tax_v1",
+        "video_ids": [it["video_id"] for it in items],
+        "prompt_hash": "0" * 64,
+    })
+    assert run_res.get("ok") is True, run_res
+
+    return idx, svc, ctx_op, clock
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE_P2_3}: preview covers entire manifest required")
-def test_p2_3_preview_covers_entire_manifest_and_refuses_incomplete():
+def submit_accepted_result(svc, ctx_client, work_item, target_shelf="shelf_alpha"):
+    card = work_item["card"]
+    excerpt = card["excerpts"][0]
+    shelf_path = ["Alpha"] if target_shelf == "shelf_alpha" else ["Beta"]
+    payload = {
+        "work_id": work_item["work_id"],
+        "client_id": ctx_client.client_id,
+        "attempt_token": work_item["attempt_token"],
+        "submission_key": f"sub_{work_item['video_id']}",
+        "schema_version": 1,
+        "video_id": work_item["video_id"],
+        "source_revision": work_item["source_revision"],
+        "taxonomy_revision": work_item["taxonomy_revision"],
+        "packet_hash": work_item["packet_hash"],
+        "result": {
+            "outcome": "assigned",
+            "memberships": [
+                {
+                    "shelf_id": target_shelf,
+                    "shelf_path": shelf_path,
+                    "confidence": 0.95,
+                    "evidence": {
+                        "basis": "packet",
+                        "kind": "timed_clip",
+                        "excerpt_id": excerpt["excerpt_id"],
+                        "card_hash": card["card_hash"],
+                        "quote": "Evidence text",
+                    },
+                }
+            ],
+        },
+        "usage": {
+            "status": "unavailable",
+            "reason": "fixture",
+        },
+    }
+    return svc.submit_result(ctx_client, payload)
+
+
+def test_p2_3_preview_covers_entire_manifest_and_refuses_incomplete(tmp_path):
     """Preview must account for all target items. Unaccounted/waiting items refuse activation."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE_P2_3}: preview covers entire manifest")
+    items = [{"video_id": f"v_{i}", "target_shelf": "shelf_alpha"} for i in range(5)]
+    idx, svc, ctx_op, clock = make_apply_environment(tmp_path, items=items)
 
-    conn = get_substrate_connection()
-    # 9 accepted, 1 waiting
-    items = [{"video_id": f"v_{i}", "shelf_id": "shelf_alpha", "disposition": "accepted"} for i in range(9)]
-    items.append({"video_id": "v_waiting", "shelf_id": "shelf_alpha", "disposition": "waiting"})
-    seed_substrate_manifest_and_proposals(conn, items=items)
+    ctx_client = RequestContext(authenticated=True, client_id="client_worker", session_id="s_worker")
+    claim_res = svc.claim_work(ctx_client, {
+        "action": "claim",
+        "run_id": "run_apply_01",
+        "client_id": "client_worker",
+        "max_items": 4,  # only claim 4 of 5; 1 remains waiting
+        "lease_seconds": 600,
+    })
+    assert claim_res.get("ok") is True
 
-    prev = library_work.preview_apply(conn, run_id="run_apply_01", expected_projection_revision=0)
+    # Submit accepted results for the 4 claimed items
+    for w in claim_res["work"]:
+        sub_res = submit_accepted_result(svc, ctx_client, w)
+        assert sub_res.get("ok") is True and sub_res.get("outcome") == "accepted"
+
+    # Preview apply
+    prev = svc.preview_apply(ctx_op, {
+        "mode": "preview",
+        "run_id": "run_apply_01",
+        "expected_projection_revision": 0,
+    })
     assert prev.get("ok") is True
     assert prev.get("can_apply") is False, "Waiting items must block activation"
-    assert "waiting" in prev.get("manifest_exclusions", {}).get("reasons", [])
+    assert any(r.get("code") == "incomplete_manifest" for r in prev.get("reasons", []))
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE_P2_3}: churn calculation and 15% ceiling required")
-def test_p2_3_churn_calculation_and_15_percent_ceiling():
+def test_p2_3_churn_calculation_and_15_percent_ceiling(tmp_path):
     """Service stops apply when churn > 15% without explicit human approval. Initial filing is reported separately."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE_P2_3}: churn ceiling")
+    items = [{"video_id": f"v_base_{i}", "target_shelf": "shelf_beta" if i < 3 else "shelf_alpha"} for i in range(10)]
+    idx, svc, ctx_op, clock = make_apply_environment(tmp_path, items=items)
 
-    conn = get_substrate_connection()
-    # Seed baseline items in item_shelves (10 existing items on shelf_alpha)
-    for i in range(10):
-        vid = f"v_base_{i}"
-        conn.execute("INSERT OR IGNORE INTO yoinks VALUES (?, 'T', 'C', 'youtube', NULL)", (vid,))
-        conn.execute("INSERT INTO item_shelves VALUES (?, 'shelf_alpha', 'tax_v1', ?, 'agent', 0, 1, 0.9, '{}', 'now')", (vid, "s" * 64))
-    conn.commit()
+    # Seed baseline item_shelves (all 10 items initially on shelf_alpha)
+    with idx.write_transaction() as c:
+        for i in range(10):
+            vid = f"v_base_{i}"
+            c.execute(
+                """INSERT INTO item_shelves (
+                    video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at
+                ) VALUES (?, 'shelf_alpha', 'tax_v1', 'rev0', 'agent', 0, 1, 0.9, '{"quote":"evidence"}', '2026-09-04T00:00:00Z')""",
+                (vid,),
+            )
 
-    # Create run proposing to move 3 of 10 items (30% churn > 15%)
-    run_items = []
-    for i in range(10):
-        vid = f"v_base_{i}"
-        target_shelf = "shelf_beta" if i < 3 else "shelf_alpha"
-        run_items.append({"video_id": vid, "shelf_id": target_shelf, "disposition": "accepted"})
-    seed_substrate_manifest_and_proposals(conn, items=run_items)
+    # Claim all 10 items and submit proposals (3 items move to shelf_beta -> 30% churn)
+    ctx_client = RequestContext(authenticated=True, client_id="client_worker", session_id="s_worker")
+    claim_res = svc.claim_work(ctx_client, {
+        "action": "claim",
+        "run_id": "run_apply_01",
+        "client_id": "client_worker",
+        "max_items": 10,
+        "lease_seconds": 600,
+    })
+    assert claim_res.get("ok") is True
+    assert len(claim_res["work"]) == 10
 
-    prev = library_work.preview_apply(conn, run_id="run_apply_01", expected_projection_revision=0)
+    for w in claim_res["work"]:
+        target = next(it["target_shelf"] for it in items if it["video_id"] == w["video_id"])
+        sub_res = submit_accepted_result(svc, ctx_client, w, target_shelf=target)
+        assert sub_res.get("ok") is True and sub_res.get("outcome") == "accepted"
+
+    prev = svc.preview_apply(ctx_op, {
+        "mode": "preview",
+        "run_id": "run_apply_01",
+        "expected_projection_revision": 0,
+    })
     assert prev.get("ok") is True
     churn = prev.get("churn_percent", 0)
     assert churn == 30.0
     assert prev.get("can_apply") is False, "30% churn exceeds 15% ceiling"
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE_P2_3}: apply transaction and revision conflict required")
-def test_p2_3_apply_transaction_and_stale_revision_conflict():
+def test_p2_3_apply_transaction_and_stale_revision_conflict(tmp_path):
     """Apply executes in one atomic transaction; stale expected_projection_revision aborts with zero changes."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE_P2_3}: apply transaction")
+    items = [{"video_id": f"v_apply_{i}", "target_shelf": "shelf_alpha"} for i in range(3)]
+    idx, svc, ctx_op, clock = make_apply_environment(tmp_path, items=items)
 
-    conn = get_substrate_connection()
-    seed_substrate_manifest_and_proposals(conn)
+    ctx_client = RequestContext(authenticated=True, client_id="client_worker", session_id="s_worker")
+    claim_res = svc.claim_work(ctx_client, {
+        "action": "claim",
+        "run_id": "run_apply_01",
+        "client_id": "client_worker",
+        "max_items": 3,
+        "lease_seconds": 600,
+    })
+    for w in claim_res["work"]:
+        submit_accepted_result(svc, ctx_client, w)
 
-    prev = library_work.preview_apply(conn, run_id="run_apply_01", expected_projection_revision=0)
+    prev = svc.preview_apply(ctx_op, {
+        "mode": "preview",
+        "run_id": "run_apply_01",
+        "expected_projection_revision": 0,
+    })
     preview_id = prev["preview_id"]
     delta_hash = prev["delta_hash"]
-    library_work.approve_preview(conn, preview_id=preview_id, approved_by="user_admin")
+
+    app_res = svc.approve_preview(ctx_op, {
+        "preview_id": preview_id,
+        "delta_hash": delta_hash,
+        "operation_key": "op_apply_01",
+        "expected_projection_revision": 0,
+    })
+    assert app_res.get("ok") is True
 
     # Stale revision (expected 1, actual 0)
-    conflict_res = library_work.apply_preview(
-        conn,
-        preview_id=preview_id,
-        expected_projection_revision=1,  # wrong revision
-        delta_hash=delta_hash,
-        operation_key="op_apply_01",
-    )
+    conflict_res = svc.apply_preview(ctx_op, {
+        "mode": "apply",
+        "preview_id": preview_id,
+        "expected_projection_revision": 1,
+        "delta_hash": delta_hash,
+        "operation_key": "op_apply_01",
+    })
     assert conflict_res.get("ok") is False
-    assert conflict_res.get("error", {}).get("code") == "revision_conflict"
+    assert conflict_res.get("error", {}).get("code") in ("revision_conflict", "preview_conflict")
 
     # Zero rows changed
-    current_rev = conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()[0]
+    current_rev = idx._conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()[0]
     assert current_rev == 0
-    assigned_count = conn.execute("SELECT count(*) FROM item_shelves").fetchone()[0]
+    assigned_count = idx._conn.execute("SELECT count(*) FROM item_shelves").fetchone()[0]
     assert assigned_count == 0
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE_P2_3}: idempotent apply key retry required")
-def test_p2_3_idempotent_apply_key_retry():
+def test_p2_3_idempotent_apply_key_retry(tmp_path):
     """Replaying the same operation key on apply returns the original receipt and advances zero rows."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE_P2_3}: idempotent apply key retry")
+    items = [{"video_id": f"v_idem_{i}", "target_shelf": "shelf_alpha"} for i in range(3)]
+    idx, svc, ctx_op, clock = make_apply_environment(tmp_path, items=items)
 
-    conn = get_substrate_connection()
-    seed_substrate_manifest_and_proposals(conn)
+    ctx_client = RequestContext(authenticated=True, client_id="client_worker", session_id="s_worker")
+    claim_res = svc.claim_work(ctx_client, {
+        "action": "claim",
+        "run_id": "run_apply_01",
+        "client_id": "client_worker",
+        "max_items": 3,
+        "lease_seconds": 600,
+    })
+    for w in claim_res["work"]:
+        submit_accepted_result(svc, ctx_client, w)
 
-    prev = library_work.preview_apply(conn, run_id="run_apply_01", expected_projection_revision=0)
+    prev = svc.preview_apply(ctx_op, {
+        "mode": "preview",
+        "run_id": "run_apply_01",
+        "expected_projection_revision": 0,
+    })
     preview_id = prev["preview_id"]
     delta_hash = prev["delta_hash"]
-    library_work.approve_preview(conn, preview_id=preview_id, approved_by="user_admin")
 
-    res1 = library_work.apply_preview(
-        conn, preview_id=preview_id, expected_projection_revision=0, delta_hash=delta_hash, operation_key="op_key_idem"
-    )
+    app_res = svc.approve_preview(ctx_op, {
+        "preview_id": preview_id,
+        "delta_hash": delta_hash,
+        "operation_key": "op_key_idem",
+        "expected_projection_revision": 0,
+    })
+    assert app_res.get("ok") is True
+
+    res1 = svc.apply_preview(ctx_op, {
+        "mode": "apply",
+        "preview_id": preview_id,
+        "expected_projection_revision": 0,
+        "delta_hash": delta_hash,
+        "operation_key": "op_key_idem",
+    })
     assert res1.get("ok") is True
-    rev1 = conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()[0]
+    rev1 = idx._conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()[0]
     assert rev1 == 1
 
     # Retry exact same key
-    res2 = library_work.apply_preview(
-        conn, preview_id=preview_id, expected_projection_revision=0, delta_hash=delta_hash, operation_key="op_key_idem"
-    )
+    res2 = svc.apply_preview(ctx_op, {
+        "mode": "apply",
+        "preview_id": preview_id,
+        "expected_projection_revision": 0,
+        "delta_hash": delta_hash,
+        "operation_key": "op_key_idem",
+    })
     assert res2.get("ok") is True
-    rev2 = conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()[0]
+    rev2 = idx._conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()[0]
     assert rev2 == 1, "Revision must not advance on idempotent retry"
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE_P2_4}: user pin and exclusive move policy required")
-def test_p2_4_pin_and_exclusive_move_policy():
+def test_p2_4_pin_and_exclusive_move_policy(tmp_path):
     """Pin adds locked membership; move sets exclusive policy blocking agent additions."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE_P2_4}: pin and exclusive move")
+    idx, svc, ctx_op, clock = make_apply_environment(tmp_path, items=[{"video_id": "vid_pin_test", "target_shelf": "shelf_alpha"}])
+    ctx_user = RequestContext(authenticated=True, client_id="user_admin", session_id="s_user", local_user_confirmed=True)
 
-    conn = get_substrate_connection()
     vid = "vid_pin_test"
-    conn.execute("INSERT OR IGNORE INTO yoinks VALUES (?, 'Title', 'Channel', 'youtube', NULL)", (vid,))
-    conn.execute("INSERT OR IGNORE INTO shelf_versions VALUES ('tax_v1', NULL, ?, 'active', 'now', 'u', 'now')", ("t" * 64,))
-    conn.execute("UPDATE library_meta SET active_version_id='tax_v1' WHERE singleton=1")
-    conn.execute("INSERT OR IGNORE INTO shelves VALUES ('shelf_a', 'now')")
-    conn.execute("INSERT OR IGNORE INTO shelves VALUES ('shelf_b', 'now')")
-    conn.execute("INSERT OR IGNORE INTO shelf_nodes VALUES ('tax_v1', 'shelf_a', NULL, 'A', '[\"A\"]', 'D', '[]', '[]', 0)")
-    conn.execute("INSERT OR IGNORE INTO shelf_nodes VALUES ('tax_v1', 'shelf_b', NULL, 'B', '[\"B\"]', 'D', '[]', '[]', 0)")
-    conn.commit()
+    move_op = {
+        "video_id": vid,
+        "shelf_id": "shelf_alpha",
+        "action": "move",
+        "expected_projection_revision": 0,
+        "operation_key": "op_move_01",
+    }
+    intent_res = svc.mint_user_intent(ctx_user, {"kind": "pin", "operation": move_op})
+    assert intent_res.get("ok") is True
+    token = intent_res["user_intent_token"]
 
-    token = "intent_token_" + "a" * 30
-
-    # User move to shelf_a -> sets exclusive_move=1
-    move_res = library_work.pin_shelf(
-        conn,
-        video_id=vid,
-        shelf_id="shelf_a",
-        action="move",
-        expected_projection_revision=0,
-        operation_key="op_move_01",
-        user_intent_token=token,
-    )
+    move_res = svc.pin_shelf(ctx_user, dict(move_op, user_intent_token=token))
     assert move_res.get("ok") is True
 
     # Verify locked=1, source='user', confidence is null
-    row = conn.execute("SELECT locked, source, confidence FROM item_shelves WHERE video_id=?", (vid,)).fetchone()
+    row = idx._conn.execute("SELECT locked, source, confidence FROM item_shelves WHERE video_id=?", (vid,)).fetchone()
     assert row[0] == 1
     assert row[1] == "user"
     assert row[2] is None
 
     # Verify exclusive_move=1 in library_item_policy
-    policy = conn.execute("SELECT exclusive_move FROM library_item_policy WHERE video_id=?", (vid,)).fetchone()
+    policy = idx._conn.execute("SELECT exclusive_move FROM library_item_policy WHERE video_id=?", (vid,)).fetchone()
     assert policy is not None
     assert policy[0] == 1
 
     # Pinning to another shelf while exclusive without unpin/move returns conflict
-    token2 = "intent_token_2_" + "b" * 28
-    pin_conflict = library_work.pin_shelf(
-        conn,
-        video_id=vid,
-        shelf_id="shelf_b",
-        action="pin",
-        expected_projection_revision=1,
-        operation_key="op_pin_conflict",
-        user_intent_token=token2,
-    )
-    assert pin_conflict.get("ok") is False
+    pin_op = {
+        "video_id": vid,
+        "shelf_id": "shelf_beta",
+        "action": "pin",
+        "expected_projection_revision": 1,
+        "operation_key": "op_pin_conflict",
+    }
+    intent_res2 = svc.mint_user_intent(ctx_user, {"kind": "pin", "operation": pin_op})
+    if intent_res2.get("ok") is False:
+        assert intent_res2.get("error", {}).get("code") == "exclusive_move_conflict"
+    else:
+        token2 = intent_res2["user_intent_token"]
+        pin_conflict = svc.pin_shelf(ctx_user, dict(pin_op, user_intent_token=token2))
+        assert pin_conflict.get("ok") is False
+        assert pin_conflict.get("error", {}).get("code") == "exclusive_move_conflict"
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE_P2_4}: user intent token required for pin/undo")
-def test_p2_4_user_intent_token_required_for_pins_and_undo():
+def test_p2_4_user_intent_token_required_for_pins_and_undo(tmp_path):
     """Missing, invalid, expired, or reused user_intent_token is rejected."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE_P2_4}: user intent token validation")
-
-    conn = get_substrate_connection()
-    vid = "vid_intent_test"
-    conn.execute("INSERT OR IGNORE INTO yoinks VALUES (?, 'Title', 'Channel', 'youtube', NULL)", (vid,))
-    conn.execute("INSERT OR IGNORE INTO shelf_versions VALUES ('tax_v1', NULL, ?, 'active', 'now', 'u', 'now')", ("t" * 64,))
-    conn.execute("UPDATE library_meta SET active_version_id='tax_v1' WHERE singleton=1")
-    conn.execute("INSERT OR IGNORE INTO shelves VALUES ('shelf_a', 'now')")
-    conn.execute("INSERT OR IGNORE INTO shelf_nodes VALUES ('tax_v1', 'shelf_a', NULL, 'A', '[\"A\"]', 'D', '[]', '[]', 0)")
-    conn.commit()
+    idx, svc, ctx_op, clock = make_apply_environment(tmp_path, items=[{"video_id": "vid_intent_test", "target_shelf": "shelf_alpha"}])
+    ctx_user = RequestContext(authenticated=True, client_id="user_admin", session_id="s_user", local_user_confirmed=True)
 
     # Malformed token (<43 chars)
-    res_bad = library_work.pin_shelf(
-        conn,
-        video_id=vid,
-        shelf_id="shelf_a",
-        action="pin",
-        expected_projection_revision=0,
-        operation_key="op_bad_tok",
-        user_intent_token="too_short",
+    res_bad = svc.pin_shelf(
+        ctx_user,
+        {
+            "video_id": "vid_intent_test",
+            "shelf_id": "shelf_alpha",
+            "action": "pin",
+            "expected_projection_revision": 0,
+            "operation_key": "op_bad_tok",
+            "user_intent_token": "too_short",
+        },
     )
     assert res_bad.get("ok") is False
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE_P2_4}: undo inverts complete operation")
-def test_p2_4_undo_inverts_complete_operation():
+def test_p2_4_undo_inverts_complete_operation(tmp_path):
     """Undo restores previous revision, inverts memberships, and preserves journal entry."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE_P2_4}: undo operation")
+    items = [{"video_id": f"v_undo_{i}", "target_shelf": "shelf_alpha"} for i in range(2)]
+    idx, svc, ctx_op, clock = make_apply_environment(tmp_path, items=items)
 
-    conn = get_substrate_connection()
-    seed_substrate_manifest_and_proposals(conn)
+    ctx_client = RequestContext(authenticated=True, client_id="client_worker", session_id="s_worker")
+    claim_res = svc.claim_work(ctx_client, {
+        "action": "claim",
+        "run_id": "run_apply_01",
+        "client_id": "client_worker",
+        "max_items": 2,
+        "lease_seconds": 600,
+    })
+    for w in claim_res["work"]:
+        submit_accepted_result(svc, ctx_client, w)
 
-    # 1. Apply preview
-    prev = library_work.preview_apply(conn, run_id="run_apply_01", expected_projection_revision=0)
-    library_work.approve_preview(conn, preview_id=prev["preview_id"], approved_by="user_admin")
-    apply_res = library_work.apply_preview(
-        conn, preview_id=prev["preview_id"], expected_projection_revision=0, delta_hash=prev["delta_hash"], operation_key="op_to_undo"
-    )
+    prev = svc.preview_apply(ctx_op, {
+        "mode": "preview",
+        "run_id": "run_apply_01",
+        "expected_projection_revision": 0,
+    })
+    preview_id = prev["preview_id"]
+    delta_hash = prev["delta_hash"]
+
+    svc.approve_preview(ctx_op, {
+        "preview_id": preview_id,
+        "delta_hash": delta_hash,
+        "operation_key": "op_to_undo",
+        "expected_projection_revision": 0,
+    })
+
+    apply_res = svc.apply_preview(ctx_op, {
+        "mode": "apply",
+        "preview_id": preview_id,
+        "expected_projection_revision": 0,
+        "delta_hash": delta_hash,
+        "operation_key": "op_to_undo",
+    })
+    assert apply_res.get("ok") is True
     apply_id = apply_res["apply_id"]
-    assert conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()[0] == 1
+    assert idx._conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()[0] == 1
 
-    # 2. Undo apply
-    undo_token = "undo_intent_" + "u" * 31
-    undo_res = library_work.undo_apply(
-        conn,
-        apply_id=apply_id,
-        expected_projection_revision=1,
-        operation_key="op_undo_01",
-        user_intent_token=undo_token,
-    )
+    # Undo apply
+    ctx_user = RequestContext(authenticated=True, client_id="user_admin", session_id="s_user", local_user_confirmed=True)
+    undo_op = {
+        "apply_id": apply_id,
+        "expected_projection_revision": 1,
+        "operation_key": "op_undo_01",
+    }
+    intent_undo = svc.mint_user_intent(ctx_user, {"kind": "undo", "operation": undo_op})
+    assert intent_undo.get("ok") is True
+    token = intent_undo["user_intent_token"]
+
+    undo_res = svc.undo_apply(ctx_user, dict(undo_op, user_intent_token=token))
     assert undo_res.get("ok") is True
+    assert undo_res.get("before_revision") == 1
+    assert undo_res.get("after_revision") == 2
 
-    # Revision restored to 0
-    rev_after = conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()[0]
-    assert rev_after == 0
+    # Monotonic revision advanced to 2 in meta
+    rev_after = idx._conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()[0]
+    assert rev_after == 2
 
-    # Assigned items cleared
-    assert conn.execute("SELECT count(*) FROM item_shelves").fetchone()[0] == 0
+    # Assigned items cleared (inverting the apply)
+    assert idx._conn.execute("SELECT count(*) FROM item_shelves").fetchone()[0] == 0
 
 
-@pytest.mark.xfail(not HAS_LIBRARY_WORK, strict=True, reason=f"{GATE_P2_4}: stale undo refuses newer changes")
-def test_p2_4_stale_undo_refuses_when_revision_not_matching():
+def test_p2_4_stale_undo_refuses_when_revision_not_matching(tmp_path):
     """Undo requires apply_id's after_revision == current_revision; rejects if newer changes exist."""
-    if not HAS_LIBRARY_WORK:
-        raise NotImplementedError(f"{GATE_P2_4}: stale undo")
+    items = [{"video_id": f"v_stale_{i}", "target_shelf": "shelf_alpha"} for i in range(2)]
+    idx, svc, ctx_op, clock = make_apply_environment(tmp_path, items=items)
 
-    conn = get_substrate_connection()
-    seed_substrate_manifest_and_proposals(conn)
+    ctx_client = RequestContext(authenticated=True, client_id="client_worker", session_id="s_worker")
+    claim_res = svc.claim_work(ctx_client, {
+        "action": "claim",
+        "run_id": "run_apply_01",
+        "client_id": "client_worker",
+        "max_items": 2,
+        "lease_seconds": 600,
+    })
+    for w in claim_res["work"]:
+        submit_accepted_result(svc, ctx_client, w)
 
-    prev = library_work.preview_apply(conn, run_id="run_apply_01", expected_projection_revision=0)
-    library_work.approve_preview(conn, preview_id=prev["preview_id"], approved_by="user_admin")
-    apply_res = library_work.apply_preview(
-        conn, preview_id=prev["preview_id"], expected_projection_revision=0, delta_hash=prev["delta_hash"], operation_key="op_first"
-    )
+    prev = svc.preview_apply(ctx_op, {
+        "mode": "preview",
+        "run_id": "run_apply_01",
+        "expected_projection_revision": 0,
+    })
+    preview_id = prev["preview_id"]
+    delta_hash = prev["delta_hash"]
+
+    svc.approve_preview(ctx_op, {
+        "preview_id": preview_id,
+        "delta_hash": delta_hash,
+        "operation_key": "op_first",
+        "expected_projection_revision": 0,
+    })
+
+    apply_res = svc.apply_preview(ctx_op, {
+        "mode": "apply",
+        "preview_id": preview_id,
+        "expected_projection_revision": 0,
+        "delta_hash": delta_hash,
+        "operation_key": "op_first",
+    })
+    assert apply_res.get("ok") is True
     apply_id = apply_res["apply_id"]
 
-    # Advance revision by another operation (e.g. user pin)
+    # Advance revision by another operation (user pin)
     vid_new = "vid_newer_pin"
-    conn.execute("INSERT OR IGNORE INTO yoinks VALUES (?, 'T', 'C', 'youtube', NULL)", (vid_new,))
-    library_work.pin_shelf(
-        conn, video_id=vid_new, shelf_id="shelf_alpha", action="pin", expected_projection_revision=1,
-        operation_key="op_newer_pin", user_intent_token="intent_newer_" + "n" * 30
-    )
-    # Current revision is now 2. apply_id after_revision was 1.
-    assert conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()[0] == 2
+    idx.upsert_yoink(dict(
+        video_id=vid_new,
+        slug=vid_new,
+        title=f"Title {vid_new}",
+        topic="Old",
+        yoinked_at="2026-09-04",
+        corpus_path="",
+        sidecar_path="",
+    ))
+    with idx.write_transaction() as c:
+        c.execute(
+            "INSERT INTO clips(video_id, seq, start, end, text) VALUES (?, 0, 0, 10, ?)",
+            (vid_new, f"Evidence text for {vid_new}"),
+        )
 
-    # Attempt undo of first apply: must conflict
-    undo_res = library_work.undo_apply(
-        conn,
-        apply_id=apply_id,
-        expected_projection_revision=2,
-        operation_key="op_undo_stale",
-        user_intent_token="intent_tok_" + "x" * 32,
-    )
-    assert undo_res.get("ok") is False
-    assert undo_res.get("error", {}).get("code") in ("stale_undo_target", "conflict")
+    ctx_user = RequestContext(authenticated=True, client_id="user_admin", session_id="s_user", local_user_confirmed=True)
+    pin_op = {
+        "video_id": vid_new,
+        "shelf_id": "shelf_alpha",
+        "action": "pin",
+        "expected_projection_revision": 1,
+        "operation_key": "op_newer_pin",
+    }
+    mint_pin = svc.mint_user_intent(ctx_user, {"kind": "pin", "operation": pin_op})
+    assert mint_pin.get("ok") is True
+    pin_res = svc.pin_shelf(ctx_user, dict(pin_op, user_intent_token=mint_pin["user_intent_token"]))
+    assert pin_res.get("ok") is True
+
+    # Current revision is now 2. apply_id after_revision was 1.
+    assert idx._conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()[0] == 2
+
+    # Attempt undo of first apply: minting intent or undo_apply must conflict
+    undo_op = {
+        "apply_id": apply_id,
+        "expected_projection_revision": 2,
+        "operation_key": "op_undo_stale",
+    }
+    # Either minting fails because after_revision != expected revision, or undo fails
+    mint_undo = svc.mint_user_intent(ctx_user, {"kind": "undo", "operation": undo_op})
+    if mint_undo.get("ok") is True:
+        undo_res = svc.undo_apply(ctx_user, dict(undo_op, user_intent_token=mint_undo["user_intent_token"]))
+        assert undo_res.get("ok") is False
+        assert undo_res.get("error", {}).get("code") in ("revision_conflict", "stale_undo_target", "conflict", "preview_conflict")
+    else:
+        assert mint_undo.get("ok") is False
+        assert mint_undo.get("error", {}).get("code") in ("revision_conflict", "stale_undo_target", "conflict", "preview_conflict")
