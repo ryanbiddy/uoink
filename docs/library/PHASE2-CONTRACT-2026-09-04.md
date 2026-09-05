@@ -151,3 +151,43 @@ Record projection revision, active memberships, pins and taxonomy activation bef
 - Choose the installed client/transport and isolated test port/profile; set dry-run model scope, wall-time/retry/usage budget and any paid-spend approval. Keep `librarian_apply_enabled=false` throughout the first proof.
 
 Draft verification in run F: `python tests/validate_phase2_contract.py --copy tests/.acceptance-run-f/measurement/rebuild.db` passed six schema checks, 22 request cases and six SQL rejection cases. Sixteen draft tables were added in memory; 548 copied items were unchanged and work/assignments stayed at zero. These checks validate the draft's syntax and selected constraints. P2-0 through P2-7 remain future implementation gates.
+
+## v1.2 rulings
+
+Contract version: `phase2-v1.2-2026-09-04`, as ruled in
+[the run L brief](PHASE2-RULINGS-BRIEF-2026-09-04.md). These rulings supersede the
+corresponding semantics above. The frozen `(context, args)` service surface,
+input tool schemas and `schema_version=1` remain in force.
+
+R1 extends the lease table's invalidation row:
+
+| Event | Work state and durable result |
+|---|---|
+| Source/taxonomy changed or item deleted; user unpin or undo | Invalidate current attempts, block affected work, delete proposals and previews, and bump `run_revision` in every run containing the item. Source changes use manifest `changed`/`deleted`; unpin and undo use `pinned` when a lock remains, otherwise `changed`. Refresh and re-claim before reconsideration, subject to the existing attempt ceiling. |
+
+R2: `_ready` reports the stored recovery state through the common error envelope:
+`recovery_state='conflict'` returns `recovery_conflict`; `'pending'` returns
+`recovery_pending`. Both use the message "Recover authoritative records before
+mutation" and the same `{code,message,retryable,details}` fields. Pending is
+retryable after replay; conflict requires repair. The code depends on the state,
+not the endpoint. Existing receipt retries and recovery entry points retain their
+replay semantics.
+
+R3: `expire_attempts` and `list_work` call `_expire` only after `_ready` passes.
+During pending or conflicting recovery, listing succeeds with the stored work
+states, counts and `recovery_state`, without reaping leases. An expiry call returns
+the corresponding recovery error and changes nothing. Normal expiry resumes once
+recovery is ready.
+
+R4: A missing or invalidated preview returns `preview_conflict` with
+`error.details.expected_revision`, `current_revision` and `conflicts`. Preview
+requests with stale projection revisions use the same details. `conflicts` lists
+currently locked memberships in `(video_id,shelf_id)` order, each as
+`{video_id,shelf_id,pin_kind}`; `pin_kind` is `move` for an exclusive move and `pin`
+otherwise. These details come from the current projection, so pin invalidation
+can still delete previews and the response remains available after restart.
+Refusal applies no partial delta.
+
+R5: `library_work.CONTRACT_VERSION` is `phase2-v1.2-2026-09-04`. Every successful
+`list_work` response includes that value as `contract_version`, including empty,
+filtered and recovery-frozen lists.
