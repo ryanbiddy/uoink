@@ -631,6 +631,9 @@ class LibraryWorkService:
             excerpt = next((e for e in card["excerpts"] if e["excerpt_id"] == evidence["excerpt_id"]), None)
             normalize = lambda text: " ".join(unicodedata.normalize("NFC", text).split())
             quote = normalize(evidence["quote"])
+            if not 1 <= len(quote.split()) <= 24:
+                fail("invalid_evidence", "Quote must contain 1 to 24 words after NFC and whitespace normalization",
+                     field=f"result.memberships[{i}].evidence.quote")
             if not excerpt or evidence["kind"] != excerpt["evidence_kind"] or not quote or quote not in normalize(excerpt["text"]):
                 fail("invalid_evidence", "Quote must occur in one specified excerpt", field="evidence.quote")
             # Description/summary prose cannot be promoted to original source evidence.
