@@ -167,3 +167,114 @@ Git staging of the seven deliverable/support files failed: `Unable to create 'E:
 Open actions: route the five reproduced repair cases to their owners; reconcile the card test's field spelling; keep SEC-06 scoped for a later patch; reserve the Phase 2 base/migration/owners/taxonomy/evaluation/client/recovery details listed in its contract. Affected results must be rerun on the next integrated SHA.
 
 **REJECT — candidate `5d61bc8968bc61ee25fa8e9318cb4ed6b8229a6c`.**
+
+
+## Run H re-acceptance, 2026-09-04
+
+**REJECT - candidate `b9c6a05b5ba17033cfc4090c061a2f298c3c4518`.** All five original run F failures are resolved in their exact reproductions. One additional failing case remains in Gemini's changed evaluator: a shelf path containing an integer receives full classification credit after the evaluator removes that component. The complete benchmark reproduces the false score. This finding, H-1 below, withholds acceptance under orchestration rule 1.
+
+This section appends to the run F report; its historical findings and verdict above are unchanged. The run H brief names `b9c6a05`; this dedicated worktree started clean at `d51f67366dd02f6954943640cd41828e0d693a19`. `git diff --name-only b9c6a05 HEAD` returned only `docs/library/RE-ACCEPTANCE-BRIEF-2026-09-04.md`. The tested code and prompts therefore match the named candidate. No production code, prompt, active migration, or label was changed in this review.
+
+**Evidence and commands**
+
+Portable receipts are in [ACCEPTANCE-EVIDENCE-RUN-H-2026-09-04.json](ACCEPTANCE-EVIDENCE-RUN-H-2026-09-04.json). The original measurement and P scripts were run unchanged. [acceptance_run_h_probe.py](../../tests/acceptance_run_h_probe.py) adds the malformed-path reproduction, public four-counter pricing, accounting-failure checks, and five real locked-database repetitions. Raw logs, XML, corpus-head manifests and disposable databases are under `tests/.acceptance-run-h/`, locally ignored and excluded from the deliverables.
+
+The named copy was `C:/Users/hello/AppData/Local/AgentControlRoom/uoink-index-copy-2026-09-04-upgraded.db`, source date **2026-09-04**, **71,733,248 bytes**, SHA-256 `2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc`. The source hash matched before and after measurement and at the final receipt check. SQLite opened only worktree-local duplicates or new fixtures. The frozen duplicate used `mode=ro` and `query_only=ON`. Cards read the bounded source-document heads referenced by that copy; their 548-item manifest hash remained `690cdf04396c8c1a8e1ad5cc4098b1e75de67a4c388de7e3ce94c8a361581367` in both states. The live index was never opened.
+
+Commands ran in PowerShell with worktree-local data/output/temp directories established before imports:
+
+```powershell
+$runH = Join-Path (Get-Location) 'tests/.acceptance-run-h'
+New-Item -ItemType Directory -Force -Path $runH, "$runH/local", "$runH/data", "$runH/output", "$runH/temp" | Out-Null
+$env:PYTHONPATH = '.'
+$env:LOCALAPPDATA = "$runH/local"
+$env:XDG_DATA_HOME = "$runH/data"
+$env:UOINK_OUTPUT_DIR = "$runH/output"
+$env:TEMP = "$runH/temp"
+$env:TMP = "$runH/temp"
+$env:PYTHONIOENCODING = 'utf-8'
+
+# S: full suite
+python -m pytest -q tests/ -p no:cacheprovider -rsx --junitxml=tests/.acceptance-run-h/suite.xml
+# M: --out must not already exist
+python tests/repair_run_d_measure.py --source C:/Users/hello/AppData/Local/AgentControlRoom/uoink-index-copy-2026-09-04-upgraded.db --out tests/.acceptance-run-h/measurement
+# P: exact original reproductions
+python tests/acceptance_run_f_probe.py --copy-dir tests/.acceptance-run-h/measurement --out tests/.acceptance-run-h/delivery
+# H: supplemental independent observations; --out must not already exist
+python tests/acceptance_run_h_probe.py --out tests/.acceptance-run-h/supplemental-final
+```
+
+| Command | Expected | Observed |
+|---|---|---|
+| S | Integrator count, no unexpected failures | **664 passed, 3 skipped, 1 xfailed**, 171 warnings, **49.59 s**, exit 0 |
+| M | Same source fingerprint; bounded cards, repeatable rebuild, valid integrity | All assertions passed, exit 0; measurements below |
+| P | Rerun each original reproduction without model/network execution | Receipt completed, exit 0; all five original findings resolved as detailed below |
+| H | Public pricing/accounting checks and repeated deadline checks; malformed path rejected | Pricing/accounting/deadline assertions passed. **Malformed path receives 100% L1/L2 credit**, `malformed_path.passes=false`. Exit 0 means observations were written, not acceptance |
+
+The suite includes **13 benchmark**, **3 adversarial-card**, **18 D-17/meter**, **25 Recall**, **3 packaging**, and **1 installed-tree smoke** tests, all passing. The Librarian-profile xfail has been removed; its test now checks top-level `truncated=true`, `truncation={selection:false,byte_budget:false,fields:[]}`, and per-excerpt `truncated=true`. P independently still observes a 240-character excerpt and 1,777-byte card. The remaining xfail is SEC-06.
+
+**Five original cases: observed versus expected**
+
+| Case | Expected from the repair brief | Run H observation and disposition |
+|---|---|---|
+| 1 - benchmark evidence/cardinality | Reject cross-clip quote and extra ID; score array-valued IDs and integer shelf paths without `TypeError` | P: `beta gamma` across `alpha beta` / `gamma delta` gives `evidence_valid=false`; extra `OTHER` gives `extra_id`, with all score flags false. Array ID gives `wrong_id`; `shelf_paths:[42]` gives L1/L2 false without exception. Wrong/missing/duplicate IDs remain rejected. **Original cases pass.** H-1 below keeps malformed-output acceptance open. |
+| 2 - benchmark fence | Exactly one complete boundary, including null-card fallback | P: one stubbed completion through the real runner, **1 opening / 1 closing delimiter**, no unescaped attack. S also passes the complete-prompt null-card fallback test. **Pass; SEC-03's reproduced delimiter failure is closed.** This is no claim about a real model's resistance to instructions. |
+| 3 - missing usage, write status, cache pricing | Missing usage counted and exposed; lost writes visible; all four counters priced with stored provenance and an estimate label | P: **1 stored unavailable call**, exposed per feature and in the public total, with `estimate=true`. H: 1,000 cache-read tokens yield **$0.000100**; adding 1,000 cache-create tokens yields **$0.001350**; adding 1,000 ordinary input and output tokens yields **$0.007350**. Stored `est_rates` equals the public table with its source URL and recorded date. A refused real nested-transaction write leaves **1 write failure**, `status.ok=false`, unchanged 3 metered calls, and preserves the caller's transaction. A read error reports `unavailable_calls=null` and `error="usage unavailable"`. **Pass; the reproduced SEC-04 visibility failure is closed.** |
+| 4 - Recall locked-DB deadline | Real exclusive lock returns silently within the 1.5-second budget | P: direct `main()` **1.0023 s**, subprocess **1.0466 s**, exit 0 and **0 stdout bytes**. H repeats direct `main()` at **1.0033, 1.0064, 1.0073, 1.0055, 1.0048 s**. S also passes the smaller-budget lock test and timer-interrupted recursive-query test. Disabled hook remains silent. **Pass for the reproduced database deadline.** |
+| 5 - installed Recall entry point | Hook present in both package lists and required by packaging coverage | P finds `scripts/recall_hook.py` staged and installed; all **8/8** probed entries are in both lists. S passes the packaging requirement. **Pass for packaging inventory.** Installed execution remains unverified. |
+
+Two P details need careful interpretation. Its original cache-only subprobe still passes the legacy `price=lambda i,o:i+o`, which has no cache-rate arguments: it returns **$0.0**, now labeled `estimate=true`, `rates=null`. H exercises the server's replacement `rates=ANTHROPIC_RATES` path and obtains the nonzero estimates above. Also, P's `status.write_failures=1` comes from its deliberately refused nested transaction earlier in the same process. That retained failure status is expected. H resets status before its isolated accounting checks.
+
+All usage counters above are synthetic fixture inputs. The calculations are observed estimates under the candidate's stored rate table, not actual model usage or paid cost. This review checked that the source URL and `source_checked="2026-09-04"` travel with the rates; it did not independently verify live provider prices. The documented cache-creation estimate uses the five-minute rate.
+
+**Independent diff review and H-1**
+
+I reviewed Gemini `2a4a5d3`, Claude `a6d7700`, and the case-5 package fix `df780f1`, including their tests and Claude's API documentation. Gemini's per-excerpt evidence test, exact assignment cardinality, safe `card_text` rendering and canonical truncation assertions resolve the cited reproductions. Claude's missing-usage buckets, visible accounting status and four-counter estimates pass the independent fixtures. P still records **200 calls / 600 input / 400 output tokens** from eight connections with no lost increments, and its unrelated pending transaction survives refusal. Recall disables SQLite's internal busy wait, retries against the remaining lock budget, and cancels/joins its interrupt timer before closing the connection. I found no additional reproducible rejection case in Claude's changes within this dispatch.
+
+**H-1 - malformed shelf path is silently repaired into a correct answer (Gemini owner).** At `scripts/librarian/bench_local.py:262-265`, the new comprehension discards every non-string or blank component before scoring. The assignment prompt requires arrays of shelf strings, and the evaluation gate requires malformed outputs to be rejected. With gold path `["Science","Physics"]` and a valid within-clip quote, this malformed prediction is accepted:
+
+```json
+{"video_id":"fixture","shelf_paths":[["Science",42,"Physics"]],"confidence":0.9,"evidence_quote":"alpha beta","unmapped":false,"unsupported":false,"proposed_new_leaf":""}
+```
+
+Expected: L1 and L2 false because the supplied path is malformed. Observed: `id_status="valid"`, L1/L2/evidence all true; `predicted_path` still contains `42`. H drives this same payload through the complete runner in explicit mock mode: **1 item, 100% L1, 100% L2, 100% evidence**, `status="completed_mock"`. A valid control path also passes. The unchanged original `shelf_paths:[42]` reproduction passes its rejection check, so it does not cover this regression.
+
+Repair the path validation before normalization: reject a path with any invalid component rather than deleting that component and scoring the remainder. Add this complete-runner regression and retain the valid control. No repair was made here. H-1 requires a fresh affected acceptance run on the next integrated SHA; the closed original reproductions remain recorded against this candidate.
+
+**Copy measurements and carried-forward checks**
+
+| Measurement | Frozen copy | Candidate upgrade/rebuild |
+|---|---:|---:|
+| Items / items with transcript clips | 548 / 212 | 548 / 212 |
+| Clips | 3,216 | 3,705 |
+| Intervals over 120 s / over 180 s | 1,729 / 72 | 435 / 271 |
+| Maximum interval | 1,041.839 s | 1,041.839 s |
+| Maximum full card / Librarian card | 109,336 / 8,153 bytes | 54,481 / 8,153 bytes |
+| Handler/dry-run/cost card mismatches, each profile | 0 | 0 |
+
+Schema remains **26**, with **0 NULL source types**. Rebuilds took **1.912 s and 1.883 s** and produced identical ordered payload hash `d2eb5f2da8277a39e446eef99839684fc18a946b5aed7a4230d4ada0603f6928`. All four card-set hashes match run F. Quick check, foreign keys, external-content FTS integrity and the explicit provenance-precedence fixture pass; oversize fine windows remain **0**.
+
+Both run C item queries still return one hit through the Python handlers. Rebuilt `WgPbbWmnXJ8` returns **7077.3-7199.689**, `timing="coarse"`; `episode_9ddb44f98b2` returns **1718.38-1787.98**, `timing="source_cues"`. The returned HTTPS links and card hashes match run F. All **271** rebuilt clips over 180 seconds remain explicitly coarse, across **18 items**. The run F decision to retain honest coarse intervals stands; no player was opened.
+
+P again observes a bounded **599-character** hostile Recall block with one closing fence and no raw code fence, unsafe link or control byte. Its failed-poll fixture records **1 tick, 1 failed poll, 0 successful polls/ingests** and null success stamps. SEC-01, SEC-02, default-off entity extraction and heartbeat regression tests remain passing in S.
+
+**Updated exceptions and unverified release behavior**
+
+H-1 is the sole new rejection finding. SEC-06 remains the previously scoped Unicode-search exception: P observes an empty Japanese query and split accented text; the suite retains its xfail. Fix tokenization and test populated multilingual fixtures in a separate `index.py` patch as specified in run F. SEC-05's documented automatic FxTwitter enrichment remains an exception; this candidate does not ship the proposed default-off enrichment flag.
+
+| Still unverified | Receipt needed to close it |
+|---|---|
+| Installer build/install and autostart | Build the accepted candidate, hash its artifact, install in an isolated Windows session with dedicated data/profile, and verify installed imports, fixture capture, populated upgrade, clip tools and actual autostart state |
+| Watchdog recovery | On a dedicated test helper/port, kill the installed test process and record restart/PID/health and preserved state; exercise wrong listener, hung scheduler and exhausted retries. Never target resident `127.0.0.1:5179` |
+| Installed client, extension, dashboard and Recall | Dedicated browser profile and named client/transport; discover tools, retrieve copied items, execute the installed Recall entry point, capture/dedup a fixture, exercise settings/error states and reconnect after restart; attach computer-use receipt |
+| Media seeking and coarse-interval presentation | Open the returned links in the isolated client and verify player position plus visible coarse duration against source timing |
+| Real model quality, instruction-following, usage and cost | Freeze taxonomy/cards/prompts/evaluation split, authorize the client run, retain all outcomes and provider-reported usage, review labels/evidence independently; verify applicable live rates and obtain invoice evidence before claiming paid cost |
+| Environment-dependent media/platform coverage | Run the POSIX bundle test on POSIX, the symlink case with Windows privileges, and ffmpeg/native-ASR extraction against fixture media in the isolated installation |
+
+Computer-use receipt: **not run; no candidate installer/build was produced in this review**. No helper, model endpoint, browser or media player was started. The three suite skips are POSIX bundle execution on Windows, unavailable Windows symlink privilege and ffmpeg absent from PATH. These limits do not create additional reproduced failures.
+
+Completed: the dated report append, portable run H evidence and supplemental reproduction script. Run F's body and original evidence/probe/measurement files are preserved. No merge or push was attempted. Open action: route H-1 to Gemini, integrate its repair, and rerun affected acceptance before release; retain the exceptions and closing receipts above.
+
+Git staging of the three deliverables failed: `Unable to create 'E:/AI/projects/uoink/checkouts/Yoink/.git/worktrees/codex5/index.lock': Permission denied`. No commit was created. The report append, `ACCEPTANCE-EVIDENCE-RUN-H-2026-09-04.json`, and `tests/acceptance_run_h_probe.py` remain for the integrator to inspect and commit.
+
+**REJECT - candidate `b9c6a05b5ba17033cfc4090c061a2f298c3c4518`.**
