@@ -1,0 +1,1526 @@
+{
+  "candidate_sha": "b1eed2a8d0213b6043e3169f3e8ed4ce212e13ad",
+  "artifact_sha256": {
+    "docs\\library\\proof\\manifest-2026-09-05.json": "7d5212dfce0bf005bfda693537a4fe2dcd5ac1915d2fd08326bdb386b5cc3056",
+    "docs\\library\\proof\\run-2026-09-05\\harness.log": "96ece9cb5cb41cc808ea2afc43606a9e0e435b905d911be0b85264649e509020",
+    "docs\\library\\proof\\run-2026-09-05\\receipts.json": "2b4e824ea9f93999de6c5108406e60a5c81f108de0b279c52fee2e96d622469c",
+    "docs\\library\\proof\\run-2026-09-05\\report.md": "85f819142f1d148cda176c853317fb42c990f10a080954c3ac4ca2c2a466c34c"
+  },
+  "implementation_sha256": {
+    "scripts/librarian/proof_run.py": "37374a278c9c26763d772bc69fdaf9f34d32f99f7fb0a4cfa37732a8af6142fc",
+    "scripts/librarian/proof_score.py": "5799eafcbefff284b742a30f212c192e64716658a003c28de0eb171a71c18722",
+    "tests/validate_proof_receipts.py": "9c7049cb4192fd2219a0e23a217bba848baee237faffed2ef17a763eb0cec44c",
+    "docs/library/proof/audit-r-2026-09-05.py": "c29c83730b7ffe2ede00ba2307233c2827c8782f2ce5bf64d394537a395e04e6"
+  },
+  "unmodified_validator_error": "Isolation root must be below _scratch/proof",
+  "validator_with_lexical_path_relocation": {
+    "status": "RECEIPTS_VALID_AUDIT_REQUIRED",
+    "target_count": 548,
+    "attempt_count": 559,
+    "retries": 11,
+    "measured_quality_items": 60,
+    "product_proof_pass": false
+  },
+  "frozen_inputs": {
+    "verified_files": 11,
+    "ordered_source_pairs": 548,
+    "exclusions": {},
+    "heldout_ids": 60,
+    "strata": {
+      "timed_evidence": 212,
+      "text_only": 336
+    },
+    "source_and_upgrade_recorded": {
+      "copy_before_upgrade_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+      "copy_after_upgrade_sha256": "b679f8e43fda27d5241d633c14011ed316d4cba68693db419f416d6c476bff09",
+      "source_after_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+      "schema_before": 25,
+      "schema_after": 27
+    },
+    "local_private_heads_available": false,
+    "archive_files": [
+      "harness.log",
+      "receipts.json",
+      "report.md"
+    ],
+    "source_revision_and_excerpt_ids": "bound to frozen card; full pre-truncation sources absent"
+  },
+  "evidence": {
+    "accepted_items": 290,
+    "memberships_checked": 352,
+    "heldout_accepted_items": 34,
+    "heldout_memberships_checked": 45,
+    "quote_word_range": [
+      2,
+      24
+    ]
+  },
+  "scores": {
+    "timed_evidence": {
+      "total": 47,
+      "mappable": 25,
+      "assigned": 30,
+      "mapped_correct": 15,
+      "exact_correct": 0,
+      "ancestor_tolerant_correct": 21,
+      "mappable_assigned": 23,
+      "abstentions": 17,
+      "coverage": 0.6382978723404256,
+      "precision": 0.5,
+      "abstention_outcomes": {
+        "unmapped": 17
+      }
+    },
+    "text_only": {
+      "total": 13,
+      "mappable": 8,
+      "abstentions": 9,
+      "assigned": 4,
+      "mapped_correct": 3,
+      "exact_correct": 0,
+      "ancestor_tolerant_correct": 4,
+      "mappable_assigned": 4,
+      "coverage": 0.3076923076923077,
+      "precision": 0.75,
+      "abstention_outcomes": {
+        "unmapped": 6,
+        "rejected": 1,
+        "unsupported": 2
+      }
+    }
+  },
+  "heldout_details": [
+    {
+      "video_id": "episode_54e695d51d6",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "security",
+        "agent guardrails"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "security"
+      ],
+      "primary": [
+        "ai and ml",
+        "security"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "episode_9ddb44f98b2",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "developer tools",
+        "coding assistants"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "episode_ee13d34d83c",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "ai and ml",
+        "industry and markets",
+        "financial analysis"
+      ],
+      "mapped_gold": [
+        "ai and ml"
+      ],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "mappable_abstained"
+    },
+    {
+      "video_id": "_3GaXHNSP2I",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "developer tools",
+        "claude code"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "0FrcYhnHmLg",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "frontier models",
+        "developer ecosystem"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "frontier models"
+      ],
+      "primary": [
+        "ai and ml",
+        "frontier models"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "iyVXw-SoUrY",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "ai and society",
+        "robotics and automation",
+        "human impact"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "wQb4JK5xKMw",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "frontier models",
+        "multimodal architectures"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "frontier models"
+      ],
+      "primary": [
+        "ai and ml",
+        "frontier models"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "HIj8wU_rGIU",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "computer science",
+        "education",
+        "programming fundamentals"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "MJmoSxSPeRY",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "ai and ml",
+        "developer tools",
+        "claude code workflows"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "mappable_abstained"
+    },
+    {
+      "video_id": "647pSnX5H_Y",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "developer tools",
+        "model context protocol"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "zYGDpG-pTho",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "optimization",
+        "rag and fine-tuning"
+      ],
+      "mapped_gold": [
+        "ai and ml"
+      ],
+      "primary": [
+        "ai and ml",
+        "education"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "over_specific"
+    },
+    {
+      "video_id": "ZRb7D6R64hM",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "developer tools",
+        "claude code"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "leXa7EKUPFk",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "computer science",
+        "artificial intelligence",
+        "expert systems"
+      ],
+      "mapped_gold": [],
+      "primary": [
+        "ai and ml",
+        "education"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_assigned"
+    },
+    {
+      "video_id": "dARl_gGrS4o",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "computer science",
+        "algorithms",
+        "constraint satisfaction"
+      ],
+      "mapped_gold": [],
+      "primary": [
+        "ai and ml",
+        "education"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_assigned"
+    },
+    {
+      "video_id": "zFXscjUoDDA",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "web development",
+        "cloud infrastructure",
+        "vercel platform"
+      ],
+      "mapped_gold": [],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_assigned"
+    },
+    {
+      "video_id": "mZzAuFq5C6Q",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "web development",
+        "ai engineering",
+        "vercel ship"
+      ],
+      "mapped_gold": [],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_assigned"
+    },
+    {
+      "video_id": "D_FCYsshMI4",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "developer tools",
+        "computer use"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "D4fkiQfzw_I",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "business and entrepreneurship",
+        "solopreneurship",
+        "product validation"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "v3Fr2JR47KA",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "developer tools",
+        "model context protocol"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "8rABwKRsec4",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "software engineering",
+        "ai programming",
+        "executable specifications"
+      ],
+      "mapped_gold": [],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_assigned"
+    },
+    {
+      "video_id": "A12AVongNN4",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "human-ai interaction",
+        "interaction models"
+      ],
+      "mapped_gold": [
+        "ai and ml"
+      ],
+      "primary": [
+        "ai and ml",
+        "frontier models"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "over_specific"
+    },
+    {
+      "video_id": "7-zJPwJC11Q",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "web development",
+        "developer tools",
+        "chat sdk"
+      ],
+      "mapped_gold": [],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_assigned"
+    },
+    {
+      "video_id": "MgwjGpLHaWE",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "developer tools",
+        "claude cowork"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "2035688213663080450",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "space and science",
+        "space stations",
+        "resupply missions"
+      ],
+      "mapped_gold": [
+        "space and science"
+      ],
+      "primary": [
+        "space and science",
+        "spaceflight"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "over_specific"
+    },
+    {
+      "video_id": "2020740688166735872",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "telecommunications",
+        "satellite internet",
+        "starlink remote testing"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "c72_dQ0j0Wo",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "hardware and compute",
+        "open weights strategy"
+      ],
+      "mapped_gold": [
+        "ai and ml"
+      ],
+      "primary": [
+        "ai and ml",
+        "frontier models"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "over_specific"
+    },
+    {
+      "video_id": "2079233126883094528",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "education",
+        "agent architectures"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "education"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "sibling_confusion"
+    },
+    {
+      "video_id": "2079628844705935360",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "security",
+        "agent tool safety"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "security"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "sibling_confusion"
+    },
+    {
+      "video_id": "2081035374852202496",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "leadership and vision",
+        "openai interviews"
+      ],
+      "mapped_gold": [
+        "ai and ml"
+      ],
+      "primary": [
+        "ai and ml"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "2082584296917774336",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "information retrieval",
+        "knowledge graphs"
+      ],
+      "mapped_gold": [
+        "ai and ml"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "over_specific"
+    },
+    {
+      "video_id": "2079985278647783424",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "developer tools",
+        "agent systems"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "2081817087295516673",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "tech and defense",
+        "enterprise software",
+        "palantir"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "2081832959116562433",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "robotics",
+        "general-purpose robotics"
+      ],
+      "mapped_gold": [
+        "ai and ml"
+      ],
+      "primary": [
+        "ai and ml",
+        "education"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "over_specific"
+    },
+    {
+      "video_id": "2082498926502952960",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "developer tools",
+        "model context protocol"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "2082938911136030720",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "education",
+        "tool use and function calling"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "education"
+      ],
+      "primary": [
+        "ai and ml",
+        "education"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "2083312428356411392",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "career and business",
+        "ai engineering",
+        "enterprise deployment"
+      ],
+      "mapped_gold": [],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_assigned"
+    },
+    {
+      "video_id": "2083598884362653696",
+      "stratum": "timed_evidence",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "developer tools",
+        "claude code masterclass"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "2078627651103993856",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "current events",
+        "legal and law enforcement",
+        "news reporting"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "1889178327400820738",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "pop culture",
+        "social media commentary",
+        "music and fandom"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "2077870396075094016",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "social commentary",
+        "cultural debates",
+        "online discourse"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "2077640475075358720",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "social commentary",
+        "internet culture",
+        "free speech"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "2078643519162298368",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "gaming and entertainment",
+        "live streaming",
+        "basketball events"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "2078656827990978560",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "media and creators",
+        "irl streaming",
+        "live broadcast incidents"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "2078621895058915328",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "gaming and entertainment",
+        "creator culture",
+        "coaching sessions"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "2078557763337154560",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "viral content",
+        "public incidents",
+        "street encounters"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "2078557465042419712",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "geopolitics and news",
+        "foreign policy",
+        "political commentary"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "2078450309794263040",
+      "stratum": "timed_evidence",
+      "outcome": "unmapped",
+      "gold": [
+        "current events",
+        "civil unrest",
+        "law enforcement"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "KjToqo-ACnc",
+      "stratum": "text_only",
+      "outcome": "unmapped",
+      "gold": [
+        "media and assets",
+        "stock footage",
+        "screensavers"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "aqz-KE-bpKQ",
+      "stratum": "text_only",
+      "outcome": "unmapped",
+      "gold": [
+        "media and assets",
+        "animation",
+        "open source films"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "h6YLDi2gnMM",
+      "stratum": "text_only",
+      "outcome": "unmapped",
+      "gold": [
+        "media and entertainment",
+        "asmr",
+        "celebration"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "2046008958511702016",
+      "stratum": "text_only",
+      "outcome": "rejected",
+      "gold": [
+        "space and science",
+        "spaceflight",
+        "astronaut observations"
+      ],
+      "mapped_gold": [
+        "space and science",
+        "spaceflight"
+      ],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "mappable_abstained"
+    },
+    {
+      "video_id": "2079140311779971072",
+      "stratum": "text_only",
+      "outcome": "unmapped",
+      "gold": [
+        "ai and ml",
+        "industry strategy",
+        "foundation model objectives"
+      ],
+      "mapped_gold": [
+        "ai and ml"
+      ],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "mappable_abstained"
+    },
+    {
+      "video_id": "2081888077858140160",
+      "stratum": "text_only",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "industry trends",
+        "model scaling"
+      ],
+      "mapped_gold": [
+        "ai and ml"
+      ],
+      "primary": [
+        "ai and ml",
+        "frontier models"
+      ],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "over_specific"
+    },
+    {
+      "video_id": "2082527680109621249",
+      "stratum": "text_only",
+      "outcome": "unmapped",
+      "gold": [
+        "ai and society",
+        "governance and ethics",
+        "open source ai"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "2082879384671649792",
+      "stratum": "text_only",
+      "outcome": "accepted",
+      "gold": [
+        "ai and ml",
+        "developer tools",
+        "engineering workflows"
+      ],
+      "mapped_gold": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "primary": [
+        "ai and ml",
+        "developer tools"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "x_2b864c9e9ff",
+      "stratum": "text_only",
+      "outcome": "unmapped",
+      "gold": [
+        "internet history",
+        "social media",
+        "twitter archives"
+      ],
+      "mapped_gold": [],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "unmappable_abstained"
+    },
+    {
+      "video_id": "x_ba442c39217",
+      "stratum": "text_only",
+      "outcome": "accepted",
+      "gold": [
+        "space and science",
+        "spaceflight",
+        "nasa astronaut equipment"
+      ],
+      "mapped_gold": [
+        "space and science",
+        "spaceflight"
+      ],
+      "primary": [
+        "space and science",
+        "spaceflight"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "x_2cc092776b1",
+      "stratum": "text_only",
+      "outcome": "accepted",
+      "gold": [
+        "space and science",
+        "spaceflight",
+        "commercial rideshare"
+      ],
+      "mapped_gold": [
+        "space and science",
+        "spaceflight"
+      ],
+      "primary": [
+        "space and science",
+        "spaceflight"
+      ],
+      "exact_correct": false,
+      "mapped_correct": true,
+      "ancestor_tolerant_correct": true,
+      "diagnosis": "right"
+    },
+    {
+      "video_id": "x_87bac984c86",
+      "stratum": "text_only",
+      "outcome": "unsupported",
+      "gold": [
+        "space and science",
+        "spaceflight",
+        "live launches"
+      ],
+      "mapped_gold": [
+        "space and science",
+        "spaceflight"
+      ],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "mappable_abstained"
+    },
+    {
+      "video_id": "x_56eeb559f6a",
+      "stratum": "text_only",
+      "outcome": "unsupported",
+      "gold": [
+        "space and science",
+        "spaceflight",
+        "orbital observations"
+      ],
+      "mapped_gold": [
+        "space and science",
+        "spaceflight"
+      ],
+      "primary": [],
+      "exact_correct": false,
+      "mapped_correct": false,
+      "ancestor_tolerant_correct": false,
+      "diagnosis": "mappable_abstained"
+    }
+  ],
+  "confusion": {
+    "right": 18,
+    "mappable_abstained": 6,
+    "unmappable_abstained": 20,
+    "over_specific": 7,
+    "unmappable_assigned": 7,
+    "sibling_confusion": 2
+  },
+  "targets": {
+    "accepted": 290,
+    "unsupported": 32,
+    "unmapped": 225,
+    "rejected": 1
+  },
+  "unmapped_holdout_overlap": [
+    "1889178327400820738",
+    "2020740688166735872",
+    "2077640475075358720",
+    "2077870396075094016",
+    "2078450309794263040",
+    "2078557465042419712",
+    "2078557763337154560",
+    "2078621895058915328",
+    "2078627651103993856",
+    "2078643519162298368",
+    "2078656827990978560",
+    "2079140311779971072",
+    "2081817087295516673",
+    "2082527680109621249",
+    "D4fkiQfzw_I",
+    "HIj8wU_rGIU",
+    "KjToqo-ACnc",
+    "MJmoSxSPeRY",
+    "aqz-KE-bpKQ",
+    "episode_ee13d34d83c",
+    "h6YLDi2gnMM",
+    "iyVXw-SoUrY",
+    "x_2b864c9e9ff"
+  ],
+  "induction_scope": {
+    "unmapped_cards": 225,
+    "old_holdout_overlap": 23,
+    "remaining_cards_outside_induction_and_old_holdout": {
+      "text_only": 181,
+      "timed_evidence": 105
+    }
+  },
+  "accounting": {
+    "recorded_totals": {
+      "serialized_input_bytes": 7944112,
+      "card_bytes": 2166288,
+      "prompt_bytes": 7243685,
+      "response_bytes": 5616155,
+      "wall_ms": 2334799,
+      "retries": 11,
+      "model_calls": 559,
+      "rejected_attempts": 12,
+      "transport_failures": 12
+    },
+    "model_processes": 72,
+    "unique_cli_sessions": 72,
+    "batch_sizes": {
+      "8": 68,
+      "7": 1,
+      "6": 1,
+      "1": 2
+    },
+    "recomputed_attempt_bytes": {
+      "card_bytes": 2166288,
+      "prompt_bytes": 7243685,
+      "response_bytes": 5616155,
+      "serialized_input_bytes": 7944112
+    },
+    "reconstructed_batch_prompt_utf8_bytes": 2821238,
+    "schema_utf8_bytes_per_call": 1253,
+    "reconstructed_batch_prompt_plus_schema_bytes": 2911454,
+    "reported_usage_once_per_cli_call": {
+      "input_tokens": 214,
+      "output_tokens": 908541,
+      "cache_read_tokens": 8315787,
+      "cache_create_tokens": 1938051
+    },
+    "reported_model_usage": {
+      "claude-haiku-4-5-20251001": {
+        "inputTokens": 1020637,
+        "outputTokens": 882,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 0,
+        "costUSD": 1.0250469999999998
+      },
+      "claude-sonnet-5": {
+        "inputTokens": 214,
+        "outputTokens": 908541,
+        "cacheReadInputTokens": 8315787,
+        "cacheCreationInputTokens": 1938051,
+        "costUSD": 18.501199399999997
+      }
+    },
+    "cli_estimate_usd_once_per_session": 19.5262464,
+    "archived_summary_cli_estimate_usd": 0.0,
+    "paid_cost_usd": null,
+    "call_wall_sum_ms": 9037957,
+    "attempt_wall_sum_ms": 9037716,
+    "wall_floor_remainder_ms": 241,
+    "concurrency_capacity_ms": 9339196,
+    "missing_or_duplicate_raw_results": [
+      {
+        "video_id": "2081117060013473792",
+        "count": 0
+      },
+      {
+        "video_id": "MgwjGpLHaWE",
+        "count": 0
+      },
+      {
+        "video_id": "WgPbbWmnXJ8",
+        "count": 0
+      }
+    ],
+    "unexpected_raw_result_ids": [],
+    "transformed_results": [
+      {
+        "video_id": "2081117060013473792",
+        "attempt_number": 1,
+        "original_result_count": 0,
+        "submitted_outcome": "error"
+      },
+      {
+        "video_id": "MgwjGpLHaWE",
+        "attempt_number": 1,
+        "original_result_count": 0,
+        "submitted_outcome": "error"
+      },
+      {
+        "video_id": "WgPbbWmnXJ8",
+        "attempt_number": 1,
+        "original_result_count": 0,
+        "submitted_outcome": "error"
+      },
+      {
+        "video_id": "zYGDpG-pTho",
+        "attempt_number": 1,
+        "original_result_count": 1,
+        "submitted_outcome": "error"
+      }
+    ]
+  },
+  "error_guard": {
+    "archived_attempt_order_max_ratio": 0.1276595744680851,
+    "at_attempt": 47,
+    "error_numerator": 6,
+    "final_ratio": 0.04293381037567084,
+    "batch_end_breaches": [
+      {
+        "completed_attempts": 48,
+        "errors": 6,
+        "ratio": 0.125
+      },
+      {
+        "completed_attempts": 56,
+        "errors": 6,
+        "ratio": 0.10714285714285714
+      },
+      {
+        "completed_attempts": 72,
+        "errors": 8,
+        "ratio": 0.1111111111111111
+      },
+      {
+        "completed_attempts": 95,
+        "errors": 12,
+        "ratio": 0.12631578947368421
+      },
+      {
+        "completed_attempts": 103,
+        "errors": 12,
+        "ratio": 0.11650485436893204
+      },
+      {
+        "completed_attempts": 111,
+        "errors": 12,
+        "ratio": 0.10810810810810811
+      },
+      {
+        "completed_attempts": 119,
+        "errors": 12,
+        "ratio": 0.10084033613445378
+      }
+    ],
+    "timeline_limitation": "No per-event timestamps; archive order is not an independently timed completion ledger"
+  },
+  "state": {
+    "before_equals_after": true,
+    "before": {
+      "projection_revision": 0,
+      "memberships": [],
+      "pins": [],
+      "item_policies": [],
+      "active_version_id": "taxonomy-v1-2026-09-04",
+      "taxonomy_revision_hash": "2f283053bbaca2e94c2dbd340f19c62a89f529457ac40ae5b1d2d84379d22d98",
+      "librarian_apply_enabled": false,
+      "applied_label_count": 0,
+      "proof_apply_count": 0
+    },
+    "preview_request": {
+      "mode": "preview",
+      "run_id": "proof-subscription-2026-09-05",
+      "expected_projection_revision": 0,
+      "activate_version": false
+    },
+    "preview_can_apply": false,
+    "preview_reasons": [
+      {
+        "code": "incomplete_manifest",
+        "video_id": "2046008958511702016",
+        "disposition": "cancelled"
+      },
+      {
+        "code": "apply_disabled"
+      },
+      {
+        "code": "preview_approval_required"
+      }
+    ],
+    "preview_items": 290,
+    "preview_memberships": 352,
+    "preview_exclusions": {
+      "unsupported": 32,
+      "unmapped": 225,
+      "cancelled": 1
+    },
+    "preview_summary": {
+      "changed_items": 0,
+      "baseline_items": 0,
+      "churn_percent": 0.0,
+      "initial_filing": true,
+      "activation": {
+        "before": "taxonomy-v1-2026-09-04",
+        "after": "taxonomy-v1-2026-09-04"
+      },
+      "blocking_reasons": [
+        {
+          "code": "incomplete_manifest",
+          "video_id": "2046008958511702016",
+          "disposition": "cancelled"
+        }
+      ]
+    },
+    "independent_database_snapshot_available": false
+  },
+  "harness_log": {
+    "completed_processes": 72,
+    "inner_wall_sum_ms": 9037948,
+    "reported_stdout_character_count": 675525,
+    "stdout_count_note": "Runner logs len(res.stdout), characters mislabeled B, not raw UTF-8 bytes",
+    "cancellation_lines": [
+      "[proof] retry limit reached for 2046008958511702016; cancelling attempt 3"
+    ]
+  },
+  "synthetic_service_word_cap_probe": [
+    {
+      "words": 24,
+      "quote_characters": 119,
+      "outcome": "accepted",
+      "accepted_memberships": 1,
+      "current_memberships": 0
+    },
+    {
+      "words": 25,
+      "quote_characters": 124,
+      "outcome": "accepted",
+      "accepted_memberships": 1,
+      "current_memberships": 0
+    },
+    {
+      "words": 26,
+      "quote_characters": 129,
+      "outcome": "accepted",
+      "accepted_memberships": 1,
+      "current_memberships": 0
+    }
+  ]
+}
