@@ -12893,7 +12893,9 @@ class Handler(BaseHTTPRequestHandler):
         if name not in tools.TOOL_REGISTRY:
             return self._send_json(404, {"ok": False,
                                          "error": "tool not found"})
-        if name in tools.LIBRARY_TOOL_NAMES:
+        # getattr: test doubles for the tools module predate the library
+        # tools and expose only TOOL_REGISTRY (tests/test_openapi_bridge.py).
+        if name in getattr(tools, "LIBRARY_TOOL_NAMES", ()):
             # Living Library Phase 2: the frozen schemas use $ref/oneOf/
             # const/pattern, which openapi_bridge.validate_arguments skips.
             # The adapters' validator is the common input contract on every
