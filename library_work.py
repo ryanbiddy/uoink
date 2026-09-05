@@ -24,7 +24,7 @@ from pathlib import Path
 
 import library_cards
 
-CONTRACT_VERSION = "phase2-v1-2026-09-04"
+CONTRACT_VERSION = "phase2-v1.2-2026-09-04"
 SCHEMA_VERSION = 1
 CLAIM_BYTE_BUDGET = 122880
 TAXONOMY_BYTE_BUDGET = 16384
@@ -260,8 +260,10 @@ class LibraryWorkService:
         return dict(conn.execute("SELECT * FROM library_meta WHERE singleton=1").fetchone())
 
     def _ready(self, conn):
-        if self._meta(conn)["recovery_state"] != "ready":
-            fail("recovery_pending", "Recover authoritative records before mutation", retryable=True)
+        state = self._meta(conn)["recovery_state"]
+        if state != "ready":
+            fail("recovery_conflict" if state == "conflict" else "recovery_pending",
+                 "Recover authoritative records before mutation", retryable=state == "pending")
 
     def _card(self, conn, video_id, profile="librarian"):
         row = conn.execute("SELECT * FROM yoinks WHERE video_id=? AND deleted_at IS NULL", (video_id,)).fetchone()
@@ -475,13 +477,21 @@ class LibraryWorkService:
         _operator(context)
         _fields(args, ())
         with self.index.write_transaction() as conn:
+            self._ready(conn)
             return success(expired=self._expire(conn))
 
     @endpoint
     def list_work(self, context, args):
         args = validate_arguments("list_library_work", args)
         with self.index.write_transaction() as conn:
-            self._expire(conn)
+            try:
+                self._ready(conn)
+            except LibraryError as exc:
+                if exc.response["error"]["code"] not in {"recovery_pending", "recovery_conflict"}:
+                    raise
+                # Recovery freezes leases, but their stored status remains visible.
+            else:
+                self._expire(conn)
             clauses, params = [], []
             if "run_id" in args:
                 clauses.append("run_id=?")
@@ -499,7 +509,8 @@ class LibraryWorkService:
             limit = args.get("limit", 25)
             items = [dict(r) for r in conn.execute("SELECT work_id,run_id,video_id,state,attempts,packet_generation FROM library_work" + where + " ORDER BY work_id LIMIT ?", params + [limit + 1])]
             revision = self._run(conn, args["run_id"])["run_revision"] if "run_id" in args else None
-            return success(run_revision=revision, counts=counts, manifest_counts=dispositions, items=items[:limit],
+            return success(contract_version=CONTRACT_VERSION, run_revision=revision,
+                counts=counts, manifest_counts=dispositions, items=items[:limit],
                 next_cursor=items[limit - 1]["work_id"] if len(items) > limit else None,
                 waiting_for_client=bool(counts.get("ready", 0) and not counts.get("leased", 0)),
                 recovery_state=self._meta(conn)["recovery_state"])
@@ -811,10 +822,19 @@ class LibraryWorkService:
         path = self.store_root / "taxonomies" / (taxonomy["revision_hash"] + ".json")
         self._atomic_file(path, (canonical(taxonomy) + "\n").encode(), immutable=True)
 
-    def _revision(self, conn, expected):
+    def _conflict_details(self, conn, expected):
+        pins = conn.execute("SELECT s.video_id,s.shelf_id,CASE WHEN p.exclusive_move=1 THEN 'move' "
+            "ELSE 'pin' END AS pin_kind FROM item_shelves s LEFT JOIN library_item_policy p "
+            "USING(video_id) WHERE s.locked=1 ORDER BY s.video_id,s.shelf_id")
+        return dict(expected_revision=expected, current_revision=self._meta(conn)["projection_revision"],
+                    conflicts=[dict(row) for row in pins])
+
+    def _revision(self, conn, expected, *, include_pins=False):
         current = self._meta(conn)["projection_revision"]
         if current != expected:
-            fail("revision_conflict", "Projection revision changed", expected_revision=expected, current_revision=current)
+            details = self._conflict_details(conn, expected) if include_pins else dict(
+                expected_revision=expected, current_revision=current)
+            fail("revision_conflict", "Projection revision changed", **details)
         return current
 
     def _snapshot(self, conn):
@@ -926,7 +946,7 @@ class LibraryWorkService:
             fail("validation_error", "Expected preview mode")
         with self._locked_store(), self.index.write_transaction() as conn:
             self._ready(conn)
-            self._revision(conn, args["expected_projection_revision"])
+            self._revision(conn, args["expected_projection_revision"], include_pins=True)
             binding, forward, inverse, summary = self._compute_preview(conn, args["run_id"], args.get("activate_version", False))
             preview_id = secrets.token_urlsafe(24)
             delta_hash, expiry = digest(binding), self._now() + 900000
@@ -943,17 +963,18 @@ class LibraryWorkService:
                 manifest_exclusions=summary["exclusions"], changed_items=summary["changed_items"], baseline_items=summary["baseline_items"],
                 churn_percent=summary["churn_percent"], initial_filing=summary["initial_filing"], can_apply=False, reasons=reasons)
 
-    def _preview(self, conn, preview_id):
+    def _preview(self, conn, preview_id, expected_revision):
         row = conn.execute("SELECT * FROM library_previews WHERE preview_id=?", (preview_id,)).fetchone()
         if row is None:
-            fail("preview_conflict", "Preview is missing or invalidated")
+            fail("preview_conflict", "Preview is missing or invalidated",
+                 **self._conflict_details(conn, expected_revision))
         row = dict(row)
         if self._now() >= row["expires_ms"]:
             fail("preview_expired", "Preview approval window expired")
         return row
 
     def _recheck_preview(self, conn, preview, args):
-        self._revision(conn, args["expected_projection_revision"])
+        self._revision(conn, args["expected_projection_revision"], include_pins=True)
         if preview["delta_hash"] != args["delta_hash"] or preview["expected_projection_revision"] != args["expected_projection_revision"]:
             fail("preview_conflict", "Preview binding differs")
         binding = decode_json(preview["binding_json"])
@@ -977,7 +998,7 @@ class LibraryWorkService:
             fail("validation_error", "Approval ceiling must be an integer between 15 and 100")
         with self._locked_store(), self.index.write_transaction() as conn:
             self._ready(conn)
-            preview = self._preview(conn, args["preview_id"])
+            preview = self._preview(conn, args["preview_id"], args["expected_projection_revision"])
             _, _, summary = self._recheck_preview(conn, preview, args)
             if 100 * summary["changed_items"] > ceiling * summary["baseline_items"]:
                 fail("churn_limit", "Displayed delta exceeds approved ceiling")
@@ -1009,7 +1030,7 @@ class LibraryWorkService:
                 self._ready(conn)
                 if not self.librarian_apply_enabled:
                     fail("apply_disabled", "Librarian apply is disabled")
-                preview = self._preview(conn, args["preview_id"])
+                preview = self._preview(conn, args["preview_id"], args["expected_projection_revision"])
                 forward, inverse, summary = self._recheck_preview(conn, preview, args)
                 stored_summary = decode_json(preview["summary_json"])
                 if not preview["approved_by"] or stored_summary.get("approval", {}).get("operation_key") != args["operation_key"]:
