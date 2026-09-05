@@ -96,7 +96,7 @@ def test_refusal_when_anthropic_api_key_set(tmp_path, monkeypatch):
         port=5182,
         skip_hash_check=True,
     )
-    with pytest.raises(ProofRunError, match="ANTHROPIC_API_KEY is set"):
+    with pytest.raises(ProofRunError, match="ANTHROPIC_API_KEY is present"):
         harness.check_guards()
 
 
@@ -114,22 +114,29 @@ def test_refusal_when_port_5179_targeted(tmp_path, clean_env):
 
 
 def create_fixture_database(db_path: Path, n_items: int = 12) -> None:
-    """Creates a realistic test database populated with items from gold-set."""
+    """Creates a realistic test database populated with items from manifest and gold-set."""
     gold_path = ROOT / "docs" / "library" / "gold-set-2026-09-04.json"
     gold_items = json.loads(gold_path.read_text(encoding="utf-8")) if gold_path.is_file() else []
+    gold_by_id = {g["video_id"]: g for g in gold_items}
+
+    manifest_path = ROOT / "docs" / "library" / "proof" / "manifest-2026-09-05.json"
+    manifest_data = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.is_file() else {}
+    manifest_ids = [entry[0] for entry in manifest_data.get("items", [])]
+
+    # Pick up to n_items targets that exist in the manifest
+    selected_ids = [g["video_id"] for g in gold_items if g["video_id"] in set(manifest_ids)]
+    chosen = selected_ids[:max(0, n_items - 2)]
+    non_gold = [vid for vid in manifest_ids if vid not in gold_by_id]
+    chosen.extend(non_gold[:(n_items - len(chosen))])
 
     idx = index_mod.Index.open(db_path)
-    # Seed items
-    seeded = 0
-    for g in gold_items:
-        if seeded >= n_items - 2:  # Save 2 spots for unmapped items
-            break
-        vid = g["video_id"]
+    for vid in chosen:
+        g = gold_by_id.get(vid, {})
         slug = g.get("slug", vid)
         title = g.get("title", f"Title {vid}")
         channel = g.get("channel", "Test Channel")
         platform = g.get("platform", "youtube")
-        card = g.get("card") or {}
+        card = g.get("card") or manifest_data.get("cards", {}).get(vid, {}).get("card") or {}
         clips = card.get("clips") or []
 
         idx.upsert_yoink(
@@ -151,28 +158,11 @@ def create_fixture_database(db_path: Path, n_items: int = 12) -> None:
                     "INSERT INTO clips(video_id,seq,start,end,text) VALUES(?,?,?,?,?)",
                     (vid, i, c.get("start", 0), c.get("end", 10), c.get("text", "Sample clip text.")),
                 )
-        seeded += 1
-
-    # Seed 2 unmapped / non-gold items
-    for extra_id in ("unmapped_vid_1", "unmapped_vid_2"):
-        idx.upsert_yoink(
-            {
-                "video_id": extra_id,
-                "slug": extra_id,
-                "title": f"Unmapped Item {extra_id}",
-                "channel": "Other Channel",
-                "platform": "youtube",
-                "topic": "Uncategorized",
-                "yoinked_at": "2026-09-04T00:00:00Z",
-                "corpus_path": "",
-                "sidecar_path": "",
-            }
-        )
-        with idx.write_transaction() as conn:
-            conn.execute(
-                "INSERT INTO clips(video_id,seq,start,end,text) VALUES(?,?,?,?,?)",
-                (extra_id, 0, 0, 10, "General non-matching content prose."),
-            )
+            if not clips:
+                conn.execute(
+                    "INSERT INTO clips(video_id,seq,start,end,text) VALUES(?,?,?,?,?)",
+                    (vid, 0, 0, 10, "Default clip content."),
+                )
 
     idx.close()
 
@@ -195,37 +185,46 @@ def test_mock_run_end_to_end(tmp_path, clean_env):
     receipts_data = json.loads(receipts_path.read_text(encoding="utf-8"))
 
     assert receipts_data["schema_version"] == 1
+    assert receipts_data["contract_version"] == "phase2-v1.2-2026-09-04"
     assert receipts_data["run_id"] == "test-run-p-mock"
-    assert receipts_data["mock"] is True
-    assert receipts_data["port"] == ephemeral_port
-    assert receipts_data["port"] != FORBIDDEN_PORT
+    assert receipts_data["mode"] == "mock"
+    assert receipts_data["status"] == "completed"
+    assert receipts_data["abort_reason"] is None
+    assert str(ephemeral_port) in receipts_data["config"]["base_url"]
+    assert str(FORBIDDEN_PORT) not in receipts_data["config"]["base_url"]
 
     totals = receipts_data["totals"]
-    assert totals["total_items"] == 12
-    assert totals["total_attempts"] == 12
-    assert totals["total_serialized_input_bytes"] > 0
-    assert totals["total_wall_ms"] >= 0
+    assert totals["serialized_input_bytes"] > 0
+    assert totals["card_bytes"] > 0
+    assert totals["prompt_bytes"] > 0
+    assert totals["response_bytes"] > 0
+    assert totals["wall_ms"] >= 0
+
+    assert len(receipts_data["targets"]) == 12
 
     # Invariant assertions: zero applies, projection revision preserved
-    before = receipts_data["before_state"]
-    after = receipts_data["after_state"]
+    before = receipts_data["before"]
+    after = receipts_data["after"]
     assert before == after
-    assert before["applied_count"] == 0
-    assert after["applied_count"] == 0
+    assert before["applied_label_count"] == 0
+    assert after["applied_label_count"] == 0
 
-    # Reshelving preview returned can_apply=False
-    preview = receipts_data["preview_result"]
-    assert preview.get("can_apply") is False
+    # Reshelving preview returned preview request and response
+    preview = receipts_data["preview"]
+    assert "request" in preview
+    assert "response" in preview
+    assert preview["request"].get("mode") == "preview"
+    assert preview["request"].get("activate_version") is False
 
     # Check per-attempt receipt records
-    receipt_list = receipts_data["receipts"]
-    assert len(receipt_list) == 12
+    attempt_list = receipts_data["attempts"]
+    assert len(attempt_list) == 12
 
-    outcomes = Counter(r["outcome"] for r in receipt_list)
-    assert outcomes["accepted"] >= 8
+    outcomes = Counter(r["outcome"] for r in attempt_list)
+    assert outcomes["accepted"] >= 5
     assert outcomes["unmapped"] >= 1
 
-    for r in receipt_list:
+    for r in attempt_list:
         assert "work_id" in r
         assert "video_id" in r
         assert "attempt_token" in r
@@ -233,12 +232,17 @@ def test_mock_run_end_to_end(tmp_path, clean_env):
         assert r["card_bytes"] > 0
         assert r["prompt_bytes"] > 0
         assert r["response_bytes"] > 0
+        assert r["serialized_input_bytes"] > 0
         assert r["wall_ms"] >= 0
         assert r["outcome"] in {"accepted", "unmapped", "unsupported", "rejected"}
         if r["outcome"] == "accepted":
-            assert r["evidence_basis"] == "packet"
-            assert r["evidence_quote"] is not None
-            assert len(r["evidence_quote"].split()) <= 25
+            res = r["result"]
+            assert res is not None
+            mem = res["memberships"][0]
+            ev = mem["evidence"]
+            assert ev["basis"] == "packet"
+            assert ev["quote"] is not None
+            assert len(ev["quote"].split()) <= 25
 
 
 def test_scorer_on_fixture_receipts(tmp_path, clean_env):

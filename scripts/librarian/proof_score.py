@@ -43,10 +43,19 @@ def score_receipts(
 ) -> dict:
     gold_by_id = {item["video_id"]: item for item in gold_data}
 
-    # Group receipts by video_id (taking final attempt)
+    # Group receipts/attempts by video_id (taking final attempt)
     receipts_by_video: Dict[str, List[dict]] = defaultdict(list)
-    for r in receipts_data.get("receipts", []):
-        receipts_by_video[r["video_id"]].append(r)
+    attempts = receipts_data.get("attempts")
+    if attempts is not None:
+        for a in attempts:
+            vid = a.get("video_id") or a.get("target_id")
+            if vid:
+                receipts_by_video[str(vid)].append(a)
+    else:
+        for r in receipts_data.get("receipts", []):
+            vid = r.get("video_id") or r.get("target_id")
+            if vid:
+                receipts_by_video[str(vid)].append(r)
 
     results_by_stratum: Dict[str, dict] = {}
     strata = holdout_data.get("strata", {})
@@ -84,7 +93,9 @@ def score_receipts(
                 abstention_count += 1
                 outcome = final_receipt.get("outcome", "unseen") if final_receipt else "unseen"
                 reason = (
-                    final_receipt.get("rejection_reason") or "Abstention / unassigned"
+                    final_receipt.get("rejection_reason")
+                    or (final_receipt.get("result", {}).get("reason") if isinstance(final_receipt.get("result"), dict) else None)
+                    or "Abstention / unassigned"
                     if final_receipt
                     else "Missing from receipts"
                 )
@@ -103,7 +114,8 @@ def score_receipts(
 
             # Assigned item
             assigned_count += 1
-            memberships = final_receipt.get("memberships") or []
+            result_payload = final_receipt.get("result") or final_receipt
+            memberships = result_payload.get("memberships") or []
             primary_shelf = memberships[0].get("shelf_path", []) if memberships else []
 
             norm_pred = [p.strip().lower() for p in primary_shelf]
@@ -116,8 +128,13 @@ def score_receipts(
             # Evidence quote and basis check
             evidence_valid = False
             evidence_checked_count += 1
-            quote = final_receipt.get("evidence_quote")
-            basis = final_receipt.get("evidence_basis")
+            evidence_obj = memberships[0].get("evidence") if (memberships and isinstance(memberships[0], dict)) else {}
+            if isinstance(evidence_obj, dict):
+                quote = evidence_obj.get("quote") or final_receipt.get("evidence_quote")
+                basis = evidence_obj.get("basis") or final_receipt.get("evidence_basis")
+            else:
+                quote = final_receipt.get("evidence_quote")
+                basis = final_receipt.get("evidence_basis")
 
             if quote and quote.strip() and basis in {"packet", "fetched_full"}:
                 # Rule check: quote under 25 words
@@ -190,42 +207,73 @@ def score_receipts(
     overall_pass = (overall_coverage >= COVERAGE_FLOOR) and (overall_precision >= PRECISION_TARGET)
 
     # Usage accounting: check whether usage was reported or unavailable
-    all_receipts = receipts_data.get("receipts", [])
-    reported_usages = [
-        r.get("usage")
-        for r in all_receipts
-        if isinstance(r.get("usage"), dict) and r.get("usage", {}).get("status") == "reported"
-    ]
-    is_measured = len(reported_usages) == len(all_receipts) and len(all_receipts) > 0
+    totals = receipts_data.get("totals", {})
+    cfg = receipts_data.get("config", {})
+    mode = receipts_data.get("mode")
+    is_mock = (mode == "mock") or cfg.get("mock", receipts_data.get("mock", False))
 
-    total_input_tokens = sum(u.get("input_tokens", 0) for u in reported_usages)
-    total_output_tokens = sum(u.get("output_tokens", 0) for u in reported_usages)
-    total_cache_read = sum(u.get("cache_read_tokens", 0) for u in reported_usages)
-    total_cache_create = sum(u.get("cache_create_tokens", 0) for u in reported_usages)
-    total_wall_ms = sum(r.get("wall_ms", 0) for r in all_receipts)
-    total_cost_usd_est = sum(u.get("total_cost_usd", 0.0) for u in reported_usages)
-
-    usage_summary = {
-        "status": "measured" if is_measured else "unmeasured (mock or CLI unavailable)",
-        "is_measured": is_measured,
-        "reported_count": len(reported_usages),
-        "total_receipts": len(all_receipts),
-        "input_tokens": total_input_tokens,
-        "output_tokens": total_output_tokens,
-        "cache_read_tokens": total_cache_read,
-        "cache_create_tokens": total_cache_create,
-        "total_tokens": total_input_tokens + total_output_tokens + total_cache_read + total_cache_create,
-        "wall_time_ms": total_wall_ms,
-        "wall_time_s": total_wall_ms / 1000.0,
-        "total_cost_usd_estimate": total_cost_usd_est,
-    }
+    if totals and ("total_input_tokens" in totals or "total_wall_ms" in totals or "wall_ms" in totals):
+        total_input_tokens = totals.get("total_input_tokens", 0)
+        total_output_tokens = totals.get("total_output_tokens", 0)
+        total_cache_read = totals.get("total_cache_read_tokens", 0)
+        total_cache_create = totals.get("total_cache_create_tokens", 0)
+        total_tokens = total_input_tokens + total_output_tokens + total_cache_read + total_cache_create
+        total_wall_ms = totals.get("wall_ms", totals.get("total_wall_ms", 0))
+        total_cost_usd_est = totals.get("total_cost_usd_est", 0.0)
+        attempts_list = receipts_data.get("attempts", [])
+        is_measured = (not is_mock) and (total_tokens > 0)
+        usage_summary = {
+            "status": "measured" if is_measured else "unmeasured (mock or CLI unavailable)",
+            "is_measured": is_measured,
+            "reported_count": len(attempts_list) if not is_mock else 0,
+            "total_receipts": len(attempts_list),
+            "input_tokens": total_input_tokens,
+            "output_tokens": total_output_tokens,
+            "cache_read_tokens": total_cache_read,
+            "cache_create_tokens": total_cache_create,
+            "total_tokens": total_tokens,
+            "wall_time_ms": total_wall_ms,
+            "wall_time_s": total_wall_ms / 1000.0,
+            "total_cost_usd_estimate": total_cost_usd_est,
+        }
+    else:
+        # Legacy fallback
+        all_receipts = receipts_data.get("receipts", [])
+        reported_usages = [
+            r.get("usage")
+            for r in all_receipts
+            if isinstance(r.get("usage"), dict) and r.get("usage", {}).get("status") == "reported"
+        ]
+        is_measured = len(reported_usages) == len(all_receipts) and len(all_receipts) > 0
+        total_input_tokens = sum(u.get("input_tokens", 0) for u in reported_usages)
+        total_output_tokens = sum(u.get("output_tokens", 0) for u in reported_usages)
+        total_cache_read = sum(u.get("cache_read_tokens", 0) for u in reported_usages)
+        total_cache_create = sum(u.get("cache_create_tokens", 0) for u in reported_usages)
+        total_wall_ms = sum(r.get("wall_ms", 0) for r in all_receipts)
+        total_cost_usd_est = sum(u.get("total_cost_usd", 0.0) for u in reported_usages)
+        usage_summary = {
+            "status": "measured" if is_measured else "unmeasured (mock or CLI unavailable)",
+            "is_measured": is_measured,
+            "reported_count": len(reported_usages),
+            "total_receipts": len(all_receipts),
+            "input_tokens": total_input_tokens,
+            "output_tokens": total_output_tokens,
+            "cache_read_tokens": total_cache_read,
+            "cache_create_tokens": total_cache_create,
+            "total_tokens": total_input_tokens + total_output_tokens + total_cache_read + total_cache_create,
+            "wall_time_ms": total_wall_ms,
+            "wall_time_s": total_wall_ms / 1000.0,
+            "total_cost_usd_estimate": total_cost_usd_est,
+        }
 
     # State assertions from receipts
-    before_state = receipts_data.get("before_state", {})
-    after_state = receipts_data.get("after_state", {})
+    before_state = receipts_data.get("before") or receipts_data.get("before_state", {})
+    after_state = receipts_data.get("after") or receipts_data.get("after_state", {})
+    before_applied = before_state.get("applied_label_count", before_state.get("applied_count", 0))
+    after_applied = after_state.get("applied_label_count", after_state.get("applied_count", 0))
     zero_applies = (
-        before_state.get("applied_count") == 0
-        and after_state.get("applied_count") == 0
+        before_applied == 0
+        and after_applied == 0
         and before_state == after_state
     )
 
@@ -255,22 +303,40 @@ def score_receipts(
 
 def render_report_markdown(score_result: dict, receipts_meta: dict) -> str:
     """Renders report.md adhering strictly to the contract and anti-slop rules."""
+    cfg = receipts_meta.get("config", {})
+    mode = receipts_meta.get("mode", "unknown")
+    is_mock = (mode == "mock") or cfg.get("mock", receipts_meta.get("mock", False))
+    client = cfg.get("client", receipts_meta.get("client", "unknown"))
+    model = cfg.get("model", receipts_meta.get("model", "unknown"))
+    run_id = receipts_meta.get("run_id", "unknown")
+
     lines: List[str] = []
     lines.append("# Living Library Product Proof Report (Run P)")
     lines.append("")
     lines.append(f"**Date:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%SZ')}  ")
-    lines.append(f"**Run ID:** `{receipts_meta.get('run_id', 'unknown')}`  ")
-    lines.append(f"**Client Mode:** `{receipts_meta.get('client', 'unknown')}` (`mock={receipts_meta.get('mock', False)}`)  ")
-    lines.append(f"**Model:** `{receipts_meta.get('model', 'unknown')}`  ")
+    lines.append(f"**Run ID:** `{run_id}`  ")
+    lines.append(f"**Client Mode:** `{client}` (`mock={is_mock}`)  ")
+    lines.append(f"**Model:** `{model}`  ")
     lines.append("")
 
     lines.append("## 1. Frozen Inputs & Boundaries")
-    frozen = receipts_meta.get("frozen_inputs", {})
-    lines.append(f"- **Taxonomy:** `{frozen.get('taxonomy_path')}` (revision `{frozen.get('taxonomy_revision_hash')}`)")
-    lines.append(f"- **Prompt Template:** `{frozen.get('prompt_path')}` (sha256 `{frozen.get('prompt_hash')}`)")
-    lines.append(f"- **Holdout Split:** `{frozen.get('holdout_path')}` (sha256 `{frozen.get('holdout_hash')}`)")
-    lines.append(f"- **Card Profile:** `{frozen.get('card_profile')}` (sha256 `{frozen.get('card_profile_hash')}`)")
-    lines.append(f"- **Source DB SHA-256:** `{frozen.get('source_sha256')}`")
+    frozen = receipts_meta.get("inputs") or receipts_meta.get("frozen_inputs", {})
+    tax_path = cfg.get("taxonomy") or frozen.get("taxonomy_path", "docs/library/taxonomy-v1.json")
+    tax_hash = frozen.get("taxonomy_revision_hash") or frozen.get("taxonomy_hash") or frozen.get("taxonomy_file_sha256")
+    prompt_path = cfg.get("prompt") or frozen.get("prompt_path", "docs/library/prompt-v1.md")
+    prompt_hash = frozen.get("prompt_sha256") or frozen.get("prompt_file_sha256") or frozen.get("prompt_template_hash")
+    holdout_path = cfg.get("holdout") or frozen.get("holdout_path", "docs/library/holdout-split-2026-09-04.json")
+    holdout_hash = frozen.get("holdout_file_sha256") or frozen.get("holdout_split_hash") or frozen.get("holdout_hash")
+    card_prof = cfg.get("card_profile") or frozen.get("card_profile", "brief-v1")
+    card_hash = frozen.get("card_profile_hash")
+    db_obj = receipts_meta.get("database", {})
+    source_sha = db_obj.get("copy_before_upgrade_sha256") or frozen.get("source_sha256") or frozen.get("source_db_sha256")
+
+    lines.append(f"- **Taxonomy:** `{tax_path}` (revision `{tax_hash}`)")
+    lines.append(f"- **Prompt Template:** `{prompt_path}` (sha256 `{prompt_hash}`)")
+    lines.append(f"- **Holdout Split:** `{holdout_path}` (sha256 `{holdout_hash}`)")
+    lines.append(f"- **Card Profile:** `{card_prof}` (sha256 `{card_hash}`)")
+    lines.append(f"- **Source DB SHA-256:** `{source_sha}`")
     lines.append("- **Transport:** Pure HTTP registry (`/tools/claim_library_work`, `/tools/submit_library_result`, `/tools/apply_reshelving`).")
     lines.append("- **Tool Invocation:** The harness drives all HTTP tool endpoints. The model executes zero tool calls.")
     lines.append("")
@@ -307,12 +373,19 @@ def render_report_markdown(score_result: dict, receipts_meta: dict) -> str:
     lines.append("")
 
     lines.append("## 4. Invariant Assertions & State Isolation")
+    before_state = score_result["before_state"]
+    after_state = score_result["after_state"]
+    before_applied = before_state.get("applied_label_count", before_state.get("applied_count", 0))
+    after_applied = after_state.get("applied_label_count", after_state.get("applied_count", 0))
+    pins_list = before_state.get("pins", [])
+    pins_count = len(pins_list) if isinstance(pins_list, list) else before_state.get("pins_count", 0)
+
     lines.append(f"- **Librarian apply enabled:** `False` (preview only).")
-    lines.append(f"- **Zero applied labels before run:** `{score_result['before_state'].get('applied_count', 0) == 0}`")
-    lines.append(f"- **Zero applied labels after run:** `{score_result['after_state'].get('applied_count', 0) == 0}`")
-    lines.append(f"- **Projection revision identical before/after:** `{score_result['before_state'].get('projection_revision') == score_result['after_state'].get('projection_revision')}` (rev {score_result['before_state'].get('projection_revision')})")
-    lines.append(f"- **Active taxonomy version unchanged:** `{score_result['before_state'].get('active_version_id')}`")
-    lines.append(f"- **Pins preserved:** `{score_result['before_state'].get('pins_count')} pin(s)`")
+    lines.append(f"- **Zero applied labels before run:** `{before_applied == 0}`")
+    lines.append(f"- **Zero applied labels after run:** `{after_applied == 0}`")
+    lines.append(f"- **Projection revision identical before/after:** `{before_state.get('projection_revision') == after_state.get('projection_revision')}` (rev {before_state.get('projection_revision')})")
+    lines.append(f"- **Active taxonomy version unchanged:** `{before_state.get('active_version_id')}`")
+    lines.append(f"- **Pins preserved:** `{pins_count} pin(s)`")
     lines.append(f"- **All invariant checks passed:** `{score_result['zero_applies_verified']}`")
     lines.append("")
 
