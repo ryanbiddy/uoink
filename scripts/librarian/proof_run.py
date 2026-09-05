@@ -238,6 +238,8 @@ class ProofHarness:
         expected_hash: Optional[str] = NAMED_COPY_HASH,
         skip_hash_check: bool = False,
         batch: int = 12,
+        taxonomy: Optional[Path] = None,
+        manifest: Optional[Path] = None,
         mock_reject_count: int = 0,
     ):
         self.source = Path(source).resolve()
@@ -274,8 +276,8 @@ class ProofHarness:
         self.error_rate_min_attempts = 20
 
         # Paths
-        self.manifest_path = ROOT / "docs" / "library" / "proof" / "manifest-2026-09-05.json"
-        self.taxonomy_path = ROOT / "docs" / "library" / "taxonomy-v1-2026-09-04.json"
+        self.manifest_path = Path(manifest).resolve() if manifest else ROOT / "docs" / "library" / "proof" / "manifest-2026-09-05.json"
+        self.taxonomy_path = Path(taxonomy).resolve() if taxonomy else ROOT / "docs" / "library" / "taxonomy-v1-2026-09-04.json"
         self.prompt_path = ROOT / "scripts" / "librarian" / "prompts" / "assign.md"
         self.holdout_path = ROOT / "docs" / "library" / "holdout-split-2026-09-04.json"
         self.gold_path = ROOT / "docs" / "library" / "gold-set-2026-09-04.json"
@@ -1832,6 +1834,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Concurrency for worker processes (default: 4)",
     )
     parser.add_argument(
+        "--taxonomy", type=Path, default=None,
+        help="Approved taxonomy JSON to activate on the disposable duplicate (default: v1)")
+    parser.add_argument(
+        "--manifest", type=Path, default=None,
+        help="Frozen target manifest JSON (default: docs/library/proof/manifest-2026-09-05.json)")
+    parser.add_argument(
         "--batch",
         type=int,
         default=12,
@@ -1887,6 +1895,8 @@ def main() -> None:
         model=args.model,
         concurrency=args.concurrency,
         batch=args.batch,
+        taxonomy=args.taxonomy,
+        manifest=args.manifest,
         port=args.port,
         scratch_dir=args.scratch,
         run_id=args.run_id,
