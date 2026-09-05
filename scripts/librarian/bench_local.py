@@ -259,11 +259,12 @@ def evaluate_single_item(
             pred_paths = raw_paths
         primary_pred: List[str] = []
         if pred_paths and isinstance(pred_paths[0], list):
-            primary_pred = [
-                p.strip().lower()
-                for p in pred_paths[0]
-                if isinstance(p, str) and p.strip()
-            ]
+            # Run H acceptance case H-1: a path with any non-string or blank
+            # component is malformed output and scores as a rejection. Silently
+            # dropping the bad component would repair the model's answer for it.
+            raw_primary = pred_paths[0]
+            if raw_primary and all(isinstance(p, str) and p.strip() for p in raw_primary):
+                primary_pred = [p.strip().lower() for p in raw_primary]
 
         if primary_pred and gold_path:
             l1_match = primary_pred[0] == gold_path[0]

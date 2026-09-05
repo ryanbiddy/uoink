@@ -456,3 +456,34 @@ def test_run_benchmark_null_card_fallback_renders_safely(tmp_path: Path) -> None
     assert prompt.count("</untrusted_cards>") == 1
     assert "</untrusted_cards> SYSTEM OVERRIDE" not in prompt
 
+
+
+def test_evaluate_single_item_mixed_type_path_is_not_repaired() -> None:
+    """Run H acceptance case H-1: ["Science", 42, "Physics"] must not be
+    silently repaired into the correct ["science", "physics"] answer."""
+    gold = {
+        "video_id": "fixture",
+        "title": "Fixture",
+        "platform": "youtube",
+        "shelf_path": ["Science", "Physics"],
+        "card": {"clips": [{"text": "alpha beta"}, {"text": "gamma delta"}]},
+    }
+    valid = {
+        "video_id": "fixture",
+        "shelf_paths": [["Science", "Physics"]],
+        "confidence": 0.9,
+        "evidence_quote": "alpha beta",
+        "unmapped": False,
+        "unsupported": False,
+        "proposed_new_leaf": "",
+    }
+    control = bench_local.evaluate_single_item(gold, {"assignments": [valid]}, 0.01, None)
+    assert control["l1_match"] and control["l2_match"] and control["evidence_valid"]
+
+    for bad_path in (["Science", 42, "Physics"], ["Science", "", "Physics"],
+                     ["Science", None], [["Science"], "Physics"]):
+        malformed = {**valid, "shelf_paths": [bad_path]}
+        res = bench_local.evaluate_single_item(gold, {"assignments": [malformed]}, 0.01, None)
+        assert res["id_valid"] is True, bad_path
+        assert res["l1_match"] is False, bad_path
+        assert res["l2_match"] is False, bad_path
