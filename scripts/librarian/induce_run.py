@@ -448,18 +448,32 @@ class InductionHarness:
         batch_proposals: List[Any] = []
         status, abort_reason = "completed", None
         n_batches = (len(unmapped_ids) + self.batch_size - 1) // self.batch_size
+        plan = []
         for i in range(n_batches):
             cid = f"call-batch-{i:02d}"
             chunk = unmapped_ids[i * self.batch_size:(i + 1) * self.batch_size]
             batches.append({"call_id": cid, "video_ids": chunk})
             prompt = (prefix.replace("{{TAXONOMY}}", library_cards.serialize_card(taxonomy_obj))
                       + "\n\n".join(library_cards.card_text(cards_by_id[vid]) for vid in chunk) + suffix)
-            record, envelope = self._claude_call(cid, chunk, prompt, self.BATCH_OUTPUT_SCHEMA)
+            plan.append((cid, chunk, prompt))
+        # Batch calls are independent; run up to 4 processes at once. Consolidation
+        # starts only after every batch has completed (validator timeline rule).
+        import concurrent.futures as cf
+        workers = max(1, min(4, int(os.environ.get("UOINK_INDUCE_CONCURRENCY", "4"))))
+        results: Dict[str, Tuple[dict, dict]] = {}
+        with cf.ThreadPoolExecutor(max_workers=workers) as ex:
+            futures = {ex.submit(self._claude_call, cid, chunk, prompt, self.BATCH_OUTPUT_SCHEMA): cid
+                       for cid, chunk, prompt in plan}
+            for fut in cf.as_completed(futures):
+                results[futures[fut]] = fut.result()
+        for cid, chunk, prompt in plan:
+            record, envelope = results[cid]
             calls.append(record)
             structured = envelope.get("structured_output") if isinstance(envelope, dict) else None
             if record["exit_status"] != 0 or not isinstance(structured, dict):
-                status, abort_reason = "aborted", f"batch call {cid} failed (exit {record['exit_status']})"
-                break
+                if status == "completed":
+                    status, abort_reason = "aborted", f"batch call {cid} failed (exit {record['exit_status']})"
+                continue
             batch_proposals.append(structured)
 
         proposal: Dict[str, Any] = {}
