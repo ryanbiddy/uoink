@@ -98,3 +98,49 @@ Ryan's contract: status-quo yt-dlp capture from a home residential IP at low rat
 | Daily 10 per source | Keeps residential YouTube capture in a human-viewer band. Placeholder; tune after Phase 3. |
 
 Neither cap legalizes yt-dlp. They only keep the accepted ToS risk small and reversible.
+
+---
+
+## Addendum: FxTwitter v2 enrichment (SEC-05), 2026-09-04
+
+**No code in this increment.** Capture still calls `fetch_fxtwitter_status_json` on every X post (`x_extractor.py:156–175`). This page is the posture for a later flag, not that flag.
+
+### What leaves the machine today
+
+| | |
+|---|---|
+| Trigger | Every successful syndication fetch in `fetch_tweet_json`, not only truncated posts. |
+| Request | HTTP GET `https://api.fxtwitter.com/2/status/{tweet_id}` |
+| Data in the URL | The numeric tweet id. No handle, no post body, no cookies, no X auth token. |
+| Headers | `User-Agent: Uoink (+https://uoink.app)`; `Accept: application/json` |
+| Also leaves | The home machine's source IP, TLS SNI `api.fxtwitter.com`, and the fact that this user just saved that tweet. |
+| What comes back | JSON. If `code==200`, the id matches, and `status.text` is longer than syndication text, the helper **overwrites** local post text (`_merge_fxtwitter_full_text`). A third-party compromise can poison the corpus. |
+| Failure | Any HTTP/URL/JSON error returns `None`; syndication text is kept. |
+
+FxTwitter (FixTweet) is a community unofficial JSON API, not an X product.
+
+### Recommended opt-in posture
+
+| | |
+|---|---|
+| Settings key | `fxtwitter_enrichment_enabled` |
+| Default | **off** |
+| When off | Syndication only. Long posts that X truncates stay truncated. No `api.fxtwitter.com` call. |
+| When on | User has opted into a third-party unofficial tweet-id lookup for full text. Still fail open to syndication. Do not treat FxTwitter as authoritative identity. |
+| Why default off | IP + tweet-id leak, content-poisoning path, and X ToS (below). Matches decision 5's opt-in pattern and decision 9's "no unofficial X path" spirit. Paste-a-URL capture can ship without this supplement. |
+
+Do not grandfather current auto-call behavior. Same clean default-off as D-17.
+
+### ToS position
+
+| | |
+|---|---|
+| Does X allow this? | **No.** It is not a published X interface. |
+| Exact cite (ToS) | X Terms of Service (US), Restrictions. PDF dated **10 Apr 2026**: https://cdn.cms-twdigitalassets.com/content/dam/legal-twitter/site-assets/x-terms-of-service-2026-04-10/en/x-terms-of-service-2026-04-10.pdf · HTML https://x.com/tos. Quote already in the X table: access or search other than through "currently available, published interfaces" is prohibited; "crawling or scraping the Services in any form, for any purpose without our prior written consent is expressly prohibited." |
+| Exact cite (developer rules) | X Developer Guidelines, Prohibited activities. https://docs.x.com/developer-guidelines · read 2026-09-04. "Non-API Automation: Browser scripting, scraping, any automation outside official API." Unofficial methods → permanent suspension. |
+| Liquidated damages | Same US ToS: $15,000 per 1,000,000 posts accessed in a 24-hour period in violation. A personal-library lookup is not that volume; the clause is why X is not analogized to YouTube. |
+| Decision 9 | Watching stays deferred. This addendum does not reopen a watcher. It is capture-time enrichment of a URL the user pasted. That is still unofficial access. |
+| Makes D4 untenable? | No. YouTube and X are different contracts. |
+| Recommended product reading | Keep paste-a-URL capture. Put FxTwitter behind `fxtwitter_enrichment_enabled`, default off. Reopen only for an official X API path that licenses storing posts in a user-owned library. |
+
+Not legal advice. No live call to `api.fxtwitter.com` was made for this addendum.
