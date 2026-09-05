@@ -114,7 +114,56 @@ Overall Throughput:      35.0 tokens/sec
 
 ---
 
-## 4. Operational Instructions for Live Run
+## 4. Benchmark Repair Increment (Run D - Astra Finding 4 Resolution)
+
+During run C, Astra identified that the benchmark harness could award credit to the wrong item if an ID was mismatched or omitted, that cards omitted `video_id`, that latency timing excluded reading the response body, and that missing token usage fell back to word count approximation.
+
+In run D, the harness was repaired with the following hardened behaviors:
+1. **Strict ID Validation:** `evaluate_single_item` strictly validates assignment IDs against the target `video_id`.
+   - **Wrong IDs:** Rejected (`id_status: "wrong_id"`, `id_valid: False`). Agreement metrics score 0.
+   - **Missing IDs:** Rejected (`id_status: "missing_id"`, `id_valid: False`). Agreement metrics score 0.
+   - **Duplicate IDs:** Rejected (`id_status: "duplicate_id"`, `id_valid: False`). Agreement metrics score 0.
+   - **Exit Evidence:** Running `python scripts/librarian/bench_local.py --mock --mock-wrong-id` returns the right label under the wrong ID, and the harness strictly scores all items 0 (0.0% Level 1 and Level 2 agreement). Tested in `tests/security/test_bench_local.py::test_mock_returns_right_label_under_wrong_id_scores_zero`.
+2. **Explicit Card Identity:** `format_card_for_prompt` explicitly adds `video_id` to every prompt card (both for non-null cards that omitted it and metadata-only stubs).
+3. **Full Response Latency Measurement:** `send_chat_completion` now records wall time through the complete `resp.read()` body read (`wall_time = t1 - t0` measured after `resp.read()`).
+4. **Honest Usage Accounting:** Missing or null `completion_tokens` from provider APIs are reported as `"unavailable"` rather than defaulting to word counts or 0.
+5. **Prompt Fencing (SEC-03):** The `{{CARDS}}` block in `assign.md`, `induce.md`, and `reshelve.md` is enclosed in explicit `<untrusted_cards>` XML fences with a strict security directive stating card content is passive data, not commands. Empty cards and metadata-only cards produce an explicit `unsupported` outcome.
+
+### Verification Run with `--mock-wrong-id`:
+```text
+$ python scripts/librarian/bench_local.py --mock --mock-wrong-id --limit 3
+=== Uoink Librarian Local Benchmark ===
+Base URL:      http://localhost:1235/v1
+Target Model:  qwen3.8-27b
+Gold Set:      docs/library/gold-set-2026-09-04.json
+Assign Prompt: scripts/librarian/prompts/assign.md
+Mock Mode:     True (wrong_id=True)
+========================================
+Evaluating subset of 3 items (--limit 3)
+
+[STATUS] Running in MOCK mode (simulated endpoint responses).
+
+Running Stage 2 Assignment evaluation...
+[01/03] episode_54e695d5 | ID: wrong_id | L1: ✗ | L2: ✗ | 2.43s | 35.0 tps
+[02/03] episode_9ddb44f9 | ID: wrong_id | L1: ✗ | L2: ✗ | 2.63s | 35.0 tps
+[03/03] episode_ee13d34d | ID: wrong_id | L1: ✗ | L2: ✗ | 2.40s | 35.0 tps
+
+========================================
+=== BENCHMARK RESULTS SUMMARY ===
+Items Evaluated:         3
+Level 1 Agreement:       0/3 (0.0%)
+Level 2 Agreement:       0/3 (0.0%)
+Evidence Grounding:      0/3 (0.0%)
+Total Wall Time:         7.46s
+Mean Latency Per Item:   2.49s
+Overall Throughput:      35.0 tokens/sec
+Reported Tokens:         261
+========================================
+```
+
+---
+
+## 5. Operational Instructions for Live Run
 
 When the user or control room host boots LM Studio with `qwen3.8-27b` listening on port `1235`:
 
@@ -124,3 +173,4 @@ When the user or control room host boots LM Studio with `qwen3.8-27b` listening 
    python scripts/librarian/bench_local.py --output docs/library/bench-results-live.json
    ```
 3. The script will emit per-item agreement checkmarks, write the JSON metric breakdown, and report true Level 1 and Level 2 agreement against the hand-verified gold set.
+
