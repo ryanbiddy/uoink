@@ -212,14 +212,28 @@ def score_receipts(
     mode = receipts_data.get("mode")
     is_mock = (mode == "mock") or cfg.get("mock", receipts_data.get("mock", False))
 
+    # Token usage lives outside the contract totals block: batched runs record
+    # it once per model call under audit_extensions.usage_totals; otherwise
+    # sum the attempts whose usage the CLI reported.
+    ext_usage = (receipts_data.get("audit_extensions") or {}).get("usage_totals") or {}
+    if not ext_usage:
+        _rep = [a.get("usage") for a in receipts_data.get("attempts", [])
+                if isinstance(a.get("usage"), dict) and a["usage"].get("status") == "reported"]
+        ext_usage = {
+            "input_tokens": sum(int(u.get("input_tokens", 0)) for u in _rep),
+            "output_tokens": sum(int(u.get("output_tokens", 0)) for u in _rep),
+            "cache_read_tokens": sum(int(u.get("cache_read_tokens", 0)) for u in _rep),
+            "cache_create_tokens": sum(int(u.get("cache_create_tokens", 0)) for u in _rep),
+            "cli_estimated_cost_usd": 0.0,
+        }
     if totals and ("total_input_tokens" in totals or "total_wall_ms" in totals or "wall_ms" in totals):
-        total_input_tokens = totals.get("total_input_tokens", 0)
-        total_output_tokens = totals.get("total_output_tokens", 0)
-        total_cache_read = totals.get("total_cache_read_tokens", 0)
-        total_cache_create = totals.get("total_cache_create_tokens", 0)
+        total_input_tokens = totals.get("total_input_tokens", ext_usage.get("input_tokens", 0))
+        total_output_tokens = totals.get("total_output_tokens", ext_usage.get("output_tokens", 0))
+        total_cache_read = totals.get("total_cache_read_tokens", ext_usage.get("cache_read_tokens", 0))
+        total_cache_create = totals.get("total_cache_create_tokens", ext_usage.get("cache_create_tokens", 0))
         total_tokens = total_input_tokens + total_output_tokens + total_cache_read + total_cache_create
         total_wall_ms = totals.get("wall_ms", totals.get("total_wall_ms", 0))
-        total_cost_usd_est = totals.get("total_cost_usd_est", 0.0)
+        total_cost_usd_est = totals.get("total_cost_usd_est", ext_usage.get("cli_estimated_cost_usd", 0.0))
         attempts_list = receipts_data.get("attempts", [])
         is_measured = (not is_mock) and (total_tokens > 0)
         usage_summary = {
