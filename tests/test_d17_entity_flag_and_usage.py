@@ -297,17 +297,177 @@ def test_usage_is_model_specific(idx):
         "claude-haiku-4-5-20251001", "claude-sonnet-5"]
 
 
-def test_usage_missing_is_not_fatal(idx):
-    assert usage_meter.record_usage(idx, "hook_type", {"content": []}) is None
-    assert usage_meter.record_usage(idx, "hook_type", {"usage": "nope"}) is None
+@pytest.fixture(autouse=True)
+def _fresh_meter_status():
+    usage_meter.reset_status()
+    yield
+    usage_meter.reset_status()
+
+
+class _BrokenIndex:
+    def write_transaction(self):
+        raise RuntimeError("locked")
+
+
+def test_usage_missing_is_not_fatal_and_not_silent(idx):
+    """Metering stays best-effort (never raises, never fails the call) but
+    a response without usage is counted, not dropped."""
+    when = datetime(2026, 9, 4, tzinfo=timezone.utc)
+    no_block = usage_meter.record_usage(idx, "hook_type", {"content": []}, now=when)
+    assert no_block["calls"] == 0 and no_block["unavailable_calls"] == 1
+    malformed = usage_meter.record_usage(idx, "hook_type", {"usage": "nope"}, now=when)
+    assert malformed["calls"] == 0 and malformed["unavailable_calls"] == 2
+    assert malformed["last_unavailable_at"] == "2026-09-04T00:00:00Z"
+    assert malformed["last_call_at"] is None and malformed["last_usage"] is None
+    # Not a response at all: nothing happened, nothing to count.
     assert usage_meter.record_usage(idx, "hook_type", None) is None
+    (bucket,) = usage_meter.read_buckets(idx)
+    assert bucket["unavailable_calls"] == 2 and bucket["calls"] == 0
+    assert usage_meter.meter_status()["write_failures"] == 0
+    # Usage that was available but could not be stored is a visible write
+    # failure, not a silent None.
     assert usage_meter.record_usage(None, "hook_type", _resp(input_tokens=1)) is None
-    assert usage_meter.read_buckets(idx) == []
-    # A broken index must not raise either: metering is best-effort.
-    class Broken:
-        def write_transaction(self):
-            raise RuntimeError("locked")
-    assert usage_meter.record_usage(Broken(), "hook_type", _resp(input_tokens=1)) is None
+    assert usage_meter.record_usage(_BrokenIndex(), "hook_type", _resp(input_tokens=1)) is None
+    status = usage_meter.meter_status()
+    assert status["write_failures"] == 2 and status["ok"] is False
+    assert status["last_error"] == "RuntimeError"
+    assert status["last_failed_feature"] == "hook_type"
+    assert status["last_failure_at"]
+
+
+# ---- 5. run F acceptance, case 3: missing usage is visible -----------------
+
+def test_missing_usage_is_visible_in_the_public_meter(monkeypatch, idx):
+    """Astra's reproduction (tests/acceptance_run_f_probe.py): the real
+    ``_record_anthropic_usage`` with a successful-looking response that has
+    model and text but no ``usage``. Before: 0 rows, ``total_usd`` 0.0, no
+    marker. Now the call is counted as unavailable everywhere the meter is
+    read."""
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    server._record_anthropic_usage("entity_extraction", {
+        "model": "fixture-model",
+        "content": [{"type": "text", "text": "ok"}]})
+    (bucket,) = usage_meter.read_buckets(idx)
+    assert bucket["feature"] == "entity_extraction"
+    assert bucket["model"] == "fixture-model"
+    assert bucket["calls"] == 0 and bucket["unavailable_calls"] == 1
+    assert bucket["input_tokens"] == 0 and bucket["est_usd"] == 0.0
+
+    actual = server._anthropic_actual_usage_payload()
+    assert "error" not in actual
+    assert actual["unavailable_calls"] == 1
+    feature = actual["by_feature"]["entity_extraction"]
+    assert feature["unavailable_calls"] == 1 and feature["calls"] == 0
+    assert feature["models"] == ["fixture-model"]
+    assert actual["total_usd"] == 0.0 and actual["estimate"] is True
+    assert actual["status"]["ok"] is True
+
+    # A later metered call on the same bucket keeps both counts.
+    server._record_anthropic_usage("entity_extraction", {
+        "model": "fixture-model", "usage": {"input_tokens": 7, "output_tokens": 3}})
+    feature = server._anthropic_actual_usage_payload()["by_feature"]["entity_extraction"]
+    assert feature["calls"] == 1 and feature["unavailable_calls"] == 1
+    assert feature["input_tokens"] == 7
+
+
+def test_cache_only_usage_is_priced_with_rate_provenance(idx):
+    """Astra's reproduction: 1,000 cache-read tokens and nothing else used
+    to price to $0.0 because only input/output had rates. Every counter now
+    has its own rate, and the rates used travel with the number."""
+    when = datetime(2026, 9, 4, tzinfo=timezone.utc)
+    bucket = usage_meter.record_usage(idx, "entity_extraction", {
+        "model": "fixture-model",
+        "usage": {"input_tokens": 0, "output_tokens": 0,
+                  "cache_read_input_tokens": 1000}},
+        now=when, rates=server.ANTHROPIC_RATES)
+    assert bucket["cache_read"] == 1000
+    assert bucket["est_usd"] == pytest.approx(
+        1000 / 1_000_000 * server.ANTHROPIC_PRICING_CACHE_READ_PER_MILLION)
+    assert bucket["est_usd"] > 0.0
+    assert bucket["est_rates"] == {
+        "input_per_million": server.ANTHROPIC_PRICING_INPUT_PER_MILLION,
+        "output_per_million": server.ANTHROPIC_PRICING_OUTPUT_PER_MILLION,
+        "cache_read_per_million": server.ANTHROPIC_PRICING_CACHE_READ_PER_MILLION,
+        "cache_create_per_million": server.ANTHROPIC_PRICING_CACHE_CREATE_PER_MILLION,
+        "source": server.ANTHROPIC_PRICING_SOURCE,
+        "source_checked": server.ANTHROPIC_PRICING_SOURCE_CHECKED,
+    }
+    assert bucket["est_rates"]["source"].startswith("https://")
+    datetime.strptime(bucket["est_rates"]["source_checked"], "%Y-%m-%d")
+
+    # Cache creation is priced at its own (higher) rate.
+    bucket = usage_meter.record_usage(idx, "entity_extraction", {
+        "model": "fixture-model",
+        "usage": {"cache_creation_input_tokens": 1000}},
+        now=when, rates=server.ANTHROPIC_RATES)
+    assert bucket["cache_create"] == 1000
+    assert bucket["est_usd"] == pytest.approx(
+        1000 / 1_000_000 * (server.ANTHROPIC_PRICING_CACHE_READ_PER_MILLION
+                            + server.ANTHROPIC_PRICING_CACHE_CREATE_PER_MILLION))
+    assert server.ANTHROPIC_PRICING_CACHE_CREATE_PER_MILLION > \
+        server.ANTHROPIC_PRICING_CACHE_READ_PER_MILLION
+
+    summary = usage_meter.month_summary(idx, month="2026-09",
+                                        rates=server.ANTHROPIC_RATES)
+    feature = summary["by_feature"]["entity_extraction"]
+    assert feature["cache_read"] == 1000 and feature["cache_create"] == 1000
+    assert feature["usd"] == pytest.approx(0.00135) and summary["total_usd"] > 0.0
+    assert summary["estimate"] is True
+    assert summary["rates"]["source"] == server.ANTHROPIC_PRICING_SOURCE
+    assert summary["rates"]["source_checked"] == server.ANTHROPIC_PRICING_SOURCE_CHECKED
+    # The legacy two-argument pricer still works, and says it priced no cache.
+    legacy = usage_meter.month_summary(idx, month="2026-09", price=lambda i, o: i + o)
+    assert legacy["by_feature"]["entity_extraction"]["usd"] == 0.0
+    assert legacy["rates"] is None and legacy["estimate"] is True
+
+
+def test_pricing_payload_carries_cache_rates_and_provenance():
+    pricing = server._anthropic_pricing_payload()
+    assert pricing["cache_read_per_million"] == server.ANTHROPIC_PRICING_CACHE_READ_PER_MILLION
+    assert pricing["cache_create_per_million"] == server.ANTHROPIC_PRICING_CACHE_CREATE_PER_MILLION
+    assert pricing["source"] == server.ANTHROPIC_RATES["source"]
+    assert pricing["source_checked"] == server.ANTHROPIC_RATES["source_checked"]
+    assert server.ANTHROPIC_RATES["cache_read_per_million"] < \
+        server.ANTHROPIC_RATES["input_per_million"] < \
+        server.ANTHROPIC_RATES["cache_create_per_million"]
+
+
+def test_meter_write_failure_is_visible_status(monkeypatch, idx):
+    """A meter write that cannot happen leaves visible accounting status,
+    separate from the (successful) inference it was metering."""
+    def broken():
+        raise RuntimeError("index unavailable")
+    monkeypatch.setattr(server, "_get_index", broken)
+    server._record_anthropic_usage("hook_type", _resp(input_tokens=5, output_tokens=1))
+    status = usage_meter.meter_status()
+    assert status["write_failures"] == 1 and status["ok"] is False
+    assert status["last_error"] == "RuntimeError"
+    assert status["last_failed_feature"] == "hook_type"
+    # The public payload shows it even while the index is unreadable ...
+    actual = server._anthropic_actual_usage_payload()
+    assert actual["error"] == "usage unavailable"
+    assert actual["unavailable_calls"] is None
+    assert actual["status"]["write_failures"] == 1 and actual["status"]["ok"] is False
+    assert actual["rates"]["source"] == server.ANTHROPIC_PRICING_SOURCE
+    # ... and once it is readable again, with the rows that did land.
+    monkeypatch.setattr(server, "_get_index", lambda: idx)
+    server._record_anthropic_usage("hook_type", _resp(input_tokens=5, output_tokens=1))
+    actual = server._anthropic_actual_usage_payload()
+    assert "error" not in actual
+    assert actual["by_feature"]["hook_type"]["calls"] == 1
+    assert actual["status"]["write_failures"] == 1 and actual["status"]["ok"] is False
+
+    # A write refused because an unrelated transaction is open (the shared
+    # boundary from run E) is a lost write too, and says so.
+    idx._conn.execute(
+        "INSERT INTO memory_layer(key,value,updated_at) VALUES('pending','1','2026-09-04')")
+    try:
+        assert usage_meter.record_usage(idx, "hook_type", _resp(input_tokens=1)) is None
+        assert idx._conn.in_transaction  # the other caller's work is untouched
+    finally:
+        idx._conn.rollback()
+    assert usage_meter.meter_status()["write_failures"] == 2
+    assert usage_meter.read_buckets(idx)[0]["calls"] == 1
 
 
 def test_usage_writes_are_atomic_across_threads(idx):

@@ -8,10 +8,12 @@ empty. Plus one test per hardening item the hook now implements.
 """
 from __future__ import annotations
 
+import contextlib
 import importlib.util
 import io
 import json
 import sqlite3
+import time
 from pathlib import Path
 
 import pytest
@@ -79,9 +81,10 @@ def _seed(tmp_path: Path, items: list[dict]) -> Path:
 
 
 def _run(monkeypatch, idx_path: Path | None, prompt: str, *,
-         session_id: str | None = None, env: dict | None = None):
-    """Run main() against idx_path; returns (exit_code, stdout, stderr)."""
-    hook = _load()
+         session_id: str | None = None, env: dict | None = None, hook=None):
+    """Run main() against idx_path; returns (exit_code, stdout, stderr).
+    Pass ``hook`` to run an already-loaded (and patched) module."""
+    hook = hook or _load()
     if idx_path is not None:
         monkeypatch.setenv("UOINK_INDEX_PATH", str(idx_path))
     for name in ("UOINK_RECALL_DISABLED", "UOINK_RECALL_DEBUG"):
@@ -228,7 +231,9 @@ def test_h2_sqlite_timeout_and_connection_closed(monkeypatch, two_items):
     out = io.StringIO()
     monkeypatch.setattr("sys.stdout", out)
     assert hook.main() == 0 and out.getvalue()
-    assert opened and opened[0]["timeout"] == hook.SQLITE_TIMEOUT_SEC
+    # SQLite's own busy handler is off; the hook waits for a lock itself,
+    # under its deadline (see the locked-index tests below).
+    assert opened and opened[0]["timeout"] == 0
     assert opened[0]["uri"] is True
     assert conns[0].closed is True
     # Closed even on the no-match path.
@@ -252,9 +257,15 @@ def test_h2_connection_is_read_only(monkeypatch, two_items):
 
 
 def test_h2_time_budget_yields_nothing(monkeypatch, two_items):
+    """Output suppression once the clock says the budget is gone (fake
+    clock: every reading is 10 s later than the last)."""
     hook = _load()
-    ticks = iter([0.0, 10.0, 20.0, 30.0, 40.0])
-    monkeypatch.setattr(hook.time, "monotonic", lambda: next(ticks))
+    clock = [0.0]
+
+    def fake_monotonic():
+        clock[0] += 10.0
+        return clock[0]
+    monkeypatch.setattr(hook.time, "monotonic", fake_monotonic)
     monkeypatch.setenv("UOINK_INDEX_PATH", str(two_items))
     monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(
         {"prompt": "ada lovelace analytical engine algorithm"})))
@@ -262,6 +273,134 @@ def test_h2_time_budget_yields_nothing(monkeypatch, two_items):
     monkeypatch.setattr("sys.stdout", out)
     assert hook.main() == 0
     assert out.getvalue() == ""
+
+
+# ---- run F acceptance, case 4: the deadline is a hard bound -----------------
+
+@contextlib.contextmanager
+def _held_exclusive(idx_path: Path):
+    """Astra's reproduction: DELETE journal mode (a WAL index would still
+    serve readers), then BEGIN EXCLUSIVE so every reader gets SQLITE_BUSY
+    until the transaction ends."""
+    lock = sqlite3.connect(idx_path)
+    try:
+        lock.execute("PRAGMA journal_mode=DELETE")
+        lock.execute("BEGIN EXCLUSIVE")
+        yield lock
+    finally:
+        lock.rollback()
+        lock.close()
+
+
+def _timed_run(monkeypatch, hook, idx_path: Path, prompt: str):
+    start = time.perf_counter()
+    result = _run(monkeypatch, idx_path, prompt, hook=hook)
+    return time.perf_counter() - start, result
+
+
+def test_locked_index_returns_within_budget_real_clock(monkeypatch, two_items):
+    """Direct main() against a DELETE-journal index held under BEGIN
+    EXCLUSIVE took 1.774-1.776 s on the candidate, above TIME_BUDGET_SEC
+    (1.5 s), because the deadline was checked only after SQLite returned.
+    Real clock, real lock: the hook must stay silent AND inside the budget
+    plus a small margin."""
+    hook = _load()
+    prompt = "alpha beta gamma delta"
+    with _held_exclusive(two_items):
+        elapsed, (code, out, err) = _timed_run(monkeypatch, hook, two_items, prompt)
+    assert code == 0 and out == "" and err == ""
+    assert elapsed < hook.TIME_BUDGET_SEC + 0.1, f"{elapsed:.3f}s over budget"
+    # It waited for the lock (up to SQLITE_TIMEOUT_SEC) rather than giving
+    # up at once: a briefly locked index is still worth a hint.
+    assert elapsed >= hook.SQLITE_TIMEOUT_SEC - 0.05, f"{elapsed:.3f}s: no wait"
+    # The lock never leaked into the hook's process state: released, the
+    # same index answers normally.
+    _, out, _ = _run(monkeypatch, two_items, "ada lovelace analytical engine algorithm", hook=hook)
+    assert "vid-ada" in out
+
+
+def test_locked_index_lock_wait_is_budgeted_against_the_deadline(monkeypatch, two_items):
+    """The lock wait is bounded by whichever comes first: SQLITE_TIMEOUT_SEC
+    or the total deadline. With a lock timeout larger than the budget, the
+    budget wins, on a real clock."""
+    hook = _load()
+    monkeypatch.setattr(hook, "SQLITE_TIMEOUT_SEC", 10.0)
+    monkeypatch.setattr(hook, "TIME_BUDGET_SEC", 0.4)
+    with _held_exclusive(two_items):
+        elapsed, (code, out, err) = _timed_run(
+            monkeypatch, hook, two_items, "alpha beta gamma delta")
+    assert code == 0 and out == "" and err == ""
+    assert elapsed < 0.4 + 0.15, f"{elapsed:.3f}s over budget"
+    assert elapsed >= 0.35, f"{elapsed:.3f}s: gave up before the deadline"
+
+
+def test_locked_index_debug_names_sqlite_not_the_path(monkeypatch, two_items, tmp_path):
+    hook = _load()
+    with _held_exclusive(two_items):
+        code, out, err = _run(monkeypatch, two_items, "alpha beta gamma delta",
+                              env={"UOINK_RECALL_DEBUG": "1"}, hook=hook)
+    assert code == 0 and out == ""
+    assert err.strip() == "[uoink recall] sqlite: OperationalError"
+    assert str(tmp_path) not in err and "index.db" not in err
+
+
+def test_slow_query_is_interrupted_at_the_deadline(monkeypatch, two_items):
+    """A query that outlives the budget is aborted by the timer's
+    Connection.interrupt(), not merely reported late. The recursive CTE
+    below runs for many seconds if nothing stops it."""
+    hook = _load()
+    monkeypatch.setattr(hook, "TIME_BUDGET_SEC", 0.3)
+    seen: list[str] = []
+
+    def slow_search(conn, terms, lock_deadline=None):
+        try:
+            conn.execute(
+                "WITH RECURSIVE c(x) AS (SELECT 1 UNION ALL SELECT x + 1 FROM c "
+                "WHERE x < 100000000) SELECT count(*) FROM c").fetchall()
+        except sqlite3.OperationalError as exc:
+            seen.append(str(exc))
+            raise
+        return "clips", []
+    monkeypatch.setattr(hook, "search", slow_search)
+    elapsed, (code, out, err) = _timed_run(
+        monkeypatch, hook, two_items, "ada lovelace analytical engine algorithm")
+    assert code == 0 and out == "" and err == ""
+    assert elapsed < 0.3 + 0.3, f"{elapsed:.3f}s: the query was not interrupted"
+    assert seen and "interrupt" in seen[0].lower()
+
+
+def test_query_helper_retries_only_while_locked(two_items):
+    """_query re-tries SQLITE_BUSY until its lock deadline and raises the
+    moment the deadline passes; any other error propagates at once."""
+    hook = _load()
+    uri = f"file:{two_items.as_posix()}?mode=ro"
+    # The reader is opened inside the lock: opening takes no lock, the
+    # first statement does (and a WAL-mode reader opened earlier would
+    # itself block the switch to DELETE journal mode).
+    with _held_exclusive(two_items):
+        conn = sqlite3.connect(uri, uri=True, timeout=0)
+        try:
+            start = time.perf_counter()
+            with pytest.raises(sqlite3.OperationalError) as busy:
+                hook._query(conn, "SELECT count(*) FROM yoinks", (),
+                            time.monotonic() + 0.2)
+            waited = time.perf_counter() - start
+        finally:
+            conn.close()
+    assert hook._is_busy(busy.value)
+    assert 0.15 <= waited < 0.5, f"{waited:.3f}s"
+    conn = sqlite3.connect(uri, uri=True, timeout=0)
+    try:
+        assert hook._query(conn, "SELECT count(*) FROM yoinks", (),
+                           time.monotonic() + 1.0)[0][0] == 2
+        start = time.perf_counter()
+        with pytest.raises(sqlite3.OperationalError) as other:
+            hook._query(conn, "SELECT * FROM no_such_table", (),
+                        time.monotonic() + 1.0)
+        assert time.perf_counter() - start < 0.1  # no retry for a real error
+        assert not hook._is_busy(other.value)
+    finally:
+        conn.close()
 
 
 def test_h3_default_index_path_is_platform_aware(monkeypatch):
@@ -436,4 +575,5 @@ def test_hook_does_not_import_server_or_network():
             imports.update(a.name.split(".")[0] for a in node.names)
         elif isinstance(node, ast.ImportFrom) and node.module:
             imports.add(node.module.split(".")[0])
-    assert imports == {"json", "os", "re", "sqlite3", "sys", "time", "pathlib", "__future__"}
+    assert imports == {"json", "os", "re", "sqlite3", "sys", "threading", "time",
+                       "pathlib", "__future__"}
