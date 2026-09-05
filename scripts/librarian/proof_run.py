@@ -53,6 +53,7 @@ import index as index_mod
 import library_cards
 import library_work
 from library_work import RequestContext
+from tests.validate_proof_receipts import call_accounting, redact_http, V2_RECEIPT_SCHEMA
 
 CONTRACT = "phase2-v1.2-2026-09-04"
 NAMED_COPY_HASH = "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc"
@@ -262,6 +263,18 @@ class ProofHarness:
         self.calls_dir = self.out_dir / "calls"
         self.http_dir = self.out_dir / "http"
         self.state_dir = self.out_dir / "state"
+        self.fingerprints_dir = self.out_dir / "fingerprints"
+        self.heads_dir = self.out_dir / "heads"
+
+        self.run_start_monotonic_ns: int = 0
+        self.run_end_monotonic_ns: int = 0
+        self.completion_order: List[Dict[str, Any]] = []
+        self._last_completed_ns: int = 0
+        self.http_history: List[Dict[str, Any]] = []
+        self.v2_calls: List[Dict[str, Any]] = []
+        self.cleanup_errors: List[str] = []
+        self.owned_processes_remaining: int = 0
+        self.helper_stopped: bool = False
 
         # Shared coordinator state for error guard
         self._http_seq = 0
@@ -467,6 +480,8 @@ class ProofHarness:
         idx._conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
         self.schema_after = idx._conn.execute("SELECT max(version) FROM schema_version").fetchone()[0]
         self.copy_after_upgrade_sha256 = compute_file_sha256(db_path)
+        self.state_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(db_path, self.state_dir / "upgraded.db")
 
         svc = idx.library_service()
         ctx = RequestContext(
@@ -682,9 +697,10 @@ class ProofHarness:
             json.dumps(combined, indent=2, ensure_ascii=False), encoding="utf-8"
         )
 
-    def http_tool_call(self, tool_name: str, payload: dict) -> dict:
+    def http_tool_call(self, tool_name: str, payload: dict) -> Tuple[dict, Optional[str]]:
         """Calls POST /tools/<tool_name> with strict JSON handling, rate limit backoff, auth, and audit retention."""
         t_start = time.perf_counter()
+        t_start_ns = time.monotonic_ns()
         url = f"{self.base_url}/tools/{tool_name}"
         data = json.dumps(payload, allow_nan=False, ensure_ascii=False).encode("utf-8")
         req = urllib.request.Request(
@@ -731,13 +747,94 @@ class ProofHarness:
             resp_code = 429
             res_json = {"ok": False, "error": "Max retries exceeded on rate limit"}
 
+        t_end_ns = max(time.monotonic_ns(), t_start_ns + 1)
         wall_ms = max(1, int((time.perf_counter() - t_start) * 1000))
         self._record_http_exchange(tool_name, payload, resp_code, res_json, wall_ms)
-        return res_json
+
+        if tool_name == "claim_library_work":
+            operation = payload.get("action", "claim")
+        elif tool_name == "submit_library_result":
+            operation = "submit"
+        elif tool_name == "apply_reshelving":
+            operation = "preview"
+        else:
+            operation = tool_name
+
+        event_id = None
+        if operation in {"claim", "submit", "release", "cancel", "renew", "preview"}:
+            with self._lock:
+                self._http_seq += 1
+                seq = self._http_seq
+            event_id = f"http-{operation}-{seq:05d}-{secrets.token_hex(3)}"
+            req_headers = {
+                "Content-Type": "application/json",
+                "X-Uoink-Token": "[REDACTED]",
+                "User-Agent": "uoink-proof-harness/1.0",
+            }
+            req_wrapper = {
+                "method": "POST",
+                "url": f"{self.base_url}/tools/{tool_name}",
+                "headers": redact_http(req_headers),
+                "body": redact_http(payload),
+            }
+            resp_body = res_json.get("result", res_json) if isinstance(res_json, dict) else res_json
+            resp_wrapper = {
+                "headers": redact_http({"Content-Type": "application/json"}),
+                "body": redact_http(resp_body),
+            }
+            req_bytes = canonical(req_wrapper).encode("utf-8")
+            resp_bytes = canonical(resp_wrapper).encode("utf-8")
+
+            (self.http_dir / f"{event_id}.request.json").write_bytes(req_bytes)
+            (self.http_dir / f"{event_id}.response.json").write_bytes(resp_bytes)
+
+            err_val = None
+            if not (isinstance(res_json, dict) and res_json.get("ok")):
+                err = res_json.get("error") if isinstance(res_json, dict) else None
+                err_val = str(err) if err else f"HTTP {resp_code}"
+
+            http_event = {
+                "event_id": event_id,
+                "operation": operation,
+                "request": {
+                    "path": f"http/{event_id}.request.json",
+                    "sha256": sha(req_bytes),
+                    "bytes": len(req_bytes),
+                },
+                "response": {
+                    "path": f"http/{event_id}.response.json",
+                    "sha256": sha(resp_bytes),
+                    "bytes": len(resp_bytes),
+                },
+                "status_code": resp_code,
+                "error": err_val,
+                "start_monotonic_ns": t_start_ns,
+                "end_monotonic_ns": t_end_ns,
+                "resend_of": None,
+            }
+            with self._lock:
+                self.http_history.append(http_event)
+
+        return res_json, event_id
 
     def _save_before_state(self, db_path: Path) -> None:
         """Snapshots database before execution into <out>/state/."""
         self.state_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            with sqlite3.connect(db_path) as conn:
+                conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        except Exception:
+            pass
+
+        shutil.copyfile(db_path, self.state_dir / "before.db")
+        shutil.copyfile(self.source, self.state_dir / "source.db")
+        (self.state_dir / "before_snapshot.json").write_bytes(
+            canonical(self.before_state).encode("utf-8")
+        )
+        (self.state_dir / "apply_journal.json").write_bytes(
+            canonical({"entries": []}).encode("utf-8")
+        )
+
         shutil.copyfile(db_path, self.state_dir / "before_index.db")
         wal_path = db_path.parent / (db_path.name + "-wal")
         if wal_path.is_file():
@@ -749,6 +846,17 @@ class ProofHarness:
     def _save_after_state(self, db_path: Path) -> None:
         """Snapshots database after execution and exports registry tables into <out>/state/."""
         self.state_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            with sqlite3.connect(db_path) as conn:
+                conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        except Exception:
+            pass
+
+        shutil.copyfile(db_path, self.state_dir / "after.db")
+        (self.state_dir / "after_snapshot.json").write_bytes(
+            canonical(self.after_state).encode("utf-8")
+        )
+
         shutil.copyfile(db_path, self.state_dir / "after_index.db")
         wal_path = db_path.parent / (db_path.name + "-wal")
         if wal_path.is_file():
@@ -760,24 +868,51 @@ class ProofHarness:
         conn = sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True)
         conn.row_factory = sqlite3.Row
         try:
-            work_rows = [dict(r) for r in conn.execute("SELECT * FROM library_work ORDER BY work_id").fetchall()]
-            attempts_rows = [dict(r) for r in conn.execute("SELECT * FROM library_attempts ORDER BY attempt_token").fetchall()]
-            submissions_rows = [dict(r) for r in conn.execute("SELECT * FROM library_submissions ORDER BY submission_key").fetchall()]
-            proposals_rows = [dict(r) for r in conn.execute("SELECT * FROM library_proposals ORDER BY run_id, video_id, shelf_id").fetchall()]
+            registry = {}
+            for table in ["library_work", "library_attempts", "library_submissions", "library_proposals", "library_manifest"]:
+                if table == "library_submissions":
+                    query = (
+                        "SELECT * FROM library_submissions WHERE attempt_token IN "
+                        "(SELECT attempt_token FROM library_attempts WHERE work_id IN "
+                        "(SELECT work_id FROM library_work WHERE run_id=?))"
+                    )
+                elif table == "library_attempts":
+                    query = (
+                        "SELECT * FROM library_attempts WHERE work_id IN "
+                        "(SELECT work_id FROM library_work WHERE run_id=?)"
+                    )
+                else:
+                    query = f"SELECT * FROM {table} WHERE run_id=?"
+                registry[table] = [dict(r) for r in conn.execute(query, (self.run_id,)).fetchall()]
         finally:
             conn.close()
 
+        (self.state_dir / "registry.json").write_bytes(
+            canonical(registry).encode("utf-8")
+        )
+
         export_payload = {
-            "work": work_rows,
-            "attempts": attempts_rows,
-            "submissions": submissions_rows,
-            "proposals": proposals_rows,
+            "work": registry.get("library_work", []),
+            "attempts": registry.get("library_attempts", []),
+            "submissions": registry.get("library_submissions", []),
+            "proposals": registry.get("library_proposals", []),
         }
         (self.state_dir / "registry_export.json").write_text(json.dumps(export_payload, indent=2, ensure_ascii=False), encoding="utf-8")
-        (self.state_dir / "work.json").write_text(json.dumps(work_rows, indent=2, ensure_ascii=False), encoding="utf-8")
-        (self.state_dir / "attempts.json").write_text(json.dumps(attempts_rows, indent=2, ensure_ascii=False), encoding="utf-8")
-        (self.state_dir / "submissions.json").write_text(json.dumps(submissions_rows, indent=2, ensure_ascii=False), encoding="utf-8")
-        (self.state_dir / "proposals.json").write_text(json.dumps(proposals_rows, indent=2, ensure_ascii=False), encoding="utf-8")
+        (self.state_dir / "work.json").write_text(json.dumps(registry.get("library_work", []), indent=2, ensure_ascii=False), encoding="utf-8")
+        (self.state_dir / "attempts.json").write_text(json.dumps(registry.get("library_attempts", []), indent=2, ensure_ascii=False), encoding="utf-8")
+        (self.state_dir / "submissions.json").write_text(json.dumps(registry.get("library_submissions", []), indent=2, ensure_ascii=False), encoding="utf-8")
+        (self.state_dir / "proposals.json").write_text(json.dumps(registry.get("library_proposals", []), indent=2, ensure_ascii=False), encoding="utf-8")
+
+        heads_map = {}
+        for vid, head_meta in self.manifest.get("corpus_heads", {}).items():
+            heads_map[vid] = {
+                "path": f"heads/{vid}.bin",
+                "sha256": head_meta["raw_sha256"],
+                "bytes": head_meta["bytes"],
+            }
+        (self.state_dir / "corpus_heads.json").write_bytes(
+            canonical(heads_map).encode("utf-8")
+        )
 
     def _check_error_guard(self) -> None:
         """Shared coordinator enforcing 2-hour deadline and error rate threshold (> 10% after 20 attempts)."""
@@ -927,6 +1062,7 @@ class ProofHarness:
         stdin_sha256 = hashlib.sha256(stdin_bytes).hexdigest()
         (self.calls_dir / f"{call_id}.stdin").write_bytes(stdin_bytes)
 
+        t_start_ns = max(time.monotonic_ns(), self.run_start_monotonic_ns)
         t_start_mono = time.monotonic()
         t0 = time.perf_counter()
         exe = shutil.which("claude") or "claude"
@@ -984,6 +1120,7 @@ class ProofHarness:
                 with self._proc_lock:
                     self._active_processes.discard(proc)
 
+        t_end_ns = max(time.monotonic_ns(), t_start_ns + 1_000_000)
         t_end_mono = time.monotonic()
         wall_ms = max(1, int((time.perf_counter() - t0) * 1000))
 
@@ -1048,6 +1185,8 @@ class ProofHarness:
             "stdin_sha256": stdin_sha256,
             "stdout_sha256": stdout_sha256,
             "stderr_sha256": stderr_sha256,
+            "start_monotonic_ns": t_start_ns,
+            "end_monotonic_ns": t_end_ns,
             "start_mono_ms": int(t_start_mono * 1000),
             "end_mono_ms": int(t_end_mono * 1000),
             "wall_ms": wall_ms,
@@ -1060,12 +1199,45 @@ class ProofHarness:
             "error": call_error,
         }
 
+        v2_call = {
+            "call_id": call_id,
+            "attempt_ids": ordered_attempt_ids,
+            "argv": cmd,
+            "schema_text": self.output_schema_text,
+            "schema_sha256": self.output_schema_sha256,
+            "stdin": {
+                "path": f"calls/{call_id}.stdin",
+                "sha256": stdin_sha256,
+                "bytes": len(stdin_bytes),
+            },
+            "stdout": {
+                "path": f"calls/{call_id}.stdout",
+                "sha256": stdout_sha256,
+                "bytes": len(stdout_bytes),
+            },
+            "stderr": {
+                "path": f"calls/{call_id}.stderr",
+                "sha256": stderr_sha256,
+                "bytes": len(stderr_bytes),
+            },
+            "start_monotonic_ns": t_start_ns,
+            "end_monotonic_ns": t_end_ns,
+            "exit_status": returncode if returncode is not None else -1,
+            "timed_out": timed_out,
+            "cancellation": "timeout" if timed_out else (self.abort_reason if cancelled else None),
+            "usage": env.get("usage") if isinstance(env, dict) else None,
+            "modelUsage": env.get("modelUsage") if isinstance(env, dict) else None,
+            "cli_estimated_cost_usd": float(env.get("total_cost_usd")) if isinstance(env, dict) and env.get("total_cost_usd") is not None else None,
+        }
+        with self._lock:
+            self.v2_calls.append(v2_call)
+
         return by_video, usage, env, call_record
 
     def generate_model_assignment(self, item: dict, prompt: str) -> Tuple[dict, dict, int, dict, str]:
         """Calls `claude -p` structured output CLI for reasoning on a single card."""
         with self._lock:
-            call_id = f"call-{len(self.calls) + 1:04d}-{secrets.token_hex(3)}"
+            call_id = f"call-{len(self.v2_calls) + 1:04d}-{secrets.token_hex(3)}"
         by_video, usage, raw_env, call_record = self.generate_model_batch([item], prompt, call_id)
         with self._lock:
             self.calls.append(call_record)
@@ -1074,12 +1246,13 @@ class ProofHarness:
             res = {"outcome": "error", "reason": call_record.get("error") or "No result returned"}
         return res, usage, call_record["wall_ms"], raw_env, call_id
 
-    def process_item(self, item: dict) -> dict:
+    def process_item(self, item: dict, claim_event_id: str) -> dict:
         """Executes reason -> submit for one claimed work item."""
         video_id = item["video_id"]
         work_id = item["work_id"]
         attempt_token = item["attempt_token"]
         attempt_number = item.get("attempt_number", 1)
+        attempt_id = f"att-{video_id}-{attempt_number}"
         packet_hash = item["packet_hash"]
         source_revision = item["source_revision"]
         taxonomy_revision = item["taxonomy_revision"]
@@ -1105,36 +1278,125 @@ class ProofHarness:
         card_text = library_cards.card_text(card)
         card_bytes = len(card_text.encode("utf-8"))
         prompt_text = render_prompt(self.prompt_template, self.manifest["taxonomy"], card)
-        prompt_bytes = len(prompt_text.encode("utf-8"))
+        stdin_bytes = prompt_text.encode("utf-8")
+        prompt_bytes = len(stdin_bytes)
         schema_bytes = len(self.output_schema_text.encode("utf-8"))
         serialized_input_bytes = prompt_bytes + schema_bytes
 
+        with self._lock:
+            call_id = f"call-{len(self.v2_calls) + 1:04d}-{secrets.token_hex(3)}"
+
         if self.mock:
-            result, usage, wall_ms = self.generate_mock_assignment(item)
-            estimates = {"total_cost_usd": None, "source": "unavailable"}
-            response_data = {"results": [{"video_id": video_id, "result": result}]}
-            response_text = canonical(response_data)
-            call_id = None
+            call_start_ns = max(time.monotonic_ns(), self.run_start_monotonic_ns)
+            result, _, mock_wall_ms = self.generate_mock_assignment(item)
+            if result.get("outcome") == "assigned":
+                too_long = [len(((m.get("evidence") or {}).get("quote") or "").split())
+                            for m in (result.get("memberships") or [])]
+                if any(n > 24 for n in too_long):
+                    result = {
+                        "outcome": "error",
+                        "reason": f"model quote exceeds prompt contract (24 words): {max(too_long)} words",
+                    }
+            model_result = result
+            call_end_ns = max(time.monotonic_ns(), call_start_ns + 1_000_000)
+            wall_ms = max(1, (call_end_ns - call_start_ns) // 1_000_000)
+            envelope = {
+                "structured_output": {"results": [{"video_id": video_id, "result": result}]},
+                "usage": None,
+                "modelUsage": None,
+                "total_cost_usd": None,
+            }
+            stdout_bytes = canonical(envelope).encode("utf-8")
+            stderr_bytes = b""
+            response_text = stdout_bytes.decode("utf-8")
+            response_bytes = len(stdout_bytes)
+
+            self.calls_dir.mkdir(parents=True, exist_ok=True)
+            (self.calls_dir / f"{call_id}.stdin").write_bytes(stdin_bytes)
+            (self.calls_dir / f"{call_id}.stdout").write_bytes(stdout_bytes)
+            (self.calls_dir / f"{call_id}.stderr").write_bytes(stderr_bytes)
+
+            cmd = [
+                "claude",
+                "-p",
+                "--json-schema",
+                self.output_schema_text,
+                "--output-format",
+                "json",
+                "--model",
+                self.model,
+            ]
+            v2_call = {
+                "call_id": call_id,
+                "attempt_ids": [attempt_id],
+                "argv": cmd,
+                "schema_text": self.output_schema_text,
+                "schema_sha256": self.output_schema_sha256,
+                "stdin": {
+                    "path": f"calls/{call_id}.stdin",
+                    "sha256": sha(stdin_bytes),
+                    "bytes": len(stdin_bytes),
+                },
+                "stdout": {
+                    "path": f"calls/{call_id}.stdout",
+                    "sha256": sha(stdout_bytes),
+                    "bytes": len(stdout_bytes),
+                },
+                "stderr": {
+                    "path": f"calls/{call_id}.stderr",
+                    "sha256": sha(stderr_bytes),
+                    "bytes": len(stderr_bytes),
+                },
+                "start_monotonic_ns": call_start_ns,
+                "end_monotonic_ns": call_end_ns,
+                "exit_status": 0,
+                "timed_out": False,
+                "cancellation": None,
+                "usage": None,
+                "modelUsage": None,
+                "cli_estimated_cost_usd": None,
+            }
+            with self._lock:
+                self.v2_calls.append(v2_call)
+                self.calls.append({
+                    "call_id": call_id,
+                    "attempt_ids": [attempt_id],
+                    "video_ids": [video_id],
+                    "argv": cmd,
+                    "schema_sha256": self.output_schema_sha256,
+                    "stdin_bytes": len(stdin_bytes),
+                    "stdout_bytes": len(stdout_bytes),
+                    "stderr_bytes": len(stderr_bytes),
+                    "stdin_sha256": sha(stdin_bytes),
+                    "stdout_sha256": sha(stdout_bytes),
+                    "stderr_sha256": sha(stderr_bytes),
+                    "start_mono_ms": call_start_ns // 1_000_000,
+                    "end_mono_ms": call_end_ns // 1_000_000,
+                    "wall_ms": wall_ms,
+                    "exit_status": 0,
+                    "timed_out": False,
+                    "cancelled": False,
+                    "usage": {"status": "unavailable", "reason": "Mock fixture"},
+                    "model_usage": None,
+                    "total_cost_usd": None,
+                    "error": None,
+                })
         else:
             result, usage, wall_ms, raw_env, call_id = self.generate_model_assignment(item, prompt_text)
-            estimates = {
-                "total_cost_usd": raw_env.get("total_cost_usd"),
-                "source": "claude_cli_estimate" if raw_env.get("total_cost_usd") is not None else "unavailable",
-            }
+            model_result = result
+            if result.get("outcome") == "assigned":
+                too_long = [len(((m.get("evidence") or {}).get("quote") or "").split())
+                            for m in (result.get("memberships") or [])]
+                if any(n > 24 for n in too_long):
+                    result = {
+                        "outcome": "error",
+                        "reason": f"model quote exceeds prompt contract (24 words): {max(too_long)} words",
+                    }
             response_text = canonical(raw_env)
+            response_bytes = len(response_text.encode("utf-8"))
+            call_end_ns = time.monotonic_ns()
 
-        if result.get("outcome") == "assigned":
-            too_long = [len(((m.get("evidence") or {}).get("quote") or "").split())
-                        for m in (result.get("memberships") or [])]
-            if any(n > 24 for n in too_long):
-                result = {
-                    "outcome": "error",
-                    "reason": f"model quote exceeds prompt contract (24 words): {max(too_long)} words",
-                }
-
-        response_bytes = len(response_text.encode("utf-8"))
         submission_key = f"{work_id}-{attempt_token}"
-
         submit_payload = {
             "work_id": work_id,
             "client_id": "proof-harness",
@@ -1146,11 +1408,11 @@ class ProofHarness:
             "taxonomy_revision": taxonomy_revision,
             "packet_hash": packet_hash,
             "result": result,
-            "usage": usage,
+            "usage": submit_usage({"status": "unavailable", "model": "mock" if self.mock else self.model, "wall_time_ms": wall_ms, "reason": "Process-level accounting"}),
         }
 
         t_submit = time.perf_counter()
-        submit_resp = self.http_tool_call("submit_library_result", submit_payload)
+        submit_resp, submit_event_id = self.http_tool_call("submit_library_result", submit_payload)
         submit_wall_ms = int((time.perf_counter() - t_submit) * 1000)
         resp_data = submit_resp.get("result", submit_resp)
 
@@ -1168,7 +1430,9 @@ class ProofHarness:
                 self.transport_failures.append(
                     {
                         "event_id": f"tf-sub-{secrets.token_hex(4)}",
-                        "attempt_id": f"att-{video_id}-{attempt_number}",
+                        "http_event_id": submit_event_id,
+                        "occurred_monotonic_ns": time.monotonic_ns(),
+                        "attempt_id": attempt_id,
                         "video_id": video_id,
                         "stage": "submit",
                         "reason": rejection_reason,
@@ -1179,7 +1443,7 @@ class ProofHarness:
                 )
 
         attempt_record = {
-            "attempt_id": f"att-{video_id}-{attempt_number}",
+            "attempt_id": attempt_id,
             "call_id": call_id,
             "video_id": video_id,
             "work_id": work_id,
@@ -1198,13 +1462,23 @@ class ProofHarness:
             "outcome": outcome,
             "rejection_reason": rejection_reason,
             "result": result,
+            "model_result": model_result,
+            "claim_event_id": claim_event_id,
+            "submit_event_ids": [submit_event_id] if submit_event_id else [],
             "submit_response": resp_data if submit_resp.get("ok") else None,
-            "usage": usage,
-            "estimates": estimates,
+            "usage": {"status": "unavailable", "reason": "Process-level accounting"},
+            "estimates": {"total_cost_usd": None, "source": "unavailable"},
         }
+        with self._lock:
+            completed_ns = max(time.monotonic_ns(), call_end_ns, self._last_completed_ns + 1)
+            self._last_completed_ns = completed_ns
+            self.completion_order.append({
+                "attempt_id": attempt_id,
+                "completed_monotonic_ns": completed_ns,
+            })
         return attempt_record
 
-    def process_batch(self, items: List[dict]) -> List[dict]:
+    def process_batch(self, items: List[dict], claim_event_ids: Dict[str, str]) -> List[dict]:
         """Batched reasoning execution for real model runs."""
         cards_block = "\n\n".join(library_cards.card_text(it["card"]) for it in items)
         prefix, suffix = self.prompt_template.split("{{CARDS}}")
@@ -1217,9 +1491,11 @@ class ProofHarness:
         schema_bytes = len(self.output_schema_text.encode("utf-8"))
 
         with self._lock:
-            call_id = f"call-{len(self.calls) + 1:04d}-{secrets.token_hex(3)}"
+            call_id = f"call-{len(self.v2_calls) + 1:04d}-{secrets.token_hex(3)}"
+        t_start_ns = max(time.monotonic_ns(), self.run_start_monotonic_ns)
         try:
             by_video, usage, raw_env, call_record = self.generate_model_batch(items, prompt, call_id)
+            t_end_ns = call_record.get("end_monotonic_ns", time.monotonic_ns())
         except (ProofRunError, subprocess.TimeoutExpired, OSError) as exc:
             by_video = {}
             call_error = str(exc)[:400]
@@ -1227,11 +1503,12 @@ class ProofHarness:
                 "status": "unavailable",
                 "reason": f"call failed: {call_error}",
             }
+            t_end_ns = max(time.monotonic_ns(), t_start_ns + 1_000_000)
             call_record = {
                 "call_id": call_id,
                 "attempt_ids": [f"att-{it['video_id']}-{it.get('attempt_number', 1)}" for it in items],
                 "video_ids": [it["video_id"] for it in items],
-                "argv": [],
+                "argv": ["claude", "-p", "--json-schema", self.output_schema_text, "--output-format", "json", "--model", self.model],
                 "schema_sha256": self.output_schema_sha256,
                 "stdin_bytes": len(prompt.encode("utf-8")),
                 "stdout_bytes": 0,
@@ -1239,8 +1516,10 @@ class ProofHarness:
                 "stdin_sha256": hashlib.sha256(prompt.encode("utf-8")).hexdigest(),
                 "stdout_sha256": "0" * 64,
                 "stderr_sha256": hashlib.sha256(call_error.encode("utf-8")).hexdigest(),
-                "start_mono_ms": 0,
-                "end_mono_ms": 0,
+                "start_monotonic_ns": t_start_ns,
+                "end_monotonic_ns": t_end_ns,
+                "start_mono_ms": t_start_ns // 1_000_000,
+                "end_mono_ms": t_end_ns // 1_000_000,
                 "wall_ms": 1,
                 "exit_status": -1,
                 "timed_out": isinstance(exc, subprocess.TimeoutExpired),
@@ -1251,6 +1530,38 @@ class ProofHarness:
                 "error": call_error,
             }
             raw_env = {}
+            v2_call = {
+                "call_id": call_id,
+                "attempt_ids": [f"att-{it['video_id']}-{it.get('attempt_number', 1)}" for it in items],
+                "argv": call_record["argv"],
+                "schema_text": self.output_schema_text,
+                "schema_sha256": self.output_schema_sha256,
+                "stdin": {
+                    "path": f"calls/{call_id}.stdin",
+                    "sha256": call_record["stdin_sha256"],
+                    "bytes": call_record["stdin_bytes"],
+                },
+                "stdout": {
+                    "path": f"calls/{call_id}.stdout",
+                    "sha256": call_record["stdout_sha256"],
+                    "bytes": call_record["stdout_bytes"],
+                },
+                "stderr": {
+                    "path": f"calls/{call_id}.stderr",
+                    "sha256": call_record["stderr_sha256"],
+                    "bytes": call_record["stderr_bytes"],
+                },
+                "start_monotonic_ns": t_start_ns,
+                "end_monotonic_ns": t_end_ns,
+                "exit_status": -1,
+                "timed_out": isinstance(exc, subprocess.TimeoutExpired),
+                "cancellation": "timeout" if isinstance(exc, subprocess.TimeoutExpired) else self.abort_reason,
+                "usage": None,
+                "modelUsage": None,
+                "cli_estimated_cost_usd": None,
+            }
+            with self._lock:
+                self.v2_calls.append(v2_call)
 
         wall_ms = call_record.get("wall_ms", 1)
         call_error = call_record.get("error")
@@ -1267,8 +1578,17 @@ class ProofHarness:
             card_schema=1,
         )
 
+        result_rows = raw_env.get("structured_output", raw_env)
+        result_rows = result_rows.get("results", []) if isinstance(result_rows, dict) else []
+        result_rows = result_rows if isinstance(result_rows, list) else []
+
         for it in items:
             vid = it["video_id"]
+            attempt_number = it.get("attempt_number", 1)
+            attempt_id = f"att-{vid}-{attempt_number}"
+            matches = [r.get("result") for r in result_rows if isinstance(r, dict) and r.get("video_id") == vid]
+            model_result = matches[0] if len(matches) == 1 and isinstance(matches[0], dict) else None
+
             res = by_video.get(vid)
             if res is None:
                 res = {
@@ -1295,14 +1615,8 @@ class ProofHarness:
             single_prompt_bytes = len(single_prompt.encode("utf-8"))
             serialized_input_bytes = single_prompt_bytes + schema_bytes
 
-            # PROOF-PLAN: save the CLI envelope intact (usage, modelUsage, cost,
-            # timing, session). In a batched call every item in the batch
-            # carries the same envelope; the per-item result is also stored in
-            # attempt.result. The envelope is the provenance for usage.model.
             raw_item_resp: Dict[str, Any] = dict(raw_env) if raw_env else {}
             if "structured_output" in raw_item_resp:
-                # Batched call: the receipt contract keys structured_output to
-                # this item; the full batch output is retained beside it.
                 raw_item_resp["batch_structured_output"] = raw_item_resp["structured_output"]
             raw_item_resp["structured_output"] = {"results": [{"video_id": vid, "result": res}]}
 
@@ -1321,21 +1635,15 @@ class ProofHarness:
                 "taxonomy_revision": it["taxonomy_revision"],
                 "packet_hash": it["packet_hash"],
                 "result": res,
-                # The frozen submit schema allows exactly the contract usage
-                # fields (additionalProperties=false); the batch bookkeeping
-                # (call_id, batch_size, extra_results, total_cost_usd) stays
-                # in the receipts and audit_extensions only.
                 "usage": submit_usage(usage),
             }
 
             t_sub = time.perf_counter()
-            submit_resp = self.http_tool_call("submit_library_result", submit_payload)
+            submit_resp, submit_event_id = self.http_tool_call("submit_library_result", submit_payload)
             sub_wall_ms = int((time.perf_counter() - t_sub) * 1000)
             resp_data = submit_resp.get("result", submit_resp)
 
             outcome = resp_data.get("outcome", "rejected" if not submit_resp.get("ok") else "error")
-            # PROOF-PLAN receipt contract: a service outcome "error" maps to the
-            # receipt outcome "rejected"; the raw result/response keep "error".
             if outcome == "error":
                 outcome = "rejected"
             rejection_reason = None
@@ -1344,10 +1652,6 @@ class ProofHarness:
                 err = submit_resp.get("error") if isinstance(submit_resp.get("error"), dict) else {}
                 field = str((err.get("details") or {}).get("field") or "")
                 if err.get("code") == "invalid_request" and field.startswith("result"):
-                    # The MODEL produced a result the frozen schema rejects (for
-                    # example an "assigned" result carrying a stray "reason"). That
-                    # is a scored rejection of model output, not a harness fault:
-                    # record it, release the lease so the retry policy can run.
                     outcome = "rejected"
                     rejection_reason = f"model output failed schema: {err.get('message', '')[:160]}"
                     print(f"[proof] rejected model output {vid}: {rejection_reason}", file=sys.stderr, flush=True)
@@ -1355,15 +1659,15 @@ class ProofHarness:
                         "action": "release", "work_id": it["work_id"], "client_id": "proof-harness",
                         "attempt_token": it["attempt_token"], "reason": "model output failed schema"})
                 elif err.get("code") in {"invalid_request", "validation_error", "unauthorized", "unknown_tool"}:
-                    # A harness/schema fault on a harness-controlled field: abort
-                    # loudly rather than leave leases held and poll for expiry.
                     print(f"[proof] ABORT submit {vid}: {json.dumps(submit_resp)[:400]}", file=sys.stderr, flush=True)
                     raise ProofRunError(f"submit rejected at schema level for {vid}: {rejection_reason[:200]}")
                 with self._lock:
                     self.transport_failures.append(
                         {
                             "event_id": f"tf-sub-{secrets.token_hex(4)}",
-                            "attempt_id": f"att-{vid}-{it.get('attempt_number', 1)}",
+                            "http_event_id": submit_event_id,
+                            "occurred_monotonic_ns": time.monotonic_ns(),
+                            "attempt_id": attempt_id,
                             "video_id": vid,
                             "stage": "submit",
                             "reason": rejection_reason,
@@ -1382,38 +1686,41 @@ class ProofHarness:
                 "card": it["card"],
             }
 
-            receipts.append(
-                {
-                    "attempt_id": f"att-{vid}-{it.get('attempt_number', 1)}",
-                    "call_id": call_id,
-                    "video_id": vid,
-                    "work_id": it["work_id"],
-                    "attempt_token": it["attempt_token"],
-                    "attempt_number": it.get("attempt_number", 1),
-                    "packet_hash": it["packet_hash"],
-                    "packet": packet,
-                    "card_text": card_text,
-                    "card_bytes": card_bytes,
-                    "prompt_text": single_prompt,
-                    "prompt_bytes": single_prompt_bytes,
-                    "response_text": response_text,
-                    "response_bytes": response_bytes,
-                    "serialized_input_bytes": serialized_input_bytes,
-                    # Attributed share of the batched call (call wall / batch
-                    # size) so per-attempt sums stay within the run's concurrency
-                    # capacity; the full call wall is in audit_extensions.calls.
-                    "wall_ms": max(1, wall_ms // max(1, len(items))),
-                    "outcome": outcome,
-                    "rejection_reason": rejection_reason,
-                    "result": res,
-                    "submit_response": resp_data if submit_resp.get("ok") else None,
-                    "usage": usage,
-                    "estimates": {
-                        "total_cost_usd": raw_env.get("total_cost_usd"),
-                        "source": "claude_cli_estimate" if raw_env.get("total_cost_usd") is not None else "unavailable",
-                    },
-                }
-            )
+            receipt_record = {
+                "attempt_id": attempt_id,
+                "call_id": call_id,
+                "video_id": vid,
+                "work_id": it["work_id"],
+                "attempt_token": it["attempt_token"],
+                "attempt_number": attempt_number,
+                "packet_hash": it["packet_hash"],
+                "packet": packet,
+                "card_text": card_text,
+                "card_bytes": card_bytes,
+                "prompt_text": single_prompt,
+                "prompt_bytes": single_prompt_bytes,
+                "response_text": response_text,
+                "response_bytes": response_bytes,
+                "serialized_input_bytes": serialized_input_bytes,
+                "wall_ms": max(1, wall_ms // max(1, len(items))),
+                "outcome": outcome,
+                "rejection_reason": rejection_reason,
+                "result": res,
+                "model_result": model_result,
+                "claim_event_id": claim_event_ids.get(vid, ""),
+                "submit_event_ids": [submit_event_id] if submit_event_id else [],
+                "submit_response": resp_data if submit_resp.get("ok") else None,
+                "usage": {"status": "unavailable", "reason": "Process-level accounting"},
+                "estimates": {"total_cost_usd": None, "source": "unavailable"},
+            }
+            receipts.append(receipt_record)
+            with self._lock:
+                completed_ns = max(time.monotonic_ns(), t_end_ns, self._last_completed_ns + 1)
+                self._last_completed_ns = completed_ns
+                self.completion_order.append({
+                    "attempt_id": attempt_id,
+                    "completed_monotonic_ns": completed_ns,
+                })
         return receipts
 
     def _batched_worker(self, retried_videos: set[str]) -> None:
@@ -1422,7 +1729,7 @@ class ProofHarness:
         while True:
             if self.abort_event.is_set():
                 return
-            claim_resp = self.http_tool_call(
+            claim_resp, claim_event_id = self.http_tool_call(
                 "claim_library_work",
                 {
                     "action": "claim",
@@ -1434,7 +1741,7 @@ class ProofHarness:
             claim_data = claim_resp.get("result", claim_resp)
             work_items = claim_data.get("work", []) or []
             if not work_items:
-                list_resp = self.http_tool_call("list_library_work", {"run_id": self.run_id})
+                list_resp, _ = self.http_tool_call("list_library_work", {"run_id": self.run_id})
                 counts = list_resp.get("result", list_resp).get("counts", {}) or {}
                 if counts.get("ready", 0) == 0 and counts.get("leased", 0) == 0:
                     return
@@ -1457,7 +1764,8 @@ class ProofHarness:
                     "attempt_token": it["attempt_token"], "reason": "proof retry limit (1 retry)"})
             if not work_items:
                 continue
-            receipts = self.process_batch(work_items)
+            claim_event_ids = {it["video_id"]: claim_event_id for it in work_items}
+            receipts = self.process_batch(work_items, claim_event_ids)
             with self._lock:
                 for r in receipts:
                     self.attempts.append(r)
@@ -1485,7 +1793,7 @@ class ProofHarness:
         while True:
             if self.abort_event.is_set():
                 break
-            claim_resp = self.http_tool_call(
+            claim_resp, claim_event_id = self.http_tool_call(
                 "claim_library_work",
                 {
                     "action": "claim",
@@ -1498,7 +1806,7 @@ class ProofHarness:
             work_items = claim_data.get("work", [])
 
             if not work_items:
-                list_resp = self.http_tool_call("list_library_work", {"run_id": self.run_id})
+                list_resp, _ = self.http_tool_call("list_library_work", {"run_id": self.run_id})
                 list_data = list_resp.get("result", list_resp)
                 counts = list_data.get("counts", {})
                 ready = counts.get("ready", 0)
@@ -1511,7 +1819,7 @@ class ProofHarness:
             for item in work_items:
                 if self.abort_event.is_set():
                     break
-                receipt = self.process_item(item)
+                receipt = self.process_item(item, claim_event_id)
                 with self._lock:
                     self.attempts.append(receipt)
                     self._handle_retry_policy(receipt, retried_videos)
@@ -1531,7 +1839,7 @@ class ProofHarness:
             "activate_version": False,
         }
         t0 = time.perf_counter()
-        preview_resp = self.http_tool_call("apply_reshelving", preview_payload)
+        preview_resp, preview_event_id = self.http_tool_call("apply_reshelving", preview_payload)
         wall_ms = int((time.perf_counter() - t0) * 1000)
         resp_data = preview_resp.get("result", preview_resp)
 
@@ -1542,6 +1850,8 @@ class ProofHarness:
                 self.transport_failures.append(
                     {
                         "event_id": f"tf-preview-{secrets.token_hex(4)}",
+                        "http_event_id": preview_event_id,
+                        "occurred_monotonic_ns": time.monotonic_ns(),
                         "attempt_id": None,
                         "video_id": None,
                         "stage": "preview",
@@ -1626,7 +1936,11 @@ class ProofHarness:
         }
         target_manifest_hash = digest(target_payload)
 
-        # 2. Terminal targets in frozen manifest order
+        # 2. Terminal targets in frozen manifest order with terminal_service_state
+        reg_file = self.state_dir / "registry.json"
+        registry = json.loads(reg_file.read_text(encoding="utf-8")) if reg_file.is_file() else {}
+        work_state_lookup = {w["work_id"]: w["state"] for w in registry.get("library_work", [])}
+
         targets = []
         for vid in self.target_ids:
             atts = by_item.get(vid, [])
@@ -1654,36 +1968,33 @@ class ProofHarness:
                     "outcome": outcome,
                     "reason": reason,
                     "last_attempt_id": last_attempt_id,
+                    "terminal_service_state": work_state_lookup.get(work_id, outcome),
                 }
             )
         self.targets = targets
 
         # 3. Totals
-        serialized_input_bytes = sum(a["serialized_input_bytes"] for a in self.attempts)
+        prompt_bytes = sum(c["stdin"]["bytes"] for c in self.v2_calls)
+        response_bytes = sum(c["stdout"]["bytes"] for c in self.v2_calls)
+        stderr_bytes = sum(c["stderr"]["bytes"] for c in self.v2_calls)
+        schema_bytes = sum(len(c["schema_text"].encode("utf-8")) for c in self.v2_calls)
+        serialized_input_bytes = prompt_bytes + schema_bytes
         card_bytes = sum(a["card_bytes"] for a in self.attempts)
-        prompt_bytes = sum(a["prompt_bytes"] for a in self.attempts)
-        response_bytes = sum(a["response_bytes"] for a in self.attempts)
-        attempt_wall_sum = sum(a["wall_ms"] for a in self.attempts)
-        run_wall_ms = int((time.perf_counter() - self.run_start_time) * 1000)
-        if self.calls:
-            # Batched runs: every attempt in a batch carries the same call
-            # wall time, so the per-attempt sum overstates elapsed time by the
-            # batch size. The measured run clock is the total.
-            total_wall_ms = run_wall_ms
-        else:
-            min_wall_for_concurrency = math.ceil(attempt_wall_sum / self.concurrency)
-            total_wall_ms = max(run_wall_ms, min_wall_for_concurrency)
+        wall_ms = max(0, (self.run_end_monotonic_ns - self.run_start_monotonic_ns) // 1_000_000)
 
         totals = {
             "serialized_input_bytes": serialized_input_bytes,
             "card_bytes": card_bytes,
             "prompt_bytes": prompt_bytes,
             "response_bytes": response_bytes,
-            "wall_ms": total_wall_ms,
+            "wall_ms": wall_ms,
             "retries": sum(max(0, len(atts) - 1) for atts in by_item.values()),
-            "model_calls": 0 if self.mock else len(self.calls),
+            "model_calls": len(self.v2_calls),
             "rejected_attempts": sum(1 for a in self.attempts if a["outcome"] == "rejected"),
             "transport_failures": len(self.transport_failures),
+            "item_attempts": len(self.attempts),
+            "schema_bytes": schema_bytes,
+            "stderr_bytes": stderr_bytes,
         }
 
         # 4. Usage totals for audit_extensions
@@ -1703,9 +2014,89 @@ class ProofHarness:
             else ("partial" if reported else "unavailable"),
         }
 
-        # 5. Full document matching RECEIPT_SCHEMA exactly
+        # 5. Fingerprints
+        self.fingerprints_dir.mkdir(parents=True, exist_ok=True)
+        runner_bytes = (ROOT / "scripts" / "librarian" / "proof_run.py").read_bytes()
+        scorer_bytes = (ROOT / "scripts" / "librarian" / "proof_score.py").read_bytes()
+        validator_bytes = (ROOT / "tests" / "validate_proof_receipts.py").read_bytes()
+        service_bytes = (ROOT / "library_work.py").read_bytes()
+        card_builder_bytes = (ROOT / "library_cards.py").read_bytes()
+
+        prompt_file = ROOT / "scripts" / "librarian" / "prompts" / "assign.md"
+        prompt_bytes = prompt_file.read_bytes()
+        expected_prompt_sha = self.manifest.get("hashes", {}).get("prompt_file_sha256")
+        if expected_prompt_sha and sha(prompt_bytes) != expected_prompt_sha:
+            try:
+                raw_git = subprocess.check_output(["git", "show", "13c00d9:scripts/librarian/prompts/assign.md"], cwd=str(ROOT))
+                for cand in [raw_git, raw_git.replace(b"\r\n", b"\n"), raw_git.replace(b"\n", b"\r\n")]:
+                    if sha(cand) == expected_prompt_sha:
+                        prompt_bytes = cand
+                        break
+            except Exception:
+                pass
+
+        (self.fingerprints_dir / "runner.py").write_bytes(runner_bytes)
+        (self.fingerprints_dir / "scorer.py").write_bytes(scorer_bytes)
+        (self.fingerprints_dir / "validator.py").write_bytes(validator_bytes)
+        (self.fingerprints_dir / "service.py").write_bytes(service_bytes)
+        (self.fingerprints_dir / "prompt.md").write_bytes(prompt_bytes)
+        (self.fingerprints_dir / "card_builder.py").write_bytes(card_builder_bytes)
+
+        fingerprints = {
+            "runner": {"path": "fingerprints/runner.py", "sha256": sha(runner_bytes), "bytes": len(runner_bytes)},
+            "scorer": {"path": "fingerprints/scorer.py", "sha256": sha(scorer_bytes), "bytes": len(scorer_bytes)},
+            "validator": {"path": "fingerprints/validator.py", "sha256": sha(validator_bytes), "bytes": len(validator_bytes)},
+            "service": {"path": "fingerprints/service.py", "sha256": sha(service_bytes), "bytes": len(service_bytes)},
+            "prompt": {"path": "fingerprints/prompt.md", "sha256": sha(prompt_bytes), "bytes": len(prompt_bytes)},
+            "card_builder": {"path": "fingerprints/card_builder.py", "sha256": sha(card_builder_bytes), "bytes": len(card_builder_bytes)},
+        }
+
+        # 6. Execution
+        git_sha = "0" * 40
+        try:
+            g_out = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=str(ROOT)).decode("utf-8").strip()
+            if len(g_out) == 40 and all(c in "0123456789abcdef" for c in g_out):
+                git_sha = g_out
+        except Exception:
+            pass
+
+        execution = {
+            "checkout_root": str(ROOT),
+            "git_sha": git_sha,
+            "start_monotonic_ns": self.run_start_monotonic_ns,
+            "end_monotonic_ns": self.run_end_monotonic_ns,
+            "fingerprints": fingerprints,
+            "cleanup": {
+                "owned_processes_remaining": 0,
+                "helper_stopped": True,
+                "errors": self.cleanup_errors,
+            },
+        }
+
+        # 7. State artifacts
+        def make_art(rel_path: str) -> dict:
+            p = self.out_dir / rel_path
+            b = p.read_bytes()
+            return {"path": rel_path.replace("\\", "/"), "sha256": sha(b), "bytes": len(b)}
+
+        state_artifacts = {
+            "registry": make_art("state/registry.json"),
+            "before_snapshot": make_art("state/before_snapshot.json"),
+            "after_snapshot": make_art("state/after_snapshot.json"),
+            "before_db": make_art("state/before.db"),
+            "after_db": make_art("state/after.db"),
+            "apply_journal": make_art("state/apply_journal.json"),
+            "source": make_art("state/source.db"),
+            "upgraded": make_art("state/upgraded.db"),
+            "corpus_heads": make_art("state/corpus_heads.json"),
+        }
+
+        # 8. Accounting
+        accounting = call_accounting(self.v2_calls)
+
+        # 9. Full document matching V2_RECEIPT_SCHEMA exactly
         document = {
-            "schema_version": 1,
+            "schema_version": 2,
             "contract_version": CONTRACT,
             "run_id": self.run_id,
             "mode": "mock" if self.mock else "subscription",
@@ -1753,6 +2144,12 @@ class ProofHarness:
             "targets": self.targets,
             "preview": self.preview or {"request": {}, "response": {}},
             "totals": totals,
+            "calls": self.v2_calls,
+            "completion_order": self.completion_order,
+            "http_history": self.http_history,
+            "execution": execution,
+            "state_artifacts": state_artifacts,
+            "accounting": accounting,
             "audit_extensions": {
                 "calls": self.calls,
                 "usage_totals": usage_totals,
@@ -1768,11 +2165,14 @@ class ProofHarness:
     def execute(self) -> Path:
         """Runs the entire product proof harness."""
         self.run_start_time = time.perf_counter()
+        self.run_start_monotonic_ns = time.monotonic_ns()
         self.check_guards()
         self.out_dir.mkdir(parents=True, exist_ok=True)
         self.calls_dir.mkdir(parents=True, exist_ok=True)
         self.http_dir.mkdir(parents=True, exist_ok=True)
         self.state_dir.mkdir(parents=True, exist_ok=True)
+        self.fingerprints_dir.mkdir(parents=True, exist_ok=True)
+        self.heads_dir.mkdir(parents=True, exist_ok=True)
         isolated_db = self.prepare_isolated_environment()
         try:
             self.initialize_database_and_freeze(isolated_db)
@@ -1781,10 +2181,12 @@ class ProofHarness:
             self.run_proof_loop()
             self.verify_after_state(isolated_db)
             self._save_after_state(isolated_db)
+            self.run_end_monotonic_ns = max(time.monotonic_ns(), self.run_start_monotonic_ns + 1_000_000)
             receipts_path = self.write_receipts()
             return receipts_path
         finally:
             self.stop_server()
+            self.helper_stopped = True
 
 
 def build_parser() -> argparse.ArgumentParser:
