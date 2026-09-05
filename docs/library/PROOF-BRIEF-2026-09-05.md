@@ -17,7 +17,8 @@ orchestrator executes the real pass afterwards and Astra audits the receipts (ru
    `UOINK_OUTPUT_DIR` to a disposable root under `_scratch/proof/`, copies the named index
    copy (sha256 `2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc`) to
    `<root>/Uoink/index.db`, imports `server`, sets `server.PORT = 5180`, and runs `main()`
-   in a thread. It reads the helper's token from the isolated `token.txt`. It never touches
+   in a thread. It reads the helper's per-install token from the isolated helper's token
+   file (the one `server.TOKEN_PATH` points at under that root). It never touches
    `127.0.0.1:5179` or `%LOCALAPPDATA%\Uoink`. Verify the source hash before copying.
 3. **Frozen inputs:** `docs/library/taxonomy-v1-2026-09-04.json` (approve it through
    `approve_taxonomy` and activate), `scripts/librarian/prompts/assign.md`, card profile
