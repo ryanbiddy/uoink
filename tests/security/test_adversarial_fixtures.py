@@ -156,10 +156,6 @@ def test_card_builder_public_entry_point_with_adversarial_fixtures(
         idx.close()
 
 
-@pytest.mark.xfail(
-    reason="Finding 2: card builder librarian profile and excerpt bounding pending Codex fix",
-    strict=True,
-)
 def test_card_builder_librarian_profile_bounds_adversarial_payloads(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -206,6 +202,8 @@ def test_card_builder_librarian_profile_bounds_adversarial_payloads(
         assert len(clips_list) >= 1
         # In Librarian profile, excerpts must be bounded to 240 characters
         assert len(clips_list[0]["text"]) <= 240
-        assert card.get("truncation_markers") is not None
+        assert card.get("truncated") is True
+        assert card.get("truncation") == {"selection": False, "byte_budget": False, "fields": []}
+        assert clips_list[0].get("truncated") is True
     finally:
         idx.close()

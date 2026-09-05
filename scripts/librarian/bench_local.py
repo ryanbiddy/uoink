@@ -28,6 +28,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 ROOT = Path(__file__).resolve().parent.parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+import library_cards
+
 DEFAULT_BASE_URL = "http://localhost:1235/v1"
 DEFAULT_MODEL = "qwen3.8-27b"
 DEFAULT_GOLD_SET = ROOT / "docs" / "library" / "gold-set-2026-09-04.json"
@@ -182,6 +186,19 @@ def generate_mock_completion(
     return content, tokens, latency
 
 
+def _has_duplicates(items: List[Any]) -> bool:
+    """Safely checks for duplicates even if items contains unhashable types."""
+    try:
+        return len(items) != len(set(items))
+    except TypeError:
+        seen: List[Any] = []
+        for x in items:
+            if any(x == s for s in seen):
+                return True
+            seen.append(x)
+        return False
+
+
 def evaluate_single_item(
     item: Dict[str, Any],
     pred_data: Dict[str, Any],
@@ -190,56 +207,85 @@ def evaluate_single_item(
 ) -> Dict[str, Any]:
     """Evaluates Level 1, Level 2 agreement and evidence quote grounding.
     
-    Rejects wrong, missing, and duplicate video_ids.
+    Rejects wrong, missing, duplicate, and extra video_ids.
     Reports missing token usage as 'unavailable' rather than zero.
     """
     target_id = item["video_id"]
     gold_path = [p.strip().lower() for p in item.get("shelf_path", [])]
 
-    # Validate assignments structure and reject wrong, missing, or duplicate IDs
+    # Validate assignments structure and reject wrong, missing, duplicate, or extra IDs
     if not isinstance(pred_data, dict) or not isinstance(pred_data.get("assignments"), list):
         id_status = "malformed_output"
         pred_item = None
     else:
         assignments = pred_data.get("assignments", [])
-        all_ids = [a.get("video_id") for a in assignments if isinstance(a, dict) and a.get("video_id") is not None]
-        has_duplicates = len(all_ids) != len(set(all_ids))
-
-        matching = [a for a in assignments if isinstance(a, dict) and a.get("video_id") == target_id]
-        if has_duplicates or len(matching) > 1:
-            id_status = "duplicate_id"
+        if not all(isinstance(a, dict) for a in assignments):
+            id_status = "malformed_output"
             pred_item = None
-        elif len(matching) == 1:
-            id_status = "valid"
-            pred_item = matching[0]
+        elif not assignments:
+            id_status = "missing_id"
+            pred_item = None
         else:
-            if any(isinstance(a, dict) and a.get("video_id") for a in assignments):
-                id_status = "wrong_id"
+            all_ids = [a.get("video_id") for a in assignments if a.get("video_id") is not None]
+            has_dup = _has_duplicates(all_ids)
+            matching = [a for a in assignments if a.get("video_id") == target_id]
+
+            if has_dup or len(matching) > 1:
+                id_status = "duplicate_id"
+                pred_item = None
+            elif len(matching) == 1:
+                if len(assignments) == 1:
+                    id_status = "valid"
+                    pred_item = matching[0]
+                else:
+                    id_status = "extra_id"
+                    pred_item = None
             else:
-                id_status = "missing_id"
-            pred_item = None
+                if any(a.get("video_id") is not None for a in assignments):
+                    id_status = "wrong_id"
+                else:
+                    id_status = "missing_id"
+                pred_item = None
 
     id_valid = (id_status == "valid")
     l1_match = False
     l2_match = False
     evidence_valid = False
-    pred_paths = []
+    pred_paths: List[Any] = []
 
     if id_valid and pred_item is not None:
-        pred_paths = pred_item.get("shelf_paths", [])
-        primary_pred = [p.strip().lower() for p in pred_paths[0]] if pred_paths and pred_paths[0] else []
+        raw_paths = pred_item.get("shelf_paths", [])
+        if isinstance(raw_paths, list):
+            pred_paths = raw_paths
+        primary_pred: List[str] = []
+        if pred_paths and isinstance(pred_paths[0], list):
+            primary_pred = [
+                p.strip().lower()
+                for p in pred_paths[0]
+                if isinstance(p, str) and p.strip()
+            ]
 
         if primary_pred and gold_path:
             l1_match = primary_pred[0] == gold_path[0]
             if l1_match and len(primary_pred) > 1 and len(gold_path) > 1:
                 l2_match = primary_pred[1] == gold_path[1]
 
-        # Grounding check
+        # Grounding check: evidence quote must occur inside ONE excerpt
         evidence_quote = pred_item.get("evidence_quote", "")
-        if item.get("card") and item["card"].get("clips"):
-            clips_text = " ".join(c.get("text", "") for c in item["card"].get("clips", []))
+        if not isinstance(evidence_quote, str):
+            evidence_quote = ""
+        card = item.get("card") or {}
+        clips = card.get("clips") or card.get("excerpts") or []
+        if clips:
             if evidence_quote and evidence_quote != "metadata-only":
-                evidence_valid = evidence_quote in clips_text
+                evidence_valid = any(
+                    isinstance(c, dict)
+                    and isinstance(c.get("text"), str)
+                    and evidence_quote in c["text"]
+                    for c in clips
+                )
+            else:
+                evidence_valid = False
         else:
             evidence_valid = (
                 evidence_quote in ("metadata-only", "")
@@ -260,7 +306,7 @@ def evaluate_single_item(
         "title": item["title"],
         "platform": item["platform"],
         "gold_path": item.get("shelf_path", []),
-        "predicted_path": pred_paths[0] if pred_paths else [],
+        "predicted_path": pred_paths[0] if (pred_paths and isinstance(pred_paths[0], list)) else [],
         "l1_match": l1_match,
         "l2_match": l2_match,
         "evidence_quote": evidence_quote,
@@ -340,7 +386,7 @@ def run_benchmark(
     print("\nRunning Stage 2 Assignment evaluation...")
     for idx, item in enumerate(gold_items, 1):
         card_obj = format_card_for_prompt(item)
-        cards_str = json.dumps([card_obj], indent=2, ensure_ascii=False)
+        cards_str = library_cards.card_text(card_obj)
         full_prompt = base_prompt.replace("{{CARDS}}", cards_str)
 
         try:
