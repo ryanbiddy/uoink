@@ -1081,9 +1081,21 @@ class ProofHarness:
             if outcome in {"rejected", "error"}:
                 rejection_reason = str(resp_data.get("rejected") or resp_data.get("error") or "Submit rejected")
                 err = submit_resp.get("error") if isinstance(submit_resp.get("error"), dict) else {}
-                if err.get("code") in {"invalid_request", "validation_error", "unauthorized", "unknown_tool"}:
-                    # A harness/schema fault, not a model result: abort loudly
-                    # rather than leave leases held and poll for expiry.
+                field = str((err.get("details") or {}).get("field") or "")
+                if err.get("code") == "invalid_request" and field.startswith("result"):
+                    # The MODEL produced a result the frozen schema rejects (for
+                    # example an "assigned" result carrying a stray "reason"). That
+                    # is a scored rejection of model output, not a harness fault:
+                    # record it, release the lease so the retry policy can run.
+                    outcome = "rejected"
+                    rejection_reason = f"model output failed schema: {err.get('message', '')[:160]}"
+                    print(f"[proof] rejected model output {vid}: {rejection_reason}", file=sys.stderr, flush=True)
+                    self.http_tool_call("claim_library_work", {
+                        "action": "release", "work_id": it["work_id"], "client_id": "proof-harness",
+                        "attempt_token": it["attempt_token"], "reason": "model output failed schema"})
+                elif err.get("code") in {"invalid_request", "validation_error", "unauthorized", "unknown_tool"}:
+                    # A harness/schema fault on a harness-controlled field: abort
+                    # loudly rather than leave leases held and poll for expiry.
                     print(f"[proof] ABORT submit {vid}: {json.dumps(submit_resp)[:400]}", file=sys.stderr, flush=True)
                     raise ProofRunError(f"submit rejected at schema level for {vid}: {rejection_reason[:200]}")
                 with self._lock:
