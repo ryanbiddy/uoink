@@ -1177,6 +1177,19 @@ class ProofHarness:
                 time.sleep(0.2)
                 continue
             idle_polls = 0
+            # Contract: at most one retry per rejected model result in the proof.
+            # A third claim can happen because a rejected attempt is no longer
+            # cancellable; refuse it here without a model call.
+            over_limit = [it for it in work_items if int(it.get("attempt_number", 1) or 1) > 2]
+            work_items = [it for it in work_items if int(it.get("attempt_number", 1) or 1) <= 2]
+            for it in over_limit:
+                print(f"[proof] retry limit reached for {it['video_id']}; cancelling attempt {it.get('attempt_number')}",
+                      file=sys.stderr, flush=True)
+                self.http_tool_call("claim_library_work", {
+                    "action": "cancel", "work_id": it["work_id"], "client_id": "proof-harness",
+                    "attempt_token": it["attempt_token"], "reason": "proof retry limit (1 retry)"})
+            if not work_items:
+                continue
             receipts = self.process_batch(work_items)
             with self._lock:
                 for r in receipts:
@@ -1370,9 +1383,14 @@ class ProofHarness:
         response_bytes = sum(a["response_bytes"] for a in self.attempts)
         attempt_wall_sum = sum(a["wall_ms"] for a in self.attempts)
         run_wall_ms = int((time.perf_counter() - self.run_start_time) * 1000)
-        min_wall_for_concurrency = math.ceil(attempt_wall_sum / self.concurrency)
-        total_wall_ms = max(run_wall_ms, min_wall_for_concurrency)
-        total_wall_ms = min(total_wall_ms, 7200000)
+        if self.calls:
+            # Batched runs: every attempt in a batch carries the same call
+            # wall time, so the per-attempt sum overstates elapsed time by the
+            # batch size. The measured run clock is the total.
+            total_wall_ms = run_wall_ms
+        else:
+            min_wall_for_concurrency = math.ceil(attempt_wall_sum / self.concurrency)
+            total_wall_ms = max(run_wall_ms, min_wall_for_concurrency)
 
         totals = {
             "serialized_input_bytes": serialized_input_bytes,
