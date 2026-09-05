@@ -930,6 +930,10 @@ class ProofHarness:
         resp_data = submit_resp.get("result", submit_resp)
 
         outcome = resp_data.get("outcome", "rejected" if not submit_resp.get("ok") else "error")
+        # PROOF-PLAN receipt contract: a service outcome "error" maps to the
+        # receipt outcome "rejected"; the raw result/response keep "error".
+        if outcome == "error":
+            outcome = "rejected"
         rejection_reason = None
         if outcome in {"rejected", "error"}:
             rejection_reason = str(resp_data.get("rejected") or resp_data.get("error") or "Submit rejected")
@@ -1039,15 +1043,16 @@ class ProofHarness:
             single_prompt_bytes = len(single_prompt.encode("utf-8"))
             serialized_input_bytes = single_prompt_bytes + schema_bytes
 
-            raw_item_resp: Dict[str, Any] = {
-                "structured_output": {"results": [{"video_id": vid, "result": res}]}
-            }
-            if raw_env.get("model"):
-                raw_item_resp["model"] = raw_env["model"]
-            if raw_env.get("usage"):
-                raw_item_resp["usage"] = raw_env["usage"]
-            if raw_env.get("total_cost_usd") is not None:
-                raw_item_resp["total_cost_usd"] = raw_env["total_cost_usd"]
+            # PROOF-PLAN: save the CLI envelope intact (usage, modelUsage, cost,
+            # timing, session). In a batched call every item in the batch
+            # carries the same envelope; the per-item result is also stored in
+            # attempt.result. The envelope is the provenance for usage.model.
+            raw_item_resp: Dict[str, Any] = dict(raw_env) if raw_env else {}
+            if "structured_output" in raw_item_resp:
+                # Batched call: the receipt contract keys structured_output to
+                # this item; the full batch output is retained beside it.
+                raw_item_resp["batch_structured_output"] = raw_item_resp["structured_output"]
+            raw_item_resp["structured_output"] = {"results": [{"video_id": vid, "result": res}]}
 
             response_text = canonical(raw_item_resp)
             response_bytes = len(response_text.encode("utf-8"))
@@ -1077,6 +1082,10 @@ class ProofHarness:
             resp_data = submit_resp.get("result", submit_resp)
 
             outcome = resp_data.get("outcome", "rejected" if not submit_resp.get("ok") else "error")
+            # PROOF-PLAN receipt contract: a service outcome "error" maps to the
+            # receipt outcome "rejected"; the raw result/response keep "error".
+            if outcome == "error":
+                outcome = "rejected"
             rejection_reason = None
             if outcome in {"rejected", "error"}:
                 rejection_reason = str(resp_data.get("rejected") or resp_data.get("error") or "Submit rejected")
@@ -1137,7 +1146,10 @@ class ProofHarness:
                     "response_text": response_text,
                     "response_bytes": response_bytes,
                     "serialized_input_bytes": serialized_input_bytes,
-                    "wall_ms": wall_ms,
+                    # Attributed share of the batched call (call wall / batch
+                    # size) so per-attempt sums stay within the run's concurrency
+                    # capacity; the full call wall is in audit_extensions.calls.
+                    "wall_ms": max(1, wall_ms // max(1, len(items))),
                     "outcome": outcome,
                     "rejection_reason": rejection_reason,
                     "result": res,
@@ -1474,6 +1486,7 @@ class ProofHarness:
             "audit_extensions": {
                 "calls": self.calls,
                 "usage_totals": usage_totals,
+                "wall_ms_attribution": "attempt.wall_ms = call wall_ms // batch_size; call totals in calls[]",
             },
         }
 
