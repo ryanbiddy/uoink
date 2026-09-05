@@ -327,6 +327,203 @@ class InductionHarness:
         }
         return proposal
 
+    # ---- real model execution (subscription client) ---------------------------
+    BATCH_OUTPUT_SCHEMA: Dict[str, Any] = {
+        "type": "object",
+        "properties": {
+            "candidates": {"type": "array", "items": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1, "maxItems": 3},
+                    "definition": {"type": "string", "minLength": 1},
+                    "include": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1},
+                    "exclude": {"type": "array", "items": {"type": "string", "minLength": 1}},
+                    "sibling_cues": {"type": "array", "items": {"type": "object", "properties": {
+                        "include_cue": {"type": "string"}, "confusing_alternative": {"type": "string"},
+                        "evidence_needed": {"type": "string"}},
+                        "required": ["include_cue", "confusing_alternative", "evidence_needed"], "additionalProperties": False}},
+                    "supporting_evidence": {"type": "array", "items": {"type": "object", "properties": {
+                        "video_id": {"type": "string"}, "source_revision": {"type": "string"}, "card_hash": {"type": "string"},
+                        "excerpt_id": {"type": "string"}, "quote": {"type": "string", "minLength": 1}},
+                        "required": ["video_id", "source_revision", "card_hash", "excerpt_id", "quote"], "additionalProperties": False}},
+                },
+                "required": ["path", "definition", "include", "exclude", "sibling_cues", "supporting_evidence"],
+                "additionalProperties": False}},
+            "dispositions": {"type": "array", "items": {
+                "type": "object",
+                "properties": {
+                    "video_id": {"type": "string"},
+                    "disposition": {"enum": ["proposed_concept", "existing_concept", "still_unmapped", "unsupported"]},
+                    "candidate_paths": {"type": "array", "items": {"type": "array", "items": {"type": "string"}}},
+                    "existing_shelf_ids": {"type": "array", "items": {"type": "string"}},
+                    "evidence": {"type": "array", "items": {"type": "object", "properties": {
+                        "video_id": {"type": "string"}, "source_revision": {"type": "string"}, "card_hash": {"type": "string"},
+                        "excerpt_id": {"type": "string"}, "quote": {"type": "string"}},
+                        "required": ["video_id", "source_revision", "card_hash", "excerpt_id", "quote"], "additionalProperties": False}},
+                    "reason": {"type": "string"},
+                },
+                "required": ["video_id", "disposition", "candidate_paths", "existing_shelf_ids", "evidence", "reason"],
+                "additionalProperties": False}},
+        },
+        "required": ["candidates", "dispositions"],
+        "additionalProperties": False,
+    }
+
+    def _claude_call(self, call_id: str, attempt_ids: List[str], prompt: str, schema: Dict[str, Any]) -> Tuple[dict, dict]:
+        """One real `claude -p` process, recorded as an immutable call record with the
+        exact stdin/stdout/stderr bytes on disk. Returns (call_record, envelope)."""
+        schema_text = json.dumps(schema, separators=(",", ":"), ensure_ascii=False)
+        exe = shutil.which("claude") or "claude"
+        argv = [exe, "-p", "--json-schema", schema_text, "--output-format", "json", "--tools", "",
+                "--no-session-persistence", "--model", self.model]
+        stdin_b = prompt.encode("utf-8")
+        timeout = int(os.environ.get("UOINK_PROOF_CALL_TIMEOUT", "900"))
+        start = time.monotonic_ns()
+        timed_out = False
+        try:
+            res = subprocess.run(argv, input=stdin_b, capture_output=True, timeout=timeout)
+            stdout_b, stderr_b, exit_status = res.stdout, res.stderr, res.returncode
+        except subprocess.TimeoutExpired as exc:
+            timed_out = True
+            stdout_b, stderr_b, exit_status = exc.stdout or b"", exc.stderr or b"", -1
+        end = time.monotonic_ns()
+        (self.calls_dir / f"{call_id}.stdin").write_bytes(stdin_b)
+        (self.calls_dir / f"{call_id}.stdout").write_bytes(stdout_b)
+        (self.calls_dir / f"{call_id}.stderr").write_bytes(stderr_b)
+        print(f"[induce] {call_id}: {len(attempt_ids)} ids, {(end - start) // 1_000_000} ms, exit {exit_status}, "
+              f"stdout {len(stdout_b)} B", file=sys.stderr, flush=True)
+        envelope: Dict[str, Any] = {}
+        try:
+            envelope = json.loads(stdout_b.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            envelope = {}
+        usage = envelope.get("usage") if isinstance(envelope.get("usage"), dict) else None
+        record = {
+            "call_id": call_id,
+            "attempt_ids": attempt_ids,
+            "argv": argv,
+            "schema_text": schema_text,
+            "schema_sha256": sha(schema_text.encode("utf-8")),
+            "stdin": make_artifact_ref(f"calls/{call_id}.stdin", stdin_b),
+            "stdout": make_artifact_ref(f"calls/{call_id}.stdout", stdout_b),
+            "stderr": make_artifact_ref(f"calls/{call_id}.stderr", stderr_b),
+            "start_monotonic_ns": start,
+            "end_monotonic_ns": end,
+            "exit_status": exit_status,
+            "timed_out": timed_out,
+            "cancellation": None,
+            "usage": usage,
+            "modelUsage": envelope.get("modelUsage") if isinstance(envelope.get("modelUsage"), dict) else None,
+            "cli_estimated_cost_usd": envelope.get("total_cost_usd") if isinstance(envelope.get("total_cost_usd"), (int, float)) else None,
+        }
+        return record, envelope
+
+    def run_real(self, unmapped_ids: List[str], cards_by_id: Dict[str, dict],
+                 archived_receipt_hash: str, manifest_hash: str, t0_mono_ns: int) -> Tuple[Path, Path]:
+        """Batch induction calls, then one consolidation call whose structured output IS
+        the proposal (the validator requires byte-for-byte identity). No post-processing
+        of model output; a malformed consolidation fails the run visibly."""
+        from validate_proof_receipts import PROPOSAL_SCHEMA
+        batch_template = (ROOT / "scripts" / "librarian" / "prompts" / "induce-batch.md").read_text(encoding="utf-8")
+        cons_template = (ROOT / "scripts" / "librarian" / "prompts" / "induce-consolidate.md").read_text(encoding="utf-8")
+        if batch_template.count("{{TAXONOMY}}") != 1 or batch_template.count("{{CARDS}}") != 1 or cons_template.count("{{PROPOSALS}}") != 1:
+            raise RuntimeError("induction prompt placeholders are not exactly one each")
+        batch_prompt_bytes = batch_template.encode("utf-8")
+        consolidation_prompt_bytes = cons_template.encode("utf-8")
+        (self.prompts_dir / "batch_prompt.md").write_bytes(batch_prompt_bytes)
+        (self.prompts_dir / "consolidation_prompt.md").write_bytes(consolidation_prompt_bytes)
+        tax_raw = self.v1_taxonomy_path.read_bytes()
+        (self.out_dir / "taxonomy.json").write_bytes(tax_raw)
+        taxonomy_obj = json.loads(tax_raw.decode("utf-8"))
+        runner_bytes = (ROOT / "scripts" / "librarian" / "induce_run.py").read_bytes()
+        validator_bytes = (ROOT / "tests" / "validate_proof_receipts.py").read_bytes()
+        card_builder_bytes = (ROOT / "library_cards.py").read_bytes()
+        (self.fingerprints_dir / "runner").write_bytes(runner_bytes)
+        (self.fingerprints_dir / "validator").write_bytes(validator_bytes)
+        (self.fingerprints_dir / "card_builder").write_bytes(card_builder_bytes)
+
+        prefix, suffix = batch_template.split("{{CARDS}}")
+        calls: List[dict] = []
+        batches: List[dict] = []
+        batch_proposals: List[Any] = []
+        status, abort_reason = "completed", None
+        n_batches = (len(unmapped_ids) + self.batch_size - 1) // self.batch_size
+        for i in range(n_batches):
+            cid = f"call-batch-{i:02d}"
+            chunk = unmapped_ids[i * self.batch_size:(i + 1) * self.batch_size]
+            batches.append({"call_id": cid, "video_ids": chunk})
+            prompt = (prefix.replace("{{TAXONOMY}}", library_cards.serialize_card(taxonomy_obj))
+                      + "\n\n".join(library_cards.card_text(cards_by_id[vid]) for vid in chunk) + suffix)
+            record, envelope = self._claude_call(cid, chunk, prompt, self.BATCH_OUTPUT_SCHEMA)
+            calls.append(record)
+            structured = envelope.get("structured_output") if isinstance(envelope, dict) else None
+            if record["exit_status"] != 0 or not isinstance(structured, dict):
+                status, abort_reason = "aborted", f"batch call {cid} failed (exit {record['exit_status']})"
+                break
+            batch_proposals.append(structured)
+
+        proposal: Dict[str, Any] = {}
+        final_id = "call-consolidation"
+        if status == "completed":
+            cons_prompt = cons_template.replace("{{PROPOSALS}}", library_cards.serialize_card(batch_proposals))
+            record, envelope = self._claude_call(final_id, ["consolidation"], cons_prompt, PROPOSAL_SCHEMA)
+            calls.append(record)
+            structured = envelope.get("structured_output") if isinstance(envelope, dict) else None
+            if record["exit_status"] != 0 or not isinstance(structured, dict):
+                status, abort_reason = "aborted", f"consolidation call failed (exit {record['exit_status']})"
+            else:
+                proposal = structured
+        end_ns = time.monotonic_ns()
+
+        self.out_proposal_path.parent.mkdir(parents=True, exist_ok=True)
+        prop_bytes = json.dumps(proposal, indent=2, ensure_ascii=False).encode("utf-8")
+        self.out_proposal_path.write_bytes(prop_bytes)
+        receipts = {
+            "kind": "induction-receipts",
+            "schema_version": 1,
+            "run_id": f"induction-run-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}",
+            "mode": "subscription",
+            "status": status,
+            "abort_reason": abort_reason,
+            "inputs": {
+                "induction_manifest_sha256": sha(self.induction_manifest_path.read_bytes()),
+                "archived_receipts_sha256": archived_receipt_hash,
+                "taxonomy_file_sha256": sha(tax_raw),
+                "batch_prompt_sha256": sha(batch_prompt_bytes),
+                "consolidation_prompt_sha256": sha(consolidation_prompt_bytes),
+            },
+            "batch_prompt": make_artifact_ref("prompts/batch_prompt.md", batch_prompt_bytes),
+            "consolidation_prompt": make_artifact_ref("prompts/consolidation_prompt.md", consolidation_prompt_bytes),
+            "taxonomy": make_artifact_ref("taxonomy.json", tax_raw),
+            "calls": calls,
+            "batches": batches,
+            "consolidation_call_id": final_id,
+            "proposal": proposal,
+            "proposal_artifact": make_artifact_ref(self.out_proposal_path.name, prop_bytes),
+            "accounting": call_accounting(calls),
+            "execution": {
+                "git_sha": get_git_sha(),
+                "start_monotonic_ns": t0_mono_ns,
+                "end_monotonic_ns": end_ns,
+                "fingerprints": {
+                    "runner": make_artifact_ref("fingerprints/runner", runner_bytes),
+                    "validator": make_artifact_ref("fingerprints/validator", validator_bytes),
+                    "card_builder": make_artifact_ref("fingerprints/card_builder", card_builder_bytes),
+                },
+            },
+        }
+        try:
+            rel_prop = self.out_proposal_path.relative_to(self.out_dir).as_posix()
+            receipts["proposal_artifact"] = make_artifact_ref(rel_prop, prop_bytes)
+        except ValueError:
+            (self.out_dir / "taxonomy-v2-proposal.json").write_bytes(prop_bytes)
+            receipts["proposal_artifact"] = make_artifact_ref("taxonomy-v2-proposal.json", prop_bytes)
+        receipts_path = self.out_dir / "receipts.json"
+        receipts_path.write_bytes(json.dumps(receipts, indent=2, ensure_ascii=False).encode("utf-8"))
+        print(f"[induce] {status}: {len(calls)} calls; proposal nodes={len(proposal.get('nodes', []))}, "
+              f"ledger={len(proposal.get('coverage_ledger', []))}", file=sys.stderr, flush=True)
+        return self.out_proposal_path, receipts_path
+
     def run(self) -> Tuple[Path, Path]:
         t0_mono_ns = time.monotonic_ns()
         self.out_dir.mkdir(parents=True, exist_ok=True)
@@ -336,10 +533,9 @@ class InductionHarness:
 
         unmapped_ids, cards_by_id, archived_receipt_hash, manifest_hash = self.load_unmapped_cards()
 
-        if self.mock:
-            proposal = self.build_mock_proposal(unmapped_ids, cards_by_id)
-        else:
-            raise NotImplementedError("Real model execution requires API / CLI credentials not available in mock mode.")
+        if not self.mock:
+            return self.run_real(unmapped_ids, cards_by_id, archived_receipt_hash, manifest_hash, t0_mono_ns)
+        proposal = self.build_mock_proposal(unmapped_ids, cards_by_id)
 
         # Save proposal to output file
         self.out_proposal_path.parent.mkdir(parents=True, exist_ok=True)
