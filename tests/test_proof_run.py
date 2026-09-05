@@ -207,7 +207,7 @@ def test_mock_run_end_to_end(tmp_path, clean_env):
     # Load and verify receipts document
     receipts_data = json.loads(receipts_path.read_text(encoding="utf-8"))
 
-    assert receipts_data["schema_version"] == 1
+    assert receipts_data["schema_version"] == 2  # v2 receipt contract (STAGE2-GATE)
     assert receipts_data["contract_version"] == "phase2-v1.2-2026-09-04"
     assert receipts_data["run_id"] == "test-run-p-mock"
     assert receipts_data["mode"] == "mock"

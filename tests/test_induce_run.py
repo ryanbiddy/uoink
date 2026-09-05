@@ -66,7 +66,7 @@ def test_induce_mock_run_end_to_end(test_tmp_dir):
 
     # 1. Validate proposal structure
     proposal = json.loads(out_proposal.read_text(encoding="utf-8"))
-    assert proposal["schema_version"] == 1
+    assert "nodes" in proposal and "coverage_ledger" in proposal  # PROPOSAL_SCHEMA shape
     assert proposal["parent_version_id"] == "taxonomy-v1-2026-09-04"
     assert "nodes" in proposal
     assert "coverage_ledger" in proposal
@@ -93,12 +93,13 @@ def test_induce_mock_run_end_to_end(test_tmp_dir):
 
     # 3. Check sibling disambiguation cues
     dev_tools = nodes_by_id.get("developer-tools", {})
-    assert "sibling_disambiguation" in dev_tools
-    assert len(dev_tools["sibling_disambiguation"]) >= 2
-    for cue in dev_tools["sibling_disambiguation"]:
-        assert "sibling_shelf_id" in cue
+    # Validator contract (PROPOSAL_SCHEMA): sibling_cues[{include_cue, confusing_alternative, evidence_needed}]
+    assert "sibling_cues" in dev_tools
+    assert len(dev_tools["sibling_cues"]) >= 2
+    for cue in dev_tools["sibling_cues"]:
+        assert "include_cue" in cue
         assert "confusing_alternative" in cue
-        assert "distinguishing_evidence" in cue
+        assert "evidence_needed" in cue
 
     # 4. Check supporting evidence threshold (>= 5 distinct cards per new concept, quotes <= 24 words)
     new_concepts = proposal["diff"]["added"]
@@ -129,15 +130,15 @@ def test_induce_mock_run_end_to_end(test_tmp_dir):
     ledger_vids = {entry["video_id"] for entry in ledger}
     assert len(ledger_vids) == 225
 
-    statuses = {entry["status"] for entry in ledger}
+    statuses = {entry["disposition"] for entry in ledger}
     assert "proposed_concept" in statuses
     assert "unsupported" in statuses
 
     for entry in ledger:
-        assert entry["status"] in {"proposed_concept", "existing_concept", "still_unmapped", "unsupported"}
+        assert entry["disposition"] in {"proposed_concept", "existing_concept", "still_unmapped", "unsupported"}
         assert entry.get("reason") and isinstance(entry["reason"], str)
-        if entry["status"] in {"proposed_concept", "existing_concept"}:
-            assert entry.get("concept_id") in nodes_by_id
+        if entry["disposition"] in {"proposed_concept", "existing_concept"}:
+            assert entry.get("shelf_ids") and all(sid in nodes_by_id for sid in entry["shelf_ids"])
 
     # 6. Check diff against v1
     diff = proposal["diff"]
@@ -149,15 +150,17 @@ def test_induce_mock_run_end_to_end(test_tmp_dir):
     rejected = proposal["rejected_proposals"]
     assert len(rejected) >= 1
     for r in rejected:
-        assert "concept" in r
+        assert "proposal" in r
         assert "reason" in r
 
     # 8. Check induction receipts
     receipts = json.loads(receipts_file.read_text(encoding="utf-8"))
-    assert receipts["schema_version"] == 1
+    assert receipts["kind"] == "induction-receipts"  # INDUCTION_RECEIPT_SCHEMA shape
     assert receipts["mode"] == "mock"
     assert receipts["status"] == "completed"
-    assert receipts["totals"]["input_cards"] == 225
-    assert receipts["totals"]["coverage_ledger_count"] == 225
-    assert receipts["totals"]["proposed_concepts"] == len(new_concepts)
-    assert len(receipts["input_card_ids"]) == 225
+    # INDUCTION_RECEIPT_SCHEMA: batches cover all 225 ids once; one immutable record per process.
+    batched_ids = [vid for b in receipts["batches"] for vid in b["video_ids"]]
+    assert len(batched_ids) == 225 and len(set(batched_ids)) == 225
+    assert receipts["accounting"]["process_count"] == len(receipts["calls"]) >= 2
+    assert receipts["consolidation_call_id"] in {c["call_id"] for c in receipts["calls"]}
+    assert receipts["abort_reason"] is None
