@@ -36,12 +36,36 @@ def normalize_text(text: str) -> str:
     return " ".join(unicodedata.normalize("NFC", text).split())
 
 
+def load_taxonomy_paths(path: str = "docs/library/taxonomy-v1-2026-09-04.json") -> list[list[str]]:
+    """Normalised node paths of the frozen taxonomy the proof ran against."""
+    try:
+        tax = json.loads(Path(path).read_text(encoding="utf-8"))
+    except OSError:
+        return []
+    nodes = tax.get("nodes") or tax.get("shelves") or []
+    return [[str(seg).strip().lower() for seg in (n.get("path") or [])] for n in nodes if n.get("path")]
+
+
+def map_gold_to_taxonomy(norm_gold: list[str], tax_paths: list[list[str]]) -> list[str]:
+    """Scoring rule (Fable, 2026-09-05): a gold label is compared at the deepest
+    ancestor that exists in the frozen taxonomy. Gold labels are up to three
+    levels; taxonomy v1 has two, so an exact-path comparison can never match.
+    The exact-path result is still reported alongside."""
+    best: list[str] = []
+    for depth in range(len(norm_gold), 0, -1):
+        prefix = norm_gold[:depth]
+        if prefix in tax_paths:
+            return prefix
+    return best
+
+
 def score_receipts(
     receipts_data: dict,
     holdout_data: dict,
     gold_data: list[dict],
 ) -> dict:
     gold_by_id = {item["video_id"]: item for item in gold_data}
+    tax_paths = load_taxonomy_paths()
 
     # Group receipts/attempts by video_id (taking final attempt)
     receipts_by_video: Dict[str, List[dict]] = defaultdict(list)
@@ -76,6 +100,7 @@ def score_receipts(
         assigned_count = 0
         abstention_count = 0
         correct_count = 0
+        exact_count = 0
         evidence_valid_count = 0
         evidence_checked_count = 0
 
@@ -120,7 +145,10 @@ def score_receipts(
 
             norm_pred = [p.strip().lower() for p in primary_shelf]
             norm_gold = [p.strip().lower() for p in gold_shelf_path]
-            is_correct = (norm_pred == norm_gold) if norm_pred and norm_gold else False
+            exact_match = (norm_pred == norm_gold) if norm_pred and norm_gold else False
+            mapped_gold = map_gold_to_taxonomy(norm_gold, tax_paths) if tax_paths else norm_gold
+            is_correct = (norm_pred == mapped_gold) if norm_pred and mapped_gold else False
+            exact_count += 1 if exact_match else 0
 
             if is_correct:
                 correct_count += 1
@@ -151,6 +179,8 @@ def score_receipts(
                 "status": "assigned",
                 "outcome": "accepted",
                 "primary_pred": primary_shelf,
+                "mapped_gold": mapped_gold,
+                "exact_match": exact_match,
                 "gold_path": gold_shelf_path,
                 "is_correct": is_correct,
                 "evidence_valid": evidence_valid,
@@ -175,6 +205,7 @@ def score_receipts(
             "assigned_count": assigned_count,
             "abstention_count": abstention_count,
             "correct_count": correct_count,
+            "exact_path_correct_count": exact_count,
             "coverage": coverage,
             "precision": precision,
             "coverage_pass": coverage_pass,
