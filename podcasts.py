@@ -1172,6 +1172,15 @@ def _record_audio_result(idx, episode_id: int, *,
              size_bytes, error, status, episode_id))
 
 
+def _is_http_url(value) -> bool:
+    """True only for absolute http:// or https:// URLs with a host."""
+    try:
+        parts = urlparse(str(value or ""))
+    except ValueError:
+        return False
+    return parts.scheme in ("http", "https") and bool(parts.netloc)
+
+
 def download_episode_audio(idx, episode_id: int, *,
                             data_root: Path,
                             ytdlp_cmd: list[str] | None = None,
@@ -1189,6 +1198,14 @@ def download_episode_audio(idx, episode_id: int, *,
                 "error": f"feed {episode['feed_id']} not found"}
     if not episode.get("audio_url"):
         return {"ok": False, "error": "episode has no audio_url"}
+    # SEC-01 (security review 2026-09-04): the enclosure URL is attacker-
+    # controlled feed content. Only http(s) may reach yt-dlp, and it always
+    # follows a "--" so it can never be parsed as an option (e.g. --exec).
+    if not _is_http_url(episode["audio_url"]):
+        _record_audio_result(idx, episode_id, local_path=None, size_bytes=0,
+                             error="audio_url is not an http(s) URL",
+                             status="error")
+        return {"ok": False, "error": "audio_url is not an http(s) URL"}
 
     out_path = _episode_audio_path(Path(data_root), feed, episode)
     # Idempotent -- skip re-download when the canonical path already
@@ -1233,6 +1250,7 @@ def download_episode_audio(idx, episode_id: int, *,
         "--max-filesize", str(_AUDIO_MAX_BYTES),
         # Output template: yt-dlp will append .mp3 after the postprocess
         "-o", str(out_stem) + ".%(ext)s",
+        "--",
         episode["audio_url"],
     ]
     log.info("podcast download: episode_id=%d url=%s -> %s",

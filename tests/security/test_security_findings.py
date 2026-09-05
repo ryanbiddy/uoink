@@ -17,54 +17,60 @@ import podcasts
 import server
 
 
-@pytest.mark.xfail(
-    reason="SEC-01: podcasts.py does not validate audio_url scheme and does not use '--' before URL in yt-dlp call",
-    strict=True,
-)
-def test_sec_01_podcast_audio_url_flag_injection(
+def _seed_episode(tmp_path, audio_url: str):
+    import index as index_mod
+    import podcasts
+    idx = index_mod.Index.open(tmp_path / "index.db")
+    feed = podcasts.add_feed(idx, "https://show.example/feed.xml")
+    podcasts.upsert_episodes(idx, feed["id"], [{
+        "guid": "ep-1", "title": "Episode 1", "audio_url": audio_url,
+        "published_at": "2026-08-01T12:00:00Z",
+    }])
+    episode_id = idx._conn.execute(
+        "SELECT id FROM podcast_episodes WHERE guid='ep-1'").fetchone()[0]
+    return idx, episode_id
+
+
+def test_sec_01_flag_like_enclosure_url_is_rejected_before_ytdlp(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    """Demonstrate SEC-01: An enclosure URL starting with '--' is treated as a command flag."""
-    recorded_args: list[str] = []
+    """SEC-01 (fixed 2026-09-04): an enclosure URL that is not http(s) never
+    reaches yt-dlp, so `--exec=...` in a feed cannot become an option."""
+    import podcasts
+    idx, episode_id = _seed_episode(tmp_path, "--exec=calc.exe")
+    spawned: list[list[str]] = []
+    monkeypatch.setattr(subprocess, "run",
+                        lambda args, **kw: spawned.append(list(args)))
+    result = podcasts.download_episode_audio(
+        idx, episode_id, data_root=tmp_path / "audio",
+        ytdlp_cmd=["yt-dlp"], timeout_sec=5)
+    assert result["ok"] is False
+    assert "http" in result["error"]
+    assert spawned == []
+    assert podcasts.get_episode(idx, episode_id)["status"] == "error"
 
-    def fake_subprocess_run(args, **kwargs):
-        recorded_args.extend(args)
-        # Simulate yt-dlp execution
-        return subprocess.CompletedProcess(args=args, returncode=0, stdout="", stderr="")
 
-    monkeypatch.setattr(subprocess, "run", fake_subprocess_run)
+def test_sec_01_http_enclosure_url_follows_double_dash(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """SEC-01 (fixed 2026-09-04): a legitimate URL is passed after `--`, so
+    even a URL that yt-dlp could mis-parse is positional."""
+    import podcasts
+    idx, episode_id = _seed_episode(tmp_path, "https://cdn.example/1.mp3")
+    spawned: list[list[str]] = []
 
-    class FakeIndex:
-        def __init__(self):
-            self.row = {
-                "id": 1,
-                "feed_id": 1,
-                "status": "new",
-                "audio_url": "--exec=calc.exe",
-                "local_audio_path": None,
-            }
-
-        def get_episode(self, episode_id):
-            return self.row
-
-        def update_episode_status(self, episode_id, status):
-            self.row["status"] = status
-
-        def record_episode_audio(self, *args, **kwargs):
-            pass
-
-    fake_idx = FakeIndex()
-    # The call should either reject non-HTTP(S) audio_url or ensure '--' precedes the URL.
-    result = podcasts.download_podcast_episode(
-        fake_idx,
-        episode_id=1,
-        out_path=tmp_path / "ep1.mp3",
-        ytdlp_cmd=["python", "-m", "yt_dlp"],
-    )
-
-    # Secure behavior: must reject URLs that do not start with http/https
-    assert result.get("ok") is False, "Expected rejection of malicious '--exec' URL"
-    assert "--" in recorded_args, "Expected '--' argument separator before URL in yt-dlp invocation"
+    def fake_run(args, **kw):
+        spawned.append(list(args))
+        return subprocess.CompletedProcess(args=args, returncode=1,
+                                           stdout="", stderr="offline")
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    podcasts.download_episode_audio(
+        idx, episode_id, data_root=tmp_path / "audio",
+        ytdlp_cmd=["yt-dlp"], timeout_sec=5)
+    assert len(spawned) == 1
+    args = spawned[0]
+    assert args[-1] == "https://cdn.example/1.mp3"
+    assert args[-2] == "--"
 
 
 def test_sec_02_recall_hook_unfenced_injection() -> None:
