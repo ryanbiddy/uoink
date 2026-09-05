@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import shutil
+
+import pytest
 
 import index as index_mod
 import provenance
@@ -82,13 +85,13 @@ def test_migration_and_python_backfill_leave_no_nulls(tmp_path):
                 "UPDATE yoinks SET source_type=NULL "
                 "WHERE video_id IN ('legacy-x', 'legacy-note')"
             )
-            conn.execute("DELETE FROM schema_version WHERE version=25")
+            conn.execute("DELETE FROM schema_version WHERE version>=25")
     finally:
         idx.close()
 
     repaired = index_mod.Index.open(db_path)
     try:
-        assert repaired.schema_version() == 25
+        assert repaired.schema_version() == index_mod.latest_schema_version()
         assert repaired.get_yoink("legacy-x")["source_type"] == "x_thread"
         assert repaired.get_yoink("legacy-note")["source_type"] == "note"
         assert repaired._conn.execute(
@@ -96,3 +99,44 @@ def test_migration_and_python_backfill_leave_no_nulls(tmp_path):
         ).fetchone()[0] == 0
     finally:
         repaired.close()
+
+
+@pytest.mark.parametrize("key", ["source_type", "kind", "type"])
+@pytest.mark.parametrize("alias, expected", list(provenance._KIND_ALIASES.items()))
+def test_0026_reconciles_all_explicit_metadata_aliases(tmp_path, monkeypatch, key, alias, expected):
+    migrations = index_mod._MIGRATIONS_DIR
+    old = tmp_path / "schema25"
+    old.mkdir()
+    for path in migrations.glob("*.sql"):
+        if int(path.name.split("_", 1)[0]) <= 25:
+            shutil.copy2(path, old / path.name)
+    monkeypatch.setattr(index_mod, "_MIGRATIONS_DIR", old)
+    path = tmp_path / "upgrade.db"
+    meta = {key: f" {alias.upper()} ", "url": "https://x.com/a/status/1"}
+    with index_mod.Index.open(path) as idx:
+        idx.upsert_yoink(_record("explicit", platform="x", metadata_json=json.dumps(meta)))
+        with idx.write_transaction() as conn:
+            conn.execute("UPDATE yoinks SET source_type='x_thread'")
+    monkeypatch.setattr(index_mod, "_MIGRATIONS_DIR", migrations)
+    with index_mod.Index.open(path) as idx:
+        assert idx.get_yoink("explicit")["source_type"] == expected
+        assert provenance.derive_source_type(platform="x", metadata_json=meta) == expected
+    with index_mod.Index.open(path) as idx:
+        assert idx.get_yoink("explicit")["source_type"] == expected
+
+
+def test_metadata_kind_wins_over_sidecar_and_invalid_higher_priority_kind(tmp_path):
+    assert provenance.derive_source_type(
+        platform="x", metadata_json={"source_type": "unrecognized", "kind": "x_article", "type": "note"},
+        sidecar={"source_type": "video"}) == "x_article"
+    with index_mod.Index.open(tmp_path / "precedence.db") as idx:
+        for vid, metadata in [("invalid", "{bad json"), ("ordered", json.dumps({
+                "source_type": "invalid", "kind": "x_article", "type": "note"}))]:
+            idx.upsert_yoink(_record(vid, platform="x", metadata_json=metadata))
+        with idx.write_transaction() as conn:
+            conn.execute("UPDATE yoinks SET source_type='x_thread'")
+            sql = (index_mod._MIGRATIONS_DIR / "0026_provenance_precedence.sql").read_text()
+            for stmt in index_mod._iter_sql_statements(sql):
+                conn.execute(stmt)
+        assert idx.get_yoink("ordered")["source_type"] == "x_article"
+        assert idx.get_yoink("invalid")["source_type"] == "x_thread"

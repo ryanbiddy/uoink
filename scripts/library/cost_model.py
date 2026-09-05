@@ -1,9 +1,8 @@
 """Measure evidence-card size on a uoink index COPY and price one Librarian pass.
 
-Reads the index read-only. Never writes. Does not import clips.py, index.py,
-or uoink_mcp_tools.py (those modules bind the live helper). Card construction
-copies get_evidence_card: 10 clips spread across the timeline + title,
-channel, summary hint.
+Reads the index read-only. Never writes or binds the helper. Card selection
+and rendering use library_cards, shared with get_evidence_card and dryrun.
+The default full profile keeps ten untruncated clips.
 
 Usage (from the worktree root):
     python scripts/library/cost_model.py
@@ -33,11 +32,8 @@ DEFAULT_INDEX = Path(
     )
 )
 
-# Match uoink_mcp_tools.get_evidence_card (do not import that module).
+# The shared builder owns the default full profile.
 N_CLIPS_DEFAULT = 10
-SUMMARY_HINT_CHARS = 600
-SUMMARY_HINT_READ_BYTES = 8192
-MD_META_LINE_RE = re.compile(r"^\s*(\*\*[^*]+:\*\*|#\s|---\s*$|!\[|## Thumbnail)")
 
 # Dispatch: assign output ~400 tokens/card. Induce output is not measured
 # (no model is called); 6_000 is a filled 40–80 node taxonomy JSON.
@@ -112,47 +108,6 @@ def _connect_ro(path: Path) -> sqlite3.Connection:
     return conn
 
 
-def _spread_clips(rows: list[dict], n: int) -> list[dict]:
-    """Same rule as uoink_mcp_tools._spread_clips."""
-    if len(rows) <= n:
-        return list(rows)
-    picked = []
-    for i in range(n):
-        lo = (i * len(rows)) // n
-        hi = ((i + 1) * len(rows)) // n
-        bucket = rows[lo:hi] or rows[lo:lo + 1]
-        picked.append(
-            max(
-                bucket,
-                key=lambda r: (len(r.get("text") or ""), -(r.get("start") or 0)),
-            )
-        )
-    picked.sort(key=lambda r: (r.get("start") or 0, r.get("seq") or 0))
-    return picked
-
-
-def _summary_hint(corpus_path: str | None) -> str | None:
-    """Same rule as uoink_mcp_tools._summary_hint. Best-effort; missing file -> None."""
-    if not isinstance(corpus_path, str) or not corpus_path:
-        return None
-    try:
-        with open(corpus_path, "r", encoding="utf-8", errors="replace") as fh:
-            head = fh.read(SUMMARY_HINT_READ_BYTES)
-    except OSError:
-        return None
-    kept = [
-        line.strip()
-        for line in head.splitlines()
-        if line.strip() and not MD_META_LINE_RE.match(line)
-    ]
-    body = " ".join(kept).strip()
-    if not body:
-        return None
-    if len(body) > SUMMARY_HINT_CHARS:
-        body = body[:SUMMARY_HINT_CHARS].rsplit(" ", 1)[0] + "…"
-    return body
-
-
 def _tiktoken_count(text: str) -> int | None:
     try:
         import tiktoken  # type: ignore
@@ -171,89 +126,14 @@ def _tokens_from_chars(n_chars: int) -> float:
     return n_chars / 4.0
 
 
-def card_text(card: dict) -> str:
-    lines = [
-        f"### {card['video_id']}",
-        f"title: {card['title'] or ''}",
-        (
-            f"channel: {card['channel'] or ''} · "
-            f"source: {card['platform'] or card['source_type'] or 'unknown'} · "
-            f"saved: {str(card['yoinked_at'] or '')[:10]}"
-        ),
-    ]
-    if card.get("summary_hint"):
-        lines.append(f"summary: {card['summary_hint']}")
-    for c in card["clips"]:
-        start = c.get("start")
-        try:
-            t = round(float(start or 0))
-        except (TypeError, ValueError):
-            t = 0
-        text = re.sub(r"\s+", " ", c.get("text") or "").strip()
-        lines.append(f"[{t}s] {text}")
-    return "\n".join(lines)
+# Shared selection, packet identity, bounds and prompt rendering.
+sys.path.insert(0, str(ROOT))
+from library_cards import build_cards as _build_cards, card_text
 
 
-def build_cards(conn: sqlite3.Connection, n_clips: int = N_CLIPS_DEFAULT) -> list[dict]:
-    rows = conn.execute(
-        "SELECT video_id, slug, title, channel, topic, hook_type, yoinked_at, "
-        "source_type, platform, author, metadata_json, corpus_path "
-        "FROM yoinks WHERE deleted_at IS NULL ORDER BY yoinked_at"
-    ).fetchall()
-    have_clips = (
-        conn.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' AND name='clips'"
-        ).fetchone()
-        is not None
-    )
-    cards = []
-    for y in rows:
-        vid = y["video_id"]
-        if have_clips:
-            clip_rows = conn.execute(
-                "SELECT start, end, text, source_deep_link, seq FROM clips "
-                "WHERE video_id=? ORDER BY seq",
-                (vid,),
-            ).fetchall()
-        else:
-            clip_rows = []
-        all_clips = [dict(c) for c in clip_rows]
-        chosen = _spread_clips(all_clips, n_clips)
-        meta: dict = {}
-        try:
-            loaded = json.loads(y["metadata_json"] or "{}")
-            if isinstance(loaded, dict):
-                meta = loaded
-        except (TypeError, json.JSONDecodeError):
-            meta = {}
-        hint = _summary_hint(y["corpus_path"])
-        cards.append(
-            {
-                "video_id": vid,
-                "slug": y["slug"],
-                "title": y["title"],
-                "channel": y["channel"] or y["author"],
-                "current_topic": y["topic"],
-                "yoinked_at": y["yoinked_at"],
-                "source_type": y["source_type"],
-                "platform": y["platform"],
-                "url": meta.get("url") if isinstance(meta.get("url"), str) else None,
-                "summary_hint": hint,
-                "clips": [
-                    {
-                        "start": c.get("start"),
-                        "end": c.get("end"),
-                        "text": c.get("text"),
-                        "deep_link": c.get("source_deep_link"),
-                    }
-                    for c in chosen
-                ],
-                "clip_count": len(all_clips),
-                "chars_all_clips": sum(len(c.get("text") or "") for c in all_clips),
-                "chars_chosen_clips": sum(len(c.get("text") or "") for c in chosen),
-            }
-        )
-    return cards
+def build_cards(conn: sqlite3.Connection, n_clips: int | None = None, *,
+                profile: str = "full", clip_chars: int | None = None) -> list[dict]:
+    return _build_cards(conn, profile=profile, n_clips=n_clips, clip_chars=clip_chars)
 
 
 def stratified_sample(cards: list[dict], n: int, seed: int = 7) -> list[dict]:

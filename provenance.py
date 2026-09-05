@@ -77,14 +77,14 @@ def derive_source_type(*, platform=None, metadata_json=None,
                        sidecar_path=None, sidecar=None) -> str:
     """Derive one canonical source type from stored provenance clues.
 
-    Explicit sidecar/metadata kinds win. Platform and URL cover normal legacy
+    Explicit metadata kinds win, followed by sidecar kinds. Platform and URL cover legacy
     rows. The final ``video`` fallback matches Uoink's pre-platform corpus,
     which consisted only of YouTube captures.
     """
     metadata = _as_dict(metadata_json)
     sidecar_data = _as_dict(sidecar) or _sidecar_data(sidecar_path)
 
-    for source in (sidecar_data, metadata):
+    for source in (metadata, sidecar_data):
         for key in ("source_type", "kind", "type"):
             kind = _canonical_kind(source.get(key))
             if kind:

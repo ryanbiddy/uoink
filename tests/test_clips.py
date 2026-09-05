@@ -105,8 +105,46 @@ def test_hard_close_at_120_seconds_needs_no_punctuation() -> None:
     ])
 
     assert len(merged) == 2
-    assert merged[0]["end"] == 121
-    assert merged[0]["text"].endswith("still going")
+    assert merged[0]["end"] == 60
+    assert merged[1]["text"].startswith("still going")
+    assert all(c["end"] - c["start"] <= 120 for c in merged)
+
+
+def test_long_cue_splits_text_without_inventing_timestamps() -> None:
+    text = "long source paragraph " * 180
+    merged = clips.merge_cues([_cue(0, 12, 1053, text)])
+    assert len(merged) > 1
+    assert "".join(c["text"] for c in merged) == text.strip()
+    assert all(len(c["text"]) <= clips.MAX_COARSE_CHARS for c in merged)
+    assert all((c["start"], c["end"], c["timing"]) == (12, 1053, "coarse")
+               for c in merged)
+
+
+def test_coarse_timing_survives_storage_and_search(tmp_path) -> None:
+    with index_mod.Index.open(tmp_path / "coarse.db") as idx:
+        _seed_item(idx, "coarse", slug="coarse", title="Coarse", channel="Test")
+        idx.insert_citations("coarse", [_cue(0, 0, 1041, "coarse sentinel " * 200)])
+        assert all(c["timing"] == "coarse" for c in idx.get_clips("coarse"))
+        assert idx.search_clips("coarse sentinel")[0]["timing"] == "coarse"
+
+
+def test_open_repairs_old_oversize_clips_once(tmp_path, monkeypatch):
+    path = tmp_path / "legacy-clips.db"
+    with index_mod.Index.open(path) as idx:
+        _seed_item(idx, "legacy", slug="legacy", title="Legacy", channel="Test")
+        idx.insert_citations("legacy", [_cue(0, 0, 1041, "legacy paragraph " * 200)])
+        with idx.write_transaction() as conn:
+            conn.execute("DELETE FROM clips")
+            conn.execute("INSERT INTO clips(video_id, seq, start, end, text, cue_count) VALUES('legacy', 0, 0, 1041, ?, 1)",
+                         ("legacy paragraph " * 200,))
+    with index_mod.Index.open(path) as idx:
+        assert len(idx.get_clips("legacy")) > 1
+        assert all(len(c["text"]) <= 1200 for c in idx.get_clips("legacy"))
+    def unexpected_rebuild(*args):
+        raise AssertionError("already repaired clips must not rebuild on open")
+    monkeypatch.setattr(clips, "rebuild_all_clips", unexpected_rebuild)
+    with index_mod.Index.open(path) as idx:
+        assert idx.search_clips("legacy paragraph")
 
 
 def test_stale_track_rewind_stops_the_walk() -> None:
