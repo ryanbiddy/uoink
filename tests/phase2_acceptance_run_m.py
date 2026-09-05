@@ -59,7 +59,9 @@ def integrity(conn):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, required=True)
-    out = parser.parse_args().out.resolve()
+    parser.add_argument("--candidate", default="f53adaf", help="Reviewed candidate revision")
+    args = parser.parse_args()
+    out = args.out.resolve()
     assert out.is_relative_to(ROOT) and not out.exists(), "Use a new directory in this worktree"
     out.mkdir(parents=True)
     for key, child in (("LOCALAPPDATA", "local"), ("XDG_DATA_HOME", "data"),
@@ -70,7 +72,7 @@ def main():
     import index
 
     started = time.perf_counter()
-    report = {"candidate_sha": subprocess.check_output(["git", "rev-parse", "f53adaf"], text=True).strip(),
+    report = {"candidate_sha": subprocess.check_output(["git", "rev-parse", args.candidate], text=True).strip(),
               "checkout_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
               "python": sys.version, "sqlite": sqlite3.sqlite_version,
               "source_date": "2026-09-04", "source_bytes": SOURCE.stat().st_size,
