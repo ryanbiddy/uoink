@@ -28,6 +28,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 # The three durable boundaries defined by PHASE2-CONTRACT-2026-09-04
 BOUNDARY_BEFORE_PUBLICATION = "before_publication"
@@ -74,26 +76,10 @@ def sha256_hash(data: str | bytes) -> str:
 
 
 def _init_test_substrate_db(db_path: Path) -> None:
-    """Initializes SQLite database with schema 0027."""
-    sql_path = ROOT / "docs" / "library" / "phase2-contract" / "0027_library_substrate.sql"
-    if not sql_path.exists():
-        sql_path = ROOT / "migrations" / "0027_library_substrate.sql"
-    sql = sql_path.read_text(encoding="utf-8")
-    
-    conn = sqlite3.connect(str(db_path))
-    conn.execute("PRAGMA foreign_keys=ON")
-    # Base yoinks table for foreign keys if not in 0027
-    conn.execute(
-        """CREATE TABLE IF NOT EXISTS yoinks (
-            video_id TEXT PRIMARY KEY,
-            title TEXT,
-            channel TEXT,
-            platform TEXT,
-            deleted_at TEXT
-        )"""
-    )
-    conn.executescript(sql)
-    conn.close()
+    """Initializes SQLite database with schema 0027 via standard migrations."""
+    from index import Index
+    idx = Index.open(db_path)
+    idx.close()
 
 
 def execute_durable_operation_with_crash(
