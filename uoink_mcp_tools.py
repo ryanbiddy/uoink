@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
+import math
 import re
 import threading
 import time
@@ -2354,6 +2356,905 @@ def get_taxonomy(args: dict[str, Any]) -> dict[str, Any]:
     )
 
 
+# ===========================================================================
+# Living Library, Phase 2 stage 1 (run J, 2026-09-04): the six registry
+# adapters for the Librarian work queue.
+#
+# Contract: docs/library/PHASE2-CONTRACT-2026-09-04.md (phase2-v1-2026-09-04).
+# Frozen input schemas: docs/library/phase2-contract/tool-schemas.json. The
+# schemas below ARE that file, embedded so an installed helper needs no
+# checkout; tests/test_library_adapters.py fails the moment the two drift.
+#
+# Division of labour (contract, "Lease and submission semantics"):
+#   * library_work.py (Astra) owns domain validation and every state
+#     transition. It is reached through ONE seam, _library_service(), so the
+#     adapters build and test against an injected stand-in until that module
+#     lands, and so an installed helper without it answers an explicit
+#     `service_unavailable` error instead of raising ImportError.
+#   * These adapters check arguments against the frozen JSON Schema (the
+#     input contract, identical on every transport), attach the trusted
+#     request context (index handle, server clock, librarian_apply_enabled)
+#     and return the service's result in the contract envelope. They add no
+#     alternate domain validation and never call a model or the network.
+#   * HTTP registry only. Nothing here is on stdio this stage: the brief
+#     permits stdio only for the read-only pair that includes
+#     `get_library_status`, and the frozen schema set does not define it.
+# ===========================================================================
+
+_library_log = logging.getLogger("uoink.library")
+
+LIBRARY_CONTRACT_VERSION = "phase2-v1-2026-09-04"
+LIBRARY_SCHEMA_VERSION = 1
+LIBRARY_JSON_SCHEMA_DIALECT = "https://json-schema.org/draft/2020-12/schema"
+# User-intent capabilities minted by the dashboard confirmation route live
+# five minutes (contract, "Pins and authoritative recovery").
+LIBRARY_INTENT_TTL_MS = 5 * 60 * 1000
+LIBRARY_TOOL_NAMES = (
+    "list_library_work",
+    "claim_library_work",
+    "submit_library_result",
+    "apply_reshelving",
+    "pin_shelf",
+    "undo_library_apply",
+)
+# Service method behind each (tool, discriminator). The claim tool's `action`
+# and the apply tool's `mode` pick the method (contract, "Service surface and
+# adapter returns"); the other four map one-to-one.
+LIBRARY_SERVICE_METHODS: dict[tuple[str, str | None], str] = {
+    ("list_library_work", None): "list_work",
+    ("claim_library_work", "claim"): "claim_work",
+    ("claim_library_work", "renew"): "renew_attempt",
+    ("claim_library_work", "release"): "release_attempt",
+    ("claim_library_work", "cancel"): "cancel_attempt",
+    ("submit_library_result", None): "submit_result",
+    ("apply_reshelving", "preview"): "preview_apply",
+    ("apply_reshelving", "apply"): "apply_preview",
+    ("pin_shelf", None): "pin_shelf",
+    ("undo_library_apply", None): "undo_apply",
+}
+# The dashboard confirmation route asks the service to mint and store the
+# user-intent capability (library_user_intents is a substrate table, and the
+# service is its only writer). Not in the contract's function table; named
+# here so the seam has exactly one place to adapt if Astra names it otherwise.
+LIBRARY_INTENT_METHOD = "mint_user_intent"
+
+# The `$defs` block is byte-identical in all six frozen schemas; one copy.
+_LIBRARY_DEFS: dict[str, Any] = {
+    "id": {"type": "string", "minLength": 1, "maxLength": 200},
+    "client": {"type": "string", "minLength": 1, "maxLength": 64},
+    "key": {"type": "string", "minLength": 1, "maxLength": 200},
+    "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9_-]{43,128}$"},
+    "revision": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "evidence": {
+        "type": "object",
+        "properties": {
+            "basis": {"type": "string", "enum": ["packet", "fetched_full"]},
+            "kind": {"type": "string", "enum": ["timed_clip", "text_only"]},
+            "excerpt_id": {"$ref": "#/$defs/hash"},
+            "card_hash": {"$ref": "#/$defs/hash"},
+            "quote": {"type": "string", "minLength": 1, "maxLength": 1000},
+        },
+        "required": ["basis", "kind", "excerpt_id", "card_hash", "quote"],
+        "additionalProperties": False,
+    },
+    "membership": {
+        "type": "object",
+        "properties": {
+            "shelf_id": {"$ref": "#/$defs/id"},
+            "shelf_path": {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1, "maxLength": 100},
+                "minItems": 1,
+                "maxItems": 3,
+            },
+            "confidence": {"$ref": "#/$defs/confidence"},
+            "evidence": {"$ref": "#/$defs/evidence"},
+        },
+        "required": ["shelf_id", "shelf_path", "confidence", "evidence"],
+        "additionalProperties": False,
+    },
+    "result": {
+        "oneOf": [
+            {
+                "type": "object",
+                "properties": {
+                    "outcome": {"const": "assigned"},
+                    "memberships": {
+                        "type": "array",
+                        "items": {"$ref": "#/$defs/membership"},
+                        "minItems": 1,
+                        "maxItems": 3,
+                    },
+                },
+                "required": ["outcome", "memberships"],
+                "additionalProperties": False,
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "outcome": {
+                        "type": "string",
+                        "enum": ["unmapped", "unsupported", "error"],
+                    },
+                    "reason": {"type": "string", "minLength": 1, "maxLength": 500},
+                },
+                "required": ["outcome", "reason"],
+                "additionalProperties": False,
+            },
+        ]
+    },
+    "usage": {
+        "oneOf": [
+            {
+                "type": "object",
+                "properties": {
+                    "status": {"const": "reported"},
+                    "model": {"type": "string", "minLength": 1, "maxLength": 200},
+                    "input_tokens": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+                    "output_tokens": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+                    "cache_read_tokens": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+                    "cache_create_tokens": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+                    "wall_time_ms": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+                },
+                "required": ["status", "model", "input_tokens", "output_tokens", "wall_time_ms"],
+                "additionalProperties": False,
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "status": {"const": "unavailable"},
+                    "model": {"type": "string", "minLength": 1, "maxLength": 200},
+                    "reason": {"type": "string", "minLength": 1, "maxLength": 500},
+                    "wall_time_ms": {"type": "integer", "minimum": 0, "maximum": 2147483647},
+                },
+                "required": ["status", "reason"],
+                "additionalProperties": False,
+            },
+        ]
+    },
+}
+
+
+def _library_schema(body: dict[str, Any]) -> dict[str, Any]:
+    return {"$schema": LIBRARY_JSON_SCHEMA_DIALECT, "$defs": _LIBRARY_DEFS, **body}
+
+
+LIBRARY_TOOL_SCHEMAS: dict[str, dict[str, Any]] = {
+    "list_library_work": _library_schema({
+        "type": "object",
+        "properties": {
+            "run_id": {"$ref": "#/$defs/id"},
+            "state": {
+                "type": "string",
+                "enum": ["all", "ready", "leased", "accepted", "unmapped",
+                         "unsupported", "blocked", "cancelled"],
+            },
+            "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25},
+            "cursor": {"type": "string", "minLength": 1, "maxLength": 500},
+        },
+        "required": [],
+        "additionalProperties": False,
+    }),
+    "claim_library_work": _library_schema({
+        "oneOf": [
+            {
+                "type": "object",
+                "properties": {
+                    "action": {"const": "claim"},
+                    "run_id": {"$ref": "#/$defs/id"},
+                    "client_id": {"$ref": "#/$defs/client"},
+                    "max_items": {"type": "integer", "minimum": 1, "maximum": 12, "default": 12},
+                    "lease_seconds": {"type": "integer", "minimum": 60, "maximum": 900, "default": 900},
+                },
+                "required": ["action", "run_id", "client_id"],
+                "additionalProperties": False,
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "action": {"const": "renew"},
+                    "work_id": {"$ref": "#/$defs/id"},
+                    "client_id": {"$ref": "#/$defs/client"},
+                    "attempt_token": {"$ref": "#/$defs/token"},
+                    "lease_seconds": {"type": "integer", "minimum": 60, "maximum": 900},
+                },
+                "required": ["action", "work_id", "client_id", "attempt_token", "lease_seconds"],
+                "additionalProperties": False,
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "action": {"type": "string", "enum": ["release", "cancel"]},
+                    "work_id": {"$ref": "#/$defs/id"},
+                    "client_id": {"$ref": "#/$defs/client"},
+                    "attempt_token": {"$ref": "#/$defs/token"},
+                    "reason": {"type": "string", "minLength": 1, "maxLength": 500},
+                },
+                "required": ["action", "work_id", "client_id", "attempt_token", "reason"],
+                "additionalProperties": False,
+            },
+        ]
+    }),
+    "submit_library_result": _library_schema({
+        "type": "object",
+        "properties": {
+            "work_id": {"$ref": "#/$defs/id"},
+            "client_id": {"$ref": "#/$defs/client"},
+            "attempt_token": {"$ref": "#/$defs/token"},
+            "submission_key": {"$ref": "#/$defs/key"},
+            "schema_version": {"const": 1},
+            "video_id": {"$ref": "#/$defs/id"},
+            "source_revision": {"$ref": "#/$defs/hash"},
+            "taxonomy_revision": {"$ref": "#/$defs/hash"},
+            "packet_hash": {"$ref": "#/$defs/hash"},
+            "result": {"$ref": "#/$defs/result"},
+            "usage": {"$ref": "#/$defs/usage"},
+        },
+        "required": ["work_id", "client_id", "attempt_token", "submission_key",
+                     "schema_version", "video_id", "source_revision",
+                     "taxonomy_revision", "packet_hash", "result", "usage"],
+        "additionalProperties": False,
+    }),
+    "apply_reshelving": _library_schema({
+        "oneOf": [
+            {
+                "type": "object",
+                "properties": {
+                    "mode": {"const": "preview", "default": "preview"},
+                    "run_id": {"$ref": "#/$defs/id"},
+                    "expected_projection_revision": {"$ref": "#/$defs/revision"},
+                    "activate_version": {"type": "boolean", "default": False},
+                },
+                "required": ["run_id", "expected_projection_revision"],
+                "additionalProperties": False,
+            },
+            {
+                "type": "object",
+                "properties": {
+                    "mode": {"const": "apply"},
+                    "preview_id": {"$ref": "#/$defs/id"},
+                    "expected_projection_revision": {"$ref": "#/$defs/revision"},
+                    "delta_hash": {"$ref": "#/$defs/hash"},
+                    "operation_key": {"$ref": "#/$defs/key"},
+                },
+                "required": ["mode", "preview_id", "expected_projection_revision",
+                             "delta_hash", "operation_key"],
+                "additionalProperties": False,
+            },
+        ]
+    }),
+    "pin_shelf": _library_schema({
+        "type": "object",
+        "properties": {
+            "video_id": {"$ref": "#/$defs/id"},
+            "shelf_id": {"$ref": "#/$defs/id"},
+            "action": {"type": "string", "enum": ["pin", "unpin", "move"]},
+            "expected_projection_revision": {"$ref": "#/$defs/revision"},
+            "operation_key": {"$ref": "#/$defs/key"},
+            "user_intent_token": {"$ref": "#/$defs/token"},
+            "reason": {"type": "string", "minLength": 1, "maxLength": 500},
+        },
+        "required": ["video_id", "shelf_id", "action", "expected_projection_revision",
+                     "operation_key", "user_intent_token"],
+        "additionalProperties": False,
+    }),
+    "undo_library_apply": _library_schema({
+        "type": "object",
+        "properties": {
+            "apply_id": {"$ref": "#/$defs/id"},
+            "expected_projection_revision": {"$ref": "#/$defs/revision"},
+            "operation_key": {"$ref": "#/$defs/key"},
+            "user_intent_token": {"$ref": "#/$defs/token"},
+        },
+        "required": ["apply_id", "expected_projection_revision", "operation_key",
+                     "user_intent_token"],
+        "additionalProperties": False,
+    }),
+}
+
+
+# ---- Frozen-schema validation (the input contract) --------------------------
+# openapi_bridge.validate_arguments covers the small subset the older tools
+# use and silently skips `$ref`, `oneOf`, `const`, `pattern`, `minLength` and
+# `minItems`, all of which the frozen library schemas rely on. This validator
+# executes exactly that subset -- nothing more general -- so every transport
+# rejects the same malformed input with the same envelope before the service
+# is asked anything. Booleans never satisfy integer/number, non-finite numbers
+# never satisfy anything, and unknown fields are refused (contract, "Lease and
+# submission semantics"). The service still validates recursively.
+
+class LibrarySchemaError(ValueError):
+    def __init__(self, field: str, reason: str):
+        self.field = field or "request"
+        self.reason = reason
+        super().__init__(f"{self.field}: {reason}")
+
+
+_LIBRARY_TYPE_LABELS = {
+    "object": "an object",
+    "array": "an array",
+    "string": "a string",
+    "integer": "an integer",
+    "number": "a number",
+    "boolean": "a boolean",
+    "null": "null",
+}
+
+
+def _library_type_ok(value: Any, expected: str) -> bool:
+    if expected == "object":
+        return isinstance(value, dict)
+    if expected == "array":
+        return isinstance(value, list)
+    if expected == "string":
+        return isinstance(value, str)
+    if expected == "boolean":
+        return isinstance(value, bool)
+    if expected == "integer":
+        return isinstance(value, int) and not isinstance(value, bool)
+    if expected == "number":
+        return isinstance(value, (int, float)) and not isinstance(value, bool)
+    if expected == "null":
+        return value is None
+    return False
+
+
+def _library_json_equal(a: Any, b: Any) -> bool:
+    """JSON equality: 1 != True, 1 == 1.0, otherwise same type and value."""
+    if isinstance(a, bool) or isinstance(b, bool):
+        return isinstance(a, bool) and isinstance(b, bool) and a == b
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return a == b
+    return type(a) is type(b) and a == b
+
+
+def _library_resolve(schema: dict[str, Any], root: dict[str, Any]) -> dict[str, Any]:
+    ref = schema.get("$ref")
+    if not isinstance(ref, str):
+        return schema
+    prefix = "#/$defs/"
+    target = (root.get("$defs") or {}).get(ref[len(prefix):]) if ref.startswith(prefix) else None
+    if not isinstance(target, dict):
+        raise LibrarySchemaError("", f"unresolvable schema reference {ref}")
+    return _library_resolve(target, root)
+
+
+def _library_join(path: str, key: str) -> str:
+    return f"{path}.{key}" if path else key
+
+
+def _library_branch_error(value: Any, branches: list, errors: list,
+                          root: dict[str, Any], label: str) -> LibrarySchemaError:
+    """When no oneOf branch matches, report the branch whose fixed
+    discriminator (`action`, `mode`, `outcome`, `status`) the input selected,
+    so the message names the field that is actually wrong. An input that
+    omits the discriminator selects the branch whose discriminator has a
+    default (apply_reshelving's preview branch)."""
+    if isinstance(value, dict):
+        defaulted: LibrarySchemaError | None = None
+        for branch, error in zip(branches, errors):
+            properties = _library_resolve(branch, root).get("properties") or {}
+            for name, prop in properties.items():
+                prop = _library_resolve(prop, root)
+                if not ("const" in prop or "enum" in prop):
+                    continue
+                if name not in value:
+                    if "default" in prop and defaulted is None:
+                        defaulted = error
+                    continue
+                allowed = [prop["const"]] if "const" in prop else list(prop["enum"])
+                if any(_library_json_equal(value[name], item) for item in allowed):
+                    return error
+        if defaulted is not None:
+            return defaulted
+    return LibrarySchemaError(label, "does not match any allowed shape")
+
+
+def _library_validate(value: Any, schema: dict[str, Any], root: dict[str, Any], path: str) -> None:
+    schema = _library_resolve(schema, root)
+    label = path or "request"
+    branches = schema.get("oneOf")
+    if isinstance(branches, list):
+        errors: list[LibrarySchemaError] = []
+        matched = 0
+        for branch in branches:
+            try:
+                _library_validate(value, branch, root, path)
+            except LibrarySchemaError as exc:
+                errors.append(exc)
+            else:
+                matched += 1
+        if matched == 1:
+            return
+        if matched > 1:
+            raise LibrarySchemaError(label, "matches more than one allowed shape")
+        raise _library_branch_error(value, branches, errors, root, label)
+
+    expected = schema.get("type")
+    if isinstance(expected, str) and not _library_type_ok(value, expected):
+        raise LibrarySchemaError(label, f"must be {_LIBRARY_TYPE_LABELS.get(expected, expected)}")
+    if isinstance(value, float) and not math.isfinite(value):
+        raise LibrarySchemaError(label, "must be a finite number")
+    if "const" in schema and not _library_json_equal(value, schema["const"]):
+        raise LibrarySchemaError(label, f"must be {json.dumps(schema['const'])}")
+    enum = schema.get("enum")
+    if isinstance(enum, list) and not any(_library_json_equal(value, item) for item in enum):
+        raise LibrarySchemaError(label, "must be one of: " + ", ".join(json.dumps(item) for item in enum))
+
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        minimum = schema.get("minimum")
+        maximum = schema.get("maximum")
+        if isinstance(minimum, (int, float)) and value < minimum:
+            raise LibrarySchemaError(label, f"must be at least {minimum}")
+        if isinstance(maximum, (int, float)) and value > maximum:
+            raise LibrarySchemaError(label, f"must be at most {maximum}")
+
+    if isinstance(value, str):
+        min_length = schema.get("minLength")
+        max_length = schema.get("maxLength")
+        if isinstance(min_length, int) and len(value) < min_length:
+            raise LibrarySchemaError(label, f"must be at least {min_length} characters")
+        if isinstance(max_length, int) and len(value) > max_length:
+            raise LibrarySchemaError(label, f"must be at most {max_length} characters")
+        pattern = schema.get("pattern")
+        if isinstance(pattern, str) and re.search(pattern, value) is None:
+            raise LibrarySchemaError(label, f"must match {pattern}")
+
+    if isinstance(value, list):
+        min_items = schema.get("minItems")
+        max_items = schema.get("maxItems")
+        if isinstance(min_items, int) and len(value) < min_items:
+            raise LibrarySchemaError(label, f"must contain at least {min_items} items")
+        if isinstance(max_items, int) and len(value) > max_items:
+            raise LibrarySchemaError(label, f"must contain at most {max_items} items")
+        item_schema = schema.get("items")
+        if isinstance(item_schema, dict):
+            for index, item in enumerate(value):
+                _library_validate(item, item_schema, root, f"{label}[{index}]")
+
+    if isinstance(value, dict):
+        properties = schema.get("properties")
+        properties = properties if isinstance(properties, dict) else {}
+        required = schema.get("required")
+        if isinstance(required, list):
+            for name in required:
+                if name not in value:
+                    raise LibrarySchemaError(_library_join(path, name), "is required")
+        if schema.get("additionalProperties") is False:
+            for name in value:
+                if name not in properties:
+                    raise LibrarySchemaError(_library_join(path, str(name)), "is not an allowed field")
+        for name, item in value.items():
+            prop = properties.get(name)
+            if isinstance(prop, dict):
+                _library_validate(item, prop, root, _library_join(path, name))
+
+
+def library_validate_arguments(tool_name: str, arguments: Any) -> LibrarySchemaError | None:
+    """First input-contract violation of `arguments` against the frozen
+    schema of one library tool, or None. Every transport routes through
+    this before the service is called."""
+    schema = LIBRARY_TOOL_SCHEMAS[tool_name]
+    if not isinstance(arguments, dict):
+        return LibrarySchemaError("", "must be an object")
+    try:
+        _library_validate(arguments, schema, schema, "")
+    except LibrarySchemaError as exc:
+        return exc
+    return None
+
+
+# ---- Envelope ---------------------------------------------------------------
+
+def _library_ok(**fields: Any) -> dict[str, Any]:
+    return {"ok": True, "schema_version": LIBRARY_SCHEMA_VERSION, **fields}
+
+
+def _library_error(code: str, message: str, *, retryable: bool = False,
+                   details: dict[str, Any] | None = None) -> dict[str, Any]:
+    return {
+        "ok": False,
+        "schema_version": LIBRARY_SCHEMA_VERSION,
+        "error": {
+            "code": code,
+            "message": message,
+            "retryable": bool(retryable),
+            "details": dict(details) if isinstance(details, dict) else {},
+        },
+    }
+
+
+def library_invalid_request(error: LibrarySchemaError) -> dict[str, Any]:
+    return _library_error("invalid_request", str(error),
+                          details={"field": error.field, "reason": error.reason})
+
+
+def _library_service_unavailable(reason: str = "not_installed") -> dict[str, Any]:
+    return _library_error(
+        "service_unavailable",
+        "The Librarian service (library_work) is not available in this helper "
+        "build; no work was read or changed.",
+        details={"module": "library_work", "reason": reason},
+    )
+
+
+def _library_normalize(result: Any, tool_name: str) -> dict[str, Any]:
+    """Coerce a service return value into the contract envelope without
+    rewriting its content. A malformed return is an internal error, never a
+    fabricated success."""
+    if not isinstance(result, dict) or not isinstance(result.get("ok"), bool):
+        _library_log.error("library %s: service returned a malformed response", tool_name)
+        return _library_error("internal_error",
+                              "The Librarian service returned a malformed response.",
+                              details={"tool": tool_name})
+    out = dict(result)
+    out.setdefault("schema_version", LIBRARY_SCHEMA_VERSION)
+    if out["ok"] is False:
+        error = out.get("error")
+        if isinstance(error, dict) and isinstance(error.get("code"), str):
+            error = dict(error)
+            error.setdefault("message", error["code"])
+            error["retryable"] = bool(error.get("retryable", False))
+            error["details"] = error["details"] if isinstance(error.get("details"), dict) else {}
+        else:
+            error = {
+                "code": "service_error",
+                "message": error if isinstance(error, str) else "The Librarian service refused the request.",
+                "retryable": False,
+                "details": {},
+            }
+        out["error"] = error
+    return out
+
+
+# ---- The seam ---------------------------------------------------------------
+
+_LIBRARY_SERVICE_MISSING = object()
+_LIBRARY_SERVICE_BROKEN = object()
+_library_service_lock = threading.Lock()
+_library_service_override: Any = None
+_library_service_resolved: Any = None
+
+
+def set_library_service(service: Any) -> None:
+    """Inject the object the adapters call (tests use a deterministic
+    in-memory stand-in; an integrator may wrap the real module). Passing
+    None clears the override and forgets any cached import result."""
+    global _library_service_override, _library_service_resolved
+    with _library_service_lock:
+        _library_service_override = service
+        _library_service_resolved = None
+        _library_status_cache.clear()
+
+
+def _library_service() -> Any:
+    """The one import seam for library_work.py. Returns the injected stand-in
+    when set, else the module, else None when it is not installed (or its
+    import failed, which is logged once)."""
+    global _library_service_resolved
+    with _library_service_lock:
+        if _library_service_override is not None:
+            return _library_service_override
+        if _library_service_resolved is None:
+            try:
+                import library_work  # Astra's module; absent until integration.
+            except ImportError:
+                _library_service_resolved = _LIBRARY_SERVICE_MISSING
+            except Exception:
+                _library_log.exception("library_work import failed")
+                _library_service_resolved = _LIBRARY_SERVICE_BROKEN
+            else:
+                _library_service_resolved = library_work
+        if _library_service_resolved in (_LIBRARY_SERVICE_MISSING, _LIBRARY_SERVICE_BROKEN):
+            return None
+        return _library_service_resolved
+
+
+def _library_service_reason() -> str:
+    return "import_failed" if _library_service_resolved is _LIBRARY_SERVICE_BROKEN else "not_installed"
+
+
+def _library_apply_enabled(backend: Any) -> bool:
+    """librarian_apply_enabled from the helper's settings; default off, and
+    off whenever the settings cannot be read."""
+    reader = getattr(backend, "_read_settings", None)
+    try:
+        settings = reader() if callable(reader) else {}
+    except Exception:
+        _library_log.exception("library: settings unreadable; apply stays off")
+        settings = {}
+    return isinstance(settings, dict) and settings.get("librarian_apply_enabled") is True
+
+
+def _library_context(transport: str, **extra: Any) -> dict[str, Any]:
+    """The trusted request context the service receives beside the JSON
+    arguments. Registry callers carry no user authority: only a
+    user_intent_token minted by the dashboard route can grant it."""
+    backend = _b()
+    context: dict[str, Any] = {
+        "contract_version": LIBRARY_CONTRACT_VERSION,
+        "schema_version": LIBRARY_SCHEMA_VERSION,
+        "transport": transport,
+        "actor": "registry",
+        "now_ms": int(time.time() * 1000),
+        "apply_enabled": _library_apply_enabled(backend),
+        "index": backend._get_index(),
+    }
+    context.update(extra)
+    return context
+
+
+def _library_context_or_none(transport: str, **extra: Any) -> dict[str, Any] | None:
+    """_library_context, with an unopenable index logged and reported as None
+    so no exception text (which can carry a local path) reaches a client."""
+    try:
+        return _library_context(transport, **extra)
+    except Exception:
+        _library_log.exception("library (%s): request context unavailable", transport)
+        return None
+
+
+_LIBRARY_RATE_LIMITERS: dict[str, _RateLimiter] = {
+    # A claim/submit loop over a 548-item copy in batches of 12 submits in
+    # bursts; the ceilings leave headroom for that while still bounding an
+    # agent stuck in a retry loop. Preview/apply/pin/undo are human-paced.
+    "list_library_work": _RateLimiter(60),
+    "claim_library_work": _RateLimiter(60),
+    "submit_library_result": _RateLimiter(120),
+    "apply_reshelving": _RateLimiter(30),
+    "pin_shelf": _RateLimiter(30),
+    "undo_library_apply": _RateLimiter(30),
+    "library_intent": _RateLimiter(30),
+}
+
+
+def _library_discriminator(tool_name: str, args: dict[str, Any]) -> str | None:
+    if tool_name == "claim_library_work":
+        return args.get("action")
+    if tool_name == "apply_reshelving":
+        return args.get("mode", "preview")
+    return None
+
+
+def _library_invoke(method: str, args: dict[str, Any], context: dict[str, Any],
+                    tool_name: str) -> dict[str, Any]:
+    service = _library_service()
+    if service is None:
+        return _library_service_unavailable(_library_service_reason())
+    fn = getattr(service, method, None)
+    if not callable(fn):
+        _library_log.error("library %s: service lacks %s", tool_name, method)
+        return _library_error("service_unavailable",
+                              f"The Librarian service does not implement {method}.",
+                              details={"module": "library_work", "method": method})
+    try:
+        result = fn(dict(args), context)
+    except Exception:
+        # Never echo the exception: it may carry SQL text or local paths.
+        _library_log.exception("library %s (%s) raised", tool_name, method)
+        return _library_error("internal_error",
+                              "The Librarian service raised an unexpected error; "
+                              "see the helper log.",
+                              details={"tool": tool_name, "method": method})
+    return _library_normalize(result, tool_name)
+
+
+def _library_call(tool_name: str, args: dict[str, Any], *, transport: str = "registry") -> dict[str, Any]:
+    """Common adapter path for the six tools on every transport: rate limit,
+    frozen-schema check, default-off apply gate, trusted context, service."""
+    try:
+        _LIBRARY_RATE_LIMITERS[tool_name].check()
+    except RateLimitExceeded as exc:
+        return _library_error("rate_limited", str(exc), retryable=True,
+                              details={"tool": tool_name})
+    error = library_validate_arguments(tool_name, args)
+    if error is not None:
+        return library_invalid_request(error)
+    method = LIBRARY_SERVICE_METHODS[(tool_name, _library_discriminator(tool_name, args))]
+    if _library_service() is None:
+        # Resolve the seam before touching the index: an unavailable service
+        # must not open the database as a side effect of reporting itself.
+        return _library_service_unavailable(_library_service_reason())
+    context = _library_context_or_none(transport)
+    if context is None:
+        return _library_error("internal_error",
+                              "The helper's index is unavailable; see the helper log.",
+                              retryable=True, details={"tool": tool_name})
+    if method == "apply_preview" and not context["apply_enabled"]:
+        # Brief reservation 10 / contract "Preview, apply and churn":
+        # librarian_apply_enabled=false is the shipping default and no client
+        # field can lift it. Preview stays available. The service re-checks
+        # context["apply_enabled"] on its own transaction boundary.
+        return _library_error(
+            "apply_disabled",
+            "Applying labels is disabled on this helper "
+            "(librarian_apply_enabled=false); preview remains available.",
+            details={"setting": "librarian_apply_enabled"},
+        )
+    return _library_invoke(method, args, context, tool_name)
+
+
+def list_library_work(args: dict[str, Any]) -> dict[str, Any]:
+    return _library_call("list_library_work", args)
+
+
+def claim_library_work(args: dict[str, Any]) -> dict[str, Any]:
+    return _library_call("claim_library_work", args)
+
+
+def submit_library_result(args: dict[str, Any]) -> dict[str, Any]:
+    return _library_call("submit_library_result", args)
+
+
+def apply_reshelving(args: dict[str, Any]) -> dict[str, Any]:
+    return _library_call("apply_reshelving", args)
+
+
+def pin_shelf(args: dict[str, Any]) -> dict[str, Any]:
+    return _library_call("pin_shelf", args)
+
+
+def undo_library_apply(args: dict[str, Any]) -> dict[str, Any]:
+    return _library_call("undo_library_apply", args)
+
+
+# ---- Dashboard user-intent confirmation -------------------------------------
+
+def _library_intent_operation_schema(kind: str) -> dict[str, Any]:
+    """The pin_shelf / undo_library_apply input schema minus the token the
+    route is about to mint: the canonical operation the capability binds."""
+    source = LIBRARY_TOOL_SCHEMAS["pin_shelf" if kind == "pin" else "undo_library_apply"]
+    properties = {k: v for k, v in source["properties"].items() if k != "user_intent_token"}
+    return _library_schema({
+        "type": "object",
+        "properties": properties,
+        "required": [name for name in source["required"] if name != "user_intent_token"],
+        "additionalProperties": False,
+    })
+
+
+LIBRARY_INTENT_REQUEST_SCHEMA: dict[str, Any] = _library_schema({
+    "type": "object",
+    "properties": {
+        "kind": {"type": "string", "enum": ["pin", "undo"]},
+        "operation": {"type": "object"},
+        # The dashboard sends this only from the confirmation control of a
+        # displayed delta; it is a product confirmation, not a generic ack.
+        "confirmed": {"const": True},
+    },
+    "required": ["kind", "operation", "confirmed"],
+    "additionalProperties": False,
+})
+
+
+def library_mint_user_intent(body: Any, *, session_hash: str) -> dict[str, Any]:
+    """Behind POST /library/intent (server.py owns auth, origin and rate
+    limit). Validates the confirmation body and the canonical operation
+    against the frozen schemas, then asks the service to mint, store and
+    return the short-lived capability bound to that operation, the expected
+    revision and the dashboard session."""
+    try:
+        _LIBRARY_RATE_LIMITERS["library_intent"].check()
+    except RateLimitExceeded as exc:
+        return _library_error("rate_limited", str(exc), retryable=True,
+                              details={"route": "/library/intent"})
+    if not isinstance(body, dict):
+        return library_invalid_request(LibrarySchemaError("", "must be an object"))
+    try:
+        _library_validate(body, LIBRARY_INTENT_REQUEST_SCHEMA, LIBRARY_INTENT_REQUEST_SCHEMA, "")
+        operation_schema = _library_intent_operation_schema(body["kind"])
+        _library_validate(body["operation"], operation_schema, operation_schema, "operation")
+    except LibrarySchemaError as exc:
+        return library_invalid_request(exc)
+    if not isinstance(session_hash, str) or len(session_hash) != 64:
+        return _library_error("internal_error", "The dashboard session could not be identified.")
+    if _library_service() is None:
+        return _library_service_unavailable(_library_service_reason())
+    context = _library_context_or_none(
+        "dashboard",
+        actor="user",
+        session_hash=session_hash,
+        intent_ttl_ms=LIBRARY_INTENT_TTL_MS,
+    )
+    if context is None:
+        return _library_error("internal_error",
+                              "The helper's index is unavailable; see the helper log.",
+                              retryable=True, details={"route": "/library/intent"})
+    request = {"kind": body["kind"], "operation": dict(body["operation"])}
+    return _library_invoke(LIBRARY_INTENT_METHOD, request, context, "library_intent")
+
+
+# ---- /health and dashboard status -------------------------------------------
+
+_LIBRARY_STATUS_TTL_SEC = 5.0
+_library_status_cache: dict[str, Any] = {}
+
+
+def _library_count(counts: Any, key: str) -> int:
+    """Counts by work state may arrive flat or nested under `work`; either
+    way a missing state is zero."""
+    if isinstance(counts, dict):
+        value = counts.get(key)
+        if value is None and isinstance(counts.get("work"), dict):
+            value = counts["work"].get(key)
+        if isinstance(value, int) and not isinstance(value, bool):
+            return value
+    return 0
+
+
+def _library_status_from_list(result: Any) -> dict[str, Any]:
+    if not isinstance(result, dict) or result.get("ok") is not True:
+        code = None
+        if isinstance(result, dict) and isinstance(result.get("error"), dict):
+            code = result["error"].get("code")
+        return {"status": "error", "waiting_for_client": False, "ready": 0, "leased": 0,
+                "run_revision": None, "recovery_state": None, "error_code": code}
+    counts = result.get("counts")
+    waiting = result.get("waiting_for_client") is True
+    ready = _library_count(counts, "ready")
+    leased = _library_count(counts, "leased")
+    recovery = result.get("recovery_state")
+    if recovery in ("pending", "conflict"):
+        status = "recovery_pending"
+    elif waiting:
+        status = "waiting_for_client"
+    elif leased:
+        status = "collecting"
+    else:
+        status = "idle"
+    revision = result.get("run_revision")
+    return {
+        "status": status,
+        "waiting_for_client": waiting,
+        "ready": ready,
+        "leased": leased,
+        "run_revision": revision if isinstance(revision, int) and not isinstance(revision, bool) else None,
+        "recovery_state": recovery if isinstance(recovery, str) else None,
+        "error_code": None,
+    }
+
+
+def library_status(index: Any, *, apply_enabled: bool, now: float | None = None) -> dict[str, Any]:
+    """The `library` block of /health: whether staged work is waiting for a
+    subscribed client (contract, "Dispatch boundaries"). Read-only, cached
+    for a few seconds because /health is polled, and it never raises. The
+    caller passes an already-open index handle; this function opens nothing."""
+    now = time.monotonic() if now is None else now
+    cached = _library_status_cache.get("payload")
+    if cached is not None and now - _library_status_cache.get("at", -1e9) < _LIBRARY_STATUS_TTL_SEC:
+        payload = dict(cached)
+    else:
+        service = _library_service()
+        if service is None:
+            payload = {"status": "unavailable", "waiting_for_client": False, "ready": 0,
+                       "leased": 0, "run_revision": None, "recovery_state": None,
+                       "error_code": None}
+        else:
+            context = {
+                "contract_version": LIBRARY_CONTRACT_VERSION,
+                "schema_version": LIBRARY_SCHEMA_VERSION,
+                "transport": "health",
+                "actor": "server",
+                "now_ms": int(time.time() * 1000),
+                "apply_enabled": bool(apply_enabled),
+                "index": index,
+            }
+            fn = getattr(service, "list_work", None)
+            try:
+                result = fn({"limit": 1}, context) if callable(fn) else None
+            except Exception:
+                _library_log.exception("library status: list_work raised")
+                result = None
+            payload = _library_status_from_list(result)
+        _library_status_cache["payload"] = dict(payload)
+        _library_status_cache["at"] = now
+    payload["apply_enabled"] = bool(apply_enabled)
+    payload["contract_version"] = LIBRARY_CONTRACT_VERSION
+    return payload
+
+
 def _schema(properties: dict[str, Any], required: list[str] | None = None) -> dict[str, Any]:
     return {
         "type": "object",
@@ -2485,6 +3386,80 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }),
         handler=get_evidence_card,
         rate_limiter=_RateLimiter(30),
+    ),
+    # ---- Living Library work queue (Phase 2 stage 1; HTTP registry only) ----
+    # Rate limits live inside _library_call so a throttled caller still gets
+    # the contract's error envelope rather than the plain string one.
+    "list_library_work": ToolSpec(
+        name="list_library_work",
+        description=(
+            "List Librarian assignment work for a run: counts by work state "
+            "and manifest disposition, the run revision, one cursor page of "
+            "items, and whether staged work is waiting for a subscribed "
+            "client. Read-only; the server never runs the Librarian itself."
+        ),
+        input_schema=LIBRARY_TOOL_SCHEMAS["list_library_work"],
+        handler=list_library_work,
+    ),
+    "claim_library_work": ToolSpec(
+        name="claim_library_work",
+        description=(
+            "Lease Librarian work for a client (action=claim returns up to "
+            "twelve single-item packets, each with one evidence card and an "
+            "attempt token), or renew, release or cancel the client's own "
+            "current attempt. Leases run 60-900 seconds and never past one "
+            "hour after the first claim; a row is exhausted after three."
+        ),
+        input_schema=LIBRARY_TOOL_SCHEMAS["claim_library_work"],
+        handler=claim_library_work,
+    ),
+    "submit_library_result": ToolSpec(
+        name="submit_library_result",
+        description=(
+            "Submit one Librarian result for one leased work row: an "
+            "assignment of one to three shelf memberships with quoted "
+            "evidence, or an explicit unmapped, unsupported or error outcome. "
+            "Validated and stored; nothing is applied to current labels. An "
+            "identical retry under the same submission_key returns the "
+            "recorded response."
+        ),
+        input_schema=LIBRARY_TOOL_SCHEMAS["submit_library_result"],
+        handler=submit_library_result,
+    ),
+    "apply_reshelving": ToolSpec(
+        name="apply_reshelving",
+        description=(
+            "Preview the exact reshelving delta for a run (mode=preview, the "
+            "default), or apply a locally approved, unexpired preview by its "
+            "delta hash and operation key (mode=apply). Apply is refused "
+            "while librarian_apply_enabled is off, which is the shipping "
+            "default, and stops at 15 percent churn without a trusted human "
+            "approval."
+        ),
+        input_schema=LIBRARY_TOOL_SCHEMAS["apply_reshelving"],
+        handler=apply_reshelving,
+    ),
+    "pin_shelf": ToolSpec(
+        name="pin_shelf",
+        description=(
+            "Pin, unpin or move one item on a shelf as a user decision that "
+            "the Librarian may not override. Requires a user_intent_token "
+            "minted by the dashboard confirmation route; no client actor "
+            "string grants that authority."
+        ),
+        input_schema=LIBRARY_TOOL_SCHEMAS["pin_shelf"],
+        handler=pin_shelf,
+    ),
+    "undo_library_apply": ToolSpec(
+        name="undo_library_apply",
+        description=(
+            "Undo one recorded library apply by replaying its stored inverse "
+            "as a new, itself reversible, journal operation. Only the apply "
+            "that produced the current projection revision can be undone, "
+            "and a user_intent_token from the dashboard is required."
+        ),
+        input_schema=LIBRARY_TOOL_SCHEMAS["undo_library_apply"],
+        handler=undo_library_apply,
     ),
     "get_uoink_corpus": ToolSpec(
         name="get_uoink_corpus",
