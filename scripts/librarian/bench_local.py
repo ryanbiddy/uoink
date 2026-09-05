@@ -72,20 +72,24 @@ def format_taxonomy_block(gold_items: List[Dict[str, Any]]) -> str:
 
 
 def format_card_for_prompt(item: Dict[str, Any]) -> Dict[str, Any]:
-    """Builds the evidence card representation expected by assign.md."""
-    if item.get("card"):
-        return item["card"]
-    return {
-        "video_id": item["video_id"],
-        "slug": item.get("slug", item["video_id"]),
-        "title": item["title"],
-        "channel": item["channel"],
-        "platform": item["platform"],
-        "summary_hint": item.get("summary_hint", item["title"]),
-        "clips": [],
-        "clip_count": 0,
-        "chars": 0,
-    }
+    """Builds the evidence card representation expected by assign.md.
+    
+    Ensures video_id is explicitly included in every returned card.
+    """
+    card = dict(item.get("card") or {})
+    if not card:
+        card = {
+            "slug": item.get("slug", item["video_id"]),
+            "title": item["title"],
+            "channel": item["channel"],
+            "platform": item["platform"],
+            "summary_hint": item.get("summary_hint", item["title"]),
+            "clips": [],
+            "clip_count": 0,
+            "chars": 0,
+        }
+    card["video_id"] = item["video_id"]
+    return card
 
 
 def send_chat_completion(
@@ -93,8 +97,12 @@ def send_chat_completion(
     model: str,
     prompt: str,
     timeout: float = 60.0,
-) -> Tuple[str, int, float]:
-    """Sends a chat completion request to the OpenAI-compatible endpoint."""
+) -> Tuple[str, Optional[int], float]:
+    """Sends a chat completion request to the OpenAI-compatible endpoint.
+    
+    Measures latency across the entire response including reading the response body.
+    Reports missing token usage as None (unavailable) rather than substituting word counts.
+    """
     url = f"{base_url.rstrip('/')}/chat/completions"
     payload = {
         "model": model,
@@ -116,16 +124,28 @@ def send_chat_completion(
     )
     t0 = time.perf_counter()
     with urllib.request.urlopen(req, timeout=timeout) as resp:
+        resp_bytes = resp.read()
         t1 = time.perf_counter()
-        resp_data = json.loads(resp.read().decode("utf-8"))
-        choice = resp_data.get("choices", [{}])[0]
-        content = choice.get("message", {}).get("content", "")
-        usage = resp_data.get("usage", {})
-        completion_tokens = usage.get("completion_tokens", len(content.split()))
-        return content, completion_tokens, (t1 - t0)
+    wall_time = t1 - t0
+    resp_data = json.loads(resp_bytes.decode("utf-8"))
+    choice = resp_data.get("choices", [{}])[0]
+    content = choice.get("message", {}).get("content", "")
+    usage = resp_data.get("usage")
+    if isinstance(usage, dict) and "completion_tokens" in usage and usage["completion_tokens"] is not None:
+        try:
+            completion_tokens: Optional[int] = int(usage["completion_tokens"])
+        except (TypeError, ValueError):
+            completion_tokens = None
+    else:
+        completion_tokens = None
+    return content, completion_tokens, wall_time
 
 
-def generate_mock_completion(item: Dict[str, Any], sim_agreement: float = 0.85) -> Tuple[str, int, float]:
+def generate_mock_completion(
+    item: Dict[str, Any],
+    sim_agreement: float = 0.85,
+    corrupt_id: Optional[str] = None,
+) -> Tuple[str, Optional[int], float]:
     """Generates a synthetic completion for harness testing and verification."""
     # Deterministic pseudo-randomness based on video_id hash
     vid_hash = sum(ord(c) for c in item["video_id"])
@@ -142,10 +162,11 @@ def generate_mock_completion(item: Dict[str, Any], sim_agreement: float = 0.85) 
             assigned_path = ["General Topics", "Overview"]
 
     quote = item.get("evidence", "metadata-only")
+    assigned_vid = corrupt_id if corrupt_id is not None else item["video_id"]
     mock_payload = {
         "assignments": [
             {
-                "video_id": item["video_id"],
+                "video_id": assigned_vid,
                 "shelf_paths": [assigned_path],
                 "confidence": 0.92 if sim_match else 0.65,
                 "evidence_quote": quote,
@@ -165,40 +186,77 @@ def evaluate_single_item(
     item: Dict[str, Any],
     pred_data: Dict[str, Any],
     wall_time: float,
-    tokens: int,
+    tokens: Optional[int],
 ) -> Dict[str, Any]:
-    """Evaluates Level 1, Level 2 agreement and evidence quote grounding."""
+    """Evaluates Level 1, Level 2 agreement and evidence quote grounding.
+    
+    Rejects wrong, missing, and duplicate video_ids.
+    Reports missing token usage as 'unavailable' rather than zero.
+    """
+    target_id = item["video_id"]
     gold_path = [p.strip().lower() for p in item.get("shelf_path", [])]
-    assignments = pred_data.get("assignments", [])
-    pred_item = next((a for a in assignments if a.get("video_id") == item["video_id"]), None)
 
-    if not pred_item and assignments:
-        pred_item = assignments[0]
+    # Validate assignments structure and reject wrong, missing, or duplicate IDs
+    if not isinstance(pred_data, dict) or not isinstance(pred_data.get("assignments"), list):
+        id_status = "malformed_output"
+        pred_item = None
+    else:
+        assignments = pred_data.get("assignments", [])
+        all_ids = [a.get("video_id") for a in assignments if isinstance(a, dict) and a.get("video_id") is not None]
+        has_duplicates = len(all_ids) != len(set(all_ids))
 
-    pred_paths = pred_item.get("shelf_paths", []) if pred_item else []
-    primary_pred = [p.strip().lower() for p in pred_paths[0]] if pred_paths and pred_paths[0] else []
+        matching = [a for a in assignments if isinstance(a, dict) and a.get("video_id") == target_id]
+        if has_duplicates or len(matching) > 1:
+            id_status = "duplicate_id"
+            pred_item = None
+        elif len(matching) == 1:
+            id_status = "valid"
+            pred_item = matching[0]
+        else:
+            if any(isinstance(a, dict) and a.get("video_id") for a in assignments):
+                id_status = "wrong_id"
+            else:
+                id_status = "missing_id"
+            pred_item = None
 
+    id_valid = (id_status == "valid")
     l1_match = False
     l2_match = False
-    if primary_pred and gold_path:
-        l1_match = primary_pred[0] == gold_path[0]
-        if l1_match and len(primary_pred) > 1 and len(gold_path) > 1:
-            l2_match = primary_pred[1] == gold_path[1]
-
-    # Grounding check
-    evidence_quote = pred_item.get("evidence_quote", "") if pred_item else ""
     evidence_valid = False
-    if item.get("card"):
-        clips_text = " ".join(c.get("text", "") for c in item["card"].get("clips", []))
-        if evidence_quote and evidence_quote != "metadata-only":
-            evidence_valid = evidence_quote in clips_text
-    else:
-        evidence_valid = evidence_quote == "metadata-only"
+    pred_paths = []
 
-    tps = tokens / wall_time if wall_time > 0 else 0.0
+    if id_valid and pred_item is not None:
+        pred_paths = pred_item.get("shelf_paths", [])
+        primary_pred = [p.strip().lower() for p in pred_paths[0]] if pred_paths and pred_paths[0] else []
+
+        if primary_pred and gold_path:
+            l1_match = primary_pred[0] == gold_path[0]
+            if l1_match and len(primary_pred) > 1 and len(gold_path) > 1:
+                l2_match = primary_pred[1] == gold_path[1]
+
+        # Grounding check
+        evidence_quote = pred_item.get("evidence_quote", "")
+        if item.get("card") and item["card"].get("clips"):
+            clips_text = " ".join(c.get("text", "") for c in item["card"].get("clips", []))
+            if evidence_quote and evidence_quote != "metadata-only":
+                evidence_valid = evidence_quote in clips_text
+        else:
+            evidence_valid = (
+                evidence_quote in ("metadata-only", "")
+                or pred_item.get("unsupported") is True
+            )
+    else:
+        evidence_quote = ""
+
+    if tokens is not None:
+        tps: Any = round(tokens / wall_time, 2) if wall_time > 0 else 0.0
+        tokens_val: Any = tokens
+    else:
+        tps = "unavailable"
+        tokens_val = "unavailable"
 
     return {
-        "video_id": item["video_id"],
+        "video_id": target_id,
         "title": item["title"],
         "platform": item["platform"],
         "gold_path": item.get("shelf_path", []),
@@ -207,9 +265,11 @@ def evaluate_single_item(
         "l2_match": l2_match,
         "evidence_quote": evidence_quote,
         "evidence_valid": evidence_valid,
+        "id_status": id_status,
+        "id_valid": id_valid,
         "wall_time_sec": round(wall_time, 3),
-        "completion_tokens": tokens,
-        "tokens_per_sec": round(tps, 2),
+        "completion_tokens": tokens_val,
+        "tokens_per_sec": tps,
     }
 
 
@@ -220,6 +280,7 @@ def run_benchmark(
     prompt_path: Path,
     limit: Optional[int] = None,
     mock: bool = False,
+    mock_wrong_id: bool = False,
     timeout: float = 60.0,
     output_path: Optional[Path] = None,
 ) -> int:
@@ -235,7 +296,7 @@ def run_benchmark(
     print(f"Target Model:  {model}")
     print(f"Gold Set:      {gold_path}")
     print(f"Assign Prompt: {prompt_path}")
-    print(f"Mock Mode:     {mock}")
+    print(f"Mock Mode:     {mock} (wrong_id={mock_wrong_id})")
     print("=" * 40)
 
     if not gold_path.exists():
@@ -272,7 +333,8 @@ def run_benchmark(
     base_prompt = prompt_template.replace("{{TAXONOMY}}", taxonomy_block)
 
     results = []
-    total_tokens = 0
+    measured_tokens = 0
+    measured_tokens_count = 0
     total_wall_time = 0.0
 
     print("\nRunning Stage 2 Assignment evaluation...")
@@ -283,7 +345,9 @@ def run_benchmark(
 
         try:
             if mock:
-                content, tokens, wall_time = generate_mock_completion(item)
+                content, tokens, wall_time = generate_mock_completion(
+                    item, corrupt_id="WRONG_ITEM_ID" if mock_wrong_id else None
+                )
             else:
                 content, tokens, wall_time = send_chat_completion(
                     base_url=base_url,
@@ -296,14 +360,22 @@ def run_benchmark(
             eval_res = evaluate_single_item(item, pred_data, wall_time, tokens)
             results.append(eval_res)
 
-            total_tokens += tokens
+            if tokens is not None:
+                measured_tokens += tokens
+                measured_tokens_count += 1
             total_wall_time += wall_time
 
             l1_sym = "✓" if eval_res["l1_match"] else "✗"
             l2_sym = "✓" if eval_res["l2_match"] else "✗"
+            tps_str = (
+                f"{eval_res['tokens_per_sec']:.1f} tps"
+                if isinstance(eval_res["tokens_per_sec"], (int, float))
+                else "tps: unavailable"
+            )
             print(
                 f"[{idx:02d}/{len(gold_items):02d}] {item['video_id'][:16]} | "
-                f"L1: {l1_sym} | L2: {l2_sym} | {wall_time:.2f}s | {eval_res['tokens_per_sec']:.1f} tps"
+                f"ID: {eval_res['id_status']} | L1: {l1_sym} | L2: {l2_sym} | "
+                f"{wall_time:.2f}s | {tps_str}"
             )
 
         except Exception as e:
@@ -318,9 +390,11 @@ def run_benchmark(
                 "l2_match": False,
                 "evidence_quote": "",
                 "evidence_valid": False,
+                "id_status": "error",
+                "id_valid": False,
                 "wall_time_sec": 0.0,
-                "completion_tokens": 0,
-                "tokens_per_sec": 0.0,
+                "completion_tokens": "unavailable",
+                "tokens_per_sec": "unavailable",
                 "error": str(e),
             })
 
@@ -333,8 +407,22 @@ def run_benchmark(
     l1_pct = (l1_matches / total_evaluated * 100.0) if total_evaluated else 0.0
     l2_pct = (l2_matches / total_evaluated * 100.0) if total_evaluated else 0.0
     ground_pct = (grounded_matches / total_evaluated * 100.0) if total_evaluated else 0.0
-    avg_tps = (total_tokens / total_wall_time) if total_wall_time > 0 else 0.0
+
     avg_latency = (total_wall_time / total_evaluated) if total_evaluated else 0.0
+    if measured_tokens_count == total_evaluated and total_evaluated > 0:
+        avg_tps = (measured_tokens / total_wall_time) if total_wall_time > 0 else 0.0
+        tps_display = f"{avg_tps:.1f} tokens/sec"
+        tps_summary: Any = round(avg_tps, 2)
+        tokens_summary: Any = measured_tokens
+    elif measured_tokens_count > 0:
+        avg_tps = (measured_tokens / total_wall_time) if total_wall_time > 0 else 0.0
+        tps_display = f"{avg_tps:.1f} tokens/sec ({measured_tokens_count}/{total_evaluated} measured)"
+        tps_summary = round(avg_tps, 2)
+        tokens_summary = f"{measured_tokens} ({measured_tokens_count}/{total_evaluated} measured)"
+    else:
+        tps_display = "unavailable"
+        tps_summary = "unavailable"
+        tokens_summary = "unavailable"
 
     print("\n" + "=" * 40)
     print("=== BENCHMARK RESULTS SUMMARY ===")
@@ -344,12 +432,14 @@ def run_benchmark(
     print(f"Evidence Grounding:      {grounded_matches}/{total_evaluated} ({ground_pct:.1f}%)")
     print(f"Total Wall Time:         {total_wall_time:.2f}s")
     print(f"Mean Latency Per Item:   {avg_latency:.2f}s")
-    print(f"Overall Throughput:      {avg_tps:.1f} tokens/sec")
+    print(f"Overall Throughput:      {tps_display}")
+    print(f"Reported Tokens:         {tokens_summary}")
     print("=" * 40)
 
     summary_data = {
         "status": "completed" if not mock else "completed_mock",
         "mock_mode": mock,
+        "mock_wrong_id": mock_wrong_id,
         "base_url": base_url,
         "model": model,
         "total_items": total_evaluated,
@@ -358,7 +448,9 @@ def run_benchmark(
         "evidence_grounding_accuracy": round(ground_pct, 2),
         "total_wall_time_sec": round(total_wall_time, 3),
         "mean_latency_per_item_sec": round(avg_latency, 3),
-        "tokens_per_second": round(avg_tps, 2),
+        "tokens_per_second": tps_summary,
+        "total_completion_tokens": tokens_summary,
+        "measured_tokens_count": measured_tokens_count,
         "item_results": results,
     }
 
@@ -380,6 +472,7 @@ def main():
     parser.add_argument("--prompt", type=Path, default=DEFAULT_PROMPT, help="Path to assign.md prompt")
     parser.add_argument("--limit", type=int, default=None, help="Limit number of items to test")
     parser.add_argument("--mock", action="store_true", help="Run with synthetic responses for test verification")
+    parser.add_argument("--mock-wrong-id", action="store_true", help="Simulate wrong ID responses in mock mode")
     parser.add_argument("--timeout", type=float, default=30.0, help="HTTP request timeout in seconds")
     parser.add_argument("--output", type=Path, default=None, help="Save evaluation metrics to JSON file")
 
@@ -392,6 +485,7 @@ def main():
             prompt_path=args.prompt,
             limit=args.limit,
             mock=args.mock,
+            mock_wrong_id=args.mock_wrong_id,
             timeout=args.timeout,
             output_path=args.output,
         )
