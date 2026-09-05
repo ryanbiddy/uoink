@@ -3018,6 +3018,40 @@ def _library_discriminator(tool_name: str, args: dict[str, Any]) -> str | None:
     return None
 
 
+def _library_is_real_module(service: Any) -> bool:
+    """True for Astra's library_work module (frozen surface: module-level
+    ``fn(index, RequestContext, args)`` delegating to
+    ``index.library_service()``); False for an injected stand-in, which keeps
+    the test-only ``fn(args, context_dict)`` shape."""
+    return hasattr(service, "RequestContext") and hasattr(service, "LibraryWorkService")
+
+
+def _library_dispatch(service: Any, fn: Any, args: dict[str, Any],
+                      context: dict[str, Any]) -> Any:
+    """Run F/M acceptance M-1: the adapters were built against a stand-in
+    whose methods took ``(arguments, context)``; the real module exports
+    ``fn(index, context, args)`` and its endpoints require a
+    ``library_work.RequestContext``. Translate the adapter's trusted dict
+    context into that object and route the apply setting through the same
+    service instance the endpoint will use."""
+    if not _library_is_real_module(service):
+        return fn(dict(args), context)
+    index = context["index"]
+    actor = context.get("actor", "registry")
+    request_context = service.RequestContext(
+        authenticated=True,
+        client_id=args.get("client_id") if isinstance(args.get("client_id"), str) else None,
+        session_id=context.get("session_hash") or f"{context.get('transport', 'registry')}",
+        operator=(actor == "server"),
+        local_user_confirmed=(actor == "user"),
+    )
+    # librarian_apply_enabled lives in the helper's settings; the service
+    # instance re-checks it on its own transaction boundary, so keep the two
+    # in step on every call rather than only at construction.
+    index.library_service().librarian_apply_enabled = bool(context.get("apply_enabled"))
+    return fn(index, request_context, dict(args))
+
+
 def _library_invoke(method: str, args: dict[str, Any], context: dict[str, Any],
                     tool_name: str) -> dict[str, Any]:
     service = _library_service()
@@ -3030,7 +3064,7 @@ def _library_invoke(method: str, args: dict[str, Any], context: dict[str, Any],
                               f"The Librarian service does not implement {method}.",
                               details={"module": "library_work", "method": method})
     try:
-        result = fn(dict(args), context)
+        result = _library_dispatch(service, fn, args, context)
     except Exception:
         # Never echo the exception: it may carry SQL text or local paths.
         _library_log.exception("library %s (%s) raised", tool_name, method)
@@ -3243,7 +3277,8 @@ def library_status(index: Any, *, apply_enabled: bool, now: float | None = None)
             }
             fn = getattr(service, "list_work", None)
             try:
-                result = fn({"limit": 1}, context) if callable(fn) else None
+                result = (_library_dispatch(service, fn, {"limit": 1}, context)
+                          if callable(fn) else None)
             except Exception:
                 _library_log.exception("library status: list_work raised")
                 result = None
