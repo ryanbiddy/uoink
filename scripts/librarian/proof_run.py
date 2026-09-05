@@ -203,6 +203,22 @@ def normalized_taxonomy(document: dict) -> dict:
     )
 
 
+def submit_usage(usage: dict) -> dict:
+    """Project a usage record onto the frozen submit schema."""
+    if usage.get("status") == "reported":
+        keys = ("status", "model", "input_tokens", "output_tokens",
+                "cache_read_tokens", "cache_create_tokens", "wall_time_ms")
+    else:
+        keys = ("status", "model", "reason", "wall_time_ms")
+    out = {k: usage[k] for k in keys if k in usage}
+    out.setdefault("status", "unavailable")
+    out.setdefault("model", str(usage.get("model") or "unknown"))
+    out.setdefault("wall_time_ms", int(usage.get("wall_time_ms", 0) or 0))
+    if out["status"] == "unavailable":
+        out.setdefault("reason", str(usage.get("reason") or "usage unavailable"))
+    return out
+
+
 class ProofRunError(RuntimeError):
     pass
 
@@ -230,6 +246,9 @@ class ProofHarness:
         self.model = model
         self.concurrency = max(1, min(4, concurrency))
         self.batch = max(1, batch)
+        # Per-call hard bound; a hung CLI must fail fast so the attempt is
+        # recorded and the lease can be retried or expire.
+        self.call_timeout = int(os.environ.get("UOINK_PROOF_CALL_TIMEOUT", "300"))
         self.port = port
         self.run_id = run_id
         self.expected_hash = expected_hash
@@ -795,9 +814,11 @@ class ProofHarness:
             text=True,
             encoding="utf-8",
             errors="replace",
-            timeout=600,
+            timeout=self.call_timeout,
         )
         wall_ms = max(1, int((time.perf_counter() - t0) * 1000))
+        print(f"[proof] model call done: {wall_ms} ms, exit {res.returncode}, "
+              f"stdout {len(res.stdout)} B", file=sys.stderr, flush=True)
 
         if res.returncode != 0 or not res.stdout.strip():
             raise ProofRunError(f"claude -p failed (exit {res.returncode}): {res.stderr[:400]}")
@@ -971,7 +992,7 @@ class ProofHarness:
         raw_env: Dict[str, Any] = {}
         try:
             by_video, usage, raw_env = self.generate_model_batch(items, prompt)
-        except ProofRunError as exc:
+        except (ProofRunError, subprocess.TimeoutExpired, OSError) as exc:
             by_video = {}
             call_error = str(exc)[:400]
             usage = {
@@ -1043,7 +1064,11 @@ class ProofHarness:
                 "taxonomy_revision": it["taxonomy_revision"],
                 "packet_hash": it["packet_hash"],
                 "result": res,
-                "usage": usage,
+                # The frozen submit schema allows exactly the contract usage
+                # fields (additionalProperties=false); the batch bookkeeping
+                # (call_id, batch_size, extra_results, total_cost_usd) stays
+                # in the receipts and audit_extensions only.
+                "usage": submit_usage(usage),
             }
 
             t_sub = time.perf_counter()
@@ -1055,6 +1080,12 @@ class ProofHarness:
             rejection_reason = None
             if outcome in {"rejected", "error"}:
                 rejection_reason = str(resp_data.get("rejected") or resp_data.get("error") or "Submit rejected")
+                err = submit_resp.get("error") if isinstance(submit_resp.get("error"), dict) else {}
+                if err.get("code") in {"invalid_request", "validation_error", "unauthorized", "unknown_tool"}:
+                    # A harness/schema fault, not a model result: abort loudly
+                    # rather than leave leases held and poll for expiry.
+                    print(f"[proof] ABORT submit {vid}: {json.dumps(submit_resp)[:400]}", file=sys.stderr, flush=True)
+                    raise ProofRunError(f"submit rejected at schema level for {vid}: {rejection_reason[:200]}")
                 with self._lock:
                     self.transport_failures.append(
                         {
@@ -1517,6 +1548,10 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    if os.environ.get("UOINK_PROOF_DUMP_SEC"):
+        # Debug aid: dump every thread's stack to stderr periodically.
+        import faulthandler
+        faulthandler.dump_traceback_later(int(os.environ["UOINK_PROOF_DUMP_SEC"]), repeat=True, file=sys.stderr)
     parser = build_parser()
     args = parser.parse_args()
 
