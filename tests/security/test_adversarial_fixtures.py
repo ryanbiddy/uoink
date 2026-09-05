@@ -33,10 +33,6 @@ def _load_recall_hook():
     return mod
 
 
-@pytest.mark.xfail(
-    reason="SEC-02: recall hook untrusted data boundary and escaping pending Claude fix",
-    strict=True,
-)
 def test_recall_hook_adversarial_fixtures_fenced(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

@@ -47,6 +47,24 @@ Single-video `/extract` still writes the complete screenshot set to disk. The cl
 
 The setting is returned by `GET /settings` and accepted by `POST /settings`. Setting it to `0` produces a text-only clipboard corpus while keeping all screenshots on disk.
 
+## Background model calls (D-17)
+
+The helper performs no model reasoning on the user's behalf except through
+named, default-off, metered feature flags. Three background jobs exist and
+each has its own boolean in `GET /settings` / `POST /settings`:
+
+| Flag | Job | Default |
+|---|---|---|
+| `comment_intelligence_enabled` | Comment Intelligence after a capture with comments | `false` |
+| `hook_type_enabled` | Hook Type classification after a capture | `false` |
+| `entity_extraction_enabled` | Entity extraction off the transcript after a capture (added 2026-09-04) | `false` |
+
+A saved Anthropic key alone never starts any of them; the spawn gate reads
+the flag. Existing installs that predate `entity_extraction_enabled` resolve
+it to `false` (no grandfathering). User-initiated MCP tools (`analyze_comments`,
+`classify_hook`) require only a valid key. The `usage` block of every response
+is metered; see `GET /settings/pricing` → `actual`.
+
 ## Endpoint reference
 
 ### GET /health and GET /ping
@@ -66,6 +84,18 @@ Success response: HTTP 200
   "migration_version": 25,
   "migration_pending": false,
   "last_successful_tick_at": "2026-09-04T16:30:00Z",
+  "heartbeat": {
+    "last_tick_completed_at": "2026-09-04T16:30:00Z",
+    "last_successful_tick_at": "2026-09-04T16:30:00Z",
+    "last_successful_poll_at": "2026-09-04T16:29:58Z",
+    "last_failed_poll_at": null,
+    "last_poll_error": null,
+    "last_ingest_completed_at": null,
+    "last_tick": {"ok": true, "polls": 1, "failed_polls": 0},
+    "counts": {"ticks": 12, "polls_ok": 3, "polls_failed": 0, "ingests": 0},
+    "tick_interval_sec": 30,
+    "freshness": {"state": "fresh", "age_sec": 4.0, "stale_after_sec": 300}
+  },
   "whisperx_available": false,
   "whisper_model": "base",
   "whisperx_model_loaded": false,
@@ -87,7 +117,8 @@ Fields:
 | `version` | string | Helper version from the top-level `VERSION` file. |
 | `migration_version` | integer | Newest SQLite schema migration opened by this helper process. |
 | `migration_pending` | boolean | `true` if the checkout contains a newer migration than the running helper opened. |
-| `last_successful_tick_at` | string or null | RFC 3339 UTC time of the last completed source-scheduler pass; `null` before the first pass. |
+| `last_successful_tick_at` | string or null | RFC 3339 UTC time of the last source-scheduler pass in which no feed poll failed; `null` before the first such pass. |
+| `heartbeat` | object | Scheduler heartbeat with separate stamps: `last_tick_completed_at` (a pass finished, any outcome), `last_successful_tick_at` (zero failed polls), `last_successful_poll_at`, `last_failed_poll_at` + `last_poll_error` (a failed poll never advances a success stamp), `last_ingest_completed_at` (an episode was published into the corpus by the watch pipeline), `last_tick` and `counts` tallies, `tick_interval_sec`, and `freshness` (`state` is `never` / `fresh` / `stale`, with `age_sec` since the last completed pass and the `stale_after_sec` bound). `uoink doctor` reports the same block and fails on `stale`. |
 | `whisperx_available` | boolean | Whether the Whisper transcription runtime can be imported. |
 | `whisper_model` | string | Normalized model selected in settings. |
 | `whisperx_model_loaded` | boolean | Whether the selected model is already present locally. |
@@ -155,7 +186,7 @@ Error responses:
 
 ### GET /settings/pricing
 
-Return the local cost-estimator constants used by setup.html for optional BYO Anthropic features. This endpoint does not call Anthropic and does not inspect the saved API key.
+Return the local cost-estimator constants used by setup.html for optional BYO Anthropic features, plus the measured usage for the current UTC month (D-17 "metered", 2026-09-04). This endpoint does not call Anthropic and does not inspect the saved API key.
 
 Auth: `X-Uoink-Token` required.
 
@@ -180,11 +211,31 @@ Success response: HTTP 200
       "hook": 0.0016,
       "both": 0.0091
     },
+    "actual": {
+      "month": "2026-09",
+      "by_feature": {
+        "hook_type": {
+          "calls": 41, "input_tokens": 48200, "output_tokens": 3100,
+          "cache_read": 0, "cache_create": 0, "usd": 0.0637,
+          "models": ["claude-haiku-4-5-20251001"]
+        }
+      },
+      "total_usd": 0.0637
+    },
     "source": "https://docs.claude.com/en/docs/about-claude/pricing",
     "source_checked": "2026-09-04"
   }
 }
 ```
+
+`est_per_video` is an estimate from hardcoded token guesses and list prices.
+`actual` is the meter: the `usage` block of every Comment Intelligence, Hook
+Type, and entity-extraction response is accumulated into the local index
+(`memory_layer` rows keyed `usage.anthropic.<feature>.<model>.<YYYY-MM>`), one
+row per feature, model, and month, and priced with the same constants. The
+4-token key probe in `POST /settings/test-key` is excluded on purpose. When the
+index cannot be read, `actual.by_feature` is empty and `actual.error` is
+`usage unavailable`.
 
 ### GET /reliability/model/status
 
@@ -1456,6 +1507,8 @@ Tools currently exposed:
 - `cancel_job`
 - `list_recent_uoinks`
 - `search_uoinks`
+- `search_clips`
+- `get_evidence_card`
 - `get_uoink_corpus`
 - `analyze_comments`
 - `classify_hook`
@@ -1466,8 +1519,9 @@ Tools currently exposed:
 - `get_transcript_reliability`
 
 The full HTTP/OpenAPI registry is generated from `TOOL_REGISTRY` and contains
-71 tools. Its Phase 1 registry-only additions are `search_clips` and
-`get_evidence_card`; neither is part of the 23-tool stdio set.
+71 tools. `search_clips` and `get_evidence_card` were Phase 1 registry-only
+additions; since 2026-09-04 (run E) they are also part of the 25-tool stdio
+set, sharing the same handlers.
 
 Full schemas and return shapes live in `docs/v2-mcp.md`.
 

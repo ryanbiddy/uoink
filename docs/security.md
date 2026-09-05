@@ -47,8 +47,12 @@ These do not require `X-Uoink-Token`:
 page, and YouTube button need to detect whether the helper is running before
 auth/token refresh completes. Their response includes the selected Whisper
 model and availability/load state, index recovery, output-root fallback,
-aggregate path-integrity counts, and a generic path-integrity hint or error.
-It does not include the helper token or raw exception text.
+aggregate path-integrity counts, a generic path-integrity hint or error, and
+the scheduler `heartbeat` block (UTC timestamps of the last completed pass,
+last successful and failed feed poll, last corpus ingest, tallies, and a
+freshness state; the last poll failure is reported as an exception class name
+or a fixed phrase only). It does not include the helper token or raw
+exception text.
 
 `/diagnose` is a broader bounded recovery report used by the popup and splash.
 The manifest, OpenAPI, well-known, and suite-discovery routes expose product

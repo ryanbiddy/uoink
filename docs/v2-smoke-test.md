@@ -80,8 +80,8 @@ Total checkpoints: 127.
 ## 6. MCP - stdio and HTTP
 
 54. [ ] Copy Claude Desktop stdio config from setup - success: command points to installed `python.exe` and `uoink_mcp.py`.
-55. [ ] Smoke-test Claude Desktop stdio - success: client lists exactly 23 canonical tools and `list_recent_uoinks` works.
-56. [ ] Smoke-test Cursor stdio - success: client lists exactly 23 canonical tools and `search_uoinks` works.
+55. [ ] Smoke-test Claude Desktop stdio - success: client lists exactly 25 canonical tools and `list_recent_uoinks` works.
+56. [ ] Smoke-test Cursor stdio - success: client lists exactly 25 canonical tools and `search_uoinks` works.
 57. [ ] Call `uoink_video` through MCP - success: returns `ok`, `slug`, `folder`, `corpus_md`, and screenshots.
 58. [ ] Call `uoink_playlist` then `get_job_status` - success: job appears in `/jobs` and completes/cancels consistently.
 59. [ ] Call `get_uoink_corpus` on a sidecar-backed uoink - success: returns `video_id` and `video_url`.

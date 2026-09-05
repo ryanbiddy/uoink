@@ -10,6 +10,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **`search_clips` and `get_evidence_card` on stdio.** The two Phase 1 clip
+  tools join the curated stdio MCP surface (23 → 25 tools); they call the
+  same handlers as the HTTP/OpenAPI registry and return the same shapes.
+- **Real model-usage meter.** Every Anthropic response's `usage` block is
+  now accumulated per feature, model, and month into the local index
+  (`usage.anthropic.<feature>.<model>.<YYYY-MM>`); `GET /settings/pricing`
+  gains an `actual` block beside the estimate (D-17 "metered").
+- **Scheduler heartbeat.** `/health` and `uoink doctor` gain a `heartbeat`
+  block that separates tick completion, last successful poll, last ingest
+  completion, and freshness. A failed feed poll no longer advances the
+  success timestamp; a stale scheduler fails `doctor`.
+
+### Changed
+
+- **Entity extraction is now opt-in (D-17).** The background entity
+  extraction call gets a named `entity_extraction_enabled` setting, default
+  off, beside Comment Intelligence and Hook Type. A saved Anthropic key alone
+  no longer starts it; turn it on under Settings → Entity extraction.
+  Existing installs start with it off.
+
+### Security
+
+- **Recall hook hardening (SEC-02).** `scripts/recall_hook.py` now wraps
+  library text in an explicit untrusted-data boundary with a
+  data-not-instructions preface, strips control characters, neutralises
+  fence-breaking markup, bounds its output, opens the index read-only with a
+  1 s timeout under a 1.5 s wall-clock budget, de-duplicates hits per
+  session, honours `UOINK_RECALL_DISABLED=1`, and never prints file paths.
+
 ## [3.8.0] - 2026-08-02
 
 Podcast subscriptions can now keep themselves current and publish selected
@@ -381,7 +412,7 @@ The "YouTube layer for any AI agent" release. Three adoption funnels: Chrome ext
 - **`LOCALAPPDATA` output fallback.** The helper automatically falls back to writing outputs to `%LOCALAPPDATA%\Yoink\output` if `DESKTOP_ROOT` is read-only or unwritable.
 - **`pending_yoinks` schema (migration 0005).** Adds a new table in `index.db` to track rate-limited yoinks, attempts, and errors.
 
-- **MCP server** with 23 tools. The current curated surface includes the original video/library tools plus podcast feed, episode, local transcription, and corpus-publishing operations. Stdio transport is officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport is available and marked experimental.
+- **MCP server** with 25 tools. The current curated surface includes the original video/library tools plus clip search, evidence cards, podcast feed, episode, local transcription, and corpus-publishing operations. Stdio transport is officially tested with Claude Desktop and Cursor. Local HTTP JSON-RPC transport is available and marked experimental.
 - **Library Index (SQLite FTS5).** `%LOCALAPPDATA%\Yoink\index.db` replaces scan-based search/recent/get-taxonomy code paths where indexed consumers need fast library access. First boot backfills existing corpora; subsequent yoinks update incrementally.
 - **Migration framework.** `schema_version` table plus numbered `migrations/NNNN_*.sql` scripts for future schema changes.
 - **Yoink Memory page.** New corpus gallery at `chrome-extension://<id>/yoink-memory.html`, opened from the popup's "View all yoinks" link. Filters by search text, channel, topic, Hook Type, and date range, with pagination at 50 results/page.
