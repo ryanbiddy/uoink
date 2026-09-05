@@ -32,10 +32,22 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PROMPTS = HERE / "prompts"
 
-CODEX_EXE = os.environ.get(
-    "UOINK_CODEX_EXE",
-    r"C:\Users\hello\OneDrive\Documents\PC Stuff\agent-control-room\node_modules\@openai\codex-win32-x64\vendor\x86_64-pc-windows-msvc\bin\codex.exe",
-)
+def _default_codex_exe() -> str:
+    """The Codex CLI: UOINK_CODEX_EXE, else `codex` on PATH, else the global npm
+    install. Never a OneDrive path: npm cannot update a package there, and the
+    Control Room moved to E:\\AI\\projects\\agent-control-room on 2026-09-04."""
+    env = os.environ.get("UOINK_CODEX_EXE")
+    if env:
+        return env
+    on_path = shutil.which("codex")
+    if on_path:
+        return on_path
+    return os.path.expandvars(
+        r"%APPDATA%\npm\node_modules\@openai\codex\node_modules\@openai"
+        r"\codex-win32-x64\vendor\x86_64-pc-windows-msvc\bin\codex.exe")
+
+
+CODEX_EXE = _default_codex_exe()
 AGY_EXE = os.environ.get("UOINK_AGY_EXE", os.path.expandvars(r"%LOCALAPPDATA%\agy\bin\agy.exe"))
 
 # ---------------------------------------------------------------------------
