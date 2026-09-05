@@ -156,6 +156,7 @@ class ProofHarness:
         run_id: str = "proof-run-p",
         expected_hash: Optional[str] = NAMED_COPY_HASH,
         skip_hash_check: bool = False,
+        batch: int = 12,
     ):
         self.source = Path(source).resolve()
         self.out_dir = Path(out_dir).resolve()
@@ -163,6 +164,14 @@ class ProofHarness:
         self.limit = limit
         self.model = model
         self.concurrency = max(1, concurrency)
+        # Cards per model call. Every `claude -p` launch carries Claude Code's
+        # full (cached) system prompt, so one card per call would spend the
+        # subscription window on overhead; the contract allows a lease to
+        # return several single-item rows, so one prompt carries `batch`
+        # cards and the model returns one result per video_id.
+        self.batch = max(1, batch)
+        self.calls: List[Dict[str, Any]] = []
+        self._receipt_lock = threading.Lock()
         self.port = port
         self.run_id = run_id
         self.expected_hash = expected_hash
@@ -658,6 +667,149 @@ class ProofHarness:
 
         return result, usage
 
+    # ---- batched model path (real runs) ------------------------------------
+    def _submit_and_receipt(self, item: dict, result: dict, usage: dict,
+                            prompt_bytes: int, wall_ms: int,
+                            card_bytes: int) -> dict:
+        """Submit one item's result and build its receipt (shared by the
+        per-item and the batched paths)."""
+        work_id = item["work_id"]
+        video_id = item["video_id"]
+        attempt_token = item["attempt_token"]
+        response_bytes = len(json.dumps(result, ensure_ascii=False).encode("utf-8"))
+        submit_payload = {
+            "work_id": work_id,
+            "client_id": "proof-harness",
+            "attempt_token": attempt_token,
+            "submission_key": f"{work_id}-{attempt_token}",
+            "schema_version": 1,
+            "video_id": video_id,
+            "source_revision": item["source_revision"],
+            "taxonomy_revision": item["taxonomy_revision"],
+            "packet_hash": item["packet_hash"],
+            "result": result,
+            "usage": usage,
+        }
+        submit_resp = self.http_tool_call("submit_library_result", submit_payload)
+        resp_data = submit_resp.get("result", submit_resp)
+        outcome = resp_data.get("outcome", "rejected" if not submit_resp.get("ok") else "error")
+        rejection_reason = None
+        if outcome in {"rejected", "error"}:
+            rejection_reason = resp_data.get("rejected") or resp_data.get("error")
+        memberships = result.get("memberships") or []
+        evidence_quote = evidence_basis = None
+        if memberships:
+            ev = memberships[0].get("evidence") or {}
+            evidence_quote, evidence_basis = ev.get("quote"), ev.get("basis")
+        return {
+            "work_id": work_id,
+            "video_id": video_id,
+            "attempt_token": attempt_token,
+            "attempt_number": item.get("attempt_number", 1),
+            "packet_hash": item["packet_hash"],
+            "card_bytes": card_bytes,
+            "prompt_bytes": prompt_bytes,
+            "response_bytes": response_bytes,
+            "wall_ms": wall_ms,
+            "outcome": outcome,
+            "rejection_reason": rejection_reason,
+            "evidence_quote": evidence_quote,
+            "evidence_basis": evidence_basis,
+            "memberships": memberships,
+            "usage": usage,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        }
+
+    def process_batch(self, items: List[dict], taxonomy_block: str) -> List[dict]:
+        """One model call for several claimed items; one submission each.
+        A video_id the model omitted or duplicated is submitted as an
+        `error` result so the rejection is recorded, never silently skipped.
+        Usage is recorded once per call in self.calls and attached to every
+        item receipt with the call id and batch size, so totals are computed
+        over calls, not over items."""
+        cards_block = "\n\n".join(library_cards.card_text(it["card"]) for it in items)
+        prompt = self.prompt_template.replace("{{TAXONOMY}}", taxonomy_block).replace(
+            "{{CARDS}}", cards_block)
+        prompt_bytes = len(prompt.encode("utf-8"))
+        card_bytes = {it["video_id"]: len(json.dumps(it["card"], ensure_ascii=False).encode("utf-8"))
+                      for it in items}
+        t0 = time.perf_counter()
+        call_id = f"call-{len(self.calls) + 1:04d}-{secrets.token_hex(3)}"
+        try:
+            by_video, usage = self.generate_model_batch(items, prompt)
+            call_error = None
+        except ProofRunError as exc:
+            by_video, call_error = {}, str(exc)[:400]
+            usage = {"status": "unavailable", "model": self.model,
+                     "reason": f"call failed: {call_error}",
+                     "wall_time_ms": int((time.perf_counter() - t0) * 1000)}
+        wall_ms = int((time.perf_counter() - t0) * 1000)
+        usage = dict(usage, call_id=call_id, batch_size=len(items))
+        with self._receipt_lock:
+            self.calls.append({"call_id": call_id, "batch_size": len(items),
+                               "video_ids": [it["video_id"] for it in items],
+                               "prompt_bytes": prompt_bytes, "wall_ms": wall_ms,
+                               "usage": usage, "error": call_error})
+        receipts = []
+        for it in items:
+            vid = it["video_id"]
+            result = by_video.get(vid)
+            if result is None:
+                result = {"outcome": "error",
+                          "reason": call_error or f"model returned no result for {vid}"}
+            receipts.append(self._submit_and_receipt(
+                it, result, usage, prompt_bytes, wall_ms, card_bytes[vid]))
+        return receipts
+
+    def generate_model_batch(self, items: List[dict], prompt: str) -> Tuple[Dict[str, dict], dict]:
+        """`claude -p` once for a batch; returns {video_id: result} and usage.
+        Duplicated video_ids keep the first result; extras are dropped and
+        counted in usage.extra_results so the receipt shows them."""
+        t0 = time.perf_counter()
+        exe = shutil.which("claude") or "claude"
+        cmd = [exe, "-p", "--json-schema", json.dumps(ASSIGN_OUTPUT_SCHEMA),
+               "--output-format", "json", "--tools", "", "--no-session-persistence"]
+        if self.model:
+            cmd += ["--model", self.model]
+        res = subprocess.run(cmd, input=prompt, capture_output=True, text=True,
+                             encoding="utf-8", errors="replace", timeout=600)
+        wall_ms = int((time.perf_counter() - t0) * 1000)
+        if res.returncode != 0 or not res.stdout.strip():
+            raise ProofRunError(f"claude -p failed (exit {res.returncode}): {res.stderr[:400]}")
+        try:
+            env = json.loads(res.stdout)
+        except json.JSONDecodeError as e:
+            raise ProofRunError(f"claude returned non-JSON stdout: {res.stdout[:300]}") from e
+        if env.get("is_error") or env.get("structured_output") is None:
+            raise ProofRunError(f"claude failed to return structured_output: {str(env.get('result'))[:300]}")
+        wanted = {it["video_id"] for it in items}
+        by_video: Dict[str, dict] = {}
+        extra = 0
+        for entry in env["structured_output"].get("results", []) or []:
+            vid = entry.get("video_id")
+            if vid in wanted and vid not in by_video and isinstance(entry.get("result"), dict):
+                by_video[vid] = entry["result"]
+            else:
+                extra += 1
+        u = env.get("usage", {})
+        if u and "input_tokens" in u:
+            usage = {
+                "status": "reported",
+                "model": env.get("model") or self.model,
+                "input_tokens": int(u.get("input_tokens", 0)),
+                "output_tokens": int(u.get("output_tokens", 0)),
+                "cache_read_tokens": int(u.get("cache_read_input_tokens", 0)),
+                "cache_create_tokens": int(u.get("cache_creation_input_tokens", 0)),
+                "wall_time_ms": wall_ms,
+                "total_cost_usd": env.get("total_cost_usd", 0.0),
+                "extra_results": extra,
+            }
+        else:
+            usage = {"status": "unavailable", "model": env.get("model") or self.model,
+                     "reason": "CLI returned no token usage", "wall_time_ms": wall_ms,
+                     "extra_results": extra}
+        return by_video, usage
+
     def process_item(self, item: dict, taxonomy_block: str) -> dict:
         """Executes the reason -> submit step for one claimed work item."""
         work_id = item["work_id"]
@@ -735,10 +887,48 @@ class ProofHarness:
         }
         return receipt
 
+    def _batched_worker(self, taxonomy_block: str, retried_videos: set[str]) -> None:
+        """One real-model worker: claim a batch, one model call, submit each,
+        until the run has no ready or leased work left."""
+        idle_polls = 0
+        while True:
+            claim_resp = self.http_tool_call(
+                "claim_library_work",
+                {"action": "claim", "run_id": self.run_id,
+                 "client_id": "proof-harness", "max_items": self.batch})
+            claim_data = claim_resp.get("result", claim_resp)
+            work_items = claim_data.get("work", []) or []
+            if not work_items:
+                list_resp = self.http_tool_call("list_library_work", {"run_id": self.run_id})
+                counts = list_resp.get("result", list_resp).get("counts", {}) or {}
+                if counts.get("ready", 0) == 0 and counts.get("leased", 0) == 0:
+                    return
+                idle_polls += 1
+                if idle_polls > 3000:  # ~10 min with nothing claimable
+                    return
+                time.sleep(0.2)
+                continue
+            idle_polls = 0
+            receipts = self.process_batch(work_items, taxonomy_block)
+            with self._receipt_lock:
+                for receipt in receipts:
+                    self.receipts.append(receipt)
+                    self._handle_retry_policy(receipt, retried_videos)
+
     def run_proof_loop(self) -> None:
         """Runs the complete claim -> reason -> submit loop over HTTP."""
         taxonomy_block = self.format_taxonomy_block()
         retried_videos: set[str] = set()
+
+        if not self.mock:
+            # Real model: batched calls, `concurrency` independent claim loops.
+            with cf.ThreadPoolExecutor(max_workers=self.concurrency) as ex:
+                futures = [ex.submit(self._batched_worker, taxonomy_block, retried_videos)
+                           for _ in range(self.concurrency)]
+                for fut in cf.as_completed(futures):
+                    fut.result()
+            self._finish_with_preview()
+            return
 
         while True:
             # Claim work
@@ -783,7 +973,10 @@ class ProofHarness:
                     self.receipts.append(receipt)
                     self._handle_retry_policy(receipt, retried_videos)
 
-        # Apply reshelving preview mode
+        self._finish_with_preview()
+
+    def _finish_with_preview(self) -> None:
+        """Preview only; apply must remain impossible in the proof."""
         preview_resp = self.http_tool_call(
             "apply_reshelving",
             {
@@ -871,12 +1064,35 @@ class ProofHarness:
         self.out_dir.mkdir(parents=True, exist_ok=True)
         out_file = self.out_dir / "receipts.json"
 
-        total_serialized_input_bytes = sum(
-            r["card_bytes"] + r["prompt_bytes"] for r in self.receipts
-        )
-        total_wall_ms = sum(r["wall_ms"] for r in self.receipts)
+        if self.calls:
+            # Batched real run: a call's prompt bytes and wall time are shared
+            # by every item in the batch, so totals come from the calls.
+            total_serialized_input_bytes = sum(c["prompt_bytes"] for c in self.calls)
+            total_wall_ms = sum(c["wall_ms"] for c in self.calls)
+        else:
+            total_serialized_input_bytes = sum(
+                r["card_bytes"] + r["prompt_bytes"] for r in self.receipts
+            )
+            total_wall_ms = sum(r["wall_ms"] for r in self.receipts)
         total_retries = sum(1 for r in self.receipts if r["attempt_number"] > 1)
         outcome_counts = Counter(r["outcome"] for r in self.receipts)
+        reported = [c["usage"] for c in self.calls if c["usage"].get("status") == "reported"]
+        usage_totals = {
+            "calls": len(self.calls),
+            "calls_with_reported_usage": len(reported),
+            "calls_without_usage": len(self.calls) - len(reported),
+            "input_tokens": sum(u.get("input_tokens", 0) for u in reported),
+            "output_tokens": sum(u.get("output_tokens", 0) for u in reported),
+            "cache_read_tokens": sum(u.get("cache_read_tokens", 0) for u in reported),
+            "cache_create_tokens": sum(u.get("cache_create_tokens", 0) for u in reported),
+            # The CLI's own list-price estimate, not a paid amount: the run
+            # is subscription-only (ANTHROPIC_API_KEY asserted unset).
+            "cli_estimated_cost_usd": round(sum(float(u.get("total_cost_usd", 0.0) or 0.0)
+                                                for u in reported), 4),
+            "paid_cost_usd": None,
+            "status": "measured" if reported and len(reported) == len(self.calls)
+                      else ("partial" if reported else "unavailable"),
+        }
 
         document = {
             "schema_version": 1,
@@ -898,7 +1114,10 @@ class ProofHarness:
                 "total_attempts": len(self.receipts),
                 "total_items": len(set(r["video_id"] for r in self.receipts)),
                 "outcome_counts": dict(outcome_counts),
+                "batch_size": self.batch if not self.mock else 1,
             },
+            "usage_totals": usage_totals,
+            "calls": self.calls,
             "receipts": self.receipts,
         }
 
@@ -963,6 +1182,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Concurrency for claude -p worker processes (default: 4)",
     )
     parser.add_argument(
+        "--batch",
+        type=int,
+        default=12,
+        help="Cards per claude -p call in real runs (default: 12; mock runs stay per-item)",
+    )
+    parser.add_argument(
         "--port",
         type=int,
         default=5180,
@@ -1006,6 +1231,7 @@ def main() -> None:
         limit=args.limit,
         model=args.model,
         concurrency=args.concurrency,
+        batch=args.batch,
         port=args.port,
         scratch_dir=args.scratch,
         run_id=args.run_id,
