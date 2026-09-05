@@ -62,6 +62,30 @@ def clean_env(monkeypatch):
     monkeypatch.setenv("NO_PROXY", "127.0.0.1,localhost")
 
 
+def run_harness_subprocess(*, source, out_dir, limit, concurrency, port, scratch_dir, run_id):
+    """Run the harness as its own interpreter, the way the orchestrator runs it.
+    In-process execution is only valid in a fresh interpreter: once another test
+    has imported `server` against the real data root, the in-thread helper
+    cannot be re-pointed, so the full suite must not run it in-process."""
+    import os
+    import subprocess
+    import sys
+    cmd = [sys.executable, str(ROOT / "scripts" / "librarian" / "proof_run.py"),
+           "--source", str(source), "--out", str(out_dir), "--mock",
+           "--limit", str(limit), "--concurrency", str(concurrency),
+           "--port", str(port), "--scratch", str(scratch_dir),
+           "--run-id", run_id, "--skip-hash-check"]
+    env = dict(os.environ)
+    env.pop("ANTHROPIC_API_KEY", None)
+    env["PYTHONPATH"] = str(ROOT)
+    res = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8",
+                         errors="replace", timeout=600, cwd=str(ROOT), env=env)
+    assert res.returncode == 0, (res.stdout[-2000:], res.stderr[-2000:])
+    receipts_path = Path(out_dir) / "receipts.json"
+    assert receipts_path.is_file(), res.stdout[-1000:]
+    return receipts_path
+
+
 def test_refusal_when_anthropic_api_key_set(tmp_path, monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-paid-api-key-test")
     dummy_source = tmp_path / "dummy.db"
@@ -161,19 +185,10 @@ def test_mock_run_end_to_end(tmp_path, clean_env):
     ephemeral_port = find_free_port()
     out_dir = tmp_path / "proof_out"
 
-    harness = ProofHarness(
-        source=fixture_db,
-        out_dir=out_dir,
-        mock=True,
-        limit=12,
-        concurrency=2,
-        port=ephemeral_port,
-        scratch_dir=tmp_path / "scratch",
-        run_id="test-run-p-mock",
-        skip_hash_check=True,
-    )
-
-    receipts_path = harness.execute()
+    receipts_path = run_harness_subprocess(
+        source=fixture_db, out_dir=out_dir, limit=12, concurrency=2,
+        port=ephemeral_port, scratch_dir=tmp_path / "scratch",
+        run_id="test-run-p-mock")
     assert receipts_path.is_file()
 
     # Load and verify receipts document
@@ -234,18 +249,10 @@ def test_scorer_on_fixture_receipts(tmp_path, clean_env):
     ephemeral_port = find_free_port()
     out_dir = tmp_path / "proof_out"
 
-    harness = ProofHarness(
-        source=fixture_db,
-        out_dir=out_dir,
-        mock=True,
-        limit=12,
-        concurrency=1,
-        port=ephemeral_port,
-        scratch_dir=tmp_path / "scratch",
-        run_id="test-run-scorer",
-        skip_hash_check=True,
-    )
-    receipts_path = harness.execute()
+    receipts_path = run_harness_subprocess(
+        source=fixture_db, out_dir=out_dir, limit=12, concurrency=1,
+        port=ephemeral_port, scratch_dir=tmp_path / "scratch",
+        run_id="test-run-scorer")
     receipts_data = json.loads(receipts_path.read_text(encoding="utf-8"))
 
     holdout_path = ROOT / "docs" / "library" / "holdout-split-2026-09-04.json"
