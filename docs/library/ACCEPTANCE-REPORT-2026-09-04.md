@@ -278,3 +278,80 @@ Completed: the dated report append, portable run H evidence and supplemental rep
 Git staging of the three deliverables failed: `Unable to create 'E:/AI/projects/uoink/checkouts/Yoink/.git/worktrees/codex5/index.lock': Permission denied`. No commit was created. The report append, `ACCEPTANCE-EVIDENCE-RUN-H-2026-09-04.json`, and `tests/acceptance_run_h_probe.py` remain for the integrator to inspect and commit.
 
 **REJECT - candidate `b9c6a05b5ba17033cfc4090c061a2f298c3c4518`.**
+
+## Run I re-acceptance, 2026-09-04
+
+**ACCEPT WITH LISTED EXCEPTIONS - candidate `d83be1f1e4a2dff916e7edf90ce3c98a1ebcc945`.** H-1 is closed: the malformed primary path receives no L1 or L2 credit in both the evaluator and the complete benchmark. All five original run F cases still pass. The exceptions and unverified release behavior listed below remain open.
+
+This independent review follows `RE-ACCEPTANCE-2-BRIEF-2026-09-04.md`. The dedicated worktree began clean at `08e018be3e43a1c3a145bd8a209c51c0fbfec3a0`. `git diff --name-only d83be1f HEAD` returned only that brief, so the tested code and prompts match the named candidate. Run F and run H remain historical records. This review changes no production code, prompt, migration, or label.
+
+**Diff review and repair routing**
+
+I reviewed both files in `git show d83be1f`: `scripts/librarian/bench_local.py` and `tests/security/test_bench_local.py`. The evaluator now requires a nonempty primary path whose every component is a nonblank string before stripping whitespace and lowercasing. It no longer discards bad components. The new test preserves a valid control and rejects an integer between valid shelves, an empty string, null, and a nested list. It passes in the full suite; the unchanged run H probe independently checks the complete runner.
+
+Fable's routing was appropriate under orchestration rule 1. Rejecting malformed components implements the existing acceptance contract and H-1 repair direction; it does not revise the contract or overrule failing evidence. The protocol gives Fable compatible implementation choices and requires independent verification, which this run supplies. Gemini's earlier ownership routed the finding; it did not require a round trip before this bounded repair. I found no new reproducible rejection case in the diff.
+
+**Evidence and commands**
+
+Portable observations, suite counts, input hashes and raw-artifact hashes are in [ACCEPTANCE-EVIDENCE-RUN-I-2026-09-04.json](ACCEPTANCE-EVIDENCE-RUN-I-2026-09-04.json). Raw logs, XML, receipts and disposable databases remain under `tests/.acceptance-run-i/`, ignored by its local `.gitignore`. The three existing measurement/probe scripts ran unchanged.
+
+The named source copy, `C:/Users/hello/AppData/Local/AgentControlRoom/uoink-index-copy-2026-09-04-upgraded.db`, has source date **2026-09-04**, **71,733,248 bytes**, and SHA-256 `2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc`. I verified its hash, copied it into this worktree, and supplied that duplicate to M. The original, local source duplicate and frozen duplicate still matched at the final check. SQLite opened only local duplicates or new fixtures; frozen reads used `mode=ro` and `query_only=ON`. All 548 corpus paths were checked as source-document paths outside project checkouts before the card probes read their bounded heads. Their manifest hash remained `690cdf04396c8c1a8e1ad5cc4098b1e75de67a4c388de7e3ce94c8a361581367` in both database states. The live index was never opened.
+
+Run from this worktree in PowerShell; probe output subdirectories must not already exist:
+
+```powershell
+$runI = Join-Path (Get-Location) 'tests/.acceptance-run-i'
+New-Item -ItemType Directory -Force -Path $runI, "$runI/local", "$runI/data", "$runI/output", "$runI/temp" | Out-Null
+Set-Content -LiteralPath "$runI/.gitignore" -Value '*' -Encoding ASCII
+$env:PYTHONPATH = '.'
+$env:LOCALAPPDATA = "$runI/local"
+$env:XDG_DATA_HOME = "$runI/data"
+$env:UOINK_OUTPUT_DIR = "$runI/output"
+$env:TEMP = "$runI/temp"
+$env:TMP = "$runI/temp"
+$env:PYTHONIOENCODING = 'utf-8'
+
+# S: full suite
+python -m pytest -q tests/ -p no:cacheprovider -rsx --junitxml=tests/.acceptance-run-i/suite.xml
+# H: unchanged H-1 reproduction, meter checks and five real lock repetitions
+python tests/acceptance_run_h_probe.py --out tests/.acceptance-run-i/supplemental
+# M: prepare the original F probe's copied databases
+Copy-Item -LiteralPath 'C:/Users/hello/AppData/Local/AgentControlRoom/uoink-index-copy-2026-09-04-upgraded.db' -Destination "$runI/uoink-index-copy-2026-09-04-upgraded.db"
+python tests/repair_run_d_measure.py --source tests/.acceptance-run-i/uoink-index-copy-2026-09-04-upgraded.db --out tests/.acceptance-run-i/measurement
+# P: unchanged original run F reproductions
+python tests/acceptance_run_f_probe.py --copy-dir tests/.acceptance-run-i/measurement --out tests/.acceptance-run-i/delivery
+```
+
+| Check | Expected | Observed on this candidate |
+|---|---|---|
+| S - suite | Match integrator count; no unexpected failures | **665 passed, 3 skipped, 1 xfailed**, 171 warnings, **47.49 s**, exit 0. Includes 14 benchmark, 18 D-17/meter, 25 Recall, 3 adversarial-card, 3 packaging and 1 installed-tree smoke tests, all passing. |
+| H - H-1 | Malformed path scores L1/L2 false; valid control passes | `["Science",42,"Physics"]` gives **L1=false, L2=false**. Complete mock benchmark: **1 item, 0.0% L1, 0.0% L2**, `status="completed_mock"`. Valid control: L1/L2/evidence true. **Pass.** |
+| M - copy preparation | Same source, repeatable rebuild, bounded cards and valid integrity | Schema **26**, **548 items**, **3,705 rebuilt clips**, identical repeat payload hash and all four card-set hashes from run H. Caller mismatches **0**; Librarian maximum **8,153 / 8,192 bytes**. Integrity and provenance-precedence assertions pass; exit 0. |
+| P - original reproductions | All five cases remain resolved | Exit 0; each receipt checked against its expected result below. |
+
+H's malformed result still reports `id_valid=true` and `evidence_valid=true`: the identity is correct and `alpha beta` occurs within one clip. Those independent checks do not restore classification credit. The raw `predicted_path` retains `42` for inspection. H and P write observations even when a gate fails; their exit codes alone are not acceptance evidence.
+
+**Five original run F cases**
+
+| Case | Expected | Run I observation and decision |
+|---|---|---|
+| 1 - evidence/cardinality | Reject cross-clip evidence, extra identities and malformed identity/path inputs without `TypeError` | `beta gamma` across separate clips gives `evidence_valid=false`. Extra `OTHER` gives `extra_id` and all score flags false. Array ID gives `wrong_id`; `shelf_paths:[42]` gives L1/L2 false. Wrong, missing and duplicate identities remain rejected. **Pass.** |
+| 2 - benchmark fence | One complete data boundary, including null-card fallback | P captures **1 opening / 1 closing delimiter**, no unescaped attack, through one stubbed completion in the real runner. S passes null-card fallback coverage. **Pass.** |
+| 3 - usage visibility and estimates | Retain missing usage; expose failed writes/reads; price four counters with provenance | P stores and publicly exposes **1 unavailable call**. H reports **1 write failure**, `status.ok=false`, preserves the caller's transaction and retains 3 metered calls. Read failure gives `unavailable_calls=null`, `error="usage unavailable"`. Cumulative estimates for cache read, cache creation, then ordinary input/output are **$0.000100 / $0.001350 / $0.007350**; stored rates match the public table, source/date included, `estimate=true`. **Pass.** |
+| 4 - Recall deadline | Exclusive lock returns silently within 1.5 seconds | P: direct `main()` **1.0026 s**, subprocess **1.0429 s**, both exit 0 with 0 stdout bytes. H direct repetitions: **1.0284, 1.0048, 1.0059, 1.0068, 1.0074 s**. Disabled hook remains silent. **Pass.** |
+| 5 - installed Recall inventory | Hook present in staging, installation list and packaging coverage | `scripts/recall_hook.py` is present in both lists; **8/8** probed entries are staged and installed. S passes packaging coverage. **Pass for inventory.** |
+
+P's concurrency fixture also retains **200 calls / 600 input / 400 output tokens** across eight connections. As in run H, its legacy two-argument price callback gives a cache-only estimate of $0.0 with `rates=null`; H separately checks the server's four-counter rate path. P's retained write-failure status comes from its deliberate nested-transaction refusal. All counters are synthetic fixtures and all dollar figures are observed estimates under stored rates. No model usage or paid cost was measured, and live provider prices were not independently checked.
+
+**Listed exceptions and scope limits**
+
+- **SEC-06:** Unicode search remains the scoped defect. P still produces an empty Japanese query, and S retains its expected failure. The separate tokenization repair described in run F remains open.
+- **SEC-05:** The documented automatic FxTwitter enrichment exception remains; this candidate does not add the proposed default-off flag.
+- **Installed behavior remains unverified:** candidate build/install/autostart, installed client/extension/dashboard/Recall, watchdog recovery, media seeking and coarse-interval presentation still need the isolated receipts specified in run H. Computer-use receipt: **not run; no candidate installer/build was produced in this review**. The package-shaped subprocess smoke does not close those checks.
+- **Model and platform coverage remains unverified:** real model quality, instruction-following, reported usage and paid cost; POSIX bundle execution, privileged Windows symlinks, and ffmpeg/native-ASR media coverage. The suite's three skips are POSIX execution on Windows, unavailable symlink privilege and ffmpeg absent from PATH.
+
+The suite ran disposable fixture servers/subprocesses; this review did not operate the resident helper at `127.0.0.1:5179`, launch an installed build/browser/player, or call a model endpoint. No merge or push was attempted. Completed deliverables are this append and the portable run I evidence JSON. There are no unresolved questions about H-1 or its routing; the listed exceptions and release receipts remain open.
+
+Git staging of both deliverables failed: `Unable to create 'E:/AI/projects/uoink/checkouts/Yoink/.git/worktrees/codex6/index.lock': Permission denied`. No commit was created. Both files remain for Fable to inspect and commit from the integration environment.
+
+**ACCEPT WITH LISTED EXCEPTIONS - candidate `d83be1f1e4a2dff916e7edf90ce3c98a1ebcc945`.**
