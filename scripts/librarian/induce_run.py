@@ -424,17 +424,15 @@ class InductionHarness:
         "additionalProperties": False,
     }
 
-    def _claude_call(self, call_id: str, attempt_ids: List[str], prompt: str, schema: Dict[str, Any]) -> Tuple[dict, dict]:
+    def _claude_call(self, call_id: str, attempt_ids: List[str], prompt: str, schema: Dict[str, Any],
+                     effort: Optional[str] = None) -> Tuple[dict, dict]:
         """One real `claude -p` process, recorded as an immutable call record with the
         exact stdin/stdout/stderr bytes on disk. Returns (call_record, envelope)."""
         schema_text = json.dumps(schema, separators=(",", ":"), ensure_ascii=False)
         exe = shutil.which("claude") or "claude"
         argv = [exe, "-p", "--json-schema", schema_text, "--output-format", "json", "--tools", "",
                 "--no-session-persistence", "--model", self.model]
-        effort = os.environ.get("UOINK_INDUCE_EFFORT")
         if effort:
-            # Consolidation is a mechanical merge; low reasoning effort halves output tokens
-            # (measured 2026-09-05: 55,272 -> 25,071 on three batches) with the same shape.
             argv += ["--effort", effort]
         stdin_b = prompt.encode("utf-8")
         timeout = int(os.environ.get("UOINK_PROOF_CALL_TIMEOUT", "900"))
@@ -539,6 +537,12 @@ class InductionHarness:
         # starts only after every batch has completed (validator timeline rule).
         import concurrent.futures as cf
         workers = max(1, min(4, int(os.environ.get("UOINK_INDUCE_CONCURRENCY", "4"))))
+        # Batch induction needs the default reasoning effort: at `low` a batch that found
+        # two concepts with six supports each at default effort found none (measured
+        # 2026-09-05, 5,659 vs 37,162 output tokens). Consolidation is a mechanical merge;
+        # low effort halves its output tokens with the same shape.
+        batch_effort = os.environ.get("UOINK_INDUCE_BATCH_EFFORT") or None
+        consolidation_effort = os.environ.get("UOINK_INDUCE_EFFORT") or None
         results: Dict[str, Tuple[dict, dict]] = {}
         resume_from = os.environ.get("UOINK_INDUCE_RESUME_FROM")
         if resume_from:
@@ -572,7 +576,7 @@ class InductionHarness:
                 print(f"[induce] resume: reused {cid}", file=sys.stderr, flush=True)
         pending = [(cid, chunk, prompt) for cid, chunk, prompt in plan if cid not in results]
         with cf.ThreadPoolExecutor(max_workers=workers) as ex:
-            futures = {ex.submit(self._claude_call, cid, chunk, prompt, self.BATCH_OUTPUT_SCHEMA): cid
+            futures = {ex.submit(self._claude_call, cid, chunk, prompt, self.BATCH_OUTPUT_SCHEMA, batch_effort): cid
                        for cid, chunk, prompt in pending}
             for fut in cf.as_completed(futures):
                 results[futures[fut]] = fut.result()
@@ -621,7 +625,8 @@ class InductionHarness:
             # 50 min; the same prompt returns in 3 min without them). The call uses
             # the schema minus those two constraint kinds; the validator still checks
             # the proposal against the full PROPOSAL_SCHEMA afterwards.
-            record, envelope = self._claude_call(final_id, ["consolidation"], cons_prompt, _cli_safe_schema(PROPOSAL_SCHEMA))
+            record, envelope = self._claude_call(final_id, ["consolidation"], cons_prompt, _cli_safe_schema(PROPOSAL_SCHEMA),
+                                                 consolidation_effort)
             calls.append(record)
             structured = envelope.get("structured_output") if isinstance(envelope, dict) else None
             if record["exit_status"] != 0 or not isinstance(structured, dict):
@@ -662,7 +667,7 @@ class InductionHarness:
                 "checkout_root": str(ROOT),
                 "cwd": str(ROOT),
                 "model": self.model,
-                "effort": os.environ.get("UOINK_INDUCE_EFFORT"),
+                "effort": {"batch": batch_effort or "default", "consolidation": consolidation_effort or "default"},
                 "concurrency": workers,
                 "call_timeout_s": int(os.environ.get("UOINK_PROOF_CALL_TIMEOUT", "900")),
                 "environment": {"ANTHROPIC_API_KEY": "unset (asserted before every process)"},
