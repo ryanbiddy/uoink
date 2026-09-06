@@ -1,0 +1,11 @@
+[induce] call-batch-00: 25 ids, 419254 ms, exit 0, stdout 27029 B
+[induce] call-batch-02: 25 ids, 443849 ms, exit 0, stdout 33081 B
+[induce] call-batch-03: 25 ids, 504505 ms, exit 0, stdout 30933 B
+[induce] call-batch-01: 25 ids, 534725 ms, exit 0, stdout 42571 B
+[induce] call-batch-06: 25 ids, 455109 ms, exit 0, stdout 39076 B
+[induce] call-batch-07: 25 ids, 506832 ms, exit 0, stdout 41736 B
+[induce] call-batch-05: 25 ids, 612959 ms, exit 0, stdout 40757 B
+[induce] call-batch-04: 25 ids, 670800 ms, exit 0, stdout 48161 B
+[induce] call-batch-08: 25 ids, 506623 ms, exit 0, stdout 39568 B
+ERROR: Key support must belong to its recorded batch
+exit=1

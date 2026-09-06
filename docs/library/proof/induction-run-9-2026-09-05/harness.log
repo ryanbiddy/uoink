@@ -1,0 +1,16 @@
+[induce] resume: reused call-batch-00
+[induce] resume: reused call-batch-01
+[induce] resume: reused call-batch-02
+[induce] resume: reused call-batch-03
+[induce] resume: reused call-batch-04
+[induce] resume: reused call-batch-05
+[induce] resume: reused call-batch-06
+[induce] resume: reused call-batch-07
+[induce] resume: reused call-batch-08
+[induce] 1 unusable support keys named in the prompt: ['c061-1']
+[induce] call-consolidation: 1 ids, 422744 ms, exit 0, stdout 121700 B
+[induce] completed: 10 calls; proposal nodes=12, ledger=225
+Taxonomy induction complete.
+Proposal written to: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\induction-attempt9\proposal.json
+Receipts written to: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\induction-attempt9\receipts.json
+exit=0

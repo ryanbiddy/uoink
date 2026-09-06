@@ -1,0 +1,2968 @@
+{
+  "version_id": "taxonomy-v2-2026-09-05",
+  "parent_version_id": "taxonomy-v1-2026-09-04",
+  "nodes": [
+    {
+      "shelf_id": "ai-and-ml",
+      "path": [
+        "AI and ML"
+      ],
+      "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+      "include": [
+        "artificial intelligence",
+        "machine learning",
+        "deep learning",
+        "neural networks",
+        "foundation models",
+        "LLMs",
+        "autonomous systems"
+      ],
+      "exclude": [
+        "traditional non-AI software development",
+        "general business operations",
+        "unrelated science and hardware"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "artificial intelligence",
+          "confusing_alternative": "general business/tech story",
+          "evidence_needed": "quote must reference AI/ML specifically, not generic tech"
+        },
+        {
+          "include_cue": "machine learning",
+          "confusing_alternative": "traditional statistics or software",
+          "evidence_needed": "quote must reference ML specifically"
+        },
+        {
+          "include_cue": "deep learning",
+          "confusing_alternative": "generic computing",
+          "evidence_needed": "quote must reference deep learning/neural techniques"
+        },
+        {
+          "include_cue": "neural networks",
+          "confusing_alternative": "biology or unrelated science",
+          "evidence_needed": "quote must reference computational neural networks"
+        },
+        {
+          "include_cue": "foundation models",
+          "confusing_alternative": "any large software system",
+          "evidence_needed": "quote must name a foundation/LLM model"
+        },
+        {
+          "include_cue": "LLMs",
+          "confusing_alternative": "any chatbot script",
+          "evidence_needed": "quote must reference a large language model"
+        },
+        {
+          "include_cue": "autonomous systems",
+          "confusing_alternative": "manually operated machinery",
+          "evidence_needed": "quote must describe autonomous operation"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "space-and-science",
+      "path": [
+        "Space and Science"
+      ],
+      "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+      "include": [
+        "space exploration",
+        "astronautics",
+        "astronomy",
+        "orbital mechanics",
+        "spacecraft engineering",
+        "scientific research"
+      ],
+      "exclude": [
+        "commercial airline aviation",
+        "science fiction and fantasy entertainment",
+        "general consumer technology"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "space exploration",
+          "confusing_alternative": "aviation",
+          "evidence_needed": "quote must be about space, not air travel"
+        },
+        {
+          "include_cue": "astronautics",
+          "confusing_alternative": "sci-fi fiction",
+          "evidence_needed": "quote must describe real astronautics"
+        },
+        {
+          "include_cue": "astronomy",
+          "confusing_alternative": "consumer tech",
+          "evidence_needed": "quote must be about astronomical observation"
+        },
+        {
+          "include_cue": "orbital mechanics",
+          "confusing_alternative": "generic physics trivia",
+          "evidence_needed": "quote must reference orbits"
+        },
+        {
+          "include_cue": "spacecraft engineering",
+          "confusing_alternative": "aircraft engineering",
+          "evidence_needed": "quote must be spacecraft-specific"
+        },
+        {
+          "include_cue": "scientific research",
+          "confusing_alternative": "business research",
+          "evidence_needed": "quote must be empirical scientific inquiry"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "developer-tools",
+      "path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+      "include": [
+        "coding assistants",
+        "agent harnesses",
+        "developer workflows",
+        "software development SDKs",
+        "IDE integrations",
+        "code generation"
+      ],
+      "exclude": [
+        "consumer conversational chatbots",
+        "pure theoretical ML papers without tools",
+        "non-technical end-user products"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "coding assistants",
+          "confusing_alternative": "consumer chatbot",
+          "evidence_needed": "quote must show a coding-assistance context"
+        },
+        {
+          "include_cue": "agent harnesses",
+          "confusing_alternative": "generic AI agent for consumers",
+          "evidence_needed": "quote must show a developer harness/workflow"
+        },
+        {
+          "include_cue": "developer workflows",
+          "confusing_alternative": "business workflow",
+          "evidence_needed": "quote must be software-engineering specific"
+        },
+        {
+          "include_cue": "software development SDKs",
+          "confusing_alternative": "consumer app",
+          "evidence_needed": "quote must reference an SDK for building software"
+        },
+        {
+          "include_cue": "IDE integrations",
+          "confusing_alternative": "standalone consumer app",
+          "evidence_needed": "quote must reference IDE tooling"
+        },
+        {
+          "include_cue": "code generation",
+          "confusing_alternative": "generic content generation",
+          "evidence_needed": "quote must be about generating code"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "security",
+      "path": [
+        "AI and ML",
+        "Security"
+      ],
+      "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+      "include": [
+        "agent guardrails",
+        "cybersecurity vulnerabilities",
+        "model sandboxing",
+        "prompt injection defenses",
+        "runtime governance",
+        "least privilege"
+      ],
+      "exclude": [
+        "generic network security without AI component",
+        "routine software bug reports",
+        "corporate compliance without technical safety"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "agent guardrails",
+          "confusing_alternative": "generic business policy",
+          "evidence_needed": "quote must describe technical guardrails on an AI agent"
+        },
+        {
+          "include_cue": "cybersecurity vulnerabilities",
+          "confusing_alternative": "non-AI IT security",
+          "evidence_needed": "quote must tie vulnerability to an AI system"
+        },
+        {
+          "include_cue": "model sandboxing",
+          "confusing_alternative": "generic virtualization",
+          "evidence_needed": "quote must reference sandboxing an AI model/agent"
+        },
+        {
+          "include_cue": "prompt injection defenses",
+          "confusing_alternative": "generic input validation",
+          "evidence_needed": "quote must reference prompt injection specifically"
+        },
+        {
+          "include_cue": "runtime governance",
+          "confusing_alternative": "corporate compliance policy",
+          "evidence_needed": "quote must describe technical runtime controls on AI"
+        },
+        {
+          "include_cue": "least privilege",
+          "confusing_alternative": "generic access control",
+          "evidence_needed": "quote must tie least-privilege to an AI/agent context"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "frontier-models",
+      "path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+      "include": [
+        "foundation model architectures",
+        "multimodal model releases",
+        "scaling laws",
+        "model capabilities benchmarks",
+        "open weights models"
+      ],
+      "exclude": [
+        "routine fine-tuning on niche tasks",
+        "end-user application tutorials",
+        "general AI business news"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "foundation model architectures",
+          "confusing_alternative": "application feature",
+          "evidence_needed": "quote must describe model architecture"
+        },
+        {
+          "include_cue": "multimodal model releases",
+          "confusing_alternative": "single-feature app launch",
+          "evidence_needed": "quote must be a model release"
+        },
+        {
+          "include_cue": "scaling laws",
+          "confusing_alternative": "generic performance claim",
+          "evidence_needed": "quote must reference scaling behavior"
+        },
+        {
+          "include_cue": "model capabilities benchmarks",
+          "confusing_alternative": "marketing claim",
+          "evidence_needed": "quote must be a benchmark/capability evaluation"
+        },
+        {
+          "include_cue": "open weights models",
+          "confusing_alternative": "closed product feature",
+          "evidence_needed": "quote must reference open-weights release"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "education",
+      "path": [
+        "AI and ML",
+        "Education"
+      ],
+      "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+      "include": [
+        "introductory lectures",
+        "algorithm explanations",
+        "machine learning coursework",
+        "mathematical foundations",
+        "step-by-step technical tutorials"
+      ],
+      "exclude": [
+        "product announcements",
+        "marketing keynotes",
+        "opinion pieces without pedagogical content"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "introductory lectures",
+          "confusing_alternative": "marketing keynote",
+          "evidence_needed": "quote must be pedagogical, not promotional"
+        },
+        {
+          "include_cue": "algorithm explanations",
+          "confusing_alternative": "product feature list",
+          "evidence_needed": "quote must explain how an algorithm works"
+        },
+        {
+          "include_cue": "machine learning coursework",
+          "confusing_alternative": "general CS coursework",
+          "evidence_needed": "quote must be ML-specific coursework"
+        },
+        {
+          "include_cue": "mathematical foundations",
+          "confusing_alternative": "casual trivia",
+          "evidence_needed": "quote must cover ML math foundations"
+        },
+        {
+          "include_cue": "step-by-step technical tutorials",
+          "confusing_alternative": "opinion commentary",
+          "evidence_needed": "quote must be a tutorial walkthrough"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "spaceflight",
+      "path": [
+        "Space and Science",
+        "Spaceflight"
+      ],
+      "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+      "include": [
+        "rocket launches",
+        "crewed space missions",
+        "orbital maneuvers",
+        "satellite deployment",
+        "astronaut spacewalks",
+        "space station resupply"
+      ],
+      "exclude": [
+        "terrestrial astronomy without launch systems",
+        "atmospheric aeronautics",
+        "speculative science fiction"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "rocket launches",
+          "confusing_alternative": "aircraft takeoff",
+          "evidence_needed": "quote must be a rocket launch"
+        },
+        {
+          "include_cue": "crewed space missions",
+          "confusing_alternative": "sci-fi film",
+          "evidence_needed": "quote must be a real crewed mission"
+        },
+        {
+          "include_cue": "orbital maneuvers",
+          "confusing_alternative": "terrestrial astronomy",
+          "evidence_needed": "quote must describe an orbital maneuver"
+        },
+        {
+          "include_cue": "satellite deployment",
+          "confusing_alternative": "consumer electronics",
+          "evidence_needed": "quote must be about satellite deployment"
+        },
+        {
+          "include_cue": "astronaut spacewalks",
+          "confusing_alternative": "underwater diving",
+          "evidence_needed": "quote must be a spacewalk"
+        },
+        {
+          "include_cue": "space station resupply",
+          "confusing_alternative": "generic cargo shipping",
+          "evidence_needed": "quote must reference a space station resupply mission"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "news-and-current-events",
+      "path": [
+        "News and Current Events"
+      ],
+      "definition": "Clips and commentary reporting or debating real-world breaking incidents, politics, and social controversies shared via social media.",
+      "include": [
+        "breaking reports naming a specific crime, riot, or armed-conflict incident",
+        "raw police/military radio or scanner audio captured during an unfolding event",
+        "political or cultural opinion segments from talk shows or panels",
+        "footage or description of a conflict or violent incident as it happens"
+      ],
+      "exclude": [
+        "discussion of an AI/tech product or capability -> AI and ML",
+        "sports match action/highlights lacking a reported incident or policy debate",
+        "livestreamer interpersonal drama lacking a reported incident or policy debate"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "breaking reports naming a specific crime, riot, or armed-conflict incident",
+          "confusing_alternative": "AI/ML autonomous-systems story",
+          "evidence_needed": "quote must report a real-world incident, not a product/model capability"
+        },
+        {
+          "include_cue": "raw police/military radio or scanner audio captured during an unfolding event",
+          "confusing_alternative": "sportscaster play-by-play",
+          "evidence_needed": "audio must be dispatch/command radio about a security event, not sports narration"
+        },
+        {
+          "include_cue": "political or cultural opinion segments from talk shows or panels",
+          "confusing_alternative": "creator interpersonal drama",
+          "evidence_needed": "speakers must be debating ideology/policy, not another creator's stream behavior"
+        },
+        {
+          "include_cue": "footage or description of a conflict or violent incident as it happens",
+          "confusing_alternative": "space/science empirical footage",
+          "evidence_needed": "quote must describe human conflict/violence, not a natural/scientific phenomenon"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "support_key": "c006-3"
+        },
+        {
+          "support_key": "c009-3"
+        },
+        {
+          "support_key": "c010-3"
+        },
+        {
+          "support_key": "c011-3"
+        },
+        {
+          "support_key": "c019-3"
+        }
+      ]
+    },
+    {
+      "shelf_id": "ai-generative-media",
+      "path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "definition": "AI systems and tools that generate finished creative or commercial media -- video, animation, images, websites, and interactive art -- from prompts, models, or captured footage.",
+      "include": [
+        "prompt-driven video/animation/image generation tools and their described outputs",
+        "AI-generated films, avatars, or websites shown as finished creative artifacts",
+        "AI combined with camera/AR tracking powering an interactive art or installation"
+      ],
+      "exclude": [
+        "AI agent autonomously completing a real-world task with no creative-media output -> AI and ML / AI Agents and Automation",
+        "company market position, funding, or revenue commentary with no shown creative artifact -> AI and ML / AI Industry and Business",
+        "model architecture, scaling, or benchmark coverage without a demoed creative output -> AI and ML / Frontier Models"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "prompt-driven video/animation/image generation tools and their described outputs",
+          "confusing_alternative": "AI Agents and Automation task demo",
+          "evidence_needed": "excerpt must show a prompt producing a visual/creative output, not a business task being completed"
+        },
+        {
+          "include_cue": "AI-generated films, avatars, or websites shown as finished creative artifacts",
+          "confusing_alternative": "AI Industry and Business story",
+          "evidence_needed": "excerpt must showcase the finished artifact itself, not company/market framing"
+        },
+        {
+          "include_cue": "AI combined with camera/AR tracking powering an interactive art or installation",
+          "confusing_alternative": "Frontier Models capability release",
+          "evidence_needed": "excerpt must show the interactive/creative experience, not a benchmark or spec"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "support_key": "c033-1"
+        },
+        {
+          "support_key": "c038-1"
+        },
+        {
+          "support_key": "c091-1"
+        },
+        {
+          "support_key": "c128-1"
+        },
+        {
+          "support_key": "c140-1"
+        }
+      ]
+    },
+    {
+      "shelf_id": "ai-agents-and-automation",
+      "path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "definition": "AI agent products that autonomously complete multi-step, real-world consumer or business tasks -- booking, sales, admin, driving, or monitoring -- on a user's behalf.",
+      "include": [
+        "agent completes a multi-step real-world task end-to-end without manual step-by-step direction",
+        "AI agents autonomously running business functions (sales, underwriting, coaching)",
+        "product framing that AI models now do a user's computer-based work for them"
+      ],
+      "exclude": [
+        "coding-specific agent harnesses, IDE extensions, or SDKs for software engineers -> AI and ML / Developer Tools",
+        "the finished creative/media artifact an agent produces, shown as output -> AI and ML / Generative Media",
+        "commentary on a company's market position or funding rather than the agent's task performance -> AI and ML / AI Industry and Business"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "agent completes a multi-step real-world task end-to-end without manual step-by-step direction",
+          "confusing_alternative": "Developer Tools coding agent harness",
+          "evidence_needed": "task target must be a real-world consumer/business action, not code review or an IDE workflow"
+        },
+        {
+          "include_cue": "AI agents autonomously running business functions (sales, underwriting, coaching)",
+          "confusing_alternative": "AI Industry and Business commentary",
+          "evidence_needed": "excerpt must show the agent performing the function, not commentary about the company"
+        },
+        {
+          "include_cue": "product framing that AI models now do a user's computer-based work for them",
+          "confusing_alternative": "Frontier Models capability claim",
+          "evidence_needed": "excerpt must frame ongoing autonomous task performance, not architecture/benchmark detail"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "support_key": "c080-2"
+        },
+        {
+          "support_key": "c088-2"
+        },
+        {
+          "support_key": "c106-2"
+        },
+        {
+          "support_key": "c095-2"
+        },
+        {
+          "support_key": "c116-2"
+        }
+      ]
+    },
+    {
+      "shelf_id": "ai-industry-and-business",
+      "path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "definition": "News, commentary, and analysis of the AI industry's competitive, commercial, and policy dynamics -- lab rivalries, revenue, government restrictions, hardware/infrastructure deals, and market strategy.",
+      "include": [
+        "cross-lab or cross-country competitive positioning in the AI industry",
+        "AI company revenue, funding, valuation, or financial comparisons",
+        "government policy or restrictions shaping AI company competitiveness"
+      ],
+      "exclude": [
+        "a specific model's architecture, scaling, or benchmark performance -> AI and ML / Frontier Models",
+        "an agent product's own real-world task demonstration -> AI and ML / AI Agents and Automation",
+        "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "cross-lab or cross-country competitive positioning in the AI industry",
+          "confusing_alternative": "Frontier Models capability benchmarking",
+          "evidence_needed": "reasoning must center on competitive/strategic positioning, not a benchmark score"
+        },
+        {
+          "include_cue": "AI company revenue, funding, valuation, or financial comparisons",
+          "confusing_alternative": "Frontier Models release news",
+          "evidence_needed": "quote must state a dollar/financial figure, not a capability claim"
+        },
+        {
+          "include_cue": "government policy or restrictions shaping AI company competitiveness",
+          "confusing_alternative": "Security guardrail mechanism",
+          "evidence_needed": "quote must be about commercial/competitive effect of policy, not a technical safety mechanism"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "support_key": "c041-2"
+        },
+        {
+          "support_key": "c082-2"
+        },
+        {
+          "support_key": "c117-2"
+        },
+        {
+          "support_key": "c130-2"
+        },
+        {
+          "support_key": "c213-2"
+        }
+      ]
+    },
+    {
+      "shelf_id": "product-launches",
+      "path": [
+        "AI and ML",
+        "Product Launches"
+      ],
+      "definition": "Announcements and demonstrations of AI-powered consumer or creator applications that show a concrete product feature, distinct from the underlying foundation model or an autonomous task-completing agent.",
+      "include": [
+        "names a specific consumer or creator app and shows a concrete feature it performs",
+        "a product's AI persona describes its own capabilities in first-person demo form",
+        "launch of a general-purpose AI app for capturing, sensing, or organizing user activity"
+      ],
+      "exclude": [
+        "an agent autonomously completing a multi-step real-world task end-to-end -> AI and ML / AI Agents and Automation",
+        "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+        "foundation model architecture or benchmark release without a wrapped end-user application -> AI and ML / Frontier Models"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "names a specific consumer or creator app and shows a concrete feature it performs",
+          "confusing_alternative": "Frontier Models release",
+          "evidence_needed": "excerpt must describe an end-user app feature, not model architecture"
+        },
+        {
+          "include_cue": "a product's AI persona describes its own capabilities in first-person demo form",
+          "confusing_alternative": "AI Agents and Automation task completion",
+          "evidence_needed": "excerpt must be a persona narrating capability, not a task being autonomously completed end-to-end"
+        },
+        {
+          "include_cue": "launch of a general-purpose AI app for capturing, sensing, or organizing user activity",
+          "confusing_alternative": "Generative Media artifact showcase",
+          "evidence_needed": "excerpt must describe the app's organizing/capturing feature, not a finished creative artifact"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "support_key": "c056-2"
+        },
+        {
+          "support_key": "c058-2"
+        },
+        {
+          "support_key": "c060-2"
+        },
+        {
+          "support_key": "c064-2"
+        },
+        {
+          "support_key": "c070-2"
+        }
+      ]
+    },
+    {
+      "shelf_id": "career-and-entrepreneurship",
+      "path": [
+        "Career and Entrepreneurship"
+      ],
+      "definition": "Practical guidance and firsthand accounts about job searching, launching or running an independent business or creative career, and the work habits or non-traditional paths that sustain them.",
+      "include": [
+        "job search and hiring practices",
+        "solopreneur and indie-business daily routines",
+        "non-traditional or self-taught paths into a technical career",
+        "financial and business pacing advice for creative professionals and artists",
+        "work ethic and competitive drive as a professional habit"
+      ],
+      "exclude": [
+        "AI industry financial or market news without a personal career/business frame -> AI and ML / AI Industry and Business",
+        "a specific AI tool's features or workflow rather than a personal work routine -> AI and ML / Product Launches"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "job search and hiring practices",
+          "confusing_alternative": "AI Industry and Business talent-market trend",
+          "evidence_needed": "quote frames an individual job-seeker's tactic, not an industry-wide labor trend"
+        },
+        {
+          "include_cue": "solopreneur and indie-business daily routines",
+          "confusing_alternative": "Product Launches feature description",
+          "evidence_needed": "quote describes a personal work routine, not a specific tool's features"
+        },
+        {
+          "include_cue": "non-traditional or self-taught paths into a technical career",
+          "confusing_alternative": "Education technical tutorial",
+          "evidence_needed": "quote narrates career backstory, not a lesson teaching a skill"
+        },
+        {
+          "include_cue": "financial and business pacing advice for creative professionals and artists",
+          "confusing_alternative": "general entertainment commentary",
+          "evidence_needed": "quote gives concrete business/financial guidance, not artistic critique"
+        },
+        {
+          "include_cue": "work ethic and competitive drive as a professional habit",
+          "confusing_alternative": "celebrity psychology commentary",
+          "evidence_needed": "quote ties drive explicitly to professional output/operating mode"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "support_key": "c201-2"
+        },
+        {
+          "support_key": "c202-2"
+        },
+        {
+          "support_key": "c203-2"
+        },
+        {
+          "support_key": "c209-2"
+        },
+        {
+          "support_key": "c217-2"
+        }
+      ]
+    }
+  ],
+  "coverage_ledger": [
+    {
+      "card_key": "c001",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c001-1"
+        }
+      ],
+      "reason": "Instructs/demonstrates an LLM performing a voice/roleplay task."
+    },
+    {
+      "card_key": "c002",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c002-1"
+        }
+      ],
+      "reason": "Explicit claim about AI's role relative to a human achievement."
+    },
+    {
+      "card_key": "c003",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Song-lyric clip; no topical concept applies."
+    },
+    {
+      "card_key": "c004",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Names 'Grok Bots' without describing function; can't ground AI concept."
+    },
+    {
+      "card_key": "c005",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Casual livestream discussion of Antarctic ice caves; no v2 shelf fits."
+    },
+    {
+      "card_key": "c006",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "news-and-current-events"
+      ],
+      "evidence": [
+        {
+          "support_key": "c006-3"
+        }
+      ],
+      "reason": "Ideological/culture-war debate segment on a political spectrum topic."
+    },
+    {
+      "card_key": "c007",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "news-and-current-events"
+      ],
+      "evidence": [
+        {
+          "support_key": "c007-3"
+        }
+      ],
+      "reason": "Panel/talk-show debate over testosterone policy; not a support: five-card cap"
+    },
+    {
+      "card_key": "c008",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Minimal robot-fighting caption; singleton, no cluster."
+    },
+    {
+      "card_key": "c009",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "news-and-current-events"
+      ],
+      "evidence": [
+        {
+          "support_key": "c009-3"
+        }
+      ],
+      "reason": "Breaking crime-news report naming a specific charge and incident."
+    },
+    {
+      "card_key": "c010",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "news-and-current-events"
+      ],
+      "evidence": [
+        {
+          "support_key": "c010-3"
+        }
+      ],
+      "reason": "Follow-up breaking-crime report with incident details."
+    },
+    {
+      "card_key": "c011",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "news-and-current-events"
+      ],
+      "evidence": [
+        {
+          "support_key": "c011-3"
+        }
+      ],
+      "reason": "Live police/security radio during the Capitol breach."
+    },
+    {
+      "card_key": "c012",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Personal-finance meme; singleton, no cluster."
+    },
+    {
+      "card_key": "c013",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Only usable excerpt is meaningless broadcast filler establishing no subject."
+    },
+    {
+      "card_key": "c014",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Dog-attack incident clip; singleton, no cluster."
+    },
+    {
+      "card_key": "c015",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Sports highlight candidate rejected: only 4 distinct cards, below 5-card threshold."
+    },
+    {
+      "card_key": "c016",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Sports highlight candidate rejected: only 4 distinct cards, below 5-card threshold."
+    },
+    {
+      "card_key": "c017",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Only usable excerpt is a meaningless fragment establishing no subject."
+    },
+    {
+      "card_key": "c018",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Sports highlight candidate rejected: only 4 distinct cards, below 5-card threshold."
+    },
+    {
+      "card_key": "c019",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "news-and-current-events"
+      ],
+      "evidence": [
+        {
+          "support_key": "c019-3"
+        }
+      ],
+      "reason": "War/conflict strike footage described in detail."
+    },
+    {
+      "card_key": "c020",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Livestreamer culture candidate rejected: only 2 distinct cards, below threshold."
+    },
+    {
+      "card_key": "c021",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Livestreamer culture candidate rejected: only 2 distinct cards, below threshold."
+    },
+    {
+      "card_key": "c022",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Sports highlight candidate rejected: only 4 distinct cards, below 5-card threshold."
+    },
+    {
+      "card_key": "c023",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "VC meme about 'agentic'; no described capability, singleton."
+    },
+    {
+      "card_key": "c024",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c024-1"
+        }
+      ],
+      "reason": "General AI lab strategy commentary, not a frontier-model capability release."
+    },
+    {
+      "card_key": "c025",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c025-1"
+        }
+      ],
+      "reason": "Launch of an autonomous attack rotorcraft matches autonomous-systems cue."
+    },
+    {
+      "card_key": "c026",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c026-1"
+        }
+      ],
+      "reason": "AI agent product that finds customers and sells for user."
+    },
+    {
+      "card_key": "c027",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Physics/electromagnetism education minigame; no v2 shelf fits."
+    },
+    {
+      "card_key": "c028",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Teen trading-script GitHub story; no AI terminology, no cluster."
+    },
+    {
+      "card_key": "c029",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Excerpt only names a footballer; no usable subject evidence."
+    },
+    {
+      "card_key": "c030",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Names AI founder/models but only recounts biography; name-only, not groundable."
+    },
+    {
+      "card_key": "c031",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Trivial personal birthday message with no topical content."
+    },
+    {
+      "card_key": "c032",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Song lyric transcript unrelated to any subject; no usable evidence."
+    },
+    {
+      "card_key": "c033",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c033-2"
+        }
+      ],
+      "reason": "Prompt-driven AI video/animation generation output."
+    },
+    {
+      "card_key": "c034",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c034-1"
+        }
+      ],
+      "reason": "AI usage dataset product feature, fits general AI and ML."
+    },
+    {
+      "card_key": "c035",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c035-1"
+        }
+      ],
+      "reason": "Explicit AI-powered classroom product."
+    },
+    {
+      "card_key": "c036",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Single-line personal reply with no topical content."
+    },
+    {
+      "card_key": "c037",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Describes blackboards but never states AI use; can't ground concept."
+    },
+    {
+      "card_key": "c038",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c038-2"
+        }
+      ],
+      "reason": "Explicitly describes a student-made AI film winning an AI-specific award."
+    },
+    {
+      "card_key": "c039",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c039-1"
+        }
+      ],
+      "reason": "New AI voice-agent product feature."
+    },
+    {
+      "card_key": "c040",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c040-1"
+        }
+      ],
+      "reason": "Same AI voice-agent feature, GPT-Live model."
+    },
+    {
+      "card_key": "c041",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c041-2"
+        }
+      ],
+      "reason": "Frames Chinese open-weight AI models as an economic 'dumping' strategy."
+    },
+    {
+      "card_key": "c042",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Discusses stock reaction but never mentions AI or hardware function."
+    },
+    {
+      "card_key": "c043",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c043-2"
+        }
+      ],
+      "reason": "Automated pipeline reconstructing 3D/simulated environment from video; not a support: five-card cap"
+    },
+    {
+      "card_key": "c044",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c044-2"
+        }
+      ],
+      "reason": "Ties semiconductor selloff to investor doubts on AI spending; not a support: five-card cap"
+    },
+    {
+      "card_key": "c045",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Robot geopolitics story never mentions AI/autonomy explicitly."
+    },
+    {
+      "card_key": "c046",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c046-2"
+        }
+      ],
+      "reason": "National AI strategy partnership between Korea and NVIDIA; not a support: five-card cap"
+    },
+    {
+      "card_key": "c047",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Game reaction commentary; AI framing only in title, not excerpt."
+    },
+    {
+      "card_key": "c048",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Political protest interview footage; no AI/space subject."
+    },
+    {
+      "card_key": "c049",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "One-line AI-jobs meme with no descriptive capability content."
+    },
+    {
+      "card_key": "c050",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c050-1"
+        }
+      ],
+      "reason": "Autonomous fighting robot, matches autonomous-systems cue."
+    },
+    {
+      "card_key": "c051",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "GIS software platform announcement; no AI/ML or space content."
+    },
+    {
+      "card_key": "c052",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Surveillance-camera protest news clip; unrelated to AI/ML or space."
+    },
+    {
+      "card_key": "c053",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "NBA player quote/sports commentary; no AI or space content."
+    },
+    {
+      "card_key": "c054",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Garbled tech-show teaser; no specific AI capability described."
+    },
+    {
+      "card_key": "c055",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c055-1"
+        }
+      ],
+      "reason": "Frontier labs/open source business interview framing fits general AI and ML."
+    },
+    {
+      "card_key": "c056",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "product-launches"
+      ],
+      "evidence": [
+        {
+          "support_key": "c056-2"
+        }
+      ],
+      "reason": "First-person ChatGPT persona demo narrating its own assistant capabilities."
+    },
+    {
+      "card_key": "c057",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Spliced dialogue doesn't itself describe any AI capability."
+    },
+    {
+      "card_key": "c058",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "product-launches"
+      ],
+      "evidence": [
+        {
+          "support_key": "c058-2"
+        }
+      ],
+      "reason": "Announces a no-code AI agent/persona app and its sensing/memory capabilities."
+    },
+    {
+      "card_key": "c059",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Marketing note about a motion-design team; no AI content in excerpt."
+    },
+    {
+      "card_key": "c060",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "product-launches"
+      ],
+      "evidence": [
+        {
+          "support_key": "c060-2"
+        }
+      ],
+      "reason": "Launch announcement for a Mac app for capturing prompts while working with AI."
+    },
+    {
+      "card_key": "c061",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Only source evidence key is verified unusable; no valid support remains."
+    },
+    {
+      "card_key": "c062",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "frontier-models"
+      ],
+      "evidence": [
+        {
+          "support_key": "c062-1"
+        }
+      ],
+      "reason": "Informal capability comparison of Opus 5's generated output vs a game studio."
+    },
+    {
+      "card_key": "c063",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "UI/UX navigation design-pattern discussion; not AI/ML or space content."
+    },
+    {
+      "card_key": "c064",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "product-launches"
+      ],
+      "evidence": [
+        {
+          "support_key": "c064-2"
+        }
+      ],
+      "reason": "Announces Gemini Omni's AI avatar-generation feature in Google Vids."
+    },
+    {
+      "card_key": "c065",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "AI-product description appears only in caption, not excerpt text."
+    },
+    {
+      "card_key": "c066",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "AI-coding-tool claim appears only in caption, not excerpt."
+    },
+    {
+      "card_key": "c067",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Dialogue does not itself identify speaker as AI; framing only in caption."
+    },
+    {
+      "card_key": "c068",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Phone-to-phone QR data-transfer technique; not AI/ML or space content."
+    },
+    {
+      "card_key": "c069",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c069-2"
+        }
+      ],
+      "reason": "Announces an AI video-creation capability launch; not a support: five-card cap"
+    },
+    {
+      "card_key": "c070",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "product-launches"
+      ],
+      "evidence": [
+        {
+          "support_key": "c070-2"
+        }
+      ],
+      "reason": "Business pitch for installing a locally-run AI agent with offline capability."
+    },
+    {
+      "card_key": "c071",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Web design/production-cost discussion; not AI/ML content."
+    },
+    {
+      "card_key": "c072",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Reduced production-time caption; no explicit AI capability described."
+    },
+    {
+      "card_key": "c073",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Reaction to unspecified 'Grok' release; names product without describing capability."
+    },
+    {
+      "card_key": "c074",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Caption naming an AI-made video concept with no capability description."
+    },
+    {
+      "card_key": "c075",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Social/political commentary; not AI/ML or space content."
+    },
+    {
+      "card_key": "c076",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Caption-only greeting with no descriptive text; no usable subject evidence."
+    },
+    {
+      "card_key": "c077",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c077-2"
+        }
+      ],
+      "reason": "Post showcases an AI-generated video valued for comedic effect; not a support: five-card cap"
+    },
+    {
+      "card_key": "c078",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "frontier-models"
+      ],
+      "evidence": [
+        {
+          "support_key": "c078-1"
+        }
+      ],
+      "reason": "Compares model price/performance against a named model, a capability-benchmarking claim."
+    },
+    {
+      "card_key": "c079",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Surveillance-camera crime discussion; no AI/ML or space subject."
+    },
+    {
+      "card_key": "c080",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "evidence": [
+        {
+          "support_key": "c080-2"
+        }
+      ],
+      "reason": "Product autonomously assembling a slide deck end-to-end."
+    },
+    {
+      "card_key": "c081",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Meta-commentary about a prompting guide's existence; not tutorial or agent content."
+    },
+    {
+      "card_key": "c082",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c082-2"
+        }
+      ],
+      "reason": "Executive commentary ranking companies in the AI race; not a support: five-card cap"
+    },
+    {
+      "card_key": "c083",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "War reporting on drone strikes; unrelated to AI/ML or Space and Science."
+    },
+    {
+      "card_key": "c084",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c084-2"
+        }
+      ],
+      "reason": "Startup launch framed by hyperscaler infrastructure-scale statistics; not a support: five-card cap"
+    },
+    {
+      "card_key": "c085",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "evidence": [
+        {
+          "support_key": "c085-2"
+        }
+      ],
+      "reason": "Autonomous-driving reasoning model making driving decisions; not a support: five-card cap"
+    },
+    {
+      "card_key": "c086",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Real-estate earnings discussion; only a job title named, no AI capability."
+    },
+    {
+      "card_key": "c087",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "developer-tools"
+      ],
+      "evidence": [
+        {
+          "support_key": "c087-1"
+        }
+      ],
+      "reason": "Vision system built with an SDK for a practical counting task."
+    },
+    {
+      "card_key": "c088",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "evidence": [
+        {
+          "support_key": "c088-2"
+        }
+      ],
+      "reason": "Product launch of an agent that autonomously orders food, books flights, and shops."
+    },
+    {
+      "card_key": "c089",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "evidence": [
+        {
+          "support_key": "c089-2"
+        }
+      ],
+      "reason": "MCP agent autonomously reads ad data and executes a new campaign; not a support: five-card cap"
+    },
+    {
+      "card_key": "c090",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c090-2"
+        }
+      ],
+      "reason": "Executive banter about data-center infrastructure scale rivalry; not a support: five-card cap"
+    },
+    {
+      "card_key": "c091",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c091-2"
+        }
+      ],
+      "reason": "Showcases a generative AI website built with named image/video models."
+    },
+    {
+      "card_key": "c092",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Mechanical system explicitly disclaiming software/AI use; not AI content."
+    },
+    {
+      "card_key": "c093",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "One-line joke naming Grok with no description; name alone can't ground a concept."
+    },
+    {
+      "card_key": "c094",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Fictional/satirical scenario with no factual description of a real capability."
+    },
+    {
+      "card_key": "c095",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "evidence": [
+        {
+          "support_key": "c095-2"
+        }
+      ],
+      "reason": "Founder describes launching a product because AI models can now do users' computer work."
+    },
+    {
+      "card_key": "c096",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Rhetorical question with no description of what the AI use is."
+    },
+    {
+      "card_key": "c097",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c097-2"
+        }
+      ],
+      "reason": "Rhetorical commentary on a lab's competitive standing; not a support: five-card cap"
+    },
+    {
+      "card_key": "c098",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Diplomatic/geopolitical story about a defense pact; unrelated to AI/ML or space."
+    },
+    {
+      "card_key": "c099",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c099-2"
+        }
+      ],
+      "reason": "Journalist reorganizes coverage around the AI industry beat; not a support: five-card cap"
+    },
+    {
+      "card_key": "c100",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Chatbot UI changelog without capability description or agentic task."
+    },
+    {
+      "card_key": "c101",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c101-2"
+        }
+      ],
+      "reason": "AI video-generation technique described; not a support: five-card cap"
+    },
+    {
+      "card_key": "c102",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Only event speaker/company list; no descriptive subject matter."
+    },
+    {
+      "card_key": "c103",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "States only a subscription cancellation; product name alone with no description."
+    },
+    {
+      "card_key": "c104",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c104-2"
+        }
+      ],
+      "reason": "Praises AI-generated video content as entertainment; not a support: five-card cap"
+    },
+    {
+      "card_key": "c105",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c105-1"
+        }
+      ],
+      "reason": "Autonomous AI replybots taking over social platforms, fits autonomous-systems cue."
+    },
+    {
+      "card_key": "c106",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "evidence": [
+        {
+          "support_key": "c106-2"
+        }
+      ],
+      "reason": "Describes AI agents autonomously running full business operations."
+    },
+    {
+      "card_key": "c107",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Meme referencing a usage limit with no content describing function."
+    },
+    {
+      "card_key": "c108",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "frontier-models"
+      ],
+      "evidence": [
+        {
+          "support_key": "c108-1"
+        }
+      ],
+      "reason": "Explicit foundation-model capability claim."
+    },
+    {
+      "card_key": "c109",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c109-2"
+        }
+      ],
+      "reason": "Pricing comparison between paid and free LLM access; not a support: five-card cap"
+    },
+    {
+      "card_key": "c110",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "evidence": [
+        {
+          "support_key": "c110-2"
+        }
+      ],
+      "reason": "AI bot completing concrete office tasks autonomously; not a support: five-card cap"
+    },
+    {
+      "card_key": "c111",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c111-2"
+        }
+      ],
+      "reason": "Marketing/promo campaign for an AI product; not a support: five-card cap"
+    },
+    {
+      "card_key": "c112",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "evidence": [
+        {
+          "support_key": "c112-2"
+        }
+      ],
+      "reason": "Agentic office-task demonstration; not a support: five-card cap"
+    },
+    {
+      "card_key": "c113",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "No matching cluster or shelf identified for this card's content."
+    },
+    {
+      "card_key": "c114",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c114-1"
+        }
+      ],
+      "reason": "General AI chatbot product feature, fits general AI and ML shelf."
+    },
+    {
+      "card_key": "c115",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "No matching cluster or shelf identified for this card's content."
+    },
+    {
+      "card_key": "c116",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "evidence": [
+        {
+          "support_key": "c116-2"
+        }
+      ],
+      "reason": "First-hand review comparing an agent bot's task performance to coding assistants."
+    },
+    {
+      "card_key": "c117",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c117-2"
+        }
+      ],
+      "reason": "Speculation on an AI lab's market dominance."
+    },
+    {
+      "card_key": "c118",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c118-2"
+        }
+      ],
+      "reason": "Analyst reacting to the same market-dominance claim; not a support: five-card cap"
+    },
+    {
+      "card_key": "c119",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c119-2"
+        }
+      ],
+      "reason": "Casual reaction to AI-generated interactive scene fidelity; not a support: five-card cap"
+    },
+    {
+      "card_key": "c120",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Compares a film unfavorably to AI without describing what AI does."
+    },
+    {
+      "card_key": "c121",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Creative dashboard visualization; no AI or space subject in excerpt."
+    },
+    {
+      "card_key": "c122",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Reaction meme with no descriptive AI subject matter."
+    },
+    {
+      "card_key": "c123",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "frontier-models"
+      ],
+      "evidence": [
+        {
+          "support_key": "c123-1"
+        }
+      ],
+      "reason": "Adoption statistic for an open-weights model family."
+    },
+    {
+      "card_key": "c124",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-agents-and-automation"
+      ],
+      "evidence": [
+        {
+          "support_key": "c124-2"
+        }
+      ],
+      "reason": "Vision of a persistent AI assistant monitoring for the user; not a support: five-card cap"
+    },
+    {
+      "card_key": "c125",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Joke naming Claude with no description of function."
+    },
+    {
+      "card_key": "c126",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Design-history archive of corporate annual reports; no matching shelf."
+    },
+    {
+      "card_key": "c127",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Founder-story excerpt truncated before AI-specific language appears."
+    },
+    {
+      "card_key": "c128",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c128-2"
+        }
+      ],
+      "reason": "Describes an AI-generated animated film premiered as a finished creative artifact."
+    },
+    {
+      "card_key": "c129",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c129-2"
+        }
+      ],
+      "reason": "AI agent marketplace launched for consumer investing; not a support: five-card cap"
+    },
+    {
+      "card_key": "c130",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c130-2"
+        }
+      ],
+      "reason": "Government policy shaping competitive gap between AI labs."
+    },
+    {
+      "card_key": "c131",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Geopolitical fuel-shortage content; unrelated to AI or space topics."
+    },
+    {
+      "card_key": "c132",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Product announcement truncated before any AI/agent mention appears."
+    },
+    {
+      "card_key": "c133",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c133-2"
+        }
+      ],
+      "reason": "Enterprise AI model-cost routing product for workforce spend; not a support: five-card cap"
+    },
+    {
+      "card_key": "c134",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c134-2"
+        }
+      ],
+      "reason": "Go-to-market partnership between an AI search company and a browser maker; not a support: five-card cap"
+    },
+    {
+      "card_key": "c135",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Drug-molecule binding biology excerpt with no AI/model language visible."
+    },
+    {
+      "card_key": "c136",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Short hardware-speed tagline; no cluster of similar hardware cards."
+    },
+    {
+      "card_key": "c137",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c137-2"
+        }
+      ],
+      "reason": "AI plus AR tracking used to build an interactive art installation; not a support: five-card cap"
+    },
+    {
+      "card_key": "c138",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Generic request to share a video; no substantive subject content."
+    },
+    {
+      "card_key": "c139",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Excerpt is only rendered movie dialogue, not a stated AI subject."
+    },
+    {
+      "card_key": "c140",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c140-2"
+        }
+      ],
+      "reason": "Names a foundation model used specifically to generate a video artifact."
+    },
+    {
+      "card_key": "c141",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c141-2"
+        }
+      ],
+      "reason": "Agent-driven workflow producing commercial-grade creative content end-to-end; not a support: five-card cap"
+    },
+    {
+      "card_key": "c142",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Consumer feature card with no cluster of similar cards in this batch."
+    },
+    {
+      "card_key": "c143",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c143-2"
+        }
+      ],
+      "reason": "Discusses enterprise data ownership/control disputes around LLMs; not a support: five-card cap"
+    },
+    {
+      "card_key": "c144",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c144-2"
+        }
+      ],
+      "reason": "States a competitive-landscape claim among named AI labs; not a support: five-card cap"
+    },
+    {
+      "card_key": "c145",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Single robotics/surgery card with no cluster of similar cards."
+    },
+    {
+      "card_key": "c146",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Satirical surveillance commentary; excerpt doesn't mention AI, no cluster."
+    },
+    {
+      "card_key": "c147",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Open-sourced UI component library; excerpt does not mention AI."
+    },
+    {
+      "card_key": "c148",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "One-line compliment about an unspecified effect; no describable subject."
+    },
+    {
+      "card_key": "c149",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Procedural generative-art code snippet; no AI mention, no cluster."
+    },
+    {
+      "card_key": "c150",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "developer-tools"
+      ],
+      "evidence": [
+        {
+          "support_key": "c150-1"
+        }
+      ],
+      "reason": "Claude agent skill/slash-command workflow matches developer-tools scope."
+    },
+    {
+      "card_key": "c151",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Excerpt names an affiliation and income figure without describing an idea."
+    },
+    {
+      "card_key": "c152",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c152-2"
+        }
+      ],
+      "reason": "AI agents replacing costly human research labor at a fraction of the price; not a support: five-card cap"
+    },
+    {
+      "card_key": "c153",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c153-2"
+        }
+      ],
+      "reason": "Fully AI-generated episodic video series, a creative-media showcase; not a support: five-card cap"
+    },
+    {
+      "card_key": "c154",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Personal/immigrant-success narrative naming a company; no AI content described."
+    },
+    {
+      "card_key": "c155",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c155-1"
+        }
+      ],
+      "reason": "Thousands of humanoid robots competing, matches autonomous-systems cue."
+    },
+    {
+      "card_key": "c156",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "One-line joke naming Grok with no descriptive content."
+    },
+    {
+      "card_key": "c157",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Energy production/geopolitics discussion; no AI subject matter."
+    },
+    {
+      "card_key": "c158",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-generative-media"
+      ],
+      "evidence": [
+        {
+          "support_key": "c158-2"
+        }
+      ],
+      "reason": "AI model prompted to generate a fictional robot design concept; not a support: five-card cap"
+    },
+    {
+      "card_key": "c159",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Human-interest reunion story; no technology or AI content."
+    },
+    {
+      "card_key": "c160",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Celebrity/entertainment gossip; no AI or tech subject."
+    },
+    {
+      "card_key": "c161",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "One-line joke about a janitor; no descriptive subject matter."
+    },
+    {
+      "card_key": "c162",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c162-1"
+        }
+      ],
+      "reason": "Engineering rebuild of an LLM product's response-streaming renderer."
+    },
+    {
+      "card_key": "c163",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Generative QR-code art project never references AI/ML explicitly."
+    },
+    {
+      "card_key": "c164",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Discusses work pace with no described subject matter or AI content."
+    },
+    {
+      "card_key": "c165",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c165-2"
+        }
+      ],
+      "reason": "Cites contracted revenue for a commercial autonomous-freight deployment; not a support: five-card cap"
+    },
+    {
+      "card_key": "c166",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c166-1"
+        }
+      ],
+      "reason": "Training a text-to-speech model from scratch, core ML content."
+    },
+    {
+      "card_key": "c167",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Tribute content; unrelated to AI, space, or shelved topics."
+    },
+    {
+      "card_key": "c168",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Satirical parody of an AI model launch; not genuine informational content."
+    },
+    {
+      "card_key": "c169",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c169-2"
+        }
+      ],
+      "reason": "Analyzes AI industry-wide token usage vs revenue capture; not a support: five-card cap"
+    },
+    {
+      "card_key": "c170",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Lists AI as one of several broad topics without specific content."
+    },
+    {
+      "card_key": "c171",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Personal narrative about a project without tying it to AI industry."
+    },
+    {
+      "card_key": "c172",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Describes indexing Census data into a mapping app; no AI content."
+    },
+    {
+      "card_key": "c173",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Satirical parody of an AI announcement; not genuine informational content."
+    },
+    {
+      "card_key": "c174",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c174-2"
+        }
+      ],
+      "reason": "Narrates the competitive/business history of an AI coding-tool startup; not a support: five-card cap"
+    },
+    {
+      "card_key": "c175",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c175-2"
+        }
+      ],
+      "reason": "Investor relaying leadership's market-size/competitor framing; not a support: five-card cap"
+    },
+    {
+      "card_key": "c176",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Song/movie lyric audio; no informative text to ground any concept."
+    },
+    {
+      "card_key": "c177",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c177-2"
+        }
+      ],
+      "reason": "CEO discusses an NVIDIA infrastructure certification deal; not a support: five-card cap"
+    },
+    {
+      "card_key": "c178",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c178-2"
+        }
+      ],
+      "reason": "Interview analyzing an AI compute-market acquisition; not a support: five-card cap"
+    },
+    {
+      "card_key": "c179",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Excerpt truncated before any AI mention appears."
+    },
+    {
+      "card_key": "c180",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Political/incident content with only a passing product mention."
+    },
+    {
+      "card_key": "c181",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "developer-tools"
+      ],
+      "evidence": [
+        {
+          "support_key": "c181-1"
+        }
+      ],
+      "reason": "AI-assisted 'vibe coded' app build fits code-generation scope."
+    },
+    {
+      "card_key": "c182",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "developer-tools"
+      ],
+      "evidence": [
+        {
+          "support_key": "c182-1"
+        }
+      ],
+      "reason": "System-simulation tool for developers to understand backend behavior."
+    },
+    {
+      "card_key": "c183",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Gaming-graphics content never described as AI-based."
+    },
+    {
+      "card_key": "c184",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Solar-powered robotics story; not space/astro content, single card."
+    },
+    {
+      "card_key": "c185",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c185-2"
+        }
+      ],
+      "reason": "Discusses changing personal/business strategy for the AI era; not a support: five-card cap"
+    },
+    {
+      "card_key": "c186",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "developer-tools"
+      ],
+      "evidence": [
+        {
+          "support_key": "c186-1"
+        }
+      ],
+      "reason": "Personal open-source harness for switching between AI agent bots."
+    },
+    {
+      "card_key": "c187",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Marketing-SaaS website generator; excerpt never uses AI/ML language."
+    },
+    {
+      "card_key": "c188",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Investing wisdom excerpt never mentions AI or any taxonomy subject."
+    },
+    {
+      "card_key": "c189",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "NFL locker-room quote; no AI/tech subject present."
+    },
+    {
+      "card_key": "c190",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c190-1"
+        }
+      ],
+      "reason": "Autonomous generative-AI livestream system, fits general AI and ML shelf."
+    },
+    {
+      "card_key": "c191",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c191-2"
+        }
+      ],
+      "reason": "Contest framed around AI's uneven economic diffusion; not a support: five-card cap"
+    },
+    {
+      "card_key": "c192",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c192-2"
+        }
+      ],
+      "reason": "Frames a new business role built around using AI to run workflows; not a support: five-card cap"
+    },
+    {
+      "card_key": "c193",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "General CS systems-programming debate; not ML-specific pedagogy."
+    },
+    {
+      "card_key": "c194",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Joke video with a translated punchline; no taxonomy subject present."
+    },
+    {
+      "card_key": "c195",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Only names a product as a meme punchline with no description."
+    },
+    {
+      "card_key": "c196",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "support_key": "c196-1"
+        }
+      ],
+      "reason": "Explicitly describes a consumer product as AI-powered."
+    },
+    {
+      "card_key": "c197",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "M&A/business interview with an ambiguous, non-groundable AI phrase."
+    },
+    {
+      "card_key": "c198",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Technical stock-trading jargon; never establishes AI as the subject."
+    },
+    {
+      "card_key": "c199",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Same technical stock-trading pattern; no AI-establishing text."
+    },
+    {
+      "card_key": "c200",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Untranslated lyrics; AI framing appears only in the hook, not the excerpt."
+    },
+    {
+      "card_key": "c201",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "career-and-entrepreneurship"
+      ],
+      "evidence": [
+        {
+          "support_key": "c201-2"
+        }
+      ],
+      "reason": "Concrete job-search and hiring-list advice."
+    },
+    {
+      "card_key": "c202",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "career-and-entrepreneurship"
+      ],
+      "evidence": [
+        {
+          "support_key": "c202-2"
+        }
+      ],
+      "reason": "Solopreneur product-shipping routine."
+    },
+    {
+      "card_key": "c203",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "career-and-entrepreneurship"
+      ],
+      "evidence": [
+        {
+          "support_key": "c203-2"
+        }
+      ],
+      "reason": "Self-taught-programmer backstory matches non-traditional-path cue."
+    },
+    {
+      "card_key": "c204",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Hobbyist watch-collecting content; no cluster or matching concept."
+    },
+    {
+      "card_key": "c205",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Societal/philosophical wealth-inequality commentary, below cluster threshold."
+    },
+    {
+      "card_key": "c206",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Beginner coding tutorial; v1 Education scoped to ML, no cluster here."
+    },
+    {
+      "card_key": "c207",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Promotional/link-only text with no substantive spoken content."
+    },
+    {
+      "card_key": "c208",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "developer-tools"
+      ],
+      "evidence": [
+        {
+          "support_key": "c208-1"
+        }
+      ],
+      "reason": "Agent-harness workflow sending screenshots into Claude Code."
+    },
+    {
+      "card_key": "c209",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "career-and-entrepreneurship"
+      ],
+      "evidence": [
+        {
+          "support_key": "c209-2"
+        }
+      ],
+      "reason": "Business/financial pacing advice for a music artist."
+    },
+    {
+      "card_key": "c210",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c210-2"
+        }
+      ],
+      "reason": "New GPU generation paired with stock-market reaction; not a support: five-card cap"
+    },
+    {
+      "card_key": "c211",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c211-2"
+        }
+      ],
+      "reason": "Market-positioning analysis of an AI hardware maker; not a support: five-card cap"
+    },
+    {
+      "card_key": "c212",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "No substantive content beyond a promotional description."
+    },
+    {
+      "card_key": "c213",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c213-2"
+        }
+      ],
+      "reason": "Direct AI-lab revenue/ARR figure."
+    },
+    {
+      "card_key": "c214",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "No description, tags, or captions; only unrelated comments remain."
+    },
+    {
+      "card_key": "c215",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "security"
+      ],
+      "evidence": [
+        {
+          "support_key": "c215-1"
+        }
+      ],
+      "reason": "Discusses putting guardrails on AI, matches runtime governance cue."
+    },
+    {
+      "card_key": "c216",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Genuine content about a zoo visit with no relation to any concept."
+    },
+    {
+      "card_key": "c217",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "career-and-entrepreneurship"
+      ],
+      "evidence": [
+        {
+          "support_key": "c217-2"
+        }
+      ],
+      "reason": "Frames pain/drive as a professional operating mode."
+    },
+    {
+      "card_key": "c218",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c218-2"
+        }
+      ],
+      "reason": "Describes market-wide urgency to hire AI-native talent; not a support: five-card cap"
+    },
+    {
+      "card_key": "c219",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Purely technical day-trading commentary with no AI subject established."
+    },
+    {
+      "card_key": "c220",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Historical tweet text with no topical subject to classify."
+    },
+    {
+      "card_key": "c221",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "career-and-entrepreneurship"
+      ],
+      "evidence": [
+        {
+          "support_key": "c221-2"
+        }
+      ],
+      "reason": "Chapter topic 'how to start a startup'; not a support: five-card cap"
+    },
+    {
+      "card_key": "c222",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Purely technical trading commentary with no AI or business subject."
+    },
+    {
+      "card_key": "c223",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-and-business"
+      ],
+      "evidence": [
+        {
+          "support_key": "c223-2"
+        }
+      ],
+      "reason": "Direct ARR/revenue comparison between AI labs; not a support: five-card cap"
+    },
+    {
+      "card_key": "c224",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "One-line video-description phrase with no substantive content."
+    },
+    {
+      "card_key": "c225",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Excerpt truncated mid-word, too fragmentary to establish subject."
+    }
+  ],
+  "diff": {
+    "preserved": [
+      "ai-and-ml",
+      "space-and-science",
+      "developer-tools",
+      "security",
+      "frontier-models",
+      "education",
+      "spaceflight"
+    ],
+    "added": [
+      "news-and-current-events",
+      "ai-generative-media",
+      "ai-agents-and-automation",
+      "ai-industry-and-business",
+      "product-launches",
+      "career-and-entrepreneurship"
+    ],
+    "renamed": [],
+    "merged": [],
+    "split": [],
+    "retired": []
+  },
+  "pin_impact_report": {
+    "silent_redirects": false,
+    "items": [],
+    "measured_pins": 0,
+    "measured_memberships": 0,
+    "measured_state": "archived stage 1 proof before-state: zero pins, zero memberships (recorded independently in the receipts)"
+  },
+  "rejected_proposals": [
+    {
+      "proposal": "News and Current Events > Breaking News: Crime and Conflict (batch1 subcategory)",
+      "reason": "Subsumed into the top-level News and Current Events node; as a standalone subcategory it had the same 4 usable candidate cards as its sibling, insufficient on its own and redundant with the merged node."
+    },
+    {
+      "proposal": "News and Current Events > Political and Social Commentary (batch1 subcategory)",
+      "reason": "Only 2 distinct candidate cards (c006, c007); merged into the broader News and Current Events top-level node instead."
+    },
+    {
+      "proposal": "Sports Highlights and Commentary",
+      "reason": "Only 4 distinct candidate cards (c015, c016, c018, c022) across all batches; below the 5-card minimum and no other batch contributed a similar card."
+    },
+    {
+      "proposal": "Livestreamer and Creator Culture",
+      "reason": "Only 2 distinct candidate cards (c020, c021); below the 5-card minimum."
+    },
+    {
+      "proposal": "AI Generative Creative Media / AI-Generated Creative Media / AI-Generated Video and Creative Media / Generative Media (duplicate names across batches 2,4,5,6,7)",
+      "reason": "Merged into a single AI and ML > Generative Media node; treating each batch's variant as a separate node would duplicate the same concept."
+    },
+    {
+      "proposal": "AI Industry, Markets, and Geopolitics / AI Industry and Business / AI Industry Business and Market Commentary / AI Business and Industry / AI Business & Markets / AI Industry and Market Economics (duplicate names across batches 2,4,5,6,7,8,9)",
+      "reason": "Merged into a single AI and ML > AI Industry and Business node; these were the same industry/market/competition concept proposed independently in nearly every batch."
+    },
+    {
+      "proposal": "AI Agents and Automation (duplicate proposals in batches 4, 5, 6)",
+      "reason": "Merged into a single AI and ML > AI Agents and Automation node rather than creating near-duplicate nodes per batch."
+    },
+    {
+      "proposal": "AI and ML > Product Launches (batch3) treated separately from overlapping video-generation candidate c069",
+      "reason": "c069 ('a new era of AI video creation begins') better fits Generative Media per sibling-precedence rules and was moved there instead of remaining a Product Launches support."
+    }
+  ]
+}

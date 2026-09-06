@@ -1,0 +1,109 @@
+{
+  "call_id": "call-consolidation",
+  "attempt_ids": [
+    "consolidation"
+  ],
+  "argv": [
+    "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+    "-p",
+    "--json-schema",
+    "{\"type\":\"object\",\"properties\":{\"version_id\":{\"type\":\"string\",\"minLength\":1},\"parent_version_id\":{\"type\":\"string\",\"minLength\":1},\"nodes\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"shelf_id\":{\"type\":\"string\",\"minLength\":1},\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\",\"minLength\":1},\"confusing_alternative\":{\"type\":\"string\",\"minLength\":1},\"evidence_needed\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false},\"minItems\":1},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"support_key\":{\"type\":\"string\"}},\"required\":[\"support_key\"],\"additionalProperties\":false}}},\"required\":[\"shelf_id\",\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false},\"minItems\":1},\"coverage_ledger\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"support_key\":{\"type\":\"string\"}},\"required\":[\"support_key\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":160},\"card_key\":{\"type\":\"string\"}},\"required\":[\"card_key\",\"disposition\",\"shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}},\"diff\":{\"type\":\"object\",\"properties\":{\"preserved\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"added\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"renamed\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"merged\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"split\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"retired\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}}},\"required\":[\"preserved\",\"added\",\"renamed\",\"merged\",\"split\",\"retired\"],\"additionalProperties\":false},\"pin_impact_report\":{\"type\":\"object\"},\"rejected_proposals\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"proposal\":{\"type\":\"string\",\"minLength\":1},\"reason\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"proposal\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"version_id\",\"parent_version_id\",\"nodes\",\"coverage_ledger\",\"diff\",\"pin_impact_report\",\"rejected_proposals\"],\"additionalProperties\":false}",
+    "--output-format",
+    "json",
+    "--tools",
+    "",
+    "--no-session-persistence",
+    "--model",
+    "claude-sonnet-5",
+    "--effort",
+    "low"
+  ],
+  "schema_text": "{\"type\":\"object\",\"properties\":{\"version_id\":{\"type\":\"string\",\"minLength\":1},\"parent_version_id\":{\"type\":\"string\",\"minLength\":1},\"nodes\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"shelf_id\":{\"type\":\"string\",\"minLength\":1},\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\",\"minLength\":1},\"confusing_alternative\":{\"type\":\"string\",\"minLength\":1},\"evidence_needed\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false},\"minItems\":1},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"support_key\":{\"type\":\"string\"}},\"required\":[\"support_key\"],\"additionalProperties\":false}}},\"required\":[\"shelf_id\",\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false},\"minItems\":1},\"coverage_ledger\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"support_key\":{\"type\":\"string\"}},\"required\":[\"support_key\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":160},\"card_key\":{\"type\":\"string\"}},\"required\":[\"card_key\",\"disposition\",\"shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}},\"diff\":{\"type\":\"object\",\"properties\":{\"preserved\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"added\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"renamed\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"merged\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"split\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"retired\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}}},\"required\":[\"preserved\",\"added\",\"renamed\",\"merged\",\"split\",\"retired\"],\"additionalProperties\":false},\"pin_impact_report\":{\"type\":\"object\"},\"rejected_proposals\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"proposal\":{\"type\":\"string\",\"minLength\":1},\"reason\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"proposal\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"version_id\",\"parent_version_id\",\"nodes\",\"coverage_ledger\",\"diff\",\"pin_impact_report\",\"rejected_proposals\"],\"additionalProperties\":false}",
+  "schema_sha256": "2eb8d878d7a6c7e26341568c09bf67c8be88cd7017783b0996b70626e749c499",
+  "stdin": {
+    "path": "calls/call-consolidation.stdin",
+    "sha256": "e3eaf3f82c6a7d9823b6696cdb0bd8be1011c52d52d9c2e20ebc2815ca3e07d1",
+    "bytes": 322826
+  },
+  "stdout": {
+    "path": "calls/call-consolidation.stdout",
+    "sha256": "3304a3b39b83fee457af72ac917c7af980796de7418ef469541887fc3e4a32fe",
+    "bytes": 137859
+  },
+  "stderr": {
+    "path": "calls/call-consolidation.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "start_monotonic_ns": 130069768217200,
+  "end_monotonic_ns": 130449846999400,
+  "exit_status": 0,
+  "timed_out": false,
+  "cancellation": null,
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+  "environment_policy": "subscription-only: ANTHROPIC_API_KEY absent from the child environment (asserted before launch); no other variable changed",
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 240513,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 48180,
+    "output_tokens_details": {
+      "thinking_tokens": 21933
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 240513,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 48180,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 240513,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 240513
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-haiku-4-5-20251001": {
+      "inputTokens": 126635,
+      "outputTokens": 15,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 0,
+      "webSearchRequests": 0,
+      "costUSD": 0.12671,
+      "contextWindow": 200000,
+      "maxOutputTokens": 32000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-haiku-4-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    },
+    "claude-sonnet-5": {
+      "inputTokens": 2,
+      "outputTokens": 48180,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 240513,
+      "webSearchRequests": 0,
+      "costUSD": 1.443856,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 21933,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "cli_estimated_cost_usd": 1.570566
+}

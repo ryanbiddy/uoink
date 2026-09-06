@@ -1,8 +1,8 @@
-# Run Z brief: hold-out v2 adjudication against the attempt 7 candidate (2026-09-05)
+# Run Z brief: hold-out v2 adjudication against the attempt 9 candidate (2026-09-05)
 
 Fable's dispatch under `ORCHESTRATION-V1-2026-09-04.md`. One section, codex only. You are
 GPT-6 Astra as the separate reviewer required by `STAGE2-GATE-2026-09-05.md`: adjudicate the
-two blind label sets for the 60 hold-out v2 cards against the attempt 7 candidate taxonomy
+two blind label sets for the 60 hold-out v2 cards against the attempt 9 candidate taxonomy
 and produce the single adjudicated label file that Fable seals and freezes before the
 measured pass. Your run X adjudication addressed the rejected attempt 6 candidate; it is
 archived as preliminary and must not be opened here. Nothing in this run executes a
@@ -13,13 +13,13 @@ model, opens the live index, or touches port 5179. Apply stays disabled.
 Open exactly these files and nothing else in the repository:
 
 1. this brief;
-2. `docs/library/proof/holdout-v2-labelling-packet-7-2026-09-05.json` (sha256 `{{PACKET_SHA}}`): the 60 cards and the attempt 7 candidate taxonomy v2 nodes
+2. `docs/library/proof/holdout-v2-labelling-packet-9-2026-09-05.json` (sha256 `c96c19001a5ee262df47da6b1cb2dec69000293e3c782c374ec45e447cbe5d35`): the 60 cards and the attempt 9 candidate taxonomy v2 nodes
    with sibling cues and precedence exclude cues;
-3. `docs/library/proof/labels/holdout-v2-labels-7-gemini-2026-09-05.json` (Gemini 3.8 Flash,
+3. `docs/library/proof/labels/holdout-v2-labels-9-gemini-2026-09-05.json` (Gemini 3.8 Flash,
    blind, 0 mechanical problems);
-4. `docs/library/proof/labels/holdout-v2-labels-7-grok-2026-09-05.json` (Grok 4.6, blind,
+4. `docs/library/proof/labels/holdout-v2-labels-9-grok-2026-09-05.json` (Grok 4.6, blind,
    0 mechanical problems);
-5. `docs/library/proof/labels/holdout-v2-agreement-7-2026-09-05.json`: Fable's mechanical
+5. `docs/library/proof/labels/holdout-v2-agreement-9-2026-09-05.json`: Fable's mechanical
    agreement table ({{AGREEMENT}}).
 
 Do not open receipts, results, audits, score tables, the old gold set or split, prompt
@@ -58,7 +58,7 @@ templates, or any other file. Do not search the repository. Do not run `claude`,
 
 ## Output
 
-Write `docs/library/proof/labels/holdout-v2-labels-adjudicated-7-2026-09-05.json`, UTF-8, LF,
+Write `docs/library/proof/labels/holdout-v2-labels-adjudicated-9-2026-09-05.json`, UTF-8, LF,
 2-space indent, the labeller schema plus the `adjudication` field:
 
 ```json
@@ -66,9 +66,9 @@ Write `docs/library/proof/labels/holdout-v2-labels-adjudicated-7-2026-09-05.json
   "schema_version": 1,
   "kind": "holdout-v2-labels",
   "labeller": "GPT-6 Astra (adjudicator)",
-  "adjudicated_from": ["holdout-v2-labels-7-gemini-2026-09-05.json", "holdout-v2-labels-7-grok-2026-09-05.json"],
+  "adjudicated_from": ["holdout-v2-labels-9-gemini-2026-09-05.json", "holdout-v2-labels-9-grok-2026-09-05.json"],
   "holdout_version": "holdout-v2-2026-09-05",
-  "packet_sha256": "{{PACKET_SHA}}",
+  "packet_sha256": "c96c19001a5ee262df47da6b1cb2dec69000293e3c782c374ec45e447cbe5d35",
   "taxonomy_version_id": "taxonomy-v2-2026-09-05",
   "blind": true,
   "files_opened": ["..."],

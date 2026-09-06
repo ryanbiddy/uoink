@@ -1,0 +1,131 @@
+{
+  "call_id": "call-batch-06",
+  "attempt_ids": [
+    "2090858975751217152",
+    "2090883364936986624",
+    "2090904591261130752",
+    "2091116328803332096",
+    "2091245754484449280",
+    "2091312890653327360",
+    "2091538222203424768",
+    "2091567513461309440",
+    "2091814080160129024",
+    "2091977971426820096",
+    "2091998463688888320",
+    "2092006565285175296",
+    "2092158830365052928",
+    "2092204804218957824",
+    "2092246969918144513",
+    "2092254012456271872",
+    "2092387281457893378",
+    "2092625875468529664",
+    "2092682844812500992",
+    "2092687038189350912",
+    "2092745356274446336",
+    "2092906890497839104",
+    "2092974877279969280",
+    "2093001292591632384",
+    "2093043429278458326"
+  ],
+  "argv": [
+    "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+    "-p",
+    "--json-schema",
+    "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+    "--output-format",
+    "json",
+    "--tools",
+    "",
+    "--no-session-persistence",
+    "--model",
+    "claude-sonnet-5"
+  ],
+  "schema_text": "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+  "schema_sha256": "accd24e7237827a59f225b24b7d6af967f665a554ddc6084e5d36ceaf3e70e3c",
+  "stdin": {
+    "path": "calls/call-batch-06.stdin",
+    "sha256": "a2174ceaba043308c56714b591866aedca251e4b45e2d7872f43df998bdc1f59",
+    "bytes": 86484
+  },
+  "stdout": {
+    "path": "calls/call-batch-06.stdout",
+    "sha256": "5bd373b0e3ca1c6a244896755ddd43886303a8a18ea9726155dc96cffb064d0a",
+    "bytes": 35266
+  },
+  "stderr": {
+    "path": "calls/call-batch-06.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  "start_monotonic_ns": 129192763142100,
+  "end_monotonic_ns": 129695063496900,
+  "exit_status": 0,
+  "timed_out": false,
+  "cancellation": null,
+  "cwd": "E:\\AI\\projects\\uoink\\checkouts\\Yoink-library",
+  "environment_policy": "subscription-only: ANTHROPIC_API_KEY absent from the child environment (asserted before launch); no other variable changed",
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 39534,
+    "cache_read_input_tokens": 83507,
+    "output_tokens": 49555,
+    "output_tokens_details": {
+      "thinking_tokens": 41906
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 39534,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 49555,
+        "cache_read_input_tokens": 83507,
+        "cache_creation_input_tokens": 39534,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 39534
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard"
+  },
+  "modelUsage": {
+    "claude-haiku-4-5-20251001": {
+      "inputTokens": 31073,
+      "outputTokens": 18,
+      "cacheReadInputTokens": 0,
+      "cacheCreationInputTokens": 0,
+      "webSearchRequests": 0,
+      "costUSD": 0.031163,
+      "contextWindow": 200000,
+      "maxOutputTokens": 32000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-haiku-4-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    },
+    "claude-sonnet-5": {
+      "inputTokens": 2,
+      "outputTokens": 49555,
+      "cacheReadInputTokens": 83507,
+      "cacheCreationInputTokens": 39534,
+      "webSearchRequests": 0,
+      "costUSD": 0.6703914,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 64000,
+      "thinkingTokens": 41906,
+      "canonicalModel": "claude-sonnet-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "cli_estimated_cost_usd": 0.7015544
+}

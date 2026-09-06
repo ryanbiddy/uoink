@@ -1,0 +1,16 @@
+[induce] call-batch-02: 25 ids, 386763 ms, exit 0, stdout 32115 B
+[induce] call-batch-01: 25 ids, 574657 ms, exit 0, stdout 36912 B
+[induce] call-batch-03: 25 ids, 625913 ms, exit 0, stdout 47622 B
+[induce] call-batch-00: 25 ids, 656247 ms, exit 0, stdout 55366 B
+[induce] call-batch-04: 25 ids, 488904 ms, exit 0, stdout 48283 B
+[induce] call-batch-06: 25 ids, 502300 ms, exit 0, stdout 35266 B
+[induce] call-batch-05: 25 ids, 555113 ms, exit 0, stdout 41816 B
+[induce] call-batch-07: 25 ids, 531511 ms, exit 0, stdout 32732 B
+[induce] call-batch-08: 25 ids, 627239 ms, exit 0, stdout 45337 B
+[induce] 1 unusable support keys named in the prompt: ['c061-1']
+[induce] call-consolidation: 1 ids, 380078 ms, exit 0, stdout 137859 B
+[induce] completed: 10 calls; proposal nodes=13, ledger=225
+Taxonomy induction complete.
+Proposal written to: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\induction-attempt8\proposal.json
+Receipts written to: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\induction-attempt8\receipts.json
+exit=0
