@@ -73,6 +73,25 @@ def make_artifact_ref(rel_path: str, raw_bytes: bytes) -> dict:
     }
 
 
+def _rel(path: Path) -> str:
+    """Repository-relative POSIX path when inside the checkout, else the absolute path."""
+    try:
+        return Path(path).resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return str(Path(path).resolve())
+
+
+def subscription_only_environment() -> Dict[str, str]:
+    """The child environment for every `claude -p` process. Paid API keys are never
+    passed; if one is present in the parent environment the run refuses to start
+    rather than silently stripping it (audit B8)."""
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        raise RuntimeError("ANTHROPIC_API_KEY is set; induction runs on the subscription client only. Unset it and rerun.")
+    env = dict(os.environ)
+    env.pop("ANTHROPIC_API_KEY", None)
+    return env
+
+
 def get_git_sha() -> str:
     try:
         res = subprocess.run(
@@ -419,16 +438,19 @@ class InductionHarness:
             argv += ["--effort", effort]
         stdin_b = prompt.encode("utf-8")
         timeout = int(os.environ.get("UOINK_PROOF_CALL_TIMEOUT", "900"))
+        # The exact stdin is on disk before the process starts, so a timed-out or
+        # killed call still leaves a replayable input (audit B2-H).
+        (self.calls_dir / f"{call_id}.stdin").write_bytes(stdin_b)
+        env = subscription_only_environment()
         start = time.monotonic_ns()
         timed_out = False
         try:
-            res = subprocess.run(argv, input=stdin_b, capture_output=True, timeout=timeout)
+            res = subprocess.run(argv, input=stdin_b, capture_output=True, timeout=timeout, env=env, cwd=str(ROOT))
             stdout_b, stderr_b, exit_status = res.stdout, res.stderr, res.returncode
         except subprocess.TimeoutExpired as exc:
             timed_out = True
             stdout_b, stderr_b, exit_status = exc.stdout or b"", exc.stderr or b"", -1
         end = time.monotonic_ns()
-        (self.calls_dir / f"{call_id}.stdin").write_bytes(stdin_b)
         (self.calls_dir / f"{call_id}.stdout").write_bytes(stdout_b)
         (self.calls_dir / f"{call_id}.stderr").write_bytes(stderr_b)
         print(f"[induce] {call_id}: {len(attempt_ids)} ids, {(end - start) // 1_000_000} ms, exit {exit_status}, "
@@ -453,6 +475,8 @@ class InductionHarness:
             "exit_status": exit_status,
             "timed_out": timed_out,
             "cancellation": None,
+            "cwd": str(ROOT),
+            "environment_policy": "subscription-only: ANTHROPIC_API_KEY absent from the child environment (asserted before launch); no other variable changed",
             "usage": usage,
             "modelUsage": envelope.get("modelUsage") if isinstance(envelope.get("modelUsage"), dict) else None,
             "cli_estimated_cost_usd": envelope.get("total_cost_usd") if isinstance(envelope.get("total_cost_usd"), (int, float)) else None,
@@ -465,6 +489,18 @@ class InductionHarness:
         the proposal (the validator requires byte-for-byte identity). No post-processing
         of model output; a malformed consolidation fails the run visibly."""
         from validate_proof_receipts import PROPOSAL_SCHEMA, derive_induction_keys, render_induction_consolidation
+        subscription_only_environment()  # refuse to start with a paid key present
+        archived = json.loads(self.receipts_path.read_text(encoding="utf-8"))
+        before_state = archived.get("before") or {}
+        induction_state = {
+            "source": "archived stage 1 receipts before-state (the only library state induction reads)",
+            "archived_receipts_sha256": archived_receipt_hash,
+            "pins": len(before_state.get("pins") or []),
+            "memberships": len(before_state.get("memberships") or []),
+            "item_policies": len(before_state.get("item_policies") or []),
+            "active_version_id": before_state.get("active_version_id"),
+        }
+        resume_record: Optional[Dict[str, Any]] = None
         induction = json.loads(self.induction_manifest_path.read_text(encoding="utf-8"))
         batch_template = (ROOT / "scripts" / "librarian" / "prompts" / "induce-batch.md").read_text(encoding="utf-8")
         cons_template = (ROOT / "scripts" / "librarian" / "prompts" / "induce-consolidate.md").read_text(encoding="utf-8")
@@ -512,6 +548,9 @@ class InductionHarness:
             prior = json.loads(Path(resume_from).read_text(encoding="utf-8"))
             prior_dir = Path(resume_from).resolve().parent
             prior_calls = {c["call_id"]: c for c in prior["calls"]}
+            resume_record = {"from_receipts": _rel(Path(resume_from)),
+                             "from_receipts_sha256": sha(Path(resume_from).read_bytes()),
+                             "reused_call_ids": []}
             for cid, chunk, prompt in plan:
                 rec = prior_calls.get(cid)
                 if not rec or rec["exit_status"] != 0 or rec["attempt_ids"] != chunk:
@@ -529,6 +568,7 @@ class InductionHarness:
                 except (UnicodeDecodeError, json.JSONDecodeError):
                     continue
                 results[cid] = (dict(rec), envelope)
+                resume_record["reused_call_ids"].append(cid)
                 print(f"[induce] resume: reused {cid}", file=sys.stderr, flush=True)
         pending = [(cid, chunk, prompt) for cid, chunk, prompt in plan if cid not in results]
         with cf.ThreadPoolExecutor(max_workers=workers) as ex:
@@ -616,8 +656,29 @@ class InductionHarness:
             "proposal": proposal,
             "proposal_artifact": make_artifact_ref(self.out_proposal_path.name, prop_bytes),
             "accounting": call_accounting(calls),
+            "induction_state": induction_state,
             "execution": {
                 "git_sha": get_git_sha(),
+                "checkout_root": str(ROOT),
+                "cwd": str(ROOT),
+                "model": self.model,
+                "effort": os.environ.get("UOINK_INDUCE_EFFORT"),
+                "concurrency": workers,
+                "call_timeout_s": int(os.environ.get("UOINK_PROOF_CALL_TIMEOUT", "900")),
+                "environment": {"ANTHROPIC_API_KEY": "unset (asserted before every process)"},
+                "database_opened": False,
+                "helper_opened": False,
+                "network_egress": "claude CLI subprocesses only; argv recorded per call; no HTTP client in the induction path",
+                "input_paths": {
+                    "archived_receipts": _rel(self.receipts_path),
+                    "source_manifest": _rel(self.manifest_path),
+                    "induction_manifest": _rel(self.induction_manifest_path),
+                    "taxonomy_v1": _rel(self.v1_taxonomy_path),
+                    "batch_template": "scripts/librarian/prompts/induce-batch.md",
+                    "consolidation_template": "scripts/librarian/prompts/induce-consolidate.md",
+                },
+                "output_root": _rel(self.out_dir),
+                "resume": resume_record,
                 "start_monotonic_ns": t0_mono_ns,
                 "end_monotonic_ns": end_ns,
                 "fingerprints": {

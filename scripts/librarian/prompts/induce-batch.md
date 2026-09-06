@@ -12,11 +12,13 @@ Your task is TAXONOMY INDUCTION (Stage 1 of TnT-LLM): analyze the sample of evid
 7. **Sibling Disambiguation Cues**: Include and exclude cues must state the specific evidence that distinguishes neighboring sibling concepts. Pair each include cue with a likely confusing alternative and the evidence needed to choose it (e.g. Developer Tools vs Education vs Security, Frontier Models vs general AI business).
 8. **Coverage Ledger**: Provide a complete ledger for all input cards classifying each into: proposed concept, existing concept, still unmapped, or unsupported, with supporting evidence or a concise reason.
 9. **Diff & Rejected Proposals**: Record a clear diff against v1 (added, preserved, retired, modified) and list any candidate concepts considered but rejected (e.g. for having fewer than 5 supporting cards).
+10. **Subject Relevance of Supports**: A supporting quote must itself establish the concept's subject: the quoted words, read with the rest of that excerpt, must state or describe the subject. A company, product, model, or person name alone does not establish membership; neither do the speaker, channel, title, or your own knowledge of what a named product does. If an excerpt only names an AI product without showing what it does, that card cannot support an AI-specific concept. A card whose only evidence is off-subject is not a support, however well its title fits.
+11. **Cues Must Match Definitions**: No include cue may be broader than the node's one-sentence definition. Where a concept could be confused with a neighbouring concept (a product launch that is also a creative-media demo, a consumer agent launch, a business story about a model release), write the deciding evidence as an exclude cue that names the neighbouring concept.
 
 ## Node Specification Requirements
 Every node in the hierarchy must specify:
 - `shelf_id`: Stable identifier string (preserving v1 IDs where applicable).
-- `path`: Array of 1 to 3 strings representing the full hierarchy path (e.g. `["AI and ML", "Developer Tools", "Coding Assistants"]`).
+- `path`: Array of 1 to 3 strings representing the full hierarchy path (e.g. `["Home and Garden", "Woodworking", "Hand Tools"]`).
 - `definition`: Exactly one clear, declarative sentence defining the scope and purpose of the shelf.
 - `include`: Array of 2 to 8 concrete cues paired with clarifying context.
 - `exclude`: Array of negative cues explicitly distinguishing this node from likely confusing alternatives.
