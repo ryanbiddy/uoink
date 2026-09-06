@@ -392,6 +392,11 @@ class InductionHarness:
         exe = shutil.which("claude") or "claude"
         argv = [exe, "-p", "--json-schema", schema_text, "--output-format", "json", "--tools", "",
                 "--no-session-persistence", "--model", self.model]
+        effort = os.environ.get("UOINK_INDUCE_EFFORT")
+        if effort:
+            # Consolidation is a mechanical merge; low reasoning effort halves output tokens
+            # (measured 2026-09-05: 55,272 -> 25,071 on three batches) with the same shape.
+            argv += ["--effort", effort]
         stdin_b = prompt.encode("utf-8")
         timeout = int(os.environ.get("UOINK_PROOF_CALL_TIMEOUT", "900"))
         start = time.monotonic_ns()

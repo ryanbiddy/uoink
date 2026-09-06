@@ -153,15 +153,15 @@ Every v1 node below MUST appear in `nodes` with `shelf_id`, `path`, `definition`
 - `version_id` = `taxonomy-v2-2026-09-05`; `parent_version_id` = `taxonomy-v1-2026-09-04`.
 - New nodes: merge equivalent candidates across batches. Each new node needs `shelf_id` (new, lowercase, hyphenated, unique), `path` (1-3 strings), one-sentence `definition`, `include` cues, `exclude` cues, `sibling_cues` (one per include cue), and `supporting_evidence` with at least 5 DISTINCT `video_id`s, each entry copying `video_id`, `source_revision`, `card_hash`, `excerpt_id` and a verbatim 1-24-word `quote` exactly as they appear in the batch proposals. If you cannot reach 5 distinct cards, do NOT create the node: list it in `rejected_proposals` with the reason.
 - No miscellaneous, other, general or uncategorized shelves. No forced counts.
-- `coverage_ledger`: EXACTLY one entry per input card, all 225 ids from the batch dispositions, none missing, none duplicated: `video_id`, `disposition` (`proposed_concept`, `existing_concept`, `still_unmapped`, `unsupported`), `shelf_ids` (the ids of the nodes it fits; empty for the last two), `evidence` (copied from the batch disposition; empty for the last two), `reason` (one line). A card whose candidate was rejected becomes `still_unmapped` (or `existing_concept` if it fits v1).
+- `coverage_ledger`: EXACTLY one entry per input card, all 225 ids from the batch dispositions, none missing, none duplicated: `video_id`, `disposition` (`proposed_concept`, `existing_concept`, `still_unmapped`, `unsupported`), `shelf_ids` (the ids of the nodes it fits; empty for the last two), `evidence` (for the first two dispositions: one or more references of the form `{"excerpt_id": "<64-hex excerpt id copied from that card's batch disposition evidence>"}`; NOTHING else in the object; empty list for the last two), `reason` (at most 160 characters). A card whose candidate was rejected becomes `still_unmapped` (or `existing_concept` if it fits v1).
 - `diff`: `preserved` = all 7 v1 shelf ids; `added` = every new shelf id; `renamed`, `merged`, `split` = []; `retired` = [].
 - `pin_impact_report`: `{"silent_redirects": false, "items": []}`.
 - `rejected_proposals`: every candidate you did not adopt, `{"proposal": <path or name>, "reason": <why>}`.
 
 ## Output size discipline (mandatory)
 The document must stay compact so it can be emitted in one response:
-- Each `coverage_ledger` row for a mapped disposition carries EXACTLY ONE `evidence` entry (the single strongest, copied verbatim from the batch data) and a `reason` of at most 12 words. Refusal rows carry `evidence: []` and a reason of at most 12 words.
-- Each new node's `supporting_evidence` carries EXACTLY FIVE entries from five distinct cards (copied verbatim), no more.
+- Ledger rows cite evidence ONLY by `{"excerpt_id": ...}` reference (one reference is enough); reasons are at most 160 characters. Refusal rows carry `evidence: []`.
+- Each new node's `supporting_evidence` carries EXACTLY FIVE full entries from five distinct cards (copied verbatim from the batch candidates), no more.
 - Definitions are one sentence; include and exclude cues are short phrases; `sibling_cues` fields are short phrases.
 - No prose outside the JSON.
 
