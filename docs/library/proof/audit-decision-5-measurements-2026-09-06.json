@@ -1,0 +1,891 @@
+{
+  "schema_version": 1,
+  "audit": "induction-run-AF-decision5",
+  "completed": true,
+  "approval": true,
+  "verdict": "APPROVE taxonomy-v2-2026-09-05 (revision decision 5)",
+  "approval_record": "docs/library/INDUCTION-AUDIT-14-2026-09-06.md",
+  "approved_by": "Codex / GPT-6 Astra (INDUCTION-AUDIT-14)",
+  "audited_checkout_sha": "ce0a8ea91c7f27f581ce00a4bbaa56d61c74ce9c",
+  "candidate_git_blob_sha256": {
+    "docs/library/proof/taxonomy-v2-revision-decision-5-2026-09-06.json": "f01bd7c2938894211a3efc86c8e08c36f979a737542aecfa29cf45a2578f5ba7",
+    "docs/library/proof/taxonomy-v2-revision-decision-4-2026-09-06.json": "44702821492c0e27082bafe9dec6e430cc9ce01e0194ade089a1d61a7e90d32a",
+    "docs/library/proof/taxonomy-v2-revision-decision-3-2026-09-06.json": "308860a0c1cf42aadf9f309f44c0a44a5358d97defdee95950d2027d0c94a16e",
+    "docs/library/proof/audit-decision-4-measurements-2026-09-06.json": "2b9ddf14fcc6d3b86638fb65f02b8ba1360c535037f7df33ce43d9d42a142748"
+  },
+  "decision_sha256": "f01bd7c2938894211a3efc86c8e08c36f979a737542aecfa29cf45a2578f5ba7",
+  "predecessor_sha256": "44702821492c0e27082bafe9dec6e430cc9ce01e0194ade089a1d61a7e90d32a",
+  "prior_measurements_sha256": "2b9ddf14fcc6d3b86638fb65f02b8ba1360c535037f7df33ce43d9d42a142748",
+  "canonical_serialization": "UTF-8; sorted keys; ensure_ascii=False; separators=(',', ':'); no trailing newline",
+  "canonical_proposal_sha256": "9863d85647c2fb8781b42993c3eec52255bd68b7bbae240393543906d96cd469",
+  "canonical_ledger_sha256": "d43012b6f70fbe6ac626e245819343a8456d733995d55845d594549b13d81f70",
+  "blocking_taxonomy_findings": [],
+  "resolved_findings": [
+    "B5-R4"
+  ],
+  "review_basis": "Exact full-proposal/225-row equality to audit 13's reviewed replacements; no new semantic sample",
+  "inherited_gates": "B1-B3 and B7-B9 from audit 10; B4-B6 semantics and prior resolutions from audits 11-13",
+  "composition": {
+    "exact_utf8_lf_bytes": true,
+    "independent_reconstruction": true,
+    "edits": 20,
+    "destination_edits": 17,
+    "reason_only_edits": [
+      "c046",
+      "c055",
+      "c089"
+    ],
+    "exact_edits": [
+      {
+        "finding": "B5-R",
+        "target": "ledger c043",
+        "field": "row",
+        "before": {
+          "card_key": "c043",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "generative-media"
+          ],
+          "evidence": [
+            {
+              "support_key": "c043-2"
+            }
+          ],
+          "reason": "Automated real2sim reconstruction pipeline; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c043",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Industrial real2sim reconstruction; no AI mechanism or finished creative artifact is established in the cited excerpt."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c046",
+        "field": "row",
+        "before": {
+          "card_key": "c046",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c046-2"
+            }
+          ],
+          "reason": "National AI strategy partnership; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c046",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c046-2"
+            }
+          ],
+          "reason": "National AI capacity and a presidential meeting with a technology CEO; not a support: five-card cap"
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c055",
+        "field": "row",
+        "before": {
+          "card_key": "c055",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c055-1"
+            }
+          ],
+          "reason": "Frontier labs/open source business interview."
+        },
+        "after": {
+          "card_key": "c055",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c055-1"
+            }
+          ],
+          "reason": "Discussion of frontier labs, model improvement and open source; the cited excerpt does not establish a business subject."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c084",
+        "field": "row",
+        "before": {
+          "card_key": "c084",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c084-2"
+            }
+          ],
+          "reason": "Hyperscaler infrastructure-scale claim; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c084",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Internet traffic and global data infrastructure; the cited excerpt establishes no AI system or AI-industry subject."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c085",
+        "field": "row",
+        "before": {
+          "card_key": "c085",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-agents-and-automation"
+          ],
+          "evidence": [
+            {
+              "support_key": "c085-2"
+            }
+          ],
+          "reason": "Autonomous-driving reasoning model; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c085",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c085-2"
+            }
+          ],
+          "reason": "Reasoning model for autonomous driving; the cited excerpt does not establish a qualifying agent or assistant workflow."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c089",
+        "field": "row",
+        "before": {
+          "card_key": "c089",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-agents-and-automation"
+          ],
+          "evidence": [
+            {
+              "support_key": "c089-2"
+            }
+          ],
+          "reason": "Agent reads ad data, executes new campaign; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c089",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-agents-and-automation"
+          ],
+          "evidence": [
+            {
+              "support_key": "c089-2"
+            }
+          ],
+          "reason": "Claude reads 184 ads and extracts five outperforming patterns; campaign execution is not established; not a support: five-card cap"
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c090",
+        "field": "row",
+        "before": {
+          "card_key": "c090",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c090-2"
+            }
+          ],
+          "reason": "Data-center scale banter/rivalry; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c090",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Rocket-factory and data-center size banter; no AI subject, spacecraft engineering or flight operation is established."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c099",
+        "field": "row",
+        "before": {
+          "card_key": "c099",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c099-2"
+            }
+          ],
+          "reason": "Journalist reorganizing coverage around AI beat; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c099",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Tech-market interview fragments and an OpenAI-headquarters location; no substantive AI-industry or AI-system subject is established."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c101",
+        "field": "row",
+        "before": {
+          "card_key": "c101",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "generative-media"
+          ],
+          "evidence": [
+            {
+              "support_key": "c101-2"
+            }
+          ],
+          "reason": "AI video generation technique described; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c101",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Video-production and green-screen instructions; no AI mechanism or finished AI-generated artifact is established."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c112",
+        "field": "row",
+        "before": {
+          "card_key": "c112",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-agents-and-automation"
+          ],
+          "evidence": [
+            {
+              "support_key": "c112-2"
+            }
+          ],
+          "reason": "Agentic office-task demonstration; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c112",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Office-task requests and a coworker comparison; no AI system, completed agent workflow or qualifying companion behavior is established."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c116",
+        "field": "row",
+        "before": {
+          "card_key": "c116",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-agents-and-automation"
+          ],
+          "evidence": [
+            {
+              "support_key": "c116-2"
+            }
+          ],
+          "reason": "Review comparing agent bot to coding assistants; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c116",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c116-2"
+            }
+          ],
+          "reason": "Grok-bot product reaction and comparison with coding apps; no qualifying agent task, companion or persistent-monitor behavior is established."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c119",
+        "field": "row",
+        "before": {
+          "card_key": "c119",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "generative-media"
+          ],
+          "evidence": [
+            {
+              "support_key": "c119-2"
+            }
+          ],
+          "reason": "Reaction to AI-generated scene fidelity; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c119",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Reaction to a subway scene in interactive game content; no AI mechanism or qualifying finished AI-generated artifact is established."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c129",
+        "field": "row",
+        "before": {
+          "card_key": "c129",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c129-2"
+            }
+          ],
+          "reason": "AI agent marketplace for investing launched; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c129",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c129-2"
+            }
+          ],
+          "reason": "AI portfolio-agent marketplace features; no competitive, financial or policy dynamic or executed agent task is established."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c133",
+        "field": "row",
+        "before": {
+          "card_key": "c133",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c133-2"
+            }
+          ],
+          "reason": "Enterprise model-cost routing for workforce spend; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c133",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c133-2"
+            }
+          ],
+          "reason": "Per-team model routing and configuration with a cost-control motive; no AI-market dynamic or coding/security-specific workflow is established."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c137",
+        "field": "row",
+        "before": {
+          "card_key": "c137",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "generative-media"
+          ],
+          "evidence": [
+            {
+              "support_key": "c137-2"
+            }
+          ],
+          "reason": "AI+AR interactive art installation; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c137",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "developer-tools"
+          ],
+          "evidence": [
+            {
+              "support_key": "c137-2"
+            }
+          ],
+          "reason": "Building AI interactive installations with ARKit, Three.js and Electron; the excerpt centers on development tools and implementation."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c155",
+        "field": "row",
+        "before": {
+          "card_key": "c155",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c155-1"
+            }
+          ],
+          "reason": "Thousands of humanoid robots competing, autonomous-systems cue."
+        },
+        "after": {
+          "card_key": "c155",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Humanoid robot competition and participation counts; the cited excerpt establishes neither autonomous operation nor an AI capability."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c185",
+        "field": "row",
+        "before": {
+          "card_key": "c185",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c185-2"
+            }
+          ],
+          "reason": "Changing personal/business strategy for AI era; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c185",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c185-2"
+            }
+          ],
+          "reason": "General commentary about changing strategy for the AI era; no competitive, financial, policy or market/usage dynamic is established."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c191",
+        "field": "row",
+        "before": {
+          "card_key": "c191",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c191-2"
+            }
+          ],
+          "reason": "Contest on AI's uneven economic diffusion; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c191",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c191-2"
+            }
+          ],
+          "reason": "Story competition about hypothetical broad AI access; no specific AI-industry competitive, financial or policy dynamic is established."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c210",
+        "field": "row",
+        "before": {
+          "card_key": "c210",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c210-2"
+            }
+          ],
+          "reason": "GPU/stock market reaction commentary; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c210",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Gaming GPU release and stock-market reaction; the cited excerpt establishes no AI system or AI-industry subject."
+        }
+      },
+      {
+        "finding": "B5-R",
+        "target": "ledger c211",
+        "field": "row",
+        "before": {
+          "card_key": "c211",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c211-2"
+            }
+          ],
+          "reason": "Market-positioning analysis of AI hardware maker; not a support: five-card cap"
+        },
+        "after": {
+          "card_key": "c211",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Nvidia positioning and unspecified headwinds; the cited excerpt does not identify an AI market, system or capability."
+        }
+      }
+    ],
+    "unchanged_rows": 205,
+    "measurements_binding": true,
+    "source_bindings": true
+  },
+  "preservation": {
+    "nodes_equal_decisions3_and4": true,
+    "nodes_literal_utf8_sha256": "4f1f960419a08a4e0db11e3842d75950e6b520c72977445122170be40e6a16dd",
+    "supporting_evidence_equal": true,
+    "retained_ledger_evidence_equal": true,
+    "rejections_equal": true,
+    "pin_fields_equal": true,
+    "diff_equal": true,
+    "normalized_v1_nodes_equal": true,
+    "candidate_counts": {
+      "adopted_or_equivalent": 15,
+      "explicitly_rejected": 6
+    }
+  },
+  "full_proposal_validator_passed": true,
+  "proposal_validation": {
+    "status": "REVISION_DECISION_VERIFIED",
+    "new_nodes": {
+      "ai-agents-and-automation": 5,
+      "ai-industry-and-business": 5,
+      "generative-media": 5,
+      "news-and-current-events": 5
+    },
+    "ledger": {
+      "existing_concept": 37,
+      "still_unmapped": 120,
+      "proposed_concept": 44,
+      "unsupported": 24
+    },
+    "edits": 20
+  },
+  "receipt_validation": {
+    "9": {
+      "status": "INDUCTION_RECEIPTS_VALID_AUDIT_REQUIRED",
+      "target_count": 225,
+      "call_count": 10,
+      "proposal_approved": false
+    },
+    "10": {
+      "status": "INDUCTION_RECEIPTS_VALID_AUDIT_REQUIRED",
+      "target_count": 225,
+      "call_count": 10,
+      "proposal_approved": false
+    }
+  },
+  "ledger_counts": {
+    "proposed_concept": 44,
+    "existing_concept": 37,
+    "still_unmapped": 120,
+    "unsupported": 24
+  },
+  "mapped_rows": 81,
+  "node_references": 20,
+  "ledger_references": 81,
+  "rejected_proposals": [
+    {
+      "proposal": "News and Current Events / Political and Social Commentary",
+      "reason": "Only 2 distinct candidate cards (c006, c007); below the five-card minimum."
+    },
+    {
+      "proposal": "News and Current Events / Breaking News: Crime and Conflict",
+      "reason": "Only 4 distinct candidate cards (c009, c010, c011, c019); below the five-card minimum."
+    },
+    {
+      "proposal": "Sports Highlights and Commentary",
+      "reason": "Only 4 distinct candidate cards (c015, c016, c018, c022); below the five-card minimum."
+    },
+    {
+      "proposal": "Livestreamer and Creator Culture",
+      "reason": "Only 2 distinct candidate cards (c020, c021); below the five-card minimum."
+    },
+    {
+      "proposal": "AI and ML / Product Launches",
+      "reason": "Cards redistributed: c058 to AI Agents and Automation (companion described as sensing, hearing, acting and remembering); c056 and c060 to the existing ai-and-ml parent; c064 and c069 to the existing ai-and-ml parent (feature/release announcements without a finished artifact); c070 left unmapped (auditor-rejected evidence). No standalone concept adopted."
+    },
+    {
+      "proposal": "Career and Entrepreneurship",
+      "reason": "Two of six candidate cards (c202, c221) rely on auditor-rejected excerpts, leaving only 4 distinct subject-relevant cards; below the five-card minimum."
+    }
+  ],
+  "archived_pin_state": {
+    "pins": 0,
+    "memberships": 0,
+    "item_policies": 0,
+    "active_version_id": "taxonomy-v1-2026-09-04"
+  },
+  "pin_impact_report": {
+    "silent_redirects": false,
+    "items": [],
+    "measured_pins": 0,
+    "measured_memberships": 0,
+    "measured_state": "archived stage 1 proof before-state: zero pins, zero memberships (recorded independently in the receipts)"
+  },
+  "projection": {
+    "status": "Calculated in memory for approved decision 5; no export written or service called",
+    "metadata_export_bytes": 12991,
+    "metadata_export_sha256": "015260a496f45322609573956401139f15522d0497e45b263b7e5b8b269696e6",
+    "metadata_parameters": {
+      "approved_by": "Codex / GPT-6 Astra (INDUCTION-AUDIT-14)",
+      "approval_record": "docs/library/INDUCTION-AUDIT-14-2026-09-06.md",
+      "proposal_path": "docs/library/proof/taxonomy-v2-revision-decision-5-2026-09-06.json",
+      "proposal_sha256": "f01bd7c2938894211a3efc86c8e08c36f979a737542aecfa29cf45a2578f5ba7",
+      "projection": "nodes restricted to shelf_id, path (NFC), definition, include, exclude; name=path[-1]; parent_shelf_id derived from path; retired=false; sibling_cues, coverage_ledger, diff, pin_impact_report and rejected_proposals remain in the archived proposal",
+      "preserved_shelf_ids": [
+        "ai-and-ml",
+        "space-and-science",
+        "developer-tools",
+        "education",
+        "frontier-models",
+        "security",
+        "spaceflight"
+      ],
+      "added_shelf_ids": [
+        "news-and-current-events",
+        "ai-agents-and-automation",
+        "ai-industry-and-business",
+        "generative-media"
+      ]
+    },
+    "expected_service_revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "service_returned_revision_hash": null,
+    "canonical_service_file_bytes": 9548,
+    "canonical_service_file_sha256": "a4b9daf4c544341ea1e6bb5458624baae294ce4849d9d17ba561273bb6f0f739",
+    "parent_revision_hash": "2f283053bbaca2e94c2dbd340f19c62a89f529457ac40ae5b1d2d84379d22d98",
+    "independent_nodes_equal": true,
+    "validator_normalization_equal": true
+  },
+  "pending_execution_observations": {
+    "service_returned_revision_hash": null,
+    "disposable_database_identity": null,
+    "integrated_execution_sha": null,
+    "sealed_labels_sha256": null,
+    "sealed_mapping_sha256": null,
+    "stage2_manifest_sha256": null
+  },
+  "scope": {
+    "model_calls": 0,
+    "helper_calls": 0,
+    "databases_opened": 0,
+    "port_5179_used": false,
+    "labels_opened": false,
+    "taxonomy_export_written": false,
+    "apply_enabled": false,
+    "commit_made": false
+  },
+  "input_files": {
+    "docs/library/proof/taxonomy-v2-revision-decision-5-2026-09-06.json": {
+      "sha256": "f01bd7c2938894211a3efc86c8e08c36f979a737542aecfa29cf45a2578f5ba7",
+      "bytes": 106693
+    },
+    "docs/library/proof/taxonomy-v2-revision-decision-4-2026-09-06.json": {
+      "sha256": "44702821492c0e27082bafe9dec6e430cc9ce01e0194ade089a1d61a7e90d32a",
+      "bytes": 93456
+    },
+    "docs/library/proof/taxonomy-v2-revision-decision-3-2026-09-06.json": {
+      "sha256": "308860a0c1cf42aadf9f309f44c0a44a5358d97defdee95950d2027d0c94a16e",
+      "bytes": 104554
+    },
+    "docs/library/proof/audit-decision-4-measurements-2026-09-06.json": {
+      "sha256": "2b9ddf14fcc6d3b86638fb65f02b8ba1360c535037f7df33ce43d9d42a142748",
+      "bytes": 350947
+    },
+    "docs/library/INDUCTION-AUDIT-13-2026-09-06.md": {
+      "sha256": "cea43ba933b17b9434f521f7dd7db2010ddab39515199e3008e5352d8ac5673d",
+      "bytes": 16822
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/proposal.json": {
+      "sha256": "bb3d51e4b6eecf542355ba0e5f5fbb0d09b1e0ad692eb1c5d1674f315a25cd7c",
+      "bytes": 79143
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/receipts.json": {
+      "sha256": "fb26d4f0a6814fc32c00cb51ea7dbc076150b775c545d90cbdc43cd1e16ee0c2",
+      "bytes": 196978
+    },
+    "docs/library/proof/induction-run-9-2026-09-05/proposal.json": {
+      "sha256": "37db6a1ee53e3ee286d32986f633bb7b12b9dfa4594a462504feb13b1a283997",
+      "bytes": 80313
+    },
+    "docs/library/proof/induction-run-9-2026-09-05/receipts.json": {
+      "sha256": "22206eafd81b4703060e6a4f578f6cdd25dd8c6183351c0687cb9b9c03fa91d9",
+      "bytes": 197894
+    },
+    "docs/library/proof/run-2026-09-05/receipts.json": {
+      "sha256": "2b4e824ea9f93999de6c5108406e60a5c81f108de0b279c52fee2e96d622469c",
+      "bytes": 21732472
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-00.stdout": {
+      "sha256": "00761d9b87094fc044817a2659bb3ec238d69cb37f9759590a2a1cee51771191",
+      "bytes": 55366
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-01.stdout": {
+      "sha256": "2e1cc827cfa80199a6120f6f763e78b5eeda66785b549b9f501d975edb433340",
+      "bytes": 36912
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-02.stdout": {
+      "sha256": "aa1bb64a5a311147f666d41dc78a9383e64d315c537431ec38a7ad434463974e",
+      "bytes": 32115
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-03.stdout": {
+      "sha256": "8c472ace844978a13266e07759937cef8fff0790cb2830fe848c7594f93e3bc9",
+      "bytes": 47622
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-04.stdout": {
+      "sha256": "5f2adccfdbce53b2b7e763a82750796df9926d9b8833f5af2e3f984a5ae65f1a",
+      "bytes": 48283
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-05.stdout": {
+      "sha256": "732aa9e736b88d46982a2e347479898fb56e5f9dcce37129737280172e95a8f2",
+      "bytes": 41816
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-06.stdout": {
+      "sha256": "5bd373b0e3ca1c6a244896755ddd43886303a8a18ea9726155dc96cffb064d0a",
+      "bytes": 35266
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-07.stdout": {
+      "sha256": "6a56b819ab82362f8fee2f1a6bcefc0f284c7dd45e1deed0089238988b5aff53",
+      "bytes": 32732
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-08.stdout": {
+      "sha256": "f222393a7b4988526ab0a2795eba28edee270ee38e9a468ee6ec8baebdacc21e",
+      "bytes": 45337
+    },
+    "docs/library/proof/induction-manifest-2026-09-05.json": {
+      "sha256": "9a759f68890a30e9e8403e2f1364cfb9464f335e342e0a70f75e4ddc6dab422d",
+      "bytes": 67846
+    },
+    "docs/library/taxonomy-v1-2026-09-04.json": {
+      "sha256": "700f8dc09831fa14491a89f4ca68417ac721a17d45bcd2a9dc6c7ede484d11df",
+      "bytes": 5591
+    },
+    "scripts/librarian/compose_revision_decision_n.py": {
+      "sha256": "10c3a84d0a7617d966a371bebdf3be53e0a3ea81ba9858702caf51505ac9d863",
+      "bytes": 8066
+    },
+    "scripts/librarian/compose_revision_decision_2.py": {
+      "sha256": "a4e9865f7ebc16179ccbdba36294615969e46a4132ee32b287e8acab4c58dba7",
+      "bytes": 16295
+    },
+    "scripts/librarian/taxonomy_from_proposal.py": {
+      "sha256": "67761c436d50a97d247d2de1e8fb245e90b069b8f4c6b935661606a9964d1031",
+      "bytes": 7411
+    },
+    "tests/validate_proof_receipts.py": {
+      "sha256": "f83de2e60783f734452c840d93c1bec2375d0056a2200dce874ef5e44cdadbb7",
+      "bytes": 114227
+    },
+    "library_cards.py": {
+      "sha256": "a848cc02d451478548ac0a3d5968a14604919f3c0744a0ee88332dc615b1a10a",
+      "bytes": 9931
+    },
+    "docs/library/ORCHESTRATION-V1-2026-09-04.md": {
+      "sha256": "09678bfff1f469761ddf2b11e324f56b5ad3ec588229bc55b5816a588985529d",
+      "bytes": 4029
+    },
+    "docs/library/INDUCTION-APPROVAL-BRIEF-2026-09-06.md": {
+      "sha256": "7866a26e284a6c454bfa6404607d446a89bdb36a36f64f3a527714d5b7a42dca",
+      "bytes": 2858
+    },
+    "docs/library/INDUCTION-AUDIT-2026-09-05.md": {
+      "sha256": "39e399113528e47fccd0cf742de5c410c190b05e894b536656e08a5ec2261445",
+      "bytes": 27277
+    },
+    "docs/library/INDUCTION-AUDIT-10-2026-09-05.md": {
+      "sha256": "13b364e5e257ec2f2229b08d1caf18902f3f7229bf3f9efc3351a0695172b0d7",
+      "bytes": 20714
+    },
+    "docs/library/INDUCTION-AUDIT-11-2026-09-06.md": {
+      "sha256": "ffa50caf2e2cc41d114e9ed752b10b98541e81f5a135a2f520f25f59afa41b14",
+      "bytes": 21049
+    },
+    "docs/library/INDUCTION-AUDIT-12-2026-09-06.md": {
+      "sha256": "b3a7b279309f36984dfebc97b1e75542d55c4c4ff5b1b910c22eb9bffed34602",
+      "bytes": 15645
+    },
+    "docs/library/STAGE2-AUDIT-PLAN-2026-09-05.md": {
+      "sha256": "2fd9f11de98610685a86b0d73bfaa833570e1b1748a3fe90f24c61c6159b7071",
+      "bytes": 18135
+    },
+    ".gitattributes": {
+      "sha256": "517bd6445814467e05bdecefde85086548e44ec5bba06a74e49e9f4e3a063726",
+      "bytes": 1079
+    },
+    "docs/library/proof/audit-decision-5-2026-09-06.py": {
+      "sha256": "094f6ccd5e7fa4db8a90a8e41fc38382c3ef46a27e14b6e032f54c9d918c36b9",
+      "bytes": 14605
+    }
+  }
+}
