@@ -1,0 +1,6 @@
+exit=0
+
+real	10m9.319s
+user	0m0.000s
+sys	0m0.015s
+is_error: False | stop: tool_use | nodes: 9 | ledger: 75 | out tokens: 55272 | ms: 607367

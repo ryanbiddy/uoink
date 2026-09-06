@@ -1,0 +1,1824 @@
+{
+  "kind": "induction-receipts",
+  "schema_version": 1,
+  "run_id": "induction-run-20260906003823",
+  "mode": "subscription",
+  "status": "aborted",
+  "abort_reason": "consolidation call failed (exit -1)",
+  "inputs": {
+    "induction_manifest_sha256": "9a759f68890a30e9e8403e2f1364cfb9464f335e342e0a70f75e4ddc6dab422d",
+    "archived_receipts_sha256": "2b4e824ea9f93999de6c5108406e60a5c81f108de0b279c52fee2e96d622469c",
+    "taxonomy_file_sha256": "700f8dc09831fa14491a89f4ca68417ac721a17d45bcd2a9dc6c7ede484d11df",
+    "batch_prompt_sha256": "92ecf0bb0d51ebd70ac4a9ffc437463924a4c0c3fdc835d1c60a7201c3190044",
+    "consolidation_prompt_sha256": "242b2d5c2634892a24e3295891f6f6d8438d81f986a2677ea67ee8c9b022da87"
+  },
+  "batch_prompt": {
+    "path": "prompts/batch_prompt.md",
+    "sha256": "92ecf0bb0d51ebd70ac4a9ffc437463924a4c0c3fdc835d1c60a7201c3190044",
+    "bytes": 4835
+  },
+  "consolidation_prompt": {
+    "path": "prompts/consolidation_prompt.md",
+    "sha256": "242b2d5c2634892a24e3295891f6f6d8438d81f986a2677ea67ee8c9b022da87",
+    "bytes": 6611
+  },
+  "taxonomy": {
+    "path": "taxonomy.json",
+    "sha256": "700f8dc09831fa14491a89f4ca68417ac721a17d45bcd2a9dc6c7ede484d11df",
+    "bytes": 5591
+  },
+  "calls": [
+    {
+      "call_id": "call-batch-00",
+      "attempt_ids": [
+        "1840739354819350528",
+        "1851588159403884544",
+        "1889178327400820738",
+        "1969830523657666560",
+        "2020740688166735872",
+        "2077640475075358720",
+        "2077870396075094016",
+        "2077931160538329088",
+        "2078287651535273984",
+        "2078443305495388160",
+        "2078450309794263040",
+        "2078513431548727297",
+        "2078557465042419712",
+        "2078557763337154560",
+        "2078619453164748801",
+        "2078621895058915328",
+        "2078627651103993856",
+        "2078643519162298368",
+        "2078650714293739521",
+        "2078656827990978560",
+        "2078684046708572163",
+        "2078973268732555264",
+        "2078988415048278016",
+        "2079140311779971072",
+        "2079190532681543680"
+      ],
+      "argv": [
+        "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+        "-p",
+        "--json-schema",
+        "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+        "--output-format",
+        "json",
+        "--tools",
+        "",
+        "--no-session-persistence",
+        "--model",
+        "claude-sonnet-5"
+      ],
+      "schema_text": "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+      "schema_sha256": "accd24e7237827a59f225b24b7d6af967f665a554ddc6084e5d36ceaf3e70e3c",
+      "stdin": {
+        "path": "calls/call-batch-00.stdin",
+        "sha256": "565e0483e725afa2024e2e0f9e2f6cc7927ea83c215f533931b2c3e632822539",
+        "bytes": 88786
+      },
+      "stdout": {
+        "path": "calls/call-batch-00.stdout",
+        "sha256": "4904542ecff72e0ac6d19be272ad6c9aaf06e6605ee544d561d3f6515e51b98e",
+        "bytes": 44306
+      },
+      "stderr": {
+        "path": "calls/call-batch-00.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "start_monotonic_ns": 109414003605600,
+      "end_monotonic_ns": 109827008620000,
+      "exit_status": 0,
+      "timed_out": false,
+      "cancellation": null,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 41664,
+        "cache_read_input_tokens": 83507,
+        "output_tokens": 37162,
+        "output_tokens_details": {
+          "thinking_tokens": 26678
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 41664,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 37162,
+            "cache_read_input_tokens": 83507,
+            "cache_creation_input_tokens": 41664,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 41664
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 32867,
+          "outputTokens": 15,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.032942,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 37162,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 41664,
+          "webSearchRequests": 0,
+          "costUSD": 0.5549814,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 26678,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "cli_estimated_cost_usd": 0.5879234
+    },
+    {
+      "call_id": "call-batch-01",
+      "attempt_ids": [
+        "2079192729997959168",
+        "2079238984417366016",
+        "2079481448843649024",
+        "2079486420972937216",
+        "2079595357273464930",
+        "2079635204994379776",
+        "2079662821449609217",
+        "2079818487246262272",
+        "2079973875807301633",
+        "2079981074323574784",
+        "2080006256354369536",
+        "2080091059644964864",
+        "2080348432774856704",
+        "2080366248735522816",
+        "2080377021914656768",
+        "2080431302835044352",
+        "2080435155756544000",
+        "2080454622179979264",
+        "2080678700157140992",
+        "2080714082626293760",
+        "2080788116747476992",
+        "2080812408759865344",
+        "2080841892582035456",
+        "2081000627354681344",
+        "2081023025714188288"
+      ],
+      "argv": [
+        "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+        "-p",
+        "--json-schema",
+        "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+        "--output-format",
+        "json",
+        "--tools",
+        "",
+        "--no-session-persistence",
+        "--model",
+        "claude-sonnet-5"
+      ],
+      "schema_text": "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+      "schema_sha256": "accd24e7237827a59f225b24b7d6af967f665a554ddc6084e5d36ceaf3e70e3c",
+      "stdin": {
+        "path": "calls/call-batch-01.stdin",
+        "sha256": "de55c168c9038550f3deb00058b35f6da05cf2a0aad23734515fe5fccba8c11d",
+        "bytes": 82778
+      },
+      "stdout": {
+        "path": "calls/call-batch-01.stdout",
+        "sha256": "38df0c76ff8f2b12a770124b3271c6a2ddc3d6b14655041dd9222635b0c35bb3",
+        "bytes": 48949
+      },
+      "stderr": {
+        "path": "calls/call-batch-01.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "start_monotonic_ns": 109414003511800,
+      "end_monotonic_ns": 109950371304700,
+      "exit_status": 0,
+      "timed_out": false,
+      "cancellation": null,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 38195,
+        "cache_read_input_tokens": 9699,
+        "output_tokens": 50452,
+        "output_tokens_details": {
+          "thinking_tokens": 39382
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 38195,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 50452,
+            "cache_read_input_tokens": 9699,
+            "cache_creation_input_tokens": 38195,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 38195
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 30176,
+          "outputTokens": 16,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.030256,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 50452,
+          "cacheReadInputTokens": 9699,
+          "cacheCreationInputTokens": 38195,
+          "webSearchRequests": 0,
+          "costUSD": 0.6592438,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 39382,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "cli_estimated_cost_usd": 0.6894998
+    },
+    {
+      "call_id": "call-batch-02",
+      "attempt_ids": [
+        "2081066532071759872",
+        "2081123013227945985",
+        "2081234873290031104",
+        "2081681247781130240",
+        "2081817087295516673",
+        "2081892838229573632",
+        "2082487466129522688",
+        "2082506081365008384",
+        "2082514369477476352",
+        "2082518119344459776",
+        "2082527680109621249",
+        "2082613460446113792",
+        "2082793149890514944",
+        "2082842696650043392",
+        "2082873830264258561",
+        "2082889185078185986",
+        "2082926453524398080",
+        "2083053861829275648",
+        "2083066957230915584",
+        "2083169868891684864",
+        "2083221587818659840",
+        "2083521358282067968",
+        "2083595539132919809",
+        "2083607643910987776",
+        "2083637374479642624"
+      ],
+      "argv": [
+        "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+        "-p",
+        "--json-schema",
+        "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+        "--output-format",
+        "json",
+        "--tools",
+        "",
+        "--no-session-persistence",
+        "--model",
+        "claude-sonnet-5"
+      ],
+      "schema_text": "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+      "schema_sha256": "accd24e7237827a59f225b24b7d6af967f665a554ddc6084e5d36ceaf3e70e3c",
+      "stdin": {
+        "path": "calls/call-batch-02.stdin",
+        "sha256": "ca5ead69197858663010f5974874ceb7b51b1252994ecedcf1251af761d0829e",
+        "bytes": 88567
+      },
+      "stdout": {
+        "path": "calls/call-batch-02.stdout",
+        "sha256": "3a6a016141bfd82be00307821f1f3ec7a69a8b11606939dde016c8e0cdc2aafd",
+        "bytes": 33640
+      },
+      "stderr": {
+        "path": "calls/call-batch-02.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "start_monotonic_ns": 109414004224200,
+      "end_monotonic_ns": 109819813690800,
+      "exit_status": 0,
+      "timed_out": false,
+      "cancellation": null,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 40710,
+        "cache_read_input_tokens": 83507,
+        "output_tokens": 37597,
+        "output_tokens_details": {
+          "thinking_tokens": 30545
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 40710,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 37597,
+            "cache_read_input_tokens": 83507,
+            "cache_creation_input_tokens": 40710,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 40710
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 32072,
+          "outputTokens": 15,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.032147,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 37597,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 40710,
+          "webSearchRequests": 0,
+          "costUSD": 0.5555154,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 30545,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "cli_estimated_cost_usd": 0.5876624
+    },
+    {
+      "call_id": "call-batch-03",
+      "attempt_ids": [
+        "2083895018537074689",
+        "2083941649282105344",
+        "2083953406482219008",
+        "2084001626679869440",
+        "2084245813782585345",
+        "2084311728884420608",
+        "2084354263174479872",
+        "2084536348820537344",
+        "2084623086427721728",
+        "2084663739400249344",
+        "2084799311314128896",
+        "2084984808216657921",
+        "2085010685562626048",
+        "2085046911103270913",
+        "2085054678329421824",
+        "2085067072858734593",
+        "2085118888220475392",
+        "2085178322451836928",
+        "2085348301776494592",
+        "2085414600552628224",
+        "2085417600264093696",
+        "2085659012348198912",
+        "2085717998187278336",
+        "2085731765587435520",
+        "2085875838202032128"
+      ],
+      "argv": [
+        "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+        "-p",
+        "--json-schema",
+        "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+        "--output-format",
+        "json",
+        "--tools",
+        "",
+        "--no-session-persistence",
+        "--model",
+        "claude-sonnet-5"
+      ],
+      "schema_text": "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+      "schema_sha256": "accd24e7237827a59f225b24b7d6af967f665a554ddc6084e5d36ceaf3e70e3c",
+      "stdin": {
+        "path": "calls/call-batch-03.stdin",
+        "sha256": "5f2741e849045934874b81e8feeee4c5e0288234869a28aac2635b913c061ac7",
+        "bytes": 81690
+      },
+      "stdout": {
+        "path": "calls/call-batch-03.stdout",
+        "sha256": "103715f225a7bab0fe52c45f2818caec6e3b0c90932128de40b81fe3accef83e",
+        "bytes": 62842
+      },
+      "stderr": {
+        "path": "calls/call-batch-03.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "start_monotonic_ns": 109414003828700,
+      "end_monotonic_ns": 110156508211900,
+      "exit_status": 0,
+      "timed_out": false,
+      "cancellation": null,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 38134,
+        "cache_read_input_tokens": 83507,
+        "output_tokens": 62050,
+        "output_tokens_details": {
+          "thinking_tokens": 47045
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 38134,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 62050,
+            "cache_read_input_tokens": 83507,
+            "cache_creation_input_tokens": 38134,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 38134
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 29927,
+          "outputTokens": 18,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.030017,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 62050,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 38134,
+          "webSearchRequests": 0,
+          "costUSD": 0.7897414,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 47045,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "cli_estimated_cost_usd": 0.8197584
+    },
+    {
+      "call_id": "call-batch-04",
+      "attempt_ids": [
+        "2085903679304179712",
+        "2085967657271275520",
+        "2086167837358321664",
+        "2086214505797931008",
+        "2086231258393112578",
+        "2086844879347634176",
+        "2086886182776868865",
+        "2086894292539424768",
+        "2087194180972118016",
+        "2087221157787525120",
+        "2087297832189403136",
+        "2087384476661735493",
+        "2087489577129013248",
+        "2088044934536585216",
+        "2088049182883954688",
+        "2088306674813775872",
+        "2088366674667773952",
+        "2088372080949739520",
+        "2088401835384057857",
+        "2088583787274014720",
+        "2088636695600087040",
+        "2088646008439795712",
+        "2088654448436629505",
+        "2088664969847959552",
+        "2089066624339034112"
+      ],
+      "argv": [
+        "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+        "-p",
+        "--json-schema",
+        "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+        "--output-format",
+        "json",
+        "--tools",
+        "",
+        "--no-session-persistence",
+        "--model",
+        "claude-sonnet-5"
+      ],
+      "schema_text": "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+      "schema_sha256": "accd24e7237827a59f225b24b7d6af967f665a554ddc6084e5d36ceaf3e70e3c",
+      "stdin": {
+        "path": "calls/call-batch-04.stdin",
+        "sha256": "83705b8308936dcbdae4cb91efff70018bc9aece1bdb6133ddcfb047bb2d642d",
+        "bytes": 90914
+      },
+      "stdout": {
+        "path": "calls/call-batch-04.stdout",
+        "sha256": "ff469fe9d392fab66a9444e62505fa9836010a2e77e9c02a23b4150dcd56b24c",
+        "bytes": 61576
+      },
+      "stderr": {
+        "path": "calls/call-batch-04.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "start_monotonic_ns": 109819817760000,
+      "end_monotonic_ns": 110488029171500,
+      "exit_status": 0,
+      "timed_out": false,
+      "cancellation": null,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 41540,
+        "cache_read_input_tokens": 83507,
+        "output_tokens": 56202,
+        "output_tokens_details": {
+          "thinking_tokens": 42612
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 41540,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 56202,
+            "cache_read_input_tokens": 83507,
+            "cache_creation_input_tokens": 41540,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 41540
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 32759,
+          "outputTokens": 13,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.032824000000000006,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 56202,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 41540,
+          "webSearchRequests": 0,
+          "costUSD": 0.7448853999999999,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 42612,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "cli_estimated_cost_usd": 0.7777093999999999
+    },
+    {
+      "call_id": "call-batch-05",
+      "attempt_ids": [
+        "2089069071929368576",
+        "2089332588963856384",
+        "2089358742852947968",
+        "2089380922604789760",
+        "2089391264878002260",
+        "2089651201738485760",
+        "2089691023404388353",
+        "2089726155008204800",
+        "2089757319974559744",
+        "2089839233309773824",
+        "2089870032771919873",
+        "2089976684019933200",
+        "2090002365835341825",
+        "2090230875883786240",
+        "2090430819865165824",
+        "2090488277426171904",
+        "2090496604902129664",
+        "2090523526595854336",
+        "2090544926706876416",
+        "2090566181854048256",
+        "2090624277900886016",
+        "2090817187900780961",
+        "2090832390952525824",
+        "2090832812081577984",
+        "2090849386284863488"
+      ],
+      "argv": [
+        "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+        "-p",
+        "--json-schema",
+        "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+        "--output-format",
+        "json",
+        "--tools",
+        "",
+        "--no-session-persistence",
+        "--model",
+        "claude-sonnet-5"
+      ],
+      "schema_text": "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+      "schema_sha256": "accd24e7237827a59f225b24b7d6af967f665a554ddc6084e5d36ceaf3e70e3c",
+      "stdin": {
+        "path": "calls/call-batch-05.stdin",
+        "sha256": "eb536f6b21f62aec532bfde6d379e4ed447bfa083fd9c890abc8385dc4f7b3a6",
+        "bytes": 88550
+      },
+      "stdout": {
+        "path": "calls/call-batch-05.stdout",
+        "sha256": "494a829262501844ed86f0735a3310de70ca867d18c9070cecf50402f1a5feff",
+        "bytes": 46561
+      },
+      "stderr": {
+        "path": "calls/call-batch-05.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "start_monotonic_ns": 109827014708700,
+      "end_monotonic_ns": 110378032658000,
+      "exit_status": 0,
+      "timed_out": false,
+      "cancellation": null,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 40818,
+        "cache_read_input_tokens": 83507,
+        "output_tokens": 51973,
+        "output_tokens_details": {
+          "thinking_tokens": 41390
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 40818,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 51973,
+            "cache_read_input_tokens": 83507,
+            "cache_creation_input_tokens": 40818,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 40818
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 32166,
+          "outputTokens": 15,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.032241,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 51973,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 40818,
+          "webSearchRequests": 0,
+          "costUSD": 0.6997074,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 41390,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "cli_estimated_cost_usd": 0.7319483999999999
+    },
+    {
+      "call_id": "call-batch-06",
+      "attempt_ids": [
+        "2090858975751217152",
+        "2090883364936986624",
+        "2090904591261130752",
+        "2091116328803332096",
+        "2091245754484449280",
+        "2091312890653327360",
+        "2091538222203424768",
+        "2091567513461309440",
+        "2091814080160129024",
+        "2091977971426820096",
+        "2091998463688888320",
+        "2092006565285175296",
+        "2092158830365052928",
+        "2092204804218957824",
+        "2092246969918144513",
+        "2092254012456271872",
+        "2092387281457893378",
+        "2092625875468529664",
+        "2092682844812500992",
+        "2092687038189350912",
+        "2092745356274446336",
+        "2092906890497839104",
+        "2092974877279969280",
+        "2093001292591632384",
+        "2093043429278458326"
+      ],
+      "argv": [
+        "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+        "-p",
+        "--json-schema",
+        "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+        "--output-format",
+        "json",
+        "--tools",
+        "",
+        "--no-session-persistence",
+        "--model",
+        "claude-sonnet-5"
+      ],
+      "schema_text": "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+      "schema_sha256": "accd24e7237827a59f225b24b7d6af967f665a554ddc6084e5d36ceaf3e70e3c",
+      "stdin": {
+        "path": "calls/call-batch-06.stdin",
+        "sha256": "af5a56428e49f4fa4141d13694e91feb71419d57e182f4e22331fb695ad52040",
+        "bytes": 85545
+      },
+      "stdout": {
+        "path": "calls/call-batch-06.stdout",
+        "sha256": "88fe6c55b5424cfd9d1b4c803062c0f66d908d77036510181bb5fc55251e6d87",
+        "bytes": 48982
+      },
+      "stderr": {
+        "path": "calls/call-batch-06.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "start_monotonic_ns": 109950375799700,
+      "end_monotonic_ns": 110475523696900,
+      "exit_status": 0,
+      "timed_out": false,
+      "cancellation": null,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 39177,
+        "cache_read_input_tokens": 83507,
+        "output_tokens": 44155,
+        "output_tokens_details": {
+          "thinking_tokens": 32693
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 39177,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 44155,
+            "cache_read_input_tokens": 83507,
+            "cache_creation_input_tokens": 39177,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 39177
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 30873,
+          "outputTokens": 18,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.030963,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 44155,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 39177,
+          "webSearchRequests": 0,
+          "costUSD": 0.6149633999999999,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 32693,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "cli_estimated_cost_usd": 0.6459263999999999
+    },
+    {
+      "call_id": "call-batch-07",
+      "attempt_ids": [
+        "2093065400393105408",
+        "2093098700612517888",
+        "2093246582913171456",
+        "2093372696302153728",
+        "2093489422624804893",
+        "2093534714439110656",
+        "2093591840171941888",
+        "2093756517485101056",
+        "2093840118318501888",
+        "2093996615065612288",
+        "2094122120032710656",
+        "2094123174367473665",
+        "2094153795198398769",
+        "2094226099517452289",
+        "2094286060456914944",
+        "2094452350132051968",
+        "2094517730636390400",
+        "2094524881493016576",
+        "2094532931670958414",
+        "2094679188800524288",
+        "2094761457007157248",
+        "2094872636996165632",
+        "2094906875976232960",
+        "2094908776167948288",
+        "2094915663961661513"
+      ],
+      "argv": [
+        "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+        "-p",
+        "--json-schema",
+        "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+        "--output-format",
+        "json",
+        "--tools",
+        "",
+        "--no-session-persistence",
+        "--model",
+        "claude-sonnet-5"
+      ],
+      "schema_text": "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+      "schema_sha256": "accd24e7237827a59f225b24b7d6af967f665a554ddc6084e5d36ceaf3e70e3c",
+      "stdin": {
+        "path": "calls/call-batch-07.stdin",
+        "sha256": "ad15ef92ab1b42858048dab667ae9c6d72f54b724e4be76203e9df0ba3047295",
+        "bytes": 103921
+      },
+      "stdout": {
+        "path": "calls/call-batch-07.stdout",
+        "sha256": "4adc2e4e83224159d4a832cc3b6b116ea26bce2fe2a768092250b860f15a69a7",
+        "bytes": 41780
+      },
+      "stderr": {
+        "path": "calls/call-batch-07.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "start_monotonic_ns": 110156512710400,
+      "end_monotonic_ns": 110630681168400,
+      "exit_status": 0,
+      "timed_out": false,
+      "cancellation": null,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 46533,
+        "cache_read_input_tokens": 83507,
+        "output_tokens": 44337,
+        "output_tokens_details": {
+          "thinking_tokens": 34697
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 46533,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 44337,
+            "cache_read_input_tokens": 83507,
+            "cache_creation_input_tokens": 46533,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 46533
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 36995,
+          "outputTokens": 18,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.037085,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 44337,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 46533,
+          "webSearchRequests": 0,
+          "costUSD": 0.6462074,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 34697,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "cli_estimated_cost_usd": 0.6832924
+    },
+    {
+      "call_id": "call-batch-08",
+      "attempt_ids": [
+        "4OmEbeR3BtI",
+        "D4fkiQfzw_I",
+        "F97xOWNph5A",
+        "FHMXO_VikdA",
+        "GL-ZoNhUFmc",
+        "HIj8wU_rGIU",
+        "KjToqo-ACnc",
+        "MJmoSxSPeRY",
+        "Oi-1Ev1fI74",
+        "R6w5MBk1PsM",
+        "_KNjASionIo",
+        "aqz-KE-bpKQ",
+        "episode_ee13d34d83c",
+        "h6YLDi2gnMM",
+        "iyVXw-SoUrY",
+        "jNQXAC9IVRw",
+        "mL8umz2yvfQ",
+        "pBF05PNBmJA",
+        "x_21fc0a19511",
+        "x_2b864c9e9ff",
+        "x_811cef5397c",
+        "x_880f13e46c6",
+        "x_916a6278802",
+        "x_ada27fa979b",
+        "x_d7a63c68734"
+      ],
+      "argv": [
+        "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+        "-p",
+        "--json-schema",
+        "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+        "--output-format",
+        "json",
+        "--tools",
+        "",
+        "--no-session-persistence",
+        "--model",
+        "claude-sonnet-5"
+      ],
+      "schema_text": "{\"type\":\"object\",\"properties\":{\"candidates\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\"},\"confusing_alternative\":{\"type\":\"string\"},\"evidence_needed\":{\"type\":\"string\"}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false}},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false}},\"dispositions\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"candidate_paths\":{\"type\":\"array\",\"items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"existing_shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\"},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\"}},\"required\":[\"video_id\",\"disposition\",\"candidate_paths\",\"existing_shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"candidates\",\"dispositions\"],\"additionalProperties\":false}",
+      "schema_sha256": "accd24e7237827a59f225b24b7d6af967f665a554ddc6084e5d36ceaf3e70e3c",
+      "stdin": {
+        "path": "calls/call-batch-08.stdin",
+        "sha256": "773b9075dbe43754d0993fd00a3be5f4ed577ad0f0ec2e35bc677d569151928c",
+        "bytes": 138543
+      },
+      "stdout": {
+        "path": "calls/call-batch-08.stdout",
+        "sha256": "59fc25dd3ecf6085ec1dec3261799fcaa9cc00c92e44c337ce982f9e920fcc9c",
+        "bytes": 28497
+      },
+      "stderr": {
+        "path": "calls/call-batch-08.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "start_monotonic_ns": 110378037115300,
+      "end_monotonic_ns": 110735305979900,
+      "exit_status": 0,
+      "timed_out": false,
+      "cancellation": null,
+      "usage": {
+        "input_tokens": 2,
+        "cache_creation_input_tokens": 63082,
+        "cache_read_input_tokens": 83507,
+        "output_tokens": 34746,
+        "output_tokens_details": {
+          "thinking_tokens": 27768
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 63082,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 34746,
+            "cache_read_input_tokens": 83507,
+            "cache_creation_input_tokens": 63082,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 63082
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard"
+      },
+      "modelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 50664,
+          "outputTokens": 18,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.050754,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 34746,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 63082,
+          "webSearchRequests": 0,
+          "costUSD": 0.6164934,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 27768,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "cli_estimated_cost_usd": 0.6672473999999999
+    },
+    {
+      "call_id": "call-consolidation",
+      "attempt_ids": [
+        "consolidation"
+      ],
+      "argv": [
+        "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+        "-p",
+        "--json-schema",
+        "{\"type\":\"object\",\"properties\":{\"version_id\":{\"type\":\"string\",\"minLength\":1},\"parent_version_id\":{\"type\":\"string\",\"minLength\":1},\"nodes\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"shelf_id\":{\"type\":\"string\",\"minLength\":1},\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\",\"minLength\":1},\"confusing_alternative\":{\"type\":\"string\",\"minLength\":1},\"evidence_needed\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false},\"minItems\":1},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\",\"minLength\":1},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":1000}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"shelf_id\",\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false},\"minItems\":1},\"coverage_ledger\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\",\"minLength\":1},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\",\"minLength\":1},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":1000}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"disposition\",\"shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}},\"diff\":{\"type\":\"object\",\"properties\":{\"preserved\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"added\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"renamed\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"merged\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"split\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"retired\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}}},\"required\":[\"preserved\",\"added\",\"renamed\",\"merged\",\"split\",\"retired\"],\"additionalProperties\":false},\"pin_impact_report\":{\"type\":\"object\"},\"rejected_proposals\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"proposal\":{\"type\":\"string\",\"minLength\":1},\"reason\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"proposal\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"version_id\",\"parent_version_id\",\"nodes\",\"coverage_ledger\",\"diff\",\"pin_impact_report\",\"rejected_proposals\"],\"additionalProperties\":false}",
+        "--output-format",
+        "json",
+        "--tools",
+        "",
+        "--no-session-persistence",
+        "--model",
+        "claude-sonnet-5"
+      ],
+      "schema_text": "{\"type\":\"object\",\"properties\":{\"version_id\":{\"type\":\"string\",\"minLength\":1},\"parent_version_id\":{\"type\":\"string\",\"minLength\":1},\"nodes\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"shelf_id\":{\"type\":\"string\",\"minLength\":1},\"path\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1,\"maxItems\":3},\"definition\":{\"type\":\"string\",\"minLength\":1},\"include\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"exclude\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1},\"minItems\":1},\"sibling_cues\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"include_cue\":{\"type\":\"string\",\"minLength\":1},\"confusing_alternative\":{\"type\":\"string\",\"minLength\":1},\"evidence_needed\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"include_cue\",\"confusing_alternative\",\"evidence_needed\"],\"additionalProperties\":false},\"minItems\":1},\"supporting_evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\",\"minLength\":1},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":1000}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}}},\"required\":[\"shelf_id\",\"path\",\"definition\",\"include\",\"exclude\",\"sibling_cues\",\"supporting_evidence\"],\"additionalProperties\":false},\"minItems\":1},\"coverage_ledger\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\",\"minLength\":1},\"disposition\":{\"enum\":[\"proposed_concept\",\"existing_concept\",\"still_unmapped\",\"unsupported\"]},\"shelf_ids\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"evidence\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"video_id\":{\"type\":\"string\",\"minLength\":1},\"source_revision\":{\"type\":\"string\"},\"card_hash\":{\"type\":\"string\"},\"excerpt_id\":{\"type\":\"string\"},\"quote\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":1000}},\"required\":[\"video_id\",\"source_revision\",\"card_hash\",\"excerpt_id\",\"quote\"],\"additionalProperties\":false}},\"reason\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"video_id\",\"disposition\",\"shelf_ids\",\"evidence\",\"reason\"],\"additionalProperties\":false}},\"diff\":{\"type\":\"object\",\"properties\":{\"preserved\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"added\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}},\"renamed\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"merged\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"split\":{\"type\":\"array\",\"items\":{\"type\":\"object\"}},\"retired\":{\"type\":\"array\",\"items\":{\"type\":\"string\",\"minLength\":1}}},\"required\":[\"preserved\",\"added\",\"renamed\",\"merged\",\"split\",\"retired\"],\"additionalProperties\":false},\"pin_impact_report\":{\"type\":\"object\"},\"rejected_proposals\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"proposal\":{\"type\":\"string\",\"minLength\":1},\"reason\":{\"type\":\"string\",\"minLength\":1}},\"required\":[\"proposal\",\"reason\"],\"additionalProperties\":false}}},\"required\":[\"version_id\",\"parent_version_id\",\"nodes\",\"coverage_ledger\",\"diff\",\"pin_impact_report\",\"rejected_proposals\"],\"additionalProperties\":false}",
+      "schema_sha256": "493283435fb73c0e5162ed4c3fdd3b65836e2a9009721776620901d7d14f11f6",
+      "stdin": {
+        "path": "calls/call-consolidation.stdin",
+        "sha256": "a3f813b58eaa0f4fb43c8da327b78d957a32fc93731e55719b9e2a07b7a0b600",
+        "bytes": 206401
+      },
+      "stdout": {
+        "path": "calls/call-consolidation.stdout",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "stderr": {
+        "path": "calls/call-consolidation.stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "start_monotonic_ns": 115329267817300,
+      "end_monotonic_ns": 117729301379500,
+      "exit_status": -1,
+      "timed_out": true,
+      "cancellation": null,
+      "usage": null,
+      "modelUsage": null,
+      "cli_estimated_cost_usd": null
+    }
+  ],
+  "batches": [
+    {
+      "call_id": "call-batch-00",
+      "video_ids": [
+        "1840739354819350528",
+        "1851588159403884544",
+        "1889178327400820738",
+        "1969830523657666560",
+        "2020740688166735872",
+        "2077640475075358720",
+        "2077870396075094016",
+        "2077931160538329088",
+        "2078287651535273984",
+        "2078443305495388160",
+        "2078450309794263040",
+        "2078513431548727297",
+        "2078557465042419712",
+        "2078557763337154560",
+        "2078619453164748801",
+        "2078621895058915328",
+        "2078627651103993856",
+        "2078643519162298368",
+        "2078650714293739521",
+        "2078656827990978560",
+        "2078684046708572163",
+        "2078973268732555264",
+        "2078988415048278016",
+        "2079140311779971072",
+        "2079190532681543680"
+      ]
+    },
+    {
+      "call_id": "call-batch-01",
+      "video_ids": [
+        "2079192729997959168",
+        "2079238984417366016",
+        "2079481448843649024",
+        "2079486420972937216",
+        "2079595357273464930",
+        "2079635204994379776",
+        "2079662821449609217",
+        "2079818487246262272",
+        "2079973875807301633",
+        "2079981074323574784",
+        "2080006256354369536",
+        "2080091059644964864",
+        "2080348432774856704",
+        "2080366248735522816",
+        "2080377021914656768",
+        "2080431302835044352",
+        "2080435155756544000",
+        "2080454622179979264",
+        "2080678700157140992",
+        "2080714082626293760",
+        "2080788116747476992",
+        "2080812408759865344",
+        "2080841892582035456",
+        "2081000627354681344",
+        "2081023025714188288"
+      ]
+    },
+    {
+      "call_id": "call-batch-02",
+      "video_ids": [
+        "2081066532071759872",
+        "2081123013227945985",
+        "2081234873290031104",
+        "2081681247781130240",
+        "2081817087295516673",
+        "2081892838229573632",
+        "2082487466129522688",
+        "2082506081365008384",
+        "2082514369477476352",
+        "2082518119344459776",
+        "2082527680109621249",
+        "2082613460446113792",
+        "2082793149890514944",
+        "2082842696650043392",
+        "2082873830264258561",
+        "2082889185078185986",
+        "2082926453524398080",
+        "2083053861829275648",
+        "2083066957230915584",
+        "2083169868891684864",
+        "2083221587818659840",
+        "2083521358282067968",
+        "2083595539132919809",
+        "2083607643910987776",
+        "2083637374479642624"
+      ]
+    },
+    {
+      "call_id": "call-batch-03",
+      "video_ids": [
+        "2083895018537074689",
+        "2083941649282105344",
+        "2083953406482219008",
+        "2084001626679869440",
+        "2084245813782585345",
+        "2084311728884420608",
+        "2084354263174479872",
+        "2084536348820537344",
+        "2084623086427721728",
+        "2084663739400249344",
+        "2084799311314128896",
+        "2084984808216657921",
+        "2085010685562626048",
+        "2085046911103270913",
+        "2085054678329421824",
+        "2085067072858734593",
+        "2085118888220475392",
+        "2085178322451836928",
+        "2085348301776494592",
+        "2085414600552628224",
+        "2085417600264093696",
+        "2085659012348198912",
+        "2085717998187278336",
+        "2085731765587435520",
+        "2085875838202032128"
+      ]
+    },
+    {
+      "call_id": "call-batch-04",
+      "video_ids": [
+        "2085903679304179712",
+        "2085967657271275520",
+        "2086167837358321664",
+        "2086214505797931008",
+        "2086231258393112578",
+        "2086844879347634176",
+        "2086886182776868865",
+        "2086894292539424768",
+        "2087194180972118016",
+        "2087221157787525120",
+        "2087297832189403136",
+        "2087384476661735493",
+        "2087489577129013248",
+        "2088044934536585216",
+        "2088049182883954688",
+        "2088306674813775872",
+        "2088366674667773952",
+        "2088372080949739520",
+        "2088401835384057857",
+        "2088583787274014720",
+        "2088636695600087040",
+        "2088646008439795712",
+        "2088654448436629505",
+        "2088664969847959552",
+        "2089066624339034112"
+      ]
+    },
+    {
+      "call_id": "call-batch-05",
+      "video_ids": [
+        "2089069071929368576",
+        "2089332588963856384",
+        "2089358742852947968",
+        "2089380922604789760",
+        "2089391264878002260",
+        "2089651201738485760",
+        "2089691023404388353",
+        "2089726155008204800",
+        "2089757319974559744",
+        "2089839233309773824",
+        "2089870032771919873",
+        "2089976684019933200",
+        "2090002365835341825",
+        "2090230875883786240",
+        "2090430819865165824",
+        "2090488277426171904",
+        "2090496604902129664",
+        "2090523526595854336",
+        "2090544926706876416",
+        "2090566181854048256",
+        "2090624277900886016",
+        "2090817187900780961",
+        "2090832390952525824",
+        "2090832812081577984",
+        "2090849386284863488"
+      ]
+    },
+    {
+      "call_id": "call-batch-06",
+      "video_ids": [
+        "2090858975751217152",
+        "2090883364936986624",
+        "2090904591261130752",
+        "2091116328803332096",
+        "2091245754484449280",
+        "2091312890653327360",
+        "2091538222203424768",
+        "2091567513461309440",
+        "2091814080160129024",
+        "2091977971426820096",
+        "2091998463688888320",
+        "2092006565285175296",
+        "2092158830365052928",
+        "2092204804218957824",
+        "2092246969918144513",
+        "2092254012456271872",
+        "2092387281457893378",
+        "2092625875468529664",
+        "2092682844812500992",
+        "2092687038189350912",
+        "2092745356274446336",
+        "2092906890497839104",
+        "2092974877279969280",
+        "2093001292591632384",
+        "2093043429278458326"
+      ]
+    },
+    {
+      "call_id": "call-batch-07",
+      "video_ids": [
+        "2093065400393105408",
+        "2093098700612517888",
+        "2093246582913171456",
+        "2093372696302153728",
+        "2093489422624804893",
+        "2093534714439110656",
+        "2093591840171941888",
+        "2093756517485101056",
+        "2093840118318501888",
+        "2093996615065612288",
+        "2094122120032710656",
+        "2094123174367473665",
+        "2094153795198398769",
+        "2094226099517452289",
+        "2094286060456914944",
+        "2094452350132051968",
+        "2094517730636390400",
+        "2094524881493016576",
+        "2094532931670958414",
+        "2094679188800524288",
+        "2094761457007157248",
+        "2094872636996165632",
+        "2094906875976232960",
+        "2094908776167948288",
+        "2094915663961661513"
+      ]
+    },
+    {
+      "call_id": "call-batch-08",
+      "video_ids": [
+        "4OmEbeR3BtI",
+        "D4fkiQfzw_I",
+        "F97xOWNph5A",
+        "FHMXO_VikdA",
+        "GL-ZoNhUFmc",
+        "HIj8wU_rGIU",
+        "KjToqo-ACnc",
+        "MJmoSxSPeRY",
+        "Oi-1Ev1fI74",
+        "R6w5MBk1PsM",
+        "_KNjASionIo",
+        "aqz-KE-bpKQ",
+        "episode_ee13d34d83c",
+        "h6YLDi2gnMM",
+        "iyVXw-SoUrY",
+        "jNQXAC9IVRw",
+        "mL8umz2yvfQ",
+        "pBF05PNBmJA",
+        "x_21fc0a19511",
+        "x_2b864c9e9ff",
+        "x_811cef5397c",
+        "x_880f13e46c6",
+        "x_916a6278802",
+        "x_ada27fa979b",
+        "x_d7a63c68734"
+      ]
+    }
+  ],
+  "consolidation_call_id": "call-consolidation",
+  "proposal": {},
+  "proposal_artifact": {
+    "path": "proposal.json",
+    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "bytes": 2
+  },
+  "accounting": {
+    "process_count": 10,
+    "counters": {
+      "input_tokens": null,
+      "output_tokens": null,
+      "cache_read_input_tokens": null,
+      "cache_creation_input_tokens": null
+    },
+    "modelUsage_by_call": {
+      "call-batch-00": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 32867,
+          "outputTokens": 15,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.032942,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 37162,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 41664,
+          "webSearchRequests": 0,
+          "costUSD": 0.5549814,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 26678,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "call-batch-01": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 30176,
+          "outputTokens": 16,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.030256,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 50452,
+          "cacheReadInputTokens": 9699,
+          "cacheCreationInputTokens": 38195,
+          "webSearchRequests": 0,
+          "costUSD": 0.6592438,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 39382,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "call-batch-02": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 32072,
+          "outputTokens": 15,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.032147,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 37597,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 40710,
+          "webSearchRequests": 0,
+          "costUSD": 0.5555154,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 30545,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "call-batch-03": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 29927,
+          "outputTokens": 18,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.030017,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 62050,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 38134,
+          "webSearchRequests": 0,
+          "costUSD": 0.7897414,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 47045,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "call-batch-04": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 32759,
+          "outputTokens": 13,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.032824000000000006,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 56202,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 41540,
+          "webSearchRequests": 0,
+          "costUSD": 0.7448853999999999,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 42612,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "call-batch-05": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 32166,
+          "outputTokens": 15,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.032241,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 51973,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 40818,
+          "webSearchRequests": 0,
+          "costUSD": 0.6997074,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 41390,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "call-batch-06": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 30873,
+          "outputTokens": 18,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.030963,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 44155,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 39177,
+          "webSearchRequests": 0,
+          "costUSD": 0.6149633999999999,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 32693,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "call-batch-07": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 36995,
+          "outputTokens": 18,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.037085,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 44337,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 46533,
+          "webSearchRequests": 0,
+          "costUSD": 0.6462074,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 34697,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "call-batch-08": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 50664,
+          "outputTokens": 18,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0,
+          "webSearchRequests": 0,
+          "costUSD": 0.050754,
+          "contextWindow": 200000,
+          "maxOutputTokens": 32000,
+          "thinkingTokens": 0,
+          "canonicalModel": "claude-haiku-4-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        },
+        "claude-sonnet-5": {
+          "inputTokens": 2,
+          "outputTokens": 34746,
+          "cacheReadInputTokens": 83507,
+          "cacheCreationInputTokens": 63082,
+          "webSearchRequests": 0,
+          "costUSD": 0.6164934,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 64000,
+          "thinkingTokens": 27768,
+          "canonicalModel": "claude-sonnet-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "call-consolidation": null
+    },
+    "cli_estimated_cost_usd": null,
+    "estimate_source": "unavailable",
+    "paid_cost_usd": null,
+    "paid_cost_source": "unavailable"
+  },
+  "execution": {
+    "git_sha": "8b7921a966122ac0d248ce492f1b5c31a1512d1b",
+    "start_monotonic_ns": 109414003511800,
+    "end_monotonic_ns": 117729302082100,
+    "fingerprints": {
+      "runner": {
+        "path": "fingerprints/runner",
+        "sha256": "ce67df027e547c24788e8ca8ee59c4f81351e24f400291d32199970c34a2e803",
+        "bytes": 40979
+      },
+      "validator": {
+        "path": "fingerprints/validator",
+        "sha256": "2000fbbbddc7f68078708f60bbde16d8d14298425fa76016e33112aeec54fcee",
+        "bytes": 100843
+      },
+      "card_builder": {
+        "path": "fingerprints/card_builder",
+        "sha256": "a848cc02d451478548ac0a3d5968a14604919f3c0744a0ee88332dc615b1a10a",
+        "bytes": 9931
+      }
+    }
+  }
+}
