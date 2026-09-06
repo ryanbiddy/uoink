@@ -1,0 +1,3452 @@
+{
+  "schema_version": 1,
+  "audit": "induction-run-AB-decision2",
+  "completed": true,
+  "approval": false,
+  "verdict": "REJECT taxonomy-v2-2026-09-05 (revision decision 2)",
+  "audited_checkout_sha": "000367e0cba8901cd5d3efd6d5cd689bd3fdfdc1",
+  "model_calls_executed_by_audit": 0,
+  "helper_calls_executed_by_audit": 0,
+  "databases_opened_by_audit": 0,
+  "unchanged_gates": "B1-B3 and B7-B9 stand from attempt-10 audit; not rerun by this script.",
+  "decision_sha256": "27e010cea18a4a4b6c9ac20b0061dd264754fea94e088e1e8fdc8e71452b19bd",
+  "predecessor_sha256": "7028edf7471a3624345257e59c6eb7627c011a65424df439a126d906df77098f",
+  "composition": {
+    "recorded_edit_count": 18,
+    "per_edit": [
+      {
+        "number": 1,
+        "repair_item": 1,
+        "target": "node ai-agents-and-automation",
+        "field": "definition",
+        "before_matches": true,
+        "before_sha256": "8d165a6ae78d03e30339a54e3a008d24c876255cc63bb0209efa48a5337e57ec",
+        "after_sha256": "f834d7aabe86e7d31da2a69b5ad87e914b4c472d67208835b5cfba44bf69a624"
+      },
+      {
+        "number": 2,
+        "repair_item": 1,
+        "target": "node ai-agents-and-automation",
+        "field": "include",
+        "before_matches": true,
+        "before_sha256": "212a4da188148a64789b23c0949c6cfa4c7f8c3b185eee66c42c7736f2559bd6",
+        "after_sha256": "16bbeebd83065b07b01db2f952711290ad62d336bbf198fd10981523154785e6"
+      },
+      {
+        "number": 3,
+        "repair_item": 1,
+        "target": "node ai-agents-and-automation",
+        "field": "sibling_cues",
+        "before_matches": true,
+        "before_sha256": "4d22384dbf0fde90dcb731c4122b5e6b2e75684ba28cd017f9c84bcc95d6a153",
+        "after_sha256": "5fc158f248f9a07ba1121496dc52682262a686760c7353b6f70cf0d4a8eb975f"
+      },
+      {
+        "number": 4,
+        "repair_item": 1,
+        "target": "node ai-agents-and-automation",
+        "field": "exclude",
+        "before_matches": true,
+        "before_sha256": "6421e7a551c1ae0bb0fbd493899a521848a2277d15be7cb1a55cae135109e5b8",
+        "after_sha256": "685135dbee5931ec4b9e05920861e32777ad281faad72eba8e3ca25899081369"
+      },
+      {
+        "number": 5,
+        "repair_item": 1,
+        "target": "ledger c058",
+        "field": "reason",
+        "before_matches": true,
+        "before_sha256": "f480e06762f7c014906444d447adc19e47fe97f199db9cd4bb8058c3d85c5dde",
+        "after_sha256": "ef35a09bc5277ef9d3c79a7c109941eec7d55ef58c3d8b6aa4dbb69e80521173"
+      },
+      {
+        "number": 6,
+        "repair_item": 1,
+        "target": "ledger c124",
+        "field": "reason",
+        "before_matches": true,
+        "before_sha256": "54ddf195c482e8ca480b41c82c9e73c2f7763f33fe93a902b86b849f780126f2",
+        "after_sha256": "6b7a5b5cf141c66e2d7d2466a7caab0e9b77451c4e317461bb1b12241e5289ed"
+      },
+      {
+        "number": 7,
+        "repair_item": 2,
+        "target": "node generative-media",
+        "field": "include",
+        "before_matches": true,
+        "before_sha256": "71cc6112b5b2af76280bbd3ac6baf96bd171e534011dde670d947dee7ca214ea",
+        "after_sha256": "f0fe04968a69425eeea9c40138f6610cc9a52da86f8025af11331bca7ae8a484"
+      },
+      {
+        "number": 8,
+        "repair_item": 2,
+        "target": "node generative-media",
+        "field": "sibling_cues",
+        "before_matches": true,
+        "before_sha256": "77930df6af3cf9a2da547e25c058d29ee9d65343fe141f0201153e04fb2a7414",
+        "after_sha256": "6d5ee78185f633570ffe70d75576dec182b8c2bb1e055bb09648a1f23d250366"
+      },
+      {
+        "number": 9,
+        "repair_item": 2,
+        "target": "node generative-media",
+        "field": "exclude",
+        "before_matches": true,
+        "before_sha256": "f38284b4cc174385d87560adf8ab34bfcd6c753cb968665d4d5f725cbd014214",
+        "after_sha256": "e62a87deed1211025f181e97150ced6acb8aa0916f9bec178f0250b4e4fc516c"
+      },
+      {
+        "number": 10,
+        "repair_item": 2,
+        "target": "node ai-industry-and-business",
+        "field": "include",
+        "before_matches": true,
+        "before_sha256": "8bbfec4c5977d5ca50a63c0b30ce1c0c8933ece6df8d82c39dd0b659408a2ab0",
+        "after_sha256": "e394bbb4ad6fee8aae87d6969fc54f3f5287a283c9459fb2550b09c0191e431d"
+      },
+      {
+        "number": 11,
+        "repair_item": 2,
+        "target": "node ai-industry-and-business",
+        "field": "sibling_cues",
+        "before_matches": true,
+        "before_sha256": "ac1ac279a652e48738cb6849946f587db9761dadfd657f6a6c50bb411ef64dab",
+        "after_sha256": "07819483cfab186f9e6297adb9cae3af152ed551e6cad0c3f18a3097135d5b2a"
+      },
+      {
+        "number": 12,
+        "repair_item": 2,
+        "target": "node ai-industry-and-business",
+        "field": "exclude",
+        "before_matches": true,
+        "before_sha256": "d20dac120130ff955bfabc1a3216be5a0094857e9295963b6b58b43c31f306e4",
+        "after_sha256": "f1bd1315821b6244b19f9c23a1d4baf06177556d01c12bf5396f225d4074e9bd"
+      },
+      {
+        "number": 13,
+        "repair_item": 2,
+        "target": "node news-and-current-events",
+        "field": "include",
+        "before_matches": true,
+        "before_sha256": "5f689c717bafdbd1ee9a733e2bde5c89904963a309912ec4bc39e2f9a0cc6e76",
+        "after_sha256": "95f2623822edf930157bf51fc328ee245e7e41f28e74cbcbf650eea40f6b39d7"
+      },
+      {
+        "number": 14,
+        "repair_item": 2,
+        "target": "node news-and-current-events",
+        "field": "sibling_cues",
+        "before_matches": true,
+        "before_sha256": "23f3ba98bb85457cbec7b520324e0f8556b0623d9e19c36efb41e8d92cd3865b",
+        "after_sha256": "2aa6f608bacbac6bd4f3635db03054f62c2f5748d9d07f56df6c694914e1ac53"
+      },
+      {
+        "number": 15,
+        "repair_item": 3,
+        "target": "ledger c007",
+        "field": "row",
+        "before_matches": true,
+        "before_sha256": "ab246cc84cec5360e09fc67a1d5f9f7d48ccb3b0fa286fa7d3b0f9cefb4ff60a",
+        "after_sha256": "0c209af2ec7c5cd171777343af1435d7738083eebd806dbff830f268972305a3"
+      },
+      {
+        "number": 16,
+        "repair_item": 3,
+        "target": "ledger c064",
+        "field": "row",
+        "before_matches": true,
+        "before_sha256": "181946704230c69f016473e6b9194c35f54366291a3ee1ada567579d54cd7223",
+        "after_sha256": "5b40a0953d65fba125f9d95013b82036a6b44b82f58171dd851f4f78c96657df"
+      },
+      {
+        "number": 17,
+        "repair_item": 3,
+        "target": "ledger c069",
+        "field": "row",
+        "before_matches": true,
+        "before_sha256": "0bbc31b6e080002e87dd58b7cc61cf5d7f5b0503825a0c38f600fae4291c994d",
+        "after_sha256": "8cac13012aad2bce6d1ccf9f6980da63fc018a72bc617b189c9aba760602c800"
+      },
+      {
+        "number": 18,
+        "repair_item": 3,
+        "target": "rejected_proposals AI and ML / Product Launches",
+        "field": "reason",
+        "before_matches": true,
+        "before_sha256": "1dd643a73086801483a9b3211b6df2edb10a7433b8c16823c4a03ca6bb1cc2eb",
+        "after_sha256": "19e6a6f2b3d6bfdc7612bc8bd63380ac5557a1fe97b21c48a50600f3541e71d2"
+      }
+    ],
+    "unchanged_outside_edits": true,
+    "exact_serialization_equal": true,
+    "independent_replay_equal": true,
+    "composer_exact_bytes_equal": true,
+    "composer_verification": {
+      "status": "REVISION_DECISION_2_VERIFIED",
+      "new_nodes": {
+        "ai-agents-and-automation": 5,
+        "ai-industry-and-business": 5,
+        "generative-media": 5,
+        "news-and-current-events": 5
+      },
+      "ledger": {
+        "existing_concept": 33,
+        "still_unmapped": 106,
+        "proposed_concept": 62,
+        "unsupported": 24
+      },
+      "edits": 18
+    },
+    "source_hashes_verified": true,
+    "semantic_review": "All recorded changes address their named repair items; edit 3 introduces an unprojected Agents/Security distinction, so the whole repair is incomplete."
+  },
+  "B4": {
+    "node_references": 20,
+    "ledger_references": 95,
+    "evidence_errors": [],
+    "candidate_kind_verified": true,
+    "rejected_keys_selected": [],
+    "node_quote_word_counts": {
+      "7": 1,
+      "8": 1,
+      "9": 2,
+      "10": 1,
+      "11": 4,
+      "12": 3,
+      "13": 1,
+      "14": 1,
+      "15": 2,
+      "16": 1,
+      "17": 2,
+      "19": 1
+    },
+    "subject_relevant_distinct_cards": {
+      "ai-agents-and-automation": 5,
+      "ai-industry-and-business": 5,
+      "generative-media": 5,
+      "news-and-current-events": 5
+    },
+    "review_method": "Human reading of every complete frozen cited excerpt; no outside facts, title or channel used.",
+    "manual_relevance_review": [
+      {
+        "support_key": "c058-1",
+        "kind": "candidate",
+        "card_key": "c058",
+        "support": {
+          "video_id": "2082506081365008384",
+          "source_revision": "d1d8481a434aef66ec0621c098c6183e126127a83d6cc76836ba906f5e1c283a",
+          "card_hash": "d8f9fc8caa3267f6cfc6cfd18536b6bff59f89f772e1f78ae84d724b4779c8e4",
+          "excerpt_id": "416f4e399f79bb65aeaf4d890ad51ed345c76482acd6001fc96121c8d8f59b2f",
+          "quote": "a new kind of application that sees, hears, acts, remembers, and emotionally understands you like a friend or coworker"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/tavus/status/2082506151728685147",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "416f4e399f79bb65aeaf4d890ad51ed345c76482acd6001fc96121c8d8f59b2f",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Tavus PAL Maker.  The first no-code way to build a PAL, a new kind of application that sees, hears, acts, remembers, and emotionally understands you like a friend or coworker, whether it's w",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 19,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "ai-agents-and-automation",
+        "subject_relevant": true,
+        "human_reason": "Sensing/acting/remembering companion explicitly fits the separately admitted companion scope."
+      },
+      {
+        "support_key": "c088-1",
+        "kind": "candidate",
+        "card_key": "c088",
+        "support": {
+          "video_id": "2085010685562626048",
+          "source_revision": "5feae371722596ed4d9af2bc2322bb462f6cd7014ce8264f2ab91eb06aa21ae1",
+          "card_hash": "be1c03f3c0cf2576cc9f28d1fb4aa19bb094e6105745695ad3646018b5a1d291",
+          "excerpt_id": "fd64fd773fe9c5a2edb84bcd98c07f446f4d323e57cb4cb512454b0db1b675e6",
+          "quote": "It can order food, book flights, shop, deeply research, you name it"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/hark_labs/status/2085018661635707303",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "fd64fd773fe9c5a2edb84bcd98c07f446f4d323e57cb4cb512454b0db1b675e6",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Hark Handoff  It is verifiably the best model ever built for using the internet.  It can order food, book flights, shop, deeply research, you name it - better and more affordably than fronti",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 12,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "ai-agents-and-automation",
+        "subject_relevant": true,
+        "human_reason": "Internet-using model orders food, books flights, shops and researches."
+      },
+      {
+        "support_key": "c106-1",
+        "kind": "candidate",
+        "card_key": "c106",
+        "support": {
+          "video_id": "2086844879347634176",
+          "source_revision": "780ec7526a826503825c5f4922b7f51f98eec8dede3439e3ea4eed941082b7cc",
+          "card_hash": "d4956fcbcdd7ae0a300cb3d396f831573c3726736fa8c0bae26817b912b7a47e",
+          "excerpt_id": "d65ff5aa3e6e902f21a0f4c381d44ac293c9e0f1657af6688c160cf79e6b8c66",
+          "quote": "AI agents at Kavak sell the cars, underwrite the loans, coach the mechanics"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/a16z/status/2086845184785203468",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "d65ff5aa3e6e902f21a0f4c381d44ac293c9e0f1657af6688c160cf79e6b8c66",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> AI agents at Kavak sell the cars, underwrite the loans, coach the mechanics, and in one Mexican city, run the entire operation.  The Latin American used-car marketplace bet on agents three years ago. To",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 13,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "ai-agents-and-automation",
+        "subject_relevant": true,
+        "human_reason": "Agents sell cars, underwrite loans, coach mechanics and run an operation."
+      },
+      {
+        "support_key": "c141-1",
+        "kind": "candidate",
+        "card_key": "c141",
+        "support": {
+          "video_id": "2090488277426171904",
+          "source_revision": "08b1bd64d68b4bbc8d41dfbf000c3330e26fbeb6f45b6a31c84a4b35210491e3",
+          "card_hash": "f652ba70980451a42258f112039633eef9cdb9ecdef7d33e8bbf69b1e62553bb",
+          "excerpt_id": "409dfa84739d908da5d1a0494d86086cec2c18c9b6fccd5f60e68a2aabc0f334",
+          "quote": "Agent-Driven Workflow: Input your goal. Agents autonomously plan, execute, and deliver."
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/Hailuo_AI/status/2090613786046779485",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "409dfa84739d908da5d1a0494d86086cec2c18c9b6fccd5f60e68a2aabc0f334",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> 🐙MiniMax Design is officially live!  Turn Ideas into Commercial-Grade Content #MiniMaxDesign #MiniMax  🤖Agent-Driven Workflow: Input your goal. Agents autonomously plan, execute, and deliver. 🪄Built for",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 11,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "ai-agents-and-automation",
+        "subject_relevant": true,
+        "human_reason": "Agents autonomously plan, execute and deliver on a goal; no finished artifact is established."
+      },
+      {
+        "support_key": "c124-1",
+        "kind": "candidate",
+        "card_key": "c124",
+        "support": {
+          "video_id": "2088664969847959552",
+          "source_revision": "b75b72c2934804f414f2262058994f83267169d45655b846b8475eb5c592b118",
+          "card_hash": "0967d4b17977d4d0f6a7b57e6e0309fff852d20147c7ed0ad5fbae845b07522d",
+          "excerpt_id": "1ae41a0fdc38f91ad1edd150a6bd94498705e6ed33aa8dbc7b55288b2bc7ca7c",
+          "quote": "Watch your computer screen all the time Watch every meeting you're"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/ChrisGPT/status/2088665099992969576#t=0",
+          "end": 54.07,
+          "evidence_kind": "timed_clip",
+          "excerpt_id": "1ae41a0fdc38f91ad1edd150a6bd94498705e6ed33aa8dbc7b55288b2bc7ca7c",
+          "start": 0.5,
+          "text": "Let me answer a more interesting question, if that's okay. How I would like to use it? Yeah. I think we are close to a world where you can have Like a descendant of ChatGPT Watch your computer screen all the time Watch every meeting you're ",
+          "timing": "source_cues",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 11,
+        "source_type": "x_thread",
+        "evidence_kind": "timed_clip",
+        "shelf_id": "ai-agents-and-automation",
+        "subject_relevant": true,
+        "human_reason": "Proposed ChatGPT descendant watches screens and meetings; the revised scope admits this proposal without inferring execution."
+      },
+      {
+        "support_key": "c082-1",
+        "kind": "candidate",
+        "card_key": "c082",
+        "support": {
+          "video_id": "2084354263174479872",
+          "source_revision": "dfaf83e7e1236099c7eb64db56541f3ca1d927123c532b7ad4fb847e09ba0b48",
+          "card_hash": "e63402dc34d1d49f584b29bea769442f8043f56fa7a85be60ef24477ba5b4560",
+          "excerpt_id": "13f6e0c0e75494c0ea92875f3e5a8875af6950b56c7fb297511e4c0e0af3feb4",
+          "quote": "Jensen Huang publicly named who's winning the AI race"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/stark0xbt/status/2084354387976351878",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "13f6e0c0e75494c0ea92875f3e5a8875af6950b56c7fb297511e4c0e0af3feb4",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> Jensen Huang publicly named who's winning the AI race. Not OpenAI. Not Anthropic. Not Google.  Elon Musk.  His reasoning wasn't personality. It was infrastructure math:  - Tesla's AI factory is stacked ",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 9,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "ai-industry-and-business",
+        "subject_relevant": true,
+        "human_reason": "AI-company competitive ranking argued through infrastructure."
+      },
+      {
+        "support_key": "c130-1",
+        "kind": "candidate",
+        "card_key": "c130",
+        "support": {
+          "video_id": "2089391264878002260",
+          "source_revision": "277de02691d3b97bb2a283e5884f0795e5ea0d1fbf7f5050e148d46bf01f4df8",
+          "card_hash": "888b6e10e7f2a2c8c7cfacd1a8ca87aa675d4edb7ab136ea0dc72aa2c0dff68f",
+          "excerpt_id": "cd268850df8e16a5e69a5b64eed26cc047b30fecfdbb4c541fdc88744613e4e2",
+          "quote": "the U.S. government imposing restrictions on Anthropic and resulting in us not getting the actual best models"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/firesidealpha/status/2089391264878002260#t=0",
+          "end": 49.2,
+          "evidence_kind": "timed_clip",
+          "excerpt_id": "cd268850df8e16a5e69a5b64eed26cc047b30fecfdbb4c541fdc88744613e4e2",
+          "start": 0.0,
+          "text": "I mean, my view is that I believe the reason that this gap has closed right now is squarely put on the U.S. government imposing restrictions on Anthropic and resulting in us not getting the actual best models that these guys have. And so th",
+          "timing": "source_cues",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 17,
+        "source_type": "x_thread",
+        "evidence_kind": "timed_clip",
+        "shelf_id": "ai-industry-and-business",
+        "subject_relevant": true,
+        "human_reason": "Government restrictions on an AI company affect competitive access to its models."
+      },
+      {
+        "support_key": "c144-1",
+        "kind": "candidate",
+        "card_key": "c144",
+        "support": {
+          "video_id": "2090544926706876416",
+          "source_revision": "841b95db57cd50946693bbf8d2bdcb895e3b7718232e36051669017992674a15",
+          "card_hash": "8d7e37128c22a259783a570a5832460bcd6f6bc2c0d207e75a8bdb2a01f9c165",
+          "excerpt_id": "1bbf3c8eab7424acc97fa6676c345d0c25760aad2cfbcfb03a9d15d7c47affc6",
+          "quote": "OpenAI and Anthropic finally have real competition."
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/davis7/status/2090557107330568694",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "1bbf3c8eab7424acc97fa6676c345d0c25760aad2cfbcfb03a9d15d7c47affc6",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> OpenAI and Anthropic finally have real competition.   The SpaceXAi comeback has been wild to watch, really hope it continues and we get even more competition in the space https://t.co/oEexA00MnG No tags",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 7,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "ai-industry-and-business",
+        "subject_relevant": true,
+        "human_reason": "Explicit commentary on competition against OpenAI and Anthropic."
+      },
+      {
+        "support_key": "c169-1",
+        "kind": "candidate",
+        "card_key": "c169",
+        "support": {
+          "video_id": "2092682844812500992",
+          "source_revision": "c8210280e7c757e9ef0796508164fe65e644c593795894e26ebaf91a1ecbe182",
+          "card_hash": "48bdda0921b539e7ad46ce689af599100b1d2b80d67f79a94b5a5130ba1a60f9",
+          "excerpt_id": "cb8ffbdf0ceb127e03b24e70657485e573200d4707dfb8762a166bcdd3c0d1d5",
+          "quote": "Open Source is eclipsing Closed Source in total token usage, but frontier labs still capture most revenue."
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/MatthewBerman/status/2092687994096681379",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "cb8ffbdf0ceb127e03b24e70657485e573200d4707dfb8762a166bcdd3c0d1d5",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> This is the most important chart in AI right now.   Open Source is eclipsing Closed Source in total token usage, but frontier labs still capture most revenue.   Watch my breakdown: https://t.co/sNdtoUoX",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 17,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "ai-industry-and-business",
+        "subject_relevant": true,
+        "human_reason": "AI token usage contrasted with revenue capture."
+      },
+      {
+        "support_key": "c213-1",
+        "kind": "candidate",
+        "card_key": "c213",
+        "support": {
+          "video_id": "episode_ee13d34d83c",
+          "source_revision": "c346179664933cbcfeb986746f8019556125e3449c5cea733dc4b43bac4e1277",
+          "card_hash": "dda2f996b1d2c8b1d4b87490870f330f51dbd3c8111a383921c48dacafe42037",
+          "excerpt_id": "b942af10c017519716012a066274e3d5cdb1a6bf71df44b899b4c15cd53919c2",
+          "quote": "OpenAI was sitting just shy of $50 billion in ARR"
+        },
+        "excerpt": {
+          "deep_link": "https://podcasters.spotify.com/pod/show/nlw/episodes/What-a-30B-Hedge-Fund-Implosion-Really-Means-for-AI-e3mqdl5#t=143",
+          "end": 195.82,
+          "evidence_kind": "timed_clip",
+          "excerpt_id": "b942af10c017519716012a066274e3d5cdb1a6bf71df44b899b4c15cd53919c2",
+          "start": 143.02,
+          "text": "Meanwhile, their data also showed that OpenAI was sitting just shy of $50 billion in ARR. Now, obviously, this data should be treated as a very rough estimate, but it seems directionally correct based on Fryer's comments. It also lines up w",
+          "timing": "source_cues",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 10,
+        "source_type": "episode",
+        "evidence_kind": "timed_clip",
+        "shelf_id": "ai-industry-and-business",
+        "subject_relevant": true,
+        "human_reason": "AI-company ARR; the excerpt expressly qualifies it as a rough estimate."
+      },
+      {
+        "support_key": "c033-1",
+        "kind": "candidate",
+        "card_key": "c033",
+        "support": {
+          "video_id": "2079818487246262272",
+          "source_revision": "f7d030ce15e85eed55b3193565aaf90e1f7575f950a8a2eb6740adb685092eca",
+          "card_hash": "f5fcd69c86caa98167fdb5591e2e18fe4f11f7e9e55047762e02e466509e210e",
+          "excerpt_id": "81dba2255c1ffd1d62c211ce709dca683040a007991cc6d7880bdf3514676a15",
+          "quote": "Create a 3D claymation-style animation of a cute caricature of Erling Haaland"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/noorwithwifi/status/2079818537137475762",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "81dba2255c1ffd1d62c211ce709dca683040a007991cc6d7880bdf3514676a15",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> Made with Seedance 2.0  Prompt:  Create a 3D claymation-style animation of a cute caricature of Erling Haaland wearing Norway's red number 9 football kit, white shorts, red socks, and red boots, with hi",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 12,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "generative-media",
+        "subject_relevant": true,
+        "human_reason": "Made-with attribution and generation prompt establish an animation."
+      },
+      {
+        "support_key": "c038-1",
+        "kind": "candidate",
+        "card_key": "c038",
+        "support": {
+          "video_id": "2080348432774856704",
+          "source_revision": "3866d89269cbb4433f156180c8d264f11465ae8f7cd01b6d36c08046a8bdfddc",
+          "card_hash": "6bf162244dae4e657be610f2f7332d0dc651d6627b7335e1cdc60dae653e6f40",
+          "excerpt_id": "b5933cb158c53299fd454fc460ba15dd43955eb3214d3e5e3de5943313c2b38d",
+          "quote": "WON THE $1,000,000 BEST AI FILM OF 2026 AWARD"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/doublenickk/status/2080348488789860719",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "b5933cb158c53299fd454fc460ba15dd43955eb3214d3e5e3de5943313c2b38d",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> A 23-YEAR-OLD STUDENT BUILT THIS WORLD WAR II FILM IN JUST ONE NIGHT AND WON THE $1,000,000 BEST AI FILM OF 2026 AWARD  This terrifyingly realistic trench battle was created during a single all-nighter.",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 9,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "generative-media",
+        "subject_relevant": true,
+        "human_reason": "A created film is described as winning an AI-film award."
+      },
+      {
+        "support_key": "c128-1",
+        "kind": "candidate",
+        "card_key": "c128",
+        "support": {
+          "video_id": "2089358742852947968",
+          "source_revision": "c2f6f9b1835ce2bbbf7c88e37458104b9b034ef275f960a1cf41d1b246dc3a8c",
+          "card_hash": "417fd743b9a46d0c03cb6fa7e4a15d363f509f5583fc4a49af74ec2d915ebbc5",
+          "excerpt_id": "d6bb489655d2e2dc1a2f57ac4809ae2f6e7edb70a966e047b5383f3cc4b6fbbe",
+          "quote": "Our first AI animated film, KÖK BÖRÜ, premiered at the world's biggest computer graphics conference"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/higgsfield_ai/status/2089399852237210011",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "d6bb489655d2e2dc1a2f57ac4809ae2f6e7edb70a966e047b5383f3cc4b6fbbe",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> Our first AI animated film, KÖK BÖRÜ, premiered at the world's biggest computer graphics conference.  It blends genAI with human art, and screened at SIGGRAPH 2026 in LA, alongside Pixar, Disney, and Nv",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 15,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "generative-media",
+        "subject_relevant": true,
+        "human_reason": "AI animated film blending genAI and human art."
+      },
+      {
+        "support_key": "c091-1",
+        "kind": "candidate",
+        "card_key": "c091",
+        "support": {
+          "video_id": "2085067072858734593",
+          "source_revision": "4a0bf9c9145e3c15935408d3cd7056212bee6b53bd6b34d91f8888a9f5fe5738",
+          "card_hash": "550c1c12fd3852e907257a53834bcbfbf9c5639a9558662dbd8eec2696011859",
+          "excerpt_id": "de40dd874e36c92709037e697a88411d9a64bbd9da028aa57f044f1294c3bf85",
+          "quote": "this is the wildest website i've seen so far, all made with ai (gpt-image-2 and seedance-2.0)"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/ky__zo/status/2085067731230154921",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "de40dd874e36c92709037e697a88411d9a64bbd9da028aa57f044f1294c3bf85",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> this is the wildest website i've seen so far, all made with ai (gpt-image-2 and seedance-2.0)  and it changes on every refresh!  unreal work, congrats @peardotno https://t.co/8mRdo8Qrsq No tags *No capt",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 16,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "generative-media",
+        "subject_relevant": true,
+        "human_reason": "Finished visual website described as made with AI image/video models."
+      },
+      {
+        "support_key": "c104-1",
+        "kind": "candidate",
+        "card_key": "c104",
+        "support": {
+          "video_id": "2086214505797931008",
+          "source_revision": "71b38afb5e435ebf12d0851ec7a7ddd719553ec50d41f8d56dc45dc840d997d6",
+          "card_hash": "e0a7c678e142349669739fda2836a16b32a7b75f8df461f5e14c5200b687ebc1",
+          "excerpt_id": "bc03ffc0811c49a56b3ad0eed3fd6bc2ccaad89315db2ca2e70878129a136bde",
+          "quote": "I’ve discovered peak AI video and it’s this orange cat’s vlogs"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/venturetwins/status/2086214537632760304",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "bc03ffc0811c49a56b3ad0eed3fd6bc2ccaad89315db2ca2e70878129a136bde",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> I’ve discovered peak AI video and it’s this orange cat’s vlogs  (he’s on IG at gingermil00) https://t.co/zmr4GahSPy No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comment",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 11,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "generative-media",
+        "subject_relevant": true,
+        "human_reason": "Firsthand description of AI cat-vlog video content."
+      },
+      {
+        "support_key": "c006-1",
+        "kind": "candidate",
+        "card_key": "c006",
+        "support": {
+          "video_id": "2077640475075358720",
+          "source_revision": "5946f41f4779074e53c690ec445f31c34fed9b046876ea1ac75c967073b39122",
+          "card_hash": "aa7d2d8267f69d374dee00e210bb119e0c2e9b868e0e8b239118cf6e17bd045a",
+          "excerpt_id": "964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3",
+          "quote": "The Center Has Been Moved So Far Left"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/elonmusk/status/2078488424894390501#t=240",
+          "end": 358.779,
+          "evidence_kind": "timed_clip",
+          "excerpt_id": "964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3",
+          "start": 240.34,
+          "text": "I Hate It He's A Racist Bigot Like Just Kidding That Was Abama To Your Point Literally The Center Has Been Moved So Far Left Yeah The Left Is Gone So Far Left That They Can't Even See The Center With A Telescope And The Danger Without You P",
+          "timing": "source_cues",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 8,
+        "source_type": "x_thread",
+        "evidence_kind": "timed_clip",
+        "shelf_id": "news-and-current-events",
+        "subject_relevant": true,
+        "human_reason": "Explicit left/center political debate."
+      },
+      {
+        "support_key": "c009-1",
+        "kind": "candidate",
+        "card_key": "c009",
+        "support": {
+          "video_id": "2078287651535273984",
+          "source_revision": "bf8eb842b087cd892a6f1f15c47da10911c1e6e71ffdca7df0d0fc4b9346a122",
+          "card_hash": "79519ef7ae40f65fbb80d6de4a255d2bd422c4ee9b9f0821017b0498e73df3ea",
+          "excerpt_id": "f93090fe7fd859871f41b56f4112715bbeef6dd0f32f30fc9d68d11f54fff9a6",
+          "quote": "A woman is charged with first degree murder after an overnight shooting"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/mattvanswol/status/2078288433403826408#t=0",
+          "end": 18.8,
+          "evidence_kind": "timed_clip",
+          "excerpt_id": "f93090fe7fd859871f41b56f4112715bbeef6dd0f32f30fc9d68d11f54fff9a6",
+          "start": 0.0,
+          "text": "A woman is charged with first degree murder after an overnight shooting in the Walker Homes neighborhood. This happened around 145 on Travis Road, police arrived on the scene to find a man shot he was pronounced dead On The Scene Kendra Sco",
+          "timing": "source_cues",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 12,
+        "source_type": "x_thread",
+        "evidence_kind": "timed_clip",
+        "shelf_id": "news-and-current-events",
+        "subject_relevant": true,
+        "human_reason": "Murder charge and shooting at a named location."
+      },
+      {
+        "support_key": "c010-1",
+        "kind": "candidate",
+        "card_key": "c010",
+        "support": {
+          "video_id": "2078443305495388160",
+          "source_revision": "6a3ebfffac94ce06401ce59e36c388dac7c7231e3bfb27131a8fb25d4a8eab73",
+          "card_hash": "26278cb609c413a60416743a6a454ebc9ee93e985579a6001544b636b1bf2c38",
+          "excerpt_id": "92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8",
+          "quote": "he was hiding under A child's bed when police arrived, they found the men dead"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/mattvanswol/status/2078443554439925876#t=0",
+          "end": 79.239,
+          "evidence_kind": "timed_clip",
+          "excerpt_id": "92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8",
+          "start": 0.0,
+          "text": "all happened after a mother found a man in her house. She says he was hiding under A child's bed when police arrived, they found the men dead near the front porch now The woman 36 year old Kendra Scott Now faces multiple charges including f",
+          "timing": "source_cues",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 15,
+        "source_type": "x_thread",
+        "evidence_kind": "timed_clip",
+        "shelf_id": "news-and-current-events",
+        "subject_relevant": true,
+        "human_reason": "Home intrusion, death, police response and charges."
+      },
+      {
+        "support_key": "c011-1",
+        "kind": "candidate",
+        "card_key": "c011",
+        "support": {
+          "video_id": "2078450309794263040",
+          "source_revision": "1c9d1f7791a40962e02e177d5f7091efffc53d0b9555554b5da4b44b301bcb79",
+          "card_hash": "955f1a8297e6ca579478a857299000380b868208f96d8837d88c1e783729fbb0",
+          "excerpt_id": "1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff",
+          "quote": "we are gonna try and get compliance but this is now effectively a riot"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/omgyallrhaterz/status/2078450573519548910#t=0",
+          "end": 62.95,
+          "evidence_kind": "timed_clip",
+          "excerpt_id": "1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff",
+          "start": 0.52,
+          "text": "We're going to give riot warning, we are gonna try and get compliance but this is now effectively a riot. 49 hours declaring it as a Riot 335-50 be advised the county police want an advisor trying to breach into the capitol We have breached",
+          "timing": "source_cues",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 14,
+        "source_type": "x_thread",
+        "evidence_kind": "timed_clip",
+        "shelf_id": "news-and-current-events",
+        "subject_relevant": true,
+        "human_reason": "Radio declares a riot and reports a capitol breach."
+      },
+      {
+        "support_key": "c019-1",
+        "kind": "candidate",
+        "card_key": "c019",
+        "support": {
+          "video_id": "2078650714293739521",
+          "source_revision": "497ce18e7bcc95ead8c0840747a7fc239b20e83f8d3bf63b16de4ddd7613194e",
+          "card_hash": "e4d73233aab2810b98e65ae2afbd84539cbca274a3c248d6db2d3b86d5d38526",
+          "excerpt_id": "b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e",
+          "quote": "missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying"
+        },
+        "excerpt": {
+          "deep_link": "https://x.com/mattvanswol/status/2078651486771273773",
+          "end": null,
+          "evidence_kind": "text_only",
+          "excerpt_id": "b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e",
+          "start": null,
+          "text": "<!-- HOOK_START --> <!-- HOOK_END --> This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying.  You can hear see the missile hit and then American soldiers screaming, \"GO GO GO GO!!!\"  Regardless of what you th",
+          "timing": "not_timed",
+          "truncated": true
+        },
+        "errors": [],
+        "words": 11,
+        "source_type": "x_thread",
+        "evidence_kind": "text_only",
+        "shelf_id": "news-and-current-events",
+        "subject_relevant": true,
+        "human_reason": "Original post reports missiles striking a named air base."
+      }
+    ],
+    "verdict": "PASS"
+  },
+  "B5": {
+    "entry_count": 225,
+    "unique_cards": 225,
+    "manifest_identities_equal": true,
+    "disposition_counts": {
+      "existing_concept": 33,
+      "still_unmapped": 106,
+      "proposed_concept": 62,
+      "unsupported": 24
+    },
+    "shelf_counts": {
+      "ai-and-ml": 22,
+      "news-and-current-events": 5,
+      "generative-media": 13,
+      "ai-industry-and-business": 33,
+      "ai-agents-and-automation": 11,
+      "frontier-models": 4,
+      "developer-tools": 6,
+      "security": 1
+    },
+    "omission_explanation_count": 42,
+    "omission_explanation_failures": [],
+    "omissions": [
+      {
+        "card_key": "c041",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c041-2"
+          }
+        ],
+        "reason": "China 'AI dumping' economic framing; not a support: five-card cap"
+      },
+      {
+        "card_key": "c043",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "generative-media"
+        ],
+        "evidence": [
+          {
+            "support_key": "c043-2"
+          }
+        ],
+        "reason": "Automated real2sim reconstruction pipeline; not a support: five-card cap"
+      },
+      {
+        "card_key": "c044",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c044-2"
+          }
+        ],
+        "reason": "Market selloff tied to AI spending doubts; not a support: five-card cap"
+      },
+      {
+        "card_key": "c046",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c046-2"
+          }
+        ],
+        "reason": "National AI strategy partnership; not a support: five-card cap"
+      },
+      {
+        "card_key": "c077",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "generative-media"
+        ],
+        "evidence": [
+          {
+            "support_key": "c077-2"
+          }
+        ],
+        "reason": "AI video showcased for comedic value; not a support: five-card cap"
+      },
+      {
+        "card_key": "c080",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-agents-and-automation"
+        ],
+        "evidence": [
+          {
+            "support_key": "c080-2"
+          }
+        ],
+        "reason": "AI product handles entire slide-building process; not a support: five-card cap"
+      },
+      {
+        "card_key": "c084",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c084-2"
+          }
+        ],
+        "reason": "Hyperscaler infrastructure-scale claim; not a support: five-card cap"
+      },
+      {
+        "card_key": "c085",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-agents-and-automation"
+        ],
+        "evidence": [
+          {
+            "support_key": "c085-2"
+          }
+        ],
+        "reason": "Autonomous-driving reasoning model; not a support: five-card cap"
+      },
+      {
+        "card_key": "c089",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-agents-and-automation"
+        ],
+        "evidence": [
+          {
+            "support_key": "c089-2"
+          }
+        ],
+        "reason": "Agent reads ad data, executes new campaign; not a support: five-card cap"
+      },
+      {
+        "card_key": "c090",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c090-2"
+          }
+        ],
+        "reason": "Data-center scale banter/rivalry; not a support: five-card cap"
+      },
+      {
+        "card_key": "c095",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-agents-and-automation"
+        ],
+        "evidence": [
+          {
+            "support_key": "c095-2"
+          }
+        ],
+        "reason": "Models capable of doing most work on computers; not a support: five-card cap"
+      },
+      {
+        "card_key": "c097",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c097-2"
+          }
+        ],
+        "reason": "Competitive standing question about Anthropic; not a support: five-card cap"
+      },
+      {
+        "card_key": "c099",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c099-2"
+          }
+        ],
+        "reason": "Journalist reorganizing coverage around AI beat; not a support: five-card cap"
+      },
+      {
+        "card_key": "c101",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "generative-media"
+        ],
+        "evidence": [
+          {
+            "support_key": "c101-2"
+          }
+        ],
+        "reason": "AI video generation technique described; not a support: five-card cap"
+      },
+      {
+        "card_key": "c109",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c109-2"
+          }
+        ],
+        "reason": "Pricing comparison between LLM access tiers; not a support: five-card cap"
+      },
+      {
+        "card_key": "c111",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c111-2"
+          }
+        ],
+        "reason": "Marketing promo campaign for AI product; not a support: five-card cap"
+      },
+      {
+        "card_key": "c112",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-agents-and-automation"
+        ],
+        "evidence": [
+          {
+            "support_key": "c112-2"
+          }
+        ],
+        "reason": "Agentic office-task demonstration; not a support: five-card cap"
+      },
+      {
+        "card_key": "c116",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-agents-and-automation"
+        ],
+        "evidence": [
+          {
+            "support_key": "c116-2"
+          }
+        ],
+        "reason": "Review comparing agent bot to coding assistants; not a support: five-card cap"
+      },
+      {
+        "card_key": "c117",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c117-2"
+          }
+        ],
+        "reason": "Speculation on Anthropic's market dominance; not a support: five-card cap"
+      },
+      {
+        "card_key": "c118",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c118-2"
+          }
+        ],
+        "reason": "Analyst reacting to Anthropic dominance claim; not a support: five-card cap"
+      },
+      {
+        "card_key": "c119",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "generative-media"
+        ],
+        "evidence": [
+          {
+            "support_key": "c119-2"
+          }
+        ],
+        "reason": "Reaction to AI-generated scene fidelity; not a support: five-card cap"
+      },
+      {
+        "card_key": "c129",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c129-2"
+          }
+        ],
+        "reason": "AI agent marketplace for investing launched; not a support: five-card cap"
+      },
+      {
+        "card_key": "c133",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c133-2"
+          }
+        ],
+        "reason": "Enterprise model-cost routing for workforce spend; not a support: five-card cap"
+      },
+      {
+        "card_key": "c134",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c134-2"
+          }
+        ],
+        "reason": "AI search/browser partnership deal; not a support: five-card cap"
+      },
+      {
+        "card_key": "c137",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "generative-media"
+        ],
+        "evidence": [
+          {
+            "support_key": "c137-2"
+          }
+        ],
+        "reason": "AI+AR interactive art installation; not a support: five-card cap"
+      },
+      {
+        "card_key": "c140",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "generative-media"
+        ],
+        "evidence": [
+          {
+            "support_key": "c140-2"
+          }
+        ],
+        "reason": "Named model used to generate video artifact; not a support: five-card cap"
+      },
+      {
+        "card_key": "c143",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c143-2"
+          }
+        ],
+        "reason": "LLMs as critical enterprise resource/control dispute; not a support: five-card cap"
+      },
+      {
+        "card_key": "c152",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c152-2"
+          }
+        ],
+        "reason": "AI agents replacing costly human research labor cost-story; not a support: five-card cap"
+      },
+      {
+        "card_key": "c153",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "generative-media"
+        ],
+        "evidence": [
+          {
+            "support_key": "c153-2"
+          }
+        ],
+        "reason": "Fully AI-generated episodic video series; not a support: five-card cap"
+      },
+      {
+        "card_key": "c158",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "generative-media"
+        ],
+        "evidence": [
+          {
+            "support_key": "c158-2"
+          }
+        ],
+        "reason": "AI model prompted to design a fictional robot concept; not a support: five-card cap"
+      },
+      {
+        "card_key": "c165",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c165-2"
+          }
+        ],
+        "reason": "Commercial autonomous-freight revenue/customer story; not a support: five-card cap"
+      },
+      {
+        "card_key": "c174",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c174-2"
+          }
+        ],
+        "reason": "Competitive/business history of AI coding-tool startup; not a support: five-card cap"
+      },
+      {
+        "card_key": "c175",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c175-2"
+          }
+        ],
+        "reason": "Market-size/competitor framing from AI company leadership; not a support: five-card cap"
+      },
+      {
+        "card_key": "c177",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c177-2"
+          }
+        ],
+        "reason": "NVIDIA infrastructure certification business deal; not a support: five-card cap"
+      },
+      {
+        "card_key": "c178",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c178-2"
+          }
+        ],
+        "reason": "NVIDIA/Hugging Face acquisition analysis; not a support: five-card cap"
+      },
+      {
+        "card_key": "c185",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c185-2"
+          }
+        ],
+        "reason": "Changing personal/business strategy for AI era; not a support: five-card cap"
+      },
+      {
+        "card_key": "c191",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c191-2"
+          }
+        ],
+        "reason": "Contest on AI's uneven economic diffusion; not a support: five-card cap"
+      },
+      {
+        "card_key": "c192",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c192-2"
+          }
+        ],
+        "reason": "New business role built around using AI; not a support: five-card cap"
+      },
+      {
+        "card_key": "c210",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c210-2"
+          }
+        ],
+        "reason": "GPU/stock market reaction commentary; not a support: five-card cap"
+      },
+      {
+        "card_key": "c211",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c211-2"
+          }
+        ],
+        "reason": "Market-positioning analysis of AI hardware maker; not a support: five-card cap"
+      },
+      {
+        "card_key": "c218",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c218-2"
+          }
+        ],
+        "reason": "Market-wide urgency to hire AI-native talent; not a support: five-card cap"
+      },
+      {
+        "card_key": "c223",
+        "disposition": "proposed_concept",
+        "shelf_ids": [
+          "ai-industry-and-business"
+        ],
+        "evidence": [
+          {
+            "support_key": "c223-2"
+          }
+        ],
+        "reason": "ARR comparison between AI labs; not a support: five-card cap"
+      }
+    ],
+    "mechanical_verdict": "PASS",
+    "semantic_verdict": "FAIL",
+    "repaired_destinations_pass": [
+      "c007",
+      "c064",
+      "c069",
+      "c058",
+      "c124"
+    ],
+    "sample_method": "Nine repair/redistribution/control rows plus first, middle and last ledger row for every populated shelf, deduplicated.",
+    "sample_count": 29,
+    "mapped_sample_count": 27,
+    "semantic_failure_keys": [
+      "c087",
+      "c095",
+      "c123",
+      "c143",
+      "c158",
+      "c177",
+      "c182",
+      "c215"
+    ],
+    "sample_records": [
+      {
+        "row": {
+          "card_key": "c001",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c001-1"
+            }
+          ],
+          "reason": "LLM performing voice/roleplay task."
+        },
+        "evidence": [
+          {
+            "support_key": "c001-1",
+            "kind": "disposition",
+            "card_key": "c001",
+            "support": {
+              "video_id": "1840739354819350528",
+              "source_revision": "029c55f627f294f4fa972395552241657946c7b3a77c045f39c0c99f1bdeae31",
+              "card_hash": "cff9e00666d0508b0d4212bcd3215d3dbe38853cc8307791e73f055ff7010ea7",
+              "excerpt_id": "320c81087012d4bb489974c5ce2685da56c32d8e04b7eb01be370ce5315d151c",
+              "quote": "Change your accent to Indian and sound as indian as possible"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/immasiddx/status/2088316146735030612#t=0",
+              "end": 49.56,
+              "evidence_kind": "timed_clip",
+              "excerpt_id": "320c81087012d4bb489974c5ce2685da56c32d8e04b7eb01be370ce5315d151c",
+              "start": 0.0,
+              "text": "Hey chat GPT, Change your accent to Indian and sound as indian as possible. Also tell me a few lines that scammers from India use To scam people abroad like in the Microsoft support Scam Act Like Alex From microsoft but he is indian Perfect",
+              "timing": "source_cues",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 11,
+            "source_type": "x_thread",
+            "evidence_kind": "timed_clip"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "ChatGPT voice/roleplay request fits the AI parent; scam dialogue is not a technical defense."
+      },
+      {
+        "row": {
+          "card_key": "c006",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "news-and-current-events"
+          ],
+          "evidence": [
+            {
+              "support_key": "c006-3"
+            }
+          ],
+          "reason": "Ideological debate segment."
+        },
+        "evidence": [
+          {
+            "support_key": "c006-3",
+            "kind": "disposition",
+            "card_key": "c006",
+            "support": {
+              "video_id": "2077640475075358720",
+              "source_revision": "5946f41f4779074e53c690ec445f31c34fed9b046876ea1ac75c967073b39122",
+              "card_hash": "aa7d2d8267f69d374dee00e210bb119e0c2e9b868e0e8b239118cf6e17bd045a",
+              "excerpt_id": "964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3",
+              "quote": "The Center Has Been Moved So Far Left"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/elonmusk/status/2078488424894390501#t=240",
+              "end": 358.779,
+              "evidence_kind": "timed_clip",
+              "excerpt_id": "964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3",
+              "start": 240.34,
+              "text": "I Hate It He's A Racist Bigot Like Just Kidding That Was Abama To Your Point Literally The Center Has Been Moved So Far Left Yeah The Left Is Gone So Far Left That They Can't Even See The Center With A Telescope And The Danger Without You P",
+              "timing": "source_cues",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 8,
+            "source_type": "x_thread",
+            "evidence_kind": "timed_clip"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Political debate establishes News."
+      },
+      {
+        "row": {
+          "card_key": "c007",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Political commentary concept rejected: only 2 cards, below five-card minimum."
+        },
+        "evidence": [],
+        "subject_destination_pass": true,
+        "human_reason": "Restored attempt-10 unmapped row removes the unsupported News assignment; reason describes rejected-candidate history.",
+        "historical_evidence_not_accepted": {
+          "support_key": "c007-3",
+          "kind": "disposition",
+          "card_key": "c007",
+          "support": {
+            "video_id": "2077870396075094016",
+            "source_revision": "916db312f0dac72b6ceb0ce75cf73883ce7ef37e92df2c375b6369076b79bdd4",
+            "card_hash": "b16c08a0a2c6bb099400c85f3d342c121bd52c4c52d4e67c0bac4ab50eb42636",
+            "excerpt_id": "2f0b2b6cef5b9f40fb76648a506147632d20b77c36ec785dee7c9ef46e021bd5",
+            "quote": "Listen, Greg told me what happens when you have low T"
+          },
+          "excerpt": {
+            "deep_link": "https://x.com/redhotnerd/status/2078287007839637800#t=1",
+            "end": 33.195,
+            "evidence_kind": "timed_clip",
+            "excerpt_id": "2f0b2b6cef5b9f40fb76648a506147632d20b77c36ec785dee7c9ef46e021bd5",
+            "start": 1.163,
+            "text": "Listen, Greg told me what happens when you have low T. He says you lose focus. He says you lose your endurance, muscle mass, so yeah, I want these guys on it. You know it's going to happen? The guys that don't need it are going to take it t",
+            "timing": "source_cues",
+            "truncated": true
+          },
+          "errors": [],
+          "words": 11,
+          "source_type": "x_thread",
+          "evidence_kind": "timed_clip"
+        }
+      },
+      {
+        "row": {
+          "card_key": "c010",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "news-and-current-events"
+          ],
+          "evidence": [
+            {
+              "support_key": "c010-3"
+            }
+          ],
+          "reason": "Breaking crime follow-up report."
+        },
+        "evidence": [
+          {
+            "support_key": "c010-3",
+            "kind": "disposition",
+            "card_key": "c010",
+            "support": {
+              "video_id": "2078443305495388160",
+              "source_revision": "6a3ebfffac94ce06401ce59e36c388dac7c7231e3bfb27131a8fb25d4a8eab73",
+              "card_hash": "26278cb609c413a60416743a6a454ebc9ee93e985579a6001544b636b1bf2c38",
+              "excerpt_id": "92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8",
+              "quote": "he was hiding under A child's bed when police arrived, they found the men dead"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/mattvanswol/status/2078443554439925876#t=0",
+              "end": 79.239,
+              "evidence_kind": "timed_clip",
+              "excerpt_id": "92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8",
+              "start": 0.0,
+              "text": "all happened after a mother found a man in her house. She says he was hiding under A child's bed when police arrived, they found the men dead near the front porch now The woman 36 year old Kendra Scott Now faces multiple charges including f",
+              "timing": "source_cues",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 15,
+            "source_type": "x_thread",
+            "evidence_kind": "timed_clip"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Crime report establishes News."
+      },
+      {
+        "row": {
+          "card_key": "c019",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "news-and-current-events"
+          ],
+          "evidence": [
+            {
+              "support_key": "c019-3"
+            }
+          ],
+          "reason": "War/conflict strike footage."
+        },
+        "evidence": [
+          {
+            "support_key": "c019-3",
+            "kind": "disposition",
+            "card_key": "c019",
+            "support": {
+              "video_id": "2078650714293739521",
+              "source_revision": "497ce18e7bcc95ead8c0840747a7fc239b20e83f8d3bf63b16de4ddd7613194e",
+              "card_hash": "e4d73233aab2810b98e65ae2afbd84539cbca274a3c248d6db2d3b86d5d38526",
+              "excerpt_id": "b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e",
+              "quote": "missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/mattvanswol/status/2078651486771273773",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying.  You can hear see the missile hit and then American soldiers screaming, \"GO GO GO GO!!!\"  Regardless of what you th",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 11,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Air-base strike report establishes News."
+      },
+      {
+        "row": {
+          "card_key": "c033",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "generative-media"
+          ],
+          "evidence": [
+            {
+              "support_key": "c033-2"
+            }
+          ],
+          "reason": "Prompt-driven claymation animation output."
+        },
+        "evidence": [
+          {
+            "support_key": "c033-2",
+            "kind": "disposition",
+            "card_key": "c033",
+            "support": {
+              "video_id": "2079818487246262272",
+              "source_revision": "f7d030ce15e85eed55b3193565aaf90e1f7575f950a8a2eb6740adb685092eca",
+              "card_hash": "f5fcd69c86caa98167fdb5591e2e18fe4f11f7e9e55047762e02e466509e210e",
+              "excerpt_id": "81dba2255c1ffd1d62c211ce709dca683040a007991cc6d7880bdf3514676a15",
+              "quote": "Create a 3D claymation-style animation of a cute caricature of Erling Haaland"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/noorwithwifi/status/2079818537137475762",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "81dba2255c1ffd1d62c211ce709dca683040a007991cc6d7880bdf3514676a15",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Made with Seedance 2.0  Prompt:  Create a 3D claymation-style animation of a cute caricature of Erling Haaland wearing Norway's red number 9 football kit, white shorts, red socks, and red boots, with hi",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 12,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Made-with attribution establishes generated animation."
+      },
+      {
+        "row": {
+          "card_key": "c041",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c041-2"
+            }
+          ],
+          "reason": "China 'AI dumping' economic framing; not a support: five-card cap"
+        },
+        "evidence": [
+          {
+            "support_key": "c041-2",
+            "kind": "disposition",
+            "card_key": "c041",
+            "support": {
+              "video_id": "2080431302835044352",
+              "source_revision": "65a21c6989f1b5f6499b237f6f863f7eddf9b21479acecea15137921c0ea4501",
+              "card_hash": "cf77fd8efd6e3e6d7ed1014238df6bdb7bf0e398f70ff85de1b4b424891cd0f0",
+              "excerpt_id": "e641c2387993c0e871eca8e97965d7369bf74da84c10275341a432720f6b4198",
+              "quote": "I think China is beginning to engage in what I'll call AI dumping"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/r0ck3t23/status/2080431413694787589#t=0",
+              "end": 46.619,
+              "evidence_kind": "timed_clip",
+              "excerpt_id": "e641c2387993c0e871eca8e97965d7369bf74da84c10275341a432720f6b4198",
+              "start": 0.0,
+              "text": "I think China is beginning to engage in what I'll call AI dumping. And that is they're going to have a series of open-weight models. About a third of corporations now are supposedly using Chinese lightweight, open-weight models that are che",
+              "timing": "source_cues",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 13,
+            "source_type": "x_thread",
+            "evidence_kind": "timed_clip"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "AI dumping and corporate adoption are industry economics."
+      },
+      {
+        "row": {
+          "card_key": "c056",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c056-2"
+            }
+          ],
+          "reason": "ChatGPT persona describing assistant capabilities."
+        },
+        "evidence": [
+          {
+            "support_key": "c056-2",
+            "kind": "disposition",
+            "card_key": "c056",
+            "support": {
+              "video_id": "2081892838229573632",
+              "source_revision": "40ec7fe8f431f291dccd17d00bc3cfad725ea7f022ae04426503bedf12490f1d",
+              "card_hash": "e5ce36ab2e5c46b2d2284df9af1918d6c0376ba2dbde8f7ebcf09a40d5a80c76",
+              "excerpt_id": "8f3918a82e565fcb9936847abf3a507a2dde7c84ba6bd919599d53fa3437ae94",
+              "quote": "I'm ChatGPT. I help people think through ideas, make sense of what's on their screen research or debug claims"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/xikhar/status/2081892931921903774#t=0",
+              "end": 87.769,
+              "evidence_kind": "timed_clip",
+              "excerpt_id": "8f3918a82e565fcb9936847abf3a507a2dde7c84ba6bd919599d53fa3437ae94",
+              "start": 0.0,
+              "text": "I'm ChatGPT. I help people think through ideas, make sense of what's on their screen research or debug claims and move work along with whatever tools are connected What do you want to tackle right now? Alright, I'll check that out Now I am ",
+              "timing": "source_cues",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 19,
+            "source_type": "x_thread",
+            "evidence_kind": "timed_clip"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Generic ChatGPT assistance; no autonomous multi-step task or persistent monitoring is established."
+      },
+      {
+        "row": {
+          "card_key": "c058",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-agents-and-automation"
+          ],
+          "evidence": [
+            {
+              "support_key": "c058-2"
+            }
+          ],
+          "reason": "Companion app described as sensing, hearing, acting, remembering and understanding the user."
+        },
+        "evidence": [
+          {
+            "support_key": "c058-2",
+            "kind": "disposition",
+            "card_key": "c058",
+            "support": {
+              "video_id": "2082506081365008384",
+              "source_revision": "d1d8481a434aef66ec0621c098c6183e126127a83d6cc76836ba906f5e1c283a",
+              "card_hash": "d8f9fc8caa3267f6cfc6cfd18536b6bff59f89f772e1f78ae84d724b4779c8e4",
+              "excerpt_id": "416f4e399f79bb65aeaf4d890ad51ed345c76482acd6001fc96121c8d8f59b2f",
+              "quote": "a new kind of application that sees, hears, acts, remembers, and emotionally understands you like a friend or coworker"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/tavus/status/2082506151728685147",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "416f4e399f79bb65aeaf4d890ad51ed345c76482acd6001fc96121c8d8f59b2f",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Tavus PAL Maker.  The first no-code way to build a PAL, a new kind of application that sees, hears, acts, remembers, and emotionally understands you like a friend or coworker, whether it's w",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 19,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Companion sensing/acting/memory fits the broadened Agents definition."
+      },
+      {
+        "row": {
+          "card_key": "c060",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c060-2"
+            }
+          ],
+          "reason": "Mac app for capturing AI prompts."
+        },
+        "evidence": [
+          {
+            "support_key": "c060-2",
+            "kind": "disposition",
+            "card_key": "c060",
+            "support": {
+              "video_id": "2082518119344459776",
+              "source_revision": "5e7f1d475d63d5a738d34964f9fe2414fdabf5936f16c2021a0446eb531e0f58",
+              "card_hash": "c1d8d34d7b8b5d40441be6cd699502644c5d64523eb04d74e627b6ad35ef7a56",
+              "excerpt_id": "0aa3c10218943efb4628ff4a4c628730bc9036d6390a3afda2b2f2359ca90cb5",
+              "quote": "a Mac app for capturing things you want to keep and prompts you want to try next while working with AI"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/shadcn/status/2082519375194763675",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "0aa3c10218943efb4628ff4a4c628730bc9036d6390a3afda2b2f2359ca90cb5",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Launching Copper, a Mac app for capturing things you want to keep and prompts you want to try next while working with AI.  The more I use AI, the more I find myself collecting little things I don't want",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 21,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Prompt-capture application explicitly used with AI; no coding workflow established."
+      },
+      {
+        "row": {
+          "card_key": "c062",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "frontier-models"
+          ],
+          "evidence": [
+            {
+              "support_key": "c062-1"
+            }
+          ],
+          "reason": "Informal capability comparison of Opus 5 output."
+        },
+        "evidence": [
+          {
+            "support_key": "c062-1",
+            "kind": "disposition",
+            "card_key": "c062",
+            "support": {
+              "video_id": "2082613460446113792",
+              "source_revision": "d13538809725ff12db08f0cf036ea79961e1eff352913a76659e28f489184e6a",
+              "card_hash": "de5e4a18bdc1cdf0dbb3afb34feea41248178fee74f7e4fd67aec7181b98b41a",
+              "excerpt_id": "25333831f9bd14253e7d22a34094fd8026fbe218f2072079f0ef51cdf28c5ad8",
+              "quote": "opus 5 creating better and more beautiful pokemon  games than gamefreak"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/kimmonismus/status/2083242033477538137",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "25333831f9bd14253e7d22a34094fd8026fbe218f2072079f0ef51cdf28c5ad8",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> lol opus 5 creating better and more beautiful pokemon  games than gamefreak was not on my bingo card (tbf gamefreak makes bad game rn)  https://t.co/qTYUYn9Izd No tags *No captions available for this vi",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 11,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Informal named-model capability comparison with a game maker; no source-code workflow or specified Media artifact kind."
+      },
+      {
+        "row": {
+          "card_key": "c064",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c064-2"
+            }
+          ],
+          "reason": "Announces an AI avatar-generation feature without a finished artifact; fits the AI and ML parent."
+        },
+        "evidence": [
+          {
+            "support_key": "c064-2",
+            "kind": "disposition",
+            "card_key": "c064",
+            "support": {
+              "video_id": "2082842696650043392",
+              "source_revision": "fd5a8ca515b5a1eb307b9ab5d60b843371c882599aca0608af71dfec674d0b26",
+              "card_hash": "84f3facb4018bc86b2031bf26457264494b7925d46b79fe160152fe250546d9a",
+              "excerpt_id": "153d08f252ba46166171c822bcb20f084f87d24d649ca690e4790eeb377b78e9",
+              "quote": "Gemini Omni in Google Vids lets you generate a personal AI avatar to star in your videos"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/GoogleWorkspace/status/2082874613449519349",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "153d08f252ba46166171c822bcb20f084f87d24d649ca690e4790eeb377b78e9",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Hate being on camera? We have some great news. 🤫🎥  Gemini Omni in Google Vids lets you generate a personal AI avatar to star in your videos. Type a script, and let your digital twin handle the rest.  Tr",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 17,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Avatar-generation feature without a particular finished artifact; AI parent justified."
+      },
+      {
+        "row": {
+          "card_key": "c069",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c069-2"
+            }
+          ],
+          "reason": "Announces an AI video-creation model release without a finished artifact; fits the AI and ML parent."
+        },
+        "evidence": [
+          {
+            "support_key": "c069-2",
+            "kind": "disposition",
+            "card_key": "c069",
+            "support": {
+              "video_id": "2083066957230915584",
+              "source_revision": "915dc8c63c86f40c54218f4ed83a380591cd573c128f65e8cd99104a148920b1",
+              "card_hash": "278bc3fa8f86276ce2e5045c778037498d256b137b987dfb2b6f9af4af1a9f54",
+              "excerpt_id": "86ff240cfd914119fa4aebbb0ebe7a27e835802f65182efb9be0174591ede50f",
+              "quote": "a new era of AI video creation begins"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/BytePlusGlobal/status/2083069262969844158",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "86ff240cfd914119fa4aebbb0ebe7a27e835802f65182efb9be0174591ede50f",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Dreamina Seedance 2.5 is now live!  From creators to enterprises, a new era of AI video creation begins.  Try Seedance 2.5 on Dreamina today. Enterprise API access via BytePlus is coming soon.  Create l",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 8,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "AI video-model release without architecture, benchmark, multimodal or finished-artifact evidence; AI parent justified."
+      },
+      {
+        "row": {
+          "card_key": "c070",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Installing offline agent with no task; auditor-rejected as subject evidence."
+        },
+        "evidence": [],
+        "subject_destination_pass": true,
+        "human_reason": "Unmapped disposition retains the recorded auditor rejection; not re-admitted by the broader Agents scope.",
+        "historical_evidence_not_accepted": {
+          "support_key": "c070-1",
+          "kind": "candidate",
+          "card_key": "c070",
+          "support": {
+            "video_id": "2083169868891684864",
+            "source_revision": "0b1b680c7b4529f391e7e2352a66ba5f221453de4fa9d3c9143b5e55f6124d1f",
+            "card_hash": "9a184492288d448cf58730f25709def9eafea85228e7638aba29b015cda38520",
+            "excerpt_id": "c5697cdae033aac6a9465588ca321aa9303011be5f2e2207fa97e8361e8b5fbd",
+            "quote": "installing an AI agent that never touches the internet"
+          },
+          "excerpt": {
+            "deep_link": "https://x.com/brainrulax/status/2083169896641265692",
+            "end": null,
+            "evidence_kind": "text_only",
+            "excerpt_id": "c5697cdae033aac6a9465588ca321aa9303011be5f2e2207fa97e8361e8b5fbd",
+            "start": null,
+            "text": "<!-- HOOK_START --> <!-- HOOK_END --> This guy bought a $400 Mac mini and walked into a coffee shop with $2,100 for installing an AI agent that never touches the internet.  I had to rewatch this because the pitch is almost too simple. He sh",
+            "timing": "not_timed",
+            "truncated": true
+          },
+          "errors": [],
+          "words": 9,
+          "source_type": "x_thread",
+          "evidence_kind": "text_only"
+        }
+      },
+      {
+        "row": {
+          "card_key": "c087",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "developer-tools"
+          ],
+          "evidence": [
+            {
+              "support_key": "c087-1"
+            }
+          ],
+          "reason": "Vision system built with Ultralytics SDK for a real task."
+        },
+        "evidence": [
+          {
+            "support_key": "c087-1",
+            "kind": "disposition",
+            "card_key": "c087",
+            "support": {
+              "video_id": "2084984808216657921",
+              "source_revision": "7c412b2b497127db204113f7c9475be561c0408232b8d11f30fde3130cd4b278",
+              "card_hash": "2d23fc02c8283426ed552531a5abb091d9acae472a22fb2f202ce4906e2e2813",
+              "excerpt_id": "253ccea041c461ae47da830485dc4faf978f6ed92c2d86f0350f4f5a3c9bb08a",
+              "quote": "Viet built a small vision system that counts potatoes on a conveyor belt"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/IlirAliu_/status/2085063787921690646",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "253ccea041c461ae47da830485dc4faf978f6ed92c2d86f0350f4f5a3c9bb08a",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> AI in robotics gets all the attention right now, but sometimes the most interesting work is very practical.  Viet built a small vision system that counts potatoes on a conveyor belt. No giant dataset. N",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 13,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": false,
+        "human_reason": "AI vision application is described, but no SDK, code, IDE or engineering-tool workflow appears; reason invents Ultralytics SDK.",
+        "exact_proposed_replacement": {
+          "card_key": "c087",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c087-1"
+            }
+          ],
+          "reason": "AI vision application counts potatoes; no SDK or software-engineering workflow is established."
+        }
+      },
+      {
+        "row": {
+          "card_key": "c095",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-agents-and-automation"
+          ],
+          "evidence": [
+            {
+              "support_key": "c095-2"
+            }
+          ],
+          "reason": "Models capable of doing most work on computers; not a support: five-card cap"
+        },
+        "evidence": [
+          {
+            "support_key": "c095-2",
+            "kind": "disposition",
+            "card_key": "c095",
+            "support": {
+              "video_id": "2085414600552628224",
+              "source_revision": "619c41967e677357229be0e6d1fc3d72e21abded584958b0571b04b76fbd148b",
+              "card_hash": "c6fde7a0b2e16d4088a8e7deea183c74393c2b158f976730cd381f826c39c904",
+              "excerpt_id": "2b45625e40e17517834ff1632b7545c50b27baf32eef3ddcfd94b6b63e7d28ef",
+              "quote": "the models have become capable enough to do most of their work on your computers"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/gabriel1/status/2085418582192841147#t=0",
+              "end": 70.299,
+              "evidence_kind": "timed_clip",
+              "excerpt_id": "2b45625e40e17517834ff1632b7545c50b27baf32eef3ddcfd94b6b63e7d28ef",
+              "start": 0.0,
+              "text": "Three months ago, I quit OpenAI because the models have become capable enough to do most of their work on your computers. Yet virtually no one is using AI to do that work I think there are two things that are hard The first thing is these t",
+              "timing": "source_cues",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 15,
+            "source_type": "x_thread",
+            "evidence_kind": "timed_clip"
+          }
+        ],
+        "subject_destination_pass": false,
+        "human_reason": "Generic model capability to do computer work does not establish an agent/assistant product, autonomous multi-step task, companion or persistent monitor.",
+        "exact_proposed_replacement": {
+          "card_key": "c095",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c095-2"
+            }
+          ],
+          "reason": "General AI computer-work capability claim; no agent product or qualifying assistant behavior is established."
+        }
+      },
+      {
+        "row": {
+          "card_key": "c104",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "generative-media"
+          ],
+          "evidence": [
+            {
+              "support_key": "c104-2"
+            }
+          ],
+          "reason": "AI video praised firsthand as entertainment."
+        },
+        "evidence": [
+          {
+            "support_key": "c104-2",
+            "kind": "disposition",
+            "card_key": "c104",
+            "support": {
+              "video_id": "2086214505797931008",
+              "source_revision": "71b38afb5e435ebf12d0851ec7a7ddd719553ec50d41f8d56dc45dc840d997d6",
+              "card_hash": "e0a7c678e142349669739fda2836a16b32a7b75f8df461f5e14c5200b687ebc1",
+              "excerpt_id": "bc03ffc0811c49a56b3ad0eed3fd6bc2ccaad89315db2ca2e70878129a136bde",
+              "quote": "I’ve discovered peak AI video and it’s this orange cat’s vlogs"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/venturetwins/status/2086214537632760304",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "bc03ffc0811c49a56b3ad0eed3fd6bc2ccaad89315db2ca2e70878129a136bde",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> I’ve discovered peak AI video and it’s this orange cat’s vlogs  (he’s on IG at gingermil00) https://t.co/zmr4GahSPy No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comment",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 11,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "AI video content is the subject."
+      },
+      {
+        "row": {
+          "card_key": "c108",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "frontier-models"
+          ],
+          "evidence": [
+            {
+              "support_key": "c108-1"
+            }
+          ],
+          "reason": "Explicit foundation-model capability claim."
+        },
+        "evidence": [
+          {
+            "support_key": "c108-1",
+            "kind": "disposition",
+            "card_key": "c108",
+            "support": {
+              "video_id": "2086894292539424768",
+              "source_revision": "d526a6f940a9520931b7ca94b19c26fe8592a8e3b99330999c8933984d85ee17",
+              "card_hash": "e8dfe394c660a7d3e4d8a3cac26511b8882c593ed3597eed713ac23fa528abe4",
+              "excerpt_id": "8bfe2833b433993df1d47592cae20945e09af2d806a510b79fb0efbcd1ca20da",
+              "quote": "We've built the world's best foundation model for quantitative finance"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/michaelwangelo/status/2086895728467812810#t=0",
+              "end": 58.8,
+              "evidence_kind": "timed_clip",
+              "excerpt_id": "8bfe2833b433993df1d47592cae20945e09af2d806a510b79fb0efbcd1ca20da",
+              "start": 0.0,
+              "text": "We're Prodigy, an AI trading research lab. We've built the world's best foundation model for quantitative finance. We're already trading live in the financial markets, and we've more than doubled our money in the last two months, while the ",
+              "timing": "source_cues",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 10,
+            "source_type": "x_thread",
+            "evidence_kind": "timed_clip"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Announcement of a built foundation model with a quantitative-finance capability claim fits model-release scope."
+      },
+      {
+        "row": {
+          "card_key": "c123",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "frontier-models"
+          ],
+          "evidence": [
+            {
+              "support_key": "c123-1"
+            }
+          ],
+          "reason": "Adoption stat for open-weights model family."
+        },
+        "evidence": [
+          {
+            "support_key": "c123-1",
+            "kind": "disposition",
+            "card_key": "c123",
+            "support": {
+              "video_id": "2088654448436629505",
+              "source_revision": "cc0a6aa726a5413720a39e065f0c3731d12fc34b12e68db0c24a538c9d3fb853",
+              "card_hash": "fdf469b87eeb30ec1ddc3dc57b7895cbccc18290775422b18ad18455bc728120",
+              "excerpt_id": "d7ae4e50d28f541d824f050017f1c54b8e0c26129e1bb571761df2e17ec42e64",
+              "quote": "Qwen model downloads - 3 billion"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/karanC_12/status/2088654503344271720",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "d7ae4e50d28f541d824f050017f1c54b8e0c26129e1bb571761df2e17ec42e64",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> World population - 8 billion 👀 Qwen model downloads - 3 billion https://t.co/i78PQ5mHMr No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 6,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": false,
+        "human_reason": "Model download count is adoption/usage evidence; no open-weight availability, architecture, benchmark or release is stated.",
+        "exact_proposed_replacement": {
+          "card_key": "c123",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c123-1"
+            }
+          ],
+          "reason": "Model download/adoption count is industry usage evidence; not a support: five-card cap"
+        }
+      },
+      {
+        "row": {
+          "card_key": "c124",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-agents-and-automation"
+          ],
+          "evidence": [
+            {
+              "support_key": "c124-2"
+            }
+          ],
+          "reason": "Proposes a persistent assistant that continuously watches the user's screen and meetings."
+        },
+        "evidence": [
+          {
+            "support_key": "c124-2",
+            "kind": "disposition",
+            "card_key": "c124",
+            "support": {
+              "video_id": "2088664969847959552",
+              "source_revision": "b75b72c2934804f414f2262058994f83267169d45655b846b8475eb5c592b118",
+              "card_hash": "0967d4b17977d4d0f6a7b57e6e0309fff852d20147c7ed0ad5fbae845b07522d",
+              "excerpt_id": "1ae41a0fdc38f91ad1edd150a6bd94498705e6ed33aa8dbc7b55288b2bc7ca7c",
+              "quote": "Watch your computer screen all the time Watch every meeting you're"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/ChrisGPT/status/2088665099992969576#t=0",
+              "end": 54.07,
+              "evidence_kind": "timed_clip",
+              "excerpt_id": "1ae41a0fdc38f91ad1edd150a6bd94498705e6ed33aa8dbc7b55288b2bc7ca7c",
+              "start": 0.5,
+              "text": "Let me answer a more interesting question, if that's okay. How I would like to use it? Yeah. I think we are close to a world where you can have Like a descendant of ChatGPT Watch your computer screen all the time Watch every meeting you're ",
+              "timing": "source_cues",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 11,
+            "source_type": "x_thread",
+            "evidence_kind": "timed_clip"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Proposed persistent screen/meeting assistant; reason no longer attributes execution."
+      },
+      {
+        "row": {
+          "card_key": "c141",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-agents-and-automation"
+          ],
+          "evidence": [
+            {
+              "support_key": "c141-2"
+            }
+          ],
+          "reason": "Agents autonomously plan, execute, deliver on a goal."
+        },
+        "evidence": [
+          {
+            "support_key": "c141-2",
+            "kind": "disposition",
+            "card_key": "c141",
+            "support": {
+              "video_id": "2090488277426171904",
+              "source_revision": "08b1bd64d68b4bbc8d41dfbf000c3330e26fbeb6f45b6a31c84a4b35210491e3",
+              "card_hash": "f652ba70980451a42258f112039633eef9cdb9ecdef7d33e8bbf69b1e62553bb",
+              "excerpt_id": "409dfa84739d908da5d1a0494d86086cec2c18c9b6fccd5f60e68a2aabc0f334",
+              "quote": "Agent-Driven Workflow: Input your goal. Agents autonomously plan, execute, and deliver."
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/Hailuo_AI/status/2090613786046779485",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "409dfa84739d908da5d1a0494d86086cec2c18c9b6fccd5f60e68a2aabc0f334",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> 🐙MiniMax Design is officially live!  Turn Ideas into Commercial-Grade Content #MiniMaxDesign #MiniMax  🤖Agent-Driven Workflow: Input your goal. Agents autonomously plan, execute, and deliver. 🪄Built for",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 11,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Autonomous plan/execute/deliver workflow; no finished artifact established."
+      },
+      {
+        "row": {
+          "card_key": "c143",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c143-2"
+            }
+          ],
+          "reason": "LLMs as critical enterprise resource/control dispute; not a support: five-card cap"
+        },
+        "evidence": [
+          {
+            "support_key": "c143-2",
+            "kind": "disposition",
+            "card_key": "c143",
+            "support": {
+              "video_id": "2090523526595854336",
+              "source_revision": "31523d5a855c2b662281bf3619ba6e6e0b42e5bf87befd619421fe4d44ad9dc1",
+              "card_hash": "7c474a779e79d611cf69d00f13b04ccc22e6fc948ea1501de94124e69417370a",
+              "excerpt_id": "1b64672b958d41121d8d75024c1931bf53f467047032bc7af0a45cc5685120bb",
+              "quote": "When you're using large language models they are, it's like a at this point everyone technical realizes they're like a critical resource to make"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/ns123abc/status/2090525062373732860#t=0",
+              "end": 120.148,
+              "evidence_kind": "timed_clip",
+              "excerpt_id": "1b64672b958d41121d8d75024c1931bf53f467047032bc7af0a45cc5685120bb",
+              "start": 0.22,
+              "text": "When you're using large language models they are, it's like a at this point everyone technical realizes they're like a critical resource to make them valuable in an enterprise like battlefield context or regulated context or manufacturing y",
+              "timing": "source_cues",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 24,
+            "source_type": "x_thread",
+            "evidence_kind": "timed_clip"
+          }
+        ],
+        "subject_destination_pass": false,
+        "human_reason": "LLMs called a critical resource in enterprise contexts; no competition, financial/policy dynamic or control dispute is established.",
+        "exact_proposed_replacement": {
+          "card_key": "c143",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c143-2"
+            }
+          ],
+          "reason": "LLMs described as useful in enterprise contexts; no competitive, financial or policy dynamic is established."
+        }
+      },
+      {
+        "row": {
+          "card_key": "c158",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "generative-media"
+          ],
+          "evidence": [
+            {
+              "support_key": "c158-2"
+            }
+          ],
+          "reason": "AI model prompted to design a fictional robot concept; not a support: five-card cap"
+        },
+        "evidence": [
+          {
+            "support_key": "c158-2",
+            "kind": "disposition",
+            "card_key": "c158",
+            "support": {
+              "video_id": "2091567513461309440",
+              "source_revision": "e628f17250ac64f2351a08d04b6034fd8a44e3c1e79e91c217b9f0039cc4e937",
+              "card_hash": "3e952136719c42abd8ea48d228446c6ec79ca4af57fa4eea6d4fd03a40a0bc8d",
+              "excerpt_id": "b3a64d328d304a2ec3f54cc46b04bec54da0bdfe9d56f9a0e961cd7c66a6a1b6",
+              "quote": "I asked Kimi K3 to design a robot for deep sea research"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/DilumSanjaya/status/2091568845463101550",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "b3a64d328d304a2ec3f54cc46b04bec54da0bdfe9d56f9a0e961cd7c66a6a1b6",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> I asked Kimi K3 to design a robot for deep sea research  Here's what it came up with  A jellyfish inspired robot with tentacles built from a hexagonal nanostructured lattice, designed to withstand extre",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 12,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": false,
+        "human_reason": "Model-generated robot design is described in prose; no finished visual artifact or its medium is established.",
+        "exact_proposed_replacement": {
+          "card_key": "c158",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c158-2"
+            }
+          ],
+          "reason": "AI model produces a robot-design concept; the cited excerpt does not establish a finished visual artifact."
+        }
+      },
+      {
+        "row": {
+          "card_key": "c177",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c177-2"
+            }
+          ],
+          "reason": "NVIDIA infrastructure certification business deal; not a support: five-card cap"
+        },
+        "evidence": [
+          {
+            "support_key": "c177-2",
+            "kind": "disposition",
+            "card_key": "c177",
+            "support": {
+              "video_id": "2093098700612517888",
+              "source_revision": "27e9af48155d4e01df103295a105edfb71091bc7a657749531cb5b92e6a2b355",
+              "card_hash": "3a684953ebf52855d3f40ecfe9a364d551999e44dab3f8d1465da171c93f90bd",
+              "excerpt_id": "134b17bb0c3056eae5da770592e095c609d69bb8744e9aab65c60e4ec45d78da",
+              "quote": "we're now the only NeoCloud certified hypervisor from NVIDIA as a result of today's announcement"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/SmallCapSnipa/status/2093098733999165878#t=0",
+              "end": 18.585,
+              "evidence_kind": "timed_clip",
+              "excerpt_id": "134b17bb0c3056eae5da770592e095c609d69bb8744e9aab65c60e4ec45d78da",
+              "start": 0.06,
+              "text": "And then, sorry, maybe just to add to that I think we're now the only NeoCloud certified hypervisor from NVIDIA as a result of today's announcement So that vertical integration that full stack is playing out live time",
+              "timing": "source_cues",
+              "truncated": false
+            },
+            "errors": [],
+            "words": 15,
+            "source_type": "x_thread",
+            "evidence_kind": "timed_clip"
+          }
+        ],
+        "subject_destination_pass": false,
+        "human_reason": "NVIDIA hypervisor certification and vertical integration establish a technology/business announcement, but no AI subject; company identity cannot supply it.",
+        "exact_proposed_replacement": {
+          "card_key": "c177",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Hypervisor certification/vertical integration is described; the cited excerpt does not establish an AI subject."
+        }
+      },
+      {
+        "row": {
+          "card_key": "c182",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "developer-tools"
+          ],
+          "evidence": [
+            {
+              "support_key": "c182-1"
+            }
+          ],
+          "reason": "System-simulation tool for developers."
+        },
+        "evidence": [
+          {
+            "support_key": "c182-1",
+            "kind": "disposition",
+            "card_key": "c182",
+            "support": {
+              "video_id": "2093591840171941888",
+              "source_revision": "e6c5583b88a67ddb8664eeb7b3e9298a600dd932bc0901a47f0f396c0670a8b7",
+              "card_hash": "07e5f15d0345fc5b7d85dbcde78ed1832dee3240b1b2dab3f2aab02536055ccb",
+              "excerpt_id": "784dbdb3af03a1e0aa007662716e12bace40954d7528fd8d474ab34641a33dbb",
+              "quote": "You can create your own systems to simulate how the database would react to different numbers of requests"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/OjasSharma276/status/2093593295658397934",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "784dbdb3af03a1e0aa007662716e12bace40954d7528fd8d474ab34641a33dbb",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> THIS IS A FREKING GOOD APPLICATION!!!  You can create your own systems to simulate how the database would react to different numbers of requests, and you can play around with it to get an idea of how th",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 18,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": false,
+        "human_reason": "Database-load simulation is software tooling, but no AI component; the AI parent's non-AI software exclusion applies.",
+        "exact_proposed_replacement": {
+          "card_key": "c182",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Database-load simulation tool; the cited excerpt establishes no AI component required by the parent shelf."
+        }
+      },
+      {
+        "row": {
+          "card_key": "c196",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "ai-and-ml"
+          ],
+          "evidence": [
+            {
+              "support_key": "c196-1"
+            }
+          ],
+          "reason": "AI-powered toothbrush consumer product."
+        },
+        "evidence": [
+          {
+            "support_key": "c196-1",
+            "kind": "disposition",
+            "card_key": "c196",
+            "support": {
+              "video_id": "2094761457007157248",
+              "source_revision": "11df6958801bf5df65e0a3a16099a6d4605ed6a6205827c5cdaf5780dfd8d910",
+              "card_hash": "7706dda601a4813249c25b71ff6d48bd9c680da2d83e9a581ac51079d655cec2",
+              "excerpt_id": "105d616c298da765c54641a80a7dc61a5eb80e1dc03c566d502a906a2acef7c6",
+              "quote": "Dyson just released a new AI-powered toothbrush with an integrated 100,000-pixel macro lens camera for $499"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/IterIntellectus/status/2094761595217850387",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "105d616c298da765c54641a80a7dc61a5eb80e1dc03c566d502a906a2acef7c6",
+              "start": null,
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Dyson just released a new AI-powered toothbrush with an integrated 100,000-pixel macro lens camera for $499  boy is this a nice piece of technology https://t.co/6hJo3vNoHy No tags *No captions available",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 16,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Explicit AI-powered consumer product; no narrower child established."
+      },
+      {
+        "row": {
+          "card_key": "c208",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "developer-tools"
+          ],
+          "evidence": [
+            {
+              "support_key": "c208-1"
+            }
+          ],
+          "reason": "Agent-harness workflow feeding screenshots into Claude Code."
+        },
+        "evidence": [
+          {
+            "support_key": "c208-1",
+            "kind": "disposition",
+            "card_key": "c208",
+            "support": {
+              "video_id": "MJmoSxSPeRY",
+              "source_revision": "fedc3b2bda5af1243768e00a3c2cccdf271949cb6cc48999836b5ae2acd0f48d",
+              "card_hash": "1d9c474c3bcf512d912ffbf3a6002db79369b71d3b07d80b5920423b85082f5b",
+              "excerpt_id": "aa4457a88895651150cdb90b2134918d3f29cccc559369d647099dfc76350442",
+              "quote": "drop in those screenshots, maybe add a short description of the niche you're trying to replicate, and then send everything into Claude code"
+            },
+            "excerpt": {
+              "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=183s",
+              "end": 281.59,
+              "evidence_kind": "timed_clip",
+              "excerpt_id": "aa4457a88895651150cdb90b2134918d3f29cccc559369d647099dfc76350442",
+              "start": 183.91,
+              "text": "Claude, the clearer the picture becomes. All you've got to do is drop in those screenshots, maybe add a short description of the niche you're trying to replicate, and then send everything into Claude code. Once you do that, Claude takes it,",
+              "timing": "source_cues",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 23,
+            "source_type": "video",
+            "evidence_kind": "timed_clip"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "Workflow sends source screenshots into Claude Code; coding-tool workflow established."
+      },
+      {
+        "row": {
+          "card_key": "c215",
+          "disposition": "existing_concept",
+          "shelf_ids": [
+            "security"
+          ],
+          "evidence": [
+            {
+              "support_key": "c215-1"
+            }
+          ],
+          "reason": "Anthropic putting guardrails on AI, matches Security cues."
+        },
+        "evidence": [
+          {
+            "support_key": "c215-1",
+            "kind": "disposition",
+            "card_key": "c215",
+            "support": {
+              "video_id": "iyVXw-SoUrY",
+              "source_revision": "6eaecd288e6fa0ade559771d9ba3fc9e74fbf79076c62cd095d4c845fa83b84e",
+              "card_hash": "5db49c64c1ebf72cee1a947ca364b9bc061f73dfe4c4465ac4142ded9b7b629e",
+              "excerpt_id": "4784109940f74d75c8cdcf7d59b1d51fab540245d31f8822101e55c9c7469021",
+              "quote": "one way to think about anthropic is that it's a little bit trying to put bumpers or guard rails on that experiment"
+            },
+            "excerpt": {
+              "deep_link": "https://youtube.com/watch?v=iyVXw-SoUrY&t=216s",
+              "end": 311.59,
+              "evidence_kind": "timed_clip",
+              "excerpt_id": "4784109940f74d75c8cdcf7d59b1d51fab540245d31f8822101e55c9c7469021",
+              "start": 216.959,
+              "text": "be. >> I think it is an experiment. And one way to think about anthropic is that it's a little bit trying to put bumpers or guard rails on that experiment. Right? >> We do know that this is coming incredibly quickly. And I think the worst v",
+              "timing": "source_cues",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 22,
+            "source_type": "video",
+            "evidence_kind": "timed_clip"
+          }
+        ],
+        "subject_destination_pass": false,
+        "human_reason": "Metaphorical bumpers/guardrails around an unnamed experiment do not establish technical AI safety; Anthropic's name alone is insufficient.",
+        "exact_proposed_replacement": {
+          "card_key": "c215",
+          "disposition": "still_unmapped",
+          "shelf_ids": [],
+          "evidence": [],
+          "reason": "Guardrails around an unspecified experiment; the cited excerpt establishes no technical AI safety mechanism."
+        }
+      },
+      {
+        "row": {
+          "card_key": "c223",
+          "disposition": "proposed_concept",
+          "shelf_ids": [
+            "ai-industry-and-business"
+          ],
+          "evidence": [
+            {
+              "support_key": "c223-2"
+            }
+          ],
+          "reason": "ARR comparison between AI labs; not a support: five-card cap"
+        },
+        "evidence": [
+          {
+            "support_key": "c223-2",
+            "kind": "disposition",
+            "card_key": "c223",
+            "support": {
+              "video_id": "x_916a6278802",
+              "source_revision": "c0d7a723fa34faa9de27a2f89932023e1809a3540a194942147dee94fec04f95",
+              "card_hash": "9fc0e1707ea088c5552ca39afaff271f767fb3349ff8fd8294ccfd66805b7000",
+              "excerpt_id": "e7f42c35e5ba01cdb169c3f0bd0795ff8895bd943a4627a421b48a6ab5333d3d",
+              "quote": "OpenAI President Greg Brockman explains why Anthropic pulled ahead of OpenAI on ARR"
+            },
+            "excerpt": {
+              "deep_link": "https://x.com/rohanpaul_ai/status/2095732265557111252",
+              "end": null,
+              "evidence_kind": "text_only",
+              "excerpt_id": "e7f42c35e5ba01cdb169c3f0bd0795ff8895bd943a4627a421b48a6ab5333d3d",
+              "start": null,
+              "text": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* OpenAI President Greg Brockman explains why Anthropic pulled ahead of OpenAI on ARR. (An",
+              "timing": "not_timed",
+              "truncated": true
+            },
+            "errors": [],
+            "words": 13,
+            "source_type": "x_thread",
+            "evidence_kind": "text_only"
+          }
+        ],
+        "subject_destination_pass": true,
+        "human_reason": "ARR comparison between AI labs is the stated subject."
+      }
+    ],
+    "limitation": "This is a 29-row destination sample, not semantic certification of all 225 rows."
+  },
+  "B6": {
+    "node_count": 11,
+    "depth_counts": {
+      "1": 3,
+      "2": 8
+    },
+    "frozen_v1_checks": [
+      {
+        "shelf_id": "ai-and-ml",
+        "service_fields_equal": true,
+        "canonical_utf8_bytes_equal": false
+      },
+      {
+        "shelf_id": "space-and-science",
+        "service_fields_equal": true,
+        "canonical_utf8_bytes_equal": false
+      },
+      {
+        "shelf_id": "developer-tools",
+        "service_fields_equal": true,
+        "canonical_utf8_bytes_equal": false
+      },
+      {
+        "shelf_id": "security",
+        "service_fields_equal": true,
+        "canonical_utf8_bytes_equal": false
+      },
+      {
+        "shelf_id": "frontier-models",
+        "service_fields_equal": true,
+        "canonical_utf8_bytes_equal": false
+      },
+      {
+        "shelf_id": "education",
+        "service_fields_equal": true,
+        "canonical_utf8_bytes_equal": false
+      },
+      {
+        "shelf_id": "spaceflight",
+        "service_fields_equal": true,
+        "canonical_utf8_bytes_equal": false
+      }
+    ],
+    "include_sibling_identity": true,
+    "definition_include_scope_agreement": "PASS",
+    "diff": {
+      "preserved": [
+        "ai-and-ml",
+        "space-and-science",
+        "developer-tools",
+        "security",
+        "frontier-models",
+        "education",
+        "spaceflight"
+      ],
+      "added": [
+        "ai-agents-and-automation",
+        "ai-industry-and-business",
+        "generative-media",
+        "news-and-current-events"
+      ],
+      "renamed": [],
+      "merged": [],
+      "split": [],
+      "retired": []
+    },
+    "candidate_dispositions": [
+      {
+        "batch": "call-batch-00",
+        "path": "News and Current Events",
+        "card_keys": [
+          "c006",
+          "c007",
+          "c009",
+          "c010",
+          "c011",
+          "c019"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "news-and-current-events",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-00",
+        "path": "News and Current Events / Breaking News: Crime and Conflict",
+        "card_keys": [
+          "c009",
+          "c010",
+          "c011",
+          "c019"
+        ],
+        "disposition": "explicitly_rejected",
+        "destination": null,
+        "reason": "Only 4 distinct candidate cards (c009, c010, c011, c019); below the five-card minimum."
+      },
+      {
+        "batch": "call-batch-00",
+        "path": "News and Current Events / Political and Social Commentary",
+        "card_keys": [
+          "c006",
+          "c007"
+        ],
+        "disposition": "explicitly_rejected",
+        "destination": null,
+        "reason": "Only 2 distinct candidate cards (c006, c007); below the five-card minimum."
+      },
+      {
+        "batch": "call-batch-00",
+        "path": "Sports Highlights and Commentary",
+        "card_keys": [
+          "c015",
+          "c016",
+          "c018",
+          "c022"
+        ],
+        "disposition": "explicitly_rejected",
+        "destination": null,
+        "reason": "Only 4 distinct candidate cards (c015, c016, c018, c022); below the five-card minimum."
+      },
+      {
+        "batch": "call-batch-00",
+        "path": "Livestreamer and Creator Culture",
+        "card_keys": [
+          "c020",
+          "c021"
+        ],
+        "disposition": "explicitly_rejected",
+        "destination": null,
+        "reason": "Only 2 distinct candidate cards (c020, c021); below the five-card minimum."
+      },
+      {
+        "batch": "call-batch-01",
+        "path": "AI and ML / AI Generative Creative Media",
+        "card_keys": [
+          "c033",
+          "c038",
+          "c043"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "generative-media",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-01",
+        "path": "AI and ML / AI Industry, Markets, and Geopolitics",
+        "card_keys": [
+          "c041",
+          "c044",
+          "c046"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "ai-industry-and-business",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-02",
+        "path": "AI and ML / Product Launches",
+        "card_keys": [
+          "c056",
+          "c058",
+          "c060",
+          "c064",
+          "c069",
+          "c070"
+        ],
+        "disposition": "explicitly_rejected",
+        "destination": null,
+        "reason": "Cards redistributed: c058 to AI Agents and Automation (companion described as sensing, hearing, acting and remembering); c056 and c060 to the existing ai-and-ml parent; c064 and c069 to the existing ai-and-ml parent (feature/release announcements without a finished artifact); c070 left unmapped (auditor-rejected evidence). No standalone concept adopted."
+      },
+      {
+        "batch": "call-batch-03",
+        "path": "AI and ML / AI Agents and Automation",
+        "card_keys": [
+          "c080",
+          "c085",
+          "c088",
+          "c089",
+          "c095"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "ai-agents-and-automation",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-03",
+        "path": "AI and ML / AI Industry and Business",
+        "card_keys": [
+          "c082",
+          "c084",
+          "c090",
+          "c097",
+          "c099"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "ai-industry-and-business",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-03",
+        "path": "AI and ML / AI-Generated Creative Media",
+        "card_keys": [
+          "c077",
+          "c091"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "generative-media",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-04",
+        "path": "AI and ML / AI Agents and Automation",
+        "card_keys": [
+          "c106",
+          "c110",
+          "c112",
+          "c116",
+          "c124"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "ai-agents-and-automation",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-04",
+        "path": "AI and ML / AI Industry Business and Market Commentary",
+        "card_keys": [
+          "c109",
+          "c111",
+          "c117",
+          "c118"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "ai-industry-and-business",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-04",
+        "path": "AI and ML / AI-Generated Video and Creative Media",
+        "card_keys": [
+          "c101",
+          "c104",
+          "c119"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "generative-media",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-05",
+        "path": "AI and ML / AI Business and Industry",
+        "card_keys": [
+          "c129",
+          "c130",
+          "c133",
+          "c134",
+          "c143",
+          "c144"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "ai-industry-and-business",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-05",
+        "path": "AI and ML / Generative Media",
+        "card_keys": [
+          "c128",
+          "c137",
+          "c140",
+          "c141"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "generative-media",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-06",
+        "path": "AI and ML / AI Business & Markets",
+        "card_keys": [
+          "c152",
+          "c165",
+          "c169",
+          "c174",
+          "c175"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "ai-industry-and-business",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-06",
+        "path": "AI and ML / AI-Generated Creative Media",
+        "card_keys": [
+          "c153",
+          "c158"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "generative-media",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-07",
+        "path": "AI and ML / AI Industry and Business",
+        "card_keys": [
+          "c177",
+          "c178",
+          "c185",
+          "c191",
+          "c192"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "ai-industry-and-business",
+        "reason": null
+      },
+      {
+        "batch": "call-batch-08",
+        "path": "Career and Entrepreneurship",
+        "card_keys": [
+          "c201",
+          "c202",
+          "c203",
+          "c209",
+          "c217",
+          "c221"
+        ],
+        "disposition": "explicitly_rejected",
+        "destination": null,
+        "reason": "Two of six candidate cards (c202, c221) rely on auditor-rejected excerpts, leaving only 4 distinct subject-relevant cards; below the five-card minimum."
+      },
+      {
+        "batch": "call-batch-08",
+        "path": "AI and ML / AI Industry and Market Economics",
+        "card_keys": [
+          "c210",
+          "c211",
+          "c213",
+          "c218",
+          "c223"
+        ],
+        "disposition": "adopted_or_equivalent",
+        "destination": "ai-industry-and-business",
+        "reason": null
+      }
+    ],
+    "candidate_counts": {
+      "adopted_or_equivalent": 15,
+      "explicitly_rejected": 6
+    },
+    "product_launches_redistribution": {
+      "c056": [
+        "ai-and-ml"
+      ],
+      "c058": [
+        "ai-agents-and-automation"
+      ],
+      "c060": [
+        "ai-and-ml"
+      ],
+      "c064": [
+        "ai-and-ml"
+      ],
+      "c069": [
+        "ai-and-ml"
+      ],
+      "c070": [
+        "still_unmapped"
+      ]
+    },
+    "pin_state": {
+      "pins": 0,
+      "memberships": 0,
+      "item_policies": 0,
+      "active_version_id": "taxonomy-v1-2026-09-04"
+    },
+    "pin_impact_report": {
+      "silent_redirects": false,
+      "items": [],
+      "measured_pins": 0,
+      "measured_memberships": 0,
+      "measured_state": "archived stage 1 proof before-state: zero pins, zero memberships (recorded independently in the receipts)"
+    },
+    "mechanical_verdict": "PASS",
+    "operative_precedence_verdict": "FAIL",
+    "boundary_failure": {
+      "id": "B6-S-Agents-Security",
+      "edit_number": 3,
+      "archived_distinction": {
+        "include_cue": "proposed persistent assistant that continuously watches the user's screen or meetings",
+        "confusing_alternative": "Security monitoring or surveillance tooling",
+        "evidence_needed": "excerpt proposes an assistant watching the user's own screen or meetings for the user, not a security control"
+      },
+      "operative_security_rule_absent": true,
+      "synthetic_case": "A proposed AI security assistant continuously watches the user's screen to detect prompt injection and enforce runtime guardrails.",
+      "conflict": "Agents include[4] admits persistent screen assistants; Security admits prompt-injection defenses/runtime governance. Only discarded sibling_cues say 'not a security control'.",
+      "exact_repair": {
+        "replace_agents_include_4": "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)",
+        "append_agents_exclude": "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security",
+        "mirror_include_cue": "Copy the replacement include[4] character-for-character into sibling_cues[4].include_cue."
+      }
+    },
+    "manual_v1_boundary_review": [
+      {
+        "new": "Agents",
+        "v1": "Developer Tools",
+        "verdict": "PASS",
+        "fields": "Agents include[1], exclude[0]",
+        "reason": "Non-engineering task completion takes Agents; coding harness/IDE/SDK workflows take Developer Tools."
+      },
+      {
+        "new": "Agents",
+        "v1": "Frontier Models",
+        "verdict": "PASS",
+        "fields": "Agents definition, exclude[1]",
+        "reason": "Acting agent/assistant product versus architecture/benchmark evaluation without that product behavior."
+      },
+      {
+        "new": "Agents",
+        "v1": "Security",
+        "verdict": "FAIL",
+        "fields": "Agents sibling_cues[4] only",
+        "reason": "Personal monitoring versus security control is lost during projection; see synthetic failing case."
+      },
+      {
+        "new": "Industry",
+        "v1": "Frontier Models",
+        "verdict": "PASS",
+        "fields": "Industry definition/include, exclude[0]; Frontier exclude[2]",
+        "reason": "Business ranking/revenue/usage economics versus technical model evaluation; Frontier already excludes general AI business news."
+      },
+      {
+        "new": "Industry",
+        "v1": "Developer Tools",
+        "verdict": "PASS",
+        "fields": "Industry definition/include, exclude[3]; Developer Tools exclude[2]",
+        "reason": "Business dynamics versus coding-tool usage and IDE/SDK workflow steps."
+      },
+      {
+        "new": "Industry",
+        "v1": "Security",
+        "verdict": "PASS",
+        "fields": "Industry include[1], exclude[4]",
+        "reason": "External government policy takes Industry priority; technical safety/guardrails take Security."
+      },
+      {
+        "new": "Media",
+        "v1": "Frontier Models",
+        "verdict": "PASS",
+        "fields": "Media include[5], exclude[0]",
+        "reason": "Artifact-centered model release takes Media priority; architecture/scaling/benchmark release without a finished artifact takes Frontier."
+      },
+      {
+        "new": "Media",
+        "v1": "Developer Tools",
+        "verdict": "PASS",
+        "fields": "Media definition/include[3], exclude[3]",
+        "reason": "Generated visual website as output versus the coding/SDK workflow used to build it."
+      },
+      {
+        "new": "News",
+        "v1": "AI and ML and its children",
+        "verdict": "PASS",
+        "fields": "News include[0], exclude[0:3]",
+        "reason": "Incident as subject takes News priority over every AI shelf; product/model/business subjects return to AI shelves."
+      }
+    ]
+  },
+  "full_proposal_validator_passed": true,
+  "proposed_repair_preflight": {
+    "status": "In-memory mechanical validation passed; no successor written or approved",
+    "ledger_replacement_rows": 8,
+    "node_field_edits": 3,
+    "expected_ledger_counts": {
+      "existing_concept": 33,
+      "still_unmapped": 109,
+      "proposed_concept": 59,
+      "unsupported": 24
+    }
+  },
+  "independent_keys_and_expansion_equal": true,
+  "projection": {
+    "status": "Diagnostic only: rejected candidate; no projected file written, approved or installed",
+    "expected_service_revision_hash": "e8263edcd7354412f2de4b9946aa3ee11126d25e2774d085c971f46479ddd2a5",
+    "service_returned_revision_hash": null,
+    "canonical_service_file_bytes": 9249,
+    "canonical_service_file_sha256": "86245d8e878440172c303eeb75c1df875f64ab83bf722c31288138d8aa892ca9",
+    "metadata_export_bytes": 12662,
+    "metadata_export_sha256": "72647d7149e7728910f73bdfb2467e2d5eae556811cecd7d26d3967ba37893c4",
+    "metadata_parameters": {
+      "approved_by": "Codex / GPT-6 Astra",
+      "approval_record": "docs/library/INDUCTION-AUDIT-11-2026-09-06.md",
+      "proposal_path": "docs/library/proof/taxonomy-v2-revision-decision-2-2026-09-05.json",
+      "proposal_sha256": "27e010cea18a4a4b6c9ac20b0061dd264754fea94e088e1e8fdc8e71452b19bd",
+      "projection": "nodes restricted to shelf_id, path (NFC), definition, include, exclude; name=path[-1]; parent_shelf_id derived from path; retired=false; sibling_cues, coverage_ledger, diff, pin_impact_report and rejected_proposals remain in the archived proposal",
+      "preserved_shelf_ids": [
+        "ai-and-ml",
+        "space-and-science",
+        "developer-tools",
+        "education",
+        "frontier-models",
+        "security",
+        "spaceflight"
+      ],
+      "added_shelf_ids": [
+        "news-and-current-events",
+        "ai-agents-and-automation",
+        "ai-industry-and-business",
+        "generative-media"
+      ]
+    },
+    "parent_revision_hash": "2f283053bbaca2e94c2dbd340f19c62a89f529457ac40ae5b1d2d84379d22d98",
+    "independent_nodes_equal": true,
+    "validator_normalization_equal": true,
+    "wrapper_unwrapped": true
+  },
+  "packet_binding": {
+    "sha256": "35af2d0f7e5d4bffccb1f6146759d08c92aef5d20270a204c8419e66b613f464",
+    "proposal_hash_equal": true,
+    "all_candidate_fields_equal": true
+  },
+  "prior_measurement_hashes": {
+    "audit-induction-measurements-2026-09-05.json": "16b995b563c4dae5b623d43f665ca75eed1b65e17f3a492caf2afc450a248620",
+    "audit-induction-9-measurements-2026-09-05.json": "b719111970654e59ab5cecfc1bfe32b651665d0f98261ab94bb26a33c3f87844",
+    "audit-induction-10-measurements-2026-09-05.json": "21639c57b4e5dcd3f8127da425be1689dd9d31b25b844abf3567188d040bb616"
+  },
+  "self_test_passed": [
+    "unrecorded proposal edit",
+    "wrong before value",
+    "missing recorded edit",
+    "wrong repair item",
+    "25-word quote",
+    "invented quote",
+    "foreign revision",
+    "NFC/Unicode whitespace",
+    "foreign-card ledger support"
+  ],
+  "input_files": {
+    "docs/library/proof/taxonomy-v2-revision-decision-2-2026-09-05.json": {
+      "sha256": "27e010cea18a4a4b6c9ac20b0061dd264754fea94e088e1e8fdc8e71452b19bd",
+      "bytes": 115947
+    },
+    "docs/library/proof/taxonomy-v2-revision-decision-2026-09-05.json": {
+      "sha256": "7028edf7471a3624345257e59c6eb7627c011a65424df439a126d906df77098f",
+      "bytes": 89272
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/proposal.json": {
+      "sha256": "bb3d51e4b6eecf542355ba0e5f5fbb0d09b1e0ad692eb1c5d1674f315a25cd7c",
+      "bytes": 79143
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/receipts.json": {
+      "sha256": "fb26d4f0a6814fc32c00cb51ea7dbc076150b775c545d90cbdc43cd1e16ee0c2",
+      "bytes": 196978
+    },
+    "docs/library/proof/induction-run-9-2026-09-05/proposal.json": {
+      "sha256": "37db6a1ee53e3ee286d32986f633bb7b12b9dfa4594a462504feb13b1a283997",
+      "bytes": 80313
+    },
+    "docs/library/proof/induction-run-9-2026-09-05/receipts.json": {
+      "sha256": "22206eafd81b4703060e6a4f578f6cdd25dd8c6183351c0687cb9b9c03fa91d9",
+      "bytes": 197894
+    },
+    "docs/library/proof/induction-manifest-2026-09-05.json": {
+      "sha256": "9a759f68890a30e9e8403e2f1364cfb9464f335e342e0a70f75e4ddc6dab422d",
+      "bytes": 67846
+    },
+    "docs/library/proof/run-2026-09-05/receipts.json": {
+      "sha256": "2b4e824ea9f93999de6c5108406e60a5c81f108de0b279c52fee2e96d622469c",
+      "bytes": 21732472
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-00.stdout": {
+      "sha256": "00761d9b87094fc044817a2659bb3ec238d69cb37f9759590a2a1cee51771191",
+      "bytes": 55366
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-01.stdout": {
+      "sha256": "2e1cc827cfa80199a6120f6f763e78b5eeda66785b549b9f501d975edb433340",
+      "bytes": 36912
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-02.stdout": {
+      "sha256": "aa1bb64a5a311147f666d41dc78a9383e64d315c537431ec38a7ad434463974e",
+      "bytes": 32115
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-03.stdout": {
+      "sha256": "8c472ace844978a13266e07759937cef8fff0790cb2830fe848c7594f93e3bc9",
+      "bytes": 47622
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-04.stdout": {
+      "sha256": "5f2adccfdbce53b2b7e763a82750796df9926d9b8833f5af2e3f984a5ae65f1a",
+      "bytes": 48283
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-05.stdout": {
+      "sha256": "732aa9e736b88d46982a2e347479898fb56e5f9dcce37129737280172e95a8f2",
+      "bytes": 41816
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-06.stdout": {
+      "sha256": "5bd373b0e3ca1c6a244896755ddd43886303a8a18ea9726155dc96cffb064d0a",
+      "bytes": 35266
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-07.stdout": {
+      "sha256": "6a56b819ab82362f8fee2f1a6bcefc0f284c7dd45e1deed0089238988b5aff53",
+      "bytes": 32732
+    },
+    "docs/library/proof/induction-run-10-2026-09-05/calls/call-batch-08.stdout": {
+      "sha256": "f222393a7b4988526ab0a2795eba28edee270ee38e9a468ee6ec8baebdacc21e",
+      "bytes": 45337
+    },
+    "docs/library/taxonomy-v1-2026-09-04.json": {
+      "sha256": "700f8dc09831fa14491a89f4ca68417ac721a17d45bcd2a9dc6c7ede484d11df",
+      "bytes": 5591
+    },
+    "docs/library/proof/holdout-v2-labelling-packet-11-2026-09-05.json": {
+      "sha256": "35af2d0f7e5d4bffccb1f6146759d08c92aef5d20270a204c8419e66b613f464",
+      "bytes": 363504
+    },
+    "docs/library/proof/audit-decision-2-2026-09-06.py": {
+      "sha256": "3fc9d01b83eba5847e2f56429ce4a12e23d4b37c254d26806fe0c881d204e9e9",
+      "bytes": 33621
+    },
+    "docs/library/proof/audit-induction-2026-09-05.py": {
+      "sha256": "71586901d6940b96ceecb551fc0e00ad460113fb1cfcd21319ff5541034abe26",
+      "bytes": 83931
+    },
+    "scripts/librarian/compose_revision_decision_2.py": {
+      "sha256": "a4e9865f7ebc16179ccbdba36294615969e46a4132ee32b287e8acab4c58dba7",
+      "bytes": 16295
+    },
+    "scripts/librarian/taxonomy_from_proposal.py": {
+      "sha256": "67761c436d50a97d247d2de1e8fb245e90b069b8f4c6b935661606a9964d1031",
+      "bytes": 7411
+    },
+    "tests/validate_proof_receipts.py": {
+      "sha256": "f83de2e60783f734452c840d93c1bec2375d0056a2200dce874ef5e44cdadbb7",
+      "bytes": 114227
+    },
+    "docs/library/INDUCTION-AUDIT-10-2026-09-05.md": {
+      "sha256": "13b364e5e257ec2f2229b08d1caf18902f3f7229bf3f9efc3351a0695172b0d7",
+      "bytes": 20714
+    },
+    "docs/library/INDUCTION-REVISION-2-BRIEF-2026-09-06.md": {
+      "sha256": "3fed044c78a2495d91fdb49eb1cafe0cffd86ea3e61673d34fd78688aa2e349f",
+      "bytes": 7364
+    },
+    "docs/library/ORCHESTRATION-V1-2026-09-04.md": {
+      "sha256": "09678bfff1f469761ddf2b11e324f56b5ad3ec588229bc55b5816a588985529d",
+      "bytes": 4029
+    },
+    "docs/library/STAGE2-AUDIT-PLAN-2026-09-05.md": {
+      "sha256": "2fd9f11de98610685a86b0d73bfaa833570e1b1748a3fe90f24c61c6159b7071",
+      "bytes": 18135
+    },
+    "scripts/librarian/prompts/induce-consolidate.md": {
+      "sha256": "a850ded1ec7c6e0a6c0d90d28a39d1fc0e9d9e6460c33ec3b62f91ed82c54b79",
+      "bytes": 11624
+    },
+    "docs/library/proof/audit-induction-measurements-2026-09-05.json": {
+      "sha256": "16b995b563c4dae5b623d43f665ca75eed1b65e17f3a492caf2afc450a248620",
+      "bytes": 320692
+    },
+    "docs/library/proof/audit-induction-9-measurements-2026-09-05.json": {
+      "sha256": "b719111970654e59ab5cecfc1bfe32b651665d0f98261ab94bb26a33c3f87844",
+      "bytes": 436411
+    },
+    "docs/library/proof/audit-induction-10-measurements-2026-09-05.json": {
+      "sha256": "21639c57b4e5dcd3f8127da425be1689dd9d31b25b844abf3567188d040bb616",
+      "bytes": 466338
+    }
+  }
+}
