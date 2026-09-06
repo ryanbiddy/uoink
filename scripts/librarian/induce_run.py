@@ -90,6 +90,26 @@ def get_git_sha() -> str:
     return "0" * 40
 
 
+def _support_is_valid(support: Dict[str, Any], cards_by_id: Dict[str, dict]) -> bool:
+    """Mirror of the validator's support checks: known card, matching hashes,
+    known excerpt, and a 1-24 word quote occurring verbatim (NFC, collapsed
+    whitespace) inside that excerpt's text."""
+    card = cards_by_id.get(support.get("video_id"))
+    if not card:
+        return False
+    if support.get("card_hash") != card.get("card_hash") or support.get("source_revision") != card.get("source_revision"):
+        return False
+    excerpts = {e.get("excerpt_id"): e for e in card.get("excerpts", [])}
+    excerpt = excerpts.get(support.get("excerpt_id"))
+    if excerpt is None:
+        return False
+    def norm(text: str) -> str:
+        return " ".join(unicodedata.normalize("NFC", str(text or "")).split())
+    quote = norm(support.get("quote"))
+    words = len(quote.split())
+    return 1 <= words <= 24 and quote in norm(excerpt.get("text"))
+
+
 def _cli_safe_schema(schema: Dict[str, Any]) -> Dict[str, Any]:
     """Deep copy of a JSON schema without `pattern` and `uniqueItems`."""
     out = copy.deepcopy(schema)
@@ -535,6 +555,26 @@ class InductionHarness:
             # Contract v1.2: the validator re-derives this key table from the recorded
             # batch outputs and requires the stdin to match byte for byte.
             keys = derive_induction_keys(induction, batches, batch_proposals)
+            # Pre-verify every support the same way the validator will (verbatim
+            # quote inside its excerpt, 1-24 words, matching hashes) and name the
+            # unusable keys in the recorded consolidation prompt, so the model
+            # never cites evidence the validator would reject. The prompt artifact
+            # is the per-run template; the validator re-renders from it.
+            unusable = sorted(
+                key for key, entry in keys["supports"].items()
+                if not _support_is_valid(entry["support"], cards_by_id))
+            if unusable:
+                cons_template = cons_template.replace(
+                    "## Key table (data)",
+                    "## Unusable support keys (verified invalid: quote not verbatim or over 24 words)\n"
+                    "Never reference these keys. A card whose only supports are unusable gets "
+                    "disposition `still_unmapped` (or `unsupported` if it has no valid source "
+                    "evidence) with an empty evidence list.\n" + ", ".join(unusable) +
+                    "\n\n## Key table (data)", 1)
+                consolidation_prompt_bytes = cons_template.encode("utf-8")
+                (self.prompts_dir / "consolidation_prompt.md").write_bytes(consolidation_prompt_bytes)
+                print(f"[induce] {len(unusable)} unusable support keys named in the prompt: {unusable}",
+                      file=sys.stderr, flush=True)
             cons_prompt = render_induction_consolidation(cons_template, batch_proposals, keys)
             # Claude Code's structured output stalls indefinitely on PROPOSAL_SCHEMA's
             # regex patterns and uniqueItems (observed 2026-09-05: zero bytes after
