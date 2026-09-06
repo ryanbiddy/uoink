@@ -1,0 +1,286 @@
+{
+  "schema_version": 1,
+  "kind": "stage2-execution-record",
+  "written_at": "2026-09-06T06:12:42.409939+00:00",
+  "integrated_candidate": {
+    "git_sha": "9de497e7eb4d87ecb42956fb4b6d8d7ea4ed521c",
+    "branch": "cc/living-library",
+    "working_tree_clean": true,
+    "dirty_entries": []
+  },
+  "stage2_manifest": {
+    "path": "docs/library/proof/manifest-stage2-2026-09-05.json",
+    "bytes": 395185,
+    "sha256": "98f438c6b5a5a65eca911b0ca369d0a1984b99331e788d31c6c275745eaef56a",
+    "sha256_lf": "98f438c6b5a5a65eca911b0ca369d0a1984b99331e788d31c6c275745eaef56a",
+    "manifest_hash": "213ef46f6853ba2512f584dd202227bb86ccc18691dacd0f76fb0ca636ed8d35",
+    "contract_version": "phase2-v1.2-2026-09-04",
+    "targets": 548,
+    "exclusions": 0
+  },
+  "source": {
+    "name": "uoink-index-copy-2026-09-04-upgraded.db",
+    "sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
+    "bytes": 71733248,
+    "schema_version": 25,
+    "upgrade": {
+      "sha256": "bab0eb397a2f14263cae54666f01623c19766c29ec4761b4d407dc6af01ca8ab",
+      "schema_version": 27,
+      "hash_note": "Measured duplicate only; migration timestamps make file hashes run-specific"
+    }
+  },
+  "cards_and_heads": {
+    "cards_hash": "b30f4918c51cc7be2c688482d79088d39f69091db02b37024a952b2cc78f6865",
+    "corpus_heads_hash": "1bb2d1c953a93c1597c3e35b64734ee604172033cca794b49a361ae7e76d7af9",
+    "card_profile_hash": "6e265b0b2822ba3db6865cfa4002824d94538d2bfc0b5366e3f210504ac6bd14",
+    "card_builder": {
+      "path": "library_cards.py",
+      "bytes": 9931,
+      "sha256": "a848cc02d451478548ac0a3d5968a14604919f3c0744a0ee88332dc615b1a10a",
+      "sha256_lf": "64c9fe900408f709f3d2462979b07e740c9688d0a9244d10f9ff8818fef9d096"
+    }
+  },
+  "evaluation_identity": {
+    "holdout": {
+      "path": "docs/library/proof/holdout-v2-2026-09-05.json",
+      "bytes": 18522,
+      "sha256": "0d5be9a11c8589dcbde79a7b2bbb08a23ad6e9e299a6da2f224439583772b309",
+      "sha256_lf": "28fdb16a096deb4cd62e6f7007e5e9792741ab876050d8497e4c29932d328d78"
+    },
+    "holdout_version": "holdout-v2-2026-09-05",
+    "strata": {
+      "timed_evidence": 47,
+      "text_only": 13
+    },
+    "labelling_packet": {
+      "path": "docs/library/proof/holdout-v2-labelling-packet-12-2026-09-06.json",
+      "bytes": 363949,
+      "sha256": "e571d4d82a5e80b67adef14d4fa336693bce41d2da724a92d0ac4ddfead926e0",
+      "sha256_lf": "e571d4d82a5e80b67adef14d4fa336693bce41d2da724a92d0ac4ddfead926e0"
+    },
+    "labelling_packet_equivalence": "INDUCTION-AUDIT-13: packet 12 (decision 3 nodes) and packet 13 (decision 4 nodes) carry identical candidate nodes; decision 5 nodes are byte-identical; packet-12 labels carried forward by that ruling"
+  },
+  "sealed_labels_and_mapping": {
+    "gold": {
+      "path": "docs/library/proof/labels/holdout-v2-gold-2026-09-05.json",
+      "bytes": 67849,
+      "sha256": "14cd54dc4063a71b4d5e357f9a534a9cb98534c654d6602087a908de16938815",
+      "sha256_lf": "14cd54dc4063a71b4d5e357f9a534a9cb98534c654d6602087a908de16938815"
+    },
+    "mapping": {
+      "path": "docs/library/proof/labels/holdout-v2-mapping-2026-09-05.json",
+      "bytes": 23582,
+      "sha256": "9fc2cc9ca019b5971e9c33927ffd543f0c0a5bcd1e92c93ea709d96e16c18157",
+      "sha256_lf": "9fc2cc9ca019b5971e9c33927ffd543f0c0a5bcd1e92c93ea709d96e16c18157"
+    },
+    "adjudicated": {
+      "path": "docs/library/proof/labels/holdout-v2-labels-adjudicated-12-2026-09-06.json",
+      "sha256": "2511cf42e10a8635ce79f2b1807f61ad106ce62df0d377448181b8667da46763"
+    },
+    "gold_items": 60,
+    "sealed": true,
+    "scorable": 60,
+    "labellers": [
+      "gemini-3.8-flash-high (blind, run AD, packet 12)",
+      "grok-4.6 (blind, run AD, packet 12)"
+    ],
+    "labeller_files": {
+      "gemini": {
+        "path": "docs/library/proof/labels/holdout-v2-labels-12-gemini-2026-09-06.json",
+        "bytes": 40207,
+        "sha256": "711ef419d734787500441c9ba5966fa1fa323ef5495d571c191867ed33825928",
+        "sha256_lf": "711ef419d734787500441c9ba5966fa1fa323ef5495d571c191867ed33825928"
+      },
+      "grok": {
+        "path": "docs/library/proof/labels/holdout-v2-labels-12-grok-2026-09-06.json",
+        "bytes": 35482,
+        "sha256": "662544e43ff4e6ff30a1d696c7260cfdd368c075c8dc4ad967bba5ba1a4aeaa5",
+        "sha256_lf": "662544e43ff4e6ff30a1d696c7260cfdd368c075c8dc4ad967bba5ba1a4aeaa5"
+      }
+    },
+    "adjudicator": "gpt-6-astra (blind, run AG)",
+    "scoring_version": "strict-mapped-primary-v2",
+    "rule": "NFC + trimmed segments, case preserved, deepest unambiguous approved ancestor, strict primary equality"
+  },
+  "approved_taxonomy": {
+    "path": "docs/library/taxonomy-v2-2026-09-05.json",
+    "bytes": 12991,
+    "sha256": "015260a496f45322609573956401139f15522d0497e45b263b7e5b8b269696e6",
+    "sha256_lf": "015260a496f45322609573956401139f15522d0497e45b263b7e5b8b269696e6",
+    "version_id": "taxonomy-v2-2026-09-05",
+    "decision": {
+      "path": "docs/library/proof/taxonomy-v2-revision-decision-5-2026-09-06.json",
+      "sha256": "f01bd7c2938894211a3efc86c8e08c36f979a737542aecfa29cf45a2578f5ba7"
+    },
+    "service_returned_revision_hash": "pending observation: recorded by the harness in receipts.before.taxonomy_revision_hash on the disposable duplicate",
+    "parent_version_id": "taxonomy-v1-2026-09-04",
+    "parent_revision_hash": "2f283053bbaca2e94c2dbd340f19c62a89f529457ac40ae5b1d2d84379d22d98",
+    "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "nodes": 11,
+    "approval": {
+      "approved_by": "Codex / GPT-6 Astra (INDUCTION-AUDIT-14)",
+      "approval_record": "docs/library/INDUCTION-AUDIT-14-2026-09-06.md",
+      "proposal_path": "docs/library/proof/taxonomy-v2-revision-decision-5-2026-09-06.json",
+      "proposal_sha256": "f01bd7c2938894211a3efc86c8e08c36f979a737542aecfa29cf45a2578f5ba7",
+      "projection": "nodes restricted to shelf_id, path (NFC), definition, include, exclude; name=path[-1]; parent_shelf_id derived from path; retired=false; sibling_cues, coverage_ledger, diff, pin_impact_report and rejected_proposals remain in the archived proposal",
+      "preserved_shelf_ids": [
+        "ai-and-ml",
+        "space-and-science",
+        "developer-tools",
+        "education",
+        "frontier-models",
+        "security",
+        "spaceflight"
+      ],
+      "added_shelf_ids": [
+        "news-and-current-events",
+        "ai-agents-and-automation",
+        "ai-industry-and-business",
+        "generative-media"
+      ]
+    },
+    "approval_record": "docs/library/INDUCTION-AUDIT-14-2026-09-06.md",
+    "parent_file": {
+      "path": "docs/library/taxonomy-v1-2026-09-04.json",
+      "bytes": 5591,
+      "sha256": "700f8dc09831fa14491a89f4ca68417ac721a17d45bcd2a9dc6c7ede484d11df",
+      "sha256_lf": "0ecad26328ea2eb9b03858f672e7b92f9d975d45f8e01b6382c8faa3aa2c4907"
+    }
+  },
+  "assignment_prompt": {
+    "path": "scripts/librarian/prompts/assign.md",
+    "bytes": 6185,
+    "sha256": "92a25e2b960c51ef8c306b3eddbd49fdb431a6f84d55c8482b24bb6f2ad816c8",
+    "sha256_lf": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+    "prompt_sha256_text_mode": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+    "renderer": "proof_run.render_prompt: {{TAXONOMY}} then {{CARDS}}, template read in text mode (universal newlines)"
+  },
+  "installed_client": {
+    "name": "Claude Code CLI (subscription)",
+    "version": "2.1.261 (Claude Code)",
+    "executable": "C:\\Users\\hello\\.local\\bin\\claude.EXE",
+    "executable_sha256": "f2f5d1a155167488aeb32cd263e15436253c7b1681ae147c9e73e4d6bbc3c852",
+    "model": "claude-sonnet-5",
+    "tools": "disabled (--tools \"\")",
+    "session_persistence": "disabled",
+    "api_key": "ANTHROPIC_API_KEY unset at record time; proof_run.py refuses to start if it is present and records anthropic_api_key_unset in the receipts"
+  },
+  "corpus_egress": {
+    "authorization": "Ryan Biddy, 2026-09-05: 'stage 2 go dont stop until done' (standing stage 2 authorization incl. induction and the measured pass on the Claude subscription); PHASE2-STAGE2-BRIEF item 7",
+    "permitted": "librarian-profile evidence cards (title, channel, platform, source type, hashes, summary hint, up to six excerpts of 240 characters) rendered into the frozen assignment prompt and sent to the subscription client",
+    "forbidden": "labels, gold, mapping, holdout membership, predictions from earlier runs, corpus files beyond the bounded heads"
+  },
+  "budget_and_isolation": {
+    "budget": "subscription-only (claude -p, ANTHROPIC_API_KEY unset); run R reference: 72 processes, 39 min, 908K output tokens, CLI estimate USD 0 (subscription); expected 60-90 processes at batch 8, under the two-hour wall budget; no paid spend authorized",
+    "wall_budget_ms": 7200000,
+    "concurrency": 4,
+    "batch": 8,
+    "max_retries": 1,
+    "error_rate_limit": 0.1,
+    "error_rate_min_attempts": 20,
+    "port": 5180,
+    "apply_enabled": false,
+    "live_index": "never opened; isolated helper on a disposable duplicate"
+  },
+  "implementation": {
+    "implementation_hash": "0d440322412f72ae8338458bb2c0479872a0aa34138016cd483d7645ad7335a2",
+    "files": {
+      "taxonomy": {
+        "path": "docs/library/taxonomy-v2-2026-09-05.json",
+        "bytes": 12991,
+        "sha256": "015260a496f45322609573956401139f15522d0497e45b263b7e5b8b269696e6",
+        "sha256_lf": "015260a496f45322609573956401139f15522d0497e45b263b7e5b8b269696e6"
+      },
+      "parent_taxonomy": {
+        "path": "docs/library/taxonomy-v1-2026-09-04.json",
+        "bytes": 5591,
+        "sha256": "700f8dc09831fa14491a89f4ca68417ac721a17d45bcd2a9dc6c7ede484d11df",
+        "sha256_lf": "0ecad26328ea2eb9b03858f672e7b92f9d975d45f8e01b6382c8faa3aa2c4907"
+      },
+      "holdout": {
+        "path": "docs/library/proof/holdout-v2-2026-09-05.json",
+        "bytes": 18522,
+        "sha256": "0d5be9a11c8589dcbde79a7b2bbb08a23ad6e9e299a6da2f224439583772b309",
+        "sha256_lf": "28fdb16a096deb4cd62e6f7007e5e9792741ab876050d8497e4c29932d328d78"
+      },
+      "gold": {
+        "path": "docs/library/proof/labels/holdout-v2-gold-2026-09-05.json",
+        "bytes": 67849,
+        "sha256": "14cd54dc4063a71b4d5e357f9a534a9cb98534c654d6602087a908de16938815",
+        "sha256_lf": "14cd54dc4063a71b4d5e357f9a534a9cb98534c654d6602087a908de16938815"
+      },
+      "mapping": {
+        "path": "docs/library/proof/labels/holdout-v2-mapping-2026-09-05.json",
+        "bytes": 23582,
+        "sha256": "9fc2cc9ca019b5971e9c33927ffd543f0c0a5bcd1e92c93ea709d96e16c18157",
+        "sha256_lf": "9fc2cc9ca019b5971e9c33927ffd543f0c0a5bcd1e92c93ea709d96e16c18157"
+      },
+      "prompt": {
+        "path": "scripts/librarian/prompts/assign.md",
+        "bytes": 6185,
+        "sha256": "92a25e2b960c51ef8c306b3eddbd49fdb431a6f84d55c8482b24bb6f2ad816c8",
+        "sha256_lf": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1"
+      },
+      "card_builder": {
+        "path": "library_cards.py",
+        "bytes": 9931,
+        "sha256": "a848cc02d451478548ac0a3d5968a14604919f3c0744a0ee88332dc615b1a10a",
+        "sha256_lf": "64c9fe900408f709f3d2462979b07e740c9688d0a9244d10f9ff8818fef9d096"
+      },
+      "index": {
+        "path": "index.py",
+        "bytes": 102624,
+        "sha256": "6fca9b084eda4fa2cfe4f3346cefd386b6076aa4f5a72d30f99d6a80bdbecb55",
+        "sha256_lf": "6f51e1d2490fc0a28994f6c717ab2995cfe411673386b18030a065cb30a704f3"
+      },
+      "clips": {
+        "path": "clips.py",
+        "bytes": 14653,
+        "sha256": "e1723fdfd839e44cf7391954a973932f165effa483f55a45050f97e18676049f",
+        "sha256_lf": "89f8f1cc9311ab5e5f0bdf15356ae3f8be2634ce7d4fdc95639c408ccacfc551"
+      },
+      "provenance": {
+        "path": "provenance.py",
+        "bytes": 6284,
+        "sha256": "d05c0d0b78dc0575800f8849c0ae4c5926a47c625dc870d0515c958573dab71a",
+        "sha256_lf": "ded8b80e664d02e5389c91ce97a167f8664596fa1ae3349a1491dfd5de64f7cf"
+      },
+      "service": {
+        "path": "library_work.py",
+        "bytes": 105995,
+        "sha256": "4dcc2122bf6292d46cf6a088fe887fa2d6018d371409e6661ffab1bbbc75ed09",
+        "sha256_lf": "46fea52235f8164d6766a612029646e6fd5b043f342f5d04058ceb23015787eb"
+      },
+      "migration26": {
+        "path": "migrations/0026_provenance_precedence.sql",
+        "bytes": 1374,
+        "sha256": "874d161a02389db5c40511e989bf074afd1adf7c67c0653ddaf4938e59c12af9",
+        "sha256_lf": "254b0905a73ea351c74751b6c83c1db52aca6db17be00e0e86a9567bff573761"
+      },
+      "migration27": {
+        "path": "migrations/0027_library_substrate.sql",
+        "bytes": 9675,
+        "sha256": "49cc76655c08b39a85c4c4bb82487b25d11932671112635cee3d3a9a50a485eb",
+        "sha256_lf": "12118c486c7f00c582ee175753217e9bef3437e5e89b8bd71a98d4a65f45c5bd"
+      }
+    },
+    "runner": {
+      "path": "scripts/librarian/proof_run.py",
+      "bytes": 108462,
+      "sha256": "ee498e33df7af1038d506041bddd13fd7c3995bd5970bcaab8fe9160b7959e88",
+      "sha256_lf": "89ad2e95b5283ec58b63157aebfbaf1e85a4fc2d8df8dff0b9a692f68394c8fa"
+    },
+    "validator": {
+      "path": "tests/validate_proof_receipts.py",
+      "bytes": 114226,
+      "sha256": "373ad9805c1bc50515219a2fedcf6ed31758f756bbc1fff2960697f3eac1334c",
+      "sha256_lf": "ac2da138183a66efa4dc62c0b7116080ab709742c0350f108296c76793ef249b"
+    },
+    "scorer": {
+      "path": "scripts/librarian/proof_score.py",
+      "bytes": 35951,
+      "sha256": "1e225679055483ae763211a802fb512f5b9980df075f1572b1a07fa22a384fc7",
+      "sha256_lf": "5ac581428c8bd5ccf2e4c04ff2044baf203a0fe666a1214b78873ee774e986c0"
+    }
+  }
+}
