@@ -9,3 +9,13 @@
 # Cross-repository contract fixtures are hashed byte-for-byte. Keep their
 # materialized bytes identical on Windows, macOS, and Linux.
 tests/fixtures/suite_integration_v1/*.json text eol=lf
+
+# Living Library stage 2: execution archives and freeze artifacts are hashed
+# byte-for-byte by tests/validate_proof_receipts.py. No EOL conversion anywhere.
+docs/library/proof/induction-run-*/** -text
+docs/library/proof/induction-attempts/** -text
+docs/library/proof/run-stage2-*/** -text
+docs/library/proof/labels/** -text
+docs/library/proof/holdout-v2-labelling-packet-*.json -text
+docs/library/proof/manifest-stage2-*.json -text
+docs/library/taxonomy-v2-*.json -text
