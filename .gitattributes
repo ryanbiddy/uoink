@@ -19,3 +19,4 @@ docs/library/proof/labels/** -text
 docs/library/proof/holdout-v2-labelling-packet-*.json -text
 docs/library/proof/manifest-stage2-*.json -text
 docs/library/taxonomy-v2-*.json -text
+docs/library/proof/taxonomy-v2-*.json -text
