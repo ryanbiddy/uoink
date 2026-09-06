@@ -41,7 +41,7 @@ def git(*args: str) -> str:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--approval-record", default="docs/library/INDUCTION-AUDIT-7-2026-09-05.md")
+    parser.add_argument("--approval-record", default="docs/library/INDUCTION-AUDIT-14-2026-09-06.md")
     parser.add_argument("--authorization", required=True,
                         help="Who authorized the execution and when (Ryan's standing stage 2 authorization)")
     parser.add_argument("--budget-note", required=True)
@@ -78,17 +78,22 @@ def main(argv=None) -> int:
         evaluation_identity=dict(holdout=file_identity(files["holdout"]["path"]),
                                  holdout_version=holdout["version"],
                                  strata={k: len(v) for k, v in holdout["strata"].items()},
-                                 labelling_packet=file_identity("docs/library/proof/holdout-v2-labelling-packet-7-2026-09-05.json")),
+                                 labelling_packet=file_identity("docs/library/proof/holdout-v2-labelling-packet-12-2026-09-06.json"),
+                                 labelling_packet_equivalence="INDUCTION-AUDIT-13: packet 12 (decision 3 nodes) and packet 13 (decision 4 nodes) carry identical candidate nodes; decision 5 nodes are byte-identical; packet-12 labels carried forward by that ruling"),
         sealed_labels_and_mapping=dict(
             gold=file_identity(files["gold"]["path"]), mapping=file_identity(files["mapping"]["path"]),
             adjudicated=dict(path=mapping["adjudicated_file"], sha256=mapping["adjudicated_sha256"]),
             gold_items=len(gold), sealed=all(item.get("sealed") is True for item in gold),
             scorable=sum(1 for row in mapping["items"].values() if row["scorable"]),
-            labellers=["gemini-3.8-flash-high (blind, run Y)", "grok-4.6 (blind, run Y)"],
-            adjudicator="gpt-6-astra (blind, run Z)",
+            labellers=["gemini-3.8-flash-high (blind, run AD, packet 12)", "grok-4.6 (blind, run AD, packet 12)"],
+            labeller_files={name: file_identity(f"docs/library/proof/labels/holdout-v2-labels-12-{name}-2026-09-06.json") for name in ("gemini", "grok")},
+            adjudicator="gpt-6-astra (blind, run AG)",
             scoring_version=mapping["scoring_version"],
             rule="NFC + trimmed segments, case preserved, deepest unambiguous approved ancestor, strict primary equality"),
         approved_taxonomy=dict(file_identity(files["taxonomy"]["path"]), version_id=taxonomy["version_id"],
+                               decision=dict(path="docs/library/proof/taxonomy-v2-revision-decision-5-2026-09-06.json",
+                                             sha256=sha((ROOT / "docs/library/proof/taxonomy-v2-revision-decision-5-2026-09-06.json").read_bytes())),
+                               service_returned_revision_hash="pending observation: recorded by the harness in receipts.before.taxonomy_revision_hash on the disposable duplicate",
                                parent_version_id=taxonomy["parent_version_id"],
                                parent_revision_hash=taxonomy["parent_revision_hash"],
                                revision_hash=taxonomy["revision_hash"], nodes=len(taxonomy["nodes"]),
@@ -100,7 +105,7 @@ def main(argv=None) -> int:
         installed_client=dict(name="Claude Code CLI (subscription)", version=claude_version, executable=claude_exe,
                               executable_sha256=sha(Path(claude_exe).read_bytes()) if claude_exe and Path(claude_exe).is_file() else None,
                               model=args.model, tools="disabled (--tools \"\")", session_persistence="disabled",
-                              api_key="ANTHROPIC_API_KEY unset at record time; the harness asserts it per process"),
+                              api_key="ANTHROPIC_API_KEY unset at record time; proof_run.py refuses to start if it is present and records anthropic_api_key_unset in the receipts"),
         corpus_egress=dict(authorization=args.authorization,
                            permitted="librarian-profile evidence cards (title, channel, platform, source type, hashes, summary hint, up to six excerpts of 240 characters) rendered into the frozen assignment prompt and sent to the subscription client",
                            forbidden="labels, gold, mapping, holdout membership, predictions from earlier runs, corpus files beyond the bounded heads"),
