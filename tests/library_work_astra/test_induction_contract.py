@@ -300,18 +300,23 @@ def test_recorded_batch_support_negative(kind):
     elif kind == "unknown excerpt":
         support["excerpt_id"] = "0" * 64
         expected = "Support must name an original excerpt"
+    # Contract v1.3 (2026-09-05): a support whose identity is not a card of its batch, or a
+    # disposition whose evidence names another card, is skipped from the key table (listed
+    # under `skipped`) instead of aborting derivation; model-transcribed 19-digit ids made
+    # a whole run fatal otherwise. A tampered record therefore changes the derived table,
+    # so the recorded consolidation stdin no longer matches and validation still fails.
     elif kind == "wrong support owner":
         support["video_id"] = "foreign"
-        expected = "Key support must belong to its recorded batch"
+        expected = "Consolidation input differs from original batch proposals or derived keys"
     elif kind == "wrong disposition owner":
         disposition["video_id"] = "foreign"
-        expected = "Key support must belong to its disposition card"
+        expected = "Consolidation input differs from original batch proposals or derived keys"
     elif kind == "wrong batch ledger":
         other = recorded_output(r["calls"][1])
         other["dispositions"].append(copy.deepcopy(disposition))
         disposition["evidence"] = []
         r["calls"][1]["stdout"] = artifact(dict(structured_output=other))
-        expected = "Key support must belong to its recorded batch"
+        expected = "Consolidation input differs from original batch proposals or derived keys"
     elif kind in {"missing candidates", "changed node quote", "wrong batch node"}:
         expected = "Support key must name recorded batch candidate evidence"
         if kind == "missing candidates":
@@ -323,7 +328,7 @@ def test_recorded_batch_support_negative(kind):
             other = recorded_output(r["calls"][1])
             other["candidates"] = output.pop("candidates")
             r["calls"][1]["stdout"] = artifact(dict(structured_output=other))
-            expected = "Key support must belong to its recorded batch"
+            expected = "Consolidation input differs from original batch proposals or derived keys"
     r["calls"][0]["stdout"] = artifact(dict(structured_output=output))
     # Invalid ownership fails derivation itself, before prompt-byte comparison.
     if not kind.startswith("wrong"):

@@ -719,25 +719,38 @@ def derive_induction_keys(induction, batches, batch_proposals):
     table = dict(cards={card_keys[row["video_id"]]: {k: row[k] for k in ("video_id", "source_revision", "card_hash")}
                         for row in items}, supports={})
     counts = Counter()
+    skipped = []
     for batch, output in zip(batches, batch_proposals):
         require(isinstance(output, dict), "Recorded batch output must be an object")
         for kind, field, evidence_field in (("candidate", "candidates", "supporting_evidence"),
                                             ("disposition", "dispositions", "evidence")):
             rows = output.get(field, [])
             require(isinstance(rows, list), "Recorded batch candidates/dispositions must be arrays")
-            for row in rows:
+            for row_index, row in enumerate(rows):
                 require(isinstance(row, dict), "Recorded batch candidate/disposition must be an object")
                 evidence = row.get(evidence_field, [])
                 require(isinstance(evidence, list), "Recorded batch evidence must be an array")
-                for support in evidence:
-                    require(isinstance(support, dict) and support.get("video_id") in batch["video_ids"],
-                            "Key support must belong to its recorded batch")
-                    vid = support["video_id"]
-                    require(kind == "candidate" or row.get("video_id") == vid,
-                            "Key support must belong to its disposition card")
+                for support_index, support in enumerate(evidence):
+                    require(isinstance(support, dict), "Recorded batch support must be an object")
+                    vid = support.get("video_id")
+                    # Contract v1.3: a support whose identity does not belong to its batch
+                    # (a model-transcribed 19-digit id, typically) gets no key and cannot
+                    # be referenced; it is listed, in output order, so the omission is
+                    # reproducible from the recorded bytes. It is never fatal.
+                    if vid not in batch["video_ids"]:
+                        skipped.append(dict(call_id=batch["call_id"], kind=kind, row=row_index, support=support_index,
+                                            video_id=vid if isinstance(vid, str) else None,
+                                            reason="support video_id is not a card of its batch"))
+                        continue
+                    if kind == "disposition" and row.get("video_id") != vid:
+                        skipped.append(dict(call_id=batch["call_id"], kind=kind, row=row_index, support=support_index,
+                                            video_id=vid, reason="disposition evidence names a different card than its row"))
+                        continue
                     counts[vid] += 1
                     key = card_keys[vid]
                     table["supports"][f"{key}-{counts[vid]}"] = dict(card_key=key, kind=kind, support=copy.deepcopy(support))
+    if skipped:  # absent when empty so contract v1.2 renderings stay byte-identical
+        table["skipped"] = skipped
     return table
 
 

@@ -479,6 +479,11 @@ class InductionHarness:
             "modelUsage": envelope.get("modelUsage") if isinstance(envelope.get("modelUsage"), dict) else None,
             "cli_estimated_cost_usd": envelope.get("total_cost_usd") if isinstance(envelope.get("total_cost_usd"), (int, float)) else None,
         }
+        # The full call record is persisted next to its bytes as soon as the process
+        # ends, so a run that aborts before writing receipts.json keeps replayable
+        # records (a later run may resume from this directory).
+        (self.calls_dir / f"{call_id}.record.json").write_bytes(
+            json.dumps(record, indent=2, ensure_ascii=False).encode("utf-8"))
         return record, envelope
 
     def run_real(self, unmapped_ids: List[str], cards_by_id: Dict[str, dict],
@@ -549,12 +554,25 @@ class InductionHarness:
             # Reuse the recorded batch calls of an earlier run whose consolidation
             # failed. Each reused call's stdin must equal the prompt this run would
             # send (same cards, template, taxonomy), so the record stays honest.
-            prior = json.loads(Path(resume_from).read_text(encoding="utf-8"))
-            prior_dir = Path(resume_from).resolve().parent
-            prior_calls = {c["call_id"]: c for c in prior["calls"]}
-            resume_record = {"from_receipts": _rel(Path(resume_from)),
-                             "from_receipts_sha256": sha(Path(resume_from).read_bytes()),
-                             "reused_call_ids": []}
+            resume_path = Path(resume_from).resolve()
+            if resume_path.is_dir():
+                # An aborted run: per-call records persisted by _claude_call.
+                prior_dir = resume_path
+                prior_calls = {}
+                for record_path in sorted((prior_dir / "calls").glob("*.record.json")):
+                    rec = json.loads(record_path.read_text(encoding="utf-8"))
+                    prior_calls[rec["call_id"]] = rec
+                resume_record = {"from_run_directory": _rel(prior_dir),
+                                 "from_records_sha256": {cid: sha((prior_dir / "calls" / f"{cid}.record.json").read_bytes())
+                                                         for cid in sorted(prior_calls)},
+                                 "reused_call_ids": []}
+            else:
+                prior = json.loads(resume_path.read_text(encoding="utf-8"))
+                prior_dir = resume_path.parent
+                prior_calls = {c["call_id"]: c for c in prior["calls"]}
+                resume_record = {"from_receipts": _rel(resume_path),
+                                 "from_receipts_sha256": sha(resume_path.read_bytes()),
+                                 "reused_call_ids": []}
             for cid, chunk, prompt in plan:
                 rec = prior_calls.get(cid)
                 if not rec or rec["exit_status"] != 0 or rec["attempt_ids"] != chunk:
