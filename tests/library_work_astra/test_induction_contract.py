@@ -330,7 +330,8 @@ def test_recorded_batch_support_negative(kind):
             r["calls"][1]["stdout"] = artifact(dict(structured_output=other))
             expected = "Consolidation input differs from original batch proposals or derived keys"
     r["calls"][0]["stdout"] = artifact(dict(structured_output=output))
-    # Invalid ownership fails derivation itself, before prompt-byte comparison.
+    # v1.3 skips invalid ownership. Keep the original consolidation input so the
+    # four ownership mutations must fail its byte binding before key expansion.
     if not kind.startswith("wrong"):
         refresh_receipt(r)
     with pytest.raises((ValueError, ValidationError), match=expected):
@@ -583,6 +584,93 @@ def test_freezes_reproduce_and_do_not_overlap():
     assert not selected & {r["video_id"] for r in induction["items"]}
 
 
+def test_v13_skips_are_ordered_unaddressable_and_bound_to_input():
+    r = make_induction_receipt()
+    baseline = receipt_keys(r)
+    assert "skipped" not in baseline  # Preserve the v1.2 wire format.
+    output = recorded_output(r["calls"][0])
+    good = copy.deepcopy(output["candidates"][0]["supporting_evidence"][0])
+    output["candidates"][0]["supporting_evidence"].insert(0, dict(good, video_id="unkeyable"))
+    disposition = next(row for row in output["dispositions"] if row["evidence"])
+    other = next(vid for vid in r["batches"][0]["video_ids"] if vid != disposition["video_id"])
+    disposition["evidence"].append(dict(good, video_id=other))
+    r["calls"][0]["stdout"] = artifact(dict(structured_output=output))
+    keys = receipt_keys(r)
+    assert keys["cards"] == baseline["cards"] and keys["supports"] == baseline["supports"]
+    assert keys["skipped"] == [
+        dict(call_id=r["batches"][0]["call_id"], kind="candidate", row=0, support=0,
+             video_id="unkeyable", reason="support video_id is not a card of its batch"),
+        dict(call_id=r["batches"][0]["call_id"], kind="disposition", row=output["dispositions"].index(disposition),
+             support=1, video_id=other, reason="disposition evidence names a different card than its row"),
+    ]
+    assert keys == receipt_keys(r)  # Deterministic replay from recorded output.
+    with pytest.raises(ValueError, match="Consolidation input differs"):
+        v.validate_induction_receipts(r)
+    refresh_receipt(r)
+    assert v.validate_induction_receipts(r)["proposal_approved"] is False
+    # Discarding an unused bad occurrence never manufactures an addressable key.
+    key = ledger_row(r, good["video_id"])["card_key"]
+    r["proposal"]["nodes"][-1]["supporting_evidence"][0] = dict(support_key=key + "-999")
+    refresh_receipt(r)
+    with pytest.raises(ValueError, match="Unknown induction support key"):
+        v.validate_induction_receipts(r)
+
+
+@pytest.mark.parametrize("identity", [None, 19, [], {}])
+def test_v13_nonstring_support_identity_is_skipped_without_coercion(identity):
+    r = make_induction_receipt()
+    baseline = receipt_keys(r)
+    output = recorded_output(r["calls"][0])
+    good = output["candidates"][0]["supporting_evidence"][0]
+    output["candidates"][0]["supporting_evidence"].append(dict(good, video_id=identity))
+    r["calls"][0]["stdout"] = artifact(dict(structured_output=output))
+    keys = receipt_keys(r)
+    assert keys["supports"] == baseline["supports"]
+    assert len(keys["skipped"]) == 1 and keys["skipped"][0]["video_id"] is None
+
+
+def test_v13_nonobject_support_still_fails():
+    r = make_induction_receipt()
+    output = recorded_output(r["calls"][0])
+    output["candidates"][0]["supporting_evidence"].append(None)
+    r["calls"][0]["stdout"] = artifact(dict(structured_output=output))
+    with pytest.raises(ValueError, match="Recorded batch support must be an object"):
+        receipt_keys(r)
+
+
+def test_v13_optional_provenance_keeps_required_fields_and_closed_objects():
+    base = v.object_schema(dict(required=v.ID))
+    before = copy.deepcopy(base)
+    extended = v.with_optional(base, dict(optional=v.TEXT))
+    assert base == before and extended["required"] == before["required"]
+    assert extended["additionalProperties"] is False
+    r = make_induction_receipt()
+    v.Draft202012Validator(v.INDUCTION_RECEIPT_SCHEMA).validate(r)
+    r["calls"][0].update(cwd="fixture-checkout", environment_policy="fixture declaration")
+    r["execution"].update(checkout_root="fixture-checkout", cwd="fixture-checkout", model="fixture-model",
+                          effort=dict(batch="default", consolidation="low"), concurrency=4, call_timeout_s=1800,
+                          environment=dict(ANTHROPIC_API_KEY="unset"), database_opened=False, helper_opened=False,
+                          network_egress="fixture only", input_paths={}, output_root="_scratch/fixture", resume=None)
+    r["induction_state"] = dict(source="fixture state", archived_receipts_sha256="0" * 64, pins=0,
+                                memberships=0, item_policies=0, active_version_id=None)
+    schema = v.Draft202012Validator(v.INDUCTION_RECEIPT_SCHEMA)
+    schema.validate(r)
+    for location, field, value in (((), "unknown", True), (("execution",), "unknown", True),
+                                   (("calls", 0), "unknown", True), (("calls", 0), "cwd", 12),
+                                   (("execution",), "database_opened", True), (("execution",), "helper_opened", True),
+                                   (("execution",), "resume", "unchecked path"), (("induction_state",), "pins", -1)):
+        changed = copy.deepcopy(r)
+        target = changed
+        for part in location:
+            target = target[part]
+        target[field] = value
+        with pytest.raises(ValidationError):
+            schema.validate(changed)
+    del r["execution"]["git_sha"]
+    with pytest.raises(ValidationError, match="required property"):
+        schema.validate(r)
+
+
 def run_offline_checks():
     test_induction_supports_and_complete_ledger()
     for kind in NEGATIVE_KINDS:
@@ -603,5 +691,10 @@ def run_offline_checks():
     test_reference_resolution_and_relaxed_call_schema()
     test_complete_induction_receipt_and_modified_batch()
     test_freezes_reproduce_and_do_not_overlap()
+    test_v13_skips_are_ordered_unaddressable_and_bound_to_input()
+    for identity in (None, 19, [], {}):
+        test_v13_nonstring_support_identity_is_skipped_without_coercion(identity)
+    test_v13_nonobject_support_still_fails()
+    test_v13_optional_provenance_keeps_required_fields_and_closed_objects()
     return (len(NEGATIVE_KINDS) + len(BATCH_NEGATIVE_KINDS) + len(IDENTITY_NEGATIVE_KINDS)
-            + len(KEY_NEGATIVE_KINDS) + len(PROMPT_NEGATIVE_KINDS) + 12)
+            + len(KEY_NEGATIVE_KINDS) + len(PROMPT_NEGATIVE_KINDS) + 19)

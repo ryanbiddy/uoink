@@ -1,8 +1,8 @@
-"""Run W: independent, archive-only induction replay. No model/helper/DB access.
+"""Runs W/Y: independent, archive-only induction replay. No model/helper/DB access.
 
 Run with python -B docs/library/proof/audit-induction-2026-09-05.py.
 Exit 0 means replay completed, NOT approval. All reads stay in this worktree.
-Contract helpers are imported only after independent measurements are complete.
+Core measurements are computed independently; helper comparisons are separate.
 The optional --self-test exercises rejection cases against in-memory copies.
 """
 from __future__ import annotations
@@ -130,11 +130,21 @@ def derive_keys(induction, batches, outputs):
     for batch, output in zip(batches, outputs, strict=True):
         for field, ev_field, kind in [("candidates", "supporting_evidence", "candidate"),
                                      ("dispositions", "evidence", "disposition")]:
-            for row in output[field]:
-                for support in row[ev_field]:
-                    vid = support["video_id"]
-                    if vid not in batch["video_ids"] or (kind == "disposition" and vid != row["video_id"]):
-                        raise ValueError("Cross-card/batch support")
+            for row_index, row in enumerate(output[field]):
+                for support_index, support in enumerate(row[ev_field]):
+                    if not isinstance(support, dict):
+                        raise ValueError("Support must be an object")
+                    vid = support.get("video_id")
+                    reason = None
+                    if vid not in batch["video_ids"]:
+                        reason = "support video_id is not a card of its batch"
+                    elif kind == "disposition" and vid != row["video_id"]:
+                        reason = "disposition evidence names a different card than its row"
+                    if reason:
+                        keys.setdefault("skipped", []).append(dict(call_id=batch["call_id"], kind=kind,
+                            row=row_index, support=support_index, video_id=vid if isinstance(vid, str) else None,
+                            reason=reason))
+                        continue
                     counts[vid] += 1
                     keys["supports"][f"{names[vid]}-{counts[vid]}"] = dict(
                         card_key=names[vid], kind=kind, support=copy.deepcopy(support))
@@ -199,6 +209,218 @@ def accounting(calls, envelopes):
                 cli_estimated_cost_usd=math.fsum(estimates) if available else None,
                 estimate_source="claude_cli_estimate" if available else "unavailable",
                 paid_cost_usd=None, paid_cost_source="unavailable")
+
+
+def audit_attempt9(result, receipts, induction, cards, frozen, keys, proposal, archive, validator):
+    """Attempt-specific observations; never relabel a historical process as new."""
+    result["audit"] = "induction-run-Y-attempt9"
+    result["archive"] = RUN.relative_to(ROOT).as_posix()
+    result["receipt_sha256"] = sha(read(RUN / "receipts.json"))
+    result["proposal_sha256"] = sha(read(RUN / "proposal.json"))
+    b2, b3, b4, b5, b6, b7, b8, b9 = [result[f"B{i}"] for i in range(2, 10)]
+    # Run W's historical defects stay in its preserved measurements, not in the
+    # accounting for the independent attempt-8 batches used by attempt 9.
+    b2.pop("prior_attempts")
+    b2.pop("model_calls_launched_in_attempt6_inferred_from_prior_identity")
+    for field in ("unique_recorded_processes_across_six_attempts", "complete_history_cost_available",
+                  "known_estimates_across_unique_processes", "history_is_record_only_for_missing_artifacts",
+                  "attempt4_proposal_replay"):
+        b7.pop(field)
+    b3.pop("gold_example_location")
+    invalid = set(b4["invalid_batch_supports"])
+    selected = {r["support_key"] for n in proposal["nodes"] for r in n["supporting_evidence"]} | {
+        r["support_key"] for row in proposal["coverage_ledger"] for r in row["evidence"]}
+    template = read(RUN / receipts["consolidation_prompt"]["path"]).decode()
+    b3["unusable_keys_named"] = all(k in template.split("## Key table (data)")[0] for k in invalid)
+    b4["unusable_keys_selected"] = sorted(selected & invalid)
+    b4["skipped"] = keys.get("skipped", [])
+
+    reviewed_hash = "37db6a1ee53e3ee286d32986f633bb7b12b9dfa4594a462504feb13b1a283997"
+    # Human review of each quote in its cited excerpt. These are neither model
+    # scores nor an automatic inference from words occurring in the source.
+    reviews = {
+        "c006-1": (True, "The cited excerpt explicitly debates left/center political ideology."),
+        "c009-1": (True, "Reports a murder charge and overnight shooting with a named location."),
+        "c010-1": (True, "Reports a home intrusion, death, police response and charges."),
+        "c011-1": (True, "Police radio declares a riot and reports a capitol breach."),
+        "c019-1": (True, "Original post describes missiles striking a named air base and soldiers reacting."),
+        "c033-1": (True, "Original post says made with Seedance and supplies the animation-generation prompt; it describes the use."),
+        "c038-1": (True, "Original post explicitly identifies a created film and an AI-film award."),
+        "c104-1": (True, "Original post explicitly describes an AI video of cat vlogs."),
+        "c140-1": (True, "Original post describes using a named model to generate a specific video."),
+        "c128-1": (True, "Original post explicitly describes its AI animated film and the use of genAI with human art."),
+        "c088-1": (True, "Describes an internet-using model ordering food, booking flights, shopping and researching."),
+        "c106-1": (True, "Explicitly describes AI agents selling cars, underwriting loans and running an operation."),
+        "c089-1": (True, "Describes Claude reading ads and extracting winning patterns through a newly launched MCP integration."),
+        "c110-1": (False, "Only requests NDAs and employee information; the sole excerpt identifies no AI actor or autonomous task completion."),
+        "c070-1": (False, "Describes installing an offline AI agent but no task, multi-step execution or business workflow; the include cue exceeds the definition."),
+        "c213-1": (True, "Reports a named AI company's ARR, with an estimate qualification in the excerpt; the subject is financial performance."),
+        "c223-1": (True, "Original post explicitly describes a revenue comparison between OpenAI and Anthropic."),
+        "c178-1": (True, "Explicitly discusses an acquisition and its consequence for open-source AI."),
+        "c082-1": (True, "Explicitly discusses AI-company competition in terms of infrastructure."),
+        "c130-1": (True, "Discusses government restrictions on an AI lab and access to its models."),
+        "c201-1": (True, "Gives a job-seeker specific advice against mass applications."),
+        "c202-1": (False, "The cited excerpt describes an app feature backlog and shipping work, without establishing an independent business or creative career. Other excerpts cannot replace the selected support."),
+        "c203-1": (True, "Describes a programmer's non-traditional credentials and self-taught path."),
+        "c209-1": (True, "Gives a musician release-timing advice, a concrete aspect of managing a creative career."),
+        "c221-1": (False, "An interview announcement and chapter heading name a startup topic; they supply no founding advice or firsthand account required by the definition and distinguishing cue."),
+    }
+    b4["manual_relevance_review_applies"] = result["proposal_sha256"] == reviewed_hash
+    b4["manual_relevance_review_method"] = "Auditor read all 25 selected quotes and every frozen excerpt on those cards; each judgment uses its cited excerpt only."
+    b4["manual_relevance_review"] = []
+    b4["manual_relevance_gaps"] = []
+    if b4["manual_relevance_review_applies"]:
+        assert set(reviews) == {e["support_key"] for n in b4["nodes"] for e in n["evidence"]}
+        for node in b4["nodes"]:
+            grounded = set()
+            for evidence in node["evidence"]:
+                support = evidence["support"]
+                card = cards[support["video_id"]]
+                excerpt = next(e for e in card["excerpts"] if e["excerpt_id"] == support["excerpt_id"])
+                passed, reason = reviews[evidence["support_key"]]
+                row = dict(shelf_id=node["shelf_id"], support_key=evidence["support_key"], support=support,
+                           excerpt=excerpt, all_card_excerpts=card["excerpts"], subject_relevant=passed, reason=reason)
+                b4["manual_relevance_review"].append(row)
+                if passed:
+                    grounded.add(support["video_id"])
+                else:
+                    b4["manual_relevance_gaps"].append(row)
+            node["distinct_cards_after_manual_relevance_review"] = len(grounded)
+    b5["omission_explanation_failures"] = [r for r in b5["proposed_without_node_support"]
+                                           if not re.search(r"; not a support: .+", r["reason"])]
+    b5["omission_explanation_count"] = b5["proposed_without_node_support_count"] - len(b5["omission_explanation_failures"])
+    ledger = {r["video_id"]: r for r in b5["rows"]}
+    for candidate in b6["batch_candidates"]:
+        candidate["final_support_card_dispositions"] = [{k: ledger[vid][k] for k in ("card_key", "video_id", "disposition", "shelf_ids", "reason")}
+                                                        for vid in candidate["video_ids"] if vid in ledger]
+    projection_bytes = (canonical(b6["projected_taxonomy"]) + "\n").encode()
+    b6["projected_file_serialization"] = "UTF-8, sorted keys, compact separators, ensure_ascii=False, one final LF (service format)"
+    b6["projected_file_sha256"] = sha(projection_bytes)
+    b6["projected_file_bytes"] = len(projection_bytes)
+    b6["projection_status"] = "Calculated diagnostic only; neither approved nor installed"
+    b6["pin_state_replay"] = dict(archive_sha256=sha(read(PROOF / "run-2026-09-05/receipts.json")),
+        pins=len(archive["before"]["pins"]), memberships=len(archive["before"]["memberships"]),
+        item_policies=len(archive["before"]["item_policies"]), active_version_id=archive["before"]["active_version_id"])
+    b6["pin_measurements_match"] = (receipts["induction_state"]["archived_receipts_sha256"] == b6["pin_state_replay"]["archive_sha256"]
+        and all(receipts["induction_state"][k] == b6["pin_state_replay"][k] for k in ("pins", "memberships", "item_policies", "active_version_id"))
+        and proposal["pin_impact_report"]["measured_pins"] == b6["pin_state_replay"]["pins"]
+        and proposal["pin_impact_report"]["measured_memberships"] == b6["pin_state_replay"]["memberships"])
+
+    origin = PROOF / "induction-run-8-2026-09-05"
+    prior_raw = read(origin / "receipts.json")
+    prior = decode(prior_raw)
+    prior_calls = {c["call_id"]: c for c in prior["calls"]}
+    resume = receipts["execution"]["resume"]
+    checks = []
+    for call in receipts["calls"]:
+        cid = call["call_id"]
+        if cid not in resume["reused_call_ids"]:
+            continue
+        original = prior_calls[cid]
+        persisted = read(origin / "calls" / f"{cid}.record.json")
+        row = dict(call_id=cid, receipt_record_equal=call == original,
+                   persisted_record_equal=decode(persisted) == call, persisted_record_sha256=sha(persisted), artifacts=[])
+        for field in ("stdin", "stdout", "stderr"):
+            raw = read(origin / original[field]["path"])
+            current = read(RUN / call[field]["path"])
+            row["artifacts"].append(dict(field=field, byte_equal=raw == current,
+                original_ref_matches=sha(raw) == original[field]["sha256"] and len(raw) == original[field]["bytes"], sha256=sha(raw)))
+        checks.append(row)
+    b2["resume"] = dict(record=resume, source_archive=origin.relative_to(ROOT).as_posix(),
+        source_hash_matches=sha(prior_raw) == resume["from_receipts_sha256"], source_execution=prior["execution"],
+        source_has_no_resume=prior["execution"]["resume"] is None,
+        reused_set_is_exact=resume["reused_call_ids"] == [b["call_id"] for b in receipts["batches"]], checks=checks,
+        original_batch_template_equal=read(origin / prior["batch_prompt"]["path"]) == read(RUN / receipts["batch_prompt"]["path"]))
+    b2["new_process_count"] = len(receipts["calls"]) - len(checks)
+    b2["resume_metadata_fields"] = ["execution.resume"]
+    new = next(c for c in receipts["calls"] if c["call_id"] == receipts["consolidation_call_id"])
+    b2["new_call_persisted_record_equal"] = document(RUN / "calls" / f"{new['call_id']}.record.json") == new
+    # Preserve the rejected attempt-8 consolidation and its raw cost as a distinct
+    # process. This never adds the nine reused batches a second time.
+    prior_final = prior_calls[prior["consolidation_call_id"]]
+    prior_artifacts = {}
+    for field in ("stdin", "stdout", "stderr"):
+        raw = read(origin / prior_final[field]["path"])
+        prior_artifacts[field] = dict(sha256=sha(raw), bytes=len(raw),
+            matches=sha(raw) == prior_final[field]["sha256"] and len(raw) == prior_final[field]["bytes"])
+    envelope = document(origin / prior_final["stdout"]["path"])
+    b2["attempt8_consolidation"] = dict(call=prior_final, artifacts=prior_artifacts,
+        persisted_record_equal=document(origin / "calls" / "call-consolidation.record.json") == prior_final,
+        distinct_from_attempt9=prior_final != new)
+    b7["reused_batch_estimate_usd"] = math.fsum(c["cli_estimated_cost_usd"] for c in receipts["calls"] if c != new)
+    b7["new_consolidation_estimate_usd"] = new["cli_estimated_cost_usd"]
+    b7["attempt8_consolidation_estimate_usd"] = envelope["total_cost_usd"]
+    b7["attempt8_and_9_unique_process_count"] = len(receipts["calls"]) + 1
+    b7["attempt8_and_9_unique_process_estimate_usd"] = math.fsum([b7["accounting"]["cli_estimated_cost_usd"], envelope["total_cost_usd"]])
+    b7["scope"] = "Attempt 9's ten represented processes and the distinct attempt-8 consolidation; not total induction-history cost"
+    events = sorted((c[k], delta) for c in receipts["calls"] for k, delta in (("start_monotonic_ns", 1), ("end_monotonic_ns", -1)))
+    active = maximum = 0
+    for _, delta in events:
+        active += delta
+        maximum = max(maximum, active)
+    b2["maximum_concurrent_processes"] = maximum
+    b2["max_call_duration_s"] = max((c["end_monotonic_ns"] - c["start_monotonic_ns"]) / 1e9 for c in receipts["calls"])
+    b8["api_key_unset_assertion_present"] = receipts["execution"]["environment"]["ANTHROPIC_API_KEY"] == "unset (asserted before every process)"
+    b8["per_call_isolation"] = [{k: c[k] for k in ("call_id", "cwd", "environment_policy")} for c in receipts["calls"]]
+    b8["archive_only_declaration"] = {k: receipts["execution"][k] for k in ("database_opened", "helper_opened", "network_egress", "input_paths", "output_root", "cwd", "checkout_root")}
+    b8["statement"] = "Accepted archive-only evidence profile from run W: launch records plus fingerprinted code and bound file inputs; no claim of independent OS network telemetry or a historical database snapshot. Historical cwd is recorded provenance, never opened by this audit."
+    b8["historical_relative_paths_contained"] = all(not PureWindowsPath(p).is_absolute() and ".." not in Path(p).parts
+        for p in [*receipts["execution"]["input_paths"].values(), receipts["execution"]["output_root"], resume["from_receipts"]])
+    b8["all_call_cwds_equal_declared_checkout"] = all(c["cwd"] == receipts["execution"]["checkout_root"] for c in receipts["calls"])
+    # Rebind archived code to each execution SHA using this worktree's Git object
+    # database. Historical paths are never read from the filesystem.
+    b8["fingerprint_commit_bindings"] = []
+    for base, rec in ((origin, prior), (RUN, receipts)):
+        for name, source in (("runner", "scripts/librarian/induce_run.py"), ("validator", "tests/validate_proof_receipts.py"), ("card_builder", "library_cards.py")):
+            raw = read(base / rec["execution"]["fingerprints"][name]["path"])
+            blob = subprocess.run(["git", "show", rec["execution"]["git_sha"] + ":" + source], cwd=ROOT, capture_output=True, check=True).stdout
+            b8["fingerprint_commit_bindings"].append(dict(archive=base.name, name=name, execution_sha=rec["execution"]["git_sha"],
+                artifact_hash_matches=sha(raw) == rec["execution"]["fingerprints"][name]["sha256"],
+                lf_content_equal_git_blob=raw.replace(b"\r\n", b"\n") == blob.replace(b"\r\n", b"\n"), git_blob_sha256=sha(blob)))
+    b9["attempt6_export_repair"] = validator.validate_induction_receipts(document(PROOF / "induction-run-2026-09-05/receipts.json"),
+        artifact_root=PROOF / "induction-run-2026-09-05", require_real=True)
+    repaired_base = PROOF / "induction-run-2026-09-05"
+    repaired = document(repaired_base / "receipts.json")
+    b9["attempt6_repaired_artifacts"] = []
+    for ref in (repaired["taxonomy"], repaired["execution"]["fingerprints"]["validator"], repaired["execution"]["fingerprints"]["card_builder"]):
+        raw = read(repaired_base / ref["path"])
+        b9["attempt6_repaired_artifacts"].append(dict(path=ref["path"], **eol_identity(raw),
+            matches=sha(raw) == ref["sha256"] and len(raw) == ref["bytes"]))
+    try:
+        validator.validate_induction_receipts(prior, artifact_root=origin, require_real=True)
+    except ValueError as exc:
+        b9["attempt8_preserved_rejection"] = str(exc)
+    packet = document(PROOF / "holdout-v2-labelling-packet-9-2026-09-05.json")
+    packet_raw = read(PROOF / "holdout-v2-labelling-packet-9-2026-09-05.json")
+    packet_fields = ("shelf_id", "path", "definition", "include", "exclude", "sibling_cues")
+    result["labelling_packet"] = dict(sha256=sha(packet_raw),
+        matches_dispatched_hash=sha(packet_raw) == "c96c19001a5ee262df47da6b1cb2dec69000293e3c782c374ec45e447cbe5d35",
+        proposal_hash_matches=packet["taxonomy_candidate"]["proposal_sha256"] == result["proposal_sha256"],
+        candidate_nodes_equal=packet["taxonomy_candidate"]["nodes"] == [{k: n[k] for k in packet_fields} for n in proposal["nodes"]])
+    # Exercise the actual aborted 7b data, without claiming its absent call
+    # records were recovered or that it belongs to attempt 9's process lineage.
+    unkeyable = PROOF / "induction-attempts/attempt7-unkeyable-aborted"
+    old_outputs = [document(unkeyable / "calls" / f"{b['call_id']}.stdout")["structured_output"] for b in receipts["batches"]]
+    old_keys = derive_keys(induction, receipts["batches"], old_outputs)
+    old_helper_keys = validator.derive_induction_keys(induction, receipts["batches"], old_outputs)
+    result["contract_v13_review"] = dict(owner="Codex / GPT-6 Astra", decision="ACCEPT implementation and four changed expectations",
+        validator_sha256=sha(read(ROOT / "tests/validate_proof_receipts.py")),
+        tests_sha256=sha(read(ROOT / "tests/library_work_astra/test_induction_contract.py")),
+        attempt7b_skipped=old_keys.get("skipped", []), attempt7b_independent_keys_equal=old_keys == old_helper_keys,
+        attempt9_skipped_field_absent="skipped" not in keys,
+        provenance_semantics="Optional fields preserve old receipts and closed outer objects; loose JSON_OBJECT subfields remain auditor-verified declarations, not automatic B8 approval.")
+    b6["operative_rule_review"] = {
+        "mutual_rules_present_between_three_new_ai_siblings": True,
+        "definition_cue_conflicts": [
+            dict(shelf_id="ai-generative-media", reason="Image generation appears in include cues; definition specifies video, animation or film."),
+            dict(shelf_id="ai-agents-and-automation", reason="Installation/operating constraints and a single office task do not require the autonomous multi-step execution in the definition."),
+        ],
+        "missing_reciprocal_precedence": [
+            dict(from_shelf="ai-generative-media", to_shelf="frontier-models", reason="New node excludes model evaluations without creative output; preserved Frontier Models has no converse rule for a model release showing creative output."),
+        ],
+        "product_launches_merge_ruling": "Not covered by equivalent-candidate merge exception: a cross-cutting product-launch concept is distributed between two non-equivalent functional nodes. It needs an explicit standalone-candidate disposition; c060 prompt capture does not establish autonomous task execution."
+    }
+    result["prior_measurements_sha256"] = sha(read(PROOF / "audit-induction-measurements-2026-09-05.json"))
 
 
 def main(self_test=False):
@@ -459,7 +681,7 @@ def main(self_test=False):
                     for model, fields in by_model.items()}
     attempts = []
     unique_processes = {}
-    for path in sorted((PROOF / "induction-attempts").glob("*")):
+    for path in sorted((PROOF / "induction-attempts").glob("*receipts.json")):
         raw = read(path)
         if not path.name.endswith("receipts.json"):
             continue
@@ -546,11 +768,13 @@ def main(self_test=False):
     b9["helper_measurement_limits"] = "The public validator reports only target_count and call_count. B4/B5 counts above come from helper-expanded data, not public metrics. Helpers do not judge relevance, omitted node-support explanations, or execution isolation for induction."
     # A diagnostic exact-hash reconstruction is isolated in scratch, never accepted
     # as the delivered archive. No receipt, prompt or model output is rewritten.
-    scratch = contained(ROOT / "_scratch/proof/audit-induction-2026-09-05/eol-diagnostic")
-    scratch.mkdir(parents=True, exist_ok=True)
+    scratch = contained(ROOT / "_scratch/proof/audit-induction-2026-09-05" / RUN.name / "eol-diagnostic")
+    diagnostic_needed = any(not r["matches"] for r in REFERENCES)
+    if diagnostic_needed:
+        scratch.mkdir(parents=True, exist_ok=True)
     repairs = []
     refs = {r["path"]: r for r in REFERENCES}
-    for path in sorted(RUN.rglob("*")):
+    for path in sorted(RUN.rglob("*")) if diagnostic_needed else []:
         if not path.is_file():
             continue
         rel = path.relative_to(RUN).as_posix()
@@ -564,10 +788,12 @@ def main(self_test=False):
         target = contained(scratch / rel)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(raw)
-    try:
-        b9["eol_diagnostic_validator"] = validator.validate_induction_receipts(receipts, artifact_root=scratch, require_real=True)
-    except Exception as exc:
-        b9["eol_diagnostic_error"] = f"{type(exc).__name__}: {exc}"
+    if diagnostic_needed:
+        try:
+            b9["eol_diagnostic_validator"] = validator.validate_induction_receipts(receipts, artifact_root=scratch, require_real=True)
+        except Exception as exc:
+            b9["eol_diagnostic_error"] = f"{type(exc).__name__}: {exc}"
+    b9["eol_diagnostic_needed"] = diagnostic_needed
     b9["diagnostic_reconstructions"] = repairs
     b9["diagnostic_is_original_archive_acceptance"] = False
     tests = []
@@ -606,6 +832,8 @@ def main(self_test=False):
                   model_calls_executed_by_audit=0, helper_calls_executed_by_audit=0, databases_opened_by_audit=0,
                   B1=b1, B2=b2, B3=b3, B4=b4, B5=b5, B6=b6, B7=b7, B8=b8, B9=b9,
                   artifact_checks=REFERENCES, self_test_passed=tests, input_files=FILES)
+    if RUN.name == "induction-run-9-2026-09-05":
+        audit_attempt9(result, receipts, induction, cards, frozen, keys, proposal, archive, validator)
     OUT.write_text(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8", newline="\n")
     print(json.dumps(dict(completed=True, approval=False, calls=b2["call_count"], nodes=b6["node_count"],
                          ledger=b5["disposition_counts"], invalid_selected_supports=b4["accepted_errors"],
@@ -618,4 +846,16 @@ def main(self_test=False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--self-test", action="store_true")
-    main(parser.parse_args().self_test)
+    parser.add_argument("--archive", type=Path, default=RUN)
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+    RUN = contained(args.archive)
+    if args.output:
+        OUT = contained(args.output)
+    elif RUN.name == "induction-run-9-2026-09-05":
+        OUT = PROOF / "audit-induction-9-measurements-2026-09-05.json"
+    elif RUN != PROOF / "induction-run-2026-09-05":
+        parser.error("Other archives require an explicit --output")
+    if RUN.name != "induction-run-2026-09-05" and OUT == PROOF / "audit-induction-measurements-2026-09-05.json":
+        parser.error("A re-audit must not overwrite the run W measurements")
+    main(args.self_test)

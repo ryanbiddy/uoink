@@ -73,6 +73,45 @@ def make_artifact_ref(rel_path: str, raw_bytes: bytes) -> dict:
     }
 
 
+def _proposal_post_checks(proposal: Dict[str, Any], keys: Dict[str, Any], batch_proposals: List[Any]) -> List[str]:
+    """Advisory checks on the model's proposal, printed to the harness log. They never
+    modify the proposal; the validator and the audit are the authorities."""
+    warnings: List[str] = []
+    supports = keys.get("supports", {})
+    node_support_cards: Dict[str, set] = {}
+    for node in proposal.get("nodes", []):
+        cards = set()
+        for entry in node.get("supporting_evidence", []) or []:
+            key = entry.get("support_key")
+            meta = supports.get(key)
+            if meta is None:
+                warnings.append(f"node {node.get('shelf_id')} cites unknown key {key}")
+            elif meta["kind"] != "candidate":
+                warnings.append(f"node {node.get('shelf_id')} cites {meta['kind']}-kind key {key}")
+            else:
+                cards.add(meta["card_key"])
+        if node.get("supporting_evidence") and len(cards) != 5:
+            warnings.append(f"node {node.get('shelf_id')} has {len(cards)} distinct support cards")
+        node_support_cards[node.get("shelf_id")] = cards
+        for cue in node.get("include", []) or []:
+            if "image" in cue.lower() and "image" not in (node.get("definition") or "").lower():
+                warnings.append(f"node {node.get('shelf_id')} include cue admits images but the definition does not say images")
+    for row in proposal.get("coverage_ledger", []) or []:
+        if row.get("disposition") == "proposed_concept":
+            in_support = any(row.get("card_key") in node_support_cards.get(sid, set()) for sid in row.get("shelf_ids", []))
+            if not in_support and "not a support" not in (row.get("reason") or ""):
+                warnings.append(f"ledger row {row.get('card_key')} is proposed but neither a support nor explained")
+    adopted = {" / ".join(node.get("path", [])) for node in proposal.get("nodes", [])}
+    rejected = " ".join(str(item.get("proposal", "")) for item in proposal.get("rejected_proposals", []) or [])
+    for output in batch_proposals:
+        for candidate in (output.get("candidates") or []) if isinstance(output, dict) else []:
+            path = " / ".join(candidate.get("path", []))
+            leaf = candidate.get("path", [""])[-1]
+            if path not in adopted and leaf not in rejected and path not in rejected:
+                warnings.append(f"batch candidate {path!r} is neither adopted under its own path nor named in rejected_proposals")
+    return warnings
+
+
 def _rel(path: Path) -> str:
     """Repository-relative POSIX path when inside the checkout, else the absolute path."""
     try:
@@ -625,6 +664,28 @@ class InductionHarness:
             unusable = sorted(
                 key for key, entry in keys["supports"].items()
                 if not _support_is_valid(entry["support"], cards_by_id))
+            # Keys an independent auditor judged off-subject in an earlier attempt on the
+            # same batch outputs (UOINK_INDUCE_AUDITOR_REJECTED_KEYS="c110-1:reason,...").
+            # They are named in the recorded prompt with the audit reference, never
+            # silently dropped, and recorded in the receipts.
+            auditor_rejected = {}
+            for item in filter(None, (os.environ.get("UOINK_INDUCE_AUDITOR_REJECTED_KEYS") or "").split(",")):
+                key, _, reason = item.partition(":")
+                if key.strip() not in keys["supports"]:
+                    raise RuntimeError(f"auditor-rejected key {key.strip()!r} is not a derived key of these batch outputs")
+                auditor_rejected[key.strip()] = reason.strip() or "auditor judged the excerpt off-subject"
+            if auditor_rejected:
+                lines = [f"- {key}: {reason}" for key, reason in sorted(auditor_rejected.items())]
+                section = ("## Auditor-rejected support keys (an independent audit of an earlier consolidation of these "
+                           "same batches judged that these excerpts do not establish their node's subject)" + chr(10) +
+                           "Never use these keys as node supports. A node that cannot reach five subject-relevant "
+                           "supports without them is rejected, not created." + chr(10) + chr(10).join(lines) +
+                           chr(10) + chr(10) + "## Key table (data)")
+                cons_template = cons_template.replace("## Key table (data)", section, 1)
+                consolidation_prompt_bytes = cons_template.encode("utf-8")
+                (self.prompts_dir / "consolidation_prompt.md").write_bytes(consolidation_prompt_bytes)
+                print(f"[induce] {len(auditor_rejected)} auditor-rejected support keys named in the prompt: {sorted(auditor_rejected)}",
+                      file=sys.stderr, flush=True)
             if unusable:
                 cons_template = cons_template.replace(
                     "## Key table (data)",
@@ -651,6 +712,8 @@ class InductionHarness:
                 status, abort_reason = "aborted", f"consolidation call failed (exit {record['exit_status']})"
             else:
                 proposal = structured
+                for warning in _proposal_post_checks(proposal, keys, batch_proposals):
+                    print(f"[induce] post-check: {warning}", file=sys.stderr, flush=True)
         end_ns = time.monotonic_ns()
 
         self.out_proposal_path.parent.mkdir(parents=True, exist_ok=True)
@@ -702,6 +765,7 @@ class InductionHarness:
                 },
                 "output_root": _rel(self.out_dir),
                 "resume": resume_record,
+                "auditor_rejected_keys": auditor_rejected or None,
                 "start_monotonic_ns": t0_mono_ns,
                 "end_monotonic_ns": end_ns,
                 "fingerprints": {
