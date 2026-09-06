@@ -1,4 +1,4 @@
-"""Runs W/Y: independent, archive-only induction replay. No model/helper/DB access.
+"""Runs W/Y/AA: independent, archive-only induction replay. No model/helper/DB access.
 
 Run with python -B docs/library/proof/audit-induction-2026-09-05.py.
 Exit 0 means replay completed, NOT approval. All reads stay in this worktree.
@@ -423,6 +423,291 @@ def audit_attempt9(result, receipts, induction, cards, frozen, keys, proposal, a
     result["prior_measurements_sha256"] = sha(read(PROOF / "audit-induction-measurements-2026-09-05.json"))
 
 
+def audit_attempt10(result, receipts, induction, cards, frozen, keys, proposal, archive, validator):
+    """Run AA measurements and hash-bound human judgments, separate from validation."""
+    result.update(audit="induction-run-AA-attempt10", archive=RUN.relative_to(ROOT).as_posix(),
+                  receipt_sha256=sha(read(RUN / "receipts.json")),
+                  proposal_sha256=sha(read(RUN / "proposal.json")))
+    b2, b3, b4, b5, b6, b7, b8 = [result[f"B{i}"] for i in range(2, 9)]
+    # Remove run-W-specific diagnostics, which are not this run's lineage.
+    b2.pop("prior_attempts")
+    b2.pop("model_calls_launched_in_attempt6_inferred_from_prior_identity")
+    for field in ("unique_recorded_processes_across_six_attempts", "complete_history_cost_available",
+                  "known_estimates_across_unique_processes", "history_is_record_only_for_missing_artifacts",
+                  "attempt4_proposal_replay"):
+        b7.pop(field)
+    b3.pop("gold_example_location")
+    invalid = set(b4["invalid_batch_supports"])
+    selected = {r["support_key"] for n in proposal["nodes"] for r in n["supporting_evidence"]} | {
+        r["support_key"] for row in proposal["coverage_ledger"] for r in row["evidence"]}
+    template = read(RUN / receipts["consolidation_prompt"]["path"]).decode()
+    instruction = template.split("## Key table (data)")[0]
+    b3["unusable_keys_named"] = all(k in instruction for k in invalid)
+    b4["unusable_keys_selected"] = sorted(selected & invalid)
+    rejected = receipts["execution"]["auditor_rejected_keys"]
+    b3["auditor_rejected_keys"] = dict(record=rejected,
+        exact_expected_set=set(rejected) == {"c070-1", "c110-1", "c202-1", "c221-1"},
+        all_reasons_and_audit_refs_in_prompt=all(f"- {k}: {v}" in instruction for k, v in rejected.items()),
+        accepted_intersection=sorted(selected & set(rejected)))
+    b4["skipped"] = keys.get("skipped", [])
+    b5["omission_explanation_failures"] = [r for r in b5["proposed_without_node_support"]
+        if not re.search(r"; not a support: .+$", r["reason"])]
+    b5["omission_explanation_count"] = b5["proposed_without_node_support_count"] - len(b5["omission_explanation_failures"])
+
+    origins = {10: (RUN, receipts)}
+    for attempt in (9, 8):
+        base = PROOF / f"induction-run-{attempt}-2026-09-05"
+        origins[attempt] = base, document(base / "receipts.json")
+    chain = []
+    for current_number, prior_number in ((10, 9), (9, 8)):
+        base, rec = origins[current_number]
+        prior_base, prior = origins[prior_number]
+        resume = rec["execution"]["resume"]
+        prior_calls = {c["call_id"]: c for c in prior["calls"]}
+        rows = []
+        for call in rec["calls"]:
+            if call["call_id"] not in resume["reused_call_ids"]:
+                continue
+            cid = call["call_id"]
+            checks = []
+            for field in ("stdin", "stdout", "stderr"):
+                raw = read(base / call[field]["path"])
+                old = read(prior_base / prior_calls[cid][field]["path"])
+                checks.append(dict(field=field, byte_equal=raw == old, sha256=sha(raw),
+                    refs_match=all(sha(raw) == c[field]["sha256"] and len(raw) == c[field]["bytes"]
+                                   for c in (call, prior_calls[cid]))))
+            # Resumed runs copy streams, not historical .record.json files.
+            origin_record = read(origins[8][0] / "calls" / f"{cid}.record.json")
+            rows.append(dict(call_id=cid, records_equal=call == prior_calls[cid],
+                attempt8_persisted_record_equal=decode(origin_record) == call,
+                attempt8_persisted_record_sha256=sha(origin_record), streams=checks))
+        chain.append(dict(from_attempt=current_number, to_attempt=prior_number, record=resume,
+            source_hash_matches=sha(read(prior_base / "receipts.json")) == resume["from_receipts_sha256"],
+            source_path_is_archive_export=resume["from_receipts"] == (prior_base / "receipts.json").relative_to(ROOT).as_posix(),
+            source_path_matches_export_or_historical_output=resume["from_receipts"] in
+                {(prior_base / "receipts.json").relative_to(ROOT).as_posix(), prior["execution"]["output_root"] + "/receipts.json"},
+            resolution="Receipt hash binds the local archive export; historical scratch/checkout paths are never opened.",
+            batches_equal=rec["batches"] == prior["batches"],
+            reused_set_exact=resume["reused_call_ids"] == [b["call_id"] for b in rec["batches"]],
+            batch_template_equal=read(base / rec["batch_prompt"]["path"]) == read(prior_base / prior["batch_prompt"]["path"]),
+            calls=rows))
+    b2["resume_chain"] = chain
+    b2["attempt8_has_no_resume"] = origins[8][1]["execution"]["resume"] is None
+    b2["new_process_count"] = len(receipts["calls"]) - len(chain[0]["calls"])
+    b2["resume_metadata_fields"] = ["execution.resume"]
+    finals = []
+    for number, (base, rec) in origins.items():
+        call = next(c for c in rec["calls"] if c["call_id"] == rec["consolidation_call_id"])
+        streams = {}
+        for field in ("stdin", "stdout", "stderr"):
+            raw = read(base / call[field]["path"])
+            streams[field] = dict(sha256=sha(raw), bytes=len(raw),
+                matches=sha(raw) == call[field]["sha256"] and len(raw) == call[field]["bytes"])
+        envelope = document(base / call["stdout"]["path"])
+        finals.append(dict(attempt=number, call=call, streams=streams,
+            persisted_record_equal=document(base / "calls/call-consolidation.record.json") == call,
+            envelope_estimate_matches=envelope["total_cost_usd"] == call["cli_estimated_cost_usd"]))
+    b2["lineage_consolidations"] = finals
+    b2["distinct_consolidations"] = len({r["call"]["stdout"]["sha256"] for r in finals}) == 3
+    events = sorted((c[k], delta) for c in receipts["calls"] for k, delta in (("start_monotonic_ns", 1), ("end_monotonic_ns", -1)))
+    active = maximum = 0
+    for _, delta in events:
+        active += delta
+        maximum = max(maximum, active)
+    b2["maximum_concurrent_processes"] = maximum
+    b2["max_call_duration_s"] = max((c["end_monotonic_ns"] - c["start_monotonic_ns"]) / 1e9 for c in receipts["calls"])
+    b7["reused_batch_estimate_usd"] = math.fsum(c["cli_estimated_cost_usd"] for c in receipts["calls"] if c["call_id"] != receipts["consolidation_call_id"])
+    b7["new_consolidation_estimate_usd"] = finals[0]["call"]["cli_estimated_cost_usd"]
+    b7["attempt8_through_10_unique_process_count"] = len({
+        (c["call_id"], c["start_monotonic_ns"], c["end_monotonic_ns"], c["stdout"]["sha256"])
+        for _, rec in origins.values() for c in rec["calls"]})
+    b7["attempt8_through_10_unique_process_estimate_usd"] = math.fsum(
+        [b7["reused_batch_estimate_usd"], *(r["call"]["cli_estimated_cost_usd"] for r in finals)])
+    b7["scope"] = "Nine attempt-8 batches and three distinct consolidations; not total induction-history cost or paid cost."
+    b8["api_key_unset_assertion_present"] = receipts["execution"]["environment"]["ANTHROPIC_API_KEY"] == "unset (asserted before every process)"
+    b8["per_call_isolation"] = [{k: c[k] for k in ("call_id", "cwd", "environment_policy")} for c in receipts["calls"]]
+    b8["historical_relative_paths_contained"] = all(not PureWindowsPath(p).is_absolute() and ".." not in Path(p).parts
+        for _, rec in origins.values() for p in [*rec["execution"]["input_paths"].values(), rec["execution"]["output_root"]])
+    b8["all_call_cwds_equal_declared_checkout"] = all(c["cwd"] == rec["execution"]["checkout_root"] for _, rec in origins.values() for c in rec["calls"])
+    b8["archive_only_declarations"] = [{"attempt": number, **{k: rec["execution"][k] for k in
+        ("database_opened", "helper_opened", "network_egress", "input_paths", "output_root", "cwd", "checkout_root")}}
+        for number, (_, rec) in origins.items()]
+    b8["statement"] = "Run-W archive-only profile: bound files, launch environment and fingerprinted code. No independent OS network telemetry or historical DB snapshots. Historical checkout strings were never opened."
+    b8["fingerprint_commit_bindings"] = []
+    for number, (base, rec) in origins.items():
+        for name, source in (("runner", "scripts/librarian/induce_run.py"), ("validator", "tests/validate_proof_receipts.py"), ("card_builder", "library_cards.py")):
+            ref = rec["execution"]["fingerprints"][name]
+            raw = read(base / ref["path"])
+            blob = subprocess.run(["git", "show", rec["execution"]["git_sha"] + ":" + source], cwd=ROOT, capture_output=True, check=True).stdout
+            b8["fingerprint_commit_bindings"].append(dict(attempt=number, name=name,
+                execution_sha=rec["execution"]["git_sha"], artifact_hash_matches=sha(raw) == ref["sha256"] and len(raw) == ref["bytes"],
+                lf_content_equal_git_blob=raw.replace(b"\r\n", b"\n") == blob.replace(b"\r\n", b"\n")))
+
+    decision_path = PROOF / "taxonomy-v2-revision-decision-2026-09-05.json"
+    raw = read(decision_path)
+    decision = decode(raw)
+    composed = decision["proposal"]
+    donor = document(origins[9][0] / "proposal.json")
+    node_id = "news-and-current-events"
+    news = next(n for n in donor["nodes"] if n["shelf_id"] == node_id)
+    donor_rows = {r["card_key"]: r for r in donor["coverage_ledger"] if node_id in r["shelf_ids"]}
+    expected = copy.deepcopy(proposal)
+    expected["nodes"].append(news)
+    expected["coverage_ledger"] = [donor_rows.get(r["card_key"], r) for r in proposal["coverage_ledger"]]
+    expected["diff"]["added"].append(node_id)
+    expected_document = copy.deepcopy(decision)
+    expected_document["proposal"] = expected
+    def pretty(value):
+        return (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode()
+    def fragment(value, offset):
+        return ("\n" + " " * offset).join(json.dumps(value, ensure_ascii=False, indent=2).splitlines()).encode()
+    # Compare the literal source JSON fragment, allowing only wrapper indentation.
+    edits = []
+    donor_raw = read(origins[9][0] / "proposal.json")
+    for label, value in [("append_node", news), *((k, v) for k, v in donor_rows.items())]:
+        edits.append(dict(edit=label, canonical_subtree_sha256=sha(canonical(value).encode()),
+            exact_donor_fragment_present=fragment(value, 4) in donor_raw,
+            exact_decision_fragment_present=fragment(value, 6) in raw))
+    base_raw = read(RUN / "proposal.json")
+    unchanged = [(n["shelf_id"], n) for n in proposal["nodes"]] + [
+        (r["card_key"], r) for r in proposal["coverage_ledger"] if r["card_key"] not in donor_rows]
+    revision = dict(sha256=sha(raw), dispatched_hash_matches=sha(raw) == "7028edf7471a3624345257e59c6eb7627c011a65424df439a126d906df77098f",
+        independent_composition_equal=expected == composed, exact_document_bytes_equal=raw == pretty(expected_document),
+        literal_subtree_checks=edits, changed_ledger_keys=sorted(donor_rows),
+        unchanged_subtree_count=len(unchanged),
+        unchanged_subtree_fragment_failures=[label for label, value in unchanged
+            if fragment(value, 4) not in base_raw or fragment(value, 6) not in raw],
+        base_rows_all_unshelved=all(r["disposition"] == "still_unmapped" and not r["shelf_ids"] and not r["evidence"]
+                                   for r in proposal["coverage_ledger"] if r["card_key"] in donor_rows),
+        diff_added_exact=composed["diff"]["added"] == proposal["diff"]["added"] + [node_id],
+        source_hash_bindings={label: sha(read(ROOT / value["path"])) == value["sha256"] and
+            sha(read((ROOT / value["path"]).parent / "receipts.json")) == value["receipts_sha256"]
+            for label, value in decision["sources"].items()})
+    outputs = [document(RUN / "calls" / f"{b['call_id']}.stdout")["structured_output"] for b in receipts["batches"]]
+    donor_outputs = [document(origins[9][0] / "calls" / f"{b['call_id']}.stdout")["structured_output"] for b in receipts["batches"]]
+    revision["donor_key_table_equal"] = derive_keys(induction, origins[9][1]["batches"], donor_outputs) == keys
+    expanded = expand(composed, keys)
+    refs = [r["support_key"] for n in composed["nodes"] for r in n["supporting_evidence"]] + [r["support_key"] for row in composed["coverage_ledger"] for r in row["evidence"]]
+    revision["accepted_rejected_keys"] = sorted(set(refs) & set(rejected))
+    revision["accepted_support_errors"] = {k: check_support(keys["supports"][k]["support"], cards, frozen)["errors"]
+        for k in refs if check_support(keys["supports"][k]["support"], cards, frozen)["errors"]}
+    revision["accepted_support_occurrences"] = len(refs)
+    revision["node_quote_word_counts"] = dict(Counter(len(normal(s["quote"]).split()) for n in expanded["nodes"] for s in n["supporting_evidence"]))
+    revision["ledger_counts"] = dict(Counter(r["disposition"] for r in composed["coverage_ledger"]))
+    revision["ledger_unique_cards"] = len({r["video_id"] for r in expanded["coverage_ledger"]})
+    revision["ledger_rows"] = composed["coverage_ledger"]
+    supports_by_node = {n["shelf_id"]: {keys["supports"][s["support_key"]]["card_key"] for s in n["supporting_evidence"]} for n in composed["nodes"]}
+    omitted = [r for r in composed["coverage_ledger"] if r["disposition"] == "proposed_concept" and
+        not any(r["card_key"] in supports_by_node[sid] for sid in r["shelf_ids"])]
+    revision["omission_explanation_count"] = len(omitted)
+    revision["omission_explanation_failures"] = [r for r in omitted if not re.search(r"; not a support: .+$", r["reason"])]
+    taxonomy = document(RUN / receipts["taxonomy"]["path"])
+    validator.Draft202012Validator(validator.PROPOSAL_SCHEMA).validate(composed)
+    validator.validate_induction_proposal(expanded, induction, cards, taxonomy,
+        batch_outputs={vid: out for b, out in zip(receipts["batches"], outputs, strict=True) for vid in b["video_ids"]})
+    revision["full_proposal_validator_passed"] = True
+    revision["independent_expansion_equals_validator"] = expanded == validator.expand_induction_proposal(composed, keys)
+    revision["new_nodes"] = {sid: len(v) for sid, v in supports_by_node.items() if v}
+    revision["preserved_fields_equal"] = all(all(next(n for n in composed["nodes"] if n["shelf_id"] == old["shelf_id"])[k] == old[k]
+        for k in ("path", "definition", "include", "exclude")) for old in taxonomy["nodes"])
+    revision["include_cues_complete"] = all(set(n["include"]) == {c["include_cue"] for c in n["sibling_cues"]} for n in composed["nodes"])
+    revision["candidate_disposition_review"] = dict(total_batch_candidates=len(b6["batch_candidates"]),
+        adopted_or_equivalent_merged=15, explicitly_rejected=6,
+        method="Auditor compares the 21 batch concept paths: News parent, 2 Agents, 7 Industry, 5 Media adopted/merged; two News children, Sports, Creator Culture, Product Launches, Career rejected.",
+        raw_attempt10_missing_candidate="News and Current Events",
+        product_launches_note="Entry now exists; c088 is an extra cross-batch reference, not one of Product Launches' six candidate cards. Actual redistribution is c058 -> Agents, c056/c060 -> ai-and-ml, c064/c069 -> Media, c070 -> still_unmapped.")
+    state = dict(pins=len(archive["before"]["pins"]), memberships=len(archive["before"]["memberships"]),
+        item_policies=len(archive["before"]["item_policies"]), active_version_id=archive["before"]["active_version_id"])
+    b6["pin_state_replay"] = state
+    b6["pin_measurements_match"] = all(receipts["induction_state"][k] == value for k, value in state.items()) and all(
+        composed["pin_impact_report"]["measured_" + k] == state[k] for k in ("pins", "memberships"))
+
+    # Each judgment below follows a human reading of the cited frozen excerpt.
+    reviews = {
+        "c058-1": (False, "Describes a sensing/acting companion builder, but no autonomous real-world multi-step task required by the definition."),
+        "c088-1": (True, "Internet-using model orders food, books flights, shops and researches."),
+        "c106-1": (True, "AI agents sell cars, underwrite loans, coach mechanics and run an operation."),
+        "c141-1": (True, "Agents autonomously plan, execute and deliver on a goal; the excerpt describes the workflow."),
+        "c124-1": (False, "A wished-for ChatGPT descendant watches screens and meetings; no action or autonomous multi-step execution appears in the excerpt."),
+        "c082-1": (True, "AI-company competitive ranking explicitly argued through infrastructure."),
+        "c130-1": (True, "Government restrictions on an AI lab and access to its models."),
+        "c144-1": (True, "Explicit commentary on competition against OpenAI and Anthropic."),
+        "c169-1": (True, "AI token usage contrasted with revenue capture by frontier labs."),
+        "c213-1": (True, "AI-company ARR, explicitly qualified in the excerpt as a rough estimate."),
+        "c033-1": (True, "Animation described as made with Seedance; its generation prompt follows."),
+        "c038-1": (True, "A created film described as winning an AI-film award."),
+        "c128-1": (True, "AI animated film described as blending genAI and human art."),
+        "c091-1": (True, "A finished visual website described as made with AI image/video models."),
+        "c104-1": (True, "Explicit firsthand description of AI cat-vlog video content."),
+        "c006-1": (True, "Explicit left/center political debate."),
+        "c009-1": (True, "Murder charge and shooting at a named location."),
+        "c010-1": (True, "Home intrusion, death, police response and charges."),
+        "c011-1": (True, "Police radio declares a riot and reports a capitol breach."),
+        "c019-1": (True, "Original post reports missiles striking a named air base."),
+    }
+    if not revision["dispatched_hash_matches"]:
+        raise ValueError("Human judgments do not apply to a changed revision decision")
+    assert set(reviews) == {s["support_key"] for n in composed["nodes"] for s in n["supporting_evidence"]}
+    rows = []
+    for node in composed["nodes"]:
+        for ref in node["supporting_evidence"]:
+            key = ref["support_key"]
+            support = keys["supports"][key]["support"]
+            excerpt = next(e for e in cards[support["video_id"]]["excerpts"] if e["excerpt_id"] == support["excerpt_id"])
+            passed, reason = reviews[key]
+            rows.append(dict(shelf_id=node["shelf_id"], support_key=key, support=support, excerpt=excerpt,
+                subject_relevant=passed, reason=reason))
+    revision["manual_relevance_review"] = rows
+    revision["subject_relevant_distinct_cards"] = {sid: len({r["support"]["video_id"] for r in rows if r["shelf_id"] == sid and r["subject_relevant"]}) for sid in revision["new_nodes"]}
+    b4["manual_relevance_review_applies"] = revision["independent_composition_equal"]
+    b4["manual_relevance_review_method"] = "Auditor read every selected quote and its full frozen excerpt; cited-excerpt judgment only, no outside product knowledge."
+    b4["manual_relevance_review"] = [r for r in rows if r["shelf_id"] != node_id]
+    b4["manual_relevance_gaps"] = [r for r in b4["manual_relevance_review"] if not r["subject_relevant"]]
+    for node in b4["nodes"]:
+        if node["shelf_id"] in revision["subject_relevant_distinct_cards"]:
+            node["distinct_cards_after_manual_relevance_review"] = revision["subject_relevant_distinct_cards"][node["shelf_id"]]
+    focused_ledger = []
+    for key in ("c007-3", "c058-2", "c064-2", "c069-2", "c124-2"):
+        support = keys["supports"][key]["support"]
+        focused_ledger.append(dict(support_key=key, support=support,
+            excerpt=next(e for e in cards[support["video_id"]]["excerpts"] if e["excerpt_id"] == support["excerpt_id"])))
+    revision["focused_ledger_evidence"] = focused_ledger
+    revision["semantic_findings"] = {
+        "B4-R": "Agents retains only 3/5 supports under its autonomous multi-step definition: c058-1 and c124-1 fail.",
+        "B6-S": "Agents' persona/monitoring include cues exceed its governing definition. Generative Media has no operative positive precedence over Frontier Models for a model release showing creative output; Fable's accepted mechanism was not implemented.",
+        "B5-R": "Imported c007-3 does not establish a policy/social debate; c064-2 and c069-2 establish generation features/announcements, not the demonstrated finished artifact required by Generative Media. c058/c124 ledger reasons share the support gap."
+    }
+    revision["authored_composition_method_acceptable"] = True
+    revision["verdict"] = "REJECT taxonomy-v2-2026-09-05 (revision decision)"
+    result["verdict"] = revision["verdict"]
+    spec = importlib.util.spec_from_file_location("projection_aa", ROOT / "scripts/librarian/taxonomy_from_proposal.py")
+    projection = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(projection)
+    nodes = projection.project_nodes(composed["nodes"])
+    service_doc = dict(schema_version=1, version_id=composed["version_id"], parent_version_id=composed["parent_version_id"],
+        nodes=nodes, revision_hash=sha(canonical(nodes).encode()))
+    revision["projection"] = dict(status="Diagnostic only; not approved, written or installed",
+        expected_service_revision_hash=service_doc["revision_hash"], service_file_bytes=len((canonical(service_doc) + "\n").encode()),
+        service_file_sha256=sha((canonical(service_doc) + "\n").encode()),
+        normalized_validator_equal=validator.normalized_taxonomy(service_doc) == service_doc,
+        unwrap_build_nodes_equal=projection.build(decision_path, approved_by="Codex / GPT-6 Astra",
+            approval_record="docs/library/INDUCTION-AUDIT-10-2026-09-05.md",
+            parent_doc=ROOT / "docs/library/taxonomy-v1-2026-09-04.json")["nodes"] == nodes)
+    packet_path = PROOF / "holdout-v2-labelling-packet-10-2026-09-05.json"
+    packet = document(packet_path)
+    fields = ("shelf_id", "path", "definition", "include", "exclude", "sibling_cues")
+    revision["packet_binding"] = dict(sha256=sha(read(packet_path)),
+        dispatched_hash_matches=sha(read(packet_path)) == "d647aa62d22f20b44b2de6b122f7e0c6c8fd75441d91b68076b62aecffb9613a",
+        proposal_hash_matches=packet["taxonomy_candidate"]["proposal_sha256"] == sha(raw),
+        candidate_nodes_equal=packet["taxonomy_candidate"]["nodes"] == [{k: n[k] for k in fields} for n in composed["nodes"]])
+    result["revision_decision"] = revision
+    result["prior_measurement_hashes"] = {p.name: sha(read(p)) for p in
+        (PROOF / "audit-induction-measurements-2026-09-05.json", PROOF / "audit-induction-9-measurements-2026-09-05.json")}
+    for path in (ROOT / "scripts/librarian/compose_revision_decision.py", ROOT / "scripts/librarian/taxonomy_from_proposal.py",
+                 ROOT / "docs/library/INDUCTION-REVISION-BRIEF-2026-09-05.md"):
+        read(path)
+
+
 def main(self_test=False):
     receipts = document(RUN / "receipts.json")
     induction_raw = read(PROOF / "induction-manifest-2026-09-05.json")
@@ -834,6 +1119,8 @@ def main(self_test=False):
                   artifact_checks=REFERENCES, self_test_passed=tests, input_files=FILES)
     if RUN.name == "induction-run-9-2026-09-05":
         audit_attempt9(result, receipts, induction, cards, frozen, keys, proposal, archive, validator)
+    elif RUN.name == "induction-run-10-2026-09-05":
+        audit_attempt10(result, receipts, induction, cards, frozen, keys, proposal, archive, validator)
     OUT.write_text(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8", newline="\n")
     print(json.dumps(dict(completed=True, approval=False, calls=b2["call_count"], nodes=b6["node_count"],
                          ledger=b5["disposition_counts"], invalid_selected_supports=b4["accepted_errors"],
