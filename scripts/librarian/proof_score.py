@@ -211,6 +211,30 @@ def validate_receipts_for_scoring(
                     )
 
 
+def verify_frozen_mapping(mapping_doc: dict, holdout_data: dict, gold_data: list[dict], taxonomy_data: dict) -> str:
+    """The scorer's own deepest-ancestor mapping must equal the frozen adjudicated table for
+    every hold-out item; the frozen table must name the taxonomy revision being scored."""
+    tax_paths, _ = extract_taxonomy_paths(taxonomy_data)
+    gold_by_id = {item["video_id"]: item for item in gold_data}
+    frozen_items = mapping_doc.get("items") or {}
+    holdout_ids = [item["video_id"] for items in (holdout_data.get("strata") or {}).values() for item in items]
+    if set(frozen_items) != set(holdout_ids):
+        raise ProofScoreError("Frozen mapping does not cover exactly the hold-out identities")
+    if mapping_doc.get("taxonomy_version_id") != taxonomy_data.get("version_id"):
+        raise ProofScoreError("Frozen mapping names a different taxonomy version")
+    if (mapping_doc.get("taxonomy_revision_hash") and taxonomy_data.get("revision_hash")
+            and mapping_doc["taxonomy_revision_hash"] != taxonomy_data["revision_hash"]):
+        raise ProofScoreError("Frozen mapping names a different taxonomy revision hash")
+    for vid in holdout_ids:
+        gold = gold_by_id.get(vid, {})
+        norm_gold = [normalize_segment(p) for p in gold.get("shelf_path", [])]
+        computed = map_gold_to_taxonomy(norm_gold, tax_paths) if gold.get("outcome", "assigned") != "unsupported" else []
+        frozen = frozen_items[vid].get("mapped_path") or []
+        if [normalize_segment(p) for p in frozen] != computed:
+            raise ProofScoreError(f"Frozen mapping differs from the scorer's rule for {vid}: frozen={frozen} computed={computed}")
+    return f"verified against {len(holdout_ids)} frozen rows ({mapping_doc.get('scoring_version')})"
+
+
 def score_receipts(
     receipts_data: dict,
     holdout_data: dict,
@@ -670,6 +694,12 @@ def main() -> None:
         default=None,
         help="Directory to write report.md (default: parent directory of receipts.json)",
     )
+    parser.add_argument(
+        "--mapping",
+        type=Path,
+        default=None,
+        help="Frozen adjudicated mapping table; every gold path must map to exactly the frozen mapped_path",
+    )
     args = parser.parse_args()
 
     if not args.receipts.is_file():
@@ -690,11 +720,24 @@ def main() -> None:
     gold_data = json.loads(args.gold.read_text(encoding="utf-8"))
     taxonomy_data = load_taxonomy(args.taxonomy)
 
+    mapping_status = "not checked (no --mapping)"
+    if args.mapping is not None:
+        if not args.mapping.is_file():
+            print(f"ERROR: Mapping file not found: {args.mapping}", file=sys.stderr)
+            sys.exit(1)
+        mapping_doc = json.loads(args.mapping.read_text(encoding="utf-8"))
+        try:
+            mapping_status = verify_frozen_mapping(mapping_doc, holdout_data, gold_data, taxonomy_data)
+        except ProofScoreError as exc:
+            print(f"SCORER ERROR: {exc}", file=sys.stderr)
+            sys.exit(1)
+
     try:
         results = score_receipts(receipts_data, holdout_data, gold_data, taxonomy_data)
     except ProofScoreError as exc:
         print(f"SCORER ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
+    results["frozen_mapping"] = mapping_status
 
     out_dir = args.out if args.out else args.receipts.parent
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -726,6 +769,7 @@ def main() -> None:
         f"Zero Applied Labels:     {results['zero_applies_verified']} (Projection revision {results['before_state'].get('projection_revision')})"
     )
     print(f"Usage Status:            {results['usage']['status']}")
+    print(f"Frozen Mapping:          {results['frozen_mapping']}")
     print("-" * 78)
     print(f"Detailed Markdown Report: {report_path}")
     print("=" * 78)

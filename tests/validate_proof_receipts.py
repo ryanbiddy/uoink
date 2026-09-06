@@ -32,6 +32,18 @@ ARCHIVE = ROOT / "docs/library/proof/run-2026-09-05/receipts.json"
 ARCHIVE_SHA256 = "2b4e824ea9f93999de6c5108406e60a5c81f108de0b279c52fee2e96d622469c"
 HOLDOUT_V2 = ROOT / "docs/library/proof/holdout-v2-2026-09-05.json"
 INDUCTION_MANIFEST = ROOT / "docs/library/proof/induction-manifest-2026-09-05.json"
+MANIFEST_STAGE2 = ROOT / "docs/library/proof/manifest-stage2-2026-09-05.json"
+# Stage-specific frozen inputs. Every other frozen file (card builder, service, migrations)
+# is shared. Stage 2 binds the approved taxonomy v2, hold-out v2, the sealed adjudicated
+# labels (as the gold file) and the adjudicated mapping table.
+STAGE_FILES = {
+    1: dict(taxonomy="docs/library/taxonomy-v1-2026-09-04.json", holdout="docs/library/holdout-split-2026-09-04.json",
+            gold="docs/library/gold-set-2026-09-04.json"),
+    2: dict(taxonomy="docs/library/taxonomy-v2-2026-09-05.json", parent_taxonomy="docs/library/taxonomy-v1-2026-09-04.json",
+            holdout="docs/library/proof/holdout-v2-2026-09-05.json",
+            gold="docs/library/proof/labels/holdout-v2-gold-2026-09-05.json",
+            mapping="docs/library/proof/labels/holdout-v2-mapping-2026-09-05.json"),
+}
 SOURCE_SHA256 = "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc"
 CONTRACT = "phase2-v1.2-2026-09-04"
 OUTCOMES = ["accepted", "rejected", "unmapped", "unsupported", "pinned", "deleted", "changed"]
@@ -943,8 +955,11 @@ def render_prompt(template, taxonomy, card):
             + library_cards.card_text(card) + suffix)
 
 
-def freeze_inputs(source, *, allow_install_corpus=False):
+def freeze_inputs(source, *, allow_install_corpus=False, stage=1):
     """Freeze the named copy and bounded Markdown heads; no helper/index defaults.
+
+    stage=2 binds the stage 2 files (STAGE_FILES[2]); the card and head freeze is identical
+    because the card builder is shared.
 
     A blocked head is retained as an unresolved target, never silently excluded.
     --allow-install-corpus permits only the copy's explicit Markdown references,
@@ -974,14 +989,17 @@ def freeze_inputs(source, *, allow_install_corpus=False):
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA query_only=ON")
     files = {}
-    for name, relative in dict(taxonomy="docs/library/taxonomy-v1-2026-09-04.json",
+    for name, relative in dict(STAGE_FILES[stage],
                                prompt="scripts/librarian/prompts/assign.md", card_builder="library_cards.py",
-                               holdout="docs/library/holdout-split-2026-09-04.json",
-                               gold="docs/library/gold-set-2026-09-04.json", index="index.py", clips="clips.py",
+                               index="index.py", clips="clips.py",
                                provenance="provenance.py", service="library_work.py",
                                migration26="migrations/0026_provenance_precedence.sql",
                                migration27="migrations/0027_library_substrate.sql").items():
         files[name] = dict(path=relative, sha256=sha((ROOT / relative).read_bytes()))
+    if stage == 2:
+        stage2_gold = read_json(ROOT / files["gold"]["path"])
+        require(isinstance(stage2_gold, list) and len(stage2_gold) == 60 and
+                all(item.get("sealed") is True for item in stage2_gold), "Stage 2 gold must be the sealed adjudicated labels")
     taxonomy = normalized_taxonomy(read_json(ROOT / files["taxonomy"]["path"]))
     split = read_json(ROOT / files["holdout"]["path"])
     heldout_ids = sorted(entry["video_id"] for rows in split["strata"].values() for entry in rows)
@@ -1501,6 +1519,8 @@ def main(argv=None):
     parser.add_argument("--mock", action="store_true", help="Require fixture receipts")
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--freeze", action="store_true", help="Rebuild the freeze from the named copy; requires --mock")
+    parser.add_argument("--stage2", action="store_true",
+                        help="Stage 2 execution freeze: taxonomy v2, hold-out v2, sealed labels; writes/validates manifest-stage2")
     parser.add_argument("--source", type=Path)
     parser.add_argument("--check-source", action="store_true", help="Remeasure source heads and compare with freeze; requires --mock")
     parser.add_argument("--allow-install-corpus", action="store_true", help="Read only explicit source Markdown heads in the install root")
@@ -1532,12 +1552,20 @@ def main(argv=None):
             print(json.dumps(validate_induction_receipts(receipts, artifact_root=args.receipts.resolve().parent,
                                                          require_real=args.require_real), indent=2))
             return 0
+        stage = 2 if args.stage2 else 1
+        assigned_manifest = MANIFEST_STAGE2 if args.stage2 else MANIFEST
+        if args.stage2 and args.manifest.resolve() == MANIFEST.resolve():
+            args.manifest = MANIFEST_STAGE2
         if args.freeze:
             require(args.mock and args.source is not None, "Freeze requires --mock --source <named-copy>")
-            require(args.manifest.resolve() == MANIFEST.resolve(), "Freeze writes only the assigned manifest file")
-            manifest = freeze_inputs(args.source, allow_install_corpus=args.allow_install_corpus)
-            MANIFEST.parent.mkdir(parents=True, exist_ok=True)
-            MANIFEST.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+            require(args.manifest.resolve() == assigned_manifest.resolve(), "Freeze writes only the assigned manifest file")
+            manifest = freeze_inputs(args.source, allow_install_corpus=args.allow_install_corpus, stage=stage)
+            if stage == 2:
+                stage1 = read_json(MANIFEST)
+                for key in ("items", "cards", "corpus_heads", "cards_hash", "corpus_heads_hash", "measured_strata"):
+                    require(manifest[key] == stage1[key], f"Stage 2 card freeze differs from stage 1: {key}")
+            assigned_manifest.parent.mkdir(parents=True, exist_ok=True)
+            assigned_manifest.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
             print(json.dumps(dict(status=manifest["freeze_status"], targets=len(manifest["items"]),
                                  frozen_cards=len(manifest["cards"]), unresolved=len(manifest["unresolved_targets"]),
                                  manifest_hash=manifest["manifest_hash"])))
@@ -1545,7 +1573,7 @@ def main(argv=None):
         manifest = verify_manifest(read_json(args.manifest))
         if args.check_source:
             require(args.mock and args.source is not None, "Source check requires --mock --source <named-copy>")
-            current = freeze_inputs(args.source, allow_install_corpus=args.allow_install_corpus)
+            current = freeze_inputs(args.source, allow_install_corpus=args.allow_install_corpus, stage=stage)
             require(current["freeze_status"] == "frozen", "Source check has unresolved corpus heads")
             require({k: v for k, v in current.items() if k != "upgrade"} ==
                     {k: v for k, v in manifest.items() if k != "upgrade"}, "Current source evidence differs from freeze")

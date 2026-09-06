@@ -290,10 +290,16 @@ class ProofHarness:
 
         # Paths
         self.manifest_path = Path(manifest).resolve() if manifest else ROOT / "docs" / "library" / "proof" / "manifest-2026-09-05.json"
-        self.taxonomy_path = Path(taxonomy).resolve() if taxonomy else ROOT / "docs" / "library" / "taxonomy-v1-2026-09-04.json"
-        self.prompt_path = ROOT / "scripts" / "librarian" / "prompts" / "assign.md"
-        self.holdout_path = ROOT / "docs" / "library" / "holdout-split-2026-09-04.json"
-        self.gold_path = ROOT / "docs" / "library" / "gold-set-2026-09-04.json"
+        # The frozen manifest names every input file (taxonomy, prompt, holdout, gold). A
+        # --taxonomy argument must agree with the manifest's frozen taxonomy path; the
+        # manifest is the freeze, not the flag. Paths are resolved in
+        # initialize_database_and_freeze once the manifest is read.
+        self.taxonomy_override = Path(taxonomy).resolve() if taxonomy else None
+        self.taxonomy_path: Optional[Path] = None
+        self.prompt_path: Optional[Path] = None
+        self.holdout_path: Optional[Path] = None
+        self.gold_path: Optional[Path] = None
+        self.parent_taxonomy_revision_hash: Optional[str] = None
 
         # Isolation root must be strictly under ROOT / "_scratch/proof"
         proof_scratch = (ROOT / "_scratch" / "proof").resolve()
@@ -455,12 +461,30 @@ class ProofHarness:
         if not self.manifest_path.is_file():
             raise ProofRunError(f"Manifest missing: {self.manifest_path}")
         self.manifest = json.loads(self.manifest_path.read_text(encoding="utf-8"))
+        frozen_files = self.manifest["files"]
+        self.taxonomy_path = (ROOT / frozen_files["taxonomy"]["path"]).resolve()
+        self.prompt_path = (ROOT / frozen_files["prompt"]["path"]).resolve()
+        self.holdout_path = (ROOT / frozen_files["holdout"]["path"]).resolve()
+        self.gold_path = (ROOT / frozen_files["gold"]["path"]).resolve()
+        if self.taxonomy_override is not None and self.taxonomy_override != self.taxonomy_path:
+            raise ProofRunError(
+                f"--taxonomy {self.taxonomy_override} disagrees with the manifest's frozen taxonomy {self.taxonomy_path}")
+        # A measured run refuses a stale freeze. Mock runs are fixture evidence and may use
+        # the historical stage 1 manifest whose prompt has since been repaired.
+        if not self.mock:
+            for name in ("taxonomy", "prompt"):
+                frozen = frozen_files[name]
+                actual = compute_file_sha256(ROOT / frozen["path"])
+                if actual != frozen["sha256"]:
+                    raise ProofRunError(f"Frozen file changed since the freeze: {frozen['path']} ({actual} != {frozen['sha256']})")
 
         if not self.prompt_path.is_file():
             raise ProofRunError(f"Prompt template missing: {self.prompt_path}")
         self.prompt_template = self.prompt_path.read_text(encoding="utf-8")
 
-        if self.gold_path.is_file():
+        # Gold labels feed only the mock fixture generator. A real run never reads them:
+        # the sealed labels stay sealed from the execution client.
+        if self.mock and self.gold_path.is_file():
             gold_items = json.loads(self.gold_path.read_text(encoding="utf-8"))
             self.gold_by_id = {item["video_id"]: item for item in gold_items}
 
@@ -491,6 +515,34 @@ class ProofHarness:
             operator=True,
             local_user_confirmed=True,
         )
+
+        # 3a. Approve the parent lineage first: the service refuses a child revision whose
+        # parent version is not itself approved on this duplicate. The parent document is
+        # bound by the manifest (files.parent_taxonomy) and its revision hash must match the
+        # child document's recorded parent_revision_hash.
+        if norm_tax.get("parent_version_id") is not None:
+            parent_entry = self.manifest["files"].get("parent_taxonomy")
+            if parent_entry is None:
+                raise ProofRunError("Taxonomy has a parent_version_id but the manifest binds no parent_taxonomy file")
+            parent_doc = json.loads((ROOT / parent_entry["path"]).read_text(encoding="utf-8"))
+            parent_norm = normalized_taxonomy(parent_doc)
+            if parent_norm["version_id"] != norm_tax["parent_version_id"]:
+                raise ProofRunError("Bound parent taxonomy version does not match parent_version_id")
+            child_doc = json.loads(self.taxonomy_path.read_text(encoding="utf-8"))
+            expected_parent_hash = child_doc.get("parent_revision_hash")
+            if expected_parent_hash is not None and expected_parent_hash != parent_norm["revision_hash"]:
+                raise ProofRunError("Parent taxonomy revision hash differs from the approved child's record")
+            parent_res = svc.approve_taxonomy(
+                ctx,
+                {
+                    "version_id": parent_norm["version_id"],
+                    "nodes": parent_norm["nodes"],
+                    "parent_version_id": parent_norm.get("parent_version_id"),
+                },
+            )
+            if not parent_res.get("ok") or parent_res.get("revision_hash") != parent_norm["revision_hash"]:
+                raise ProofRunError(f"approve_taxonomy (parent lineage) failed or revision hash mismatch: {parent_res}")
+            self.parent_taxonomy_revision_hash = parent_norm["revision_hash"]
 
         # 3. Approve taxonomy
         tax_res = svc.approve_taxonomy(
