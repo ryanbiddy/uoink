@@ -1,5 +1,8 @@
 You are the Librarian consolidating batch induction proposals into ONE taxonomy v2 proposal for a private media library. Output JSON only, matching the provided schema exactly. Nothing you write is applied; a human reviews it.
 
+## How references work (read first)
+You never copy ids or hashes. The KEY TABLE below assigns a short key to every card (`c001` ... `c225`, in library order) and to every support entry that appears in the batch data (`c001-1`, `c001-2`, ...; the number is the occurrence within that card, counting candidate supports first, then disposition evidence, in batch order). Refer to cards by `card_key` and to evidence by `{"support_key": "..."}`. A validator expands the keys and checks the evidence.
+
 ## Baseline taxonomy v1 (frozen; version_id `taxonomy-v1-2026-09-04`)
 Every v1 node below MUST appear in `nodes` with `shelf_id`, `path`, `definition`, `include`, `exclude` copied EXACTLY as given, listed in `diff.preserved`, with `supporting_evidence: []` and `sibling_cues` covering every include cue (one entry per include cue: `include_cue` = the cue text verbatim, `confusing_alternative`, `evidence_needed`).
 [
@@ -151,22 +154,16 @@ Every v1 node below MUST appear in `nodes` with `shelf_id`, `path`, `definition`
 
 ## Rules for the consolidated proposal
 - `version_id` = `taxonomy-v2-2026-09-05`; `parent_version_id` = `taxonomy-v1-2026-09-04`.
-- New nodes: merge equivalent candidates across batches. Each new node needs `shelf_id` (new, lowercase, hyphenated, unique), `path` (1-3 strings), one-sentence `definition`, `include` cues, `exclude` cues, `sibling_cues` (one per include cue), and `supporting_evidence` with at least 5 DISTINCT `video_id`s, each entry copying `video_id`, `source_revision`, `card_hash`, `excerpt_id` and a verbatim 1-24-word `quote` exactly as they appear in the batch proposals. If you cannot reach 5 distinct cards, do NOT create the node: list it in `rejected_proposals` with the reason.
+- New nodes: merge equivalent candidates across batches. Each new node needs `shelf_id` (new, lowercase, hyphenated, unique), `path` (1-3 strings), one-sentence `definition`, `include` cues, `exclude` cues, `sibling_cues` (one per include cue), and `supporting_evidence`: EXACTLY FIVE entries `{"support_key": "..."}` whose keys belong to FIVE DIFFERENT cards and whose `kind` in the key table is `candidate`. If you cannot find five distinct cards, do NOT create the node: list it in `rejected_proposals` with the reason.
 - No miscellaneous, other, general or uncategorized shelves. No forced counts.
-- `coverage_ledger`: EXACTLY one entry per input card, all 225 ids from the batch dispositions, none missing, none duplicated: `video_id`, `disposition` (`proposed_concept`, `existing_concept`, `still_unmapped`, `unsupported`), `shelf_ids` (the ids of the nodes it fits; empty for the last two), `evidence` (for the first two dispositions: one or more references of the form `{"excerpt_id": "<64-hex excerpt id copied from that card's batch disposition evidence>"}`; NOTHING else in the object; empty list for the last two), `reason` (at most 160 characters). A card whose candidate was rejected becomes `still_unmapped` (or `existing_concept` if it fits v1).
+- `coverage_ledger`: EXACTLY one row per card key `c001` through `c225`, none missing, none duplicated: `card_key`, `disposition` (`proposed_concept`, `existing_concept`, `still_unmapped`, `unsupported`), `shelf_ids` (ids of the nodes it fits; empty for the last two), `evidence` (for the first two: one entry `{"support_key": "..."}` whose key belongs to THAT card and whose `kind` is `disposition`; empty list for the last two), `reason` (at most 160 characters). A card whose candidate was rejected becomes `still_unmapped` (or `existing_concept` if it fits v1).
 - `diff`: `preserved` = all 7 v1 shelf ids; `added` = every new shelf id; `renamed`, `merged`, `split` = []; `retired` = [].
 - `pin_impact_report`: `{"silent_redirects": false, "items": []}`.
 - `rejected_proposals`: every candidate you did not adopt, `{"proposal": <path or name>, "reason": <why>}`.
+- Keep the document compact: short reasons, short cues, no prose outside the JSON.
 
-## Output size discipline (mandatory)
-The document must stay compact so it can be emitted in one response:
-- Ledger rows cite evidence ONLY by `{"excerpt_id": ...}` reference (one reference is enough); reasons are at most 160 characters. Refusal rows carry `evidence: []`.
-- Each new node's `supporting_evidence` carries EXACTLY FIVE full entries from five distinct cards (copied verbatim from the batch candidates), no more.
-- Definitions are one sentence; include and exclude cues are short phrases; `sibling_cues` fields are short phrases.
-- No prose outside the JSON.
-
-## Exactness check (mandatory, before you finish)
-Identifiers are verified byte-for-byte by a validator; one wrong character rejects the whole proposal. Copy every `video_id`, `source_revision`, `card_hash` and `excerpt_id` character-for-character from the batch data; never retype from memory. Then verify: (a) the ledger has exactly one row for every `video_id` that appears in ANY batch disposition, no id missing, none duplicated, none invented; (b) every node support entry's four identifiers match a single batch candidate support entry exactly; (c) every ledger `excerpt_id` reference appears in that same card's batch disposition evidence.
+## Key table (data)
+{{KEYS}}
 
 ## Batch proposals (data)
 {{PROPOSALS}}

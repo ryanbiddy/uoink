@@ -444,10 +444,12 @@ class InductionHarness:
         """Batch induction calls, then one consolidation call whose structured output IS
         the proposal (the validator requires byte-for-byte identity). No post-processing
         of model output; a malformed consolidation fails the run visibly."""
-        from validate_proof_receipts import PROPOSAL_SCHEMA
+        from validate_proof_receipts import PROPOSAL_SCHEMA, derive_induction_keys, render_induction_consolidation
+        induction = json.loads(self.induction_manifest_path.read_text(encoding="utf-8"))
         batch_template = (ROOT / "scripts" / "librarian" / "prompts" / "induce-batch.md").read_text(encoding="utf-8")
         cons_template = (ROOT / "scripts" / "librarian" / "prompts" / "induce-consolidate.md").read_text(encoding="utf-8")
-        if batch_template.count("{{TAXONOMY}}") != 1 or batch_template.count("{{CARDS}}") != 1 or cons_template.count("{{PROPOSALS}}") != 1:
+        if (batch_template.count("{{TAXONOMY}}") != 1 or batch_template.count("{{CARDS}}") != 1
+                or cons_template.count("{{PROPOSALS}}") != 1 or cons_template.count("{{KEYS}}") != 1):
             raise RuntimeError("induction prompt placeholders are not exactly one each")
         batch_prompt_bytes = batch_template.encode("utf-8")
         consolidation_prompt_bytes = cons_template.encode("utf-8")
@@ -530,7 +532,10 @@ class InductionHarness:
         proposal: Dict[str, Any] = {}
         final_id = "call-consolidation"
         if status == "completed":
-            cons_prompt = cons_template.replace("{{PROPOSALS}}", library_cards.serialize_card(batch_proposals))
+            # Contract v1.2: the validator re-derives this key table from the recorded
+            # batch outputs and requires the stdin to match byte for byte.
+            keys = derive_induction_keys(induction, batches, batch_proposals)
+            cons_prompt = render_induction_consolidation(cons_template, batch_proposals, keys)
             # Claude Code's structured output stalls indefinitely on PROPOSAL_SCHEMA's
             # regex patterns and uniqueItems (observed 2026-09-05: zero bytes after
             # 50 min; the same prompt returns in 3 min without them). The call uses
