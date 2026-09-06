@@ -613,22 +613,30 @@ def _check_v2(receipts, manifest, template, artifact_root):
 
 SUPPORT_SCHEMA = object_schema(dict(video_id=ID, source_revision=HASH, card_hash=HASH,
                                    excerpt_id=HASH, quote=dict(type="string", minLength=1, maxLength=1000)))
-EXCERPT_REFERENCE_SCHEMA = object_schema(dict(excerpt_id=HASH))
+CARD_KEY = dict(type="string", pattern=r"^c[0-9]{3}$")
+SUPPORT_REFERENCE_SCHEMA = object_schema(dict(support_key=dict(type="string", pattern=r"^c[0-9]{3}-[1-9][0-9]*$")))
 INDUCTION_NODE_SCHEMA = object_schema(dict(
     shelf_id=ID, path=array_schema(ID, minItems=1, maxItems=3), definition=ID,
     include=array_schema(ID, minItems=1), exclude=array_schema(ID, minItems=1),
     sibling_cues=array_schema(object_schema(dict(include_cue=ID, confusing_alternative=ID, evidence_needed=ID)), minItems=1),
     supporting_evidence=array_schema(SUPPORT_SCHEMA)))
-PROPOSAL_SCHEMA = object_schema(dict(
+EXPANDED_PROPOSAL_SCHEMA = object_schema(dict(
     version_id=ID, parent_version_id=ID, nodes=array_schema(INDUCTION_NODE_SCHEMA, minItems=1),
     coverage_ledger=array_schema(object_schema(dict(video_id=ID,
         disposition=dict(enum=["proposed_concept", "existing_concept", "still_unmapped", "unsupported"]),
-        shelf_ids=array_schema(ID, uniqueItems=True), evidence=array_schema(EXCERPT_REFERENCE_SCHEMA, uniqueItems=True),
+        shelf_ids=array_schema(ID, uniqueItems=True), evidence=array_schema(SUPPORT_SCHEMA, uniqueItems=True),
         reason=dict(type="string", minLength=1, maxLength=160)))),
     diff=object_schema(dict(preserved=array_schema(ID, uniqueItems=True), added=array_schema(ID, uniqueItems=True),
         renamed=array_schema(JSON_OBJECT), merged=array_schema(JSON_OBJECT), split=array_schema(JSON_OBJECT),
         retired=array_schema(ID, uniqueItems=True))),
     pin_impact_report=JSON_OBJECT, rejected_proposals=array_schema(object_schema(dict(proposal=ID, reason=ID)))))
+PROPOSAL_SCHEMA = copy.deepcopy(EXPANDED_PROPOSAL_SCHEMA)
+PROPOSAL_SCHEMA["properties"]["nodes"]["items"]["properties"]["supporting_evidence"] = array_schema(SUPPORT_REFERENCE_SCHEMA)
+_ledger_schema = PROPOSAL_SCHEMA["properties"]["coverage_ledger"]["items"]
+_ledger_schema["properties"].pop("video_id")
+_ledger_schema["properties"]["card_key"] = CARD_KEY
+_ledger_schema["required"] = ["card_key" if key == "video_id" else key for key in _ledger_schema["required"]]
+_ledger_schema["properties"]["evidence"] = array_schema(SUPPORT_REFERENCE_SCHEMA, uniqueItems=True)
 INDUCTION_RECEIPT_SCHEMA = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "urn:uoink:induction-receipts:2026-09-05:v1",
@@ -679,13 +687,92 @@ def _recorded_induction_supports(batch_outputs, video_id, *, candidates):
     return supports
 
 
-def validate_induction_proposal(proposal, induction, cards, taxonomy, *, batch_outputs):
-    """batch_outputs maps each card ID to its own recorded batch's decoded output.
+def derive_induction_keys(induction, batches, batch_proposals):
+    """Assign occurrence keys from manifest order and recorded batch array order.
 
+    Per batch, visit candidates/supporting_evidence before dispositions/evidence.
+    Identical objects at different locations get distinct keys; their origin is
+    retained so ledger and node references cannot borrow each other's evidence.
+    This helper derives identities, not source validity; selected supports still
+    pass the complete evidence checks after expansion.
+    """
+    items = induction["items"]
+    ids = [row["video_id"] for row in items]
+    require(len(ids) == len(set(ids)) == 225, "Induction keys require 225 distinct manifest cards")
+    require(len(batches) == len(batch_proposals), "Induction key batches/output count mismatch")
+    selected = [vid for batch in batches for vid in batch["video_ids"]]
+    require(len(selected) == len(set(selected)) == 225 and set(selected) == set(ids),
+            "Induction key batches must cover the manifest once")
+    card_keys = {vid: f"c{index:03d}" for index, vid in enumerate(ids, 1)}
+    table = dict(cards={card_keys[row["video_id"]]: {k: row[k] for k in ("video_id", "source_revision", "card_hash")}
+                        for row in items}, supports={})
+    counts = Counter()
+    for batch, output in zip(batches, batch_proposals):
+        require(isinstance(output, dict), "Recorded batch output must be an object")
+        for kind, field, evidence_field in (("candidate", "candidates", "supporting_evidence"),
+                                            ("disposition", "dispositions", "evidence")):
+            rows = output.get(field, [])
+            require(isinstance(rows, list), "Recorded batch candidates/dispositions must be arrays")
+            for row in rows:
+                require(isinstance(row, dict), "Recorded batch candidate/disposition must be an object")
+                evidence = row.get(evidence_field, [])
+                require(isinstance(evidence, list), "Recorded batch evidence must be an array")
+                for support in evidence:
+                    require(isinstance(support, dict) and support.get("video_id") in batch["video_ids"],
+                            "Key support must belong to its recorded batch")
+                    vid = support["video_id"]
+                    require(kind == "candidate" or row.get("video_id") == vid,
+                            "Key support must belong to its disposition card")
+                    counts[vid] += 1
+                    key = card_keys[vid]
+                    table["supports"][f"{key}-{counts[vid]}"] = dict(card_key=key, kind=kind, support=copy.deepcopy(support))
+    return table
+
+
+def render_induction_consolidation(template, batch_proposals, keys):
+    """Fill both slots once, without interpreting placeholder text in evidence."""
+    require(template.count("{{PROPOSALS}}") == template.count("{{KEYS}}") == 1,
+            "Consolidation requires exactly one PROPOSALS and one KEYS placeholder")
+    values = {"{{PROPOSALS}}": library_cards.serialize_card(batch_proposals),
+              "{{KEYS}}": library_cards.serialize_card(keys)}
+    return re.sub(r"\{\{(?:PROPOSALS|KEYS)\}\}", lambda match: values[match.group()], template)
+
+
+def expand_induction_proposal(proposal, keys):
+    """Return a separate full-support document; never mutate recorded model output.
+
+    Receipt validation always re-derives keys from checked batch stdout. Standalone
+    callers must provide that same table; this helper alone proves no provenance.
+    """
+    Draft202012Validator(PROPOSAL_SCHEMA).validate(proposal)
+    expanded = copy.deepcopy(proposal)
+
+    def resolve(reference, kind, card_key=None):
+        key = reference["support_key"]
+        require(key in keys["supports"], f"Unknown induction support key: {key}")
+        entry = keys["supports"][key]
+        require(entry["kind"] == kind, f"Support key must name recorded batch {kind} evidence: {key}")
+        require(card_key is None or entry["card_key"] == card_key, "Ledger support key belongs to another card")
+        return copy.deepcopy(entry["support"])
+
+    for node in expanded["nodes"]:
+        node["supporting_evidence"] = [resolve(ref, "candidate") for ref in node["supporting_evidence"]]
+    for row in expanded["coverage_ledger"]:
+        key = row.pop("card_key")
+        require(key in keys["cards"], f"Unknown induction card key: {key}")
+        row["video_id"] = keys["cards"][key]["video_id"]
+        row["evidence"] = [resolve(ref, "disposition", key) for ref in row["evidence"]]
+    return expanded
+
+
+def validate_induction_proposal(proposal, induction, cards, taxonomy, *, batch_outputs):
+    """Validate an expanded proposal containing exact full support objects.
+
+    batch_outputs maps each card ID to its own recorded batch's decoded output.
     Receipt validation constructs this binding from checked calls; a standalone
     proposal check cannot authenticate supplied batch bytes or process provenance.
     """
-    Draft202012Validator(PROPOSAL_SCHEMA).validate(proposal)
+    Draft202012Validator(EXPANDED_PROPOSAL_SCHEMA).validate(proposal)
     frozen = {r["video_id"]: r for r in induction["items"]}
     require(len(frozen) == len(induction["items"]) == 225, "Induction requires all 225 distinct cards")
     nodes = {n["shelf_id"]: n for n in proposal["nodes"]}
@@ -730,22 +817,12 @@ def validate_induction_proposal(proposal, induction, cards, taxonomy, *, batch_o
         require(bool(row["shelf_ids"]) == mapped and bool(row["evidence"]) == mapped, "Ledger disposition lacks evidence/concept or falsely maps refusal")
         if row["disposition"] == "existing_concept":
             require(set(row["shelf_ids"]) <= set(old), "Existing-concept ledger names a new shelf")
-        for reference in row["evidence"]:
-            supports = _recorded_induction_supports(batch_outputs, row["video_id"], candidates=False)
-            matches = [s for s in supports if s.get("excerpt_id") == reference["excerpt_id"]]
-            # A reference needs at least one valid full support in this card's
-            # disposition. Unused batch evidence cannot supply invented support.
-            valid = False
-            for support in matches:
-                if not Draft202012Validator(SUPPORT_SCHEMA).is_valid(support):
-                    continue
-                try:
-                    _check_support(support, cards, frozen)
-                except ValueError:
-                    continue
-                valid = True
-                break
-            require(valid, "Ledger excerpt lacks valid recorded batch disposition support for its card")
+        require(len({s["excerpt_id"] for s in row["evidence"]}) == len(row["evidence"]), "Duplicate ledger excerpt reference")
+        for support in row["evidence"]:
+            require(support["video_id"] == row["video_id"], "Ledger support belongs to another card")
+            _check_support(support, cards, frozen)
+            require(support in _recorded_induction_supports(batch_outputs, row["video_id"], candidates=False),
+                    "Ledger support differs from recorded batch disposition evidence")
 
 
 def validate_induction_receipts(receipts, induction=None, *, artifact_root=ROOT, require_real=False):
@@ -793,8 +870,9 @@ def validate_induction_receipts(receipts, induction=None, *, artifact_root=ROOT,
         batch_proposals.append(output)
         batch_outputs.update({vid: output for vid in batch["video_ids"]})
     template = prompts["consolidation_prompt"]
-    require(template.count("{{PROPOSALS}}") == 1, "Consolidation placeholder changed")
-    require(call_inputs[final_id] == template.replace("{{PROPOSALS}}", library_cards.serialize_card(batch_proposals)).encode("utf-8"), "Consolidation input differs from original batch proposals")
+    keys = derive_induction_keys(induction, receipts["batches"], batch_proposals)
+    require(call_inputs[final_id] == render_induction_consolidation(template, batch_proposals, keys).encode("utf-8"),
+            "Consolidation input differs from original batch proposals or derived keys")
     require(calls[final_id]["attempt_ids"] == ["consolidation"], "Consolidation call identity mismatch")
     require(all(c["exit_status"] == 0 and not c["timed_out"] and not c["cancellation"] for c in calls.values()), "Failed induction call cannot establish a completed proposal")
     proposal = receipts["proposal"]
@@ -807,7 +885,8 @@ def validate_induction_receipts(receipts, induction=None, *, artifact_root=ROOT,
     require(all(c["end_monotonic_ns"] <= calls[final_id]["start_monotonic_ns"] for cid, c in calls.items() if cid != final_id), "Consolidation precedes a batch completion")
     for record in execution["fingerprints"].values():
         artifact_bytes(record, artifact_root)
-    validate_induction_proposal(proposal, induction, cards, taxonomy, batch_outputs=batch_outputs)
+    expanded = expand_induction_proposal(proposal, keys)
+    validate_induction_proposal(expanded, induction, cards, taxonomy, batch_outputs=batch_outputs)
     return dict(status="INDUCTION_FIXTURE_VALID" if receipts["mode"] == "mock" else "INDUCTION_RECEIPTS_VALID_AUDIT_REQUIRED",
                 target_count=225, call_count=len(calls), proposal_approved=False)
 

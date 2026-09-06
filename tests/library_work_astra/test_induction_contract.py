@@ -45,7 +45,7 @@ def induction_fixture():
         support = next((s for s in supports if s["video_id"] == row["video_id"]), None)
         if support:
             row.update(disposition="proposed_concept", shelf_ids=["fixture-new"],
-                       evidence=[dict(excerpt_id=support["excerpt_id"])])
+                       evidence=[copy.deepcopy(support)])
     return proposal, induction, cards, taxonomy, tax_raw
 
 
@@ -79,6 +79,24 @@ def batch_outputs_fixture(proposal, induction):
     return outputs
 
 
+def keyed_proposal(proposal, keys):
+    """Mock-only encoding, before recording stdout; real output is never repaired."""
+    result = copy.deepcopy(proposal)
+    by_video = {row["video_id"]: key for key, row in keys["cards"].items()}
+
+    def reference(support, kind):
+        key = next(key for key, entry in keys["supports"].items()
+                   if entry["kind"] == kind and entry["support"] == support)
+        return dict(support_key=key)
+
+    for node in result["nodes"]:
+        node["supporting_evidence"] = [reference(s, "candidate") for s in node["supporting_evidence"]]
+    for row in result["coverage_ledger"]:
+        row["card_key"] = by_video[row.pop("video_id")]
+        row["evidence"] = [reference(s, "disposition") for s in row["evidence"]]
+    return result
+
+
 def test_induction_supports_and_complete_ledger():
     proposal, induction, cards, taxonomy, _ = induction_fixture()
     outputs = batch_outputs_fixture(proposal, induction)
@@ -88,7 +106,7 @@ def test_induction_supports_and_complete_ledger():
 
 
 NEGATIVE_KINDS = ["four cards", "repeated card", "25 words", "foreign card", "missing source", "title support", "missing ledger", "duplicate ledger", "silent pins", "missing alternative", "unchanged id", "missing parent",
-                  "full ledger support", "long reason", "invalid reference", "duplicate reference", "foreign reference", "empty mapped evidence", "refusal evidence"]
+                  "excerpt ledger reference", "long reason", "invalid reference", "duplicate reference", "foreign reference", "empty mapped evidence", "refusal evidence"]
 
 
 @pytest.mark.parametrize("kind", NEGATIVE_KINDS)
@@ -122,8 +140,8 @@ def test_induction_proposal_negative(kind):
             node[field] = tax["nodes"][0][field]
     elif kind == "missing parent":
         node["path"] = ["Absent parent", "child"]
-    elif kind == "full ledger support":
-        mapped["evidence"] = [copy.deepcopy(node["supporting_evidence"][0])]
+    elif kind == "excerpt ledger reference":
+        mapped["evidence"] = [dict(excerpt_id=node["supporting_evidence"][0]["excerpt_id"])]
     elif kind == "long reason":
         mapped["reason"] = "x" * 161
     elif kind == "invalid reference":
@@ -144,7 +162,7 @@ def make_induction_receipt():
     p, induction, cards, taxonomy, tax_raw = induction_fixture()
     ids = [row["video_id"] for row in induction["items"]]
     batch_template = "{{TAXONOMY}}\n{{CARDS}}"
-    consolidate_template = "Consolidate the supplied proposals: {{PROPOSALS}}"
+    consolidate_template = "Keys: {{KEYS}}\nConsolidate the supplied proposals: {{PROPOSALS}}"
     calls, batches, proposals = [], [], []
 
     def call(cid, aids, stdin, result, start):
@@ -162,7 +180,9 @@ def make_induction_receipt():
         calls.append(call(cid, selected, prompt, partial, start))
         batches.append(dict(call_id=cid, video_ids=selected))
         proposals.append(partial)
-    calls.append(call("final", ["consolidation"], consolidate_template.replace("{{PROPOSALS}}", v.library_cards.serialize_card(proposals)), p, 226))
+    keys = v.derive_induction_keys(induction, batches, proposals)
+    p = keyed_proposal(p, keys)
+    calls.append(call("final", ["consolidation"], v.render_induction_consolidation(consolidate_template, proposals, keys), p, 226))
     r = dict(kind="induction-receipts", schema_version=1, run_id="fixture", mode="mock", status="completed", abort_reason=None,
              inputs=dict(induction_manifest_sha256=v.sha(v.INDUCTION_MANIFEST.read_bytes()), archived_receipts_sha256=v.ARCHIVE_SHA256,
                          taxonomy_file_sha256=v.sha(tax_raw), batch_prompt_sha256=v.sha(batch_template.encode()),
@@ -178,12 +198,22 @@ def recorded_output(call):
     return v.decode_json(v.artifact_bytes(call["stdout"], ROOT))["structured_output"]
 
 
+def receipt_keys(receipts):
+    return v.derive_induction_keys(v.read_json(v.INDUCTION_MANIFEST), receipts["batches"],
+                                   [recorded_output(call) for call in receipts["calls"][:-1]])
+
+
+def ledger_row(receipts, video_id):
+    key = next(key for key, row in receipt_keys(receipts)["cards"].items() if row["video_id"] == video_id)
+    return next(row for row in receipts["proposal"]["coverage_ledger"] if row["card_key"] == key)
+
+
 def refresh_receipt(receipts):
     """Rebind fixture bytes so tamper cases reach the intended semantic check."""
     final = receipts["calls"][-1]
     template = v.artifact_bytes(receipts["consolidation_prompt"], ROOT).decode()
     proposals = [recorded_output(call) for call in receipts["calls"][:-1]]
-    final["stdin"] = artifact(template.replace("{{PROPOSALS}}", v.library_cards.serialize_card(proposals)).encode())
+    final["stdin"] = artifact(v.render_induction_consolidation(template, proposals, receipt_keys(receipts)).encode())
     final["stdout"] = artifact(dict(structured_output=receipts["proposal"]))
     receipts["proposal_artifact"] = artifact(receipts["proposal"])
     receipts["accounting"] = v.call_accounting(receipts["calls"])
@@ -197,14 +227,17 @@ def test_reference_resolution_and_relaxed_call_schema():
     supports = [dict(video_id=card["video_id"], source_revision=card["source_revision"], card_hash=card["card_hash"],
                      excerpt_id=e["excerpt_id"], quote=e["text"].split()[0])
                 for e in card["excerpts"] if e["evidence_kind"] == "timed_clip"][:2]
-    mapped = next(row for row in p["coverage_ledger"] if row["video_id"] == card["video_id"])
+    mapped = ledger_row(r, card["video_id"])
     mapped.update(disposition="existing_concept", shelf_ids=[p["diff"]["preserved"][0]], reason="x" * 160,
-                  evidence=[dict(excerpt_id=s["excerpt_id"]) for s in supports])
+                  evidence=[])
     batch = next(call for call in r["calls"] if card["video_id"] in call["attempt_ids"])
     output = recorded_output(batch)
     row = next(row for row in output["dispositions"] if row["video_id"] == card["video_id"])
     row.update(disposition="existing_concept", candidate_paths=[], existing_shelf_ids=mapped["shelf_ids"], evidence=supports)
     batch["stdout"] = artifact(dict(structured_output=output))
+    keys = receipt_keys(r)
+    mapped["evidence"] = [dict(support_key=key) for key, entry in keys["supports"].items()
+                          if entry["kind"] == "disposition" and entry["support"] in supports]
     # The call may omit pattern and uniqueItems; the offline schema keeps both.
     spec = importlib.util.spec_from_file_location("astra_induce_runner", ROOT / "scripts/librarian/induce_run.py")
     runner = importlib.util.module_from_spec(spec)
@@ -222,7 +255,7 @@ def test_reference_resolution_and_relaxed_call_schema():
         bad = copy.deepcopy(r)
         row = next(row for row in bad["proposal"]["coverage_ledger"] if row["evidence"])
         if change == "pattern":
-            row["evidence"][0]["excerpt_id"] = "invalid"
+            row["evidence"][0]["support_key"] = "invalid"
         elif change == "uniqueItems":
             row["evidence"].append(copy.deepcopy(row["evidence"][0]))
         else:
@@ -244,46 +277,58 @@ def test_recorded_batch_support_negative(kind):
     output = recorded_output(r["calls"][0])
     disposition = next(row for row in output["dispositions"] if row["evidence"])
     support = disposition["evidence"][0]
-    expected = "Ledger excerpt lacks valid recorded batch disposition support"
+    expected = "Unknown induction support key"
     if kind == "missing dispositions":
         output.pop("dispositions")  # Candidate evidence alone cannot back a ledger reference.
     elif kind == "missing support":
         disposition["evidence"] = []
     elif kind == "empty quote":
         support["quote"] = ""
+        expected = "minLength"
     elif kind == "25 words":
         support["quote"] = " ".join(["word"] * 25)
+        expected = "Support quote"
     elif kind == "invented quote":
         support["quote"] = "invented fixture quotation"
+        expected = "Support quote"
     elif kind == "source revision":
         support["source_revision"] = "0" * 64
+        expected = "Support source/card binding mismatch"
     elif kind == "card hash":
         support["card_hash"] = "0" * 64
+        expected = "Support source/card binding mismatch"
     elif kind == "unknown excerpt":
         support["excerpt_id"] = "0" * 64
-        next(row for row in r["proposal"]["coverage_ledger"] if row["evidence"])["evidence"][0]["excerpt_id"] = "0" * 64
+        expected = "Support must name an original excerpt"
     elif kind == "wrong support owner":
         support["video_id"] = "foreign"
+        expected = "Key support must belong to its recorded batch"
     elif kind == "wrong disposition owner":
         disposition["video_id"] = "foreign"
+        expected = "Key support must belong to its disposition card"
     elif kind == "wrong batch ledger":
         other = recorded_output(r["calls"][1])
         other["dispositions"].append(copy.deepcopy(disposition))
         disposition["evidence"] = []
         r["calls"][1]["stdout"] = artifact(dict(structured_output=other))
+        expected = "Key support must belong to its recorded batch"
     elif kind in {"missing candidates", "changed node quote", "wrong batch node"}:
-        expected = "Node support differs from recorded batch candidate evidence"
+        expected = "Support key must name recorded batch candidate evidence"
         if kind == "missing candidates":
             output.pop("candidates")  # Disposition evidence alone cannot back node support.
         elif kind == "changed node quote":
-            output["candidates"][0]["supporting_evidence"][0]["quote"] += " "
+            output["candidates"][0]["supporting_evidence"][0]["quote"] = "invented candidate quotation"
+            expected = "Support quote"
         else:
             other = recorded_output(r["calls"][1])
             other["candidates"] = output.pop("candidates")
             r["calls"][1]["stdout"] = artifact(dict(structured_output=other))
+            expected = "Key support must belong to its recorded batch"
     r["calls"][0]["stdout"] = artifact(dict(structured_output=output))
-    refresh_receipt(r)
-    with pytest.raises(ValueError, match=expected):
+    # Invalid ownership fails derivation itself, before prompt-byte comparison.
+    if not kind.startswith("wrong"):
+        refresh_receipt(r)
+    with pytest.raises((ValueError, ValidationError), match=expected):
         v.validate_induction_receipts(r)
 
 
@@ -296,16 +341,18 @@ def test_ineligible_original_ledger_evidence():
     excerpt = next(e for e in card["excerpts"] if e["evidence_kind"] == "text_only")
     support = dict(video_id=card["video_id"], source_revision=card["source_revision"], card_hash=card["card_hash"],
                    excerpt_id=excerpt["excerpt_id"], quote=excerpt["text"].split()[0])
-    mapped = next(row for row in r["proposal"]["coverage_ledger"] if row["video_id"] == card["video_id"])
+    mapped = ledger_row(r, card["video_id"])
     mapped.update(disposition="existing_concept", shelf_ids=[r["proposal"]["diff"]["preserved"][0]],
-                  evidence=[dict(excerpt_id=excerpt["excerpt_id"])])
+                  evidence=[])
     batch = next(call for call in r["calls"] if card["video_id"] in call["attempt_ids"])
     output = recorded_output(batch)
     row = next(row for row in output["dispositions"] if row["video_id"] == card["video_id"])
     row.update(disposition="existing_concept", candidate_paths=[], existing_shelf_ids=mapped["shelf_ids"], evidence=[support])
     batch["stdout"] = artifact(dict(structured_output=output))
+    mapped["evidence"] = [dict(support_key=key) for key, entry in receipt_keys(r)["supports"].items()
+                          if entry["kind"] == "disposition" and entry["support"] == support]
     refresh_receipt(r)
-    with pytest.raises(ValueError, match="Ledger excerpt lacks valid recorded batch disposition support"):
+    with pytest.raises(ValueError, match="Ineligible original source evidence"):
         v.validate_induction_receipts(r)
 
 
@@ -349,6 +396,178 @@ def test_complete_induction_receipt_and_modified_batch():
         v.validate_induction_receipts(r)
 
 
+def test_key_assignment_expansion_and_immutable_output():
+    r = make_induction_receipt()
+    before = copy.deepcopy(r)
+    keys = receipt_keys(r)
+    full, induction, cards, tax, _ = induction_fixture()
+    assert list(keys["cards"]) == [f"c{i:03d}" for i in range(1, 226)]
+    assert [row["video_id"] for row in keys["cards"].values()] == [row["video_id"] for row in induction["items"]]
+    for support in full["nodes"][-1]["supporting_evidence"]:
+        key = next(key for key, row in keys["cards"].items() if row["video_id"] == support["video_id"])
+        assert keys["supports"][key + "-1"] == dict(card_key=key, kind="candidate", support=support)
+        assert keys["supports"][key + "-2"] == dict(card_key=key, kind="disposition", support=support)
+    # Batch/completion order never renumbers manifest cards or per-card evidence.
+    batches = list(reversed(r["batches"]))
+    outputs = list(reversed([recorded_output(call) for call in r["calls"][:-1]]))
+    assert v.derive_induction_keys(induction, batches, outputs) == keys
+    expanded = v.expand_induction_proposal(r["proposal"], keys)
+    assert expanded == full
+    v.validate_induction_proposal(expanded, induction, cards, tax, batch_outputs=batch_outputs_fixture(full, induction))
+    assert v.validate_induction_receipts(r)["proposal_approved"] is False
+    assert r == before
+    expanded["nodes"][-1]["supporting_evidence"][0]["quote"] = "independent copy"
+    assert r == before and receipt_keys(r) == keys
+
+
+def test_support_occurrence_order_and_literal_placeholders():
+    r = make_induction_receipt()
+    output = recorded_output(r["calls"][0])
+    original = copy.deepcopy(output["candidates"][0]["supporting_evidence"][0])
+    key = ledger_row(r, original["video_id"])["card_key"]
+    extra = dict(original, quote="{{KEYS}} {{PROPOSALS}}")
+    output["candidates"][0]["supporting_evidence"].append(extra)
+    output["candidates"].append(copy.deepcopy(output["candidates"][0]))
+    r["calls"][0]["stdout"] = artifact(dict(structured_output=output))
+    keys = receipt_keys(r)
+    # Every occurrence gets a key, including byte-identical duplicates.
+    assert [keys["supports"][f"{key}-{i}"]["support"] for i in range(1, 6)] == [original, extra, original, extra, original]
+    assert [keys["supports"][f"{key}-{i}"]["kind"] for i in range(1, 6)] == ["candidate"] * 4 + ["disposition"]
+    proposals = [output]
+    for template in ("{{KEYS}}\n{{PROPOSALS}}", "{{PROPOSALS}}\n{{KEYS}}"):
+        expected = "\n".join(v.library_cards.serialize_card(keys if slot == "{{KEYS}}" else proposals)
+                             for slot in template.split("\n"))
+        assert v.render_induction_consolidation(template, proposals, keys) == expected
+
+
+KEY_NEGATIVE_KINDS = ["unknown card", "unknown node support", "unknown ledger support", "foreign support",
+                      "node disposition key", "ledger candidate key", "duplicate card", "duplicate support",
+                      "long reason", "old card identity", "old node support", "old excerpt reference", "extra support field",
+                      "four keyed cards", "repeated keyed card", "missing keyed ledger", "refusal with key", "mapped without key"]
+
+
+@pytest.mark.parametrize("kind", KEY_NEGATIVE_KINDS)
+def test_keyed_proposal_negative(kind):
+    r = make_induction_receipt()
+    p = r["proposal"]
+    node = p["nodes"][-1]
+    mapped = [row for row in p["coverage_ledger"] if row["evidence"]]
+    row = mapped[0]
+    expected = "Unknown induction"
+    if kind == "unknown card":
+        row["card_key"] = "c999"
+    elif kind == "unknown node support":
+        node["supporting_evidence"][0]["support_key"] = "c001-999"
+    elif kind == "unknown ledger support":
+        row["evidence"][0]["support_key"] = "c001-999"
+    elif kind == "foreign support":
+        row["evidence"] = copy.deepcopy(mapped[1]["evidence"])
+        expected = "Ledger support key belongs to another card"
+    elif kind == "node disposition key":
+        node["supporting_evidence"][0] = copy.deepcopy(row["evidence"][0])
+        expected = "Support key must name recorded batch candidate"
+    elif kind == "ledger candidate key":
+        row["evidence"][0] = copy.deepcopy(node["supporting_evidence"][0])
+        expected = "Support key must name recorded batch disposition"
+    elif kind == "duplicate card":
+        p["coverage_ledger"][-1] = copy.deepcopy(row)
+        expected = "Coverage ledger missing/duplicate"
+    elif kind == "duplicate support":
+        row["evidence"].append(copy.deepcopy(row["evidence"][0]))
+        expected = "uniqueItems"
+    elif kind == "long reason":
+        row["reason"] = "x" * 161
+        expected = "maxLength"
+    elif kind == "old card identity":
+        row["video_id"] = receipt_keys(r)["cards"][row.pop("card_key")]["video_id"]
+        expected = "'card_key' is a required property"
+    elif kind == "old node support":
+        node["supporting_evidence"][0] = copy.deepcopy(next(iter(receipt_keys(r)["supports"].values()))["support"])
+        expected = "'support_key' is a required property"
+    elif kind == "old excerpt reference":
+        row["evidence"][0] = dict(excerpt_id="0" * 64)
+        expected = "'support_key' is a required property"
+    elif kind == "extra support field":
+        row["evidence"][0]["quote"] = "invented"
+        expected = "Additional properties"
+    elif kind == "four keyed cards":
+        node["supporting_evidence"].pop()
+        expected = "five distinct"
+    elif kind == "repeated keyed card":
+        node["supporting_evidence"][-1] = copy.deepcopy(node["supporting_evidence"][0])
+        expected = "five distinct"
+    elif kind == "missing keyed ledger":
+        p["coverage_ledger"].pop()
+        expected = "Coverage ledger missing/duplicate"
+    elif kind == "refusal with key":
+        row.update(disposition="still_unmapped", shelf_ids=[])
+        expected = "Ledger disposition lacks"
+    elif kind == "mapped without key":
+        row["evidence"] = []
+        expected = "Ledger disposition lacks"
+    refresh_receipt(r)
+    with pytest.raises((ValueError, ValidationError), match=expected):
+        v.validate_induction_receipts(r)
+
+
+PROMPT_NEGATIVE_KINDS = ["missing keys slot", "duplicate keys slot", "missing proposals slot", "duplicate proposals slot",
+                         "altered key table", "reordered proposals", "extra input"]
+
+
+@pytest.mark.parametrize("kind", PROMPT_NEGATIVE_KINDS)
+def test_key_table_and_prompt_binding_negative(kind):
+    r = make_induction_receipt()
+    template = v.artifact_bytes(r["consolidation_prompt"], ROOT).decode()
+    proposals = [recorded_output(call) for call in r["calls"][:-1]]
+    keys = receipt_keys(r)
+    expected = "Consolidation input differs"
+    if kind.endswith("slot"):
+        token = "{{KEYS}}" if "keys" in kind else "{{PROPOSALS}}"
+        template = template.replace(token, "" if kind.startswith("missing") else token * 2)
+        r["consolidation_prompt"] = artifact(template.encode())
+        r["inputs"]["consolidation_prompt_sha256"] = v.sha(template.encode())
+        expected = "Consolidation requires exactly one"
+    elif kind == "altered key table":
+        keys["cards"]["c001"]["video_id"] = "invented"
+        r["calls"][-1]["stdin"] = artifact(v.render_induction_consolidation(template, proposals, keys).encode())
+    elif kind == "reordered proposals":
+        r["calls"][-1]["stdin"] = artifact(v.render_induction_consolidation(template, list(reversed(proposals)), keys).encode())
+    else:
+        r["calls"][-1]["stdin"] = artifact(v.artifact_bytes(r["calls"][-1]["stdin"], ROOT) + b"extra")
+    with pytest.raises(ValueError, match=expected):
+        v.validate_induction_receipts(r)
+
+
+def test_selected_support_cannot_borrow_another_quote():
+    r = make_induction_receipt()
+    output = recorded_output(r["calls"][0])
+    row = next(row for row in output["dispositions"] if row["evidence"])
+    # A valid alternative for the same excerpt cannot rescue the selected bad key.
+    row["evidence"].append(copy.deepcopy(row["evidence"][0]))
+    row["evidence"][0]["quote"] = "invented selected quotation"
+    r["calls"][0]["stdout"] = artifact(dict(structured_output=output))
+    refresh_receipt(r)
+    with pytest.raises(ValueError, match="Support quote"):
+        v.validate_induction_receipts(r)
+
+
+def test_distinct_keys_cannot_repeat_ledger_excerpt():
+    r = make_induction_receipt()
+    output = recorded_output(r["calls"][0])
+    row = next(row for row in output["dispositions"] if row["evidence"])
+    support = copy.deepcopy(row["evidence"][0])
+    # Distinct normalized quotes still refer to one excerpt under the v1.1 rule.
+    support["quote"] += " "
+    row["evidence"].append(support)
+    r["calls"][0]["stdout"] = artifact(dict(structured_output=output))
+    mapped = ledger_row(r, row["video_id"])
+    mapped["evidence"] = [dict(support_key=key) for key, entry in receipt_keys(r)["supports"].items()
+                          if entry["card_key"] == mapped["card_key"] and entry["kind"] == "disposition"]
+    refresh_receipt(r)
+    with pytest.raises(ValueError, match="Duplicate ledger excerpt reference"):
+        v.validate_induction_receipts(r)
+
+
 def test_freezes_reproduce_and_do_not_overlap():
     report = v.verify_stage2_freezes()
     assert report["holdout_count"] == 60 and report["induction_count"] == 225
@@ -367,8 +586,17 @@ def run_offline_checks():
         test_recorded_batch_support_negative(kind)
     for kind in IDENTITY_NEGATIVE_KINDS:
         test_induction_call_identity_negative(kind)
+    for kind in KEY_NEGATIVE_KINDS:
+        test_keyed_proposal_negative(kind)
+    for kind in PROMPT_NEGATIVE_KINDS:
+        test_key_table_and_prompt_binding_negative(kind)
+    test_key_assignment_expansion_and_immutable_output()
+    test_support_occurrence_order_and_literal_placeholders()
+    test_selected_support_cannot_borrow_another_quote()
+    test_distinct_keys_cannot_repeat_ledger_excerpt()
     test_ineligible_original_ledger_evidence()
     test_reference_resolution_and_relaxed_call_schema()
     test_complete_induction_receipt_and_modified_batch()
     test_freezes_reproduce_and_do_not_overlap()
-    return len(NEGATIVE_KINDS) + len(BATCH_NEGATIVE_KINDS) + len(IDENTITY_NEGATIVE_KINDS) + 8
+    return (len(NEGATIVE_KINDS) + len(BATCH_NEGATIVE_KINDS) + len(IDENTITY_NEGATIVE_KINDS)
+            + len(KEY_NEGATIVE_KINDS) + len(PROMPT_NEGATIVE_KINDS) + 12)
