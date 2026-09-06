@@ -20,7 +20,7 @@ Open exactly these files and nothing else in the repository:
 4. `docs/library/proof/labels/holdout-v2-labels-9-grok-2026-09-05.json` (Grok 4.6, blind,
    0 mechanical problems);
 5. `docs/library/proof/labels/holdout-v2-agreement-9-2026-09-05.json`: Fable's mechanical
-   agreement table ({{AGREEMENT}}).
+   agreement table (45 of 60 primaries agree, 57 of 60 outcomes agree; 15 disagreements. Two Grok rows (`2090888779125116928`, `2092244803295571968`) are malformed: outcome `unmappable` with an approved node path; treat them as Grok saying "does not belong on that shelf" and decide from the card).
 
 Do not open receipts, results, audits, score tables, the old gold set or split, prompt
 templates, or any other file. Do not search the repository. Do not run `claude`, `codex`,
