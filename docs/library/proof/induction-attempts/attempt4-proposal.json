@@ -1,0 +1,3417 @@
+{
+  "version_id": "taxonomy-v2-2026-09-05",
+  "parent_version_id": "taxonomy-v1-2026-09-04",
+  "nodes": [
+    {
+      "shelf_id": "ai-and-ml",
+      "path": [
+        "AI and ML"
+      ],
+      "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+      "include": [
+        "artificial intelligence",
+        "machine learning",
+        "deep learning",
+        "neural networks",
+        "foundation models",
+        "LLMs",
+        "autonomous systems"
+      ],
+      "exclude": [
+        "traditional non-AI software development",
+        "general business operations",
+        "unrelated science and hardware"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "artificial intelligence",
+          "confusing_alternative": "Space and Science",
+          "evidence_needed": "excerpt discusses AI methods or systems, not orbital/astrophysics topics"
+        },
+        {
+          "include_cue": "machine learning",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "excerpt discusses ML concepts generally, not a specific coding tool"
+        },
+        {
+          "include_cue": "deep learning",
+          "confusing_alternative": "Frontier Models",
+          "evidence_needed": "excerpt is general technique discussion, not a specific model release"
+        },
+        {
+          "include_cue": "neural networks",
+          "confusing_alternative": "Education",
+          "evidence_needed": "excerpt references architecture generally, not a pedagogical lecture"
+        },
+        {
+          "include_cue": "foundation models",
+          "confusing_alternative": "Frontier Models",
+          "evidence_needed": "excerpt is a brief mention, not a dedicated capability/architecture report"
+        },
+        {
+          "include_cue": "LLMs",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "excerpt is about chatting with/using an LLM generally, not an SDK/IDE workflow"
+        },
+        {
+          "include_cue": "autonomous systems",
+          "confusing_alternative": "Space and Science",
+          "evidence_needed": "excerpt frames autonomy as an AI/robotics capability, not a spacecraft/orbital system"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "space-and-science",
+      "path": [
+        "Space and Science"
+      ],
+      "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+      "include": [
+        "space exploration",
+        "astronautics",
+        "astronomy",
+        "orbital mechanics",
+        "spacecraft engineering",
+        "scientific research"
+      ],
+      "exclude": [
+        "commercial airline aviation",
+        "science fiction and fantasy entertainment",
+        "general consumer technology"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "space exploration",
+          "confusing_alternative": "Spaceflight",
+          "evidence_needed": "excerpt is broad scientific/exploratory framing, not a specific launch/mission operation"
+        },
+        {
+          "include_cue": "astronautics",
+          "confusing_alternative": "Spaceflight",
+          "evidence_needed": "excerpt discusses the discipline generally, not a specific crewed mission"
+        },
+        {
+          "include_cue": "astronomy",
+          "confusing_alternative": "AI and ML",
+          "evidence_needed": "excerpt is about celestial observation, not an AI method applied to it"
+        },
+        {
+          "include_cue": "orbital mechanics",
+          "confusing_alternative": "Spaceflight",
+          "evidence_needed": "excerpt is theoretical/mechanics discussion, not an active mission maneuver"
+        },
+        {
+          "include_cue": "spacecraft engineering",
+          "confusing_alternative": "AI and ML",
+          "evidence_needed": "excerpt is about vehicle design, not autonomous software"
+        },
+        {
+          "include_cue": "scientific research",
+          "confusing_alternative": "AI and ML",
+          "evidence_needed": "excerpt is empirical/physical science, not an AI/ML study"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "developer-tools",
+      "path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+      "include": [
+        "coding assistants",
+        "agent harnesses",
+        "developer workflows",
+        "software development SDKs",
+        "IDE integrations",
+        "code generation"
+      ],
+      "exclude": [
+        "consumer conversational chatbots",
+        "pure theoretical ML papers without tools",
+        "non-technical end-user products"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "coding assistants",
+          "confusing_alternative": "Agentic AI Assistants",
+          "evidence_needed": "excerpt is aimed at software engineers writing code, not general business tasks"
+        },
+        {
+          "include_cue": "agent harnesses",
+          "confusing_alternative": "Agentic AI Assistants",
+          "evidence_needed": "excerpt is an engineering/protocol tool (e.g. MCP), not a consumer agent"
+        },
+        {
+          "include_cue": "developer workflows",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "excerpt describes a technical workflow, not funding/market news"
+        },
+        {
+          "include_cue": "software development SDKs",
+          "confusing_alternative": "Frontier Models",
+          "evidence_needed": "excerpt is about integration/build tooling, not model architecture"
+        },
+        {
+          "include_cue": "IDE integrations",
+          "confusing_alternative": "AI Product Launches & Demos",
+          "evidence_needed": "excerpt is an engineer-facing extension, not a consumer feature ship"
+        },
+        {
+          "include_cue": "code generation",
+          "confusing_alternative": "Generative Media",
+          "evidence_needed": "excerpt produces code, not creative visual/video output"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "security",
+      "path": [
+        "AI and ML",
+        "Security"
+      ],
+      "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+      "include": [
+        "agent guardrails",
+        "cybersecurity vulnerabilities",
+        "model sandboxing",
+        "prompt injection defenses",
+        "runtime governance",
+        "least privilege"
+      ],
+      "exclude": [
+        "generic network security without AI component",
+        "routine software bug reports",
+        "corporate compliance without technical safety"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "agent guardrails",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "excerpt discusses technical guardrails, not business/deal terms"
+        },
+        {
+          "include_cue": "cybersecurity vulnerabilities",
+          "confusing_alternative": "News and Current Events",
+          "evidence_needed": "excerpt is a technical vulnerability analysis, not general crime/political news"
+        },
+        {
+          "include_cue": "model sandboxing",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "excerpt is about safety isolation, not general coding workflow"
+        },
+        {
+          "include_cue": "prompt injection defenses",
+          "confusing_alternative": "AI Culture & Memes",
+          "evidence_needed": "excerpt is a substantive technical defense description, not a joke"
+        },
+        {
+          "include_cue": "runtime governance",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "excerpt is about technical operational controls, not funding/market framing"
+        },
+        {
+          "include_cue": "least privilege",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "excerpt is framed as a safety principle, not a generic SDK feature"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "frontier-models",
+      "path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+      "include": [
+        "foundation model architectures",
+        "multimodal model releases",
+        "scaling laws",
+        "model capabilities benchmarks",
+        "open weights models"
+      ],
+      "exclude": [
+        "routine fine-tuning on niche tasks",
+        "end-user application tutorials",
+        "general AI business news"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "foundation model architectures",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "excerpt discusses architecture/design, not revenue or market positioning"
+        },
+        {
+          "include_cue": "multimodal model releases",
+          "confusing_alternative": "Generative Media",
+          "evidence_needed": "excerpt is a technical release/benchmark, not a creative-output showcase"
+        },
+        {
+          "include_cue": "scaling laws",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "excerpt is a technical scaling finding, not a compute-economics/spend narrative"
+        },
+        {
+          "include_cue": "model capabilities benchmarks",
+          "confusing_alternative": "AI Culture & Memes",
+          "evidence_needed": "excerpt is a substantive benchmark comparison, not a joke/reaction"
+        },
+        {
+          "include_cue": "open weights models",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "excerpt is about technical release specs, not trade/dumping/market framing"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "education",
+      "path": [
+        "AI and ML",
+        "Education"
+      ],
+      "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+      "include": [
+        "introductory lectures",
+        "algorithm explanations",
+        "machine learning coursework",
+        "mathematical foundations",
+        "step-by-step technical tutorials"
+      ],
+      "exclude": [
+        "product announcements",
+        "marketing keynotes",
+        "opinion pieces without pedagogical content"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "introductory lectures",
+          "confusing_alternative": "AI Product Launches & Demos",
+          "evidence_needed": "excerpt teaches a concept, not announcing a shipped feature"
+        },
+        {
+          "include_cue": "algorithm explanations",
+          "confusing_alternative": "Frontier Models",
+          "evidence_needed": "excerpt is a conceptual walkthrough, not a specific model's benchmark report"
+        },
+        {
+          "include_cue": "machine learning coursework",
+          "confusing_alternative": "AI Culture & Memes",
+          "evidence_needed": "excerpt is structured instructional content, not a joke about ML"
+        },
+        {
+          "include_cue": "mathematical foundations",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "excerpt explains underlying math/theory, not a tool's usage"
+        },
+        {
+          "include_cue": "step-by-step technical tutorials",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "excerpt teaches an ML/AI concept pedagogically, not a specific dev-tool workflow"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "spaceflight",
+      "path": [
+        "Space and Science",
+        "Spaceflight"
+      ],
+      "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+      "include": [
+        "rocket launches",
+        "crewed space missions",
+        "orbital maneuvers",
+        "satellite deployment",
+        "astronaut spacewalks",
+        "space station resupply"
+      ],
+      "exclude": [
+        "terrestrial astronomy without launch systems",
+        "atmospheric aeronautics",
+        "speculative science fiction"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "rocket launches",
+          "confusing_alternative": "News and Current Events",
+          "evidence_needed": "excerpt is a mission/launch detail, not political/military framing"
+        },
+        {
+          "include_cue": "crewed space missions",
+          "confusing_alternative": "Space and Science",
+          "evidence_needed": "excerpt is an active mission operation, not general astrophysics research"
+        },
+        {
+          "include_cue": "orbital maneuvers",
+          "confusing_alternative": "AI and ML",
+          "evidence_needed": "excerpt is a spacecraft operation, not an autonomous-system software topic"
+        },
+        {
+          "include_cue": "satellite deployment",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "excerpt is an operational mission detail, not a funding/business narrative"
+        },
+        {
+          "include_cue": "astronaut spacewalks",
+          "confusing_alternative": "News and Current Events",
+          "evidence_needed": "excerpt is a mission-operations description, not general news commentary"
+        },
+        {
+          "include_cue": "space station resupply",
+          "confusing_alternative": "Space and Science",
+          "evidence_needed": "excerpt is a specific logistics/mission event, not general scientific inquiry"
+        }
+      ],
+      "supporting_evidence": []
+    },
+    {
+      "shelf_id": "news-and-current-events",
+      "path": [
+        "News and Current Events"
+      ],
+      "definition": "Breaking-news style clips covering crime reporting, political/cultural commentary, and military conflict footage about real-world civic events.",
+      "include": [
+        "political/cultural commentary panels",
+        "local crime reporting with anchor narration",
+        "historical political event footage (e.g. riot/breach)",
+        "war/military conflict footage"
+      ],
+      "exclude": [
+        "AI/ML product, model, or agent discussion",
+        "sports highlights or streamer drama without political/civic content",
+        "space exploration or scientific research content"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "political/cultural commentary panels",
+          "confusing_alternative": "Sports and Streaming Culture",
+          "evidence_needed": "excerpt discusses political/social ideology rather than a game or match"
+        },
+        {
+          "include_cue": "local crime reporting with anchor narration",
+          "confusing_alternative": "AI and ML",
+          "evidence_needed": "excerpt names an arrest, charge, or victim with no AI/model terminology"
+        },
+        {
+          "include_cue": "historical political event footage (e.g. riot/breach)",
+          "confusing_alternative": "Sports and Streaming Culture",
+          "evidence_needed": "excerpt uses law-enforcement/riot terms rather than game terms"
+        },
+        {
+          "include_cue": "war/military conflict footage",
+          "confusing_alternative": "Space and Science",
+          "evidence_needed": "excerpt names a strike on a base or soldiers, not orbital/launch activity"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "video_id": "2077640475075358720",
+          "source_revision": "5946f41f4779074e53c690ec445f31c34fed9b046876ea1ac75c967073b39122",
+          "card_hash": "aa7d2d8267f69d374dee00e210bb119e0c2e9b868e0e8b239118cf6e17bd045a",
+          "excerpt_id": "964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3",
+          "quote": "The Center Has Been Moved So Far Left Yeah The Left Is Gone So Far Left"
+        },
+        {
+          "video_id": "2077870396075094016",
+          "source_revision": "916db312f0dac72b6ceb0ce75cf73883ce7ef37e92df2c375b6369076b79bdd4",
+          "card_hash": "b16c08a0a2c6bb099400c85f3d342c121bd52c4c52d4e67c0bac4ab50eb42636",
+          "excerpt_id": "2f0b2b6cef5b9f40fb76648a506147632d20b77c36ec785dee7c9ef46e021bd5",
+          "quote": "Greg told me what happens when you have low T."
+        },
+        {
+          "video_id": "2078287651535273984",
+          "source_revision": "bf8eb842b087cd892a6f1f15c47da10911c1e6e71ffdca7df0d0fc4b9346a122",
+          "card_hash": "79519ef7ae40f65fbb80d6de4a255d2bd422c4ee9b9f0821017b0498e73df3ea",
+          "excerpt_id": "f93090fe7fd859871f41b56f4112715bbeef6dd0f32f30fc9d68d11f54fff9a6",
+          "quote": "A woman is charged with first degree murder after an overnight shooting in the Walker Homes neighborhood."
+        },
+        {
+          "video_id": "2078450309794263040",
+          "source_revision": "1c9d1f7791a40962e02e177d5f7091efffc53d0b9555554b5da4b44b301bcb79",
+          "card_hash": "1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff",
+          "excerpt_id": "1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff",
+          "quote": "the county police want an advisor trying to breach into the capitol"
+        },
+        {
+          "video_id": "2078650714293739521",
+          "source_revision": "497ce18e7bcc95ead8c0840747a7fc239b20e83f8d3bf63b16de4ddd7613194e",
+          "card_hash": "e4d73233aab2810b98e65ae2afbd84539cbca274a3c248d6db2d3b86d5d38526",
+          "excerpt_id": "b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e",
+          "quote": "This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying."
+        }
+      ]
+    },
+    {
+      "shelf_id": "sports-and-streaming-culture",
+      "path": [
+        "Sports and Streaming Culture"
+      ],
+      "definition": "Livestreamer highlight and drama clips alongside traditional sports match highlight footage shared as short social clips.",
+      "include": [
+        "streamer basketball league highlights",
+        "livestreaming personality incidents",
+        "streamer drama/reaction commentary",
+        "traditional sports match highlight/commentary clips"
+      ],
+      "exclude": [
+        "AI/ML or developer tooling content",
+        "political commentary or crime/war reporting"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "streamer basketball league highlights",
+          "confusing_alternative": "News and Current Events",
+          "evidence_needed": "excerpt uses play-by-play/game terms rather than legal/political terms"
+        },
+        {
+          "include_cue": "livestreaming personality incidents",
+          "confusing_alternative": "News and Current Events",
+          "evidence_needed": "excerpt is about a streamer's on-camera interaction, not a crime narrative"
+        },
+        {
+          "include_cue": "streamer drama/reaction commentary",
+          "confusing_alternative": "AI Culture & Memes",
+          "evidence_needed": "excerpt names a specific streamer/stream event with no AI/agent terminology"
+        },
+        {
+          "include_cue": "traditional sports match highlight/commentary clips",
+          "confusing_alternative": "News and Current Events",
+          "evidence_needed": "excerpt text discusses match/tour play rather than political statements"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "video_id": "2078619453164748801",
+          "source_revision": "fc9a5204ede852c2ac5c3f46aaea08fba8afb086c55568d4ac37670eceba3d6f",
+          "card_hash": "b92265803a877182249c5bd8cb832ff7a4dc1d71c13a62c728f4dfdb2e8ba344",
+          "excerpt_id": "a6d6ff90aa2bffa536ccda3f8df93d72bdc41b655c885c1c8d67dbbc88a9e5c0",
+          "quote": "France vs. England match highlights.."
+        },
+        {
+          "video_id": "2078621895058915328",
+          "source_revision": "aa3c83677fa8e490ce8e6c7054f26ce2e2f43a32a3f8981f35acefca07ffaec1",
+          "card_hash": "d36d566c34dd28affd6c04fcf9f8ba6bd5ff657738a93d0e2b8a558125e1c377",
+          "excerpt_id": "3a8f6a1238629e150a9fc803b168e2e980ad2d3c7d0019e1f89aca6db6e1a7d2",
+          "quote": "We should be able to win by 20."
+        },
+        {
+          "video_id": "2078643519162298368",
+          "source_revision": "4d8389abd9806e5d8a2f73bf88e2dea9d50dd4922b4e0b1fa7952166471a9d5e",
+          "card_hash": "ff5f10f8cbeb702cc20c17cb17b9e861027b7b455d1aa16f20a2b9854c6b0f2b",
+          "excerpt_id": "503a59eff6ad621f6d4440644a45b7070a87b4105f356e2588d36f31838ea0a0",
+          "quote": "From West Orange, New Jersey. Black Boy Max!"
+        },
+        {
+          "video_id": "2078656827990978560",
+          "source_revision": "05f5d7521b83dbc1def6a534c6bed5e7bd917230eaee94126c251a364ef7b75d",
+          "card_hash": "65d552b6f75f731191921a3d0d18bf6627d573a2140d12c298d85a292224b0b8",
+          "excerpt_id": "11bfb156fd7159d01651d0623a0170f5f3917343addd8d2ef5305832f0c492b5",
+          "quote": "You're streaming right now Okay so who gave you that Jake!"
+        },
+        {
+          "video_id": "2078684046708572163",
+          "source_revision": "e91499c190e9a71bb5a00f4263c1764c224ee33e70321d1ad8ac51c90c6e140b",
+          "card_hash": "717600e7674c0291feaa1d4c05d8505fbe51f9136fa03971035b96408ae09619",
+          "excerpt_id": "f63ea6e2b63f7ff1cc75ee321b256a2d9f60b5a89c59774f608ba2e6abc32eb0",
+          "quote": "Marlon defended PlaqueboyMax after Ojay left Max emotional enough to end his stream"
+        }
+      ]
+    },
+    {
+      "shelf_id": "ai-product-launches-demos",
+      "path": [
+        "AI and ML",
+        "AI Product Launches & Demos"
+      ],
+      "definition": "Announcements and demonstrations of shipped AI-powered products, app features, novelty consumer gadgets, and creative outputs independent of technical benchmarks.",
+      "include": [
+        "voice/agent feature launches on an existing mainstream app",
+        "generative video/image demo reels showcasing creative output",
+        "industrial or classroom AI hardware demos",
+        "vibe-coded consumer apps built by hobbyists",
+        "personal projects built around a named AI chatbot",
+        "new consumer-facing AI content-generation platforms"
+      ],
+      "exclude": [
+        "model architecture, scaling laws, or benchmark reporting",
+        "coding assistants or SDKs built for software engineers",
+        "funding, revenue, or market-positioning framing"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "voice/agent feature launches on an existing mainstream app",
+          "confusing_alternative": "Frontier Models",
+          "evidence_needed": "excerpt frames it as a shipped UI feature, not a benchmark or architecture report"
+        },
+        {
+          "include_cue": "generative video/image demo reels showcasing creative output",
+          "confusing_alternative": "Generative Media",
+          "evidence_needed": "excerpt frames it as a broad product ship, not a dedicated creative-media artifact"
+        },
+        {
+          "include_cue": "industrial or classroom AI hardware demos",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "excerpt describes the shipped hardware/feature, not funding or market data"
+        },
+        {
+          "include_cue": "vibe-coded consumer apps built by hobbyists",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "excerpt frames the build as an informal solo/hobbyist demo, not a professional workflow"
+        },
+        {
+          "include_cue": "personal projects built around a named AI chatbot",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "excerpt describes the personal build itself, not a funding figure or deal"
+        },
+        {
+          "include_cue": "new consumer-facing AI content-generation platforms",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "excerpt announces end-user functionality rather than market/investment implications"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "video_id": "2079192729997959168",
+          "source_revision": "fff3c2c2295a7dc3aa41262fb77c908dadb13f0bdf2959a2554875259d8d10a9",
+          "card_hash": "857aa29cf41d6b94a6863d67dac091a6c90a7b53a66830a6d3ed9be8cd7eaa97",
+          "excerpt_id": "96315b797f79792250278ca45fcb45c3efea7a396a9a751eb2096427c7402d89",
+          "quote": "ReachSale is an AI Agent that find potential customers and do sell for you"
+        },
+        {
+          "video_id": "2080366248735522816",
+          "source_revision": "2c343ec4075020bb56e9dd051efa61d833c43901a3227fd39da296ebfc03a78c",
+          "card_hash": "34f45f4ada190c82abc73ee857b77d2f5e51d2df4df3bcf7072ff5ec73885918",
+          "excerpt_id": "ce8e4ad25905b524f013eae414782949e79884f0a36f7e2f428eb26e012ea022",
+          "quote": "Today we're bringing ChatGPT Voice to the desktop app"
+        },
+        {
+          "video_id": "2080091059644964864",
+          "source_revision": "02276a30b2282f0dbfa24eb80324d51424a783c81db411aea34495caf7b72e5a",
+          "card_hash": "e705c1c3ff96da5bf6ecb034d0dc0ab04c1ab548688b3e05aa12b7a010dc0b0b",
+          "excerpt_id": "d2c6853bbdf0f0db12809ed635a2a49e0f4f99a978544b9151648fb64ee7470a",
+          "quote": "these are the next generation of school blackboards in China"
+        },
+        {
+          "video_id": "2093534714439110656",
+          "source_revision": "60c217c06f0f314c6b3ac28d87a23b79ebe0955abaaf04875b3d0acce387469c",
+          "card_hash": "f31755d6cae87adc3114a0a2839fd15130c17145ca86d0239452d7338867d5ac",
+          "excerpt_id": "f9434796e4224b8996fcc8a0964f14561fa3863b643e884465e386d32ca0db6b",
+          "quote": "SOMEONE VIBE CODED A MOBILE APP WHERE ZOMBIES CHASE YOU IN REAL LIFE"
+        },
+        {
+          "video_id": "2094761457007157248",
+          "source_revision": "11df6958801bf5df65e0a3a16099a6d4605ed6a6205827c5cdaf5780dfd8d910",
+          "card_hash": "7706dda601a4813249c25b71ff6d48bd9c680da2d83e9a581ac51079d655cec2",
+          "excerpt_id": "105d616c298da765c54641a80a7dc61a5eb80e1dc03c566d502a906a2acef7c6",
+          "quote": "Dyson just released a new AI-powered toothbrush with an integrated 100,000-pixel macro lens camera"
+        }
+      ]
+    },
+    {
+      "shelf_id": "ai-industry-business",
+      "path": [
+        "AI and ML",
+        "AI Industry & Business"
+      ],
+      "definition": "Financial, market, competitive, and geopolitical dynamics of the AI industry, including revenue, funding, chip demand, pricing, and lab rivalry.",
+      "include": [
+        "AI company ARR/revenue and funding-round figures",
+        "chip/GPU market and stock reactions to AI news",
+        "open-weight model releases framed as trade/market strategy",
+        "national or lab competitive positioning narratives",
+        "enterprise AI cost/procurement or agency monetization stories",
+        "business partnerships and acquisitions involving AI companies"
+      ],
+      "exclude": [
+        "technical benchmark or architecture discussion with no business framing",
+        "step-by-step coding-tool tutorials without business narrative",
+        "jokes/memes about AI with no factual business claim"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "AI company ARR/revenue and funding-round figures",
+          "confusing_alternative": "Frontier Models",
+          "evidence_needed": "dollar/revenue figures rather than benchmark scores or architecture claims"
+        },
+        {
+          "include_cue": "chip/GPU market and stock reactions to AI news",
+          "confusing_alternative": "Frontier Models",
+          "evidence_needed": "stock price or investor reaction language rather than technical specs"
+        },
+        {
+          "include_cue": "open-weight model releases framed as trade/market strategy",
+          "confusing_alternative": "Frontier Models",
+          "evidence_needed": "economic/competitive framing (dumping, adoption) rather than capability specs"
+        },
+        {
+          "include_cue": "national or lab competitive positioning narratives",
+          "confusing_alternative": "AI and ML",
+          "evidence_needed": "excerpt explicitly invokes geopolitical rivalry or 'behind/ahead' national framing"
+        },
+        {
+          "include_cue": "enterprise AI cost/procurement or agency monetization stories",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "excerpt frames the tool as an org-wide cost/procurement lever, not an individual coding workflow"
+        },
+        {
+          "include_cue": "business partnerships and acquisitions involving AI companies",
+          "confusing_alternative": "AI Product Launches & Demos",
+          "evidence_needed": "excerpt frames the news as a business deal, not a shipped consumer feature"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "video_id": "2080431302835044352",
+          "source_revision": "65a21c6989f1b5f6499b237f6f863f7eddf9b21479acecea15137921c0ea4501",
+          "card_hash": "cf77fd8efd6e3e6d7ed1014238df6bdb7bf0e398f70ff85de1b4b424891cd0f0",
+          "excerpt_id": "e641c2387993c0e871eca8e97965d7369bf74da84c10275341a432720f6b4198",
+          "quote": "China is beginning to engage in what I'll call AI dumping"
+        },
+        {
+          "video_id": "2084799311314128896",
+          "source_revision": "90f7a7f0a7474c15dc7e9e819a6707800c900ba34334f0ffd3dedb5c54fb0c55",
+          "card_hash": "4a64b2f5e0b458a9e5738b096dca5ea0bffd442960c14422787cfaac4de2c7ce",
+          "excerpt_id": "3859ee0d46d9049648d84b1c05afc8961443da5677a5cf883bf7e67d713c9cbc",
+          "quote": "$OPEN reported $883M in Q2 revenue (up 23% QoQ)"
+        },
+        {
+          "video_id": "2088366674667773952",
+          "source_revision": "933e8046a21ff31aac591fb15efd8030c84890989b96dece21548adcdfcb83a7",
+          "card_hash": "859b6f071b438fde0bca619874022b69e4ff61e5a4223ba6292c2aa0c311448b",
+          "excerpt_id": "f21e23ee1fd620201528fa15b54aca18d2b96858511b27ec85fa845a4b27cb34",
+          "quote": "Anthropic Believes They Could Be the ONLY Company Left in the World"
+        },
+        {
+          "video_id": "2093372696302153728",
+          "source_revision": "06b8b8d105360fae05088646034e8a50f313e64495e990ac16526e98c88b8cdf",
+          "card_hash": "d29c380309dd9107fd9fc9c224c18961d2c003fd7394e7de866476f90c8e35e4",
+          "excerpt_id": "2ebc08b67e44630e948d9418a4a198bbd6d1ace2b67dba43574bec177ce8217b",
+          "quote": "Owner has raised $240M, reached a $2.3B valuation, and crossed $100M ARR."
+        },
+        {
+          "video_id": "episode_ee13d34d83c",
+          "source_revision": "c346179664933cbcfeb986746f8019556125e3449c5cea733dc4b43bac4e1277",
+          "card_hash": "dda2f996b1d2c8b1d4b87490870f330f51dbd3c8111a383921c48dacafe42037",
+          "excerpt_id": "b942af10c017519716012a066274e3d5cdb1a6bf71df44b899b4c15cd53919c2",
+          "quote": "their data also showed that OpenAI was sitting just shy of $50 billion in ARR"
+        }
+      ]
+    },
+    {
+      "shelf_id": "generative-media",
+      "path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "definition": "AI-powered products, model releases, and demos that generate or reinterpret creative media such as video, avatars, games, and film from prompts or scripts.",
+      "include": [
+        "AI avatar/digital-twin video generation for end users",
+        "AI video-generation model releases marketed for creating content",
+        "no-code multimodal AI companion builders",
+        "frontier models demonstrated by generating game/interactive content",
+        "AI reinterpretations of existing film/media concepts"
+      ],
+      "exclude": [
+        "foundation-model architecture/scaling discussion with no creative output shown",
+        "IDE- or SDK-level coding-assistant tooling",
+        "space or astronomy content with no AI-generation angle"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "AI avatar/digital-twin video generation for end users",
+          "confusing_alternative": "Frontier Models",
+          "evidence_needed": "card describes an end-user creative output, not model architecture or benchmarks"
+        },
+        {
+          "include_cue": "AI video-generation model releases marketed for creating content",
+          "confusing_alternative": "Frontier Models",
+          "evidence_needed": "card frames the release around creation/production use rather than capability comparison"
+        },
+        {
+          "include_cue": "no-code multimodal AI companion builders",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "card emphasizes no-code/consumer framing rather than SDK or engineering workflow"
+        },
+        {
+          "include_cue": "frontier models demonstrated by generating game/interactive content",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "card highlights the generated creative artifact, not the coding process"
+        },
+        {
+          "include_cue": "AI reinterpretations of existing film/media concepts",
+          "confusing_alternative": "Space and Science",
+          "evidence_needed": "card discusses AI-driven filmmaking, not actual astronomy or spacecraft content"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "video_id": "2082506081365008384",
+          "source_revision": "d1d8481a434aef66ec0621c098c6183e126127a83d6cc76836ba906f5e1c283a",
+          "card_hash": "d8f9fc8caa3267f6cfc6cfd18536b6bff59f89f772e1f78ae84d724b4779c8e4",
+          "excerpt_id": "416f4e399f79bb65aeaf4d890ad51ed345c76482acd6001fc96121c8d8f59b2f",
+          "quote": "a new kind of application that sees, hears, acts, remembers, and emotionally understands you"
+        },
+        {
+          "video_id": "2082842696650043392",
+          "source_revision": "fd5a8ca515b5a1eb307b9ab5d60b843371c882599aca0608af71dfec674d0b26",
+          "card_hash": "84f3facb4018bc86b2031bf26457264494b7925d46b79fe160152fe250546d9a",
+          "excerpt_id": "153d08f252ba46166171c822bcb20f084f87d24d649ca690e4790eeb377b78e9",
+          "quote": "Gemini Omni in Google Vids lets you generate a personal AI avatar to star in your videos."
+        },
+        {
+          "video_id": "2083607643910987776",
+          "source_revision": "916b6893eb7cf24c164ba09bf22b730e8fd482d9f0498ca6f7df9cac4ee5825d",
+          "card_hash": "79c2da86f9ebb203c03b9f689e808fde8bdc1b562b291482aadd5b3243375aeb",
+          "excerpt_id": "d1982372e0ff8df865b710ce609773b378369625dd0eaeb3cc866a43ebbf4942",
+          "quote": "if a space odyssey was made in 2026 with AI"
+        },
+        {
+          "video_id": "2089358742852947968",
+          "source_revision": "c2f6f9b1835ce2bbbf7c88e37458104b9b034ef275f960a1cf41d1b246dc3a8c",
+          "card_hash": "417fd743b9a46d0c03cb6fa7e4a15d363f509f5583fc4a49af74ec2d915ebbc5",
+          "excerpt_id": "d6bb489655d2e2dc1a2f57ac4809ae2f6e7edb70a966e047b5383f3cc4b6fbbe",
+          "quote": "Our first AI animated film, KÖK BÖRÜ, premiered at the world's biggest computer graphics conference."
+        },
+        {
+          "video_id": "2090488277426171904",
+          "source_revision": "08b1bd64d68b4bbc8d41dfbf000c3330e26fbeb6f45b6a31c84a4b35210491e3",
+          "card_hash": "f652ba70980451a42258f112039633eef9cdb9ecdef7d33e8bbf69b1e62553bb",
+          "excerpt_id": "409dfa84739d908da5d1a0494d86086cec2c18c9b6fccd5f60e68a2aabc0f334",
+          "quote": "Turn Ideas into Commercial-Grade Content"
+        }
+      ]
+    },
+    {
+      "shelf_id": "ai-culture-memes",
+      "path": [
+        "AI and ML",
+        "AI Culture & Memes"
+      ],
+      "definition": "Short-form jokes, reaction memes, and informal hot takes about AI models, companies, or personalities shared without substantive technical or business claims.",
+      "include": [
+        "one-line emotional reactions naming a specific AI model/assistant",
+        "comedic reaction posts about AI-generated entertainment",
+        "snarky one-liners about a model being restricted after controversy",
+        "absurdist fictional scenarios starring a named AI model",
+        "offhand stat comparisons posted for humor/shock value",
+        "personal reactions to canceling an AI subscription"
+      ],
+      "exclude": [
+        "concrete revenue, funding, or benchmark figures",
+        "step-by-step tutorials or fundamentals explanations",
+        "named product launches with a functional description"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "one-line emotional reactions naming a specific AI model/assistant",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "no functional description of a tool or workflow, just an emotional one-liner"
+        },
+        {
+          "include_cue": "comedic reaction posts about AI-generated entertainment",
+          "confusing_alternative": "Frontier Models",
+          "evidence_needed": "framed as humor/entertainment reaction, not a capability claim"
+        },
+        {
+          "include_cue": "snarky one-liners about a model being restricted after controversy",
+          "confusing_alternative": "Security",
+          "evidence_needed": "joke framing rather than a technical account of a guardrail"
+        },
+        {
+          "include_cue": "absurdist fictional scenarios starring a named AI model",
+          "confusing_alternative": "Frontier Models",
+          "evidence_needed": "explicitly fictional/future scenario, not a real current capability claim"
+        },
+        {
+          "include_cue": "offhand stat comparisons posted for humor/shock value",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "quote pairs unrelated numbers for comedic effect, not a sourced business/usage metric"
+        },
+        {
+          "include_cue": "personal reactions to canceling an AI subscription",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "a single personal statement, not a market/pricing analysis"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "video_id": "2083895018537074689",
+          "source_revision": "0951eb81d8c68a81c5d38e5bae04fac0788b694b1f1ed5e99972afc24fc92b06",
+          "card_hash": "fd78822976ba7c8720a48d61a51b3cf9aa2e9f1862e7bc624f0b01578d0028de",
+          "excerpt_id": "87211a5d83a8537156cc245d66bcec493a1b3eef1ec620c855d95f14a98cda9f",
+          "quote": "I trust you claude bro"
+        },
+        {
+          "video_id": "2085178322451836928",
+          "source_revision": "36c6585844fd0bac4548250f3e7f97438a91e6eee152e588c22c1637cad994b3",
+          "card_hash": "c2c2a04c4af8f9e5839442a7c1bd39706a5c50de6b407245d53a4a7497ee84c3",
+          "excerpt_id": "3e341970d77c89574cf61d374209229a3fe37d23858be02c24ec36371be44a63",
+          "quote": "Grok getting his 30th lobotomy after another incident"
+        },
+        {
+          "video_id": "2085348301776494592",
+          "source_revision": "e849b4f5a42aa29b9c8423d7f593fd4802ce31e8bd48d9708a3bcf9f235fe48c",
+          "card_hash": "b19e84735c19bc38a63150b3c59183d306e296756dd36503c3561beb7fac2e2b",
+          "excerpt_id": "bc53e4d5a5ed0042fae489624ee6111e62358a0d2c88aaf86665ee40cfb02b37",
+          "quote": "The year is 2030. Claude 9 has gone rogue and taken control of one billion Sexbots"
+        },
+        {
+          "video_id": "2086167837358321664",
+          "source_revision": "e0fc80945e3811448059818ba5969064174994a8ff9145ff98e847402d2db11d",
+          "card_hash": "20a92edae93b5d76e67901086a8cbd5827b3583c7bbb4a906c7f68cde5c2b1d1",
+          "excerpt_id": "232d33e97a2201b65833a48215af9832251ff9bca332026de47f9535ef52e5fa",
+          "quote": "Cancelled my Claude subscription."
+        },
+        {
+          "video_id": "2088654448436629505",
+          "source_revision": "cc0a6aa726a5413720a39e065f0c3731d12fc34b12e68db0c24a538c9d3fb853",
+          "card_hash": "fdf469b87eeb30ec1ddc3dc57b7895cbccc18290775422b18ad18455bc728120",
+          "excerpt_id": "d7ae4e50d28f541d824f050017f1c54b8e0c26129e1bb571761df2e17ec42e64",
+          "quote": "World population - 8 billion 👀 Qwen model downloads - 3 billion"
+        }
+      ]
+    },
+    {
+      "shelf_id": "agentic-ai-assistants",
+      "path": [
+        "AI and ML",
+        "Agentic AI Assistants"
+      ],
+      "definition": "Consumer- and business-facing AI agent products that autonomously complete real-world tasks such as booking, ordering, document building, and unattended computer work.",
+      "include": [
+        "tutorials showing an agent autonomously assembling a finished document/deck",
+        "product launches for agents that browse the web and transact on a user's behalf",
+        "autonomous agents running end-to-end business operations",
+        "bots that log into tools and complete tasks independently",
+        "comparative reviews of competing agent platforms as digital teammates"
+      ],
+      "exclude": [
+        "developer-facing SDKs, MCP protocols, or IDE integrations for engineers",
+        "physical robots or autonomous vehicles",
+        "funding/earnings commentary about an AI company without a specific agent product"
+      ],
+      "sibling_cues": [
+        {
+          "include_cue": "tutorials showing an agent autonomously assembling a finished document/deck",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "audience is a general end user producing an office artifact, not a developer using an SDK/IDE"
+        },
+        {
+          "include_cue": "product launches for agents that browse the web and transact on a user's behalf",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "a specific product name with described end-user actions, not a funding figure"
+        },
+        {
+          "include_cue": "autonomous agents running end-to-end business operations",
+          "confusing_alternative": "AI Industry & Business",
+          "evidence_needed": "quote must describe the agent performing the task, not investor/market commentary"
+        },
+        {
+          "include_cue": "bots that log into tools and complete tasks independently",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "quote shows the bot acting on general business tasks, not code editors or IDEs"
+        },
+        {
+          "include_cue": "comparative reviews of competing agent platforms as digital teammates",
+          "confusing_alternative": "Developer Tools",
+          "evidence_needed": "quote compares agents as general-purpose teammates even if coding tools are named"
+        }
+      ],
+      "supporting_evidence": [
+        {
+          "video_id": "2084245813782585345",
+          "source_revision": "cb616c7202f96475660046416314aaaca45ecd39a8f47f79d8da4decad98fe52",
+          "card_hash": "35d597a088f9e08f951b6e82c251bdbf6755d3f8230e57b9e4e11bc896962bc1",
+          "excerpt_id": "42e42212bb275b8220fae74e70d3abaf7a1923b6be1be5276345066a5f63df5f",
+          "quote": "Kimi Slides handles the entire slide-building process"
+        },
+        {
+          "video_id": "2086844879347634176",
+          "source_revision": "780ec7526a826503825c5f4922b7f51f98eec8dede3439e3ea4eed941082b7cc",
+          "card_hash": "d4956fcbcdd7ae0a300cb3d396f831573c3726736fa8c0bae26817b912b7a47e",
+          "excerpt_id": "d65ff5aa3e6e902f21a0f4c381d44ac293c9e0f1657af6688c160cf79e6b8c66",
+          "quote": "AI agents at Kavak sell the cars, underwrite the loans, coach the mechanics, and in one Mexican city, run the entire operation."
+        },
+        {
+          "video_id": "2087221157787525120",
+          "source_revision": "4d168fd2db2248e6617a9b53aab1f1abfad477c187a3714288f686e9cfc80158",
+          "card_hash": "5fe67813b388ad2c358b9eeabb26bb522db2b190a8e048420862e43586109c17",
+          "excerpt_id": "14ad41ceb387aa7204d080d0c270f8fcfee20c3cbbbb4da96747c104428e692e",
+          "quote": "Can you send NDAs to all of our campus leads? How many employees do I have starting on Monday?"
+        },
+        {
+          "video_id": "2088306674813775872",
+          "source_revision": "de77314ad87c901361a63fbc1852241659b282121d2b1e90632670b5ad48040e",
+          "card_hash": "c512a42bbbf7e36e206157bf7ad5055f1c14990aeac16c8097c6d1c5b22561d9",
+          "excerpt_id": "75e18eb6f4304aa960fe6a3a824eeda80c24cdd882a2b0d569f228f0c49d2d12",
+          "quote": "Bro they leapfrogged codex app and Claude code entirely."
+        },
+        {
+          "video_id": "2088664969847959552",
+          "source_revision": "b75b72c2934804f414f2262058994f83267169d45655b846b8475eb5c592b118",
+          "card_hash": "0967d4b17977d4d0f6a7b57e6e0309fff852d20147c7ed0ad5fbae845b07522d",
+          "excerpt_id": "1ae41a0fdc38f91ad1edd150a6bd94498705e6ed33aa8dbc7b55288b2bc7ca7c",
+          "quote": "I think we are close to a world where you can have Like a descendant of ChatGPT Watch your computer screen all the time"
+        }
+      ]
+    }
+  ],
+  "coverage_ledger": [
+    {
+      "video_id": "1840739354819350528",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "320c81087012d4bb489974c5ce2685da56c32d8e04b7eb01be370ce5315d151c"
+        }
+      ],
+      "reason": "User directly prompts ChatGPT to change persona/accent, hands-on chatbot interaction."
+    },
+    {
+      "video_id": "1851588159403884544",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "57d638788b4c656699dfbb39956da5b8a6f79e4631928b56299eb924cde096ce"
+        }
+      ],
+      "reason": "Quote contrasts human effort with AI and speculates about AI's future perspective."
+    },
+    {
+      "video_id": "1889178327400820738",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Song lyrics with no topical AI/space/news/sports content."
+    },
+    {
+      "video_id": "1969830523657666560",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "bd3b2440ff904dae72df7a150d5249a3a62b8bd480c473f5afc559c653fabc7f"
+        }
+      ],
+      "reason": "Describes watching autonomous 'Grok Bots' complete a task."
+    },
+    {
+      "video_id": "2020740688166735872",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Antarctic ice cave discussion, not space exploration or scientific research cluster."
+    },
+    {
+      "video_id": "2077640475075358720",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "news-and-current-events"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3"
+        }
+      ],
+      "reason": "Political/ideological commentary about the political spectrum."
+    },
+    {
+      "video_id": "2077870396075094016",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "news-and-current-events"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "2f0b2b6cef5b9f40fb76648a506147632d20b77c36ec785dee7c9ef46e021bd5"
+        }
+      ],
+      "reason": "Cable-news style panel discussion of military/cultural policy."
+    },
+    {
+      "video_id": "2077931160538329088",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "'Robot fights are fun' lacks autonomous/AI system content; no cluster reaches 5 cards."
+    },
+    {
+      "video_id": "2078287651535273984",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "news-and-current-events"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "f93090fe7fd859871f41b56f4112715bbeef6dd0f32f30fc9d68d11f54fff9a6"
+        }
+      ],
+      "reason": "Local crime news reporting with anchor-style narration."
+    },
+    {
+      "video_id": "2078443305495388160",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "news-and-current-events"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8"
+        }
+      ],
+      "reason": "Follow-up local crime news reporting continuing the same story."
+    },
+    {
+      "video_id": "2078450309794263040",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "news-and-current-events"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff"
+        }
+      ],
+      "reason": "Law-enforcement radio traffic from a historical political riot event."
+    },
+    {
+      "video_id": "2078513431548727297",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Personal-finance meme with no cards to reach 5-card threshold."
+    },
+    {
+      "video_id": "2078557465042419712",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Generic broadcast filler text carries no topical signal."
+    },
+    {
+      "video_id": "2078557763337154560",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Viral dog-attack reaction clip, no news-reporting framing, no matching cluster."
+    },
+    {
+      "video_id": "2078619453164748801",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "sports-and-streaming-culture"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "a6d6ff90aa2bffa536ccda3f8df93d72bdc41b655c885c1c8d67dbbc88a9e5c0"
+        }
+      ],
+      "reason": "Traditional soccer match highlight clip."
+    },
+    {
+      "video_id": "2078621895058915328",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "sports-and-streaming-culture"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "3a8f6a1238629e150a9fc803b168e2e980ad2d3c7d0019e1f89aca6db6e1a7d2"
+        }
+      ],
+      "reason": "Streamer-league basketball pep talk/game commentary."
+    },
+    {
+      "video_id": "2078627651103993856",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Generic filler text, arrest topic only in unusable title."
+    },
+    {
+      "video_id": "2078643519162298368",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "sports-and-streaming-culture"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "503a59eff6ad621f6d4440644a45b7070a87b4105f356e2588d36f31838ea0a0"
+        }
+      ],
+      "reason": "Streamer-league basketball game highlight play-by-play."
+    },
+    {
+      "video_id": "2078650714293739521",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "news-and-current-events"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e"
+        }
+      ],
+      "reason": "War/military conflict footage description."
+    },
+    {
+      "video_id": "2078656827990978560",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "sports-and-streaming-culture"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "11bfb156fd7159d01651d0623a0170f5f3917343addd8d2ef5305832f0c492b5"
+        }
+      ],
+      "reason": "Livestreamer's on-camera incident at a live event."
+    },
+    {
+      "video_id": "2078684046708572163",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "sports-and-streaming-culture"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "f63ea6e2b63f7ff1cc75ee321b256a2d9f60b5a89c59774f608ba2e6abc32eb0"
+        }
+      ],
+      "reason": "Streamer drama/reaction commentary about another creator's stream."
+    },
+    {
+      "video_id": "2078973268732555264",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "sports-and-streaming-culture"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "ca10e8ac163d609c2b261f593570390fbf5c9fee110e85a2b54d6d41ecf9d2aa"
+        }
+      ],
+      "reason": "Soccer match commentary despite channel name implying news."
+    },
+    {
+      "video_id": "2078988415048278016",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "9798715593b0ee496d85b1ef411219d92c20f2d1ac1d9a0680b69c8dee0eb941"
+        }
+      ],
+      "reason": "Meme referencing the AI-agent term 'agentic' and investor reaction."
+    },
+    {
+      "video_id": "2079140311779971072",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "frontier-models"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "1b81eba48a839d7e20391d1907ed9f36fe40b2149362a2aed525ec038774b831"
+        }
+      ],
+      "reason": "Discusses a frontier model (K3) outperforming competitors and lab strategy."
+    },
+    {
+      "video_id": "2079190532681543680",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "16c9ff78ed550e5135f5fb18401ffc1db01a67ce96e494606a12475f9b79f259"
+        }
+      ],
+      "reason": "Launch of an autonomous rotorcraft, an autonomous intelligent system."
+    },
+    {
+      "video_id": "2079192729997959168",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-product-launches-demos"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "96315b797f79792250278ca45fcb45c3efea7a396a9a751eb2096427c7402d89"
+        }
+      ],
+      "reason": "Pitches a pre-order AI Agent sales product, a consumer AI tool launch."
+    },
+    {
+      "video_id": "2079238984417366016",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Electromagnetism-intuition minigame; general physics, no cluster reaches 5 cards."
+    },
+    {
+      "video_id": "2079481448843649024",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Teen trading script/GitHub virality story; no matching cluster."
+    },
+    {
+      "video_id": "2079486420972937216",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Football highlight clip with no AI/ML, space, or business content."
+    },
+    {
+      "video_id": "2079595357273464930",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "frontier-models"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "7158c5678e2919bdf24a9ec21f83ddceca2896ffd3302fceaf7a6034ec970309"
+        }
+      ],
+      "reason": "References the splash release of Kimi's K3 frontier foundation model."
+    },
+    {
+      "video_id": "2079635204994379776",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Birthday greeting with no substantive topical content."
+    },
+    {
+      "video_id": "2079662821449609217",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Song lyrics from a music clip, not AI/ML or Space content."
+    },
+    {
+      "video_id": "2079818487246262272",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-product-launches-demos"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "81dba2255c1ffd1d62c211ce709dca683040a007991cc6d7880bdf3514676a15"
+        }
+      ],
+      "reason": "Showcases a generative-video product output, a product demo."
+    },
+    {
+      "video_id": "2079973875807301633",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-product-launches-demos"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "b9241b8bef20f08d13eee1eca60c3d35bd835715e220c60732804b3803fe02ed"
+        }
+      ],
+      "reason": "Announces a new feature added to the Claude assistant."
+    },
+    {
+      "video_id": "2079981074323574784",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-product-launches-demos"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "23fc4a4f3f1ff47980d37c525199254c1e5199f3fd1676e0cf21e6df24756bf9"
+        }
+      ],
+      "reason": "Demos an AI-branded classroom hardware product."
+    },
+    {
+      "video_id": "2080006256354369536",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "One-line pet meme reply with no substantive content."
+    },
+    {
+      "video_id": "2080091059644964864",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-product-launches-demos"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "d2c6853bbdf0f0db12809ed635a2a49e0f4f99a978544b9151648fb64ee7470a"
+        }
+      ],
+      "reason": "Same AI classroom-hardware demo event."
+    },
+    {
+      "video_id": "2080348432774856704",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-product-launches-demos"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "b5933cb158c53299fd454fc460ba15dd43955eb3214d3e5e3de5943313c2b38d"
+        }
+      ],
+      "reason": "AI-made film winning an award, a product/creative showcase."
+    },
+    {
+      "video_id": "2080366248735522816",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-product-launches-demos"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "ce8e4ad25905b524f013eae414782949e79884f0a36f7e2f428eb26e012ea022"
+        }
+      ],
+      "reason": "Announces a shipped voice-agent feature in a mainstream app."
+    },
+    {
+      "video_id": "2080377021914656768",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-product-launches-demos"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "13b70fc0c4c1bf38ffda56e7484db02e8fa0e9c002bee8f95aaa41a8a660e307"
+        }
+      ],
+      "reason": "Official launch post for the same ChatGPT Voice desktop feature."
+    },
+    {
+      "video_id": "2080431302835044352",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "e641c2387993c0e871eca8e97965d7369bf74da84c10275341a432720f6b4198"
+        }
+      ],
+      "reason": "Frames open-weight model releases as economic dumping strategy."
+    },
+    {
+      "video_id": "2080435155756544000",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "b08d39b723d1f7a8fb7367315449361fe897661df28029e529e297b35b6cce5f"
+        }
+      ],
+      "reason": "Stock/earnings commentary on AI infrastructure demand."
+    },
+    {
+      "video_id": "2080678700157140992",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "b36670226e23f8b56fc9008ede6987eea7269425c6f8dabd30b4b09cbf0cb0af"
+        }
+      ],
+      "reason": "Market-selloff analysis tied to AI infrastructure spending doubts."
+    },
+    {
+      "video_id": "2080714082626293760",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "3994a9bece8e6104a15f156340f9b730e2a03c98b9b6a34e45fffe67eb149cf0"
+        }
+      ],
+      "reason": "Frames a robot reveal in geopolitical/military-competitiveness terms."
+    },
+    {
+      "video_id": "2080788116747476992",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "3c8e9c11b7f07a75b8cf48890a93beaab6db550e3e24a0f2834c5129f6c5bb64"
+        }
+      ],
+      "reason": "Head-of-state meeting about national AI strategy partnership."
+    },
+    {
+      "video_id": "2080812408759865344",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "frontier-models"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "c782bd74449d42cec78dc73aab002522985025c5c6462c35d646ff932e0e78cb"
+        }
+      ],
+      "reason": "Hands-on capability evaluation of Claude Opus 5's generated game output."
+    },
+    {
+      "video_id": "2080841892582035456",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Political rally interview footage with no AI/ML or space content."
+    },
+    {
+      "video_id": "2081000627354681344",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "8c429ac2e9fafbadc2e93c89ce285f47fa63ae1435bb215e34ee608605756004"
+        }
+      ],
+      "reason": "Explicit reference to AI-driven job displacement."
+    },
+    {
+      "video_id": "2081023025714188288",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "9abbc53706abfb58416d0c3c2c6a2f83ae444dcc4030ee28f71e73e0e812794a"
+        }
+      ],
+      "reason": "Matches the 'autonomous systems' include cue of AI and ML."
+    },
+    {
+      "video_id": "2081066532071759872",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "GIS/geospatial mapping-platform announcement, no matching cluster."
+    },
+    {
+      "video_id": "2081123013227945985",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Police/surveillance-camera protest footage, outside all shelves."
+    },
+    {
+      "video_id": "2081234873290031104",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "NBA player-trade commentary, sports content with no taxonomy match."
+    },
+    {
+      "video_id": "2081681247781130240",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Launch of a European tech news show, too thin for a new cluster."
+    },
+    {
+      "video_id": "2081817087295516673",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "frontier-models"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "e854026832862c8fa8d6fb0eb11f0dbe86bc7813164bb411ec27191f34f07711"
+        }
+      ],
+      "reason": "Discusses frontier labs and rise of open-source models."
+    },
+    {
+      "video_id": "2081892838229573632",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "8f3918a82e565fcb9936847abf3a507a2dde7c84ba6bd919599d53fa3437ae94"
+        }
+      ],
+      "reason": "Demo of a conversational AI assistant describing its own capabilities."
+    },
+    {
+      "video_id": "2082487466129522688",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Comedic skit transcript; AI-browser topic only in unusable hint."
+    },
+    {
+      "video_id": "2082506081365008384",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "generative-media"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "416f4e399f79bb65aeaf4d890ad51ed345c76482acd6001fc96121c8d8f59b2f"
+        }
+      ],
+      "reason": "No-code multimodal AI companion (PAL) builder."
+    },
+    {
+      "video_id": "2082514369477476352",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "In-house motion-design team commentary with no AI mention."
+    },
+    {
+      "video_id": "2082518119344459776",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "0aa3c10218943efb4628ff4a4c628730bc9036d6390a3afda2b2f2359ca90cb5"
+        }
+      ],
+      "reason": "General productivity app for AI users capturing prompts."
+    },
+    {
+      "video_id": "2082527680109621249",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "frontier-models"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "58b93590bb1ce23af031fb8cc0bf0ba2e73250fade3aafbba6dd4b7afb655dd6"
+        }
+      ],
+      "reason": "Explainer on open-source vs. closed AI models."
+    },
+    {
+      "video_id": "2082613460446113792",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "generative-media"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "25333831f9bd14253e7d22a34094fd8026fbe218f2072079f0ef51cdf28c5ad8"
+        }
+      ],
+      "reason": "Frontier model demonstrated by generating game content."
+    },
+    {
+      "video_id": "2082793149890514944",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "UI/UX design-pattern discussion, not AI/ML related."
+    },
+    {
+      "video_id": "2082842696650043392",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "generative-media"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "153d08f252ba46166171c822bcb20f084f87d24d649ca690e4790eeb377b78e9"
+        }
+      ],
+      "reason": "AI avatar/video-generation product for end users."
+    },
+    {
+      "video_id": "2082873830264258561",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Founders' fundraising backstory; no groundable AI-generation text."
+    },
+    {
+      "video_id": "2082889185078185986",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "In-game audio commentary with no textual AI/coding reference."
+    },
+    {
+      "video_id": "2082926453524398080",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Ambiguous role-play dialogue, AI-agent framing only in unusable hint."
+    },
+    {
+      "video_id": "2083053861829275648",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Offline QR-code file-transfer hack, not AI/ML content."
+    },
+    {
+      "video_id": "2083066957230915584",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "generative-media"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "86ff240cfd914119fa4aebbb0ebe7a27e835802f65182efb9be0174591ede50f"
+        }
+      ],
+      "reason": "AI video-generation model release framed around content creation."
+    },
+    {
+      "video_id": "2083169868891684864",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "c5697cdae033aac6a9465588ca321aa9303011be5f2e2207fa97e8361e8b5fbd"
+        }
+      ],
+      "reason": "Pitch for a local/offline autonomous AI agent."
+    },
+    {
+      "video_id": "2083221587818659840",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Web scroll-design and agency-cost commentary, not AI/ML."
+    },
+    {
+      "video_id": "2083521358282067968",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Text never explicitly mentions AI or a model."
+    },
+    {
+      "video_id": "2083595539132919809",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "frontier-models"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "80d1166b87871d1974f82e1c865a9804b28b378679ecba749260a90c6be9cf7c"
+        }
+      ],
+      "reason": "Reaction to a new frontier model (Grok) release."
+    },
+    {
+      "video_id": "2083607643910987776",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "generative-media"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "d1982372e0ff8df865b710ce609773b378369625dd0eaeb3cc866a43ebbf4942"
+        }
+      ],
+      "reason": "AI reinterpretation of an existing film concept."
+    },
+    {
+      "video_id": "2083637374479642624",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Social/political gender-identity commentary, outside taxonomy scope."
+    },
+    {
+      "video_id": "2083895018537074689",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "87211a5d83a8537156cc245d66bcec493a1b3eef1ec620c855d95f14a98cda9f"
+        }
+      ],
+      "reason": "One-line meme reaction naming Claude, no technical/business substance."
+    },
+    {
+      "video_id": "2083941649282105344",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "13d02fb32c27a20d3abe474673b937cb12981d98b7a5e2711150a79164bbe745"
+        }
+      ],
+      "reason": "Comedic reaction to an AI-generated video."
+    },
+    {
+      "video_id": "2083953406482219008",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "d1db23413aa2d5683733784f7e259b89271071a04d27da71a0a0201b59693472"
+        }
+      ],
+      "reason": "Vendor pricing discount and portal partnership promotion."
+    },
+    {
+      "video_id": "2084001626679869440",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Surveillance-camera crime-reduction policy, outside AI/ML and Space scope."
+    },
+    {
+      "video_id": "2084245813782585345",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "agentic-ai-assistants"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "42e42212bb275b8220fae74e70d3abaf7a1923b6be1be5276345066a5f63df5f"
+        }
+      ],
+      "reason": "Tutorial for an autonomous productivity agent (slide-building)."
+    },
+    {
+      "video_id": "2084311728884420608",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "education"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "d4fc9588bb8b6be474181ba352f07899b378fc445c21cd24bde451e5d80002af"
+        }
+      ],
+      "reason": "Instructional guide on how to prompt Claude models effectively."
+    },
+    {
+      "video_id": "2084354263174479872",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "13f6e0c0e75494c0ea92875f3e5a8875af6950b56c7fb297511e4c0e0af3feb4"
+        }
+      ],
+      "reason": "Executive commentary on AI infrastructure competition."
+    },
+    {
+      "video_id": "2084536348820537344",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Geopolitical/military drone-strike reporting, outside AI/ML and Space scope."
+    },
+    {
+      "video_id": "2084623086427721728",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "011ac18748006ebf09377493774f07d73ab12183efa6c40091c1b25c1a799222"
+        }
+      ],
+      "reason": "Stealth-startup infrastructure statistics tied to funding."
+    },
+    {
+      "video_id": "2084663739400249344",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Robotics & Computer Vision candidate rejected: only 3 distinct cards, below 5-card threshold."
+    },
+    {
+      "video_id": "2084799311314128896",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "3859ee0d46d9049648d84b1c05afc8961443da5677a5cf883bf7e67d713c9cbc"
+        }
+      ],
+      "reason": "Earnings-call revenue figures with the company's Chief AI Officer."
+    },
+    {
+      "video_id": "2084984808216657921",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Robotics & Computer Vision candidate rejected: only 3 distinct cards, below 5-card threshold."
+    },
+    {
+      "video_id": "2085010685562626048",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "agentic-ai-assistants"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "fd64fd773fe9c5a2edb84bcd98c07f446f4d323e57cb4cb512454b0db1b675e6"
+        }
+      ],
+      "reason": "Consumer web-browsing agent product performing transactions."
+    },
+    {
+      "video_id": "2085046911103270913",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "developer-tools"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "ecb436555dee9c7ca27b4fcbe61455f9730e9f33c7c5aca661e22d2167ff5d71"
+        }
+      ],
+      "reason": "MCP launch is an agent-harness/developer-integration tool."
+    },
+    {
+      "video_id": "2085054678329421824",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "b84a5434fbe711cba96b9e0ea277fb4a8c5e2f1a7daa9648cf9a04b1d0493ecc"
+        }
+      ],
+      "reason": "Executive banter comparing company infrastructure scale."
+    },
+    {
+      "video_id": "2085067072858734593",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "de40dd874e36c92709037e697a88411d9a64bbd9da028aa57f044f1294c3bf85"
+        }
+      ],
+      "reason": "Amazed one-line reaction to AI-generated creative output."
+    },
+    {
+      "video_id": "2085118888220475392",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Robotics & Computer Vision candidate rejected: only 3 distinct cards, below 5-card threshold."
+    },
+    {
+      "video_id": "2085178322451836928",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "3e341970d77c89574cf61d374209229a3fe37d23858be02c24ec36371be44a63"
+        }
+      ],
+      "reason": "Snarky one-liner about a model being restricted after controversy."
+    },
+    {
+      "video_id": "2085348301776494592",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "bc53e4d5a5ed0042fae489624ee6111e62358a0d2c88aaf86665ee40cfb02b37"
+        }
+      ],
+      "reason": "Absurdist fictional scenario starring a named AI model."
+    },
+    {
+      "video_id": "2085414600552628224",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "agentic-ai-assistants"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "2b45625e40e17517834ff1632b7545c50b27baf32eef3ddcfd94b6b63e7d28ef"
+        }
+      ],
+      "reason": "Founder pitch for a general computer-use agent for everyday work."
+    },
+    {
+      "video_id": "2085417600264093696",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "fef8faa7a416d0db7c4f76f6af78fc0416462c6eba6ed002de6d871999cd75be"
+        }
+      ],
+      "reason": "Provocative teaser question about a public figure's AI use."
+    },
+    {
+      "video_id": "2085659012348198912",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "f923fa00ea14c847aebb283f068864b533f72be359f53b88c0d26899cd98ca15"
+        }
+      ],
+      "reason": "Rhetorical hot-take questioning a company's competitive status."
+    },
+    {
+      "video_id": "2085717998187278336",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Geopolitical diplomatic news, outside AI/ML and Space scope."
+    },
+    {
+      "video_id": "2085731765587435520",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "4be6debccf2bfcb58980d60c95378d5e435b2d0fd42b705ea2e04184875f4ef5"
+        }
+      ],
+      "reason": "Journalist announcing a career move to cover the AI industry."
+    },
+    {
+      "video_id": "2085875838202032128",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "fe9a84bf9f12cff7627fb6fff24bb47300b13d8c705f5bfeb3e734149c2a3261"
+        }
+      ],
+      "reason": "Consumer AI-app weekly feature-update recap."
+    },
+    {
+      "video_id": "2085903679304179712",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "AI video-generation tutorial; only 2 similar cards, below threshold."
+    },
+    {
+      "video_id": "2085967657271275520",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Conference speaker name-list, not substantive single-topic content."
+    },
+    {
+      "video_id": "2086167837358321664",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "232d33e97a2201b65833a48215af9832251ff9bca332026de47f9535ef52e5fa"
+        }
+      ],
+      "reason": "Personal reaction statement about dropping an AI subscription."
+    },
+    {
+      "video_id": "2086214505797931008",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Viral AI-generated video vlogs discovery; only 2 cards, below threshold."
+    },
+    {
+      "video_id": "2086231258393112578",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "459420788665c514fde0c3bd77a94163b11dffdc0aa23f76255d2c342a18e54f"
+        }
+      ],
+      "reason": "Personal opinion/theory riff on AI's cultural effect on the internet."
+    },
+    {
+      "video_id": "2086844879347634176",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "agentic-ai-assistants"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "d65ff5aa3e6e902f21a0f4c381d44ac293c9e0f1657af6688c160cf79e6b8c66"
+        }
+      ],
+      "reason": "Autonomous agents executing end-to-end business operations."
+    },
+    {
+      "video_id": "2086886182776868865",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "7ab29380f7d3d0ac73d91fd5cc6806f7364f694860688ad0273b841d78940226"
+        }
+      ],
+      "reason": "Joke about hitting a coding-tool usage limit."
+    },
+    {
+      "video_id": "2086894292539424768",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "8bfe2833b433993df1d47592cae20945e09af2d806a510b79fb0efbcd1ca20da"
+        }
+      ],
+      "reason": "Startup launch announcement with business/financial framing."
+    },
+    {
+      "video_id": "2087194180972118016",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "5469768002006cd50eb5368433a55cf49f70444d301d9ade5c05ccf4f9a4888f"
+        }
+      ],
+      "reason": "Pricing/economics comparison between AI model offerings."
+    },
+    {
+      "video_id": "2087221157787525120",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "agentic-ai-assistants"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "14ad41ceb387aa7204d080d0c270f8fcfee20c3cbbbb4da96747c104428e692e"
+        }
+      ],
+      "reason": "Launch of an agentic bot that completes general business tasks."
+    },
+    {
+      "video_id": "2087297832189403136",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "40733883db645b6b2004573ce38c488244c65f8c220ba8e635c0a5347c70be7d"
+        }
+      ],
+      "reason": "Promotional/marketing campaign for an AI product's user acquisition."
+    },
+    {
+      "video_id": "2087384476661735493",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "agentic-ai-assistants"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "cc329aaf1ab97e3d2deb394970b9fa106c202286e559e28cefbea4f17b9c5473"
+        }
+      ],
+      "reason": "Repost of the Grok Bot agent demo describing autonomous task completion."
+    },
+    {
+      "video_id": "2087489577129013248",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "4393c2eb26dcd2fd8a6a26441354507a11a1121ebae2465f614d0e394e34a6d4"
+        }
+      ],
+      "reason": "Interview about running a profitable AI-services agency."
+    },
+    {
+      "video_id": "2088044934536585216",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "dcff27eed348d9966fead9e95153fe73ea9cb3d586e184da790f7d426eff8f82"
+        }
+      ],
+      "reason": "Consumer AI product feature announcement fits general AI and ML."
+    },
+    {
+      "video_id": "2088049182883954688",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "3e9c905108b40d96c8ca2a36506b6040a3989a8a37838550366fa9f22a7f6f2e"
+        }
+      ],
+      "reason": "Personal note about AI research compute hardware."
+    },
+    {
+      "video_id": "2088306674813775872",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "agentic-ai-assistants"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "75e18eb6f4304aa960fe6a3a824eeda80c24cdd882a2b0d569f228f0c49d2d12"
+        }
+      ],
+      "reason": "Comparative review of the Grok agent against coding-assistant competitors."
+    },
+    {
+      "video_id": "2088366674667773952",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "f21e23ee1fd620201528fa15b54aca18d2b96858511b27ec85fa845a4b27cb34"
+        }
+      ],
+      "reason": "Commentary on a lab's market-dominance ambitions."
+    },
+    {
+      "video_id": "2088372080949739520",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "5613a03bfa71dbdb59594068c047459356a3d4e276c0749a2b34dc552768fcf5"
+        }
+      ],
+      "reason": "Same market-position story analyzed by a second commentator."
+    },
+    {
+      "video_id": "2088401835384057857",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "frontier-models"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "f540a980d9b53187a894d06ca414a821d8109ce48722a5c59e7e91ab68afa410"
+        }
+      ],
+      "reason": "Evaluating a demo's quality, speculating about training-data memorization."
+    },
+    {
+      "video_id": "2088583787274014720",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "9e3ab93ae28e055a511c9ecbb1d769e45b892ee2e3dbf818cdfbe3fb5b1f4c8d"
+        }
+      ],
+      "reason": "Viral entertainment story framed as a comparison to AI quality."
+    },
+    {
+      "video_id": "2088636695600087040",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Indie Stripe-subscriber dashboard viz, not AI or space content."
+    },
+    {
+      "video_id": "2088646008439795712",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "f7cd8c5b05298f9e62c2e80c010a1a8f790420a946cbce36751d25879ecb124e"
+        }
+      ],
+      "reason": "Meme about aspiring AI engineers."
+    },
+    {
+      "video_id": "2088654448436629505",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "d7ae4e50d28f541d824f050017f1c54b8e0c26129e1bb571761df2e17ec42e64"
+        }
+      ],
+      "reason": "Offhand stat comparison posted for shock/humor value."
+    },
+    {
+      "video_id": "2088664969847959552",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "agentic-ai-assistants"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "1ae41a0fdc38f91ad1edd150a6bd94498705e6ed33aa8dbc7b55288b2bc7ca7c"
+        }
+      ],
+      "reason": "Speculation about an always-on AI assistant monitoring a screen."
+    },
+    {
+      "video_id": "2089066624339034112",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "37515f7ce2c9f9ba4a4787fd026d262aface656b162f95ec4d637e314220ee0e"
+        }
+      ],
+      "reason": "Self-deprecating meme about AI replacing jobs."
+    },
+    {
+      "video_id": "2089069071929368576",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Corporate annual-report design history, not AI/ML or Space content."
+    },
+    {
+      "video_id": "2089332588963856384",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "90ee207d7f6d14a0edb08b2ae0d96a5306fbd72c1724ddbdb1c13e1509b7cd34"
+        }
+      ],
+      "reason": "Founding story (customer failures, rebuilds) of an AI startup."
+    },
+    {
+      "video_id": "2089358742852947968",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "generative-media"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "d6bb489655d2e2dc1a2f57ac4809ae2f6e7edb70a966e047b5383f3cc4b6fbbe"
+        }
+      ],
+      "reason": "AI animated film premiering at a major graphics conference."
+    },
+    {
+      "video_id": "2089380922604789760",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "a6cee74d306195178914b06f087bb9fc22d72ba5cc1fe05b5c61028785d8b774"
+        }
+      ],
+      "reason": "Launch of a commercial AI agent marketplace for portfolios."
+    },
+    {
+      "video_id": "2089391264878002260",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "cd268850df8e16a5e69a5b64eed26cc047b30fecfdbb4c541fdc88744613e4e2"
+        }
+      ],
+      "reason": "Discusses competitive/regulatory dynamics between US AI labs."
+    },
+    {
+      "video_id": "2089651201738485760",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Russia fuel-shortage report, unrelated to AI/ML or Space content."
+    },
+    {
+      "video_id": "2089691023404388353",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "2897b84d33a6fd66802fb90d81393e3ffbabdcf1955492dc40c128572bb367e3"
+        }
+      ],
+      "reason": "Open-sourced AI marketing agent product, a business-function launch."
+    },
+    {
+      "video_id": "2089726155008204800",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "6f654f8f0c3ffabc02ed38b0c9f57ff5dcd028c514db96d1d5b0827dc1b06640"
+        }
+      ],
+      "reason": "Frames an AI model-routing product as enterprise cost lever."
+    },
+    {
+      "video_id": "2089757319974559744",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "49677a515801d5c734dbe877c67122ab887284438e1dc6fad642150fac2336dd"
+        }
+      ],
+      "reason": "Business partnership between Exa and Firefox for AI browser search."
+    },
+    {
+      "video_id": "2089839233309773824",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Drug-target binding biology, no explicit AI/ML method in visible text."
+    },
+    {
+      "video_id": "2089870032771919873",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "4793a44484d62ad430a0ad91bedddc87732b6781b92d802131721cd4092df2cd"
+        }
+      ],
+      "reason": "Short AI hardware/product announcement fits general AI and ML."
+    },
+    {
+      "video_id": "2089976684019933200",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "generative-media"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "0397c476df904197b387b1ce70766823feab5d92bcde59a5a8524e19924496db"
+        }
+      ],
+      "reason": "AI-assisted AR/camera-driven interactive installation, creative generative-AI."
+    },
+    {
+      "video_id": "2090002365835341825",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Generic self-promotional sharing text, no topical content."
+    },
+    {
+      "video_id": "2090230875883786240",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Skit dialogue with no AI/ML or Space content."
+    },
+    {
+      "video_id": "2090430819865165824",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "generative-media"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "e98d46024013370f08be3e4ade283f589eb297939cc8317edafd407d6b203e92"
+        }
+      ],
+      "reason": "Uses a generative AI model to create video content in a spreadsheet."
+    },
+    {
+      "video_id": "2090488277426171904",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "generative-media"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "409dfa84739d908da5d1a0494d86086cec2c18c9b6fccd5f60e68a2aabc0f334"
+        }
+      ],
+      "reason": "Launch of an AI design agent producing commercial-grade content."
+    },
+    {
+      "video_id": "2090496604902129664",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "3f6c325b523c3a63bd51a953aca34b5636f1abaa8da324b0bbb9fb5730c0562f"
+        }
+      ],
+      "reason": "Product feature announcement for an AI assistant fits general AI and ML."
+    },
+    {
+      "video_id": "2090523526595854336",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "4b6dbad9505dc2a913a08eb69a343e4dc2b50f130a50cc01172a6655e26b95f4"
+        }
+      ],
+      "reason": "Business-model/data-ownership dispute between AI labs and a customer."
+    },
+    {
+      "video_id": "2090544926706876416",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "1bbf3c8eab7424acc97fa6676c345d0c25760aad2cfbcfb03a9d15d7c47affc6"
+        }
+      ],
+      "reason": "Comments on OpenAI/Anthropic facing new competition."
+    },
+    {
+      "video_id": "2090566181854048256",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "c57b4e6c80e29387245c7ca5ea5e23b5c3c30e3f318d025f46e9b149cf082d17"
+        }
+      ],
+      "reason": "Humanoid robot capability discussion fits 'autonomous systems' cue."
+    },
+    {
+      "video_id": "2090624277900886016",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Satirical surveillance-camera commentary, not AI-guardrail content."
+    },
+    {
+      "video_id": "2090817187900780961",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Open-source three.js UI library, general web tool without AI content."
+    },
+    {
+      "video_id": "2090832390952525824",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Brief compliment on a visual text effect, no AI/ML or Space content."
+    },
+    {
+      "video_id": "2090832812081577984",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Procedural generative-art code, not AI/ML-driven per excerpt."
+    },
+    {
+      "video_id": "2090884854590382515",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Anthropic 'ELI5' prompting-skill mention, no matching cluster."
+    },
+    {
+      "video_id": "2090858975751217152",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "a5e80a8a7c9d3dc0724a55fccee019c5d235410c020f654d21cbabe833423269"
+        }
+      ],
+      "reason": "Unverified personal-income hype hook referencing a viral AI idea."
+    },
+    {
+      "video_id": "2090883364936986624",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "cd85ba691fda2c37a23a930fd345166d9cc51ce6683855a9ef816c062a465066"
+        }
+      ],
+      "reason": "AI agents framed by cost/revenue displacement of a real desk."
+    },
+    {
+      "video_id": "2090904591261130752",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "adb9f126a66c64a8f320abd5554978bf09f34546328074b1d28046a98ff003a6"
+        }
+      ],
+      "reason": "AI-generated video content fits general AI and ML shelf."
+    },
+    {
+      "video_id": "2091116328803332096",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "45cf49cc61b55c4cd4af0aec8508086af6a1efa16498b1308504f205d980d596"
+        }
+      ],
+      "reason": "Chip-industry national-champion narrative about Nvidia."
+    },
+    {
+      "video_id": "2091245754484449280",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "bda95d15f5784c4c72e82ecd7e0fac35337b9fe7563b3271e19836ebc495d072"
+        }
+      ],
+      "reason": "Humanoid robotics competition fits 'autonomous systems' cue."
+    },
+    {
+      "video_id": "2091312890653327360",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "0396216fdd7f7140af3374bf156130b02328cf6a4496efb6788127afe3624ea5"
+        }
+      ],
+      "reason": "Absurd future-scenario joke personifying Grok."
+    },
+    {
+      "video_id": "2091538222203424768",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "5508e1d6516cb02d21bbfaeaec4694aab53f034dff2ae8cf67ceecd32208a3e9"
+        }
+      ],
+      "reason": "Geopolitical AI-compute/energy competition narrative."
+    },
+    {
+      "video_id": "2091567513461309440",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "b3a64d328d304a2ec3f54cc46b04bec54da0bdfe9d56f9a0e961cd7c66a6a1b6"
+        }
+      ],
+      "reason": "Using a foundation model for creative/technical output."
+    },
+    {
+      "video_id": "2091814080160129024",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Human-interest reunion story, no AI/ML or space content."
+    },
+    {
+      "video_id": "2091977971426820096",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Celebrity collaboration news, unrelated to AI/ML or space."
+    },
+    {
+      "video_id": "2091998463688888320",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "8cadbf36f7340621652099381f2da655f0a8a7a61847c6aba98b0a41e31058ee"
+        }
+      ],
+      "reason": "Wealth/status meme about Nvidia employees."
+    },
+    {
+      "video_id": "2092006565285175296",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "98b33901e8dac864ced9bb6d1fd7f283089117dfe668792fcacf4d29c832f5b1"
+        }
+      ],
+      "reason": "AI assistant engineering update, general AI and ML fit."
+    },
+    {
+      "video_id": "2092158830365052928",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Browser QR/art project with no AI-model framing."
+    },
+    {
+      "video_id": "2092204804218957824",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "General entrepreneurial-urgency commentary, no AI/space content."
+    },
+    {
+      "video_id": "2092246969918144513",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "b27cedb1476bc57c470ec223eca5c58358651163df032e59687813fdc6fe40e3"
+        }
+      ],
+      "reason": "Autonomous-freight AI company funding/revenue figures."
+    },
+    {
+      "video_id": "2092254012456271872",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "frontier-models"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "6c87d1162dd97660c52d5448e947cfa9a58f11a2cfaa5727e11b949291b1645f"
+        }
+      ],
+      "reason": "Open-source TTS model release matches open-weights cue."
+    },
+    {
+      "video_id": "2092387281457893378",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Celebrity tribute content, no AI/ML or space content."
+    },
+    {
+      "video_id": "2092625875468529664",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "26624b19913378b0935e0c1b25aff52a51e1949de602f08c3294dc72b17250df"
+        }
+      ],
+      "reason": "Satirical fake model-release parodying benchmark-launch conventions."
+    },
+    {
+      "video_id": "2092682844812500992",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "cb8ffbdf0ceb127e03b24e70657485e573200d4707dfb8762a166bcdd3c0d1d5"
+        }
+      ],
+      "reason": "Analyst chart on open vs closed source usage/revenue share."
+    },
+    {
+      "video_id": "2092687038189350912",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "914b3d66b23fefce396a068fa8e8eabf1b0c29ebca5d5ebb208fa81e08a0f2b4"
+        }
+      ],
+      "reason": "Broad AI-adjacent podcast conversation fits general AI and ML."
+    },
+    {
+      "video_id": "2092745356274446336",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "0c588d9f47421c3210f12f44b14aa31843f9e33549924de5f7721d2fc604af9c"
+        }
+      ],
+      "reason": "Jensen Huang commentary on chip-industry competitive rivalry."
+    },
+    {
+      "video_id": "2092906890497839104",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Indie mapping-product update, no AI/ML framing."
+    },
+    {
+      "video_id": "2092974877279969280",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-culture-memes"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "e3a216b774ea27c036636bc18179574c53f103071a9643e69936faa990fd0407"
+        }
+      ],
+      "reason": "Ironic 'problem solved' framing borrowing AI-launch phrasing for a joke."
+    },
+    {
+      "video_id": "2093001292591632384",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "7b6d57eefa7b4e8566f15c837095303ff62763e4d37027d2af0411e33fdf47fd"
+        }
+      ],
+      "reason": "VC narrative of Cursor's competitive origin story."
+    },
+    {
+      "video_id": "2093043429278458326",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "b94734bf6b6267a29c24bf5bbe3baabf3a42867d71f10d98fa39ecd11558c6c0"
+        }
+      ],
+      "reason": "Founder commentary on market strategy for AI coding tools."
+    },
+    {
+      "video_id": "2093065400393105408",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Political commentary transcript with no relevant taxonomy content."
+    },
+    {
+      "video_id": "2093098700612517888",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "134b17bb0c3056eae5da770592e095c609d69bb8744e9aab65c60e4ec45d78da"
+        }
+      ],
+      "reason": "NVIDIA compute/hypervisor certification business deal."
+    },
+    {
+      "video_id": "2093246582913171456",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "809e084837a286b712ca63c42bbd28f42ab48ffcac01e46f7369428aad71116a"
+        }
+      ],
+      "reason": "Analysis of the NVIDIA/Hugging Face acquisition."
+    },
+    {
+      "video_id": "2093372696302153728",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "2ebc08b67e44630e948d9418a4a198bbd6d1ace2b67dba43574bec177ce8217b"
+        }
+      ],
+      "reason": "AI startup funding round, valuation, and ARR milestone."
+    },
+    {
+      "video_id": "2093489422624804893",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Immigration/political video, no relevant taxonomy content."
+    },
+    {
+      "video_id": "2093534714439110656",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-product-launches-demos"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "f9434796e4224b8996fcc8a0964f14561fa3863b643e884465e386d32ca0db6b"
+        }
+      ],
+      "reason": "Hobbyist vibe-coded GPS app showcase, novelty consumer demo."
+    },
+    {
+      "video_id": "2093591840171941888",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "developer-tools"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "784dbdb3af03a1e0aa007662716e12bace40954d7528fd8d474ab34641a33dbb"
+        }
+      ],
+      "reason": "Developer-focused simulation/workflow tool for system behavior."
+    },
+    {
+      "video_id": "2093756517485101056",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "4bff26ac1244c91e5dd93da9325c9240122f3138f3fbac8e03a16aaa943f9023"
+        }
+      ],
+      "reason": "DLSS is neural upscaling tech, fitting neural networks/deep learning."
+    },
+    {
+      "video_id": "2093840118318501888",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Solar-powered RoboBee, mechanical robotics not AI-driven."
+    },
+    {
+      "video_id": "2093996615065612288",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "1b8dc974aaa66588446a6221f0c4fe06b847db34239c726264baa57b2881888e"
+        }
+      ],
+      "reason": "Professional/business strategy pivot framed around the AI era."
+    },
+    {
+      "video_id": "2094122120032710656",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-product-launches-demos"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "293ce9b6c896cf2f9ce3e621197cf86021b66cf88733bbf80cc061d40b702984"
+        }
+      ],
+      "reason": "Personal hardware project built around Grok chatbots, novelty demo."
+    },
+    {
+      "video_id": "2094123174367473665",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Product announcement text never mentions AI or a groundable term."
+    },
+    {
+      "video_id": "2094153795198398769",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "General VC investing wisdom, no AI content."
+    },
+    {
+      "video_id": "2094226099517452289",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "NFL sports content, unrelated to any shelf."
+    },
+    {
+      "video_id": "2094286060456914944",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-product-launches-demos"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "840241708021f70d572807242a62fc2d38737954c271e9999e43968144edc8d7"
+        }
+      ],
+      "reason": "Launch of a consumer-facing AI livestream generation platform."
+    },
+    {
+      "video_id": "2094452350132051968",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "07b2fda06bf2f0cee969f402760cdb0ef0b2c8be831c3f4b3c56a2747f2193b2"
+        }
+      ],
+      "reason": "General discussion of AI's future diffusion."
+    },
+    {
+      "video_id": "2094517730636390400",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "f757ba6ad315a5b2ff827a4c2358554365e01f80bbbb8df6d8051037612247e9"
+        }
+      ],
+      "reason": "Describes a new AI-driven business role created by AI adoption."
+    },
+    {
+      "video_id": "2094524881493016576",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "C++/Python CS-fundamentals content, distinct from ML-scoped Education."
+    },
+    {
+      "video_id": "2094532931670958414",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Humor dashcam video, unrelated to any shelf."
+    },
+    {
+      "video_id": "2094679188800524288",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "ai-and-ml"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "577e66d8f438741fcbc1c5b48c6a44c35e6760ad8d513e7181790bdf291fa6a1"
+        }
+      ],
+      "reason": "References Claude, an LLM, fitting the LLMs cue."
+    },
+    {
+      "video_id": "2094761457007157248",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-product-launches-demos"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "105d616c298da765c54641a80a7dc61a5eb80e1dc03c566d502a906a2acef7c6"
+        }
+      ],
+      "reason": "Consumer gadget marketed as AI-powered, novelty showcase."
+    },
+    {
+      "video_id": "2094872636996165632",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "9ceeccbf8713e0cdf8bb618a943c7b684d334b486250d684de5956f022ef31dc"
+        }
+      ],
+      "reason": "AI-enabled insurance brokerage roll-up/consolidation discussion."
+    },
+    {
+      "video_id": "2094906875976232960",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Stock-chart trading analysis, not AI-industry content."
+    },
+    {
+      "video_id": "2094908776167948288",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Stock-chart trading analysis, not AI-industry content."
+    },
+    {
+      "video_id": "2094915663961661513",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Russian song lyrics, AI framing only in ungroundable caption."
+    },
+    {
+      "video_id": "4OmEbeR3BtI",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Job-search advice, no v1 shelf covers career content."
+    },
+    {
+      "video_id": "D4fkiQfzw_I",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Solopreneur routine content, no matching shelf or cluster."
+    },
+    {
+      "video_id": "F97xOWNph5A",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Conference-growth founder interview, not tooling or AI economics."
+    },
+    {
+      "video_id": "FHMXO_VikdA",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Personal watch-collecting practice footage, no thematic cluster."
+    },
+    {
+      "video_id": "GL-ZoNhUFmc",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Tupac interview, undersized music cluster below threshold."
+    },
+    {
+      "video_id": "HIj8wU_rGIU",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "General beginner programming tutorial, distinct from ML Education."
+    },
+    {
+      "video_id": "KjToqo-ACnc",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Only channel self-promotion text for a wordless screensaver video."
+    },
+    {
+      "video_id": "MJmoSxSPeRY",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Claude Code used for non-coding channel cloning, not a dev workflow."
+    },
+    {
+      "video_id": "Oi-1Ev1fI74",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Music-industry business advice, undersized cluster below threshold."
+    },
+    {
+      "video_id": "R6w5MBk1PsM",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "5ab2cac902fbdabd9ccccf0c3015d9dd207dd83b5b402d95ca01b1d5d32a0f23"
+        }
+      ],
+      "reason": "Nvidia GPU product news and stock market reaction."
+    },
+    {
+      "video_id": "aqz-KE-bpKQ",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Only the film's promotional description, no captioned dialogue."
+    },
+    {
+      "video_id": "episode_ee13d34d83c",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "b942af10c017519716012a066274e3d5cdb1a6bf71df44b899b4c15cd53919c2"
+        }
+      ],
+      "reason": "Podcast analysis of OpenAI ARR and hyperscaler capex."
+    },
+    {
+      "video_id": "h6YLDi2gnMM",
+      "disposition": "unsupported",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Card states no description/captions available; no usable text."
+    },
+    {
+      "video_id": "iyVXw-SoUrY",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "security"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "4784109940f74d75c8cdcf7d59b1d51fab540245d31f8822101e55c9c7469021"
+        }
+      ],
+      "reason": "Discusses guardrails on AI development, matching governance-guardrail scope."
+    },
+    {
+      "video_id": "jNQXAC9IVRw",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Historic 'Me at the zoo' clip, unique curiosity with no cluster."
+    },
+    {
+      "video_id": "mL8umz2yvfQ",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Tupac work-ethic piece, undersized music cluster below threshold."
+    },
+    {
+      "video_id": "pBF05PNBmJA",
+      "disposition": "existing_concept",
+      "shelf_ids": [
+        "developer-tools"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "1cc0385f6628c7023e6a4df4fecd8bee4ad0ceb1cd263493d3d0512618d183f5"
+        }
+      ],
+      "reason": "Covers agent-to-agent protocols and coding-agent tooling configuration."
+    },
+    {
+      "video_id": "x_21fc0a19511",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Retail stock trade-setup alert, undersized trading cluster."
+    },
+    {
+      "video_id": "x_2b864c9e9ff",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Historic first tweet, trivial with no thematic cluster."
+    },
+    {
+      "video_id": "x_811cef5397c",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Teaser text cut off before any AI-economics content, no cluster."
+    },
+    {
+      "video_id": "x_880f13e46c6",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "Retail stock trade-setup post, undersized trading cluster."
+    },
+    {
+      "video_id": "x_916a6278802",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "e7f42c35e5ba01cdb169c3f0bd0795ff8895bd943a4627a421b48a6ab5333d3d"
+        }
+      ],
+      "reason": "Direct ARR comparison between OpenAI and Anthropic."
+    },
+    {
+      "video_id": "x_ada27fa979b",
+      "disposition": "still_unmapped",
+      "shelf_ids": [],
+      "evidence": [],
+      "reason": "One-line reaction-video description, no thematic cluster."
+    },
+    {
+      "video_id": "x_d7a63c68734",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "545212d962f6fe4d437f7e12ca951efefc62caf1bf5a2387b855284fe2823075"
+        }
+      ],
+      "reason": "Discussion of AI lab economics between industry commentators."
+    },
+    {
+      "video_id": "_KNjASionIo",
+      "disposition": "proposed_concept",
+      "shelf_ids": [
+        "ai-industry-business"
+      ],
+      "evidence": [
+        {
+          "excerpt_id": "4503c601a80fe6a405cbb7564be18b80e860a17f041ee71320f6efdb4d9e9fd7"
+        }
+      ],
+      "reason": "Rising cloud AI costs vs local hardware economics."
+    }
+  ],
+  "diff": {
+    "preserved": [
+      "ai-and-ml",
+      "space-and-science",
+      "developer-tools",
+      "security",
+      "frontier-models",
+      "education",
+      "spaceflight"
+    ],
+    "added": [
+      "news-and-current-events",
+      "sports-and-streaming-culture",
+      "ai-product-launches-demos",
+      "ai-industry-business",
+      "generative-media",
+      "ai-culture-memes",
+      "agentic-ai-assistants"
+    ],
+    "renamed": [],
+    "merged": [],
+    "split": [],
+    "retired": []
+  },
+  "pin_impact_report": {
+    "silent_redirects": false,
+    "items": []
+  },
+  "rejected_proposals": [
+    {
+      "proposal": "AI and ML / Robotics & Computer Vision",
+      "reason": "Only 3 distinct supporting video_ids (2084663739400249344, 2084984808216657921, 2085118888220475392) across all batches; below the 5-card minimum. All 3 cards reclassified as still_unmapped."
+    }
+  ]
+}
