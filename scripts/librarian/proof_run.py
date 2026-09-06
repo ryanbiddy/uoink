@@ -713,8 +713,10 @@ class ProofHarness:
             "X-Uoink-Token": "[REDACTED]",
             "User-Agent": "uoink-proof-harness/1.0",
         }
-        redacted_req = redact(payload)
-        redacted_resp = redact(resp_data)
+        # AH-R1: the supplemental exports must redact nested lease secrets (attempt_token
+        # and friends) exactly like the main http-* wrappers, not only the helper token.
+        redacted_req = redact_http(redact(payload))
+        redacted_resp = redact_http(redact(resp_data))
 
         req_record = {
             "seq": seq,

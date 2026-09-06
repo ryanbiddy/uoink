@@ -3,9 +3,20 @@
 **Verdict: the stage 2 gate is not met.** The measured pass over all 548 frozen targets with
 the approved taxonomy v2 passes coverage in both strata and strict precision in the text-only
 stratum, and fails strict precision in the timed stratum (31 of 41 correct, 75.6%, against a
-90% target). Receipts validate under contract v2 with `--require-real`; Astra's replay audit
-(run AH, `STAGE2-AUDIT-2026-09-06.md`) is the record of what the archive establishes. Apply
-stayed disabled; zero labels were applied; the live index was never opened.
+90% target). Astra's replay audit (run AH, [`STAGE2-AUDIT-2026-09-06.md`](STAGE2-AUDIT-2026-09-06.md))
+independently reproduces every number here, verifies all 6,905 archive hashes and all 431
+memberships, and finds the error guard, deadline, concurrency, accounting, registry and state
+checks pass. It nevertheless **rejects the receipts as a record** on two tooling defects:
+AH-R1, the supplemental HTTP exports (`http/NNNNN_*.json`) kept nested lease tokens
+(`attempt_token`) unredacted although the main `http-*` wrappers were redacted; AH-R2, the
+scorer CLI accepted mock receipts and receipts stripped of their original artifacts. Both are
+repaired in the commit that lands this paragraph (the supplemental export now applies the
+shared nested-secret redaction; the scorer refuses non-subscription receipts and runs full
+`--require-real` validation against the frozen manifest before scoring, and the audit's two
+negative probes now exit 1). The archive is preserved unmodified as the failing evidence, so
+its lease tokens remain in the private complete copy; they belong to a disposable helper that
+no longer exists. AH-Q1 (timed precision) stands regardless. Apply stayed disabled; zero
+labels were applied; the live index was never opened.
 
 This document is Fable's account. Every number below is recomputed from the archived
 receipts by the scorer or the validator; Astra's audit is authoritative where they differ.

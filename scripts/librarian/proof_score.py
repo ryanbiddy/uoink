@@ -700,6 +700,13 @@ def main() -> None:
         default=None,
         help="Frozen adjudicated mapping table; every gold path must map to exactly the frozen mapped_path",
     )
+    parser.add_argument(
+        "--manifest",
+        type=Path,
+        default=None,
+        help="Frozen execution manifest; the receipts are fully validated against it (--require-real, all original "
+             "artifacts) before any score is computed. Required.",
+    )
     args = parser.parse_args()
 
     if not args.receipts.is_file():
@@ -716,6 +723,29 @@ def main() -> None:
         sys.exit(1)
 
     receipts_data = json.loads(args.receipts.read_text(encoding="utf-8"))
+    # AH-R2: the CLI scores only real, fully validated receipts. Mock receipts are fixture
+    # evidence and are refused; receipts stripped of their original artifacts fail the
+    # validator below and are refused as well.
+    if receipts_data.get("mode") != "subscription":
+        print(f"SCORER ERROR: refusing to score mode={receipts_data.get('mode')!r}; only real subscription receipts are scored",
+              file=sys.stderr)
+        sys.exit(1)
+    if args.manifest is None or not args.manifest.is_file():
+        print("SCORER ERROR: --manifest <frozen execution manifest> is required for real receipts", file=sys.stderr)
+        sys.exit(1)
+    try:
+        sys.path.insert(0, str(ROOT / "tests"))
+        import validate_proof_receipts as _validator
+        manifest_data = _validator.verify_manifest(json.loads(args.manifest.read_text(encoding="utf-8")))
+        validation = _validator.validate_receipts(receipts_data, manifest_data, require_real=True,
+                                                  artifact_root=args.receipts.resolve().parent)
+    except Exception as exc:  # any validator failure refuses scoring
+        detail = str(exc).splitlines()[0][:300] if str(exc) else type(exc).__name__
+        print(f"SCORER ERROR: receipts did not pass full real validation: {detail}", file=sys.stderr)
+        sys.exit(1)
+    if not str(validation.get("status", "")).startswith("RECEIPTS_VALID"):
+        print(f"SCORER ERROR: validator status {validation.get('status')!r} is not a real validation", file=sys.stderr)
+        sys.exit(1)
     holdout_data = json.loads(args.holdout.read_text(encoding="utf-8"))
     gold_data = json.loads(args.gold.read_text(encoding="utf-8"))
     taxonomy_data = load_taxonomy(args.taxonomy)
@@ -738,6 +768,7 @@ def main() -> None:
         print(f"SCORER ERROR: {exc}", file=sys.stderr)
         sys.exit(1)
     results["frozen_mapping"] = mapping_status
+    results["receipt_validation"] = validation
 
     out_dir = args.out if args.out else args.receipts.parent
     out_dir.mkdir(parents=True, exist_ok=True)
