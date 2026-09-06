@@ -3,6 +3,11 @@ You are the Librarian consolidating batch induction proposals into ONE taxonomy 
 ## How references work (read first)
 You never copy ids or hashes. The KEY TABLE below assigns a short key to every card (`c001` ... `c225`, in library order) and to every support entry that appears in the batch data (`c001-1`, `c001-2`, ...; the number is the occurrence within that card, counting candidate supports first, then disposition evidence, in batch order). Refer to cards by `card_key` and to evidence by `{"support_key": "..."}`. A validator expands the keys and checks the evidence.
 
+Every support key carries a `kind` in the key table, and the two kinds are NOT interchangeable:
+- `"kind": "candidate"` keys come from a batch candidate's `supporting_evidence`. ONLY these may appear in a node's `supporting_evidence`.
+- `"kind": "disposition"` keys come from a batch disposition's `evidence`. ONLY these may appear in a ledger row's `evidence`, and only for the row's own `card_key`.
+A card often has both, e.g. `c006-1` (candidate) and `c006-3` (disposition) for the same excerpt: the node takes `c006-1`, the ledger row takes `c006-3`. One node support key of kind `disposition` invalidates the entire proposal, so look up the `kind` of every key you write.
+
 ## Baseline taxonomy v1 (frozen; version_id `taxonomy-v1-2026-09-04`)
 Every v1 node below MUST appear in `nodes` with `shelf_id`, `path`, `definition`, `include`, `exclude` copied EXACTLY as given, listed in `diff.preserved`, with `supporting_evidence: []` and `sibling_cues` covering every include cue (one entry per include cue: `include_cue` = the cue text verbatim, `confusing_alternative`, `evidence_needed`).
 [
@@ -165,6 +170,7 @@ Every v1 node below MUST appear in `nodes` with `shelf_id`, `path`, `definition`
 - `pin_impact_report`: `{"silent_redirects": false, "items": [], "measured_pins": 0, "measured_memberships": 0, "measured_state": "archived stage 1 proof before-state: zero pins, zero memberships (recorded independently in the receipts)"}`. This is the measured population the proposal was induced against; nothing is redirected because nothing is pinned.
 - `rejected_proposals`: every candidate you did not adopt, `{"proposal": <path or name>, "reason": <why>}`.
 - Keep the document compact: short reasons, short cues, no prose outside the JSON.
+- Final self-check before you finish: for every node, every `support_key` has `"kind": "candidate"` in the key table and the five keys belong to five different `card_key`s; for every ledger row with evidence, the key has `"kind": "disposition"` and its `card_key` equals the row's `card_key`.
 
 ## Key table (data)
 {{KEYS}}

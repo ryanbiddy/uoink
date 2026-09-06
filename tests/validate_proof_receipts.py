@@ -194,6 +194,14 @@ def array_schema(items, **options):
     return dict(type="array", items=items, **options)
 
 
+def with_optional(schema, optional):
+    """A closed object schema plus optional properties (contract v1.3 provenance fields);
+    required keys and additionalProperties=False are unchanged."""
+    out = copy.deepcopy(schema)
+    out["properties"].update(optional)
+    return out
+
+
 TEXT = dict(type="string")
 ID = dict(type="string", minLength=1)
 HASH = dict(type="string", pattern="^[a-f0-9]{64}$")
@@ -272,6 +280,8 @@ CALL_SCHEMA = object_schema(dict(
     usage=dict(anyOf=[JSON_OBJECT, dict(type="null")]),
     modelUsage=dict(anyOf=[JSON_OBJECT, dict(type="null")]),
     cli_estimated_cost_usd=dict(type=["number", "null"], minimum=0)))
+# Contract v1.3: per-process provenance recorded by the induction runner (audit B8).
+CALL_SCHEMA = with_optional(CALL_SCHEMA, dict(cwd=TEXT, environment_policy=TEXT))
 COMPLETION_SCHEMA = object_schema(dict(attempt_id=ID, completed_monotonic_ns=COUNT))
 HTTP_SCHEMA = object_schema(dict(
     event_id=ID, operation=dict(enum=["claim", "submit", "release", "cancel", "renew", "preview"]),
@@ -660,9 +670,17 @@ INDUCTION_RECEIPT_SCHEMA = {
         calls=array_schema(CALL_SCHEMA, minItems=1),
         batches=array_schema(object_schema(dict(call_id=ID, video_ids=array_schema(ID, minItems=1, maxItems=25, uniqueItems=True)))),
         consolidation_call_id=ID, proposal=PROPOSAL_SCHEMA, proposal_artifact=ARTIFACT_SCHEMA,
-        accounting=JSON_OBJECT, execution=object_schema(dict(git_sha=dict(type="string", pattern="^[a-f0-9]{40}$"),
+        accounting=JSON_OBJECT, execution=with_optional(object_schema(dict(git_sha=dict(type="string", pattern="^[a-f0-9]{40}$"),
             start_monotonic_ns=COUNT, end_monotonic_ns=COUNT,
-            fingerprints=object_schema({name: ARTIFACT_SCHEMA for name in ("runner", "validator", "card_builder")})))))}
+            fingerprints=object_schema({name: ARTIFACT_SCHEMA for name in ("runner", "validator", "card_builder")}))),
+            # Contract v1.3 isolation and provenance evidence (audit B8, B2-H).
+            dict(checkout_root=TEXT, cwd=TEXT, model=ID, effort=JSON_OBJECT, concurrency=COUNT, call_timeout_s=COUNT,
+                 environment=JSON_OBJECT, database_opened=dict(const=False), helper_opened=dict(const=False),
+                 network_egress=TEXT, input_paths=JSON_OBJECT, output_root=TEXT,
+                 resume=dict(anyOf=[JSON_OBJECT, dict(type="null")])))))}
+INDUCTION_RECEIPT_SCHEMA = with_optional(INDUCTION_RECEIPT_SCHEMA, dict(
+    induction_state=object_schema(dict(source=TEXT, archived_receipts_sha256=HASH, pins=COUNT, memberships=COUNT,
+                                       item_policies=COUNT, active_version_id=dict(anyOf=[ID, dict(type="null")])))))
 
 
 def _check_support(support, cards, frozen):
