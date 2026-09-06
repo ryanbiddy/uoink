@@ -165,5 +165,8 @@ The document must stay compact so it can be emitted in one response:
 - Definitions are one sentence; include and exclude cues are short phrases; `sibling_cues` fields are short phrases.
 - No prose outside the JSON.
 
+## Exactness check (mandatory, before you finish)
+Identifiers are verified byte-for-byte by a validator; one wrong character rejects the whole proposal. Copy every `video_id`, `source_revision`, `card_hash` and `excerpt_id` character-for-character from the batch data; never retype from memory. Then verify: (a) the ledger has exactly one row for every `video_id` that appears in ANY batch disposition, no id missing, none duplicated, none invented; (b) every node support entry's four identifiers match a single batch candidate support entry exactly; (c) every ledger `excerpt_id` reference appears in that same card's batch disposition evidence.
+
 ## Batch proposals (data)
 {{PROPOSALS}}
