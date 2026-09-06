@@ -1,0 +1,26 @@
+[induce] resume: reused call-batch-00
+[induce] resume: reused call-batch-01
+[induce] resume: reused call-batch-02
+[induce] resume: reused call-batch-03
+[induce] resume: reused call-batch-04
+[induce] resume: reused call-batch-05
+[induce] resume: reused call-batch-06
+[induce] resume: reused call-batch-07
+[induce] resume: reused call-batch-08
+[induce] 4 auditor-rejected support keys named in the prompt: ['c070-1', 'c110-1', 'c202-1', 'c221-1']
+[induce] 1 unusable support keys named in the prompt: ['c061-1']
+[induce] call-consolidation: 1 ids, 384506 ms, exit 0, stdout 122257 B
+[induce] post-check: batch candidate 'AI and ML / AI Generative Creative Media' is neither adopted under its own path nor named in rejected_proposals
+[induce] post-check: batch candidate 'AI and ML / AI Industry, Markets, and Geopolitics' is neither adopted under its own path nor named in rejected_proposals
+[induce] post-check: batch candidate 'AI and ML / AI-Generated Creative Media' is neither adopted under its own path nor named in rejected_proposals
+[induce] post-check: batch candidate 'AI and ML / AI Industry Business and Market Commentary' is neither adopted under its own path nor named in rejected_proposals
+[induce] post-check: batch candidate 'AI and ML / AI-Generated Video and Creative Media' is neither adopted under its own path nor named in rejected_proposals
+[induce] post-check: batch candidate 'AI and ML / AI Business and Industry' is neither adopted under its own path nor named in rejected_proposals
+[induce] post-check: batch candidate 'AI and ML / AI Business & Markets' is neither adopted under its own path nor named in rejected_proposals
+[induce] post-check: batch candidate 'AI and ML / AI-Generated Creative Media' is neither adopted under its own path nor named in rejected_proposals
+[induce] post-check: batch candidate 'AI and ML / AI Industry and Market Economics' is neither adopted under its own path nor named in rejected_proposals
+[induce] completed: 10 calls; proposal nodes=10, ledger=225
+Taxonomy induction complete.
+Proposal written to: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\induction-attempt10\proposal.json
+Receipts written to: E:\AI\projects\uoink\checkouts\Yoink-library\_scratch\induction-attempt10\receipts.json
+exit=0

@@ -40,6 +40,8 @@ def main(argv=None) -> int:
         return 1
     proposal_raw = args.proposal.read_bytes()
     proposal = json.loads(proposal_raw.decode("utf-8"))
+    if proposal.get("kind") == "taxonomy-v2-revision-decision":
+        proposal = proposal["proposal"]  # reviewer-authored composition; the file hash binds the whole decision
     cards = []
     for vid in sorted(rows):
         stratum, row = rows[vid]

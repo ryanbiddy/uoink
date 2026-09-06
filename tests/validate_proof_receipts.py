@@ -677,7 +677,8 @@ INDUCTION_RECEIPT_SCHEMA = {
             dict(checkout_root=TEXT, cwd=TEXT, model=ID, effort=JSON_OBJECT, concurrency=COUNT, call_timeout_s=COUNT,
                  environment=JSON_OBJECT, database_opened=dict(const=False), helper_opened=dict(const=False),
                  network_egress=TEXT, input_paths=JSON_OBJECT, output_root=TEXT,
-                 resume=dict(anyOf=[JSON_OBJECT, dict(type="null")])))))}
+                 resume=dict(anyOf=[JSON_OBJECT, dict(type="null")]),
+                 auditor_rejected_keys=dict(anyOf=[JSON_OBJECT, dict(type="null")])))))}
 INDUCTION_RECEIPT_SCHEMA = with_optional(INDUCTION_RECEIPT_SCHEMA, dict(
     induction_state=object_schema(dict(source=TEXT, archived_receipts_sha256=HASH, pins=COUNT, memberships=COUNT,
                                        item_policies=COUNT, active_version_id=dict(anyOf=[ID, dict(type="null")])))))

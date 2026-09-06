@@ -64,6 +64,8 @@ def revision_hash(projected: list[dict]) -> str:
 def build(proposal_path: Path, *, approved_by: str, approval_record: str, parent_doc: Path) -> dict:
     raw = proposal_path.read_bytes()
     proposal = json.loads(raw.decode("utf-8"))
+    if proposal.get("kind") == "taxonomy-v2-revision-decision":
+        proposal = proposal["proposal"]  # reviewer-authored composition; the file hash binds the whole decision
     parent = json.loads(parent_doc.read_text(encoding="utf-8"))
     if proposal["parent_version_id"] != parent["version_id"]:
         raise SystemExit("Proposal parent does not match the parent taxonomy document")
