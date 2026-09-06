@@ -1,0 +1,58 @@
+{
+  "seq": 429,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "reMOXQ4Dyf1QDPzNAevlqAlH7bjIb_HO",
+      "video_id": "2083598884362653696",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.87,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "58515a160b5ad582203d746f9d5de063c0a85509d81298cd1450351bbe58de04",
+            "card_hash": "b49ba4b9183a1dfe12adc7976ea3215e4b472eab99286a0a71289ca70692ecec",
+            "quote": "One Routine Is Clean Up Dead Code This Is A Single Prompt",
+            "start": 1657.46,
+            "end": 1776.329,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "0bd47e98cc4ffc6fe025cf8b4e9ac321a4cc0dadb7adc1f2e4442add1f8fb26e",
+            "card_hash": "b49ba4b9183a1dfe12adc7976ea3215e4b472eab99286a0a71289ca70692ecec",
+            "quote": "a prompt injection classifier which we run for all traffic",
+            "start": 105.099,
+            "end": 224.65,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

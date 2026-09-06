@@ -1,0 +1,39 @@
+{
+  "seq": 1031,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "PllZ7lIkBYRDUuNZ4qzu5lkHA2E8_11v",
+      "video_id": "2094843633572659200",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "5728f240c189e6806da4981d5b638d5e7fcc7a556c670408089a16bfd3a9fc96",
+            "card_hash": "57da78c9d44fe122ede8c681e6a0fd519d2aa9fdc1ecf30f6bb525946ffd905a",
+            "quote": "Today we're releasing Fable 5.1, the latest upgrade to our most capable model class",
+            "start": 0.0,
+            "end": 79.316,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

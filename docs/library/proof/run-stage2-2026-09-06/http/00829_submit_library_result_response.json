@@ -1,0 +1,39 @@
+{
+  "seq": 829,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Cgi_uPbFmcVLej3368MjEMfTrabXz3zY",
+      "video_id": "2091998648997441536",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "f7d4d06439c9454fbfede720d1ff9f02ed98cbd79695b41c3a89ce974b03448e",
+            "card_hash": "7228e4df99d411ef5a213b5a01a7b0868a525560815b5e3cbec94c8993bb5fd0",
+            "quote": "would you recommend going $200 Claude sub to Cursor for now?",
+            "start": 440.663,
+            "end": 558.892,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "seq": 517,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "fuicCDrx4DTxaCZjpHrgNLV243z2mYFM",
+    "client_id": "proof-harness",
+    "attempt_token": "xWHxpmb9jqRJTj1rWRpTsJSx77yhwd1AUA3x9Vtf_1I",
+    "submission_key": "fuicCDrx4DTxaCZjpHrgNLV243z2mYFM-xWHxpmb9jqRJTj1rWRpTsJSx77yhwd1AUA3x9Vtf_1I",
+    "schema_version": 1,
+    "video_id": "2085855834697879810",
+    "source_revision": "5c5b313e9c99786ab7cd29c215f39f4a07f57208300a4b76aad002255dba8082",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "2ecde702489d21bb1b5327d409b934074fd93ae6b23c1495fa6dd969249704cd",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "966fe985471c7b6c5cc34f53125bf625b0914aa10ae3082d16f60526393c7537",
+            "card_hash": "c59dc567e05ede7318abb64bea12df059de09a69d920fffb940ba7125f12e373",
+            "quote": "no protocol, no MCP, no setup. it's just terminals."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 10312,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 17742,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "seq": 725,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "hOWpg6lG-0XfGyYaA2MhfeC8zzKfgoCx",
+    "client_id": "proof-harness",
+    "attempt_token": "zyzS52u99E_9OUdHOxXlhUFNGMJKTMLzNKrgGs3foyM",
+    "submission_key": "hOWpg6lG-0XfGyYaA2MhfeC8zzKfgoCx-zyzS52u99E_9OUdHOxXlhUFNGMJKTMLzNKrgGs3foyM",
+    "schema_version": 1,
+    "video_id": "2089305813735337984",
+    "source_revision": "eaa11108f4754d4c8c3f9ebbf239c5c560e083dff01a17920fd453c03c90f92c",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "9a5018dd55933b386a6465e8e85997fd6403682158b28c5399f7ab837bb359a1",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "bbe69440fc78006c850cbd45e7270609b13a0b108c04a6af5c9420643ee6e6a7",
+            "card_hash": "09619f128a203a047f015970804c1fec722b6575b0431ee92d9a65c897e4bf25",
+            "quote": "Turn vibe-slop Three.js prototypes into stunning apps"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 9982,
+      "cache_read_tokens": 92574,
+      "cache_create_tokens": 44094,
+      "wall_time_ms": 0
+    }
+  }
+}

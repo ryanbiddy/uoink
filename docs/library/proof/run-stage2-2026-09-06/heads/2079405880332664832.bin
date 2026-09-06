@@ -1,0 +1,224 @@
+# Ahmad - Prediction  We’re gonna get Kimi K3 equivalent intelligence running o...
+
+**Channel:** Ahmad (— subscribers)
+**Uploaded:** 2026-08-15 | **Duration:** 18:07 | **Views:** — | **Likes:** 422
+**URL:** https://x.com/TheAhmadOsman/status/2088745234842705975
+**Uoinked:** 2026-08-16T07:36:03
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Other
+**Analysis:** The speaker opens with a bold prediction about AI model capability ('We're gonna get Kimi K3 equivalent intelligence running on a single RTX PRO 6000 in less than 18 months'), which immediately stakes out a specific future claim that intrigues the viewer into wanting to know how this will happen.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Prediction  We’re gonna get Kimi K3 equivalent intelligence running on a single RTX PRO 6000 in less than 18 months  How? Watch this video to learn how we get therE  https://t.co/Q3OH95BMzI
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:12] Hey, everyone.
+[00:00:17] We are about to start this presentation called the
+[00:00:21] desktop frontier and it's basically
+[00:00:27] about where we started and how far we've come
+[00:00:32] with local and open source models.
+[00:00:37] How many, like just a quick question?
+[00:00:40] How may of you here follow me on X ?
+[00:00:44] Amazing!
+[00:00:46] Love y'all! So every now an then I would say a prediction.
+[00:00:52] Here's the new one. We
+[00:00:59] have the equivalent of GLM 5.2 class intelligence running
+[00:01:03] on a single RTX 1590 with 32 gigabytes
+[00:01:07] of VRAM that's basically late 2027 this is conservative
+[00:01:14] we might actually get there faster
+[00:01:20] so you know for a long time, uh...
+[00:01:23] The story has been bigger models, Bigger Models!
+[00:01:31] With a 20 trillion and I'm not saying
+[00:01:33] that there won't ever be like a gap between frontier
+[00:01:35] intelligence uh...
+[00:01:37] And you know open source models.
+[00:01:39] There will always be a gap but that gap um well shrank,
+[00:01:44] and the efficiency of the modules
+[00:01:47] Well get exponentially better
+[00:01:54] So the term that they liked to think about is impact per parameter
+[00:02:05] So what could the model do um...
+[00:02:07] What footprint like hardware footprint did it have last year
+[00:02:10] in comparison to now? And uh,
+[00:02:13] What Hardware does that use and what are they really
+[00:02:17] need to use a year ago
+[00:02:18] And you know
+[00:02:20] Are we moving down for
+[00:02:22] The same kind of quality on
+[00:02:25] That on that hardware again as I was saying earlier
+[00:02:27] i used To run Lama 2
+[00:02:29] On an RTX 1390
+[00:02:35] That's better than Lama 3 405
+[00:02:37] that's a 400 billion plus parameters model
+[00:02:42] That you beat with the 27 Billion Parameter Model
+[00:02:45] A year and half after
+[00:02:51] So um
+[00:02:52] Yeah, as I was saying similar capabilities are moving into smaller hardware footprint
+[00:02:56] Um
+[00:02:59] Benchmark scores or one thing
+[00:03:01] But also You know
+[00:03:03] A Year ago This time
+[00:03:08] There was a lot of models that were able to successfully
+[00:03:09] run within cloth code
+[00:03:12] Right It wasn't until GLM 4.5
+[00:03:15] That came out in late July
+[00:03:17] And glm4 point 5 air required at least for RTX
+[00:03:23] 1390s or an rtx pro 6000
+[00:03:25] Now,
+[00:03:27] That footprint For hardware is not needed anymore
+[00:03:30] All you need
+[00:03:31] Is single RTX 30 90 50 90 and
+[00:03:35] And you have something much more capable
+[00:03:37] Much More intelligent So is this trend just random or
+[00:03:42] Is there more to it
+[00:03:43] That's a question that everyone should ask
+[00:03:46] Um Is
+[00:03:48] It Just by By your
+[00:03:49] Random chance That we've gotten
+[00:03:51] This far from models
+[00:03:53] That weren't able
+[00:03:54] To sustain More than 4,000
+[00:03:56] Um Tokens In terms of context lengths
+[00:03:59] And now we have
+[00:04:00] Things that are million
+[00:04:01] Prime Million
+[00:04:03] Uh Pokins
+[00:04:05] Locally On your hardware
+[00:04:07] That you own It's not by chance
+[00:04:10] You know Its Not just a coincidence
+[00:04:11] We got here There is research being done
+[00:04:14] There Is efficiency gains to be made
+[00:04:16] Their architecture hacks
+[00:04:18] That compound
+[00:04:19] And they will continue
+[00:04:21] To combine And I think
+[00:04:25] I like this line But
+[00:04:26] It's not that small models are beating
+[00:04:28] Big models
+[00:04:29] Its That newer more efficient
+[00:04:31] Models Are
+[00:04:32] Beating older less Efficient ones
+[00:04:35] Uh So Yeah
+[00:04:37] Capability density
+[00:04:39] Is You know
+[00:04:40] The literature I
+[00:04:42] Back This up with
+[00:04:44] Um Natural machine intelligence
+[00:04:46] Calls this
+[00:04:47] Pattern Densing law
+[00:04:49] And Basically
+[00:04:51] Um Every three and a half months
+[00:04:54] We Are having
+[00:04:55] Fifty percent fewer parameters
+[00:04:58] Whether that's Intense or activated
+[00:04:59] That is a different story But we are
+[00:05:01] Getting Way
+[00:05:02] More intelligence
+[00:05:04] Out of the models
+[00:05:05] That were running So
+[00:05:12] You know Right now
+[00:05:14] Where at Its
+[00:05:15] GLM 5.2
+[00:05:16] Thats our
+[00:05:17] Biggest player
+[00:05:19] And Um It 744 billion
+[00:05:22] Parameters Total Was only
+[00:05:24] 40 Billion parameter
+[00:05:25] Activated And
+[00:05:26] That supports Up to
+[00:05:28] One million Context
+[00:05:29] Sense You can run This in
+[00:05:30] Nvm v4 On
+[00:05:32] A machine Uh
+[00:05:33] On a
+[00:05:34] Dgx station Or
+[00:05:35] on A server With eight
+[00:05:36] Rtx pro Six thousand
+[00:05:37] Thats something
+[00:05:38] That you Like At the
+[00:05:40] X Station Is Something That you can
+[00:05:41] Set Under your desk
+[00:05:43] And its running This kind of
+[00:05:44] Frontier intelligence Whether
+[00:05:46] You know It's On one benchmark
+[00:05:48] Actually beats Gbt 5.5
+[00:05:50] Extra high Doesn't that
+[00:05:52] Mean We are
+[00:05:54] Getting somewhere With local and open source
+[00:05:55] Models That we
+[00:05:57] Can compete With the frontier
+[00:05:58] That Were not
+[00:06:00] Far off From
+[00:06:01] The best That You can
+[00:06:02] Get from The cloud We also
+[00:06:05] Have Ultra Which proved
+[00:06:07] That Nvm v4
+[00:06:08] Training More efficient Can be
+[00:06:10] Done On Hardware
+[00:06:12] Right Thats very
+[00:06:14] Important Even for
+[00:06:16] Training These models For making
+[00:06:17] Small and
+[00:06:19] Specialized Models Could
+[00:06:21] Be Cheaper
+[00:06:24] And could Deliver you value
+[00:06:27] In terms of
+[00:06:28] Economics Way sooner Or
+[00:06:30] You know For much
+[00:06:31] Less money Than you
+[00:06:32] Used to Yeah So
+[00:06:36] Again Lama 2
+[00:06:38] That was A 70
+[00:06:39] Billion Parameter Model If
+[00:06:41] You try To run This right Now
+[00:06:42] Your Laugh At It Right
+[00:06:44] That used To take
+[00:06:46] Eight RTX 3090
+[00:06:48] Load up And
+[00:06:49] Those same
+[00:06:50] 8RTX30 90s Could run
+[00:06:52] Something like 15 Barrel
+[00:06:53] Agents Right now With
+[00:06:54] 3.5 27
+[00:06:56] That's
+[00:06:57] A massive Jump in
+[00:06:59] Term of Performance Gains
+[00:07:01] So the
+[00:07:02] Fencing Wall Basically Means that
+[00:07:05] We have Similar or Better
+[00:07:06] Capabilities
+[00:07:08] Was Significantly
+[00:07:09] Fewer Parameters
+[00:07:10] That's The impact
+[00:07:11] Per Parameter As I Was Saying
+[00:07:12] You Want Everybody
+[00:07:14] To Leave Here Thinking
+[00:07:16] About This Term And
+[00:07:18] You Know Thinking
+[00:07:19] Where Are We Going Get
+[00:07:20] A Year From Today
+[00:07:21] As They Were
+[00:07:22] Seeing Earlier Everyone
+[00:07:24] Has A Phone Am Assuming
+[00:07:25] Raise Your Hand If You Have A Phone
+[00:07:28] If He Didn't Raise
+[00:07:29] His Hands When Or You Lie About
+[00:07:30] Other Things Well So
+[00:07:31] C

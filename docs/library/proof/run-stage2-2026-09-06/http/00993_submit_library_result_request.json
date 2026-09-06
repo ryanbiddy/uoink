@@ -1,0 +1,51 @@
+{
+  "seq": 993,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "J1uRtvnZB8biUc0p93LFHegL9YQc-1xT",
+    "client_id": "proof-harness",
+    "attempt_token": "shia7xgrpsqPxY3Xrwf0GI1sABmgdG96MtDp9_a6hWs",
+    "submission_key": "J1uRtvnZB8biUc0p93LFHegL9YQc-1xT-shia7xgrpsqPxY3Xrwf0GI1sABmgdG96MtDp9_a6hWs",
+    "schema_version": 1,
+    "video_id": "2093678734708801536",
+    "source_revision": "23a09bfb37b4533ecbbe759ae148cd93b24a5054e4b4e1231131887c4658c35c",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "8b78fabddc706743bc3913dfe8d2ced041db6c55c1f636abc11e7945c93f23b8",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "a9451b1be0b0c8700bf35c2bc6f0ecd7ea321d7d86d9f4be2371cf4eff658ed3",
+            "card_hash": "4fbd6d0ec5e88a446671dcd04683705295fa48be12c469e88f72207dfc0823e9",
+            "quote": "Real-time object detection using frontier object detection models."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 19402,
+      "cache_read_tokens": 186415,
+      "cache_create_tokens": 37063,
+      "wall_time_ms": 0
+    }
+  }
+}

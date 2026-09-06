@@ -1,0 +1,39 @@
+{
+  "seq": 639,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "aMP243O4RFO3vk3HcvPl96boDVVIi8dA",
+      "video_id": "2088401835384057857",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "f540a980d9b53187a894d06ca414a821d8109ce48722a5c59e7e91ab68afa410",
+            "card_hash": "470b9d30b27aca46ac3f5dece73410f3611582c8eddd7f061dd1e489c14c009a",
+            "quote": "this is top tier",
+            "start": 0.0,
+            "end": 115.73,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

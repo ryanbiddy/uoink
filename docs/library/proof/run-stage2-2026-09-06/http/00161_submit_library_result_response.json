@@ -1,0 +1,39 @@
+{
+  "seq": 161,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "0MuSkjl3xcOHwWoNlxc4sH6cgHXQfAiX",
+      "video_id": "2080678700157140992",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "b36670226e23f8b56fc9008ede6987eea7269425c6f8dabd30b4b09cbf0cb0af",
+            "card_hash": "58ec37f03b31f52cadac9ddf4ec356f5c60a64923770043cab952ddd166603d1",
+            "quote": "The semi selloff right now is being driven by a mix of macro fear, profit taking and investors questioning",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

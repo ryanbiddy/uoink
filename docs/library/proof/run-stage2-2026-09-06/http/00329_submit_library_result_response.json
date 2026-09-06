@@ -1,0 +1,39 @@
+{
+  "seq": 329,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Kk8gNyTEPm6jnt5Rt7rA0DOraKsR9_2H",
+      "video_id": "2082879384671649792",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "6a95605137e66c7c5c0bb3afb21d4bfd3f7b06bf9e0153b51ccbefdd1fee44ff",
+            "card_hash": "afc9ed6372043df1f665b26fc67f454dada0c85b90bf8e1fbc96ed0483f2d685",
+            "quote": "85% of our engineers are running dozens or hundreds of agents.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

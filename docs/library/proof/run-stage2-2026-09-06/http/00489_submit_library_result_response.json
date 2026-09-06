@@ -1,0 +1,58 @@
+{
+  "seq": 489,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 20,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "jwfwnrxTokGKlJ43S9AlNh2i2mltVtis",
+      "video_id": "2085020353986785281",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "93546f3a115211c620039f6b4446330eb8c80023577647c220c4639a9414cf52",
+            "card_hash": "658fb64f2a3851213f7b4612c2a6a858403b0914031d32ff620e363b0f29f547",
+            "quote": "Today we're going to be talking about picking the right model",
+            "start": 0.0,
+            "end": 58.399,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "d437a89d14b4a35a9dca0459cc25d3ae7af81fd22ec182c437a03eb8083eac24",
+            "card_hash": "658fb64f2a3851213f7b4612c2a6a858403b0914031d32ff620e363b0f29f547",
+            "quote": "Pareto Curve of The Performance Of A Model Versus the Cost",
+            "start": 222.5,
+            "end": 342.1,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

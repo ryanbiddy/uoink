@@ -1,0 +1,909 @@
+{
+  "seq": 943,
+  "tool": "claim_library_work",
+  "wall_ms": 10,
+  "request": {
+    "seq": 943,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 943,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 10,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "lXL5pDjy0j2ofp-MeqxR-KTcCoMGgfPK",
+            "video_id": "2093509312752820225",
+            "attempt_token": "1Wvwdb0OzabNgjgiFWmgmZlDW7KzER9GxashMPeu3Lo",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678058089,
+            "source_revision": "93bebf5294e0c392eac0045e79ffff0455535368504362b3fe124d3fa5ddbc5e",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "d68c07db7db65735d21cc20ef2598bdd5ff3eedc43dc3a2bd1bea9cf3faea3ca",
+            "card": {
+              "card_hash": "1289fd0227135d23229e52211f5f51005d532f826c2b19d4cd48d0ca3c0c7c52",
+              "channel": "Kyle Hessling",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/KyleHessling1/status/2093509375352799338",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "e756fa06e30de100628cb37e25c114582765d87d6538237a25a4ddbfab28cb27",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Qwen 3.8 27B at 56tps; on 9 year old GPU btw  Nvidia V100 32GB ~$650 on EBay right now! Using Dflash 2; disabling the ECC adds some more speed too! Thinking and prose is a bit slower, but 56-63 tps in c",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Qwen 3.8 27B at 56tps; on 9 year old GPU btw  Nvidia V100 32GB ~$650 on EBay right now! Using Dflash 2; disabling the ECC adds some more speed too! Thinking and prose is a bit slower, but 56-63 tps in code gen!  MTP runs faster for prose vs DFlash2 but slower sustained code https://t.co/0Lgn5MsyMX No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Kyle_Hessling_-_Qwen_3_8_27B_at_56tps_on_9_year_old_GPU_btw_Nvidia_V100_32GB_650",
+              "source_revision": "93bebf5294e0c392eac0045e79ffff0455535368504362b3fe124d3fa5ddbc5e",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Qwen 3.8 27B at 56tps; on 9 year old GPU btw  Nvidia V100 32GB ~$650 on EBay right now! Using Dflash 2; disabling the ECC adds some more speed too! Thinking and prose is a bit slower, but 56-63 tps in code gen!  MTP runs faster for prose vs DFlash2 but slower sustained code https://t.co/0Lgn5MsyMX No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)",
+              "title": "Kyle Hessling - Qwen 3.8 27B at 56tps; on 9 year old GPU btw  Nvidia V100 32GB ~$650 ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/KyleHessling1/status/2093509375352799338",
+              "video_id": "2093509312752820225",
+              "yoinked_at": "2026-08-30T07:47:44"
+            }
+          },
+          {
+            "work_id": "yEL4WlFD1X1IrGLKUa3UnzgFVaFkOBKU",
+            "video_id": "2093860831595499892",
+            "attempt_token": "8-BRT2XYFsbzBY-cQNd1D9pRq2ubEzNSVK4t3mjTrWk",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678058090,
+            "source_revision": "84c7ae6646eab4ea3434f7d078d881c6650b08906e324273ddb2ebd918b671ba",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "e56ba9ceed35f55af239fdc303dc8dd7f95f0beb397f51d07513774bfa2c6366",
+            "card": {
+              "card_hash": "e13df16b9e41a332eb2cebaaf178b9d50fb7f1b7498558a4ec38b464a1fd5a08",
+              "channel": "Fireside Alpha",
+              "chars": 1111,
+              "chars_all_clips": 1111,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/firesidealpha/status/2093860831595499892#t=0",
+                  "end": 72.283,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "b1b3034b7a94713a393d8fcf0a64f9128b88b3b96340a1d7d11a25381a3fe6c4",
+                  "start": 0.259,
+                  "text": "I think the conclusion is that they're basically winning on both sides of the curve. So both fast tokens and cheap tokens, which is just so interesting, because we've seen so many other companies make claims about how they're going to beat ",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/firesidealpha/status/2093860831595499892#t=0",
+                  "end": 72.283,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "b1b3034b7a94713a393d8fcf0a64f9128b88b3b96340a1d7d11a25381a3fe6c4",
+                  "start": 0.259,
+                  "text": "I think the conclusion is that they're basically winning on both sides of the curve. So both fast tokens and cheap tokens, which is just so interesting, because we've seen so many other companies make claims about how they're going to beat ",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> SemiAnalysis' Jordan Nanos reveals the OpenAI engineers scrolling their own kernel code had no idea what it did line by line, and it didn't matter because the AI does  \"It's not slop, because it performs, but it's literally just AI-generated assembly basically puked out in Gluon, https://t.co/LzGNG4rF6Y No tags [00:00:00] I think the conclusion is that they're basically winning on [00:00:05] both sides of the curve. So both fast tokens and cheap [00:00:11] tokens, which is just so interesting, because we've seen so many [00:00:16] other companies make clai",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Fireside_Alpha_-_SemiAnalysis_Jordan_Nanos_reveals_the_OpenAI_engineers_scrollin",
+              "source_revision": "84c7ae6646eab4ea3434f7d078d881c6650b08906e324273ddb2ebd918b671ba",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> SemiAnalysis' Jordan Nanos reveals the OpenAI engineers scrolling their own kernel code had no idea what it did line by line, and it didn't matter because the AI does  \"It's not slop, because it performs, but it's literally just AI-generated assembly basically puked out in Gluon, https://t.co/LzGNG4rF6Y No tags [00:00:00] I think the conclusion is that they're basically winning on [00:00:05] both sides of the curve. So both fast tokens and cheap [00:00:11] tokens, which is just so interesting, because we've seen so many [00:00:16] other companies make clai",
+              "title": "Fireside Alpha - SemiAnalysis' Jordan Nanos reveals the OpenAI engineers scrolling the...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/firesidealpha/status/2093860831595499892",
+              "video_id": "2093860831595499892",
+              "yoinked_at": "2026-08-30T07:48:14"
+            }
+          },
+          {
+            "work_id": "zpGqQisubPMwP5yDI9QAlx_FY-Z4NsnW",
+            "video_id": "2093996615065612288",
+            "attempt_token": "66NjaMD498m6jrK-9rWPxN04KHBVukcbC0M53cCOhCw",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678058090,
+            "source_revision": "f583025b6a02bdb0eb48806e20e11ed414990490a423eba2908b72984decbbc1",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "62c0cbc6b194fbea0517fdf1323aa02000b1041d0c1f80ad9c6f87b25d989e67",
+            "card": {
+              "card_hash": "b4f9804d787c4bd546e02066fd6119346fc1d641d3030791f729839736a2e417",
+              "channel": "Meng To",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/MengTo/status/2094003563626369287",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "1b8dc974aaa66588446a6221f0c4fe06b847db34239c726264baa57b2881888e",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> I recorded a 21-min video to talk about how I'm changing my strategy for the AI era https://t.co/abxnfN5o8L No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are di",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I recorded a 21-min video to talk about how I'm changing my strategy for the AI era https://t.co/abxnfN5o8L No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Meng_To_-_I_recorded_a_21-min_video_to_talk_about_how_I_m_changing_my_strategy",
+              "source_revision": "f583025b6a02bdb0eb48806e20e11ed414990490a423eba2908b72984decbbc1",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I recorded a 21-min video to talk about how I'm changing my strategy for the AI era https://t.co/abxnfN5o8L No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Meng To - I recorded a 21-min video to talk about how I'm changing my strategy ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/MengTo/status/2094003563626369287",
+              "video_id": "2093996615065612288",
+              "yoinked_at": "2026-08-30T07:51:13"
+            }
+          },
+          {
+            "work_id": "2vExfdHz2HaQt7N1yGkkRq22UDSXrw96",
+            "video_id": "2094679188800524288",
+            "attempt_token": "iZSy5iSC5rlax0oNWHM3Jag0_GbPjjxJBdMTPZ1VrXo",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678058091,
+            "source_revision": "36f3d920925aa4727d62a50778095869c6b68ec02f45b780cf67c40273ffce77",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "1a9138c7c5159ff3e1a1b4ec0fab1d18e15eb6860e023f0a4f675bba186012ed",
+            "card": {
+              "card_hash": "2794bace4f6525ad3f0e4c9a223cd02a3e5d6a0a9c21b42200f3ab25d80f489d",
+              "channel": "Dhruv",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/HeyDhruvv/status/2094679210589909463",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "577e66d8f438741fcbc1c5b48c6a44c35e6760ad8d513e7181790bdf291fa6a1",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Me and claude 10 minutes before deadline 💀 https://t.co/PKf6ImZQ3a No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comment",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Me and claude 10 minutes before deadline 💀 https://t.co/PKf6ImZQ3a No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Dhruv_-_Me_and_claude_10_minutes_before_deadline",
+              "source_revision": "36f3d920925aa4727d62a50778095869c6b68ec02f45b780cf67c40273ffce77",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Me and claude 10 minutes before deadline 💀 https://t.co/PKf6ImZQ3a No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Dhruv - Me and claude 10 minutes before deadline 💀",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/HeyDhruvv/status/2094679210589909463",
+              "video_id": "2094679188800524288",
+              "yoinked_at": "2026-09-01T07:51:35"
+            }
+          },
+          {
+            "work_id": "4YIjBXWIuCjhEqcre1ZZvllc7cozSPUL",
+            "video_id": "2094761457007157248",
+            "attempt_token": "rLCwjdhCpqbMLlTqPYOP9k71C_xf2kRbahdCtAJqNjk",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678058092,
+            "source_revision": "11df6958801bf5df65e0a3a16099a6d4605ed6a6205827c5cdaf5780dfd8d910",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "560847cc97156ca870161b9ff9c3fdc5668f9d07258d48944a77aa0d22677e12",
+            "card": {
+              "card_hash": "7706dda601a4813249c25b71ff6d48bd9c680da2d83e9a581ac51079d655cec2",
+              "channel": "vittorio",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/IterIntellectus/status/2094761595217850387",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "105d616c298da765c54641a80a7dc61a5eb80e1dc03c566d502a906a2acef7c6",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Dyson just released a new AI-powered toothbrush with an integrated 100,000-pixel macro lens camera for $499  boy is this a nice piece of technology https://t.co/6hJo3vNoHy No tags *No captions available",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Dyson just released a new AI-powered toothbrush with an integrated 100,000-pixel macro lens camera for $499  boy is this a nice piece of technology https://t.co/6hJo3vNoHy No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "vittorio_-_Dyson_just_released_a_new_AI-powered_toothbrush_with_an_integrated_10",
+              "source_revision": "11df6958801bf5df65e0a3a16099a6d4605ed6a6205827c5cdaf5780dfd8d910",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Dyson just released a new AI-powered toothbrush with an integrated 100,000-pixel macro lens camera for $499  boy is this a nice piece of technology https://t.co/6hJo3vNoHy No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "vittorio - Dyson just released a new AI-powered toothbrush with an integrated 10...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/IterIntellectus/status/2094761595217850387",
+              "video_id": "2094761457007157248",
+              "yoinked_at": "2026-09-01T07:51:47"
+            }
+          },
+          {
+            "work_id": "CWhR5LSLC1R_46cbFg-esEOWpjY1Wqtl",
+            "video_id": "2094666723681075201",
+            "attempt_token": "_SYXIeW_wOWbE2RQiambKiJWxD6IfXac3Jw3JJjCu00",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678058092,
+            "source_revision": "ed35a80da3ea6c16f052fa83fb882b15949fd37c98204b6ebe47421ed9cd9199",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "063935b3c8e784d73a87913017c738b1415ab4dd066dda864ca18bb5763521aa",
+            "card": {
+              "card_hash": "0511471f50a6cee52a805bd2256d0b83e2b4eb43e817aa49589ff954ae14264a",
+              "channel": "Sofía Sicilia",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/SofiaSici/status/2094666731507597429",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "942dd848ef1bc5f500e9c43e286f27a027da6a6887937a4744b584057d665a43",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> 🚨 ÚLTIMA HORA: Alguien construyó exactamente la herramienta que Andrej Karpathy dijo que alguien debería construir.  Un proyecto open source que supera las 100.000 estrellas en GitHub.  Se llama Graphif",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> 🚨 ÚLTIMA HORA: Alguien construyó exactamente la herramienta que Andrej Karpathy dijo que alguien debería construir.  Un proyecto open source que supera las 100.000 estrellas en GitHub.  Se llama Graphify. Un solo comando. Cualquier carpeta. Gráfico de conocimiento completo.  Le https://t.co/qqEHXUqQ1c No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Sof_a_Sicilia_-_LTIMA_HORA_Alguien_construy_exactamente_la_herramienta_que_Andre",
+              "source_revision": "ed35a80da3ea6c16f052fa83fb882b15949fd37c98204b6ebe47421ed9cd9199",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 🚨 ÚLTIMA HORA: Alguien construyó exactamente la herramienta que Andrej Karpathy dijo que alguien debería construir.  Un proyecto open source que supera las 100.000 estrellas en GitHub.  Se llama Graphify. Un solo comando. Cualquier carpeta. Gráfico de conocimiento completo.  Le https://t.co/qqEHXUqQ1c No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "title": "Sofía Sicilia - 🚨 ÚLTIMA HORA: Alguien construyó exactamente la herramienta que Andre...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/SofiaSici/status/2094666731507597429",
+              "video_id": "2094666723681075201",
+              "yoinked_at": "2026-09-02T07:37:21"
+            }
+          },
+          {
+            "work_id": "D-EVgmbIyXMrFYK_9zblz-_f1sJaa9LG",
+            "video_id": "2094362669444648960",
+            "attempt_token": "Z5ohxgMFOcT1-mWzATxnaohA641_sy_WSZ3iWDnYnuI",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678058094,
+            "source_revision": "b35260e348156f9d656d9ca2d886b9c49dd4aa3d33b77205b7f23ec06a9cc3b4",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "e807095e2852240d45b5b4e4d19a69b46b2a2e5cb99af9b56b836164c8398757",
+            "card": {
+              "card_hash": "a924ac9e8740ac48f90a53bee24a2b32d7d9c745611ad10ca452dce0cf19854f",
+              "channel": "Lewis Tunstall",
+              "chars": 95330,
+              "chars_all_clips": 95330,
+              "chars_chosen_clips": 1440,
+              "clip_count": 56,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/_lewtun/status/2094364485871923547#t=315",
+                  "end": 434.364,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "1288b9169eff2925bbb6b7c5af0edf8dd91774864f4c742d4da33b7d103975e1",
+                  "start": 315.354,
+                  "text": "such as in-context learning where if you just provided the model with a sequence of examples it could then figure out how to autocomplete the final example. So if you look here you've got this model you just give it a bunch of addition prob",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/_lewtun/status/2094364485871923547#t=1461",
+                  "end": 1580.863,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "99763a5b308c6b6cde9e752ac0f8cdab500f26fa11fd51c126f5975d75d35383",
+                  "start": 1461.201,
+                  "text": "They are processed through a neural network layer called self-attention By the way, has anyone had self-attention or should I? Quickly explain it Okay, I'll give you like a very quick thing. So what makes the transformer special is that bef",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/_lewtun/status/2094364485871923547#t=2029",
+                  "end": 2148.371,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "103fd7d478a012779c72cea48e5b8667d18ba25e37e415ba61d2d0d289407243",
+                  "start": 2029.476,
+                  "text": "And like I guarantee they will fail Like it's not that like they're not smart but it's just that this is a very optimized industry and people have spent many billions of dollars Was trying to figure out good choices of neural network archit",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/_lewtun/status/2094364485871923547#t=3431",
+                  "end": 3549.789,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ee5461c1378a9b3e595eb3a542905b7a5414261f67cba882822b20f29e17a211",
+                  "start": 3431.247,
+                  "text": "And although there have been many attempts to come up with some sort of like theoretical principled way of figuring out how to do mixtures the reality is that today you have to basically just run experiments So you say, okay I want my model",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/_lewtun/status/2094364485871923547#t=3721",
+                  "end": 3840.582,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "d502cc0df05e6fc88d8be587b2713a99ef63d8057718a4515fa20762b93c822e",
+                  "start": 3721.393,
+                  "text": "you think of them in the abstract and you'll look at like some spec sheet from NVIDIA and you'll say okay, here's like the theoretical flops I can get from my from this GPU I'll do some benchmarking on the GPU and then you know, I'll say, o",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/_lewtun/status/2094364485871923547#t=5358",
+                  "end": 5477.815,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "321e1e9d1d74836a5923860efff6047f41680b2d1d550f7dfce060d07e95ac5e",
+                  "start": 5358.348,
+                  "text": "It exploited that to basically launch a cyber attack on Hugging Face because it thought oh the answer to my question is probably on Hugging Face because we host all the public benchmarks And these benchmarks are typically private because yo",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/_lewtun/status/2094364485871923547#t=315",
+                  "end": 434.364,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "1288b9169eff2925bbb6b7c5af0edf8dd91774864f4c742d4da33b7d103975e1",
+                  "start": 315.354,
+                  "text": "such as in-context learning where if you just provided the model with a sequence of examples it could then figure out how to autocomplete the final example. So if you look here you've got this model you just give it a bunch of addition prob",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/_lewtun/status/2094364485871923547#t=1461",
+                  "end": 1580.863,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "99763a5b308c6b6cde9e752ac0f8cdab500f26fa11fd51c126f5975d75d35383",
+                  "start": 1461.201,
+                  "text": "They are processed through a neural network layer called self-attention By the way, has anyone had self-attention or should I? Quickly explain it Okay, I'll give you like a very quick thing. So what makes the transformer special is that bef",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/_lewtun/status/2094364485871923547#t=2029",
+                  "end": 2148.371,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "103fd7d478a012779c72cea48e5b8667d18ba25e37e415ba61d2d0d289407243",
+                  "start": 2029.476,
+                  "text": "And like I guarantee they will fail Like it's not that like they're not smart but it's just that this is a very optimized industry and people have spent many billions of dollars Was trying to figure out good choices of neural network archit",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/_lewtun/status/2094364485871923547#t=3431",
+                  "end": 3549.789,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ee5461c1378a9b3e595eb3a542905b7a5414261f67cba882822b20f29e17a211",
+                  "start": 3431.247,
+                  "text": "And although there have been many attempts to come up with some sort of like theoretical principled way of figuring out how to do mixtures the reality is that today you have to basically just run experiments So you say, okay I want my model",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/_lewtun/status/2094364485871923547#t=3721",
+                  "end": 3840.582,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "d502cc0df05e6fc88d8be587b2713a99ef63d8057718a4515fa20762b93c822e",
+                  "start": 3721.393,
+                  "text": "you think of them in the abstract and you'll look at like some spec sheet from NVIDIA and you'll say okay, here's like the theoretical flops I can get from my from this GPU I'll do some benchmarking on the GPU and then you know, I'll say, o",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/_lewtun/status/2094364485871923547#t=5358",
+                  "end": 5477.815,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "321e1e9d1d74836a5923860efff6047f41680b2d1d550f7dfce060d07e95ac5e",
+                  "start": 5358.348,
+                  "text": "It exploited that to basically launch a cyber attack on Hugging Face because it thought oh the answer to my question is probably on Hugging Face because we host all the public benchmarks And these benchmarks are typically private because yo",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Lewis_Tunstall_-_The_recording_from_my_CERN_lecture_on_training_LLMs_is_now_onli",
+              "source_revision": "b35260e348156f9d656d9ca2d886b9c49dd4aa3d33b77205b7f23ec06a9cc3b4",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "Lewis Tunstall - The recording from my CERN lecture on training LLMs is now online!   ...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://x.com/_lewtun/status/2094364485871923547",
+              "video_id": "2094362669444648960",
+              "yoinked_at": "2026-08-31T07:57:20"
+            }
+          },
+          {
+            "work_id": "DfK5MMVCR8E_9Obm6bbWMpgH1n6dyLk1",
+            "video_id": "2094227178032599040",
+            "attempt_token": "hwv94_Xn2E22b_yQnpAH4eM3Ah9bLLm3-9dVONEJXRg",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678058095,
+            "source_revision": "00c0b8d5d58dc8a3389bb9039062b892f5b0d1ba09743fc2ebd8c0d3543d0049",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "2c2dee292d9969a5dc335e7fe9926b4a9a6da35aa895310f0b72e3f480a8edfc",
+            "card": {
+              "card_hash": "1e09bb3d17b3a54be9464c4dfbd7c72f481d2712d0d1a2baa92484863e2b4d81",
+              "channel": "Rohan Paul",
+              "chars": 1110,
+              "chars_all_clips": 1110,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/rohanpaul_ai/status/2094228459992285296#t=0",
+                  "end": 67.073,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "cbce73e54257a94fe8d487dcb3c74ef295d41dae4074c4b2cb10726b8aabcc8b",
+                  "start": 0.06,
+                  "text": "The thing is we're not used to what's coming So you use your ChatGPT right? And you wait a little while and you see it go down down, down, down, down There's a company called Talos that was just bought by AMD. They have something called Cha",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/rohanpaul_ai/status/2094228459992285296#t=0",
+                  "end": 67.073,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "cbce73e54257a94fe8d487dcb3c74ef295d41dae4074c4b2cb10726b8aabcc8b",
+                  "start": 0.06,
+                  "text": "The thing is we're not used to what's coming So you use your ChatGPT right? And you wait a little while and you see it go down down, down, down, down There's a company called Talos that was just bought by AMD. They have something called Cha",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> unbelievable. 🤯  Emad Mostaque just showed Taalas generating at ~14,000 tokens/second speed.  For context, ChatGPT generates anywhere between 50 to 150 tokens/second.   ----  From \"The Peter McCormack Show\" YouTube channel, (full link in comment) https://t.co/LW66zhjnPE No tags [00:00:00] The thing is [00:00:00] we're not used to what's coming [00:00:02] So you use your ChatGPT [00:00:03] right? And you wait [00:00:04] a little while and you see it go down [00:00:05] down, down, down, down [00:00:06] There's a company called Talos that was just [00:00:08] ",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Rohan_Paul_-_unbelievable_Emad_Mostaque_just_showed_Taalas_generating_at_14_0",
+              "source_revision": "00c0b8d5d58dc8a3389bb9039062b892f5b0d1ba09743fc2ebd8c0d3543d0049",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> unbelievable. 🤯  Emad Mostaque just showed Taalas generating at ~14,000 tokens/second speed.  For context, ChatGPT generates anywhere between 50 to 150 tokens/second.   ----  From \"The Peter McCormack Show\" YouTube channel, (full link in comment) https://t.co/LW66zhjnPE No tags [00:00:00] The thing is [00:00:00] we're not used to what's coming [00:00:02] So you use your ChatGPT [00:00:03] right? And you wait [00:00:04] a little while and you see it go down [00:00:05] down, down, down, down [00:00:06] There's a company called Talos that was just [00:00:08] ",
+              "title": "Rohan Paul - unbelievable. 🤯  Emad Mostaque just showed Taalas generating at ~14,0...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/rohanpaul_ai/status/2094228459992285296",
+              "video_id": "2094227178032599040",
+              "yoinked_at": "2026-08-31T07:54:31"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

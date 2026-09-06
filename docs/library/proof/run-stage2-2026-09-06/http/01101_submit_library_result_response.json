@@ -1,0 +1,58 @@
+{
+  "seq": 1101,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "WTmWh26j8OgE5c8k9qHE9YgXgQaQpPgY",
+      "video_id": "5LqC6qdVAwU",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "40b5a999320627f97a012a2e626eaa60f2e7b9a8c3106494d03b539a93f6f542",
+            "card_hash": "2859f838c30f437be90a7012b68c9ddecbd5c905deba67af1112cce129ce66b6",
+            "quote": "cutting down jailbreaks even further, ended up increasing the compute needed for requests by over 50%",
+            "start": 468.28,
+            "end": 1405.4,
+            "timing": "coarse",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "bb16e307ffe16412d2a56b8d023a0471dbb78a9e044ecd67fcdcc1858ec6487b",
+            "card_hash": "2859f838c30f437be90a7012b68c9ddecbd5c905deba67af1112cce129ce66b6",
+            "quote": "If I had a button at the top of every repo that I could click and have all the PRs get triaged",
+            "start": 468.28,
+            "end": 1405.4,
+            "timing": "coarse",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

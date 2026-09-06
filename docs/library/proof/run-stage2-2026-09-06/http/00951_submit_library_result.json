@@ -1,0 +1,59 @@
+{
+  "seq": 951,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 951,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "Xje6jjaIHqxIQvRC8S6efrj98AOuWYUH",
+      "client_id": "proof-harness",
+      "attempt_token": "TOdvzq7IZ-pC_h7ttiSlCpcMHZRfkP4UJRkU4u5_ufg",
+      "submission_key": "Xje6jjaIHqxIQvRC8S6efrj98AOuWYUH-TOdvzq7IZ-pC_h7ttiSlCpcMHZRfkP4UJRkU4u5_ufg",
+      "schema_version": 1,
+      "video_id": "2093534714439110656",
+      "source_revision": "60c217c06f0f314c6b3ac28d87a23b79ebe0955abaaf04875b3d0acce387469c",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "cd9e1a2170ed18108de00187cbbaddd3b851cea4f0dc817417c3500f083bc3cd",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt describes a GPS-based zombie-chase mobile game as a novelty consumer app; the passing mention of it being 'vibe coded' is not evidence of any demonstrated AI/ML capability, developer workflow, or other approved shelf's central subject."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 12323,
+        "cache_read_tokens": 186544,
+        "cache_create_tokens": 30752,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 951,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "Xje6jjaIHqxIQvRC8S6efrj98AOuWYUH",
+        "video_id": "2093534714439110656",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

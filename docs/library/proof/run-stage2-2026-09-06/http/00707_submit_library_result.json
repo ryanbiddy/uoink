@@ -1,0 +1,95 @@
+{
+  "seq": 707,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 707,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "6bwlez5K6F9kc6aolqHQ8S3qUBKXeWV8",
+      "client_id": "proof-harness",
+      "attempt_token": "YzRewLn3MDVgF2AzhK8lIYrlKUPMXxwnxFRPHNSIESM",
+      "submission_key": "6bwlez5K6F9kc6aolqHQ8S3qUBKXeWV8-YzRewLn3MDVgF2AzhK8lIYrlKUPMXxwnxFRPHNSIESM",
+      "schema_version": 1,
+      "video_id": "2089391264878002260",
+      "source_revision": "277de02691d3b97bb2a283e5884f0795e5ea0d1fbf7f5050e148d46bf01f4df8",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "14905f1cf1a02f68e0a454c3948d5390cab5b92c49956a23021d2d6236f318aa",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "cd268850df8e16a5e69a5b64eed26cc047b30fecfdbb4c541fdc88744613e4e2",
+              "card_hash": "888b6e10e7f2a2c8c7cfacd1a8ca87aa675d4edb7ab136ea0dc72aa2c0dff68f",
+              "quote": "the U.S. government imposing restrictions on Anthropic and resulting in us not getting the actual best models"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 14139,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20384,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 707,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "6bwlez5K6F9kc6aolqHQ8S3qUBKXeWV8",
+        "video_id": "2089391264878002260",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "cd268850df8e16a5e69a5b64eed26cc047b30fecfdbb4c541fdc88744613e4e2",
+              "card_hash": "888b6e10e7f2a2c8c7cfacd1a8ca87aa675d4edb7ab136ea0dc72aa2c0dff68f",
+              "quote": "the U.S. government imposing restrictions on Anthropic and resulting in us not getting the actual best models",
+              "start": 0.0,
+              "end": 49.2,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

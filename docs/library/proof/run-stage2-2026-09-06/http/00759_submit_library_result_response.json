@@ -1,0 +1,39 @@
+{
+  "seq": 759,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "z5Nr7eXsk8O15bMMMElZkwOa6H8ClDqh",
+      "video_id": "2089380922604789760",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "a6cee74d306195178914b06f087bb9fc22d72ba5cc1fe05b5c61028785d8b774",
+            "card_hash": "57a75ce5670a69a2cdc02590154e83d7f3c0659f028973f13444f04459bda792",
+            "quote": "We’ve launched the first-ever marketplace of AI Agents for your portfolio.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

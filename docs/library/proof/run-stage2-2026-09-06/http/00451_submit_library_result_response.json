@@ -1,0 +1,39 @@
+{
+  "seq": 451,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Flg3BVtbnNrGw6FJjOaDagT9K-FZlXox",
+      "video_id": "2085067072858734593",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.88,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "de40dd874e36c92709037e697a88411d9a64bbd9da028aa57f044f1294c3bf85",
+            "card_hash": "550c1c12fd3852e907257a53834bcbfbf9c5639a9558662dbd8eec2696011859",
+            "quote": "all made with ai (gpt-image-2 and seedance-2.0)",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

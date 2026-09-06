@@ -1,0 +1,39 @@
+{
+  "seq": 733,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 27,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Q3UiB3b4uaqf955-4T6BQqt7kMRQBBWZ",
+      "video_id": "2089740357752012800",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.92,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "16b97c44839687ce1fed9ed7a7114dbb14e5a4d9cad6a877c6b8ced03dd0c9e9",
+            "card_hash": "6e7cd043f3b3868a4b5765c70c497cc63380abe17714396bdc8586782f3fe0c6",
+            "quote": "the first AI agent most companies should build is an autonomous analyst",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

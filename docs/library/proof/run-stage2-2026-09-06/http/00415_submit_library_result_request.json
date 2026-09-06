@@ -1,0 +1,66 @@
+{
+  "seq": 415,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "Efxsed_SLdT1goh8Vw3Lcj_OIj2oQPyU",
+    "client_id": "proof-harness",
+    "attempt_token": "4iUc7CYMeJoKOQIOPH5efCkckH2g0ZCGnFLk1Rvpwzw",
+    "submission_key": "Efxsed_SLdT1goh8Vw3Lcj_OIj2oQPyU-4iUc7CYMeJoKOQIOPH5efCkckH2g0ZCGnFLk1Rvpwzw",
+    "schema_version": 1,
+    "video_id": "2084345349293166592",
+    "source_revision": "1d77af40b45c439f853f62f50f4088687cc61966e6e1cf1d37ddfe8a536e5e72",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "c69f73aca524435aecd4346aa29ec4f07cf302377bd0408797b8557014eae96c",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "66a90fc288d270bd6b2d828ab2cd528cf5f43cf0fffdf368b6027e8f9e2f431b",
+            "card_hash": "ccd117914880b4d2a603667dd9074bf4981f0652ca7734584862e2630619f0b7",
+            "quote": "I hope you made it to the right class. This class was on self-improving AI agents"
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "c4515fc4d8241af738f6e616a3dded093af9d8a3a9d071337d800cbf62230e33",
+            "card_hash": "ccd117914880b4d2a603667dd9074bf4981f0652ca7734584862e2630619f0b7",
+            "quote": "If Pre Training Is The Place Where The Model After Repeated Sampling Should Be Able To Have One Solution Correct"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 15782,
+      "cache_read_tokens": 189114,
+      "cache_create_tokens": 36038,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 935,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 24,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "KzIlZBVK5q7OaSRmJGsqXgM_G20fstzw",
+      "video_id": "2093098700612517888",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "134b17bb0c3056eae5da770592e095c609d69bb8744e9aab65c60e4ec45d78da",
+            "card_hash": "3a684953ebf52855d3f40ecfe9a364d551999e44dab3f8d1465da171c93f90bd",
+            "quote": "we're now the only NeoCloud certified hypervisor from NVIDIA as a result of today's announcement",
+            "start": 0.06,
+            "end": 18.585,
+            "timing": "source_cues",
+            "truncated": false
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

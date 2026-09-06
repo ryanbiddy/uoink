@@ -1,0 +1,35 @@
+{
+  "seq": 965,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "Xy8U0GInJgWZ4U7jXydB72RjMCR6mGq0",
+    "client_id": "proof-harness",
+    "attempt_token": "hGcUSjNvsZuKLVY6rL45Vbwg8GtIetYpkpnRV8jk4HU",
+    "submission_key": "Xy8U0GInJgWZ4U7jXydB72RjMCR6mGq0-hGcUSjNvsZuKLVY6rL45Vbwg8GtIetYpkpnRV8jk4HU",
+    "schema_version": 1,
+    "video_id": "2093015323037650944",
+    "source_revision": "1f63be706c01c77ae98980380bcc7c02b4c82c010f53101d9f0e3f792a7f9744",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "824d710e349d11a055bd5eef82a2a975e4c870f6a89d699ef6633e3a8026a8be",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Excerpt only describes a home robot's physical hardware specs (motors, camera, LiDAR, IMUs) and pre-order pricing; it does not establish any AI/ML capability, agent behavior, or other approved-shelf subject as its central topic. The company name 'Hugging Face' is a mere mention and does not establish a technical shelf per rule 1."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 21320,
+      "cache_read_tokens": 186700,
+      "cache_create_tokens": 39250,
+      "wall_time_ms": 0
+    }
+  }
+}

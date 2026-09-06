@@ -1,0 +1,66 @@
+{
+  "seq": 1087,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "W-nz47OdwPQfnc_tnHhfTSx3x_e2bd6J",
+    "client_id": "proof-harness",
+    "attempt_token": "LJxwPEk22mtJ47G0jQMW3B4VaMwN_yXjcLHYXnTsZ4s",
+    "submission_key": "W-nz47OdwPQfnc_tnHhfTSx3x_e2bd6J-LJxwPEk22mtJ47G0jQMW3B4VaMwN_yXjcLHYXnTsZ4s",
+    "schema_version": 1,
+    "video_id": "JmCXZQ2xiZo",
+    "source_revision": "e622bcf3aff29f649041776834d9b51c665a139c53f54cd30f6076a6df31bf00",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "fd95f33a4c8942a2ec4ed820e71e70f6713543f2da7ca0845b7bb780c64bd08a",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.74,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "394665846985695efd835321dbdcb49b24848033b85d8b1e4ec9f3289ea5eadc",
+            "card_hash": "7e062e13ef0d553fb8e779b84a53783f2073bb3b1e0464737b2d0fdb4eacc3f3",
+            "quote": "how much money Open AI and Anthropic and Google are making"
+          }
+        },
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "67918cb71b1248f63032001ff34fcf6f62715fbeac2caf00611959be5e36c327",
+            "card_hash": "7e062e13ef0d553fb8e779b84a53783f2073bb3b1e0464737b2d0fdb4eacc3f3",
+            "quote": "can you go and do research for me?"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 14960,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 29948,
+      "wall_time_ms": 0
+    }
+  }
+}

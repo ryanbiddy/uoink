@@ -1,0 +1,59 @@
+{
+  "seq": 35,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 35,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "HJsokxq0PvonZcoOyxDLCSwb8Lp5vnAu",
+      "client_id": "proof-harness",
+      "attempt_token": "kV3Jr_-YWPb9YZ4HNUwEhz0bGrn1T0A0AssQ-DGMdng",
+      "submission_key": "HJsokxq0PvonZcoOyxDLCSwb8Lp5vnAu-kV3Jr_-YWPb9YZ4HNUwEhz0bGrn1T0A0AssQ-DGMdng",
+      "schema_version": 1,
+      "video_id": "1560338557981564935",
+      "source_revision": "50530e45eb5a673befeda23b937dea83bbbd07750bdaa2265bdbf2a004cdcf9b",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "60e12cdab40b045260e7fb7e896d76f905c16a1e26a0714ff1c90767fb86e656",
+      "result": {
+        "outcome": "unsupported",
+        "reason": "The card's excerpt contains only a bare repeated URL with no descriptive text or transcript content, providing no basis for grounded classification."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 8287,
+        "cache_read_tokens": 0,
+        "cache_create_tokens": 104678,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 35,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "HJsokxq0PvonZcoOyxDLCSwb8Lp5vnAu",
+        "video_id": "1560338557981564935",
+        "outcome": "unsupported",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

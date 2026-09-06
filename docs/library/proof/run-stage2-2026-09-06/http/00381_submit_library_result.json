@@ -1,0 +1,59 @@
+{
+  "seq": 381,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 381,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "RHtikgELZXCZ9bGrCPM1apu3fZxD4dnE",
+      "client_id": "proof-harness",
+      "attempt_token": "gmyfYyLOxN6DaJ_sOoT5WoBRgKgGyK8Ps29WyTHre4I",
+      "submission_key": "RHtikgELZXCZ9bGrCPM1apu3fZxD4dnE-gmyfYyLOxN6DaJ_sOoT5WoBRgKgGyK8Ps29WyTHre4I",
+      "schema_version": 1,
+      "video_id": "2083438553493843968",
+      "source_revision": "c32b7b088d03a8b27d4208ccdc5847470957a49f1a3288258efeef78b20b14db",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "84c5025a31b5343dffde53d6f70b9d17600d9fca3261eeaa53021bbf30524e2e",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "The only usable transcript excerpt is a brief timed clip consisting of generic exclamations (\"Yeah, it works! It's alive. Awesome!\") with no substantive technical content; the descriptive claims about an ESP32-S3 AI model appear only in the untimed promotional hint text, which per rules cannot ground a shelf assignment on its own."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 13584,
+        "cache_read_tokens": 186442,
+        "cache_create_tokens": 31617,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 381,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "RHtikgELZXCZ9bGrCPM1apu3fZxD4dnE",
+        "video_id": "2083438553493843968",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

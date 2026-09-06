@@ -1,0 +1,35 @@
+{
+  "seq": 341,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "ofPvVU3Zy-qPaXftKdsaKt9vBTCzmSzD",
+    "client_id": "proof-harness",
+    "attempt_token": "kEos4vLybqP4a8dxiYWmxHm-jGtXVagGJ9bmt9Y-Mzc",
+    "submission_key": "ofPvVU3Zy-qPaXftKdsaKt9vBTCzmSzD-kEos4vLybqP4a8dxiYWmxHm-jGtXVagGJ9bmt9Y-Mzc",
+    "schema_version": 1,
+    "video_id": "2083221587818659840",
+    "source_revision": "13301391c2c9c31b0bb7ba43ae26c6dc366c47da0e843f8aa17f8898a5e596be",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "1378bcdcb5167a85d0fd70312a02ebebafa8e977c630422601ea01652d535f1d",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Excerpt discusses the production cost and 3D scroll-driven visual effects of Apple's marketing web pages, built by design/motion agencies. This is web design and creative-agency commentary with no AI/ML, space/science, or news subject matter, so it falls outside every approved shelf."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 14147,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 20354,
+      "wall_time_ms": 0
+    }
+  }
+}

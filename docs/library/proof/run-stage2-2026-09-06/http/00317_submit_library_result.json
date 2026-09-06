@@ -1,0 +1,59 @@
+{
+  "seq": 317,
+  "tool": "submit_library_result",
+  "wall_ms": 2,
+  "request": {
+    "seq": 317,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "3dL3lOI4zWT_KiFZKtpeHRn8vVPIREBh",
+      "client_id": "proof-harness",
+      "attempt_token": "2et1fFqn126LlAVGSP6StMexrIYVyx6-6-y_tJW7-1s",
+      "submission_key": "3dL3lOI4zWT_KiFZKtpeHRn8vVPIREBh-2et1fFqn126LlAVGSP6StMexrIYVyx6-6-y_tJW7-1s",
+      "schema_version": 1,
+      "video_id": "2082613460446113792",
+      "source_revision": "d13538809725ff12db08f0cf036ea79961e1eff352913a76659e28f489184e6a",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "488305dfbfd1749d99fe1da0f58447cf3b5e4e190b7e720d81cbdec461368050",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt is a brief casual reaction claiming an AI model generated Pokémon-style games; it does not describe a finished visual artifact (animation, film, or generated website) required for Generative Media, nor the central subject of any other approved shelf, so it falls outside the approved taxonomy."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 12735,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20893,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 317,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 2,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "3dL3lOI4zWT_KiFZKtpeHRn8vVPIREBh",
+        "video_id": "2082613460446113792",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

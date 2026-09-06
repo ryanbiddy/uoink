@@ -1,0 +1,58 @@
+{
+  "seq": 397,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "iUhvAKvvwp4BN0B74WtnxRkgGszuKmgW",
+      "video_id": "2083597581263769600",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "d319804c2c0171538b87cbb72a41427bf7a4803f2773abca6e2ba8f6950632c7",
+            "card_hash": "a758069c5f674bf077bc30f7667328e129e9f214cd9a6a727126442c6ae5f328",
+            "quote": "Cool So You Can See That It'S Actually Doing The Mathematic Calculation Right And Here As Your Creating This Function Tools Over Here",
+            "start": 1306.16,
+            "end": 1425.38,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "2ce5916bea848dea5e44938e111a756a365973aa38fb94491acd26e07b84afdc",
+            "card_hash": "a758069c5f674bf077bc30f7667328e129e9f214cd9a6a727126442c6ae5f328",
+            "quote": "Agent Security With Model Armor So Basically You Can Adding Agents Like Model Armour To Before Agent Call Back",
+            "start": 5233.71,
+            "end": 5353.43,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 665,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "8zNGhQPqcmrLP3zykywF8adUZodr_wo2",
+      "video_id": "2088709395383549952",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "a3fadd31423a84d7d5347e4f3548b73974303f6ee5091849965ef15f9e2542ab",
+            "card_hash": "50cc34f8d89431ad50db0a1d2add9359f72fca96c780f97d80cdf59d104e0eb1",
+            "quote": "Apple Silicon is built for MoE models -- huge unified memory, modest bandwidth.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 281,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "R8jkhhCbac7qdb6ZpY05PEpU70Af7Gwq",
+      "video_id": "2081149998704521712",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.76,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "5999ae016c02ffa2ebb222d1d624d54e0be5198cf3d33eeb05639a248a4409c4",
+            "card_hash": "8e59f749c46b8bd79b714bda8d42970a04bc59d00784cea4e16ae25b68a8c612",
+            "quote": "We were way behind Claude Code, and it seemed like a kind of crazy kamikaze mission to try to beat them",
+            "start": 0.38,
+            "end": 57.72,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

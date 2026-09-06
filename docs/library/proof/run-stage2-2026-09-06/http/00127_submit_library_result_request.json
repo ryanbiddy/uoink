@@ -1,0 +1,51 @@
+{
+  "seq": 127,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "RLVLFmlqwYSMK5rPH3lVFE8sRdm9Bf0b",
+    "client_id": "proof-harness",
+    "attempt_token": "q0O3HR0lsfEM5Zu1vgE8nruXS797VV67rNh0x8RJjbs",
+    "submission_key": "RLVLFmlqwYSMK5rPH3lVFE8sRdm9Bf0b-q0O3HR0lsfEM5Zu1vgE8nruXS797VV67rNh0x8RJjbs",
+    "schema_version": 1,
+    "video_id": "2080337269240836096",
+    "source_revision": "7010834460427ee03fbcc32425deea39f28cb944bb24cb8b8d529bd2c499a805",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "9a578e54359913aa4d1288b3626a5a17a98b8e7a0a7c0861b96ed8898d7c84fb",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.7,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "16d2dfed437795e6e181cf7f8a645ad7c50414e1caecd6d6cded9a9e45d090e6",
+            "card_hash": "a57d9a9fd4b5e99694af50f152576a42e0036b53094f69942e7d6b136131e367",
+            "quote": "Claude Opus 5.0 is quite the AGI beast in 3D, the texture and details are absolutely insane."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 15570,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 20016,
+      "wall_time_ms": 0
+    }
+  }
+}

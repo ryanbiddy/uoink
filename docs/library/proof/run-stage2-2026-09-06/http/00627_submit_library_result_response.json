@@ -1,0 +1,39 @@
+{
+  "seq": 627,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "IWB5eSzUDEEex92hNk8Gdx81-dP9IVY1",
+      "video_id": "2088115945864937472",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.7,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "13407100c0b4f48570546dec379c803d29d0b951d673bd1e206faf6e9e39b4fb",
+            "card_hash": "273c95ed94843f1bd8edc51e4e3419d97f09892c78ae60e1a177a4888e6975a8",
+            "quote": "typing into Claude Code, waiting",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

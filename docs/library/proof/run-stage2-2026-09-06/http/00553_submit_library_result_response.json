@@ -1,0 +1,77 @@
+{
+  "seq": 553,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "smukb9edNXS593y8AlbW1bUUr6EDJz6y",
+      "video_id": "2084670556981338112",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "be2bccc5f692357b9dc147c6b17a21d0b63e88e85c63f46b694035b645665e84",
+            "card_hash": "b2a9fbcafa2b1abb30a8f37cc2d332fbf8f36231150875f8b4c55c8b40ca3a11",
+            "quote": "The Next Step After Instruction Fine Tuning Is This Process Of Using Human Preferences And Finetuning The Model Based On That",
+            "start": 954.659,
+            "end": 1074.369,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "ad24d4c03a60353ebcf02651313853ee186a03def92c7c8ccbeff5db827aa2c3",
+            "card_hash": "b2a9fbcafa2b1abb30a8f37cc2d332fbf8f36231150875f8b4c55c8b40ca3a11",
+            "quote": "The GSM 8K Was The First Paper That Kind Of Show",
+            "start": 3458.46,
+            "end": 3577.679,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "268e32329029751bd0cf212ed139cbf8f63e9eb2d53734b9209b5a36d7ed1d2d",
+            "card_hash": "b2a9fbcafa2b1abb30a8f37cc2d332fbf8f36231150875f8b4c55c8b40ca3a11",
+            "quote": "When You Are On Customer Support Side Of Things And Using LLMs Definitely Streamlines Experience",
+            "start": 3219.559,
+            "end": 3339.349,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

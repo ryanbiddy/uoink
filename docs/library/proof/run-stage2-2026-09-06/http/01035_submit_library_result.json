@@ -1,0 +1,59 @@
+{
+  "seq": 1035,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 1035,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "YqhHEu_ltQWob4S8n9CS3I5TwZXDDiV0",
+      "client_id": "proof-harness",
+      "attempt_token": "_wV7ct0WxcBSV4SuLUbLJjUGqhvAdxTsBvyyB_urpp0",
+      "submission_key": "YqhHEu_ltQWob4S8n9CS3I5TwZXDDiV0-_wV7ct0WxcBSV4SuLUbLJjUGqhvAdxTsBvyyB_urpp0",
+      "schema_version": 1,
+      "video_id": "2094872636996165632",
+      "source_revision": "e843e02d38cf7547e00992fb62bea4adb94c626d7cd163b9b66399d6de0f3c70",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "9162b1dd1f54aec0e6f9c87cb8219003e90e90f1d579c327789eda9c31b22be8",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpts discuss an insurance-brokerage consolidation platform ('guide'), carrier contracts, M&A deal-making, and Medicare/long-term-care planning. Passing mentions of 'the models accelerate' are ambiguous and not tied to any demonstrated AI product, technique, or capability, so this business/insurance content does not fit any approved AI/ML, space/science, or news shelf."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 7854,
+        "cache_read_tokens": 187115,
+        "cache_create_tokens": 27106,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1035,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "YqhHEu_ltQWob4S8n9CS3I5TwZXDDiV0",
+        "video_id": "2094872636996165632",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

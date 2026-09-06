@@ -1,0 +1,91 @@
+# How to Run YOLO Object Detection Models on the Raspberry Pi
+
+**Channel:** Edje Electronics (41.9K subscribers)
+**Uploaded:** 2025-02-05 | **Duration:** 09:16 | **Views:** 165,136 | **Likes:** 4,310
+**URL:** https://www.youtube.com/watch?v=z70ZrSZNi-8
+**Uoinked:** 2026-07-09T19:23:09
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Demo
+**Analysis:** The opening immediately showcases a real-world application in action—a smart reading lamp that turns on when the creator sits on the couch—demonstrating the practical result of running YOLO on Raspberry Pi before explaining the technical setup.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+The Raspberry Pi is just powerful enough to run lightweight YOLO11 object detection models in real-time. This makes it ideal for edge AI applications that act on visual data from the world around them. In this video, we'll walk through the process of setting up Ultralytics YOLO11 models to run on the Raspberry Pi with a custom Python script. The video also gives an example of a "smart lamp" program that shows how to use Raspberry Pi GPIO to turn on a lamp when a person is detected sitting on the couch.
+
+A written version of this tutorial is available on my website at https://www.ejtech.io/learn/yolo-on-raspberry-pi .
+
+*** Links mentioned in video ***
+Learn how to train a custom YOLO detection model: https://youtu.be/r0RspiLG260
+YOLO speed and accuracy comparison on the Raspberry Pi: https://youtu.be/_WKS4E9SmkA
+Smart lamp example instructions and code: https://github.com/EdjeElectronics/Train-and-Deploy-YOLO-Models/tree/main/examples/toggle_pi_gpio
+Train and Deploy YOLO Models repository on GitHub: https://github.com/EdjeElectronics/Train-and-Deploy-YOLO-Models/tree/main
+
+*** Amazon Associate links ***
+Raspberry Pi 5 8GB with basic kit: https://amzn.to/3Qo4wrX
+Logitech c920 USB camera I used in this video: https://amzn.to/40Q6PK7
+Raspberry Pi Picamera Module 3: https://amzn.to/3PXfggn
+IoT AC Power Relay for safely turning devices on and off: https://amzn.to/3WJASk8
+Note: This power relay only works with 120V wall outlets. If you are in a country that uses 240V (such as in Europe or India), you will need to find a similar relay that supports up to 240V.
+
+*** Chapters ***
+0:00 - Introduction
+1:03 - Install Ultralytics
+3:25 - Set up YOLO11 Model
+5:28 - Run Inference
+7:26 - Smart Lamp Example
+8:37 - Conclusion
+
+-------------------------------------------
+Music Acknowledgements
+-------------------------------------------
+(Blue Wednesday is awesome, if you like Lo-Fi definitely check out his music!)
+Music provided by Chillhop Music
+Blue Wednesday, Shopan - Home Court
+https://chll.to/4001b39d
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+### Chapter: Introduction (00:00:00)
+
+[00:00:15] [Music] hey everyone in this video we'll walk through the process of setting up the Raspberry Pi to run YOLO object detection models the Raspberry Pi is just powerful enough to run lightweight YOLO models in real time making it great for controlling real world systems that on visual data from the world around them you can use it to make cool applications like this smart reading lamp that turns on whenever I sit in my favorite reading spot on the couch in this video I'll show how to install Ultra litics on the pie set up a yellow 11 detection model and use it to run inference on a live camera feed with a custom python script the instructions in this video should work for a Raspberry Pi 4 or five running the latest version of 64-bit Raspberry Pi OS all right let's get
+
+### Chapter: Install Ultralytics (00:01:03)
+
+[00:01:05] started set up your Raspberry Pi power it on and connect it to the internet once you're on the home screen open a terminal and issue pseudo apt update and and pseudo apt upgrade
+[00:01:23] Dy this will update the pi depending on how many updates it needs to install it can take anywhere from a few minutes to half an hour [Applause]
+[00:01:35] next create a new directory called YOLO and move into it by issuing make dear YOLO and CD
+[00:01:40] YOLO and CD YOLO now we need to create a virtual environment to install our python libraries in using a virtual environment allows us to avoid version conflicts with existing python libraries on the operating
+[00:01:52] operating system create an environment named VM by issuing python 3-m vm-- system site packages and then
+[00:02:10] VM then activate it by issuing Source vmb
+[00:02:12] vmb activate when the environment is active VM will appear in front of the command prompt if you ever close and reopen the terminal window then you'll need to reactivate the environment by moving into the YOLO folder and using Source vmb activate next let's install the ultral litics and ncnn libraries that we'll use for running YOLO issue pip install ultral litic and
+[00:02:40] litic and ncnn this command downloads a lot of libraries so it can take up to 15 minutes to complete if it gets stuck for more than 15 minutes or if you get errors try running the PIP install command again until it finishes successfully it helps to make sure you have a good internet connection when you're installing the libraries [Applause]
+[00:03:04] if you haven't already plug your camera into the Raspberry Pi most USB webcam should work you can issue lsdev videoo star and confirm you see video Z or video One appear when the camera's plugged in if you're using a pi camera make sure to power the Raspberry Pi off before plugging in the ribbon cable all right now let's set up the YOLO model you can use an off-the-shelf sample model that's been trained on the Coco data set to detect 80 common objects or you can use a custom model you've trained yourself to use an off-the-shelf model download it by issuing YOLO detect predict model equal YOLO 11n
+
+### Chapter: Set up YOLO11 Model (00:03:25)
+
+[00:03:46] YOLO 11n PT you can also use YOLO 11s or YOLO 11 L here but they don't run as fast on the pi see my YOLO comparison video to get an idea of the detection frame rate you can get with each model when the model's finished downloading you'll have a YOLO 11n PT file inside your YOLO folder if you want to use a custom model you can just move the model file into the YOLO folder on the pi for example I'll transfer my custom candy. PT file which contains a candy detection model into the YOLO folder if you want to train your own custom detection model check out my previous YouTube video that gives stepbystep instructions on how to do so it's linked in the video description below whether you're using an off-the-shelf model or a custom model you should now have a model. PT file in your YOLO
+[00:04:42] your YOLO folder by default ultral ltic YOLO models are stored in the pytorch format we'll take this and convert it to ncnn format which is optimized for running on arm CPUs like the one on the Raspberry Pi ncnn is a bit faster than other formats like tensorflow light or onnx convert the model to ncnn format by issuing YOLO export model equal YOLO 11n PT format equal ncnn if your model file has a different name than YOLO 11n use that [Applause]
+[00:05:18] [Applause] instead when the conversion is complete the new model files will be saved in a folder called YOLO 11 ncnn model we'll use this for running inference I wrote a basic python script called YOLO detect. that shows how to load a model run inference on an image parse the results and display detection boxes around each object in the image download the script by issuing WG https
+
+### Chapter: Run Inference (00:05:28)
+
+[00:05:45] https ed.
+[00:05:47] ed. codolo
+[00:05:52] detect. run the script by entering the path to your model the index of your USB camera and the resolution you want to run at for example you can use python YOLO detect. pi-- model equals YOLO 11n ncnn model Source equals USB 0 resolution equals 1280 x
+[00:06:18] 720 a window will appear showing live detection results from the camera the yolu 11n model runs about 6 or seven FPS on my Raspberry Pi 5 and it does a decent job at detecting objects not bad you can press Q to 

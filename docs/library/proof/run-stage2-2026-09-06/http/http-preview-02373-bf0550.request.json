@@ -1,0 +1,1 @@
+{"body":{"activate_version":false,"expected_projection_revision":0,"mode":"preview","run_id":"stage2-2026-09-06"},"headers":{"Content-Type":"application/json","User-Agent":"uoink-proof-harness/1.0","X-Uoink-Token":"[REDACTED]"},"method":"POST","url":"http://127.0.0.1:5180/tools/apply_reshelving"}

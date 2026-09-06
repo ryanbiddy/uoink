@@ -1,0 +1,887 @@
+{
+  "seq": 7,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 73,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "7VOLV65NZVLq-8eiL0cmPisvPyCYAxob",
+          "video_id": "2078656827990978560",
+          "attempt_token": "FBgydrZE_sHqLdsulQPKWyPtbgAzQHnmrOpDLUKHp1I",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079178,
+          "source_revision": "05f5d7521b83dbc1def6a534c6bed5e7bd917230eaee94126c251a364ef7b75d",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "f0d3324cc854063843e757129765fadf3347c05d2a3c08ff1804b0e27c72280c",
+          "card": {
+            "card_hash": "65d552b6f75f731191921a3d0d18bf6627d573a2140d12c298d85a292224b0b8",
+            "channel": "clip 🛸",
+            "chars": 311,
+            "chars_all_clips": 311,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/clippedszn/status/2078656967489339674#t=0",
+                "end": 52.049,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "11bfb156fd7159d01651d0623a0170f5f3917343addd8d2ef5305832f0c492b5",
+                "start": 0.0,
+                "text": "We'll keep the camera on. Are you recording this? Yeah Who's giving you to write, record and broadcast it To come stream here You're streaming right now Okay so who gave you that Jake! Thank you bro Can we call jake Who are u guys with Paul",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/clippedszn/status/2078656967489339674#t=0",
+                "end": 52.049,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "11bfb156fd7159d01651d0623a0170f5f3917343addd8d2ef5305832f0c492b5",
+                "start": 0.0,
+                "text": "We'll keep the camera on. Are you recording this? Yeah Who's giving you to write, record and broadcast it To come stream here You're streaming right now Okay so who gave you that Jake! Thank you bro Can we call jake Who are u guys with Paul",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> N3ON was almost KICKED OUT by WWE security for streaming during Saturday night’s event 😳  “I have permission from Paul Heyman” https://t.co/vmSTPMQtkZ No tags [00:00:00] We'll keep the camera on. [00:00:02] Are you recording this? [00:00:04] Yeah Who's giving you to write, record and broadcast it [00:00:10] To come stream here [00:00:12] You're streaming right now [00:00:14] Okay so who gave you that [00:00:17] Jake! Thank you bro [00:00:19] Can we call jake [00:00:24] Who are u guys with [00:00:26] Paul Heyman [00:00:27] Peter how r ur doing [00:00:33] An",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "clip_-_N3ON_was_almost_KICKED_OUT_by_WWE_security_for_streaming_during_Satur",
+            "source_revision": "05f5d7521b83dbc1def6a534c6bed5e7bd917230eaee94126c251a364ef7b75d",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> N3ON was almost KICKED OUT by WWE security for streaming during Saturday night’s event 😳  “I have permission from Paul Heyman” https://t.co/vmSTPMQtkZ No tags [00:00:00] We'll keep the camera on. [00:00:02] Are you recording this? [00:00:04] Yeah Who's giving you to write, record and broadcast it [00:00:10] To come stream here [00:00:12] You're streaming right now [00:00:14] Okay so who gave you that [00:00:17] Jake! Thank you bro [00:00:19] Can we call jake [00:00:24] Who are u guys with [00:00:26] Paul Heyman [00:00:27] Peter how r ur doing [00:00:33] An",
+            "title": "clip 🛸 - N3ON was almost KICKED OUT by WWE security for streaming during Satur...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/clippedszn/status/2078656967489339674",
+            "video_id": "2078656827990978560",
+            "yoinked_at": "2026-07-18T22:53:57"
+          }
+        },
+        {
+          "work_id": "9eBaz35n_7bp0u-ceL_gJW6qzPa5lEOc",
+          "video_id": "2079190532681543680",
+          "attempt_token": "1CKRJhCLQvAFV1EnOdlAJOKuKpBgvxuLsO8-5tx1AiQ",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079179,
+          "source_revision": "302e089520a3d0d9216058c86bb7a0b783bfebf1a4caa81feb0225f8a270a544",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "465f235ba0901494b9364f35d4daac9cd5b0eb3876041c9184dc6fe15b8fe026",
+          "card": {
+            "card_hash": "01e128455e17949c29ec5896941303d574956555ad1099eae490e892aa18f703",
+            "channel": "Shortcut ‎",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/shortcutdotnews/status/2079190671945077184",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "16c9ff78ed550e5135f5fb18401ffc1db01a67ce96e494606a12475f9b79f259",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> JUST IN: Anduril and Archer launch Thunder, an autonomous attack rotorcraft https://t.co/kJHrS2rbC3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled o",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> JUST IN: Anduril and Archer launch Thunder, an autonomous attack rotorcraft https://t.co/kJHrS2rbC3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Shortcut_-_JUST_IN_Anduril_and_Archer_launch_Thunder_an_autonomous_attack_roto",
+            "source_revision": "302e089520a3d0d9216058c86bb7a0b783bfebf1a4caa81feb0225f8a270a544",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> JUST IN: Anduril and Archer launch Thunder, an autonomous attack rotorcraft https://t.co/kJHrS2rbC3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Shortcut ‎ - JUST IN: Anduril and Archer launch Thunder, an autonomous attack roto...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/shortcutdotnews/status/2079190671945077184",
+            "video_id": "2079190532681543680",
+            "yoinked_at": "2026-07-20T22:45:39"
+          }
+        },
+        {
+          "work_id": "AMCdAesK9aTBz_TchFrcy59U2fDMFpu1",
+          "video_id": "2079405880332664832",
+          "attempt_token": "apf6jxtGjMl2Cm-1QVcQvfxf8hq0aVxu_ZO_x9s4TMw",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079181,
+          "source_revision": "a32b8d59e5bad0055ebe07e9672df64eed4eca7a0b597149d4ee036bb9f1d3bf",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "baa08083a36e6d59fe8b9edb7012e2f600f828085af720f9762aeedb361c37af",
+          "card": {
+            "card_hash": "4209f457c4c25a2051d755465a733a03378949db6dbc779c21b1203997a05461",
+            "channel": "Ahmad",
+            "chars": 11658,
+            "chars_all_clips": 11658,
+            "chars_chosen_clips": 1440,
+            "clip_count": 10,
+            "clips": [
+              {
+                "deep_link": "https://x.com/TheAhmadOsman/status/2088745234842705975#t=12",
+                "end": 83.68,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1a07987eb5682f934b3c032e33bfb4eae1fe38eb0950ff1f53e77c3ecb2e2a1c",
+                "start": 12.06,
+                "text": "Hey, everyone. We are about to start this presentation called the desktop frontier and it's basically about where we started and how far we've come with local and open source models. How many, like just a quick question? How may of you here",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/TheAhmadOsman/status/2088745234842705975#t=203",
+                "end": 322.579,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1e1e79a9110fcb1d904084d2b87ee297ad11f2776a74b02b551b8fd7f1bae142",
+                "start": 203.15,
+                "text": "1390s or an rtx pro 6000 Now, That footprint For hardware is not needed anymore All you need Is single RTX 30 90 50 90 and you have something much more capable Much More intelligent So is this trend just random or Is there more to it That's",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/TheAhmadOsman/status/2088745234842705975#t=322",
+                "end": 441.68,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "968d992231ed71640f0562cfb03668e9edbdd349daf7621af780c649d80fd536",
+                "start": 322.579,
+                "text": "Parameters Total Was only 40 Billion parameter Activated And That supports Up to One million Context Sense You can run This in Nvm v4 On A machine Uh On a Dgx station Or on A server With eight Rtx pro Six thousand Thats something That you L",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/TheAhmadOsman/status/2088745234842705975#t=560",
+                "end": 680.07,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "95c595d69e14ad903f6fc255a06553c9622f25806f3406ff121917f8fdc5db53",
+                "start": 560.83,
+                "text": "Model Started Bunching Above Their Weight After Lama 2 With Mistral 7b One Of My Favorite Models If You Try To Build Work But It Used To Take So Much In Terms Of Hardware Right That You Would Now Get From A 9b Million Model That I Can Run W",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/TheAhmadOsman/status/2088745234842705975#t=799",
+                "end": 917.659,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "4c064b854ef6ed75640d452d3f24e11d7a5f71dd21f45676ba17af8f375f90ec",
+                "start": 799.519,
+                "text": "Model Has 40% Higher Number Of Activated Bar Meters So Not Far Off Massive Amount Performance Gains And A Very Small Amount Of Time With Massively Different Footprint In Terms Hardware Requirements That Trend Happened Like What Two Three Mo",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/TheAhmadOsman/status/2088745234842705975#t=918",
+                "end": 1037.48,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9afd0ee560c9081d1e1e94e20948b9b265b5ec5872d580b89ecf29d169080238",
+                "start": 918.539,
+                "text": "Viral Post That We Are Going Have Quality Of Obus 4.5 At Home On Single Pro 6000 That Happened By March So Question Hardware Purchase Today Does It Get More Valuable As Models Become Efficient And Smaller In Size That Is A Good Question Why",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/TheAhmadOsman/status/2088745234842705975#t=12",
+                "end": 83.68,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1a07987eb5682f934b3c032e33bfb4eae1fe38eb0950ff1f53e77c3ecb2e2a1c",
+                "start": 12.06,
+                "text": "Hey, everyone. We are about to start this presentation called the desktop frontier and it's basically about where we started and how far we've come with local and open source models. How many, like just a quick question? How may of you here",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/TheAhmadOsman/status/2088745234842705975#t=203",
+                "end": 322.579,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1e1e79a9110fcb1d904084d2b87ee297ad11f2776a74b02b551b8fd7f1bae142",
+                "start": 203.15,
+                "text": "1390s or an rtx pro 6000 Now, That footprint For hardware is not needed anymore All you need Is single RTX 30 90 50 90 and you have something much more capable Much More intelligent So is this trend just random or Is there more to it That's",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/TheAhmadOsman/status/2088745234842705975#t=322",
+                "end": 441.68,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "968d992231ed71640f0562cfb03668e9edbdd349daf7621af780c649d80fd536",
+                "start": 322.579,
+                "text": "Parameters Total Was only 40 Billion parameter Activated And That supports Up to One million Context Sense You can run This in Nvm v4 On A machine Uh On a Dgx station Or on A server With eight Rtx pro Six thousand Thats something That you L",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/TheAhmadOsman/status/2088745234842705975#t=560",
+                "end": 680.07,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "95c595d69e14ad903f6fc255a06553c9622f25806f3406ff121917f8fdc5db53",
+                "start": 560.83,
+                "text": "Model Started Bunching Above Their Weight After Lama 2 With Mistral 7b One Of My Favorite Models If You Try To Build Work But It Used To Take So Much In Terms Of Hardware Right That You Would Now Get From A 9b Million Model That I Can Run W",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/TheAhmadOsman/status/2088745234842705975#t=799",
+                "end": 917.659,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "4c064b854ef6ed75640d452d3f24e11d7a5f71dd21f45676ba17af8f375f90ec",
+                "start": 799.519,
+                "text": "Model Has 40% Higher Number Of Activated Bar Meters So Not Far Off Massive Amount Performance Gains And A Very Small Amount Of Time With Massively Different Footprint In Terms Hardware Requirements That Trend Happened Like What Two Three Mo",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/TheAhmadOsman/status/2088745234842705975#t=918",
+                "end": 1037.48,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9afd0ee560c9081d1e1e94e20948b9b265b5ec5872d580b89ecf29d169080238",
+                "start": 918.539,
+                "text": "Viral Post That We Are Going Have Quality Of Obus 4.5 At Home On Single Pro 6000 That Happened By March So Question Hardware Purchase Today Does It Get More Valuable As Models Become Efficient And Smaller In Size That Is A Good Question Why",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Ahmad_-_Prediction_We_re_gonna_get_Kimi_K3_equivalent_intelligence_running_o",
+            "source_revision": "a32b8d59e5bad0055ebe07e9672df64eed4eca7a0b597149d4ee036bb9f1d3bf",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "Ahmad - Prediction  We’re gonna get Kimi K3 equivalent intelligence running o...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/TheAhmadOsman/status/2088745234842705975",
+            "video_id": "2079405880332664832",
+            "yoinked_at": "2026-08-16T07:36:03"
+          }
+        },
+        {
+          "work_id": "BAGtTukUCz0lJAsrG0nFkEjcBk5Hk9jU",
+          "video_id": "2078684046708572163",
+          "attempt_token": "RwUPS5AtL7VdLGccGl-MpET0jWSmkmeAAifqEyUSY34",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079182,
+          "source_revision": "e91499c190e9a71bb5a00f4263c1764c224ee33e70321d1ad8ac51c90c6e140b",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "3eba13bf5394efc6e04172ac1bb89cc4882b50ea04907df992633dd9ba434c9e",
+          "card": {
+            "card_hash": "717600e7674c0291feaa1d4c05d8505fbe51f9136fa03971035b96408ae09619",
+            "channel": "Chip 🍪",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/ChipGotIt_/status/2078684429568917982",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "f63ea6e2b63f7ff1cc75ee321b256a2d9f60b5a89c59774f608ba2e6abc32eb0",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Marlon defended PlaqueboyMax after Ojay left Max emotional enough to end his stream ❤️‍🩹  “That is so weird. Just hating him for how he is” https://t.co/n5ALS0V0Q6 No tags *No captions available for thi",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Marlon defended PlaqueboyMax after Ojay left Max emotional enough to end his stream ❤️‍🩹  “That is so weird. Just hating him for how he is” https://t.co/n5ALS0V0Q6 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Chip_-_Marlon_defended_PlaqueboyMax_after_Ojay_left_Max_emotional_enough_to",
+            "source_revision": "e91499c190e9a71bb5a00f4263c1764c224ee33e70321d1ad8ac51c90c6e140b",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Marlon defended PlaqueboyMax after Ojay left Max emotional enough to end his stream ❤️‍🩹  “That is so weird. Just hating him for how he is” https://t.co/n5ALS0V0Q6 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Chip 🍪 - Marlon defended PlaqueboyMax after Ojay left Max emotional enough to ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/ChipGotIt_/status/2078684429568917982",
+            "video_id": "2078684046708572163",
+            "yoinked_at": "2026-07-18T22:53:47"
+          }
+        },
+        {
+          "work_id": "BEWR3GNxpQ8Sr6rm4DpMHpjxPFoXUt6G",
+          "video_id": "2079481448843649024",
+          "attempt_token": "Okf85dcXflrCur6kJUXZHAoTqbthxesE5YFUSSWqWJ4",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079182,
+          "source_revision": "25276408bc0a0ff537177ce4a50b416eaf053ab7be1c86fa09d8c5674af251a9",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "d2c30447165341032f49021e4fcefef4250b84e7cff6dd1652a5caa532ecb033",
+          "card": {
+            "card_hash": "d2bbaeeec38f010fc7c3e0df7b60f53cdb4bffd5b9e9dec818caf3c62b7a8139",
+            "channel": "0xAkky",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/AKKY33157665/status/2079482737975570677",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "33182a1aba6bf1b4ec0ffc1400387a92f24137513c5de5f6dbed5daab8745470",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> 一个13岁男孩，假期写了个Polymarket交易脚本，免费扔到GitHub就回学校了。  两个月后，一个交易员给他转了2万美元，说靠这个脚本一个月赚了20多万。  他没卖课、没设付费墙，只是做了个有用的东西，然后回去写作业。  剩下的，互联网帮他搞定了。 https://t.co/7SmVqsA3ko No tags *No captions available for this video.* <",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> 一个13岁男孩，假期写了个Polymarket交易脚本，免费扔到GitHub就回学校了。  两个月后，一个交易员给他转了2万美元，说靠这个脚本一个月赚了20多万。  他没卖课、没设付费墙，只是做了个有用的东西，然后回去写作业。  剩下的，互联网帮他搞定了。 https://t.co/7SmVqsA3ko No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "0xAkky_-_13_Polymarket_GitHub_2",
+            "source_revision": "25276408bc0a0ff537177ce4a50b416eaf053ab7be1c86fa09d8c5674af251a9",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 一个13岁男孩，假期写了个Polymarket交易脚本，免费扔到GitHub就回学校了。  两个月后，一个交易员给他转了2万美元，说靠这个脚本一个月赚了20多万。  他没卖课、没设付费墙，只是做了个有用的东西，然后回去写作业。  剩下的，互联网帮他搞定了。 https://t.co/7SmVqsA3ko No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "0xAkky - 一个13岁男孩，假期写了个Polymarket交易脚本，免费扔到GitHub就回学校了。  两个月后，一个交易员给他转了2万美元，说靠这个...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/AKKY33157665/status/2079482737975570677",
+            "video_id": "2079481448843649024",
+            "yoinked_at": "2026-07-21T10:49:29"
+          }
+        },
+        {
+          "work_id": "BFTP_WD7uaqnEBbeJTxORnNhS_BWvwXB",
+          "video_id": "2078557763337154560",
+          "attempt_token": "oUR5EEQ3pPlPY0stTqNmMMWdJpId9LjpnF2Ty82-yl0",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079183,
+          "source_revision": "6abca6a84fc8a3e76633cb74751c4ba0bd9d615e49bda212127d45f22c1497c5",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "18faf93b8e03e3af3cac41d8a8f22700ee2e6b9590103b73d23a4364adcf55d7",
+          "card": {
+            "card_hash": "11b0e6c742622f36ca8f4355659931e4c394aea977051e914c067af23e163724",
+            "channel": "The Black Tucker Carlson Jr 🇺🇸",
+            "chars": 102,
+            "chars_all_clips": 102,
+            "chars_chosen_clips": 102,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/B1TuckerCarlson/status/2078557954769293714#t=0",
+                "end": 49.799,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "8e7376bbe5eee9bd4440f979bdaab2e0eb286b7975a0ca2ac9a1aa132caf1f48",
+                "start": 0.0,
+                "text": "Oh my god! Run upstairs Get your dog Stay in front of me Ease on up stairs baby with you dog Oh My God",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/B1TuckerCarlson/status/2078557954769293714#t=0",
+                "end": 49.799,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "8e7376bbe5eee9bd4440f979bdaab2e0eb286b7975a0ca2ac9a1aa132caf1f48",
+                "start": 0.0,
+                "text": "Oh my god! Run upstairs Get your dog Stay in front of me Ease on up stairs baby with you dog Oh My God",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Pitbull owner attacked by Belgian Shepherd while its owner watches in disbelief https://t.co/jup1xdOzsx No tags [00:00:00] Oh my god! [00:00:06] Run upstairs Get [00:00:19] your dog Stay in front of me [00:00:28] Ease on up stairs baby with you dog [00:00:30] Oh My [00:00:48] God <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "The_Black_Tucker_Carlson_Jr_-_Pitbull_owner_attacked_by_Belgian_Shepherd_while_i",
+            "source_revision": "6abca6a84fc8a3e76633cb74751c4ba0bd9d615e49bda212127d45f22c1497c5",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Pitbull owner attacked by Belgian Shepherd while its owner watches in disbelief https://t.co/jup1xdOzsx No tags [00:00:00] Oh my god! [00:00:06] Run upstairs Get [00:00:19] your dog Stay in front of me [00:00:28] Ease on up stairs baby with you dog [00:00:30] Oh My [00:00:48] God <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "The Black Tucker Carlson Jr 🇺🇸 - Pitbull owner attacked by Belgian Shepherd while its owner watches in...",
+            "topic": "Uncategorized",
+            "truncated": false,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/B1TuckerCarlson/status/2078557954769293714",
+            "video_id": "2078557763337154560",
+            "yoinked_at": "2026-07-18T22:54:56"
+          }
+        },
+        {
+          "work_id": "EjxrLbbhCIDgpGVos3lmqauNRIAM2P6i",
+          "video_id": "2079486420972937216",
+          "attempt_token": "B1MyVEnHqaUXB1050fAgbdhskcojpyBqQvIG-AnOZCc",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079184,
+          "source_revision": "2c8e6351e8a0b5a4ede6bdba164c99ae1165c0addae1ac7c2beee497a490bb2f",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "85dcec27f8ed9dbe6aa4b1d1ec45fa7d4d9545071d64568ef6ee9796652fae90",
+          "card": {
+            "card_hash": "66e3b831c55be608ec9208993bc2d259f42c904285be8102c007df8768d9c844",
+            "channel": "Julius Kanyi",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/kanyicool/status/2079486526983954856",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "1175836d33bb32bfd4ed9887d3891439d45b8441d21e95fab1b4cb1d1d64737c",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> @kirawontmiss Lamine Yamal during the entire world cup https://t.co/EPL3FORygv No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- y",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> @kirawontmiss Lamine Yamal during the entire world cup https://t.co/EPL3FORygv No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Julius_Kanyi_-_kirawontmiss_Lamine_Yamal_during_the_entire_world_cup",
+            "source_revision": "2c8e6351e8a0b5a4ede6bdba164c99ae1165c0addae1ac7c2beee497a490bb2f",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> @kirawontmiss Lamine Yamal during the entire world cup https://t.co/EPL3FORygv No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Julius Kanyi - @kirawontmiss Lamine Yamal during the entire world cup",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/kanyicool/status/2079486526983954856",
+            "video_id": "2079486420972937216",
+            "yoinked_at": "2026-07-21T10:49:38"
+          }
+        },
+        {
+          "work_id": "KGATM3HhVnmEfBH1I8fLe1ASaX8jpQcj",
+          "video_id": "2078650714293739521",
+          "attempt_token": "K_BZV95TxoAsfgCDtLUM0a98a-ELgoP5yzjcQJePuvI",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079185,
+          "source_revision": "497ce18e7bcc95ead8c0840747a7fc239b20e83f8d3bf63b16de4ddd7613194e",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "5b1ea3f7fa509dfade4f0a85f8985a9dc2a581fb65f7c0ec682f8768e9e181ec",
+          "card": {
+            "card_hash": "e4d73233aab2810b98e65ae2afbd84539cbca274a3c248d6db2d3b86d5d38526",
+            "channel": "Matt Van Swol",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/mattvanswol/status/2078651486771273773",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "b1b7582f6a614f0f288f967f35dfa644d28fd902d2112e05454aa7f7f8cf523e",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying.  You can hear see the missile hit and then American soldiers screaming, \"GO GO GO GO!!!\"  Regardless of what you th",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying.  You can hear see the missile hit and then American soldiers screaming, \"GO GO GO GO!!!\"  Regardless of what you think about the war in Iran, please pray for our troops. https://t.co/Q08K8BuMS7 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Matt_Van_Swol_-_This_video_of_missiles_hitting_Muwaffaq_Salti_Air_Base_in_Jordan",
+            "source_revision": "497ce18e7bcc95ead8c0840747a7fc239b20e83f8d3bf63b16de4ddd7613194e",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> This video of missiles hitting Muwaffaq Salti Air Base in Jordan is beyond horrifying.  You can hear see the missile hit and then American soldiers screaming, \"GO GO GO GO!!!\"  Regardless of what you think about the war in Iran, please pray for our troops. https://t.co/Q08K8BuMS7 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Matt Van Swol - This video of missiles hitting Muwaffaq Salti Air Base in Jordan is b...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/mattvanswol/status/2078651486771273773",
+            "video_id": "2078650714293739521",
+            "yoinked_at": "2026-07-19T09:49:49"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

@@ -1,0 +1,756 @@
+{
+  "seq": 673,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 19,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "VwQmmuuIy1vr3ESuvsdrtuoJaMOvMcCj",
+          "video_id": "2089691023404388353",
+          "attempt_token": "fUye5EcYPo_SRese3yylxh28_TSfYotDTNlqU14HQr4",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677412261,
+          "source_revision": "1e0b704252555140d416e8632b1ca276dd7deec3e32352c4ef749133e10c27fe",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "5ea1ecd42eabdb268bc86030a162a664fcbee72e745f968a2bc28e58e705e2a6",
+          "card": {
+            "card_hash": "3942c5ce7b41cf313a9d44f19be5579d55f6761b5971622689622f93b07bd84b",
+            "channel": "Romain Torres",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/rom1trs/status/2089692842708938829",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "2897b84d33a6fd66802fb90d81393e3ffbabdcf1955492dc40c128572bb367e3",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> We just open-sourced an entire marketing department.  Introducing Marketing OS by Arcads.  It does the work of your first six marketing hires.  📁 Marketing Department ┃ ┣ 📁 Head of Marketing ┃ ┣ 📁 Posit",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> We just open-sourced an entire marketing department.  Introducing Marketing OS by Arcads.  It does the work of your first six marketing hires.  📁 Marketing Department ┃ ┣ 📁 Head of Marketing ┃ ┣ 📁 Positioning ┃ ┣ 📁 Pricing ┃ ┗ 📁 Competitor Teardowns ┃ ┣ 📁 https://t.co/ju02kTGJIj No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Romain_Torres_-_We_just_open-sourced_an_entire_marketing_department_Introducing",
+            "source_revision": "1e0b704252555140d416e8632b1ca276dd7deec3e32352c4ef749133e10c27fe",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> We just open-sourced an entire marketing department.  Introducing Marketing OS by Arcads.  It does the work of your first six marketing hires.  📁 Marketing Department ┃ ┣ 📁 Head of Marketing ┃ ┣ 📁 Positioning ┃ ┣ 📁 Pricing ┃ ┗ 📁 Competitor Teardowns ┃ ┣ 📁 https://t.co/ju02kTGJIj No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Romain Torres - We just open-sourced an entire marketing department.  Introducing Mar...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/rom1trs/status/2089692842708938829",
+            "video_id": "2089691023404388353",
+            "yoinked_at": "2026-08-19T07:51:42"
+          }
+        },
+        {
+          "work_id": "WTZyQN2RPPLHjGKJNAvY4P1a0z-KEiCX",
+          "video_id": "2089069071929368576",
+          "attempt_token": "Tqr9cNmQt6JITYYA-CBr0imYz49_71Y6fDYRnA1FgjQ",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677412261,
+          "source_revision": "5b37fa54e430427bbf64cb10e2cb88d82404f6c49fc0add20fcfc4f9c441ae8a",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "631dbfc13b856eac9a8cb001d8e58080bfc5ac0fa1ef7928ac70e81fcfe4aa60",
+          "card": {
+            "card_hash": "19099084c5d7ec3e460cf6fdbced50a9f8f1b92fe78f98360ddb1389a14fbb00",
+            "channel": "Phil Hedayatnia",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/PhilHedayatnia/status/2089069536628936886",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "ed3bf53a3cfefce987bb4a48c933a1cfce26f69f8917cdaf612558494f739bcc",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> For most of the last century, companies hired serious designers, illustrators, and artists for the most boring document they published: the annual report.  I built an archive of 3000+ of them, spanning ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> For most of the last century, companies hired serious designers, illustrators, and artists for the most boring document they published: the annual report.  I built an archive of 3000+ of them, spanning 1945-1991. https://t.co/Y8uxFafL6y No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Phil_Hedayatnia_-_For_most_of_the_last_century_companies_hired_serious_designers",
+            "source_revision": "5b37fa54e430427bbf64cb10e2cb88d82404f6c49fc0add20fcfc4f9c441ae8a",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> For most of the last century, companies hired serious designers, illustrators, and artists for the most boring document they published: the annual report.  I built an archive of 3000+ of them, spanning 1945-1991. https://t.co/Y8uxFafL6y No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Phil Hedayatnia - For most of the last century, companies hired serious designers, illu...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/PhilHedayatnia/status/2089069536628936886",
+            "video_id": "2089069071929368576",
+            "yoinked_at": "2026-08-17T07:39:23"
+          }
+        },
+        {
+          "work_id": "WTlim1FDpXI6u4MJgAF8mstU5ZezdvtA",
+          "video_id": "2089388284455649281",
+          "attempt_token": "3rn_XgHA2B_-X2PF1a2TFOyZ1IYsdsqUh4vmo3rpgDY",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677412262,
+          "source_revision": "b511b26f8c7ed1effe68e5214956978f3c94884a918114dafb36a3a8160545a9",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "1481f1494ff74420f762561d147cc128ad5a40dd669c6fda0773d05bbba9a6a0",
+          "card": {
+            "card_hash": "5ad218be3b2af826890dad0f32d464da5ac73a9b67dfad3a75094898c8a6b769",
+            "channel": "Nous Research",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/NousResearch/status/2089429432612147572",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "1ec678ff57e98848ed38889d7e6c9024fd494883db1001c251d69338a630ee57",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Bot Mode for Hermes Desktop.  Your agent profiles become a series of named Bots. Each Bot has its own role, model, memory, skills and profile picture; Bots can use any model and even communi",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Bot Mode for Hermes Desktop.  Your agent profiles become a series of named Bots. Each Bot has its own role, model, memory, skills and profile picture; Bots can use any model and even communicate with each other.   Build a specialist Bot once to use it forever. https://t.co/AYWD9Ro2I1 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Nous_Research_-_Introducing_Bot_Mode_for_Hermes_Desktop_Your_agent_profiles_beco",
+            "source_revision": "b511b26f8c7ed1effe68e5214956978f3c94884a918114dafb36a3a8160545a9",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Bot Mode for Hermes Desktop.  Your agent profiles become a series of named Bots. Each Bot has its own role, model, memory, skills and profile picture; Bots can use any model and even communicate with each other.   Build a specialist Bot once to use it forever. https://t.co/AYWD9Ro2I1 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Nous Research - Introducing Bot Mode for Hermes Desktop.  Your agent profiles become ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/NousResearch/status/2089429432612147572",
+            "video_id": "2089388284455649281",
+            "yoinked_at": "2026-08-18T07:49:18"
+          }
+        },
+        {
+          "work_id": "aPwvaIAG7yNDRF_Cj5qexg4ErPN6rx52",
+          "video_id": "2089870032771919873",
+          "attempt_token": "vEp5xvpQ_JuNxsJ6V1XAhiz6oKFCZNgX6Mmf0R7maTI",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677412262,
+          "source_revision": "3ab57f46ca2a290ccbd086e6553b3124a825087e850e7b4b7a92171dea80f5cd",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "c91af80d5f54d6dc0efe15b6d389ef69ce3d0e38d7ae10ecef284a93f00b6b0e",
+          "card": {
+            "card_hash": "64ae6baca3a4721b60b20301750b519fa7099d23230783e89bc649d37544c170",
+            "channel": "Cerebras",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/cerebras/status/2089870131291943228",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "4793a44484d62ad430a0ad91bedddc87732b6781b92d802131721cd4092df2cd",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> The Fastest AI Just Got Faster. Meet CS-4. https://t.co/Ubd4uul4l4 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comment",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> The Fastest AI Just Got Faster. Meet CS-4. https://t.co/Ubd4uul4l4 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Cerebras_-_The_Fastest_AI_Just_Got_Faster_Meet_CS-4",
+            "source_revision": "3ab57f46ca2a290ccbd086e6553b3124a825087e850e7b4b7a92171dea80f5cd",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> The Fastest AI Just Got Faster. Meet CS-4. https://t.co/Ubd4uul4l4 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Cerebras - The Fastest AI Just Got Faster. Meet CS-4.",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/cerebras/status/2089870131291943228",
+            "video_id": "2089870032771919873",
+            "yoinked_at": "2026-08-19T07:51:53"
+          }
+        },
+        {
+          "work_id": "eW-tBL7lWCZ1Lc9MgLJQ0JG8FHBFYwuy",
+          "video_id": "2090002365835341825",
+          "attempt_token": "eTUaKqk1hqb9R_jBqMHDrH708_MhW0I4p5yIgBq2mO4",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677412263,
+          "source_revision": "fe874580f800b1b59b241c988988afebb7fec6d237ccda993e147d9d3cdb21c9",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "1814ca1e0548e8f090f208bc3abf3b3930d0b787535bf6d6b6160926c248d180",
+          "card": {
+            "card_hash": "fe5cdacca77fb7959078227c748a355c938c4a455a47025787fa468f46913c43",
+            "channel": "khalifa aminu",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/inventorkhalifa/status/2090002759516872803",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "9d3a4660b49a72351dc2c5b84841ea256e9d0ae635253da36ebad0af429bc3e8",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> This is the full video of it I want this talent to reach the whole world. Please share it widely Thank you, everyone🙏 https://t.co/ACaiIsyO9F No tags *No captions available for this video.* <!-- yoink:c",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> This is the full video of it I want this talent to reach the whole world. Please share it widely Thank you, everyone🙏 https://t.co/ACaiIsyO9F No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "khalifa_aminu_-_This_is_the_full_video_of_it_I_want_this_talent_to_reach_the_who",
+            "source_revision": "fe874580f800b1b59b241c988988afebb7fec6d237ccda993e147d9d3cdb21c9",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> This is the full video of it I want this talent to reach the whole world. Please share it widely Thank you, everyone🙏 https://t.co/ACaiIsyO9F No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "khalifa aminu - This is the full video of it I want this talent to reach the whole wo...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/inventorkhalifa/status/2090002759516872803",
+            "video_id": "2090002365835341825",
+            "yoinked_at": "2026-08-19T07:52:12"
+          }
+        },
+        {
+          "work_id": "fDtl3eJq-lSJPzsmO26UHPWFhWRS64pR",
+          "video_id": "2089358742852947968",
+          "attempt_token": "fZEZouhgDfXnDHV921KYxlNQ1uXinY9XRDLbyWZUhkw",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677412264,
+          "source_revision": "c2f6f9b1835ce2bbbf7c88e37458104b9b034ef275f960a1cf41d1b246dc3a8c",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "5b884801744f9fdc04eb1edb585f8c98b94a805594536936ee3a83116578f8f0",
+          "card": {
+            "card_hash": "417fd743b9a46d0c03cb6fa7e4a15d363f509f5583fc4a49af74ec2d915ebbc5",
+            "channel": "Higgsfield AI 🧩",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/higgsfield_ai/status/2089399852237210011",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "d6bb489655d2e2dc1a2f57ac4809ae2f6e7edb70a966e047b5383f3cc4b6fbbe",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Our first AI animated film, KÖK BÖRÜ, premiered at the world's biggest computer graphics conference.  It blends genAI with human art, and screened at SIGGRAPH 2026 in LA, alongside Pixar, Disney, and Nv",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Our first AI animated film, KÖK BÖRÜ, premiered at the world's biggest computer graphics conference.  It blends genAI with human art, and screened at SIGGRAPH 2026 in LA, alongside Pixar, Disney, and Nvidia.  Now live and open-sourced with all prompts and assets available for the https://t.co/tOKaNxy4Yv No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Higgsfield_AI_-_Our_first_AI_animated_film_K_K_B_R_premiered_at_the_world_s_bigg",
+            "source_revision": "c2f6f9b1835ce2bbbf7c88e37458104b9b034ef275f960a1cf41d1b246dc3a8c",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Our first AI animated film, KÖK BÖRÜ, premiered at the world's biggest computer graphics conference.  It blends genAI with human art, and screened at SIGGRAPH 2026 in LA, alongside Pixar, Disney, and Nvidia.  Now live and open-sourced with all prompts and assets available for the https://t.co/tOKaNxy4Yv No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+            "title": "Higgsfield AI 🧩 - Our first AI animated film, KÖK BÖRÜ, premiered at the world's bigges...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/higgsfield_ai/status/2089399852237210011",
+            "video_id": "2089358742852947968",
+            "yoinked_at": "2026-08-18T07:51:59"
+          }
+        },
+        {
+          "work_id": "g0JDJX1C8pd_cXXVMWKj_a6UIRRc7YwA",
+          "video_id": "2090106310385688577",
+          "attempt_token": "wM5W2h-Yv0zD5HJDksosnIHlbJ7VCUjUyPyXu5L2bZc",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677412264,
+          "source_revision": "81a352ad9b255deddc2785f695d75f0c17ca8099073627f943c7f8765c268eb9",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "1f1e8b2301454bcaec57a5183d5906c2c5a513205c31a3c58d319bd0b05d61f9",
+          "card": {
+            "card_hash": "01926dd30685a9ebbc4b27ea393f991f33bf030ad096a0662b4c87b245625c26",
+            "channel": "Rob Pruzan",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/RobKnight__/status/2090106928668041363",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "584f65cf2b2453223501b9f5c0c3f0d1da46e4ea7c9d7ac7d4597f948d94185c",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing terminal-code: VS Code inside the terminal  - VS Code compatible CLI - works over ssh - syncs with your terminal theme  https://t.co/j3HThPdVPw https://t.co/tV0FOB7WrH No tags *No captions a",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing terminal-code: VS Code inside the terminal  - VS Code compatible CLI - works over ssh - syncs with your terminal theme  https://t.co/j3HThPdVPw https://t.co/tV0FOB7WrH No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Rob_Pruzan_-_Introducing_terminal-code_VS_Code_inside_the_terminal_-_VS_Code_com",
+            "source_revision": "81a352ad9b255deddc2785f695d75f0c17ca8099073627f943c7f8765c268eb9",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing terminal-code: VS Code inside the terminal  - VS Code compatible CLI - works over ssh - syncs with your terminal theme  https://t.co/j3HThPdVPw https://t.co/tV0FOB7WrH No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Rob Pruzan - Introducing terminal-code: VS Code inside the terminal  - VS Code com...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/RobKnight__/status/2090106928668041363",
+            "video_id": "2090106310385688577",
+            "yoinked_at": "2026-08-21T07:55:27"
+          }
+        },
+        {
+          "work_id": "hOWpg6lG-0XfGyYaA2MhfeC8zzKfgoCx",
+          "video_id": "2089305813735337984",
+          "attempt_token": "zyzS52u99E_9OUdHOxXlhUFNGMJKTMLzNKrgGs3foyM",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677412265,
+          "source_revision": "eaa11108f4754d4c8c3f9ebbf239c5c560e083dff01a17920fd453c03c90f92c",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "9a5018dd55933b386a6465e8e85997fd6403682158b28c5399f7ab837bb359a1",
+          "card": {
+            "card_hash": "09619f128a203a047f015970804c1fec722b6575b0431ee92d9a65c897e4bf25",
+            "channel": "Aiden Bai",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/aidenybai/status/2089400082550620636",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "bbe69440fc78006c850cbd45e7270609b13a0b108c04a6af5c9420643ee6e6a7",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing /improve-threejs  Turn vibe-slop Three.js prototypes into stunning apps   It makes slow, visually buggy games run fast! https://t.co/sKeC7ChkVL No tags *No captions available for this video.",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing /improve-threejs  Turn vibe-slop Three.js prototypes into stunning apps   It makes slow, visually buggy games run fast! https://t.co/sKeC7ChkVL No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Aiden_Bai_-_Introducing_improve-threejs_Turn_vibe-slop_Three_js_prototypes_into",
+            "source_revision": "eaa11108f4754d4c8c3f9ebbf239c5c560e083dff01a17920fd453c03c90f92c",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing /improve-threejs  Turn vibe-slop Three.js prototypes into stunning apps   It makes slow, visually buggy games run fast! https://t.co/sKeC7ChkVL No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Aiden Bai - Introducing /improve-threejs  Turn vibe-slop Three.js prototypes into...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/aidenybai/status/2089400082550620636",
+            "video_id": "2089305813735337984",
+            "yoinked_at": "2026-08-18T07:49:04"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 997,
+  "tool": "claim_library_work",
+  "wall_ms": 22,
+  "request": {
+    "seq": 997,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "cancel",
+      "work_id": "FRSGuepjI3VNqmTkqZ0Wb_kqh_7rxwVH",
+      "client_id": "proof-harness",
+      "attempt_token": "H5VhFbrpiewnGOSndLBFiw1ouCclgCPGvn54HipOg24",
+      "reason": "Exceeded 1 retry limit"
+    }
+  },
+  "response": {
+    "seq": 997,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 22,
+    "body": {
+      "ok": false,
+      "schema_version": 1,
+      "error": {
+        "code": "stale_attempt",
+        "message": "Attempt is no longer current",
+        "retryable": true,
+        "details": {}
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 585,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "t5q5U0XVAO7M8Qksbr0IISWzwJ8zYDx0",
+      "video_id": "2085699005846097921",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.7,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "de90ebb6370f3a378ac49641e1ba8956b3e737fe66491b0c410f63bb95baf80b",
+            "card_hash": "d6819af42655ef49d255d72f0e5ae954912cff534f481aca5df5a9a259566aaf",
+            "quote": "decompiled and reverse engineered into 5000 lines or so of c  All done with deepseek flash 0731",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "seq": 483,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 483,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "b8CUKQD6SIkibHqOSW6v-_W176qdgqMv",
+      "client_id": "proof-harness",
+      "attempt_token": "G54POzh__oWasEJVQmGuFeOsJex51Sdyf1Ck4SJh_-0",
+      "submission_key": "b8CUKQD6SIkibHqOSW6v-_W176qdgqMv-G54POzh__oWasEJVQmGuFeOsJex51Sdyf1Ck4SJh_-0",
+      "schema_version": 1,
+      "video_id": "2084799311314128896",
+      "source_revision": "90f7a7f0a7474c15dc7e9e819a6707800c900ba34334f0ffd3dedb5c54fb0c55",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "14cd4580ea72a80a4b6a3d59b2e07a97bc94d37d13797c03d4a1144cdb83d58e",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt discusses Opendoor's (a real-estate company) Q2 earnings call with its executives; there is no AI technical or AI-industry-competitive content in the evidence beyond an executive title mention, so it falls outside every approved shelf's scope."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 15092,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 22295,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 483,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "b8CUKQD6SIkibHqOSW6v-_W176qdgqMv",
+        "video_id": "2084799311314128896",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

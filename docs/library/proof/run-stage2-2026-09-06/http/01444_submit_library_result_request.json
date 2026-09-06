@@ -1,0 +1,51 @@
+{
+  "seq": 1444,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "ErT11hZCvRbtBl97L8eGGkNdwH8c6khG",
+    "client_id": "proof-harness",
+    "attempt_token": "HQLHfZ1WdUm8enSsHOJjg9yzivEAPfi4UnSnYV19vs4",
+    "submission_key": "ErT11hZCvRbtBl97L8eGGkNdwH8c6khG-HQLHfZ1WdUm8enSsHOJjg9yzivEAPfi4UnSnYV19vs4",
+    "schema_version": 1,
+    "video_id": "x_6d0489f045f",
+    "source_revision": "068c07af4d889b8e9d37873295d1b4d323420a6546faad41f842324bab6d4da4",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "0761757e1a401d0ed1a5ad40f9bfdd7c192a4916f77f57e1e261d7e87d42888e",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "spaceflight",
+          "shelf_path": [
+            "Space and Science",
+            "Spaceflight"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "cfc878327c84741e233f25390ce573373b50bd115ae47a320adead3b7b50b25a",
+            "card_hash": "270cf6510e11a833eb181f15139c822276e52ff0313cec1a81c7b0e45231a515",
+            "quote": "Exploration is part of who we are. Back to the Moon. Building a Moon Base."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 10982,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 22121,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 1139,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "2lkvAwIRZl6kUVUUsBZ1O4vWjWK3ac3J",
+      "video_id": "LNwODJXcvt4",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "d8df9c35790515cb80226bf6436f0d2fe889203f907ddb28565446d7e180b1fd",
+            "card_hash": "542a26c3518d2a9ad184ac1dd157805a49cf2417034e4f5345b71c272ccd0ca1",
+            "quote": "can train a custom object detection model",
+            "start": 0.0,
+            "end": 120.0,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

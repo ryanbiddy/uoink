@@ -1,0 +1,95 @@
+{
+  "seq": 861,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 861,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "ucJPSh5WSKVo9tbPb-ZF0vStRloAFCYS",
+      "client_id": "proof-harness",
+      "attempt_token": "6Q3U9AZREZHNzkNM_iYB3F4q9Qt1XALoyBmlEx0bGuo",
+      "submission_key": "ucJPSh5WSKVo9tbPb-ZF0vStRloAFCYS-6Q3U9AZREZHNzkNM_iYB3F4q9Qt1XALoyBmlEx0bGuo",
+      "schema_version": 1,
+      "video_id": "2091830598666956801",
+      "source_revision": "18077f7f94645cbcbd87fda702dbd905eacb0af7ea00ba8724ba56d0ca71a312",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "96789da355639f207a493751c0e414f28ad6d2dac35d37ea938e3d38daa1d249",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "security",
+            "shelf_path": [
+              "AI and ML",
+              "Security"
+            ],
+            "confidence": 0.63,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "ad30a02db4605c8c95cd63a6657443a9ba0cc56f08a51f56ae48b5975363db28",
+              "card_hash": "3c96a91ec61a6e2611c8a29722a3bddc3f57807e26148ab5b09936f2b1e95844",
+              "quote": "one rule about who's allowed to change their mind"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 14298,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20736,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 861,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "ucJPSh5WSKVo9tbPb-ZF0vStRloAFCYS",
+        "video_id": "2091830598666956801",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "security",
+            "shelf_path": [
+              "AI and ML",
+              "Security"
+            ],
+            "confidence": 0.63,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "ad30a02db4605c8c95cd63a6657443a9ba0cc56f08a51f56ae48b5975363db28",
+              "card_hash": "3c96a91ec61a6e2611c8a29722a3bddc3f57807e26148ab5b09936f2b1e95844",
+              "quote": "one rule about who's allowed to change their mind",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

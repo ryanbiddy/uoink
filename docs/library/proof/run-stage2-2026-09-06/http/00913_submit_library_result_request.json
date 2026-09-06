@@ -1,0 +1,51 @@
+{
+  "seq": 913,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "eZc2VwkKRbkT8HOHmqJF8VUmvp1N3E4p",
+    "client_id": "proof-harness",
+    "attempt_token": "DVg64aShT_lpLQlyZSFmZmhYcqrz5cf6a6z97IJMDho",
+    "submission_key": "eZc2VwkKRbkT8HOHmqJF8VUmvp1N3E4p-DVg64aShT_lpLQlyZSFmZmhYcqrz5cf6a6z97IJMDho",
+    "schema_version": 1,
+    "video_id": "2092254012456271872",
+    "source_revision": "f4cf5247b9315ef264a956067a4efadd0a31c09fb192b9b25e28e52ebcf51c98",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "23415977fd45a6ab540d7ef1a50b823526f7efecd61852ed2276db9f9dd38502",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "6c87d1162dd97660c52d5448e947cfa9a58f11a2cfaa5727e11b949291b1645f",
+            "card_hash": "e84555e58a3b968cca72cb1fdf6208f052e926741c686a6ddadaa2f617002525",
+            "quote": "training your own text-to-speech model from scratch on your own GPU"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 16444,
+      "cache_read_tokens": 185177,
+      "cache_create_tokens": 33216,
+      "wall_time_ms": 0
+    }
+  }
+}

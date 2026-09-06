@@ -1,0 +1,39 @@
+{
+  "seq": 723,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "g0JDJX1C8pd_cXXVMWKj_a6UIRRc7YwA",
+      "video_id": "2090106310385688577",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "584f65cf2b2453223501b9f5c0c3f0d1da46e4ea7c9d7ac7d4597f948d94185c",
+            "card_hash": "01926dd30685a9ebbc4b27ea393f991f33bf030ad096a0662b4c87b245625c26",
+            "quote": "Introducing terminal-code: VS Code inside the terminal",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

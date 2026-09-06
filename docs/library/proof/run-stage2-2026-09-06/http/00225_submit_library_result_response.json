@@ -1,0 +1,39 @@
+{
+  "seq": 225,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "8NRWKi7beH51tHkkGVTSkQAn6xIy930C",
+      "video_id": "2080348432774856704",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "b5933cb158c53299fd454fc460ba15dd43955eb3214d3e5e3de5943313c2b38d",
+            "card_hash": "6bf162244dae4e657be610f2f7332d0dc651d6627b7335e1cdc60dae653e6f40",
+            "quote": "WON THE $1,000,000 BEST AI FILM OF 2026 AWARD",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

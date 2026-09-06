@@ -1,0 +1,95 @@
+{
+  "seq": 977,
+  "tool": "submit_library_result",
+  "wall_ms": 5,
+  "request": {
+    "seq": 977,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "4KXOLbPrm3zQQqJ_J_3chb9pwqBGW-GD",
+      "client_id": "proof-harness",
+      "attempt_token": "jsHbCYypflYmbqHThw-xBCKAQR1P9Siwv1-uvIsJ4iU",
+      "submission_key": "4KXOLbPrm3zQQqJ_J_3chb9pwqBGW-GD-jsHbCYypflYmbqHThw-xBCKAQR1P9Siwv1-uvIsJ4iU",
+      "schema_version": 1,
+      "video_id": "2093622343004463198",
+      "source_revision": "169cd9d04ea27c0a5112055ebd91f38accfe0c3b8770efd633f6dc9dd087c2bd",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "fcaf0f1db27bf9a51d0389ab10f647e4951741546e07a7470cf0768b5390239d",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "5b4c32dcf1ec982de5646fac4b7dc973cb6acd64d6217eea79794c0dd8f40b54",
+              "card_hash": "8d623db2bd4e6de95b54c6a18e647d91fb51ee09fd895d15efd3c68038823fc2",
+              "quote": "this is the first time in history now many idea guys will have edge"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 21320,
+        "cache_read_tokens": 186700,
+        "cache_create_tokens": 39250,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 977,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 5,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "4KXOLbPrm3zQQqJ_J_3chb9pwqBGW-GD",
+        "video_id": "2093622343004463198",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "5b4c32dcf1ec982de5646fac4b7dc973cb6acd64d6217eea79794c0dd8f40b54",
+              "card_hash": "8d623db2bd4e6de95b54c6a18e647d91fb51ee09fd895d15efd3c68038823fc2",
+              "quote": "this is the first time in history now many idea guys will have edge",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

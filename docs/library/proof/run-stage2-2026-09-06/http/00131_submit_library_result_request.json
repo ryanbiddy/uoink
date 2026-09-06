@@ -1,0 +1,51 @@
+{
+  "seq": 131,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "TvKQ2FsvpXCYkzYD-OJ_TRJSWSimYJPJ",
+    "client_id": "proof-harness",
+    "attempt_token": "BclbSATmMYDKr8zcii8Sl5mIteq5iy6Bz6VwXfuyp88",
+    "submission_key": "TvKQ2FsvpXCYkzYD-OJ_TRJSWSimYJPJ-BclbSATmMYDKr8zcii8Sl5mIteq5iy6Bz6VwXfuyp88",
+    "schema_version": 1,
+    "video_id": "2079578068440506368",
+    "source_revision": "905406807c50bc0653fb2bac6c2bf6a6069910aa86d56c0aa562e093b865a418",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "e5954f82cdb854ae81f474ff986402537bc07b1b839c17f1b0f104026446cac0",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.82,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "e5b6b0e537e61c647fc1dfaaeb7c2446b414daf291649f5f3d2bea148451b34d",
+            "card_hash": "44ce3d23faed507b1a8bb79ff7e97b75879c65c04a24a8634e3e3c7da22fa60f",
+            "quote": "Today we’re expanding the Gemini family with three new models built to be faster, more token efficient, and reliable at scale."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 15570,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 20016,
+      "wall_time_ms": 0
+    }
+  }
+}

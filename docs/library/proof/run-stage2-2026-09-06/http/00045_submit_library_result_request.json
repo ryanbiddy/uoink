@@ -1,0 +1,35 @@
+{
+  "seq": 45,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "7VOLV65NZVLq-8eiL0cmPisvPyCYAxob",
+    "client_id": "proof-harness",
+    "attempt_token": "FBgydrZE_sHqLdsulQPKWyPtbgAzQHnmrOpDLUKHp1I",
+    "submission_key": "7VOLV65NZVLq-8eiL0cmPisvPyCYAxob-FBgydrZE_sHqLdsulQPKWyPtbgAzQHnmrOpDLUKHp1I",
+    "schema_version": 1,
+    "video_id": "2078656827990978560",
+    "source_revision": "05f5d7521b83dbc1def6a534c6bed5e7bd917230eaee94126c251a364ef7b75d",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "f0d3324cc854063843e757129765fadf3347c05d2a3c08ff1804b0e27c72280c",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Transcript is casual chatter about a livestreamer at a WWE event interacting with security and staff; no AI/ML, space/science, or breaking crime/riot/conflict content is established, so it falls outside every approved shelf."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 9215,
+      "cache_read_tokens": 103823,
+      "cache_create_tokens": 111643,
+      "wall_time_ms": 0
+    }
+  }
+}

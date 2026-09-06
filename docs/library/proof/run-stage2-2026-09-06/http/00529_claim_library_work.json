@@ -1,0 +1,909 @@
+{
+  "seq": 529,
+  "tool": "claim_library_work",
+  "wall_ms": 10,
+  "request": {
+    "seq": 529,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 529,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 10,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "pLXzd1eCFB2N887RZcmknLZ0aIH5tptS",
+            "video_id": "2087194180972118016",
+            "attempt_token": "BDkVWlH76FAkVTD00e6Og-rImjKSfXz5WhlzOy20f5s",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677088042,
+            "source_revision": "69957a77704fc683a9b799e52d222cb35f0a499bb58f1a6055042ff08ec227b2",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "85e18fb599c89110b6aee7c004c12616ec422fab85375548ea8259bc64c82443",
+            "card": {
+              "card_hash": "d72bafd393b9ce26fffe55a0b61b553ffbc2d1887500f7af5c4c3fc269662a3a",
+              "channel": "Karan",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/karankendre/status/2087194324316668246",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "5469768002006cd50eb5368433a55cf49f70444d301d9ade5c05ccf4f9a4888f",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Why would anyone pay $6 / 1M tokens   when GPT-5.6 Luna is literally free ??? https://t.co/e72sPfSLth No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Why would anyone pay $6 / 1M tokens   when GPT-5.6 Luna is literally free ??? https://t.co/e72sPfSLth No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Karan_-_Why_would_anyone_pay_6_1M_tokens_when_GPT-5_6_Luna_is_literally",
+              "source_revision": "69957a77704fc683a9b799e52d222cb35f0a499bb58f1a6055042ff08ec227b2",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Why would anyone pay $6 / 1M tokens   when GPT-5.6 Luna is literally free ??? https://t.co/e72sPfSLth No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Karan - Why would anyone pay $6 / 1M tokens   when GPT-5.6 Luna is literally ...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/karankendre/status/2087194324316668246",
+              "video_id": "2087194180972118016",
+              "yoinked_at": "2026-08-12T07:38:47"
+            }
+          },
+          {
+            "work_id": "pVLYsJKchd1_OKMcwrjHC6eTZAKVulhz",
+            "video_id": "2087217791900491839",
+            "attempt_token": "uwFU4mYqI4JtC4tCOfOQ04X_D2yCC0gEM3mwPznnwfk",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677088043,
+            "source_revision": "ad9d9c0d94f7e0050df443032980f9978e075568a8ff5927140c8febd9480573",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "9842345cff4a64be2dafad4003ce1ff20f92a76e2a4a5d3862595666fd11a7c0",
+            "card": {
+              "card_hash": "ed73aeba6f2abfcf7fe54a2a6bf5e08fc7d6a8d0bfc76e5ddf23f9ff0d7870d8",
+              "channel": "Black Forest Labs",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/bfl_ai/status/2087217791900491839",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "0f1f7e08640f9e948594b1dfdb412d9749b93cea1f2b40153fc2ce0f97a922e8",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> FLUX 3 Video is #2 in the world.  To celebrate, FLUX 3 Video is free to use in our playground until Sunday 16th, 11:59pm PT (link in the thread).  This is just the beginning of what’s coming. Up next: 4",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> FLUX 3 Video is #2 in the world.  To celebrate, FLUX 3 Video is free to use in our playground until Sunday 16th, 11:59pm PT (link in the thread).  This is just the beginning of what’s coming. Up next: 4K, video editing, and multiple images &amp; videos as reference input. https://t.co/d2ulDdMvFN No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Black_Forest_Labs_-_FLUX_3_Video_is_2_in_the_world_To_celebrate_FLUX_3_Video_is",
+              "source_revision": "ad9d9c0d94f7e0050df443032980f9978e075568a8ff5927140c8febd9480573",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> FLUX 3 Video is #2 in the world.  To celebrate, FLUX 3 Video is free to use in our playground until Sunday 16th, 11:59pm PT (link in the thread).  This is just the beginning of what’s coming. Up next: 4K, video editing, and multiple images &amp; videos as reference input. https://t.co/d2ulDdMvFN No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Black Forest Labs - FLUX 3 Video is #2 in the world.  To celebrate, FLUX 3 Video is free ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/bfl_ai/status/2087217791900491839",
+              "video_id": "2087217791900491839",
+              "yoinked_at": "2026-08-12T07:38:52"
+            }
+          },
+          {
+            "work_id": "pbskjuyCZm_6XZ91GZtqLX3DCKAY6MYL",
+            "video_id": "2086795560451768320",
+            "attempt_token": "3tuWi57Y6Wdj3O7EDlrNtRiJS3WYa3otvgFZRXos5pg",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677088043,
+            "source_revision": "d281b085f10bb32db0ce04463d4644a870a2c0f423519a9646bddaaa12603efc",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "39cf2265123206012b0fef0167646240c98b4d153eba013a61292460fade94a2",
+            "card": {
+              "card_hash": "00dd90d628e5104e4619954e69ef1154144bee7d2e962506c47e216fe689ed27",
+              "channel": "Spotify Engineering",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/SpotifyEng/status/2086795659651191106",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "a41f2d441d0fda548bff736a2b6d9fda3cba9cf55bc6adce2e8ac7252d28ab40",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> We just launched Xirp, a vendor-neutral agentic development environment. One place to manage agent sessions across @ClaudeDevs, @GeminiApp CLI, and @OpenAI Codex. 1,300+ @Spotify engineers already use i",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> We just launched Xirp, a vendor-neutral agentic development environment. One place to manage agent sessions across @ClaudeDevs, @GeminiApp CLI, and @OpenAI Codex. 1,300+ @Spotify engineers already use it. Now it's available for you to try. Learn more at https://t.co/Hwo8Qqx4OI. https://t.co/YTuJ3LA3M9 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Spotify_Engineering_-_We_just_launched_Xirp_a_vendor-neutral_agentic_development",
+              "source_revision": "d281b085f10bb32db0ce04463d4644a870a2c0f423519a9646bddaaa12603efc",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> We just launched Xirp, a vendor-neutral agentic development environment. One place to manage agent sessions across @ClaudeDevs, @GeminiApp CLI, and @OpenAI Codex. 1,300+ @Spotify engineers already use it. Now it's available for you to try. Learn more at https://t.co/Hwo8Qqx4OI. https://t.co/YTuJ3LA3M9 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "title": "Spotify Engineering - We just launched Xirp, a vendor-neutral agentic development environme...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/SpotifyEng/status/2086795659651191106",
+              "video_id": "2086795560451768320",
+              "yoinked_at": "2026-08-11T07:39:21"
+            }
+          },
+          {
+            "work_id": "rAbdKzMAZESF3WRba2c9k28sv72_fl8-",
+            "video_id": "2086219750065967512",
+            "attempt_token": "mmZuZb5NSfVfPeYfuNHVI5hUD2IP6SDuSY0gwLbbI_E",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677088044,
+            "source_revision": "d9567387ba6d46affdc558220f0f97d9c0e3ba2990ff5376961b0249c37774ea",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "f2ef02aa34e92738eb0332762f184f3ba3a64d402078e4c36f5746cfdf7a517b",
+            "card": {
+              "card_hash": "b44d83f05843a30c2417f5dca30e2305b9ceeb55e6c351db65a74ded0e96254f",
+              "channel": "Chris",
+              "chars": 90,
+              "chars_all_clips": 90,
+              "chars_chosen_clips": 90,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/ChrisGPT/status/2086219750065967512#t=0",
+                  "end": 14.72,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "eeed6e03e4e921963be851452651acbcf5c569081d1b0017faff95604a063544",
+                  "start": 0.4,
+                  "text": "It's pouring, watch this. Okay no umbrella Hair gone Makeup perfect Lincoln Bio Rain Proof",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/ChrisGPT/status/2086219750065967512#t=0",
+                  "end": 14.72,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "eeed6e03e4e921963be851452651acbcf5c569081d1b0017faff95604a063544",
+                  "start": 0.4,
+                  "text": "It's pouring, watch this. Okay no umbrella Hair gone Makeup perfect Lincoln Bio Rain Proof",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> You can clearly see the jump from Seedance 2.0 to 2.5 here.  2.0 was already good, but you can still pick up that recognizable AI hue and texture in the skin. With Seedance 2.5, I’d say we’re hitting like 90–95% human facial realism in shots like this. Skin texture, lighting, and https://t.co/Ny7hkOsGeq No tags [00:00:00] It's pouring, watch this. [00:00:03] Okay no umbrella [00:00:04] Hair gone [00:00:11] Makeup perfect [00:00:13] Lincoln Bio Rain Proof <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No ch",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Chris_-_You_can_clearly_see_the_jump_from_Seedance_2_0_to_2_5_here_2_0_was",
+              "source_revision": "d9567387ba6d46affdc558220f0f97d9c0e3ba2990ff5376961b0249c37774ea",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> You can clearly see the jump from Seedance 2.0 to 2.5 here.  2.0 was already good, but you can still pick up that recognizable AI hue and texture in the skin. With Seedance 2.5, I’d say we’re hitting like 90–95% human facial realism in shots like this. Skin texture, lighting, and https://t.co/Ny7hkOsGeq No tags [00:00:00] It's pouring, watch this. [00:00:03] Okay no umbrella [00:00:04] Hair gone [00:00:11] Makeup perfect [00:00:13] Lincoln Bio Rain Proof <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No ch",
+              "title": "Chris - You can clearly see the jump from Seedance 2.0 to 2.5 here.  2.0 was ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/ChrisGPT/status/2086219750065967512",
+              "video_id": "2086219750065967512",
+              "yoinked_at": "2026-08-09T07:42:19"
+            }
+          },
+          {
+            "work_id": "t9pmxkVU8FgbRcDtWZMpMLLdBPlNUmfo",
+            "video_id": "2086913080869482497",
+            "attempt_token": "glylksSt5IB-xFV_9bxaUtq1ziWRoa0Bu6Jl35p5dJo",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677088045,
+            "source_revision": "edd56c59322e12a87d425431dc9478459b63759e060244c19ba52150417c2512",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "97caedada241367bb51d6291698e0ee104436491f250cdeb24e406175d7e32c1",
+            "card": {
+              "card_hash": "9b7144d22ff0980680a507a8762d9872b60e36902b2261f56b039d00b4556eb3",
+              "channel": "Just a Dude Who Invests",
+              "chars": 1708,
+              "chars_all_clips": 1708,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/DudeWhoInvests/status/2086913136892756148#t=0",
+                  "end": 113.959,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "289f22b713905fa8ad72eb43d799844b7c8ad65c87ae24469e1a06d311828134",
+                  "start": 0.0,
+                  "text": "came together and what exactly it is. Well, first of all I want to thank my partners for joining me here today this the first time that has ever happened before And I can't imagine a more important time to do it We're announcing six partner",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/DudeWhoInvests/status/2086913136892756148#t=0",
+                  "end": 113.959,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "289f22b713905fa8ad72eb43d799844b7c8ad65c87ae24469e1a06d311828134",
+                  "start": 0.0,
+                  "text": "came together and what exactly it is. Well, first of all I want to thank my partners for joining me here today this the first time that has ever happened before And I can't imagine a more important time to do it We're announcing six partner",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Nvidia $NVDA CEO Jensen Huang is literally TELLING you what to buy to get filthy rich…  “Compute is becoming an asset class.”  Companies that provide compute: Amazon $AMZN Google $GOOGL Microsoft $MSFT Meta $META CoreWeave $CRWV Nebius $NBIS  Is it time to buy… https://t.co/zNp0CMeZJQ No tags [00:00:00] came together and what exactly it is. [00:00:01] Well, first of all I want to thank [00:00:03] my partners for joining me here today [00:00:05] this the first time [00:00:06] that has ever happened before [00:00:07] And I can't imagine a more important [00:",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Just_a_Dude_Who_Invests_-_Nvidia_NVDA_CEO_Jensen_Huang_is_literally_TELLING_you",
+              "source_revision": "edd56c59322e12a87d425431dc9478459b63759e060244c19ba52150417c2512",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Nvidia $NVDA CEO Jensen Huang is literally TELLING you what to buy to get filthy rich…  “Compute is becoming an asset class.”  Companies that provide compute: Amazon $AMZN Google $GOOGL Microsoft $MSFT Meta $META CoreWeave $CRWV Nebius $NBIS  Is it time to buy… https://t.co/zNp0CMeZJQ No tags [00:00:00] came together and what exactly it is. [00:00:01] Well, first of all I want to thank [00:00:03] my partners for joining me here today [00:00:05] this the first time [00:00:06] that has ever happened before [00:00:07] And I can't imagine a more important [00:",
+              "title": "Just a Dude Who Invests - Nvidia $NVDA CEO Jensen Huang is literally TELLING you what to buy to...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/DudeWhoInvests/status/2086913136892756148",
+              "video_id": "2086913080869482497",
+              "yoinked_at": "2026-08-11T07:39:03"
+            }
+          },
+          {
+            "work_id": "xi9WD8V6ZJPm943l6sAHWyZLS3MxGLf-",
+            "video_id": "2086879775277125633",
+            "attempt_token": "PI2NP8PjA6RpDHExzkW2g3MVogZU3KFX42cjD5UvHxY",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677088046,
+            "source_revision": "21dcae88d8fba8ff742591fa33d39426744ac51bb4f28f454c888fb4e7d58d54",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "926886e8481c94a5401fabae000a39d4d29b75f4dfee819831540b48add57c8b",
+            "card": {
+              "card_hash": "b8ce4cd4bbba67a06820e6893c93f8514bf86366162057232de481a39e88aabc",
+              "channel": "Nous Research",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/NousResearch/status/2086881660658663469",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "98e61344a36673865858787130288f49cf74edcba40db37cb10928ad92fb763b",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Hermes has twelve browser tools. Browser Use mode replaces them with a single one, driven by @browser_use's CLI 3.0.  Instead of a dozen schemas in every request and a tool call per click, the agent wri",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Hermes has twelve browser tools. Browser Use mode replaces them with a single one, driven by @browser_use's CLI 3.0.  Instead of a dozen schemas in every request and a tool call per click, the agent writes a script. In our tests that cut token use 48-66% with no accuracy drop. https://t.co/DHvR00hgDe No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Nous_Research_-_Hermes_has_twelve_browser_tools_Browser_Use_mode_replaces_them_w",
+              "source_revision": "21dcae88d8fba8ff742591fa33d39426744ac51bb4f28f454c888fb4e7d58d54",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Hermes has twelve browser tools. Browser Use mode replaces them with a single one, driven by @browser_use's CLI 3.0.  Instead of a dozen schemas in every request and a tool call per click, the agent writes a script. In our tests that cut token use 48-66% with no accuracy drop. https://t.co/DHvR00hgDe No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+              "title": "Nous Research - Hermes has twelve browser tools. Browser Use mode replaces them with ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/NousResearch/status/2086881660658663469",
+              "video_id": "2086879775277125633",
+              "yoinked_at": "2026-08-11T07:39:26"
+            }
+          },
+          {
+            "work_id": "y0Bi9JigTaKJTBrJ2p0X9rUd49E9KpqN",
+            "video_id": "2086844879347634176",
+            "attempt_token": "GJk4pQAe7FEtpknMy-sGso8cadB2j-W8lzUDASRw5r0",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677088046,
+            "source_revision": "780ec7526a826503825c5f4922b7f51f98eec8dede3439e3ea4eed941082b7cc",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "c627463b6da401b167d45c0025957ebb27b7273542c6fd3247a38389ba21a674",
+            "card": {
+              "card_hash": "d4956fcbcdd7ae0a300cb3d396f831573c3726736fa8c0bae26817b912b7a47e",
+              "channel": "a16z",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/a16z/status/2086845184785203468",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "d65ff5aa3e6e902f21a0f4c381d44ac293c9e0f1657af6688c160cf79e6b8c66",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> AI agents at Kavak sell the cars, underwrite the loans, coach the mechanics, and in one Mexican city, run the entire operation.  The Latin American used-car marketplace bet on agents three years ago. To",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> AI agents at Kavak sell the cars, underwrite the loans, coach the mechanics, and in one Mexican city, run the entire operation.  The Latin American used-car marketplace bet on agents three years ago. Today ~95% of interactions and transactions run end-to-end on AI: NPS tripled, https://t.co/hK64T9u9z4 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "a16z_-_AI_agents_at_Kavak_sell_the_cars_underwrite_the_loans_coach_the_mec",
+              "source_revision": "780ec7526a826503825c5f4922b7f51f98eec8dede3439e3ea4eed941082b7cc",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> AI agents at Kavak sell the cars, underwrite the loans, coach the mechanics, and in one Mexican city, run the entire operation.  The Latin American used-car marketplace bet on agents three years ago. Today ~95% of interactions and transactions run end-to-end on AI: NPS tripled, https://t.co/hK64T9u9z4 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "title": "a16z - AI agents at Kavak sell the cars, underwrite the loans, coach the mec...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/a16z/status/2086845184785203468",
+              "video_id": "2086844879347634176",
+              "yoinked_at": "2026-08-11T07:39:54"
+            }
+          },
+          {
+            "work_id": "ysvjNbKiUcYFc3I4dzXGgDYHhuhk8Nd7",
+            "video_id": "2086167440203923456",
+            "attempt_token": "jXHFvMNpVdrM2Q4vMkJkirSEPdSxrk8n9RAnq0sjfyU",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677088048,
+            "source_revision": "d873db97c10916d5f74eb97a75b2eadc8783d2eec3e0288fdc1e80dcda85532f",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "c9769001a964898c71d71136e3a9afdd466a205c5bdeed34e34f44fe33ea673e",
+            "card": {
+              "card_hash": "7d9049170278f157198eb98a1fc5e231cc57f31961b9332c0b12c9e4ae382903",
+              "channel": "Linas Beliūnas",
+              "chars": 50762,
+              "chars_all_clips": 50762,
+              "chars_chosen_clips": 1440,
+              "clip_count": 34,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/linasbeliunas/status/2086168410736546189#t=0",
+                  "end": 119.349,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "aadcb8a85d60faef991b7898b3863376fda0804d927594cfbe78622ff16c1521",
+                  "start": 0.0,
+                  "text": "And I'm going to talk to you about what's happening in AI. A little huge notice, but it is a thing these days and we have many people at Google working on this area so presenting the work of not just my work with many, many people like Goog",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/linasbeliunas/status/2086168410736546189#t=1073",
+                  "end": 1193.839,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "8e833afa69329c7b70f15655855c5a784a9de9db8c67266a74b81bf2233a5e36",
+                  "start": 1073.97,
+                  "text": "That State Being Ready Before You Can Go On To Update The Next Word So It's Not Very Parallelizable Which Isn't Good In Modern Hardware And The Other Thing Is You Are Trying To Force All Of Things That Went Through Into A Single Vector So I",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/linasbeliunas/status/2086168410736546189#t=1910",
+                  "end": 2030.289,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "9ba104e4d292a7d220bb3a198d4d26bba44063e2fe462e61b6619dcf77544aa1",
+                  "start": 1910.68,
+                  "text": "What That Teacher Model Can Give The Word That Likely Next Words So It Could Be Violin Can You Piano Could Be Trumpet Is Almost Certainly Not Airplane Unless There's New Concerto They Don't Know About And To That Give A Really Rich Gradient",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/linasbeliunas/status/2086168410736546189#t=2268",
+                  "end": 2388.039,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "adc3105012ed44d1e1078df40ad4e3254221fd8e922b7cb4ccbaf2bbc8f39a26",
+                  "start": 2268.8,
+                  "text": "The Question Mark It Can Probably Make A Prediction Of Four Or Five Tokens And Get Some Of Them Correct In Particular Some Prefix Of Them Correct So You Have A Fast Draft Model Where You Don't Need The Full Sophistication Of Much Larger Mod",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/linasbeliunas/status/2086168410736546189#t=3103",
+                  "end": 3222.199,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "6f64635e3bb85ffeea9ebaf4d770b119d89e2df2720556cc7715f4b21c5c5467",
+                  "start": 3103.42,
+                  "text": "Planet Not Demoted Dwarf And He Said Perfect We Are So Back Okay I Want To Touch A Little Bit On How We Organize A Big Effort Like Gemini In Particular This Is A Large Effort Now Co-author Of The Paper With More Than 1000 Authors Our Report",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/linasbeliunas/status/2086168410736546189#t=3342",
+                  "end": 3460.96,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ff71f69651b0a58b6d58245195d87677b999d22b544439cf7e47943363bbaf55",
+                  "start": 3342.059,
+                  "text": "Important How Do Humans And Agents Collaborate To Get Stuff Done Right Like Currently A Lot Of The Uses Are You A Single Person Sitting Down With An Interactive Chatbot Interface Doing Stuff But In The Future It Seems Like More Work Is Goin",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/linasbeliunas/status/2086168410736546189#t=0",
+                  "end": 119.349,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "aadcb8a85d60faef991b7898b3863376fda0804d927594cfbe78622ff16c1521",
+                  "start": 0.0,
+                  "text": "And I'm going to talk to you about what's happening in AI. A little huge notice, but it is a thing these days and we have many people at Google working on this area so presenting the work of not just my work with many, many people like Goog",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/linasbeliunas/status/2086168410736546189#t=1073",
+                  "end": 1193.839,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "8e833afa69329c7b70f15655855c5a784a9de9db8c67266a74b81bf2233a5e36",
+                  "start": 1073.97,
+                  "text": "That State Being Ready Before You Can Go On To Update The Next Word So It's Not Very Parallelizable Which Isn't Good In Modern Hardware And The Other Thing Is You Are Trying To Force All Of Things That Went Through Into A Single Vector So I",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/linasbeliunas/status/2086168410736546189#t=1910",
+                  "end": 2030.289,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "9ba104e4d292a7d220bb3a198d4d26bba44063e2fe462e61b6619dcf77544aa1",
+                  "start": 1910.68,
+                  "text": "What That Teacher Model Can Give The Word That Likely Next Words So It Could Be Violin Can You Piano Could Be Trumpet Is Almost Certainly Not Airplane Unless There's New Concerto They Don't Know About And To That Give A Really Rich Gradient",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/linasbeliunas/status/2086168410736546189#t=2268",
+                  "end": 2388.039,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "adc3105012ed44d1e1078df40ad4e3254221fd8e922b7cb4ccbaf2bbc8f39a26",
+                  "start": 2268.8,
+                  "text": "The Question Mark It Can Probably Make A Prediction Of Four Or Five Tokens And Get Some Of Them Correct In Particular Some Prefix Of Them Correct So You Have A Fast Draft Model Where You Don't Need The Full Sophistication Of Much Larger Mod",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/linasbeliunas/status/2086168410736546189#t=3103",
+                  "end": 3222.199,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "6f64635e3bb85ffeea9ebaf4d770b119d89e2df2720556cc7715f4b21c5c5467",
+                  "start": 3103.42,
+                  "text": "Planet Not Demoted Dwarf And He Said Perfect We Are So Back Okay I Want To Touch A Little Bit On How We Organize A Big Effort Like Gemini In Particular This Is A Large Effort Now Co-author Of The Paper With More Than 1000 Authors Our Report",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/linasbeliunas/status/2086168410736546189#t=3342",
+                  "end": 3460.96,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ff71f69651b0a58b6d58245195d87677b999d22b544439cf7e47943363bbaf55",
+                  "start": 3342.059,
+                  "text": "Important How Do Humans And Agents Collaborate To Get Stuff Done Right Like Currently A Lot Of The Uses Are You A Single Person Sitting Down With An Interactive Chatbot Interface Doing Stuff But In The Future It Seems Like More Work Is Goin",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Linas_Beli_nas_-_Instead_of_watching_1_hour_of_Netflix_tonight_watch_this_ex-Goo",
+              "source_revision": "d873db97c10916d5f74eb97a75b2eadc8783d2eec3e0288fdc1e80dcda85532f",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "Linas Beliūnas - Instead of watching 1 hour of Netflix tonight, watch this ex-Google C...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://x.com/linasbeliunas/status/2086168410736546189",
+              "video_id": "2086167440203923456",
+              "yoinked_at": "2026-08-09T07:46:18"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

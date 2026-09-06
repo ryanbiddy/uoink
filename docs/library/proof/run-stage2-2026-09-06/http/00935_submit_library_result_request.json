@@ -1,0 +1,51 @@
+{
+  "seq": 935,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "KzIlZBVK5q7OaSRmJGsqXgM_G20fstzw",
+    "client_id": "proof-harness",
+    "attempt_token": "HKvYkU9uWp41MTAGeePn_21klSAlGima03-YFtYQjoM",
+    "submission_key": "KzIlZBVK5q7OaSRmJGsqXgM_G20fstzw-HKvYkU9uWp41MTAGeePn_21klSAlGima03-YFtYQjoM",
+    "schema_version": 1,
+    "video_id": "2093098700612517888",
+    "source_revision": "27e9af48155d4e01df103295a105edfb71091bc7a657749531cb5b92e6a2b355",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "57209f1a962cffa8b3a9ccf61e01501f8e03c30c35b443d39000bba897545cce",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "134b17bb0c3056eae5da770592e095c609d69bb8744e9aab65c60e4ec45d78da",
+            "card_hash": "3a684953ebf52855d3f40ecfe9a364d551999e44dab3f8d1465da171c93f90bd",
+            "quote": "we're now the only NeoCloud certified hypervisor from NVIDIA as a result of today's announcement"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 15696,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 22313,
+      "wall_time_ms": 0
+    }
+  }
+}

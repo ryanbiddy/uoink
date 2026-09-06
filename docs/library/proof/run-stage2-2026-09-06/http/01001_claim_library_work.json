@@ -1,0 +1,1060 @@
+{
+  "seq": 1001,
+  "tool": "claim_library_work",
+  "wall_ms": 10,
+  "request": {
+    "seq": 1001,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 1001,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 10,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "FRSGuepjI3VNqmTkqZ0Wb_kqh_7rxwVH",
+            "video_id": "2092344854756069376",
+            "attempt_token": "7GB_Az8mVi6uHvHfeT0vx6vXM507FzKdCyxefiqin0w",
+            "attempt_number": 3,
+            "lease_expires_ms": 1788678124615,
+            "source_revision": "a768de1854db75705c2367b8dbe0e409838549b30bfb656487c4ceb8ee3bd1ef",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "cd6c9a6baf046ee6fdb88103743258017f0a543858fcb8a29232e0698f202692",
+            "card": {
+              "card_hash": "48c7aeb7f5723339fff9d0aba739ca2e7d9810eccc97a12f72055fbb67ba259e",
+              "channel": "OpenAI Developers",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/OpenAIDevs/status/2092344873764704345",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "c37a5da711ce9970888626d20d89fce286dd39cb384b240abbce14de4e0b85ec",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> The WebMCP Challenge is here.  We’ve teamed up with @ChromiumDev, @CloudflareDev, @ShopifyDevs, @vercel, @render, and @Netlify for a 10-day hackathon.  Up for grabs: $35,000 in cash prizes, Codex Micros",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> The WebMCP Challenge is here.  We’ve teamed up with @ChromiumDev, @CloudflareDev, @ShopifyDevs, @vercel, @render, and @Netlify for a 10-day hackathon.  Up for grabs: $35,000 in cash prizes, Codex Micros, ChatGPT Pro subscriptions, and more prizes from our supporters. https://t.co/J7CGKSxggZ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "OpenAI_Developers_-_The_WebMCP_Challenge_is_here_We_ve_teamed_up_with_ChromiumDe",
+              "source_revision": "a768de1854db75705c2367b8dbe0e409838549b30bfb656487c4ceb8ee3bd1ef",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> The WebMCP Challenge is here.  We’ve teamed up with @ChromiumDev, @CloudflareDev, @ShopifyDevs, @vercel, @render, and @Netlify for a 10-day hackathon.  Up for grabs: $35,000 in cash prizes, Codex Micros, ChatGPT Pro subscriptions, and more prizes from our supporters. https://t.co/J7CGKSxggZ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "OpenAI Developers - The WebMCP Challenge is here.  We’ve teamed up with @ChromiumDev, @Cl...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/OpenAIDevs/status/2092344873764704345",
+              "video_id": "2092344854756069376",
+              "yoinked_at": "2026-08-26T07:55:19"
+            }
+          },
+          {
+            "work_id": "NTq-qeTh8OKXWmWFLTOeeJgqatc4XMy2",
+            "video_id": "2092658884297334784",
+            "attempt_token": "gp8TI_25vYFFobR4Cfu3VeyXj9aVrYgFoTC79b5WOzk",
+            "attempt_number": 3,
+            "lease_expires_ms": 1788678124616,
+            "source_revision": "fe9061677d7c91e2667115fbac143a259ebf794902f6ddf2f229e15036b77d33",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "cc882ac93adef5a7699201499f5d87f03fa0ea21e1c030063fd608e7716d23e0",
+            "card": {
+              "card_hash": "751e34f3613f149acd066dcc16f77d202cd681c6ec3087fb9b4812c5eb15bcb7",
+              "channel": "Meta for Developers",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/MetaforDevs/status/2092658893143072815",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "73f0906f4f52b284112b3d8bb44647836266efdf2907413c8b26546bfab1ec01",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Muse Image is now available on Meta Model API and priced for production volumes at $0.01/image.   It’s an agentic image model that reasons before it renders. Each call searches the web to refine the out",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Muse Image is now available on Meta Model API and priced for production volumes at $0.01/image.   It’s an agentic image model that reasons before it renders. Each call searches the web to refine the output through iterative passes and evaluates the prompt for precise elements https://t.co/xzH4ymjejl No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Meta_for_Developers_-_Muse_Image_is_now_available_on_Meta_Model_API_and_priced_f",
+              "source_revision": "fe9061677d7c91e2667115fbac143a259ebf794902f6ddf2f229e15036b77d33",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Muse Image is now available on Meta Model API and priced for production volumes at $0.01/image.   It’s an agentic image model that reasons before it renders. Each call searches the web to refine the output through iterative passes and evaluates the prompt for precise elements https://t.co/xzH4ymjejl No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+              "title": "Meta for Developers - Muse Image is now available on Meta Model API and priced for producti...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/MetaforDevs/status/2092658893143072815",
+              "video_id": "2092658884297334784",
+              "yoinked_at": "2026-08-27T07:38:26"
+            }
+          },
+          {
+            "work_id": "E3EZZeVJ5ZnqA873OSd4yT3VSe0ujF4y",
+            "video_id": "2094906875976232960",
+            "attempt_token": "QEYCHp_rPL3ltUJEtasa9xOfcwh-3Tk7DlrvAXBNWls",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678124617,
+            "source_revision": "8dae30056d1c65ed1aeb883a95e4996436ced0339f138bf8ec51918277d85665",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "79a6ffda3044fa9c874bc6d4e9aec2b3cc801ede515e8d579822bbc8326ccb5f",
+            "card": {
+              "card_hash": "20f1fb1a6e3018f84ce9ec91e2fdc0747d22128a712c9f4130a86384d2863db7",
+              "channel": "Peter DiCarlo",
+              "chars": 7529,
+              "chars_all_clips": 7529,
+              "chars_chosen_clips": 1200,
+              "clip_count": 5,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094907185234915787#t=0",
+                  "end": 119.3,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "047e3709c95bcf670d740712275b9b4e3ec1ab7a5474b583c9d0f126e98f2ce9",
+                  "start": 0.6,
+                  "text": "I was bullish on CoreWeave for a while and then back here on August 12th after we had nearly a 20% move after earnings I decided to close my position around $112 Now I did an extensive write-up talking about why I wanted to close my positio",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094907185234915787#t=119",
+                  "end": 225.055,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c049390fb4cab2c7591dfda6055b46baef1cca8907a884733b360df3973f38a4",
+                  "start": 119.34,
+                  "text": "This would be the External swing high We have a low all the way down here at about thirty-three dollars and thirty-six cents which would be considered our external swing low So obviously when price is making higher highs on the external and",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094907185234915787#t=225",
+                  "end": 344.895,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "5a78375d5fdc0bcd9240c1c7b413957b427ddf1eb62b4648e7569b09f46a820d",
+                  "start": 225.575,
+                  "text": "Both times, smart money pricing right here institutional sell pricing right there So until price can clear or break above a swing high the anticipation is that price short-term Would reject where we anticipated it and that price would proba",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094907185234915787#t=345",
+                  "end": 464.515,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c67c6b1be3ed3d7880ae78ec28de689def07223b8ff6ae1bb6a55d7ac5d35d27",
+                  "start": 345.315,
+                  "text": "you'll notice that the smart money zone on the external timeframe is actually placed right here at $60 So if I really wanted to be a stickler and I really wanted the best price And I was okay with it potentially bouncing early The zone that",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094907185234915787#t=464",
+                  "end": 495.347,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "8f89a24b40f82cef2c687b8f2bffc462a75914db7ade5b9d67c958f2b7f8e53e",
+                  "start": 464.875,
+                  "text": "if we look at November 20th expirations you have implied volatility above 70% which is really, really high And also the volume on these contracts is pretty damn decent So I think that selling cash secured puts maybe for middle of October wi",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094907185234915787#t=0",
+                  "end": 119.3,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "047e3709c95bcf670d740712275b9b4e3ec1ab7a5474b583c9d0f126e98f2ce9",
+                  "start": 0.6,
+                  "text": "I was bullish on CoreWeave for a while and then back here on August 12th after we had nearly a 20% move after earnings I decided to close my position around $112 Now I did an extensive write-up talking about why I wanted to close my positio",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094907185234915787#t=119",
+                  "end": 225.055,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c049390fb4cab2c7591dfda6055b46baef1cca8907a884733b360df3973f38a4",
+                  "start": 119.34,
+                  "text": "This would be the External swing high We have a low all the way down here at about thirty-three dollars and thirty-six cents which would be considered our external swing low So obviously when price is making higher highs on the external and",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094907185234915787#t=225",
+                  "end": 344.895,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "5a78375d5fdc0bcd9240c1c7b413957b427ddf1eb62b4648e7569b09f46a820d",
+                  "start": 225.575,
+                  "text": "Both times, smart money pricing right here institutional sell pricing right there So until price can clear or break above a swing high the anticipation is that price short-term Would reject where we anticipated it and that price would proba",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094907185234915787#t=345",
+                  "end": 464.515,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c67c6b1be3ed3d7880ae78ec28de689def07223b8ff6ae1bb6a55d7ac5d35d27",
+                  "start": 345.315,
+                  "text": "you'll notice that the smart money zone on the external timeframe is actually placed right here at $60 So if I really wanted to be a stickler and I really wanted the best price And I was okay with it potentially bouncing early The zone that",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094907185234915787#t=464",
+                  "end": 495.347,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "8f89a24b40f82cef2c687b8f2bffc462a75914db7ade5b9d67c958f2b7f8e53e",
+                  "start": 464.875,
+                  "text": "if we look at November 20th expirations you have implied volatility above 70% which is really, really high And also the volume on these contracts is pretty damn decent So I think that selling cash secured puts maybe for middle of October wi",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I sold my $CRWV position last month after the earnings breakout.  Since then, I’ve been patient and waiting for the right opportunity to get back in.  In today’s video, I explain why I’m still bullish long term and exactly where I plan to buy again.  Watch now. https://t.co/Qo8ZjxSoo7 No tags [00:00:00] I was bullish on CoreWeave for a while [00:00:03] and then back here on August 12th [00:00:06] after we had nearly a 20% move after earnings [00:00:10] I decided to close my position around $112 [00:00:14] Now [00:00:15] I did an extensive write-up talking ",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Peter_DiCarlo_-_I_sold_my_CRWV_position_last_month_after_the_earnings_breakout_S",
+              "source_revision": "8dae30056d1c65ed1aeb883a95e4996436ced0339f138bf8ec51918277d85665",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I sold my $CRWV position last month after the earnings breakout.  Since then, I’ve been patient and waiting for the right opportunity to get back in.  In today’s video, I explain why I’m still bullish long term and exactly where I plan to buy again.  Watch now. https://t.co/Qo8ZjxSoo7 No tags [00:00:00] I was bullish on CoreWeave for a while [00:00:03] and then back here on August 12th [00:00:06] after we had nearly a 20% move after earnings [00:00:10] I decided to close my position around $112 [00:00:14] Now [00:00:15] I did an extensive write-up talking ",
+              "title": "Peter DiCarlo - I sold my $CRWV position last month after the earnings breakout.  Sin...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/pdicarlotrader/status/2094907185234915787",
+              "video_id": "2094906875976232960",
+              "yoinked_at": "2026-09-01T15:36:19"
+            }
+          },
+          {
+            "work_id": "F6AxU7ItNgmoqMTyd1Hih7eBMM_u4EJ3",
+            "video_id": "2094908776167948288",
+            "attempt_token": "lC30K1KF7iW1W1c1FMLDg3TuHi7Eq06ATYLXmnIowu4",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678124618,
+            "source_revision": "e89327961fd25a72ccd778e8013bfe114a557e4d49da3ec9e7fab74de844cd6f",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "4a85ab5e7e91520698ad1f76700d88cf17ea8c5fff171239665766ef81cbf33a",
+            "card": {
+              "card_hash": "dd19ba9f8b2f3a3f939b9a4065c2f956f6e6a46f4afbb718db4f0d1136eeb1e2",
+              "channel": "Peter DiCarlo",
+              "chars": 5524,
+              "chars_all_clips": 5524,
+              "chars_chosen_clips": 960,
+              "clip_count": 4,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094909532052832556#t=0",
+                  "end": 119.321,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "0da3916a26458eab90ddb56baf3ff337994decfb5808f86944520805691fdb13",
+                  "start": 0.46,
+                  "text": "So I've been talking about CIFR for the past couple of weeks and this major buy zone support that we are currently sitting in And we have called this to perfection Back on August 19th we talked about this buy zone alert From there we said t",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094909532052832556#t=119",
+                  "end": 220.775,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "afecaffba1122c0fc1dab9f32ecb65a6c4a403ffd2e9413d640e1bb14e0c9a32",
+                  "start": 119.661,
+                  "text": "long-term, we are pretty damn good When price pulls back into a smart money zone when price holds over the external swing low there's historically about a 70% chance that price is going to break out back to swing highs So this means that we",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094909532052832556#t=221",
+                  "end": 281.194,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ac98d4c42daa7add528f378ffd705b0397346fa92ee9f66eaee9ebd1b0e89bb2",
+                  "start": 221.135,
+                  "text": "Well, it's bearish, right? And the reason for that is you can see every time price sells off it bounces to make what? A lower high It sells off again makes a lower high sells off again, makes a lower high So the idea here is that until we s",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094909532052832556#t=281",
+                  "end": 352.0,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "4435d43f8c44bbf7fd8c5f26edb2cefab87cc032eec28b54f301538068572e47",
+                  "start": 281.454,
+                  "text": "Well if we look at this most recent swing high and we pull to that most recent swing low it means that we'd probably push 15 16% and then reject within this range Now, the thing to understand is that at some point we're not going to reject ",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094909532052832556#t=0",
+                  "end": 119.321,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "0da3916a26458eab90ddb56baf3ff337994decfb5808f86944520805691fdb13",
+                  "start": 0.46,
+                  "text": "So I've been talking about CIFR for the past couple of weeks and this major buy zone support that we are currently sitting in And we have called this to perfection Back on August 19th we talked about this buy zone alert From there we said t",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094909532052832556#t=119",
+                  "end": 220.775,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "afecaffba1122c0fc1dab9f32ecb65a6c4a403ffd2e9413d640e1bb14e0c9a32",
+                  "start": 119.661,
+                  "text": "long-term, we are pretty damn good When price pulls back into a smart money zone when price holds over the external swing low there's historically about a 70% chance that price is going to break out back to swing highs So this means that we",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094909532052832556#t=221",
+                  "end": 281.194,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ac98d4c42daa7add528f378ffd705b0397346fa92ee9f66eaee9ebd1b0e89bb2",
+                  "start": 221.135,
+                  "text": "Well, it's bearish, right? And the reason for that is you can see every time price sells off it bounces to make what? A lower high It sells off again makes a lower high sells off again, makes a lower high So the idea here is that until we s",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094909532052832556#t=281",
+                  "end": 352.0,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "4435d43f8c44bbf7fd8c5f26edb2cefab87cc032eec28b54f301538068572e47",
+                  "start": 281.454,
+                  "text": "Well if we look at this most recent swing high and we pull to that most recent swing low it means that we'd probably push 15 16% and then reject within this range Now, the thing to understand is that at some point we're not going to reject ",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> $CIFR Smart Money Alert 🚨  Price is now trading near one of the deepest discounts and strongest support levels in the market.  In today’s video, I break down the entire setup, including:  • My stop-loss levels • My take-profit targets • How long I expect this move to take to https://t.co/XLiQJmwt02 No tags [00:00:00] So I've been talking about CIFR for the [00:00:02] past couple of weeks and this major [00:00:05] buy zone support [00:00:06] that we are currently sitting in [00:00:08] And we have called this to perfection [00:00:11] Back on August 19th [00:",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Peter_DiCarlo_-_CIFR_Smart_Money_Alert_Price_is_now_trading_near_one_of_the_deep",
+              "source_revision": "e89327961fd25a72ccd778e8013bfe114a557e4d49da3ec9e7fab74de844cd6f",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> $CIFR Smart Money Alert 🚨  Price is now trading near one of the deepest discounts and strongest support levels in the market.  In today’s video, I break down the entire setup, including:  • My stop-loss levels • My take-profit targets • How long I expect this move to take to https://t.co/XLiQJmwt02 No tags [00:00:00] So I've been talking about CIFR for the [00:00:02] past couple of weeks and this major [00:00:05] buy zone support [00:00:06] that we are currently sitting in [00:00:08] And we have called this to perfection [00:00:11] Back on August 19th [00:",
+              "title": "Peter DiCarlo - $CIFR Smart Money Alert 🚨  Price is now trading near one of the deepe...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/pdicarlotrader/status/2094909532052832556",
+              "video_id": "2094908776167948288",
+              "yoinked_at": "2026-09-01T15:11:29"
+            }
+          },
+          {
+            "work_id": "OYlhKswomYIYdTnUt3Kv5Gp7BjNf2EjG",
+            "video_id": "2094803470000009216",
+            "attempt_token": "mq4W5ox_c1NdkPN65Ia7a-l5CcRBE5NNMU3cGXH7r9k",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678124618,
+            "source_revision": "919683489ca4a8618f20c0be6f2633c4b22a8ea1ad251ebb1e41841155b058e8",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "3c4b8d4d388b852a09238e464ecca9e95c2c3d45199aa950c199290b12ed28d4",
+            "card": {
+              "card_hash": "948186a1791a25d236945d4258818461f3639d951655b18b97618f626c233472",
+              "channel": "Perplexity",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/perplexity_ai/status/2094803515264978953",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "cc3400ddcacfd9dd2832e04b6d0372bc862eff5db67096aad1733697b51b1083",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing hybrid compute in Perplexity Computer.  Computer can start a task in the cloud, then move to a local model that runs on your Mac. Use it for steps involving private files or sensitive data. ",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing hybrid compute in Perplexity Computer.  Computer can start a task in the cloud, then move to a local model that runs on your Mac. Use it for steps involving private files or sensitive data.  Available today in the Perplexity Mac app. https://t.co/bafirGWgwA No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Perplexity_-_Introducing_hybrid_compute_in_Perplexity_Computer_Computer_can_star",
+              "source_revision": "919683489ca4a8618f20c0be6f2633c4b22a8ea1ad251ebb1e41841155b058e8",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing hybrid compute in Perplexity Computer.  Computer can start a task in the cloud, then move to a local model that runs on your Mac. Use it for steps involving private files or sensitive data.  Available today in the Perplexity Mac app. https://t.co/bafirGWgwA No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Perplexity - Introducing hybrid compute in Perplexity Computer.  Computer can star...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/perplexity_ai/status/2094803515264978953",
+              "video_id": "2094803470000009216",
+              "yoinked_at": "2026-09-02T07:37:15"
+            }
+          },
+          {
+            "work_id": "PllZ7lIkBYRDUuNZ4qzu5lkHA2E8_11v",
+            "video_id": "2094843633572659200",
+            "attempt_token": "uia8qqCSnuJkOSy0yCGa_YuB4j8OsJOTX-J-rN-0ums",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678124619,
+            "source_revision": "c3a2d04c7b7b9a24975a0b828243389addbcabb69445987aa3ea6cec4a7ffa49",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "90b342a705dd7528cf84f9d2ec17462eb233348eeff51c541ab47afe5032a66d",
+            "card": {
+              "card_hash": "57da78c9d44fe122ede8c681e6a0fd519d2aa9fdc1ecf30f6bb525946ffd905a",
+              "channel": "Claude",
+              "chars": 1368,
+              "chars_all_clips": 1368,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/claudeai/status/2094848579558953258#t=0",
+                  "end": 79.316,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "5728f240c189e6806da4981d5b638d5e7fcc7a556c670408089a16bfd3a9fc96",
+                  "start": 0.0,
+                  "text": "Today we're releasing Fable 5.1, the latest upgrade to our most capable model class. Whatever you already hand Claude, it can take on more and do the hardest parts better. That's possible because of how it handles multi-step work like a com",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/claudeai/status/2094848579558953258#t=0",
+                  "end": 79.316,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "5728f240c189e6806da4981d5b638d5e7fcc7a556c670408089a16bfd3a9fc96",
+                  "start": 0.0,
+                  "text": "Today we're releasing Fable 5.1, the latest upgrade to our most capable model class. Whatever you already hand Claude, it can take on more and do the hardest parts better. That's possible because of how it handles multi-step work like a com",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Fable 5.1 excels at complex, long-running tasks. And its research capabilities offer an early glimpse of how AI models will contribute to scientific progress. https://t.co/Yj0h0C3LdL No tags [00:00:00] Today we're releasing Fable 5.1, [00:00:02] the latest upgrade [00:00:03] to our most capable model class. [00:00:05] Whatever you already hand Claude, [00:00:07] it can take on more and do the hardest parts better. [00:00:10] That's possible because of how it handles multi-step work [00:00:13] like a complex financial model, [00:00:15] a long mathematical p",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Claude_-_Fable_5_1_excels_at_complex_long-running_tasks_And_its_research_cap",
+              "source_revision": "c3a2d04c7b7b9a24975a0b828243389addbcabb69445987aa3ea6cec4a7ffa49",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Fable 5.1 excels at complex, long-running tasks. And its research capabilities offer an early glimpse of how AI models will contribute to scientific progress. https://t.co/Yj0h0C3LdL No tags [00:00:00] Today we're releasing Fable 5.1, [00:00:02] the latest upgrade [00:00:03] to our most capable model class. [00:00:05] Whatever you already hand Claude, [00:00:07] it can take on more and do the hardest parts better. [00:00:10] That's possible because of how it handles multi-step work [00:00:13] like a complex financial model, [00:00:15] a long mathematical p",
+              "title": "Claude - Fable 5.1 excels at complex, long-running tasks. And its research cap...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/claudeai/status/2094848579558953258",
+              "video_id": "2094843633572659200",
+              "yoinked_at": "2026-09-02T07:36:44"
+            }
+          },
+          {
+            "work_id": "QmUdg7OYZYnMoeN89xGJ1YxvUe95rbIZ",
+            "video_id": "2095522313676439556",
+            "attempt_token": "av3QiRLm_4dEzzw5S6KWDjA2cOaKWRfEFb_EFWph1EA",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678124620,
+            "source_revision": "43ac8da277c76ca9c202509afebcfa116f1d25d593ffbb4af0bcb0b43251ad3c",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "5b62456044f5a04c15f4a07556446c8190d4ae64b6c2f5cd52246e8c94ec773b",
+            "card": {
+              "card_hash": "bfcd4e6e495e05547624a1df987dd9e0320232884c914e8cbf6441dfba918540",
+              "channel": "Pietro Schirano",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/skirano/status/2095595938534351231",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "b35b1f1f56be85d8e5db9c3a6d116e385770addaaea540103bb4dda8c7b7141c",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> 4/6 Perfectly converted this video into code. I can't tell you my shock when it recreated everything down to the cards and animations.   Video input on the left, interactive code to the right. https://t",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> 4/6 Perfectly converted this video into code. I can't tell you my shock when it recreated everything down to the cards and animations.   Video input on the left, interactive code to the right. https://t.co/fNaa23iMUf No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Pietro_Schirano_-_4_6_Perfectly_converted_this_video_into_code_I_can_t_tell_you",
+              "source_revision": "43ac8da277c76ca9c202509afebcfa116f1d25d593ffbb4af0bcb0b43251ad3c",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 4/6 Perfectly converted this video into code. I can't tell you my shock when it recreated everything down to the cards and animations.   Video input on the left, interactive code to the right. https://t.co/fNaa23iMUf No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Pietro Schirano - 4/6 Perfectly converted this video into code. I can't tell you my sho...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/skirano/status/2095595938534351231",
+              "video_id": "2095522313676439556",
+              "yoinked_at": "2026-09-04T07:55:55"
+            }
+          },
+          {
+            "work_id": "YqhHEu_ltQWob4S8n9CS3I5TwZXDDiV0",
+            "video_id": "2094872636996165632",
+            "attempt_token": "_wV7ct0WxcBSV4SuLUbLJjUGqhvAdxTsBvyyB_urpp0",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678124621,
+            "source_revision": "e843e02d38cf7547e00992fb62bea4adb94c626d7cd163b9b66399d6de0f3c70",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "9162b1dd1f54aec0e6f9c87cb8219003e90e90f1d579c327789eda9c31b22be8",
+            "card": {
+              "card_hash": "afc64d5b0c1cc6d75671f39e926ff88a57235ef4f4d3ef2b8d1270c30d7ae10b",
+              "channel": "Claire Zau",
+              "chars": 64211,
+              "chars_all_clips": 64211,
+              "chars_chosen_clips": 1440,
+              "clip_count": 36,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/clairejyz/status/2094878197657842124#t=371",
+                  "end": 490.632,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "9ceeccbf8713e0cdf8bb618a943c7b684d334b486250d684de5956f022ef31dc",
+                  "start": 371.527,
+                  "text": "Our view is it's not too much to ask for both and that's what guide's going to provide to the partners that we're working with today and we're already seeing that come through That's so exciting. I think what's typically helpful is also may",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/clairejyz/status/2094878197657842124#t=1017",
+                  "end": 1137.719,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "506cb20b96e6c66aa1221888ee1677c8dc1f41ff0aa87e59f65bbadf918586e3",
+                  "start": 1017.959,
+                  "text": "And we're going to have that conversation And then shortly after that we're, you know, talking to one of our existing partners about the new carrier contract that we just won as a part of the relationship you know with guides. So we went to",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/clairejyz/status/2094878197657842124#t=1646",
+                  "end": 1765.607,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "d9a264bea69e53045bfd6048b370018ed8a1cbe17877e02549458fec708b956b",
+                  "start": 1646.221,
+                  "text": "What does that journey even look like? And where do they sit across all of this? If you think about kind of where it starts initially we'll focus on outreach and needs assessment right? To say, look One of the things that might be driving a",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/clairejyz/status/2094878197657842124#t=2170",
+                  "end": 2290.144,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "f657012f11524de2eeefbbaeaf96d757ab4f6e0e16c1ae525886f0b3a9bf476f",
+                  "start": 2170.328,
+                  "text": "You know, my perspective is kind of twofold and I, I somewhat say that in jest I think one the thing that I think always gave me comfort about M&A is we ultimately own the customer relationship And so for us As the models accelerate and giv",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/clairejyz/status/2094878197657842124#t=2578",
+                  "end": 2698.496,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ef7c02f349105c8ba9cc31b17c115ae050243ac0e851845262b0f51b0e977ba8",
+                  "start": 2578.885,
+                  "text": "So, I think it's like two things one is doing deals is not a walk in the park. When I first got into this you know I had a few conversations from introductions or otherwise with you know, some banks, advisors in the space some agency owners",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/clairejyz/status/2094878197657842124#t=3124",
+                  "end": 3243.979,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "69bb67e19cd939b84a734a012dc6d7fd4c479c09884bf8ed5a54a389b89dd7b6",
+                  "start": 3124.667,
+                  "text": "Have they been managing it? What's going on? How do we deal with their long-term care spend? You find these things get really interconnected at the end of their life Yeah Your parents might be aging into Medicare for the first time and they",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Developer Marketing",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/clairejyz/status/2094878197657842124#t=371",
+                  "end": 490.632,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "9ceeccbf8713e0cdf8bb618a943c7b684d334b486250d684de5956f022ef31dc",
+                  "start": 371.527,
+                  "text": "Our view is it's not too much to ask for both and that's what guide's going to provide to the partners that we're working with today and we're already seeing that come through That's so exciting. I think what's typically helpful is also may",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/clairejyz/status/2094878197657842124#t=1017",
+                  "end": 1137.719,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "506cb20b96e6c66aa1221888ee1677c8dc1f41ff0aa87e59f65bbadf918586e3",
+                  "start": 1017.959,
+                  "text": "And we're going to have that conversation And then shortly after that we're, you know, talking to one of our existing partners about the new carrier contract that we just won as a part of the relationship you know with guides. So we went to",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/clairejyz/status/2094878197657842124#t=1646",
+                  "end": 1765.607,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "d9a264bea69e53045bfd6048b370018ed8a1cbe17877e02549458fec708b956b",
+                  "start": 1646.221,
+                  "text": "What does that journey even look like? And where do they sit across all of this? If you think about kind of where it starts initially we'll focus on outreach and needs assessment right? To say, look One of the things that might be driving a",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/clairejyz/status/2094878197657842124#t=2170",
+                  "end": 2290.144,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "f657012f11524de2eeefbbaeaf96d757ab4f6e0e16c1ae525886f0b3a9bf476f",
+                  "start": 2170.328,
+                  "text": "You know, my perspective is kind of twofold and I, I somewhat say that in jest I think one the thing that I think always gave me comfort about M&A is we ultimately own the customer relationship And so for us As the models accelerate and giv",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/clairejyz/status/2094878197657842124#t=2578",
+                  "end": 2698.496,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ef7c02f349105c8ba9cc31b17c115ae050243ac0e851845262b0f51b0e977ba8",
+                  "start": 2578.885,
+                  "text": "So, I think it's like two things one is doing deals is not a walk in the park. When I first got into this you know I had a few conversations from introductions or otherwise with you know, some banks, advisors in the space some agency owners",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/clairejyz/status/2094878197657842124#t=3124",
+                  "end": 3243.979,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "69bb67e19cd939b84a734a012dc6d7fd4c479c09884bf8ed5a54a389b89dd7b6",
+                  "start": 3124.667,
+                  "text": "Have they been managing it? What's going on? How do we deal with their long-term care spend? You find these things get really interconnected at the end of their life Yeah Your parents might be aging into Medicare for the first time and they",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Claire_Zau_-_Six_health_insurance_brokers_are_retiring_for_every_one_entering_th",
+              "source_revision": "e843e02d38cf7547e00992fb62bea4adb94c626d7cd163b9b66399d6de0f3c70",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "Claire Zau - Six health insurance brokers are retiring for every one entering the ...",
+              "topic": "Developer Marketing",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://x.com/clairejyz/status/2094878197657842124",
+              "video_id": "2094872636996165632",
+              "yoinked_at": "2026-09-02T07:41:16"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

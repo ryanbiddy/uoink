@@ -1,0 +1,39 @@
+{
+  "seq": 577,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "xi9WD8V6ZJPm943l6sAHWyZLS3MxGLf-",
+      "video_id": "2086879775277125633",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "98e61344a36673865858787130288f49cf74edcba40db37cb10928ad92fb763b",
+            "card_hash": "b8ce4cd4bbba67a06820e6893c93f8514bf86366162057232de481a39e88aabc",
+            "quote": "Browser Use mode replaces them with a single one, driven by @browser_use's CLI 3.0.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

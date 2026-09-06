@@ -1,0 +1,163 @@
+{
+  "seq": 899,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 899,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "ODuyU3TeXUkoE8Gds4NyGgMYCaocS5PI",
+      "client_id": "proof-harness",
+      "attempt_token": "gQ4f2P03VS2xZNsAnye-6u9OsoSGndSZ7zOqhZnr-qE",
+      "submission_key": "ODuyU3TeXUkoE8Gds4NyGgMYCaocS5PI-gQ4f2P03VS2xZNsAnye-6u9OsoSGndSZ7zOqhZnr-qE",
+      "schema_version": 1,
+      "video_id": "2092386459282182144",
+      "source_revision": "ad6874617dccb89f82faaf5caa2b472fad7c4db915766055b7e5d74fd0b14780",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "2a0501fb369be314f19163094e835526a602099136b2d27774932bdb09ec1382",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.75,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "50cd849c13f04d54ab34e5dbdf1f8fe20ad5afb1ab2628c183698e84270b79e9",
+              "card_hash": "d5db2964d6bdc14562c82b37ce8105ad18f8833b3867595efef9cdeb15a6fcc6",
+              "quote": "there are some neolabs that succeed and become one of the largest companies"
+            }
+          },
+          {
+            "shelf_id": "security",
+            "shelf_path": [
+              "AI and ML",
+              "Security"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "1d7783389276c71a633428aa3d65fd56c076f0c83751108a90a72ae884240a13",
+              "card_hash": "d5db2964d6bdc14562c82b37ce8105ad18f8833b3867595efef9cdeb15a6fcc6",
+              "quote": "Is the AI doing things we want it to be doing?"
+            }
+          },
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "ef13c88ed60a75aac5fbbd2725aaa24f43281046d200e02d27ce7caa521e6cb5",
+              "card_hash": "d5db2964d6bdc14562c82b37ce8105ad18f8833b3867595efef9cdeb15a6fcc6",
+              "quote": "we use all kinds of like different things now like mixture of experts like different positional encodings"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 15534,
+        "cache_read_tokens": 188597,
+        "cache_create_tokens": 35427,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 899,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "ODuyU3TeXUkoE8Gds4NyGgMYCaocS5PI",
+        "video_id": "2092386459282182144",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.75,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "50cd849c13f04d54ab34e5dbdf1f8fe20ad5afb1ab2628c183698e84270b79e9",
+              "card_hash": "d5db2964d6bdc14562c82b37ce8105ad18f8833b3867595efef9cdeb15a6fcc6",
+              "quote": "there are some neolabs that succeed and become one of the largest companies",
+              "start": 688.027,
+              "end": 808.021,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          },
+          {
+            "shelf_id": "security",
+            "shelf_path": [
+              "AI and ML",
+              "Security"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "1d7783389276c71a633428aa3d65fd56c076f0c83751108a90a72ae884240a13",
+              "card_hash": "d5db2964d6bdc14562c82b37ce8105ad18f8833b3867595efef9cdeb15a6fcc6",
+              "quote": "Is the AI doing things we want it to be doing?",
+              "start": 1560.049,
+              "end": 1678.255,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          },
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "ef13c88ed60a75aac5fbbd2725aaa24f43281046d200e02d27ce7caa521e6cb5",
+              "card_hash": "d5db2964d6bdc14562c82b37ce8105ad18f8833b3867595efef9cdeb15a6fcc6",
+              "quote": "we use all kinds of like different things now like mixture of experts like different positional encodings",
+              "start": 935.604,
+              "end": 1053.311,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

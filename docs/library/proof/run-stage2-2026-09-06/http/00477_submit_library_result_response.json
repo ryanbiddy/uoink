@@ -1,0 +1,39 @@
+{
+  "seq": 477,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "MIUHyI28EkTsQEvQaePJTE-dNMzcMldZ",
+      "video_id": "2085053109412257792",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "7c388f17c781ac48238425b26a4ca42dfc1cf4b0a88372547ff4da3488a0694b",
+            "card_hash": "426dc34fcc57e2e90b2ad370d6d7d34a8c14a93effa19aa20b8e1b7f3d85dbd2",
+            "quote": "it's the clearest explanation I've seen of how AI agents actually work",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

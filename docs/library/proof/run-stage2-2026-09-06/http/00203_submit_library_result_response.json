@@ -1,0 +1,39 @@
+{
+  "seq": 203,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "t1KgA_JTr6I1Cd8_WBo0ZLH4aBNLBwn0",
+      "video_id": "2080366248735522816",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "ce8e4ad25905b524f013eae414782949e79884f0a36f7e2f428eb26e012ea022",
+            "card_hash": "34f45f4ada190c82abc73ee857b77d2f5e51d2df4df3bcf7072ff5ec73885918",
+            "quote": "The same incredible GPT Live model, now able use your entire computer.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

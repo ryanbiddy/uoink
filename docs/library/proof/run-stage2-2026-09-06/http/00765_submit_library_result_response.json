@@ -1,0 +1,39 @@
+{
+  "seq": 765,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "YFjYP8h_iUjhBjKE3QL1gue4N4B9kPNZ",
+      "video_id": "2090852339485904896",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "a4fe384486e3902e28473cbd84694015f0d815dc49096f5a38faab992bcb3b00",
+            "card_hash": "7dc6827ffbd392a564c8f70c459bc4928c215f1c5b34636904917b1bfb285c8e",
+            "quote": "Ox Alpha is wired into codex now",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 1225,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "oNapkKyROfcCcy1SkenGyYb0R1f-dm_F",
+      "video_id": "ub2xbSlay7g",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "b36af614f980aa27a01e0128ce3d96b57c8e889a7329ac6f4bf5b7641373e6a1",
+            "card_hash": "e87ebab2d681b928252ab917bc8008053cf650ce1f803ed5761b77cb479e312d",
+            "quote": "So, I would start with YOLO 26. Uh, it's got the best performance",
+            "start": 2532.8,
+            "end": 2632.71,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

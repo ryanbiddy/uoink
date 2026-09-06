@@ -1,0 +1,809 @@
+{
+  "seq": 853,
+  "tool": "claim_library_work",
+  "wall_ms": 12,
+  "request": {
+    "seq": 853,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 853,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 12,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "_hbSOY-5rO6JfDPLGwu21bzfVx1W9YmN",
+            "video_id": "2092487671717490688",
+            "attempt_token": "mpsNOVVL3LyopENSXiwYZqrGw-PByQj7Nb8x9jmiwRg",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677787290,
+            "source_revision": "a71f001de90adb82221c433757b8ba1fbd88d12be8432d55e387b9983cc16dbc",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "fe0b39f3e4e26a020e30265e94a5cb28e3ff209a5842bfc8e14f4654f5fc1b42",
+            "card": {
+              "card_hash": "00b54034e8fc233aa51d1cd790429d4b25d0a44180693d6b01dee6a23bafb812",
+              "channel": "el.cine",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/EHuanglu/status/2092487733096956261",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "7aaae179b846963628b1395f6a899ffa4b22752a59b8a29bffcc4d9955b3294d",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> the craziest moment from China’s AI robot race https://t.co/Bhlgg4BG2x No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:com",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> the craziest moment from China’s AI robot race https://t.co/Bhlgg4BG2x No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "el_cine_-_the_craziest_moment_from_China_s_AI_robot_race",
+              "source_revision": "a71f001de90adb82221c433757b8ba1fbd88d12be8432d55e387b9983cc16dbc",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> the craziest moment from China’s AI robot race https://t.co/Bhlgg4BG2x No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "el.cine - the craziest moment from China’s AI robot race",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/EHuanglu/status/2092487733096956261",
+              "video_id": "2092487671717490688",
+              "yoinked_at": "2026-08-26T07:55:03"
+            }
+          },
+          {
+            "work_id": "dyKxHmPx7DIp74YEK1ukDNuDkXnYunLT",
+            "video_id": "2092625875468529664",
+            "attempt_token": "yuXgGYIGN1ju_smmjfT6RrTu_Y6nhAHkV8Rky220wFs",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677787291,
+            "source_revision": "14421074ebb7116eec5bc77e3beddc11f0dd45f2678895200587dc58125dbb0b",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "7813cf7275cb9924a7d632f5bc50c36d1b093a99bda0aace3972501f5e43707c",
+            "card": {
+              "card_hash": "64f3e37c5abc850d7373d97bf235fa6bea2fb1b3aba59aaed4fe0626545bee4a",
+              "channel": "Kevin Grajeda",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/k_grajeda/status/2092626136609993166",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "26624b19913378b0935e0c1b25aff52a51e1949de602f08c3294dc72b17250df",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> excited to release RadiusNet-31P, a SOTA open-weight model capable of predicting the perfect concentric border radius with 99.999% accuracy  trained for 5,000 epochs so designers never have to subtract ",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> excited to release RadiusNet-31P, a SOTA open-weight model capable of predicting the perfect concentric border radius with 99.999% accuracy  trained for 5,000 epochs so designers never have to subtract again  ↓ open weights in the first reply https://t.co/6OVZdp2C4V No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Kevin_Grajeda_-_excited_to_release_RadiusNet-31P_a_SOTA_open-weight_model_capabl",
+              "source_revision": "14421074ebb7116eec5bc77e3beddc11f0dd45f2678895200587dc58125dbb0b",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> excited to release RadiusNet-31P, a SOTA open-weight model capable of predicting the perfect concentric border radius with 99.999% accuracy  trained for 5,000 epochs so designers never have to subtract again  ↓ open weights in the first reply https://t.co/6OVZdp2C4V No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Kevin Grajeda - excited to release RadiusNet-31P, a SOTA open-weight model capable of...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/k_grajeda/status/2092626136609993166",
+              "video_id": "2092625875468529664",
+              "yoinked_at": "2026-08-27T07:38:47"
+            }
+          },
+          {
+            "work_id": "eZc2VwkKRbkT8HOHmqJF8VUmvp1N3E4p",
+            "video_id": "2092254012456271872",
+            "attempt_token": "DVg64aShT_lpLQlyZSFmZmhYcqrz5cf6a6z97IJMDho",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677787292,
+            "source_revision": "f4cf5247b9315ef264a956067a4efadd0a31c09fb192b9b25e28e52ebcf51c98",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "23415977fd45a6ab540d7ef1a50b823526f7efecd61852ed2276db9f9dd38502",
+            "card": {
+              "card_hash": "e84555e58a3b968cca72cb1fdf6208f052e926741c686a6ddadaa2f617002525",
+              "channel": "kyutai",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/kyutai_labs/status/2092254286772080768",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "6c87d1162dd97660c52d5448e947cfa9a58f11a2cfaa5727e11b949291b1645f",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> If you're looking for a weekend project, how about training your own text-to-speech model from scratch on your own GPU, and then running it on any device's CPU?  We just open-sourced the entire Pocket T",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> If you're looking for a weekend project, how about training your own text-to-speech model from scratch on your own GPU, and then running it on any device's CPU?  We just open-sourced the entire Pocket TTS training stack: data pipeline, recipes, and evals.  It learns pretty damn https://t.co/0ILSqVoOh3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "kyutai_-_If_you_re_looking_for_a_weekend_project_how_about_training_your_own",
+              "source_revision": "f4cf5247b9315ef264a956067a4efadd0a31c09fb192b9b25e28e52ebcf51c98",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> If you're looking for a weekend project, how about training your own text-to-speech model from scratch on your own GPU, and then running it on any device's CPU?  We just open-sourced the entire Pocket TTS training stack: data pipeline, recipes, and evals.  It learns pretty damn https://t.co/0ILSqVoOh3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "title": "kyutai - If you're looking for a weekend project, how about training your own ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/kyutai_labs/status/2092254286772080768",
+              "video_id": "2092254012456271872",
+              "yoinked_at": "2026-08-26T07:55:14"
+            }
+          },
+          {
+            "work_id": "hMVRjnpXTM-1GsDolxHFX3IbkRCsuuKx",
+            "video_id": "2092906890497839104",
+            "attempt_token": "YTbQXK6-LfAkfvFbes5dkxotJJRJIzHi1AThQEVR8dU",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677787292,
+            "source_revision": "1a127f7d7a4ca19755603839dde5c17b6572f34aaccaf62e8e34fe1ba1435e25",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "b601145b33df8be2f7978ccb4125b905549c91e2fc6a3498f8492d6e788443c7",
+            "card": {
+              "card_hash": "be0b7b9bdb84a8952c0f8b38ad7960378310201f413858e6108dc1b846156d49",
+              "channel": "@levelsio",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/levelsio/status/2092907465629135100",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "af8a767c9d7c2ab3c778331531a443d4808eff51801e4c94ba26e43b187c2f1b",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Strava's data is quite protected so I couldn't index it for Hoodmaps  But the good thing is the US Census data publishes median income level and the data is very fresh and accurate, so I added it to 🗺️ ",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Strava's data is quite protected so I couldn't index it for Hoodmaps  But the good thing is the US Census data publishes median income level and the data is very fresh and accurate, so I added it to 🗺️ https://t.co/OyIH4aqaz1  So now you can switch to [ 💰 Income mode ] and https://t.co/DSRyndNzxs No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "levelsio_-_Strava_s_data_is_quite_protected_so_I_couldn_t_index_it_for_Hoodmaps",
+              "source_revision": "1a127f7d7a4ca19755603839dde5c17b6572f34aaccaf62e8e34fe1ba1435e25",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Strava's data is quite protected so I couldn't index it for Hoodmaps  But the good thing is the US Census data publishes median income level and the data is very fresh and accurate, so I added it to 🗺️ https://t.co/OyIH4aqaz1  So now you can switch to [ 💰 Income mode ] and https://t.co/DSRyndNzxs No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "@levelsio - Strava's data is quite protected so I couldn't index it for Hoodmaps ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/levelsio/status/2092907465629135100",
+              "video_id": "2092906890497839104",
+              "yoinked_at": "2026-08-27T07:38:33"
+            }
+          },
+          {
+            "work_id": "kB2xGatT67XEkN1Pgw4UeVjeNzdTK-I6",
+            "video_id": "2092694542948659200",
+            "attempt_token": "o5aGhZ5ljxQmcdvRX1aC-lmoqjpvInoHGNGM8VXhUFU",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677787293,
+            "source_revision": "defac4afc2db2e168e5a90e9bf32579f1f531ee99ae58bb407bf2071a2d0ddfc",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "34722f2f041d4831ea35f5c1e30365f8c071dec825d4f9836ee76c71a16f1741",
+            "card": {
+              "card_hash": "854b037695d556fd0c312accd6738800569a23a9cb54c73c38a2898b5fcd9bfd",
+              "channel": "Alok",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/analogalok/status/2092697021790708148",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "7dcbef6961438ec4c8139892e7fc5cf0a73594e1f973215c84395fa86e2beac6",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> The VRAM barrier is officially dead.  I just ran Qwen 3.8 Flash Next (MoE) 125B A6B with a  250,000 context window on a single 24GB RTX 4090.  21 tokens/sec decode. 364 t/s prefill.   no mtp. no dflash.",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> The VRAM barrier is officially dead.  I just ran Qwen 3.8 Flash Next (MoE) 125B A6B with a  250,000 context window on a single 24GB RTX 4090.  21 tokens/sec decode. 364 t/s prefill.   no mtp. no dflash. no kv cache quantization!  We are running datacenter models on consumer https://t.co/v5tkPtZqDq No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Alok_-_The_VRAM_barrier_is_officially_dead_I_just_ran_Qwen_3_8_Flash_Next",
+              "source_revision": "defac4afc2db2e168e5a90e9bf32579f1f531ee99ae58bb407bf2071a2d0ddfc",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> The VRAM barrier is officially dead.  I just ran Qwen 3.8 Flash Next (MoE) 125B A6B with a  250,000 context window on a single 24GB RTX 4090.  21 tokens/sec decode. 364 t/s prefill.   no mtp. no dflash. no kv cache quantization!  We are running datacenter models on consumer https://t.co/v5tkPtZqDq No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)",
+              "title": "Alok - The VRAM barrier is officially dead.  I just ran Qwen 3.8 Flash Next ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/analogalok/status/2092697021790708148",
+              "video_id": "2092694542948659200",
+              "yoinked_at": "2026-08-27T07:38:41"
+            }
+          },
+          {
+            "work_id": "tAhA1UUi9BEMnaefxLvrYsPSjULIHP5L",
+            "video_id": "2092344910666207232",
+            "attempt_token": "wusN4sri1doZRUPaVB7l96qrzpma77y_1NaZ70O-x_s",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677787294,
+            "source_revision": "7372efbe3a1cb6452bec996efe1e0e4008fd79058c513678f70bd3fba071044e",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "81e2c540f41143e5eb65a6525db815b42273333729256d83a7b1324384b0c511",
+            "card": {
+              "card_hash": "3bd282d4886d2f43158b5ae5a3c51267020ab54d8e2eb1fa16ecb3a8b91dbb87",
+              "channel": "OpenAI Developers",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/OpenAIDevs/status/2092344959248761263",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "69a05ba0b919e14fe57b2bdfc321c01350adaf5504921f26a692a1763b26edac",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> We’re adding support for WebMCP in the ChatGPT desktop app’s built-in browser and ChatGPT Sites.  When you visit a compatible website, ChatGPT or Codex can automatically use it to complete your task.  U",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> We’re adding support for WebMCP in the ChatGPT desktop app’s built-in browser and ChatGPT Sites.  When you visit a compatible website, ChatGPT or Codex can automatically use it to complete your task.  Update to the latest version of the ChatGPT desktop app, then just ask Codex to https://t.co/XCGXUTRotN No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "OpenAI_Developers_-_We_re_adding_support_for_WebMCP_in_the_ChatGPT_desktop_app_s",
+              "source_revision": "7372efbe3a1cb6452bec996efe1e0e4008fd79058c513678f70bd3fba071044e",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> We’re adding support for WebMCP in the ChatGPT desktop app’s built-in browser and ChatGPT Sites.  When you visit a compatible website, ChatGPT or Codex can automatically use it to complete your task.  Update to the latest version of the ChatGPT desktop app, then just ask Codex to https://t.co/XCGXUTRotN No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+              "title": "OpenAI Developers - We’re adding support for WebMCP in the ChatGPT desktop app’s built-in...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/OpenAIDevs/status/2092344959248761263",
+              "video_id": "2092344910666207232",
+              "yoinked_at": "2026-08-26T07:54:45"
+            }
+          },
+          {
+            "work_id": "zqCZHDOF3eJemZ62r4746UHS6V-OsD-j",
+            "video_id": "2092387281457893378",
+            "attempt_token": "scT8GcGWqL-RAb7AmU_MAd5F5aZZDtUGcOnLKrfHq_o",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677787294,
+            "source_revision": "d57f7b90d20c59299a04b541f3c52c2f5e4dfa09f9c1eb976d0bfaa88176c27e",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "4daa5c0b91df223e849d69f97bb42d4e875da238efb7ebbd89f83e5f0f7341a2",
+            "card": {
+              "card_hash": "ae5223b1f521ec1c8a33f77d7b034f083a75e63e7f312db606b8571f1bcf9f6c",
+              "channel": "Shania Twain 💎💎💎",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/ShaniaTwain/status/2092387365386125742",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "ff10cf6293e9fb149f8fc53b42f6e21cbe5fc37e6bdcad9a1d8357335f0821bd",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Dolly was pure light sent from heaven. My mentor is gone. My songwriting teacher and hero of grace and humility. There is a hole in my heart but the joy of just the thought of her smile will continue to",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Dolly was pure light sent from heaven. My mentor is gone. My songwriting teacher and hero of grace and humility. There is a hole in my heart but the joy of just the thought of her smile will continue to fill me with inspiration for as long as I live. I will cherish this moment https://t.co/x2noNjLgou No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Shania_Twain_-_Dolly_was_pure_light_sent_from_heaven_My_mentor_is_gone_My_songwr",
+              "source_revision": "d57f7b90d20c59299a04b541f3c52c2f5e4dfa09f9c1eb976d0bfaa88176c27e",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Dolly was pure light sent from heaven. My mentor is gone. My songwriting teacher and hero of grace and humility. There is a hole in my heart but the joy of just the thought of her smile will continue to fill me with inspiration for as long as I live. I will cherish this moment https://t.co/x2noNjLgou No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+              "title": "Shania Twain 💎💎💎 - Dolly was pure light sent from heaven. My mentor is gone. My songwrit...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/ShaniaTwain/status/2092387365386125742",
+              "video_id": "2092387281457893378",
+              "yoinked_at": "2026-08-26T07:55:26"
+            }
+          },
+          {
+            "work_id": "1v0GB2FTbzuhKZdW7ee15UUgDc-JDxhr",
+            "video_id": "2093065400393105408",
+            "attempt_token": "a9Lj-WtF8T3CkvI0AhSe0Cz1cK2wBIv4gzlxBITTIlk",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677787295,
+            "source_revision": "4e3bc56a827713527b8d296ecdec27d431f054ebc057bb223f3a4b4323e0f7df",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "14058b29663c712e4dd1a201aee6fcab318422da30888df817d451cc8db801bb",
+            "card": {
+              "card_hash": "600d401844a576c9a47b596c714a20c4dcac39fe48ae2af0640dac2299414584",
+              "channel": "Michael Jackson Global",
+              "chars": 721,
+              "chars_all_clips": 721,
+              "chars_chosen_clips": 394,
+              "clip_count": 2,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/Michael_Jk_/status/2093066461254484350#t=0",
+                  "end": 101.446,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "be24669e235025d277df0f2eef0e3928f7c72d887eb0fee63f45e4f8eff27908",
+                  "start": 0.34,
+                  "text": "Sit down Do you like your job? Well, I think if I were you I'd go somewhere because you better come up with things No, there'll be no more You can feed me bread and water Water's great, but it You can say my voice is awful but my song's not",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/Michael_Jk_/status/2093066461254484350#t=101",
+                  "end": 122.725,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ab0351dcf3d33287e25da4dc1ae4fbb108dea9186d7d11b4514eaa62b94f973a",
+                  "start": 101.826,
+                  "text": "I normally have a lot to say but I think the clip alone speaks for itself and what happens prior to that No, no, nope, nope, here you go That's for you No",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/Michael_Jk_/status/2093066461254484350#t=0",
+                  "end": 101.446,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "be24669e235025d277df0f2eef0e3928f7c72d887eb0fee63f45e4f8eff27908",
+                  "start": 0.34,
+                  "text": "Sit down Do you like your job? Well, I think if I were you I'd go somewhere because you better come up with things No, there'll be no more You can feed me bread and water Water's great, but it You can say my voice is awful but my song's not",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/Michael_Jk_/status/2093066461254484350#t=101",
+                  "end": 122.725,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ab0351dcf3d33287e25da4dc1ae4fbb108dea9186d7d11b4514eaa62b94f973a",
+                  "start": 101.826,
+                  "text": "I normally have a lot to say but I think the clip alone speaks for itself and what happens prior to that No, no, nope, nope, here you go That's for you No",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> American reveals a 1932 Betty Boop cartoon shows exactly what we’ve learned in the Jeffrey Epstein files and about Hollywood  They’ve been telling us this whole time what’s really been going on  This isn’t a cartoon, it’s a horror film. Follow @Whiplash_1776 @Michael_Jk_ https://t.co/IPSDgbAhAk No tags [00:00:00] Sit down [00:00:09] Do [00:00:17] you like your job? [00:00:19] Well, I think if I were you [00:00:26] I'd go somewhere [00:00:32] because [00:00:37] you better come up with things [00:00:38] No, there'll be no more [00:00:43] You can feed me brea",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Michael_Jackson_Global_-_American_reveals_a_1932_Betty_Boop_cartoon_shows_exactl",
+              "source_revision": "4e3bc56a827713527b8d296ecdec27d431f054ebc057bb223f3a4b4323e0f7df",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> American reveals a 1932 Betty Boop cartoon shows exactly what we’ve learned in the Jeffrey Epstein files and about Hollywood  They’ve been telling us this whole time what’s really been going on  This isn’t a cartoon, it’s a horror film. Follow @Whiplash_1776 @Michael_Jk_ https://t.co/IPSDgbAhAk No tags [00:00:00] Sit down [00:00:09] Do [00:00:17] you like your job? [00:00:19] Well, I think if I were you [00:00:26] I'd go somewhere [00:00:32] because [00:00:37] you better come up with things [00:00:38] No, there'll be no more [00:00:43] You can feed me brea",
+              "title": "Michael Jackson Global - American reveals a 1932 Betty Boop cartoon shows exactly what we’ve l...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/Michael_Jk_/status/2093066461254484350",
+              "video_id": "2093065400393105408",
+              "yoinked_at": "2026-08-28T07:51:00"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

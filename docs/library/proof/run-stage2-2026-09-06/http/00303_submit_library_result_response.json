@@ -1,0 +1,39 @@
+{
+  "seq": 303,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "2Yf44pLLRa0DQhSfAM1PKhMmdG9nlDo1",
+      "video_id": "2081801821308571648",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "ceeee94f2174d0941b1a9691a48fa4e9f91cb6d0f836d0543e653d49d3dc7393",
+            "card_hash": "bfa75ce51dfa88b4d981511a32a6ad6d458c41073926d75bf2be162a05fcd6d6",
+            "quote": "Claude Opus 5 was left running for 24 hours straight and built an entire game from scratch.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

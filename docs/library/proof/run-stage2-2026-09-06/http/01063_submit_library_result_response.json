@@ -1,0 +1,58 @@
+{
+  "seq": 1063,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "qkrn6WWDZahKpbFct49QHrgq0EfWEKQ5",
+      "video_id": "2094462045219438592",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "3d258d03e602b20594f6db0cc680635f97922283ab9956221505dd58a1945d77",
+            "card_hash": "0f4ca0fbdd16f88f102169b4496e0cc04c28d387a36e5eefa595cc6ef32c1c7b",
+            "quote": "what if software could generate itself as you interact with it? Introducing Solaris, the first interface world model",
+            "start": 0.98,
+            "end": 79.63,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "3d258d03e602b20594f6db0cc680635f97922283ab9956221505dd58a1945d77",
+            "card_hash": "0f4ca0fbdd16f88f102169b4496e0cc04c28d387a36e5eefa595cc6ef32c1c7b",
+            "quote": "Introducing Solaris, the first interface world model",
+            "start": 0.98,
+            "end": 79.63,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

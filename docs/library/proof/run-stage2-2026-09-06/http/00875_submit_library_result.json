@@ -1,0 +1,59 @@
+{
+  "seq": 875,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 875,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "QoLB95eAvMFajXNrG50WRO5b2e-LCJRV",
+      "client_id": "proof-harness",
+      "attempt_token": "Fz2ptNPaZRZrVMxWNkbIw65Qttxy8ERvb14-wgWTLA8",
+      "submission_key": "QoLB95eAvMFajXNrG50WRO5b2e-LCJRV-Fz2ptNPaZRZrVMxWNkbIw65Qttxy8ERvb14-wgWTLA8",
+      "schema_version": 1,
+      "video_id": "2092246969918144513",
+      "source_revision": "b20d26a9f856eba338fcbbb716f70c202ebe1dd8db387067196a04d9d8f9f274",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "2e8d74fe957c23e23f59ff6b427142b772ed20c4838ad082904fb0f521f16023",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "The excerpt describes contracted revenue, Fortune 50 customers, and truck routes for an autonomous freight trucking company's commercial operations. This is general business/logistics commentary, explicitly excluded from the AI and ML top-level shelf, and does not match AI Industry and Business's focus on the AI industry's competitive/financial dynamics (model providers, labs). No approved shelf fits this content."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 22094,
+        "cache_read_tokens": 186230,
+        "cache_create_tokens": 40521,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 875,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "QoLB95eAvMFajXNrG50WRO5b2e-LCJRV",
+        "video_id": "2092246969918144513",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

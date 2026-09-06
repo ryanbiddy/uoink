@@ -1,0 +1,39 @@
+{
+  "seq": 969,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 29,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "d3gZutaP8nvQo2gbYUC2HTG2ZyaqSveC",
+      "video_id": "2092974877279969280",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.7,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "e3a216b774ea27c036636bc18179574c53f103071a9643e69936faa990fd0407",
+            "card_hash": "a252124cb615a5dfd9c02bda3c4b0b6161d1cacde68370f09840b88fbceaf781",
+            "quote": "Developers have been testing the fleX Alpha stealth model",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

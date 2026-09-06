@@ -1,0 +1,59 @@
+{
+  "seq": 89,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 89,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "XzMCiCAOwlz02t9_-qfmJstk1y2Ar4yP",
+      "client_id": "proof-harness",
+      "attempt_token": "lPFd3q--bh1OvOPl3jWYsWQXal9qWa6frDSeuAfyLb4",
+      "submission_key": "XzMCiCAOwlz02t9_-qfmJstk1y2Ar4yP-lPFd3q--bh1OvOPl3jWYsWQXal9qWa6frDSeuAfyLb4",
+      "schema_version": 1,
+      "video_id": "2079238984417366016",
+      "source_revision": "42d094e341a7078ef15fc3ce0cba8ab26c21973e3ed1b15015a66f6d72b6e653",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "3202704fd1915369cb60ece04671bb3ddf88cf713bd93c643464499b9ffa7bf9",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt describes an interactive minigame for building intuition about electromagnetism/Smith charts (RF engineering education), which does not fall under the Space and Science shelf's astronautics/astrophysics/orbital-mechanics scope or any other approved shelf."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 6561,
+        "cache_read_tokens": 185114,
+        "cache_create_tokens": 23209,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 89,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "XzMCiCAOwlz02t9_-qfmJstk1y2Ar4yP",
+        "video_id": "2079238984417366016",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

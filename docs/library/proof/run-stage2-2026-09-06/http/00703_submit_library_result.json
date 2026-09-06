@@ -1,0 +1,59 @@
+{
+  "seq": 703,
+  "tool": "submit_library_result",
+  "wall_ms": 26,
+  "request": {
+    "seq": 703,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "zb_vzZBzWKXElvnICLAb02NmYEeb01-Q",
+      "client_id": "proof-harness",
+      "attempt_token": "8_72ECYbBWFuq7BuusTXPSMsVXuLlzJ_nrYuUI58BHI",
+      "submission_key": "zb_vzZBzWKXElvnICLAb02NmYEeb01-Q-8_72ECYbBWFuq7BuusTXPSMsVXuLlzJ_nrYuUI58BHI",
+      "schema_version": 1,
+      "video_id": "2088636695600087040",
+      "source_revision": "dd67f342dbc947d5095dc9495c209cb4c582e0ba9b874f1b722c1a6367677af7",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "71bdcdba568b3d353155d4655f704ba88da4280cb2102cd9848ad0d1e9cdcad0",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt describes a Stripe subscriber-visualization dashboard styled as a forest; the content is unrelated to AI/ML, space/science, or news and current events, so it falls outside the approved taxonomy."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 14139,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20384,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 703,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 26,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "zb_vzZBzWKXElvnICLAb02NmYEeb01-Q",
+        "video_id": "2088636695600087040",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "seq": 1155,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 1155,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "NoqBK5ehnfKdtZ5BbazUSfaz-RAFdaIt",
+      "client_id": "proof-harness",
+      "attempt_token": "ZE2-disYMOEhL5Ndwhq1JZ4pbKvbordxgaxaxgqK93M",
+      "submission_key": "NoqBK5ehnfKdtZ5BbazUSfaz-RAFdaIt-ZE2-disYMOEhL5Ndwhq1JZ4pbKvbordxgaxaxgqK93M",
+      "schema_version": 1,
+      "video_id": "episode_9ddb44f98b2",
+      "source_revision": "bfdcd089b163bd63548e46fd4e543c0cb54c39562d78c08bc2e9e4c8cf6e33df",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "6642177e7766602374520126c08444b5970c4b0c6e30d6ff420f1e2391a46c87",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.8,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "c82b5acac2a2872121274c6ce6cf8ec39b7713e5897138226e621669a926dfac",
+              "card_hash": "dbad26b53d1eabdf4408943fb4da03097dd99a866c3fa9f9884a845e9d6bdea5",
+              "quote": "outside of just harness and when they use Codex, HTTP tier work, there's also the new models you've released"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 12784,
+        "cache_read_tokens": 196372,
+        "cache_create_tokens": 40753,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1155,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "NoqBK5ehnfKdtZ5BbazUSfaz-RAFdaIt",
+        "video_id": "episode_9ddb44f98b2",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.8,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "c82b5acac2a2872121274c6ce6cf8ec39b7713e5897138226e621669a926dfac",
+              "card_hash": "dbad26b53d1eabdf4408943fb4da03097dd99a866c3fa9f9884a845e9d6bdea5",
+              "quote": "outside of just harness and when they use Codex, HTTP tier work, there's also the new models you've released",
+              "start": 984.7,
+              "end": 1057.34,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

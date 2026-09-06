@@ -1,0 +1,50 @@
+{
+  "seq": 901,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "V3INk3Dn88FWn9iEqvMNr4rThiMlQSy3",
+    "client_id": "proof-harness",
+    "attempt_token": "sI-sBTpVjWaJa_-ar11b3Z9-poGJ1VmpOcX4qtJDUSc",
+    "submission_key": "V3INk3Dn88FWn9iEqvMNr4rThiMlQSy3-sI-sBTpVjWaJa_-ar11b3Z9-poGJ1VmpOcX4qtJDUSc",
+    "schema_version": 1,
+    "video_id": "2092272769685934080",
+    "source_revision": "426fe4795798cd54a873165ee358f235fbf2640bb98a6e9855bd73f6707c61a4",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "bfd09441e7c6c6cd107c5961455b83b6ab2be612287694dfd76a107326f27638",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "0fe44ff1db985bbd4c750ff882150ea47833eb147ed0205bf98db0b9d98d0a4a",
+            "card_hash": "9c642dadb721d3f9456085d52ccfbc523fc51bd572666fcc43839eb8e57cbd49",
+            "quote": "These machines are built for local AI"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 15534,
+      "cache_read_tokens": 188597,
+      "cache_create_tokens": 35427,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "seq": 1229,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "vweOJSK4SnO6YySxRYKm1weEsH5r3SGC",
+      "video_id": "nlGYV0bmddI",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "space-and-science",
+          "shelf_path": [
+            "Space and Science"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "e7bc33e5dd86dde53f5c1bec13c51f5d9c59584930ea877ba83b811710ddc959",
+            "card_hash": "8a183137b226206e827fdb9fd553a7081bf190559ca9200348ac0c6f759713b9",
+            "quote": "It's because it's so cold and so dry there that when it snows, it basically never melts",
+            "start": 1.95,
+            "end": 44.52,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

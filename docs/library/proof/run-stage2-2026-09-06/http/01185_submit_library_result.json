@@ -1,0 +1,95 @@
+{
+  "seq": 1185,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 1185,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "hxFz_m9OzdDcHysAlVs3KMy1DEL0LJJY",
+      "client_id": "proof-harness",
+      "attempt_token": "lqPAk5noeCBIMYtODETWHGojT3g0hX77UxcgRs1kmMQ",
+      "submission_key": "hxFz_m9OzdDcHysAlVs3KMy1DEL0LJJY-lqPAk5noeCBIMYtODETWHGojT3g0hX77UxcgRs1kmMQ",
+      "schema_version": 1,
+      "video_id": "_KNjASionIo",
+      "source_revision": "1878e89cad2f73714ed9b3fb6f62b8e1f6d9e68b295082fd04bf924e32d16c3a",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "365a1eaa1dcffce560f6eb239283939f800ad73ea73816137d12a562d51e67c8",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "e3ef2590d14f96c6ada25f151a3b221ca3ec3051197d71e46185259e853c62d1",
+              "card_hash": "cd669a7bef8c767824345d811f60bb5dce1a3855072b56d89a31a148235dc07b",
+              "quote": "if you look at Nvidia they're probably the best positioned player"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 19366,
+        "cache_read_tokens": 197341,
+        "cache_create_tokens": 47794,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1185,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "hxFz_m9OzdDcHysAlVs3KMy1DEL0LJJY",
+        "video_id": "_KNjASionIo",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "e3ef2590d14f96c6ada25f151a3b221ca3ec3051197d71e46185259e853c62d1",
+              "card_hash": "cd669a7bef8c767824345d811f60bb5dce1a3855072b56d89a31a148235dc07b",
+              "quote": "if you look at Nvidia they're probably the best positioned player",
+              "start": 2.23,
+              "end": 1044.069,
+              "timing": "coarse",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

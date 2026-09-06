@@ -1,0 +1,58 @@
+{
+  "seq": 693,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "dAvIJIHqz2ssyn7nx8YbI_I8-oD3hOuO",
+      "video_id": "2089007841277276160",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "c76136bbad09207503b1e19583d458b4d4d8e253980f5c3e9a2b31c186098b78",
+            "card_hash": "c1e42cf15672f769d15c525850deb4c734c54c826aaa8170b1733c4054ad8084",
+            "quote": "It's Very Readable With 300 Lines So Everyone Can Take A Look At It Let Me Basically Step Through It",
+            "start": 3135.679,
+            "end": 3255.3,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "e95566b8cfffa179ac323457b9804cb3c34eb1e0f7ed554f74b4bba16195fa81",
+            "card_hash": "c1e42cf15672f769d15c525850deb4c734c54c826aaa8170b1733c4054ad8084",
+            "quote": "This Step Here The Multi-Headed Detention And That's This Line To Communicate Phase",
+            "start": 3494.9,
+            "end": 3613.289,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

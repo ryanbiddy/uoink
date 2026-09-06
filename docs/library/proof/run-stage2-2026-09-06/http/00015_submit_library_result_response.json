@@ -1,0 +1,38 @@
+{
+  "seq": 15,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "l1IUT4GqRoSTRc7idIVkw_OVCsHZtYLP",
+      "video_id": "2078443305495388160",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "news-and-current-events",
+          "shelf_path": [
+            "News and Current Events"
+          ],
+          "confidence": 0.9,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8",
+            "card_hash": "26278cb609c413a60416743a6a454ebc9ee93e985579a6001544b636b1bf2c38",
+            "quote": "a mother found a man in her house. She says he was hiding under A child's bed when police arrived",
+            "start": 0.0,
+            "end": 79.239,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

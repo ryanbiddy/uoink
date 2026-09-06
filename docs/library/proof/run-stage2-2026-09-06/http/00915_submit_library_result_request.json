@@ -1,0 +1,35 @@
+{
+  "seq": 915,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "hMVRjnpXTM-1GsDolxHFX3IbkRCsuuKx",
+    "client_id": "proof-harness",
+    "attempt_token": "YTbQXK6-LfAkfvFbes5dkxotJJRJIzHi1AThQEVR8dU",
+    "submission_key": "hMVRjnpXTM-1GsDolxHFX3IbkRCsuuKx-YTbQXK6-LfAkfvFbes5dkxotJJRJIzHi1AThQEVR8dU",
+    "schema_version": 1,
+    "video_id": "2092906890497839104",
+    "source_revision": "1a127f7d7a4ca19755603839dde5c17b6572f34aaccaf62e8e34fe1ba1435e25",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "b601145b33df8be2f7978ccb4125b905549c91e2fc6a3498f8492d6e788443c7",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Excerpt describes a mapping product (Hoodmaps) incorporating US Census income data; no AI/ML, news/current-events, or space/science subject matter is present, so it falls outside every approved shelf."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 16444,
+      "cache_read_tokens": 185177,
+      "cache_create_tokens": 33216,
+      "wall_time_ms": 0
+    }
+  }
+}

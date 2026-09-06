@@ -1,0 +1,51 @@
+{
+  "seq": 749,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "sGOlXZLesbh5GRCN3EeU2_wWGsXq09ag",
+    "client_id": "proof-harness",
+    "attempt_token": "xzXsz9XVG15CEEKgfjKteKC_7NMHeHFRllfPjJRpVKw",
+    "submission_key": "sGOlXZLesbh5GRCN3EeU2_wWGsXq09ag-xzXsz9XVG15CEEKgfjKteKC_7NMHeHFRllfPjJRpVKw",
+    "schema_version": 1,
+    "video_id": "2089383338654199808",
+    "source_revision": "bab6b39b8c9b1c43ee6818ba0c87b05ff24ac836b3b7b2f0ffce0e06c98e46ed",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "762cee8cfb32678723a2466dd22b06fca74291c6ad09715e2eaa76f9969b39ad",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "c5210ebcaef06d779e6b4673c8573a5de394195480a029ab5281e88a11f56e0d",
+            "card_hash": "c26ffa48d359c09eb7f537a3cc15ef0dc5b95c8c76186e04da873a22e568b457",
+            "quote": "agents wrote 30% of code in a week, global tax filing shipped"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 10150,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 19302,
+      "wall_time_ms": 0
+    }
+  }
+}

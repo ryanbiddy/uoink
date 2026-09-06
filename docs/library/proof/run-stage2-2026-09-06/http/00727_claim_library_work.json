@@ -1,0 +1,778 @@
+{
+  "seq": 727,
+  "tool": "claim_library_work",
+  "wall_ms": 9,
+  "request": {
+    "seq": 727,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 727,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 9,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "YFjYP8h_iUjhBjKE3QL1gue4N4B9kPNZ",
+            "video_id": "2090852339485904896",
+            "attempt_token": "NdepDWIkJ8ScgOx84tbVOUySU02-lEp9HEhC36ImODw",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677518867,
+            "source_revision": "3c6c8566397b904af042411ad8aef9df733833d2af0a3ada15dccf86864700d0",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "2826c9f7543325c95ec86307b20ce7221d4d10edf8afb55f75408dbb38003389",
+            "card": {
+              "card_hash": "7dc6827ffbd392a564c8f70c459bc4928c215f1c5b34636904917b1bfb285c8e",
+              "channel": "Ziwen",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/ziwenxu_/status/2090852424663830751",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "a4fe384486e3902e28473cbd84694015f0d815dc49096f5a38faab992bcb3b00",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Ox Alpha is wired into codex now, and it's free for the whole week!!  no api key, no billing.   It sits in the picker next to the models we already pay for, and our native models never moved.  Vision an",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Ox Alpha is wired into codex now, and it's free for the whole week!!  no api key, no billing.   It sits in the picker next to the models we already pay for, and our native models never moved.  Vision and a million tokens of context, costing nothing until the window shuts. so we https://t.co/6ZP2Grsg7O No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Ziwen_-_Ox_Alpha_is_wired_into_codex_now_and_it_s_free_for_the_whole_week",
+              "source_revision": "3c6c8566397b904af042411ad8aef9df733833d2af0a3ada15dccf86864700d0",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Ox Alpha is wired into codex now, and it's free for the whole week!!  no api key, no billing.   It sits in the picker next to the models we already pay for, and our native models never moved.  Vision and a million tokens of context, costing nothing until the window shuts. so we https://t.co/6ZP2Grsg7O No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "title": "Ziwen - Ox Alpha is wired into codex now, and it's free for the whole week!! ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/ziwenxu_/status/2090852424663830751",
+              "video_id": "2090852339485904896",
+              "yoinked_at": "2026-08-22T07:47:43"
+            }
+          },
+          {
+            "work_id": "a1UpStRkVHkposcGK37iSI4QxLEJYNIx",
+            "video_id": "2090544926706876416",
+            "attempt_token": "3DyQyBhM1sPciwzTdwXPCMu1K6VN9yKfV8ADOVmds9s",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677518868,
+            "source_revision": "841b95db57cd50946693bbf8d2bdcb895e3b7718232e36051669017992674a15",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "0e9b856207d1ead3f2ae2063980fc5592e9557afd25db38a641f6254aad52869",
+            "card": {
+              "card_hash": "8d7e37128c22a259783a570a5832460bcd6f6bc2c0d207e75a8bdb2a01f9c165",
+              "channel": "Ben Davis",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/davis7/status/2090557107330568694",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "1bbf3c8eab7424acc97fa6676c345d0c25760aad2cfbcfb03a9d15d7c47affc6",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> OpenAI and Anthropic finally have real competition.   The SpaceXAi comeback has been wild to watch, really hope it continues and we get even more competition in the space https://t.co/oEexA00MnG No tags",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> OpenAI and Anthropic finally have real competition.   The SpaceXAi comeback has been wild to watch, really hope it continues and we get even more competition in the space https://t.co/oEexA00MnG No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Ben_Davis_-_OpenAI_and_Anthropic_finally_have_real_competition_The_SpaceXAi_co",
+              "source_revision": "841b95db57cd50946693bbf8d2bdcb895e3b7718232e36051669017992674a15",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> OpenAI and Anthropic finally have real competition.   The SpaceXAi comeback has been wild to watch, really hope it continues and we get even more competition in the space https://t.co/oEexA00MnG No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Ben Davis - OpenAI and Anthropic finally have real competition.   The SpaceXAi co...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/davis7/status/2090557107330568694",
+              "video_id": "2090544926706876416",
+              "yoinked_at": "2026-08-21T07:57:25"
+            }
+          },
+          {
+            "work_id": "aUgmtKwin8WkEQQJpSqBtUzMrCDdlzxV",
+            "video_id": "2090463556693278720",
+            "attempt_token": "t1siIH56JK8-cI16wKCqvcqMm4lvmxBAANVd7hbWTfc",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677518869,
+            "source_revision": "bef8f98f933197bb1441fc4389b5201044e593ad266b06c9ea53337cc64d02d3",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "6e58589ffadfbbc075169272228c2bb4fea463eb0356fd5c68be351abae3382e",
+            "card": {
+              "card_hash": "a8416005dc48b284536bff974fe9108adf84406b44fe1f11163323b2e6bd04bd",
+              "channel": "Exa",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/ExaAILabs/status/2090472683758841932",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "abaf92a758f1da4c72b969c133717e83055b52a273e57269a92caee2a353a875",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Exa in Codex &amp; ChatGPT:  Give Codex access to 100B+ websites, docs, papers, people, companies, and more.  Open Codex -&gt; Plugins -&gt; “Exa” -&gt; Install https://t.co/qke36N7lVz No ta",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Exa in Codex &amp; ChatGPT:  Give Codex access to 100B+ websites, docs, papers, people, companies, and more.  Open Codex -&gt; Plugins -&gt; “Exa” -&gt; Install https://t.co/qke36N7lVz No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Exa_-_Introducing_Exa_in_Codex_amp_ChatGPT_Give_Codex_access_to_100B_w",
+              "source_revision": "bef8f98f933197bb1441fc4389b5201044e593ad266b06c9ea53337cc64d02d3",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Exa in Codex &amp; ChatGPT:  Give Codex access to 100B+ websites, docs, papers, people, companies, and more.  Open Codex -&gt; Plugins -&gt; “Exa” -&gt; Install https://t.co/qke36N7lVz No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Exa - Introducing Exa in Codex &amp; ChatGPT:  Give Codex access to 100B+ w...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/ExaAILabs/status/2090472683758841932",
+              "video_id": "2090463556693278720",
+              "yoinked_at": "2026-08-21T07:55:56"
+            }
+          },
+          {
+            "work_id": "b7P-Or2KjkSiWJ_AUj8RT2BPS-dBBxXv",
+            "video_id": "2090832390952525824",
+            "attempt_token": "Kq1-4sywvjmTHRd6TG-IdO439Xp5hUCSyqMHsG0LyKo",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677518869,
+            "source_revision": "bb0c7db828b5adcafed8a639a1f15e56d3915300ae2f249324ec59955166aabb",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "e7a12b2fcd67d7d406823d8f9d52a7b9cbed3141d5254e33d4f034d28d105237",
+            "card": {
+              "card_hash": "ff2c1a11a6b6bae2483af8c68c1d082696d104a02ffc9c0d101f29cfc29da5df",
+              "channel": "Robert Johns",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/RobertJohns/status/2090832456081608791",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "05cf7c3d40cdcb3b6af2f7285f21b83af6d0ba6dd67b7e21e3f0a2da8f4788dd",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> One of the coolest uses of a text effect that I’ve seen in a long while. Bravo @hermeuscorp! https://t.co/Ybro5dL7iP No tags *No captions available for this video.* <!-- yoink:comments-start --> *Commen",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> One of the coolest uses of a text effect that I’ve seen in a long while. Bravo @hermeuscorp! https://t.co/Ybro5dL7iP No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Robert_Johns_-_One_of_the_coolest_uses_of_a_text_effect_that_I_ve_seen_in_a_long",
+              "source_revision": "bb0c7db828b5adcafed8a639a1f15e56d3915300ae2f249324ec59955166aabb",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> One of the coolest uses of a text effect that I’ve seen in a long while. Bravo @hermeuscorp! https://t.co/Ybro5dL7iP No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Robert Johns - One of the coolest uses of a text effect that I’ve seen in a long whi...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/RobertJohns/status/2090832456081608791",
+              "video_id": "2090832390952525824",
+              "yoinked_at": "2026-08-22T07:48:05"
+            }
+          },
+          {
+            "work_id": "f5uXR7c02gZNDE4O5KFvefHGjxpKTUmE",
+            "video_id": "2090852806257422336",
+            "attempt_token": "hcumMSHfadUOUPyXlzvOslI3NJ-euoUCp2Pdt9mpXc0",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677518870,
+            "source_revision": "28f316df0bf6a954d035577f2a7db8286da21a885c24afe7d0955f0c15159ae1",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "6ab6d7d97aca7b9e2477068a053da8c8b48813a6ac5b9dbefffe309e4a7e01aa",
+            "card": {
+              "card_hash": "5860ee479dbb81f6d4034c0bd43ceeb53a330b89b5ae15b868bb0e7821ecf0f9",
+              "channel": "Grok Bot",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Social Media Research",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/bot/status/2090852881373311369",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "b72dcf10cf20a79b21455f6c41caf6d3232ddb00294e769dcddaf234dd0d4196",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> We're making Grok Bot more widely available.  All SuperGrok Plus, Cursor Pro+, and Cursor Teams subscribers now have access.  We're also offering a free trial with limited usage for all other users. htt",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> We're making Grok Bot more widely available.  All SuperGrok Plus, Cursor Pro+, and Cursor Teams subscribers now have access.  We're also offering a free trial with limited usage for all other users. https://t.co/0D3oUDZQCM No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Grok_Bot_-_We_re_making_Grok_Bot_more_widely_available_All_SuperGrok_Plus_Cur",
+              "source_revision": "28f316df0bf6a954d035577f2a7db8286da21a885c24afe7d0955f0c15159ae1",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> We're making Grok Bot more widely available.  All SuperGrok Plus, Cursor Pro+, and Cursor Teams subscribers now have access.  We're also offering a free trial with limited usage for all other users. https://t.co/0D3oUDZQCM No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Grok Bot - We're making Grok Bot more widely available.  All SuperGrok Plus, Cur...",
+              "topic": "Social Media Research",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/bot/status/2090852881373311369",
+              "video_id": "2090852806257422336",
+              "yoinked_at": "2026-08-22T07:47:31"
+            }
+          },
+          {
+            "work_id": "ik7yuirFpKA7jpZeanrZpT9KM3AA_4t0",
+            "video_id": "2090849386284863488",
+            "attempt_token": "EUb9nEzC6oaul3Zh_3CsQIwxaJRKfqTbRmJfafVeC_k",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677518871,
+            "source_revision": "734a579fb1c550ef11621e425181d05cec6fd37ab36661a0764432959ca115e5",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "e6d303df7f998fa7db60f57734b377af31e6199cf2d65cd1ebc26c1f833d37da",
+            "card": {
+              "card_hash": "a0b317ff753327be1b02075a5e53d05dce470f4a71803a212fa3e6677658caf4",
+              "channel": "Thariq",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/trq212/status/2090884854590382515",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "edff50a0d895c8153820abef8bd96cf11795e4e88056f128e5cd80a895adb6ed",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> a skill people at Anthropic have been using a lot recently: ELI5  /eli5 &lt;what you want explained&gt;  \"explain like I'm someone who knows nothing about this topic, using a HTML artifact with big pict",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> a skill people at Anthropic have been using a lot recently: ELI5  /eli5 &lt;what you want explained&gt;  \"explain like I'm someone who knows nothing about this topic, using a HTML artifact with big pictures and few words\" https://t.co/OZqzjAyFdT No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Thariq_-_a_skill_people_at_Anthropic_have_been_using_a_lot_recently_ELI5_el",
+              "source_revision": "734a579fb1c550ef11621e425181d05cec6fd37ab36661a0764432959ca115e5",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> a skill people at Anthropic have been using a lot recently: ELI5  /eli5 &lt;what you want explained&gt;  \"explain like I'm someone who knows nothing about this topic, using a HTML artifact with big pictures and few words\" https://t.co/OZqzjAyFdT No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Thariq - a skill people at Anthropic have been using a lot recently: ELI5  /el...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/trq212/status/2090884854590382515",
+              "video_id": "2090849386284863488",
+              "yoinked_at": "2026-08-22T07:47:54"
+            }
+          },
+          {
+            "work_id": "lHYHCGcfRpxusrFpsd5GoVZD8TSzOCde",
+            "video_id": "2090817187900780961",
+            "attempt_token": "4mxgbStSlctwHCw6htnCpMjQRjU6zhUXESnolXskUm8",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677518872,
+            "source_revision": "c41c25a7547e2eaadd151e3cb11090789e225c96490be39cabe924f4fe4b51a5",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "1ecaf2aa340334e54875da5a91dec21f8910ac78e2275c8ce611151052993eab",
+            "card": {
+              "card_hash": "0f14140ef9acb38be5b239187e596db5aacfcc827af8081a3094e19fedf45293",
+              "channel": "Meng To",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/MengTo/status/2090817187900780961",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "1e12f0fd47d25e792e07de689613101ec43c5dd6b56a52d76c32682e1818a342",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> I open-sourced ThreeUI, my library of three.js components and landing pages.  160+ are free, and the tool is free too. It includes procedural 3D hero sections, icons, and motion designs. Copy the prompt",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I open-sourced ThreeUI, my library of three.js components and landing pages.  160+ are free, and the tool is free too. It includes procedural 3D hero sections, icons, and motion designs. Copy the prompt or source, give it to your agent, then change the theme, lighting, motion or https://t.co/YagCLibnqu No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Meng_To_-_I_open-sourced_ThreeUI_my_library_of_three_js_components_and_landing",
+              "source_revision": "c41c25a7547e2eaadd151e3cb11090789e225c96490be39cabe924f4fe4b51a5",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I open-sourced ThreeUI, my library of three.js components and landing pages.  160+ are free, and the tool is free too. It includes procedural 3D hero sections, icons, and motion designs. Copy the prompt or source, give it to your agent, then change the theme, lighting, motion or https://t.co/YagCLibnqu No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+              "title": "Meng To - I open-sourced ThreeUI, my library of three.js components and landing...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/MengTo/status/2090817187900780961",
+              "video_id": "2090817187900780961",
+              "yoinked_at": "2026-08-22T07:47:37"
+            }
+          },
+          {
+            "work_id": "slmWU5jYbYIujscqK4aZl_6YcpfDk06S",
+            "video_id": "2090488277426171904",
+            "attempt_token": "QCVZ1P70mtMVzrKWorDSel-6Lhcjk2yyJxBnP5AQ3tQ",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677518873,
+            "source_revision": "08b1bd64d68b4bbc8d41dfbf000c3330e26fbeb6f45b6a31c84a4b35210491e3",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "fd332a08dcadd96710e10a4e27b9a8da1f4d76d3987e9b5a1a343a2317240f7a",
+            "card": {
+              "card_hash": "f652ba70980451a42258f112039633eef9cdb9ecdef7d33e8bbf69b1e62553bb",
+              "channel": "MiniMax Design (H3)",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Productivity and Workflows",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/Hailuo_AI/status/2090613786046779485",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "409dfa84739d908da5d1a0494d86086cec2c18c9b6fccd5f60e68a2aabc0f334",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> 🐙MiniMax Design is officially live!  Turn Ideas into Commercial-Grade Content #MiniMaxDesign #MiniMax  🤖Agent-Driven Workflow: Input your goal. Agents autonomously plan, execute, and deliver. 🪄Built for",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> 🐙MiniMax Design is officially live!  Turn Ideas into Commercial-Grade Content #MiniMaxDesign #MiniMax  🤖Agent-Driven Workflow: Input your goal. Agents autonomously plan, execute, and deliver. 🪄Built for Commercial Creation: Craft ads, e-commerce assets, motion graphics, and https://t.co/YxHHl8L0qp MiniMaxDesign, MiniMax *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](htt",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "MiniMax_Design_H3_-_MiniMax_Design_is_officially_live_Turn_Ideas_into_Commercial",
+              "source_revision": "08b1bd64d68b4bbc8d41dfbf000c3330e26fbeb6f45b6a31c84a4b35210491e3",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 🐙MiniMax Design is officially live!  Turn Ideas into Commercial-Grade Content #MiniMaxDesign #MiniMax  🤖Agent-Driven Workflow: Input your goal. Agents autonomously plan, execute, and deliver. 🪄Built for Commercial Creation: Craft ads, e-commerce assets, motion graphics, and https://t.co/YxHHl8L0qp MiniMaxDesign, MiniMax *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](htt",
+              "title": "MiniMax Design (H3) - 🐙MiniMax Design is officially live!  Turn Ideas into Commercial-Grade...",
+              "topic": "Productivity and Workflows",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/Hailuo_AI/status/2090613786046779485",
+              "video_id": "2090488277426171904",
+              "yoinked_at": "2026-08-21T07:55:33"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

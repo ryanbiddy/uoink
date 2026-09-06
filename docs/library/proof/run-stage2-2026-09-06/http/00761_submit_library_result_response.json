@@ -1,0 +1,38 @@
+{
+  "seq": 761,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 22,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "-o-OWhR0MgCmJCcs7SjNvJCt5lKwpmVN",
+      "video_id": "2090566181854048256",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "c57b4e6c80e29387245c7ca5ea5e23b5c3c30e3f318d025f46e9b149cf082d17",
+            "card_hash": "ddc5958e89a8786e1606c773aa9006515747bc3f94aeabf90db32fbd26bbee70",
+            "quote": "a humanoid robot is going to have the same kind of capability as a human",
+            "start": 0.1,
+            "end": 77.628,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

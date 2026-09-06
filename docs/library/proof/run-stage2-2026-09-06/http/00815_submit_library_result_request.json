@@ -1,0 +1,51 @@
+{
+  "seq": 815,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "X27gd2dLaSTFKJkd7FgvTCuA-aU8TYpv",
+    "client_id": "proof-harness",
+    "attempt_token": "egQYbhxK-k4T0jXSSxs4Wujx7K2vSG1RB_wrLfi0Wyw",
+    "submission_key": "X27gd2dLaSTFKJkd7FgvTCuA-aU8TYpv-egQYbhxK-k4T0jXSSxs4Wujx7K2vSG1RB_wrLfi0Wyw",
+    "schema_version": 1,
+    "video_id": "2090496604902129664",
+    "source_revision": "7bb80e30758afed744b1c8f73229b7edc40d4af4e1bc83bb90b571ea753aa5a2",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "a3cbc5c9dd8ad62eb2313fb493c82399a32ea192cc574d5a7c071c6ac65f4a28",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "3f6c325b523c3a63bd51a953aca34b5636f1abaa8da324b0bbb9fb5730c0562f",
+            "card_hash": "bb080ad7095c124b8518deeeb27372a716cdeab510ab143a38b5c7553706a38d",
+            "quote": "Search messages, catch up on conversations, draft and send replies—all with ChatGPT on your Mac."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 20778,
+      "cache_read_tokens": 188428,
+      "cache_create_tokens": 40596,
+      "wall_time_ms": 0
+    }
+  }
+}

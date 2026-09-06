@@ -1,0 +1,95 @@
+{
+  "seq": 931,
+  "tool": "submit_library_result",
+  "wall_ms": 24,
+  "request": {
+    "seq": 931,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "DIJzJoPS3Xc_TI9jvg6rPxABCa3kpDS2",
+      "client_id": "proof-harness",
+      "attempt_token": "Lnz1FE-DTyUqYxSawTsopm5relnSwhzI3mw95U-Y5NY",
+      "submission_key": "DIJzJoPS3Xc_TI9jvg6rPxABCa3kpDS2-Lnz1FE-DTyUqYxSawTsopm5relnSwhzI3mw95U-Y5NY",
+      "schema_version": 1,
+      "video_id": "2093001292591632384",
+      "source_revision": "70483878d4c47d88f938f94e15fe211c3106e3b0a590177a067ee66b9e0fadff",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "2917300b89bf31d43bd2d0e3d1cafa28ba74e55e0f433238c80b20b48739e100",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "7b6d57eefa7b4e8566f15c837095303ff62763e4d37027d2af0411e33fdf47fd",
+              "card_hash": "549aab30ef7306ec9e3246db06dc117011bef5a22ad08bb202e8a04e144d0ada",
+              "quote": "In 2023, four MIT dropouts released a fork of Microsoft's code editor."
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 15696,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 22313,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 931,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 24,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "DIJzJoPS3Xc_TI9jvg6rPxABCa3kpDS2",
+        "video_id": "2093001292591632384",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "7b6d57eefa7b4e8566f15c837095303ff62763e4d37027d2af0411e33fdf47fd",
+              "card_hash": "549aab30ef7306ec9e3246db06dc117011bef5a22ad08bb202e8a04e144d0ada",
+              "quote": "In 2023, four MIT dropouts released a fork of Microsoft's code editor.",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "seq": 837,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 837,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "QfBI9lzsrjWOxL8cGxXrolA6_taFl2Uo",
+      "client_id": "proof-harness",
+      "attempt_token": "3-7S6rc0IsuD-8Og21aNY5OHZWmHkvD3g2uJ5L5Gr8o",
+      "submission_key": "QfBI9lzsrjWOxL8cGxXrolA6_taFl2Uo-3-7S6rc0IsuD-8Og21aNY5OHZWmHkvD3g2uJ5L5Gr8o",
+      "schema_version": 1,
+      "video_id": "2091192707511189504",
+      "source_revision": "d733759a8794f815199bbbf908f329f1a8ce454e09083806c3782925f78606e5",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "3e2ebe98200f2e03619429bcb26930d0e31bbb3499cae2f5d1f103d842bdaed8",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "52c989aa5b20195b76515c34bc191e5b5f4ac8f098eae9a746908451d2c6dd61",
+              "card_hash": "30f95ad5dde043e564ab9b18bbce3259ea815c3aeb266ecc10c3ef8546ba4a44",
+              "quote": "delete your IDE, you don't need it anymore"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 17649,
+        "cache_read_tokens": 188508,
+        "cache_create_tokens": 37595,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 837,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "QfBI9lzsrjWOxL8cGxXrolA6_taFl2Uo",
+        "video_id": "2091192707511189504",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "52c989aa5b20195b76515c34bc191e5b5f4ac8f098eae9a746908451d2c6dd61",
+              "card_hash": "30f95ad5dde043e564ab9b18bbce3259ea815c3aeb266ecc10c3ef8546ba4a44",
+              "quote": "delete your IDE, you don't need it anymore",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

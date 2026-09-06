@@ -1,0 +1,59 @@
+{
+  "seq": 1189,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 1189,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "kz_uvwOWfGKhZKoq-o7ViWLj3K0EeMfK",
+      "client_id": "proof-harness",
+      "attempt_token": "2dOBzdccqbxk0fhZosdaRG82L-dFL_xnXi1qCS6vLJY",
+      "submission_key": "kz_uvwOWfGKhZKoq-o7ViWLj3K0EeMfK-2dOBzdccqbxk0fhZosdaRG82L-dFL_xnXi1qCS6vLJY",
+      "schema_version": 1,
+      "video_id": "Vh4O04Bpovw",
+      "source_revision": "41b126f9d4d797db89f22bb3d500d7528ac9a042b8fa67df7d65bca50a3b4bdf",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "fbaa1f8c6810f97234af8e49e3408f51667d084410da5a40858dff1c26e371b4",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpts show a human-interest travel documentary touring the Biosphere 2 facility and profiling inspirational personal stories (a graduate's journey, perseverance); the content centers on the structure as a place to visit and on people's stories rather than on astronautics, orbital mechanics, or empirical scientific inquiry as required by Space and Science, and no other approved shelf fits."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 19366,
+        "cache_read_tokens": 197341,
+        "cache_create_tokens": 47794,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1189,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "kz_uvwOWfGKhZKoq-o7ViWLj3K0EeMfK",
+        "video_id": "Vh4O04Bpovw",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

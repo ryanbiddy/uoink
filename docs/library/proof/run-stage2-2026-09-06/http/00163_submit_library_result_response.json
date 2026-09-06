@@ -1,0 +1,39 @@
+{
+  "seq": 163,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "1qBD_C8sY_nkeKleHkqRAQozNMHBQKd-",
+      "video_id": "2080447768397787137",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "b0b69e16d68461b066508af7b574161df8cf5f86285b0ece476502b9403539e1",
+            "card_hash": "0304836acb2cedac9014ae93f7a7dd1f95f350eb68e51de00cad329c59bb76b0",
+            "quote": "could you help me understand the changes in this file",
+            "start": 0.37,
+            "end": 23.879,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

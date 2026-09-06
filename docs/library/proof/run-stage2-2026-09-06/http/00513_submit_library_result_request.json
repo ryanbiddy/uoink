@@ -1,0 +1,50 @@
+{
+  "seq": 513,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "Wz-myljYPF2pPNASoPCXaC0XsLK_erlo",
+    "client_id": "proof-harness",
+    "attempt_token": "0SKqeyOF83Z9-Ei7pUppuNRC7Lcq-gm7xuZd-6PTM2c",
+    "submission_key": "Wz-myljYPF2pPNASoPCXaC0XsLK_erlo-0SKqeyOF83Z9-Ei7pUppuNRC7Lcq-gm7xuZd-6PTM2c",
+    "schema_version": 1,
+    "video_id": "2085875838202032128",
+    "source_revision": "d1a389db75ff47f6df19967367287ed73c848d53b88111d5fcc6cd33875d3eab",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "2cf27a9c6487842e966afda1404b144c338ccc5b4b0cc855f7ed4efde188185e",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "fe9a84bf9f12cff7627fb6fff24bb47300b13d8c705f5bfeb3e734149c2a3261",
+            "card_hash": "4c62ce6b4422bd4cd42cca609660eb623fff48316818690517a55b530703e6e9",
+            "quote": "This week's ChatGPT feature drop - Aug 7:"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 10312,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 17742,
+      "wall_time_ms": 0
+    }
+  }
+}

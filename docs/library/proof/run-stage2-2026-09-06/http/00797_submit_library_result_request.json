@@ -1,0 +1,35 @@
+{
+  "seq": 797,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "PoatWEGhIK73M-Lm_je5gtsZf3L9MlrM",
+    "client_id": "proof-harness",
+    "attempt_token": "4kNDhuwE9wDg0y001jR7YPXnlF7Mqa6YpVTgzPBCL80",
+    "submission_key": "PoatWEGhIK73M-Lm_je5gtsZf3L9MlrM-4kNDhuwE9wDg0y001jR7YPXnlF7Mqa6YpVTgzPBCL80",
+    "schema_version": 1,
+    "video_id": "2091312890653327360",
+    "source_revision": "8e177aab41715b6f7082c80e6f5da4f6100f0b0335e0239302bf6bf9cb479af7",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "1e25ee43e2b65c01ec36be04165c83ce8bf6d0319a179f822ac95ec017c6cce6",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Excerpt is a humorous meme caption about Grok with no substantive discussion of AI capability, policy, or product; a mere name-drop does not establish a technical shelf."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 8769,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 23198,
+      "wall_time_ms": 0
+    }
+  }
+}

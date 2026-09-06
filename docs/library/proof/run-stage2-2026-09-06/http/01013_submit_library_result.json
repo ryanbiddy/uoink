@@ -1,0 +1,59 @@
+{
+  "seq": 1013,
+  "tool": "submit_library_result",
+  "wall_ms": 26,
+  "request": {
+    "seq": 1013,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "WU1mUNLFwPZYDDlW1tWgSJCWmEJIUa78",
+      "client_id": "proof-harness",
+      "attempt_token": "pXEqJdkgci2EyaCQQfHov4Lj4wu8_DWWz6ZvuHnu75Q",
+      "submission_key": "WU1mUNLFwPZYDDlW1tWgSJCWmEJIUa78-pXEqJdkgci2EyaCQQfHov4Lj4wu8_DWWz6ZvuHnu75Q",
+      "schema_version": 1,
+      "video_id": "2094452350132051968",
+      "source_revision": "69e96723b252509a108573a9333527bdc4f5d5573d5b5b86914bd26a0cd81de0",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "7fa6d1439fc5b2d21b7297c6cef4e83f4ffe2d1573d94622a7d5365b86e2a2e4",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt announces a fiction/non-fiction story-writing competition ('GPU World') about a hypothetical AI-diffused future. The central subject is a literary contest, not AI/ML technology, a product, research, or an agent/model itself, so it does not match any approved shelf despite thematic AI references."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 11353,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 21587,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1013,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 26,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "WU1mUNLFwPZYDDlW1tWgSJCWmEJIUa78",
+        "video_id": "2094452350132051968",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

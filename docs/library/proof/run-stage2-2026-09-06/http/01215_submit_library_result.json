@@ -1,0 +1,81 @@
+{
+  "seq": 1215,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 1215,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "ZSqkx09mfgKa1Qq5qvqVl7VqI_cFu99C",
+      "client_id": "proof-harness",
+      "attempt_token": "KNXnOwKVRC4V56uWc6Wq-pfW61E7ZUAPm9lOcPfuGZs",
+      "submission_key": "ZSqkx09mfgKa1Qq5qvqVl7VqI_cFu99C-KNXnOwKVRC4V56uWc6Wq-pfW61E7ZUAPm9lOcPfuGZs",
+      "schema_version": 1,
+      "video_id": "x_56eeb559f6a",
+      "source_revision": "73fae738e0e4ab8db47da4423b3d8eca69bd200e10b27ac7a4ce1c50690227bc",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "5dd1e1082ac23802306c799d69baabfde600cd70d9ed897045f6e66bfd8aa57c",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "spaceflight",
+            "shelf_path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "bac2d0f040da9e5613de84db1a5ac1c602396dbac2077cd44ae7fe7372511998",
+              "card_hash": "fe38a73bbce7331bed50b9ca647603a4fa88c1e2c1e561b0323a302e55c68711",
+              "quote": "Like watching sunset at the beach from the most foreign seat in the cosmos"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 19184,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 29533,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1215,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "ZSqkx09mfgKa1Qq5qvqVl7VqI_cFu99C",
+        "video_id": "x_56eeb559f6a",
+        "outcome": "rejected",
+        "accepted_memberships": [],
+        "rejected": [
+          {
+            "code": "invalid_evidence",
+            "field": "evidence.quote",
+            "reason": "Quote must occur in one specified excerpt"
+          }
+        ],
+        "retryable": true
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 1017,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "bYgqtvfI0_fW9RymLc6FtkxANzG0Tb44",
+      "video_id": "2094718226601218048",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.9,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "42d8192e258796e73d8d07347bd1133c48c14cd270e5ab0a4787cd72e2c7c3c4",
+            "card_hash": "98de5999b5d443ff99e1e3f7cf06284c6202f023cdbbdb09f97e0173c10c42c6",
+            "quote": "After these incidents went public they immediately paused all of the cyber evals they were doing for pre-release models",
+            "start": 1935.216,
+            "end": 2054.07,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

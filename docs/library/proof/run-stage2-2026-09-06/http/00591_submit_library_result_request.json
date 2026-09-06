@@ -1,0 +1,66 @@
+{
+  "seq": 591,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "z46FcEGHa--Dt0jkBUVJnkUll7xOwkR5",
+    "client_id": "proof-harness",
+    "attempt_token": "GQz-jGMEPGMdWsbU7FvdVPe0sUvOQhKoMWXI-6zUC3U",
+    "submission_key": "z46FcEGHa--Dt0jkBUVJnkUll7xOwkR5-GQz-jGMEPGMdWsbU7FvdVPe0sUvOQhKoMWXI-6zUC3U",
+    "schema_version": 1,
+    "video_id": "2086120621734326272",
+    "source_revision": "a0d4274c5954653b69552dda83170a82f868e15a30059cb31cef608a2d400394",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "03d37aa9ae72386b7d6409ded881c137a82d9bb1989095f9f7f91b926b5baa3c",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "8fa60b77ac41ff9d32b6608ec51f5ab8a5f08f380205d048c97eb32c91183f7e",
+            "card_hash": "40786eba9594caba0ce163d09223ae7df8b9a8ffe6b7aaf2a79511d78f72ca7a",
+            "quote": "TRY RAC FIRST MAYBE A RULE I THINK FIND TURNING IS BETWEEN 10 TO 100X MORE WORK THAN FINE TUNING"
+          }
+        },
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4aca5d7410434edf756e1362574e752af7293c45a74cb3346c0cc42c414a03b6",
+            "card_hash": "40786eba9594caba0ce163d09223ae7df8b9a8ffe6b7aaf2a79511d78f72ca7a",
+            "quote": "Welcome to this NeurIPS tutorial on application development using LLMs"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 18457,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 20482,
+      "wall_time_ms": 0
+    }
+  }
+}

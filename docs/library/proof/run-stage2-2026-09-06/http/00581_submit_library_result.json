@@ -1,0 +1,129 @@
+{
+  "seq": 581,
+  "tool": "submit_library_result",
+  "wall_ms": 5,
+  "request": {
+    "seq": 581,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "ysvjNbKiUcYFc3I4dzXGgDYHhuhk8Nd7",
+      "client_id": "proof-harness",
+      "attempt_token": "jXHFvMNpVdrM2Q4vMkJkirSEPdSxrk8n9RAnq0sjfyU",
+      "submission_key": "ysvjNbKiUcYFc3I4dzXGgDYHhuhk8Nd7-jXHFvMNpVdrM2Q4vMkJkirSEPdSxrk8n9RAnq0sjfyU",
+      "schema_version": 1,
+      "video_id": "2086167440203923456",
+      "source_revision": "d873db97c10916d5f74eb97a75b2eadc8783d2eec3e0288fdc1e80dcda85532f",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "c9769001a964898c71d71136e3a9afdd466a205c5bdeed34e34f44fe33ea673e",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "education",
+            "shelf_path": [
+              "AI and ML",
+              "Education"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "aadcb8a85d60faef991b7898b3863376fda0804d927594cfbe78622ff16c1521",
+              "card_hash": "7d9049170278f157198eb98a1fc5e231cc57f31961b9332c0b12c9e4ae382903",
+              "quote": "I'm going to talk to you about what's happening in AI."
+            }
+          },
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "6f64635e3bb85ffeea9ebaf4d770b119d89e2df2720556cc7715f4b21c5c5467",
+              "card_hash": "7d9049170278f157198eb98a1fc5e231cc57f31961b9332c0b12c9e4ae382903",
+              "quote": "This Is A Large Effort Now Co-author Of The Paper With More Than 1000 Authors Our Report"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 13778,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20764,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 581,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 5,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "ysvjNbKiUcYFc3I4dzXGgDYHhuhk8Nd7",
+        "video_id": "2086167440203923456",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "education",
+            "shelf_path": [
+              "AI and ML",
+              "Education"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "aadcb8a85d60faef991b7898b3863376fda0804d927594cfbe78622ff16c1521",
+              "card_hash": "7d9049170278f157198eb98a1fc5e231cc57f31961b9332c0b12c9e4ae382903",
+              "quote": "I'm going to talk to you about what's happening in AI.",
+              "start": 0.0,
+              "end": 119.349,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          },
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "6f64635e3bb85ffeea9ebaf4d770b119d89e2df2720556cc7715f4b21c5c5467",
+              "card_hash": "7d9049170278f157198eb98a1fc5e231cc57f31961b9332c0b12c9e4ae382903",
+              "quote": "This Is A Large Effort Now Co-author Of The Paper With More Than 1000 Authors Our Report",
+              "start": 3103.42,
+              "end": 3222.199,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

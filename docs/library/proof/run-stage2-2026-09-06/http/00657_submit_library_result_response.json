@@ -1,0 +1,39 @@
+{
+  "seq": 657,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "0jbg8GTksM9rpd2xl4IhRwqDGYS2DosO",
+      "video_id": "2088693139502485504",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "1dd8c8d682d8ab2f12349baca19bd4b225d6cbb360cbb84e331829dc7c5566dc",
+            "card_hash": "8a6d21abdb3d662bfa1dbc10f296ac27f631c879262b99538a5d6c5f83ed1a8d",
+            "quote": "You can use Luna Max as a native sub-agent in Codex and benefit from the incredible price/performance ratio.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

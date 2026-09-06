@@ -1,0 +1,95 @@
+{
+  "seq": 27,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 27,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "77n_BTXNU4cHJSA-hBN8ZPVWr6EhWYnr",
+      "client_id": "proof-harness",
+      "attempt_token": "Bqz5Y5Fg5YgTEhSAdc6u-zFExf_bFUaWGqnaWdadTf4",
+      "submission_key": "77n_BTXNU4cHJSA-hBN8ZPVWr6EhWYnr-Bqz5Y5Fg5YgTEhSAdc6u-zFExf_bFUaWGqnaWdadTf4",
+      "schema_version": 1,
+      "video_id": "-JXwa-WlkU8",
+      "source_revision": "7d948df8b454d673ec3bbc3bf2c2aa168e2b8ecbcaa55c4a03a510aea888e474",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "74c39eab4277a3abbad0a93efd06ecd80a1de8c01cf2a911ac6781a8a04fb33c",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "education",
+            "shelf_path": [
+              "AI and ML",
+              "Education"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "4d6a4c36694d07c97f9625d2dc60eb413a90a6def15005381251104d314f0f3e",
+              "card_hash": "ffeda496303143028d239b26b8c0a97939df60ba252470169015a91abcab5bcc",
+              "quote": "how we can run inference training and all of that"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 8287,
+        "cache_read_tokens": 0,
+        "cache_create_tokens": 104678,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 27,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "77n_BTXNU4cHJSA-hBN8ZPVWr6EhWYnr",
+        "video_id": "-JXwa-WlkU8",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "education",
+            "shelf_path": [
+              "AI and ML",
+              "Education"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "4d6a4c36694d07c97f9625d2dc60eb413a90a6def15005381251104d314f0f3e",
+              "card_hash": "ffeda496303143028d239b26b8c0a97939df60ba252470169015a91abcab5bcc",
+              "quote": "how we can run inference training and all of that",
+              "start": 2.19,
+              "end": 349.55,
+              "timing": "coarse",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

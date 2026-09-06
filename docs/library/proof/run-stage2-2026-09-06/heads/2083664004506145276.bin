@@ -1,0 +1,81 @@
+# Fireside Alpha - Anthropic Technical Staff Jess Yan says the harness and the model can...
+
+**Channel:** Fireside Alpha (— subscribers)
+**Uploaded:** 2026-08-01 | **Duration:** — | **Views:** — | **Likes:** 216
+**URL:** https://x.com/firesidealpha/status/2083664004506145276
+**Uoinked:** 2026-08-02T07:45:33
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The video opens by citing Jess Yan, identified as Anthropic Technical Staff, lending credibility and expertise to the claims being made about AI model performance and architecture. The hook establishes authority through her role and the specificity of her technical insights.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Anthropic Technical Staff Jess Yan says the harness and the model cannot be pulled apart without giving up performance, though she flags her own bias.    "I think I am quite biased but I also think that it is impossible to get the maximum possible performance without tying https://t.co/4oQwkpTxyd
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] And it turns out that there are different models that are good for different
+[00:00:02] parts of these tasks, right? And even across different tasks, it's
+[00:00:06] like some tasks are these really crazy hard ones where you want to actually
+[00:00:10] use max thinking and you want to use the very best models you can
+[00:00:14] get your hands on in the world, right? And then many other tasks are
+[00:00:18] boilerplate enough or repetitive enough that what you care about is just
+[00:00:22] getting it done really fast, getting an immediate answer, having the ability to
+[00:00:27] verify that it was correct. But then beyond that, making sure that it was
+[00:00:30] as cheap and fast and efficient as possible, right? And so Devin, rather
+[00:00:34] than being pegged to one model and saying, "Oh, we're only going to serve
+[00:00:37] you GPT for this, or we're only going to serve you Opus for this."
+[00:00:39] Devin can use any of the different models it has in its arsenal, which
+[00:00:42] include all of these models from Anthropic, OpenAI, Google, etc. But
+[00:00:46] also our own models, right? Or open source models out there. And it will
+[00:00:50] dynamically go and choose these models for these tasks.
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:30]
+
+![Screenshot at 00:00:30](screenshots/shot_0002.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About Fireside Alpha:**
+*No channel description available.*
+
+**Recent videos from this channel:**
+- *No recent videos found.*
+
+---
+
+*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*

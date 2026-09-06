@@ -1,0 +1,51 @@
+{
+  "seq": 919,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "tAhA1UUi9BEMnaefxLvrYsPSjULIHP5L",
+    "client_id": "proof-harness",
+    "attempt_token": "wusN4sri1doZRUPaVB7l96qrzpma77y_1NaZ70O-x_s",
+    "submission_key": "tAhA1UUi9BEMnaefxLvrYsPSjULIHP5L-wusN4sri1doZRUPaVB7l96qrzpma77y_1NaZ70O-x_s",
+    "schema_version": 1,
+    "video_id": "2092344910666207232",
+    "source_revision": "7372efbe3a1cb6452bec996efe1e0e4008fd79058c513678f70bd3fba071044e",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "81e2c540f41143e5eb65a6525db815b42273333729256d83a7b1324384b0c511",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "69a05ba0b919e14fe57b2bdfc321c01350adaf5504921f26a692a1763b26edac",
+            "card_hash": "3bd282d4886d2f43158b5ae5a3c51267020ab54d8e2eb1fa16ecb3a8b91dbb87",
+            "quote": "ChatGPT or Codex can automatically use it to complete your task"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 16444,
+      "cache_read_tokens": 185177,
+      "cache_create_tokens": 33216,
+      "wall_time_ms": 0
+    }
+  }
+}

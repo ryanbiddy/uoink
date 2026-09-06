@@ -1,0 +1,58 @@
+{
+  "seq": 1087,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "W-nz47OdwPQfnc_tnHhfTSx3x_e2bd6J",
+      "video_id": "JmCXZQ2xiZo",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.74,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "394665846985695efd835321dbdcb49b24848033b85d8b1e4ec9f3289ea5eadc",
+            "card_hash": "7e062e13ef0d553fb8e779b84a53783f2073bb3b1e0464737b2d0fdb4eacc3f3",
+            "quote": "how much money Open AI and Anthropic and Google are making",
+            "start": 753.0,
+            "end": 820.91,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "67918cb71b1248f63032001ff34fcf6f62715fbeac2caf00611959be5e36c327",
+            "card_hash": "7e062e13ef0d553fb8e779b84a53783f2073bb3b1e0464737b2d0fdb4eacc3f3",
+            "quote": "can you go and do research for me?",
+            "start": 114.12,
+            "end": 230.55,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

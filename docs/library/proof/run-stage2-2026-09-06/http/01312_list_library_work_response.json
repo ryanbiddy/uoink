@@ -1,0 +1,235 @@
+{
+  "seq": 1312,
+  "tool": "list_library_work",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "contract_version": "phase2-v1.2-2026-09-04",
+      "run_revision": 543,
+      "counts": {
+        "accepted": 369,
+        "cancelled": 2,
+        "leased": 15,
+        "unmapped": 127,
+        "unsupported": 35
+      },
+      "manifest_counts": {
+        "accepted": 369,
+        "cancelled": 2,
+        "rejected": 2,
+        "unmapped": 127,
+        "unsupported": 35,
+        "waiting": 13
+      },
+      "items": [
+        {
+          "work_id": "-8tFzQazTjQmNddrnjuw_1zqcWfDE1vS",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2081066532071759872",
+          "state": "unmapped",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "-H8TNoUr3kToxcYV24X1m35DgZRYmViO",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2080709349606150317",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "-LrOFeERUMhvBdPzfr01VyUPBOPh0adB",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2079662821449609217",
+          "state": "unmapped",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "-ORA7F683rut5qJJEQP3S5Iw9pE9Xys7",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2084984808216657921",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "-XSIvqhBlNqH8GZM1CfdFhYqeyFVfBIE",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2088044934536585216",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "-o-OWhR0MgCmJCcs7SjNvJCt5lKwpmVN",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2090566181854048256",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "0MuSkjl3xcOHwWoNlxc4sH6cgHXQfAiX",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2080678700157140992",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "0Otm0trlhN_K02HU3ck5V4Xlk0vW4W8i",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "r0RspiLG260",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "0Pt0kqbRdpEzeCqSa3FuDfP7VSkwyysc",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2079140311779971072",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "0ZwqHMFqciFdrsoooZ-UzqjtI2Sq-THq",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "leXa7EKUPFk",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "0ce_xLgVmv5nRBV3n0k_BtmXuISAH8LW",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2089054598837256192",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "0jbg8GTksM9rpd2xl4IhRwqDGYS2DosO",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2088693139502485504",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "0kfSQRBrlKR10Ov7KrVPngsTcE3L47V9",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "8GRmLR__OGQ",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "0m6l5bRZBvpoNq3lRBRHocDQD2vZvWK5",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2086167837358321664",
+          "state": "unmapped",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "0nuO4NctQHqUlrzeTHzjSaeGLvdomwsZ",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2088998949701005312",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "1HamE4yY4m9c-x188eGddhDQwf3sLy1T",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2081762221613592576",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "1RWvB951l4P2dAZioezreSpjYUblE2v6",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2089011298621399260",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "1qBD_C8sY_nkeKleHkqRAQozNMHBQKd-",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2080447768397787137",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "1v0GB2FTbzuhKZdW7ee15UUgDc-JDxhr",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2093065400393105408",
+          "state": "unmapped",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "2QUBX0V-EixjQZ6RsQUkXNGCJVGtihUT",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2091116328803332096",
+          "state": "unmapped",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "2SdjN2semh7GXB5a0e3O52l3r1g3jy2l",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2080841892582035456",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "2Yf44pLLRa0DQhSfAM1PKhMmdG9nlDo1",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2081801821308571648",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "2g8GzDh-H2JKfVPmfrpt6MsEZ1p6j_nt",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2087384476661735493",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "2hjkPetzLp_S166nSD6PEJh5rFg--Izn",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "2084245813782585345",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        },
+        {
+          "work_id": "2kmAoyTqeinHGhfoNMjUDg-sDCngeNIl",
+          "run_id": "stage2-2026-09-06",
+          "video_id": "1851588159403884544",
+          "state": "accepted",
+          "attempts": 1,
+          "packet_generation": 1
+        }
+      ],
+      "next_cursor": "2kmAoyTqeinHGhfoNMjUDg-sDCngeNIl",
+      "waiting_for_client": false,
+      "recovery_state": "ready"
+    }
+  }
+}

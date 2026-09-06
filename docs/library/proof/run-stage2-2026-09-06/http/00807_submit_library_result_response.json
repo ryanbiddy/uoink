@@ -1,0 +1,39 @@
+{
+  "seq": 807,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 25,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "7SwXol5GJNuCcS14Mn2MO2PjHFN-GzTR",
+      "video_id": "2090844215756419072",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "3faeb10d02c3fa22554503507299eddc37ebbd76c09306a199d6f392757db1b9",
+            "card_hash": "6176811efe42278ba84e5efb936e7df69b64bb8c369490c0a210b0ec0a9be462",
+            "quote": "if we're talking about like writing and creating your own tools you have this API format",
+            "start": 700.668,
+            "end": 819.73,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,876 @@
+{
+  "seq": 313,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 11,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "HsbDbHrpTeBSxVgE1631xhkp6mq31OZm",
+          "video_id": "2081888077858140160",
+          "attempt_token": "VvS3RxqEy5CwfokQf1YNswXGL76GvYOC5-7VrbrqISk",
+          "attempt_number": 2,
+          "lease_expires_ms": 1788676669211,
+          "source_revision": "537c45af957145fd5a5c59c152f927b2d6400d589dff959d272df1cc6d05f014",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "be359141629fb5f9327de7f0c7271714bd145df581ba7a1f34115994809daa8c",
+          "card": {
+            "card_hash": "6528eefcd5e23d6987e58ce2875d80b47bb2210008c7dd82ff535d7fa2133f72",
+            "channel": "The TWIML AI Podcast",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/twimlai/status/2081890010174050630",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "08ab39b122c05fa0d88e8f65ca3e09dbf1ab1e3072444a7888ce66958ddf26c6",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> For more than a decade, AI has advanced by training ever-larger models on ever-larger datasets. But as high-quality training data becomes harder to find and pretraining grows increasingly expensive, res",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> For more than a decade, AI has advanced by training ever-larger models on ever-larger datasets. But as high-quality training data becomes harder to find and pretraining grows increasingly expensive, researchers are looking for new ways to keep foundation models improving.  In https://t.co/9TbStWsviK No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "The_TWIML_AI_Podcast_-_For_more_than_a_decade_AI_has_advanced_by_training_ever-l",
+            "source_revision": "537c45af957145fd5a5c59c152f927b2d6400d589dff959d272df1cc6d05f014",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> For more than a decade, AI has advanced by training ever-larger models on ever-larger datasets. But as high-quality training data becomes harder to find and pretraining grows increasingly expensive, researchers are looking for new ways to keep foundation models improving.  In https://t.co/9TbStWsviK No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments",
+            "title": "The TWIML AI Podcast - For more than a decade, AI has advanced by training ever-larger model...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/twimlai/status/2081890010174050630",
+            "video_id": "2081888077858140160",
+            "yoinked_at": "2026-07-28T09:58:34"
+          }
+        },
+        {
+          "work_id": "EzAj692xXpFu__a0TN9aSJAQnes3sXTk",
+          "video_id": "2083289812333973504",
+          "attempt_token": "7LGE_sTrNDXYTl7xJzH40_AVOA87TeBLZnA_uRqpQHc",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676669212,
+          "source_revision": "908870aacc6e00f3cea11d1689102ec6c4e6488bc774fed1cd49a04e81a00d0f",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "5ae33a9a0fb4b69a63160492b1daa57f25a9c851b2d102eee43e0f2aa1d09eb5",
+          "card": {
+            "card_hash": "4276b149157588fe3cdf12760c7cd593ea0a6ecdba610bead0fb6f679bed62b0",
+            "channel": "Logan Kilpatrick",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/OfficialLoganK/status/2083291516689322483",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "94e34941bc7162334aea828a174674b4981996b46c6a4e0374cd07784c08f28f",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> A conversation with the Google DeepMind Robotics team about our latest Gemini Robotics 2 model, the arc of robotics progress, and where we go next 🤖 https://t.co/KUJfYBw6cm No tags *No captions availabl",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> A conversation with the Google DeepMind Robotics team about our latest Gemini Robotics 2 model, the arc of robotics progress, and where we go next 🤖 https://t.co/KUJfYBw6cm No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Logan_Kilpatrick_-_A_conversation_with_the_Google_DeepMind_Robotics_team_about_o",
+            "source_revision": "908870aacc6e00f3cea11d1689102ec6c4e6488bc774fed1cd49a04e81a00d0f",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> A conversation with the Google DeepMind Robotics team about our latest Gemini Robotics 2 model, the arc of robotics progress, and where we go next 🤖 https://t.co/KUJfYBw6cm No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Logan Kilpatrick - A conversation with the Google DeepMind Robotics team about our lates...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/OfficialLoganK/status/2083291516689322483",
+            "video_id": "2083289812333973504",
+            "yoinked_at": "2026-08-01T07:51:39"
+          }
+        },
+        {
+          "work_id": "I8i5Y0gqosqB_IP7gOTSdFhGARLlxD4s",
+          "video_id": "2083270328453853184",
+          "attempt_token": "uiUeenmWwLdFcFWGFhWVgDmZscdAt_aG6xRNERDSa-8",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676669212,
+          "source_revision": "ec4c1534f886a02a4f32ae9cced99255aba9b5621b72b720efb538bb20948055",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "cb4a239c019b57defa2db6d6849b5b5360dbb59c0fb3a8886df9d605b00e43dd",
+          "card": {
+            "card_hash": "ccb099b13d9eea3c1a435a4848b82c84da8e277117291dec008d9e37a76a9cbf",
+            "channel": "Founders Inc",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/fdotinc/status/2083279883950862631",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "13751081459df219b27d6e96c0bf93c190ec4a2f06f293f40ad4c92b26af377d",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> they gave frontier models a 1 billion token context window:  you can now run Fable [1B], Opus [100M],  GPT 5.6 [500M] across your entire codebase  - it's a graph based tool that can traverse databases w",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> they gave frontier models a 1 billion token context window:  you can now run Fable [1B], Opus [100M],  GPT 5.6 [500M] across your entire codebase  - it's a graph based tool that can traverse databases with 400M+ of nodes in ms - only one prompt to install - &amp; it's open source https://t.co/mNny90FjoL No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Founders_Inc_-_they_gave_frontier_models_a_1_billion_token_context_window_you_ca",
+            "source_revision": "ec4c1534f886a02a4f32ae9cced99255aba9b5621b72b720efb538bb20948055",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> they gave frontier models a 1 billion token context window:  you can now run Fable [1B], Opus [100M],  GPT 5.6 [500M] across your entire codebase  - it's a graph based tool that can traverse databases with 400M+ of nodes in ms - only one prompt to install - &amp; it's open source https://t.co/mNny90FjoL No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+            "title": "Founders Inc - they gave frontier models a 1 billion token context window:  you can ...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/fdotinc/status/2083279883950862631",
+            "video_id": "2083270328453853184",
+            "yoinked_at": "2026-08-01T07:49:02"
+          }
+        },
+        {
+          "work_id": "JegiR2--WKgdwtXnU3Iw7M8aBe2bRz35",
+          "video_id": "2083283122385543168",
+          "attempt_token": "z-McM4uvcDSIqb1mgs3DtsMvmFmf_aivhvMgOdFJUP4",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676669213,
+          "source_revision": "c4c0bde55ce854f2ac6d56254f1d815c34bf66c6550912b00ddc7ae37e7a31c7",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "939431f7ea1c9910eb9ab1721fd4d778856a82586fa9a472060dbc596fc1da66",
+          "card": {
+            "card_hash": "4fabb0644359e9b352f041ac69049ed6ba4e07d1b1f56cf89526c794bb8ff49f",
+            "channel": "Rohit",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/rohit4verse/status/2083284519550136641",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "deb7e04a1d6f8f6be342edd2ef6daedd3b95022673b2439a2da7894ee4bf7a75",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I've rebuilt my agent stack four times this year.  every rebuild landed on the same seven layers. seven. that's it.  no framework. no orchestrator subscription. no \"agentic OS.\"  probably the only full ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> I've rebuilt my agent stack four times this year.  every rebuild landed on the same seven layers. seven. that's it.  no framework. no orchestrator subscription. no \"agentic OS.\"  probably the only full stack agentic stack you need. https://t.co/PxBOYdzMJY No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Rohit_-_I_ve_rebuilt_my_agent_stack_four_times_this_year_every_rebuild_land",
+            "source_revision": "c4c0bde55ce854f2ac6d56254f1d815c34bf66c6550912b00ddc7ae37e7a31c7",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I've rebuilt my agent stack four times this year.  every rebuild landed on the same seven layers. seven. that's it.  no framework. no orchestrator subscription. no \"agentic OS.\"  probably the only full stack agentic stack you need. https://t.co/PxBOYdzMJY No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Rohit - I've rebuilt my agent stack four times this year.  every rebuild land...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/rohit4verse/status/2083284519550136641",
+            "video_id": "2083283122385543168",
+            "yoinked_at": "2026-08-01T07:49:13"
+          }
+        },
+        {
+          "work_id": "KIH_IWMJcyfiAleWgR5fhcSyMuufOtKP",
+          "video_id": "2083970247514783744",
+          "attempt_token": "6jJ-wvC4acmL3kaNKst5-oTAzL4OPqnmoP8UOlUAgBo",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676669214,
+          "source_revision": "9ec16b4f54a01ac36505ce97597ea87eee3964b1e9cbf39d4dedf7ba6273b31d",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "8d3b54a49546b5cc6ab90c57bce7e34bc7d2a32a4fc503cfc7039aa06f0217f3",
+          "card": {
+            "card_hash": "735d921c2e5b9688ae4c83b6965da6c8650cd5f3b40160f2596424e1fe97d45f",
+            "channel": "Aarno",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/TheGlobalMinima/status/2083972296390418559",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "7a78126dbe6703bf352528a21ef3a2ed321f9031097aeb18fe21bdb1085fc5f7",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> literally one of the best introductions to reinforcement learning today. only within 90 minutes. &gt; framing of rl problems: agent, environment, states, actions, rewards &gt; grid maze: world models vs",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> literally one of the best introductions to reinforcement learning today. only within 90 minutes. &gt; framing of rl problems: agent, environment, states, actions, rewards &gt; grid maze: world models vs model-free &gt; eval methods: monte carlo, td, sarsa &gt; scaling up: dqn, actor/critic https://t.co/1qBewcCCaa No tags *No captions available for this video.*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Aarno_-_literally_one_of_the_best_introductions_to_reinforcement_learning_tod",
+            "source_revision": "9ec16b4f54a01ac36505ce97597ea87eee3964b1e9cbf39d4dedf7ba6273b31d",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> literally one of the best introductions to reinforcement learning today. only within 90 minutes. &gt; framing of rl problems: agent, environment, states, actions, rewards &gt; grid maze: world models vs model-free &gt; eval methods: monte carlo, td, sarsa &gt; scaling up: dqn, actor/critic https://t.co/1qBewcCCaa No tags *No captions available for this video.*",
+            "title": "Aarno - literally one of the best introductions to reinforcement learning tod...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/TheGlobalMinima/status/2083972296390418559",
+            "video_id": "2083970247514783744",
+            "yoinked_at": "2026-08-03T07:38:45"
+          }
+        },
+        {
+          "work_id": "LF3bp-j7Wc-M9FTLhohtr-FZ9MGusB_U",
+          "video_id": "2083312428356411392",
+          "attempt_token": "k_D7OIydZyFuvgDp_Tmyfn_RibRR67RaJXULHPvd59E",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676669215,
+          "source_revision": "f4184203b0e5a1422f86a0c3bf31a671861e14a9577a452edb4c5798e83b5107",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "2586adf7d906dfa4726ea1514a28e552c5293eea694ee8833195ff3289f49da6",
+          "card": {
+            "card_hash": "5866f9672a922b88304dd40c95758fbbf07056db2f3a4268d834c15c24df11c3",
+            "channel": "Lunar",
+            "chars": 32133,
+            "chars_all_clips": 32133,
+            "chars_chosen_clips": 1440,
+            "clip_count": 20,
+            "clips": [
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2083317178711921133#t=0",
+                "end": 119.159,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "6336935041a46dc152c13cdc678bf5c078db88810ae1cab979f67656e689252e",
+                "start": 0.0,
+                "text": "Today I'm joined by Colin Jarvis, Head of Forward Deployed Engineering at OpenAI. Colin thanks for doing it. Yeah, thanks for having me. I am so thrilled to be doing this with you are actually somebody... ...I was talking a little bit but y",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2083317178711921133#t=600",
+                "end": 720.47,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "8caddb6736323bf7c0486170a44e07c942f155a5cd3ebb7b7f7e63a84f118548",
+                "start": 600.509,
+                "text": "That Are Reusable For Other Customers And Customer Work Or Consulting Work That You Might Do For One Customer Even In The Like Brief Example There Is Their Sort Of An Element A Product Where We Were Kind Of Figuring Out Okay This Eventually",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2083317178711921133#t=839",
+                "end": 958.24,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "fd9888ae813eaf94349b775a640ded630877a7b36388d051899110ae22460ccb",
+                "start": 839.179,
+                "text": "Understanding Of The Ethos Which Should Know How You Develop With LLMs Or Orchestrate Whatever Your Own Like Whatever Your End To End Workflow Is You Wrap Evals Around It Put Guard Rails To Protect The Things That Are Out Then Can't Really ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2083317178711921133#t=1196",
+                "end": 1312.319,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9c7ab93e86ee9050c8299cf59aa79e00867d66f6b8ac1a8dfda13e7a73d2eb65",
+                "start": 1196.819,
+                "text": "Will Execute A Few So That Actually Take A Couple Seconds This Is Like Kind Of Again A Toy Example So It's Going To Do Five Different Optimization Run But In Practice There Are Other Area Where We Have Seen Folks Recently Use Agents Sort Of",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2083317178711921133#t=1679",
+                "end": 1798.93,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b97811e9a3514f5f236cabcc3688e4bb2b1614e3b52ef2ed46f273cfc46a126f",
+                "start": 1679.5,
+                "text": "What Not To Do You Have Seen This Enough Times Where I'm Sure You See In A Good Set Of Examples Were Did Not Lead To A Product Or Did Not Lead To Learning Was There A Common Thread Across Those Experiences Of Like Hey This Is Yeah These Are",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2083317178711921133#t=1917",
+                "end": 2036.829,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7e0077f23ffb6168e55183719f12d95e3a4a2c93ec3cf6980b819de2a2c1d5c7",
+                "start": 1917.95,
+                "text": "To Production So I've Got To Orchestrate It I Gotta Put Tracing In I Gotta Label Those Things Build Eval's And Then I Need Some Guardrails These Are The Rough Components The Companies That Do Only One Part Of That Chain Are The Ones I Don't",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2083317178711921133#t=0",
+                "end": 119.159,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "6336935041a46dc152c13cdc678bf5c078db88810ae1cab979f67656e689252e",
+                "start": 0.0,
+                "text": "Today I'm joined by Colin Jarvis, Head of Forward Deployed Engineering at OpenAI. Colin thanks for doing it. Yeah, thanks for having me. I am so thrilled to be doing this with you are actually somebody... ...I was talking a little bit but y",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2083317178711921133#t=600",
+                "end": 720.47,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "8caddb6736323bf7c0486170a44e07c942f155a5cd3ebb7b7f7e63a84f118548",
+                "start": 600.509,
+                "text": "That Are Reusable For Other Customers And Customer Work Or Consulting Work That You Might Do For One Customer Even In The Like Brief Example There Is Their Sort Of An Element A Product Where We Were Kind Of Figuring Out Okay This Eventually",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2083317178711921133#t=839",
+                "end": 958.24,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "fd9888ae813eaf94349b775a640ded630877a7b36388d051899110ae22460ccb",
+                "start": 839.179,
+                "text": "Understanding Of The Ethos Which Should Know How You Develop With LLMs Or Orchestrate Whatever Your Own Like Whatever Your End To End Workflow Is You Wrap Evals Around It Put Guard Rails To Protect The Things That Are Out Then Can't Really ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2083317178711921133#t=1196",
+                "end": 1312.319,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9c7ab93e86ee9050c8299cf59aa79e00867d66f6b8ac1a8dfda13e7a73d2eb65",
+                "start": 1196.819,
+                "text": "Will Execute A Few So That Actually Take A Couple Seconds This Is Like Kind Of Again A Toy Example So It's Going To Do Five Different Optimization Run But In Practice There Are Other Area Where We Have Seen Folks Recently Use Agents Sort Of",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2083317178711921133#t=1679",
+                "end": 1798.93,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b97811e9a3514f5f236cabcc3688e4bb2b1614e3b52ef2ed46f273cfc46a126f",
+                "start": 1679.5,
+                "text": "What Not To Do You Have Seen This Enough Times Where I'm Sure You See In A Good Set Of Examples Were Did Not Lead To A Product Or Did Not Lead To Learning Was There A Common Thread Across Those Experiences Of Like Hey This Is Yeah These Are",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2083317178711921133#t=1917",
+                "end": 2036.829,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7e0077f23ffb6168e55183719f12d95e3a4a2c93ec3cf6980b819de2a2c1d5c7",
+                "start": 1917.95,
+                "text": "To Production So I've Got To Orchestrate It I Gotta Put Tracing In I Gotta Label Those Things Build Eval's And Then I Need Some Guardrails These Are The Rough Components The Companies That Do Only One Part Of That Chain Are The Ones I Don't",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Lunar_-_OpenAI_pays_FDE_engineers_up_to_785K_year_In_this_40-minute_talk",
+            "source_revision": "f4184203b0e5a1422f86a0c3bf31a671861e14a9577a452edb4c5798e83b5107",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "Lunar - OpenAI pays FDE engineers up to $785K/year.  In this 40-minute talk, ...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/LunarResearcher/status/2083317178711921133",
+            "video_id": "2083312428356411392",
+            "yoinked_at": "2026-08-01T07:52:14"
+          }
+        },
+        {
+          "work_id": "RHtikgELZXCZ9bGrCPM1apu3fZxD4dnE",
+          "video_id": "2083438553493843968",
+          "attempt_token": "gmyfYyLOxN6DaJ_sOoT5WoBRgKgGyK8Ps29WyTHre4I",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676669216,
+          "source_revision": "c32b7b088d03a8b27d4208ccdc5847470957a49f1a3288258efeef78b20b14db",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "84c5025a31b5343dffde53d6f70b9d17600d9fca3261eeaa53021bbf30524e2e",
+          "card": {
+            "card_hash": "dbdf3400c709fac8d33cc1abf1ce9b312f3a4ac4c348e2faf433026549dded85",
+            "channel": "Steven Cheng",
+            "chars": 36,
+            "chars_all_clips": 36,
+            "chars_chosen_clips": 36,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/stevencheng/status/2083633865512436083#t=0",
+                "end": 5.339,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b10a0655898b825eb717223b822b9774476310dfda633d2e3b6d74b93cd63256",
+                "start": 0.3,
+                "text": "Yeah, it works! It's alive. Awesome!",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/stevencheng/status/2083633865512436083#t=0",
+                "end": 5.339,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b10a0655898b825eb717223b822b9774476310dfda633d2e3b6d74b93cd63256",
+                "start": 0.3,
+                "text": "Yeah, it works! It's alive. Awesome!",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> I love this opensource project!  Someone just put a 28.9M parameter AI model on an ESP32-S3.  A chip that costs only a few dollars.  No cloud. No API. No internet.  It runs locally at ~9.5 tokens/s and can generate stories on a tiny screen. This changes the way we think about AI https://t.co/qdhbbudlLf No tags [00:00:00] Yeah, it works! [00:00:02] It's alive. [00:00:04] Awesome! <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoin",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Steven_Cheng_-_I_love_this_opensource_project_Someone_just_put_a_28_9M_parameter",
+            "source_revision": "c32b7b088d03a8b27d4208ccdc5847470957a49f1a3288258efeef78b20b14db",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I love this opensource project!  Someone just put a 28.9M parameter AI model on an ESP32-S3.  A chip that costs only a few dollars.  No cloud. No API. No internet.  It runs locally at ~9.5 tokens/s and can generate stories on a tiny screen. This changes the way we think about AI https://t.co/qdhbbudlLf No tags [00:00:00] Yeah, it works! [00:00:02] It's alive. [00:00:04] Awesome! <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoin",
+            "title": "Steven Cheng - I love this opensource project!  Someone just put a 28.9M parameter A...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/stevencheng/status/2083633865512436083",
+            "video_id": "2083438553493843968",
+            "yoinked_at": "2026-08-02T07:45:38"
+          }
+        },
+        {
+          "work_id": "T06_cGpYfb92kDM9mO7PUZ2t-aAeG6vU",
+          "video_id": "2084001626679869440",
+          "attempt_token": "b5a7638FGJdWVknuPEK9t2gUMAgz81UNZkt31lB6up8",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676669216,
+          "source_revision": "7de2952c9c493b695ebe0ab6a0466cdd16e661cbf942cf6539f0d430f40b5e75",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "e83f029935b9211f4598a951fd94456e9a4d24b737e540f7e6d1852ae676bac6",
+          "card": {
+            "card_hash": "daa36d4885d8ac284327a4fb8014abe759b80e8123fb838389e610c187f95cd4",
+            "channel": "Tyler Oliveira",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/tyleraloevera/status/2084003609205678481",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "c470471efe6cbbf6362e399d1a6da4d4324562a2d7277b67b76e12d216afc39c",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Do Flock Cameras Solve Crime? Prevent Crime? Or Just Record It?  Turns out, there’s no independent, peer-reviewed study showing that Flock reduces crime.  The strongest research saying Flock SOLVES crim",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Do Flock Cameras Solve Crime? Prevent Crime? Or Just Record It?  Turns out, there’s no independent, peer-reviewed study showing that Flock reduces crime.  The strongest research saying Flock SOLVES crime is a white paper, written by Flock, using Flock's own data.  In their own https://t.co/VXEpamH6ae No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Tyler_Oliveira_-_Do_Flock_Cameras_Solve_Crime_Prevent_Crime_Or_Just_Record_It_Tu",
+            "source_revision": "7de2952c9c493b695ebe0ab6a0466cdd16e661cbf942cf6539f0d430f40b5e75",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Do Flock Cameras Solve Crime? Prevent Crime? Or Just Record It?  Turns out, there’s no independent, peer-reviewed study showing that Flock reduces crime.  The strongest research saying Flock SOLVES crime is a white paper, written by Flock, using Flock's own data.  In their own https://t.co/VXEpamH6ae No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+            "title": "Tyler Oliveira - Do Flock Cameras Solve Crime? Prevent Crime? Or Just Record It?  Turn...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/tyleraloevera/status/2084003609205678481",
+            "video_id": "2084001626679869440",
+            "yoinked_at": "2026-08-03T07:36:58"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

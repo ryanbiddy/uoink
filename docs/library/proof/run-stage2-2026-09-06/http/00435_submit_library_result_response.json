@@ -1,0 +1,39 @@
+{
+  "seq": 435,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "3BWRWqXED7ZJEFkG9X-tGl3aJ3VlX51K",
+      "video_id": "2084093069323104256",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "40195de095037e8dd0410d347530a9119993a9996b6afd200267b82d2f3ed07a",
+            "card_hash": "dabb8cd790227a08bb67e548e681bcb51aa465b9d51f2de59742004982202f71",
+            "quote": "Meet Qwen3.8-Max: A New Bar for Coding and Cowork.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

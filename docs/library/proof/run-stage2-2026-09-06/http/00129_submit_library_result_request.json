@@ -1,0 +1,50 @@
+{
+  "seq": 129,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "SG4xtN4DHvd_HSuf1I9GliAcKeU_Ge7j",
+    "client_id": "proof-harness",
+    "attempt_token": "jT79NGpuMfllcDAFBNVR2YfStMYE5bfs4gAtD2JfM9I",
+    "submission_key": "SG4xtN4DHvd_HSuf1I9GliAcKeU_Ge7j-jT79NGpuMfllcDAFBNVR2YfStMYE5bfs4gAtD2JfM9I",
+    "schema_version": 1,
+    "video_id": "2079672460769964032",
+    "source_revision": "61b62c3144800f875e73cb0f67eb675a1577dfd44fb174d0270f71af35d0319f",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "eeec5e83c4503d0f5071dd5a50da52908c16f23d80dd799b64293916ab8eae38",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "c4f80e18847620c801d1728dab96e42c493d156b4b124c8589beec4b887cf75d",
+            "card_hash": "d3019d3befd8c5f9d4e20f0eb4332afcc180d4a9ddc69a0334f1ec3255a1b8c3",
+            "quote": "I wrote the full Craftax RL environment + PPO in one CUDA file. zero python in the loop."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 15570,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 20016,
+      "wall_time_ms": 0
+    }
+  }
+}

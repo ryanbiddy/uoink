@@ -1,0 +1,25 @@
+{
+  "seq": 207,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 6,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "9KOivrB0lSJjwLhyKZvf6qnbTUW-KmO9",
+      "video_id": "2080703315634270208",
+      "outcome": "rejected",
+      "accepted_memberships": [],
+      "rejected": [
+        {
+          "code": "invalid_evidence",
+          "field": "evidence.quote",
+          "reason": "Quote must occur in one specified excerpt"
+        }
+      ],
+      "retryable": true
+    }
+  }
+}

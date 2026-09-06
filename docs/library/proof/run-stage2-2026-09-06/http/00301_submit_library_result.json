@@ -1,0 +1,95 @@
+{
+  "seq": 301,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 301,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "1HamE4yY4m9c-x188eGddhDQwf3sLy1T",
+      "client_id": "proof-harness",
+      "attempt_token": "_gCOiaUU1JjUJQy8X0gfF45tDVXS3lB5Qzhjz_sFu9k",
+      "submission_key": "1HamE4yY4m9c-x188eGddhDQwf3sLy1T-_gCOiaUU1JjUJQy8X0gfF45tDVXS3lB5Qzhjz_sFu9k",
+      "schema_version": 1,
+      "video_id": "2081762221613592576",
+      "source_revision": "7e6aa61b86d175e3f6f598675b4a41a256cbd34d8fbf2890a84df6ef862a5477",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "47f5be110655648fc76bb638eb66487b8c6f8747df94fc7140477f0baa62ac70",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "education",
+            "shelf_path": [
+              "AI and ML",
+              "Education"
+            ],
+            "confidence": 0.63,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "251882b6a15b6e0cb638b0d8823ebf260b7a1d1ffb3a67c54941de2bb08597eb",
+              "card_hash": "d211e64ad4e70ce02a72b6c31da827c5d7aeff24e25c9e330b2e273152ba049b",
+              "quote": "I spent 48 hours with the Kimi K3 modeling code."
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 18248,
+        "cache_read_tokens": 186155,
+        "cache_create_tokens": 36169,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 301,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "1HamE4yY4m9c-x188eGddhDQwf3sLy1T",
+        "video_id": "2081762221613592576",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "education",
+            "shelf_path": [
+              "AI and ML",
+              "Education"
+            ],
+            "confidence": 0.63,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "251882b6a15b6e0cb638b0d8823ebf260b7a1d1ffb3a67c54941de2bb08597eb",
+              "card_hash": "d211e64ad4e70ce02a72b6c31da827c5d7aeff24e25c9e330b2e273152ba049b",
+              "quote": "I spent 48 hours with the Kimi K3 modeling code.",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

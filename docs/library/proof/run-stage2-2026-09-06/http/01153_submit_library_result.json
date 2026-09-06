@@ -1,0 +1,95 @@
+{
+  "seq": 1153,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 1153,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "M9pkiVPdNcG3w4F5kZrBkHW9qgRlKQuV",
+      "client_id": "proof-harness",
+      "attempt_token": "EjfhT9QzCDV2Rlw-JvQpExMnb3gtOj3b9W56JTFmfyw",
+      "submission_key": "M9pkiVPdNcG3w4F5kZrBkHW9qgRlKQuV-EjfhT9QzCDV2Rlw-JvQpExMnb3gtOj3b9W56JTFmfyw",
+      "schema_version": 1,
+      "video_id": "episode_54e695d51d6",
+      "source_revision": "09211643f3931ffad8f0be5b0c7cb0147f6b0c3eeddff82cf150157379270133",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "f248810805b1de26e19abfd26c07ef112db9df2472058a75b448289b55773808",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "security",
+            "shelf_path": [
+              "AI and ML",
+              "Security"
+            ],
+            "confidence": 0.88,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "5dd3b1bf3e4f9492aa123ed99a61add32911171872c7d87e2e418d69f04ae378",
+              "card_hash": "60d0138e18b65a9525cf9a4a99f2514e38aed7ba9f82f84a15efccefae4d5303",
+              "quote": "How are we doing this sandboxing? How are we protecting ourselves, but also creating a product that allows other people to do this?"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 12784,
+        "cache_read_tokens": 196372,
+        "cache_create_tokens": 40753,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1153,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "M9pkiVPdNcG3w4F5kZrBkHW9qgRlKQuV",
+        "video_id": "episode_54e695d51d6",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "security",
+            "shelf_path": [
+              "AI and ML",
+              "Security"
+            ],
+            "confidence": 0.88,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "5dd3b1bf3e4f9492aa123ed99a61add32911171872c7d87e2e418d69f04ae378",
+              "card_hash": "60d0138e18b65a9525cf9a4a99f2514e38aed7ba9f82f84a15efccefae4d5303",
+              "quote": "How are we doing this sandboxing? How are we protecting ourselves, but also creating a product that allows other people to do this?",
+              "start": 922.23,
+              "end": 990.485,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

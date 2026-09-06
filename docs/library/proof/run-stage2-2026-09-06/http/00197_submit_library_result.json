@@ -1,0 +1,95 @@
+{
+  "seq": 197,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 197,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "gvEqjq4qnDUV9jkBN20W_WCLUgdgkR26",
+      "client_id": "proof-harness",
+      "attempt_token": "4pq5ca2LyRFAbi3Jp79QFohX455-99t63S7fRfeLnY4",
+      "submission_key": "gvEqjq4qnDUV9jkBN20W_WCLUgdgkR26-4pq5ca2LyRFAbi3Jp79QFohX455-99t63S7fRfeLnY4",
+      "schema_version": 1,
+      "video_id": "2080435155756544000",
+      "source_revision": "3fce2521bf7a9953432bf0f1e0a6f0abfb575b735c76109f5c2228e125f5d390",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "ea017e4da20b7beee0e07d5e2939f8807414f7034900e028728c83e3837eed8e",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.76,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "b08d39b723d1f7a8fb7367315449361fe897661df28029e529e297b35b6cce5f",
+              "card_hash": "33567aa2e8fc1830656b693fe2a7c52e46e4a575cd13eacc56c117ab68e0b5d6",
+              "quote": "right after earnings last night with Google Nebius went through The Roof"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 14824,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20947,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 197,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "gvEqjq4qnDUV9jkBN20W_WCLUgdgkR26",
+        "video_id": "2080435155756544000",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.76,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "b08d39b723d1f7a8fb7367315449361fe897661df28029e529e297b35b6cce5f",
+              "card_hash": "33567aa2e8fc1830656b693fe2a7c52e46e4a575cd13eacc56c117ab68e0b5d6",
+              "quote": "right after earnings last night with Google Nebius went through The Roof",
+              "start": 0.0,
+              "end": 57.899,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

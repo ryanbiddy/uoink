@@ -1,0 +1,39 @@
+{
+  "seq": 635,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "X_98e-Irds2aCMeOHVhBwip4vttOH5yp",
+      "video_id": "2087297832189403136",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "40733883db645b6b2004573ce38c488244c65f8c220ba8e635c0a5347c70be7d",
+            "card_hash": "88a1415750f852157f465e92a6b79ca179ff71157410ca694b8c7f8e49aa0e84",
+            "quote": "College students in the US will be able to claim a year of ChatGPT Plus for free",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

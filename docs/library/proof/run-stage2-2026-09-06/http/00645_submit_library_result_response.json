@@ -1,0 +1,39 @@
+{
+  "seq": 645,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "hJRk8lBpHsaYzlw8F3gu_090A99n0AZ2",
+      "video_id": "2087932684202868736",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.88,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "8e9135c300fe6e8255c6ad580a7eecc7c0d5075243cae4d8c2edd6dd43b375cd",
+            "card_hash": "2f02047ecfa01ac8601af0fba93ae36003122cfd583162cfa5d55d484d6afdef",
+            "quote": "open-sourcing nac, an agent harness for long-running tasks",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

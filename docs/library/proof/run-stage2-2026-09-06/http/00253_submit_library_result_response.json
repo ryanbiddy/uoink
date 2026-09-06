@@ -1,0 +1,39 @@
+{
+  "seq": 253,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "RhR8clHztPNd8ceUqTPrXXrcWlDzEl_k",
+      "video_id": "2081756084549906432",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "7d8221dcc538a8fe61e479d00f59470370d017ecd098db4ecad6ce5b0a73567e",
+            "card_hash": "991b30ad1cafabe6bb19acaa614662122b0135fc9c6be0633e68759861cbe07e",
+            "quote": "Kimi K3 (open weights, coming soon)",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

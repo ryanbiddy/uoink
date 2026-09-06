@@ -1,0 +1,39 @@
+{
+  "seq": 837,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "QfBI9lzsrjWOxL8cGxXrolA6_taFl2Uo",
+      "video_id": "2091192707511189504",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "52c989aa5b20195b76515c34bc191e5b5f4ac8f098eae9a746908451d2c6dd61",
+            "card_hash": "30f95ad5dde043e564ab9b18bbce3259ea815c3aeb266ecc10c3ef8546ba4a44",
+            "quote": "delete your IDE, you don't need it anymore",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

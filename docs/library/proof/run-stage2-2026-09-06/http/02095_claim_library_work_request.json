@@ -1,0 +1,17 @@
+{
+  "seq": 2095,
+  "url": "http://127.0.0.1:5180/tools/claim_library_work",
+  "tool": "claim_library_work",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "action": "claim",
+    "run_id": "stage2-2026-09-06",
+    "client_id": "proof-harness",
+    "max_items": 8
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 867,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "4_R-nEW7oeOrrtTRRJHkxLKYu9eCTVYX",
+      "video_id": "2092745356274446336",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "0c588d9f47421c3210f12f44b14aa31843f9e33549924de5f7721d2fc604af9c",
+            "card_hash": "3f604c128a2a9d445fd6b0d91b7f5c627c82df9ce7df0a707cddbc82e822fb13",
+            "quote": "a chip that I think could really hurt you",
+            "start": 0.1,
+            "end": 83.26,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

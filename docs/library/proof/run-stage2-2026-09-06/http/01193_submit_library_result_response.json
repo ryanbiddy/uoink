@@ -1,0 +1,39 @@
+{
+  "seq": 1193,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "xAj5O0gy2cZ3PXrWjerMQZtSpSzSmnG6",
+      "video_id": "c72_dQ0j0Wo",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "74fdc4dd68d9e72b5d916d85852fe7778ea3596c1da0f416269861df23822af2",
+            "card_hash": "0e64b3b9dc887e3f645aa0fc266a9f921d23d1d7f1e8c9d22409eceeab1a98c6",
+            "quote": "Why is it important for Nvidia to release open models when Nvidia also sells GPUs to Frontier Labs",
+            "start": 3.11,
+            "end": 112.716,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

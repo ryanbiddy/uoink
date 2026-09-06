@@ -1,0 +1,59 @@
+{
+  "seq": 361,
+  "tool": "submit_library_result",
+  "wall_ms": 2,
+  "request": {
+    "seq": 361,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "ZaewlK-l5EGXZ-xqqSHGMuYrx-OYQBdR",
+      "client_id": "proof-harness",
+      "attempt_token": "ublrN5a26H9QPBH81UkuvATlwCWECuwjok83czWqtSI",
+      "submission_key": "ZaewlK-l5EGXZ-xqqSHGMuYrx-OYQBdR-ublrN5a26H9QPBH81UkuvATlwCWECuwjok83czWqtSI",
+      "schema_version": 1,
+      "video_id": "2082926453524398080",
+      "source_revision": "e47bb694de03aa32a8888124be6fb5ae94c0081a27af0dfd9643b8629f907452",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "a52e4474c6571605514eaecf4b866484e3bc3dffe3d17006238cf38af3dfca44",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Transcript is a comedic dialogue about a person claiming to be swallowed by a whale; despite the clickbait 'AI panic attack' framing in the title, no excerpt establishes an actual AI system, a real news incident, or any other approved-shelf subject matter."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 16086,
+        "cache_read_tokens": 186502,
+        "cache_create_tokens": 34334,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 361,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 2,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "ZaewlK-l5EGXZ-xqqSHGMuYrx-OYQBdR",
+        "video_id": "2082926453524398080",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

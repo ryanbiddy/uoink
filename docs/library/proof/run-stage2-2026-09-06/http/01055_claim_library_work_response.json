@@ -1,0 +1,1294 @@
+{
+  "seq": 1055,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 12,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "elNlx6wc74MAC_yhDV_eVIMa9qQMF35a",
+          "video_id": "A12AVongNN4",
+          "attempt_token": "PJKwdk2noVDeFNb26Jf9l3DVD2HzplbbBsdG-eLN7xw",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678231648,
+          "source_revision": "ab9560cff53de0ee3fb0666fbffb020ab236bf2092286ba513994ea71202f24e",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "a9b1b4744bdd489dcf2fec03ec15c1b64ea77b536523c1a3b08254a441b8f200",
+          "card": {
+            "card_hash": "b88ea460f03830b00e619c5ac1a4c334fafc35294a5996beee2068f1c917f9d3",
+            "channel": "Thinking Machines Lab",
+            "chars": 2087,
+            "chars_all_clips": 2087,
+            "chars_chosen_clips": 480,
+            "clip_count": 2,
+            "clips": [
+              {
+                "deep_link": "https://youtube.com/watch?v=A12AVongNN4&t=1s",
+                "end": 56.79,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b27aa66cca87c38bd0c85516b5ae92804029e658f24b673449edd54e807b144a",
+                "start": 1.189,
+                "text": "Hey, I need your help with something today. You ready? >> Absolutely, I'm ready. What's up? >> Yeah. So, we're giving an announcement today and I've got two of my friends coming to help. Every time one of them enters the frame, I need you t",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=A12AVongNN4&t=56s",
+                "end": 136.72,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "d3101ef09d15a5fdb2a8f9a7b5e29963cec7b8470099c32d99d37b3f26da4d36",
+                "start": 56.79,
+                "text": "for my friend and for audience? >> Absolutely. I'll translate as you go preview model. >> Today we're taking a look at our preview model which makes conversation between humans and AI easier. It has many features like web search and artifac",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://youtube.com/watch?v=A12AVongNN4&t=1s",
+                "end": 56.79,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b27aa66cca87c38bd0c85516b5ae92804029e658f24b673449edd54e807b144a",
+                "start": 1.189,
+                "text": "Hey, I need your help with something today. You ready? >> Absolutely, I'm ready. What's up? >> Yeah. So, we're giving an announcement today and I've got two of my friends coming to help. Every time one of them enters the frame, I need you t",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=A12AVongNN4&t=56s",
+                "end": 136.72,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "d3101ef09d15a5fdb2a8f9a7b5e29963cec7b8470099c32d99d37b3f26da4d36",
+                "start": 56.79,
+                "text": "for my friend and for audience? >> Absolutely. I'll translate as you go preview model. >> Today we're taking a look at our preview model which makes conversation between humans and AI easier. It has many features like web search and artifac",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "For AI to collaborate with people the way we do with each other, it should listen, talk, watch, show, and think at the same time — just like people do. Introducing interaction models, an AI designed from the ground up for real-time collaboration. __ This is a preview demo of our interaction model. You can read the full technical report at https://thinkingmachines.ai/blog/interaction-models/ No tags [00:00:01] Hey, I need your help with something [00:00:01] Hey, I need your help with something today. You ready? [00:00:03] today. You ready? [00:00:03] today. You ready? >> Absolutely, I'm ready. ",
+              "truncated": true
+            },
+            "platform": "youtube",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Introducing_interaction_models_Thinking_Machines_Lab",
+            "source_revision": "ab9560cff53de0ee3fb0666fbffb020ab236bf2092286ba513994ea71202f24e",
+            "source_type": "video",
+            "status": "evidenced",
+            "summary_hint": "For AI to collaborate with people the way we do with each other, it should listen, talk, watch, show, and think at the same time — just like people do. Introducing interaction models, an AI designed from the ground up for real-time collaboration. __ This is a preview demo of our interaction model. You can read the full technical report at https://thinkingmachines.ai/blog/interaction-models/ No tags [00:00:01] Hey, I need your help with something [00:00:01] Hey, I need your help with something today. You ready? [00:00:03] today. You ready? [00:00:03] today. You ready? >> Absolutely, I'm ready. ",
+            "title": "Introducing interaction models | Thinking Machines Lab",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://www.youtube.com/watch?v=A12AVongNN4",
+            "video_id": "A12AVongNN4",
+            "yoinked_at": "2026-05-12T18:38:39"
+          }
+        },
+        {
+          "work_id": "h2dk9KWKkwH7SDub513pj4p-L2HHqImq",
+          "video_id": "2095783502306545664",
+          "attempt_token": "sat4x7KaAMVx1swQqWjvgygjfI1dhydtIkRi4AWNpow",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678231649,
+          "source_revision": "2695fef3ecf8c909c468f237cbc44055c365d221cc830eafb7ebce550753d7c2",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "59ca407896a24711299049f144ea8ce409b445527babf9e8442882c042d82e32",
+          "card": {
+            "card_hash": "75daf80a7726dc5ed3a8d6c5a0cd8a6931cb6fb1e124e5f026e663ce02516ab3",
+            "channel": "Clara Bennett",
+            "chars": 26245,
+            "chars_all_clips": 26245,
+            "chars_chosen_clips": 1440,
+            "clip_count": 18,
+            "clips": [
+              {
+                "deep_link": "https://x.com/CodeswithClara/status/2095784631601930578#t=0",
+                "end": 120.349,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "5b6d7866d4e87351bf9d6f83a9e311ddaa26d4216e7c360064e3408161fa8fa0",
+                "start": 0.36,
+                "text": "You, with like an affordable amount of spend on tokens you can do what a hundred person incredibly great engineering team would do as a startup And that was just totally impossible That was like not in the set of options for a startup And n",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/CodeswithClara/status/2095784631601930578#t=371",
+                "end": 472.542,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "8ec30800c04a433b882418564779ffbaaf3bd264be5cf603b8ef2eff97b6a58a",
+                "start": 371.077,
+                "text": "You know, don't get too ambitious Don't get too big. Let's try this smaller And so breaking that down as a systems problem I'll use the thing of when we were like scaling up AI models there was technically can we do this at all? This seems ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/CodeswithClara/status/2095784631601930578#t=725",
+                "end": 845.25,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3a622ff5ba7a09bdc2a1de57d5ba7361ba860a363d83a9f475080f02b3c046a0",
+                "start": 725.608,
+                "text": "And we had a new model We actually had GPD-4 done but we had a new model we were ready to release in between called 3.5 And we had figured out a new kind of post-training where we could get the models to do like a good job with instruction ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/CodeswithClara/status/2095784631601930578#t=925",
+                "end": 1038.471,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "cb09abe334f876c04192ee7a50991bf15d6740195f21a4c9527b0653b8da4886",
+                "start": 925.973,
+                "text": "I think that is definitely the current pipeline I expect we will go through a major rewrite. I don't know when it'll happen or exactly how but it is a little odd to me that it's so It happens as a pipeline and it doesn't quite feel like the",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/CodeswithClara/status/2095784631601930578#t=1206",
+                "end": 1297.426,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "37d635d2c5d437bd03ce600ddbc9e589af5a66899ecb2623af767b14894b1720",
+                "start": 1206.116,
+                "text": "Is one of them true? Is one more likely to be true? How should people reason about compute as a utility versus tokens as a utility? And by compute I mean here chips versus tokens Does that make sense? I think as a consumer as like a busines",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/CodeswithClara/status/2095784631601930578#t=1458",
+                "end": 1576.973,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b0bd3022ece92904cc5d4e51fb55fdce8e2bd0521a077c6c4be3d214889dc806",
+                "start": 1458.111,
+                "text": "So clearly LLMs are capable of figuring out new knowledge And clearly they are capable of doing some things that some intelligence tasks that humans just can't do They are going to scale much further So how much better and what distribution",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/CodeswithClara/status/2095784631601930578#t=0",
+                "end": 120.349,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "5b6d7866d4e87351bf9d6f83a9e311ddaa26d4216e7c360064e3408161fa8fa0",
+                "start": 0.36,
+                "text": "You, with like an affordable amount of spend on tokens you can do what a hundred person incredibly great engineering team would do as a startup And that was just totally impossible That was like not in the set of options for a startup And n",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/CodeswithClara/status/2095784631601930578#t=371",
+                "end": 472.542,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "8ec30800c04a433b882418564779ffbaaf3bd264be5cf603b8ef2eff97b6a58a",
+                "start": 371.077,
+                "text": "You know, don't get too ambitious Don't get too big. Let's try this smaller And so breaking that down as a systems problem I'll use the thing of when we were like scaling up AI models there was technically can we do this at all? This seems ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/CodeswithClara/status/2095784631601930578#t=725",
+                "end": 845.25,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3a622ff5ba7a09bdc2a1de57d5ba7361ba860a363d83a9f475080f02b3c046a0",
+                "start": 725.608,
+                "text": "And we had a new model We actually had GPD-4 done but we had a new model we were ready to release in between called 3.5 And we had figured out a new kind of post-training where we could get the models to do like a good job with instruction ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/CodeswithClara/status/2095784631601930578#t=925",
+                "end": 1038.471,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "cb09abe334f876c04192ee7a50991bf15d6740195f21a4c9527b0653b8da4886",
+                "start": 925.973,
+                "text": "I think that is definitely the current pipeline I expect we will go through a major rewrite. I don't know when it'll happen or exactly how but it is a little odd to me that it's so It happens as a pipeline and it doesn't quite feel like the",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/CodeswithClara/status/2095784631601930578#t=1206",
+                "end": 1297.426,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "37d635d2c5d437bd03ce600ddbc9e589af5a66899ecb2623af767b14894b1720",
+                "start": 1206.116,
+                "text": "Is one of them true? Is one more likely to be true? How should people reason about compute as a utility versus tokens as a utility? And by compute I mean here chips versus tokens Does that make sense? I think as a consumer as like a busines",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/CodeswithClara/status/2095784631601930578#t=1458",
+                "end": 1576.973,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b0bd3022ece92904cc5d4e51fb55fdce8e2bd0521a077c6c4be3d214889dc806",
+                "start": 1458.111,
+                "text": "So clearly LLMs are capable of figuring out new knowledge And clearly they are capable of doing some things that some intelligence tasks that humans just can't do They are going to scale much further So how much better and what distribution",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Clara_Bennett_-_Sam_Altman_CEO_of_Open_AI_You_no_longer_need_to_write_prompts",
+            "source_revision": "2695fef3ecf8c909c468f237cbc44055c365d221cc830eafb7ebce550753d7c2",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "Clara Bennett - Sam Altman (CEO of Open AI):  \"You no longer need to write prompts.\" ...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/CodeswithClara/status/2095784631601930578",
+            "video_id": "2095783502306545664",
+            "yoinked_at": "2026-09-04T07:58:42"
+          }
+        },
+        {
+          "work_id": "oKqIpD2Rf4wiDbdbdka_Q-HHCzsrcCLh",
+          "video_id": "D4fkiQfzw_I",
+          "attempt_token": "X3kaLQkRCTFq-VV_ZTqu06Fz9oAtqejtoXRH-jv8jPg",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678231650,
+          "source_revision": "de2771dc015b237c38781356de805a65ad3b19f870bb78632e95549e8cf3a7c8",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "bfc51115fcf571ba595b4e4629bfa2ffb2d69f5dcf61a0233f16e40e34e6ad19",
+          "card": {
+            "card_hash": "6e7394f38a883dd0cb4dfd220dfcf8a18a23af1ffd91cdbbacc9023a34261150",
+            "channel": "Starter Story",
+            "chars": 10066,
+            "chars_all_clips": 10066,
+            "chars_chosen_clips": 1440,
+            "clip_count": 8,
+            "clips": [
+              {
+                "deep_link": "https://youtube.com/watch?v=D4fkiQfzw_I&t=3s",
+                "end": 56.389,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a92c1e7c256d92f268af8d6c8c5298856922d787834e9f9c91d376657a299b5e",
+                "start": 3.83,
+                "text": "So basically I work all days all year long. I love my day so much that I want to repeat it every single day. I don't like Sundays cuz my my fun is actually making stuff. So I don't see why I would take a day off and when I go on holiday usu",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=D4fkiQfzw_I&t=58s",
+                "end": 163.509,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "c387219735cec50618815f8d744db811bfc4d85ef800206612312156797d44b1",
+                "start": 58.069,
+                "text": "My days might sound boring for some people, but I leave the exact same day almost every day, 365 days a year. I always start the day with a coffee and breakfast with wife and then I hit the gym right after. We train at the gym together. The",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=D4fkiQfzw_I&t=225s",
+                "end": 317.43,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "eb8cac2e9108bf02e58eee5c79ad10c8d153c048ec0d0d46c2e3c5ebf4ba5b03",
+                "start": 225.27,
+                "text": "Now I really try to think less about what would be the output. I just try to think what what is the thing I want to exist. So recently I launched this little Mac OS app that analyze your posture with a webcam and tells me if I'm sitting str",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=D4fkiQfzw_I&t=319s",
+                "end": 364.629,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9f65bd202616e157e2f299e342d10d54e111c2e0edaa9eb0cafb1ec83ded814c",
+                "start": 319.51,
+                "text": "Um I have a big list of things I have to make. So I have a few apps that are already running. Among them there are features like important features I have to ship. Initially I didn't have many problems but as you start to make stuff you wil",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=D4fkiQfzw_I&t=367s",
+                "end": 415.43,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3251a9316e0adafaa70cd30cfa685d5df97d113a1b5f61d09156759a220991d3",
+                "start": 367.909,
+                "text": "We're always afraid to show our new creation and uh your ideals to the world in the first time. Just keep in mind that that that's the biggest barrier to your success ever. There's this little voice inside of your head telling you that it's",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=D4fkiQfzw_I&t=418s",
+                "end": 514.469,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "cbfa354f3610ce67f8ff82baf6627edc56643b8cf2957afb898b6d0cbfe9cd40",
+                "start": 418.55,
+                "text": ">> The only way to validate an idea is to ship it with a buy button. Now with AI that it's even easier to ship stuff. This even more true. I have a slightly controversial take on AI is that there's a bunch of people who are obsessed with pr",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Playlist",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://youtube.com/watch?v=D4fkiQfzw_I&t=3s",
+                "end": 56.389,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a92c1e7c256d92f268af8d6c8c5298856922d787834e9f9c91d376657a299b5e",
+                "start": 3.83,
+                "text": "So basically I work all days all year long. I love my day so much that I want to repeat it every single day. I don't like Sundays cuz my my fun is actually making stuff. So I don't see why I would take a day off and when I go on holiday usu",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=D4fkiQfzw_I&t=58s",
+                "end": 163.509,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "c387219735cec50618815f8d744db811bfc4d85ef800206612312156797d44b1",
+                "start": 58.069,
+                "text": "My days might sound boring for some people, but I leave the exact same day almost every day, 365 days a year. I always start the day with a coffee and breakfast with wife and then I hit the gym right after. We train at the gym together. The",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=D4fkiQfzw_I&t=225s",
+                "end": 317.43,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "eb8cac2e9108bf02e58eee5c79ad10c8d153c048ec0d0d46c2e3c5ebf4ba5b03",
+                "start": 225.27,
+                "text": "Now I really try to think less about what would be the output. I just try to think what what is the thing I want to exist. So recently I launched this little Mac OS app that analyze your posture with a webcam and tells me if I'm sitting str",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=D4fkiQfzw_I&t=319s",
+                "end": 364.629,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9f65bd202616e157e2f299e342d10d54e111c2e0edaa9eb0cafb1ec83ded814c",
+                "start": 319.51,
+                "text": "Um I have a big list of things I have to make. So I have a few apps that are already running. Among them there are features like important features I have to ship. Initially I didn't have many problems but as you start to make stuff you wil",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=D4fkiQfzw_I&t=367s",
+                "end": 415.43,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3251a9316e0adafaa70cd30cfa685d5df97d113a1b5f61d09156759a220991d3",
+                "start": 367.909,
+                "text": "We're always afraid to show our new creation and uh your ideals to the world in the first time. Just keep in mind that that that's the biggest barrier to your success ever. There's this little voice inside of your head telling you that it's",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=D4fkiQfzw_I&t=418s",
+                "end": 514.469,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "cbfa354f3610ce67f8ff82baf6627edc56643b8cf2957afb898b6d0cbfe9cd40",
+                "start": 418.55,
+                "text": ">> The only way to validate an idea is to ship it with a buy button. Now with AI that it's even easier to ship stuff. This even more true. I have a slightly controversial take on AI is that there's a bunch of people who are obsessed with pr",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "youtube",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "How_I_Work_77K_Month_Solopreneur",
+            "source_revision": "de2771dc015b237c38781356de805a65ad3b19f870bb78632e95549e8cf3a7c8",
+            "source_type": "video",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "How I Work: $77K/Month Solopreneur",
+            "topic": "Playlist",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://www.youtube.com/watch?v=D4fkiQfzw_I",
+            "video_id": "D4fkiQfzw_I",
+            "yoinked_at": "2026-05-16T14:21:59"
+          }
+        },
+        {
+          "work_id": "tNrFafUwJ8kgk6bYzfjsjhWc6olv8Voq",
+          "video_id": "2095596032256065543",
+          "attempt_token": "PvY6k-tnsYHT3yZamEYCo9hl3znMlnZ7nUvRU14SunU",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678231650,
+          "source_revision": "7ed8cc1b965c6f677176beef9416af00acbfe09fbb4b01568db34690892c5fcb",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "99ebd226b39bbb6fee3af6abeebebeafe1ee4abe6ee93bb4c302c1719e802341",
+          "card": {
+            "card_hash": "aa99ac3b5cfd688015b386fef7a55f2dcf971223b52c0babbbe4a965230a2922",
+            "channel": "Max Weinbach",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/mweinbach/status/2095596127286366501",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "412f987d51b06096bb9a557d9280c91b47d51c57fa67cce1d2c706633aa922a7",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I had early access to GPT-6 Astra and it's maybe the most insane model I've experienced  In Blender, I had it recreate Apple Park from just images. It did an absurd job. https://t.co/0vDgg9u1DQ No tags ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> I had early access to GPT-6 Astra and it's maybe the most insane model I've experienced  In Blender, I had it recreate Apple Park from just images. It did an absurd job. https://t.co/0vDgg9u1DQ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Max_Weinbach_-_I_had_early_access_to_GPT-6_Astra_and_it_s_maybe_the_most_insane",
+            "source_revision": "7ed8cc1b965c6f677176beef9416af00acbfe09fbb4b01568db34690892c5fcb",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I had early access to GPT-6 Astra and it's maybe the most insane model I've experienced  In Blender, I had it recreate Apple Park from just images. It did an absurd job. https://t.co/0vDgg9u1DQ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Max Weinbach - I had early access to GPT-6 Astra and it's maybe the most insane mode...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/mweinbach/status/2095596127286366501",
+            "video_id": "2095596032256065543",
+            "yoinked_at": "2026-09-04T07:56:06"
+          }
+        },
+        {
+          "work_id": "zt6HIsy8Y44TdqrTuM1bY0bHAmAAr968",
+          "video_id": "8rABwKRsec4",
+          "attempt_token": "CvnBhdq0qrTwIrbG1b6IIU4-OZjniXBF-NhB2P0Hel4",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678231652,
+          "source_revision": "65041956e887fda60b3de4d03795ef08f0ccde1a8a776a500de74727a05bae2a",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "b4f8f440072755db77b47581ff2b2ce36fa28bbcee22e87d2bee2277ee295294",
+          "card": {
+            "card_hash": "4b4cdce649ffe7b05f50b611b83c06fd6952cc65038618a8f4c1f64efb0fe874",
+            "channel": "AI Engineer",
+            "chars": 18390,
+            "chars_all_clips": 18390,
+            "chars_chosen_clips": 1440,
+            "clip_count": 18,
+            "clips": [
+              {
+                "deep_link": "https://youtube.com/watch?v=8rABwKRsec4&t=123s",
+                "end": 240.869,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "157c4905b8a5a858a66acd13ee62cb7a3fc55d1f21345671f8d3cdfd60123235",
+                "start": 123.439,
+                "text": "write code. Okay. Now, for those people, keep their head up if you feel that the most valuable professional artifact that you produce is code. Okay, there's quite a few people and I think this is quite natural. We all work very very hard to",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=8rABwKRsec4&t=240s",
+                "end": 352.15,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2bd9a83b17bf62585cbe6adaa26a5999b50b2ea2a6f0f0c4440ffbae91ec0316",
+                "start": 240.879,
+                "text": "bottleneck. Knowing what to build, talking to people and gathering requirements, knowing how to build it, knowing why to build it, and at the end of the day, knowing if it has been built correctly and has actually achieved the intentions th",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=8rABwKRsec4&t=507s",
+                "end": 597.03,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "cb095b61171148caa55c424fca63bc166b7291a1a4dd914e5bb8ea7bbc5d1bd2",
+                "start": 507.84,
+                "text": "podcasts. Uh, show of hands, who works at a company that has developers as customers? Okay. So, a a quick like thought exercise is if you were to take your entire codebase, all of the the documentation, oh, so all of the code that runs your",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=8rABwKRsec4&t=863s",
+                "end": 937.829,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "91c3615f5416f7de8879b72ebc3961ac9f819e42deccd6ebaed0771f3ff5aa04",
+                "start": 863.199,
+                "text": "training. You then uh take its response, the original prompt and the policy and you give that to a greater model and you ask it to score the response according to the specification. How aligned is it? So the document actually becomes both t",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=8rABwKRsec4&t=937s",
+                "end": 1106.07,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9cb84784b9c09b3c08ebfe223fe5cc42450276d79ace6e4c9eb64485ebbcfefb",
+                "start": 937.839,
+                "text": " national model specification. It has written text which is aspirationally at least clear and unambiguous policy that we can all refer to. And it doesn't mean that we agree with it but we can refer to it as the current status quo as the rea",
+                "timing": "coarse",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=8rABwKRsec4&t=1149s",
+                "end": 1227.27,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "4044eac7521e2846fb71ffdc00195c11c80669a9774741d234989af67fa571fa",
+                "start": 1149.84,
+                "text": "uh a PM uh a lawmaker an engineer a marketer is now the programmer and software engineering has never been about code. Going back to our original question a lot of you put your hands down when you thought well actually the thing I produced ",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://youtube.com/watch?v=8rABwKRsec4&t=123s",
+                "end": 240.869,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "157c4905b8a5a858a66acd13ee62cb7a3fc55d1f21345671f8d3cdfd60123235",
+                "start": 123.439,
+                "text": "write code. Okay. Now, for those people, keep their head up if you feel that the most valuable professional artifact that you produce is code. Okay, there's quite a few people and I think this is quite natural. We all work very very hard to",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=8rABwKRsec4&t=240s",
+                "end": 352.15,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2bd9a83b17bf62585cbe6adaa26a5999b50b2ea2a6f0f0c4440ffbae91ec0316",
+                "start": 240.879,
+                "text": "bottleneck. Knowing what to build, talking to people and gathering requirements, knowing how to build it, knowing why to build it, and at the end of the day, knowing if it has been built correctly and has actually achieved the intentions th",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=8rABwKRsec4&t=507s",
+                "end": 597.03,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "cb095b61171148caa55c424fca63bc166b7291a1a4dd914e5bb8ea7bbc5d1bd2",
+                "start": 507.84,
+                "text": "podcasts. Uh, show of hands, who works at a company that has developers as customers? Okay. So, a a quick like thought exercise is if you were to take your entire codebase, all of the the documentation, oh, so all of the code that runs your",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=8rABwKRsec4&t=863s",
+                "end": 937.829,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "91c3615f5416f7de8879b72ebc3961ac9f819e42deccd6ebaed0771f3ff5aa04",
+                "start": 863.199,
+                "text": "training. You then uh take its response, the original prompt and the policy and you give that to a greater model and you ask it to score the response according to the specification. How aligned is it? So the document actually becomes both t",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=8rABwKRsec4&t=937s",
+                "end": 1106.07,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9cb84784b9c09b3c08ebfe223fe5cc42450276d79ace6e4c9eb64485ebbcfefb",
+                "start": 937.839,
+                "text": " national model specification. It has written text which is aspirationally at least clear and unambiguous policy that we can all refer to. And it doesn't mean that we agree with it but we can refer to it as the current status quo as the rea",
+                "timing": "coarse",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=8rABwKRsec4&t=1149s",
+                "end": 1227.27,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "4044eac7521e2846fb71ffdc00195c11c80669a9774741d234989af67fa571fa",
+                "start": 1149.84,
+                "text": "uh a PM uh a lawmaker an engineer a marketer is now the programmer and software engineering has never been about code. Going back to our original question a lot of you put your hands down when you thought well actually the thing I produced ",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "youtube",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "The_New_Code_Sean_Grove_OpenAI",
+            "source_revision": "65041956e887fda60b3de4d03795ef08f0ccde1a8a776a500de74727a05bae2a",
+            "source_type": "video",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "The New Code — Sean Grove, OpenAI",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://www.youtube.com/watch?v=8rABwKRsec4",
+            "video_id": "8rABwKRsec4",
+            "yoinked_at": "2026-05-17T18:22:31"
+          }
+        },
+        {
+          "work_id": "2lkvAwIRZl6kUVUUsBZ1O4vWjWK3ac3J",
+          "video_id": "LNwODJXcvt4",
+          "attempt_token": "Ta0HmwFCmfG9FhyS6SXOCQnDx3hqts-DGZOA8YZcKbw",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678231653,
+          "source_revision": "663cbb1dd9789d1cce8feefeeb946177a7e626dbbded903cc16531b573a3c47b",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "cb8ce75594bedec5c448616886abfa6f114beaf93104188688c8550cacac387b",
+          "card": {
+            "card_hash": "542a26c3518d2a9ad184ac1dd157805a49cf2417034e4f5345b71c272ccd0ca1",
+            "channel": "Ultralytics",
+            "chars": 7567,
+            "chars_all_clips": 7567,
+            "chars_chosen_clips": 812,
+            "clip_count": 4,
+            "clips": [
+              {
+                "deep_link": "https://youtube.com/watch?v=LNwODJXcvt4&t=0s",
+                "end": 120.0,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "d8df9c35790515cb80226bf6436f0d2fe889203f907ddb28565446d7e180b1fd",
+                "start": 0.0,
+                "text": "so in this video here we're going to see how we\\h can train a custom object detection model with\\h\\h YOLOv8 from Ultralytics we're going to see how\\h we can set it up we're also going to see how you\\h\\h can label your data with a specific t",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=LNwODJXcvt4&t=120s",
+                "end": 237.18,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "85428c1193c55d4f4d253ba713c62ac4383e6d122bf561806b60529ed87baa90",
+                "start": 120.0,
+                "text": "our Google colab notebook so I've already copy\\h pasted it here you first of all you just need\\h\\h to copy paste in your API key then when we run\\h this we act like just download our data set and\\h\\h then we'll have our data set in our Goog",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=LNwODJXcvt4&t=237s",
+                "end": 356.1,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "36ccb59a1815a42fee4f35237675f0ebd2c8a48bd0d18000c3d86dd990585b1d",
+                "start": 237.18,
+                "text": "verify that we actually learn whatever you want to\\h I usually look at the mean error position so that\\h\\h is probably like the most important parameter we\\h both have the mean air position of 0.50 and also\\h\\h 0.50 to 0.95 in intervals of ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=LNwODJXcvt4&t=356s",
+                "end": 360.78,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "498c67d693269eae89f6e751b36dc1863558448aa882defa8760fe8f32018a4a",
+                "start": 356.1,
+                "text": "be really exciting to run it live on a webcam\\h I hope to see in that video guys bye for now",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://youtube.com/watch?v=LNwODJXcvt4&t=0s",
+                "end": 120.0,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "d8df9c35790515cb80226bf6436f0d2fe889203f907ddb28565446d7e180b1fd",
+                "start": 0.0,
+                "text": "so in this video here we're going to see how we\\h can train a custom object detection model with\\h\\h YOLOv8 from Ultralytics we're going to see how\\h we can set it up we're also going to see how you\\h\\h can label your data with a specific t",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=LNwODJXcvt4&t=120s",
+                "end": 237.18,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "85428c1193c55d4f4d253ba713c62ac4383e6d122bf561806b60529ed87baa90",
+                "start": 120.0,
+                "text": "our Google colab notebook so I've already copy\\h pasted it here you first of all you just need\\h\\h to copy paste in your API key then when we run\\h this we act like just download our data set and\\h\\h then we'll have our data set in our Goog",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=LNwODJXcvt4&t=237s",
+                "end": 356.1,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "36ccb59a1815a42fee4f35237675f0ebd2c8a48bd0d18000c3d86dd990585b1d",
+                "start": 237.18,
+                "text": "verify that we actually learn whatever you want to\\h I usually look at the mean error position so that\\h\\h is probably like the most important parameter we\\h both have the mean air position of 0.50 and also\\h\\h 0.50 to 0.95 in intervals of ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=LNwODJXcvt4&t=356s",
+                "end": 360.78,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "498c67d693269eae89f6e751b36dc1863558448aa882defa8760fe8f32018a4a",
+                "start": 356.1,
+                "text": "be really exciting to run it live on a webcam\\h I hope to see in that video guys bye for now",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Learn how to train Ultralytics YOLOv8 models on your custom dataset using Google Colab in this comprehensive tutorial! 🚀 Join Nicolai as he walks you through every step needed to harness the power of YOLOv8 for real-time object detection. From setting up your environment and labeling your dataset to importing and training the model in Google Colab, this video covers it all. In this episode, you will: 1. Set Up Environment: Learn how to configure Google Colab for optimal performance by selecting a GPU and installing Ultralytics with `pip install ultralytics",
+              "truncated": true
+            },
+            "platform": "youtube",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "How_to_Train_Ultralytics_YOLOv8_models_on_Your_Custom_Dataset_in_Google_Colab_Ep",
+            "source_revision": "663cbb1dd9789d1cce8feefeeb946177a7e626dbbded903cc16531b573a3c47b",
+            "source_type": "video",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Learn how to train Ultralytics YOLOv8 models on your custom dataset using Google Colab in this comprehensive tutorial! 🚀 Join Nicolai as he walks you through every step needed to harness the power of YOLOv8 for real-time object detection. From setting up your environment and labeling your dataset to importing and training the model in Google Colab, this video covers it all. In this episode, you will: 1. Set Up Environment: Learn how to configure Google Colab for optimal performance by selecting a GPU and installing Ultralytics with `pip install ultralytics",
+            "title": "How to Train Ultralytics YOLOv8 models on Your Custom Dataset in Google Colab | Episode 3",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://www.youtube.com/watch?v=LNwODJXcvt4",
+            "video_id": "LNwODJXcvt4",
+            "yoinked_at": "2026-07-09T19:19:06"
+          }
+        },
+        {
+          "work_id": "6250kjIce54J0V_B1lYmMLXIfW3wbLix",
+          "video_id": "MJmoSxSPeRY",
+          "attempt_token": "FPg1CsBKnhLcNdb2Dx9h_DGSWcVKBHBptzF6q92xqm0",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678231654,
+          "source_revision": "fedc3b2bda5af1243768e00a3c2cccdf271949cb6cc48999836b5ae2acd0f48d",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "882f76d742bc6f44125f68950281b64f0adb68aa503cb7e9d0ff03ac3f57a1b1",
+          "card": {
+            "card_hash": "1d9c474c3bcf512d912ffbf3a6002db79369b71d3b07d80b5920423b85082f5b",
+            "channel": "Jacksons AI",
+            "chars": 28015,
+            "chars_all_clips": 28015,
+            "chars_chosen_clips": 1440,
+            "clip_count": 21,
+            "clips": [
+              {
+                "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=1s",
+                "end": 75.99,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "f411a55742cc4c080e0e62b7cf4a0d97318ab7f6472c7a5a280b04bb4a1cbd5d",
+                "start": 1.75,
+                "text": "Now, with the release of Claude Code and Opus 4.7, it is literally possible to clone and model almost any YouTube channel, whether it's documentary, 2D, history, Pixar, fictional, true crime, or pretty much any other niche. And after hours ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=183s",
+                "end": 281.59,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "aa4457a88895651150cdb90b2134918d3f29cccc559369d647099dfc76350442",
+                "start": 183.91,
+                "text": "Claude, the clearer the picture becomes. All you've got to do is drop in those screenshots, maybe add a short description of the niche you're trying to replicate, and then send everything into Claude code. Once you do that, Claude takes it,",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=636s",
+                "end": 735.91,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "0262be327b03c293b84b9fa8c12cd2652a8d72032cb19b2344cc56fe9d709729",
+                "start": 636.069,
+                "text": "beginner, don't worry about that at all. Just use any external tool to generate your images and keep it simple. So yeah, once Claude understands your visual style, all you've got to do next is say, \"I need prompts for my script.\" All right,",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=891s",
+                "end": 977.99,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "782e9bd1e14a58ea2c5f30add43ef1b741d4e661b682ddae4e236696e8186112",
+                "start": 891.35,
+                "text": "good, so I'm just going to download it. Next, I'll head back to Claude Code and look for a scene that actually features a person. I'm going to grab the second prompt, highlight just that section, and copy it. Quick heads up here. Don't righ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=1165s",
+                "end": 1237.99,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a7f855b335fff4014a25cf1ad34cb39e8d14e4e292cd0d004a9b48088afe6e9b",
+                "start": 1165.99,
+                "text": "earlier, which is honestly really cool. It means every single image you created can now be turned into a video if you want. So, everything lines up perfectly. You don't have to guess anything. It's all mapped out for you. Now, if you're mor",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=1434s",
+                "end": 1539.6,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "c79ba705b4a85d0daa93e1e7177e2cf1b426cbf840a62256aa7c53ac83f165f3",
+                "start": 1434.71,
+                "text": "it looks really good. It's cinematic. The style matches, the text is on point. Everything just fits together nicely. Not going to lie, this is basically ready to go. You don't even need to edit it. You could literally upload this straight t",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Social Media Research",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=1s",
+                "end": 75.99,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "f411a55742cc4c080e0e62b7cf4a0d97318ab7f6472c7a5a280b04bb4a1cbd5d",
+                "start": 1.75,
+                "text": "Now, with the release of Claude Code and Opus 4.7, it is literally possible to clone and model almost any YouTube channel, whether it's documentary, 2D, history, Pixar, fictional, true crime, or pretty much any other niche. And after hours ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=183s",
+                "end": 281.59,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "aa4457a88895651150cdb90b2134918d3f29cccc559369d647099dfc76350442",
+                "start": 183.91,
+                "text": "Claude, the clearer the picture becomes. All you've got to do is drop in those screenshots, maybe add a short description of the niche you're trying to replicate, and then send everything into Claude code. Once you do that, Claude takes it,",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=636s",
+                "end": 735.91,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "0262be327b03c293b84b9fa8c12cd2652a8d72032cb19b2344cc56fe9d709729",
+                "start": 636.069,
+                "text": "beginner, don't worry about that at all. Just use any external tool to generate your images and keep it simple. So yeah, once Claude understands your visual style, all you've got to do next is say, \"I need prompts for my script.\" All right,",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=891s",
+                "end": 977.99,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "782e9bd1e14a58ea2c5f30add43ef1b741d4e661b682ddae4e236696e8186112",
+                "start": 891.35,
+                "text": "good, so I'm just going to download it. Next, I'll head back to Claude Code and look for a scene that actually features a person. I'm going to grab the second prompt, highlight just that section, and copy it. Quick heads up here. Don't righ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=1165s",
+                "end": 1237.99,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a7f855b335fff4014a25cf1ad34cb39e8d14e4e292cd0d004a9b48088afe6e9b",
+                "start": 1165.99,
+                "text": "earlier, which is honestly really cool. It means every single image you created can now be turned into a video if you want. So, everything lines up perfectly. You don't have to guess anything. It's all mapped out for you. Now, if you're mor",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://youtube.com/watch?v=MJmoSxSPeRY&t=1434s",
+                "end": 1539.6,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "c79ba705b4a85d0daa93e1e7177e2cf1b426cbf840a62256aa7c53ac83f165f3",
+                "start": 1434.71,
+                "text": "it looks really good. It's cinematic. The style matches, the text is on point. Everything just fits together nicely. Not going to lie, this is basically ready to go. You don't even need to edit it. You could literally upload this straight t",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "youtube",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Clone_Any_Youtube_channel_with_CLAUDE_CODE_No_coding_needed",
+            "source_revision": "fedc3b2bda5af1243768e00a3c2cccdf271949cb6cc48999836b5ae2acd0f48d",
+            "source_type": "video",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "Clone Any Youtube channel with CLAUDE CODE | No coding needed)",
+            "topic": "Social Media Research",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://www.youtube.com/watch?v=MJmoSxSPeRY",
+            "video_id": "MJmoSxSPeRY",
+            "yoinked_at": "2026-05-11T12:39:49"
+          }
+        },
+        {
+          "work_id": "9VVtijvCL3Ejm9HwcvnONs_dZ1oH3gkv",
+          "video_id": "KjToqo-ACnc",
+          "attempt_token": "JB2hx86nP1620Z_zS70vDdCnb9vdeBx90gzPoagZcFQ",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678231655,
+          "source_revision": "3cd427596dd8392d97882c0505653595dd95c26f28495e9d916c307871ca379f",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "522044c0b2eead72ed205734bab7e1f27357e9d08fd6d6a8dea7a92dfafd61f5",
+          "card": {
+            "card_hash": "7fe42914f5bdd634d9cc9f46d9a452ec3cdde8002c1adaa84a3f3b64f0c3f3ee",
+            "channel": "MG1010",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Social Media Research",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://www.youtube.com/watch?v=KjToqo-ACnc",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "31b1ab8c75bfa2b00b6bcf5b0e5b4175cea4faa14eb8ccb4c73cf3b5357035c1",
+                "start": null,
+                "text": "PREMIUM 4k Short Version of the Top Quality and Bonus:  https://gum.co/qyXQa ▬▬▬▬▬▬▬▬▬▬▬▬▬▬ My Portfolio: https://www.behance.net/mg1010 Instagram: https://www.instagram.com/mg_motion/ Patreon | Donation: https://www.patreon.com/MG1010 ►Pai",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "PREMIUM 4k Short Version of the Top Quality and Bonus:  https://gum.co/qyXQa ▬▬▬▬▬▬▬▬▬▬▬▬▬▬ My Portfolio: https://www.behance.net/mg1010 Instagram: https://www.instagram.com/mg_motion/ Patreon | Donation: https://www.patreon.com/MG1010 ►Paid 4k Video Footages, Backgrounds, Screensavers: https://mg1010.gumroad.com Background Screensavers Playlist: https://www.youtube.com/playlist?list=PLLyLFhIJDBmyrXQ1mWuDQ6bHf323HP4hH ------------------------------------------------ ► Other colors and emotions: Red Version: https://youtu.be/ae6_Nq4AWDA Orange Version: https://youtu.be/-dJjRvEVD_4 Thank you🙂 ba",
+              "truncated": true
+            },
+            "platform": "youtube",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Blue_Neon_Keyboard_Keys_Background_video_Footage_Screensaver",
+            "source_revision": "3cd427596dd8392d97882c0505653595dd95c26f28495e9d916c307871ca379f",
+            "source_type": "video",
+            "status": "evidenced",
+            "summary_hint": "PREMIUM 4k Short Version of the Top Quality and Bonus:  https://gum.co/qyXQa ▬▬▬▬▬▬▬▬▬▬▬▬▬▬ My Portfolio: https://www.behance.net/mg1010 Instagram: https://www.instagram.com/mg_motion/ Patreon | Donation: https://www.patreon.com/MG1010 ►Paid 4k Video Footages, Backgrounds, Screensavers: https://mg1010.gumroad.com Background Screensavers Playlist: https://www.youtube.com/playlist?list=PLLyLFhIJDBmyrXQ1mWuDQ6bHf323HP4hH ------------------------------------------------ ► Other colors and emotions: Red Version: https://youtu.be/ae6_Nq4AWDA Orange Version: https://youtu.be/-dJjRvEVD_4 Thank you🙂 ba",
+            "title": "Blue Neon Keyboard Keys Background video | Footage | Screensaver",
+            "topic": "Social Media Research",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://www.youtube.com/watch?v=KjToqo-ACnc",
+            "video_id": "KjToqo-ACnc",
+            "yoinked_at": "2026-05-10T00:12:51"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "seq": 891,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "81Co0j1KUO-RlkJcTH9BfgAD2NUPVH5u",
+    "client_id": "proof-harness",
+    "attempt_token": "6BRM9lwMk1jxZqd-n1NDdu0Q_gY_Y_kgNKk4n1kXOOQ",
+    "submission_key": "81Co0j1KUO-RlkJcTH9BfgAD2NUPVH5u-6BRM9lwMk1jxZqd-n1NDdu0Q_gY_Y_kgNKk4n1kXOOQ",
+    "schema_version": 1,
+    "video_id": "2092646578058412032",
+    "source_revision": "bf47d1882cecb2781e8b6596a62a10e603ba3eaa3d780395e3cca6eb68f3961d",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "1101a1f0b6f60752928fbf42f4d97873ea557aaa526a87f55485ba69c3a8a46e",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "The selected excerpts contain only a generic marketing jingle about technology evolving and a truncated fragment ('available now on our API?'); neither establishes a specific product, model type, or technical subject. The title/summary_hint claims about a 'frontier computer-use model' cannot be used per Rule 1 since excerpts are present but don't ground that claim."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 15534,
+      "cache_read_tokens": 188597,
+      "cache_create_tokens": 35427,
+      "wall_time_ms": 0
+    }
+  }
+}

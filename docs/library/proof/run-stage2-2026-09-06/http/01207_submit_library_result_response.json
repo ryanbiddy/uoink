@@ -1,0 +1,39 @@
+{
+  "seq": 1207,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "6XN6yNiurec6sSVt0UDe9ic5GrUFwknK",
+      "video_id": "pI_WARqK_X4",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "df9ade6df5d6217f090cb8f72a832b214b109bcb1bcff791e6651009d6459b28",
+            "card_hash": "3dd4403ba3964165ddf3c4e97f11f143c34e3dfda5d0caa81071a101b87a4fe0",
+            "quote": "five glimpses into our enchanting prior conversation",
+            "start": 330.72,
+            "end": 421.55,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

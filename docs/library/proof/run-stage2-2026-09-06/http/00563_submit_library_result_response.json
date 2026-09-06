@@ -1,0 +1,39 @@
+{
+  "seq": 563,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "32y0PjlLNDbC8vevwWyGwx-QAr1vs0aD",
+      "video_id": "2085903679304179712",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "72b83237f37177b5474f12512e4441de3a0d4ada9349b62d7de643f184ef6e23",
+            "card_hash": "496cc60a192cf26e90ce6b91a06519a3f57d22011af4507a89e7ecdf2a995998",
+            "quote": "In fact, the video generation It's just like making a picture",
+            "start": 118.54,
+            "end": 236.819,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

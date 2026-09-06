@@ -1,0 +1,889 @@
+{
+  "seq": 133,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 12,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "XLJOpFK3fkjMTqX-fnYHDvk1r7c16Jxw",
+          "video_id": "2080394147458846720",
+          "attempt_token": "J5n2kIvjdTvKnkcNaqxyF47YJ5my3BTRkfRjss6KSa0",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676329290,
+          "source_revision": "81702850f80357a6bcbd347c431a508e94f241026de9494af285c7b83aa75df4",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "f5854697296dc350db5532b3c9218d5ce7f603c677c1825e7347562fb5bbd58d",
+          "card": {
+            "card_hash": "ebb6783268c2614a5cf3bfe43d72d64cbfd8878b63981504a2899d2de1240618",
+            "channel": "HOV_DID🐻",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/_HOV_DID/status/2080420192958464025",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "39e956cd6e5befe58e1707cb864098c5f0b729e2db61bfd3fe2155ea6bb2ed35",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> How do I explain to future generations that this wasn't AI? https://t.co/ivKbCqETwo No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> How do I explain to future generations that this wasn't AI? https://t.co/ivKbCqETwo No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "HOV_DID_-_How_do_I_explain_to_future_generations_that_this_wasn_t_AI",
+            "source_revision": "81702850f80357a6bcbd347c431a508e94f241026de9494af285c7b83aa75df4",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> How do I explain to future generations that this wasn't AI? https://t.co/ivKbCqETwo No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "HOV_DID🐻 - How do I explain to future generations that this wasn't AI?",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/_HOV_DID/status/2080420192958464025",
+            "video_id": "2080394147458846720",
+            "yoinked_at": "2026-07-25T02:03:49"
+          }
+        },
+        {
+          "work_id": "ZzIbdQKlNTuTjymAJfr4huwdsfyNeczs",
+          "video_id": "2080739568429494272",
+          "attempt_token": "Lya9HtSt9r6HsCbgX4Ok8JgSC_D_Ym4w258KyZif9No",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676329291,
+          "source_revision": "88eaa7ab1868ef6a82ab4ca64164313a8f2be873893c2bcbdc00c29fa4d5492c",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "196ed6621b055038811f7253223995d6da8177acd5bfc4a834cb85b2d6342fe1",
+          "card": {
+            "card_hash": "f82d75d519e07b607f19b0a469023e04f440e948847999bbeec8aabea5969067",
+            "channel": "am.will",
+            "chars": 4374,
+            "chars_all_clips": 4374,
+            "chars_chosen_clips": 960,
+            "clip_count": 4,
+            "clips": [
+              {
+                "deep_link": "https://x.com/LLMJunky/status/2080740121398120655#t=1",
+                "end": 59.89,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3bd7448c8e8df5e9277a2ff3f0f347ea99d1acde9a166d3df94c7144da888aec",
+                "start": 1.26,
+                "text": "So first things first, I would like to apologize to Anthropik because I was completely wrong about this model. I really thought it wouldn't be that big of a deal and had no idea that it was gonna cook THIS hard I am just absolutely mind-blo",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LLMJunky/status/2080740121398120655#t=59",
+                "end": 178.379,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1b53b34e07cbb098470a31639eaba6fda72d0919b4c91b07b88f60d75b91dab7",
+                "start": 59.95,
+                "text": "The physics are amazing It actually built the walls With rounded edges and there Are no real sharp corners You can drive on the ceiling I could Do all of their normal Rocket League flying mechanics As you see I have one infinite boost added",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LLMJunky/status/2080740121398120655#t=178",
+                "end": 296.259,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "6e837f1b4578a644f9c1b52ab0372a3e7cdb4a938b3ff75a4b7c6e2ec7a83294",
+                "start": 178.379,
+                "text": "On his own And more than half of the fixes That I had come up with In my followup prompt were already solved By he time that Model finished What's interesting about this is These are not things language models would normally pick For exampl",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LLMJunky/status/2080740121398120655#t=296",
+                "end": 309.56,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "00ed517a3b278ea1e2d364daa56b1dcde4a995206f152aab76000c204748b0f5",
+                "start": 296.259,
+                "text": "You think practice with A couple things you can turn on infinite boost With B, Turned on Practice mode And play around It is on free vs. Hell account so i don't Know how well its gonna run but Letme know Enjoy Thanks for watching catch ya l",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/LLMJunky/status/2080740121398120655#t=1",
+                "end": 59.89,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3bd7448c8e8df5e9277a2ff3f0f347ea99d1acde9a166d3df94c7144da888aec",
+                "start": 1.26,
+                "text": "So first things first, I would like to apologize to Anthropik because I was completely wrong about this model. I really thought it wouldn't be that big of a deal and had no idea that it was gonna cook THIS hard I am just absolutely mind-blo",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LLMJunky/status/2080740121398120655#t=59",
+                "end": 178.379,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1b53b34e07cbb098470a31639eaba6fda72d0919b4c91b07b88f60d75b91dab7",
+                "start": 59.95,
+                "text": "The physics are amazing It actually built the walls With rounded edges and there Are no real sharp corners You can drive on the ceiling I could Do all of their normal Rocket League flying mechanics As you see I have one infinite boost added",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LLMJunky/status/2080740121398120655#t=178",
+                "end": 296.259,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "6e837f1b4578a644f9c1b52ab0372a3e7cdb4a938b3ff75a4b7c6e2ec7a83294",
+                "start": 178.379,
+                "text": "On his own And more than half of the fixes That I had come up with In my followup prompt were already solved By he time that Model finished What's interesting about this is These are not things language models would normally pick For exampl",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LLMJunky/status/2080740121398120655#t=296",
+                "end": 309.56,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "00ed517a3b278ea1e2d364daa56b1dcde4a995206f152aab76000c204748b0f5",
+                "start": 296.259,
+                "text": "You think practice with A couple things you can turn on infinite boost With B, Turned on Practice mode And play around It is on free vs. Hell account so i don't Know how well its gonna run but Letme know Enjoy Thanks for watching catch ya l",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> WOW! I thought Opus 5 would just be a cheaper Fable. I was dead wrong.  This model is absolutely BONKERS. I'm genuinely blown away.  Opus 5 built the best Rocket League clone i've ever seen, and it did it while consuming only 27% of my 5x Max sub.  Sound on. There's layers to https://t.co/5ZzqpluF9K No tags [00:00:01] So first things first, I would like to apologize to Anthropik because [00:00:05] I was completely wrong about this model. [00:00:08] I really thought it wouldn't be that big of a deal [00:00:10] and had no idea that it was gonna cook THIS har",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "am_will_-_WOW_I_thought_Opus_5_would_just_be_a_cheaper_Fable_I_was_dead_wrong",
+            "source_revision": "88eaa7ab1868ef6a82ab4ca64164313a8f2be873893c2bcbdc00c29fa4d5492c",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> WOW! I thought Opus 5 would just be a cheaper Fable. I was dead wrong.  This model is absolutely BONKERS. I'm genuinely blown away.  Opus 5 built the best Rocket League clone i've ever seen, and it did it while consuming only 27% of my 5x Max sub.  Sound on. There's layers to https://t.co/5ZzqpluF9K No tags [00:00:01] So first things first, I would like to apologize to Anthropik because [00:00:05] I was completely wrong about this model. [00:00:08] I really thought it wouldn't be that big of a deal [00:00:10] and had no idea that it was gonna cook THIS har",
+            "title": "am.will - WOW! I thought Opus 5 would just be a cheaper Fable. I was dead wrong...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/LLMJunky/status/2080740121398120655",
+            "video_id": "2080739568429494272",
+            "yoinked_at": "2026-07-24T19:52:31"
+          }
+        },
+        {
+          "work_id": "e8GSq_nAyiw0kNc1Fb2uj4JRHLHd5ztt",
+          "video_id": "2080738996829786112",
+          "attempt_token": "ZFuYNOwG6vh3O9rBOzZTVZVMAcriMChkULbBd4wqkGM",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676329292,
+          "source_revision": "d6ccf237f4b8deddd7ec9623ef135fc64850a0e873f28b2dfefa71565392711c",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "7c7e82bc22cf379534547c6132e8bd18cd312ec7dcac1a66f9839f55372026c1",
+          "card": {
+            "card_hash": "9064f105f20861379ae854692b21e2349dac574c548b7626c45601ed3a8f28af",
+            "channel": "Alex Ermolov",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/alex_erm/status/2080739261909762364",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "73d9add7b5d9c9a7f7510198ebc97e70eb18eb12c71e71b0c2d455c98f54ef2a",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Opus 5, snowboarder test, one shot. On par with Fable, ahead of every other model I've run. No visual defects on the first pass, and the sliding physics feel right. https://t.co/urbknyH0OD No tags *No c",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Opus 5, snowboarder test, one shot. On par with Fable, ahead of every other model I've run. No visual defects on the first pass, and the sliding physics feel right. https://t.co/urbknyH0OD No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Alex_Ermolov_-_Opus_5_snowboarder_test_one_shot_On_par_with_Fable_ahead_of_every",
+            "source_revision": "d6ccf237f4b8deddd7ec9623ef135fc64850a0e873f28b2dfefa71565392711c",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Opus 5, snowboarder test, one shot. On par with Fable, ahead of every other model I've run. No visual defects on the first pass, and the sliding physics feel right. https://t.co/urbknyH0OD No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Alex Ermolov - Opus 5, snowboarder test, one shot. On par with Fable, ahead of every...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/alex_erm/status/2080739261909762364",
+            "video_id": "2080738996829786112",
+            "yoinked_at": "2026-07-24T19:52:20"
+          }
+        },
+        {
+          "work_id": "fkmu_LzJCCplM9iYzAnYM4k4BAv5OMG9",
+          "video_id": "2080337995551653888",
+          "attempt_token": "ldx4FeSJq9v_-2g0P7Lz0ecWCdAjdnuK1o6cYAAKhgs",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676329292,
+          "source_revision": "885cb670cc55fbb9b4a9816120f6abc73765c2fafad76dd4ef11bf9dd5dfa3f4",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "70282f7a81e75557920954d1c285359894491d2eefcd7a7a9030f541ee76ad73",
+          "card": {
+            "card_hash": "b1c4780f7b19eca64e7e45db8ba626539bcc1641b272426c0887ecd95904b55d",
+            "channel": "Sophia Xu",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/thesophiaxu/status/2080340651363967406",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "ec8a5dd13b6f6869f8c37fb0114f3b713d519c90bb899651d8f1d6311d4f1564",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> You can read any graduate-level textbook in another domain by asking a coding agent to make you an interactive one  Here's me learning neuroimaging using nested tooltips to recursively explain concepts ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> You can read any graduate-level textbook in another domain by asking a coding agent to make you an interactive one  Here's me learning neuroimaging using nested tooltips to recursively explain concepts and interactive widgets for \"gears-level understanding\" https://t.co/3HMEnwsu2D No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Sophia_Xu_-_You_can_read_any_graduate-level_textbook_in_another_domain_by_asking",
+            "source_revision": "885cb670cc55fbb9b4a9816120f6abc73765c2fafad76dd4ef11bf9dd5dfa3f4",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> You can read any graduate-level textbook in another domain by asking a coding agent to make you an interactive one  Here's me learning neuroimaging using nested tooltips to recursively explain concepts and interactive widgets for \"gears-level understanding\" https://t.co/3HMEnwsu2D No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Sophia Xu - You can read any graduate-level textbook in another domain by asking ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/thesophiaxu/status/2080340651363967406",
+            "video_id": "2080337995551653888",
+            "yoinked_at": "2026-07-24T19:52:55"
+          }
+        },
+        {
+          "work_id": "gvEqjq4qnDUV9jkBN20W_WCLUgdgkR26",
+          "video_id": "2080435155756544000",
+          "attempt_token": "4pq5ca2LyRFAbi3Jp79QFohX455-99t63S7fRfeLnY4",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676329293,
+          "source_revision": "3fce2521bf7a9953432bf0f1e0a6f0abfb575b735c76109f5c2228e125f5d390",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "ea017e4da20b7beee0e07d5e2939f8807414f7034900e028728c83e3837eed8e",
+          "card": {
+            "card_hash": "33567aa2e8fc1830656b693fe2a7c52e46e4a575cd13eacc56c117ab68e0b5d6",
+            "channel": "Shay Boloor",
+            "chars": 950,
+            "chars_all_clips": 950,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/StockSavvyShay/status/2080435237885182261#t=0",
+                "end": 57.899,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b08d39b723d1f7a8fb7367315449361fe897661df28029e529e297b35b6cce5f",
+                "start": 0.0,
+                "text": "This morning, the next NVIDIA rack and just the demand that it's going to create. Of course right after earnings last night with Google Nebius went through The Roof this is a name you've liked its come on like gang buses here recently How m",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/StockSavvyShay/status/2080435237885182261#t=0",
+                "end": 57.899,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b08d39b723d1f7a8fb7367315449361fe897661df28029e529e297b35b6cce5f",
+                "start": 0.0,
+                "text": "This morning, the next NVIDIA rack and just the demand that it's going to create. Of course right after earnings last night with Google Nebius went through The Roof this is a name you've liked its come on like gang buses here recently How m",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> $NBIS may be the biggest beneficiary of $GOOGL capacity shortage because the company still needs third party compute even after doubling quarterly capex.  That shortage is exactly what Nebius is built to solve by offering immediately available full stack AI infrastructure to https://t.co/FXHbkfPe9P No tags [00:00:00] This morning, the next [00:00:01] NVIDIA rack and just the demand that it's going to create. [00:00:07] Of course right after earnings last night with Google Nebius went through [00:00:12] The Roof this is a name you've liked its [00:00:14] co",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Shay_Boloor_-_NBIS_may_be_the_biggest_beneficiary_of_GOOGL_capacity_shortage_bec",
+            "source_revision": "3fce2521bf7a9953432bf0f1e0a6f0abfb575b735c76109f5c2228e125f5d390",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> $NBIS may be the biggest beneficiary of $GOOGL capacity shortage because the company still needs third party compute even after doubling quarterly capex.  That shortage is exactly what Nebius is built to solve by offering immediately available full stack AI infrastructure to https://t.co/FXHbkfPe9P No tags [00:00:00] This morning, the next [00:00:01] NVIDIA rack and just the demand that it's going to create. [00:00:07] Of course right after earnings last night with Google Nebius went through [00:00:12] The Roof this is a name you've liked its [00:00:14] co",
+            "title": "Shay Boloor - $NBIS may be the biggest beneficiary of $GOOGL capacity shortage beca...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/StockSavvyShay/status/2080435237885182261",
+            "video_id": "2080435155756544000",
+            "yoinked_at": "2026-07-24T11:00:42"
+          }
+        },
+        {
+          "work_id": "jyLKz7LNNJTXfqT29JrINcW-Qi7XUQmi",
+          "video_id": "2080736332205436952",
+          "attempt_token": "YXEXpkBrmID5eEznSx_k1iRtH9FUnlQ1GO5nRRJmUa0",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676329294,
+          "source_revision": "6abbddc709fb4ff3015a0a643735d466cd71cbadee844cdb3c0fc530211b7712",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "8d8d4f0ec2d8ff8a788898759c3913933db53effa703c310438dd3562c397e15",
+          "card": {
+            "card_hash": "597a1478ab6f53137be508e7273520c8201cf606376acd795b81412d1258c661",
+            "channel": "Dan",
+            "chars": 3452,
+            "chars_all_clips": 3452,
+            "chars_chosen_clips": 720,
+            "clip_count": 3,
+            "clips": [
+              {
+                "deep_link": "https://x.com/Daniel_Farinax/status/2080736332205436952#t=0",
+                "end": 46.74,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "80080df03650a10ed82e71761771fad83e5e3ed198fa0a97c7cb278e2a5d0d77",
+                "start": 0.0,
+                "text": "Okay, so this is the part that still feels illegal. I didn't write a GDD I did an open blender I didn't spend a weekend hunting assets and fighting Unity import settings like it's 2016 I talked to Grok 4.5 inside grok build The agent harnes",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/Daniel_Farinax/status/2080736332205436952#t=47",
+                "end": 165.68,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "641de1b9b77070ef8306380a68df5f609bcd5d57e672d8f9f67956f29d16a4ce",
+                "start": 47.02,
+                "text": "That was the spec Grok 4.5 didn't just dump code into chat And pray Through grock build Unity project path Built a macOS app Dropped you on the beach with wasters And then iterated like teammate who never sleeps Edit Compile Build Launch Re",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/Daniel_Farinax/status/2080736332205436952#t=165",
+                "end": 253.74,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "f3d68662023486b3d1a68bf0fbf2f49f209493bd3b2eba3f3be55e1320e28efa",
+                "start": 165.68,
+                "text": "Placed at one heights sample Grock split them into individual boulders Aligned to slope And sank in terrain by bounds Cliffs stopped being random white slabs And became shoreline pieces Facing outward, scaled down Fewer of the multi-million",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/Daniel_Farinax/status/2080736332205436952#t=0",
+                "end": 46.74,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "80080df03650a10ed82e71761771fad83e5e3ed198fa0a97c7cb278e2a5d0d77",
+                "start": 0.0,
+                "text": "Okay, so this is the part that still feels illegal. I didn't write a GDD I did an open blender I didn't spend a weekend hunting assets and fighting Unity import settings like it's 2016 I talked to Grok 4.5 inside grok build The agent harnes",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/Daniel_Farinax/status/2080736332205436952#t=47",
+                "end": 165.68,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "641de1b9b77070ef8306380a68df5f609bcd5d57e672d8f9f67956f29d16a4ce",
+                "start": 47.02,
+                "text": "That was the spec Grok 4.5 didn't just dump code into chat And pray Through grock build Unity project path Built a macOS app Dropped you on the beach with wasters And then iterated like teammate who never sleeps Edit Compile Build Launch Re",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/Daniel_Farinax/status/2080736332205436952#t=165",
+                "end": 253.74,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "f3d68662023486b3d1a68bf0fbf2f49f209493bd3b2eba3f3be55e1320e28efa",
+                "start": 165.68,
+                "text": "Placed at one heights sample Grock split them into individual boulders Aligned to slope And sank in terrain by bounds Cliffs stopped being random white slabs And became shoreline pieces Facing outward, scaled down Fewer of the multi-million",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> HUGE GROK PERFORMANCE 🚨  Built a full Unity space combat game with Grok Build + Grok 4.5 all in C#.  CLI agents. MCP into the editor. Batchmode builds.   I didn’t know Unity. I wrote zero code.  Full walkthrough 👇 Audio on. I break down the build 🔊 https://t.co/1ZYoYpP6H7 No tags [00:00:00] Okay, so this is the part that still feels illegal. [00:00:03] I didn't write a GDD [00:00:05] I did an open blender [00:00:06] I didn't spend a weekend hunting assets [00:00:09] and fighting Unity import settings like it's 2016 [00:00:12] I talked to Grok 4.5 inside gr",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Dan_-_HUGE_GROK_PERFORMANCE_Built_a_full_Unity_space_combat_game_with_Gr",
+            "source_revision": "6abbddc709fb4ff3015a0a643735d466cd71cbadee844cdb3c0fc530211b7712",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> HUGE GROK PERFORMANCE 🚨  Built a full Unity space combat game with Grok Build + Grok 4.5 all in C#.  CLI agents. MCP into the editor. Batchmode builds.   I didn’t know Unity. I wrote zero code.  Full walkthrough 👇 Audio on. I break down the build 🔊 https://t.co/1ZYoYpP6H7 No tags [00:00:00] Okay, so this is the part that still feels illegal. [00:00:03] I didn't write a GDD [00:00:05] I did an open blender [00:00:06] I didn't spend a weekend hunting assets [00:00:09] and fighting Unity import settings like it's 2016 [00:00:12] I talked to Grok 4.5 inside gr",
+            "title": "Dan - HUGE GROK PERFORMANCE 🚨  Built a full Unity space combat game with Gr...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Daniel_Farinax/status/2080736332205436952",
+            "video_id": "2080736332205436952",
+            "yoinked_at": "2026-07-25T02:04:16"
+          }
+        },
+        {
+          "work_id": "lRFDTv-2liiqXWt9zvhZv3yfGNNLQFwR",
+          "video_id": "2080366865633931503",
+          "attempt_token": "rDdrsL5nu13Awvxa-omlehHw6q6A_X9qQt2CBsn05U8",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676329294,
+          "source_revision": "c41ce4b17f968c8f6715970fa204e589257d59bb7940f4f3f8119b72c84ae4bf",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "0e5e030643af9fc4558128dc4b18cddc2f1ae23afb404733f85a25123c956a9e",
+          "card": {
+            "card_hash": "ddaa324f842fa6a9fa7d7cc1376cfe3540695eeaedfbdea6135930e0806a20ed",
+            "channel": "Grace Li",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/grx_xce/status/2080366865633931503",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "61c804b0b91dd224747c96e9da0705b50406ac84f939ff7dc0c557d33185b10d",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> WE COULD NOT BELIEVE IT WHEN WE SAW THIS  We were curious about Kimi K3's massive jump in consumed thinking tokens   After taking a closer look, we found that Kimi K3 devotes 10x more thinking tokens to",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> WE COULD NOT BELIEVE IT WHEN WE SAW THIS  We were curious about Kimi K3's massive jump in consumed thinking tokens   After taking a closer look, we found that Kimi K3 devotes 10x more thinking tokens to coding during reasoning than any other model we've seen before  Not only https://t.co/MY9THdcTwc No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Grace_Li_-_WE_COULD_NOT_BELIEVE_IT_WHEN_WE_SAW_THIS_We_were_curious_about_Kimi",
+            "source_revision": "c41ce4b17f968c8f6715970fa204e589257d59bb7940f4f3f8119b72c84ae4bf",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> WE COULD NOT BELIEVE IT WHEN WE SAW THIS  We were curious about Kimi K3's massive jump in consumed thinking tokens   After taking a closer look, we found that Kimi K3 devotes 10x more thinking tokens to coding during reasoning than any other model we've seen before  Not only https://t.co/MY9THdcTwc No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app",
+            "title": "Grace Li - WE COULD NOT BELIEVE IT WHEN WE SAW THIS  We were curious about Kimi ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/grx_xce/status/2080366865633931503",
+            "video_id": "2080366865633931503",
+            "yoinked_at": "2026-07-24T19:30:42"
+          }
+        },
+        {
+          "work_id": "t1KgA_JTr6I1Cd8_WBo0ZLH4aBNLBwn0",
+          "video_id": "2080366248735522816",
+          "attempt_token": "61qId8LyxQiY0HTPiTTM_caKg9_EaeijJQ7kAnYUtuQ",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676329295,
+          "source_revision": "2c343ec4075020bb56e9dd051efa61d833c43901a3227fd39da296ebfc03a78c",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "f373f592b0966a4de6bdac58e51e52ea2c68a30768768c97a3124eb29ec084b9",
+          "card": {
+            "card_hash": "34f45f4ada190c82abc73ee857b77d2f5e51d2df4df3bcf7072ff5ec73885918",
+            "channel": "Andrew Ambrosino",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/ajambrosino/status/2080378445138460796",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "ce8e4ad25905b524f013eae414782949e79884f0a36f7e2f428eb26e012ea022",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Today we're bringing ChatGPT Voice to the desktop app. The same incredible GPT Live model, now able use your entire computer.  Try it with Codex &amp; ChatGPT Work on desktop. Team really cooked.  Now, ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Today we're bringing ChatGPT Voice to the desktop app. The same incredible GPT Live model, now able use your entire computer.  Try it with Codex &amp; ChatGPT Work on desktop. Team really cooked.  Now, here's @guinnesschen and @jxnlco: https://t.co/4oM7LvdO9h No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Andrew_Ambrosino_-_Today_we_re_bringing_ChatGPT_Voice_to_the_desktop_app_The_sam",
+            "source_revision": "2c343ec4075020bb56e9dd051efa61d833c43901a3227fd39da296ebfc03a78c",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Today we're bringing ChatGPT Voice to the desktop app. The same incredible GPT Live model, now able use your entire computer.  Try it with Codex &amp; ChatGPT Work on desktop. Team really cooked.  Now, here's @guinnesschen and @jxnlco: https://t.co/4oM7LvdO9h No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Andrew Ambrosino - Today we're bringing ChatGPT Voice to the desktop app. The same incre...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/ajambrosino/status/2080378445138460796",
+            "video_id": "2080366248735522816",
+            "yoinked_at": "2026-07-24T19:52:38"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

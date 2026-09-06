@@ -1,0 +1,58 @@
+{
+  "seq": 415,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Efxsed_SLdT1goh8Vw3Lcj_OIj2oQPyU",
+      "video_id": "2084345349293166592",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "66a90fc288d270bd6b2d828ab2cd528cf5f43cf0fffdf368b6027e8f9e2f431b",
+            "card_hash": "ccd117914880b4d2a603667dd9074bf4981f0652ca7734584862e2630619f0b7",
+            "quote": "I hope you made it to the right class. This class was on self-improving AI agents",
+            "start": 0.0,
+            "end": 119.549,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "c4515fc4d8241af738f6e616a3dded093af9d8a3a9d071337d800cbf62230e33",
+            "card_hash": "ccd117914880b4d2a603667dd9074bf4981f0652ca7734584862e2630619f0b7",
+            "quote": "If Pre Training Is The Place Where The Model After Repeated Sampling Should Be Able To Have One Solution Correct",
+            "start": 2990.28,
+            "end": 3110.05,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

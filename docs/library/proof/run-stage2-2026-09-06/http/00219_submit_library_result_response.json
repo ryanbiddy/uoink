@@ -1,0 +1,39 @@
+{
+  "seq": 219,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "LhRFPqCI-hLGI7kkVgJYCUiE5Jt7_PYH",
+      "video_id": "2080494068191350784",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "c3707337bdc53ea6e292e86046d7a95ad19da7927e89a006e3c962d6f64df0eb",
+            "card_hash": "84c1ab0b27dedbdd923fdb54f992bf414c6ebc14388f45a086e9dec3f7c4501b",
+            "quote": "看了一半才发现牛逼的是AI  现在AI已经可以做到这程度了？",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

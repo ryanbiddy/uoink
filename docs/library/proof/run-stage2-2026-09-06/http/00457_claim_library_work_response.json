@@ -1,0 +1,1105 @@
+{
+  "seq": 457,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 14,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "8iotk3bQnZT20bHRKYAHh5VNrqFpfW7Q",
+          "video_id": "2085731765587435520",
+          "attempt_token": "azkBXV_vTqm2zxlkXU1OVwmjTAvHqfPoXmgor3jl3GA",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676946407,
+          "source_revision": "490db4ec986eb54c3da4b3eacfdc6e18e1b6a4d10e849c941061a84a3ad74b80",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "922419db3bd2a8eff984d002baa2d90dc9598abe130e4dc75a71174e373f4322",
+          "card": {
+            "card_hash": "e68294733d6d1c0055e2cac06665b4775c7e3e94deab565c817a348f78bf7952",
+            "channel": "Deirdre Bosa",
+            "chars": 1266,
+            "chars_all_clips": 1266,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/dee_bosa/status/2085732536366321764#t=0",
+                "end": 81.9,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "4be6debccf2bfcb58980d60c95378d5e435b2d0fd42b705ea2e04184875f4ef5",
+                "start": 0.0,
+                "text": "For more than a decade, I've covered tech through the market. Their entire model is software. Why not just kind of go all in? So I'm outside of the open AI headquarters. I have to clarify that's a non-gap basis. I'm Deirdre Bosa with The Te",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/dee_bosa/status/2085732536366321764#t=0",
+                "end": 81.9,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "4be6debccf2bfcb58980d60c95378d5e435b2d0fd42b705ea2e04184875f4ef5",
+                "start": 0.0,
+                "text": "For more than a decade, I've covered tech through the market. Their entire model is software. Why not just kind of go all in? So I'm outside of the open AI headquarters. I have to clarify that's a non-gap basis. I'm Deirdre Bosa with The Te",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> AI is no longer a segment. It’s a whole show. So I’m leaving CNBC at the end of the month to build it with @jaswu_  More soon. Reach us at dbosa@dbosalive.com jwu@dbosalive.com https://t.co/StdZNsNTbA No tags [00:00:00] For more than a decade, I've covered tech through the market. [00:00:03] Their entire model is software. [00:00:05] Why not just kind of go all in? [00:00:07] So I'm outside of the open AI headquarters. [00:00:08] I have to clarify that's a non-gap basis. [00:00:11] I'm Deirdre Bosa with The Tech Check Take China's AI Breakthroughs. [00:00:",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Deirdre_Bosa_-_AI_is_no_longer_a_segment_It_s_a_whole_show_So_I_m_leaving_CNBC_a",
+            "source_revision": "490db4ec986eb54c3da4b3eacfdc6e18e1b6a4d10e849c941061a84a3ad74b80",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> AI is no longer a segment. It’s a whole show. So I’m leaving CNBC at the end of the month to build it with @jaswu_  More soon. Reach us at dbosa@dbosalive.com jwu@dbosalive.com https://t.co/StdZNsNTbA No tags [00:00:00] For more than a decade, I've covered tech through the market. [00:00:03] Their entire model is software. [00:00:05] Why not just kind of go all in? [00:00:07] So I'm outside of the open AI headquarters. [00:00:08] I have to clarify that's a non-gap basis. [00:00:11] I'm Deirdre Bosa with The Tech Check Take China's AI Breakthroughs. [00:00:",
+            "title": "Deirdre Bosa - AI is no longer a segment. It’s a whole show. So I’m leaving CNBC at ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/dee_bosa/status/2085732536366321764",
+            "video_id": "2085731765587435520",
+            "yoinked_at": "2026-08-08T07:47:34"
+          }
+        },
+        {
+          "work_id": "D0SL5LArsQ8IKuzzjD4rn_lMnDPQ_ID4",
+          "video_id": "2086124560861270016",
+          "attempt_token": "xtdNv00SDgJsQNLWUSr7OSZvLXgeALae4olnwjUYShA",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676946409,
+          "source_revision": "5cbfc38a4cf3d4a035e59455ab4f42703acb4167d8a7d2d8c95623b50ba4f6d0",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "1aa27d468b67b0244097d8e1482edd4a54c510558b058e7abda426b47fd9cca7",
+          "card": {
+            "card_hash": "dc88a0f71dcbbd98fb66fcba93f0ee7e0170ebf81c4523992153d7d64ea9db0a",
+            "channel": "Arena.ai",
+            "chars": 15289,
+            "chars_all_clips": 15289,
+            "chars_chosen_clips": 1440,
+            "clip_count": 12,
+            "clips": [
+              {
+                "deep_link": "https://x.com/arena/status/2086132106455904562#t=0",
+                "end": 75.78,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "5529d6cdf439d295b850d3c812cbeb76fede80f2891e2e7e610b760318b92395",
+                "start": 0.0,
+                "text": "Thank you, Tiana for the introduction. So the question I want to share in today's talk is when we train a model To catch reward hacking does that data We trained on looks anything like they were hacking there actually happens during our tra",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/arena/status/2086132106455904562#t=271",
+                "end": 390.579,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9ff1757bffa43d4188a433d1c04735a311bc688218aac86acaafde93eb696d50",
+                "start": 271.25,
+                "text": "Is One Of The Standard Approaches So Basically The Set Out Is, The Model Reads Output Of A Model That Agent Model And Then Labels It Is Either Hack Or Normal Strategy And In Sorry There Are Two Components That Matters In This Setting For Mo",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/arena/status/2086132106455904562#t=511",
+                "end": 629.679,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3bca8ba4f568e807021907b40dcf38dc19b103b143b9458abbb6e906bb2c308f",
+                "start": 511.199,
+                "text": "Reel Hacking Because Essentially Hacking Is Rare To Find Solving The Task Honestly Also Are For Reverse So You Have To Find The Hacking Trajectory Among All The Other Real Strategy And That Taking Is Different For Four Different Environment",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/arena/status/2086132106455904562#t=749",
+                "end": 867.98,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7b108b9c537ee1fa8a157d41116c7bf8eca68a0b0fa155f4078f328a79d57a46",
+                "start": 749.74,
+                "text": "On Quinn 2.5 Coder Using Logistic Regression Prop The Roles Are What The Monitor Was Trained Out And The Colors Were Tested On And Two Diagnoses Also At Match Conditions We Can See That When Training On The Pro List Hacks The Model Doing Pr",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/arena/status/2086132106455904562#t=869",
+                "end": 988.789,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2c017015bb25f57cad13e0e5c37fde205cda4639649ae05017b3de57b1d05a8d",
+                "start": 869.0,
+                "text": "Can Never Train Transfer To Training Time Hacks And the Opposite Is That The Training Time Hack Scanner Catch You Transfer Two Prontate Hacking Then Natural Questions Too Raises There Whether Strong Model Like The Proprietary GPT Can Actual",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/arena/status/2086132106455904562#t=1108",
+                "end": 1226.16,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "cfff18624d9bff91bb7863ef1ae12de8522da1b178a0173c3cff0157a359eba0",
+                "start": 1108.079,
+                "text": "Kind Of Saying Is Running A Self Written Unit Has And Then By Implementing That Self At It By Implement In Running The Self Writen Units As He Actually Runs Access Zero And Any Past A Unit Has Without The Availability Evaluate There Actuall",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/arena/status/2086132106455904562#t=0",
+                "end": 75.78,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "5529d6cdf439d295b850d3c812cbeb76fede80f2891e2e7e610b760318b92395",
+                "start": 0.0,
+                "text": "Thank you, Tiana for the introduction. So the question I want to share in today's talk is when we train a model To catch reward hacking does that data We trained on looks anything like they were hacking there actually happens during our tra",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/arena/status/2086132106455904562#t=271",
+                "end": 390.579,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9ff1757bffa43d4188a433d1c04735a311bc688218aac86acaafde93eb696d50",
+                "start": 271.25,
+                "text": "Is One Of The Standard Approaches So Basically The Set Out Is, The Model Reads Output Of A Model That Agent Model And Then Labels It Is Either Hack Or Normal Strategy And In Sorry There Are Two Components That Matters In This Setting For Mo",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/arena/status/2086132106455904562#t=511",
+                "end": 629.679,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3bca8ba4f568e807021907b40dcf38dc19b103b143b9458abbb6e906bb2c308f",
+                "start": 511.199,
+                "text": "Reel Hacking Because Essentially Hacking Is Rare To Find Solving The Task Honestly Also Are For Reverse So You Have To Find The Hacking Trajectory Among All The Other Real Strategy And That Taking Is Different For Four Different Environment",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/arena/status/2086132106455904562#t=749",
+                "end": 867.98,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7b108b9c537ee1fa8a157d41116c7bf8eca68a0b0fa155f4078f328a79d57a46",
+                "start": 749.74,
+                "text": "On Quinn 2.5 Coder Using Logistic Regression Prop The Roles Are What The Monitor Was Trained Out And The Colors Were Tested On And Two Diagnoses Also At Match Conditions We Can See That When Training On The Pro List Hacks The Model Doing Pr",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/arena/status/2086132106455904562#t=869",
+                "end": 988.789,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2c017015bb25f57cad13e0e5c37fde205cda4639649ae05017b3de57b1d05a8d",
+                "start": 869.0,
+                "text": "Can Never Train Transfer To Training Time Hacks And the Opposite Is That The Training Time Hack Scanner Catch You Transfer Two Prontate Hacking Then Natural Questions Too Raises There Whether Strong Model Like The Proprietary GPT Can Actual",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/arena/status/2086132106455904562#t=1108",
+                "end": 1226.16,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "cfff18624d9bff91bb7863ef1ae12de8522da1b178a0173c3cff0157a359eba0",
+                "start": 1108.079,
+                "text": "Kind Of Saying Is Running A Self Written Unit Has And Then By Implementing That Self At It By Implement In Running The Self Writen Units As He Actually Runs Access Zero And Any Past A Unit Has Without The Availability Evaluate There Actuall",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Arena_ai_-_Arena_intern_and_UCLA_PhD_candidate_hgzhou42_introduces_Trace-and-",
+            "source_revision": "5cbfc38a4cf3d4a035e59455ab4f42703acb4167d8a7d2d8c95623b50ba4f6d0",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "Arena.ai - Arena intern and UCLA PhD candidate, @hgzhou42, introduces Trace-and-...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/arena/status/2086132106455904562",
+            "video_id": "2086124560861270016",
+            "yoinked_at": "2026-08-09T07:46:32"
+          }
+        },
+        {
+          "work_id": "K4WwN7XW-8dsnGwlG9ivKbBUgjJxl9oP",
+          "video_id": "2085409224574545920",
+          "attempt_token": "seXn9fHRbz4zqYLkUWGyeDDcxObfRmrm9EHIRl5Xuyw",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676946411,
+          "source_revision": "f1dc4127f1b8d182c90d0cdaf2dbbafe2dbfbf1edd84b61bd7b908e33bccd5e6",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "fdd7ad7e374b4cc0b3b5608c7d422ae577875326ecf1bf9d81ba483eb5bda37d",
+          "card": {
+            "card_hash": "f40c8a70cb5fda7749ec7ab41ab4d94d120e42874a2cea1df1134e2f47c9777e",
+            "channel": "codila",
+            "chars": 52938,
+            "chars_all_clips": 52938,
+            "chars_chosen_clips": 1440,
+            "clip_count": 35,
+            "clips": [
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085412493858377871#t=0",
+                "end": 106.879,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7fc39f6f86a151159eb20b137ba53ff80b695cb54fb628d5ace5c591ef540609",
+                "start": 0.0,
+                "text": "And I'm going to talk to you about what's happening in AI. A little huge notice, but it is a thing these days and we have many people at Google working on this area so presenting the work of not just my works but many, many people at Google",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085412493858377871#t=1054",
+                "end": 1173.599,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7d0490f7109aeda19df30d07204e087ab2963059963390510cb8a97817d74a98",
+                "start": 1054.769,
+                "text": "State And then you go on to The next word As You progress through say 100 words Of A sentence There is two problems with That one Is You Have this sequential process every word you have to wait for the update of The state and there's a Sequ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085412493858377871#t=1292",
+                "end": 1412.819,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3eca7d6f412f63ff66124c1c1cd6df43492f2a891c9f4b945067ad6c48471f57",
+                "start": 1292.93,
+                "text": "Instead You Can Just Apply A Transformer Based Model To Same Problem What They Found Was Again Much Better If You Look At TPU Core Days To Reach Certain Levels Of Accuracy The TPU Core Days Are Much Lower And the accuracy is higher Compared",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085412493858377871#t=2140",
+                "end": 2256.03,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3bf7e61dbf2299bab25bad61adb0867ef21ff628974ac5673c3660d6706cd22e",
+                "start": 2140.559,
+                "text": "Generate Code For Coding Thing Where You Now Have A reward for Does the code even compile does the code Compile and pass the unit test you get more reward these kind of things so These Really Help a Lot In Both Math and coding but also in K",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085412493858377871#t=3209",
+                "end": 3328.21,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "5b29862eb32d995c9207600c165c2f6f2e6e7a6e6419ead4c14bd17514edf3fb",
+                "start": 3209.019,
+                "text": "Infrastructure Which Is Like How Do We Make The Training Process Work Well how do we make the serving infrastructure work well on the code base and then longer term research that is meant to feed in good ideas for Gemini n plus two or Gemin",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085412493858377871#t=3328",
+                "end": 3447.32,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2d82b650451f770d6ec134b3284d5631f09a74f839b8f74b7c1f61dab17d78e3",
+                "start": 3328.21,
+                "text": "Larger Scale Into A New Candidates Baseline And Then Repeat That Seems To Have Worked Pretty Well Few Forward Looking Thoughts I Mean One Area That's Going Really Important Is How Do Humans Collaborated To Get Stuff Done Right Like Currentl",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085412493858377871#t=0",
+                "end": 106.879,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7fc39f6f86a151159eb20b137ba53ff80b695cb54fb628d5ace5c591ef540609",
+                "start": 0.0,
+                "text": "And I'm going to talk to you about what's happening in AI. A little huge notice, but it is a thing these days and we have many people at Google working on this area so presenting the work of not just my works but many, many people at Google",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085412493858377871#t=1054",
+                "end": 1173.599,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7d0490f7109aeda19df30d07204e087ab2963059963390510cb8a97817d74a98",
+                "start": 1054.769,
+                "text": "State And then you go on to The next word As You progress through say 100 words Of A sentence There is two problems with That one Is You Have this sequential process every word you have to wait for the update of The state and there's a Sequ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085412493858377871#t=1292",
+                "end": 1412.819,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3eca7d6f412f63ff66124c1c1cd6df43492f2a891c9f4b945067ad6c48471f57",
+                "start": 1292.93,
+                "text": "Instead You Can Just Apply A Transformer Based Model To Same Problem What They Found Was Again Much Better If You Look At TPU Core Days To Reach Certain Levels Of Accuracy The TPU Core Days Are Much Lower And the accuracy is higher Compared",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085412493858377871#t=2140",
+                "end": 2256.03,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3bf7e61dbf2299bab25bad61adb0867ef21ff628974ac5673c3660d6706cd22e",
+                "start": 2140.559,
+                "text": "Generate Code For Coding Thing Where You Now Have A reward for Does the code even compile does the code Compile and pass the unit test you get more reward these kind of things so These Really Help a Lot In Both Math and coding but also in K",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085412493858377871#t=3209",
+                "end": 3328.21,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "5b29862eb32d995c9207600c165c2f6f2e6e7a6e6419ead4c14bd17514edf3fb",
+                "start": 3209.019,
+                "text": "Infrastructure Which Is Like How Do We Make The Training Process Work Well how do we make the serving infrastructure work well on the code base and then longer term research that is meant to feed in good ideas for Gemini n plus two or Gemin",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085412493858377871#t=3328",
+                "end": 3447.32,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2d82b650451f770d6ec134b3284d5631f09a74f839b8f74b7c1f61dab17d78e3",
+                "start": 3328.21,
+                "text": "Larger Scale Into A New Candidates Baseline And Then Repeat That Seems To Have Worked Pretty Well Few Forward Looking Thoughts I Mean One Area That's Going Really Important Is How Do Humans Collaborated To Get Stuff Done Right Like Currentl",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "codila_-_Ex-Google_Jeff_Dean_just_released_1-hour_lecture_on_full_AI_engineeri",
+            "source_revision": "f1dc4127f1b8d182c90d0cdaf2dbbafe2dbfbf1edd84b61bd7b908e33bccd5e6",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "codila - Ex-Google Jeff Dean just released 1-hour lecture on full AI engineeri...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/0xCodila/status/2085412493858377871",
+            "video_id": "2085409224574545920",
+            "yoinked_at": "2026-08-07T07:42:54"
+          }
+        },
+        {
+          "work_id": "LGtiOFDMkNDTbX_MdGPFDqb0XMDizoeK",
+          "video_id": "2085459208485359617",
+          "attempt_token": "86oPH42z_CfQi9g6iU3vc8tnMIja63mPDyfuZqIDdrg",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676946413,
+          "source_revision": "19fab43d1ac900b002c19c12c0a5ffd795baee51771def79c02230ca8b963c34",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "2f6e32cefceba4b0fffbdcd22773fed600add65a065dc29cfdf10d72ae4f276a",
+          "card": {
+            "card_hash": "fa36c4dc358097f69d0366fd7cafa7932126948f3d05d1b7c283385f3be23d0f",
+            "channel": "Lunar",
+            "chars": 100715,
+            "chars_all_clips": 100715,
+            "chars_chosen_clips": 1440,
+            "clip_count": 64,
+            "clips": [
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2085468711167615253#t=708",
+                "end": 828.159,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7b8ed8c36ae23f18d91900fd58802e3018f3a13eaefb39b016cce6d8a8bb76db",
+                "start": 708.94,
+                "text": "Server Server Basically For Agents That Connect Into External World You Will Call Those M S P Server As Through Here About Why Don't We And Not To Cut Yeah Sorry Not To Cut You Off But Also When She Says External World Essentially There Are",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2085468711167615253#t=2370",
+                "end": 2489.57,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a02c7b685415c80d54552c605ef4130fe3f30d9b7db699202f06c8041012fd64",
+                "start": 2370.09,
+                "text": "Agent A C To Be Running At The Same Time Yeah And The Best Way Of Coordinating That Would Again Through Parallow Agent ADK Make Sure When It Gets Called All Three Agents Get Delegated So There's Actually Something With Adk Is Very Specializ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2085468711167615253#t=3691",
+                "end": 3809.76,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "484c191d4a39e2028b75f5d75fb86b73983e5ce37c885558fd1f4aac23219ad1",
+                "start": 3691.94,
+                "text": "Essentially Can Not Be Discover Across Different Endpoints Now Going Back To Lab So Now That We Cover Architecture Go Ahead Build Through Code And Enable Each Of Those Familiar Agents With Their Own 828 Endpoint That Makes Available Agent C",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2085468711167615253#t=4642",
+                "end": 4761.489,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "94f254cbc4ecb95a43622727b5f762dc45efa913b5f7350d1e68ebe307fe3407",
+                "start": 4642.189,
+                "text": "Want To Delegate To Fire Agent Water Agent Earth Agent And Connect Them Through Those URLs And Understand When To Use Them How They Use Them By Reading That Agent Card And We Can Also Like Here Using Lm Agents We Can Use A Workflow Agent Li",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2085468711167615253#t=5358",
+                "end": 5478.14,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "bc77fe29344c9dc9e4f24e471651d2e928e3e96ddd664de9ccdba92fe70e3d63",
+                "start": 5358.159,
+                "text": "Point Of This Whole Life Cycle And A Good Exam Pole Like I Had Really Great App Left About You Know Agent Security With Model Armor So Basically You Can Adding Agents Like Model Armour To Before Agent Call Back To Protect Your Agent Maybe Y",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2085468711167615253#t=6670",
+                "end": 6790.1,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "d8800a2c1f071101493700537926e846ce573bb8c0644bdd3aec286f51be823d",
+                "start": 6670.439,
+                "text": "Go To Summoner Agent.py File All We're Gonna Do Is Add A Quick Local Function That Takes Us Out Of Tool Context As Well As A Tool One Thing That Can Do With Callback Context As Well Is Tool Contact Is Interact With State So Through Two Cont",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2085468711167615253#t=708",
+                "end": 828.159,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7b8ed8c36ae23f18d91900fd58802e3018f3a13eaefb39b016cce6d8a8bb76db",
+                "start": 708.94,
+                "text": "Server Server Basically For Agents That Connect Into External World You Will Call Those M S P Server As Through Here About Why Don't We And Not To Cut Yeah Sorry Not To Cut You Off But Also When She Says External World Essentially There Are",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2085468711167615253#t=2370",
+                "end": 2489.57,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a02c7b685415c80d54552c605ef4130fe3f30d9b7db699202f06c8041012fd64",
+                "start": 2370.09,
+                "text": "Agent A C To Be Running At The Same Time Yeah And The Best Way Of Coordinating That Would Again Through Parallow Agent ADK Make Sure When It Gets Called All Three Agents Get Delegated So There's Actually Something With Adk Is Very Specializ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2085468711167615253#t=3691",
+                "end": 3809.76,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "484c191d4a39e2028b75f5d75fb86b73983e5ce37c885558fd1f4aac23219ad1",
+                "start": 3691.94,
+                "text": "Essentially Can Not Be Discover Across Different Endpoints Now Going Back To Lab So Now That We Cover Architecture Go Ahead Build Through Code And Enable Each Of Those Familiar Agents With Their Own 828 Endpoint That Makes Available Agent C",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2085468711167615253#t=4642",
+                "end": 4761.489,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "94f254cbc4ecb95a43622727b5f762dc45efa913b5f7350d1e68ebe307fe3407",
+                "start": 4642.189,
+                "text": "Want To Delegate To Fire Agent Water Agent Earth Agent And Connect Them Through Those URLs And Understand When To Use Them How They Use Them By Reading That Agent Card And We Can Also Like Here Using Lm Agents We Can Use A Workflow Agent Li",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2085468711167615253#t=5358",
+                "end": 5478.14,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "bc77fe29344c9dc9e4f24e471651d2e928e3e96ddd664de9ccdba92fe70e3d63",
+                "start": 5358.159,
+                "text": "Point Of This Whole Life Cycle And A Good Exam Pole Like I Had Really Great App Left About You Know Agent Security With Model Armor So Basically You Can Adding Agents Like Model Armour To Before Agent Call Back To Protect Your Agent Maybe Y",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/LunarResearcher/status/2085468711167615253#t=6670",
+                "end": 6790.1,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "d8800a2c1f071101493700537926e846ce573bb8c0644bdd3aec286f51be823d",
+                "start": 6670.439,
+                "text": "Go To Summoner Agent.py File All We're Gonna Do Is Add A Quick Local Function That Takes Us Out Of Tool Context As Well As A Tool One Thing That Can Do With Callback Context As Well Is Tool Contact Is Interact With State So Through Two Cont",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Lunar_-_Google_just_released_a_free_2-hour_course_on_full_Graph_Engineering",
+            "source_revision": "19fab43d1ac900b002c19c12c0a5ffd795baee51771def79c02230ca8b963c34",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "Lunar - Google just released a free 2-hour course on full Graph Engineering. ...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/LunarResearcher/status/2085468711167615253",
+            "video_id": "2085459208485359617",
+            "yoinked_at": "2026-08-07T07:44:40"
+          }
+        },
+        {
+          "work_id": "MQx51GrHREoNssk4_xgFVQJhc25T_E74",
+          "video_id": "2085417600264093696",
+          "attempt_token": "c28gU4JUCO7OZn8vrFK5eX0uzLN2hgn4tFuIP7pVbHg",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676946414,
+          "source_revision": "68bfb0c3a9e1f470f87ac9a4b02ba5d9dfc32f0cb8e54004bd31ef07043fddbf",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "e4ae116d1c9330617b420e2cff63c0749ad78b0948ac6624bab1d19ae2944b14",
+          "card": {
+            "card_hash": "a7fb442c1096c31f08b3452b48a8df59ef831fb27b9cbd9d66ca4b55ac18f8e3",
+            "channel": "@jason",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/Jason/status/2085417724327481732",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "fef8faa7a416d0db7c4f76f6af78fc0416462c6eba6ed002de6d871999cd75be",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Terrifying confession or brilliant use of AI by @saylor?   [ from DOAC ] https://t.co/2fsuL73amD No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on t",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Terrifying confession or brilliant use of AI by @saylor?   [ from DOAC ] https://t.co/2fsuL73amD No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "jason_-_Terrifying_confession_or_brilliant_use_of_AI_by_saylor_from_DOAC",
+            "source_revision": "68bfb0c3a9e1f470f87ac9a4b02ba5d9dfc32f0cb8e54004bd31ef07043fddbf",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Terrifying confession or brilliant use of AI by @saylor?   [ from DOAC ] https://t.co/2fsuL73amD No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "@jason - Terrifying confession or brilliant use of AI by @saylor?   [ from DOAC ]",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Jason/status/2085417724327481732",
+            "video_id": "2085417600264093696",
+            "yoinked_at": "2026-08-07T07:40:10"
+          }
+        },
+        {
+          "work_id": "QdI9umAPCbU9IP-CZEippHiOpwwm49Pn",
+          "video_id": "2085414600552628224",
+          "attempt_token": "99V3waMuRIM6HJXEOTfgIEcehWZGCht8M8hqJIRxgjU",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676946415,
+          "source_revision": "619c41967e677357229be0e6d1fc3d72e21abded584958b0571b04b76fbd148b",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "b5c71927bdc14f61d3e2932432a469360754c11537208f782e64db66d3a4376e",
+          "card": {
+            "card_hash": "c6fde7a0b2e16d4088a8e7deea183c74393c2b158f976730cd381f826c39c904",
+            "channel": "gabriel",
+            "chars": 1409,
+            "chars_all_clips": 1409,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/gabriel1/status/2085418582192841147#t=0",
+                "end": 70.299,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2b45625e40e17517834ff1632b7545c50b27baf32eef3ddcfd94b6b63e7d28ef",
+                "start": 0.0,
+                "text": "Three months ago, I quit OpenAI because the models have become capable enough to do most of their work on your computers. Yet virtually no one is using AI to do that work I think there are two things that are hard The first thing is these t",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/gabriel1/status/2085418582192841147#t=0",
+                "end": 70.299,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2b45625e40e17517834ff1632b7545c50b27baf32eef3ddcfd94b6b63e7d28ef",
+                "start": 0.0,
+                "text": "Three months ago, I quit OpenAI because the models have become capable enough to do most of their work on your computers. Yet virtually no one is using AI to do that work I think there are two things that are hard The first thing is these t",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> 3 months ago i resigned from @OpenAI. today we are launching Energy  everyone will soon use AI for all work on their computers, but very few do today even though AI is good enough  our users do days of work in hours. we'll onboard the world to working with ai https://t.co/lPEEUUP6TB No tags [00:00:00] Three months ago, I quit OpenAI [00:00:01] because the models have become capable enough to do most [00:00:04] of their work on your computers. Yet [00:00:05] virtually no one is using AI to do that work [00:00:08] I think there are two things that are hard [",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "gabriel_-_3_months_ago_i_resigned_from_OpenAI_today_we_are_launching_Energy",
+            "source_revision": "619c41967e677357229be0e6d1fc3d72e21abded584958b0571b04b76fbd148b",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 3 months ago i resigned from @OpenAI. today we are launching Energy  everyone will soon use AI for all work on their computers, but very few do today even though AI is good enough  our users do days of work in hours. we'll onboard the world to working with ai https://t.co/lPEEUUP6TB No tags [00:00:00] Three months ago, I quit OpenAI [00:00:01] because the models have become capable enough to do most [00:00:04] of their work on your computers. Yet [00:00:05] virtually no one is using AI to do that work [00:00:08] I think there are two things that are hard [",
+            "title": "gabriel - 3 months ago i resigned from @OpenAI. today we are launching Energy  ...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/gabriel1/status/2085418582192841147",
+            "video_id": "2085414600552628224",
+            "yoinked_at": "2026-08-07T07:40:04"
+          }
+        },
+        {
+          "work_id": "TV8WRAw7Jipg5oX3FVtPzxW4rDmsX8NZ",
+          "video_id": "2085967657271275520",
+          "attempt_token": "zx6hD-5OCb8D2KH8RPehsBFEPM1CSded1eGdrQMUnxc",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676946415,
+          "source_revision": "1b3b85f8a9f7086fdf9b707f5557c9676eed7d74f45b36a3d4d0d6ece4641e6e",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "d279ed26710e871878a3b8397a0cf2f6a50aae87e9826351c4df63facf0e7515",
+          "card": {
+            "card_hash": "a9a2321534421cbd1d5539d9d0ed55b029138ea7594b1a79cebe18a0331f3ed6",
+            "channel": "The All-In Podcast",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/theallinpod/status/2086090055051829264",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "c77f31fed654d7795e8a739c4b5fef246b539810b6854470c19c610fc3bc3e6d",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> 🚨 The All-In Summit 2026 Speaker Announcement:  Jensen Huang (@JensenHuang), CEO of NVIDIA  Satya Nadella (@satyanadella), CEO of Microsoft Jared Isaacman (@rookisaacman), NASA Administrator Gwynne Shot",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> 🚨 The All-In Summit 2026 Speaker Announcement:  Jensen Huang (@JensenHuang), CEO of NVIDIA  Satya Nadella (@satyanadella), CEO of Microsoft Jared Isaacman (@rookisaacman), NASA Administrator Gwynne Shotwell (@Gwynne_Shotwell), President and COO of SpaceX Martin Shkreli https://t.co/StGikBOkjC No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "The_All-In_Podcast_-_The_All-In_Summit_2026_Speaker_Announcement_Jensen_Huang_Je",
+            "source_revision": "1b3b85f8a9f7086fdf9b707f5557c9676eed7d74f45b36a3d4d0d6ece4641e6e",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 🚨 The All-In Summit 2026 Speaker Announcement:  Jensen Huang (@JensenHuang), CEO of NVIDIA  Satya Nadella (@satyanadella), CEO of Microsoft Jared Isaacman (@rookisaacman), NASA Administrator Gwynne Shotwell (@Gwynne_Shotwell), President and COO of SpaceX Martin Shkreli https://t.co/StGikBOkjC No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "The All-In Podcast - 🚨 The All-In Summit 2026 Speaker Announcement:  Jensen Huang (@Jensen...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/theallinpod/status/2086090055051829264",
+            "video_id": "2085967657271275520",
+            "yoinked_at": "2026-08-09T07:42:07"
+          }
+        },
+        {
+          "work_id": "UntytZBN7o0Oo0CWGZ2QhcS34DmlRo9V",
+          "video_id": "2085852545315115008",
+          "attempt_token": "hnLZoEG5oVxNJu1I1CA3EBnpb3lqR_KdAk_qEouepIc",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676946416,
+          "source_revision": "8186013d88baeaed68ede69b4c822b7f0ae1b44c7f132b85b9c1754829f58ecd",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "1f002cca39144fde4a51c16ac01d376c00080d45dc4306cea2cd60ecbcd83ecb",
+          "card": {
+            "card_hash": "a8091859448e8fb547f527e82c4ad169f4311360db01d707d9e27cf2f4227418",
+            "channel": "ClaudeDevs",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/ClaudeDevs/status/2085853169930957158",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "b9b30e85debde79897a769a8c82d4ffb5007cde66818ad6e76505ec5487fe00c",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> We shipped four updates to Claude Managed Agents this week.  First, you can now set a budget for sessions to keep spend predictable. Sessions that hit the limit pause with a budget_reached event, you ca",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> We shipped four updates to Claude Managed Agents this week.  First, you can now set a budget for sessions to keep spend predictable. Sessions that hit the limit pause with a budget_reached event, you can raise the budget to resume. https://t.co/0DUdGgFHzY No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "ClaudeDevs_-_We_shipped_four_updates_to_Claude_Managed_Agents_this_week_First_y",
+            "source_revision": "8186013d88baeaed68ede69b4c822b7f0ae1b44c7f132b85b9c1754829f58ecd",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> We shipped four updates to Claude Managed Agents this week.  First, you can now set a budget for sessions to keep spend predictable. Sessions that hit the limit pause with a budget_reached event, you can raise the budget to resume. https://t.co/0DUdGgFHzY No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "ClaudeDevs - We shipped four updates to Claude Managed Agents this week.  First, y...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/ClaudeDevs/status/2085853169930957158",
+            "video_id": "2085852545315115008",
+            "yoinked_at": "2026-08-08T07:47:22"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

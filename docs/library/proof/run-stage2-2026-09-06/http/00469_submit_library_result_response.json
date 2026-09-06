@@ -1,0 +1,39 @@
+{
+  "seq": 469,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "QMSPnrsE8d-gQKRuaOn4r9qUq_S-Tj1b",
+      "video_id": "2084354263174479872",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.88,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "13f6e0c0e75494c0ea92875f3e5a8875af6950b56c7fb297511e4c0e0af3feb4",
+            "card_hash": "e63402dc34d1d49f584b29bea769442f8043f56fa7a85be60ef24477ba5b4560",
+            "quote": "Jensen Huang publicly named who's winning the AI race. Not OpenAI. Not Anthropic. Not Google.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

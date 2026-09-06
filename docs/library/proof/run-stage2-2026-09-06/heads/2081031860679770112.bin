@@ -1,0 +1,227 @@
+# David Ondrej - DeepSeek V4 just dropped and it's 40x cheaper than GPT-5.5 Pro  1.6 t...
+
+**Channel:** David Ondrej (— subscribers)
+**Uploaded:** 2026-07-25 | **Duration:** 09:30 | **Views:** — | **Likes:** 837
+**URL:** https://x.com/DavidOndrej1/status/2081032002925420941
+**Uoinked:** 2026-07-25T18:09:53
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Stakes
+**Analysis:** The opening 'Is this what AGI feels like?' combined with the emphasis on cost ('costs a couple of pennies') and the claim that 'you risk being in a permanent underclass' if you fall behind in AI immediately establishes what viewers stand to gain (access to powerful AI) or lose (being left behind) by paying attention.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+DeepSeek V4 just dropped and it's 40x cheaper than GPT-5.5 Pro  1.6 trillion parameters, trained on limited GPUs, still matches the top labs  I built 4 full apps with it to see if the hype is real https://t.co/U9tRRnNiZY
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Is this what AGI feels like?
+[00:00:01] Four different terminals, all running DeepSeek V4 Pro.
+[00:00:05] Building four different projects in parallel and it costs a
+[00:00:09] couple of pennies to do.
+[00:00:10] Guys we really do live in the future.
+[00:00:13] Okay so this is a huge day.
+[00:00:15] DeepSeek v4 arrived.
+[00:00:16] This is perhaps the most anticipated AI model
+[00:00:19] over the last year and a half
+[00:00:20] And we are at this step of the cycle
+[00:00:23] Where OpenAI just released 5.5
+[00:00:25] And now DeepSeek v4 drops
+[00:00:26] Same day basically there's no time
+[00:00:30] You're one day in the AI space and you
+[00:00:31] risk being in a permanent underclass
+[00:00:32] So DeepSeek v4, how good is it?
+[00:00:35] It's insanely good okay
+[00:00:36] And we are going to compare it with GPT 5.5
+[00:00:39] AND Opus 4.7 later on
+[00:00:41] But this model
+[00:00:42] Is not only The biggest open source of all time
+[00:00:45] Its also
+[00:00:46] THE BEST Open Source Model
+[00:00:48] Of All Time First let us look at
+[00:00:50] The size 1.6 trillion parameters
+[00:00:52] Okay so Previous Biggest Models were like
+[00:00:55] One Trillion This is one point six
+[00:00:56] So 60% larger
+[00:00:58] Than previous Biggest
+[00:00:59] Open Source Models Its a mixture of experts architecture
+[00:01:01] So not all
+[00:01:02] Of these parameters are active
+[00:01:03] In every message
+[00:01:04] Only about 47 billion or something
+[00:01:07] Are Active It has the 1 million context window
+[00:01:09] But There're few caveats
+[00:01:11] More on that later And yeah it is
+[00:01:13] The most powerful open source model
+[00:01:14] Of today By A LOT
+[00:01:16] so Architecture Is genuinely interesting
+[00:01:18] Domain novelties Are compressed
+[00:01:20] Sparse attention For long contexts
+[00:01:22] Heavily Compressed Attention
+[00:01:23] MHC Residual changes
+[00:01:25] and then this Interesting Uses
+[00:01:26] The same Muon Optimizer
+[00:01:28] As Kimi So this is
+[00:01:30] Inspired from KimiK 2.5
+[00:01:31] And This Is the Beauty
+[00:01:32] Of open source Community Right
+[00:01:33] You can take ideas From each other
+[00:01:35] Because Everything Is Open Source
+[00:01:36] Which Open AI
+[00:01:38] and Anthropic Should learn
+[00:01:40] From Obviously It has some
+[00:01:41] MOW Routing Tricks
+[00:01:43] Fp4 An FP8
+[00:01:44] Inference A Multi Teacher
+[00:01:45] On Policy Distillation
+[00:01:46] so a lot of Innovation on
+[00:01:48] The Actual Architecture
+[00:01:49] itself But Most Interesting
+[00:01:51] Part I Think
+[00:01:52] Is The Story Behind
+[00:01:53] Hardware The GPUs
+[00:01:55] If you think About It This
+[00:01:56] Model Being So
+[00:01:57] Good And Not
+[00:02:00] Be Trained On The Best Hardware
+[00:02:01] Is Like That
+[00:02:02] Says A Lot Okay so
+[00:02:04] this is the Biggest News
+[00:02:05] Does Most People Will Overthink
+[00:02:06] Because They Don't Realize
+[00:02:07] The State Of Geo Politics
+[00:02:08] and AI You Need Understanding
+[00:02:10] In Both You Have To Realise
+[00:02:12] How Good Deep Seek V4
+[00:02:13] Is Despite China's
+[00:02:15] Limitations on GPUs
+[00:02:16] Basically Every
+[00:02:17] Other Country in World Maybe
+[00:02:19] Except For Like North Korea
+[00:02:20] Has More
+[00:02:21] Access To GPUs
+[00:02:22] Than China Both
+[00:02:24] The United States And
+[00:02:25] the European Union Have
+[00:02:26] Put So Many
+[00:02:27] Restrictions and Export Control
+[00:02:29] On The Latest
+[00:02:30] And Greatest Chips In
+[00:02:31] The Supply Chain
+[00:02:33] Of These Chips For
+[00:02:34] Example Asml They
+[00:02:36] Are The Best EUV
+[00:02:37] Machines In The World
+[00:02:38] Their Lithography Is
+[00:02:40] Super Advanced And
+[00:02:41] Nobody Else Can Basically
+[00:02:42] Make This Machine Each
+[00:02:43] Of Them Costs Like 500 Million
+[00:02:45] Dollars And
+[00:02:46] There Is Export Control On
+[00:02:47] China So China Cannot
+[00:02:49] Buy A Single One Of
+[00:02:50] These Machines From
+[00:02:51] Asml This Means That
+[00:02:52] Deep Seek Had To Use
+[00:02:53] Mix Off Huawei
+[00:02:55] Assent GPU's
+[00:02:56] And Old Nvidia
+[00:02:57] Gpus Maybe Like 100
+[00:02:59] Or Some
+[00:03:00] Illegally Smuggled
+[00:03:01] H100 So
+[00:03:03] Imagine How Good His Model
+[00:03:04] Could Have Been If
+[00:03:05] They Had The Greatest And Latest
+[00:03:06] Hardware Okay It's Like About
+[00:03:14] 20 Different Ones And What Do You Need To Realize
+[00:03:16] Is That Deep Seek Comes In Two Sizes
+[00:03:18] Dpc V4 Pro And
+[00:03:20] TvV For Flash Flashes
+[00:03:21] Obviously The Faster Version Similar
+[00:03:23] To Gemini Flash Models
+[00:03:24] And Pro Is The Latest
+[00:03:25] And Greatest Versions So We Say
+[00:03:26] I'm Going Be Comparing Deeps Eak
+[00:03:28] Before Pro Versus
+[00:03:31] Mainly Opas 4.6
+[00:03:32] And Four Point Five We Have
+[00:03:34] The Previous Versions Because
+[00:03:36] That'S When They Benchmarked Did So
+[00:03:38] We Don't Have Four But Seven Versions 4.7
+[00:03:44] And 5.5
+[00:03:46] Are Better Than Deep
+[00:03:47] Seek But There'S A Big Bot
+[00:03:49] They'Re Way More
+[00:03:50] Expensive And I Mean Way
+[00:03:52] More We're Going To Touch
+[00:03:53] On The Cost In Second First
+[00:03:54] Let's Look At Some Of
+[00:03:55] The Most Common
+[00:03:56] And Most Popular Benchmarks
+[00:03:57] So 1st Category Is
+[00:03:58] Knowledge And Reasoning MMLu
+[00:04:00] You Can See That Dpc
+[00:04:01] V4 Is Similar
+[00:04:03] As Five One
+[00:04:04] Four Extra High And
+[00:04:05] Little Bit Underneath
+[00:04:06] Opus 4.6 On
+[00:04:07] Simple QA Is Actually
+[00:04:09] Better Than Both
+[00:04:10] Opas N Gpd
+[00:04:11] On GPQ A Diamond
+[00:04:12] S Lightly Worse Or
+[00:04:13] Humanities Last Exam It'S
+[00:04:15] Slightly Worse On
+[00:04:16] Life Code Bench Its
+[00:04:18] Actually Better Own
+[00:04:20] Cold Forces It's
+[00:04:21] Also Better So
+[00:04:22] On Multiple Benchmarks
+[00:04:23] This IS The
+[00:04:24] Best Am All In The World Is
+[00:04:26] Not Just Like It'S Trying
+[00:04:27] To Catch Up To
+[00:04:28] Open AI Or Anthropic
+[00:04:29] On Several
+[00:04:30] Of These Most Popular Benchmarks
+[00:04:32] China Has Already Caught
+[00:04:33] Up Then On Long
+[00:04:34] Context It'S
+[00:04:36] Severely Behind Opus
+[00:04:38] Than Let's Look At
+[00:04:39] A Genetic Coding Because
+[00:04:40] That' What We Care About Of Course On
+[00:04:42] This Channel By The
+[00:04:43] Way If You're Interested In Ai And
+[00:04:44] if You Want Be On the Cutting Edge
+[00:04:45] Of Ai Make Sure Subscribe
+[00:04:47] It Takes A Couple Of Seconds
+[00:04:48] And The Alpha You Get Is
+[00:04:49] Immense I Mean In The Last
+[00:04:50] 24 Hours Alone
+[00:04:52] This Is The Third
+[00:04:53] Video Im Uploading
+[00:04:54] Right So If You Really Want
+[00:04:55] To Be On the Cutting Edge of Ai From
+[00:04:56] Somebody Who Spends
+[00:04:57] All Day Every Day
+[00:04:58] in The AI Field and
+[0

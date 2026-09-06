@@ -1,0 +1,39 @@
+{
+  "seq": 721,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "fDtl3eJq-lSJPzsmO26UHPWFhWRS64pR",
+      "video_id": "2089358742852947968",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.92,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "d6bb489655d2e2dc1a2f57ac4809ae2f6e7edb70a966e047b5383f3cc4b6fbbe",
+            "card_hash": "417fd743b9a46d0c03cb6fa7e4a15d363f509f5583fc4a49af74ec2d915ebbc5",
+            "quote": "premiered at the world's biggest computer graphics conference",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

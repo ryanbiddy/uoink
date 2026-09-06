@@ -1,0 +1,66 @@
+{
+  "seq": 407,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "7pi03yMZ3-nLvo7QqGQjTUn-OViEfYOP",
+    "client_id": "proof-harness",
+    "attempt_token": "tkzRuTkwQSeYuF9CPGsAqEfyXj3-qTQv0QndU6khde4",
+    "submission_key": "7pi03yMZ3-nLvo7QqGQjTUn-OViEfYOP-tkzRuTkwQSeYuF9CPGsAqEfyXj3-qTQv0QndU6khde4",
+    "schema_version": 1,
+    "video_id": "2084309519715139584",
+    "source_revision": "538d175c1730af273d924d8ca45dc516e03ec7b89e061d3e6416cc7c56d6c712",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "d0c18b0f23f62660b31725c238c2000f57932a61368714924d12ace04ee43d2a",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "47a94bb51c6e40675a8c78b64eada8bd0b89769252fd9937d698561222f50756",
+            "card_hash": "ef9aaf1f5254d306e1f29290c18506a81573b779f0a524e1d75aaf968f8f86f5",
+            "quote": "You Ask Quad If Have A Question Like Where's The Code Base And How Do I Get Access To It Again"
+          }
+        },
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "d658da99b1d2a17011f4164187b45d8ee2d9b660870a1a6c50db36ed5170c718",
+            "card_hash": "ef9aaf1f5254d306e1f29290c18506a81573b779f0a524e1d75aaf968f8f86f5",
+            "quote": "Anti Prompt Injection Training On Every Model Publish System Card That Talks About How Resilient Is The Model To Common Attacks"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 15782,
+      "cache_read_tokens": 189114,
+      "cache_create_tokens": 36038,
+      "wall_time_ms": 0
+    }
+  }
+}

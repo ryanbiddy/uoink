@@ -1,0 +1,198 @@
+# matt palmer - Getting Started with Grok Bot  01:00 What is @Bot? 05:26 Anatomy of a...
+
+**Channel:** matt palmer (— subscribers)
+**Uploaded:** 2026-08-25 | **Duration:** 29:32 | **Views:** — | **Likes:** 1,512
+**URL:** https://x.com/mattyp/status/2092286281266962681
+**Uoinked:** 2026-08-26T07:57:42
+**Topic:** Productivity and Workflows
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Demo
+**Analysis:** The video opens by immediately showing Grok Bot in action—asking it to perform a specific task (retrieving Twitter follower data and creating a Notion database)—rather than explaining what it is first. This live demonstration of the tool's capability serves as the hook to draw viewers in.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Getting Started with Grok Bot  01:00 What is @Bot? 05:26 Anatomy of a bot 08:49 3 ways to run 12:04 Multi-bot chains 16:06 Workflow 1: X followers to @Notion 20:29 Workflow 2: Personal software 23:08 Workflow 3: Coding with @cursor_ai 26:44 Workflow 4: Search 28:27 Recap https://t.co/UUdJR9NpLn
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Hey Grokbot
+[00:00:00] could you go get that information
+[00:00:03] off of Twitter for each of my followers
+[00:00:04] either through the API
+[00:00:06] or by physically going and looking at their profile
+[00:00:09] create a Notion database
+[00:00:10] pull that information into the database
+[00:00:13] and then hand it over to me?
+[00:00:14] Now
+[00:00:14] typically this is something we might use AI
+[00:00:16] to write a script for to accomplish that goal
+[00:00:19] right? This is typically like a personal
+[00:00:21] scripting or software approach
+[00:00:24] Now I just had an agent do it
+[00:00:25] and it's kind of
+[00:00:27] better because it's completely disposable
+[00:00:31] It took me maybe five or ten minutes
+[00:00:32] and now I have access to this agent
+[00:00:33] forever. I can tweak it
+[00:00:35] I can update it
+[00:00:36] and I can approve it
+[00:00:36] Today we're going to talk all about Grokbot
+[00:00:38] Specifically, we'll talk about what Grokbot is and how it works
+[00:00:42] and then we're going to move into how
+[00:00:43] you can get started and how you can
+[00:00:44] set up the tool
+[00:00:45] to start automating your own workflows
+[00:00:47] And finally, we're going to dig a bit deeper
+[00:00:49] and I'll show you some of my favorite
+[00:00:50] workflows and uses for this tool
+[00:00:52] because really the possibilities are endless
+[00:00:55] as cliche as that might sound
+[00:00:57] and we're all still kind of figuring out
+[00:00:59] what this tool is Capable of
+[00:01:00] So
+[00:01:01] what is Grokbot? It might be easier to
+[00:01:03] show you rather than explain
+[00:01:04] I have
+[00:01:05] a bot open in front of me here
+[00:01:07] Under the hood
+[00:01:08] Grokbot is just an agent with a computer
+[00:01:10] So an agent, as you're familiar with
+[00:01:13] is just a model that has access to
+[00:01:14] some tools and can do stuff for us
+[00:01:17] And this agent has access to a computer
+[00:01:19] So if I click this window
+[00:01:20] we can actually see the computer
+[00:01:22] More than that
+[00:01:22] we can interact with it like a remote
+[00:01:24] desktop
+[00:01:25] So Behind the scenes
+[00:01:27] this is running on a virtual machine in
+[00:01:28] the cloud
+[00:01:29] somewhere. So none of this is happening on
+[00:01:31] my laptop
+[00:01:32] And I have a terminal in front of
+[00:01:33] me
+[00:01:33] I could run a command
+[00:01:36] I have a file system and I have
+[00:01:39] X here
+[00:01:41] Now the cool thing is that Grokbot has
+[00:01:42] access to
+[00:01:43] all of these things the same way
+[00:01:46] we do
+[00:01:47] So more than just an agent with a computer
+[00:01:49] it's an agent with a computer
+[00:01:51] with really good computer use
+[00:01:53] And we can actually
+[00:01:55] teach Grokbot how to do certain things
+[00:01:57] on this computer by
+[00:01:59] recording and teaching a task to Grokbot
+[00:02:02] or by prompting and instructing it
+[00:02:04] And so
+[00:02:05] today
+[00:02:06] I'm going to go over
+[00:02:07] some workflows and some things that I've found
+[00:02:09] Grokbot to be really good at
+[00:02:11] But just to give you a bit of a taste there
+[00:02:13] that might include things like doing grocery shopping
+[00:02:16] For example
+[00:02:17] I asked Grokbot to
+[00:02:18] look at
+[00:02:19] Costco
+[00:02:19] and look at Amazon
+[00:02:21] and add certain things to my cart here
+[00:02:22] and then compare prices
+[00:02:24] compare delivery charges, compare times, etc.
+[00:02:29] And it's really good at stuff like that
+[00:02:30] We can control the computer just like Grokbot
+[00:02:32] can. So
+[00:02:33] when it needs to To step in to
+[00:02:35] complete two factor authentication or log into a website
+[00:02:37] it can hand that computer off to us
+[00:02:39] and allow us to complete that action
+[00:02:41] So recap, what is Grokbot?
+[00:02:43] It is an agent with a computer that
+[00:02:45] runs in the cloud
+[00:02:46] So nothing's running on your machine and that
+[00:02:48] gives us access
+[00:02:49] via mobile
+[00:02:50] and via desktop
+[00:02:51] that has really good computer use
+[00:02:53] And that's really it. That's the foundation
+[00:02:55] So while the inputs and outputs are chat
+[00:02:58] we're always typing text to Grokbot
+[00:03:00] those are pretty simple
+[00:03:02] Under the hood
+[00:03:03] there's this whole like operating
+[00:03:05] You can think of like as a
+[00:03:06] server
+[00:03:07] or
+[00:03:07] a really powerful tool that allows us to
+[00:03:09] get stuff done
+[00:03:10] And that's the foundation
+[00:03:11] for the rest of this video
+[00:03:13] So just to drive this home
+[00:03:14] I can come over to my marketplace bot
+[00:03:16] here and ask it to
+[00:03:18] do a search for a variegated monstera albo
+[00:03:22] And what we'll see
+[00:03:23] in the computer use on the right is that the bot
+[00:03:27] because I've already authorized and logged into Facebook
+[00:03:30] is going to be able to open up that machine
+[00:03:33] go to a new tab
+[00:03:34] Maybe use the same one and do a
+[00:03:35] new search. It's going to take all the
+[00:03:37] actions that we would take
+[00:03:38] So really, it's more than a personal assistant
+[00:03:41] It's more than some of the other AI
+[00:03:42] tools you're familiar with
+[00:03:44] It's
+[00:03:44] an agent that can do everything that you
+[00:03:46] can do on a computer
+[00:03:47] So we can see Grokbot performing
+[00:03:49] searches for a few different plants
+[00:03:52] and only finding a few of them
+[00:03:54] on Craigslist. So what can Grokbot do?
+[00:03:56] I want to give you a few use
+[00:03:57] cases before we dig into
+[00:03:59] how to use Grokbot and how to get
+[00:04:00] things set up
+[00:04:01] So you kind of understand why you might
+[00:04:03] adopt a tool like If you're still curious
+[00:04:06] I've been using Grokbot for more main
+[00:04:07] four main things, which is first, writing software
+[00:04:10] second, building personal software as agents
+[00:04:14] This is a little bit different
+[00:04:15] I'm actually moving the software into chat
+[00:04:17] We'll talk about what that means
+[00:04:19] later on in the video
+[00:04:21] for information and knowledge retrieval
+[00:04:23] So looking across the cursor
+[00:04:25] SpaceX, Slack, Notion, GitHub
+[00:04:28] It's been really helpful. It's actually how I
+[00:04:30] onboarded to cursor. We'll use that as an example
+[00:04:32] And fourth, for automating Workflows
+[00:04:34] So
+[00:04:35] very similar to what I just showed you
+[00:04:36] with this grocery example
+[00:04:38] you could think of any workflow
+[00:04:39] any sort of knowledge work you might have to do
+[00:04:42] whether that's
+[00:04:42] going on LinkedIn and reaching out to people
+[00:04:44] or finding information if you're a salesperson
+[00:04:46] bringing that into your CRM
+[00:04:48] reaching out to these clients

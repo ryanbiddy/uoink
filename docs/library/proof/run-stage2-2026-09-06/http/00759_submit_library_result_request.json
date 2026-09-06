@@ -1,0 +1,51 @@
+{
+  "seq": 759,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "z5Nr7eXsk8O15bMMMElZkwOa6H8ClDqh",
+    "client_id": "proof-harness",
+    "attempt_token": "2z2HMj2JtlGi8oIh2zcUElmmKDukwzItF28T-mn-iSo",
+    "submission_key": "z5Nr7eXsk8O15bMMMElZkwOa6H8ClDqh-2z2HMj2JtlGi8oIh2zcUElmmKDukwzItF28T-mn-iSo",
+    "schema_version": 1,
+    "video_id": "2089380922604789760",
+    "source_revision": "f229dd486e937cdc88e18614a7963d0e1cc0a7907e462ad5fb16c59a68dd2c95",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "61cfb3d0ad2180f52c46d90231d6eca09d92447345df9b4779c5452025daa776",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "a6cee74d306195178914b06f087bb9fc22d72ba5cc1fe05b5c61028785d8b774",
+            "card_hash": "57a75ce5670a69a2cdc02590154e83d7f3c0659f028973f13444f04459bda792",
+            "quote": "We’ve launched the first-ever marketplace of AI Agents for your portfolio."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 10150,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 19302,
+      "wall_time_ms": 0
+    }
+  }
+}

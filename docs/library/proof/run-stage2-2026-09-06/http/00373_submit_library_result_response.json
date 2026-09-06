@@ -1,0 +1,39 @@
+{
+  "seq": 373,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "I8i5Y0gqosqB_IP7gOTSdFhGARLlxD4s",
+      "video_id": "2083270328453853184",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "13751081459df219b27d6e96c0bf93c190ec4a2f06f293f40ad4c92b26af377d",
+            "card_hash": "ccb099b13d9eea3c1a435a4848b82c84da8e277117291dec008d9e37a76a9cbf",
+            "quote": "it's a graph based tool that can traverse databases",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

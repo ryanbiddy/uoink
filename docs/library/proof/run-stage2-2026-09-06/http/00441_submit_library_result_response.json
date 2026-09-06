@@ -1,0 +1,39 @@
+{
+  "seq": 441,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "UUap4MQDskjpwfJ1nawByUjZKMi8jVEP",
+      "video_id": "2084110051984465920",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "4ab6abbcfc5dccf0bef81a90e1602b70c8370dd821059e8cae6387e03d4c0a8c",
+            "card_hash": "b8a5cb027b3ddec1129a220ee42aea0244f778552d609e18a5ce7fcee93b953c",
+            "quote": "Text-to-video, prompt only",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,876 @@
+{
+  "seq": 403,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 33,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "UUap4MQDskjpwfJ1nawByUjZKMi8jVEP",
+          "video_id": "2084110051984465920",
+          "attempt_token": "9zq15ai-4bh0jMJbaDK8bZ8pp2VyVyPMleoXVHpIfYA",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676839053,
+          "source_revision": "ad2492500a5da13e386082f0ca79569e23d4d75a766b986113bf163fda1c29e2",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "0cae6a4a114cb2738dcc81c0ae2308cd0839598688060250f6a976f7dd16f75c",
+          "card": {
+            "card_hash": "b8a5cb027b3ddec1129a220ee42aea0244f778552d609e18a5ce7fcee93b953c",
+            "channel": "ComfyUI",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/ComfyUI/status/2084110113078751465",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "4ab6abbcfc5dccf0bef81a90e1602b70c8370dd821059e8cae6387e03d4c0a8c",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> MiniMax H3 is native in ComfyUI, day zero with the weights.  Model highlights:  → Text-to-video, prompt only  → Image-to-video  → First-and-last-frame -  control the opening frame, the closing frame, or",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> MiniMax H3 is native in ComfyUI, day zero with the weights.  Model highlights:  → Text-to-video, prompt only  → Image-to-video  → First-and-last-frame -  control the opening frame, the closing frame, or both  → Reference-to-video - carry a subject, a motion, or a voice https://t.co/1ac09WsHBs No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "ComfyUI_-_MiniMax_H3_is_native_in_ComfyUI_day_zero_with_the_weights_Model_hi",
+            "source_revision": "ad2492500a5da13e386082f0ca79569e23d4d75a766b986113bf163fda1c29e2",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> MiniMax H3 is native in ComfyUI, day zero with the weights.  Model highlights:  → Text-to-video, prompt only  → Image-to-video  → First-and-last-frame -  control the opening frame, the closing frame, or both  → Reference-to-video - carry a subject, a motion, or a voice https://t.co/1ac09WsHBs No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "ComfyUI - MiniMax H3 is native in ComfyUI, day zero with the weights.  Model hi...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/ComfyUI/status/2084110113078751465",
+            "video_id": "2084110051984465920",
+            "yoinked_at": "2026-08-03T07:36:30"
+          }
+        },
+        {
+          "work_id": "ic5KS7DnYR90x0DELlEHH5xsowiptiyl",
+          "video_id": "2084218738224566272",
+          "attempt_token": "gWgg7y13Dztm-XcDbT4TIue6I_hW8aeOSfidBjZHgys",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676839054,
+          "source_revision": "194f8841440cdb4c07cf1a7ced71b33f6000c595ab075409a921d2b411157cf7",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "87fef95847d457ff6f4a3185855a212a0850dfac1cf3890d49da2ed93aeb8edb",
+          "card": {
+            "card_hash": "aa4c4e1847cb78b2b7f3425aa4d0e542b84ad7c067bf7ab56890e4724ed4bdfa",
+            "channel": "Emil Kowalski",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/emilkowalski/status/2084228500114768245",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "87c3323c125101fecb14ef3977a29daf822bc673bfafb8ce5cc2ead079d877e5",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Thanks to AI we can now move way faster to actually trying things in code, and it’s great.  Exploration in design tools is obviously needed too, but by being able to touch the UI you can experience it i",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Thanks to AI we can now move way faster to actually trying things in code, and it’s great.  Exploration in design tools is obviously needed too, but by being able to touch the UI you can experience it instead of just imagining how it would actually feel. https://t.co/rUQ62W2oNg No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Emil_Kowalski_-_Thanks_to_AI_we_can_now_move_way_faster_to_actually_trying_thing",
+            "source_revision": "194f8841440cdb4c07cf1a7ced71b33f6000c595ab075409a921d2b411157cf7",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Thanks to AI we can now move way faster to actually trying things in code, and it’s great.  Exploration in design tools is obviously needed too, but by being able to touch the UI you can experience it instead of just imagining how it would actually feel. https://t.co/rUQ62W2oNg No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Emil Kowalski - Thanks to AI we can now move way faster to actually trying things in ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/emilkowalski/status/2084228500114768245",
+            "video_id": "2084218738224566272",
+            "yoinked_at": "2026-08-03T07:36:25"
+          }
+        },
+        {
+          "work_id": "-ORA7F683rut5qJJEQP3S5Iw9pE9Xys7",
+          "video_id": "2084984808216657921",
+          "attempt_token": "U5UKMv_ZZrMcBtYs8_TfNewfOp88jhKLom1metjCdKY",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676839054,
+          "source_revision": "7c412b2b497127db204113f7c9475be561c0408232b8d11f30fde3130cd4b278",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "0dc573196c1250db61b682972c018bed0fd08527ae530025448af7e02ac043fb",
+          "card": {
+            "card_hash": "2d23fc02c8283426ed552531a5abb091d9acae472a22fb2f202ce4906e2e2813",
+            "channel": "Ilir Aliu",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/IlirAliu_/status/2085063787921690646",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "253ccea041c461ae47da830485dc4faf978f6ed92c2d86f0350f4f5a3c9bb08a",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> AI in robotics gets all the attention right now, but sometimes the most interesting work is very practical.  Viet built a small vision system that counts potatoes on a conveyor belt. No giant dataset. N",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> AI in robotics gets all the attention right now, but sometimes the most interesting work is very practical.  Viet built a small vision system that counts potatoes on a conveyor belt. No giant dataset. No huge model. Just a clear problem and a smart setup.  He used Ultralytics’ https://t.co/FWBUfSq5Db No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Ilir_Aliu_-_AI_in_robotics_gets_all_the_attention_right_now_but_sometimes_the_mo",
+            "source_revision": "7c412b2b497127db204113f7c9475be561c0408232b8d11f30fde3130cd4b278",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> AI in robotics gets all the attention right now, but sometimes the most interesting work is very practical.  Viet built a small vision system that counts potatoes on a conveyor belt. No giant dataset. No huge model. Just a clear problem and a smart setup.  He used Ultralytics’ https://t.co/FWBUfSq5Db No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+            "title": "Ilir Aliu - AI in robotics gets all the attention right now, but sometimes the mo...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/IlirAliu_/status/2085063787921690646",
+            "video_id": "2084984808216657921",
+            "yoinked_at": "2026-08-06T07:35:04"
+          }
+        },
+        {
+          "work_id": "6LtqJeFS7Pt7MunIP5CqF-El24lf5AYe",
+          "video_id": "2085398091726041088",
+          "attempt_token": "FZSq0iYIR3hu4Na_ghPQbhr5LFwZq5JBhheNL3n5us0",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676839055,
+          "source_revision": "1765d0783ccdf11b94c36b1468887925ae2f88037236efd14eb8681dbbbe3435",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "88e210d847e70e56d417471e130257a79ced1670bd701a0e6237534ebdbabbf8",
+          "card": {
+            "card_hash": "728622224feb03bea2c1e12f85fcee42e5f43c7fd33705fd2f3afd75e1ce408c",
+            "channel": "OpenAI Developers",
+            "chars": 1326,
+            "chars_all_clips": 1326,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/OpenAIDevs/status/2085398373511918022#t=3",
+                "end": 90.769,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "214de02a0a709c01df7e01998e4d02da624356577f9205f75093faaf4648a80c",
+                "start": 3.629,
+                "text": "Skills and MCP servers are making agents more capable, And plugins give developers a way to package those capabilities So they can be shared and reused. But today every agent product expects A different manifest folder structure And setup p",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/OpenAIDevs/status/2085398373511918022#t=3",
+                "end": 90.769,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "214de02a0a709c01df7e01998e4d02da624356577f9205f75093faaf4648a80c",
+                "start": 3.629,
+                "text": "Skills and MCP servers are making agents more capable, And plugins give developers a way to package those capabilities So they can be shared and reused. But today every agent product expects A different manifest folder structure And setup p",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Build a plugin once and use it across compatible agent clients.  Introducing Agent Plugins, an open standard developed with @awsdevelopers, @cursor_ai, @github, @code, and @vercel that packages Agent Skills and supports MCP server configurations in a shared format. https://t.co/JOQe4sc40N No tags [00:00:03] Skills and MCP servers are making agents more capable, [00:00:07] And plugins give developers a way to package those capabilities [00:00:10] So they can be shared and reused. [00:00:12] But today every agent product expects [00:00:15] A different manife",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "OpenAI_Developers_-_Build_a_plugin_once_and_use_it_across_compatible_agent_clien",
+            "source_revision": "1765d0783ccdf11b94c36b1468887925ae2f88037236efd14eb8681dbbbe3435",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Build a plugin once and use it across compatible agent clients.  Introducing Agent Plugins, an open standard developed with @awsdevelopers, @cursor_ai, @github, @code, and @vercel that packages Agent Skills and supports MCP server configurations in a shared format. https://t.co/JOQe4sc40N No tags [00:00:03] Skills and MCP servers are making agents more capable, [00:00:07] And plugins give developers a way to package those capabilities [00:00:10] So they can be shared and reused. [00:00:12] But today every agent product expects [00:00:15] A different manife",
+            "title": "OpenAI Developers - Build a plugin once and use it across compatible agent clients.  Intr...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/OpenAIDevs/status/2085398373511918022",
+            "video_id": "2085398091726041088",
+            "yoinked_at": "2026-08-07T07:40:16"
+          }
+        },
+        {
+          "work_id": "A_DUtFAQ6FwCnLhAqz9PLyjjNPA_LDlo",
+          "video_id": "2085066155828391937",
+          "attempt_token": "ZqcZpA_LzAp7jBTb8nyxWJla9yhi_1WI8zyAC5216pk",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676839057,
+          "source_revision": "1efda1e4374fd446087c20a26a069763870287ecd453458787ba1b281d30a14d",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "f4bd7474e0c7bc5c7b4894ab9c0add26229063fbe2494d7ff015b94805a2614e",
+          "card": {
+            "card_hash": "4103ac8b96ac11cb8dcb095151888b4370795a5fcf79465fbe64e6989a28e75b",
+            "channel": "codila",
+            "chars": 50824,
+            "chars_all_clips": 50824,
+            "chars_chosen_clips": 1440,
+            "clip_count": 34,
+            "clips": [
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085067388563620180#t=0",
+                "end": 118.719,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "0900ce217ef7700907b98a7c23ccea50a590079d220a047db01d2f83a5ff1126",
+                "start": 0.0,
+                "text": "Welcome to Building Toward Computer Use with Anthropiq, built in partnership of anthropic and taught by Colt Steele who's AnthropiQs header curriculum. welcome colts Thanks Andrew I'm delighted To have the opportunity to share this course W",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085067388563620180#t=713",
+                "end": 832.62,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "e097f41b70b249f76cc9b53cb73ba227aab7c471d5cc1ef258f9dd76a4499dc3",
+                "start": 713.82,
+                "text": "Single Example This Invoice.png Image I Provide An Image Message Properly Formatted Then I Provided A Text Prompt Pretty Simple One Generate JSON Object Representing The Contents Of This invoice It Should Include All Dates Dollar Amounts An",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085067388563620180#t=1429",
+                "end": 1549.039,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7b56614f30326091e290384cf5c4532d7f220a7a9d5d2f55bf364ab7472d0624",
+                "start": 1429.13,
+                "text": "As To What It Supposed Be Good At So The Next Step Here Is Provide The Actual Instruction To The Model Right If You Scroll Up We Told The Model Please Follow These Direct Order List Of Instructions So The First Instruction Is To Review The ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085067388563620180#t=2265",
+                "end": 2383.34,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "304357598fd62e27c9b3b158563adffca9694382be00afb0c27f9aa735169c8f",
+                "start": 2265.059,
+                "text": "Any Simple Prompt Will Do Here Ideally Something To Do With The Book Frankenstein It's All A Function Called Make Non Cashed Api Call And You'll See That There Is Some Timing Logic In Here To Start A Timer Before After Essentially To Calcul",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085067388563620180#t=3216",
+                "end": 3335.929,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "6d56959056d02c43b825c08054d00ce44afb290001c7839beab09ec59c59908d",
+                "start": 3216.84,
+                "text": "By ID Customer Orders And Cancel Or Ders Or Can Instantiate Fake Database Here And Imagine That You Are A Customer Support Representative And Somebody Chats With You And Says My Name Is John Doe My Email Is john At Gmail Dot Com I Want To C",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085067388563620180#t=3687",
+                "end": 3806.019,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7bac68bd0036c0afedc18b047e339939dfc695d5b3544d9ce164d84a2d3e4c08",
+                "start": 3687.099,
+                "text": "Have Some Sort Of Loop Function With The Model That's The Next Step Is To Put It All Together So You Can See The Complete Flow This Is A Simple Complete Implementation Of Chatbot That Uses Four Tools You Saw Previously There Is Lots To Cove",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085067388563620180#t=0",
+                "end": 118.719,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "0900ce217ef7700907b98a7c23ccea50a590079d220a047db01d2f83a5ff1126",
+                "start": 0.0,
+                "text": "Welcome to Building Toward Computer Use with Anthropiq, built in partnership of anthropic and taught by Colt Steele who's AnthropiQs header curriculum. welcome colts Thanks Andrew I'm delighted To have the opportunity to share this course W",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085067388563620180#t=713",
+                "end": 832.62,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "e097f41b70b249f76cc9b53cb73ba227aab7c471d5cc1ef258f9dd76a4499dc3",
+                "start": 713.82,
+                "text": "Single Example This Invoice.png Image I Provide An Image Message Properly Formatted Then I Provided A Text Prompt Pretty Simple One Generate JSON Object Representing The Contents Of This invoice It Should Include All Dates Dollar Amounts An",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085067388563620180#t=1429",
+                "end": 1549.039,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7b56614f30326091e290384cf5c4532d7f220a7a9d5d2f55bf364ab7472d0624",
+                "start": 1429.13,
+                "text": "As To What It Supposed Be Good At So The Next Step Here Is Provide The Actual Instruction To The Model Right If You Scroll Up We Told The Model Please Follow These Direct Order List Of Instructions So The First Instruction Is To Review The ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085067388563620180#t=2265",
+                "end": 2383.34,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "304357598fd62e27c9b3b158563adffca9694382be00afb0c27f9aa735169c8f",
+                "start": 2265.059,
+                "text": "Any Simple Prompt Will Do Here Ideally Something To Do With The Book Frankenstein It's All A Function Called Make Non Cashed Api Call And You'll See That There Is Some Timing Logic In Here To Start A Timer Before After Essentially To Calcul",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085067388563620180#t=3216",
+                "end": 3335.929,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "6d56959056d02c43b825c08054d00ce44afb290001c7839beab09ec59c59908d",
+                "start": 3216.84,
+                "text": "By ID Customer Orders And Cancel Or Ders Or Can Instantiate Fake Database Here And Imagine That You Are A Customer Support Representative And Somebody Chats With You And Says My Name Is John Doe My Email Is john At Gmail Dot Com I Want To C",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2085067388563620180#t=3687",
+                "end": 3806.019,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7bac68bd0036c0afedc18b047e339939dfc695d5b3544d9ce164d84a2d3e4c08",
+                "start": 3687.099,
+                "text": "Have Some Sort Of Loop Function With The Model That's The Next Step Is To Put It All Together So You Can See The Complete Flow This Is A Simple Complete Implementation Of Chatbot That Uses Four Tools You Saw Previously There Is Lots To Cove",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "codila_-_Anthropic_and_Andrew_Ng_built_an_agent_that_uses_90_fewer_tokens_fro",
+            "source_revision": "1efda1e4374fd446087c20a26a069763870287ecd453458787ba1b281d30a14d",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "codila - Anthropic and Andrew Ng built an agent that uses 90% fewer tokens fro...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/0xCodila/status/2085067388563620180",
+            "video_id": "2085066155828391937",
+            "yoinked_at": "2026-08-06T07:39:01"
+          }
+        },
+        {
+          "work_id": "Flg3BVtbnNrGw6FJjOaDagT9K-FZlXox",
+          "video_id": "2085067072858734593",
+          "attempt_token": "onoofubND9w_VIEfyir1pJr-sNkeNsOSIxSBhTMSOSk",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676839057,
+          "source_revision": "4a0bf9c9145e3c15935408d3cd7056212bee6b53bd6b34d91f8888a9f5fe5738",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "6da0e7ffdf568117666ed8e254817bd5f0ca43ddb6514c608f1123dc739fc431",
+          "card": {
+            "card_hash": "550c1c12fd3852e907257a53834bcbfbf9c5639a9558662dbd8eec2696011859",
+            "channel": "kyzo",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/ky__zo/status/2085067731230154921",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "de40dd874e36c92709037e697a88411d9a64bbd9da028aa57f044f1294c3bf85",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> this is the wildest website i've seen so far, all made with ai (gpt-image-2 and seedance-2.0)  and it changes on every refresh!  unreal work, congrats @peardotno https://t.co/8mRdo8Qrsq No tags *No capt",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> this is the wildest website i've seen so far, all made with ai (gpt-image-2 and seedance-2.0)  and it changes on every refresh!  unreal work, congrats @peardotno https://t.co/8mRdo8Qrsq No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "kyzo_-_this_is_the_wildest_website_i_ve_seen_so_far_all_made_with_ai_gpt-i",
+            "source_revision": "4a0bf9c9145e3c15935408d3cd7056212bee6b53bd6b34d91f8888a9f5fe5738",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> this is the wildest website i've seen so far, all made with ai (gpt-image-2 and seedance-2.0)  and it changes on every refresh!  unreal work, congrats @peardotno https://t.co/8mRdo8Qrsq No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "kyzo - this is the wildest website i've seen so far, all made with ai (gpt-i...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/ky__zo/status/2085067731230154921",
+            "video_id": "2085067072858734593",
+            "yoinked_at": "2026-08-07T07:40:33"
+          }
+        },
+        {
+          "work_id": "IeDODeh_LPNd3uSjBb0eYoKFF78ieTBF",
+          "video_id": "2085386098293788673",
+          "attempt_token": "wyCLwBSF9cjxxPaY-9Zlr6ernMnoY37mv_giZ7DjmpU",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676839058,
+          "source_revision": "3b31897e84d84cfba027d247073d5996a66b62c2ff4a67712d00d7aba6ffc351",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "2ed9a92fe22e6db65342a9640e6f706d99cc48e0a03050fc8ae565b5fa89e333",
+          "card": {
+            "card_hash": "0158c305fe50f3c4e4bb17b85cac714600871acee83f14b4add03c1d7efb24a1",
+            "channel": "AI at Meta",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/AIatMeta/status/2085388945148297322",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "df7a9afea55cd57f707df4a55322d43ce602f131555be7f43f038bb6a33b75d9",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> To understand whether we're making genuine progress on reasoning, we entered our AI models in five STEM Olympiad competitions.  The results: 🏅 Asian Physics Olympiad (APhO): Perfect score, theory exam 🏅",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> To understand whether we're making genuine progress on reasoning, we entered our AI models in five STEM Olympiad competitions.  The results: 🏅 Asian Physics Olympiad (APhO): Perfect score, theory exam 🏅 International Physics Olympiad (IPhO): Perfect score, theory exam 🥇 https://t.co/fh1h8I1d3S No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "AI_at_Meta_-_To_understand_whether_we_re_making_genuine_progress_on_reasoning_we",
+            "source_revision": "3b31897e84d84cfba027d247073d5996a66b62c2ff4a67712d00d7aba6ffc351",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> To understand whether we're making genuine progress on reasoning, we entered our AI models in five STEM Olympiad competitions.  The results: 🏅 Asian Physics Olympiad (APhO): Perfect score, theory exam 🏅 International Physics Olympiad (IPhO): Perfect score, theory exam 🥇 https://t.co/fh1h8I1d3S No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "AI at Meta - To understand whether we're making genuine progress on reasoning, we ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/AIatMeta/status/2085388945148297322",
+            "video_id": "2085386098293788673",
+            "yoinked_at": "2026-08-07T07:40:22"
+          }
+        },
+        {
+          "work_id": "L-G005KK42nAT08R0qb940MQ4hnC5b3p",
+          "video_id": "2084667135348051968",
+          "attempt_token": "kpNM1K6_IJyOKwTU38FTeKP2Prr3zcGVuZtdXiHOIUA",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676839059,
+          "source_revision": "79e411b7c4324a80a991b05f144657a91724cc203942565e2bb3e958311d94bb",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "8d985467af70d23dccc90ff7d79758d5222c1407c8f6671fb71ec72b5f40788f",
+          "card": {
+            "card_hash": "92c748b4a6814b688f41f3a6854940d3af47e853ecc49c87d77c452105734ba1",
+            "channel": "Tomas Hernando Kofman",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/tomas_hk/status/2084669945150062619",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "feb8859866b046e82913a8ea1f5c110a49ae4151e26dda204f7dad9a215b59ea",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Today we’re announcing Not Diamond Code, the world’s most powerful intelligent model router for long-horizon coding agents.  Not Diamond works with any gateway or harness, including Claude Code, to sele",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Today we’re announcing Not Diamond Code, the world’s most powerful intelligent model router for long-horizon coding agents.  Not Diamond works with any gateway or harness, including Claude Code, to select the best model and reasoning effort for each step, reducing costs by 20-65% https://t.co/io9biZOxbM No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Tomas_Hernando_Kofman_-_Today_we_re_announcing_Not_Diamond_Code_the_world_s_most",
+            "source_revision": "79e411b7c4324a80a991b05f144657a91724cc203942565e2bb3e958311d94bb",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Today we’re announcing Not Diamond Code, the world’s most powerful intelligent model router for long-horizon coding agents.  Not Diamond works with any gateway or harness, including Claude Code, to select the best model and reasoning effort for each step, reducing costs by 20-65% https://t.co/io9biZOxbM No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+            "title": "Tomas Hernando Kofman - Today we’re announcing Not Diamond Code, the world’s most powerful in...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/tomas_hk/status/2084669945150062619",
+            "video_id": "2084667135348051968",
+            "yoinked_at": "2026-08-05T07:32:16"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

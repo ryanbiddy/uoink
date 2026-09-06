@@ -1,0 +1,58 @@
+{
+  "seq": 245,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "IxWmfa4Fg5Tay4fY7NX8pKTDG3_R7_1K",
+      "video_id": "2082498926502952960",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "1249a8d2cb55c16de5d4412668735cb07c2dc21d9394662639d5b61ccd48bae9",
+            "card_hash": "2f8344f5f225b29c8e9662ad0aa4c18326b2dd29f2a79145f311ed2a38203370",
+            "quote": "They Are Moving More Tools And More To MCPs Because This Way The Model Has A Little Bit More Control",
+            "start": 239.919,
+            "end": 358.379,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "f05f1bd4f64491645852bd525b448d92ab9aca72c969d48f7ba01ab1eda7fb28",
+            "card_hash": "2f8344f5f225b29c8e9662ad0aa4c18326b2dd29f2a79145f311ed2a38203370",
+            "quote": "There Is A Lot Of Companies Right Now Thinking About ROI And How You Measure This",
+            "start": 1066.0,
+            "end": 1185.579,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 1155,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "NoqBK5ehnfKdtZ5BbazUSfaz-RAFdaIt",
+      "video_id": "episode_9ddb44f98b2",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "c82b5acac2a2872121274c6ce6cf8ec39b7713e5897138226e621669a926dfac",
+            "card_hash": "dbad26b53d1eabdf4408943fb4da03097dd99a866c3fa9f9884a845e9d6bdea5",
+            "quote": "outside of just harness and when they use Codex, HTTP tier work, there's also the new models you've released",
+            "start": 984.7,
+            "end": 1057.34,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "seq": 1075,
+  "tool": "submit_library_result",
+  "wall_ms": 24,
+  "request": {
+    "seq": 1075,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "9uMAKQcynD3E86BzzSpnngRmggxBleor",
+      "client_id": "proof-harness",
+      "attempt_token": "No_FWiRlA5qWks89MS5xi7lQYUXs98mS2dJ_uA9OCB0",
+      "submission_key": "9uMAKQcynD3E86BzzSpnngRmggxBleor-No_FWiRlA5qWks89MS5xi7lQYUXs98mS2dJ_uA9OCB0",
+      "schema_version": 1,
+      "video_id": "FLcrvMfHUJM",
+      "source_revision": "76a63317ff57fa200eea72da6478e41f2535626d877154257c2b8682e99ca7fe",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "a281db75e6e058bb767f919ed91227cabe329bd95cef1257491dc0b51764d99c",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-and-ml",
+            "shelf_path": [
+              "AI and ML"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "a10feb60262e0fbf90365db222890cead840da70ae40466d6e17a4e40905c799",
+              "card_hash": "7e071fbd71dd9720e959193b9bea246824a2ec30b32b441b19c395095c264985",
+              "quote": "AI scientists warn that a few companies are on track to literally end life on Earth."
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 14960,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 29948,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1075,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 24,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "9uMAKQcynD3E86BzzSpnngRmggxBleor",
+        "video_id": "FLcrvMfHUJM",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-and-ml",
+            "shelf_path": [
+              "AI and ML"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "a10feb60262e0fbf90365db222890cead840da70ae40466d6e17a4e40905c799",
+              "card_hash": "7e071fbd71dd9720e959193b9bea246824a2ec30b32b441b19c395095c264985",
+              "quote": "AI scientists warn that a few companies are on track to literally end life on Earth.",
+              "start": 0.233,
+              "end": 6.539,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

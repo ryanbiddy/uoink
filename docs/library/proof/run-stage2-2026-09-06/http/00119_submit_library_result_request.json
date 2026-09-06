@@ -1,0 +1,51 @@
+{
+  "seq": 119,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "Kv7o8l1U-JRDfWDMQ4Tm8oOYQuwAlqyE",
+    "client_id": "proof-harness",
+    "attempt_token": "rGD8axw6NinDoZ6rXHdt5pimvfN0Ah1P5c5H5s18pJg",
+    "submission_key": "Kv7o8l1U-JRDfWDMQ4Tm8oOYQuwAlqyE-rGD8axw6NinDoZ6rXHdt5pimvfN0Ah1P5c5H5s18pJg",
+    "schema_version": 1,
+    "video_id": "2079961848095412224",
+    "source_revision": "c7488789519644994d69ba53af2ef1ab71f8a69b63c50fc1faa431ea7fffedec",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "4dd335d1ae4cd8f7833d6862bc3298a5cb0ec1ef2ae053abd48ec8030023190e",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "db3032c848974a325d7d9c3c51ed3730f96a7731cc0c34091be56957148f9a60",
+            "card_hash": "6b5a0f66aa53e0a1f65c39606e91db51864cb5ba9fc811177a8b4de123edebfa",
+            "quote": "Kimi K3 was already in internal evaluation by April/May, before Fable 5 had been available long enough to be a plausibly distilled."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 15570,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 20016,
+      "wall_time_ms": 0
+    }
+  }
+}

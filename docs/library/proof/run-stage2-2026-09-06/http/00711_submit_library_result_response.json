@@ -1,0 +1,39 @@
+{
+  "seq": 711,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "VwQmmuuIy1vr3ESuvsdrtuoJaMOvMcCj",
+      "video_id": "2089691023404388353",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "2897b84d33a6fd66802fb90d81393e3ffbabdcf1955492dc40c128572bb367e3",
+            "card_hash": "3942c5ce7b41cf313a9d44f19be5579d55f6761b5971622689622f93b07bd84b",
+            "quote": "It does the work of your first six marketing hires.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

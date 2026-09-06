@@ -1,0 +1,38 @@
+{
+  "seq": 73,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "aB2YKMYwYliHOAgyltdoUaJWGnDOGD3S",
+      "video_id": "2078450309794263040",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "news-and-current-events",
+          "shelf_path": [
+            "News and Current Events"
+          ],
+          "confidence": 0.92,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff",
+            "card_hash": "955f1a8297e6ca579478a857299000380b868208f96d8837d88c1e783729fbb0",
+            "quote": "We're going to give riot warning, we are gonna try and get compliance but this is now effectively a riot.",
+            "start": 0.52,
+            "end": 62.95,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

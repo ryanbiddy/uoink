@@ -1,0 +1,58 @@
+{
+  "seq": 869,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "5W1K5jSDH5Me2GsnGACaO98D2vLurqAM",
+      "video_id": "2092270658524745728",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.9,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "899084656dd7b173c80c0f0c81e350300a727883b755415c357093e0e64c243f",
+            "card_hash": "b4539bf48feaa45d092df1dc98bff44c562d81402c03faac73ba65f61b4cd328",
+            "quote": "Anthropic started turning a profit in Q2.",
+            "start": 101.36,
+            "end": 204.16,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "07b655a1141791ff3461dbbc639d855f1def3081435cb596d1c2d3733e677a86",
+            "card_hash": "b4539bf48feaa45d092df1dc98bff44c562d81402c03faac73ba65f61b4cd328",
+            "quote": "Codex and Fable can actually help you do this.",
+            "start": 877.04,
+            "end": 956.08,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

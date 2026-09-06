@@ -1,0 +1,39 @@
+{
+  "seq": 1175,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "IvsO6YRgXSn5tiJegI32JVvjEZlbDP9b",
+      "video_id": "dARl_gGrS4o",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "698844435c480d489700a84499872093089622ea8fe0c284054027e9e86b11fc",
+            "card_hash": "bb7fe1ea8bc57499b9da7f0dc58539974f7a2d30d28c391efcf36cc2c988e05e",
+            "quote": "you always want to use most constraint first",
+            "start": 2637.829,
+            "end": 2692.117,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

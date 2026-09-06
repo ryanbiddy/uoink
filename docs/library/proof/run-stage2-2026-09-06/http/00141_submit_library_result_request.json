@@ -1,0 +1,35 @@
+{
+  "seq": 141,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "uxPhbZT5x4_8SDfoFS_PEJUrfycxSKDu",
+    "client_id": "proof-harness",
+    "attempt_token": "CLb9iUNLys5uJFl3SVpND3nAh-3PhPbsCCXLVv7Uw_c",
+    "submission_key": "uxPhbZT5x4_8SDfoFS_PEJUrfycxSKDu-CLb9iUNLys5uJFl3SVpND3nAh-3PhPbsCCXLVv7Uw_c",
+    "schema_version": 1,
+    "video_id": "2078988415048278016",
+    "source_revision": "f4e5c8dac8a1b3a99665a98f4c2bddc45bc40b4c405ab884083cec8ec20a0a8a",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "06a3060f04cfbf07704ce4be6fbb68422b7cafad3e5efcb7b0eabb2bb957036f",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "The only evidenced text is a one-line joke ('VCs when they hear the word agentic') with no captions/transcript for the underlying video. A bare meme mention of the term 'agentic' does not constitute substantive AI/ML, industry, or agent-product content sufficient to ground any shelf per the 'mere mentions' rule."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 17170,
+      "cache_read_tokens": 188825,
+      "cache_create_tokens": 37085,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "seq": 157,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "qdMwMnEgpUd47NheN8yTT9xh6O-VuXOq",
+    "client_id": "proof-harness",
+    "attempt_token": "aSP5FEGEajKJLWF2K7vn6lvQIYwHBAaIa3Ykd-mApAk",
+    "submission_key": "qdMwMnEgpUd47NheN8yTT9xh6O-VuXOq-aSP5FEGEajKJLWF2K7vn6lvQIYwHBAaIa3Ykd-mApAk",
+    "schema_version": 1,
+    "video_id": "2079930744781070336",
+    "source_revision": "7a0a986e5aa005a79101436508125619488e66814d936fe508c1e98e8d3330ba",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "a35e3c60c9b5f7c26bf01d58db4c862b5401ee57a8b5e364b411302ed7014894",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "a0c7117e4554ef16854490378e696174760867a7b0bfce7f82d14b73cbc65b4d",
+            "card_hash": "8dd952674db428643514bc1f6b20a0c637e1f29136e93bf92e7eb3095d8a4393",
+            "quote": "robotics is very real. It scales across a wide variety of environments"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 12619,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 18591,
+      "wall_time_ms": 0
+    }
+  }
+}

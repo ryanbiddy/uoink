@@ -1,0 +1,811 @@
+{
+  "seq": 25,
+  "tool": "claim_library_work",
+  "wall_ms": 11,
+  "request": {
+    "seq": 25,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 25,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 11,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "KWhxWSQsVudF2sTbAFT4BWkh4YNmzqRe",
+            "video_id": "2079192729997959168",
+            "attempt_token": "hb4d032JuVnb6OMUBTnEpKsZbCykgO69a_ODvJxee98",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676165477,
+            "source_revision": "fff3c2c2295a7dc3aa41262fb77c908dadb13f0bdf2959a2554875259d8d10a9",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "0d8355f525d77ae405c4785bc81c0686c2d156a08de68aa7a924a4cf8a9e5371",
+            "card": {
+              "card_hash": "857aa29cf41d6b94a6863d67dac091a6c90a7b53a66830a6d3ed9be8cd7eaa97",
+              "channel": "Hieu 🚀",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/hieuSSR/status/2079193044558205340",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "96315b797f79792250278ca45fcb45c3efea7a396a9a751eb2096427c7402d89",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> That's a great salesmanship. And I'm building this tool to help you sale more too  ReachSale is an AI Agent that find potential customers and do sell for you  👉 Pre-order for $49 (limited 50 slots - BYO",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> That's a great salesmanship. And I'm building this tool to help you sale more too  ReachSale is an AI Agent that find potential customers and do sell for you  👉 Pre-order for $49 (limited 50 slots - BYOK)  7 days refundable, no BYOK when available https://t.co/5RDQHP7r7t  Here https://t.co/FIfi5mMcd6 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Hieu_-_That_s_a_great_salesmanship_And_I_m_building_this_tool_to_help_you_s",
+              "source_revision": "fff3c2c2295a7dc3aa41262fb77c908dadb13f0bdf2959a2554875259d8d10a9",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> That's a great salesmanship. And I'm building this tool to help you sale more too  ReachSale is an AI Agent that find potential customers and do sell for you  👉 Pre-order for $49 (limited 50 slots - BYOK)  7 days refundable, no BYOK when available https://t.co/5RDQHP7r7t  Here https://t.co/FIfi5mMcd6 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+              "title": "Hieu 🚀 - That's a great salesmanship. And I'm building this tool to help you s...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/hieuSSR/status/2079193044558205340",
+              "video_id": "2079192729997959168",
+              "yoinked_at": "2026-07-20T22:35:15"
+            }
+          },
+          {
+            "work_id": "Miv34h3Nw--M6K4lTVqIDcHDC-Uf7IiJ",
+            "video_id": "2078973268732555264",
+            "attempt_token": "rgKdlIrD-xaiel7CExkU9PZg0iD27YqNTGFG-0ARhFg",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676165478,
+            "source_revision": "887a9f4937b7f8bd7ddcbf38818fa465be5116bb4496d07f172c354accc92756",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "608fbc79ebc04c319a8c97f493016d9cb05f0f9986db14aa9f6a190ab419ad20",
+            "card": {
+              "card_hash": "33d78d698bdbdb3d33a0c2298c5c367c485e6d306867d4638a683498255c4d69",
+              "channel": "Suppressed News.",
+              "chars": 188,
+              "chars_all_clips": 188,
+              "chars_chosen_clips": 188,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/SuppressedNws1/status/2078973317025816608#t=0",
+                  "end": 28.199,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ca10e8ac163d609c2b261f593570390fbf5c9fee110e85a2b54d6d41ecf9d2aa",
+                  "start": 0.0,
+                  "text": "...in the initial part and in this final part of the championship I would have liked to see Murga again on tour Let's go back to that bus From Frenkie de Jong, Gaudín What happened Frenki?",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/SuppressedNws1/status/2078973317025816608#t=0",
+                  "end": 28.199,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ca10e8ac163d609c2b261f593570390fbf5c9fee110e85a2b54d6d41ecf9d2aa",
+                  "start": 0.0,
+                  "text": "...in the initial part and in this final part of the championship I would have liked to see Murga again on tour Let's go back to that bus From Frenkie de Jong, Gaudín What happened Frenki?",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> @elonmusk Congratulations and thank you Spain!🇪🇸👏🏻  Israel can now continue crying about it🔥 https://t.co/f14Y4YCOMW No tags [00:00:00] ...in the initial part and in this final part of the championship [00:00:04] I would have liked to see Murga again on tour [00:00:07] Let's go back to that bus [00:00:18] From Frenkie de Jong, Gaudín [00:00:26] What happened Frenki? <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRy",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Suppressed_News_-_elonmusk_Congratulations_and_thank_you_Spain_Israel_can_now_co",
+              "source_revision": "887a9f4937b7f8bd7ddcbf38818fa465be5116bb4496d07f172c354accc92756",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> @elonmusk Congratulations and thank you Spain!🇪🇸👏🏻  Israel can now continue crying about it🔥 https://t.co/f14Y4YCOMW No tags [00:00:00] ...in the initial part and in this final part of the championship [00:00:04] I would have liked to see Murga again on tour [00:00:07] Let's go back to that bus [00:00:18] From Frenkie de Jong, Gaudín [00:00:26] What happened Frenki? <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRy",
+              "title": "Suppressed News. - @elonmusk Congratulations and thank you Spain!🇪🇸👏🏻  Israel can now co...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/SuppressedNws1/status/2078973317025816608",
+              "video_id": "2078973268732555264",
+              "yoinked_at": "2026-07-21T10:49:44"
+            }
+          },
+          {
+            "work_id": "NjPInkCN_rMoYiOgILG8_SkP74ND_wjt",
+            "video_id": "2079389488686551041",
+            "attempt_token": "HCI6ylc-R0lZf6kWjRghByYffSdSBpgpE4891tZhLZc",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676165478,
+            "source_revision": "23a6ced57d76ada5a40e06f8f7fcf35c1d8bde54fa5725f1f7ba378b316ab927",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "fa15f74d47dcc26a2d35c41e872e24d5f0bcd6c9d0da68488c0b2f45de0fd9f2",
+            "card": {
+              "card_hash": "322fcaa0032327bb7ec527deee7216f296ecd0f2fccc38bb400907553ddbff45",
+              "channel": "Unity",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/unity/status/2079389530260414898",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "67b105e5608d64ae735149b05b92d11877d7f70ba498a1540c54660281167d38",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> We’re excited to introduce the Unity CLI, our new terminal-native path for connecting coding agents, CI pipelines, and custom tooling to Unity.  Unity MCP remains fully supported for your existing setup",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> We’re excited to introduce the Unity CLI, our new terminal-native path for connecting coding agents, CI pipelines, and custom tooling to Unity.  Unity MCP remains fully supported for your existing setups but to help with the transition, the CLI includes an \"MCP Mode,\" allowing https://t.co/wlwH2a0xPV No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Unity_-_We_re_excited_to_introduce_the_Unity_CLI_our_new_terminal-native_pat",
+              "source_revision": "23a6ced57d76ada5a40e06f8f7fcf35c1d8bde54fa5725f1f7ba378b316ab927",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> We’re excited to introduce the Unity CLI, our new terminal-native path for connecting coding agents, CI pipelines, and custom tooling to Unity.  Unity MCP remains fully supported for your existing setups but to help with the transition, the CLI includes an \"MCP Mode,\" allowing https://t.co/wlwH2a0xPV No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+              "title": "Unity - We’re excited to introduce the Unity CLI, our new terminal-native pat...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/unity/status/2079389530260414898",
+              "video_id": "2079389488686551041",
+              "yoinked_at": "2026-07-21T10:49:13"
+            }
+          },
+          {
+            "work_id": "VJb9kaUDnSpiO6S5t2Qbi9N5gKT6eAD9",
+            "video_id": "2078647190453411840",
+            "attempt_token": "G27RWSxm8SA5kUf86HBbLM0DUX9DsvnDuleP7DC0Td8",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676165479,
+            "source_revision": "6869a0898a226362fd2709938506be76e19d7221133356c3c429e366c3365a46",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "ed98ea72954b54e3577a8d4c37904486c9944f9cecdabcb903de1a07e4508842",
+            "card": {
+              "card_hash": "f2c4766a6bdf4d04a167502d89e81edd13088931842827d9543d03b93935b21e",
+              "channel": "Elon Musk",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/elonmusk/status/2078741450812965182",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "9b799776cfee78fb107f50595e3c072ae538d74e4817a83ebd1f2661296d2f2a",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> https://t.co/gD1ZGTEArD No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> https://t.co/gD1ZGTEArD No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Elon_Musk_-_https_t_co_gD1ZGTEArD",
+              "source_revision": "6869a0898a226362fd2709938506be76e19d7221133356c3c429e366c3365a46",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> https://t.co/gD1ZGTEArD No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Elon Musk - https://t.co/gD1ZGTEArD",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/elonmusk/status/2078741450812965182",
+              "video_id": "2078647190453411840",
+              "yoinked_at": "2026-07-19T09:49:08"
+            }
+          },
+          {
+            "work_id": "XzMCiCAOwlz02t9_-qfmJstk1y2Ar4yP",
+            "video_id": "2079238984417366016",
+            "attempt_token": "lPFd3q--bh1OvOPl3jWYsWQXal9qWa6frDSeuAfyLb4",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676165480,
+            "source_revision": "42d094e341a7078ef15fc3ce0cba8ab26c21973e3ed1b15015a66f6d72b6e653",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "3202704fd1915369cb60ece04671bb3ddf88cf713bd93c643464499b9ffa7bf9",
+            "card": {
+              "card_hash": "2b04f75108967b32eee67071adac2841dfaaf484c954c210d15ffbf7279d040c",
+              "channel": "Arena Physica",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/arenaphysica/status/2079239168257843368",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "1bd99b0565ea6b08a105490e08fa2b2e4154ea14187c64b1c9a50e8fc7b85118",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> As humans, we don't naturally have strong intuition around electromagnetism so @chris_m_bryant built a minigame into his blog post on Smith charts to help it click. Give it a try here: https://t.co/MdfX",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> As humans, we don't naturally have strong intuition around electromagnetism so @chris_m_bryant built a minigame into his blog post on Smith charts to help it click. Give it a try here: https://t.co/MdfXeh20Ow.  What should we demystify next? Let us know in the comments below ⬇️ https://t.co/f0SmFfam8s No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Arena_Physica_-_As_humans_we_don_t_naturally_have_strong_intuition_around_electr",
+              "source_revision": "42d094e341a7078ef15fc3ce0cba8ab26c21973e3ed1b15015a66f6d72b6e653",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> As humans, we don't naturally have strong intuition around electromagnetism so @chris_m_bryant built a minigame into his blog post on Smith charts to help it click. Give it a try here: https://t.co/MdfXeh20Ow.  What should we demystify next? Let us know in the comments below ⬇️ https://t.co/f0SmFfam8s No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "title": "Arena Physica - As humans, we don't naturally have strong intuition around electromag...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/arenaphysica/status/2079239168257843368",
+              "video_id": "2079238984417366016",
+              "yoinked_at": "2026-07-21T10:49:08"
+            }
+          },
+          {
+            "work_id": "YEXxmRzoJlHpWfytIWnL6RiwPb5WFWTd",
+            "video_id": "2079289624183316480",
+            "attempt_token": "VIMcmqQvQUI1wS5r6CtNPfaxXNJnCWXYd1I-e0fyduU",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676165480,
+            "source_revision": "f5b153536a4de3c287fcb66afd2cc0f65f3ea7f3b849483ea1b59eb12b6809c3",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "8f1f594b8635dd9d384fe92309652bdc3b3955c81a5b8a50449563ab6b601256",
+            "card": {
+              "card_hash": "b916af4086c7e515b680ae9dab3a16675366801a082d3b98d4211c176c4f02f6",
+              "channel": "Shengkun",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Social Media Research",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/shengkun_ye/status/2079289736250970258",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "462aa05433d8cc084705bee3449b961ba04811875cd833580959f6657b48eb8f",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> We just killed Apify.  Your agent can now read every social media platform. No logins. No subscriptions.  X, Reddit, LinkedIn, TikTok, Facebook, Instagram, YouTube, Rednote, and even Amazon.  Apify: $19",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> We just killed Apify.  Your agent can now read every social media platform. No logins. No subscriptions.  X, Reddit, LinkedIn, TikTok, Facebook, Instagram, YouTube, Rednote, and even Amazon.  Apify: $199/month. Monid: From $0.0015/request. Pay as you go. https://t.co/1OtlJcgzxK No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Shengkun_-_We_just_killed_Apify_Your_agent_can_now_read_every_social_media_pla",
+              "source_revision": "f5b153536a4de3c287fcb66afd2cc0f65f3ea7f3b849483ea1b59eb12b6809c3",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> We just killed Apify.  Your agent can now read every social media platform. No logins. No subscriptions.  X, Reddit, LinkedIn, TikTok, Facebook, Instagram, YouTube, Rednote, and even Amazon.  Apify: $199/month. Monid: From $0.0015/request. Pay as you go. https://t.co/1OtlJcgzxK No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Shengkun - We just killed Apify.  Your agent can now read every social media pla...",
+              "topic": "Social Media Research",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/shengkun_ye/status/2079289736250970258",
+              "video_id": "2079289624183316480",
+              "yoinked_at": "2026-07-20T22:45:45"
+            }
+          },
+          {
+            "work_id": "ZzCd7l__5aWpmBV0XTSeFlSti_A1N87v",
+            "video_id": "2078621895058915328",
+            "attempt_token": "KhA569wTx1nZFfDCdNOVQQFzltxE980l2cLNGmkztIU",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676165481,
+            "source_revision": "aa3c83677fa8e490ce8e6c7054f26ce2e2f43a32a3f8981f35acefca07ffaec1",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "30872b3d9ec86aa1dd92bdb8d34c284667171b3681708f977af45cef8d4ea9d0",
+            "card": {
+              "card_hash": "d36d566c34dd28affd6c04fcf9f8ba6bd5ff657738a93d0e2b8a558125e1c377",
+              "channel": "PlaqueBoyMaxUpdates",
+              "chars": 603,
+              "chars_all_clips": 603,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/PlaqueReport/status/2078622060746518557#t=0",
+                  "end": 49.969,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "3a8f6a1238629e150a9fc803b168e2e980ad2d3c7d0019e1f89aca6db6e1a7d2",
+                  "start": 0.0,
+                  "text": "And we're embarrassing him. We should be able to win by 20. We got a representation of you, with a representation of him. Do he look happy? Do we want a ring or not? Yes! So we gotta do better. Pass the ball. Get it around. Really get crazy",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/PlaqueReport/status/2078622060746518557#t=0",
+                  "end": 49.969,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "3a8f6a1238629e150a9fc803b168e2e980ad2d3c7d0019e1f89aca6db6e1a7d2",
+                  "start": 0.0,
+                  "text": "And we're embarrassing him. We should be able to win by 20. We got a representation of you, with a representation of him. Do he look happy? Do we want a ring or not? Yes! So we gotta do better. Pass the ball. Get it around. Really get crazy",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Kai Cenat &amp; Lethal Shooter give PlaqueBoyMax and the rest of Streamer University's Class of 2026 a pep talk at halftime https://t.co/PpILTMz9ly No tags [00:00:00] And we're embarrassing him. [00:00:02] We should be able to win by 20. [00:00:03] We got a representation of you, [00:00:05] with a representation of him. [00:00:07] Do he look happy? [00:00:08] Do we want a ring or not? Yes! [00:00:13] So we gotta do better. [00:00:15] Pass the ball. Get it around. [00:00:17] Really get crazy on that court. [00:00:19] It shouldn't even be this close. [00:00:",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "PlaqueBoyMaxUpdates_-_Kai_Cenat_amp_Lethal_Shooter_give_PlaqueBoyMax_and_the_res",
+              "source_revision": "aa3c83677fa8e490ce8e6c7054f26ce2e2f43a32a3f8981f35acefca07ffaec1",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Kai Cenat &amp; Lethal Shooter give PlaqueBoyMax and the rest of Streamer University's Class of 2026 a pep talk at halftime https://t.co/PpILTMz9ly No tags [00:00:00] And we're embarrassing him. [00:00:02] We should be able to win by 20. [00:00:03] We got a representation of you, [00:00:05] with a representation of him. [00:00:07] Do he look happy? [00:00:08] Do we want a ring or not? Yes! [00:00:13] So we gotta do better. [00:00:15] Pass the ball. Get it around. [00:00:17] Really get crazy on that court. [00:00:19] It shouldn't even be this close. [00:00:",
+              "title": "PlaqueBoyMaxUpdates - Kai Cenat &amp; Lethal Shooter give PlaqueBoyMax and the rest of Stre...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/PlaqueReport/status/2078622060746518557",
+              "video_id": "2078621895058915328",
+              "yoinked_at": "2026-07-18T22:54:45"
+            }
+          },
+          {
+            "work_id": "ewsdIixj-xDE3p4hwE87DQW-HMxZ_Ln0",
+            "video_id": "2079336900192595969",
+            "attempt_token": "LPFvRA_Cf7Gpm3XNGE4MwZeg68kLSSdPF1R8hPi2Dtc",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676165481,
+            "source_revision": "e1795970a788f515e326e3c48e203ce8231d53a52bb00381fe250ab993585206",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "c4afe7e79e32f5ae4a049f1fb00685973640ecc79dc09ef31baceb556229e095",
+            "card": {
+              "card_hash": "ea60181891b26a0f1748ed3375a46b90b1949aee1898547c8e12f94913b114d0",
+              "channel": "zoryn",
+              "chars": 25,
+              "chars_all_clips": 25,
+              "chars_chosen_clips": 25,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/z0rynx/status/2079337397955731567#t=11",
+                  "end": 13.939,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "faba9abd119ace9510ca9c4b9bf89085ea13d9595a26ff9e42775946a2b4b441",
+                  "start": 11.119,
+                  "text": "She is the angel of love.",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/z0rynx/status/2079337397955731567#t=11",
+                  "end": 13.939,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "faba9abd119ace9510ca9c4b9bf89085ea13d9595a26ff9e42775946a2b4b441",
+                  "start": 11.119,
+                  "text": "She is the angel of love.",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> A 27-year-old pointed Claude Code at 4,000 Obsidian notes and woke up to an employee he never hired.  6 years of notes. Ideas, half-finished essays, 212 book summaries all rotting in a folder he stopped opening in 2024.  Then he noticed something obvious that almost nobody uses. https://t.co/3egLub8Lcj No tags [00:00:11] She is the angel of love. <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "zoryn_-_A_27-year-old_pointed_Claude_Code_at_4_000_Obsidian_notes_and_woke_up",
+              "source_revision": "e1795970a788f515e326e3c48e203ce8231d53a52bb00381fe250ab993585206",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> A 27-year-old pointed Claude Code at 4,000 Obsidian notes and woke up to an employee he never hired.  6 years of notes. Ideas, half-finished essays, 212 book summaries all rotting in a folder he stopped opening in 2024.  Then he noticed something obvious that almost nobody uses. https://t.co/3egLub8Lcj No tags [00:00:11] She is the angel of love. <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+              "title": "zoryn - A 27-year-old pointed Claude Code at 4,000 Obsidian notes and woke up...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/z0rynx/status/2079337397955731567",
+              "video_id": "2079336900192595969",
+              "yoinked_at": "2026-07-21T10:49:19"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "seq": 147,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "3DvbLkVibgfgtBDsrNS3ucElfjWuXJ4W",
+      "video_id": "2079985278647783424",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "08d936e7c87feafea111961f9eeffeb786108a637d072093a20db19d2d8cc3dc",
+            "card_hash": "48a508be987d1b5655805bb2386648a4c883aad5427226c8bbc973f8afa2b6ba",
+            "quote": "you basically take Messages API And roll your own Harness",
+            "start": 118.659,
+            "end": 236.9,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "5b15e150df90a0c10541396f215ab7f977a98a5682edba51a961b0b1d4d7d6d7",
+            "card_hash": "48a508be987d1b5655805bb2386648a4c883aad5427226c8bbc973f8afa2b6ba",
+            "quote": "our view of asynchronous agents at Anthropic",
+            "start": 0.0,
+            "end": 118.659,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

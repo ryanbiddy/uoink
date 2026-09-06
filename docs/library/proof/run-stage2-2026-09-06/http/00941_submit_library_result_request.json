@@ -1,0 +1,81 @@
+{
+  "seq": 941,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "TmmI9egR5E-njcgt-B4FvxWSUZLN9_rB",
+    "client_id": "proof-harness",
+    "attempt_token": "4OfJOT6DFFhXQClpbQYKoEBWp1Ec1tNz4ha5VTW1ihw",
+    "submission_key": "TmmI9egR5E-njcgt-B4FvxWSUZLN9_rB-4OfJOT6DFFhXQClpbQYKoEBWp1Ec1tNz4ha5VTW1ihw",
+    "schema_version": 1,
+    "video_id": "2093296474498990080",
+    "source_revision": "e756de0df0e956c0f39e3b6a7c63b65bf6118eb8e4a9e4ae418fcd2819650b24",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "992137791a5112e8b2f627a7daf9e9115e1d67c37182619baa148a7aa0b3b7f3",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "29a1bf9cc6039c18093d1dd07309de9737589b2d30c7273630d8c8a6b0e92bd5",
+            "card_hash": "b8b7135620242a9c719ff6f6c1ab2b885541fb07f83a9ab3ee3f7c4cf90e1e12",
+            "quote": "we are going to have a whole lot of papers covered in this course"
+          }
+        },
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "db2a9a9466984924b5c35bde9b0d32f09decd730bb38a43b00b7962a7ec3b438",
+            "card_hash": "b8b7135620242a9c719ff6f6c1ab2b885541fb07f83a9ab3ee3f7c4cf90e1e12",
+            "quote": "deep research can be accomplished end-to-end"
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "9456aba55f4d6646865529dbf73fdec53837b3caf778768e81ebf1621adcca0b",
+            "card_hash": "b8b7135620242a9c719ff6f6c1ab2b885541fb07f83a9ab3ee3f7c4cf90e1e12",
+            "quote": "exponential growth in just the model size for large language models"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 15696,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 22313,
+      "wall_time_ms": 0
+    }
+  }
+}

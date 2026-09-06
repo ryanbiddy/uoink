@@ -1,0 +1,39 @@
+{
+  "seq": 249,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Ng-hJ6EJZeeKk-o44CdIsNf5Dytnm9LZ",
+      "video_id": "2082501832442814465",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.9,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "ee2925297fda63debb60db546f243e5ecd2e678e7bc016a93635f9a096d8a8c5",
+            "card_hash": "6258aaf2c8ec61b73db1bb7e8c55d0c25bb8281c056b5d13bfe5c49e05592b06",
+            "quote": "Gemma 4 is a family of multimodal, open large language models that come In five different sizes across four different architectures",
+            "start": 0.0,
+            "end": 118.67,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 359,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Ydpjv0IDDqN5WEWwl8cVEOQAWvykUjgy",
+      "video_id": "2082527680109621249",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.82,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "58b93590bb1ce23af031fb8cc0bf0ba2e73250fade3aafbba6dd4b7afb655dd6",
+            "card_hash": "8f9e8ac7612eb0c5d7a8d330c123b46a2acf47c49368cdd0d33912f472265c2b",
+            "quote": "My biggest fear for AI is concentration of power.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

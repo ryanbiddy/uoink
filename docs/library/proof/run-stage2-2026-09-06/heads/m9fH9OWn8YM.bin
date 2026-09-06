@@ -1,0 +1,120 @@
+# Train Yolov8 object detection on a custom dataset | Step by step guide | Computer vision tutorial
+
+**Channel:** Felipe Tambasco (60.1K subscribers)
+**Uploaded:** 2023-01-30 | **Duration:** 01:04:48 | **Views:** 676,845 | **Likes:** 13,282
+**URL:** https://www.youtube.com/watch?v=m9fH9OWn8YM
+**Uoinked:** 2026-07-09T19:21:31
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Promise List
+**Analysis:** The creator opens by promising a 'super comprehensive step-by-step guide' and explicitly outlines multiple specific steps the viewer will learn (data collection, annotation, dataset structure, training, and testing), which positions the video as delivering a structured list of takeaways.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+In this video I show you a super comprehensive step by step tutorial on how to use yolov8 to train an object detector on your own custom dataset!
+
+Code: https://www.patreon.com/posts/source-code-on-146365540
+
+Step by step tutorial on how to download data from the Open Images Dataset v7: https://bit.ly/46Ue4kC
+
+🎬  Timestamps ⏱️
+
+0:00 Intro
+0:42 Data collection
+5:04 Data annotation
+19:49 Dataset structure
+30:08 Train yolov8
+50:15 Test yolov8
+1:04:09 Outro
+
+🌍 Community 👥
+ 
+Join our Discord server: https://discord.gg/uKc5TtCvaT
+Support me on Patreon: https://www.patreon.com/ComputerVisionEngineer
+
+# Hashtags #
+
+#yolov8 #yolo #objectdetection #computervision #computervisionengineer #computervisiontutorial
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+### Chapter: Intro (00:00:00)
+
+[00:00:00] hey my name is Felipe and welcome to my channel\h in this video we are going to train an object\h\h
+[00:00:05] detector using yolo V8 and I'm going to walk you\h step by step through the entire process from how\h\h
+[00:00:11] to collect the data you need in order to train an\h object detector how to annotate the data using a\h\h
+[00:00:16] computer vision annotation tool how to structure\h the data into the exact format you need in order\h\h
+[00:00:21] to use yolo V8, how to do the training and\h I'm going to show you two different ways to\h\h
+[00:00:25] do it; from your local environment and also from\h a Google collab and how to test the performance\h\h
+[00:00:30] ofthea model you trained so this is going to be\h a super comprehensive step-by-step guide of\h\h
+[00:00:35] everything you need to know in order to train\h an object detector using yolo v8 on your own\h\h
+[00:00:40] custom data set so let's get started so let's\h start with this tutorial let's start with this\h\h
+
+### Chapter: Data collection (00:00:42)
+
+[00:00:45] process and the first thing we need to do is to\h collect data the data collection is the first step\h\h
+[00:00:50] in this process remember that if you want to train\h an object detector or any type of machine learning\h\h
+[00:00:56] model you definitely need data, the algorithm, the specific algorithm you're going to use in this\h\h
+[00:01:02] case yolo V8 is very very important but the data\h is as important as the algorithm if you don't have\h\h
+[00:01:08] data you cannot train any machine learning model\h that's very important so let me show you the data\h\h
+[00:01:14] I am going to use in this process these are some\h images I have\h\h
+[00:01:19] downloaded and which I'm going to use in order\h to train this object detector and let me show\h\h
+[00:01:24] you a few of them these are some images of alpacas\h this is an alpaca data set I have downloaded for\h\h
+[00:01:31] today's tutorial and you can see these are all\h images containing alpacas in different postures\h\h
+[00:01:37] and in different situations right so this is\h exactly the data I am going to use in this process\h\h
+[00:01:43] but obviously you could use whatever data set you\h want you could use exactly the same data set I am\h\h
+[00:01:49] going to use or you can just collect the data\h yourself you could just take your cell phone or\h\h
+[00:01:55] your camera or whatever and you can just take the\h pictures the photos the images you are going\h\h
+[00:02:00] to use you can just do your own data collection\h or something else you could do is to just use a\h\h
+[00:02:07] a publicly available data set so let\h me show you this data set this is the open image\h\h
+[00:02:12] dataset version 7 and this is a dataset which is\h publicly available and you can definitely use it\h\h
+[00:02:17] in order to work on today's tutorial in order to\h train the object detector we are going to train\h\h
+[00:02:22] on todays tutorial so let me show you how it looks\h like if I go to explore and I select detection\h\h
+[00:02:30] uh you can see that I'm going to unselect all\h these options you can see that this is a huge\h\h
+[00:02:37] data set containing many many many many many\h many many many categories I don't know how\h\h
+[00:02:43] many but they are many this is a huge data set\h it contains millions of images, hundreds of\h\h
+[00:02:51] thousands if not millions of annotations thousands\h of categories this is a super super huge data set\h\h
+[00:02:58] and you can see that you have many many different\h categories now we are looking at trumpet and you\h\h
+[00:03:02] can see these are different images with trumpets\h and from each one of these images we have a\h\h
+[00:03:07] bounding box around the trumpet and if I show you\h another one for example we also have Beetle and in\h\h
+[00:03:15] this category you can see we have many different\h images from many different type of beetles so\h\h
+[00:03:20] this is another example or if I show you this one\h which is bottle and we have many different images\h\h
+[00:03:27] containing bottles for example there you can see\h many different type of bottles and in all cases we\h\h
+[00:03:33] have a bounding box around the bottle and I\hcould show you I don't know how many examples because\h\h
+[00:03:38] there are many many many different categories\h so remember the first step in this process is\h\h
+[00:03:43] the data collection this is the data I am going\h to to use in this project which is a dataset\h\h
+[00:03:48] of alpacas and you can use the exact same data\h I am using if you want to you can use the same\h\h
+[00:03:54] data set of alpacas or you can just collect your\h own data set by using your cell phone your camera\h\h
+[00:03:59] or something like that or you can also download\h the images from a publicly available dataset\h\h
+[00:04:05] for example the open images dataset version 7. if you\h decide to use open images dataset version 7 let\h\h
+[00:04:12] me show you another category which is alpaca this\h is exactly from where I have downloaded all of the\h\h
+[00:04:19] images of alpacas so if in case you decide to use\h this publicly available data set I can provide you\h\h
+[00:04:25] with a couple of scripts I have used in order to\h download all this data in order to parse through\h\h
+[00:04:33] all the different annotations and to\h format this data in the exact format we need\h\h
+[00:04:38] in order to work on today's tutorial so in case\h you decide to use open image data set I am going\h\h
+[00:04:44] to give you a couple of scripts which are going to\h be super super useful for you so that's that's all\h\h
+[00:04:51] I can say about the data collection remember you\h need to collect data if you want to train an object\h\h
+[00:04:55] detector and you have all those different ways\h to do it and all these different categories and\h\h
+[00:05:00] all these different options so now let's move on\h to the next step and now let's continue with the\h\h
+
+### Chapter: Data annotation (00:05:04)
+
+[00:05:06] data annotation you have collected a lot of images\h as I have over here you have a lot of images which\h\h
+[00:05:12] you have collected yourself or maybe you have\h downloaded this data from a publicly available\h\h
+[00:05:17] data set and now it's the time to annotate this\h data set maybe you were lucky enough when you were\h\h
+[00:05:24] creating the dataset and maybe this data set you\h are using is already annota

@@ -1,0 +1,39 @@
+{
+  "seq": 235,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "L7FjT0lvauOc38zq0FlICTY-lynnFDJO",
+      "video_id": "2081088786948063232",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "9a19bd120ffd281d7ba98b761400b28d0dc3ed65b4946ce5df1639c576b6ffa1",
+            "card_hash": "27e14785d9a07748eba3c5dd8e7b37731a8a5dba11f3284d7200414240d7a0f1",
+            "quote": "Build a working Web OS from scratch",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

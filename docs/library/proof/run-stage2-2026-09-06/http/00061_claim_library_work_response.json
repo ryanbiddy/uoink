@@ -1,0 +1,865 @@
+{
+  "seq": 61,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 12,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "D1cvZDy0vey6lrlCdlDyIMjOPClRPzal",
+          "video_id": "2080091059644964864",
+          "attempt_token": "2LByeAOf77cZ_AGvxkvIdlTo7-CfjA7gBRo1IqDzkV0",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676177342,
+          "source_revision": "02276a30b2282f0dbfa24eb80324d51424a783c81db411aea34495caf7b72e5a",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "7ebcdfeb982d754a7708ed296f51806cf76a00d2b8ed2ff3b60423829e960074",
+          "card": {
+            "card_hash": "e705c1c3ff96da5bf6ecb034d0dc0ab04c1ab548688b3e05aa12b7a010dc0b0b",
+            "channel": "Jason Smith - 上官杰文",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/ShangguanJiewen/status/2080091657413054757",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "d2c6853bbdf0f0db12809ed635a2a49e0f4f99a978544b9151648fb64ee7470a",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> While the US debates whether to solve homelessness or not, these are the next generation of school blackboards in China🇨🇳.  👇 https://t.co/dFNf23Z767 No tags *No captions available for this video.* <!--",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> While the US debates whether to solve homelessness or not, these are the next generation of school blackboards in China🇨🇳.  👇 https://t.co/dFNf23Z767 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Jason_Smith_-_-_While_the_US_debates_whether_to_solve_homelessness_or_not_these",
+            "source_revision": "02276a30b2282f0dbfa24eb80324d51424a783c81db411aea34495caf7b72e5a",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> While the US debates whether to solve homelessness or not, these are the next generation of school blackboards in China🇨🇳.  👇 https://t.co/dFNf23Z767 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Jason Smith - 上官杰文 - While the US debates whether to solve homelessness or not, these are ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/ShangguanJiewen/status/2080091657413054757",
+            "video_id": "2080091059644964864",
+            "yoinked_at": "2026-07-23T10:52:57"
+          }
+        },
+        {
+          "work_id": "Kv7o8l1U-JRDfWDMQ4Tm8oOYQuwAlqyE",
+          "video_id": "2079961848095412224",
+          "attempt_token": "rGD8axw6NinDoZ6rXHdt5pimvfN0Ah1P5c5H5s18pJg",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676177342,
+          "source_revision": "c7488789519644994d69ba53af2ef1ab71f8a69b63c50fc1faa431ea7fffedec",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "4dd335d1ae4cd8f7833d6862bc3298a5cb0ec1ef2ae053abd48ec8030023190e",
+          "card": {
+            "card_hash": "6b5a0f66aa53e0a1f65c39606e91db51864cb5ba9fc811177a8b4de123edebfa",
+            "channel": "Chris",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/ChrisGPT/status/2079961868584558890",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "db3032c848974a325d7d9c3c51ed3730f96a7731cc0c34091be56957148f9a60",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Kimi K3 was already in internal evaluation by April/May, before Fable 5 had been available long enough to be a plausibly distilled. I’ll wait for the evidence from the USG if they’ll publish it.  Howeve",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Kimi K3 was already in internal evaluation by April/May, before Fable 5 had been available long enough to be a plausibly distilled. I’ll wait for the evidence from the USG if they’ll publish it.  However Kimi already outperformed Fable on BrowserComp, so if K3.1 beats Fable 5 on https://t.co/8z43F4vITN No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Chris_-_Kimi_K3_was_already_in_internal_evaluation_by_April_May_before_Fable",
+            "source_revision": "c7488789519644994d69ba53af2ef1ab71f8a69b63c50fc1faa431ea7fffedec",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Kimi K3 was already in internal evaluation by April/May, before Fable 5 had been available long enough to be a plausibly distilled. I’ll wait for the evidence from the USG if they’ll publish it.  However Kimi already outperformed Fable on BrowserComp, so if K3.1 beats Fable 5 on https://t.co/8z43F4vITN No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+            "title": "Chris - Kimi K3 was already in internal evaluation by April/May, before Fable...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/ChrisGPT/status/2079961868584558890",
+            "video_id": "2079961848095412224",
+            "yoinked_at": "2026-07-23T02:56:42"
+          }
+        },
+        {
+          "work_id": "MnmuXfEKRjXv8Ldn6DD496K15CPhR0Q6",
+          "video_id": "2079628844705935360",
+          "attempt_token": "vPySLV5eIbSpHjeCu5vs1vFzLehiAUDLNL5dbnHvyA0",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676177344,
+          "source_revision": "796039c5e22bd168eb9a9e5b86c8653b1951576f02424973e8dc1168bc194f73",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "f9dd6ffdaf30fc89c1d8b46e6f45cfc244b3a25a49a4b60ace55f903ef838904",
+          "card": {
+            "card_hash": "09d965f57265c026cf7f4cd14d9b78e471a2c640c8ba9a201cbc13ee323aa421",
+            "channel": "Roan",
+            "chars": 87710,
+            "chars_all_clips": 87710,
+            "chars_chosen_clips": 1440,
+            "clip_count": 61,
+            "clips": [
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2079631718051664169#t=544",
+                "end": 663.35,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7d26fdeea49708ae9428f5424232405096d7d179d4f13e0a3405fc213ef1a0c0",
+                "start": 544.289,
+                "text": "Writing A Script To Fetch A Weather API Right And Then Start Maybe He Wants It Be Reusable Like Maybe You Want This Pretty Often So If My That's Whether Api And Then Get Though Like Maybe Even Get Your Location Dynamically Right Based On Yo",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2079631718051664169#t=1497",
+                "end": 1615.569,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "47d3fe56a6f7244915f334e62bd924f2e589f9edd2acfabe1b0f46d55c23093a",
+                "start": 1497.96,
+                "text": "That's How The Tool Calling Is Like Of Blend Some Of These But There's Bash So Bash Is Very Composable Right Like Static Scripts Low Context Usage It Can Take A Little Bit More Discovery Time Because Let'S Say That You Have Whatever You Hav",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2079631718051664169#t=3319",
+                "end": 3438.76,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a1058809fa73e295eebad702857abc4eb6a3c51dadb503a4dd8dcf2a0b4743b1",
+                "start": 3319.099,
+                "text": "This How Would Like Thing Right I Think We Like To Say That Models Are Grown And Not Designed The Rands Of Really Sort Of Understanding Their Capabilities Yeah Or You Know What Is Where It Is Now Good Question So Is A Way To Add Metadata To",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2079631718051664169#t=4390",
+                "end": 4509.979,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "c8d77a5e0d6443bd815271989d0d83e831a79cc6078390d061b7b3ea675258d3",
+                "start": 4390.569,
+                "text": "You See Like The First 10 Rows In The 1st Like You Know 30 Columns Or Something Right That's What You See You Don't Load All Of It Into Context Right Away If You Probably Have An Intuition For Like Hey I Should Load More This Into Contex Ri",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2079631718051664169#t=4758",
+                "end": 4878.25,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "d28f50704113da4a32ca46469cbec10c7e89df839036ea985f9b6b804b8fb73f",
+                "start": 4758.609,
+                "text": "Will Get Output Then I Do The Verifications So How Does This So The Question Is Like Where Do You Verification Is It Only At The End In The Middle Things I Would Say Everywhere You Can Just Constantly Verify Verification Right Like Uh Like ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2079631718051664169#t=6782",
+                "end": 6901.22,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "480a488c8b1701bd92c11be871aa04770a51e08f26d2af9ad5e73b120ee5bdb3",
+                "start": 6782.0,
+                "text": "You Want One Of Them Has A Breakdown For Total Compensation 525 And The Other One Has A Break Down Of Total Compensation 4 750 Which 1 You Want To Interview For Use A 750 Obviously In Now One Of The Most Profitable Companies In World They C",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2079631718051664169#t=544",
+                "end": 663.35,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7d26fdeea49708ae9428f5424232405096d7d179d4f13e0a3405fc213ef1a0c0",
+                "start": 544.289,
+                "text": "Writing A Script To Fetch A Weather API Right And Then Start Maybe He Wants It Be Reusable Like Maybe You Want This Pretty Often So If My That's Whether Api And Then Get Though Like Maybe Even Get Your Location Dynamically Right Based On Yo",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2079631718051664169#t=1497",
+                "end": 1615.569,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "47d3fe56a6f7244915f334e62bd924f2e589f9edd2acfabe1b0f46d55c23093a",
+                "start": 1497.96,
+                "text": "That's How The Tool Calling Is Like Of Blend Some Of These But There's Bash So Bash Is Very Composable Right Like Static Scripts Low Context Usage It Can Take A Little Bit More Discovery Time Because Let'S Say That You Have Whatever You Hav",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2079631718051664169#t=3319",
+                "end": 3438.76,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a1058809fa73e295eebad702857abc4eb6a3c51dadb503a4dd8dcf2a0b4743b1",
+                "start": 3319.099,
+                "text": "This How Would Like Thing Right I Think We Like To Say That Models Are Grown And Not Designed The Rands Of Really Sort Of Understanding Their Capabilities Yeah Or You Know What Is Where It Is Now Good Question So Is A Way To Add Metadata To",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2079631718051664169#t=4390",
+                "end": 4509.979,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "c8d77a5e0d6443bd815271989d0d83e831a79cc6078390d061b7b3ea675258d3",
+                "start": 4390.569,
+                "text": "You See Like The First 10 Rows In The 1st Like You Know 30 Columns Or Something Right That's What You See You Don't Load All Of It Into Context Right Away If You Probably Have An Intuition For Like Hey I Should Load More This Into Contex Ri",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2079631718051664169#t=4758",
+                "end": 4878.25,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "d28f50704113da4a32ca46469cbec10c7e89df839036ea985f9b6b804b8fb73f",
+                "start": 4758.609,
+                "text": "Will Get Output Then I Do The Verifications So How Does This So The Question Is Like Where Do You Verification Is It Only At The End In The Middle Things I Would Say Everywhere You Can Just Constantly Verify Verification Right Like Uh Like ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2079631718051664169#t=6782",
+                "end": 6901.22,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "480a488c8b1701bd92c11be871aa04770a51e08f26d2af9ad5e73b120ee5bdb3",
+                "start": 6782.0,
+                "text": "You Want One Of Them Has A Breakdown For Total Compensation 525 And The Other One Has A Break Down Of Total Compensation 4 750 Which 1 You Want To Interview For Use A 750 Obviously In Now One Of The Most Profitable Companies In World They C",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Roan_-_My_friend_applied_to_250_tech_jobs_in_two_years_No_MIT_No_Stanford",
+            "source_revision": "796039c5e22bd168eb9a9e5b86c8653b1951576f02424973e8dc1168bc194f73",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "Roan - My friend applied to 250 tech jobs in two years. No MIT. No Stanford....",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/RohOnChain/status/2079631718051664169",
+            "video_id": "2079628844705935360",
+            "yoinked_at": "2026-07-22T10:56:00"
+          }
+        },
+        {
+          "work_id": "MqQn9lg0DTf1KkKky84RI6Uqw4IwgaML",
+          "video_id": "2079633339041087488",
+          "attempt_token": "8EpNnVTRph_Yx-b6DQF6CDFJ2ZcG5gZUFYbQQkl24TQ",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676177345,
+          "source_revision": "06a1c3b5d8dc28754efd34c9e7735bbe83ec3cd961eb655d533eebdacba72c59",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "adc6c92382aa347be33e42df2593ce296b95ad229de5a7c7fc100ef1a2da9549",
+          "card": {
+            "card_hash": "3d05d7c899b237ad9054d946f54afa1c584b4b201c568f215efd96a5c6bc49a7",
+            "channel": "Plasma AI",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/Plasma__AI/status/2079636286990881263",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "3f6855c7ea39d822bfa4b79855bd3227f249f266789b723dc1f5d0c4f4ffd4a5",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Fractal:  An open source tool for building hierarchical agent loops.  We built Fractal to solve our hardest problems. https://t.co/Hqa1ze18wl No tags *No captions available for this video.* ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Fractal:  An open source tool for building hierarchical agent loops.  We built Fractal to solve our hardest problems. https://t.co/Hqa1ze18wl No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Plasma_AI_-_Introducing_Fractal_An_open_source_tool_for_building_hierarchical_a",
+            "source_revision": "06a1c3b5d8dc28754efd34c9e7735bbe83ec3cd961eb655d533eebdacba72c59",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Fractal:  An open source tool for building hierarchical agent loops.  We built Fractal to solve our hardest problems. https://t.co/Hqa1ze18wl No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Plasma AI - Introducing Fractal:  An open source tool for building hierarchical a...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Plasma__AI/status/2079636286990881263",
+            "video_id": "2079633339041087488",
+            "yoinked_at": "2026-07-26T08:17:07"
+          }
+        },
+        {
+          "work_id": "QQsVZSBCMPmBsBh0CQR8pVrqP2jyKRrQ",
+          "video_id": "2079747355944058880",
+          "attempt_token": "dFIb68PYCNi6rpFYPEeFZb-kgkYj6s6NiLy1ZGZx1oI",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676177345,
+          "source_revision": "cb79f472a0207b6b675f057104c306d14cf8481b117314fd991fc29532173456",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "9468735e79f4450a231ca89c2a12c540f17ec26123676a33f60c2a8ba3c7d7b5",
+          "card": {
+            "card_hash": "78f1119bdd30f1c98f12524b9cd1a43189a38365d19166df5f98dee3f3d62223",
+            "channel": "Shubham Saboo",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/Saboo_Shubham_/status/2079747628171157835",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "f1b5095c175adbbf0f24ccd69cdcfd549daeb4f04f67897e27c73e5c5996a885",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Excalidraw for AI Agents....INSANE. https://t.co/UzsYKvIX8C No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end -",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Excalidraw for AI Agents....INSANE. https://t.co/UzsYKvIX8C No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Shubham_Saboo_-_Excalidraw_for_AI_Agents_INSANE",
+            "source_revision": "cb79f472a0207b6b675f057104c306d14cf8481b117314fd991fc29532173456",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Excalidraw for AI Agents....INSANE. https://t.co/UzsYKvIX8C No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Shubham Saboo - Excalidraw for AI Agents....INSANE.",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Saboo_Shubham_/status/2079747628171157835",
+            "video_id": "2079747355944058880",
+            "yoinked_at": "2026-07-22T10:59:21"
+          }
+        },
+        {
+          "work_id": "RLVLFmlqwYSMK5rPH3lVFE8sRdm9Bf0b",
+          "video_id": "2080337269240836096",
+          "attempt_token": "q0O3HR0lsfEM5Zu1vgE8nruXS797VV67rNh0x8RJjbs",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676177346,
+          "source_revision": "7010834460427ee03fbcc32425deea39f28cb944bb24cb8b8d529bd2c499a805",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "9a578e54359913aa4d1288b3626a5a17a98b8e7a0a7c0861b96ed8898d7c84fb",
+          "card": {
+            "card_hash": "a57d9a9fd4b5e99694af50f152576a42e0036b53094f69942e7d6b136131e367",
+            "channel": "sui ☄️",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/birdabo/status/2080340647622623315",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "16d2dfed437795e6e181cf7f8a645ad7c50414e1caecd6d6cded9a9e45d090e6",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> i tried Opus 5.0 vs Fable 5 Max.   Claude Opus 5.0 is quite the AGI beast in 3D, the texture and details are absolutely insane.  Fable one shotted this though, could be improved.   credit to @chetaslua ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> i tried Opus 5.0 vs Fable 5 Max.   Claude Opus 5.0 is quite the AGI beast in 3D, the texture and details are absolutely insane.  Fable one shotted this though, could be improved.   credit to @chetaslua for the Opus 5 code. https://t.co/ZAKAjjapuX No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "sui_-_i_tried_Opus_5_0_vs_Fable_5_Max_Claude_Opus_5_0_is_quite_the_AGI_b",
+            "source_revision": "7010834460427ee03fbcc32425deea39f28cb944bb24cb8b8d529bd2c499a805",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> i tried Opus 5.0 vs Fable 5 Max.   Claude Opus 5.0 is quite the AGI beast in 3D, the texture and details are absolutely insane.  Fable one shotted this though, could be improved.   credit to @chetaslua for the Opus 5 code. https://t.co/ZAKAjjapuX No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "sui ☄️ - i tried Opus 5.0 vs Fable 5 Max.   Claude Opus 5.0 is quite the AGI b...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/birdabo/status/2080340647622623315",
+            "video_id": "2080337269240836096",
+            "yoinked_at": "2026-07-24T11:01:26"
+          }
+        },
+        {
+          "work_id": "SG4xtN4DHvd_HSuf1I9GliAcKeU_Ge7j",
+          "video_id": "2079672460769964032",
+          "attempt_token": "jT79NGpuMfllcDAFBNVR2YfStMYE5bfs4gAtD2JfM9I",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676177347,
+          "source_revision": "61b62c3144800f875e73cb0f67eb675a1577dfd44fb174d0270f71af35d0319f",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "eeec5e83c4503d0f5071dd5a50da52908c16f23d80dd799b64293916ab8eae38",
+          "card": {
+            "card_hash": "d3019d3befd8c5f9d4e20f0eb4332afcc180d4a9ddc69a0334f1ec3255a1b8c3",
+            "channel": "Elliot Arledge",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/elliotarledge/status/2079673508955832591",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "c4f80e18847620c801d1728dab96e42c493d156b4b124c8589beec4b887cf75d",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I wrote the full Craftax RL environment + PPO in one CUDA file. zero python in the loop.  training from scratch on my RTX PRO 6000 &gt; 0.6s: first wood, first crafting table, first dungeon entered &gt;",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> I wrote the full Craftax RL environment + PPO in one CUDA file. zero python in the loop.  training from scratch on my RTX PRO 6000 &gt; 0.6s: first wood, first crafting table, first dungeon entered &gt; 1.7s: first zombie + skeleton kills, first bow found &gt; 2.9s: first iron &gt; 14s: https://t.co/PweZaDWUD9 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Elliot_Arledge_-_I_wrote_the_full_Craftax_RL_environment_PPO_in_one_CUDA_file_ze",
+            "source_revision": "61b62c3144800f875e73cb0f67eb675a1577dfd44fb174d0270f71af35d0319f",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I wrote the full Craftax RL environment + PPO in one CUDA file. zero python in the loop.  training from scratch on my RTX PRO 6000 &gt; 0.6s: first wood, first crafting table, first dungeon entered &gt; 1.7s: first zombie + skeleton kills, first bow found &gt; 2.9s: first iron &gt; 14s: https://t.co/PweZaDWUD9 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https",
+            "title": "Elliot Arledge - I wrote the full Craftax RL environment + PPO in one CUDA file. zero ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/elliotarledge/status/2079673508955832591",
+            "video_id": "2079672460769964032",
+            "yoinked_at": "2026-07-22T10:54:19"
+          }
+        },
+        {
+          "work_id": "TvKQ2FsvpXCYkzYD-OJ_TRJSWSimYJPJ",
+          "video_id": "2079578068440506368",
+          "attempt_token": "BclbSATmMYDKr8zcii8Sl5mIteq5iy6Bz6VwXfuyp88",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676177347,
+          "source_revision": "905406807c50bc0653fb2bac6c2bf6a6069910aa86d56c0aa562e093b865a418",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "e5954f82cdb854ae81f474ff986402537bc07b1b839c17f1b0f104026446cac0",
+          "card": {
+            "card_hash": "44ce3d23faed507b1a8bb79ff7e97b75879c65c04a24a8634e3e3c7da22fa60f",
+            "channel": "Google",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/Google/status/2079589747366724030",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "e5b6b0e537e61c647fc1dfaaeb7c2446b414daf291649f5f3d2bea148451b34d",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Today we’re expanding the Gemini family with three new models built to be faster, more token efficient, and reliable at scale.  Meet the new Gemini models ↓ https://t.co/hVYNQqxgjd No tags *No captions ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Today we’re expanding the Gemini family with three new models built to be faster, more token efficient, and reliable at scale.  Meet the new Gemini models ↓ https://t.co/hVYNQqxgjd No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Google_-_Today_we_re_expanding_the_Gemini_family_with_three_new_models_built_t",
+            "source_revision": "905406807c50bc0653fb2bac6c2bf6a6069910aa86d56c0aa562e093b865a418",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Today we’re expanding the Gemini family with three new models built to be faster, more token efficient, and reliable at scale.  Meet the new Gemini models ↓ https://t.co/hVYNQqxgjd No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Google - Today we’re expanding the Gemini family with three new models built t...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Google/status/2079589747366724030",
+            "video_id": "2079578068440506368",
+            "yoinked_at": "2026-08-16T22:46:49"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

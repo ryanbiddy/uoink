@@ -1,0 +1,93 @@
+{
+  "seq": 491,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 491,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "k6BnkAPRX-LtsZmFDdWPgv6vfL4ETFZw",
+      "client_id": "proof-harness",
+      "attempt_token": "O5WCIZDuKKMRFsKeQmpnog4Nps3tSTaE1Yv570A-PpI",
+      "submission_key": "k6BnkAPRX-LtsZmFDdWPgv6vfL4ETFZw-O5WCIZDuKKMRFsKeQmpnog4Nps3tSTaE1Yv570A-PpI",
+      "schema_version": 1,
+      "video_id": "2084721190325604353",
+      "source_revision": "80aec92a39a1cb8b75f0b1c19abd4b4bf3dc825e4a85f55fa015af7c8125d9ba",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "e62b4c9f63ac77aa689347a505990f5f2048dad7a03de626059a0608f73f02da",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "space-and-science",
+            "shelf_path": [
+              "Space and Science"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "9aae3bdec5d817d4f1fc0296267b8bf418e6efa7ec96539ce5878a29bafac4f5",
+              "card_hash": "49931936f8dbb47fdb7d72036b68c4f356ba84d581a645f0c9fc0c3fdac6157c",
+              "quote": "SpaceX is partnering with @Nvidia to design the Starmind AI1 satellite compute payload."
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 15092,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 22295,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 491,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "k6BnkAPRX-LtsZmFDdWPgv6vfL4ETFZw",
+        "video_id": "2084721190325604353",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "space-and-science",
+            "shelf_path": [
+              "Space and Science"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "9aae3bdec5d817d4f1fc0296267b8bf418e6efa7ec96539ce5878a29bafac4f5",
+              "card_hash": "49931936f8dbb47fdb7d72036b68c4f356ba84d581a645f0c9fc0c3fdac6157c",
+              "quote": "SpaceX is partnering with @Nvidia to design the Starmind AI1 satellite compute payload.",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

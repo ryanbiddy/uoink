@@ -1,0 +1,59 @@
+{
+  "seq": 559,
+  "tool": "submit_library_result",
+  "wall_ms": 2,
+  "request": {
+    "seq": 559,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "yhkU04T-dqNJukBYkfN3RFDXjFZ3vKKO",
+      "client_id": "proof-harness",
+      "attempt_token": "bAXg0lXKxVIv4QIOLN1f7exkOct16MBOoHkz8eiKlj4",
+      "submission_key": "yhkU04T-dqNJukBYkfN3RFDXjFZ3vKKO-bAXg0lXKxVIv4QIOLN1f7exkOct16MBOoHkz8eiKlj4",
+      "schema_version": 1,
+      "video_id": "2085348301776494592",
+      "source_revision": "e849b4f5a42aa29b9c8423d7f593fd4802ce31e8bd48d9708a3bcf9f235fe48c",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "270e9bdf2249329e1ddeb837088774c3f5111099138aa8121007b3017964721c",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Satirical/joke tweet imagining a fictional 2030 scenario involving 'Claude 9' and sexbots ('the Goonpocalypse'). It is not grounded technical AI content, real industry news, or a real-world incident, so it does not match any approved shelf definition."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 30355,
+        "cache_read_tokens": 188747,
+        "cache_create_tokens": 40176,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 559,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 2,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "yhkU04T-dqNJukBYkfN3RFDXjFZ3vKKO",
+        "video_id": "2085348301776494592",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

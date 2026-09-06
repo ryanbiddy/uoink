@@ -1,0 +1,40 @@
+{
+  "seq": 1005,
+  "tool": "claim_library_work",
+  "wall_ms": 28,
+  "request": {
+    "seq": 1005,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "cancel",
+      "work_id": "NTq-qeTh8OKXWmWFLTOeeJgqatc4XMy2",
+      "client_id": "proof-harness",
+      "attempt_token": "gp8TI_25vYFFobR4Cfu3VeyXj9aVrYgFoTC79b5WOzk",
+      "reason": "proof retry limit (1 retry)"
+    }
+  },
+  "response": {
+    "seq": 1005,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 28,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "NTq-qeTh8OKXWmWFLTOeeJgqatc4XMy2",
+        "state": "cancelled",
+        "remaining_attempts": 0,
+        "lease_expires_ms": 1788678124616
+      }
+    }
+  }
+}

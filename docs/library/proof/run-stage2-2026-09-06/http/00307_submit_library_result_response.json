@@ -1,0 +1,39 @@
+{
+  "seq": 307,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "AaiDRgYg2dBaMibwfLoq_E9pPHgtKtA5",
+      "video_id": "2081832959116562433",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "f7529e8b4cc00d3d84d82b07b79739139f828abc2d3fdf6c3807b51f72ab329a",
+            "card_hash": "8142cfa9e30595e92e4ab23b5f0aea4cdf8aaf591d1e0be44c39f58b35b66ffa",
+            "quote": "今天，我要谈谈一些研究项目 与OpenAI机器人团队的合作。",
+            "start": 1.71,
+            "end": 117.69,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

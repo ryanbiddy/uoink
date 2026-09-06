@@ -1,0 +1,887 @@
+{
+  "seq": 817,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 11,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "oKXKo81MENzZW8pXYbv7W85E37xeXcqm",
+          "video_id": "2092204804218957824",
+          "attempt_token": "fysKu4GOKWaEg1-zgcz-Fs59lfKoTNp8dTuUa4_u4fE",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677721350,
+          "source_revision": "682ff80c60312e7d76647f1dd76d11caad673e5f75f1936fd052012ca5fbd170",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "11812638a2dd721b7b0c8c359f16394d25a99f35ec2e0547e58bb8d573f8271e",
+          "card": {
+            "card_hash": "808e6868d567574d12a207e99bf2aca16408117c50ea6857b2654813c2ec8259",
+            "channel": "Sam Stoffel",
+            "chars": 1742,
+            "chars_all_clips": 1742,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/sam_stoffel/status/2093368006093238678#t=0",
+                "end": 117.902,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "98f2a424f7cde4a4d93b3c3018bec7744cfcdb1ec50cc3411a41e58c8ee44e5e",
+                "start": 0.28,
+                "text": "It's also pretty amazing that on a project of this scale you're still measuring things in days You're still like a day you know, I mean that's that's impressive when other people are like months hours Yeah Wow I mean it's nonstop. It's not ",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/sam_stoffel/status/2093368006093238678#t=0",
+                "end": 117.902,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "98f2a424f7cde4a4d93b3c3018bec7744cfcdb1ec50cc3411a41e58c8ee44e5e",
+                "start": 0.28,
+                "text": "It's also pretty amazing that on a project of this scale you're still measuring things in days You're still like a day you know, I mean that's that's impressive when other people are like months hours Yeah Wow I mean it's nonstop. It's not ",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Elon Musk's extreme sense of urgency is unmatched: https://t.co/DCykiyAxnu No tags [00:00:00] It's also pretty amazing that on a project of this scale [00:00:02] you're still measuring things in days [00:00:04] You're still like a day [00:00:05] you know, I mean [00:00:05] that's that's impressive when other people are like months [00:00:08] hours [00:00:09] Yeah [00:00:10] Wow [00:00:11] I mean [00:00:11] it's nonstop. It's not like you're doing that [00:00:13] because there's a launch in two days [00:00:15] You're doing that [00:00:16] the whole time thi",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Sam_Stoffel_-_Elon_Musk_s_extreme_sense_of_urgency_is_unmatched",
+            "source_revision": "682ff80c60312e7d76647f1dd76d11caad673e5f75f1936fd052012ca5fbd170",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Elon Musk's extreme sense of urgency is unmatched: https://t.co/DCykiyAxnu No tags [00:00:00] It's also pretty amazing that on a project of this scale [00:00:02] you're still measuring things in days [00:00:04] You're still like a day [00:00:05] you know, I mean [00:00:05] that's that's impressive when other people are like months [00:00:08] hours [00:00:09] Yeah [00:00:10] Wow [00:00:11] I mean [00:00:11] it's nonstop. It's not like you're doing that [00:00:13] because there's a launch in two days [00:00:15] You're doing that [00:00:16] the whole time thi",
+            "title": "Sam Stoffel - Elon Musk's extreme sense of urgency is unmatched:",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/sam_stoffel/status/2093368006093238678",
+            "video_id": "2092204804218957824",
+            "yoinked_at": "2026-08-29T07:50:57"
+          }
+        },
+        {
+          "work_id": "pWLLVgYRrCf46Pm02iCtmbv_AQr0COF5",
+          "video_id": "2091977971426820096",
+          "attempt_token": "MVgnZDHWoGp4FVCzoIAQbDQ0qd0AkUnNcl5LK1Nk8cc",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677721351,
+          "source_revision": "ddbd6d47d21d10a40354bf18cdb219596fa98a850b4c00db4de14309f8bcf0e6",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "b41fb15798703c903d7980302b6331a9cdbfbce80ae4ca7547d518548cfbbf58",
+          "card": {
+            "card_hash": "202b96be651a59b79dcbd9771151d89c035e01f705ab2cae5853282b87fd77ec",
+            "channel": "ryan 🤿",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Developer Marketing",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/scubaryan_/status/2091978007946674390",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "b3a7e00d9fc359c5692ffe933db7071e220f16bac1edf818db76f12b246f683b",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> MrBeast was shocked after Shakira revealed she’s a massive fan of his content and they planned on creating schools in Columbia for a video together ❤️ https://t.co/i6BsEdX4XS No tags *No captions availa",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> MrBeast was shocked after Shakira revealed she’s a massive fan of his content and they planned on creating schools in Columbia for a video together ❤️ https://t.co/i6BsEdX4XS No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "ryan_-_MrBeast_was_shocked_after_Shakira_revealed_she_s_a_massive_fan_of_his",
+            "source_revision": "ddbd6d47d21d10a40354bf18cdb219596fa98a850b4c00db4de14309f8bcf0e6",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> MrBeast was shocked after Shakira revealed she’s a massive fan of his content and they planned on creating schools in Columbia for a video together ❤️ https://t.co/i6BsEdX4XS No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "ryan 🤿 - MrBeast was shocked after Shakira revealed she’s a massive fan of his...",
+            "topic": "Developer Marketing",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/scubaryan_/status/2091978007946674390",
+            "video_id": "2091977971426820096",
+            "yoinked_at": "2026-08-25T07:49:48"
+          }
+        },
+        {
+          "work_id": "sWxe4vyXxh1l1PW1QjGhoDGgvTOGJaNf",
+          "video_id": "2091957857650716672",
+          "attempt_token": "rgEYFnyNwo1nitMHWrNBRPJVbrjypsH-H8wVMH_V_l8",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677721351,
+          "source_revision": "7219b4ed77b0a6750859dc95dc631887fa59750fdede71ee36f6c15cfb3e3f6d",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "de4843cd4ddd5ce5fc57436b8689966045499462cbf5e4cc50bbf94b69d72771",
+          "card": {
+            "card_hash": "81ac2502be5d6c95fc2be106b746907f93e0e8cfaa7adc8e20d9e51224c6e279",
+            "channel": "Matthew Berman",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/MatthewBerman/status/2091959711423996249",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "2c6887a44b9262138ac4c9ea3ee6fb355d8d3ca5d6768e45c69b839e8d9ec088",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> My full interview with Tibo (@thsottiaux)  0:45 Tibo's Lessons from Google DeepMind 4:22 Building OpenAI’s Relentless Culture 7:23 Astra &amp; Next Gen Models 11:18 How Fast AI Changes Developer Workflo",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> My full interview with Tibo (@thsottiaux)  0:45 Tibo's Lessons from Google DeepMind 4:22 Building OpenAI’s Relentless Culture 7:23 Astra &amp; Next Gen Models 11:18 How Fast AI Changes Developer Workflows 14:27 ChatGPT &amp; Codex Merging 20:25 OpenAI vs. Anthropic 23:37 Why OpenAI Keeps https://t.co/Z5x2fxAJH9 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](http",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Matthew_Berman_-_My_full_interview_with_Tibo_thsottiaux_0_45_Tibo_s_Lessons_from",
+            "source_revision": "7219b4ed77b0a6750859dc95dc631887fa59750fdede71ee36f6c15cfb3e3f6d",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> My full interview with Tibo (@thsottiaux)  0:45 Tibo's Lessons from Google DeepMind 4:22 Building OpenAI’s Relentless Culture 7:23 Astra &amp; Next Gen Models 11:18 How Fast AI Changes Developer Workflows 14:27 ChatGPT &amp; Codex Merging 20:25 OpenAI vs. Anthropic 23:37 Why OpenAI Keeps https://t.co/Z5x2fxAJH9 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](http",
+            "title": "Matthew Berman - My full interview with Tibo (@thsottiaux)  0:45 Tibo's Lessons from G...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/MatthewBerman/status/2091959711423996249",
+            "video_id": "2091957857650716672",
+            "yoinked_at": "2026-08-25T07:51:09"
+          }
+        },
+        {
+          "work_id": "ucJPSh5WSKVo9tbPb-ZF0vStRloAFCYS",
+          "video_id": "2091830598666956801",
+          "attempt_token": "6Q3U9AZREZHNzkNM_iYB3F4q9Qt1XALoyBmlEx0bGuo",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677721352,
+          "source_revision": "18077f7f94645cbcbd87fda702dbd905eacb0af7ea00ba8724ba56d0ca71a312",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "96789da355639f207a493751c0e414f28ad6d2dac35d37ea938e3d38daa1d249",
+          "card": {
+            "card_hash": "3c96a91ec61a6e2611c8a29722a3bddc3f57807e26148ab5b09936f2b1e95844",
+            "channel": "wast3",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/0xWast3/status/2091831417432936836",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "ad30a02db4605c8c95cd63a6657443a9ba0cc56f08a51f56ae48b5975363db28",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Anthropic ex-engineer runs an internal graph that costs $6 a month and catches what a $300,000 eval suite misses. No retrieval layer. Seven nodes and one rule about who's allowed to change their mind.  ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Anthropic ex-engineer runs an internal graph that costs $6 a month and catches what a $300,000 eval suite misses. No retrieval layer. Seven nodes and one rule about who's allowed to change their mind.  He published the whole schema.  His version starts from the opposite idea. A https://t.co/APITJ5hmDK No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "wast3_-_Anthropic_ex-engineer_runs_an_internal_graph_that_costs_6_a_month_an",
+            "source_revision": "18077f7f94645cbcbd87fda702dbd905eacb0af7ea00ba8724ba56d0ca71a312",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Anthropic ex-engineer runs an internal graph that costs $6 a month and catches what a $300,000 eval suite misses. No retrieval layer. Seven nodes and one rule about who's allowed to change their mind.  He published the whole schema.  His version starts from the opposite idea. A https://t.co/APITJ5hmDK No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+            "title": "wast3 - Anthropic ex-engineer runs an internal graph that costs $6 a month an...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/0xWast3/status/2091831417432936836",
+            "video_id": "2091830598666956801",
+            "yoinked_at": "2026-08-25T07:49:26"
+          }
+        },
+        {
+          "work_id": "xya4T7LqLPo4giutY7a3tLv91ElkHzSJ",
+          "video_id": "2092244803295571968",
+          "attempt_token": "5rqGZ6Xsyuv6A29XuWd9ilf0CsLHbwkm7XT04krawhc",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677721352,
+          "source_revision": "9fb2e2eb8932725bc805ccecb24dccef95be65cf6c8cadab82e1783b2b66aae4",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "63af2da9ee1f643d730ff47685a494bc8c0b9ab3fac09c04c2bbcdafd57d3ab3",
+          "card": {
+            "card_hash": "7039c4bd75e869041119043dd63eea0d448972be6e626311b6db4d88a207fee1",
+            "channel": "alex",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/aialecs/status/2092244919205122308",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "3af7930d86873ff0281e0a7fed55c2dbb96c562a9aa7d98747edff1fc94a3b74",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> LOS ESTUDIANTES PUEDEN CONSEGUIR 1 AÑO DE CURSOR PRO GRATIS.  Con GPT, Claude y Gemini incluidos.  Guárdalo en favoritos para no perderlo. https://t.co/9SGkVl1yGk No tags *No captions available for this",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> LOS ESTUDIANTES PUEDEN CONSEGUIR 1 AÑO DE CURSOR PRO GRATIS.  Con GPT, Claude y Gemini incluidos.  Guárdalo en favoritos para no perderlo. https://t.co/9SGkVl1yGk No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "alex_-_LOS_ESTUDIANTES_PUEDEN_CONSEGUIR_1_A_O_DE_CURSOR_PRO_GRATIS_Con_GPT",
+            "source_revision": "9fb2e2eb8932725bc805ccecb24dccef95be65cf6c8cadab82e1783b2b66aae4",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> LOS ESTUDIANTES PUEDEN CONSEGUIR 1 AÑO DE CURSOR PRO GRATIS.  Con GPT, Claude y Gemini incluidos.  Guárdalo en favoritos para no perderlo. https://t.co/9SGkVl1yGk No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "alex - LOS ESTUDIANTES PUEDEN CONSEGUIR 1 AÑO DE CURSOR PRO GRATIS.  Con GPT...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/aialecs/status/2092244919205122308",
+            "video_id": "2092244803295571968",
+            "yoinked_at": "2026-08-26T07:54:51"
+          }
+        },
+        {
+          "work_id": "3SITOtf_6XowtvPrxM3yjlTWyWULM7XS",
+          "video_id": "2092682844812500992",
+          "attempt_token": "apReuYOwLpT-2suAdOOtpCmSNpE4y5Z9wCK_yscWLXU",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677721353,
+          "source_revision": "c8210280e7c757e9ef0796508164fe65e644c593795894e26ebaf91a1ecbe182",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "d9ee2c19dfddf270b45a040146af9a45d8b7146e46ced3eda0a8fc0a3f457d21",
+          "card": {
+            "card_hash": "48bdda0921b539e7ad46ce689af599100b1d2b80d67f79a94b5a5130ba1a60f9",
+            "channel": "Matthew Berman",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/MatthewBerman/status/2092687994096681379",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "cb8ffbdf0ceb127e03b24e70657485e573200d4707dfb8762a166bcdd3c0d1d5",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> This is the most important chart in AI right now.   Open Source is eclipsing Closed Source in total token usage, but frontier labs still capture most revenue.   Watch my breakdown: https://t.co/sNdtoUoX",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> This is the most important chart in AI right now.   Open Source is eclipsing Closed Source in total token usage, but frontier labs still capture most revenue.   Watch my breakdown: https://t.co/sNdtoUoXfw No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Matthew_Berman_-_This_is_the_most_important_chart_in_AI_right_now_Open_Source_is",
+            "source_revision": "c8210280e7c757e9ef0796508164fe65e644c593795894e26ebaf91a1ecbe182",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> This is the most important chart in AI right now.   Open Source is eclipsing Closed Source in total token usage, but frontier labs still capture most revenue.   Watch my breakdown: https://t.co/sNdtoUoXfw No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Matthew Berman - This is the most important chart in AI right now.   Open Source is ec...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/MatthewBerman/status/2092687994096681379",
+            "video_id": "2092682844812500992",
+            "yoinked_at": "2026-08-27T07:39:55"
+          }
+        },
+        {
+          "work_id": "4_R-nEW7oeOrrtTRRJHkxLKYu9eCTVYX",
+          "video_id": "2092745356274446336",
+          "attempt_token": "-NEAkMsALtlmfZ526SEnvgEbf6joKe7zfSeSsJ-irjI",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677721354,
+          "source_revision": "f3029a5833559ae67431fd4b04c60f90fc7421fe33d07d51a12b991f65009fda",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "af55f5d11e8fb1cf2283d62751aa98ca6971dab6700a60d3923e38ddb5aae311",
+          "card": {
+            "card_hash": "3f604c128a2a9d445fd6b0d91b7f5c627c82df9ce7df0a707cddbc82e822fb13",
+            "channel": "Nicholas Mugalli",
+            "chars": 1285,
+            "chars_all_clips": 1285,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/RealNickMugalli/status/2092745523346214936#t=0",
+                "end": 83.26,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "0c588d9f47421c3210f12f44b14aa31843f9e33549924de5f7721d2fc604af9c",
+                "start": 0.1,
+                "text": "And I said, you know what? The whole time I've been working on something a chip that I think could really hurt you It's called jalapeno. I don't know Let's call it, I don't know, tomatillo And you said to me well that's fine. Would you real",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/RealNickMugalli/status/2092745523346214936#t=0",
+                "end": 83.26,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "0c588d9f47421c3210f12f44b14aa31843f9e33549924de5f7721d2fc604af9c",
+                "start": 0.1,
+                "text": "And I said, you know what? The whole time I've been working on something a chip that I think could really hurt you It's called jalapeno. I don't know Let's call it, I don't know, tomatillo And you said to me well that's fine. Would you real",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> WOW!!! Jensen of $NVDA responds to OpenAI claims that their jalapeño chip is better than Nvidia’s GB300   SHOTS FIRED!!! Reminds me of “You not talking to someone who woke up a loser” moment!! What a boss!! https://t.co/vBBDpuEwZt No tags [00:00:00] And I said, you know what? [00:00:01] The whole time I've been working on something [00:00:03] a chip that I think could really hurt [00:00:04] you [00:00:05] It's called jalapeno. I don't know [00:00:06] Let's call it, I don't know, tomatillo [00:00:09] And you said to me [00:00:10] well [00:00:10] that's fine",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Nicholas_Mugalli_-_WOW_Jensen_of_NVDA_responds_to_OpenAI_claims_that_their_jalap",
+            "source_revision": "f3029a5833559ae67431fd4b04c60f90fc7421fe33d07d51a12b991f65009fda",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> WOW!!! Jensen of $NVDA responds to OpenAI claims that their jalapeño chip is better than Nvidia’s GB300   SHOTS FIRED!!! Reminds me of “You not talking to someone who woke up a loser” moment!! What a boss!! https://t.co/vBBDpuEwZt No tags [00:00:00] And I said, you know what? [00:00:01] The whole time I've been working on something [00:00:03] a chip that I think could really hurt [00:00:04] you [00:00:05] It's called jalapeno. I don't know [00:00:06] Let's call it, I don't know, tomatillo [00:00:09] And you said to me [00:00:10] well [00:00:10] that's fine",
+            "title": "Nicholas Mugalli - WOW!!! Jensen of $NVDA responds to OpenAI claims that their jalapeño ...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/RealNickMugalli/status/2092745523346214936",
+            "video_id": "2092745356274446336",
+            "yoinked_at": "2026-08-27T07:38:54"
+          }
+        },
+        {
+          "work_id": "5W1K5jSDH5Me2GsnGACaO98D2vLurqAM",
+          "video_id": "2092270658524745728",
+          "attempt_token": "IY17WpVnQQg8ZvGjd1U9yZe3Ju-qnnRWVa2lWVkc4gc",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677721356,
+          "source_revision": "dc460f17e10a06ba3c59911355cfbc299440fe0be37e7720c9991b1feae4b123",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "5e0e9c99d0c255d12a67eaf4441f195ba6d70958e9f5a3e28c4dd6509e12e024",
+          "card": {
+            "card_hash": "b4539bf48feaa45d092df1dc98bff44c562d81402c03faac73ba65f61b4cd328",
+            "channel": "Dwarkesh Patel",
+            "chars": 75184,
+            "chars_all_clips": 75184,
+            "chars_chosen_clips": 1440,
+            "clip_count": 85,
+            "clips": [
+              {
+                "deep_link": "https://x.com/dwarkesh_sp/status/2092280377255551320#t=101",
+                "end": 204.16,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "899084656dd7b173c80c0f0c81e350300a727883b755415c357093e0e64c243f",
+                "start": 101.36,
+                "text": "Up until now, they have been companies that mostly lost money. Anthropic started turning a profit in Q2. It’s believed at some point in Q3, OpenAI could start turning a profit even, with the bigger rise of Codex and 5.6 and all this. But if",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/dwarkesh_sp/status/2092280377255551320#t=877",
+                "end": 956.08,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "07b655a1141791ff3461dbbc639d855f1def3081435cb596d1c2d3733e677a86",
+                "start": 877.04,
+                "text": "Go get a GB300 rack, go download the Kimi weights, go download vLLM or SGLang, set it up. Codex and Fable can actually help you do this. It’s pretty simple. It’s not trivial, but it’s not rocket science. Go put it on OpenRouter. It’s very s",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/dwarkesh_sp/status/2092280377255551320#t=1715",
+                "end": 1781.52,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "600725843ef820b68d1ccef9cdffc4c617764b4142088949961f21c1872cbccf",
+                "start": 1715.76,
+                "text": "Obviously, who captures the value is still up for debate, but ultimately everyone’s going to raise their prices. Because they can, and it’s super inflationary. Especially if the method of regulation is… Right now, so far, it’s just \"don’t r",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/dwarkesh_sp/status/2092280377255551320#t=2670",
+                "end": 2746.08,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "09638001dc44956b1f7e2ac830ce1bfe9c77264c8fc09d5ee9de90ace3196b9e",
+                "start": 2670.32,
+                "text": "But still, at the current size of the US economy, it’ll be like a third to a quarter of the US economy just going towards data centers. As I say that out loud, I’m like, \"Maybe you’re right and we just won’t allow it, and that’s the reason ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/dwarkesh_sp/status/2092280377255551320#t=3624",
+                "end": 3680.32,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "f1199de44559761761349de493503f986a5190857a611ffc984b67fde6fbbc0f",
+                "start": 3624.64,
+                "text": "Part of my brain is like, \"It might be hundreds of percent,\" but let’s say it’s at least tens of percent. I’m just like, okay. Every country that is not involved in the production of AI defaults. Every stock that is not an AI stock is worth",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/dwarkesh_sp/status/2092280377255551320#t=4032",
+                "end": 4131.12,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a7e63ef51d0fc21cb04c2847059f8a1d66a1eb759eb1a22eec78272851d89729",
+                "start": 4032.08,
+                "text": "The Jane Street team follows frontier LLM research closely. A relatively common intern project is adapting a recent paper to financial markets, which come with their own set of gnarly problems. Ultimately, we're trying to model thousands of",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/dwarkesh_sp/status/2092280377255551320#t=101",
+                "end": 204.16,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "899084656dd7b173c80c0f0c81e350300a727883b755415c357093e0e64c243f",
+                "start": 101.36,
+                "text": "Up until now, they have been companies that mostly lost money. Anthropic started turning a profit in Q2. It’s believed at some point in Q3, OpenAI could start turning a profit even, with the bigger rise of Codex and 5.6 and all this. But if",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/dwarkesh_sp/status/2092280377255551320#t=877",
+                "end": 956.08,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "07b655a1141791ff3461dbbc639d855f1def3081435cb596d1c2d3733e677a86",
+                "start": 877.04,
+                "text": "Go get a GB300 rack, go download the Kimi weights, go download vLLM or SGLang, set it up. Codex and Fable can actually help you do this. It’s pretty simple. It’s not trivial, but it’s not rocket science. Go put it on OpenRouter. It’s very s",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/dwarkesh_sp/status/2092280377255551320#t=1715",
+                "end": 1781.52,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "600725843ef820b68d1ccef9cdffc4c617764b4142088949961f21c1872cbccf",
+                "start": 1715.76,
+                "text": "Obviously, who captures the value is still up for debate, but ultimately everyone’s going to raise their prices. Because they can, and it’s super inflationary. Especially if the method of regulation is… Right now, so far, it’s just \"don’t r",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/dwarkesh_sp/status/2092280377255551320#t=2670",
+                "end": 2746.08,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "09638001dc44956b1f7e2ac830ce1bfe9c77264c8fc09d5ee9de90ace3196b9e",
+                "start": 2670.32,
+                "text": "But still, at the current size of the US economy, it’ll be like a third to a quarter of the US economy just going towards data centers. As I say that out loud, I’m like, \"Maybe you’re right and we just won’t allow it, and that’s the reason ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/dwarkesh_sp/status/2092280377255551320#t=3624",
+                "end": 3680.32,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "f1199de44559761761349de493503f986a5190857a611ffc984b67fde6fbbc0f",
+                "start": 3624.64,
+                "text": "Part of my brain is like, \"It might be hundreds of percent,\" but let’s say it’s at least tens of percent. I’m just like, okay. Every country that is not involved in the production of AI defaults. Every stock that is not an AI stock is worth",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/dwarkesh_sp/status/2092280377255551320#t=4032",
+                "end": 4131.12,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a7e63ef51d0fc21cb04c2847059f8a1d66a1eb759eb1a22eec78272851d89729",
+                "start": 4032.08,
+                "text": "The Jane Street team follows frontier LLM research closely. A relatively common intern project is adapting a recent paper to financial markets, which come with their own set of gnarly problems. Ultimately, we're trying to model thousands of",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Dwarkesh_Patel_-_Had_a_lot_of_fun_chatting_again_with_my_twin_brother_dylan522p",
+            "source_revision": "dc460f17e10a06ba3c59911355cfbc299440fe0be37e7720c9991b1feae4b123",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "Dwarkesh Patel - Had a lot of fun chatting again with my twin brother @dylan522p   We ...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/dwarkesh_sp/status/2092280377255551320",
+            "video_id": "2092270658524745728",
+            "yoinked_at": "2026-08-25T18:14:05"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 497,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 13,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "D0SL5LArsQ8IKuzzjD4rn_lMnDPQ_ID4",
+      "video_id": "2086124560861270016",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "5529d6cdf439d295b850d3c812cbeb76fede80f2891e2e7e610b760318b92395",
+            "card_hash": "dc88a0f71dcbbd98fb66fcba93f0ee7e0170ebf81c4523992153d7d64ea9db0a",
+            "quote": "when we train a model To catch reward hacking",
+            "start": 0.0,
+            "end": 75.78,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

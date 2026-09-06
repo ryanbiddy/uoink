@@ -1,0 +1,39 @@
+{
+  "seq": 1129,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "elNlx6wc74MAC_yhDV_eVIMa9qQMF35a",
+      "video_id": "A12AVongNN4",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "d3101ef09d15a5fdb2a8f9a7b5e29963cec7b8470099c32d99d37b3f26da4d36",
+            "card_hash": "b88ea460f03830b00e619c5ac1a4c334fafc35294a5996beee2068f1c917f9d3",
+            "quote": "our preview model which makes conversation between humans and AI easier",
+            "start": 56.79,
+            "end": 136.72,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

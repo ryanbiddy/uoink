@@ -1,0 +1,38 @@
+{
+  "seq": 185,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "8ixT5Pi4bVAr90U35ZXkGBEDWciN6gYx",
+      "video_id": "2081035374852202496",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "26467ef5ef69a7b8454de49a5be416a22074b145da7ae62414439906d28dab2f",
+            "card_hash": "cec983686f0271b14dbacf71872b41cfb98492f768099944ec78ec03db81fcc4",
+            "quote": "Extraordinarily Abundant High Quality Low Cost Intelligence",
+            "start": 600.049,
+            "end": 719.899,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

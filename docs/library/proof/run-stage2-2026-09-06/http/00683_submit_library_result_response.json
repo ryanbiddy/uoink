@@ -1,0 +1,39 @@
+{
+  "seq": 683,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "PrvCtdSoe5TzAOkNhZ1XislOWNZ9vkHY",
+      "video_id": "2088744367154765824",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "2db701fee8b5ff376788cde99a4d1fbf41050bcb1eaab82d8ce04a0c3f2656d5",
+            "card_hash": "d095f9e6d1f5226bc8f77497e22dd4f4aead4e98bf9caa26dd0761bf7e420633",
+            "quote": "You can now do frontier-level coding on a laptop GPU",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

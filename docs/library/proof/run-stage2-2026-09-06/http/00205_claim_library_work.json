@@ -1,0 +1,839 @@
+{
+  "seq": 205,
+  "tool": "claim_library_work",
+  "wall_ms": 12,
+  "request": {
+    "seq": 205,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 205,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 12,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "vpi_yX8Xg6gAECwUk3OCVwUlL-ZCZ7br",
+            "video_id": "2080998143701721088",
+            "attempt_token": "93WQk6GU7lpATY1TMC1hDpi3YZjrNZR10F_ZGJwqDNQ",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676476737,
+            "source_revision": "e31f013604d3589b41af10cdfc2ca5fdbd95db96deacfbdcf56f5352a0a748db",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "9ad4b11761dec39f2ad46d850146098565f62ab2aed7243ba65779b48c809e42",
+            "card": {
+              "card_hash": "1cc6c0e8211b45e00bb05e3a0b4333efeb49cf7c8f2f22cc3a46d209139e9299",
+              "channel": "Samuel Rondot",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/samuelrdt/status/2080998991332884753",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "d23d78237103aaa12589e8175551fdb4bcc1452980da03c3c4a20ef95a441795",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> I gave both Fable 5 and Opus 5 the exact same prompt: \"Build an ultra-realistic flight simulator.\"  The results weren't what I expected.  Which one do you prefer? https://t.co/WwDnymsX8A No tags *No cap",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I gave both Fable 5 and Opus 5 the exact same prompt: \"Build an ultra-realistic flight simulator.\"  The results weren't what I expected.  Which one do you prefer? https://t.co/WwDnymsX8A No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Samuel_Rondot_-_I_gave_both_Fable_5_and_Opus_5_the_exact_same_prompt_Build_an_ul",
+              "source_revision": "e31f013604d3589b41af10cdfc2ca5fdbd95db96deacfbdcf56f5352a0a748db",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I gave both Fable 5 and Opus 5 the exact same prompt: \"Build an ultra-realistic flight simulator.\"  The results weren't what I expected.  Which one do you prefer? https://t.co/WwDnymsX8A No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Samuel Rondot - I gave both Fable 5 and Opus 5 the exact same prompt: \"Build an ultra...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/samuelrdt/status/2080998991332884753",
+              "video_id": "2080998143701721088",
+              "yoinked_at": "2026-07-25T18:09:37"
+            }
+          },
+          {
+            "work_id": "yiubao0Yrg31VA3hpTNnLhJL9SPxZr8L",
+            "video_id": "2080812408759865344",
+            "attempt_token": "yuJqtkLuZjdYymnfsqi7VUrbKJry5EPRzUWiWKisE0I",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676476737,
+            "source_revision": "e530586bdce6f96476ba220d8d0f65e87670a50054eac8515d898faefcd2aa3a",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "691b7f5f9dbb9d740e3ea4fab4dba7330baa6f2750a4e24206849c068823cc3b",
+            "card": {
+              "card_hash": "9f59cd3dd7ffeeb6bb57c2c37a94f2e60f85ee3ae2cdfe544ee00be844863f56",
+              "channel": "BijanBowen",
+              "chars": 591,
+              "chars_all_clips": 591,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/bijanbowen/status/2080812782648512620#t=0",
+                  "end": 61.289,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c782bd74449d42cec78dc73aab002522985025c5c6462c35d646ff932e0e78cb",
+                  "start": 0.05,
+                  "text": "The sound design, and I can hear this on like tinny atrocious laptop speakers. The echoes of the bullets... Alright let's check out our zombie enemies. Wow look at that! Look at their heads they're scary! This is a different species of resu",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/bijanbowen/status/2080812782648512620#t=0",
+                  "end": 61.289,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c782bd74449d42cec78dc73aab002522985025c5c6462c35d646ff932e0e78cb",
+                  "start": 0.05,
+                  "text": "The sound design, and I can hear this on like tinny atrocious laptop speakers. The echoes of the bullets... Alright let's check out our zombie enemies. Wow look at that! Look at their heads they're scary! This is a different species of resu",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Opus 5 subway FPS Result, best one yet IMO https://t.co/I8oaHy7iXt No tags [00:00:00] The sound design, [00:00:01] and I can hear this on like tinny atrocious laptop [00:00:05] speakers. The echoes of the bullets... [00:00:09] Alright let's check out our zombie enemies. [00:00:12] Wow look at that! [00:00:13] Look at their heads they're scary! [00:00:18] This is a different species of result I could say. [00:00:25] Yeah obviously the bullet holes are leaving effects in there but [00:00:32] What the heck? [00:00:37] This model's incredible. [00:00:40] This ",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "BijanBowen_-_Opus_5_subway_FPS_Result_best_one_yet_IMO",
+              "source_revision": "e530586bdce6f96476ba220d8d0f65e87670a50054eac8515d898faefcd2aa3a",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Opus 5 subway FPS Result, best one yet IMO https://t.co/I8oaHy7iXt No tags [00:00:00] The sound design, [00:00:01] and I can hear this on like tinny atrocious laptop [00:00:05] speakers. The echoes of the bullets... [00:00:09] Alright let's check out our zombie enemies. [00:00:12] Wow look at that! [00:00:13] Look at their heads they're scary! [00:00:18] This is a different species of result I could say. [00:00:25] Yeah obviously the bullet holes are leaving effects in there but [00:00:32] What the heck? [00:00:37] This model's incredible. [00:00:40] This ",
+              "title": "BijanBowen - Opus 5 subway FPS Result, best one yet IMO",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/bijanbowen/status/2080812782648512620",
+              "video_id": "2080812408759865344",
+              "yoinked_at": "2026-07-26T05:15:54"
+            }
+          },
+          {
+            "work_id": "1HamE4yY4m9c-x188eGddhDQwf3sLy1T",
+            "video_id": "2081762221613592576",
+            "attempt_token": "_gCOiaUU1JjUJQy8X0gfF45tDVXS3lB5Qzhjz_sFu9k",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676476738,
+            "source_revision": "7e6aa61b86d175e3f6f598675b4a41a256cbd34d8fbf2890a84df6ef862a5477",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "47f5be110655648fc76bb638eb66487b8c6f8747df94fc7140477f0baa62ac70",
+            "card": {
+              "card_hash": "d211e64ad4e70ce02a72b6c31da827c5d7aeff24e25c9e330b2e273152ba049b",
+              "channel": "ali",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/waterloo_intern/status/2081762991532560503",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "251882b6a15b6e0cb638b0d8823ebf260b7a1d1ffb3a67c54941de2bb08597eb",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> I spent 48 hours with the Kimi K3 modeling code.  It took: - 650 mg of caffeine (mandatory) - 40 cans of LaCroix (optional... world record (?)) - 8 papers - 6 months off my lifespan  Finally grokked the",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I spent 48 hours with the Kimi K3 modeling code.  It took: - 650 mg of caffeine (mandatory) - 40 cans of LaCroix (optional... world record (?)) - 8 papers - 6 months off my lifespan  Finally grokked the entire lineage of Kimi K3 and how we got here... every single step, since https://t.co/JvU2CvXuFi No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "ali_-_I_spent_48_hours_with_the_Kimi_K3_modeling_code_It_took_-_650_mg_o",
+              "source_revision": "7e6aa61b86d175e3f6f598675b4a41a256cbd34d8fbf2890a84df6ef862a5477",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I spent 48 hours with the Kimi K3 modeling code.  It took: - 650 mg of caffeine (mandatory) - 40 cans of LaCroix (optional... world record (?)) - 8 papers - 6 months off my lifespan  Finally grokked the entire lineage of Kimi K3 and how we got here... every single step, since https://t.co/JvU2CvXuFi No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+              "title": "ali - I spent 48 hours with the Kimi K3 modeling code.  It took: - 650 mg o...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/waterloo_intern/status/2081762991532560503",
+              "video_id": "2081762221613592576",
+              "yoinked_at": "2026-07-28T09:56:46"
+            }
+          },
+          {
+            "work_id": "2Yf44pLLRa0DQhSfAM1PKhMmdG9nlDo1",
+            "video_id": "2081801821308571648",
+            "attempt_token": "7OxWkCTJV72qPcUjZOIjns3kQOirf9KBWOJa45kL84g",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676476739,
+            "source_revision": "f229b86f2168273115b6dc51ad43ea6c734229de61715d2a4312024c76c073bf",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "7d47fde401baf4f48feba011a48962fc5685324d62b6ff8ca19919058773f34c",
+            "card": {
+              "card_hash": "bfa75ce51dfa88b4d981511a32a6ad6d458c41073926d75bf2be162a05fcd6d6",
+              "channel": "Chubby♨️",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2082101266961023452",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "ceeee94f2174d0941b1a9691a48fa4e9f91cb6d0f836d0543e653d49d3dc7393",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> I thought this was a joke wtf: Claude Opus 5 was left running for 24 hours straight and built an entire game from scratch. without any external assets or code. Prompts, workflow, code are included.  htt",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I thought this was a joke wtf: Claude Opus 5 was left running for 24 hours straight and built an entire game from scratch. without any external assets or code. Prompts, workflow, code are included.  https://t.co/CxN1DlXAbH No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Chubby_-_I_thought_this_was_a_joke_wtf_Claude_Opus_5_was_left_running_for_24",
+              "source_revision": "f229b86f2168273115b6dc51ad43ea6c734229de61715d2a4312024c76c073bf",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I thought this was a joke wtf: Claude Opus 5 was left running for 24 hours straight and built an entire game from scratch. without any external assets or code. Prompts, workflow, code are included.  https://t.co/CxN1DlXAbH No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Chubby♨️ - I thought this was a joke wtf: Claude Opus 5 was left running for 24 ...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/kimmonismus/status/2082101266961023452",
+              "video_id": "2081801821308571648",
+              "yoinked_at": "2026-07-28T09:56:34"
+            }
+          },
+          {
+            "work_id": "9HJ6e25jvwckJ7oBeCuvjw3hblBA2oFL",
+            "video_id": "2081715828459028480",
+            "attempt_token": "J4XXBc6umXMBzMdO4ArhMYXz8Q-gxZZ_8djB8WQylTY",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676476739,
+            "source_revision": "86f2e7d544dd0e277107deb3c845615e9ef1d6cf70e866aa167c026dcea6f6e9",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "37711d57f18a421b8d1e9b7a6df1241a2c6c4616ba3dbfb6b84d5c94c9513c61",
+            "card": {
+              "card_hash": "8b53dda43f339b14899c694cf4d9085fabd311ca06cf47d4e8e90e272c4035f4",
+              "channel": "nooooob",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Productivity and Workflows",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/mikeluan123/status/2081716631986983093",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "15320bb33196db7ee55d33141300abe3d1003682b5f602f0a9628c300ad1a7be",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> My holy-shi moment of opus5.   Homeworld Style Space RTS   with OPUS 5 (workflow)  68.6k input, 4.6m output, 837.2m cache read, 13.6m cache write ($632.65)  ---  Models: generated,  Asset: none.  Beside",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> My holy-shi moment of opus5.   Homeworld Style Space RTS   with OPUS 5 (workflow)  68.6k input, 4.6m output, 837.2m cache read, 13.6m cache write ($632.65)  ---  Models: generated,  Asset: none.  Besides minor game play issues, watching model cook this is beyond my imagination. https://t.co/mTylDkXBAM No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "nooooob_-_My_holy-shi_moment_of_opus5_Homeworld_Style_Space_RTS_with_OPUS",
+              "source_revision": "86f2e7d544dd0e277107deb3c845615e9ef1d6cf70e866aa167c026dcea6f6e9",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> My holy-shi moment of opus5.   Homeworld Style Space RTS   with OPUS 5 (workflow)  68.6k input, 4.6m output, 837.2m cache read, 13.6m cache write ($632.65)  ---  Models: generated,  Asset: none.  Besides minor game play issues, watching model cook this is beyond my imagination. https://t.co/mTylDkXBAM No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "title": "nooooob - My holy-shi moment of opus5.   Homeworld Style Space RTS   with OPUS ...",
+              "topic": "Productivity and Workflows",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/mikeluan123/status/2081716631986983093",
+              "video_id": "2081715828459028480",
+              "yoinked_at": "2026-07-28T08:50:42"
+            }
+          },
+          {
+            "work_id": "AaiDRgYg2dBaMibwfLoq_E9pPHgtKtA5",
+            "video_id": "2081832959116562433",
+            "attempt_token": "r-zJ6tWpDGLRkG7g3uSvI9lvzOtAW2zNR6ZVajF5Rso",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676476740,
+            "source_revision": "8311d854db5a98ddc2323d96275c51f4f55263f436468bb0db964cad5c5a8296",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "214d4672a9110dfd146f370805ea53159444b12b2a48800e0f0dc1c25667eae2",
+            "card": {
+              "card_hash": "8142cfa9e30595e92e4ab23b5f0aea4cdf8aaf591d1e0be44c39f58b35b66ffa",
+              "channel": "Michael Guo",
+              "chars": 3267,
+              "chars_all_clips": 3267,
+              "chars_chosen_clips": 720,
+              "clip_count": 8,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/Michaelzsguo/status/2081848350501167159#t=1",
+                  "end": 117.69,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "f7529e8b4cc00d3d84d82b07b79739139f828abc2d3fdf6c3807b51f72ab329a",
+                  "start": 1.71,
+                  "text": "太棒了，酷。 今天，我要谈谈一些研究项目 与OpenAI机器人团队的合作。 我们机器人团队的一个大问题是开发 驱动通用机器人的算法。 想想我们人类如何生活在这个世界上， 我们可以烹饪、搬运物品、使用不同的工具 添加更多物品。 我们充分利用身体，尤其是双手 来完成各种任务。 在某种程度上，我们就是通用机器人，对吧？ 也就是说，我们将同样的标准应用于 对这类事物的定义。 通用机器人应该能够与 现实世界非常复杂的环境进行交互 并能操控周围的各种物体。 然而，不幸的是，如今大多数面向",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/Michaelzsguo/status/2081848350501167159#t=117",
+                  "end": 236.92,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "68af201501b4482d6a86992aafa0b10de5549a906362321a93d0f811f5e6b2a6",
+                  "start": 117.69,
+                  "text": "通过移动物体进行手内操作。 这是一个六面体块，上面有OpenAI字样， 将其移动到目标方向。 我们认为这是一个重要问题，因为类人 机械手，这是全球性的努力。 想象一下，如果我们能很好地控制它，就有可能 自动化许多目前由人类完成的任务。 不幸的是，进展不大 在类人机械手方面，由于其复杂性 这样的系统。 为什么困难？ 首先，系统具有非常高的维度。 例如，在我们的机器人中，正如你所见 这个很酷的插图。 Shadow灵巧手有24个关节和20个执行器。 任务尤其困难，因为在操作过程中，",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/Michaelzsguo/status/2081848350501167159#t=356",
+                  "end": 474.59,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "b709f0beddd6616dde444b2c5c03c5ea22976dbedcb1546e38c9e72efeff3c74",
+                  "start": 356.37,
+                  "text": "这个系统追踪五个指尖的位置 在三维空间中。 我们还有三个高分辨率摄像头用于捕捉 图像作为视觉模型的输入。 我们的视觉模型预测位置方向 块。 然而，我们的模拟到现实方法 可能会严重失败，因为有很多模型 差异存在于模拟和现实之间。 如果你的模型都参考模拟环境， 真实机器人表现可能非常差。 为了解决这个问题，我们决定采用， 我们使用强化学习。 我们训练所有模拟，以便生成 技术上、理论上无限量的数据。 为了克服模拟与现实的差异， 我们使用域随机化。 域随机化指的是在模拟中随机化 不同",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/Michaelzsguo/status/2081848350501167159#t=1",
+                  "end": 117.69,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "f7529e8b4cc00d3d84d82b07b79739139f828abc2d3fdf6c3807b51f72ab329a",
+                  "start": 1.71,
+                  "text": "太棒了，酷。 今天，我要谈谈一些研究项目 与OpenAI机器人团队的合作。 我们机器人团队的一个大问题是开发 驱动通用机器人的算法。 想想我们人类如何生活在这个世界上， 我们可以烹饪、搬运物品、使用不同的工具 添加更多物品。 我们充分利用身体，尤其是双手 来完成各种任务。 在某种程度上，我们就是通用机器人，对吧？ 也就是说，我们将同样的标准应用于 对这类事物的定义。 通用机器人应该能够与 现实世界非常复杂的环境进行交互 并能操控周围的各种物体。 然而，不幸的是，如今大多数面向",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/Michaelzsguo/status/2081848350501167159#t=117",
+                  "end": 236.92,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "68af201501b4482d6a86992aafa0b10de5549a906362321a93d0f811f5e6b2a6",
+                  "start": 117.69,
+                  "text": "通过移动物体进行手内操作。 这是一个六面体块，上面有OpenAI字样， 将其移动到目标方向。 我们认为这是一个重要问题，因为类人 机械手，这是全球性的努力。 想象一下，如果我们能很好地控制它，就有可能 自动化许多目前由人类完成的任务。 不幸的是，进展不大 在类人机械手方面，由于其复杂性 这样的系统。 为什么困难？ 首先，系统具有非常高的维度。 例如，在我们的机器人中，正如你所见 这个很酷的插图。 Shadow灵巧手有24个关节和20个执行器。 任务尤其困难，因为在操作过程中，",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/Michaelzsguo/status/2081848350501167159#t=356",
+                  "end": 474.59,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "b709f0beddd6616dde444b2c5c03c5ea22976dbedcb1546e38c9e72efeff3c74",
+                  "start": 356.37,
+                  "text": "这个系统追踪五个指尖的位置 在三维空间中。 我们还有三个高分辨率摄像头用于捕捉 图像作为视觉模型的输入。 我们的视觉模型预测位置方向 块。 然而，我们的模拟到现实方法 可能会严重失败，因为有很多模型 差异存在于模拟和现实之间。 如果你的模型都参考模拟环境， 真实机器人表现可能非常差。 为了解决这个问题，我们决定采用， 我们使用强化学习。 我们训练所有模拟，以便生成 技术上、理论上无限量的数据。 为了克服模拟与现实的差异， 我们使用域随机化。 域随机化指的是在模拟中随机化 不同",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Michael_Guo_-_Lilian_Weng_shared_today_that_she_is_leaving_Thinking_Machines_Lab",
+              "source_revision": "8311d854db5a98ddc2323d96275c51f4f55263f436468bb0db964cad5c5a8296",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "Michael Guo - Lilian Weng shared today that she is leaving Thinking Machines Lab",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint",
+                  "title"
+                ],
+                "selection": true
+              },
+              "url": "https://x.com/Michaelzsguo/status/2081848350501167159",
+              "video_id": "2081832959116562433",
+              "yoinked_at": "2026-07-28T08:51:56"
+            }
+          },
+          {
+            "work_id": "FMl7xb98nCfWrN5qAzWcjOFt6HE06JSP",
+            "video_id": "2082514369477476352",
+            "attempt_token": "Kdr_t6qa7PwusNHtsYDtrpiJPmqK5qsQ3bma8pl-SUw",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676476741,
+            "source_revision": "de76943efdff63ca9645c11627623a14230d725dac5b9484ef276e69cef3d51c",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "5f53cfb79b438979795920c9ee72e71d4ee80d1ab5046eb82cbb0b9f08935754",
+            "card": {
+              "card_hash": "92182b645abc9d90acff844af899df7fff6621a8eae06e87e825ff3a7abf6f4d",
+              "channel": "Benji Taylor",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/benjitaylor/status/2082515001949221152",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "717f9f62a73c34c01f4cc859da19bb971ddefcb380b5f508352a564332cc254e",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> I love all the launch videos we've created recently, all of which are made by our new in-house motion design team. Great products deserve great launches! https://t.co/gWeogxsT9b No tags *No captions ava",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I love all the launch videos we've created recently, all of which are made by our new in-house motion design team. Great products deserve great launches! https://t.co/gWeogxsT9b No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Benji_Taylor_-_I_love_all_the_launch_videos_we_ve_created_recently_all_of_which",
+              "source_revision": "de76943efdff63ca9645c11627623a14230d725dac5b9484ef276e69cef3d51c",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I love all the launch videos we've created recently, all of which are made by our new in-house motion design team. Great products deserve great launches! https://t.co/gWeogxsT9b No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Benji Taylor - I love all the launch videos we've created recently, all of which are...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/benjitaylor/status/2082515001949221152",
+              "video_id": "2082514369477476352",
+              "yoinked_at": "2026-07-30T07:39:56"
+            }
+          },
+          {
+            "work_id": "HsbDbHrpTeBSxVgE1631xhkp6mq31OZm",
+            "video_id": "2081888077858140160",
+            "attempt_token": "uhj8Z5fmx3zx2_cW_Z--97JhiSq51H3tf4DyZL0MsIs",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676476742,
+            "source_revision": "537c45af957145fd5a5c59c152f927b2d6400d589dff959d272df1cc6d05f014",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "be359141629fb5f9327de7f0c7271714bd145df581ba7a1f34115994809daa8c",
+            "card": {
+              "card_hash": "6528eefcd5e23d6987e58ce2875d80b47bb2210008c7dd82ff535d7fa2133f72",
+              "channel": "The TWIML AI Podcast",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/twimlai/status/2081890010174050630",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "08ab39b122c05fa0d88e8f65ca3e09dbf1ab1e3072444a7888ce66958ddf26c6",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> For more than a decade, AI has advanced by training ever-larger models on ever-larger datasets. But as high-quality training data becomes harder to find and pretraining grows increasingly expensive, res",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> For more than a decade, AI has advanced by training ever-larger models on ever-larger datasets. But as high-quality training data becomes harder to find and pretraining grows increasingly expensive, researchers are looking for new ways to keep foundation models improving.  In https://t.co/9TbStWsviK No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "The_TWIML_AI_Podcast_-_For_more_than_a_decade_AI_has_advanced_by_training_ever-l",
+              "source_revision": "537c45af957145fd5a5c59c152f927b2d6400d589dff959d272df1cc6d05f014",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> For more than a decade, AI has advanced by training ever-larger models on ever-larger datasets. But as high-quality training data becomes harder to find and pretraining grows increasingly expensive, researchers are looking for new ways to keep foundation models improving.  In https://t.co/9TbStWsviK No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments",
+              "title": "The TWIML AI Podcast - For more than a decade, AI has advanced by training ever-larger model...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/twimlai/status/2081890010174050630",
+              "video_id": "2081888077858140160",
+              "yoinked_at": "2026-07-28T09:58:34"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

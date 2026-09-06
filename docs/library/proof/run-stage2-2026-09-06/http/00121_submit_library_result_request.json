@@ -1,0 +1,65 @@
+{
+  "seq": 121,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "MnmuXfEKRjXv8Ldn6DD496K15CPhR0Q6",
+    "client_id": "proof-harness",
+    "attempt_token": "vPySLV5eIbSpHjeCu5vs1vFzLehiAUDLNL5dbnHvyA0",
+    "submission_key": "MnmuXfEKRjXv8Ldn6DD496K15CPhR0Q6-vPySLV5eIbSpHjeCu5vs1vFzLehiAUDLNL5dbnHvyA0",
+    "schema_version": 1,
+    "video_id": "2079628844705935360",
+    "source_revision": "796039c5e22bd168eb9a9e5b86c8653b1951576f02424973e8dc1168bc194f73",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "f9dd6ffdaf30fc89c1d8b46e6f45cfc244b3a25a49a4b60ace55f903ef838904",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "47d3fe56a6f7244915f334e62bd924f2e589f9edd2acfabe1b0f46d55c23093a",
+            "card_hash": "09d965f57265c026cf7f4cd14d9b78e471a2c640c8ba9a201cbc13ee323aa421",
+            "quote": "So Bash Is Very Composable Right Like Static Scripts Low Context Usage"
+          }
+        },
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "a1058809fa73e295eebad702857abc4eb6a3c51dadb503a4dd8dcf2a0b4743b1",
+            "card_hash": "09d965f57265c026cf7f4cd14d9b78e471a2c640c8ba9a201cbc13ee323aa421",
+            "quote": "We Like To Say That Models Are Grown And Not Designed"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 15570,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 20016,
+      "wall_time_ms": 0
+    }
+  }
+}

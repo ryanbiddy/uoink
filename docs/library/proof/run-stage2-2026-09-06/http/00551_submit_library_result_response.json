@@ -1,0 +1,39 @@
+{
+  "seq": 551,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "rVKVjg4gzy3p2unDoxt4FfUkQOIDocG0",
+      "video_id": "2085065022733205504",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "2a856864ff4d3aea5624e9546fba7d98039eae03016ecdd04560c4bda5b8626d",
+            "card_hash": "4f06f4f96bfc4691e99548830f84a368daedea925908234f61340eb664aea04a",
+            "quote": "Context turns the internet Into an API purpose built for agents",
+            "start": 0.0,
+            "end": 53.5,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

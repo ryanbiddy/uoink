@@ -1,0 +1,39 @@
+{
+  "seq": 1065,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "z4yaRvJzLT97gKp-H07y4uYyhUZgpEK6",
+      "video_id": "2094277992017211392",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "378c98bef7e87e89fbf6c5330ddab64cf2080b9c5888c716b5a336acd4f3200e",
+            "card_hash": "79c9b2f21a568ced561ee89e692632584c04f529a349c1a1e837ada332172ce2",
+            "quote": "A Berlin artist made a shirt that makes you invisible to AI surveillance cameras",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

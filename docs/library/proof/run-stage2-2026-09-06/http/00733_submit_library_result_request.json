@@ -1,0 +1,51 @@
+{
+  "seq": 733,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "Q3UiB3b4uaqf955-4T6BQqt7kMRQBBWZ",
+    "client_id": "proof-harness",
+    "attempt_token": "ZNnc2GqK_ZnEEjcgaXB0ottKAYpybK35hW9fOgQUfkE",
+    "submission_key": "Q3UiB3b4uaqf955-4T6BQqt7kMRQBBWZ-ZNnc2GqK_ZnEEjcgaXB0ottKAYpybK35hW9fOgQUfkE",
+    "schema_version": 1,
+    "video_id": "2089740357752012800",
+    "source_revision": "729c5e904e995fd15a0c133fa80c22058fdfe0f9fba7d699286135125d4793eb",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "d1b0c0715a0fa192e3a7235673f4f5890bd20bcd630e4074bd77ef1b1a52816d",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.92,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "16b97c44839687ce1fed9ed7a7114dbb14e5a4d9cad6a877c6b8ced03dd0c9e9",
+            "card_hash": "6e7cd043f3b3868a4b5765c70c497cc63380abe17714396bdc8586782f3fe0c6",
+            "quote": "the first AI agent most companies should build is an autonomous analyst"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 19481,
+      "cache_read_tokens": 184437,
+      "cache_create_tokens": 35282,
+      "wall_time_ms": 0
+    }
+  }
+}

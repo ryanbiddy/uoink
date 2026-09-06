@@ -1,0 +1,39 @@
+{
+  "seq": 571,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "pbskjuyCZm_6XZ91GZtqLX3DCKAY6MYL",
+      "video_id": "2086795560451768320",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.92,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "a41f2d441d0fda548bff736a2b6d9fda3cba9cf55bc6adce2e8ac7252d28ab40",
+            "card_hash": "00dd90d628e5104e4619954e69ef1154144bee7d2e962506c47e216fe689ed27",
+            "quote": "We just launched Xirp, a vendor-neutral agentic development environment.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

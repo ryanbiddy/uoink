@@ -1,0 +1,39 @@
+{
+  "seq": 913,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "eZc2VwkKRbkT8HOHmqJF8VUmvp1N3E4p",
+      "video_id": "2092254012456271872",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "6c87d1162dd97660c52d5448e947cfa9a58f11a2cfaa5727e11b949291b1645f",
+            "card_hash": "e84555e58a3b968cca72cb1fdf6208f052e926741c686a6ddadaa2f617002525",
+            "quote": "training your own text-to-speech model from scratch on your own GPU",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

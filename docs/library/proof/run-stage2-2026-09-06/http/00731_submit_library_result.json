@@ -1,0 +1,93 @@
+{
+  "seq": 731,
+  "tool": "submit_library_result",
+  "wall_ms": 5,
+  "request": {
+    "seq": 731,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "O441vY1NmOH91dVyLBKpUHhcpmKOpjU0",
+      "client_id": "proof-harness",
+      "attempt_token": "_Ksh-dNRoMWD8cGpVvR1VlQl-Jz3d87X-mYCG_d1GFI",
+      "submission_key": "O441vY1NmOH91dVyLBKpUHhcpmKOpjU0-_Ksh-dNRoMWD8cGpVvR1VlQl-Jz3d87X-mYCG_d1GFI",
+      "schema_version": 1,
+      "video_id": "2089664214595932160",
+      "source_revision": "b49eb69331b36b113a6bcffe2cb425840abd8d6d92489dc5a806b1dd55ea77c0",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "cd9cec1a70cc95bbe62ad94ccafa36fca3afd4dbd93f706efba2c7a8d93c4fb6",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-and-ml",
+            "shelf_path": [
+              "AI and ML"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "89cec7018ba008ef5f5dff9d91d24043084bc8b09320f1347e2eb6825d39927f",
+              "card_hash": "e9feb204be7ea2d70dc25033a0c008e9da929e5fe1a50870c8204875731e74fb",
+              "quote": "I got a 448x448 monocular depth model down to ~8 ms on my M4 Pro across ~250 dispatches"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 19481,
+        "cache_read_tokens": 184437,
+        "cache_create_tokens": 35282,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 731,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 5,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "O441vY1NmOH91dVyLBKpUHhcpmKOpjU0",
+        "video_id": "2089664214595932160",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-and-ml",
+            "shelf_path": [
+              "AI and ML"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "89cec7018ba008ef5f5dff9d91d24043084bc8b09320f1347e2eb6825d39927f",
+              "card_hash": "e9feb204be7ea2d70dc25033a0c008e9da929e5fe1a50870c8204875731e74fb",
+              "quote": "I got a 448x448 monocular depth model down to ~8 ms on my M4 Pro across ~250 dispatches",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

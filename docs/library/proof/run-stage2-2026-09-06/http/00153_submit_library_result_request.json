@@ -1,0 +1,51 @@
+{
+  "seq": 153,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "nqWJW2MM2pFdubgbYCiw8TwtmQ4WFLSI",
+    "client_id": "proof-harness",
+    "attempt_token": "t82u9XeqaLV15q7LG4MkqeN6zPcyrcBEUMBG9Nc2f8g",
+    "submission_key": "nqWJW2MM2pFdubgbYCiw8TwtmQ4WFLSI-t82u9XeqaLV15q7LG4MkqeN6zPcyrcBEUMBG9Nc2f8g",
+    "schema_version": 1,
+    "video_id": "2079818487246262272",
+    "source_revision": "f7d030ce15e85eed55b3193565aaf90e1f7575f950a8a2eb6740adb685092eca",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "b9444eb2235429ca1f00f90275c3bdd56c4547d9c7b4e21dff687e7c578e94f1",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "81dba2255c1ffd1d62c211ce709dca683040a007991cc6d7880bdf3514676a15",
+            "card_hash": "f5fcd69c86caa98167fdb5591e2e18fe4f11f7e9e55047762e02e466509e210e",
+            "quote": "Create a 3D claymation-style animation of a cute caricature of Erling Haaland wearing Norway's red number 9 football kit"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 12619,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 18591,
+      "wall_time_ms": 0
+    }
+  }
+}

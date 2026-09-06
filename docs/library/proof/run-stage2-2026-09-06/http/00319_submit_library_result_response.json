@@ -1,0 +1,39 @@
+{
+  "seq": 319,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "5NL1AAMtVwxPqMhpJvXUhcTmne7HFIu0",
+      "video_id": "2083066957230915584",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.82,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "86ff240cfd914119fa4aebbb0ebe7a27e835802f65182efb9be0174591ede50f",
+            "card_hash": "278bc3fa8f86276ce2e5045c778037498d256b137b987dfb2b6f9af4af1a9f54",
+            "quote": "Dreamina Seedance 2.5 is now live!",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

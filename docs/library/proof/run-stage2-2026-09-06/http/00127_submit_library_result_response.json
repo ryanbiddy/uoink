@@ -1,0 +1,39 @@
+{
+  "seq": 127,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "RLVLFmlqwYSMK5rPH3lVFE8sRdm9Bf0b",
+      "video_id": "2080337269240836096",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.7,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "16d2dfed437795e6e181cf7f8a645ad7c50414e1caecd6d6cded9a9e45d090e6",
+            "card_hash": "a57d9a9fd4b5e99694af50f152576a42e0036b53094f69942e7d6b136131e367",
+            "quote": "Claude Opus 5.0 is quite the AGI beast in 3D, the texture and details are absolutely insane.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

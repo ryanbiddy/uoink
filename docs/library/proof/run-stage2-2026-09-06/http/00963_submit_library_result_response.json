@@ -1,0 +1,39 @@
+{
+  "seq": 963,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 6,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "U1qrCn-5AVsH4kaflmrddj7G8y1QLQYI",
+      "video_id": "2093246582913171456",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "809e084837a286b712ca63c42bbd28f42ab48ffcac01e46f7369428aad71116a",
+            "card_hash": "c738d5516446ded757fe231257779dac071634f97a4430be84cdcac57a5b2295",
+            "quote": "the NVIDIA hugging face acquisition what does this mean for open source AI?",
+            "start": 46.856,
+            "end": 166.155,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

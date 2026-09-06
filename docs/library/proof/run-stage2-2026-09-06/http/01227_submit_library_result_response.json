@@ -1,0 +1,39 @@
+{
+  "seq": 1227,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 7,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "sfaE2DjTLZ52SWzSBDpRrSWJnZEt_Fiz",
+      "video_id": "v3Fr2JR47KA",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.82,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "c765f83a3809ee167e3fd4c21a7e0b54e82d8e7a3e0251fabdd66eb7aaf656f6",
+            "card_hash": "0452ee1ac715f57319b6a4ad08a7956ef380e6e2674285a832930b4a6ea1776e",
+            "quote": "This is an MCP application. That's an agent shipping its own interface",
+            "start": 16.75,
+            "end": 94.75,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

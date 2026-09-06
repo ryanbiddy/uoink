@@ -1,0 +1,39 @@
+{
+  "seq": 479,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "M_lKcNlN0C8g9htHKtPjfAaUaVMRClnn",
+      "video_id": "2085046911103270913",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "ecb436555dee9c7ca27b4fcbe61455f9730e9f33c7c5aca661e22d2167ff5d71",
+            "card_hash": "271242eaf23e9144ad8192dadf8cabfb929ccf4981559637d7b7da67011b15d8",
+            "quote": "Today it read 184 of our Meta ads, pulled the 5 patterns that outperform",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

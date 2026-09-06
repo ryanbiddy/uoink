@@ -1,0 +1,59 @@
+{
+  "seq": 561,
+  "tool": "submit_library_result",
+  "wall_ms": 2,
+  "request": {
+    "seq": 561,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "yx27GeVaqP_ZRDp0qaWlRNLDZVZv-stB",
+      "client_id": "proof-harness",
+      "attempt_token": "crP6gi4bNqOMYIn6j5uJzocBlKzN7yrkV8CPSCIBfY0",
+      "submission_key": "yx27GeVaqP_ZRDp0qaWlRNLDZVZv-stB-crP6gi4bNqOMYIn6j5uJzocBlKzN7yrkV8CPSCIBfY0",
+      "schema_version": 1,
+      "video_id": "2085010685562626048",
+      "source_revision": "5feae371722596ed4d9af2bc2322bb462f6cd7014ce8264f2ab91eb06aa21ae1",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "f7f6ba74b7b6a3133059fe57d09f4c296da4d1792d4c8f2aac963b5c90745eaf",
+      "result": {
+        "outcome": "unsupported",
+        "reason": "The card's sole excerpt carries a malformed excerpt_id (63 hex characters rather than the required 64), so it cannot be cited as schema-valid evidence; no other excerpt exists on this card to ground a classification."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 30355,
+        "cache_read_tokens": 188747,
+        "cache_create_tokens": 40176,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 561,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 2,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "yx27GeVaqP_ZRDp0qaWlRNLDZVZv-stB",
+        "video_id": "2085010685562626048",
+        "outcome": "unsupported",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

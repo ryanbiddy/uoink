@@ -1,0 +1,58 @@
+{
+  "seq": 1211,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "DUlXq86MSfTunfpV5LP0aqNO8pwiRxHL",
+      "video_id": "tOC2N0B9lio",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "ffc4487fd792d8d9af183e076d16197aab4559cf5aa49ec0028ebc24d1a6c79e",
+            "card_hash": "adf02ab36b37018b92f39c1b63697dd3e23e1e52d30c775b13a31bcc0f1ca6b6",
+            "quote": "Claude basically joins the team",
+            "start": 2.15,
+            "end": 83.03,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "0b53b0fe58d684f6f7399f6a438bdfcc5e8c27da920b3d4211bfb4aeb2d40b38",
+            "card_hash": "adf02ab36b37018b92f39c1b63697dd3e23e1e52d30c775b13a31bcc0f1ca6b6",
+            "quote": "65% of our product team's code is created by our internal version of Claude Tag",
+            "start": 280.8,
+            "end": 999.79,
+            "timing": "coarse",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

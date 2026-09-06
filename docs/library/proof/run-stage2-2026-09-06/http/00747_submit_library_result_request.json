@@ -1,0 +1,35 @@
+{
+  "seq": 747,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "neJBq09pQPnMTSz2P3Asa77dnIUXRspa",
+    "client_id": "proof-harness",
+    "attempt_token": "vPzcXVS3XH8cVjjySUOr_-kVIkn60qmxQLTXG2N3vik",
+    "submission_key": "neJBq09pQPnMTSz2P3Asa77dnIUXRspa-vPzcXVS3XH8cVjjySUOr_-kVIkn60qmxQLTXG2N3vik",
+    "schema_version": 1,
+    "video_id": "2089762819629805568",
+    "source_revision": "80b9d67d81c22c6d4182032d089b5848f93a4a637b931ae1f55c3356056aaa46",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "067de8e57978f817de3057acf0ae7d2c9fe33ff34dd95c186c853a8d6adf0d64",
+    "result": {
+      "outcome": "unsupported",
+      "reason": "This is a video source (X post linking a video) with no captions available and comments disabled; the only text is a bare caption ('the speed of AI robot in china rn') with no transcript or descriptive prose, insufficient for grounded classification."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 10150,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 19302,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,1018 @@
+{
+  "seq": 331,
+  "tool": "claim_library_work",
+  "wall_ms": 13,
+  "request": {
+    "seq": 331,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 331,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 13,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "U9WYccjkULEJX9TzzilxZUMYWlfzSOxD",
+            "video_id": "2083691176830390272",
+            "attempt_token": "BRfXNtA_nb9mpH4DQA7QFRfsKANXFJ-ohkauQdeqQ88",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676718507,
+            "source_revision": "52071140bfa844db1c203930339e24adf6c2bc0c53ef524c2307c0e7bcc9754a",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "b467a7fdff872d60b5f4bb82ec3750abb3b7a67d421018f063f862fd6ac599f5",
+            "card": {
+              "card_hash": "fb0acd8a23ed3123833c24b139095dacdae0633c5dc6d87f37dd8ea3f27bcc9e",
+              "channel": "Lunar",
+              "chars": 73418,
+              "chars_all_clips": 73418,
+              "chars_chosen_clips": 1440,
+              "clip_count": 49,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2083696076553412981#t=353",
+                  "end": 472.67,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c0c04f3797004a04855d964f358727aee46fd788a9f26d62fa3bb96da15264d8",
+                  "start": 353.06,
+                  "text": "For Vector Models And You Will See It Does Provide Some Particularly Nice Features Especially In Terms Of LLM Interoperability So Langchain Gives A Common Set Of Method For Invoking LLMs Which Is Really Convenient Because It Let's Swap Out ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2083696076553412981#t=1785",
+                  "end": 1905.349,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "cf419d5cf838929f1acbd96d03b04c22ff0697b1c8a884026d466efeb38d7bc8",
+                  "start": 1785.599,
+                  "text": "This Natural Language Input There's A Very Nice Way To See How Agents Are Cool Calling Actually Works National Language Input Is Turned Into Structured Tool Call Which Has Pass To This Tools Node The Tools Notes Stand Shared With My Multip ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2083696076553412981#t=1905",
+                  "end": 2025.099,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "f292d37326ebaac63c846f64a2311fe77b35a6676a7c82dad5ba2d049111db5a",
+                  "start": 1905.349,
+                  "text": "Deploy It Using Landgraf Platforms So Now We Are Going To Go A Little Deeper Into Both State Memory In This Second Module First Let's Talk More About Your State Schema When You Define The Land Graf State Graph Use Specify A Scheme The Schem",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2083696076553412981#t=2925",
+                  "end": 3042.769,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "e710949c01e824df9266264b5e7e1bb1ce1c0b2577092a735423ef1b9e9cd6b5",
+                  "start": 2925.3,
+                  "text": "Okay the Output I don't wanna get an answer kind of intuitive So the user will pass a Question and it'll get back another Answer And everything else will be hidden from the User at Answer Time So all I need to do is basically define my thin",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2083696076553412981#t=3875",
+                  "end": 3995.03,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "69e31c699eaaef50775d551e7bb0e4e47d3f585b2aea489105f728aa0fd0ce51",
+                  "start": 3875.73,
+                  "text": "Profile For The User What Will Be Collection Of To-Do Items Want All The Instructions About How To Create To Do Items Okay So In Order To Enforce The Agent To Make A Decision About 1 Of These 3 Memory Types When I'm Going To Do Is A Nice Tr",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2083696076553412981#t=4878",
+                  "end": 4997.88,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2994838e71da003f7a4a54ee80fd5940d8a3c99b949a7d0bc6c3099d0a2bab46",
+                  "start": 4878.739,
+                  "text": "In the prior modules, we built a number Of different and interesting graphs that showcase The capabilities Of LandGraph For Example We Built Research Assist In Module 4 We Built Task Maestro In Module 5 That Showcase Long-Term Memory Now Yo",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2083696076553412981#t=353",
+                  "end": 472.67,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c0c04f3797004a04855d964f358727aee46fd788a9f26d62fa3bb96da15264d8",
+                  "start": 353.06,
+                  "text": "For Vector Models And You Will See It Does Provide Some Particularly Nice Features Especially In Terms Of LLM Interoperability So Langchain Gives A Common Set Of Method For Invoking LLMs Which Is Really Convenient Because It Let's Swap Out ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2083696076553412981#t=1785",
+                  "end": 1905.349,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "cf419d5cf838929f1acbd96d03b04c22ff0697b1c8a884026d466efeb38d7bc8",
+                  "start": 1785.599,
+                  "text": "This Natural Language Input There's A Very Nice Way To See How Agents Are Cool Calling Actually Works National Language Input Is Turned Into Structured Tool Call Which Has Pass To This Tools Node The Tools Notes Stand Shared With My Multip ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2083696076553412981#t=1905",
+                  "end": 2025.099,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "f292d37326ebaac63c846f64a2311fe77b35a6676a7c82dad5ba2d049111db5a",
+                  "start": 1905.349,
+                  "text": "Deploy It Using Landgraf Platforms So Now We Are Going To Go A Little Deeper Into Both State Memory In This Second Module First Let's Talk More About Your State Schema When You Define The Land Graf State Graph Use Specify A Scheme The Schem",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2083696076553412981#t=2925",
+                  "end": 3042.769,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "e710949c01e824df9266264b5e7e1bb1ce1c0b2577092a735423ef1b9e9cd6b5",
+                  "start": 2925.3,
+                  "text": "Okay the Output I don't wanna get an answer kind of intuitive So the user will pass a Question and it'll get back another Answer And everything else will be hidden from the User at Answer Time So all I need to do is basically define my thin",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2083696076553412981#t=3875",
+                  "end": 3995.03,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "69e31c699eaaef50775d551e7bb0e4e47d3f585b2aea489105f728aa0fd0ce51",
+                  "start": 3875.73,
+                  "text": "Profile For The User What Will Be Collection Of To-Do Items Want All The Instructions About How To Create To Do Items Okay So In Order To Enforce The Agent To Make A Decision About 1 Of These 3 Memory Types When I'm Going To Do Is A Nice Tr",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2083696076553412981#t=4878",
+                  "end": 4997.88,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2994838e71da003f7a4a54ee80fd5940d8a3c99b949a7d0bc6c3099d0a2bab46",
+                  "start": 4878.739,
+                  "text": "In the prior modules, we built a number Of different and interesting graphs that showcase The capabilities Of LandGraph For Example We Built Research Assist In Module 4 We Built Task Maestro In Module 5 That Showcase Long-Term Memory Now Yo",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Lunar_-_Anthropic_engineer_just_dropped_a_1-hour_workshop_on_Graph_Engineeri",
+              "source_revision": "52071140bfa844db1c203930339e24adf6c2bc0c53ef524c2307c0e7bcc9754a",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "Lunar - Anthropic engineer just dropped a 1-hour+ workshop on Graph Engineeri...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://x.com/LunarResearcher/status/2083696076553412981",
+              "video_id": "2083691176830390272",
+              "yoinked_at": "2026-08-02T07:50:10"
+            }
+          },
+          {
+            "work_id": "UGiIcGbkEgat2pmuMLNPc-Sal_PU3E5V",
+            "video_id": "2083595539132919809",
+            "attempt_token": "k-z0lm3iNar2zpK2HyhtdseUx993bWB3aOVVBXMk5T4",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676718508,
+            "source_revision": "47353ed41f6f3401f6977405d1b3653a2ecb00eda100c807e67d3317d8e7fa7d",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "d86a2a9acf955590a6f4f2e528970f864aa8917e8b66112d1dca8ecfdc4fd5e3",
+            "card": {
+              "card_hash": "eedf496a69229617a5de7bd54fb712f29f11984889b34b0be77d03c08fbd7938",
+              "channel": "tetsuo",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/tetsuoai/status/2083736366341595479",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "80d1166b87871d1974f82e1c865a9804b28b378679ecba749260a90c6be9cf7c",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> This is how I react whenever a new Grok model gets released. https://t.co/KC72p6tNPn No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* ",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> This is how I react whenever a new Grok model gets released. https://t.co/KC72p6tNPn No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "tetsuo_-_This_is_how_I_react_whenever_a_new_Grok_model_gets_released",
+              "source_revision": "47353ed41f6f3401f6977405d1b3653a2ecb00eda100c807e67d3317d8e7fa7d",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> This is how I react whenever a new Grok model gets released. https://t.co/KC72p6tNPn No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "tetsuo - This is how I react whenever a new Grok model gets released.",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/tetsuoai/status/2083736366341595479",
+              "video_id": "2083595539132919809",
+              "yoinked_at": "2026-08-02T07:45:26"
+            }
+          },
+          {
+            "work_id": "Za0lJiY6OaIym1cIJ-2TsRE7R77TdjAD",
+            "video_id": "2083664004506145276",
+            "attempt_token": "jFM5wiZ-kERSH3X6lMn2OZiZNHZtHXjq3eSgL8z2_PY",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676718508,
+            "source_revision": "6691298dc1d90e0abed81f62b26a34c2bb90551dbb235d44faa09eb20a374507",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "bb6925f273f42612a7ce0cfaab65c88dc2361245f79302e80452b6e6a290178f",
+            "card": {
+              "card_hash": "87e2c78c6e844156652454f55472aef34d5b58e95d0541de3a391890b8ecc45a",
+              "channel": "Fireside Alpha",
+              "chars": 1064,
+              "chars_all_clips": 1064,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/firesidealpha/status/2083664004506145276#t=0",
+                  "end": 54.34,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2abad6e67d6816b92b5c1faad263f9eff47807400fa5d0976239fff7b16a7a88",
+                  "start": 0.0,
+                  "text": "And it turns out that there are different models that are good for different parts of these tasks, right? And even across different tasks, it's like some tasks are these really crazy hard ones where you want to actually use max thinking and",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/firesidealpha/status/2083664004506145276#t=0",
+                  "end": 54.34,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2abad6e67d6816b92b5c1faad263f9eff47807400fa5d0976239fff7b16a7a88",
+                  "start": 0.0,
+                  "text": "And it turns out that there are different models that are good for different parts of these tasks, right? And even across different tasks, it's like some tasks are these really crazy hard ones where you want to actually use max thinking and",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Anthropic Technical Staff Jess Yan says the harness and the model cannot be pulled apart without giving up performance, though she flags her own bias.    \"I think I am quite biased but I also think that it is impossible to get the maximum possible performance without tying https://t.co/4oQwkpTxyd No tags [00:00:00] And it turns out that there are different models that are good for different [00:00:02] parts of these tasks, right? And even across different tasks, it's [00:00:06] like some tasks are these really crazy hard ones where you want to actually [00",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Fireside_Alpha_-_Anthropic_Technical_Staff_Jess_Yan_says_the_harness_and_the_mod",
+              "source_revision": "6691298dc1d90e0abed81f62b26a34c2bb90551dbb235d44faa09eb20a374507",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Anthropic Technical Staff Jess Yan says the harness and the model cannot be pulled apart without giving up performance, though she flags her own bias.    \"I think I am quite biased but I also think that it is impossible to get the maximum possible performance without tying https://t.co/4oQwkpTxyd No tags [00:00:00] And it turns out that there are different models that are good for different [00:00:02] parts of these tasks, right? And even across different tasks, it's [00:00:06] like some tasks are these really crazy hard ones where you want to actually [00",
+              "title": "Fireside Alpha - Anthropic Technical Staff Jess Yan says the harness and the model can...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/firesidealpha/status/2083664004506145276",
+              "video_id": "2083664004506145276",
+              "yoinked_at": "2026-08-02T07:45:33"
+            }
+          },
+          {
+            "work_id": "_woRqz4uPCLFgtGTsooaaAkGbk9BWFjo",
+            "video_id": "2083607643910987776",
+            "attempt_token": "q-1mmJ5AnKAWzSwanZuU-Z4Kd-L0A-9sj-y6Trbk_Vc",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676718509,
+            "source_revision": "916b6893eb7cf24c164ba09bf22b730e8fd482d9f0498ca6f7df9cac4ee5825d",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "49139c2ef4b1b03000be1770c84562576ce242406ada2cc3c4efd39bbea97ad1",
+            "card": {
+              "card_hash": "79c2da86f9ebb203c03b9f689e808fde8bdc1b562b291482aadd5b3243375aeb",
+              "channel": "el.cine",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/EHuanglu/status/2083607695438037144",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "d1982372e0ff8df865b710ce609773b378369625dd0eaeb3cc866a43ebbf4942",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> if a space odyssey was made in 2026 with AI https://t.co/KSHIMbVsDI No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:commen",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> if a space odyssey was made in 2026 with AI https://t.co/KSHIMbVsDI No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "el_cine_-_if_a_space_odyssey_was_made_in_2026_with_AI",
+              "source_revision": "916b6893eb7cf24c164ba09bf22b730e8fd482d9f0498ca6f7df9cac4ee5825d",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> if a space odyssey was made in 2026 with AI https://t.co/KSHIMbVsDI No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "el.cine - if a space odyssey was made in 2026 with AI",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/EHuanglu/status/2083607695438037144",
+              "video_id": "2083607643910987776",
+              "yoinked_at": "2026-08-02T07:45:14"
+            }
+          },
+          {
+            "work_id": "fot09dBofq6YMEvimhhO2fMNHvIjvvzx",
+            "video_id": "2083953406482219008",
+            "attempt_token": "RuYRFcOgtJPYNPlUjAYF0oB_QkjrZdpHQt1ovZWvNXc",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676718510,
+            "source_revision": "3de54f6eb1e95dad675a7fb4e748f2d8cd29121c657b2c83327ea4884fdc65b5",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "f191245aec4f2f22492df9250906dadf7768f4bc15d5164d0aa80e2bef3daf05",
+            "card": {
+              "card_hash": "e67fd4786e6ff23a6652b270ed67441bdfcfdf8153ca7e9cdbc417b1ad2db505",
+              "channel": "Nous Research",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/NousResearch/status/2083953441571742191",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "d1db23413aa2d5683733784f7e259b89271071a04d27da71a0a0201b59693472",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> DeepSeek V4 Flash 0731 is now 90% off on Nous Portal for the next 7 days, in partnership with @novita_labs.  At this discounted price, it is over 1000x cheaper than Fable 5 on comparable tasks while sti",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> DeepSeek V4 Flash 0731 is now 90% off on Nous Portal for the next 7 days, in partnership with @novita_labs.  At this discounted price, it is over 1000x cheaper than Fable 5 on comparable tasks while still beating it on Terminal-Bench 2.1.  Try it today at https://t.co/4KFwhsReyA https://t.co/gggqrUSRyP No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Nous_Research_-_DeepSeek_V4_Flash_0731_is_now_90_off_on_Nous_Portal_for_the_next",
+              "source_revision": "3de54f6eb1e95dad675a7fb4e748f2d8cd29121c657b2c83327ea4884fdc65b5",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> DeepSeek V4 Flash 0731 is now 90% off on Nous Portal for the next 7 days, in partnership with @novita_labs.  At this discounted price, it is over 1000x cheaper than Fable 5 on comparable tasks while still beating it on Terminal-Bench 2.1.  Try it today at https://t.co/4KFwhsReyA https://t.co/gggqrUSRyP No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+              "title": "Nous Research - DeepSeek V4 Flash 0731 is now 90% off on Nous Portal for the next 7 d...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/NousResearch/status/2083953441571742191",
+              "video_id": "2083953406482219008",
+              "yoinked_at": "2026-08-03T07:36:35"
+            }
+          },
+          {
+            "work_id": "iUhvAKvvwp4BN0B74WtnxRkgGszuKmgW",
+            "video_id": "2083597581263769600",
+            "attempt_token": "8b--UBEChAw7Si-rQMAJB1aLf0chkcYOeu316FpYa6o",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676718512,
+            "source_revision": "61508420cace9c8aa4b308f457730514eefd13f4bde215c1f55d969d1762bdbd",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "f526ff5a0fd8e577e3f469a10154817bd828b3e3ad39a15cc4126a998b74f46e",
+            "card": {
+              "card_hash": "a758069c5f674bf077bc30f7667328e129e9f214cd9a6a727126442c6ae5f328",
+              "channel": "codila",
+              "chars": 98169,
+              "chars_all_clips": 98169,
+              "chars_chosen_clips": 1440,
+              "clip_count": 62,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/0xCodila/status/2083602508807569560#t=0",
+                  "end": 119.459,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2acf98117c575d6c23866dc82ff090a333361f1db59d47b9546c634bb9416622",
+                  "start": 0.0,
+                  "text": "Hi, I'm Annie and I am Ayo. Hey builders! Stop typing and start interacting we're moving beyond the text box The future isn't just about chatting with AI it's an immersive real-time experience And to celebrate the power of multi-modal ai th",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/0xCodila/status/2083602508807569560#t=1306",
+                  "end": 1425.38,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "d319804c2c0171538b87cbb72a41427bf7a4803f2773abca6e2ba8f6950632c7",
+                  "start": 1306.16,
+                  "text": "Cool So You Can See That It'S Actually Doing The Mathematic Calculation Right And Here As Your Creating This Function Tools Over Here And In The List Tools You're Also Using Aiding At MCP To Type So That You Creating This M CP 2 Tag Okay Le",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/0xCodila/status/2083602508807569560#t=2608",
+                  "end": 2727.579,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "cc08a8c224cbb3c799500ae9e79fafb0f0658c876e5250ad2ca0ccdb0982749e",
+                  "start": 2608.659,
+                  "text": "Our Particular Use Case We Care About The Order Hence The Submit To The Agent Depends On Your Use Case Great So Next Let's Open A D K Web To Check To Take Two Tests Our Agents As You Can See We Have A Lot Of Commands Over Here But Usually C",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/0xCodila/status/2083602508807569560#t=4280",
+                  "end": 4392.979,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "b776bdd3be2d1e96b5f8f39d03d1ba41014f451c95e986ee35ad128927483a81",
+                  "start": 4280.529,
+                  "text": "There Was No I Mean There Were Different Standards There Is Things Like ICP N But You Know The Nice Thing About A2A Is That Kind Of Creates A Universal Protocol How It Communicates Before Each Way We Tend To See Within Each Organization The",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/0xCodila/status/2083602508807569560#t=5233",
+                  "end": 5353.43,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2ce5916bea848dea5e44938e111a756a365973aa38fb94491acd26e07b84afdc",
+                  "start": 5233.71,
+                  "text": "Adding Control At Specific Point Of This Whole Life Cycle And A Good Exam P O Like I Had Really Great App Left About You Know Agent Security With Model Armor So Basically You Can Adding Agents Like Model Armour To Before Agent Call Back To ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/0xCodila/status/2083602508807569560#t=7007",
+                  "end": 7127.689,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "6ea0b5a535b8f05080905c45afdd09c84d5286aee8566ded887489b20b159e70",
+                  "start": 7007.8,
+                  "text": "And Enter The Dungeon So Let's Go Ahead And Do Now I'm Going Come Over Here In Copy The Summon Url Now So Copying Summon Er Come Over Here To The Dungeon And Put The A2A Endpoint Which Is Essentially The Path Of Our Summoner Agent And It Au",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/0xCodila/status/2083602508807569560#t=0",
+                  "end": 119.459,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2acf98117c575d6c23866dc82ff090a333361f1db59d47b9546c634bb9416622",
+                  "start": 0.0,
+                  "text": "Hi, I'm Annie and I am Ayo. Hey builders! Stop typing and start interacting we're moving beyond the text box The future isn't just about chatting with AI it's an immersive real-time experience And to celebrate the power of multi-modal ai th",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/0xCodila/status/2083602508807569560#t=1306",
+                  "end": 1425.38,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "d319804c2c0171538b87cbb72a41427bf7a4803f2773abca6e2ba8f6950632c7",
+                  "start": 1306.16,
+                  "text": "Cool So You Can See That It'S Actually Doing The Mathematic Calculation Right And Here As Your Creating This Function Tools Over Here And In The List Tools You're Also Using Aiding At MCP To Type So That You Creating This M CP 2 Tag Okay Le",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/0xCodila/status/2083602508807569560#t=2608",
+                  "end": 2727.579,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "cc08a8c224cbb3c799500ae9e79fafb0f0658c876e5250ad2ca0ccdb0982749e",
+                  "start": 2608.659,
+                  "text": "Our Particular Use Case We Care About The Order Hence The Submit To The Agent Depends On Your Use Case Great So Next Let's Open A D K Web To Check To Take Two Tests Our Agents As You Can See We Have A Lot Of Commands Over Here But Usually C",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/0xCodila/status/2083602508807569560#t=4280",
+                  "end": 4392.979,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "b776bdd3be2d1e96b5f8f39d03d1ba41014f451c95e986ee35ad128927483a81",
+                  "start": 4280.529,
+                  "text": "There Was No I Mean There Were Different Standards There Is Things Like ICP N But You Know The Nice Thing About A2A Is That Kind Of Creates A Universal Protocol How It Communicates Before Each Way We Tend To See Within Each Organization The",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/0xCodila/status/2083602508807569560#t=5233",
+                  "end": 5353.43,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2ce5916bea848dea5e44938e111a756a365973aa38fb94491acd26e07b84afdc",
+                  "start": 5233.71,
+                  "text": "Adding Control At Specific Point Of This Whole Life Cycle And A Good Exam P O Like I Had Really Great App Left About You Know Agent Security With Model Armor So Basically You Can Adding Agents Like Model Armour To Before Agent Call Back To ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/0xCodila/status/2083602508807569560#t=7007",
+                  "end": 7127.689,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "6ea0b5a535b8f05080905c45afdd09c84d5286aee8566ded887489b20b159e70",
+                  "start": 7007.8,
+                  "text": "And Enter The Dungeon So Let's Go Ahead And Do Now I'm Going Come Over Here In Copy The Summon Url Now So Copying Summon Er Come Over Here To The Dungeon And Put The A2A Endpoint Which Is Essentially The Path Of Our Summoner Agent And It Au",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "codila_-_Google_just_released_free_2-hour_course_on_full_Graph_engineering_1",
+              "source_revision": "61508420cace9c8aa4b308f457730514eefd13f4bde215c1f55d969d1762bdbd",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "codila - Google just released free 2-hour course on full Graph engineering: 1 ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://x.com/0xCodila/status/2083602508807569560",
+              "video_id": "2083597581263769600",
+              "yoinked_at": "2026-08-02T07:48:15"
+            }
+          },
+          {
+            "work_id": "iyUnlKHPmUFI84d8p27dbAFFKs5wZvPX",
+            "video_id": "2083521358282067968",
+            "attempt_token": "keef9i-ixwRZakhZomHOBTykkJnip7lSWT2pKSZsEy8",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676718512,
+            "source_revision": "8660d27fa62ca66e59fe6c33f61b9f5fb3453b783a68a59ee1455769621eb104",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "a7cfe622b30b4ff16ab001ae1e334db4225845dabb9bee7cc9c370e951f32f24",
+            "card": {
+              "card_hash": "4336089a11455e7737963108ffdf1ab08bd331c7799cfa2a31f930033b9adca7",
+              "channel": "Elon Musk",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/elonmusk/status/2083595725552734528",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "d9015852b863444d84a38d8ceb50e2258f83b3159f432574c35c7f0aacf698de",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> A special effect like this used to take months of effort by a specialized company https://t.co/6QgCLwangb No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disa",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> A special effect like this used to take months of effort by a specialized company https://t.co/6QgCLwangb No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Elon_Musk_-_A_special_effect_like_this_used_to_take_months_of_effort_by_a_specia",
+              "source_revision": "8660d27fa62ca66e59fe6c33f61b9f5fb3453b783a68a59ee1455769621eb104",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> A special effect like this used to take months of effort by a specialized company https://t.co/6QgCLwangb No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Elon Musk - A special effect like this used to take months of effort by a special...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/elonmusk/status/2083595725552734528",
+              "video_id": "2083521358282067968",
+              "yoinked_at": "2026-08-02T07:45:50"
+            }
+          },
+          {
+            "work_id": "jt22tbFRcjXodehWKnVLY9JorEzHDDas",
+            "video_id": "2083637374479642624",
+            "attempt_token": "VELU-OY_-jluz0G10jJhE_1eAiw6ltSrHv3d574ZeOk",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676718513,
+            "source_revision": "a3e25b29e2dbfb2496ec11f1253502abb1c3f3a040e1ec063a68c1502674a0f8",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "cf7ee05722edb48025016b3c4dc0e746e7e2378b193fbcaad61220521dedf4be",
+            "card": {
+              "card_hash": "b9edb8bf78cb4b1f96c1f3e8c3d24aa178b13c902b6a923987e4f77ccdfa17eb",
+              "channel": "J.K. Rowling",
+              "chars": 522,
+              "chars_all_clips": 522,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/jk_rowling/status/2083637556319543378#t=0",
+                  "end": 30.859,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2593b690fc6f5b7f40a63dbef23ca647051af7faf796dfe8454efce35dc52b8b",
+                  "start": 0.0,
+                  "text": "opinion and your opinion is ugly as hell. I've got a bunch of passing pick me trans people up in my comments right now telling me that i'm making society a worse place to us all by being myself and sharing my experience let me tell you, you",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/jk_rowling/status/2083637556319543378#t=0",
+                  "end": 30.859,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2593b690fc6f5b7f40a63dbef23ca647051af7faf796dfe8454efce35dc52b8b",
+                  "start": 0.0,
+                  "text": "opinion and your opinion is ugly as hell. I've got a bunch of passing pick me trans people up in my comments right now telling me that i'm making society a worse place to us all by being myself and sharing my experience let me tell you, you",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> If you don’t think he’s a woman, you’re transphobic. When he claimed to be a woman, he became a woman. He now belongs in women’s changing rooms, bathrooms, hospital wards, prison cells and rape support centres.  If you try and differentiate between him and a trans woman who looks https://t.co/FIqSwDDSmo No tags [00:00:00] opinion and your opinion is ugly as hell. [00:00:02] I've got a bunch of passing pick me trans [00:00:04] people up in my comments right now telling me [00:00:07] that i'm making society a worse place to us [00:00:09] all by being myself ",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "J_K_Rowling_-_If_you_don_t_think_he_s_a_woman_you_re_transphobic_When_he_claimed",
+              "source_revision": "a3e25b29e2dbfb2496ec11f1253502abb1c3f3a040e1ec063a68c1502674a0f8",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> If you don’t think he’s a woman, you’re transphobic. When he claimed to be a woman, he became a woman. He now belongs in women’s changing rooms, bathrooms, hospital wards, prison cells and rape support centres.  If you try and differentiate between him and a trans woman who looks https://t.co/FIqSwDDSmo No tags [00:00:00] opinion and your opinion is ugly as hell. [00:00:02] I've got a bunch of passing pick me trans [00:00:04] people up in my comments right now telling me [00:00:07] that i'm making society a worse place to us [00:00:09] all by being myself ",
+              "title": "J.K. Rowling - If you don’t think he’s a woman, you’re transphobic. When he claimed ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/jk_rowling/status/2083637556319543378",
+              "video_id": "2083637374479642624",
+              "yoinked_at": "2026-08-02T07:45:55"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

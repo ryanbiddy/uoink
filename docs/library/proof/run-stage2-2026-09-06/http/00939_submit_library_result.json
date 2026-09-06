@@ -1,0 +1,95 @@
+{
+  "seq": 939,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 939,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "PK7X22qBBfN6s2it2T-Mb0Ea6cbYjDFC",
+      "client_id": "proof-harness",
+      "attempt_token": "AgSnXsFxEOXBkgt4aC1yPuU7hZbb4aZHii1EdVvyTLU",
+      "submission_key": "PK7X22qBBfN6s2it2T-Mb0Ea6cbYjDFC-AgSnXsFxEOXBkgt4aC1yPuU7hZbb4aZHii1EdVvyTLU",
+      "schema_version": 1,
+      "video_id": "2093010398140063744",
+      "source_revision": "356ac967f375f0f5d9bd24be7cbe3840de0e3753e056ba7fca7853b2fc9870f9",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "b24531c4a69082e7254cb0747fcac7f45748653aa27d4a2c3e7ace56400a30af",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "67a23104200296becb8bb9401e49c0d65785327ec8af53d0f94d801e9fb82ad2",
+              "card_hash": "9bbf4128ece16c89e0af6c7c84745f86f5e8d939f72fb443826de81d772de0ca",
+              "quote": "We've iterated based on developer feedback and are excited to introduce lots of new features"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 15696,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 22313,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 939,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "PK7X22qBBfN6s2it2T-Mb0Ea6cbYjDFC",
+        "video_id": "2093010398140063744",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "67a23104200296becb8bb9401e49c0d65785327ec8af53d0f94d801e9fb82ad2",
+              "card_hash": "9bbf4128ece16c89e0af6c7c84745f86f5e8d939f72fb443826de81d772de0ca",
+              "quote": "We've iterated based on developer feedback and are excited to introduce lots of new features",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "seq": 677,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 677,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "JFMO5S5ErHtzXG6ZzAThH4x_LJeoRm8R",
+      "client_id": "proof-harness",
+      "attempt_token": "GNzOrmWpHDO2eqkKvVFKmWDcfoIKAMstM-yYYmMD6Bo",
+      "submission_key": "JFMO5S5ErHtzXG6ZzAThH4x_LJeoRm8R-GNzOrmWpHDO2eqkKvVFKmWDcfoIKAMstM-yYYmMD6Bo",
+      "schema_version": 1,
+      "video_id": "2088664969847959552",
+      "source_revision": "b75b72c2934804f414f2262058994f83267169d45655b846b8475eb5c592b118",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "57a0dbbb87cd19c84e1bd2c3b3beb3d6a1aec89bf1f47c8b7afa8d8657f42559",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "1ae41a0fdc38f91ad1edd150a6bd94498705e6ed33aa8dbc7b55288b2bc7ca7c",
+              "card_hash": "0967d4b17977d4d0f6a7b57e6e0309fff852d20147c7ed0ad5fbae845b07522d",
+              "quote": "Watch your computer screen all the time"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 15644,
+        "cache_read_tokens": 186786,
+        "cache_create_tokens": 33766,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 677,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "JFMO5S5ErHtzXG6ZzAThH4x_LJeoRm8R",
+        "video_id": "2088664969847959552",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "1ae41a0fdc38f91ad1edd150a6bd94498705e6ed33aa8dbc7b55288b2bc7ca7c",
+              "card_hash": "0967d4b17977d4d0f6a7b57e6e0309fff852d20147c7ed0ad5fbae845b07522d",
+              "quote": "Watch your computer screen all the time",
+              "start": 0.5,
+              "end": 54.07,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

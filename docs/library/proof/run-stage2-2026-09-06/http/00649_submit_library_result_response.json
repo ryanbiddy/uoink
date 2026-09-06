@@ -1,0 +1,39 @@
+{
+  "seq": 649,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "uRlD9N9tpU4o1iUW_JEaRWAmrWJQJvZ1",
+      "video_id": "2087982002381221888",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "9f8e6f65d501d8e52ad81a7ea949668b5e92f9fc4084836596af8d2343f3ac7e",
+            "card_hash": "9ac6c2f7bb8d4619a6f35ebef90ff49d4d1123a2f5caa995f7b8f851f791cb44",
+            "quote": "We Have A Diff Viewer As Well Where You Can Stage Changes",
+            "start": 134.919,
+            "end": 254.759,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

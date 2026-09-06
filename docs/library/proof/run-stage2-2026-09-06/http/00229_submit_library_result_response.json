@@ -1,0 +1,38 @@
+{
+  "seq": 229,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "DRnwxiZ3ht2iqo1h8V3t6hQdfUaUccnR",
+      "video_id": "2080788848867787093",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "9ff6fe605521062a6e62c3fbafbe65f521cf4046c80e277c38a1659198218c2c",
+            "card_hash": "ae2b6a0d406d4877bf5466831680003c5b1409e62166b1e0d9e23cd283760b60",
+            "quote": "We gave Opus 5 robot arms. It can stack bowls.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

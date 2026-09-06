@@ -1,0 +1,39 @@
+{
+  "seq": 119,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Kv7o8l1U-JRDfWDMQ4Tm8oOYQuwAlqyE",
+      "video_id": "2079961848095412224",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "db3032c848974a325d7d9c3c51ed3730f96a7731cc0c34091be56957148f9a60",
+            "card_hash": "6b5a0f66aa53e0a1f65c39606e91db51864cb5ba9fc811177a8b4de123edebfa",
+            "quote": "Kimi K3 was already in internal evaluation by April/May, before Fable 5 had been available long enough to be a plausibly distilled.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

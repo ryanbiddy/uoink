@@ -1,0 +1,59 @@
+{
+  "seq": 593,
+  "tool": "submit_library_result",
+  "wall_ms": 2,
+  "request": {
+    "seq": 593,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "0m6l5bRZBvpoNq3lRBRHocDQD2vZvWK5",
+      "client_id": "proof-harness",
+      "attempt_token": "teAnpMzOQ981k71AvscSRIDH-LrPKV21BbkGhDpMLso",
+      "submission_key": "0m6l5bRZBvpoNq3lRBRHocDQD2vZvWK5-teAnpMzOQ981k71AvscSRIDH-LrPKV21BbkGhDpMLso",
+      "schema_version": 1,
+      "video_id": "2086167837358321664",
+      "source_revision": "e0fc80945e3811448059818ba5969064174994a8ff9145ff98e847402d2db11d",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "453f2eda06b1df1ab1aefeb4e83d486312e8c47b90fb271ef6b13ed612ac0978",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "The only content is a one-line personal statement ('Cancelled my Claude subscription.') with no captions or further context. It does not establish any subject matter matching an approved shelf definition; a mere product mention does not justify a technical-shelf assignment."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 18457,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20482,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 593,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 2,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "0m6l5bRZBvpoNq3lRBRHocDQD2vZvWK5",
+        "video_id": "2086167837358321664",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

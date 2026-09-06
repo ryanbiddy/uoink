@@ -1,0 +1,59 @@
+{
+  "seq": 77,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 77,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "aq7Kd0ANoN6O2kY26KmA8TaxIid0tnI7",
+      "client_id": "proof-harness",
+      "attempt_token": "CCEhkLb85805Pi7iG-CwrHNu-i2U9oGZPDjXA3C1mDc",
+      "submission_key": "aq7Kd0ANoN6O2kY26KmA8TaxIid0tnI7-CCEhkLb85805Pi7iG-CwrHNu-i2U9oGZPDjXA3C1mDc",
+      "schema_version": 1,
+      "video_id": "2078014058238808064",
+      "source_revision": "16d20eedb78173f3d77ed82383201590f47db8a3d32da91485809ab60ab6a791",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "1fc55381d022685f5653aa59821402bc22ab7e1797cd85917ad1d2a289517bf2",
+      "result": {
+        "outcome": "unsupported",
+        "reason": "Source is a video (X post) with clip_count 0 and no captions available; the only text ('Anthropic with every industry:') is a bare provider mention with no substantive content, insufficient for grounded classification."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 9712,
+        "cache_read_tokens": 0,
+        "cache_create_tokens": 103604,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 77,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "aq7Kd0ANoN6O2kY26KmA8TaxIid0tnI7",
+        "video_id": "2078014058238808064",
+        "outcome": "unsupported",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

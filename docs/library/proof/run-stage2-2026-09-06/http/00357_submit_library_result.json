@@ -1,0 +1,95 @@
+{
+  "seq": 357,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 357,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "Yd1WmvqA-1cHKDYTsciuvd9FXg8vp6lp",
+      "client_id": "proof-harness",
+      "attempt_token": "TA-ghsi7gU99I9WRvgQxPxUrnTmoeyRtiZV8eoGnOYA",
+      "submission_key": "Yd1WmvqA-1cHKDYTsciuvd9FXg8vp6lp-TA-ghsi7gU99I9WRvgQxPxUrnTmoeyRtiZV8eoGnOYA",
+      "schema_version": 1,
+      "video_id": "2082844194066870272",
+      "source_revision": "dea831bbf1cc723c408ee5a36c1b36e85370f7e4d3eb8a0c17aa51c19a46f899",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "108898e52f9e1a6f3a85a36d21ac3fdf8fdda98add61201453b8c013de807ead",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "6b50a2e5ce73312829509c33586326f0c0815248b5bed029980a4bb6c9afae9e",
+              "card_hash": "f0821a3772001ffd836f12aeabdcba354a044ecc0f45f8473d652feb9f7215bb",
+              "quote": "Today, we take a major stride toward making that dream a reality"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 16086,
+        "cache_read_tokens": 186502,
+        "cache_create_tokens": 34334,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 357,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "Yd1WmvqA-1cHKDYTsciuvd9FXg8vp6lp",
+        "video_id": "2082844194066870272",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "6b50a2e5ce73312829509c33586326f0c0815248b5bed029980a4bb6c9afae9e",
+              "card_hash": "f0821a3772001ffd836f12aeabdcba354a044ecc0f45f8473d652feb9f7215bb",
+              "quote": "Today, we take a major stride toward making that dream a reality",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

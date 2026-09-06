@@ -1,0 +1,77 @@
+{
+  "seq": 1169,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "6WFg_PZPR6zyIYhdP7fQjqknsSDYbDIo",
+      "video_id": "ZRb7D6R64hM",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "85d3fe83c6cab97f26f10d7979a2cce1fd00825764dc954d82690d4201878261",
+            "card_hash": "27d49f02608387a766b3985bf5bc53f496bac6dfb52181bace14fc9ccdc9dddb",
+            "quote": "Daily stand-ups at 8 a.m. weekly competitor briefs every Monday or Friday.",
+            "start": 410.71,
+            "end": 530.15,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "1aa90e6d0c7118b9caa4b8ccf16ff47877146309bcd6b8d8ac6651071c579250",
+            "card_hash": "27d49f02608387a766b3985bf5bc53f496bac6dfb52181bace14fc9ccdc9dddb",
+            "quote": "Boris uses one called /commit pushpr dozens of times a day.",
+            "start": 816.069,
+            "end": 904.15,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4f43670c83fa770cc1ac01c0e7c5393fcc83d1582a14b41e76911eecc9a9044f",
+            "card_hash": "27d49f02608387a766b3985bf5bc53f496bac6dfb52181bace14fc9ccdc9dddb",
+            "quote": "It's the cleanest way to cap autonomous agents that might otherwise run wild.",
+            "start": 1142.549,
+            "end": 1244.63,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

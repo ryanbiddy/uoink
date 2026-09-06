@@ -1,0 +1,39 @@
+{
+  "seq": 1093,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "0kfSQRBrlKR10Ov7KrVPngsTcE3L47V9",
+      "video_id": "8GRmLR__OGQ",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "39df6e874e95bde3261f0b9260b05f04c456bf333ac88f5c1b54792b75eb50dc",
+            "card_hash": "1d1218fd00816c8a67bb41b23df641c83919ef6b5f7bf7114c6a146cc101f162",
+            "quote": "testing is hard and the cursor adapter is not as reliable as we want it to be",
+            "start": 2250.24,
+            "end": 2596.76,
+            "timing": "coarse",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

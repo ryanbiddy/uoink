@@ -1,0 +1,39 @@
+{
+  "seq": 743,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "VjgDE4qt-pUrs-evKrSDD5YRgHt0Y0OO",
+      "video_id": "2089169138811817984",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "e02ccfdf508c88552edcec41d8f17b20f6bbf6b655f510dacd8902b57d3dfba0",
+            "card_hash": "5d4f4378c3558e44ad05a379fab74e528cfbc8d49865d8068c96bb1e044db105",
+            "quote": "In the Codex app, you can move chats in and out of projects",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

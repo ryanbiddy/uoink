@@ -1,0 +1,39 @@
+{
+  "seq": 1135,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "tNrFafUwJ8kgk6bYzfjsjhWc6olv8Voq",
+      "video_id": "2095596032256065543",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "412f987d51b06096bb9a557d9280c91b47d51c57fa67cce1d2c706633aa922a7",
+            "card_hash": "aa99ac3b5cfd688015b386fef7a55f2dcf971223b52c0babbbe4a965230a2922",
+            "quote": "I had early access to GPT-6 Astra and it's maybe the most insane model I've experienced",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

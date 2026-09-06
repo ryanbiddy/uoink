@@ -1,0 +1,51 @@
+{
+  "seq": 681,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "NPO8zi5SWBhl6sMU0t-LTxmhYkM98AVW",
+    "client_id": "proof-harness",
+    "attempt_token": "78ENVdCVMk5_6-wehsgIhMv59sgHzKLJCY-ebqVAIFY",
+    "submission_key": "NPO8zi5SWBhl6sMU0t-LTxmhYkM98AVW-78ENVdCVMk5_6-wehsgIhMv59sgHzKLJCY-ebqVAIFY",
+    "schema_version": 1,
+    "video_id": "2088647911370276864",
+    "source_revision": "be658234775e4dbedadf0e6b69c53eb4a7afc52f81a8deccf381aa79fbf1ceaf",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "7c214e4a395694de7cc1439b08b1a0f098fdeecab2bd0841b26de4b8290a7884",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "e8a7e7f2697f4ef202885ceb7b2a9a190b36cb8e5405aad09150dabef941f9b9",
+            "card_hash": "d92b0ef2720a219503330bb56ab33a3bcbaeb58f01203ec7aa37dc03fd1d0ea7",
+            "quote": "X's width is the sequence length"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 15644,
+      "cache_read_tokens": 186786,
+      "cache_create_tokens": 33766,
+      "wall_time_ms": 0
+    }
+  }
+}

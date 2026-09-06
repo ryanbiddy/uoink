@@ -1,0 +1,51 @@
+{
+  "seq": 265,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "gWDFcTdsk0zmfwRiGU9lIG7J4mNxnIo9",
+    "client_id": "proof-harness",
+    "attempt_token": "hUiIuX3ey__jbOZMZ-HhYu9YDpvcavhAWlRP0tW5-I8",
+    "submission_key": "gWDFcTdsk0zmfwRiGU9lIG7J4mNxnIo9-hUiIuX3ey__jbOZMZ-HhYu9YDpvcavhAWlRP0tW5-I8",
+    "schema_version": 1,
+    "video_id": "2082487466129522688",
+    "source_revision": "24378c98d60d2d36f6af6333a77eec3b42dac1156997f87e30f7b8b4c72659b3",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "eafbf94ef2aa11e33f63bad800deadf2dfd26fa34f2e4ada95c9f812d290d89c",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "a6318112d3aff952dba4f23bd1e31084ba9f04d2bb176ded08f73805288d5fed",
+            "card_hash": "96fee268a77e7a698b6e21509f323aca0e86b59feae4f6c8716fdaf82cd0e936",
+            "quote": "Let's maximize outreach throughout all of LinkedIn. We need to brief a meeting to the entire team by this morning."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 11033,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 18663,
+      "wall_time_ms": 0
+    }
+  }
+}

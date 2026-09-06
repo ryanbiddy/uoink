@@ -1,0 +1,39 @@
+{
+  "seq": 365,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "eQMXoGHfnodvjtk8D4Qax-YSAdpRj_uH",
+      "video_id": "2083262686318444544",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "88bc2095a32ecaa382b6f14d7f15cb1cb9d44b64c7eef929ab6f9de707c9a8a2",
+            "card_hash": "d983ef7f77a48a64372371cda8f29b8c95d2fa6757d64b47be646367c4985e09",
+            "quote": "Google just dropped a 1-hour course on Graph Engineering: from agents to full automation",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

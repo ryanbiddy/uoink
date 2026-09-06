@@ -1,0 +1,59 @@
+{
+  "seq": 1448,
+  "tool": "submit_library_result",
+  "wall_ms": 2,
+  "request": {
+    "seq": 1448,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "R49O15OPtjXb8vP3JSF-sUpstSOcF-VQ",
+      "client_id": "proof-harness",
+      "attempt_token": "pwQAziKSOHkHMkVtNjEjNxFR403dTuMIfxIbv7_pa9U",
+      "submission_key": "R49O15OPtjXb8vP3JSF-sUpstSOcF-VQ-pwQAziKSOHkHMkVtNjEjNxFR403dTuMIfxIbv7_pa9U",
+      "schema_version": 1,
+      "video_id": "x_d7a63c68734",
+      "source_revision": "3ea9fe590ac77446e7f69701dd797919ff4a5009d55216a7408b71dabfd727a3",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "850e74d688598b3cd4a741afedab3f4a424b5b76d7c7c8875d5978ff37520c92",
+      "result": {
+        "outcome": "unsupported",
+        "reason": "The single excerpt is truncated before any substantive content ('We went through lab econ'); the specific AI-lab economics detail (inference/training shift, Anthropic/OpenAI FLOPs) appears only in the summary hint, not in an excerpt, so grounded classification is not possible per the excerpt text alone."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 10982,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 22121,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1448,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 2,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "R49O15OPtjXb8vP3JSF-sUpstSOcF-VQ",
+        "video_id": "x_d7a63c68734",
+        "outcome": "unsupported",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

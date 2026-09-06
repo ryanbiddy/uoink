@@ -1,0 +1,183 @@
+# mireia. - usuarios de claude ahora mismo
+
+**Channel:** mireia. (— subscribers)
+**Uploaded:** 2026-08-22 | **Duration:** — | **Views:** — | **Likes:** 939
+**URL:** https://x.com/heymireia/status/2091208884786520487
+**Uoinked:** 2026-08-23T07:36:32
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The speaker immediately establishes credentials by introducing herself as 'a member of technical staff at Anthropic on the Applied AI team,' positioning herself as an expert with insider knowledge about Claude and its systems. This credential-based opening builds trust and frames her as a qualified authority before diving into the technical content.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+usuarios de claude ahora mismo https://t.co/MGulym9hpy
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Alright, hello everyone
+[00:00:01] It's great to see you all here today
+[00:00:03] for our session on shipping your first manage
+[00:00:05] agent
+[00:00:06] Let's go ahead and get started
+[00:00:08] My name is Isabella He
+[00:00:09] I'm a member of technical staff at Anthropic
+[00:00:11] on the Applied AI team at Anthropic sits at
+[00:00:14] the intersection of products
+[00:00:16] research, and our customers
+[00:00:18] which means that I get to contribute internally
+[00:00:20] to products at Anthropic like Claude Code and our Claude harnesses
+[00:00:23] as well as work externally with our customers
+[00:00:25] that are building on top of Claude
+[00:00:27] and on top of our harnesses
+[00:00:29] So my goal today is to get you
+[00:00:30] all hands-on with actually building on top of manage agents
+[00:00:34] understanding how the harness works under the hood
+[00:00:36] and getting you ready to actually ship your
+[00:00:38] first incident response management
+[00:00:41] So as a quick overview of today's agenda
+[00:00:43] we're going to cover first a quick refresher
+[00:00:45] of Claude manage agents
+[00:00:46] I want to talk to you for a
+[00:00:47] little bit about how this harness works under
+[00:00:49] the hood and what makes it so special
+[00:00:51] Our team put a lot of thought into
+[00:00:53] the architectural design of Claude manage agents
+[00:00:55] to make sure that it runs ready
+[00:00:57] and reliably for production-ready. Agents
+[00:00:59] So
+[00:00:59] I want to talk you through a little
+[00:01:00] bit of how that works
+[00:01:02] so that then when we transition into the second portion here
+[00:01:05] which is the hands-on workshop
+[00:01:07] you'll actually understand what each of the primitives
+[00:01:09] you're building actually mean for your agents under the hood
+[00:01:12] So, for the majority of today's session
+[00:01:14] I want you all to actually have your laptops open
+[00:01:16] building alongside me, actually working inside of a repository
+[00:01:20] and getting you ready to actually spin up
+[00:01:22] a working incident response agent
+[00:01:25] Lastly
+[00:01:25] we'll talk a little bit about Beyond the
+[00:01:26] Basics
+[00:01:27] Today's session is the first session of a
+[00:01:29] couple of other ones that we'll build on
+[00:01:30] top of this on Claude Manage Agents
+[00:01:32] Specifically, right after this one
+[00:01:34] I think there's another session on Dreaming
+[00:01:36] which is one of my favorite new
+[00:01:37] features with Claude Manage Agents for self-improving agents
+[00:01:40] and memory built into the harness
+[00:01:42] So
+[00:01:42] encourage everyone to dive in a little bit
+[00:01:44] deeper into what else is in the box
+[00:01:46] after we set you all up for success
+[00:01:48] today with a quick introduction
+[00:01:51] So let's first touch a little bit about
+[00:01:52] how we got here with Claude managed agents
+[00:01:55] When we first released the very first Claude back in 2023
+[00:01:59] we released the messages API alongside access to
+[00:02:01] Claude
+[00:02:03] This provided raw model access to all Claude
+[00:02:05] models
+[00:02:06] This became the very first way that people
+[00:02:08] could programmatically build on top of Claude
+[00:02:11] and essentially gave a way for people to
+[00:02:13] access tokens in and tokens out
+[00:02:15] via our Claude models
+[00:02:17] This also meant that for everyone building on
+[00:02:19] top of Claude models
+[00:02:20] they had to implement all the various primitives
+[00:02:22] themselves. Things like context management
+[00:02:25] the actual agent loop
+[00:02:26] compaction, etc.
+[00:02:28] All the primitives that come alongside making an
+[00:02:29] agent work
+[00:02:31] When models were less intelligent back in the
+[00:02:33] early days of let's say 2023
+[00:02:35] some of these primitives were much simpler because
+[00:02:37] agents could simply do less
+[00:02:39] But as we evolved into now with higher model intelligence
+[00:02:42] and as agents are able to take on
+[00:02:43] more complex tasks
+[00:02:45] and actually take actions within environments
+[00:02:47] and come to actually do entire tasks for
+[00:02:50] humans
+[00:02:51] The primitives that come alongside context management
+[00:02:54] and managing an agent's ability to execute API
+[00:02:56] calls and tool calls becomes much more complex
+[00:03:00] So that's when we moved to the agent SDK
+[00:03:02] which became a harness that allows you to
+[00:03:04] programmatically call Claude Code
+[00:03:06] one of our favorite agents at Anthropic
+[00:03:09] So
+[00:03:09] Claude Code is something that
+[00:03:11] an agent has access to a computer and
+[00:03:13] takes actions within file system
+[00:03:15] So
+[00:03:15] the agent SDK
+[00:03:16] became a way for you to make Claude
+[00:03:17] much more powerful
+[00:03:19] by leveraging the power of Claude Code within
+[00:03:20] Harness
+[00:03:22] The main thing here though is that with the agent SDK
+[00:03:25] developers still had to manage hosting and scaling
+[00:03:28] on their own
+[00:03:29] and making sure that the agent SDK would
+[00:03:30] be safe to run within their containers
+[00:03:33] That's when we then evolved into Claude Managed Agents
+[00:03:36] which is the first harness to be able
+[00:03:38] to handle scaling and production-ready components for you by Anthropic
+[00:03:43] providing things like a purpose-built harness
+[00:03:45] sandboxing, observability, tool runtime
+[00:03:48] all within a managed infrastructure system
+[00:03:51] This means that developers can focus on task and agent configuration
+[00:03:54] custom tool logic
+[00:03:56] the things that actually matter
+[00:03:57] for bringing domain expertise and customizability to your agents
+[00:04:01] where you're handing off the rest of all
+[00:04:02] the primitives and
+[00:04:04] core compute and primitives of
+[00:04:06] essentially managing the
+[00:04:07] basics of agent running to Anthropic
+[00:04:11] So that brings me to
+[00:04:12] manage agents
+[00:04:13] as the fastest way to build production-ready agents
+[00:04:16] on Claude
+[00:04:17] We've seen people build 10 to 15 times
+[00:04:19] faster to production with Claude managed agents
+[00:04:22] by leveraging our purpose-built harness
+[00:04:25] Part of the reason why we built Claude
+[00:04:26] managed agents is because is because harnesses should
+[00:04:29] evolve alongside your agents
+[00:04:31] For example
+[00:04:32] back when we were building ourselves on top
+[00:04:34] of models like Sonnet 4.5
+[00:04:36] we noticed that Sonnet 4.5 emitted a particular
+[00:04:39] behavior called context anxiety
+[00:04:41] This meant that with Sonnet 4.5
+[00:04:43] Claude started wrapping up tasks early
+[00:04:44] even when it still had room to spare
+[00:04:46] in its context window
+[00:04:48] To manage that, in our harness
+[00:04:49] we then added some mitigations to
+[00:04:52] combat against this early stopping behavior
+[00:04:55] But when Opus 4.5 then came out
+[00:04:57] we actually saw this behavior go away
+[00:04:58] making all that work we had done inside
+[00:05:00] of the harness essentially obso

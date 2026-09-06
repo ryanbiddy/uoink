@@ -1,0 +1,39 @@
+{
+  "seq": 1444,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 2,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "ErT11hZCvRbtBl97L8eGGkNdwH8c6khG",
+      "video_id": "x_6d0489f045f",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "spaceflight",
+          "shelf_path": [
+            "Space and Science",
+            "Spaceflight"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "cfc878327c84741e233f25390ce573373b50bd115ae47a320adead3b7b50b25a",
+            "card_hash": "270cf6510e11a833eb181f15139c822276e52ff0313cec1a81c7b0e45231a515",
+            "quote": "Exploration is part of who we are. Back to the Moon. Building a Moon Base.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

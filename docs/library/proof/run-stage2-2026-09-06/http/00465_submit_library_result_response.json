@@ -1,0 +1,58 @@
+{
+  "seq": 465,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "OwLYUPz6vmILRJy2YFPTjVlI-rMA7yPk",
+      "video_id": "2084022671646273536",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "1b55ae66bc59cd7e8df1decf0f6bb8b9b0a40ed02ac9e510af8e41398213d08a",
+            "card_hash": "a18b2c4ce52c8a9a449a349e895b5f9ba91bde4d1576831c77492ab89a445d7e",
+            "quote": "Some Step By Step Instructions For How To Perform At Scale",
+            "start": 1546.539,
+            "end": 1665.38,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "45bd834b1b0dce5a1c279f57a956971a97b19a54c5d0c5adee416e4f1c4a8078",
+            "card_hash": "a18b2c4ce52c8a9a449a349e895b5f9ba91bde4d1576831c77492ab89a445d7e",
+            "quote": "This Is Now In M C P We Are Going Need All Of These Things Be MCP Services",
+            "start": 2739.699,
+            "end": 2857.69,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

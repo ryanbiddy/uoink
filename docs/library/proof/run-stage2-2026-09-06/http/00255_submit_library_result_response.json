@@ -1,0 +1,19 @@
+{
+  "seq": 255,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 20,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "WOkuIsDTk-JZ9Yvl_ytVUa8XErqmbHQc",
+      "video_id": "2082518119344459776",
+      "outcome": "unmapped",
+      "accepted_memberships": [],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

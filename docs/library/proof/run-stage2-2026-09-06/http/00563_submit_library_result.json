@@ -1,0 +1,95 @@
+{
+  "seq": 563,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 563,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "32y0PjlLNDbC8vevwWyGwx-QAr1vs0aD",
+      "client_id": "proof-harness",
+      "attempt_token": "jdm8ZxcCpWeS5G2-dsgwvwiU6nloCqJqAQDpFRIqW7Q",
+      "submission_key": "32y0PjlLNDbC8vevwWyGwx-QAr1vs0aD-jdm8ZxcCpWeS5G2-dsgwvwiU6nloCqJqAQDpFRIqW7Q",
+      "schema_version": 1,
+      "video_id": "2085903679304179712",
+      "source_revision": "359938718ddbe8459e6642330b87d876e807ac7ae9f920afbb644ba1b0756d7b",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "ecb38675b34087e44c48b4df1b36cd5c74ae233181de5018cea49df796ad7fa1",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "generative-media",
+            "shelf_path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "72b83237f37177b5474f12512e4441de3a0d4ada9349b62d7de643f184ef6e23",
+              "card_hash": "496cc60a192cf26e90ce6b91a06519a3f57d22011af4507a89e7ecdf2a995998",
+              "quote": "In fact, the video generation It's just like making a picture"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 30355,
+        "cache_read_tokens": 188747,
+        "cache_create_tokens": 40176,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 563,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "32y0PjlLNDbC8vevwWyGwx-QAr1vs0aD",
+        "video_id": "2085903679304179712",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "generative-media",
+            "shelf_path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "72b83237f37177b5474f12512e4441de3a0d4ada9349b62d7de643f184ef6e23",
+              "card_hash": "496cc60a192cf26e90ce6b91a06519a3f57d22011af4507a89e7ecdf2a995998",
+              "quote": "In fact, the video generation It's just like making a picture",
+              "start": 118.54,
+              "end": 236.819,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

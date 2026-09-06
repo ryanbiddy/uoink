@@ -1,0 +1,51 @@
+{
+  "seq": 373,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "I8i5Y0gqosqB_IP7gOTSdFhGARLlxD4s",
+    "client_id": "proof-harness",
+    "attempt_token": "uiUeenmWwLdFcFWGFhWVgDmZscdAt_aG6xRNERDSa-8",
+    "submission_key": "I8i5Y0gqosqB_IP7gOTSdFhGARLlxD4s-uiUeenmWwLdFcFWGFhWVgDmZscdAt_aG6xRNERDSa-8",
+    "schema_version": 1,
+    "video_id": "2083270328453853184",
+    "source_revision": "ec4c1534f886a02a4f32ae9cced99255aba9b5621b72b720efb538bb20948055",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "cb4a239c019b57defa2db6d6849b5b5360dbb59c0fb3a8886df9d605b00e43dd",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "13751081459df219b27d6e96c0bf93c190ec4a2f06f293f40ad4c92b26af377d",
+            "card_hash": "ccb099b13d9eea3c1a435a4848b82c84da8e277117291dec008d9e37a76a9cbf",
+            "quote": "it's a graph based tool that can traverse databases"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 13584,
+      "cache_read_tokens": 186442,
+      "cache_create_tokens": 31617,
+      "wall_time_ms": 0
+    }
+  }
+}

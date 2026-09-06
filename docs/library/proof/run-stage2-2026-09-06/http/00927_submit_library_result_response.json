@@ -1,0 +1,39 @@
+{
+  "seq": 927,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "55zpnwhGqggGV5zVuGhvkVauEm9Rc8Hi",
+      "video_id": "2093372696302153728",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.82,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "2ebc08b67e44630e948d9418a4a198bbd6d1ace2b67dba43574bec177ce8217b",
+            "card_hash": "d29c380309dd9107fd9fc9c224c18961d2c003fd7394e7de866476f90c8e35e4",
+            "quote": "Owner has raised $240M, reached a $2.3B valuation, and crossed $100M ARR.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

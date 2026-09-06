@@ -1,0 +1,58 @@
+{
+  "seq": 449,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "A_DUtFAQ6FwCnLhAqz9PLyjjNPA_LDlo",
+      "video_id": "2085066155828391937",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "e097f41b70b249f76cc9b53cb73ba227aab7c471d5cc1ef258f9dd76a4499dc3",
+            "card_hash": "4103ac8b96ac11cb8dcb095151888b4370795a5fcf79465fbe64e6989a28e75b",
+            "quote": "Generate JSON Object Representing The Contents Of This invoice",
+            "start": 713.82,
+            "end": 832.62,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "0900ce217ef7700907b98a7c23ccea50a590079d220a047db01d2f83a5ff1126",
+            "card_hash": "4103ac8b96ac11cb8dcb095151888b4370795a5fcf79465fbe64e6989a28e75b",
+            "quote": "built in partnership of anthropic and taught by Colt Steele",
+            "start": 0.0,
+            "end": 118.719,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

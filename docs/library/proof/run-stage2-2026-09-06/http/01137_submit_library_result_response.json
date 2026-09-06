@@ -1,0 +1,58 @@
+{
+  "seq": 1137,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "zt6HIsy8Y44TdqrTuM1bY0bHAmAAr968",
+      "video_id": "8rABwKRsec4",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "91c3615f5416f7de8879b72ebc3961ac9f819e42deccd6ebaed0771f3ff5aa04",
+            "card_hash": "4b4cdce649ffe7b05f50b611b83c06fd6952cc65038618a8f4c1f64efb0fe874",
+            "quote": "You then uh take its response, the original prompt and the policy and you give that to a greater model",
+            "start": 863.199,
+            "end": 937.829,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4044eac7521e2846fb71ffdc00195c11c80669a9774741d234989af67fa571fa",
+            "card_hash": "4b4cdce649ffe7b05f50b611b83c06fd6952cc65038618a8f4c1f64efb0fe874",
+            "quote": "a PM uh a lawmaker an engineer a marketer is now the programmer and software engineering has never been about code",
+            "start": 1149.84,
+            "end": 1227.27,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

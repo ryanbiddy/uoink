@@ -1,0 +1,238 @@
+# codila - Anthropic and Andrew Ng built an agent that uses 90% fewer tokens fro...
+
+**Channel:** codila (— subscribers)
+**Uploaded:** 2026-08-05 | **Duration:** 01:06:45 | **Views:** — | **Likes:** 398
+**URL:** https://x.com/0xCodila/status/2085067388563620180
+**Uoinked:** 2026-08-06T07:39:01
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Promise List
+**Analysis:** The title and description promise a specific breakdown of how an agent reduces token usage from 108,000 to 11, with the description explicitly stating 'here's how: step 1 → order matters: tools first, then...' indicating a numbered or sequential list of steps/methods to achieve the claimed result.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Anthropic and Andrew Ng built an agent that uses 90% fewer tokens from scratch:  they dropped the entire book of Frankenstein into a prompt - 108,000 tokens asked one question  the input dropped from 108,000 tokens to 11  here's how:  step 1 → order matters: tools first, then https://t.co/YcWlWKn3PK
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Welcome to Building Toward Computer Use with Anthropiq,
+[00:00:04] built in partnership of anthropic and taught by Colt Steele who's
+[00:00:07] AnthropiQs header curriculum.
+[00:00:09] welcome colts Thanks Andrew
+[00:00:11] I'm delighted To have the opportunity
+[00:00:12] to share this course With all
+[00:00:13] Of you Anthropic made a recent breakthrough
+[00:00:16] And released A model that can use
+[00:00:18] The computer That is
+[00:00:19] It Can look At The screen
+[00:00:21] In The Computer Take
+[00:00:24] A Screenshot And generate mouse clicks or keystrokes in sequence
+[00:00:28] to execute some tasks such as
+[00:00:30] Search the web using a browser and download an image
+[00:00:33] And so on This computer use capability is built by
+[00:00:36] Using many features of large language models
+[00:00:39] In combination Including their ability
+[00:00:41] To process An
+[00:00:43] Image Such As To understand
+[00:00:45] What's Happening In
+[00:00:46] A Screenshot Or
+[00:00:47] To Use Tools That
+[00:00:48] Generate Mouse Clicks And
+[00:00:49] Key Stroke And Carry out
+[00:00:55] Complex tasks By taking
+[00:00:56] Many actions On that
+[00:00:58] Computer In this course
+[00:01:00] You'll learn About the individual features
+[00:01:03] Which will be useful For your
+[00:01:04] Applications Even outside
+[00:01:06] Of L1
+[00:01:07] Based computer Use
+[00:01:09] As well as See how It can all
+[00:01:10] Come together For
+[00:01:11] Computer Use And
+[00:01:13] Colts Will show You How
+[00:01:14] All This Works Thanks
+[00:01:15] Andrew in This Course
+[00:01:17] you Will Learn
+[00:01:18] To use many of The Models
+[00:01:19] and Features That
+[00:01:20] Combine So
+[00:01:23] Here's How The Course
+[00:01:24] Will Progress You'll first Learn a
+[00:01:26] Little bit About Anthropics Background
+[00:01:27] And Vision and
+[00:01:28] What's Unique about Our Family
+[00:01:29] Of Models Then you Will Use
+[00:01:31] The API To Make Some Basic
+[00:01:32] Requests This then
+[00:01:34] Leads to Multi Model
+[00:01:35] Request Where You
+[00:01:37] Will use the model To Analyze
+[00:01:38] Images Then You will Dive
+[00:01:40] Into Prompting Which Anthropic
+[00:01:42] Has Really Leaned into Making
+[00:01:43] Models Much More Predictable
+[00:01:44] With Solid Prompting You'll
+[00:01:46] Learn About The Prompting Tips That
+[00:01:48] Actually Matter Things Like
+[00:01:49] Chain Of Thought And Endshot
+[00:01:50] Prompting As Well
+[00:01:51] as Get A Chance To Use
+[00:01:52] Our Prompter Improver Tools
+[00:01:54] Recently Large Language
+[00:01:55] Models Have Been Supporting
+[00:01:57] Large Input Context
+[00:01:58] Anthropics Cloud For Example
+[00:02:00] Supports Over
+[00:02:01] 200,000
+[00:02:02] Input Tokens
+[00:02:03] Which Is More Than 500
+[00:02:05] Pages Of
+[00:02:06] Text Long inputs
+[00:02:07] Can Be Expensive Process
+[00:02:15] Over And Over To Keep
+[00:02:17] On Generating That Mixed
+[00:02:18] Response Then That
+[00:02:20] Too Gets More Expensive
+[00:02:21] As The History Gets
+[00:02:23] Longer As A Conversation
+[00:02:24] Goes On Exactly
+[00:02:26] and that Brings
+[00:02:27] Us Right to Prompt Caching
+[00:02:29] Promt Cashing Retains Some
+[00:02:30] Of The Results Of Processing
+[00:02:32] Prompts Between Invocations
+[00:02:33] Which Can Be A Large
+[00:02:35] Cost And Latency
+[00:02:37] Saver You Will Also
+[00:02:38] Get Use The Model To Generate
+[00:02:40] Calls To External
+[00:02:41] Tools And
+[00:02:42] Produce Structured Output
+[00:02:43] Such As JSON and
+[00:02:45] At The Very End We'll
+[00:02:46] Walk Through A Complete
+[00:02:47] Example Of Computer Use
+[00:02:49] That You Can Run On Your
+[00:02:50] Own Machine Note Because
+[00:02:52] of Nature You Will
+[00:02:54] Have To Run It Rather
+[00:02:56] Than In Deep
+[00:02:58] Learning AI Notebook
+[00:02:59] I've Tried Out
+[00:03:00] Myself Using Really
+[00:03:04] Cool And I
+[00:03:05] Think This Capability
+[00:03:06] Will Make Possible
+[00:03:07] New Build An AI
+[00:03:11] Assistant To Use
+[00:03:12] A Computer To Carry
+[00:03:13] Up Tasks For You
+[00:03:14] Kind Of Think RPA
+[00:03:16] Or Robotic Process
+[00:03:17] Automation Which
+[00:03:18] Has Been Good At Repetitive
+[00:03:20] Task But Now Easier
+[00:03:21] To Build And More General
+[00:03:23] With L1 Based
+[00:03:24] Tools Or As
+[00:03:26] This Technology Gets Even
+[00:03:27] Better Than Even
+[00:03:28] More Flexible More
+[00:03:29] Open-ended Tasks
+[00:03:30] That Gradually Feel
+[00:03:31] Like Personal Assistance
+[00:03:34] Many People
+[00:03:38] Have Worked I'd
+[00:03:40] Thank From Anthropic
+[00:03:41] Ben Mann Maggie
+[00:03:43] Vo Kevin Garcia
+[00:03:44] The Team Working
+[00:03:46] On Computer Use And
+[00:03:47] from Deep Learning.ai
+[00:03:48] Jeff Ludwig and
+[00:03:50] Ashmer Gagari Anthropic
+[00:03:52] Has Built A Lot Of Really
+[00:03:53] Great Models And I
+[00:03:54] Regularly Used Them Myself
+[00:03:55] Ghost Will Share
+[00:03:56] Details In These
+[00:03:58] Models In The Next
+[00:03:59] Video By the
+[00:04:02] End of This Lesson You'll
+[00:04:03] Be Able To Write Multi-Modal
+[00:04:04] Prompts That Combine
+[00:04:05] Images Text To
+[00:04:11] Your Let's
+[00:04:12] Start Making Our First
+[00:04:14] Multi-Modal Request
+[00:04:15] With Some Text
+[00:04:18] Send It Off To The
+[00:04:20] Model And Get A Response
+[00:04:21] Just
+[00:04:22] As In Previous Video
+[00:04:23] We Have Basic Setup
+[00:04:25] Import Anthropic
+[00:04:27] Client
+[00:04:28] And Then Help Variable
+[00:04:30] Storing The Model
+[00:04:31] Name String Before
+[00:04:33] Working With Images
+[00:04:34] We Need To Talk
+[00:04:35] More About Messages
+[00:04:37] Structure We've Seen So
+[00:04:38] Far So In The Previous
+[00:04:39] Lesson We Set
+[00:04:40] Up A Messages List Where
+[00:04:42] Each Message Had A Role
+[00:04:43] Said To User And
+[00:04:44] Then Content Set To
+[00:04:46] String Like Tell
+[00:04:47] Me Joke If
+[00:04:48] I Run This We
+[00:04:49] Should See A Joke Not
+[00:04:52] A Good One But
+[00:04:53] A Joke Now This Is Actually
+[00:04:54] Shortcut Setting
+[00:04:56] Content To A String
+[00:04:57] Is A Shortcut
+[00:04:58] For This Syntax
+[00:04:59] Here Where
+[00:05:01] We Set Content To A List
+[00:05:02] That Contains
+[00:05:03] A Bunch Of Content
+[00:05:04] Blocks In
+[00:05:05] This Case It's Just A
+[00:05:06] Single Content Block
+[00:05:07] With The Type Set
+[00:05:09] To Text And
+[00:05:10] Then Text Set To
+[00:05:11] Tell Me A Joke So
+[00:05:12] This Will Give
+[00:05:13] Us The Exact Same Sort
+[00:05:14] Of Input Prompt Different
+[00:05:16] Syntax Up
+[00:05:17] Here We Have A Nice Shortcut
+[00:05:19] If Were Simply Doing
+[00:05:20] Text Prompts Its Easier
+[00:05:21] To Do This Way But As
+[00:05:31] A Text Of
+[00:05:44] A Single Word Who
+[00:05:46] Made You And
+[00:05:47] If I Run This We
+[00:05:48] Will See That We Get A Response

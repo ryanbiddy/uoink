@@ -1,0 +1,152 @@
+# 📆 ThursdAI - GLM 5, MiniMax 2.5, Seedance 2, Gemini 3 Deep Think, Codex Spark 100tps & more AI news
+
+**Channel:** Alex Volkov from ThursdAI (44.1K subscribers)
+**Uploaded:** 2026-02-13 | **Duration:** 01:28:15 | **Views:** 651 | **Likes:** 8
+**URL:** https://www.youtube.com/watch?v=wQb4JK5xKMw
+**Uoinked:** 2026-06-13T16:22:14
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Promise List
+**Analysis:** The title and opening promise multiple specific AI news items and breaking announcements (GLM 5, MiniMax 2.5, Gemini 3, Codex Spark, Seedance 2, and 'more'), establishing an expectation of comprehensive coverage across several major developments.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+This week on ThursdAI: open source models are closing the gap on frontier labs FAST — and we had the researchers behind them live on the show.
+
+We interviewed Lou from ZAI about GLM-5 (744B params, MIT license, lowest hallucination rate on Artificial Analysis) and Olive Song from Minimax about M-2.5 (80.2% on SWE-Bench Verified with only 10B active params). Both models approach Claude Opus 4.5-level performance at a fraction of the cost.
+
+Then, mid-show, THREE pieces of breaking news dropped live:
+
+Google released Gemini 3 Deep Think — 84% on ARC-AGI-2 (up from 68% by Opus 4.6 just one week prior)
+OpenAI launched GPT 5.3 Codex Spark on Cerebras for blazing-fast real-time coding
+ByteDance's Seedance 2 shattered video generation expectations with multi-shot consistency, physics, and stereo audio
+Plus: XAI's SpaceX acquisition and co-founder departures, Matt Schumer's 74M-view viral article on the acceleration, the "agent psychosis" sleep problem, and more.
+
+🕐 TIMESTAMPS
+
+00:00 Intro & Highlights of the Week
+06:33 TLDR - This Week's AI News Rundown
+11:34 Interview: Lou from ZAI on GLM-5
+19:44 Panel Discussion: GLM-5 Reactions
+26:37 BREAKING: Minimax M-2.5 Drops Live
+26:52 Interview: Olive Song from Minimax on M-2.5
+44:31 Panel Discussion: Minimax & Open Source Momentum
+54:20 This Week's Buzz - W&B Inference
+55:49 XAI Restructuring & SpaceX Acquisition
+01:01:10 Matt Schumer's Viral AI Article & The Acceleration
+01:07:38 BREAKING: Gemini 3 Deep Think - 84% on ARC-AGI-2
+01:11:14 BREAKING: GPT 5.3 Codex Spark on Cerebras
+01:11:22 Seedance 2 - ByteDance's Mind-Bending Video Model
+01:15:09 Agent Psychosis & The Sleep Problem
+01:20:56 Bytedance SeeDance 2.0 - shattering reality
+01:25:21 Wrap-Up & Goodbye
+
+## Tags
+
+ThursdAI
+
+---
+
+## Transcript
+
+### Chapter: Intro & Highlights of the Week (00:00:00)
+
+[00:00:30] Alex Volkov: Welcome, everyone.
+[00:00:31] Welcome to ThursdAI four February 12th.
+[00:00:34] My name is Alex Volkov.
+[00:00:35] I'm AI Evangelist with Weights, & Biases from CoreWeave.
+[00:00:39] ThursdAI is brought to you by Weights, & Biases, and I am
+[00:00:42] really excited about today's show.
+[00:00:45] Uh, we have folks tuning in on YouTube.
+[00:00:48] and we have our own Wolfram, Raven Wolf over here, and Ryan Carson.
+[00:00:52] What's up guys?
+[00:00:53] How you guys doing?
+[00:00:54] Ryan Carson: Good to see everybody.
+[00:00:56] Alex Volkov: Good to see you guys.
+[00:00:57] Hi.
+[00:00:57] Wolfram Ravenwolf: What a week.
+[00:00:58] So much cool stuff from China.
+[00:01:01] Alex Volkov: Open source is back, open source is back with a vengeance,
+[00:01:05] and we have so much new stuff to talk about, including the breaking news,
+[00:01:11] for Minimax, minimax 2.5 just dropped and, literally 30 minutes before.
+[00:01:16] and the thing that I will start the show with is that both.
+[00:01:22] Companies will have representatives of theirs on the show today
+[00:01:25] for us to interview live.
+[00:01:26] So we're gonna welcome Lou from Z.ai formerly known as pu ai.
+[00:01:32] we have Lou to talk to us about their release, and then we're gonna have
+[00:01:37] the lead researcher on, the Minimax team Olive song to join us also to
+[00:01:43] talk about the drop that they had.
+[00:01:46] both models are competing with the previous opus on benchmarks.
+[00:01:52] This is insane, folks.
+[00:01:53] Open source is catching up super quick, open weights.
+[00:01:56] These models are now live and I'm, I'm very, very excited.
+[00:01:59] So with that, I wanna say hi to everybody who tune in.
+[00:02:02] I see a bunch of folks on Twitter spaces and Queen and LinkedIn and near,
+[00:02:05] we have a bunch of folks on YouTube as well, and obviously you guys.
+[00:02:09] So how has your week been?
+[00:02:11] let's talk about AI thing that happened.
+[00:02:14] and then we can dive into the show while people kind of pick up.
+[00:02:19] Ryan Carson: I'll go first.
+[00:02:20] Wolf, I'm good to see you, Alex.
+[00:02:21] Good to see you as always.
+[00:02:22] so I shipped, an open source project called Amp Farm just to kind of
+[00:02:27] orchestrate agents on top of Open Claw.
+[00:02:29] people seem to like it.
+[00:02:30] I'm going on twist tomorrow to talk about it.
+[00:02:32] that was kind of what I was thinking a lot about Agent orchestration.
+[00:02:36] Do you do it on top of open Claw?
+[00:02:37] Do you do it somewhere else?
+[00:02:39] everything's changing so fast.
+[00:02:41] Alex Volkov: That's awesome.
+[00:02:41] Wolfram, how are you doing?
+[00:02:43] Wolfram Ravenwolf: Oh, this is the week I've been, yeah,
+[00:02:45] you know what I've been up to?
+[00:02:46] doing evaluations left and right, and new models come out.
+[00:02:49] And I'm so excited because I find so many interesting things and, soon
+[00:02:52] we will be able to talk about these.
+[00:02:54] So I'm looking forward to that.
+[00:02:55] this week, my highlight, actually when it came out as Pony alpha,
+[00:02:59] I tested this model in German and I was a bit disappointed because
+[00:03:02] in German it was very weak.
+[00:03:03] But now that it is released and I tested it in English,
+[00:03:06] I have to say, wow, amazing.
+[00:03:08] I'm really impressed.
+[00:03:09] I'm looking forward to talk more about how we can use it with some
+[00:03:13] of the genic tools that we have.
+[00:03:14] But that will be a topic for another time.
+[00:03:16] For now my highlight of the week, GL LM five, and there are more highlights.
+[00:03:21] It's hard to say, but right now, if I have to pick one, I will pick this
+[00:03:26] Alex Volkov: I heard that we're gonna have two breaking news releases, today.
+[00:03:33] I didn't know about the open source models.
+[00:03:34] I will just say, folks, we have our own Weights, & Biases, CoreWeave inference,
+[00:03:42] and we have day zero support for GLM five.
+[00:03:46] And we're gonna work really, really hard to get you Minimax 2.5 as well.
+[00:03:49] if you want a little bit of credits, I will point you to our main account,
+[00:03:53] and I'm probably gonna link this, in the show below so that you'd be able
+[00:03:56] to claim some credits because, top tier intelligence doesn't come cheap,
+[00:04:02] but we're gonna give it to you cheap.
+[00:04:03] so, for me, the absolute excitement of the week was,
+[00:04:09] you know what, I'm not gonna go with lms.
+[00:04:10] You guys went with lms.
+[00:04:12] I'm gonna go with fucking Seedance that broke my brain this week.
+[00:04:16] Just absolutely broke my bearing.
+[00:04:18] If your feed is not full of Seedance videos yet, it will
+[00:04:21] be so very, very, very soon.
+[00:04:23] Biden's released, An announcement today that Seedance is official,
+[00:04:27] but also they pre release, see dance on a bunch of their platforms.
+[00:04:30] Biden's obviously the folks who build TikTok and they've
+[00:04:34] trained it on everything.
+[00:04:35] They literally, I'm pretty sure that our faces are in there, Ryan Wolfram,
+[00:04:39] like our faces are in there, but also every Hollywood movie, every Hollywood
+[00:04:43] actor, every, you know, there, there is a story about a Chinese influencer
+[00:04:47] that like, all he needed to do is put his face and say me saying something.
+[00:04:50] It was like almost perfectly his voice, because they

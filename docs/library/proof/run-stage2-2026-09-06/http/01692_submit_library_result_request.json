@@ -1,0 +1,35 @@
+{
+  "seq": 1692,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "bvgKtt7rAh_sZ8int1X0ezz7-Fw4f6S5",
+    "client_id": "proof-harness",
+    "attempt_token": "eT7Ar3AU-JrHpjmJ9JDGXKhFYn-Z2mPz2DPVSAf30G0",
+    "submission_key": "bvgKtt7rAh_sZ8int1X0ezz7-Fw4f6S5-eT7Ar3AU-JrHpjmJ9JDGXKhFYn-Z2mPz2DPVSAf30G0",
+    "schema_version": 1,
+    "video_id": "x_880f13e46c6",
+    "source_revision": "40e69039960fa2ff2ff99f39ba92f77a063918383c3c521f488d578375954d80",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "762295aca95e735a79c8665ea0f0d4527e6ef506bdcc6942ca4610d5dd53fc8f",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "This is personal stock-trading commentary about a $CRWV equity position (buying/selling decisions, earnings breakout), which is financial trading content not covered by any approved shelf (no AI/ML, news-incident, or space/science subject matter is established by the excerpt)."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 7485,
+      "cache_read_tokens": 181698,
+      "cache_create_tokens": 21568,
+      "wall_time_ms": 0
+    }
+  }
+}

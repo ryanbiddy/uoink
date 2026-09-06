@@ -1,0 +1,35 @@
+{
+  "seq": 905,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "Wn9v6dQgkZ-HFw93QetCurJYFfktOQI4",
+    "client_id": "proof-harness",
+    "attempt_token": "biS9eQ7t-haCKM76yX1Y9fW2uZXBU-qh8kiD5asYT68",
+    "submission_key": "Wn9v6dQgkZ-HFw93QetCurJYFfktOQI4-biS9eQ7t-haCKM76yX1Y9fW2uZXBU-qh8kiD5asYT68",
+    "schema_version": 1,
+    "video_id": "2092687038189350912",
+    "source_revision": "42dd6ff68fbeb2177553a137cbb1b7a4f65cdcfbf25107614dee2de5e15a3741",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "0d8cebab9cdaa8f41b50d8d33f78f3f4244701cfc08634681a2b3c96813eed04",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "The excerpt is a promotional description spanning multiple broad topics ('the future of programming, AI, Linux, and human civilization') without establishing any single grounded technical subject; a mere mention of AI alongside several other unrelated topics does not establish a specific approved shelf per Rule 1."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 15534,
+      "cache_read_tokens": 188597,
+      "cache_create_tokens": 35427,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "seq": 203,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "t1KgA_JTr6I1Cd8_WBo0ZLH4aBNLBwn0",
+    "client_id": "proof-harness",
+    "attempt_token": "61qId8LyxQiY0HTPiTTM_caKg9_EaeijJQ7kAnYUtuQ",
+    "submission_key": "t1KgA_JTr6I1Cd8_WBo0ZLH4aBNLBwn0-61qId8LyxQiY0HTPiTTM_caKg9_EaeijJQ7kAnYUtuQ",
+    "schema_version": 1,
+    "video_id": "2080366248735522816",
+    "source_revision": "2c343ec4075020bb56e9dd051efa61d833c43901a3227fd39da296ebfc03a78c",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "f373f592b0966a4de6bdac58e51e52ea2c68a30768768c97a3124eb29ec084b9",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "ce8e4ad25905b524f013eae414782949e79884f0a36f7e2f428eb26e012ea022",
+            "card_hash": "34f45f4ada190c82abc73ee857b77d2f5e51d2df4df3bcf7072ff5ec73885918",
+            "quote": "The same incredible GPT Live model, now able use your entire computer."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 14824,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 20947,
+      "wall_time_ms": 0
+    }
+  }
+}

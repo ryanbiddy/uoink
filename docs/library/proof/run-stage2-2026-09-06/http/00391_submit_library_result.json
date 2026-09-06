@@ -1,0 +1,95 @@
+{
+  "seq": 391,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 391,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "Za0lJiY6OaIym1cIJ-2TsRE7R77TdjAD",
+      "client_id": "proof-harness",
+      "attempt_token": "jFM5wiZ-kERSH3X6lMn2OZiZNHZtHXjq3eSgL8z2_PY",
+      "submission_key": "Za0lJiY6OaIym1cIJ-2TsRE7R77TdjAD-jFM5wiZ-kERSH3X6lMn2OZiZNHZtHXjq3eSgL8z2_PY",
+      "schema_version": 1,
+      "video_id": "2083664004506145276",
+      "source_revision": "6691298dc1d90e0abed81f62b26a34c2bb90551dbb235d44faa09eb20a374507",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "bb6925f273f42612a7ce0cfaab65c88dc2361245f79302e80452b6e6a290178f",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.63,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "2abad6e67d6816b92b5c1faad263f9eff47807400fa5d0976239fff7b16a7a88",
+              "card_hash": "87e2c78c6e844156652454f55472aef34d5b58e95d0541de3a391890b8ecc45a",
+              "quote": "there are different models that are good for different parts of these tasks"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 12710,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 22115,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 391,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "Za0lJiY6OaIym1cIJ-2TsRE7R77TdjAD",
+        "video_id": "2083664004506145276",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.63,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "2abad6e67d6816b92b5c1faad263f9eff47807400fa5d0976239fff7b16a7a88",
+              "card_hash": "87e2c78c6e844156652454f55472aef34d5b58e95d0541de3a391890b8ecc45a",
+              "quote": "there are different models that are good for different parts of these tasks",
+              "start": 0.0,
+              "end": 54.34,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

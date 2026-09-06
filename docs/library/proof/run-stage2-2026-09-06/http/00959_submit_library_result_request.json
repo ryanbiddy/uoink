@@ -1,0 +1,35 @@
+{
+  "seq": 959,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "frA5VXp9UIAl1es3gNNlJOsDdUNoToYz",
+    "client_id": "proof-harness",
+    "attempt_token": "pOtvn4X1eu2C56fniHPMlpmSISMV3F81zxY94nq8zIE",
+    "submission_key": "frA5VXp9UIAl1es3gNNlJOsDdUNoToYz-pOtvn4X1eu2C56fniHPMlpmSISMV3F81zxY94nq8zIE",
+    "schema_version": 1,
+    "video_id": "2093756517485101056",
+    "source_revision": "5ccbc6686c95c3d82d52b5442a0f5c468f21962a154715df045a7ad8c855f355",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "706770bb0a70ee2516fcc2ee2aafc767b676e970f7bf916194f79b3e55d3f80a",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Excerpt is a gaming graphics comparison (GTA V DLSS versions on an RTX GPU); DLSS is mentioned only as a consumer graphics feature, not as a central AI/ML subject, and the content is general consumer technology/gaming rather than any approved shelf."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 12323,
+      "cache_read_tokens": 186544,
+      "cache_create_tokens": 30752,
+      "wall_time_ms": 0
+    }
+  }
+}

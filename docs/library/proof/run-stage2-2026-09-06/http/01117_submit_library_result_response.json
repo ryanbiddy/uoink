@@ -1,0 +1,39 @@
+{
+  "seq": 1117,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "ou0lN5vKihW7d7KoicnLuKT5Vi2Clqxr",
+      "video_id": "2095522237709492225",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "78a73fa12f3c9221391b00a394e7226f93ce95d591792cc84338fe912524b927",
+            "card_hash": "e8fcf064095b69eed90f774e1fb70ae72bfd49654c71ec36db4f9fd4e62518a2",
+            "quote": "Created an underwater exploration game in one /goal prompt, all the 3D elements and sounds were made from scratch.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

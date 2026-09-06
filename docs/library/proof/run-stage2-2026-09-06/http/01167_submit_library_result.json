@@ -1,0 +1,59 @@
+{
+  "seq": 1167,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 1167,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "ovGuUhcqNg3EY3ERqdc4UouERGHHRIp_",
+      "client_id": "proof-harness",
+      "attempt_token": "kF_iKpWsgUj8lT7dJAWe-LzRdVaDOSunRKnfAUJ6EME",
+      "submission_key": "ovGuUhcqNg3EY3ERqdc4UouERGHHRIp_-kF_iKpWsgUj8lT7dJAWe-LzRdVaDOSunRKnfAUJ6EME",
+      "schema_version": 1,
+      "video_id": "F97xOWNph5A",
+      "source_revision": "2c880b210c2584b8aa1aa6e326ceea7637cad384452b66605cbdc1530b0e3e93",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "3c3e9364583568b97d20fa7cd010236001dda778b1f4de523674bd9366411450",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpts center on the AI Engineer conference's growth, attendee logistics, speaker lineups, and personal motivation of the organizer -- conference business/marketing content, not the technical, industry-financial, or agent-product subject matter defined by any approved AI shelf."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 16185,
+        "cache_read_tokens": 92574,
+        "cache_create_tokens": 78511,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1167,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "ovGuUhcqNg3EY3ERqdc4UouERGHHRIp_",
+        "video_id": "F97xOWNph5A",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

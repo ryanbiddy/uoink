@@ -1,0 +1,51 @@
+{
+  "seq": 621,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "CSq6SRraVL7rOcb9fuqWpoxG8lv0BkxY",
+    "client_id": "proof-harness",
+    "attempt_token": "oI6xmTfFSkeez9ZAAj3m9KopnxBG2dzFsHAe6AngS5Q",
+    "submission_key": "CSq6SRraVL7rOcb9fuqWpoxG8lv0BkxY-oI6xmTfFSkeez9ZAAj3m9KopnxBG2dzFsHAe6AngS5Q",
+    "schema_version": 1,
+    "video_id": "2088122798111592448",
+    "source_revision": "ec1914944af022a2a759eab50ebea9287b65672219bf3ae7f818637e2da4944c",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "4ea390e72cb58b76d3558285ef2adcc39bd26166009b166c08ca6f748ffd8441",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "40f73b6a55f18695dc61063adf648ee445569f730a29fa7dda20f00ec1ecf6fd",
+            "card_hash": "f8f43bc023a76a51bde4151763d0da1179b7947eb5d5b63a3569995b777d899b",
+            "quote": "maximize the heck out of the Codex GUI"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 14980,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 20361,
+      "wall_time_ms": 0
+    }
+  }
+}

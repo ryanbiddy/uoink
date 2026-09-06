@@ -1,0 +1,129 @@
+{
+  "seq": 501,
+  "tool": "submit_library_result",
+  "wall_ms": 5,
+  "request": {
+    "seq": 501,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "LGtiOFDMkNDTbX_MdGPFDqb0XMDizoeK",
+      "client_id": "proof-harness",
+      "attempt_token": "86oPH42z_CfQi9g6iU3vc8tnMIja63mPDyfuZqIDdrg",
+      "submission_key": "LGtiOFDMkNDTbX_MdGPFDqb0XMDizoeK-86oPH42z_CfQi9g6iU3vc8tnMIja63mPDyfuZqIDdrg",
+      "schema_version": 1,
+      "video_id": "2085459208485359617",
+      "source_revision": "19fab43d1ac900b002c19c12c0a5ffd795baee51771def79c02230ca8b963c34",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "2f6e32cefceba4b0fffbdcd22773fed600add65a065dc29cfdf10d72ae4f276a",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.78,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "7b8ed8c36ae23f18d91900fd58802e3018f3a13eaefb39b016cce6d8a8bb76db",
+              "card_hash": "fa36c4dc358097f69d0366fd7cafa7932126948f3d05d1b7c283385f3be23d0f",
+              "quote": "Basically For Agents That Connect Into External World You Will Call Those M S P Server As"
+            }
+          },
+          {
+            "shelf_id": "security",
+            "shelf_path": [
+              "AI and ML",
+              "Security"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "bc77fe29344c9dc9e4f24e471651d2e928e3e96ddd664de9ccdba92fe70e3d63",
+              "card_hash": "fa36c4dc358097f69d0366fd7cafa7932126948f3d05d1b7c283385f3be23d0f",
+              "quote": "Agent Security With Model Armor So Basically You Can Adding Agents Like Model Armour To Before Agent Call Back To Protect Your Agent"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 13596,
+        "cache_read_tokens": 190924,
+        "cache_create_tokens": 35465,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 501,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 5,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "LGtiOFDMkNDTbX_MdGPFDqb0XMDizoeK",
+        "video_id": "2085459208485359617",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.78,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "7b8ed8c36ae23f18d91900fd58802e3018f3a13eaefb39b016cce6d8a8bb76db",
+              "card_hash": "fa36c4dc358097f69d0366fd7cafa7932126948f3d05d1b7c283385f3be23d0f",
+              "quote": "Basically For Agents That Connect Into External World You Will Call Those M S P Server As",
+              "start": 708.94,
+              "end": 828.159,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          },
+          {
+            "shelf_id": "security",
+            "shelf_path": [
+              "AI and ML",
+              "Security"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "bc77fe29344c9dc9e4f24e471651d2e928e3e96ddd664de9ccdba92fe70e3d63",
+              "card_hash": "fa36c4dc358097f69d0366fd7cafa7932126948f3d05d1b7c283385f3be23d0f",
+              "quote": "Agent Security With Model Armor So Basically You Can Adding Agents Like Model Armour To Before Agent Call Back To Protect Your Agent",
+              "start": 5358.159,
+              "end": 5478.14,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

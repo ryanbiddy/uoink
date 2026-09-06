@@ -1,0 +1,898 @@
+{
+  "seq": 925,
+  "tool": "claim_library_work",
+  "wall_ms": 10,
+  "request": {
+    "seq": 925,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 925,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 10,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "O24XBTovfPrcpx0uwGjL2VW_6bua1yTo",
+            "video_id": "2094027052739592192",
+            "attempt_token": "h542jcRFybqEcoJJQbEV9hr7V3yUv9CcNfOGQ4aqbHo",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677948697,
+            "source_revision": "a32e10e0cd53ebe3459bf814778d20526e21885d71e2618b4dd38460228edc71",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "e9f39020b55b2fdce1769382a148db1322ef2fb12cdd823452d2e820336f9872",
+            "card": {
+              "card_hash": "1c563b9889689d436b60dacdd1d59dd5c76b13fc7d4da4158c1b1667190d4d51",
+              "channel": "DogeDesigner",
+              "chars": 179,
+              "chars_all_clips": 179,
+              "chars_chosen_clips": 179,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/cb_doge/status/2094028432682205200#t=1",
+                  "end": 15.126,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "4f641e4b17a7c93732f84c92d6521eb0738986fec884a96753e8131c21a1fe8b",
+                  "start": 1.0,
+                  "text": "One, ignition and liftoff. Go Falcon Heavy and go Roman Space Telescope And liftoff of NASA's Roman Space Telescope on a mission to revolutionize our understanding of the universe",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/cb_doge/status/2094028432682205200#t=1",
+                  "end": 15.126,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "4f641e4b17a7c93732f84c92d6521eb0738986fec884a96753e8131c21a1fe8b",
+                  "start": 1.0,
+                  "text": "One, ignition and liftoff. Go Falcon Heavy and go Roman Space Telescope And liftoff of NASA's Roman Space Telescope on a mission to revolutionize our understanding of the universe",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> SpaceX just launched NASA’s newest flagship space telescope.  What makes Roman special:  • Its mirror came from hardware once built for U.S. intelligence • Same mirror size as Hubble, but less than 1/4 the weight • A huge 300MP infrared camera • Each image covers at least https://t.co/UsqHn9lvN4 No tags [00:00:01] One, ignition [00:00:03] and liftoff. Go Falcon Heavy and go [00:00:06] Roman Space Telescope [00:00:08] And liftoff of NASA's Roman Space Telescope on [00:00:11] a mission to revolutionize our understanding of the [00:00:14] universe <!-- yoink:",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "DogeDesigner_-_SpaceX_just_launched_NASA_s_newest_flagship_space_telescope_What",
+              "source_revision": "a32e10e0cd53ebe3459bf814778d20526e21885d71e2618b4dd38460228edc71",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> SpaceX just launched NASA’s newest flagship space telescope.  What makes Roman special:  • Its mirror came from hardware once built for U.S. intelligence • Same mirror size as Hubble, but less than 1/4 the weight • A huge 300MP infrared camera • Each image covers at least https://t.co/UsqHn9lvN4 No tags [00:00:01] One, ignition [00:00:03] and liftoff. Go Falcon Heavy and go [00:00:06] Roman Space Telescope [00:00:08] And liftoff of NASA's Roman Space Telescope on [00:00:11] a mission to revolutionize our understanding of the [00:00:14] universe <!-- yoink:",
+              "title": "DogeDesigner - SpaceX just launched NASA’s newest flagship space telescope.  What ma...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/cb_doge/status/2094028432682205200",
+              "video_id": "2094027052739592192",
+              "yoinked_at": "2026-08-30T07:48:35"
+            }
+          },
+          {
+            "work_id": "SS-OzIrC9gkzyjNEb9TnVX9pSa_kAl2Z",
+            "video_id": "2093715067636154369",
+            "attempt_token": "M6vKUpGm4ZRVFZWKVzjOQUgjnz3tJNvkZJi6kGQgJ8c",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677948699,
+            "source_revision": "6130553b9b9a31855a03be21d7f983c3e0ec5c1be8edb41684f1e337c061a067",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "0e4e258a906f11f193167d44b05ad3581afd6ef1a6bfe81cb0b066afe15e6813",
+            "card": {
+              "card_hash": "bb2a241d9693d9f876fdd0275f4ef2d9055a359c9634333da08c0a088e0f15f1",
+              "channel": "kaori",
+              "chars": 119782,
+              "chars_all_clips": 119782,
+              "chars_chosen_clips": 1440,
+              "clip_count": 78,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/kaorixbt/status/2093722881972682867#t=772",
+                  "end": 892.42,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "95b34c8f8b90f94095164f755aff11e11cd022cf3d584f56a9f847f37bbcadf9",
+                  "start": 772.812,
+                  "text": "biggest model that's currently available as of today that's available and that's what we want to be using So if you pay twenty dollars per month you have that with some limits And then if you pay for two hundred dollars per month you get th",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kaorixbt/status/2093722881972682867#t=1603",
+                  "end": 1722.092,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "a76b82b7d838ac29e33780afcccbcaab993829a07792f270277d4648eb92a8d9",
+                  "start": 1603.286,
+                  "text": "And it will be able to reference that text and give you the correct answer And notice that this is a really good example of why we would need internet search Without the internet search this model has no chance to actually give us the corre",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kaorixbt/status/2093722881972682867#t=2603",
+                  "end": 2722.921,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "265c31251ce787a5a9ee6b496d73f22c69642494c3fe4a9e63d15ef12a6dfe0b",
+                  "start": 2603.903,
+                  "text": "So this is the table that it produced Now this table is basically hit and miss unfortunately. So I wanted to show it as an example of a failure I think some of these numbers I didn't fully check them but they don't seem way too wrong Some o",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kaorixbt/status/2093722881972682867#t=4009",
+                  "end": 4129.104,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "e9dd99cc284d627a0fce18ba7f0f8d2f489168e7a22cd3442831850b564e9784",
+                  "start": 4009.626,
+                  "text": "if you're a conceptual kind of like visual thinker and I think I'm a little bit like that as well I like to lay out information and like as like a tree like this and it helps me remember what that chapter is about very easily and I just rea",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kaorixbt/status/2093722881972682867#t=5817",
+                  "end": 5937.144,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "7f4a08d0cc33f5a2954286e8963a8db8594ff14386e98c3809c1f8a220e7ef9b",
+                  "start": 5817.913,
+                  "text": "So obviously I want to know a lot more information. So what I did here is I uploaded all my results So first I did the lipid panel as an example and I uploaded little screenshots of my lipid panel and then I made sure that ChatGPT sees all ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kaorixbt/status/2093722881972682867#t=7287",
+                  "end": 7407.378,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "29a3c34b6b7212a31763f2b2946af70cc5d41a834a018acb0d208ac9060636a5",
+                  "start": 7287.497,
+                  "text": "So the first thing to realize and that we looked at is you're talking basically to a zip file Be aware of what pricing tier you're at and depending on the pricing tier which model you are using if you are using a model that is very large th",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/kaorixbt/status/2093722881972682867#t=772",
+                  "end": 892.42,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "95b34c8f8b90f94095164f755aff11e11cd022cf3d584f56a9f847f37bbcadf9",
+                  "start": 772.812,
+                  "text": "biggest model that's currently available as of today that's available and that's what we want to be using So if you pay twenty dollars per month you have that with some limits And then if you pay for two hundred dollars per month you get th",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kaorixbt/status/2093722881972682867#t=1603",
+                  "end": 1722.092,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "a76b82b7d838ac29e33780afcccbcaab993829a07792f270277d4648eb92a8d9",
+                  "start": 1603.286,
+                  "text": "And it will be able to reference that text and give you the correct answer And notice that this is a really good example of why we would need internet search Without the internet search this model has no chance to actually give us the corre",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kaorixbt/status/2093722881972682867#t=2603",
+                  "end": 2722.921,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "265c31251ce787a5a9ee6b496d73f22c69642494c3fe4a9e63d15ef12a6dfe0b",
+                  "start": 2603.903,
+                  "text": "So this is the table that it produced Now this table is basically hit and miss unfortunately. So I wanted to show it as an example of a failure I think some of these numbers I didn't fully check them but they don't seem way too wrong Some o",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kaorixbt/status/2093722881972682867#t=4009",
+                  "end": 4129.104,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "e9dd99cc284d627a0fce18ba7f0f8d2f489168e7a22cd3442831850b564e9784",
+                  "start": 4009.626,
+                  "text": "if you're a conceptual kind of like visual thinker and I think I'm a little bit like that as well I like to lay out information and like as like a tree like this and it helps me remember what that chapter is about very easily and I just rea",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kaorixbt/status/2093722881972682867#t=5817",
+                  "end": 5937.144,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "7f4a08d0cc33f5a2954286e8963a8db8594ff14386e98c3809c1f8a220e7ef9b",
+                  "start": 5817.913,
+                  "text": "So obviously I want to know a lot more information. So what I did here is I uploaded all my results So first I did the lipid panel as an example and I uploaded little screenshots of my lipid panel and then I made sure that ChatGPT sees all ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kaorixbt/status/2093722881972682867#t=7287",
+                  "end": 7407.378,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "29a3c34b6b7212a31763f2b2946af70cc5d41a834a018acb0d208ac9060636a5",
+                  "start": 7287.497,
+                  "text": "So the first thing to realize and that we looked at is you're talking basically to a zip file Be aware of what pricing tier you're at and depending on the pricing tier which model you are using if you are using a model that is very large th",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "kaori_-_Andrej_Karpathy_spent_8_years_at_OpenAI_and_Tesla_Last_week_he_comp",
+              "source_revision": "6130553b9b9a31855a03be21d7f983c3e0ec5c1be8edb41684f1e337c061a067",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "kaori - Andrej Karpathy spent 8 years at OpenAI and Tesla  Last week, he comp...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://x.com/kaorixbt/status/2093722881972682867",
+              "video_id": "2093715067636154369",
+              "yoinked_at": "2026-08-30T07:50:57"
+            }
+          },
+          {
+            "work_id": "U4pYZw-n-tHyv3-0x8pJ9Zs2GzK44pNr",
+            "video_id": "2093489422624804893",
+            "attempt_token": "RX9V0P6KfNsZF8AxdOhj-GWZe0xLIaqMiztqwQqEbzQ",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677948700,
+            "source_revision": "558287d0b407c8efa9633ef6ec53e86838c0974535bea9da3fad4a3811cbad08",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "7a91fe5fd467e416b6cabbccbd719402ca92493050fea3c517ae072b0de46348",
+            "card": {
+              "card_hash": "30e130d69f8e74d34222c11ec4dc69c18f008c2ff333062c30806227a50d0caf",
+              "channel": "RadioGenoa",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/RadioGenoa/status/2093489422624804893",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "f90ec4f540775ec5c9da459590c08d704323dba7508c2bdb2df677178b799df3",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> The invaders in Ceuta threw water bottles with chemical substances on Spanish patriots. See for yourself. @Grok do you know what this is about? https://t.co/qEXLfKuX21 No tags *No captions available for",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> The invaders in Ceuta threw water bottles with chemical substances on Spanish patriots. See for yourself. @Grok do you know what this is about? https://t.co/qEXLfKuX21 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "RadioGenoa_-_The_invaders_in_Ceuta_threw_water_bottles_with_chemical_substances",
+              "source_revision": "558287d0b407c8efa9633ef6ec53e86838c0974535bea9da3fad4a3811cbad08",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> The invaders in Ceuta threw water bottles with chemical substances on Spanish patriots. See for yourself. @Grok do you know what this is about? https://t.co/qEXLfKuX21 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "RadioGenoa - The invaders in Ceuta threw water bottles with chemical substances on...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/RadioGenoa/status/2093489422624804893",
+              "video_id": "2093489422624804893",
+              "yoinked_at": "2026-08-29T07:50:21"
+            }
+          },
+          {
+            "work_id": "Xje6jjaIHqxIQvRC8S6efrj98AOuWYUH",
+            "video_id": "2093534714439110656",
+            "attempt_token": "TOdvzq7IZ-pC_h7ttiSlCpcMHZRfkP4UJRkU4u5_ufg",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677948700,
+            "source_revision": "60c217c06f0f314c6b3ac28d87a23b79ebe0955abaaf04875b3d0acce387469c",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "cd9e1a2170ed18108de00187cbbaddd3b851cea4f0dc817417c3500f083bc3cd",
+            "card": {
+              "card_hash": "f31755d6cae87adc3114a0a2839fd15130c17145ca86d0239452d7338867d5ac",
+              "channel": "Om Patel",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/om_patel5/status/2093534746043109550",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "f9434796e4224b8996fcc8a0964f14561fa3863b643e884465e386d32ca0db6b",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> SOMEONE VIBE CODED A MOBILE APP WHERE ZOMBIES CHASE YOU IN REAL LIFE  it uses your actual gps position, so the only way to survive is to physically run  &gt; you get a 60 second head start, then the hor",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> SOMEONE VIBE CODED A MOBILE APP WHERE ZOMBIES CHASE YOU IN REAL LIFE  it uses your actual gps position, so the only way to survive is to physically run  &gt; you get a 60 second head start, then the horde spawns on your neighborhood map &gt; tap the red skulls to shoot them, but you https://t.co/izViZs5Jw8 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://u",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Om_Patel_-_SOMEONE_VIBE_CODED_A_MOBILE_APP_WHERE_ZOMBIES_CHASE_YOU_IN_REAL_LIFE",
+              "source_revision": "60c217c06f0f314c6b3ac28d87a23b79ebe0955abaaf04875b3d0acce387469c",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> SOMEONE VIBE CODED A MOBILE APP WHERE ZOMBIES CHASE YOU IN REAL LIFE  it uses your actual gps position, so the only way to survive is to physically run  &gt; you get a 60 second head start, then the horde spawns on your neighborhood map &gt; tap the red skulls to shoot them, but you https://t.co/izViZs5Jw8 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://u",
+              "title": "Om Patel - SOMEONE VIBE CODED A MOBILE APP WHERE ZOMBIES CHASE YOU IN REAL LIFE ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/om_patel5/status/2093534746043109550",
+              "video_id": "2093534714439110656",
+              "yoinked_at": "2026-08-29T07:51:09"
+            }
+          },
+          {
+            "work_id": "Zx8wv9tYYW8okb6HBVXDgmnAqKbHvHJ-",
+            "video_id": "2093591840171941888",
+            "attempt_token": "BtrnwGgsmrZ5Vt_paZ3oT8Ve1GnBYw5MZu2nyCUwVeE",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677948701,
+            "source_revision": "e6c5583b88a67ddb8664eeb7b3e9298a600dd932bc0901a47f0f396c0670a8b7",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "5704b0a48c66e16f12b1a6e58fd3679af44eb244581b4bbe601e7567ed72ec66",
+            "card": {
+              "card_hash": "07e5f15d0345fc5b7d85dbcde78ed1832dee3240b1b2dab3f2aab02536055ccb",
+              "channel": "Ojas Sharma",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/OjasSharma276/status/2093593295658397934",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "784dbdb3af03a1e0aa007662716e12bace40954d7528fd8d474ab34641a33dbb",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> THIS IS A FREKING GOOD APPLICATION!!!  You can create your own systems to simulate how the database would react to different numbers of requests, and you can play around with it to get an idea of how th",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> THIS IS A FREKING GOOD APPLICATION!!!  You can create your own systems to simulate how the database would react to different numbers of requests, and you can play around with it to get an idea of how things actually work under the hood.  Crazy product, I loved it @xevrion_the1 https://t.co/FYUH2s9iqU No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Ojas_Sharma_-_THIS_IS_A_FREKING_GOOD_APPLICATION_You_can_create_your_own_system",
+              "source_revision": "e6c5583b88a67ddb8664eeb7b3e9298a600dd932bc0901a47f0f396c0670a8b7",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> THIS IS A FREKING GOOD APPLICATION!!!  You can create your own systems to simulate how the database would react to different numbers of requests, and you can play around with it to get an idea of how things actually work under the hood.  Crazy product, I loved it @xevrion_the1 https://t.co/FYUH2s9iqU No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+              "title": "Ojas Sharma - THIS IS A FREKING GOOD APPLICATION!!!  You can create your own system...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/OjasSharma276/status/2093593295658397934",
+              "video_id": "2093591840171941888",
+              "yoinked_at": "2026-08-29T07:50:51"
+            }
+          },
+          {
+            "work_id": "eKqPqXJ4tbD4eRBt7pHmiIjT2fwtdeGI",
+            "video_id": "2094122120032710656",
+            "attempt_token": "KFcBQ5QWvO82TDXQOpK7TadedcnGu2ECRRDSnujOrCM",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677948701,
+            "source_revision": "3cda959837a94ebd906cc6b6fd4840afc13b20b689945891726dd59743621a48",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "47f5116b22bacaf17f3258ba6d0b38da35d1590144e24851eca5d6dc4dddcdf7",
+            "card": {
+              "card_hash": "ecbdebe36dbd12fb7109411b72e7ea90b2de5e878476d59b3a277173b28182ad",
+              "channel": "Bobby Thakkar",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/BobbyThakkar/status/2094122297044996136",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "293ce9b6c896cf2f9ce3e621197cf86021b66cf88733bbf80cc061d40b702984",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> made myself a Grok Pocket this weekend so i can take my grok bots on the go and easily switch between them.  gonna spend the evening fine-tuning the animation and making responses minimal.   will open-s",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> made myself a Grok Pocket this weekend so i can take my grok bots on the go and easily switch between them.  gonna spend the evening fine-tuning the animation and making responses minimal.   will open-source it this week. https://t.co/iBvNaOLdUO No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Bobby_Thakkar_-_made_myself_a_Grok_Pocket_this_weekend_so_i_can_take_my_grok_bot",
+              "source_revision": "3cda959837a94ebd906cc6b6fd4840afc13b20b689945891726dd59743621a48",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> made myself a Grok Pocket this weekend so i can take my grok bots on the go and easily switch between them.  gonna spend the evening fine-tuning the animation and making responses minimal.   will open-source it this week. https://t.co/iBvNaOLdUO No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Bobby Thakkar - made myself a Grok Pocket this weekend so i can take my grok bots on ...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/BobbyThakkar/status/2094122297044996136",
+              "video_id": "2094122120032710656",
+              "yoinked_at": "2026-08-31T07:54:43"
+            }
+          },
+          {
+            "work_id": "fnntZf77BQNMIe16HaQgeA885gNb_Vfc",
+            "video_id": "2094144554630894045",
+            "attempt_token": "eIHWIMALQlew6LsfQLLIyQSmscBPVy8GTRRx1JafVhM",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677948702,
+            "source_revision": "6f074d4f9f0213a4d9759a3eb9be9f595c1a1b321ebf41fd1608d748e4a0a16f",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "6971cab12aa2160ed154df93455422aa1778e7b13ee92a591702d49e29ddd4f5",
+            "card": {
+              "card_hash": "65007346442bd52254ae8bb75128430543e2037833785201f7aacac2e90a4915",
+              "channel": "Sergio Paniego",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/SergioPaniego/status/2094144554630894045",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "756760711ebedee072e25a225a9578b23b3c9ed646d14b7f72b7fa17f18fd09e",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> trained my own with trl + openenv  blog with open artifacts (code, models, dataset, rl env...) soon! https://t.co/HTxA9HLRv9 No tags *No captions available for this video.* <!-- yoink:comments-start -->",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> trained my own with trl + openenv  blog with open artifacts (code, models, dataset, rl env...) soon! https://t.co/HTxA9HLRv9 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Sergio_Paniego_-_trained_my_own_with_trl_openenv_blog_with_open_artifacts_code_m",
+              "source_revision": "6f074d4f9f0213a4d9759a3eb9be9f595c1a1b321ebf41fd1608d748e4a0a16f",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> trained my own with trl + openenv  blog with open artifacts (code, models, dataset, rl env...) soon! https://t.co/HTxA9HLRv9 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Sergio Paniego - trained my own with trl + openenv  blog with open artifacts (code, mo...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/SergioPaniego/status/2094144554630894045",
+              "video_id": "2094144554630894045",
+              "yoinked_at": "2026-08-31T07:55:06"
+            }
+          },
+          {
+            "work_id": "frA5VXp9UIAl1es3gNNlJOsDdUNoToYz",
+            "video_id": "2093756517485101056",
+            "attempt_token": "pOtvn4X1eu2C56fniHPMlpmSISMV3F81zxY94nq8zIE",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677948703,
+            "source_revision": "5ccbc6686c95c3d82d52b5442a0f5c468f21962a154715df045a7ad8c855f355",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "706770bb0a70ee2516fcc2ee2aafc767b676e970f7bf916194f79b3e55d3f80a",
+            "card": {
+              "card_hash": "dac6b8509ce85fa25c8d8ba42f26e183c973711e8497409c8c2fde2edacfbabd",
+              "channel": "Intern",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/gamingskew/status/2093756630743822364",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "4bff26ac1244c91e5dd93da9325c9240122f3138f3fbac8e03a16aaa943f9023",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> GTA V DLSS 4.5 vs DLSS 5 🤯🔥  Michael, Trevor &amp; Franklin look noticeably more detailed and realistic with improved facial detail, textures and lighting.  Tested on my RTX 5060 Ti 16GB 👀 https://t.co/",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> GTA V DLSS 4.5 vs DLSS 5 🤯🔥  Michael, Trevor &amp; Franklin look noticeably more detailed and realistic with improved facial detail, textures and lighting.  Tested on my RTX 5060 Ti 16GB 👀 https://t.co/HAa0DqhtI3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Intern_-_GTA_V_DLSS_4_5_vs_DLSS_5_Michael_Trevor_amp_Franklin_look_noti",
+              "source_revision": "5ccbc6686c95c3d82d52b5442a0f5c468f21962a154715df045a7ad8c855f355",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> GTA V DLSS 4.5 vs DLSS 5 🤯🔥  Michael, Trevor &amp; Franklin look noticeably more detailed and realistic with improved facial detail, textures and lighting.  Tested on my RTX 5060 Ti 16GB 👀 https://t.co/HAa0DqhtI3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Intern - GTA V DLSS 4.5 vs DLSS 5 🤯🔥  Michael, Trevor &amp; Franklin look noti...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/gamingskew/status/2093756630743822364",
+              "video_id": "2093756517485101056",
+              "yoinked_at": "2026-08-30T07:48:28"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

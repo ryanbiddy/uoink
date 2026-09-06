@@ -1,0 +1,39 @@
+{
+  "seq": 945,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "O24XBTovfPrcpx0uwGjL2VW_6bua1yTo",
+      "video_id": "2094027052739592192",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "spaceflight",
+          "shelf_path": [
+            "Space and Science",
+            "Spaceflight"
+          ],
+          "confidence": 0.93,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4f641e4b17a7c93732f84c92d6521eb0738986fec884a96753e8131c21a1fe8b",
+            "card_hash": "1c563b9889689d436b60dacdd1d59dd5c76b13fc7d4da4158c1b1667190d4d51",
+            "quote": "liftoff of NASA's Roman Space Telescope on a mission to revolutionize our understanding of the universe",
+            "start": 1.0,
+            "end": 15.126,
+            "timing": "source_cues",
+            "truncated": false
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

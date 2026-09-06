@@ -1,0 +1,35 @@
+{
+  "seq": 921,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "zqCZHDOF3eJemZ62r4746UHS6V-OsD-j",
+    "client_id": "proof-harness",
+    "attempt_token": "scT8GcGWqL-RAb7AmU_MAd5F5aZZDtUGcOnLKrfHq_o",
+    "submission_key": "zqCZHDOF3eJemZ62r4746UHS6V-OsD-j-scT8GcGWqL-RAb7AmU_MAd5F5aZZDtUGcOnLKrfHq_o",
+    "schema_version": 1,
+    "video_id": "2092387281457893378",
+    "source_revision": "d57f7b90d20c59299a04b541f3c52c2f5e4dfa09f9c1eb976d0bfaa88176c27e",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "4daa5c0b91df223e849d69f97bb42d4e875da238efb7ebbd89f83e5f0f7341a2",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Tribute message about Dolly Parton's death; personal/entertainment tribute content unrelated to AI/ML, news of a breaking incident, or space/science."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 16444,
+      "cache_read_tokens": 185177,
+      "cache_create_tokens": 33216,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "seq": 297,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "vpi_yX8Xg6gAECwUk3OCVwUlL-ZCZ7br",
+    "client_id": "proof-harness",
+    "attempt_token": "93WQk6GU7lpATY1TMC1hDpi3YZjrNZR10F_ZGJwqDNQ",
+    "submission_key": "vpi_yX8Xg6gAECwUk3OCVwUlL-ZCZ7br-93WQk6GU7lpATY1TMC1hDpi3YZjrNZR10F_ZGJwqDNQ",
+    "schema_version": 1,
+    "video_id": "2080998143701721088",
+    "source_revision": "e31f013604d3589b41af10cdfc2ca5fdbd95db96deacfbdcf56f5352a0a748db",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "9ad4b11761dec39f2ad46d850146098565f62ab2aed7243ba65779b48c809e42",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "d23d78237103aaa12589e8175551fdb4bcc1452980da03c3c4a20ef95a441795",
+            "card_hash": "1cc6c0e8211b45e00bb05e3a0b4333efeb49cf7c8f2f22cc3a46d209139e9299",
+            "quote": "I gave both Fable 5 and Opus 5 the exact same prompt"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 18248,
+      "cache_read_tokens": 186155,
+      "cache_create_tokens": 36169,
+      "wall_time_ms": 0
+    }
+  }
+}

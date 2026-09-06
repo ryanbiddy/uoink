@@ -1,0 +1,39 @@
+{
+  "seq": 363,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "cdbx5LsZJXM_YQkjd8MZ6dgUiGkgo0LM",
+      "video_id": "2082975098760294548",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "023f91b390771fb7cc0f8c25cc09afb838a3c864e65dc7a816d5a9022260a53c",
+            "card_hash": "896f937d1f921362eaee0d2815909b80764de65ed89f8dcd097207cb316a4ee3",
+            "quote": "Based ADK Agents And The Infrastructure That Those Agents Live On",
+            "start": 230.659,
+            "end": 350.339,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 199,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 8,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "jyLKz7LNNJTXfqT29JrINcW-Qi7XUQmi",
+      "video_id": "2080736332205436952",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "641de1b9b77070ef8306380a68df5f609bcd5d57e672d8f9f67956f29d16a4ce",
+            "card_hash": "597a1478ab6f53137be508e7273520c8201cf606376acd795b81412d1258c661",
+            "quote": "Grok 4.5 didn't just dump code into chat And pray",
+            "start": 47.02,
+            "end": 165.68,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

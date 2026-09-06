@@ -1,0 +1,51 @@
+{
+  "seq": 49,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "AMCdAesK9aTBz_TchFrcy59U2fDMFpu1",
+    "client_id": "proof-harness",
+    "attempt_token": "apf6jxtGjMl2Cm-1QVcQvfxf8hq0aVxu_ZO_x9s4TMw",
+    "submission_key": "AMCdAesK9aTBz_TchFrcy59U2fDMFpu1-apf6jxtGjMl2Cm-1QVcQvfxf8hq0aVxu_ZO_x9s4TMw",
+    "schema_version": 1,
+    "video_id": "2079405880332664832",
+    "source_revision": "a32b8d59e5bad0055ebe07e9672df64eed4eca7a0b597149d4ee036bb9f1d3bf",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "baa08083a36e6d59fe8b9edb7012e2f600f828085af720f9762aeedb361c37af",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "1a07987eb5682f934b3c032e33bfb4eae1fe38eb0950ff1f53e77c3ecb2e2a1c",
+            "card_hash": "4209f457c4c25a2051d755465a733a03378949db6dbc779c21b1203997a05461",
+            "quote": "it's basically about where we started and how far we've come with local and open source models"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 9215,
+      "cache_read_tokens": 103823,
+      "cache_create_tokens": 111643,
+      "wall_time_ms": 0
+    }
+  }
+}

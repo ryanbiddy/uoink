@@ -1,0 +1,39 @@
+{
+  "seq": 1179,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 7,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "a79JqRBjKqKO39Ll8Y0l4UgCnKL32rbo",
+      "video_id": "WgPbbWmnXJ8",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "3e25e27ce7cfc319b51bce92d5053bec0ce7f3620d5dafc98d969ce4801923b8",
+            "card_hash": "08ca7ba3b4f0d1654af0203f3e40d9e0848638a04d81d0927b91f4a768e6d5dd",
+            "quote": "we can use our GPU to actually run it and hopefully the GPU will give us real-time results",
+            "start": 4164.42,
+            "end": 4272.83,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

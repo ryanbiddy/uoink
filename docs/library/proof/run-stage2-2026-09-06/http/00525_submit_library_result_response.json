@@ -1,0 +1,39 @@
+{
+  "seq": 525,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "qX_y5rIz06ANX5iXoBN2fvPcA0vH6NnT",
+      "video_id": "2086079297580916736",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "459fd546830c1ac8e4856864d54d6f45d6d28f154d9735fb04efb9f58f45dd8b",
+            "card_hash": "1e8c61b4996f68ec50821c5eb04031f304fee71b97d344e5649fa7819ab21ccf",
+            "quote": "They just built the agent-native version of Git.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

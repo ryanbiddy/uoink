@@ -1,0 +1,66 @@
+{
+  "seq": 429,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "reMOXQ4Dyf1QDPzNAevlqAlH7bjIb_HO",
+    "client_id": "proof-harness",
+    "attempt_token": "mHjMERUgY3nBabCWktW4VXCz4MpVrQQa6nMYBdQIGc0",
+    "submission_key": "reMOXQ4Dyf1QDPzNAevlqAlH7bjIb_HO-mHjMERUgY3nBabCWktW4VXCz4MpVrQQa6nMYBdQIGc0",
+    "schema_version": 1,
+    "video_id": "2083598884362653696",
+    "source_revision": "cc99c03359ddfbe23ceb6a11c0b3be5f0e80e5a932a084956e6a4d6a1a543388",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "829c573c1a12aaf439490e580c4cc58e8f9ba80af0be0bc36a59a5766a27abb5",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.87,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "58515a160b5ad582203d746f9d5de063c0a85509d81298cd1450351bbe58de04",
+            "card_hash": "b49ba4b9183a1dfe12adc7976ea3215e4b472eab99286a0a71289ca70692ecec",
+            "quote": "One Routine Is Clean Up Dead Code This Is A Single Prompt"
+          }
+        },
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "0bd47e98cc4ffc6fe025cf8b4e9ac321a4cc0dadb7adc1f2e4442add1f8fb26e",
+            "card_hash": "b49ba4b9183a1dfe12adc7976ea3215e4b472eab99286a0a71289ca70692ecec",
+            "quote": "a prompt injection classifier which we run for all traffic"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 19088,
+      "cache_read_tokens": 186333,
+      "cache_create_tokens": 36888,
+      "wall_time_ms": 0
+    }
+  }
+}

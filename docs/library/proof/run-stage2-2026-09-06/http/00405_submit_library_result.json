@@ -1,0 +1,93 @@
+{
+  "seq": 405,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 405,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "71Ph7QeuL5tJJqDEa9vPhjz2ddO6xsAP",
+      "client_id": "proof-harness",
+      "attempt_token": "ClE5Bhm46-sIgct0QNs-KHxgzkYvYEYsGpvxS1zNEBs",
+      "submission_key": "71Ph7QeuL5tJJqDEa9vPhjz2ddO6xsAP-ClE5Bhm46-sIgct0QNs-KHxgzkYvYEYsGpvxS1zNEBs",
+      "schema_version": 1,
+      "video_id": "2084311728884420608",
+      "source_revision": "cd24efd1cb51d11aff3b719aeb3edc3038b3d82e8cc94a85b6af31b504d02385",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "429aed5520884aafaa05e683f6ad536220385a17b3c16dd64afae4d9e74a32d1",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-and-ml",
+            "shelf_path": [
+              "AI and ML"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "d4fc9588bb8b6be474181ba352f07899b378fc445c21cd24bde451e5d80002af",
+              "card_hash": "008a4aee0b4184f492ca01c9b1d35f1cc9b297554b839de2b37ccdd6260bd255",
+              "quote": "Anthropic finally published the prompting playbook for every Claude model."
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 15782,
+        "cache_read_tokens": 189114,
+        "cache_create_tokens": 36038,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 405,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "71Ph7QeuL5tJJqDEa9vPhjz2ddO6xsAP",
+        "video_id": "2084311728884420608",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-and-ml",
+            "shelf_path": [
+              "AI and ML"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "d4fc9588bb8b6be474181ba352f07899b378fc445c21cd24bde451e5d80002af",
+              "card_hash": "008a4aee0b4184f492ca01c9b1d35f1cc9b297554b839de2b37ccdd6260bd255",
+              "quote": "Anthropic finally published the prompting playbook for every Claude model.",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"body":{"accepted_memberships":[],"ok":true,"outcome":"rejected","rejected":[{"code":"invalid_evidence","field":"evidence.quote","reason":"Quote must occur in one specified excerpt"}],"retryable":true,"schema_version":1,"video_id":"2092658884297334784","work_id":"NTq-qeTh8OKXWmWFLTOeeJgqatc4XMy2"},"headers":{"Content-Type":"application/json"}}

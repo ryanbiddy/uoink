@@ -1,0 +1,39 @@
+{
+  "seq": 543,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "jWA-3oJktK69q6vljHdTIvfOlIibT252",
+      "video_id": "2086975532756041728",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "cd1f6a7c6e9696cf2e081ad6297979c62916947f56b1bdf7c9aedf485df091ed",
+            "card_hash": "1deec8914b95da2615eedab74320b99113f44468ccb50af1c16294c442dc734b",
+            "quote": "VSCode can now give you a visualization of all your hermes agents working live",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

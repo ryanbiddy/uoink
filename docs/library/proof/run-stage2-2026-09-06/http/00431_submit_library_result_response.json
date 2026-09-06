@@ -1,0 +1,39 @@
+{
+  "seq": 431,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "tBMcNX583CDHenpYovo-OCA_KvB5NROS",
+      "video_id": "2083386739209768960",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "c48de5c2ac1ce69b44bc34d6da5dda9dc5228ebcf4f496c001383405e4443c48",
+            "card_hash": "85b5930df4102e2fc25c1adf5e69d3ee0fc5832dfcc1c9969385b094e0bbe05e",
+            "quote": "We ran a test between the new DeepSeek V4 Flash, Kimi K3 and GLM 5.2.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

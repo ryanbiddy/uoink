@@ -1,0 +1,39 @@
+{
+  "seq": 337,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 6,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "guHr2rowD8OKuxWoGZZZT9lmpcme7Psk",
+      "video_id": "2082842696650043392",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.7,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "153d08f252ba46166171c822bcb20f084f87d24d649ca690e4790eeb377b78e9",
+            "card_hash": "84f3facb4018bc86b2031bf26457264494b7925d46b79fe160152fe250546d9a",
+            "quote": "Gemini Omni in Google Vids lets you generate a personal AI avatar to star in your videos.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

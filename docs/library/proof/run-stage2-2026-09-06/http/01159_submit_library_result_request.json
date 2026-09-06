@@ -1,0 +1,35 @@
+{
+  "seq": 1159,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "WPIEyk2iXBLR04Yx27T3OWxbce32pOhA",
+    "client_id": "proof-harness",
+    "attempt_token": "J9q-8tYphmFoG-IvWwYi_Aa7fwOTg6jACefV0HZbl-0",
+    "submission_key": "WPIEyk2iXBLR04Yx27T3OWxbce32pOhA-J9q-8tYphmFoG-IvWwYi_Aa7fwOTg6jACefV0HZbl-0",
+    "schema_version": 1,
+    "video_id": "jNQXAC9IVRw",
+    "source_revision": "c1d5f7d020e336f9385534c4ef82a5fe21141c57ba6225a49f3008ed355b8c04",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "eae567fd84c739829f2dd6158350af27668ac3592a1bf4582c58da35f303898b",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Content is a casual clip about elephants at a zoo with no connection to AI/ML, news events, or space/science topics."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 12784,
+      "cache_read_tokens": 196372,
+      "cache_create_tokens": 40753,
+      "wall_time_ms": 0
+    }
+  }
+}

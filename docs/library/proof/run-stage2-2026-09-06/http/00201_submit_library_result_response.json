@@ -1,0 +1,39 @@
+{
+  "seq": 201,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 7,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "lRFDTv-2liiqXWt9zvhZv3yfGNNLQFwR",
+      "video_id": "2080366865633931503",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "61c804b0b91dd224747c96e9da0705b50406ac84f939ff7dc0c557d33185b10d",
+            "card_hash": "ddaa324f842fa6a9fa7d7cc1376cfe3540695eeaedfbdea6135930e0806a20ed",
+            "quote": "Kimi K3's massive jump in consumed thinking tokens",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

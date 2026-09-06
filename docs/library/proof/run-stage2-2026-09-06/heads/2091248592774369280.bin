@@ -1,0 +1,191 @@
+# MTS - FULL INTERVIEW: Peter McCrory says 6 months ago he thought his edge o...
+
+**Channel:** MTS (— subscribers)
+**Uploaded:** 2026-08-22 | **Duration:** 24:01 | **Views:** — | **Likes:** 93
+**URL:** https://x.com/MTSlive/status/2091252532689658001
+**Uoinked:** 2026-08-23T07:38:43
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The opening establishes a counterintuitive claim: Peter McCrory no longer believes his comparative advantage over Claude lies in knowing which questions to ask—a reversal of what he thought six months ago. This challenges the common assumption that human judgment in question-formulation remains a defensible edge against AI capabilities.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+FULL INTERVIEW: Peter McCrory says 6 months ago he thought his edge over Claude was knowing which question to ask. He no longer thinks that. His team is now working on 3 singularities: software, economic, and Coasean.  @PeterMcCrory is Head of Economics at @AnthropicAI and leads https://t.co/cHQZI6LeFE
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] I think about my job as an economist
+[00:00:02] Yes, Claude is increasingly able to
+[00:00:05] download data, run regressions, even build economic models
+[00:00:10] And, you know, six months ago
+[00:00:12] I might have thought to myself
+[00:00:13] well
+[00:00:13] I still have this comparative advantage at asking the right question
+[00:00:17] or even having like the insightful
+[00:00:20] breakthrough in, how to formulate, a particular model
+[00:00:25] But, you know, each new generation of Claude
+[00:00:28] is
+[00:00:29] pushing the boundary of implementation and into
+[00:00:33] question asking and
+[00:00:35] and even like evaluation
+[00:00:37] and I I've I've felt that Claude
+[00:00:40] is actually surprisingly insightful
+[00:00:43] and creative about
+[00:00:44] tackling the sorts of questions that I
+[00:00:46] am trying to tackle with it
+[00:00:49] Hello everyone and welcome back to MTS
+[00:00:52] Today
+[00:00:53] we are joined by Peter McCrory who is
+[00:00:55] the head of economics at Anthropic
+[00:00:57] and he helps lead the Anthropic Economic Index
+[00:00:59] which uses privacy preserving analysis of Claude usage
+[00:01:02] to study how AI is being adopted across tasks
+[00:01:05] occupations, firms
+[00:01:07] and regions
+[00:01:08] And he recently wrote the article Why Has
+[00:01:10] AI Increased Unemployment? Peter
+[00:01:12] we're very excited to have you on
+[00:01:13] MTS today
+[00:01:15] Thanks for having me. It's a delight to
+[00:01:16] be here
+[00:01:17] Absolutely
+[00:01:18] So, your article, Why Hasn't AI Increased Unemployment?
+[00:01:22] definitely a lot of people have been wondering this
+[00:01:24] especially people who thought that like
+[00:01:27] you know, back in 2020
+[00:01:28] if they had been given a model on
+[00:01:29] the level of like Fable today
+[00:01:31] many people would have predicted there would be
+[00:01:33] large-scale unemployment. And yet this basically
+[00:01:35] hasn't happened yet
+[00:01:37] so
+[00:01:38] could you explain for the audience the
+[00:01:39] thesis behind your article?
+[00:01:41] Yeah, so, You know
+[00:01:43] it's it's a question that I find myself
+[00:01:45] asking. I I use
+[00:01:47] this frontier tech this frontier technology every single day
+[00:01:51] and
+[00:01:52] I find that my job is
+[00:01:54] being radically changed even
+[00:01:56] relative to what I was doing
+[00:01:57] back in 2020 as an economist
+[00:01:59] You know, downloading data, running regressions
+[00:02:01] doing very sophisticated analyses that
+[00:02:04] increasingly Claude can just do end to end
+[00:02:07] And so in some sense
+[00:02:08] the premise of the essay is AI capabilities
+[00:02:11] as you say
+[00:02:12] have advanced sufficiently far that it's reasonable to
+[00:02:16] ask why hasn't this had an impact on unemployment?
+[00:02:19] Moreover, diffusion within the economy
+[00:02:21] I think it's like one in five firms
+[00:02:24] in the US report using AI to some extent
+[00:02:28] from the Business Trend and Outlook survey
+[00:02:31] And so
+[00:02:32] The diffusion within the economy has also accelerated
+[00:02:35] And there's even some signs that productivity
+[00:02:38] labor productivity growth in the US has been stronger
+[00:02:42] or it has been stronger in recent years
+[00:02:44] And maybe some of that is due to AI
+[00:02:46] So like
+[00:02:46] maybe we're seeing some signs
+[00:02:48] of an impact in the aggregate
+[00:02:49] And so why not
+[00:02:51] in the labor market where the unemployment rate
+[00:02:53] in the US is
+[00:02:55] close to where the Fed would pinpoint full employment
+[00:03:00] and even digging into the data
+[00:03:01] it's hard to get very
+[00:03:03] definitive answers on the impact
+[00:03:05] So that's the premise of the essay
+[00:03:07] The basic punchline is
+[00:03:10] so far it has the hallmarks of it
+[00:03:12] of being a skill bias technology that
+[00:03:15] automates some aspects of
+[00:03:17] the work that we do but also
+[00:03:19] complements and
+[00:03:20] amplifies other forms of human expertise
+[00:03:23] that
+[00:03:23] rely on a human in the loop to
+[00:03:25] get the greatest value out of the technology
+[00:03:27] right so
+[00:03:28] it hasn't happened so far but you know
+[00:03:30] Dario Amodei said May 2025 AI could wipe
+[00:03:33] out half of all entry-level white-collar jobs and
+[00:03:35] spike unemployment to
+[00:03:36] 10 to 20% in the next one to
+[00:03:37] five years
+[00:03:38] you know we're a little over a year
+[00:03:39] in this definitely has not happened yet
+[00:03:42] but do you think it's still basically possible
+[00:03:44] that this happens
+[00:03:45] within the next five years
+[00:03:46] or that I guess Next four years
+[00:03:49] So, you know, I, I do want to like
+[00:03:51] it's a great question and emphasize that the essay
+[00:03:54] essay is
+[00:03:55] primarily focusing on
+[00:03:57] what impact do we see so far
+[00:03:59] Right. Based on patterns of adoption of the
+[00:04:02] technology today
+[00:04:05] What
+[00:04:07] looms on the horizon over the next
+[00:04:09] four years
+[00:04:11] I think there's still a lot of uncertainty
+[00:04:12] It depends in some sense on whether or not the
+[00:04:17] capabilities continue to advance or even accelerate
+[00:04:21] as we might expect that they will
+[00:04:23] and whether or not the jagged frontier maybe smooths out
+[00:04:26] So
+[00:04:27] right now it's the case that
+[00:04:29] for a lot of different types of cognitive
+[00:04:31] work that Human expertise is augmented and amplified
+[00:04:36] But if that no longer is the case
+[00:04:40] then
+[00:04:41] that points more in the direction of
+[00:04:43] disruption or displacement
+[00:04:45] And so like making sense of that
+[00:04:47] the range of uncertainty
+[00:04:48] that might materialize over the next
+[00:04:50] four years
+[00:04:51] is certainly a key priority for
+[00:04:55] the work that my team is doing
+[00:04:57] But again, the essay is posing the
+[00:04:59] the, in some sense, the simpler question
+[00:05:01] which is
+[00:05:01] why have we not seen any impact
+[00:05:04] so far today
+[00:05:05] Yeah
+[00:05:06] On the other end
+[00:05:06] even just data around unemployment is incredibly
+[00:05:09] difficult to accurately assess. Even just technology
+[00:05:13] it's not really segmented by
+[00:05:15] AI and by the impacts of how different
+[00:05:18] industries are affecting unemployment. And so
+[00:05:21] what has been your experience as
+[00:05:23] the person who's actually getting all this data
+[00:05:25] trying to synthesize what it means?
+[00:05:26] What's still missing to accurately understand what's happening?
+[00:05:30] Right? So, I mean
+[00:05:31] one thing that is helpful in the US
+[00:05:34] is that the US does have
+[00:05:35] very rich labor market data that's relatively real-time
+[00:05:40] And so, for example
+[0

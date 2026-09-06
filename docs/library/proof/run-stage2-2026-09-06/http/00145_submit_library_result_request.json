@@ -1,0 +1,35 @@
+{
+  "seq": 145,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "-LrOFeERUMhvBdPzfr01VyUPBOPh0adB",
+    "client_id": "proof-harness",
+    "attempt_token": "03nZSLmkq5p8d03VE67ic1eqr37MH3IxUY5_kn0zr7k",
+    "submission_key": "-LrOFeERUMhvBdPzfr01VyUPBOPh0adB-03nZSLmkq5p8d03VE67ic1eqr37MH3IxUY5_kn0zr7k",
+    "schema_version": 1,
+    "video_id": "2079662821449609217",
+    "source_revision": "6e61eae6999b70a4d0b7a5f3be8372a68d0ddb213c8b2de67dde249a84b03904",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "b838c015b738a9d66c3a845c9e88863a1434708fcd30105089adcd0fd2f13c8b",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Timed-clip excerpt is song lyrics played over a football clip ('This is beautiful to watch'); lyrical/musical content over sports footage does not fall under any approved shelf."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 17170,
+      "cache_read_tokens": 188825,
+      "cache_create_tokens": 37085,
+      "wall_time_ms": 0
+    }
+  }
+}

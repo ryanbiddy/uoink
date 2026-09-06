@@ -1,0 +1,39 @@
+{
+  "seq": 159,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "-H8TNoUr3kToxcYV24X1m35DgZRYmViO",
+      "video_id": "2080709349606150317",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.88,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "00bba5b6c53e3ece7235e9e1db88eee80efde1a903571571e926efeb5338a2f0",
+            "card_hash": "77b3a6109c04b43f6c6b37080f1e0d776118446304a4d5ce43f972c18d62fa72",
+            "quote": "Tried recreating Fall Guys using the exact same prompt with Claude Opus 5.0 (Claude Code) and Kimi K3 (Kimi CLI).",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

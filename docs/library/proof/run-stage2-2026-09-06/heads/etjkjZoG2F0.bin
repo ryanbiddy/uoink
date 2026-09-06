@@ -1,0 +1,76 @@
+# YOLOv11: How to Train for Object Detection on a Custom Dataset | Step-by-step guide
+
+**Channel:** Roboflow (70.2K subscribers)
+**Uploaded:** 2024-10-17 | **Duration:** 01:11:48 | **Views:** 145,200 | **Likes:** 2,720
+**URL:** https://www.youtube.com/watch?v=etjkjZoG2F0
+**Uoinked:** 2026-07-09T19:21:53
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Promise List
+**Analysis:** The opening immediately promises a 'comprehensive step-by-step' guide covering the entire process of training YOLOv11 on custom datasets, implying multiple distinct stages or steps the viewer will learn. The transcript reinforces this by outlining several key phases: finding datasets, labeling, training, evaluation, and deployment.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Master YOLOv11 object detection with this complete tutorial.  From finding datasets to labeling images, training the model, and deploying it for real-world use, this guide has you covered. Learn to train on your local machine or Google Colab and get your custom object detection model up and running.
+
+Chapters:
+
+- 00:00:00 Introduction to YOLOv11
+- 00:00:55 Finding Free Annotated Datasets for YOLOv11
+- 00:02:14 Image Labeling for YOLOv11
+- 00:09:05 Setting Up Your Local YOLOv11 Training Environment
+- 00:15:44 Understanding YOLO Annotation Formats
+- 00:27:22 Training YOLOv11 Locally
+- 00:34:03 YOLOv11Training Hyperparameters
+- 00:38:04 Evaluating Your YOLOv11 Model's Performance
+- 00:43:30 Running Inference with Your Trained YOLOv11 Model
+- 00:48:19 YOLOv11 Training in Google Colab
+- 01:00:41 Saving Your Fine-Tuned YOLOv11 Model Weights
+- 01:04:32 Deploying Your YOLOv11 Model
+- 01:11:07 Conclusion
+
+Resources: 
+
+- Roboflow: https://roboflow.com
+
+- ⭐ Notebooks GitHub: https://github.com/roboflow/notebooks 
+- ⭐ Supervision GitHub: https://github.com/roboflow/supervision
+
+- 🏞️ TFT-ID dataset: https://universe.roboflow.com/huyifei/tft-id
+
+- 📓 YOLOv11 object detection model training notebook: https://colab.research.google.com/github/roboflow-ai/notebooks/blob/main/notebooks/train-yolo11-object-detection-on-custom-dataset.ipynb
+
+ - 🗞 YOLOv11 object detection model training blog post: https://blog.roboflow.com/yolov11-how-to-train-custom-data/
+
+Stay updated with the projects I'm working on at https://github.com/roboflow and https://github.com/SkalskiP! ⭐
+
+#yolo #yolov11 #yolo11 #objectdetection
+
+## Tags
+
+YOLO 11, YOLO11, YOLOv11, YOLO11 Tutorial, Object Detection Tutorial, YOLOv11 Training, Computer Vision, Object Detection, Ultralytics, yolo object detection, yolo python, step by step guide, Deploy YOLO11, YOLO annotation format, YOLO11 Training, Ultralytics YOLO11
+
+---
+
+## Transcript
+
+### Chapter: Introduction to YOLOv11 (00:00:00)
+
+[00:00:03] YOLO 11 is out and in this tutorial we'll find unit for object detection on custom data set this guide provide a comprehensive step-by-step work through of the entire process whether you already have your images or you need to find the data no data set no problem we'll start by finding free already annotated data sets for object detection already have images I'll show you how to label them for training and create your data set next we'll train YOLO 11 model we cover training in two distinct environments your local machine and Google callab once we do it we'll evaluate the trained model's performance and save it finally we'll deploy the model run it in browser and use it with python SDK we have a lot to cover so let's get started any time that I need to train the model but I don't have the data set the first place I look is roof flow Universe there are already half million data sets on the website and most of them are for object detection so there is a high chance that somebody already annotated the images that you or I need for training and just scrolling through the website we can see that those data sets come from different use cases there is some foodball data set there are some medical images some aerial images there is data set to the detect fire and smoke there are some data sets related to video games and data sets to detect safety equipment and as a matter of fact the data set that I will use today in this tutorial also comes from roof flow universe so some time ago I got interested in document understanding and I was curious if I will find a data set that will help me out to process arive uh papers and that's how I found this TFT ID data set and the cool thing is that you can go into those images take a look at the annotations evaluate the quality and yeah that data set is exactly what I needed to make this tutorial like I said many of you probably already have the images or plan to collect them you may scrape the internet or take images with your phone or scan documents and if that's the case let me quickly show you how to annotate them there are of course multiple options on the market some of them open source like cat or my open source project called Mak sense but if you're looking for something that is free to use and with minimum hustle roof flow is probably your best option and of course I don't say that because it's roof flow YouTube channel you can totally trust me on that no but honestly I think it's the best so let me show you how to use it so for the next few minutes I will will pretend that I don't have the data set that is fully annotated already and I will use the sap set of images from TFT ID data set to guide you through the whole labeling process the first thing that you need to do is to log into your roof flow account or create one if you don't have one already and once you do it you will probably end up in this main workspace view here I click the new project button that is in top right corner and that takes me to project creation view now I can provide the project name I'm just replicating the TFT ID data set so that's the name that I'm going to use and I need to provide annotation group this is pretty much the answer to the question what objects am I going to annotate and in my case those are going to be research papers we select project type here object detection and create a public project the first thing that you should do once you create a fresh project is Define the list of classes that you would like to annotate like I said I replicate TFT ID data set so in my case I will use figure table and text once you're happy with the list of classes you can click add classes button success yay great successful and now the next step is to upload your data to the project to do that we go to upload data View and here we just drag and drop our images and and once we are happy with the list of images that you would like to add to your project we click save and continue depending on the size of those images and the amount of images that you uploaded that process can take between few seconds and few minutes the next view allow us to pick the way that we are going to annotate the data set you can use the auto annotation uh functionalities that are in roof flow but for this particular data set I don't really recommend that we can hire somebody to annotate the data for us or we can manually annotate the data set and this is the option that I'm going to use here that view will probably look a little bit different for you uh I have a lot of people in my workspace and I can just invite them to help me with annotation but uh for this particular job I will just assign uh those images to
+
+### Chapter: Finding Free Annotated Datasets for YOLOv11 (00:00:55)
+
+
+### Chapter: Image Labeling for YOLOv11 (00:02:14)
+
+[00:05:25] to myself and here it is our first annotation job is is created and I can just start
+[00:05:32] just start annotating uh so I click Start annotating button this takes me to the editor where I can move between images and let's say that I would like to annotate this one I just zoom in I draw the bounding box around the object that uh is interesting to me I pick the class I submit and I just do it for every object visible on the image so I had uh two more text Fields one more table uh o

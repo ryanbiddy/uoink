@@ -1,0 +1,66 @@
+{
+  "seq": 1141,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "6250kjIce54J0V_B1lYmMLXIfW3wbLix",
+    "client_id": "proof-harness",
+    "attempt_token": "FPg1CsBKnhLcNdb2Dx9h_DGSWcVKBHBptzF6q92xqm0",
+    "submission_key": "6250kjIce54J0V_B1lYmMLXIfW3wbLix-FPg1CsBKnhLcNdb2Dx9h_DGSWcVKBHBptzF6q92xqm0",
+    "schema_version": 1,
+    "video_id": "MJmoSxSPeRY",
+    "source_revision": "fedc3b2bda5af1243768e00a3c2cccdf271949cb6cc48999836b5ae2acd0f48d",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "882f76d742bc6f44125f68950281b64f0adb68aa503cb7e9d0ff03ac3f57a1b1",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "c79ba705b4a85d0daa93e1e7177e2cf1b426cbf840a62256aa7c53ac83f165f3",
+            "card_hash": "1d9c474c3bcf512d912ffbf3a6002db79369b71d3b07d80b5920423b85082f5b",
+            "quote": "it looks really good. It's cinematic. The style matches, the text is on point. Everything just fits together nicely."
+          }
+        },
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "aa4457a88895651150cdb90b2134918d3f29cccc559369d647099dfc76350442",
+            "card_hash": "1d9c474c3bcf512d912ffbf3a6002db79369b71d3b07d80b5920423b85082f5b",
+            "quote": "send everything into Claude code. Once you do that, Claude takes it,"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 23533,
+      "cache_read_tokens": 194011,
+      "cache_create_tokens": 47375,
+      "wall_time_ms": 0
+    }
+  }
+}

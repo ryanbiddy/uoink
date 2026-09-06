@@ -1,0 +1,95 @@
+{
+  "seq": 597,
+  "tool": "submit_library_result",
+  "wall_ms": 7,
+  "request": {
+    "seq": 597,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "3OSxrruBzkv3tB02NmM_XVErdv-eIn9R",
+      "client_id": "proof-harness",
+      "attempt_token": "z-AKjXCh2Xr1DZhFs8U9zKs-kleIVTh7XNegYcktvsg",
+      "submission_key": "3OSxrruBzkv3tB02NmM_XVErdv-eIn9R-z-AKjXCh2Xr1DZhFs8U9zKs-kleIVTh7XNegYcktvsg",
+      "schema_version": 1,
+      "video_id": "2086214505797931008",
+      "source_revision": "71b38afb5e435ebf12d0851ec7a7ddd719553ec50d41f8d56dc45dc840d997d6",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "e02071dab4888b617f0d3f58b826ea922c5cb2e4b89368902ff1787b6af5435f",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "generative-media",
+            "shelf_path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "confidence": 0.75,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "bc03ffc0811c49a56b3ad0eed3fd6bc2ccaad89315db2ca2e70878129a136bde",
+              "card_hash": "e0a7c678e142349669739fda2836a16b32a7b75f8df461f5e14c5200b687ebc1",
+              "quote": "I’ve discovered peak AI video and it’s this orange cat’s vlogs"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 18457,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20482,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 597,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 7,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "3OSxrruBzkv3tB02NmM_XVErdv-eIn9R",
+        "video_id": "2086214505797931008",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "generative-media",
+            "shelf_path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "confidence": 0.75,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "bc03ffc0811c49a56b3ad0eed3fd6bc2ccaad89315db2ca2e70878129a136bde",
+              "card_hash": "e0a7c678e142349669739fda2836a16b32a7b75f8df461f5e14c5200b687ebc1",
+              "quote": "I’ve discovered peak AI video and it’s this orange cat’s vlogs",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

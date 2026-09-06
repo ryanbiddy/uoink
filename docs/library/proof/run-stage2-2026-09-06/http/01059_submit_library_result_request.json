@@ -1,0 +1,51 @@
+{
+  "seq": 1059,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "lraTih1ImmMhJecIwGF_OVXHGRXrV1m3",
+    "client_id": "proof-harness",
+    "attempt_token": "QpUqiA5dhAu_3ChGQ_kfMwtzHxGGBPtLMeEnhYjNOLk",
+    "submission_key": "lraTih1ImmMhJecIwGF_OVXHGRXrV1m3-QpUqiA5dhAu_3ChGQ_kfMwtzHxGGBPtLMeEnhYjNOLk",
+    "schema_version": 1,
+    "video_id": "2094517730636390400",
+    "source_revision": "32a400599bd2f032b00ca10026b59c7e28da045fdc0d84cded2549ba3ec9f50c",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "f5487bc86ff037216278a5dac4ae551bf451df77973feac52d94b33009a0a1f2",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "f757ba6ad315a5b2ff827a4c2358554365e01f80bbbb8df6d8051037612247e9",
+            "card_hash": "d03f6a684054dba0924e37ad52d4ce4927deadb04bfef06fd0ad6c93c25f5673",
+            "quote": "A forward deployed engineer embeds with your team and uses AI to build the workflows"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 11871,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 18944,
+      "wall_time_ms": 0
+    }
+  }
+}

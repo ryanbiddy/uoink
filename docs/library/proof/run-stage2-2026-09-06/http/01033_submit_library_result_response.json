@@ -1,0 +1,39 @@
+{
+  "seq": 1033,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "QmUdg7OYZYnMoeN89xGJ1YxvUe95rbIZ",
+      "video_id": "2095522313676439556",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "b35b1f1f56be85d8e5db9c3a6d116e385770addaaea540103bb4dda8c7b7141c",
+            "card_hash": "bfcd4e6e495e05547624a1df987dd9e0320232884c914e8cbf6441dfba918540",
+            "quote": "Perfectly converted this video into code",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

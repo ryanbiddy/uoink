@@ -1,0 +1,58 @@
+{
+  "seq": 1161,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "ZYry-_dzPppt3FIo69yiv5sqh6rl11D2",
+      "video_id": "mZzAuFq5C6Q",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "71a6e0e0f0f17eefcb4be31d309df0f4e7ce684624f5109b03bc101f37c330e7",
+            "card_hash": "c2360665f85c9259f82bea65dc477c9d36930309d777d1795cfdf0d9a444d149",
+            "quote": "you're switching models, juggling each provider's unique SDK, managing rate limits, reconciling billing systems",
+            "start": 128.479,
+            "end": 240.47,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "b55b57df87be4b2d3b7b5cfed6f65958ebddbdfb1bd7fc74b5795fb71ed84c61",
+            "card_hash": "c2360665f85c9259f82bea65dc477c9d36930309d777d1795cfdf0d9a444d149",
+            "quote": "this agent has been live at for months. It already saved us hundreds of patient person days of work",
+            "start": 2637.76,
+            "end": 2898.55,
+            "timing": "coarse",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

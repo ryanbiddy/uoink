@@ -1,0 +1,95 @@
+{
+  "seq": 455,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 455,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "L-G005KK42nAT08R0qb940MQ4hnC5b3p",
+      "client_id": "proof-harness",
+      "attempt_token": "kpNM1K6_IJyOKwTU38FTeKP2Prr3zcGVuZtdXiHOIUA",
+      "submission_key": "L-G005KK42nAT08R0qb940MQ4hnC5b3p-kpNM1K6_IJyOKwTU38FTeKP2Prr3zcGVuZtdXiHOIUA",
+      "schema_version": 1,
+      "video_id": "2084667135348051968",
+      "source_revision": "79e411b7c4324a80a991b05f144657a91724cc203942565e2bb3e958311d94bb",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "8d985467af70d23dccc90ff7d79758d5222c1407c8f6671fb71ec72b5f40788f",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "feb8859866b046e82913a8ea1f5c110a49ae4151e26dda204f7dad9a215b59ea",
+              "card_hash": "92c748b4a6814b688f41f3a6854940d3af47e853ecc49c87d77c452105734ba1",
+              "quote": "Not Diamond works with any gateway or harness, including Claude Code"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 11136,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20287,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 455,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "L-G005KK42nAT08R0qb940MQ4hnC5b3p",
+        "video_id": "2084667135348051968",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "feb8859866b046e82913a8ea1f5c110a49ae4151e26dda204f7dad9a215b59ea",
+              "card_hash": "92c748b4a6814b688f41f3a6854940d3af47e853ecc49c87d77c452105734ba1",
+              "quote": "Not Diamond works with any gateway or harness, including Claude Code",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

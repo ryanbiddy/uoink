@@ -1,0 +1,51 @@
+{
+  "seq": 967,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "aB-yhTfXOUjGkdX9Zw2_1ZlkC7-Pcjms",
+    "client_id": "proof-harness",
+    "attempt_token": "d0kQJHFKyOTqJqzX7vL3mLUm2IKAW_woyC_Vpdhx5tQ",
+    "submission_key": "aB-yhTfXOUjGkdX9Zw2_1ZlkC7-Pcjms-d0kQJHFKyOTqJqzX7vL3mLUm2IKAW_woyC_Vpdhx5tQ",
+    "schema_version": 1,
+    "video_id": "2093043429278458326",
+    "source_revision": "a3a0fa6037bd70d0c48e915b743abcb4ab2de062331635bb25ea5b7682ee9837",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "45569832858b3ddb22abce63bb81f34c0cc281e6f560aa582b093741c34b327e",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "b94734bf6b6267a29c24bf5bbe3baabf3a42867d71f10d98fa39ecd11558c6c0",
+            "card_hash": "501e0278780921d1b7dab8211f1b93e0bfe226b59d85f15db1f546ee5212a3d5",
+            "quote": "we are going after the biggest market in the world"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 21320,
+      "cache_read_tokens": 186700,
+      "cache_create_tokens": 39250,
+      "wall_time_ms": 0
+    }
+  }
+}

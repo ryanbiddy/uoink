@@ -1,0 +1,51 @@
+{
+  "seq": 303,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "2Yf44pLLRa0DQhSfAM1PKhMmdG9nlDo1",
+    "client_id": "proof-harness",
+    "attempt_token": "7OxWkCTJV72qPcUjZOIjns3kQOirf9KBWOJa45kL84g",
+    "submission_key": "2Yf44pLLRa0DQhSfAM1PKhMmdG9nlDo1-7OxWkCTJV72qPcUjZOIjns3kQOirf9KBWOJa45kL84g",
+    "schema_version": 1,
+    "video_id": "2081801821308571648",
+    "source_revision": "f229b86f2168273115b6dc51ad43ea6c734229de61715d2a4312024c76c073bf",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "7d47fde401baf4f48feba011a48962fc5685324d62b6ff8ca19919058773f34c",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "ceeee94f2174d0941b1a9691a48fa4e9f91cb6d0f836d0543e653d49d3dc7393",
+            "card_hash": "bfa75ce51dfa88b4d981511a32a6ad6d458c41073926d75bf2be162a05fcd6d6",
+            "quote": "Claude Opus 5 was left running for 24 hours straight and built an entire game from scratch."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 18248,
+      "cache_read_tokens": 186155,
+      "cache_create_tokens": 36169,
+      "wall_time_ms": 0
+    }
+  }
+}

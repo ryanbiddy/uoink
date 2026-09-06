@@ -1,0 +1,95 @@
+{
+  "seq": 369,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 369,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "HsbDbHrpTeBSxVgE1631xhkp6mq31OZm",
+      "client_id": "proof-harness",
+      "attempt_token": "VvS3RxqEy5CwfokQf1YNswXGL76GvYOC5-7VrbrqISk",
+      "submission_key": "HsbDbHrpTeBSxVgE1631xhkp6mq31OZm-VvS3RxqEy5CwfokQf1YNswXGL76GvYOC5-7VrbrqISk",
+      "schema_version": 1,
+      "video_id": "2081888077858140160",
+      "source_revision": "537c45af957145fd5a5c59c152f927b2d6400d589dff959d272df1cc6d05f014",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "be359141629fb5f9327de7f0c7271714bd145df581ba7a1f34115994809daa8c",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.7,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "08ab39b122c05fa0d88e8f65ca3e09dbf1ab1e3072444a7888ce66958ddf26c6",
+              "card_hash": "6528eefcd5e23d6987e58ce2875d80b47bb2210008c7dd82ff535d7fa2133f72",
+              "quote": "AI has advanced by training ever-larger models on ever-larger datasets"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 13584,
+        "cache_read_tokens": 186442,
+        "cache_create_tokens": 31617,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 369,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "HsbDbHrpTeBSxVgE1631xhkp6mq31OZm",
+        "video_id": "2081888077858140160",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.7,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "08ab39b122c05fa0d88e8f65ca3e09dbf1ab1e3072444a7888ce66958ddf26c6",
+              "card_hash": "6528eefcd5e23d6987e58ce2875d80b47bb2210008c7dd82ff535d7fa2133f72",
+              "quote": "AI has advanced by training ever-larger models on ever-larger datasets",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

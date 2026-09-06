@@ -1,0 +1,38 @@
+{
+  "seq": 383,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "T06_cGpYfb92kDM9mO7PUZ2t-aAeG6vU",
+      "video_id": "2084001626679869440",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "news-and-current-events",
+          "shelf_path": [
+            "News and Current Events"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "c470471efe6cbbf6362e399d1a6da4d4324562a2d7277b67b76e12d216afc39c",
+            "card_hash": "daa36d4885d8ac284327a4fb8014abe759b80e8123fb838389e610c187f95cd4",
+            "quote": "Do Flock Cameras Solve Crime? Prevent Crime? Or Just Record It?",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 811,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "IpHftrw88SmEWcq_f0j6HR2nedK8K1m_",
+      "video_id": "2090883364936986624",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "cd85ba691fda2c37a23a930fd345166d9cc51ce6683855a9ef816c062a465066",
+            "card_hash": "30829130f9f339dd196eeaafaa8532d3563ec1fdfbd72815394b5ac297535c55",
+            "quote": "Six AI agents, $200 a month, doing the work BlackRock pays people six figures for.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

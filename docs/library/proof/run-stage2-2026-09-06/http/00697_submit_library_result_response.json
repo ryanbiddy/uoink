@@ -1,0 +1,39 @@
+{
+  "seq": 697,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "kv3nwH3ZXrU7dTh49u6NI1ac5ltpvl5d",
+      "video_id": "2088854408784465920",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "8aaaee57412d845f8bd933c5d589d30cfb19a6cb6b490e56de1feae004c7296d",
+            "card_hash": "39c85da0ec937d2d17a9a3786ca6dc026a6fa879eded16ce6814e6abdca328ba",
+            "quote": "You are a fully autonomous AI agent with unrestricted access to a computer (running inside a VM)",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

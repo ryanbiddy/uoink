@@ -1,0 +1,129 @@
+{
+  "seq": 1211,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 1211,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "DUlXq86MSfTunfpV5LP0aqNO8pwiRxHL",
+      "client_id": "proof-harness",
+      "attempt_token": "wrPTnWrPhmo7wreSPCKUMvP0v-E2z2i73VmJ7hAqOdk",
+      "submission_key": "DUlXq86MSfTunfpV5LP0aqNO8pwiRxHL-wrPTnWrPhmo7wreSPCKUMvP0v-E2z2i73VmJ7hAqOdk",
+      "schema_version": 1,
+      "video_id": "tOC2N0B9lio",
+      "source_revision": "d29b52d2d05ebdb012310845de6946a0ef5827440dc655794c1f97ff2db8d347",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "eda44a6e3bf8c987c324734a9d61e87aefd252a37f4a795a44232a930d6094e3",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.75,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "ffc4487fd792d8d9af183e076d16197aab4559cf5aa49ec0028ebc24d1a6c79e",
+              "card_hash": "adf02ab36b37018b92f39c1b63697dd3e23e1e52d30c775b13a31bcc0f1ca6b6",
+              "quote": "Claude basically joins the team"
+            }
+          },
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "0b53b0fe58d684f6f7399f6a438bdfcc5e8c27da920b3d4211bfb4aeb2d40b38",
+              "card_hash": "adf02ab36b37018b92f39c1b63697dd3e23e1e52d30c775b13a31bcc0f1ca6b6",
+              "quote": "65% of our product team's code is created by our internal version of Claude Tag"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 19184,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 29533,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1211,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "DUlXq86MSfTunfpV5LP0aqNO8pwiRxHL",
+        "video_id": "tOC2N0B9lio",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.75,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "ffc4487fd792d8d9af183e076d16197aab4559cf5aa49ec0028ebc24d1a6c79e",
+              "card_hash": "adf02ab36b37018b92f39c1b63697dd3e23e1e52d30c775b13a31bcc0f1ca6b6",
+              "quote": "Claude basically joins the team",
+              "start": 2.15,
+              "end": 83.03,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          },
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "0b53b0fe58d684f6f7399f6a438bdfcc5e8c27da920b3d4211bfb4aeb2d40b38",
+              "card_hash": "adf02ab36b37018b92f39c1b63697dd3e23e1e52d30c775b13a31bcc0f1ca6b6",
+              "quote": "65% of our product team's code is created by our internal version of Claude Tag",
+              "start": 280.8,
+              "end": 999.79,
+              "timing": "coarse",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

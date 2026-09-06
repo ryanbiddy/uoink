@@ -1,0 +1,38 @@
+{
+  "seq": 949,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "U4pYZw-n-tHyv3-0x8pJ9Zs2GzK44pNr",
+      "video_id": "2093489422624804893",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "news-and-current-events",
+          "shelf_path": [
+            "News and Current Events"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "f90ec4f540775ec5c9da459590c08d704323dba7508c2bdb2df677178b799df3",
+            "card_hash": "30e130d69f8e74d34222c11ec4dc69c18f008c2ff333062c30806227a50d0caf",
+            "quote": "The invaders in Ceuta threw water bottles with chemical substances on Spanish patriots.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

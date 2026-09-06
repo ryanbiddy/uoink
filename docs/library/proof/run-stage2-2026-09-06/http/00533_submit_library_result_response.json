@@ -1,0 +1,39 @@
+{
+  "seq": 533,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "HRPAkTbVTVT6bentHJ8NmHjy8Xs7S1XG",
+      "video_id": "2087207632528719872",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.9,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "e671f2902570eb041ff442a1e7ca304af7ccd48dd0443acc42e110415dda4b8e",
+            "card_hash": "983ccf62732fe83126b90a1bd87c370c41aed01bbad35387be98d0609fe84a9a",
+            "quote": "Three months ago, we launched Cappy the AI software engineer",
+            "start": 0.0,
+            "end": 107.989,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

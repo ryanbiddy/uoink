@@ -1,0 +1,35 @@
+{
+  "seq": 53,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "BEWR3GNxpQ8Sr6rm4DpMHpjxPFoXUt6G",
+    "client_id": "proof-harness",
+    "attempt_token": "Okf85dcXflrCur6kJUXZHAoTqbthxesE5YFUSSWqWJ4",
+    "submission_key": "BEWR3GNxpQ8Sr6rm4DpMHpjxPFoXUt6G-Okf85dcXflrCur6kJUXZHAoTqbthxesE5YFUSSWqWJ4",
+    "schema_version": 1,
+    "video_id": "2079481448843649024",
+    "source_revision": "25276408bc0a0ff537177ce4a50b416eaf053ab7be1c86fa09d8c5674af251a9",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "d2c30447165341032f49021e4fcefef4250b84e7cff6dd1652a5caa532ecb033",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Anecdote about a teenager's free Polymarket trading script going viral on GitHub; this is a human-interest story about a script, not developer tooling, an AI/ML topic, or a breaking-incident report, so it doesn't fit any approved shelf's cues."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 9215,
+      "cache_read_tokens": 103823,
+      "cache_create_tokens": 111643,
+      "wall_time_ms": 0
+    }
+  }
+}

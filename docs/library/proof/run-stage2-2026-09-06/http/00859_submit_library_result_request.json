@@ -1,0 +1,66 @@
+{
+  "seq": 859,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "sWxe4vyXxh1l1PW1QjGhoDGgvTOGJaNf",
+    "client_id": "proof-harness",
+    "attempt_token": "rgEYFnyNwo1nitMHWrNBRPJVbrjypsH-H8wVMH_V_l8",
+    "submission_key": "sWxe4vyXxh1l1PW1QjGhoDGgvTOGJaNf-rgEYFnyNwo1nitMHWrNBRPJVbrjypsH-H8wVMH_V_l8",
+    "schema_version": 1,
+    "video_id": "2091957857650716672",
+    "source_revision": "7219b4ed77b0a6750859dc95dc631887fa59750fdede71ee36f6c15cfb3e3f6d",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "de4843cd4ddd5ce5fc57436b8689966045499462cbf5e4cc50bbf94b69d72771",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "2c6887a44b9262138ac4c9ea3ee6fb355d8d3ca5d6768e45c69b839e8d9ec088",
+            "card_hash": "81ac2502be5d6c95fc2be106b746907f93e0e8cfaa7adc8e20d9e51224c6e279",
+            "quote": "How Fast AI Changes Developer"
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "2c6887a44b9262138ac4c9ea3ee6fb355d8d3ca5d6768e45c69b839e8d9ec088",
+            "card_hash": "81ac2502be5d6c95fc2be106b746907f93e0e8cfaa7adc8e20d9e51224c6e279",
+            "quote": "Next Gen Models"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 14298,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 20736,
+      "wall_time_ms": 0
+    }
+  }
+}

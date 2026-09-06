@@ -1,0 +1,51 @@
+{
+  "seq": 239,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "QUmBrKodNkc-pFNoBAc6t_mdSMiY5Uly",
+    "client_id": "proof-harness",
+    "attempt_token": "2j4u-r1E3FD6WngFqtWhil842O7V7WrG_H21l3cU6ds",
+    "submission_key": "QUmBrKodNkc-pFNoBAc6t_mdSMiY5Uly-2j4u-r1E3FD6WngFqtWhil842O7V7WrG_H21l3cU6ds",
+    "schema_version": 1,
+    "video_id": "2081060018053369942",
+    "source_revision": "8b05a11557418c4263a2bb9c01038caa6ceff6524d11caa6ae0378c822911118",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "1490d2e31ed87e5ccbf7950b3fcf665da83f21993aceb0b9f23a57e6de57d215",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "1365bac685fffb9b3a88cdb86e60c6231fd7259e1361f7ccc5ee4c4d426b7c72",
+            "card_hash": "e4c41a27c067cc49073673c8527ca6130a5fed87cd3959333cb131012ef93b46",
+            "quote": "Meet your AI employees. You prompt what you want to build, they do deep research, code design and ship"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 14194,
+      "cache_read_tokens": 184911,
+      "cache_create_tokens": 30730,
+      "wall_time_ms": 0
+    }
+  }
+}

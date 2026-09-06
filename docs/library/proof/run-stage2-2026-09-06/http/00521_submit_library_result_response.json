@@ -1,0 +1,39 @@
+{
+  "seq": 521,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "kfTroW6hi5-f8O4pWeH-Z3Xi0uwTV2p2",
+      "video_id": "2085823910373683200",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "29855ad0c2d9b16544709b774d1c1209e396079ba864de02359125c11aaafdc4",
+            "card_hash": "0f4681a9fbe66e0acbe05845ddd2a57a374ad3551a6359daee2586fc24014862",
+            "quote": "In 2 hours at Stanford he shows how to build agents that work and improve entirely on their own.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

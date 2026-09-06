@@ -1,0 +1,35 @@
+{
+  "seq": 1027,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "F6AxU7ItNgmoqMTyd1Hih7eBMM_u4EJ3",
+    "client_id": "proof-harness",
+    "attempt_token": "lC30K1KF7iW1W1c1FMLDg3TuHi7Eq06ATYLXmnIowu4",
+    "submission_key": "F6AxU7ItNgmoqMTyd1Hih7eBMM_u4EJ3-lC30K1KF7iW1W1c1FMLDg3TuHi7Eq06ATYLXmnIowu4",
+    "schema_version": 1,
+    "video_id": "2094908776167948288",
+    "source_revision": "e89327961fd25a72ccd778e8013bfe114a557e4d49da3ec9e7fab74de844cd6f",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "4a85ab5e7e91520698ad1f76700d88cf17ea8c5fff171239665766ef81cbf33a",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Excerpts are pure stock-trading technical analysis (buy zones, swing highs/lows, smart money zones) on Cipher Mining (CIFR) equity. Content is financial/trading commentary with no AI/ML, space/science, or breaking-news subject matter, so it falls outside the approved taxonomy."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 7854,
+      "cache_read_tokens": 187115,
+      "cache_create_tokens": 27106,
+      "wall_time_ms": 0
+    }
+  }
+}

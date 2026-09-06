@@ -1,0 +1,39 @@
+{
+  "seq": 1197,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "7BbOX2xe8Vlc4LlvZDM0c8-hPFQTdcp1",
+      "video_id": "hPJYSxsHDtQ",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "45eb2a047fd91074371600365dc49b61930b2f7ba20590832de626d3b2e0d1e6",
+            "card_hash": "acb7ffda8ba634e40b2585cbad618e4ba4ae887846dd4e0d7e365d921782652a",
+            "quote": "the transformer architectures we've analyzed those we've integrated the best pieces but we've also kept the best pieces of YOLO",
+            "start": 208.4,
+            "end": 306.55,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

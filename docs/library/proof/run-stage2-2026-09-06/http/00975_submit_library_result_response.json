@@ -1,0 +1,39 @@
+{
+  "seq": 975,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "pGr4_b1bBp55DwVLoYM3ZXvMtey1kv39",
+      "video_id": "2093433792144789505",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "e6dc45e34a68b23172fc2b60cdfb3ca225c94073739cfe6647792b86d51b5b92",
+            "card_hash": "2a3eb3dc3a45de7258d353d28c651d8579ead1b69d5f1893ee94cf90e9b3a1d8",
+            "quote": "GLM 5.3 Flash performs at GLM 5.3 level in Blender for 17x cheaper!",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 375,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "JegiR2--WKgdwtXnU3Iw7M8aBe2bRz35",
+      "video_id": "2083283122385543168",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.7,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "deb7e04a1d6f8f6be342edd2ef6daedd3b95022673b2439a2da7894ee4bf7a75",
+            "card_hash": "4fabb0644359e9b352f041ac69049ed6ba4e07d1b1f56cf89526c794bb8ff49f",
+            "quote": "I've rebuilt my agent stack four times this year",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

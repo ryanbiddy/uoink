@@ -1,0 +1,38 @@
+{
+  "seq": 741,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "UsPoDKRPCJbVGxqbN_jayqjp1Utx6lyV",
+      "video_id": "2089757319974559744",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "49677a515801d5c734dbe877c67122ab887284438e1dc6fad642150fac2336dd",
+            "card_hash": "0647cb4880c4ac2b941902b58fd3bc6ea92e919b018ba63530370c3609dc2689",
+            "quote": "Exa is partnering with @firefox to power search for an AI browser for the open internet",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

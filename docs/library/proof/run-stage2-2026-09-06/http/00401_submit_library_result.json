@@ -1,0 +1,93 @@
+{
+  "seq": 401,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 401,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "jt22tbFRcjXodehWKnVLY9JorEzHDDas",
+      "client_id": "proof-harness",
+      "attempt_token": "VELU-OY_-jluz0G10jJhE_1eAiw6ltSrHv3d574ZeOk",
+      "submission_key": "jt22tbFRcjXodehWKnVLY9JorEzHDDas-VELU-OY_-jluz0G10jJhE_1eAiw6ltSrHv3d574ZeOk",
+      "schema_version": 1,
+      "video_id": "2083637374479642624",
+      "source_revision": "a3e25b29e2dbfb2496ec11f1253502abb1c3f3a040e1ec063a68c1502674a0f8",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "cf7ee05722edb48025016b3c4dc0e746e7e2378b193fbcaad61220521dedf4be",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "2593b690fc6f5b7f40a63dbef23ca647051af7faf796dfe8454efce35dc52b8b",
+              "card_hash": "b9edb8bf78cb4b1f96c1f3e8c3d24aa178b13c902b6a923987e4f77ccdfa17eb",
+              "quote": "I've got a bunch of passing pick me trans people up in my comments right now telling me that i'm making society"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 12710,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 22115,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 401,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "jt22tbFRcjXodehWKnVLY9JorEzHDDas",
+        "video_id": "2083637374479642624",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "2593b690fc6f5b7f40a63dbef23ca647051af7faf796dfe8454efce35dc52b8b",
+              "card_hash": "b9edb8bf78cb4b1f96c1f3e8c3d24aa178b13c902b6a923987e4f77ccdfa17eb",
+              "quote": "I've got a bunch of passing pick me trans people up in my comments right now telling me that i'm making society",
+              "start": 0.0,
+              "end": 30.859,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

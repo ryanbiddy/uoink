@@ -1,0 +1,129 @@
+{
+  "seq": 1131,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 1131,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "h2dk9KWKkwH7SDub513pj4p-L2HHqImq",
+      "client_id": "proof-harness",
+      "attempt_token": "sat4x7KaAMVx1swQqWjvgygjfI1dhydtIkRi4AWNpow",
+      "submission_key": "h2dk9KWKkwH7SDub513pj4p-L2HHqImq-sat4x7KaAMVx1swQqWjvgygjfI1dhydtIkRi4AWNpow",
+      "schema_version": 1,
+      "video_id": "2095783502306545664",
+      "source_revision": "2695fef3ecf8c909c468f237cbc44055c365d221cc830eafb7ebce550753d7c2",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "59ca407896a24711299049f144ea8ce409b445527babf9e8442882c042d82e32",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "37d635d2c5d437bd03ce600ddbc9e589af5a66899ecb2623af767b14894b1720",
+              "card_hash": "75daf80a7726dc5ed3a8d6c5a0cd8a6931cb6fb1e124e5f026e663ce02516ab3",
+              "quote": "How should people reason about compute as a utility versus tokens as a utility?"
+            }
+          },
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "3a622ff5ba7a09bdc2a1de57d5ba7361ba860a363d83a9f475080f02b3c046a0",
+              "card_hash": "75daf80a7726dc5ed3a8d6c5a0cd8a6931cb6fb1e124e5f026e663ce02516ab3",
+              "quote": "we had a new model we were ready to release in between called 3.5 And we had figured out a new kind of post-training"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 23533,
+        "cache_read_tokens": 194011,
+        "cache_create_tokens": 47375,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1131,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "h2dk9KWKkwH7SDub513pj4p-L2HHqImq",
+        "video_id": "2095783502306545664",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "37d635d2c5d437bd03ce600ddbc9e589af5a66899ecb2623af767b14894b1720",
+              "card_hash": "75daf80a7726dc5ed3a8d6c5a0cd8a6931cb6fb1e124e5f026e663ce02516ab3",
+              "quote": "How should people reason about compute as a utility versus tokens as a utility?",
+              "start": 1206.116,
+              "end": 1297.426,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          },
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.68,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "3a622ff5ba7a09bdc2a1de57d5ba7361ba860a363d83a9f475080f02b3c046a0",
+              "card_hash": "75daf80a7726dc5ed3a8d6c5a0cd8a6931cb6fb1e124e5f026e663ce02516ab3",
+              "quote": "we had a new model we were ready to release in between called 3.5 And we had figured out a new kind of post-training",
+              "start": 725.608,
+              "end": 845.25,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

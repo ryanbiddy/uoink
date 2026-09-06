@@ -1,0 +1,39 @@
+{
+  "seq": 233,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "J1-zMn2MNktjPfdEO0GJsLXRW2K9qTS8",
+      "video_id": "2081117060013473792",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "98994e8cfd9f7ddf93bc94453723b256038e7af9e5fb01dc5374d22af6d756bb",
+            "card_hash": "c857421bc55e58211a72e28d2038c4a0df94b7d92df9019701bc643ee869a4d3",
+            "quote": "a kind of crazy kamikaze mission to try to beat them with a coding app",
+            "start": 0.38,
+            "end": 57.72,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "seq": 1151,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 1151,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "IpXF_5jge_iRATAb5FWdAWNF4gNYVEBo",
+      "client_id": "proof-harness",
+      "attempt_token": "Ze46YEVSHzGZFACIMqCstbO1cWB_Q6OZ1ikPfTw1JSI",
+      "submission_key": "IpXF_5jge_iRATAb5FWdAWNF4gNYVEBo-Ze46YEVSHzGZFACIMqCstbO1cWB_Q6OZ1ikPfTw1JSI",
+      "schema_version": 1,
+      "video_id": "episode_ee13d34d83c",
+      "source_revision": "c346179664933cbcfeb986746f8019556125e3449c5cea733dc4b43bac4e1277",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "4a61e29f15689d05e6c890b4f2c2f4501d46154b306ed141b8dd3664bbe742bb",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.88,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "b942af10c017519716012a066274e3d5cdb1a6bf71df44b899b4c15cd53919c2",
+              "card_hash": "dda2f996b1d2c8b1d4b87490870f330f51dbd3c8111a383921c48dacafe42037",
+              "quote": "OpenAI was sitting just shy of $50 billion in ARR"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 12784,
+        "cache_read_tokens": 196372,
+        "cache_create_tokens": 40753,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1151,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "IpXF_5jge_iRATAb5FWdAWNF4gNYVEBo",
+        "video_id": "episode_ee13d34d83c",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.88,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "b942af10c017519716012a066274e3d5cdb1a6bf71df44b899b4c15cd53919c2",
+              "card_hash": "dda2f996b1d2c8b1d4b87490870f330f51dbd3c8111a383921c48dacafe42037",
+              "quote": "OpenAI was sitting just shy of $50 billion in ARR",
+              "start": 143.02,
+              "end": 195.82,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

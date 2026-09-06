@@ -1,0 +1,58 @@
+{
+  "seq": 1187,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "kvt0yk6gakOifI1ce44_DGURG0OtL-2C",
+      "video_id": "_3GaXHNSP2I",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "722c3b8e01395ae0fe9f40237cf5c8f76b805e277de4343165671afce6b8ee29",
+            "card_hash": "155cc058605b7f100e3c5a1921c83bbea4f59cfabcb20b27a25c90b004071d74",
+            "quote": "such a thin wrapper in JavaScript. Just do as OpenAI does. Release it open source.",
+            "start": 905.2,
+            "end": 1015.55,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "e1af7e26e08cd3907e2604ed1824faf04b43aac9ebe8c6919e046201a7f380b7",
+            "card_hash": "155cc058605b7f100e3c5a1921c83bbea4f59cfabcb20b27a25c90b004071d74",
+            "quote": "Gemma is a series of open-source models from Google DeepMind, advanced reasoning and agentic workflows",
+            "start": 2240.6,
+            "end": 2334.47,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

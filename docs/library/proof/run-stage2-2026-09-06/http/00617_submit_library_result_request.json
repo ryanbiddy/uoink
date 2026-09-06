@@ -1,0 +1,35 @@
+{
+  "seq": 617,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "BOF0s0gVTxyOs-Z353cUPSvfBy5aTRMe",
+    "client_id": "proof-harness",
+    "attempt_token": "Ay7dofyp-wsr9vb2SOIQe7gQzFskgXv37bweQ8QIEmc",
+    "submission_key": "BOF0s0gVTxyOs-Z353cUPSvfBy5aTRMe-Ay7dofyp-wsr9vb2SOIQe7gQzFskgXv37bweQ8QIEmc",
+    "schema_version": 1,
+    "video_id": "2088372080949739520",
+    "source_revision": "6fa6649d36d758ed5d1931b99ef37df435ee167c0ac78226844d2eb706363940",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "3d4872e3fd52d2cdf53ea9d7e8d811df08f4ea3ccfd659cd4a9b25cb062f5e9f",
+    "result": {
+      "outcome": "error",
+      "reason": "model returned no result for 2088372080949739520"
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 15484,
+      "cache_read_tokens": 187032,
+      "cache_create_tokens": 34352,
+      "wall_time_ms": 0
+    }
+  }
+}

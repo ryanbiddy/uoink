@@ -1,0 +1,59 @@
+{
+  "seq": 117,
+  "tool": "submit_library_result",
+  "wall_ms": 18,
+  "request": {
+    "seq": 117,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "D1cvZDy0vey6lrlCdlDyIMjOPClRPzal",
+      "client_id": "proof-harness",
+      "attempt_token": "2LByeAOf77cZ_AGvxkvIdlTo7-CfjA7gBRo1IqDzkV0",
+      "submission_key": "D1cvZDy0vey6lrlCdlDyIMjOPClRPzal-2LByeAOf77cZ_AGvxkvIdlTo7-CfjA7gBRo1IqDzkV0",
+      "schema_version": 1,
+      "video_id": "2080091059644964864",
+      "source_revision": "02276a30b2282f0dbfa24eb80324d51424a783c81db411aea34495caf7b72e5a",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "7ebcdfeb982d754a7708ed296f51806cf76a00d2b8ed2ff3b60423829e960074",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "This is a single political-opinion tweet contrasting US homelessness policy debate with Chinese classroom technology. It is not a breaking crime/conflict report, raw scanner audio, or a talk-show/panel opinion segment (the specific include cues for News and Current Events), and it contains no AI/ML, space/science, or other approved-shelf subject matter."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 15570,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20016,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 117,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 18,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "D1cvZDy0vey6lrlCdlDyIMjOPClRPzal",
+        "video_id": "2080091059644964864",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

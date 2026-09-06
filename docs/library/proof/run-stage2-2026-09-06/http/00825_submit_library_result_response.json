@@ -1,0 +1,38 @@
+{
+  "seq": 825,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "AfCmkVQdFZj0aUp4UU7y8ZlkkbDQWpUL",
+      "video_id": "2092006565285175296",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "98b33901e8dac864ced9bb6d1fd7f283089117dfe668792fcacf4d29c832f5b1",
+            "card_hash": "405d5c3aeac35852ecb824fdb89174f47af98af053716af339399640d574eae1",
+            "quote": "Long answers on Claude on web and desktop now stream ~4x smoother.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 271,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "ry-D4AsPid_zf2QHYEUBW-PqrSqzHOHK",
+      "video_id": "2081323432663461888",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "2108c00de57413ebb7c0f458d5e0231334bf0b5a58b4ea8bdc409780e0cde2cc",
+            "card_hash": "9879b7d3912087d8ef45dd6c6c36ff79bbbd6bc86a59e6178b3f9bd51db43436",
+            "quote": "Built this using Higgsfield + Cursor Composer 2.5 + my custom landing-page-design-skill.md file.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

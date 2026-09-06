@@ -1,0 +1,218 @@
+# Codez - Andrew Ng just released a 1-hour course on building agentic knowledge...
+
+**Channel:** Codez (— subscribers)
+**Uploaded:** 2026-07-20 | **Duration:** 01:06:27 | **Views:** — | **Likes:** 2,308
+**URL:** https://x.com/0xCodez/status/2079234800766816633
+**Uoinked:** 2026-07-20T22:46:25
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The hook opens by establishing credibility through Andrew Ng, a highly recognized AI expert, releasing a new course on the topic. This immediately signals expertise and authority to viewers familiar with Ng's reputation in the field.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Andrew Ng just released a 1-hour course on building agentic knowledge Graphs from scratch:  • 00:00 - Introduction to agentic knowledge Graphs • 03:07 - Construction of agentic Graphs • 14:00 - Architecture of multi-agent systems • 23:00 - Building agentic graphs with Google https://t.co/kcGkh81n6H
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] In partnership with Neo4j.
+[00:00:01] This course you design a multi-agent system that
+[00:00:04] transforms your structured and unstructured data
+[00:00:07] into the knowledge drafts,
+[00:00:08] I found Knowledge Draft really useful for
+[00:00:11] high stakes applications where accuracy of
+[00:00:13] information we store every tree is important.
+[00:00:17] Discusses will teach why it also give
+[00:00:19] me great set tools to building these knowledge drops
+[00:00:22] on delighted in structure
+[00:00:23] for this cause is Andres Collager
+[00:00:26] who has developed an evangelist
+[00:00:28] for Genes of AI at Neo4j.
+[00:00:31] Thanks Andrew, I'm excited to be
+[00:00:33] back here and work with you on this course
+[00:00:35] Similar to RAG a knowledge graph system
+[00:00:38] splits your text documents into
+[00:00:40] chunks as stores them in the vector database
+[00:00:43] but In addition
+[00:00:44] To that it places
+[00:00:46] The chumps inside draft structure which
+[00:00:48] is chunk its later entities
+[00:00:50] extracted from their Chunks
+[00:00:52] For example A TextChunk
+[00:00:53] From a product review can contain
+[00:00:55] Entities such As Product orders
+[00:00:57] Or delivery issues
+[00:00:58] Or product defects To build a knowledge draft
+[00:01:01] You extract the relevant entities from
+[00:01:03] The chunks then connect
+[00:01:04] The chumps and Entities in
+[00:01:06] A graph through edges
+[00:01:08] Here each edge represents
+[00:01:09] A relationship for example
+[00:01:11] Maybe it represents that this chunk
+[00:01:13] Mentioned a certain Product or
+[00:01:14] That product has an issue
+[00:01:17] The entities are retrieved
+[00:01:19] Alongside to Relevant Chunks
+[00:01:20] To provide more Relevance context
+[00:01:22] To DLM
+[00:01:24] To generate More precise
+[00:01:26] And accurate answers
+[00:01:27] You can also connect
+[00:01:29] This type of graph To another draft
+[00:01:31] Containing additional information
+[00:01:33] Extracted from structured data
+[00:01:35] Such as CSE files
+[00:01:37] In this course Andreas will walk you through
+[00:01:40] How to build a multi-agent system
+[00:01:41] That helps Do all the work
+[00:01:43] Of constructing A knowledge Graph
+[00:01:45] To transform your
+[00:01:46] Structured and unstructure
+[00:01:48] Data into Knowledge graphs
+[00:01:50] First decide on
+[00:01:51] The schema Meaning what types
+[00:01:53] Entities or nodes
+[00:01:55] Can be extracted From that data
+[00:01:56] And what Relationships exist
+[00:01:58] Between them Once you have
+[00:02:00] The schema defined You can construct
+[00:02:02] The actual graph And store it
+[00:02:03] In a Graph database Instead of mainly
+[00:02:05] Looking at your data To find the
+[00:02:07] Graph's Schema You'll design A multi-agent system
+[00:02:10] For doing that Using Google AVK
+[00:02:12] Or Agent Development Kit
+[00:02:14] After You learn The basic syntax
+[00:02:16] With ADK You will
+[00:02:17] Design Your System One agent
+[00:02:18] At Time The first
+[00:02:20] Agent Will converse
+[00:02:21] with You To extract The goal
+[00:02:23] Of Type Of Graph That You want
+[00:02:24] To build Then given This
+[00:02:25] Goal A group
+[00:02:27] Of agents Will specialize
+[00:02:28] In extracting The entities
+[00:02:29] And relationships From your
+[00:02:31] Structured data Another
+[00:02:33] Group Of Agents
+[00:02:34] Handles Your Unstructured
+[00:02:35] Data Finally Final
+[00:02:37] Set Of Agents Connect
+[00:02:38] Two Models To
+[00:02:39] Constru Ctruck Accordingly
+[00:02:41] Many people Have worked
+[00:02:42] To create This course
+[00:02:44] I'd like to thank
+[00:02:45] Premier4j Martin
+[00:02:46] O'Hanlon Adam
+[00:02:48] Cowley DeepLearning.ai
+[00:02:50] Christopher Policastro
+[00:02:51] Hara Salami
+[00:02:52] Also Contributed To this
+[00:02:54] Course In the first
+[00:02:55] Lesson You'll Learn More About
+[00:02:56] The Online Structure
+[00:02:58] Of Knowledge Drafts
+[00:02:59] And How You Can Build One
+[00:03:00] To Use It To
+[00:03:01] Identify Root Causes
+[00:03:02] Of Product Issues
+[00:03:04] Sounds Great Let's
+[00:03:06] Get Started Go Through What
+[00:03:07] A Knowledge Graph Means And
+[00:03:09] How They Help Represent In
+[00:03:10] Retrieved Relationships From
+[00:03:11] Your Data Then Explore
+[00:03:13] The Dataset That Work On
+[00:03:14] To Build A Knowledge
+[00:03:16] Graph Lets dive In So
+[00:03:18] What Is A Knowledge Graph
+[00:03:20] We're Gonna Take A Step Back For A Moment
+[00:03:21] And Reflect On Relational Databases
+[00:03:25] And What A Relationship
+[00:03:26] Schema Looks Like We All
+[00:03:27] Probably Are Familiar With Some
+[00:03:29] Scenario Like This
+[00:03:30] Where There'll Be Some
+[00:03:31] Table In The Left And
+[00:03:32] Some Table On The Right And
+[00:03:34] This Table In The Middle That
+[00:03:35] Is The Join Table That
+[00:03:37] Allows From Multiple Connections
+[00:03:38] Between The Persons
+[00:03:39] And Products In This
+[00:03:40] Particular Example So
+[00:03:42] Let's Think About These Two Tables
+[00:03:43] Or The Join Table If
+[00:03:45] You Ask A Question Like
+[00:03:46] What Products Is This
+[00:03:47] Person Purchased You
+[00:03:49] Would First Start With The Person Table
+[00:03:50] And Select This Person
+[00:03:52] Here It's Identified
+[00:03:53] By ABK Of
+[00:03:55] Course He Do Adjoin Over
+[00:03:56] To The Person Product Table
+[00:03:58] And You'd See That Their
+[00:03:59] Personal Product Table Has
+[00:04:00] Joined Between The
+[00:04:01] Abk In Some Shared
+[00:04:03] They Be Can Lamp Maybe
+[00:04:04] K An Desk
+[00:04:05] Fantastic One Word Join
+[00:04:07] Across From The Person
+[00:04:08] To The Personal Product To
+[00:04:10] The Product Table Now
+[00:04:12] You've Got A Complete Answer
+[00:04:13] Where For Maybe K
+[00:04:14] He Can See That Here's
+[00:04:15] The Products At ABK Is
+[00:04:17] Purchased This Chair Lamp
+[00:04:18] And Desk In You Can Get
+[00:04:19] Details About Those Purchases
+[00:04:21] What If You Extended
+[00:04:23] That Question Any Last Who
+[00:04:25] Else Bought Products That
+[00:04:26] Ab Kay Bot Well
+[00:04:28] You Start With Same Joins
+[00:04:29] Going That This Person
+[00:04:38] EE Who Is Bought
+[00:04:40] Some Products That ABK
+[00:04:41] Also Bot But
+[00:04:43] Notice That E Has
+[00:04:44] Also Bought One
+[00:04:45] Extra Product Hmm
+[00:04:47] That's Interesting So We
+[00:04:49] Could Probably Extend This
+[00:04:50] 1 More Step And
+[00:04:51] Ask Well What
+[00:04:53] Product Should Be Recommended
+[00:04:54] At Abk By Next
+[00:04:56] Now This Is Kind Of The Basics
+[00:04:58] Of Doing A Recommed Dation
+[00:04:59] Query If You've Got
+[00:05:00] Some Purchase Pattern
+[00:05:02] From Maybe K The Thing You Want To
+[00:05:08] Recommend To Abk Is What That Other Group Of People Bought
+[00:05:11] At A VK Has Not
+[00:05:13] So Same Joins Apply
+[00:05:14] From Maybe K Through
+[00:05:15] To The Products Back To
+[00:05:

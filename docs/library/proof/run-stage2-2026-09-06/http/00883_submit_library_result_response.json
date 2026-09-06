@@ -1,0 +1,39 @@
+{
+  "seq": 883,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "hTbuVyMwpZmMtMFYZ8lKwsvF5M4QLos3",
+      "video_id": "2091979655037300736",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "1c56e00990964259ca46849a8b376acb5b56c9ebd54a3785f1555776ef4b5873",
+            "card_hash": "202e4c03b2dbde12f6d56fbfcbe64c9244b1b8f466652a4ed062a63c26761466",
+            "quote": "using agents to write code",
+            "start": 174.362,
+            "end": 293.482,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "seq": 585,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 585,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "t5q5U0XVAO7M8Qksbr0IISWzwJ8zYDx0",
+      "client_id": "proof-harness",
+      "attempt_token": "-NvmR1gFw4rQda6JOQc8vEdSCye_aXcJ61v3ixMfzkg",
+      "submission_key": "t5q5U0XVAO7M8Qksbr0IISWzwJ8zYDx0--NvmR1gFw4rQda6JOQc8vEdSCye_aXcJ61v3ixMfzkg",
+      "schema_version": 1,
+      "video_id": "2085699005846097921",
+      "source_revision": "5fba8fc4a71fb120eaf4c582be0e8ab4808e88bbde6905a77c269b531577d43f",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "e776f74dffb6ec7bdaac2168a248eddd3a8374a582c73b5499cfcbb8ee39e5a3",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.7,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "de90ebb6370f3a378ac49641e1ba8956b3e737fe66491b0c410f63bb95baf80b",
+              "card_hash": "d6819af42655ef49d255d72f0e5ae954912cff534f481aca5df5a9a259566aaf",
+              "quote": "decompiled and reverse engineered into 5000 lines or so of c  All done with deepseek flash 0731"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 18457,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20482,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 585,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "t5q5U0XVAO7M8Qksbr0IISWzwJ8zYDx0",
+        "video_id": "2085699005846097921",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.7,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "de90ebb6370f3a378ac49641e1ba8956b3e737fe66491b0c410f63bb95baf80b",
+              "card_hash": "d6819af42655ef49d255d72f0e5ae954912cff534f481aca5df5a9a259566aaf",
+              "quote": "decompiled and reverse engineered into 5000 lines or so of c  All done with deepseek flash 0731",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 537,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "cZpbqmKkXJTV4HuDsTOn6CBteKWnzGDm",
+      "video_id": "2087174761277538304",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "dc83e45dcd7b1f1b64d3728478f3153216ede65eb4d555629a00ad4625107706",
+            "card_hash": "7fad19e6c232106f57a64d5a8635bf95398af5a62198eb324a25fa7ceaf37be3",
+            "quote": "The first desktop app to run and train models locally",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

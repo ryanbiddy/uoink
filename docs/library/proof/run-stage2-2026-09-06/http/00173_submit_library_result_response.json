@@ -1,0 +1,39 @@
+{
+  "seq": 173,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "zGyL2bDiNtIL9LXq1VozY0GgnRxJc9TN",
+      "video_id": "2080431302835044352",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "e641c2387993c0e871eca8e97965d7369bf74da84c10275341a432720f6b4198",
+            "card_hash": "cf77fd8efd6e3e6d7ed1014238df6bdb7bf0e398f70ff85de1b4b424891cd0f0",
+            "quote": "I think China is beginning to engage in what I'll call AI dumping.",
+            "start": 0.0,
+            "end": 46.619,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

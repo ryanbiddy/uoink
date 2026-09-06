@@ -1,0 +1,39 @@
+{
+  "seq": 1049,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "CWhR5LSLC1R_46cbFg-esEOWpjY1Wqtl",
+      "video_id": "2094666723681075201",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "942dd848ef1bc5f500e9c43e286f27a027da6a6887937a4744b584057d665a43",
+            "card_hash": "0511471f50a6cee52a805bd2256d0b83e2b4eb43e817aa49589ff954ae14264a",
+            "quote": "Un proyecto open source que supera las 100.000 estrellas en GitHub.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

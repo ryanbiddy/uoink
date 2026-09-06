@@ -1,0 +1,51 @@
+{
+  "seq": 1197,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "7BbOX2xe8Vlc4LlvZDM0c8-hPFQTdcp1",
+    "client_id": "proof-harness",
+    "attempt_token": "vUABoeGxctyL4GYRUGzHPDwpovirR7FQulyn5iizoDw",
+    "submission_key": "7BbOX2xe8Vlc4LlvZDM0c8-hPFQTdcp1-vUABoeGxctyL4GYRUGzHPDwpovirR7FQulyn5iizoDw",
+    "schema_version": 1,
+    "video_id": "hPJYSxsHDtQ",
+    "source_revision": "840e7af5396322a5a75c2cbe87acd03201ee28509673a6ebca83619ac66eb7dd",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "2d1989ac9148313742146c213d9b783bb890c8a8d3d6174f052b9fc065c3608a",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "45eb2a047fd91074371600365dc49b61930b2f7ba20590832de626d3b2e0d1e6",
+            "card_hash": "acb7ffda8ba634e40b2585cbad618e4ba4ae887846dd4e0d7e365d921782652a",
+            "quote": "the transformer architectures we've analyzed those we've integrated the best pieces but we've also kept the best pieces of YOLO"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 19366,
+      "cache_read_tokens": 197341,
+      "cache_create_tokens": 47794,
+      "wall_time_ms": 0
+    }
+  }
+}

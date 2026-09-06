@@ -1,0 +1,59 @@
+{
+  "seq": 855,
+  "tool": "submit_library_result",
+  "wall_ms": 5,
+  "request": {
+    "seq": 855,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "oKXKo81MENzZW8pXYbv7W85E37xeXcqm",
+      "client_id": "proof-harness",
+      "attempt_token": "fysKu4GOKWaEg1-zgcz-Fs59lfKoTNp8dTuUa4_u4fE",
+      "submission_key": "oKXKo81MENzZW8pXYbv7W85E37xeXcqm-fysKu4GOKWaEg1-zgcz-Fs59lfKoTNp8dTuUa4_u4fE",
+      "schema_version": 1,
+      "video_id": "2092204804218957824",
+      "source_revision": "682ff80c60312e7d76647f1dd76d11caad673e5f75f1936fd052012ca5fbd170",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "11812638a2dd721b7b0c8c359f16394d25a99f35ec2e0547e58bb8d573f8271e",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt only contains generic praise of a person's fast work pace ('measuring things in days', 'impressive when other people are like months') with no reference to AI, space/science, or a breaking news incident; no approved shelf's central subject is established."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 14298,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20736,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 855,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 5,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "oKXKo81MENzZW8pXYbv7W85E37xeXcqm",
+        "video_id": "2092204804218957824",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

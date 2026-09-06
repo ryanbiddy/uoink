@@ -1,0 +1,35 @@
+{
+  "seq": 575,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "t9pmxkVU8FgbRcDtWZMpMLLdBPlNUmfo",
+    "client_id": "proof-harness",
+    "attempt_token": "glylksSt5IB-xFV_9bxaUtq1ziWRoa0Bu6Jl35p5dJo",
+    "submission_key": "t9pmxkVU8FgbRcDtWZMpMLLdBPlNUmfo-glylksSt5IB-xFV_9bxaUtq1ziWRoa0Bu6Jl35p5dJo",
+    "schema_version": 1,
+    "video_id": "2086913080869482497",
+    "source_revision": "edd56c59322e12a87d425431dc9478459b63759e060244c19ba52150417c2512",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "97caedada241367bb51d6291698e0ee104436491f250cdeb24e406175d7e32c1",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "The only citable excerpt is generic introductory remarks ('thank my partners for joining me... We're announcing six partner[ships]') that do not themselves establish an AI industry/business subject. The summary_hint references Nvidia's Jensen Huang and compute-as-asset-class commentary, but it lacks an excerpt_id and cannot be used as grounded evidence per the assignment rules."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 13778,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 20764,
+      "wall_time_ms": 0
+    }
+  }
+}

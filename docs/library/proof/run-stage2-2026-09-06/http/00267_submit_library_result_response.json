@@ -1,0 +1,39 @@
+{
+  "seq": 267,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 21,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "kTvw7Pn0EnXiaNpO1PZn596tk3NBzZVc",
+      "video_id": "2082506081365008384",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.9,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "416f4e399f79bb65aeaf4d890ad51ed345c76482acd6001fc96121c8d8f59b2f",
+            "card_hash": "d8f9fc8caa3267f6cfc6cfd18536b6bff59f89f772e1f78ae84d724b4779c8e4",
+            "quote": "a new kind of application that sees, hears, acts, remembers, and emotionally understands you like a friend or coworker",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

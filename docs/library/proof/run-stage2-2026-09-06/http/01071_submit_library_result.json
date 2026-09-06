@@ -1,0 +1,95 @@
+{
+  "seq": 1071,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 1071,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "9SZfYod4WX_YEllvpje3UjFm4TLNOKke",
+      "client_id": "proof-harness",
+      "attempt_token": "fhHwSCQXfaYXqpB2oisBHwC6makg55GbXlkcj9ht0xM",
+      "submission_key": "9SZfYod4WX_YEllvpje3UjFm4TLNOKke-fhHwSCQXfaYXqpB2oisBHwC6makg55GbXlkcj9ht0xM",
+      "schema_version": 1,
+      "video_id": "2095522731559469057",
+      "source_revision": "22c91b35431636cfa18d2608f76866299b12c00812abba121ecb622178cc88bf",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "de9617b7944cbf86d835f710fea5225fd55e07d7f25b9879c2f96911d620be81",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "f8c1766623d170ca7679d52d4d55211913f3bed6d9652b2e8e5dba2d7afd1d0d",
+              "card_hash": "ee740c61c6faa3743dfa4115ab60b4cffa9c6a8cb6da2e09c2e2f585fb8d6460",
+              "quote": "I gave it access to Ableton via MCP and it made this track from scratch"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 11871,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 18944,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1071,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "9SZfYod4WX_YEllvpje3UjFm4TLNOKke",
+        "video_id": "2095522731559469057",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "f8c1766623d170ca7679d52d4d55211913f3bed6d9652b2e8e5dba2d7afd1d0d",
+              "card_hash": "ee740c61c6faa3743dfa4115ab60b4cffa9c6a8cb6da2e09c2e2f585fb8d6460",
+              "quote": "I gave it access to Ableton via MCP and it made this track from scratch",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "seq": 467,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 7,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "PqblUKXGkOsUYr62UEFuEqvuATLgoSA1",
+      "video_id": "2084009513531703296",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "aa69c1e8a52ab90377c00bfa72d50aa3810d77d16e200f962e65b47801b3ba38",
+            "card_hash": "d27cb23ea1a0b8a0055bb3fcccbaae55e2422527599f4041e37e9232304ff30f",
+            "quote": "the frontier capabilities that we have available today disseminating into these kinds industries",
+            "start": 355.61,
+            "end": 474.49,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

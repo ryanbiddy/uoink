@@ -1,0 +1,239 @@
+# Roan - Don't waste 2 years learning to build self-improving AI agents.  Stan...
+
+**Channel:** Roan (— subscribers)
+**Uploaded:** 2026-08-03 | **Duration:** 03:33:06 | **Views:** — | **Likes:** 690
+**URL:** https://x.com/RohOnChain/status/2084349908287635939
+**Uoinked:** 2026-08-04T07:55:39
+**Topic:** AI and ML
+**Note:** Capped screenshots at 200: interval raised from 30s to 64s for this video (processed media 213m).
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Stakes
+**Analysis:** The hook opens by emphasizing what the viewer stands to lose ('Don't waste 2 years') and what they stand to gain (learning from Stanford's condensed 3-hour course on self-improving AI agents), creating urgency around the value proposition.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Don't waste 2 years learning to build self-improving AI agents.  Stanford just dropped a 3 hour course on building AI agents from scratch.  • 00:00 - self-improving AI agent basics • 1:07:24 - multi-step reasoning in AI agents • 2:22:04 - AI agents learning from feedback https://t.co/FaKgMVEHEQ
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] I hope you made it to the right class.
+[00:00:02] This class was on self-improving AI
+[00:00:03] agents, anyone?
+[00:00:06] Made into a white glass here yes okay so
+[00:00:11] let's take a look at
+[00:00:12] an overview of the trends for large language models
+[00:00:15] So one of
+[00:00:16] The aspects that has been mind blowing since GP3 came out is
+[00:00:20] That as your scale up
+[00:00:24] The number of parameters in a model they get better
+[00:00:28] and what this means is that
+[00:00:29] Language models like BERT, T5 were good but as we increase the
+[00:00:34] Number of parameters got really better.
+[00:00:36] They perform much Better
+[00:00:38] And what led to something called scaling loss for large language
+[00:00:41] Models which are used
+[00:00:43] Building base model
+[00:00:44] For pre-trained based
+[00:00:46] Model As you
+[00:00:48] Increase amount Of compute so there
+[00:00:50] Are three graphs here As
+[00:00:51] You Increased Amount Of Compute
+[00:00:52] On X Axes The
+[00:00:54] Loss Function On
+[00:00:55] Y Axes Goes down
+[00:00:57] And the more compute you have put in
+[00:01:00] The More Test
+[00:01:02] Lost Goes Down Which leads to a better model
+[00:01:04] So that was one big aspect
+[00:01:06] That led To GP3
+[00:01:07] and then all Of The subsequent
+[00:01:09] Chat GPD Palm
+[00:01:11] Gemini And so on
+[00:01:12] Then similarly as we increase
+[00:01:14] The data set Size On
+[00:01:15] X axis The test
+[00:01:17] loss goes Down Further
+[00:01:18] On y Axis
+[00:01:20] So That's another Aspect
+[00:01:21] of Like Another Access
+[00:01:23] Of Scaling That
+[00:01:24] Leads To Better Language
+[00:01:25] Models And
+[00:01:26] The Fourth One Is Of Course
+[00:01:28] That The Third One Is Of Course Parameter
+[00:01:29] Count So If
+[00:01:30] You Increase The Number Of
+[00:01:32] Layers In A Transformer
+[00:01:33] Or The Amount Of Parameters
+[00:01:34] There Are There In
+[00:01:35] The Language Model That Improves
+[00:01:37] The Loss Value
+[00:01:38] And Then That Leads
+[00:01:39] To A Better Model and
+[00:01:40] This Has Been The Foundation
+[00:01:41] For A Lot Of The
+[00:01:43] This Has Been Before This
+[00:01:56] Graph Is A
+[00:01:57] Little Bit Updated But From
+[00:01:59] 2080 To 2024 The
+[00:02:01] Model Size Has
+[00:02:02] Gone Off Almost
+[00:02:04] Consistently We Have Been
+[00:02:05] Increasing The Side
+[00:02:06] Of The Models So You Started
+[00:02:07] With Something Like BERT
+[00:02:09] Was 340 Million Parameters
+[00:02:10] GPD 2 1.5
+[00:02:12] Billion Parameter And
+[00:02:13] Then GB3 Was 175
+[00:02:15] Billions Parameters
+[00:02:16] And Then Say
+[00:02:18] Palm 5 40 Billion
+[00:02:19] And There Was
+[00:02:20] A Bunch Subsequent Models
+[00:02:22] And GBD 4 Is
+[00:02:23] Estimated To Be There
+[00:02:25] Which Is Like Trillions Of
+[00:02:26] Parameters So You
+[00:02:27] Can Imagine That There Has Been
+[00:02:28] An Exponential Growth In
+[00:02:29] Just The Model Size For
+[00:02:31] Large Language Models
+[00:02:32] The Large Stands For
+[00:02:33] They Are Growing In Size
+[00:02:35] And That Has Being One
+[00:02:36] Key Area In
+[00:02:37] Which The Models Have Been Getting
+[00:02:39] Better Why Do
+[00:02:42] We Care About The Models
+[00:02:43] Getting Bigger
+[00:02:44] What Does is that as the models become bigger,
+[00:03:21] they have emergent behavior where the capabilities like reasoning
+[00:03:24] only emerged in larger models.
+[00:03:27] So just to understand few-shot learning
+[00:03:29] or zero-shot learning here...
+[00:03:31] If a model is given
+[00:03:34] a question or a task
+[00:03:36] such as translate English into French
+[00:03:37] it's able
+[00:03:38] to give so this
+[00:03:40] is called a prompt like it's given
+[00:03:41] the task translate English
+[00:03:42] to French and then asked
+[00:03:43] you translate cheese into
+[00:03:45] whatever is the French word.
+[00:03:46] If that model can predict
+[00:03:47] the answer without
+[00:03:49] actually being trained
+[00:03:50] on specific tasks
+[00:03:51] in addition giving
+[00:03:56] description of
+[00:03:58] the task also give
+[00:03:59] examples from
+[00:04:01] English to French
+[00:04:06] and you can
+[00:04:10] see that this capability
+[00:04:12] shows up in
+[00:04:13] the large
+[00:04:14] language models across a
+[00:04:15] lot of tasks and
+[00:04:18] subsequent innovations
+[00:04:23] came from
+[00:04:25] reasoning aspects on
+[00:04:27] the reason side
+[00:04:29] models have become bigger
+[00:04:31] they had an emergent
+[00:04:32] behavior which Azalea
+[00:04:34] will the scaling loss
+[00:04:42] property that we
+[00:04:44] kind of know how to last
+[00:04:45] functions going go down
+[00:04:46] as be throwing
+[00:04:47] more compute data
+[00:04:48] and parameters in
+[00:04:50] a model there are
+[00:04:51] new kinds behaviors
+[00:04:53] at appear into models
+[00:04:55] they didn't have before
+[00:04:56] me never could predicted
+[00:04:58] until he had
+[00:04:59] these bigger models on
+[00:05:00] saw this behavior India
+[00:05:02] one after most important
+[00:05:04] what
+[00:05:06] up those behaviors
+[00:05:08] is emergent
+[00:05:09] it has shown off
+[00:05:10] thought behavior and for
+[00:05:12] those of you who
+[00:05:13] are not familiar with this
+[00:05:14] here is how it
+[00:05:15] works so in
+[00:05:17] a usual prompt
+[00:05:18] prompting up the model we
+[00:05:20] can ask him although
+[00:05:21] in this case if they
+[00:05:23] match problem and
+[00:05:25] then he can give one shot
+[00:05:26] example here is
+[00:05:27] about probably on his
+[00:05:28] answer now I see
+[00:05:30] similar but at
+[00:05:32] all exact another
+[00:05:33] exactly to say math
+[00:05:34] problems and the model
+[00:05:35] expected to answered that
+[00:05:38] and the model
+[00:05:39] might be able to use
+[00:05:40] one shot example
+[00:05:42] or it may not
+[00:05:43] but we can
+[00:05:44] do better here by
+[00:05:46] not only give
+[00:05:47] an example also
+[00:05:49] provide a reasoning
+[00:05:51] of chain off thought
+[00:05:52] on how he got that
+[00:05:53] answer so in this
+[00:05:55] case question is
+[00:05:57] very simple questions
+[00:05:58] Roger has five tennis
+[00:05:59] balls buys two more
+[00:06:01] cans each
+[00:06:03] can have
+[00:06:05] three tennis balls tennis
+[00:06:08] balls does he have
+[00:06:09] now instead of
+[00:06:10] saying 11 we
+[00:06:11] are walking the model
+[00:06:12] through to get this
+[00:06:13] Roger
+[00:06:15] started with five ball
+[00:06:16] two cans three
+[00:06:17] ten is six and
+[00:06:20] 5 plus 6 is
+[00:06:21] eleven in that
+[00:06:23] example then a
+[00:06:24] lot has become familiar
+[00:06:27] with process
+[00:06:28] together answer
+[00:06:29] can leverage debt
+[00:06:31] too answering problems
+[00:06:34] well obviously there
+[00:06:35] very simple problem
+[00:

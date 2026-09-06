@@ -1,0 +1,58 @@
+{
+  "seq": 407,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "7pi03yMZ3-nLvo7QqGQjTUn-OViEfYOP",
+      "video_id": "2084309519715139584",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "47a94bb51c6e40675a8c78b64eada8bd0b89769252fd9937d698561222f50756",
+            "card_hash": "ef9aaf1f5254d306e1f29290c18506a81573b779f0a524e1d75aaf968f8f86f5",
+            "quote": "You Ask Quad If Have A Question Like Where's The Code Base And How Do I Get Access To It Again",
+            "start": 357.87,
+            "end": 477.25,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "d658da99b1d2a17011f4164187b45d8ee2d9b660870a1a6c50db36ed5170c718",
+            "card_hash": "ef9aaf1f5254d306e1f29290c18506a81573b779f0a524e1d75aaf968f8f86f5",
+            "quote": "Anti Prompt Injection Training On Every Model Publish System Card That Talks About How Resilient Is The Model To Common Attacks",
+            "start": 1628.849,
+            "end": 1747.13,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

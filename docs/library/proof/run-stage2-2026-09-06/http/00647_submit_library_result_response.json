@@ -1,0 +1,39 @@
+{
+  "seq": 647,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "lyZAT6th5lRFdsK-epGtmSr6ZAC0OO4U",
+      "video_id": "2087970510340509696",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.82,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "4d04f12b5f851dc37e9c3009bc35b296cbde5630b1b6bbd6e4e45495b9375d30",
+            "card_hash": "87e409ec8da250d0189fceab0e353a299ee4d723c336da9e38c4cb50158b603d",
+            "quote": "a 1.6T-parameter MoE with 1M context built for agentic coding",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

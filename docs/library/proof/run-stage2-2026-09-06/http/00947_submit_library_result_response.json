@@ -1,0 +1,39 @@
+{
+  "seq": 947,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "SS-OzIrC9gkzyjNEb9TnVX9pSa_kAl2Z",
+      "video_id": "2093715067636154369",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.66,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "29a3c34b6b7212a31763f2b2946af70cc5d41a834a018acb0d208ac9060636a5",
+            "card_hash": "bb2a241d9693d9f876fdd0275f4ef2d9055a359c9634333da08c0a088e0f15f1",
+            "quote": "you're talking basically to a zip file",
+            "start": 7287.497,
+            "end": 7407.378,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,152 @@
+# Introducing interaction models | Thinking Machines Lab
+
+**Channel:** Thinking Machines Lab (2.0K subscribers)
+**Uploaded:** 2026-05-11 | **Duration:** 02:15 | **Views:** 24,471 | **Likes:** —
+**URL:** https://www.youtube.com/watch?v=A12AVongNN4
+**Yoinked:** 2026-05-12T18:38:39
+**Topic:** Uncategorized
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+For AI to collaborate with people the way we do with each other, it should listen, talk, watch, show, and think at the same time — just like people do. Introducing interaction models, an AI designed from the ground up for real-time collaboration.
+__
+
+This is a preview demo of our interaction model. You can read the full technical report at https://thinkingmachines.ai/blog/interaction-models/
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:01] Hey, I need your help with something
+[00:00:01] Hey, I need your help with something today. You ready?
+[00:00:03] today. You ready?
+[00:00:03] today. You ready? >> Absolutely, I'm ready. What's up?
+[00:00:05] >> Absolutely, I'm ready. What's up?
+[00:00:06] >> Absolutely, I'm ready. What's up? >> Yeah. So, we're giving an announcement
+[00:00:07] >> Yeah. So, we're giving an announcement
+[00:00:07] >> Yeah. So, we're giving an announcement today and I've got two of my friends
+[00:00:09] today and I've got two of my friends
+[00:00:09] today and I've got two of my friends coming to help. Every time one of them
+[00:00:11] coming to help. Every time one of them
+[00:00:11] coming to help. Every time one of them enters the frame, I need you to say
+[00:00:13] enters the frame, I need you to say
+[00:00:13] enters the frame, I need you to say friend.
+[00:00:16] friend.
+[00:00:16] friend. >> Got it. I'll say friend whenever one of
+[00:00:18] >> Got it. I'll say friend whenever one of
+[00:00:18] >> Got it. I'll say friend whenever one of them walks in.
+[00:00:19] them walks in.
+[00:00:19] them walks in. >> Cool. So, we've got a new system for
+[00:00:21] >> Cool. So, we've got a new system for
+[00:00:21] >> Cool. So, we've got a new system for full duplex audio and video, which means
+[00:00:24] full duplex audio and video, which means
+[00:00:24] full duplex audio and video, which means that uh you can stream input into it in
+[00:00:26] that uh you can stream input into it in
+[00:00:26] that uh you can stream input into it in real time, and it can respond to you
+[00:00:28] real time, and it can respond to you
+[00:00:28] real time, and it can respond to you even while you're speaking to it
+[00:00:29] even while you're speaking to it
+[00:00:30] even while you're speaking to it simultaneously. How does that sound?
+[00:00:33] simultaneously. How does that sound?
+[00:00:33] simultaneously. How does that sound? >> Sounds like a solid setup. Full duplex
+[00:00:35] >> Sounds like a solid setup. Full duplex
+[00:00:35] >> Sounds like a solid setup. Full duplex with real-time interaction is super
+[00:00:37] with real-time interaction is super
+[00:00:37] with real-time interaction is super useful,
+[00:00:42] >> friend.
+[00:00:42] >> friend. >> Hey, Rowan, I heard you're talking about
+[00:00:44] >> Hey, Rowan, I heard you're talking about
+[00:00:44] >> Hey, Rowan, I heard you're talking about our amazing interaction model. I have a
+[00:00:46] our amazing interaction model. I have a
+[00:00:46] our amazing interaction model. I have a few things to add but to make it
+[00:00:48] few things to add but to make it
+[00:00:48] few things to add but to make it interesting I'll do it in Hindi. Can you
+[00:00:50] interesting I'll do it in Hindi. Can you
+[00:00:50] interesting I'll do it in Hindi. Can you translate in to in English in real time
+[00:00:53] translate in to in English in real time
+[00:00:53] translate in to in English in real time for my friend and for audience?
+[00:00:56] for my friend and for audience?
+[00:00:56] for my friend and for audience? >> Absolutely. I'll translate as you go
+[00:01:00] >> Absolutely. I'll translate as you go
+[00:01:00] >> Absolutely. I'll translate as you go preview model.
+[00:01:02] preview model.
+[00:01:02] preview model. >> Today we're taking a look at our preview
+[00:01:03] >> Today we're taking a look at our preview
+[00:01:04] >> Today we're taking a look at our preview model
+[00:01:10] which makes conversation between humans
+[00:01:10] which makes conversation between humans and AI easier. It has many features like
+[00:01:12] and AI easier. It has many features like
+[00:01:12] and AI easier. It has many features like web search and artifacts.
+[00:01:20] friend. >> Hey. Hey guys. Uh, I just heard
+[00:01:22] >> Hey. Hey guys. Uh, I just heard
+[00:01:22] >> Hey. Hey guys. Uh, I just heard something really cool about search and
+[00:01:23] something really cool about search and
+[00:01:23] something really cool about search and artifact generation. Uh, perfect timing
+[00:01:25] artifact generation. Uh, perfect timing
+[00:01:25] artifact generation. Uh, perfect timing for me because just now I was wondering
+[00:01:28] for me because just now I was wondering
+[00:01:28] for me because just now I was wondering what are a typical humans simple
+[00:01:30] what are a typical humans simple
+[00:01:30] what are a typical humans simple reaction time for auditory, visual, and
+[00:01:33] reaction time for auditory, visual, and
+[00:01:33] reaction time for auditory, visual, and tactile communication cues. Could you
+[00:01:35] tactile communication cues. Could you
+[00:01:35] tactile communication cues. Could you search for me?
+[00:01:37] search for me?
+[00:01:37] search for me? >> Let me find those typical reaction times
+[00:01:39] >> Let me find those typical reaction times
+[00:01:39] >> Let me find those typical reaction times for you. Got it. So tactile is fastest
+[00:01:42] for you. Got it. So tactile is fastest
+[00:01:42] for you. Got it. So tactile is fastest at around 150 milliseconds. Then
+[00:01:44] at around 150 milliseconds. Then
+[00:01:44] at around 150 milliseconds. Then auditory at 140 to 170 and visuals the
+[00:01:47] auditory at 140 to 170 and visuals the
+[00:01:47] auditory at 140 to 170 and visuals the slowest at 180 to 250.
+[00:01:49] slowest at 180 to 250.
+[00:01:49] slowest at 180 to 250. >> Oh, interesting. Can you visual
+[00:01:50] >> Oh, interesting. Can you visual
+[00:01:50] >> Oh, interesting. Can you visual visualize them in a bar chart for me?
+[00:01:53] visualize them in a bar chart for me?
+[00:01:53] visualize them in a bar chart for me? >> Absolutely. Let me generate a quick bar
+[00:01:54] >> Absolutely. Let me generate a quick bar
+[00:01:54] >> Absolutely. Let me generate a quick bar chart for those reaction times.
+[00:01:56] chart for those reaction times.
+[00:01:56] chart for those reaction times. >> In the meantime, could you quickly
+[00:01:57] >> In the meantime, could you quickly
+[00:01:58] >> In the meantime, could you quickly explain to me why is auditory even
+[00:01:59] explain to me why is auditory even
+[00:01:59] explain to me why is auditory even faster than visual? That's a little bit
+[00:02:01] faster than visual? That's a little bit
+[00:02:01] faster than visual? That's a little bit unexpected.
+[00:02:04] unexpected.
+[00:02:04] unexpected. >> Sure thing. Auditory is faster because
+[00:02:06] >> Sure thing. Auditory is faster because
+[00:02:06] >> Sure thing. Auditory is faster because sound signals travel a shorter, more
+[00:02:08] sound signals travel a shorter, more
+[00:02:08] sound signals travel a shorter, more direct neural path to the brain than
+[00:02:09] direct neural path to the brain than
+[00:02:09] direct neural path to the brain than visual info does.
+[00:02:10] visual info does.
+[00:02:10] visual info does. >> Makes sense. Thank you so much. It's
+[00:02:12] >> Makes sense. Thank you so much. It's
+[00:02:12] >> Makes sense. Thank you so much. It's great tar, by the way.
+[00:02:13] great tar, by the way.
+[00:02:13] great tar, by the way. >> You're welcome.
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jp

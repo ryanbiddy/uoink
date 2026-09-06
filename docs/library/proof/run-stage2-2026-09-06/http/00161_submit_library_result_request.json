@@ -1,0 +1,51 @@
+{
+  "seq": 161,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "0MuSkjl3xcOHwWoNlxc4sH6cgHXQfAiX",
+    "client_id": "proof-harness",
+    "attempt_token": "k_oDTcuow0WLA58sA2ZM22XGZwrEZMLxY3svm2BFMlQ",
+    "submission_key": "0MuSkjl3xcOHwWoNlxc4sH6cgHXQfAiX-k_oDTcuow0WLA58sA2ZM22XGZwrEZMLxY3svm2BFMlQ",
+    "schema_version": 1,
+    "video_id": "2080678700157140992",
+    "source_revision": "e54fd975f0c88437fc4ca530fbf9e1d82473e52fef668312a1f8af7dc978726d",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "e6f519364c96235cdc9ef63196f9cadcb4e012ac50263b5b1c6d9a87e24ffb92",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "b36670226e23f8b56fc9008ede6987eea7269425c6f8dabd30b4b09cbf0cb0af",
+            "card_hash": "58ec37f03b31f52cadac9ddf4ec356f5c60a64923770043cab952ddd166603d1",
+            "quote": "The semi selloff right now is being driven by a mix of macro fear, profit taking and investors questioning"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 12619,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 18591,
+      "wall_time_ms": 0
+    }
+  }
+}

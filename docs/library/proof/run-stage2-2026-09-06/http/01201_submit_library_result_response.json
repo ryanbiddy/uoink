@@ -1,0 +1,57 @@
+{
+  "seq": 1201,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "hTO-mTx49U1pFORDK4KaCcJsGv9CJBmY",
+      "video_id": "iyVXw-SoUrY",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.66,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4784109940f74d75c8cdcf7d59b1d51fab540245d31f8822101e55c9c7469021",
+            "card_hash": "5db49c64c1ebf72cee1a947ca364b9bc061f73dfe4c4465ac4142ded9b7b629e",
+            "quote": "trying to put bumpers or guard rails on that experiment",
+            "start": 216.959,
+            "end": 311.59,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "news-and-current-events",
+          "shelf_path": [
+            "News and Current Events"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "9e8714dc601c51c7242873ee3af4f9021d6fc27ec1909bf19ccfb69e34d30d20",
+            "card_hash": "5db49c64c1ebf72cee1a947ca364b9bc061f73dfe4c4465ac4142ded9b7b629e",
+            "quote": "Is Iran doing anything that surprises you?",
+            "start": 3426.559,
+            "end": 3540.789,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

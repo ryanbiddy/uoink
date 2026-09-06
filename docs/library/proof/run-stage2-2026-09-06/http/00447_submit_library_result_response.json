@@ -1,0 +1,39 @@
+{
+  "seq": 447,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 16,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "6LtqJeFS7Pt7MunIP5CqF-El24lf5AYe",
+      "video_id": "2085398091726041088",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "214de02a0a709c01df7e01998e4d02da624356577f9205f75093faaf4648a80c",
+            "card_hash": "728622224feb03bea2c1e12f85fcee42e5f43c7fd33705fd2f3afd75e1ce408c",
+            "quote": "Skills and MCP servers are making agents more capable",
+            "start": 3.629,
+            "end": 90.769,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

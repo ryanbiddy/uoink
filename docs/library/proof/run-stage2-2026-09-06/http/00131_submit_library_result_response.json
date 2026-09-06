@@ -1,0 +1,39 @@
+{
+  "seq": 131,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "TvKQ2FsvpXCYkzYD-OJ_TRJSWSimYJPJ",
+      "video_id": "2079578068440506368",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.82,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "e5b6b0e537e61c647fc1dfaaeb7c2446b414daf291649f5f3d2bea148451b34d",
+            "card_hash": "44ce3d23faed507b1a8bb79ff7e97b75879c65c04a24a8634e3e3c7da22fa60f",
+            "quote": "Today we’re expanding the Gemini family with three new models built to be faster, more token efficient, and reliable at scale.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

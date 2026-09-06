@@ -1,0 +1,59 @@
+{
+  "seq": 47,
+  "tool": "submit_library_result",
+  "wall_ms": 6,
+  "request": {
+    "seq": 47,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "9eBaz35n_7bp0u-ceL_gJW6qzPa5lEOc",
+      "client_id": "proof-harness",
+      "attempt_token": "1CKRJhCLQvAFV1EnOdlAJOKuKpBgvxuLsO8-5tx1AiQ",
+      "submission_key": "9eBaz35n_7bp0u-ceL_gJW6qzPa5lEOc-1CKRJhCLQvAFV1EnOdlAJOKuKpBgvxuLsO8-5tx1AiQ",
+      "schema_version": 1,
+      "video_id": "2079190532681543680",
+      "source_revision": "302e089520a3d0d9216058c86bb7a0b783bfebf1a4caa81feb0225f8a270a544",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "465f235ba0901494b9364f35d4daac9cd5b0eb3876041c9184dc6fe15b8fe026",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt is a brief product-announcement tweet about a military rotorcraft ('autonomous attack rotorcraft') with no technical AI/ML discussion, no agent-acting-for-a-user demonstration, and no named crime/riot/conflict incident, so it doesn't meet any shelf's specific inclusion cues (defense hardware, not AI/ML content or a breaking-incident report)."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 9215,
+        "cache_read_tokens": 103823,
+        "cache_create_tokens": 111643,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 47,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 6,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "9eBaz35n_7bp0u-ceL_gJW6qzPa5lEOc",
+        "video_id": "2079190532681543680",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

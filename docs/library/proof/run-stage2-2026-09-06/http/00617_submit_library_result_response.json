@@ -1,0 +1,25 @@
+{
+  "seq": 617,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "BOF0s0gVTxyOs-Z353cUPSvfBy5aTRMe",
+      "video_id": "2088372080949739520",
+      "outcome": "error",
+      "accepted_memberships": [],
+      "rejected": [
+        {
+          "code": "client_error",
+          "field": "result",
+          "reason": "model returned no result for 2088372080949739520"
+        }
+      ],
+      "retryable": true
+    }
+  }
+}

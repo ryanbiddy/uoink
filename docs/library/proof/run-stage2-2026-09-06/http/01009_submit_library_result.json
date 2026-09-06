@@ -1,0 +1,95 @@
+{
+  "seq": 1009,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 1009,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "HVd6mrjvP5Zr3iarbBAKm0z692f0tniZ",
+      "client_id": "proof-harness",
+      "attempt_token": "OIIo2fiir6-UGaHxj7VHhxRQ77fuPvlonRIW9c6fu-M",
+      "submission_key": "HVd6mrjvP5Zr3iarbBAKm0z692f0tniZ-OIIo2fiir6-UGaHxj7VHhxRQ77fuPvlonRIW9c6fu-M",
+      "schema_version": 1,
+      "video_id": "2094477244164947968",
+      "source_revision": "c67d13f472a8e2680dcf70525cae036e9db561b3938556e979b4f691ff98808a",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "42c470e7c08cc75319c0af0e82fab4c9b452e98388ecd521173568e43c8ba49c",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "9f5e07db97a1abab10d0e53174beaed8251d1aa5fa020af92705036f68bd0435",
+              "card_hash": "be188995b9385b930c8bbc541029aa67acf3721ba340122f874d2c437be403eb",
+              "quote": "they can go and pick it up and solve the problem and give us back a PR"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 11353,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 21587,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1009,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "HVd6mrjvP5Zr3iarbBAKm0z692f0tniZ",
+        "video_id": "2094477244164947968",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "9f5e07db97a1abab10d0e53174beaed8251d1aa5fa020af92705036f68bd0435",
+              "card_hash": "be188995b9385b930c8bbc541029aa67acf3721ba340122f874d2c437be403eb",
+              "quote": "they can go and pick it up and solve the problem and give us back a PR",
+              "start": 1632.912,
+              "end": 1752.619,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

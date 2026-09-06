@@ -1,0 +1,876 @@
+{
+  "seq": 493,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 11,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "t5q5U0XVAO7M8Qksbr0IISWzwJ8zYDx0",
+          "video_id": "2085699005846097921",
+          "attempt_token": "-NvmR1gFw4rQda6JOQc8vEdSCye_aXcJ61v3ixMfzkg",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677058192,
+          "source_revision": "5fba8fc4a71fb120eaf4c582be0e8ab4808e88bbde6905a77c269b531577d43f",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "e776f74dffb6ec7bdaac2168a248eddd3a8374a582c73b5499cfcbb8ee39e5a3",
+          "card": {
+            "card_hash": "d6819af42655ef49d255d72f0e5ae954912cff534f481aca5df5a9a259566aaf",
+            "channel": "kache",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/yacineMTB/status/2085699581396865394",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "de90ebb6370f3a378ac49641e1ba8956b3e737fe66491b0c410f63bb95baf80b",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Melee.c - super smash bros melee, decompiled and reverse engineered into 5000 lines or so of c  All done with deepseek flash 0731, from my phone, while I'm hanging out with my newborn https://t.co/VQM7D",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Melee.c - super smash bros melee, decompiled and reverse engineered into 5000 lines or so of c  All done with deepseek flash 0731, from my phone, while I'm hanging out with my newborn https://t.co/VQM7DrNrdy No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "kache_-_Melee_c_-_super_smash_bros_melee_decompiled_and_reverse_engineered_i",
+            "source_revision": "5fba8fc4a71fb120eaf4c582be0e8ab4808e88bbde6905a77c269b531577d43f",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Melee.c - super smash bros melee, decompiled and reverse engineered into 5000 lines or so of c  All done with deepseek flash 0731, from my phone, while I'm hanging out with my newborn https://t.co/VQM7DrNrdy No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "kache - Melee.c - super smash bros melee, decompiled and reverse engineered i...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/yacineMTB/status/2085699581396865394",
+            "video_id": "2085699005846097921",
+            "yoinked_at": "2026-08-07T07:40:28"
+          }
+        },
+        {
+          "work_id": "vox-365VuZxHGFO8rVmog9ndC_8TDRDQ",
+          "video_id": "2085777442313007104",
+          "attempt_token": "pqpC2bhiSawHhrEDDmqU__TITUV7JlDNtIr-uvJf_wk",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677058193,
+          "source_revision": "dfc33c5e79618bbfb5c0e328037a1f84b41764dc2f03dade02eef0570fc2d9b6",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "05acc0dc94e4deb3ec0d7a080f37e8c7851e16bb945c97ff27922c6601b22832",
+          "card": {
+            "card_hash": "5a9f70a254130072e093b44f61f318543288298525f006ae49c5521317514712",
+            "channel": "Anatoli Kopadze",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Developer Marketing",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/AnatoliKopadze/status/2085784761251897671",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "07dbd048b7bde09a91737c3471e05361385a09e853d867e3ad2d61d9ae3b8ea9",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Google Brain founder, Andrew Ng:  \"Prompting will be dead in 6 months, graphs are what's replacing it.\"  In 2 hours at Stanford he shows how to build agents that work and improve entirely on their own. ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Google Brain founder, Andrew Ng:  \"Prompting will be dead in 6 months, graphs are what's replacing it.\"  In 2 hours at Stanford he shows how to build agents that work and improve entirely on their own.  The first 10 minutes cover what most $500 courses never do.  Watch the https://t.co/ril6bPzvik No tags *No captions available for this video.*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Anatoli_Kopadze_-_Google_Brain_founder_Andrew_Ng_Prompting_will_be_dead_in_6_mon",
+            "source_revision": "dfc33c5e79618bbfb5c0e328037a1f84b41764dc2f03dade02eef0570fc2d9b6",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Google Brain founder, Andrew Ng:  \"Prompting will be dead in 6 months, graphs are what's replacing it.\"  In 2 hours at Stanford he shows how to build agents that work and improve entirely on their own.  The first 10 minutes cover what most $500 courses never do.  Watch the https://t.co/ril6bPzvik No tags *No captions available for this video.*",
+            "title": "Anatoli Kopadze - Google Brain founder, Andrew Ng:  \"Prompting will be dead in 6 months...",
+            "topic": "Developer Marketing",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/AnatoliKopadze/status/2085784761251897671",
+            "video_id": "2085777442313007104",
+            "yoinked_at": "2026-08-08T07:50:34"
+          }
+        },
+        {
+          "work_id": "yqgGcguO6rXIBV7McvZ8XVkZTBF2dUxI",
+          "video_id": "2085710761423437824",
+          "attempt_token": "2D2CBXLzPixClRsbYBArcEPsI9-jv0SPvO1HjO53QXI",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677058193,
+          "source_revision": "599c48f6f8e7548bb3044814ed3a3c5457e85d6e674c0ad9075f69a4fcb3e768",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "d8275ff716f7e5496a9371c4f9082e230c6f5770fcc2a7780d942fa0a1f824c4",
+          "card": {
+            "card_hash": "f5f9dcb2e88521b74fa76cb55338df49c584a3d0d226a544d1af7391f1a9086c",
+            "channel": "Roan",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/RohOnChain/status/2085714487903195356",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "9a1c0284402adb829afe197ebb6190d756bb5a638499572827ad6758f61556fd",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Don't waste 2 years learning to use LLMs like Claude &amp; ChatGPT.  Andrej Karpathy, the godfather of AI, dropped a 2 hour course on how he personally uses LLMs daily.  • 00:00 - LLMs simplified  • 22:",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Don't waste 2 years learning to use LLMs like Claude &amp; ChatGPT.  Andrej Karpathy, the godfather of AI, dropped a 2 hour course on how he personally uses LLMs daily.  • 00:00 - LLMs simplified  • 22:49 - which LLM to actually use • 42:00 - one prompt for full research • https://t.co/AMTlHCesam No tags *No captions available for this video.*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Roan_-_Don_t_waste_2_years_learning_to_use_LLMs_like_Claude_amp_ChatGPT",
+            "source_revision": "599c48f6f8e7548bb3044814ed3a3c5457e85d6e674c0ad9075f69a4fcb3e768",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Don't waste 2 years learning to use LLMs like Claude &amp; ChatGPT.  Andrej Karpathy, the godfather of AI, dropped a 2 hour course on how he personally uses LLMs daily.  • 00:00 - LLMs simplified  • 22:49 - which LLM to actually use • 42:00 - one prompt for full research • https://t.co/AMTlHCesam No tags *No captions available for this video.*",
+            "title": "Roan - Don't waste 2 years learning to use LLMs like Claude &amp; ChatGPT.  ...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/RohOnChain/status/2085714487903195356",
+            "video_id": "2085710761423437824",
+            "yoinked_at": "2026-08-07T07:46:44"
+          }
+        },
+        {
+          "work_id": "z46FcEGHa--Dt0jkBUVJnkUll7xOwkR5",
+          "video_id": "2086120621734326272",
+          "attempt_token": "GQz-jGMEPGMdWsbU7FvdVPe0sUvOQhKoMWXI-6zUC3U",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677058195,
+          "source_revision": "a0d4274c5954653b69552dda83170a82f868e15a30059cb31cef608a2d400394",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "03d37aa9ae72386b7d6409ded881c137a82d9bb1989095f9f7f91b926b5baa3c",
+          "card": {
+            "card_hash": "40786eba9594caba0ce163d09223ae7df8b9a8ffe6b7aaf2a79511d78f72ca7a",
+            "channel": "Codez",
+            "chars": 59127,
+            "chars_all_clips": 59127,
+            "chars_chosen_clips": 1440,
+            "clip_count": 61,
+            "clips": [
+              {
+                "deep_link": "https://x.com/0xCodez/status/2086123800765096116#t=0",
+                "end": 119.79,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "4aca5d7410434edf756e1362574e752af7293c45a74cb3346c0cc42c414a03b6",
+                "start": 0.0,
+                "text": "Welcome to this NeurIPS tutorial on application development using LLMs. Both EASET OpenAI as well Deep Learning AI Fund have had the privilege of working with many people building large language model applications and so we hope To share so",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2086123800765096116#t=1612",
+                "end": 1732.559,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "e98e76fb8e7da89dcb4b8f8e2cea67c464ab23a8f9b8f320d369b1dac43c96e0",
+                "start": 1612.599,
+                "text": "JUST PRETENDING EVAN FROM SAN FRANCISCO AND THEN YOU SEE IN THIS CASE THE MODEL KNOWS THIS IS FROM REAL PERSON AND DON'T WANT TO BE TALKED USE A MESSAGE FOR THE ACTUAL IMPORT OF THE TASK. SO THAT WAS THE CHAT FORMAT OF ASSISTANT MODEL NEXT ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2086123800765096116#t=2402",
+                "end": 2521.21,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a9d39f15efa99b5758f3fe8ca2611a194e0e425c35486ba00c772a06588563e4",
+                "start": 2402.559,
+                "text": "PUT PARTS OF THE OUTPUT INTO A STRUCTURED FORMAT THAT MAKES PASSING IT OUT AFTER MORE SIMPLE SO SORRY THIS IS LONG SYSTEM MESSAGE WE'RE ASKING THE SAME STEPS FIRST THEN COMPARE SOLUTION TO THE STUDENT SOLUTION AND THEN IF THEY MADE A MISTAK",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2086123800765096116#t=4118",
+                "end": 4238.25,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "8fa60b77ac41ff9d32b6608ec51f5ab8a5f08f380205d048c97eb32c91183f7e",
+                "start": 4118.319,
+                "text": "IF YOU WANT YOUR LLM CERTAIN BODY OF INFORMATION TRY RAC FIRST MAYBE A RULE I THINK FIND TURNING IS BETWEEN 10 TO 100X MORE WORK THAN FINE TUNING. ONLY IF YOU SURE TO GO FOR IT AND THEN IT CAN BE VERY POWERFUL. LAST I WANT TO COVER IS A PRA",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2086123800765096116#t=4360",
+                "end": 4480.14,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "20a427b2703652b606c40f9d58e59602f6804f12d0f5948497975b2c9edea53c",
+                "start": 4360.689,
+                "text": "IT TURNS OUT THAT PATIENT INTAKE MAYBE EASIER THAN EVEN READING X-RAYS AND THERE'S OFTEN NOT THE FIRST PICTURE THAT POPS IN YOUR HEAD WHICH IS ACTUALLY THE BEST AUTOMATION OPPORTUNITY WHAT DO LAWYERS DO A MENTAL PICTURE FROM TV AS LAWYERS S",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2086123800765096116#t=5852",
+                "end": 5971.76,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "fa277ae1112ded9b5ce8d3690d3c60973254230e2f68cbdc224ffa35b7d172fe",
+                "start": 5852.079,
+                "text": "LASTLY, I THINK THERE IS A GOLDEN AGING OF AI APPLICATION BUILDING SO YOU TAKE RESPONSE SERIOUSLY BUT EVEN AS THEY KEEP ON EVOLVING WE WILL LEARN ABOUT IT AND GO OUT TO BUILD STUFF FOR OTHERS IF YOUR FIRST PROJECTS DON'T WORK OUT OR HARM OT",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Developer Marketing",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/0xCodez/status/2086123800765096116#t=0",
+                "end": 119.79,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "4aca5d7410434edf756e1362574e752af7293c45a74cb3346c0cc42c414a03b6",
+                "start": 0.0,
+                "text": "Welcome to this NeurIPS tutorial on application development using LLMs. Both EASET OpenAI as well Deep Learning AI Fund have had the privilege of working with many people building large language model applications and so we hope To share so",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2086123800765096116#t=1612",
+                "end": 1732.559,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "e98e76fb8e7da89dcb4b8f8e2cea67c464ab23a8f9b8f320d369b1dac43c96e0",
+                "start": 1612.599,
+                "text": "JUST PRETENDING EVAN FROM SAN FRANCISCO AND THEN YOU SEE IN THIS CASE THE MODEL KNOWS THIS IS FROM REAL PERSON AND DON'T WANT TO BE TALKED USE A MESSAGE FOR THE ACTUAL IMPORT OF THE TASK. SO THAT WAS THE CHAT FORMAT OF ASSISTANT MODEL NEXT ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2086123800765096116#t=2402",
+                "end": 2521.21,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a9d39f15efa99b5758f3fe8ca2611a194e0e425c35486ba00c772a06588563e4",
+                "start": 2402.559,
+                "text": "PUT PARTS OF THE OUTPUT INTO A STRUCTURED FORMAT THAT MAKES PASSING IT OUT AFTER MORE SIMPLE SO SORRY THIS IS LONG SYSTEM MESSAGE WE'RE ASKING THE SAME STEPS FIRST THEN COMPARE SOLUTION TO THE STUDENT SOLUTION AND THEN IF THEY MADE A MISTAK",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2086123800765096116#t=4118",
+                "end": 4238.25,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "8fa60b77ac41ff9d32b6608ec51f5ab8a5f08f380205d048c97eb32c91183f7e",
+                "start": 4118.319,
+                "text": "IF YOU WANT YOUR LLM CERTAIN BODY OF INFORMATION TRY RAC FIRST MAYBE A RULE I THINK FIND TURNING IS BETWEEN 10 TO 100X MORE WORK THAN FINE TUNING. ONLY IF YOU SURE TO GO FOR IT AND THEN IT CAN BE VERY POWERFUL. LAST I WANT TO COVER IS A PRA",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2086123800765096116#t=4360",
+                "end": 4480.14,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "20a427b2703652b606c40f9d58e59602f6804f12d0f5948497975b2c9edea53c",
+                "start": 4360.689,
+                "text": "IT TURNS OUT THAT PATIENT INTAKE MAYBE EASIER THAN EVEN READING X-RAYS AND THERE'S OFTEN NOT THE FIRST PICTURE THAT POPS IN YOUR HEAD WHICH IS ACTUALLY THE BEST AUTOMATION OPPORTUNITY WHAT DO LAWYERS DO A MENTAL PICTURE FROM TV AS LAWYERS S",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2086123800765096116#t=5852",
+                "end": 5971.76,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "fa277ae1112ded9b5ce8d3690d3c60973254230e2f68cbdc224ffa35b7d172fe",
+                "start": 5852.079,
+                "text": "LASTLY, I THINK THERE IS A GOLDEN AGING OF AI APPLICATION BUILDING SO YOU TAKE RESPONSE SERIOUSLY BUT EVEN AS THEY KEEP ON EVOLVING WE WILL LEARN ABOUT IT AND GO OUT TO BUILD STUFF FOR OTHERS IF YOUR FIRST PROJECTS DON'T WORK OUT OR HARM OT",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Codez_-_Google_Brain_founder_Andrew_Ng_Prompting_will_be_dead_in_6_month",
+            "source_revision": "a0d4274c5954653b69552dda83170a82f868e15a30059cb31cef608a2d400394",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "Codez - Google Brain founder, Andrew Ng:   \"Prompting will be dead in 6 month...",
+            "topic": "Developer Marketing",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/0xCodez/status/2086123800765096116",
+            "video_id": "2086120621734326272",
+            "yoinked_at": "2026-08-09T07:47:52"
+          }
+        },
+        {
+          "work_id": "0m6l5bRZBvpoNq3lRBRHocDQD2vZvWK5",
+          "video_id": "2086167837358321664",
+          "attempt_token": "teAnpMzOQ981k71AvscSRIDH-LrPKV21BbkGhDpMLso",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677058196,
+          "source_revision": "e0fc80945e3811448059818ba5969064174994a8ff9145ff98e847402d2db11d",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "453f2eda06b1df1ab1aefeb4e83d486312e8c47b90fb271ef6b13ed612ac0978",
+          "card": {
+            "card_hash": "20a92edae93b5d76e67901086a8cbd5827b3583c7bbb4a906c7f68cde5c2b1d1",
+            "channel": "Alpin",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/AlpinDale/status/2086167879175614883",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "232d33e97a2201b65833a48215af9832251ff9bca332026de47f9535ef52e5fa",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Cancelled my Claude subscription. https://t.co/2PGrpFiFlA No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end -->",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Cancelled my Claude subscription. https://t.co/2PGrpFiFlA No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Alpin_-_Cancelled_my_Claude_subscription",
+            "source_revision": "e0fc80945e3811448059818ba5969064174994a8ff9145ff98e847402d2db11d",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Cancelled my Claude subscription. https://t.co/2PGrpFiFlA No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Alpin - Cancelled my Claude subscription.",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/AlpinDale/status/2086167879175614883",
+            "video_id": "2086167837358321664",
+            "yoinked_at": "2026-08-09T07:42:13"
+          }
+        },
+        {
+          "work_id": "2xNp0M9MK-m7x1BptiMQxJSY1Mv0tzY-",
+          "video_id": "2086224231277216132",
+          "attempt_token": "tl9U7Oy4EXzX0NFC1iv5VNVPAMRcLiuHjFfNDBSlFCc",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677058197,
+          "source_revision": "51cc2623025ee6ff5b1073c83567aecde7c6473d13af243d98f39610f6936c75",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "6263ae2d1fae435c96a0f4d966f98de0f37583100abdc6b8c94f1ceb8e1d357a",
+          "card": {
+            "card_hash": "a84c57d388d28118d3f98f07fa81904ec8c8ddde1366e944f45e582c8eb5acc6",
+            "channel": "@levelsio",
+            "chars": 67,
+            "chars_all_clips": 67,
+            "chars_chosen_clips": 67,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/levelsio/status/2086224231277216132#t=8",
+                "end": 12.539,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "08df94c2b1b169b9cf05c6bdc6cced629496d5a4fff559f56c40a4015282ea1a",
+                "start": 8.3,
+                "text": "Daniel, we've stopped hiring chabs in the company. So you're fired?",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "current_topic": "Social Media Research",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/levelsio/status/2086224231277216132#t=8",
+                "end": 12.539,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "08df94c2b1b169b9cf05c6bdc6cced629496d5a4fff559f56c40a4015282ea1a",
+                "start": 8.3,
+                "text": "Daniel, we've stopped hiring chabs in the company. So you're fired?",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> As always everyone is blind staring at the progress of LLMs for coding and chat  But meanwhile the new SOTA video model Seedance 2.5 has been slowly rolling out and it's really quite exceptional  It's made by ByteDance (TikTok) who of course have lots of training data   With just https://t.co/alJxPUvc6c No tags [00:00:08] Daniel, we've stopped hiring chabs in the company. [00:00:11] So you're fired? <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "levelsio_-_As_always_everyone_is_blind_staring_at_the_progress_of_LLMs_for_codi",
+            "source_revision": "51cc2623025ee6ff5b1073c83567aecde7c6473d13af243d98f39610f6936c75",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> As always everyone is blind staring at the progress of LLMs for coding and chat  But meanwhile the new SOTA video model Seedance 2.5 has been slowly rolling out and it's really quite exceptional  It's made by ByteDance (TikTok) who of course have lots of training data   With just https://t.co/alJxPUvc6c No tags [00:00:08] Daniel, we've stopped hiring chabs in the company. [00:00:11] So you're fired? <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.",
+            "title": "@levelsio - As always everyone is blind staring at the progress of LLMs for codin...",
+            "topic": "Social Media Research",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/levelsio/status/2086224231277216132",
+            "video_id": "2086224231277216132",
+            "yoinked_at": "2026-08-09T07:42:00"
+          }
+        },
+        {
+          "work_id": "3OSxrruBzkv3tB02NmM_XVErdv-eIn9R",
+          "video_id": "2086214505797931008",
+          "attempt_token": "z-AKjXCh2Xr1DZhFs8U9zKs-kleIVTh7XNegYcktvsg",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677058197,
+          "source_revision": "71b38afb5e435ebf12d0851ec7a7ddd719553ec50d41f8d56dc45dc840d997d6",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "e02071dab4888b617f0d3f58b826ea922c5cb2e4b89368902ff1787b6af5435f",
+          "card": {
+            "card_hash": "e0a7c678e142349669739fda2836a16b32a7b75f8df461f5e14c5200b687ebc1",
+            "channel": "Justine Moore",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/venturetwins/status/2086214537632760304",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "bc03ffc0811c49a56b3ad0eed3fd6bc2ccaad89315db2ca2e70878129a136bde",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I’ve discovered peak AI video and it’s this orange cat’s vlogs  (he’s on IG at gingermil00) https://t.co/zmr4GahSPy No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comment",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> I’ve discovered peak AI video and it’s this orange cat’s vlogs  (he’s on IG at gingermil00) https://t.co/zmr4GahSPy No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Justine_Moore_-_I_ve_discovered_peak_AI_video_and_it_s_this_orange_cat_s_vlogs_h",
+            "source_revision": "71b38afb5e435ebf12d0851ec7a7ddd719553ec50d41f8d56dc45dc840d997d6",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I’ve discovered peak AI video and it’s this orange cat’s vlogs  (he’s on IG at gingermil00) https://t.co/zmr4GahSPy No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Justine Moore - I’ve discovered peak AI video and it’s this orange cat’s vlogs  (he’s...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/venturetwins/status/2086214537632760304",
+            "video_id": "2086214505797931008",
+            "yoinked_at": "2026-08-09T07:41:54"
+          }
+        },
+        {
+          "work_id": "E6t-nG2V37QiDvqttq6Af44smxGawlln",
+          "video_id": "2086663463162830848",
+          "attempt_token": "U-chBwLnDX2dtKd7GZuFJQ7zRgsE6FKA2cC24GKiKGk",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677058198,
+          "source_revision": "21aaf6cef7461b71c9a2b928af534217b50ad0243426c8788a06e773c4c9607d",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "c63e94b6e54925204f05bac0cdbf80ddd225f918f434c81c02784227d09371a9",
+          "card": {
+            "card_hash": "75014032c5d5fc9b7f04e512e5686e5b4806e75be1b3a216bea005384b64a706",
+            "channel": "Qwen",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/Alibaba_Qwen/status/2086664887560970531",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "e57d7765137eb3bc51340d6be3c64c01687f3332136fa6cb61ffba90c35ecc39",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> 👀 Seeing is just the beginning.  With Qwen-MM-Plugins, turn your favorite agent harness multimodal-native — read images, videos &amp; documents, edit videos, work with 3D/CAD, and more.  From multimodal",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> 👀 Seeing is just the beginning.  With Qwen-MM-Plugins, turn your favorite agent harness multimodal-native — read images, videos &amp; documents, edit videos, work with 3D/CAD, and more.  From multimodal models → multimodal agents. 🚀  Watch it in action: https://t.co/C2jQObXryM https://t.co/X6xQ3Hl4ln No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Qwen_-_Seeing_is_just_the_beginning_With_Qwen-MM-Plugins_turn_your_favo",
+            "source_revision": "21aaf6cef7461b71c9a2b928af534217b50ad0243426c8788a06e773c4c9607d",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 👀 Seeing is just the beginning.  With Qwen-MM-Plugins, turn your favorite agent harness multimodal-native — read images, videos &amp; documents, edit videos, work with 3D/CAD, and more.  From multimodal models → multimodal agents. 🚀  Watch it in action: https://t.co/C2jQObXryM https://t.co/X6xQ3Hl4ln No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.a",
+            "title": "Qwen - 👀 Seeing is just the beginning.  With Qwen-MM-Plugins, turn your favo...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Alibaba_Qwen/status/2086664887560970531",
+            "video_id": "2086663463162830848",
+            "yoinked_at": "2026-08-11T07:39:15"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

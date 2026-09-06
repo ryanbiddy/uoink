@@ -1,0 +1,51 @@
+{
+  "seq": 417,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "FNpG8OGMNj6bzInyETfy4A_vjJLVhnwj",
+    "client_id": "proof-harness",
+    "attempt_token": "rxy--B7Z57DIqKG-0wN0aOXWdt2wWfooWiwoOkG41OY",
+    "submission_key": "FNpG8OGMNj6bzInyETfy4A_vjJLVhnwj-rxy--B7Z57DIqKG-0wN0aOXWdt2wWfooWiwoOkG41OY",
+    "schema_version": 1,
+    "video_id": "2084651855372808192",
+    "source_revision": "7b5c86cc28496808700207622ac2730c42116f78af03329a939eff0c7702ac4c",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "79675c9976415355f7c40a82bb13136a5a244b74ccf55a384932cf497b307a5a",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "61d39a6d8d61fbe3d50046d92504095501d0c7558120743e42d609da9ee1ca35",
+            "card_hash": "a06686ca137988f96dc29a1ab73403ca744f8ae9d4f9bdb39988c8aeb397c38f",
+            "quote": "our top story tonight across the country enterprises had a completely uneventful day"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 15782,
+      "cache_read_tokens": 189114,
+      "cache_create_tokens": 36038,
+      "wall_time_ms": 0
+    }
+  }
+}

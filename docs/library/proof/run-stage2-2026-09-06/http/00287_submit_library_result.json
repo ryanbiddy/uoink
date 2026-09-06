@@ -1,0 +1,59 @@
+{
+  "seq": 287,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 287,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "hs0rBMYdS2uWbq7MlXzVs1GeFK-4KJ23",
+      "client_id": "proof-harness",
+      "attempt_token": "PngStCrv3gad7AJydFd7XqwbwZqYZbhxkt9l7QMCvaA",
+      "submission_key": "hs0rBMYdS2uWbq7MlXzVs1GeFK-4KJ23-PngStCrv3gad7AJydFd7XqwbwZqYZbhxkt9l7QMCvaA",
+      "schema_version": 1,
+      "video_id": "2081167007945576448",
+      "source_revision": "00be0dba3a35d5227a02898ab92943af9788cb44ddea2482c30acc48015300d4",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "0f531190faed716c6e2ba5644548db4da84599d0febf94179e804a0881d2a8f3",
+      "result": {
+        "outcome": "unsupported",
+        "reason": "Card is a video post with zero transcript content (chars=0, clip_count=0, clips=[]); only a truncated tweet caption/hook is present, and the card notes 'No captions available for this video,' which does not constitute eligible evidence for grounded classification."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 15316,
+        "cache_read_tokens": 184221,
+        "cache_create_tokens": 31818,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 287,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "hs0rBMYdS2uWbq7MlXzVs1GeFK-4KJ23",
+        "video_id": "2081167007945576448",
+        "outcome": "unsupported",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "seq": 371,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 371,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "EzAj692xXpFu__a0TN9aSJAQnes3sXTk",
+      "client_id": "proof-harness",
+      "attempt_token": "7LGE_sTrNDXYTl7xJzH40_AVOA87TeBLZnA_uRqpQHc",
+      "submission_key": "EzAj692xXpFu__a0TN9aSJAQnes3sXTk-7LGE_sTrNDXYTl7xJzH40_AVOA87TeBLZnA_uRqpQHc",
+      "schema_version": 1,
+      "video_id": "2083289812333973504",
+      "source_revision": "908870aacc6e00f3cea11d1689102ec6c4e6488bc774fed1cd49a04e81a00d0f",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "5ae33a9a0fb4b69a63160492b1daa57f25a9c851b2d102eee43e0f2aa1d09eb5",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "94e34941bc7162334aea828a174674b4981996b46c6a4e0374cd07784c08f28f",
+              "card_hash": "4276b149157588fe3cdf12760c7cd593ea0a6ecdba610bead0fb6f679bed62b0",
+              "quote": "A conversation with the Google DeepMind Robotics team about our latest Gemini Robotics 2 model"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 13584,
+        "cache_read_tokens": 186442,
+        "cache_create_tokens": 31617,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 371,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "EzAj692xXpFu__a0TN9aSJAQnes3sXTk",
+        "video_id": "2083289812333973504",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "94e34941bc7162334aea828a174674b4981996b46c6a4e0374cd07784c08f28f",
+              "card_hash": "4276b149157588fe3cdf12760c7cd593ea0a6ecdba610bead0fb6f679bed62b0",
+              "quote": "A conversation with the Google DeepMind Robotics team about our latest Gemini Robotics 2 model",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

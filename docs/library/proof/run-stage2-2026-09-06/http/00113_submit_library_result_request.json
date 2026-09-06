@@ -1,0 +1,51 @@
+{
+  "seq": 113,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "mScphPa67HaZBCUDQl7_-Ng98IFmyV2F",
+    "client_id": "proof-harness",
+    "attempt_token": "tZWJsyI3_jZBUNBY25-DlwlnOiOH6JJx_g1h8T518a0",
+    "submission_key": "mScphPa67HaZBCUDQl7_-Ng98IFmyV2F-tZWJsyI3_jZBUNBY25-DlwlnOiOH6JJx_g1h8T518a0",
+    "schema_version": 1,
+    "video_id": "2079595357273464930",
+    "source_revision": "b92f15b1288c9ab9fb0d3b6583847dc36cf295c13f348eec7aa4e197643e8517",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "a8dda4ba052fbe9ca66726aeeac2200bfe42368150eef0f6ab865f091806499c",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "7158c5678e2919bdf24a9ec21f83ddceca2896ffd3302fceaf7a6034ec970309",
+            "card_hash": "480483196b2e419137fab026e883be3b8f5c4e2a640b7a8a62fe37839a52a46a",
+            "quote": "Kimi's founder was flagged as a generational talent 12 years before K3 shocked the world"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 15337,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 18077,
+      "wall_time_ms": 0
+    }
+  }
+}

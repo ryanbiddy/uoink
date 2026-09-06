@@ -1,0 +1,39 @@
+{
+  "seq": 967,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "aB-yhTfXOUjGkdX9Zw2_1ZlkC7-Pcjms",
+      "video_id": "2093043429278458326",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "b94734bf6b6267a29c24bf5bbe3baabf3a42867d71f10d98fa39ecd11558c6c0",
+            "card_hash": "501e0278780921d1b7dab8211f1b93e0bfe226b59d85f15db1f546ee5212a3d5",
+            "quote": "we are going after the biggest market in the world",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

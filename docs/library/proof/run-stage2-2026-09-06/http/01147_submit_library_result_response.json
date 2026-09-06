@@ -1,0 +1,39 @@
+{
+  "seq": 1147,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "7qdwCt6OtJgqBGwnt0FNrry3SHTWRHVM",
+      "video_id": "etjkjZoG2F0",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "573debb936e41d450b1628e48ddf4c3ee2955010bad342f34abd95b4025f68f1",
+            "card_hash": "33fd014c2c410d61dd221e15f1647fbb51c45de32e2ee4a48919fd68ae61a644",
+            "quote": "let me use this time to tell you a little bit more about those additional arguments that you can pass to training command",
+            "start": 2043.519,
+            "end": 2283.91,
+            "timing": "coarse",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

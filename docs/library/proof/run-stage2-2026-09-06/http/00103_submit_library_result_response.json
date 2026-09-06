@@ -1,0 +1,39 @@
+{
+  "seq": 103,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "YSMgD3DUeRfKYLh2xhg2yi5doVupAo9w",
+      "video_id": "2079973875807301633",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "b9241b8bef20f08d13eee1eca60c3d35bd835715e220c60732804b3803fe02ed",
+            "card_hash": "791ddf6b024102ae13e7a3c1fe4976a7e68d34ef8f6af35b74b0fb33239a2a2d",
+            "quote": "our public dataset measuring how AI is used across the economy",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "seq": 181,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 181,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "6BMrZCs9TmMHcAj-kPON9OjgzabPK8-C",
+      "client_id": "proof-harness",
+      "attempt_token": "eHPg_OFV2t_gQpOj-Pl_Ak0Z4kLGBm_NrGQc8tXGTjE",
+      "submission_key": "6BMrZCs9TmMHcAj-kPON9OjgzabPK8-C-eHPg_OFV2t_gQpOj-Pl_Ak0Z4kLGBm_NrGQc8tXGTjE",
+      "schema_version": 1,
+      "video_id": "2081123013227945985",
+      "source_revision": "d8a98117afbd1bfd454f89b8c73a2e29bd198e4d5a941ad49fe2603f266edf30",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "6572a8b2b37292dea232c0c19c0605525828843cf1cbace878a92a02a7543820",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "32224b11dba6eeede054735658a740895f6c0be6aa370471984b20d47e56f3db",
+              "card_hash": "7acaa8300b494d600bb2cbfa92c91981f578ec2f27bf3d3b82671aea2a636638",
+              "quote": "Yo, what's that piece of shit hanging on the pole?"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 10669,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 23159,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 181,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "6BMrZCs9TmMHcAj-kPON9OjgzabPK8-C",
+        "video_id": "2081123013227945985",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "32224b11dba6eeede054735658a740895f6c0be6aa370471984b20d47e56f3db",
+              "card_hash": "7acaa8300b494d600bb2cbfa92c91981f578ec2f27bf3d3b82671aea2a636638",
+              "quote": "Yo, what's that piece of shit hanging on the pole?",
+              "start": 0.96,
+              "end": 28.8,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

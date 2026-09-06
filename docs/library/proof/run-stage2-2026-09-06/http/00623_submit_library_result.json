@@ -1,0 +1,95 @@
+{
+  "seq": 623,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 623,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "Cxzvr2LMBf-ARVKZOdKqSgXLINw_nMoN",
+      "client_id": "proof-harness",
+      "attempt_token": "uXE8zfOrvp7jNCs3zCtL-eZ_K3GeRZTPZoThL9JfI8I",
+      "submission_key": "Cxzvr2LMBf-ARVKZOdKqSgXLINw_nMoN-uXE8zfOrvp7jNCs3zCtL-eZ_K3GeRZTPZoThL9JfI8I",
+      "schema_version": 1,
+      "video_id": "2087948643621888000",
+      "source_revision": "e282418e1243f71aef2ba4fdeac60002103206df6ad593ed05ad23d03d00d0ac",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "ae4cffa90f2d126796e8fad83addf5082b24d1a7cd6e7c122e06e63b4d6a9790",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "f845f8f4895f81d9bb01b0f0ea2039f9d25d73ad62843d56c243ee1dee6de5e4",
+              "card_hash": "03eb64e296c83ac5c015509e1896aaaaf9566735b0d245a58e4534d6141d7286",
+              "quote": "Meet Gemini 3.7 Flash"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 14980,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20361,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 623,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "Cxzvr2LMBf-ARVKZOdKqSgXLINw_nMoN",
+        "video_id": "2087948643621888000",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.72,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "f845f8f4895f81d9bb01b0f0ea2039f9d25d73ad62843d56c243ee1dee6de5e4",
+              "card_hash": "03eb64e296c83ac5c015509e1896aaaaf9566735b0d245a58e4534d6141d7286",
+              "quote": "Meet Gemini 3.7 Flash",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "seq": 121,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 7,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "MnmuXfEKRjXv8Ldn6DD496K15CPhR0Q6",
+      "video_id": "2079628844705935360",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "47d3fe56a6f7244915f334e62bd924f2e589f9edd2acfabe1b0f46d55c23093a",
+            "card_hash": "09d965f57265c026cf7f4cd14d9b78e471a2c640c8ba9a201cbc13ee323aa421",
+            "quote": "So Bash Is Very Composable Right Like Static Scripts Low Context Usage",
+            "start": 1497.96,
+            "end": 1615.569,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "a1058809fa73e295eebad702857abc4eb6a3c51dadb503a4dd8dcf2a0b4743b1",
+            "card_hash": "09d965f57265c026cf7f4cd14d9b78e471a2c640c8ba9a201cbc13ee323aa421",
+            "quote": "We Like To Say That Models Are Grown And Not Designed",
+            "start": 3319.099,
+            "end": 3438.76,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

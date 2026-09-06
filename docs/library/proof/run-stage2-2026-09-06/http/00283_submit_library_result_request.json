@@ -1,0 +1,35 @@
+{
+  "seq": 283,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "YBBXO1of5Brfm2Zpca_y6mAKxiaHHXc3",
+    "client_id": "proof-harness",
+    "attempt_token": "XiXub7hQrFTxFVFKY0itSyDNwei5CsOhIVLyvY_Q7is",
+    "submission_key": "YBBXO1of5Brfm2Zpca_y6mAKxiaHHXc3-XiXub7hQrFTxFVFKY0itSyDNwei5CsOhIVLyvY_Q7is",
+    "schema_version": 1,
+    "video_id": "2081046304575164416",
+    "source_revision": "6ab66a4e728507ff25d5003a83736ff295168d4e34e68dd6b23e9a150590b5a1",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "c142a08480ba7d3c910cc3e0cac237af9da8c464cd392c2ad9ebf70076735b30",
+    "result": {
+      "outcome": "unsupported",
+      "reason": "Card is a video post with zero transcript content (chars=0, clip_count=0, clips=[]); only a truncated tweet caption/hook is present, and the card notes 'No captions available for this video,' which does not constitute eligible timed-clip or article-prose evidence."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 15316,
+      "cache_read_tokens": 184221,
+      "cache_create_tokens": 31818,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "seq": 149,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 149,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "4bWa6cb1myr_u1LN-U2Hh_-nGZivu3E5",
+      "client_id": "proof-harness",
+      "attempt_token": "S0iJomG1F5tmKStv9t9lpwHm47VsfPv1sr1QRI0TdpY",
+      "submission_key": "4bWa6cb1myr_u1LN-U2Hh_-nGZivu3E5-S0iJomG1F5tmKStv9t9lpwHm47VsfPv1sr1QRI0TdpY",
+      "schema_version": 1,
+      "video_id": "2080061661197570048",
+      "source_revision": "07217726327bf3305db41eb807e8295ef040f767d15cc7b37b31501fcbd626c4",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "e9a1d59ab361ac6d8a47c21d1cd30980a56103db49da602b6e27e331bf4cac47",
+      "result": {
+        "outcome": "unsupported",
+        "reason": "The card's hint discusses using AI to generate dialogue and video for acting performances, but the only eligible timed-clip excerpt is the in-scene fictional dialogue itself ('Joe, look at me...'), not any commentary on AI generation. Title/hint text cannot substitute for excerpt evidence, so grounded evidence is insufficient to classify."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 17170,
+        "cache_read_tokens": 188825,
+        "cache_create_tokens": 37085,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 149,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "4bWa6cb1myr_u1LN-U2Hh_-nGZivu3E5",
+        "video_id": "2080061661197570048",
+        "outcome": "unsupported",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

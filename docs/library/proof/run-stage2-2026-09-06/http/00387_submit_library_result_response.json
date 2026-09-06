@@ -1,0 +1,58 @@
+{
+  "seq": 387,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 6,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "U9WYccjkULEJX9TzzilxZUMYWlfzSOxD",
+      "video_id": "2083691176830390272",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "c0c04f3797004a04855d964f358727aee46fd788a9f26d62fa3bb96da15264d8",
+            "card_hash": "fb0acd8a23ed3123833c24b139095dacdae0633c5dc6d87f37dd8ea3f27bcc9e",
+            "quote": "Langchain Gives A Common Set Of Method For Invoking LLMs Which Is Really Convenient",
+            "start": 353.06,
+            "end": 472.67,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.66,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "2994838e71da003f7a4a54ee80fd5940d8a3c99b949a7d0bc6c3099d0a2bab46",
+            "card_hash": "fb0acd8a23ed3123833c24b139095dacdae0633c5dc6d87f37dd8ea3f27bcc9e",
+            "quote": "In the prior modules, we built a number Of different and interesting graphs that showcase The capabilities Of LandGraph",
+            "start": 4878.739,
+            "end": 4997.88,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

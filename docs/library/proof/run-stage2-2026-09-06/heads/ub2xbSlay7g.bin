@@ -1,0 +1,52 @@
+# Ultralytics Live Session 20: Ultralytics YOLO26 is here!
+
+**Channel:** Ultralytics (24.6K subscribers)
+**Uploaded:** 2026-01-21 | **Duration:** 01:00:07 | **Views:** 2,002 | **Likes:** 105
+**URL:** https://www.youtube.com/watch?v=ub2xbSlay7g
+**Uoinked:** 2026-07-09T19:19:43
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The opening establishes credibility by introducing Glenn Jocher as founder and CEO of Ultralytics alongside Jing Qiu, a senior ML engineer who co-authored YOLO versions, immediately positioning the speakers as experts in the field before discussing the new YOLO26 product launch.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Join us for Ultralytics Live Session 20, where we’ll dive into our latest product launch  - Ultralytics YOLO26. In this session, Ultralytics’ Founder and CEO Glenn Jocher and Senior Machine Learning Engineer Jing Qiu will take a deep dive into the newest advancements in computer vision intelligence. 
+
+Ultralytics YOLO26 represents the next generation of real-time object detection models, engineered from the ground up for easy integrations on edge and low-power devices. Featuring a streamlined architecture that removes unnecessary complexity while introducing targeted innovations, YOLO26 delivers faster, lighter, and more accessible model deployment. The result is a highly practical model family that achieves improved small-object accuracy, seamless deployment, and up to 43% faster CPU inference, making YOLO26 one of the most deployable YOLO models to date.
+
+Agenda for the ULS:
+✅ Introduction to Ultralytics YOLO26
+✅ Live Demo
+✅ Live Q&A
+
+🔗 Useful Links:
+💻 Try it on the Ultralytics Platform: https://platform.ultralytics.com/ultralytics/yolo26
+📚 Ultralytics YOLO26: https://docs.ultralytics.com/models/yolo26/ 
+📖 Ultralytics YOLO26 blog: https://www.ultralytics.com/blog/ultralytics-yolo26-the-new-standard-for-edge-first-vision-ai
+📄 Ultralytics License: https://ultralytics.com/license
+💬 Discord Community: https://discord.com/invite/ultralytics
+🏠 Ultralytics: https://www.ultralytics.com 
+
+Stay informed and inspired! Like, subscribe, and visit our site for more insights and updates.
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:02] Okay, let's see. Are we live now? >> Yeah. Yeah, we're live. >> Thumbs up. Okay, guys. All right, so welcome to the latest Ultralix live session and the first one of 2026. So, super excited to be here. We've got a lot of new things to talk about. I'm Glenn. I'm the founder at Ulty. I'm sitting here in our London office next to King's Cross and we're joined here with Jing Cube who is the lead R&D uh ML engineer on the YOLO effort. He's sitting in Changdu, China. So Jing, if you want to give a quick intro about yourself.
+[00:00:38] yourself. >> Yeah, thank you. Hi everyone, my name is Jin Ko. Currently I'm senior machine learning engineer in analytics and I'm also the co-author of YOLO UV 8 and 11 and 26. CR leading R&D uh direction of YOLO models. Yeah. Hi everyone. >> Okay. All right. Great. So uh today we've got uh some exciting news with YOLO 26 which is the latest Ultralytics YOLO model which we launched uh just last week. So I think it was 14 January. We uh we announced these at Yolo Vision. We have these two main events in London and Shenzhen and we did a brief intro bit of a demo and kind of previewed some of the features in the models and explained uh what was going to go into them. And so now we are finally here with the models and super excited for this live session. So what we're going to do is walk through uh what we've done uh for about the first 30 minutes and then we've got this long Q&A session scheduled for the second half uh of our YouTube live. So I'm sure everybody's got a lot of questions. So drop them in the YouTube channel and we will try and get to all of them at the end of the session here. Okay. So we've been working on YOLO models for several years now. Uh YOLO's got quite a rich history and Ultralix came in initially with our version five which we launched in 2020. And so I I did a lot of work on that and I had little experience at the time and so we had uh a lot of great effort go into it and a lot of great community feedback I think which was one of the main advantages of open sourcing a lot of the R&D that we've been doing here. So when I did that I'd never done any open source before. is scary and exciting at the same time. And one of the best things about the open source community is I think the level of connectedness that you get with the end users. When you work on a project and you put it on GitHub open source for everybody to use, people will come back and they'll tell you uh how it went, what they could do better, and like ideas that they have to improve the product. And so we always make sure that we're very attentive to the end user. um we want to make the best products and we're a small company and so the great thing about open source is that it's a huge community and with the level of adoption that we see with the YOLO models we rapidly mature the product so with thousands of users giving us feedback trying out the models in all sorts of domains with all sorts of applications that we'd never be able to test and debug ourselves we got super valuable feedback so I want to give a huge thanks to the community for all the help that we've gotten over the last few years. We wouldn't have been able to do it without you and I think it's one of the uh main strengths at Ultralytics here. So, we combine all the internal R&D with the great YOLO team that we have with all the great community uh contributions and feedback to roll out these new models every year. So, the last time we launched a new YOLO version was YOLO 11 and we did this at Yolo Vision at the end of 2024. So it's been a little over a year and there's been a lot of things that have happened in that year. So Ultralytics itself has been growing. Um we got about 50 people now and we've gone through two investment rounds now. So initially all the work we did was bootstrapped which means that there was no funding behind it. It was a kind of a small core team of enthusiastic people uh but there was no business there was no revenue and so it was really difficult to kind of like glue together uh cohesive and coherent uh business effort and technical team behind that and so we raised a seed round in 2024 to begin to put that together and due to the momentum and the success that we saw the investors came back and we've successfully raised a series A just a few months ago. So in all, we've raised about $30 million and this puts us in a great position now uh just like many of the other startups out there uh and the other big companies that we've competing against in in the AI space.
+[00:04:41] AI space. So every every time we launch a model, we always benchmark it. And of course, as almost everybody knows, the Coco data set BC here on the y- axis is the main metric that we use. It's um in the US what we call a yard stick, common yard stick that everybody can compare against. Uh so the KCO data set was initially launched in 2014 but it doesn't have to be new to be relevant. It's um sort of the steady benchmark that everybody in detection has been benchmarking against since the early days. So we have uh the very first models that we created YOLO v5 here on this curve and on the x-axis of the curve you see what's called latency. So this is the time from providing an image to the model to getting that first result back. Units are milliseconds per image. So, these are all pretty fast. You can see um through all these generations, models have typically been running inference on T4 GPUs, which are from the Tesla generation. Little old now. Um but again, easy to keep using the same GPU to compare to previous generations. So, all of these models perform real-time inference since they're less than 30 milliseconds per image. And of course, that's the real strength of small edge object detection models like YOLO is downloading them, running them

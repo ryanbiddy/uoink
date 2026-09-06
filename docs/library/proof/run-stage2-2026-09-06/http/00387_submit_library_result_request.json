@@ -1,0 +1,66 @@
+{
+  "seq": 387,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "U9WYccjkULEJX9TzzilxZUMYWlfzSOxD",
+    "client_id": "proof-harness",
+    "attempt_token": "BRfXNtA_nb9mpH4DQA7QFRfsKANXFJ-ohkauQdeqQ88",
+    "submission_key": "U9WYccjkULEJX9TzzilxZUMYWlfzSOxD-BRfXNtA_nb9mpH4DQA7QFRfsKANXFJ-ohkauQdeqQ88",
+    "schema_version": 1,
+    "video_id": "2083691176830390272",
+    "source_revision": "52071140bfa844db1c203930339e24adf6c2bc0c53ef524c2307c0e7bcc9754a",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "b467a7fdff872d60b5f4bb82ec3750abb3b7a67d421018f063f862fd6ac599f5",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "c0c04f3797004a04855d964f358727aee46fd788a9f26d62fa3bb96da15264d8",
+            "card_hash": "fb0acd8a23ed3123833c24b139095dacdae0633c5dc6d87f37dd8ea3f27bcc9e",
+            "quote": "Langchain Gives A Common Set Of Method For Invoking LLMs Which Is Really Convenient"
+          }
+        },
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.66,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "2994838e71da003f7a4a54ee80fd5940d8a3c99b949a7d0bc6c3099d0a2bab46",
+            "card_hash": "fb0acd8a23ed3123833c24b139095dacdae0633c5dc6d87f37dd8ea3f27bcc9e",
+            "quote": "In the prior modules, we built a number Of different and interesting graphs that showcase The capabilities Of LandGraph"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 12710,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 22115,
+      "wall_time_ms": 0
+    }
+  }
+}

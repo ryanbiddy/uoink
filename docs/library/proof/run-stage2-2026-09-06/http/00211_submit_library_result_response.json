@@ -1,0 +1,39 @@
+{
+  "seq": 211,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "DFxSWbudz6-wgKfmHvbL5Z-E4GDO-AvX",
+      "video_id": "2080377021914656768",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "13b70fc0c4c1bf38ffda56e7484db02e8fa0e9c002bee8f95aaa41a8a660e307",
+            "card_hash": "7cc632e3447a651cc5df3e0f25d54dcce7aede28068de718042bbf17b712a27d",
+            "quote": "Control your computer and direct multiple agents running  in ChatGPT Work or Codex, using just your voice.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 1069,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "49Fi34QqSNtpXveakVphBhSglAvsVb6p",
+      "video_id": "2094906490146742272",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "ea61578f87661e014f5654401b4cf99ac9851894fb9d7bfe0cfd3929ac4a2813",
+            "card_hash": "e35287e889da90eb1fbf354bff9d658c8179bbe0cf798563c8d62d7b9436e440",
+            "quote": "Truly insane work from @theworldlabs, this new model is a game-changer.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

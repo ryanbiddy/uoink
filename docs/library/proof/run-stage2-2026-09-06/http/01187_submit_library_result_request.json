@@ -1,0 +1,66 @@
+{
+  "seq": 1187,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "kvt0yk6gakOifI1ce44_DGURG0OtL-2C",
+    "client_id": "proof-harness",
+    "attempt_token": "MX6vk9hAtuBtiAQamdjcECP3U0tf2rzUq-JpgWZ4Imc",
+    "submission_key": "kvt0yk6gakOifI1ce44_DGURG0OtL-2C-MX6vk9hAtuBtiAQamdjcECP3U0tf2rzUq-JpgWZ4Imc",
+    "schema_version": 1,
+    "video_id": "_3GaXHNSP2I",
+    "source_revision": "be4bea12f2e39e2206d492a7e2fed47fa3fed8d294197b790de171b0f137979f",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "f3bdc1ff8a0bbe3cd32e60d85abf525daf1d522c16a9da20400c12c61ed61df7",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "722c3b8e01395ae0fe9f40237cf5c8f76b805e277de4343165671afce6b8ee29",
+            "card_hash": "155cc058605b7f100e3c5a1921c83bbea4f59cfabcb20b27a25c90b004071d74",
+            "quote": "such a thin wrapper in JavaScript. Just do as OpenAI does. Release it open source."
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "e1af7e26e08cd3907e2604ed1824faf04b43aac9ebe8c6919e046201a7f380b7",
+            "card_hash": "155cc058605b7f100e3c5a1921c83bbea4f59cfabcb20b27a25c90b004071d74",
+            "quote": "Gemma is a series of open-source models from Google DeepMind, advanced reasoning and agentic workflows"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 19366,
+      "cache_read_tokens": 197341,
+      "cache_create_tokens": 47794,
+      "wall_time_ms": 0
+    }
+  }
+}

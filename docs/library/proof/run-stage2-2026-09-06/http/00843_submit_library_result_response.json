@@ -1,0 +1,57 @@
+{
+  "seq": 843,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "_UuDvY0Tmva2u6jN4QWk9xKs8o0zf27p",
+      "video_id": "2091248592774369280",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4d35e5d13079006f48784ece173c41b746dd781db29bb78c2fb79e4614dbd744",
+            "card_hash": "6c3679eaecc335ac39508f3a076937a20261583056eb1a5819100f51c772fb67",
+            "quote": "Claude is increasingly able to download data, run regressions, even build economic models",
+            "start": 0.08,
+            "end": 81.979,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "76880377e70258f82f0f7aa3382123955bc9b3f01ca98743391bc60602098dd6",
+            "card_hash": "6c3679eaecc335ac39508f3a076937a20261583056eb1a5819100f51c772fb67",
+            "quote": "one in five firms in the US report using AI to some extent",
+            "start": 139.62,
+            "end": 256.672,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

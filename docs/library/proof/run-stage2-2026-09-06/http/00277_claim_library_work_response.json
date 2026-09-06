@@ -1,0 +1,876 @@
+{
+  "seq": 277,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 12,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "NlOKZMPucKOit76lCsmeactpQVnUhCQ3",
+          "video_id": "2083169868891684864",
+          "attempt_token": "n-5SDCj2RyzQtFO3JokCLPF33n-wnpqLXxrj9oMaIjo",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676596446,
+          "source_revision": "0b1b680c7b4529f391e7e2352a66ba5f221453de4fa9d3c9143b5e55f6124d1f",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "4f35a53e56652aa3daf8b159aaa7c6a5aba212621802c87a867c39c34ff0e07d",
+          "card": {
+            "card_hash": "9a184492288d448cf58730f25709def9eafea85228e7638aba29b015cda38520",
+            "channel": "BrainRul",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/brainrulax/status/2083169896641265692",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "c5697cdae033aac6a9465588ca321aa9303011be5f2e2207fa97e8361e8b5fbd",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> This guy bought a $400 Mac mini and walked into a coffee shop with $2,100 for installing an AI agent that never touches the internet.  I had to rewatch this because the pitch is almost too simple. He sh",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> This guy bought a $400 Mac mini and walked into a coffee shop with $2,100 for installing an AI agent that never touches the internet.  I had to rewatch this because the pitch is almost too simple. He shows up, plugs in the Mac mini, installs a local AI agent running entirely https://t.co/ExFcBbwZ8v No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "BrainRul_-_This_guy_bought_a_400_Mac_mini_and_walked_into_a_coffee_shop_with_2",
+            "source_revision": "0b1b680c7b4529f391e7e2352a66ba5f221453de4fa9d3c9143b5e55f6124d1f",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> This guy bought a $400 Mac mini and walked into a coffee shop with $2,100 for installing an AI agent that never touches the internet.  I had to rewatch this because the pitch is almost too simple. He shows up, plugs in the Mac mini, installs a local AI agent running entirely https://t.co/ExFcBbwZ8v No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app",
+            "title": "BrainRul - This guy bought a $400 Mac mini and walked into a coffee shop with $2...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/brainrulax/status/2083169896641265692",
+            "video_id": "2083169868891684864",
+            "yoinked_at": "2026-08-01T07:49:18"
+          }
+        },
+        {
+          "work_id": "P9rw_ZzTbb9Mx0oWlWKB-qh8VJvFedR2",
+          "video_id": "2082615569636065280",
+          "attempt_token": "5tdmr2g7LzelTjhF2iiKQ8OnjAjhXaCzE-fSYy-pNCo",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676596447,
+          "source_revision": "252889b0cab9358e448e36a405241bef4c74b7780c338a4ebc398f71657269db",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "8b950e0458ba8a46c3721089aea7dcb6311cf56f827622cf5d97cc2fcd4dce9b",
+          "card": {
+            "card_hash": "47d7639e4a9cf95ee831b5e254d0de0d243bac545f12b64e51c9d7b63e492763",
+            "channel": "OpenAI",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/OpenAI/status/2082616638625722669",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "ef191c92042ca6b4c0e0d25c110762592e2056b1099b0551f151442c32fb2b1d",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> ARC-AGI-3 tests how well models can learn unfamiliar 2D games without instructions.  The standard harness discarded GPT-5.6 Sol’s reasoning after each move and dropped earlier actions as the context fil",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> ARC-AGI-3 tests how well models can learn unfamiliar 2D games without instructions.  The standard harness discarded GPT-5.6 Sol’s reasoning after each move and dropped earlier actions as the context filled up. The model had to keep starting over. https://t.co/cLtHYMNqiO No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "OpenAI_-_ARC-AGI-3_tests_how_well_models_can_learn_unfamiliar_2D_games_without",
+            "source_revision": "252889b0cab9358e448e36a405241bef4c74b7780c338a4ebc398f71657269db",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> ARC-AGI-3 tests how well models can learn unfamiliar 2D games without instructions.  The standard harness discarded GPT-5.6 Sol’s reasoning after each move and dropped earlier actions as the context filled up. The model had to keep starting over. https://t.co/cLtHYMNqiO No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "OpenAI - ARC-AGI-3 tests how well models can learn unfamiliar 2D games without...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/OpenAI/status/2082616638625722669",
+            "video_id": "2082615569636065280",
+            "yoinked_at": "2026-07-30T07:39:15"
+          }
+        },
+        {
+          "work_id": "Tu5JEVi8HpszCIXlU84iRkEKnm0zoHL3",
+          "video_id": "2082793149890514944",
+          "attempt_token": "FDCk25H0f2aTP73aGl3miitD4ZIuQaMV-zu1imTTJ_M",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676596447,
+          "source_revision": "69f49f58e5428f1e747de02a157ea93bdffd36af7fea9c1eeffb7ff39808db2b",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "8df940c81d44cee1b4beb82d4c46eb1107f62adc3994fd5b973a979b5eec485f",
+          "card": {
+            "card_hash": "34f6bf8ac01e071a06b6bf461521ac028da1190a5dc1be10e96eb220fd32d053",
+            "channel": "luis.",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/disco_lu/status/2082838373715357787",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "0affc4e238a94a8030d8f4c4130fbfda2f7801377164f540fa1e62d8a1072fec",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> A new design pattern that's popping up: tab + dropdown  Navigational tabs mixed with complex dropdown behaviour, mimicking a mega menu! Our apps are getting so complex that we're bending traditional sim",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> A new design pattern that's popping up: tab + dropdown  Navigational tabs mixed with complex dropdown behaviour, mimicking a mega menu! Our apps are getting so complex that we're bending traditional simplicity rules  Alternatives may include:  DropTab PillDrop MegaTab PopTab https://t.co/wmZqaH7R91 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "luis_-_A_new_design_pattern_that_s_popping_up_tab_dropdown_Navigational",
+            "source_revision": "69f49f58e5428f1e747de02a157ea93bdffd36af7fea9c1eeffb7ff39808db2b",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> A new design pattern that's popping up: tab + dropdown  Navigational tabs mixed with complex dropdown behaviour, mimicking a mega menu! Our apps are getting so complex that we're bending traditional simplicity rules  Alternatives may include:  DropTab PillDrop MegaTab PopTab https://t.co/wmZqaH7R91 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app",
+            "title": "luis. - A new design pattern that's popping up: tab + dropdown  Navigational ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/disco_lu/status/2082838373715357787",
+            "video_id": "2082793149890514944",
+            "yoinked_at": "2026-07-31T07:44:41"
+          }
+        },
+        {
+          "work_id": "Yd1WmvqA-1cHKDYTsciuvd9FXg8vp6lp",
+          "video_id": "2082844194066870272",
+          "attempt_token": "TA-ghsi7gU99I9WRvgQxPxUrnTmoeyRtiZV8eoGnOYA",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676596448,
+          "source_revision": "dea831bbf1cc723c408ee5a36c1b36e85370f7e4d3eb8a0c17aa51c19a46f899",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "108898e52f9e1a6f3a85a36d21ac3fdf8fdda98add61201453b8c013de807ead",
+          "card": {
+            "card_hash": "f0821a3772001ffd836f12aeabdcba354a044ecc0f45f8473d652feb9f7215bb",
+            "channel": "Google AI",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/GoogleAI/status/2082844740446253125",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "6b50a2e5ce73312829509c33586326f0c0815248b5bed029980a4bb6c9afae9e",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> For decades, we’ve dreamed of robots that can seamlessly step into our world and lend a hand.  Today, we take a major stride toward making that dream a reality:  Introducing Gemini Robotics 2 from @Goog",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> For decades, we’ve dreamed of robots that can seamlessly step into our world and lend a hand.  Today, we take a major stride toward making that dream a reality:  Introducing Gemini Robotics 2 from @GoogleDeepMind, the intelligence layer powering the next generation of truly https://t.co/f4AsXTzQxB No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Google_AI_-_For_decades_we_ve_dreamed_of_robots_that_can_seamlessly_step_into_ou",
+            "source_revision": "dea831bbf1cc723c408ee5a36c1b36e85370f7e4d3eb8a0c17aa51c19a46f899",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> For decades, we’ve dreamed of robots that can seamlessly step into our world and lend a hand.  Today, we take a major stride toward making that dream a reality:  Introducing Gemini Robotics 2 from @GoogleDeepMind, the intelligence layer powering the next generation of truly https://t.co/f4AsXTzQxB No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)",
+            "title": "Google AI - For decades, we’ve dreamed of robots that can seamlessly step into ou...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/GoogleAI/status/2082844740446253125",
+            "video_id": "2082844194066870272",
+            "yoinked_at": "2026-07-31T07:43:56"
+          }
+        },
+        {
+          "work_id": "Ydpjv0IDDqN5WEWwl8cVEOQAWvykUjgy",
+          "video_id": "2082527680109621249",
+          "attempt_token": "drJ5110ecCYbq1dCkgU2v9sfINAS2TE-Ue2H88L1thk",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676596449,
+          "source_revision": "ea6766954df86e6f185d730defd91f3bc152f251360626f9c3ab3951eeba7408",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "e2a2830cf13cffc476e1b941986960fe4317a5cbc8db6c304af6c53e1bc1e460",
+          "card": {
+            "card_hash": "8f9e8ac7612eb0c5d7a8d330c123b46a2acf47c49368cdd0d33912f472265c2b",
+            "channel": "Matthew Berman",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/MatthewBerman/status/2082529177409069514",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "58b93590bb1ce23af031fb8cc0bf0ba2e73250fade3aafbba6dd4b7afb655dd6",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> My biggest fear for AI is concentration of power.   Open-source is a solution.  Watch this video to understand what's going on:  0:00 Intro 0:52 NVIDIA's letter 1:36 What is open-source? 3:53 How open-s",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> My biggest fear for AI is concentration of power.   Open-source is a solution.  Watch this video to understand what's going on:  0:00 Intro 0:52 NVIDIA's letter 1:36 What is open-source? 3:53 How open-source works 5:48 Kimi K3 6:38 Closed vs Open 8:39 Open-source in the U.S. https://t.co/w6zIlQN5ui No tags *No captions available for this video.*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Matthew_Berman_-_My_biggest_fear_for_AI_is_concentration_of_power_Open-source_is",
+            "source_revision": "ea6766954df86e6f185d730defd91f3bc152f251360626f9c3ab3951eeba7408",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> My biggest fear for AI is concentration of power.   Open-source is a solution.  Watch this video to understand what's going on:  0:00 Intro 0:52 NVIDIA's letter 1:36 What is open-source? 3:53 How open-source works 5:48 Kimi K3 6:38 Closed vs Open 8:39 Open-source in the U.S. https://t.co/w6zIlQN5ui No tags *No captions available for this video.*",
+            "title": "Matthew Berman - My biggest fear for AI is concentration of power.   Open-source is a ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/MatthewBerman/status/2082529177409069514",
+            "video_id": "2082527680109621249",
+            "yoinked_at": "2026-07-30T07:42:23"
+          }
+        },
+        {
+          "work_id": "ZaewlK-l5EGXZ-xqqSHGMuYrx-OYQBdR",
+          "video_id": "2082926453524398080",
+          "attempt_token": "ublrN5a26H9QPBH81UkuvATlwCWECuwjok83czWqtSI",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676596449,
+          "source_revision": "e47bb694de03aa32a8888124be6fb5ae94c0081a27af0dfd9643b8629f907452",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "a52e4474c6571605514eaecf4b866484e3bc3dffe3d17006238cf38af3dfca44",
+          "card": {
+            "card_hash": "1e4934824722125da6c9722073658fbad3292a46589253848149007523179353",
+            "channel": "greg",
+            "chars": 845,
+            "chars_all_clips": 845,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/greg16676935420/status/2084304462420869215#t=0",
+                "end": 87.01,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b2bf51724e97ae03b5bc46767f78d9d787086ad3511d8aeed03f6b5da4585865",
+                "start": 0.0,
+                "text": "oh my god i just got swallowed by a whale are you all right yeah i think so I can. Yeah, I'm using my phone right now okay good So...you still- You-You can still get out safely? No! I mean it I'm inside of him I think it's a male So Whale s",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/greg16676935420/status/2084304462420869215#t=0",
+                "end": 87.01,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b2bf51724e97ae03b5bc46767f78d9d787086ad3511d8aeed03f6b5da4585865",
+                "start": 0.0,
+                "text": "oh my god i just got swallowed by a whale are you all right yeah i think so I can. Yeah, I'm using my phone right now okay good So...you still- You-You can still get out safely? No! I mean it I'm inside of him I think it's a male So Whale s",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> This could be the first ever panic attack by an AI in human history  https://t.co/lVOBwVrphW No tags [00:00:00] oh my god i just got swallowed by a whale are [00:00:04] you all right yeah i think so [00:00:09] I can. Yeah, I'm using my phone right now okay good [00:00:13] So...you still- You-You can still get out safely? [00:00:18] No! I mean it I'm inside of him [00:00:20] I think it's a male [00:00:23] So Whale stomachs [00:00:25] Are very harsh and there is not much air [00:00:28] Maybe I could go out if its blow hole or something [00:00:31] Yeah [00:00",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "greg_-_This_could_be_the_first_ever_panic_attack_by_an_AI_in_human_history",
+            "source_revision": "e47bb694de03aa32a8888124be6fb5ae94c0081a27af0dfd9643b8629f907452",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> This could be the first ever panic attack by an AI in human history  https://t.co/lVOBwVrphW No tags [00:00:00] oh my god i just got swallowed by a whale are [00:00:04] you all right yeah i think so [00:00:09] I can. Yeah, I'm using my phone right now okay good [00:00:13] So...you still- You-You can still get out safely? [00:00:18] No! I mean it I'm inside of him [00:00:20] I think it's a male [00:00:23] So Whale stomachs [00:00:25] Are very harsh and there is not much air [00:00:28] Maybe I could go out if its blow hole or something [00:00:31] Yeah [00:00",
+            "title": "greg - This could be the first ever panic attack by an AI in human history",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/greg16676935420/status/2084304462420869215",
+            "video_id": "2082926453524398080",
+            "yoinked_at": "2026-08-04T07:49:40"
+          }
+        },
+        {
+          "work_id": "cdbx5LsZJXM_YQkjd8MZ6dgUiGkgo0LM",
+          "video_id": "2082975098760294548",
+          "attempt_token": "_L4qUCyT4UXZ5rxAAo7pP_hGGLnEkigkgboVNCTTXcY",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676596451,
+          "source_revision": "3c44e29b52c8e75463830473d8e49f3ebb3ade2b1a4615de99ac8acdba4c4637",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "dd4c1ed5862335a7d7981cc86d79b021bcbeabd91d75063aa936c929cbf4111b",
+          "card": {
+            "card_hash": "896f937d1f921362eaee0d2815909b80764de65ed89f8dcd097207cb316a4ee3",
+            "channel": "codila",
+            "chars": 52688,
+            "chars_all_clips": 52688,
+            "chars_chosen_clips": 1440,
+            "clip_count": 33,
+            "clips": [
+              {
+                "deep_link": "https://x.com/0xCodila/status/2082975098760294548#t=230",
+                "end": 350.339,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "023f91b390771fb7cc0f8c25cc09afb838a3c864e65dc7a816d5a9022260a53c",
+                "start": 230.659,
+                "text": "Based ADK Agents And The Infrastructure That Those Agents Live On So You Know Our First Question That I Think We Need To Answer Is Why Is This A Polyglot Stack Why Do Have A Stack Comprised Of So Many Different Types Of Frameworks And Langu",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2082975098760294548#t=947",
+                "end": 1066.67,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3df61b704f5d6c97a9037b859a09af7ef433b50036cd4e835b801306adaa6749",
+                "start": 947.759,
+                "text": "Everything Around The LLM Call We Needed Life Cycle Management Around The L LM And We Also Need Sessions To Live Across Requests We Need A Callback So That We Can Intercept Like Or Interpret Model Calls In Tool Call And We Want Things Like ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2082975098760294548#t=1784",
+                "end": 1902.64,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "090e3fd6e9737b64c45569fbd9cfe4928495149a4bce7f3e6257c3311b05a824",
+                "start": 1784.119,
+                "text": "Find It In ADK's Documentation At Adk.dev Is The New URL For documentation But You Can See That For GIS Spatial Engineering We Have Got This Skill Markdown File If We Look At That We Can See Let Kill That So For The Skill Mark Down File We ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2082975098760294548#t=1902",
+                "end": 2021.88,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "6b1b9a739f8caea1cc0992d332cae590ee4d0136f9b96c89d113914852efbbef",
+                "start": 1902.64,
+                "text": "Is Also How Did Agents Communicate Over The Gateway To Front End I Think That Is Another Important Piece This Is A Large File It Probably Too Big So Again I Will Be Looking For PRs If People Want Help Me Refactor My Code Base That Would Be ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2082975098760294548#t=2736",
+                "end": 2856.36,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "54d652742ebbbf917a84c6ff780ba2202076e3e8ab54cab40a1a67754a196e7a",
+                "start": 2736.75,
+                "text": "Of Them Is Code Execution Here Let Me Make Sure My Screen Is Big Enough So We Use A I Studio In This Case Because I Had Non Developers Who Were Trying To Figure What Would The Best Alg Rhy Be So That Was The Geo JSON File I Showed You Earli",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2082975098760294548#t=3690",
+                "end": 3808.739,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a11a037850482ce0c8e9b3a3b3c40e814dff32a2e860b7ff05b37baaedc2931a",
+                "start": 3690.76,
+                "text": "Cloud Run Because Then Your Sessions State Is Only Localized To A Single Instance And I Needed To Share It Across All Those Instances Because We Never Know Which One The Global Load Balancer Will Give The Next Message To But I Also Couldn't",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/0xCodila/status/2082975098760294548#t=230",
+                "end": 350.339,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "023f91b390771fb7cc0f8c25cc09afb838a3c864e65dc7a816d5a9022260a53c",
+                "start": 230.659,
+                "text": "Based ADK Agents And The Infrastructure That Those Agents Live On So You Know Our First Question That I Think We Need To Answer Is Why Is This A Polyglot Stack Why Do Have A Stack Comprised Of So Many Different Types Of Frameworks And Langu",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2082975098760294548#t=947",
+                "end": 1066.67,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3df61b704f5d6c97a9037b859a09af7ef433b50036cd4e835b801306adaa6749",
+                "start": 947.759,
+                "text": "Everything Around The LLM Call We Needed Life Cycle Management Around The L LM And We Also Need Sessions To Live Across Requests We Need A Callback So That We Can Intercept Like Or Interpret Model Calls In Tool Call And We Want Things Like ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2082975098760294548#t=1784",
+                "end": 1902.64,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "090e3fd6e9737b64c45569fbd9cfe4928495149a4bce7f3e6257c3311b05a824",
+                "start": 1784.119,
+                "text": "Find It In ADK's Documentation At Adk.dev Is The New URL For documentation But You Can See That For GIS Spatial Engineering We Have Got This Skill Markdown File If We Look At That We Can See Let Kill That So For The Skill Mark Down File We ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2082975098760294548#t=1902",
+                "end": 2021.88,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "6b1b9a739f8caea1cc0992d332cae590ee4d0136f9b96c89d113914852efbbef",
+                "start": 1902.64,
+                "text": "Is Also How Did Agents Communicate Over The Gateway To Front End I Think That Is Another Important Piece This Is A Large File It Probably Too Big So Again I Will Be Looking For PRs If People Want Help Me Refactor My Code Base That Would Be ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2082975098760294548#t=2736",
+                "end": 2856.36,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "54d652742ebbbf917a84c6ff780ba2202076e3e8ab54cab40a1a67754a196e7a",
+                "start": 2736.75,
+                "text": "Of Them Is Code Execution Here Let Me Make Sure My Screen Is Big Enough So We Use A I Studio In This Case Because I Had Non Developers Who Were Trying To Figure What Would The Best Alg Rhy Be So That Was The Geo JSON File I Showed You Earli",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodila/status/2082975098760294548#t=3690",
+                "end": 3808.739,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a11a037850482ce0c8e9b3a3b3c40e814dff32a2e860b7ff05b37baaedc2931a",
+                "start": 3690.76,
+                "text": "Cloud Run Because Then Your Sessions State Is Only Localized To A Single Instance And I Needed To Share It Across All Those Instances Because We Never Know Which One The Global Load Balancer Will Give The Next Message To But I Also Couldn't",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "codila_-_Google_just_released_free_1-hour_course_on_full_agentic_systems_1_ag",
+            "source_revision": "3c44e29b52c8e75463830473d8e49f3ebb3ade2b1a4615de99ac8acdba4c4637",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "codila - Google just released free 1-hour course on full agentic systems: 1 ag...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/0xCodila/status/2082975098760294548",
+            "video_id": "2082975098760294548",
+            "yoinked_at": "2026-07-31T07:47:25"
+          }
+        },
+        {
+          "work_id": "eQMXoGHfnodvjtk8D4Qax-YSAdpRj_uH",
+          "video_id": "2083262686318444544",
+          "attempt_token": "jXLsdBiez013unubDeWQtyoiDH3sXMkos3pv35n-XiU",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676596451,
+          "source_revision": "19f1f2e2d3ae00ef65ede4a22e538014dca73e1ca3d0a70341f224f7f09e1c20",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "7e5b8406dc993a73606be6eaef618ce9f884037d67e56b40c45a355e4704c780",
+          "card": {
+            "card_hash": "d983ef7f77a48a64372371cda8f29b8c95d2fa6757d64b47be646367c4985e09",
+            "channel": "Mahax",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/Mahaximus_/status/2083264047299092486",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "88bc2095a32ecaa382b6f14d7f15cb1cb9d44b64c7eef929ab6f9de707c9a8a2",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Google just dropped a 1-hour course on Graph Engineering: from agents to full automation  00:00 – Build your first AI agent  08:24 – Build agent memory  28:34 – Agentic loops  40:04 – How to build MCP  ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Google just dropped a 1-hour course on Graph Engineering: from agents to full automation  00:00 – Build your first AI agent  08:24 – Build agent memory  28:34 – Agentic loops  40:04 – How to build MCP  1:00:22 – Graph engineering   This 1-hour watch replaces any $500 course you https://t.co/XilcwB537R No tags *No captions available for this video.*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Mahax_-_Google_just_dropped_a_1-hour_course_on_Graph_Engineering_from_agents",
+            "source_revision": "19f1f2e2d3ae00ef65ede4a22e538014dca73e1ca3d0a70341f224f7f09e1c20",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Google just dropped a 1-hour course on Graph Engineering: from agents to full automation  00:00 – Build your first AI agent  08:24 – Build agent memory  28:34 – Agentic loops  40:04 – How to build MCP  1:00:22 – Graph engineering   This 1-hour watch replaces any $500 course you https://t.co/XilcwB537R No tags *No captions available for this video.*",
+            "title": "Mahax - Google just dropped a 1-hour course on Graph Engineering: from agents...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Mahaximus_/status/2083264047299092486",
+            "video_id": "2083262686318444544",
+            "yoinked_at": "2026-08-01T07:51:08"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

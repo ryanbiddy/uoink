@@ -1,0 +1,77 @@
+{
+  "seq": 941,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "TmmI9egR5E-njcgt-B4FvxWSUZLN9_rB",
+      "video_id": "2093296474498990080",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "29a1bf9cc6039c18093d1dd07309de9737589b2d30c7273630d8c8a6b0e92bd5",
+            "card_hash": "b8b7135620242a9c719ff6f6c1ab2b885541fb07f83a9ab3ee3f7c4cf90e1e12",
+            "quote": "we are going to have a whole lot of papers covered in this course",
+            "start": 3819.481,
+            "end": 3936.696,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "db2a9a9466984924b5c35bde9b0d32f09decd730bb38a43b00b7962a7ec3b438",
+            "card_hash": "b8b7135620242a9c719ff6f6c1ab2b885541fb07f83a9ab3ee3f7c4cf90e1e12",
+            "quote": "deep research can be accomplished end-to-end",
+            "start": 2572.233,
+            "end": 2691.25,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "9456aba55f4d6646865529dbf73fdec53837b3caf778768e81ebf1621adcca0b",
+            "card_hash": "b8b7135620242a9c719ff6f6c1ab2b885541fb07f83a9ab3ee3f7c4cf90e1e12",
+            "quote": "exponential growth in just the model size for large language models",
+            "start": 238.501,
+            "end": 358.136,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

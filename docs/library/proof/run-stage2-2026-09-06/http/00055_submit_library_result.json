@@ -1,0 +1,59 @@
+{
+  "seq": 55,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 55,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "BFTP_WD7uaqnEBbeJTxORnNhS_BWvwXB",
+      "client_id": "proof-harness",
+      "attempt_token": "oUR5EEQ3pPlPY0stTqNmMMWdJpId9LjpnF2Ty82-yl0",
+      "submission_key": "BFTP_WD7uaqnEBbeJTxORnNhS_BWvwXB-oUR5EEQ3pPlPY0stTqNmMMWdJpId9LjpnF2Ty82-yl0",
+      "schema_version": 1,
+      "video_id": "2078557763337154560",
+      "source_revision": "6abca6a84fc8a3e76633cb74751c4ba0bd9d615e49bda212127d45f22c1497c5",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "18faf93b8e03e3af3cac41d8a8f22700ee2e6b9590103b73d23a4364adcf55d7",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Transcript depicts a dog attacking a person while the owner reacts; this is not a named crime, riot, or armed-conflict incident and has no AI/ML or space/science content, so it does not meet any approved shelf's inclusion cues."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 9215,
+        "cache_read_tokens": 103823,
+        "cache_create_tokens": 111643,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 55,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "BFTP_WD7uaqnEBbeJTxORnNhS_BWvwXB",
+        "video_id": "2078557763337154560",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

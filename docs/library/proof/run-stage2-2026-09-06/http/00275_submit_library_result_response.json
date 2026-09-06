@@ -1,0 +1,39 @@
+{
+  "seq": 275,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "w0pGx8xfbrLC0fsZDuRK2gs5s_HZSTBl",
+      "video_id": "2082152403114348544",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "bbf94b7b6b09f0147cb99f7216e5b2a9f4278d41065c8d1b19b23f861b9c371a",
+            "card_hash": "4ad1e3aa8abee662ca69055426d0ac6af1d1507b8a3a2d4d6117a12174d83a76",
+            "quote": "Before, running a remote MCP server meant managing session state, which limited where you could run it.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

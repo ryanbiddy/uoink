@@ -1,0 +1,39 @@
+{
+  "seq": 239,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "QUmBrKodNkc-pFNoBAc6t_mdSMiY5Uly",
+      "video_id": "2081060018053369942",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "1365bac685fffb9b3a88cdb86e60c6231fd7259e1361f7ccc5ee4c4d426b7c72",
+            "card_hash": "e4c41a27c067cc49073673c8527ca6130a5fed87cd3959333cb131012ef93b46",
+            "quote": "Meet your AI employees. You prompt what you want to build, they do deep research, code design and ship",
+            "start": 0.11,
+            "end": 44.52,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 265,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "gWDFcTdsk0zmfwRiGU9lIG7J4mNxnIo9",
+      "video_id": "2082487466129522688",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "a6318112d3aff952dba4f23bd1e31084ba9f04d2bb176ded08f73805288d5fed",
+            "card_hash": "96fee268a77e7a698b6e21509f323aca0e86b59feae4f6c8716fdaf82cd0e936",
+            "quote": "Let's maximize outreach throughout all of LinkedIn. We need to brief a meeting to the entire team by this morning.",
+            "start": 6.7,
+            "end": 33.88,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

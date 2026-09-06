@@ -1,0 +1,39 @@
+{
+  "seq": 1219,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "b5-C7nM3YRw7lSBpdA5HH4-usa6WPya9",
+      "video_id": "pFlLqO3oUoc",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "fabc43002d610a8c5fc1aea3b4e62718454c8bd75bdbfef3a087df6d3702279c",
+            "card_hash": "029519909080c1c90526d3ccb6fd64f52eabb000bc5666f83bfda1c12f838293",
+            "quote": "I wanted Fable to help me plan this whole thing",
+            "start": 3.59,
+            "end": 161.0,
+            "timing": "coarse",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

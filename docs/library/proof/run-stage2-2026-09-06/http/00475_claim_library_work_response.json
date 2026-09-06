@@ -1,0 +1,756 @@
+{
+  "seq": 475,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 10,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "Wz-myljYPF2pPNASoPCXaC0XsLK_erlo",
+          "video_id": "2085875838202032128",
+          "attempt_token": "0SKqeyOF83Z9-Ei7pUppuNRC7Lcq-gm7xuZd-6PTM2c",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676988746,
+          "source_revision": "d1a389db75ff47f6df19967367287ed73c848d53b88111d5fcc6cd33875d3eab",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "2cf27a9c6487842e966afda1404b144c338ccc5b4b0cc855f7ed4efde188185e",
+          "card": {
+            "card_hash": "4c62ce6b4422bd4cd42cca609660eb623fff48316818690517a55b530703e6e9",
+            "channel": "Adam Fry",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/adamhfry/status/2085878037216940344",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "fe9a84bf9f12cff7627fb6fff24bb47300b13d8c705f5bfeb3e734149c2a3261",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> This week's ChatGPT feature drop - Aug 7:  1/ Rich formatting in our web composer – When you paste in emails or documents, our composer will retain the formatting; copying and pasting is so common, we s",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> This week's ChatGPT feature drop - Aug 7:  1/ Rich formatting in our web composer – When you paste in emails or documents, our composer will retain the formatting; copying and pasting is so common, we should have done this a while ago!  2/ Updated model for paid users – GPT 5.6 https://t.co/QsiZ5SXfDT No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Adam_Fry_-_This_week_s_ChatGPT_feature_drop_-_Aug_7_1_Rich_formatting_in_our",
+            "source_revision": "d1a389db75ff47f6df19967367287ed73c848d53b88111d5fcc6cd33875d3eab",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> This week's ChatGPT feature drop - Aug 7:  1/ Rich formatting in our web composer – When you paste in emails or documents, our composer will retain the formatting; copying and pasting is so common, we should have done this a while ago!  2/ Updated model for paid users – GPT 5.6 https://t.co/QsiZ5SXfDT No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+            "title": "Adam Fry - This week's ChatGPT feature drop - Aug 7:  1/ Rich formatting in our ...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/adamhfry/status/2085878037216940344",
+            "video_id": "2085875838202032128",
+            "yoinked_at": "2026-08-08T07:47:28"
+          }
+        },
+        {
+          "work_id": "Z_sPjvcMdoutaOeklUew_p6cqwchrOb7",
+          "video_id": "2085779305968123904",
+          "attempt_token": "sCD76wmrk8WXWqofI4f2W-NmngpmazzZ6UmZJFMlFps",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676988747,
+          "source_revision": "892c0b8ecdcc471e9d6c268d6fe791d961baea7d4189eb363878731efa72d776",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "a9b5e5dcc89dae3717d43964c4e6b76e77d173e996bd2caa0a48c9ee89b1fe80",
+          "card": {
+            "card_hash": "8e0df0a2cf4c8a9f6227bf4eda31e339c41c4fe4d0675cc6b331cf8452cf1462",
+            "channel": "Code With Antonio",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/codewithantonio/status/2085780150130561299",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "4082290c421832ff8e3d70089afae0f40fb9ae7068bbd1db0994af8eaac601b5",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> i am pretty sure i just created the best AI game generator in the world  - no 9 hour loop, this took ~10 minutes - custom harness (works w/ opus 5, kimi 3, any model) - custom game engine AI can build u",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> i am pretty sure i just created the best AI game generator in the world  - no 9 hour loop, this took ~10 minutes - custom harness (works w/ opus 5, kimi 3, any model) - custom game engine AI can build upon - completely web-based  will share more exampels https://t.co/TmHzM2H6vW No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Code_With_Antonio_-_i_am_pretty_sure_i_just_created_the_best_AI_game_generator_i",
+            "source_revision": "892c0b8ecdcc471e9d6c268d6fe791d961baea7d4189eb363878731efa72d776",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> i am pretty sure i just created the best AI game generator in the world  - no 9 hour loop, this took ~10 minutes - custom harness (works w/ opus 5, kimi 3, any model) - custom game engine AI can build upon - completely web-based  will share more exampels https://t.co/TmHzM2H6vW No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Code With Antonio - i am pretty sure i just created the best AI game generator in the wor...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/codewithantonio/status/2085780150130561299",
+            "video_id": "2085779305968123904",
+            "yoinked_at": "2026-08-08T07:47:45"
+          }
+        },
+        {
+          "work_id": "fuicCDrx4DTxaCZjpHrgNLV243z2mYFM",
+          "video_id": "2085855834697879810",
+          "attempt_token": "xWHxpmb9jqRJTj1rWRpTsJSx77yhwd1AUA3x9Vtf_1I",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676988748,
+          "source_revision": "5c5b313e9c99786ab7cd29c215f39f4a07f57208300a4b76aad002255dba8082",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "2ecde702489d21bb1b5327d409b934074fd93ae6b23c1495fa6dd969249704cd",
+          "card": {
+            "card_hash": "c59dc567e05ede7318abb64bea12df059de09a69d920fffb940ba7125f12e373",
+            "channel": "herdr",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/herdrdev/status/2085855834697879810",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "966fe985471c7b6c5cc34f53125bf625b0914aa10ae3082d16f60526393c7537",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> this is great! but don't leave claudes alone :(  in herdr any agent can talk to any agent.   no protocol, no MCP, no setup. it's just terminals. https://t.co/NFfiIGz1mo No tags *No captions available fo",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> this is great! but don't leave claudes alone :(  in herdr any agent can talk to any agent.   no protocol, no MCP, no setup. it's just terminals. https://t.co/NFfiIGz1mo No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "herdr_-_this_is_great_but_don_t_leave_claudes_alone_in_herdr_any_agent_c",
+            "source_revision": "5c5b313e9c99786ab7cd29c215f39f4a07f57208300a4b76aad002255dba8082",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> this is great! but don't leave claudes alone :(  in herdr any agent can talk to any agent.   no protocol, no MCP, no setup. it's just terminals. https://t.co/NFfiIGz1mo No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "herdr - this is great! but don't leave claudes alone :(  in herdr any agent c...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/herdrdev/status/2085855834697879810",
+            "video_id": "2085855834697879810",
+            "yoinked_at": "2026-08-08T07:47:57"
+          }
+        },
+        {
+          "work_id": "ja8L4R9QrXtBb1ajcd3UxQB0K1bQ8DZC",
+          "video_id": "2085717998187278336",
+          "attempt_token": "k4bEfLRNNisu1CmJ6YTMSzOykcKPxIBu0xrydxOaOvk",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676988748,
+          "source_revision": "b720bed8e3edb7fd167d89d2f8b697b51b4c866a3df1830209d6656f8d653bc8",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "4559c32f4a3808633801a0da3f267fe3ef603cd9f8eb71deba294740c48db7ad",
+          "card": {
+            "card_hash": "35ce7a5b7fb1bff54ba84ba1948e224cab4085a42bdcd21e89600bfdba4c93cd",
+            "channel": "Mario Nawfal",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/MarioNawfal/status/2085774870655455395",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "4f6b02a0c83abd598af4d9453de1b48d013ecde0a8a736579f14f5a2027d94d9",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> 🇸🇦🇵🇰🇹🇷 MBS,  Erdogan, and Pakistani PM Shehbaz Sharif just prayed together in Mecca.  The 3 leaders side by side for today's prayers right after sealing their new defense pact.  The alliance just got a ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> 🇸🇦🇵🇰🇹🇷 MBS,  Erdogan, and Pakistani PM Shehbaz Sharif just prayed together in Mecca.  The 3 leaders side by side for today's prayers right after sealing their new defense pact.  The alliance just got a very public blessing!  Writer: Claudio https://t.co/dQucMmr8tT No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Mario_Nawfal_-_MBS_Erdogan_and_Pakistani_PM_Shehbaz_Sharif_just_prayed_tog",
+            "source_revision": "b720bed8e3edb7fd167d89d2f8b697b51b4c866a3df1830209d6656f8d653bc8",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 🇸🇦🇵🇰🇹🇷 MBS,  Erdogan, and Pakistani PM Shehbaz Sharif just prayed together in Mecca.  The 3 leaders side by side for today's prayers right after sealing their new defense pact.  The alliance just got a very public blessing!  Writer: Claudio https://t.co/dQucMmr8tT No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Mario Nawfal - 🇸🇦🇵🇰🇹🇷 MBS,  Erdogan, and Pakistani PM Shehbaz Sharif just prayed tog...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/MarioNawfal/status/2085774870655455395",
+            "video_id": "2085717998187278336",
+            "yoinked_at": "2026-08-08T07:48:03"
+          }
+        },
+        {
+          "work_id": "kfTroW6hi5-f8O4pWeH-Z3Xi0uwTV2p2",
+          "video_id": "2085823910373683200",
+          "attempt_token": "1-KaM6RiXd7xPooZnoKSxKkmWlFdjWb70msdpkxicJ4",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676988749,
+          "source_revision": "8189c80b1a511e4784697a038018b362db72849f6ed7ee28fae0a7b302a0a406",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "9fbe001770c43a7a13ed267a7b14f90a35211b5d4f279d01a72a94b414f5be3c",
+          "card": {
+            "card_hash": "0f4681a9fbe66e0acbe05845ddd2a57a374ad3551a6359daee2586fc24014862",
+            "channel": "Movez",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Developer Marketing",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/0xMovez/status/2085825569602646514",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "29855ad0c2d9b16544709b774d1c1209e396079ba864de02359125c11aaafdc4",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Google Brain founder, Andrew Ng:  \"Prompting will be dead in 6 months, graphs are what's replacing it.\"  In 2 hours at Stanford he shows how to build agents that work and improve entirely on their own. ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Google Brain founder, Andrew Ng:  \"Prompting will be dead in 6 months, graphs are what's replacing it.\"  In 2 hours at Stanford he shows how to build agents that work and improve entirely on their own.  The first 10 minutes alone cover what most $500 courses never touch.  Watch https://t.co/YN38lQ3osZ No tags *No captions available for this video.*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Movez_-_Google_Brain_founder_Andrew_Ng_Prompting_will_be_dead_in_6_months",
+            "source_revision": "8189c80b1a511e4784697a038018b362db72849f6ed7ee28fae0a7b302a0a406",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Google Brain founder, Andrew Ng:  \"Prompting will be dead in 6 months, graphs are what's replacing it.\"  In 2 hours at Stanford he shows how to build agents that work and improve entirely on their own.  The first 10 minutes alone cover what most $500 courses never touch.  Watch https://t.co/YN38lQ3osZ No tags *No captions available for this video.*",
+            "title": "Movez - Google Brain founder, Andrew Ng:  \"Prompting will be dead in 6 months...",
+            "topic": "Developer Marketing",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/0xMovez/status/2085825569602646514",
+            "video_id": "2085823910373683200",
+            "yoinked_at": "2026-08-08T07:54:01"
+          }
+        },
+        {
+          "work_id": "l69EkqxHUnQNx2h4lL6OHf4HDIH5IVpp",
+          "video_id": "2085659012348198912",
+          "attempt_token": "o9L30Zde5PVVAo_qTXFvTrqrnB6B3xOO42jxu4ICVzs",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676988750,
+          "source_revision": "3606fdf6f6bbe3847ca3cf23e49025665e74331110ff5e0384e3b84c1d461971",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "9fbf2e5bdc113a6b46d14abf70a8135671d674083415404fcd3dbad8f735d156",
+          "card": {
+            "card_hash": "4c8ddf930f362c19dad19f9a246a4e3fc840dc93712528ad00b661541255a86f",
+            "channel": "CHEAF",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/cheaf25master/status/2085659052202418592",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "f923fa00ea14c847aebb283f068864b533f72be359f53b88c0d26899cd98ca15",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Current AI situation 😭 Is Anthropic losing aura? https://t.co/4m5yAjPU9O No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:c",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Current AI situation 😭 Is Anthropic losing aura? https://t.co/4m5yAjPU9O No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "CHEAF_-_Current_AI_situation_Is_Anthropic_losing_aura",
+            "source_revision": "3606fdf6f6bbe3847ca3cf23e49025665e74331110ff5e0384e3b84c1d461971",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Current AI situation 😭 Is Anthropic losing aura? https://t.co/4m5yAjPU9O No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "CHEAF - Current AI situation 😭 Is Anthropic losing aura?",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/cheaf25master/status/2085659052202418592",
+            "video_id": "2085659012348198912",
+            "yoinked_at": "2026-08-08T07:47:40"
+          }
+        },
+        {
+          "work_id": "qX_y5rIz06ANX5iXoBN2fvPcA0vH6NnT",
+          "video_id": "2086079297580916736",
+          "attempt_token": "h7YbFpSg4x0MY2fdy4wJmHWoqpL7oK0Pln6RenYWQVs",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676988750,
+          "source_revision": "9196b902dcbf259bb2c0ae784efddf48849d9f3f61704d6f83dd650b49ac8c7a",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "f781b5d007a52a215e4cb1caaa809791ca333236e0c3a407cc5c2e214eec46cc",
+          "card": {
+            "card_hash": "1e8c61b4996f68ec50821c5eb04031f304fee71b97d344e5649fa7819ab21ccf",
+            "channel": "Akshay 🚀",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/akshay_pachaar/status/2086079311279493389",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "459fd546830c1ac8e4856864d54d6f45d6d28f154d9735fb04efb9f58f45dd8b",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Stanford researchers did it again.  They just built the agent-native version of Git.  When an agent works on a longer task, the run builds up a lot of state.  This includes files edited/created, a dev s",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Stanford researchers did it again.  They just built the agent-native version of Git.  When an agent works on a longer task, the run builds up a lot of state.  This includes files edited/created, a dev server, a database, installed packages, KV cache, etc.  Say the agent is at https://t.co/4Yce8RaBnY No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Akshay_-_Stanford_researchers_did_it_again_They_just_built_the_agent-native",
+            "source_revision": "9196b902dcbf259bb2c0ae784efddf48849d9f3f61704d6f83dd650b49ac8c7a",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Stanford researchers did it again.  They just built the agent-native version of Git.  When an agent works on a longer task, the run builds up a lot of state.  This includes files edited/created, a dev server, a database, installed packages, KV cache, etc.  Say the agent is at https://t.co/4Yce8RaBnY No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+            "title": "Akshay 🚀 - Stanford researchers did it again.  They just built the agent-native ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/akshay_pachaar/status/2086079311279493389",
+            "video_id": "2086079297580916736",
+            "yoinked_at": "2026-08-09T07:42:25"
+          }
+        },
+        {
+          "work_id": "qqsC2_eoHB9qNiR8bvKvo9_loVWsRWny",
+          "video_id": "2085876111183912960",
+          "attempt_token": "9VaCtN_WdG_udj5bMB8cvpaFPgRaQIQnp43Jv2dwq-0",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676988751,
+          "source_revision": "d0d8b0a5db9fbf1454c704675580c9d1a70f70de4da08f0730398a96d3e349e2",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "414fd9bc78361b1ea594665e41b2ea14a46e93952be1feabc0cedaa3ac80a5e0",
+          "card": {
+            "card_hash": "e38a0b8dc82d26badd788773be109574ce1d696bb170ce3080fef42bdf68e114",
+            "channel": "Leon Lin",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/LexnLin/status/2085876281443336319",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "fa42cd51d125d6626a1de5d97b096c3d65f26c8bc9b4320647ff187ac858dd96",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Little animation for the OpenAI logo, made in Codex https://t.co/rUnMbyok9S No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoin",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Little animation for the OpenAI logo, made in Codex https://t.co/rUnMbyok9S No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Leon_Lin_-_Little_animation_for_the_OpenAI_logo_made_in_Codex",
+            "source_revision": "d0d8b0a5db9fbf1454c704675580c9d1a70f70de4da08f0730398a96d3e349e2",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Little animation for the OpenAI logo, made in Codex https://t.co/rUnMbyok9S No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Leon Lin - Little animation for the OpenAI logo, made in Codex",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/LexnLin/status/2085876281443336319",
+            "video_id": "2085876111183912960",
+            "yoinked_at": "2026-08-08T07:47:52"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

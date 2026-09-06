@@ -1,0 +1,58 @@
+{
+  "seq": 1079,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "AKed3WcvSKJ2rQIkoYGhkLFRdmFacsML",
+      "video_id": "G2GEUhe2ro8",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4e13013e7c35000a2a467ac69024f18cb48928f689c0ad46a51fca0123602172",
+            "card_hash": "06f5ecf4192c093762afddcd36c501687f4ce7b1dac398f37c98ee335607228a",
+            "quote": "Now let's understand both of them one by one",
+            "start": 1.99,
+            "end": 889.829,
+            "timing": "coarse",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "c554e14a9e9c367262efcd4cdc96f498393ea666f50e2aeec5b37ee8238930b1",
+            "card_hash": "06f5ecf4192c093762afddcd36c501687f4ce7b1dac398f37c98ee335607228a",
+            "quote": "This N is the smallest model and then the next one is S and then M, L and XL.",
+            "start": 954.0,
+            "end": 1099.669,
+            "timing": "coarse",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

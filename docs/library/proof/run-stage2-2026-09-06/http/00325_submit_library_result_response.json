@@ -1,0 +1,39 @@
+{
+  "seq": 325,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 21,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "FYb6CJYtGUeCKBa5kWgfz8UaWM-EM1Ar",
+      "video_id": "2082938911136030720",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "a214a5145b04f1a3408c078558dae225f7ce423a0ccdf955a5032ac246124a26",
+            "card_hash": "3a52edbb59a88f9469ef6618ece21e5211d695fa6c358d0654b25b57d77cf6ab",
+            "quote": "I Put Together Some Slides On Training For Tool Use",
+            "start": 1436.869,
+            "end": 1556.359,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

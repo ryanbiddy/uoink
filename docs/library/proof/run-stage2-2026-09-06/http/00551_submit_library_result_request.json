@@ -1,0 +1,51 @@
+{
+  "seq": 551,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "rVKVjg4gzy3p2unDoxt4FfUkQOIDocG0",
+    "client_id": "proof-harness",
+    "attempt_token": "ZsAQAryF0Q0U5QukpS5DiL0Ske-u-9GrwCQlcbKiuRA",
+    "submission_key": "rVKVjg4gzy3p2unDoxt4FfUkQOIDocG0-ZsAQAryF0Q0U5QukpS5DiL0Ske-u-9GrwCQlcbKiuRA",
+    "schema_version": 1,
+    "video_id": "2085065022733205504",
+    "source_revision": "12db6b7bcd6d09b8379ef4f76d5de1a259acd4278981051f30926c66a569808c",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "9ae61d9bc27b4cd7b717e251930a26840ec940e19b8806c48989cfee5e2a1836",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "2a856864ff4d3aea5624e9546fba7d98039eae03016ecdd04560c4bda5b8626d",
+            "card_hash": "4f06f4f96bfc4691e99548830f84a368daedea925908234f61340eb664aea04a",
+            "quote": "Context turns the internet Into an API purpose built for agents"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 30355,
+      "cache_read_tokens": 188747,
+      "cache_create_tokens": 40176,
+      "wall_time_ms": 0
+    }
+  }
+}

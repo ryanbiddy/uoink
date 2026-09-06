@@ -1,0 +1,51 @@
+{
+  "seq": 911,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "dyKxHmPx7DIp74YEK1ukDNuDkXnYunLT",
+    "client_id": "proof-harness",
+    "attempt_token": "yuXgGYIGN1ju_smmjfT6RrTu_Y6nhAHkV8Rky220wFs",
+    "submission_key": "dyKxHmPx7DIp74YEK1ukDNuDkXnYunLT-yuXgGYIGN1ju_smmjfT6RrTu_Y6nhAHkV8Rky220wFs",
+    "schema_version": 1,
+    "video_id": "2092625875468529664",
+    "source_revision": "14421074ebb7116eec5bc77e3beddc11f0dd45f2678895200587dc58125dbb0b",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "7813cf7275cb9924a7d632f5bc50c36d1b093a99bda0aace3972501f5e43707c",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "26624b19913378b0935e0c1b25aff52a51e1949de602f08c3294dc72b17250df",
+            "card_hash": "64f3e37c5abc850d7373d97bf235fa6bea2fb1b3aba59aaed4fe0626545bee4a",
+            "quote": "a SOTA open-weight model capable of predicting the perfect concentric border radius with 99.999% accuracy"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 16444,
+      "cache_read_tokens": 185177,
+      "cache_create_tokens": 33216,
+      "wall_time_ms": 0
+    }
+  }
+}

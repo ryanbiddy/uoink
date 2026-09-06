@@ -1,0 +1,95 @@
+{
+  "seq": 215,
+  "tool": "submit_library_result",
+  "wall_ms": 16,
+  "request": {
+    "seq": 215,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "FuqgDmUl5NzEhsQXnAexI35PaJe3-AJ3",
+      "client_id": "proof-harness",
+      "attempt_token": "6Vu8jQ3nVdPoRimPZeuF6Uaik1qQfgVoh0s_9zq-PtQ",
+      "submission_key": "FuqgDmUl5NzEhsQXnAexI35PaJe3-AJ3-6Vu8jQ3nVdPoRimPZeuF6Uaik1qQfgVoh0s_9zq-PtQ",
+      "schema_version": 1,
+      "video_id": "2080700057892815114",
+      "source_revision": "1a95f43d492188e9ad377e46e0c8c3612831fb069597cb9aa6e906262dcf51c9",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "5d5230ff53ee98fb40d7002d561ee3f25759848a8186a5b12c172b4a6c3ced3b",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.8,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "947856ec0e9a90fffa381eff0f6862342bcc9f69237dc6120aa332e63d5ddf11",
+              "card_hash": "625af089969fba31bb04149677bd15e9ffe529824f48a4a433435af085b1933d",
+              "quote": "We’ve spent the last week @every testing it across coding, writing, knowledge work, and our internal agent"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 16961,
+        "cache_read_tokens": 184704,
+        "cache_create_tokens": 32768,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 215,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 16,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "FuqgDmUl5NzEhsQXnAexI35PaJe3-AJ3",
+        "video_id": "2080700057892815114",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.8,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "947856ec0e9a90fffa381eff0f6862342bcc9f69237dc6120aa332e63d5ddf11",
+              "card_hash": "625af089969fba31bb04149677bd15e9ffe529824f48a4a433435af085b1933d",
+              "quote": "We’ve spent the last week @every testing it across coding, writing, knowledge work, and our internal agent",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

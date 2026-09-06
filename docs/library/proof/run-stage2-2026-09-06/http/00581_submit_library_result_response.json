@@ -1,0 +1,58 @@
+{
+  "seq": 581,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "ysvjNbKiUcYFc3I4dzXGgDYHhuhk8Nd7",
+      "video_id": "2086167440203923456",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "aadcb8a85d60faef991b7898b3863376fda0804d927594cfbe78622ff16c1521",
+            "card_hash": "7d9049170278f157198eb98a1fc5e231cc57f31961b9332c0b12c9e4ae382903",
+            "quote": "I'm going to talk to you about what's happening in AI.",
+            "start": 0.0,
+            "end": 119.349,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "6f64635e3bb85ffeea9ebaf4d770b119d89e2df2720556cc7715f4b21c5c5467",
+            "card_hash": "7d9049170278f157198eb98a1fc5e231cc57f31961b9332c0b12c9e4ae382903",
+            "quote": "This Is A Large Effort Now Co-author Of The Paper With More Than 1000 Authors Our Report",
+            "start": 3103.42,
+            "end": 3222.199,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

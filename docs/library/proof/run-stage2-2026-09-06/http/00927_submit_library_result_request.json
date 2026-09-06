@@ -1,0 +1,51 @@
+{
+  "seq": 927,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "55zpnwhGqggGV5zVuGhvkVauEm9Rc8Hi",
+    "client_id": "proof-harness",
+    "attempt_token": "vR1bqrlQbI-USHLYovKL2PrIjqy7SavfVE-_fH2xGMc",
+    "submission_key": "55zpnwhGqggGV5zVuGhvkVauEm9Rc8Hi-vR1bqrlQbI-USHLYovKL2PrIjqy7SavfVE-_fH2xGMc",
+    "schema_version": 1,
+    "video_id": "2093372696302153728",
+    "source_revision": "06b8b8d105360fae05088646034e8a50f313e64495e990ac16526e98c88b8cdf",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "74fe2c4767e10c4807d836288ed6f322de96008816c631ca96fc9efd5282ceb1",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.82,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "2ebc08b67e44630e948d9418a4a198bbd6d1ace2b67dba43574bec177ce8217b",
+            "card_hash": "d29c380309dd9107fd9fc9c224c18961d2c003fd7394e7de866476f90c8e35e4",
+            "quote": "Owner has raised $240M, reached a $2.3B valuation, and crossed $100M ARR."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 15696,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 22313,
+      "wall_time_ms": 0
+    }
+  }
+}

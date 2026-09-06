@@ -1,0 +1,39 @@
+{
+  "seq": 227,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "8w6CY_6iH2Fz-Uedv-OAuZ_NzIwqT1Qs",
+      "video_id": "2081224906050617344",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "bf3672cb750c90023512f3ec5c7d2b09a85f13241caaad73a94d22d2c6d0c610",
+            "card_hash": "51d4aae34a9798343f4f1953f609cca8d93495c470a3751949beed582a4eac84",
+            "quote": "Shared conversations are showing up in search results",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

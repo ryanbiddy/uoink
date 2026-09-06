@@ -1,0 +1,35 @@
+{
+  "seq": 1171,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "FVVs-1nlM19mIxBtH0YZE6km1kw6rb1Z",
+    "client_id": "proof-harness",
+    "attempt_token": "p0ylu9xL6OsXbs0T86h41ZCdcV8ygc9WOeQoHnshm6A",
+    "submission_key": "FVVs-1nlM19mIxBtH0YZE6km1kw6rb1Z-p0ylu9xL6OsXbs0T86h41ZCdcV8ygc9WOeQoHnshm6A",
+    "schema_version": 1,
+    "video_id": "Oi-1Ev1fI74",
+    "source_revision": "809c55ba7c740acdc6a92870492173dcd455b377ef01e85c8611305e257a2e59",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "f5552b1ffb42be605642f9a1aabce5e9acb5c79e2b1a0eade57664eeed4d1e92",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Excerpts are music-industry business advice (money management, release timing, regional artist rules) with no AI, space/science, or news/current-events content matching any approved shelf."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 16185,
+      "cache_read_tokens": 92574,
+      "cache_create_tokens": 78511,
+      "wall_time_ms": 0
+    }
+  }
+}

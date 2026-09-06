@@ -1,0 +1,229 @@
+# am.will - WOW! I thought Opus 5 would just be a cheaper Fable. I was dead wrong...
+
+**Channel:** am.will (— subscribers)
+**Uploaded:** 2026-07-24 | **Duration:** 05:10 | **Views:** — | **Likes:** 760
+**URL:** https://x.com/LLMJunky/status/2080740121398120655
+**Uoinked:** 2026-07-24T19:52:31
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The creator opens by explicitly contradicting their own initial expectation: 'I thought Opus 5 would just be a cheaper Fable. I was dead wrong.' This challenges the assumption (held even by the creator) that a lower-cost model would necessarily be inferior, creating intrigue through subverted expectations.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+WOW! I thought Opus 5 would just be a cheaper Fable. I was dead wrong.  This model is absolutely BONKERS. I'm genuinely blown away.  Opus 5 built the best Rocket League clone i've ever seen, and it did it while consuming only 27% of my 5x Max sub.  Sound on. There's layers to https://t.co/5ZzqpluF9K
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:01] So first things first, I would like to apologize to Anthropik because
+[00:00:05] I was completely wrong about this model.
+[00:00:08] I really thought it wouldn't be that big of a deal
+[00:00:10] and had no idea that it was gonna cook THIS hard
+[00:00:13] I am just absolutely mind-blown right now
+[00:00:15] This is the only test i've done so keep that in mind
+[00:00:18] But this is by far easily
+[00:00:22] The best Rocket League demo whatever you want
+[00:00:25] To call it that I have ever seen
+[00:00:26] And they built it in one hour and half
+[00:00:29] So definitely not a fast model
+[00:00:31] But if what you see right now is pretty much
+[00:00:34] how it came out of the box
+[00:00:35] And, The first thing I noticed was the car
+[00:00:38] so most of these models build ugly clunky looking
+[00:00:42] Boxed cars. They're basically just
+[00:00:44] A bunch of rectangles slapped together
+[00:00:47] This one was actually built like a proper little RC Car
+[00:00:52] If you look at them, You can even see reflections in their windshield
+[00:00:56] Look at that power slide
+[00:00:58] It's Like perfect.
+[00:00:59] The physics are amazing
+[00:01:01] It actually built the walls
+[00:01:03] With rounded edges and there
+[00:01:05] Are no real sharp corners
+[00:01:07] You can drive on the ceiling
+[00:01:09] I could
+[00:01:10] Do all of their normal Rocket League flying mechanics
+[00:01:13] As you see
+[00:01:15] I have one infinite boost added in here
+[00:01:17] And i do have a playable demo for you
+[00:01:18] Actually this time, I wanted to be able
+[00:01:20] To get your hands on it
+[00:01:22] We can turn on the practice bot
+[00:01:24] Here as well But yeah
+[00:01:27] I mean this is a little bit ridiculous
+[00:01:29] I've never seen
+[00:01:31] A model come anywhere close to
+[00:01:33] This level of quality
+[00:01:34] The physics are perfect
+[00:01:36] It really almost feels like
+[00:01:39] A Rocket League game I need to connect the controller
+[00:01:42] Because that's what it was meant for
+[00:01:45] Controller, its kinda hard
+[00:01:47] To control with mouse and keyboard
+[00:01:48] Even the bot is smart
+[00:01:50] It plays defense
+[00:01:52] So yeah
+[00:01:55] I'm just completely blown away
+[00:01:56] I had no idea it was going to be this good
+[00:01:58] Like i even got demolitions on
+[00:02:00] Which, I did prompt that in
+[00:02:01] That was a follow up prompt
+[00:02:03] What you see right now is pretty much what
+[00:02:06] You've gotten out of the box The fixes that I did make
+[00:02:10] Full disclosure Steering was reversed
+[00:02:13] Left and Right I added power slide because
+[00:02:17] It wasn't working at first time
+[00:02:19] And thats pretty much it
+[00:02:22] One thing I noticed about this model
+[00:02:24] That actually really blew me away
+[00:02:26] Was as it was working
+[00:02:28] It had a playable demo pretty early on
+[00:02:30] There were problems with the ball
+[00:02:32] Had like a funky glow
+[00:02:34] You see how when he hits
+[00:02:35] So its doing that all of time
+[00:02:38] Whenever i would do flip
+[00:02:39] It'd flip 6 times instead once
+[00:02:42] And just little small things
+[00:02:44] Like that and then I started to make list
+[00:02:45] Of what i wanted fix
+[00:02:48] And didn't want distract
+[00:02:50] The model because now when you send in
+[00:02:52] Claude desktop it actually does steer
+[00:02:54] At mid turn and i just wanted to let
+[00:02:55] It work, see what its fixed
+[00:02:58] On his own And more than half of the fixes
+[00:03:01] That I had come up with
+[00:03:03] In my followup prompt were already solved
+[00:03:05] By he time that
+[00:03:07] Model finished What's interesting about this is
+[00:03:11] These are not things language models would normally pick
+[00:03:14] For example
+[00:03:15] The glow on ball
+[00:03:16] There no reason why
+[00:03:18] It should see the ball glowing
+[00:03:20] And think that doesn't look right
+[00:03:21] At least in my opinion, normally a model
+[00:03:24] Wouldn' notice something like this
+[00:03:25] It would just send it
+[00:03:27] Because its more of visual aesthetic thing
+[00:03:30] That human will pick up
+[00:03:32] Immediately picked on
+[00:03:34] There were some The car had missing bumper
+[00:03:37] Wasn't rendering properly
+[00:03:39] Caught It caught flips
+[00:03:43] As well It knew that it wasn't supposed to flip
+[00:03:46] More than once And actually went
+[00:03:49] This is the first time models have ever done this too
+[00:03:52] Actually when and looked up
+[00:03:53] The physics from psionics
+[00:03:55] Looked at how
+[00:03:58] Doing a flips can speed your car
+[00:04:00] Up, you need add on its own
+[00:04:02] I didn' tell them So yeah i mean
+[00:04:05] You could see it does speed
+[00:04:06] See That's nuts
+[00:04:12] Personally This is easily the best game
+[00:04:15] I think that An AI model has done in one shot
+[00:04:19] That i personally ever seen
+[00:04:20] I am just absolutely blown away
+[00:04:22] Shout out to Anthropic
+[00:04:24] This is the Best Model In The World
+[00:04:26] You know love GPT soul
+[00:04:28] For sure but this crazy
+[00:04:30] At least for gaming anyway
+[00:04:31] Im gonna do more testing But early im extremely bullish on
+[00:04:34] Super happy to use it
+[00:04:36] Also by they way we only used
+[00:04:39] Let me see how much usage
+[00:04:42] We did
+[00:04:44] Only 24% to build this whole game
+[00:04:48] On a 5x max
+[00:04:50] So yeah very impressed
+[00:04:52] Great job hope you enjoy it
+[00:04:54] Links in the comments let me know what
+[00:04:56] You think practice with A couple things you can turn on infinite boost
+[00:04:59] With B, Turned on Practice mode
+[00:05:01] And play around
+[00:05:02] It is on free vs.
+[00:05:04] Hell account so i don't Know how well its gonna run but
+[00:05:06] Letme know Enjoy Thanks for watching catch ya later
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:30]
+
+![Screenshot at 00:00:30](screenshots/shot_0002.jpg)
+
+### [00:01:00]
+
+![Screenshot at 00:01:00](screenshots/shot_0003.jpg)
+
+### [00:01:30]
+
+![Screenshot at 00:01:30](screenshots/shot_0004.jpg)
+
+### [00:02:00]
+
+![Screenshot at 00:02:00](screenshots/shot_0005.jpg)
+
+### [00:02:30]
+
+![Screenshot at 00:02:30](screenshots/shot_0006.jpg)
+
+### [00:03:00]
+
+![Screenshot at 00:03:00](screenshots/shot_0007.jpg)
+
+### [00:03:30]
+
+![Screenshot at 00:03:30](screenshots/shot_0008.jpg)
+
+### [00:04:00]
+
+![Screenshot at 00:04:00](screenshots/shot_0009.jpg)
+
+### [00:04:30]
+
+![Screenshot at 00:04:30](screenshots/shot_0010.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About am.will:**
+*No channel description available.*
+
+**Recent videos from this channel:**
+- *No recent videos found.*
+
+--

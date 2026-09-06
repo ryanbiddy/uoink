@@ -1,0 +1,39 @@
+{
+  "seq": 669,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "EG_NvBNEXkQktylCGDUSAGXXWIqnTaOL",
+      "video_id": "2089059158611935232",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "1099ccfc3490381148333d5953498674e87daa711ace9b8ffe82dea8b72dcba8",
+            "card_hash": "9d1b43c9276dac9e9e4ef5662798648ddab901db430ccdd6772d69cfd9663f91",
+            "quote": "Andrew Ng explains it in the very first lecture of Stanford's CS229",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

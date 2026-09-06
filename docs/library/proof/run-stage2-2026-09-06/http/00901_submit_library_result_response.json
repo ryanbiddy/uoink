@@ -1,0 +1,38 @@
+{
+  "seq": 901,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "V3INk3Dn88FWn9iEqvMNr4rThiMlQSy3",
+      "video_id": "2092272769685934080",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "0fe44ff1db985bbd4c750ff882150ea47833eb147ed0205bf98db0b9d98d0a4a",
+            "card_hash": "9c642dadb721d3f9456085d52ccfbc523fc51bd572666fcc43839eb8e57cbd49",
+            "quote": "These machines are built for local AI",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

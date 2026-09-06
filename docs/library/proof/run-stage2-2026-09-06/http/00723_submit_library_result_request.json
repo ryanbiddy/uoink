@@ -1,0 +1,51 @@
+{
+  "seq": 723,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "g0JDJX1C8pd_cXXVMWKj_a6UIRRc7YwA",
+    "client_id": "proof-harness",
+    "attempt_token": "wM5W2h-Yv0zD5HJDksosnIHlbJ7VCUjUyPyXu5L2bZc",
+    "submission_key": "g0JDJX1C8pd_cXXVMWKj_a6UIRRc7YwA-wM5W2h-Yv0zD5HJDksosnIHlbJ7VCUjUyPyXu5L2bZc",
+    "schema_version": 1,
+    "video_id": "2090106310385688577",
+    "source_revision": "81a352ad9b255deddc2785f695d75f0c17ca8099073627f943c7f8765c268eb9",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "1f1e8b2301454bcaec57a5183d5906c2c5a513205c31a3c58d319bd0b05d61f9",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "584f65cf2b2453223501b9f5c0c3f0d1da46e4ea7c9d7ac7d4597f948d94185c",
+            "card_hash": "01926dd30685a9ebbc4b27ea393f991f33bf030ad096a0662b4c87b245625c26",
+            "quote": "Introducing terminal-code: VS Code inside the terminal"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 9982,
+      "cache_read_tokens": 92574,
+      "cache_create_tokens": 44094,
+      "wall_time_ms": 0
+    }
+  }
+}

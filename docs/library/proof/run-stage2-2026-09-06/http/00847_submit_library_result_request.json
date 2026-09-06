@@ -1,0 +1,66 @@
+{
+  "seq": 847,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "bO8u6Ov7R4O8fI8bKgn8UQUnWb9c6wUr",
+    "client_id": "proof-harness",
+    "attempt_token": "o9t9spIvz9AAIrcHjhyBghy5mqwG7lHe36lzLtx-RNw",
+    "submission_key": "bO8u6Ov7R4O8fI8bKgn8UQUnWb9c6wUr-o9t9spIvz9AAIrcHjhyBghy5mqwG7lHe36lzLtx-RNw",
+    "schema_version": 1,
+    "video_id": "2090953710696329216",
+    "source_revision": "2f05c77ccdbb5c062ba4f98498553bf69f612ae2873a1b9be0f2846df97b0a53",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "aea96b8606a00275535a55dfbe6ab649cec776f66b5fc8fbd85b7f0891502297",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "570d35be0edbcd17a23716aca9037599d1442c12d2e63746d75ba0356dd4e859",
+            "card_hash": "17023b63651467ce9bdc1d22a5f1c8d7619a8254fb2b6f972e16074252084fc1",
+            "quote": "go get that information off of Twitter for each of my followers"
+          }
+        },
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "607d05a7983cc11c63cc26593f700d647a3a54926775c27be46836a9db9d281d",
+            "card_hash": "17023b63651467ce9bdc1d22a5f1c8d7619a8254fb2b6f972e16074252084fc1",
+            "quote": "this is the really nice part about the integration with Cursor"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 17649,
+      "cache_read_tokens": 188508,
+      "cache_create_tokens": 37595,
+      "wall_time_ms": 0
+    }
+  }
+}

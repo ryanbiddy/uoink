@@ -1,0 +1,880 @@
+{
+  "seq": 3,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 37,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "PVtNMNazRppIdaOuhwq2fi5sXvfuZ-f7",
+          "video_id": "2046008958511702016",
+          "attempt_token": "Ued7iueW3M1d-bzOtcRyqmmThBPbbYBrQPJxu-NMQEE",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079143,
+          "source_revision": "7d51822f6b713f06a26589c6654ca31370a09b5ce4f21148d46bbd25f22c3992",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "601f277e30e42902555347a7c02f84e9769328c6d7e5532aacb307aa4868c5ed",
+          "card": {
+            "card_hash": "c2a677ee038189bf32df884ca384ba20fee28bfafa9c9b038169a6b52085e7f2",
+            "channel": "Reid Wiseman",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/astro_reid/status/2046009031613907029",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "bcf4693dfddcc0cf3112e9eec55b35417bcf2328d53fb359c47843a98fa8fb7a",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Only one chance in this lifetime…  Like watching sunset at the beach from the most foreign seat in the cosmos, I couldn’t resist a cell phone video of Earthset. You can hear the shutter on the Nikon as ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Only one chance in this lifetime…  Like watching sunset at the beach from the most foreign seat in the cosmos, I couldn’t resist a cell phone video of Earthset. You can hear the shutter on the Nikon as @Astro_Christina is hammering away on 3-shot brackets and capturing those https://t.co/8aWnaFJ69c No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app",
+              "truncated": true
+            },
+            "platform": "youtube",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Reid_Wiseman_-_Only_one_chance_in_this_lifetime_Like_watching_sunset_at_the_beac",
+            "source_revision": "7d51822f6b713f06a26589c6654ca31370a09b5ce4f21148d46bbd25f22c3992",
+            "source_type": "video",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Only one chance in this lifetime…  Like watching sunset at the beach from the most foreign seat in the cosmos, I couldn’t resist a cell phone video of Earthset. You can hear the shutter on the Nikon as @Astro_Christina is hammering away on 3-shot brackets and capturing those https://t.co/8aWnaFJ69c No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app",
+            "title": "Reid Wiseman - Only one chance in this lifetime…  Like watching sunset at the beach ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/astro_reid/status/2046009031613907029",
+            "video_id": "2046008958511702016",
+            "yoinked_at": "2026-07-07T16:04:09"
+          }
+        },
+        {
+          "work_id": "S-MKcUnC7fZZX8LLdMcGEElAdqAqmeME",
+          "video_id": "2078516830549733376",
+          "attempt_token": "joTOfV-l08Wi1P-axkJWv3lT42mwZVETaRFl8QdfrRw",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079144,
+          "source_revision": "deabde9ea5b5872eb8a455ad5a3a5385cc1edbd21ab1a94b804a1168333d3638",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "b443bb246f9a084ac32a20c02428c59619444764c6b44ff5f739f04c042a1835",
+          "card": {
+            "card_hash": "c0d2504340104794c8d14d5e980e362dfc0aed781b7b2ca4fad264c2973f61e8",
+            "channel": "定",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/de3dsoul/status/2078570503850082646",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "9237c753f0fa40b5ff10cab83dec7fa55f4b22c4c990c3aab710b88ad3f0f97e",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> zelda https://t.co/imjpN81TOx No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description ava",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> zelda https://t.co/imjpN81TOx No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "-_zelda",
+            "source_revision": "deabde9ea5b5872eb8a455ad5a3a5385cc1edbd21ab1a94b804a1168333d3638",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> zelda https://t.co/imjpN81TOx No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "定 - zelda",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/de3dsoul/status/2078570503850082646",
+            "video_id": "2078516830549733376",
+            "yoinked_at": "2026-07-18T21:58:02"
+          }
+        },
+        {
+          "work_id": "UY6neuzM84hLUYPQTUWxXBZDMp381sS1",
+          "video_id": "1840739354819350528",
+          "attempt_token": "S1PJNpP6T-lzkWaqsWU8Cz-PrP3usDZbvnlNpLfmyRo",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079145,
+          "source_revision": "029c55f627f294f4fa972395552241657946c7b3a77c045f39c0c99f1bdeae31",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "814e6587e5d6f44db1acfa44d4d989f7266d8f35927387ac4e0cfd406546220e",
+          "card": {
+            "card_hash": "cff9e00666d0508b0d4212bcd3215d3dbe38853cc8307791e73f055ff7010ea7",
+            "channel": "sid",
+            "chars": 306,
+            "chars_all_clips": 306,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/immasiddx/status/2088316146735030612#t=0",
+                "end": 49.56,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "320c81087012d4bb489974c5ce2685da56c32d8e04b7eb01be370ce5315d151c",
+                "start": 0.0,
+                "text": "Hey chat GPT, Change your accent to Indian and sound as indian as possible. Also tell me a few lines that scammers from India use To scam people abroad like in the Microsoft support Scam Act Like Alex From microsoft but he is indian Perfect",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/immasiddx/status/2088316146735030612#t=0",
+                "end": 49.56,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "320c81087012d4bb489974c5ce2685da56c32d8e04b7eb01be370ce5315d151c",
+                "start": 0.0,
+                "text": "Hey chat GPT, Change your accent to Indian and sound as indian as possible. Also tell me a few lines that scammers from India use To scam people abroad like in the Microsoft support Scam Act Like Alex From microsoft but he is indian Perfect",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> This is still my favourite ChatGPT video of all time. 😭  I asked ChatGPT to act like an Indian scammer and the response was HILARIOUS. https://t.co/hKbJElRGri No tags [00:00:00] Hey chat GPT, Change your accent to Indian and sound as [00:00:03] indian as possible. Also [00:00:05] tell me a few lines that scammers from India use [00:00:07] To scam people abroad like in the Microsoft support [00:00:10] Scam Act Like Alex From microsoft but he is indian [00:00:43] Perfect, thank you so much. [00:00:47] You can switch back to your normal accent now <!-- yoink:",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "sid_-_This_is_still_my_favourite_ChatGPT_video_of_all_time_I_asked_Chat",
+            "source_revision": "029c55f627f294f4fa972395552241657946c7b3a77c045f39c0c99f1bdeae31",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> This is still my favourite ChatGPT video of all time. 😭  I asked ChatGPT to act like an Indian scammer and the response was HILARIOUS. https://t.co/hKbJElRGri No tags [00:00:00] Hey chat GPT, Change your accent to Indian and sound as [00:00:03] indian as possible. Also [00:00:05] tell me a few lines that scammers from India use [00:00:07] To scam people abroad like in the Microsoft support [00:00:10] Scam Act Like Alex From microsoft but he is indian [00:00:43] Perfect, thank you so much. [00:00:47] You can switch back to your normal accent now <!-- yoink:",
+            "title": "sid - This is still my favourite ChatGPT video of all time. 😭  I asked Chat...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/immasiddx/status/2088316146735030612",
+            "video_id": "1840739354819350528",
+            "yoinked_at": "2026-08-15T07:32:53"
+          }
+        },
+        {
+          "work_id": "VOFJKYzVyExg3XGCJSm8S6AxJv-iNOEp",
+          "video_id": "2077931160538329088",
+          "attempt_token": "n5Mhg6cd60uz1a_ofqzFMjir-3-Y3xJUuex3NZWb70k",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079146,
+          "source_revision": "f7067fdb48d9a758096d93caa39f901901e7ff4ddf5fa883951382f760c5f08c",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "9d4b143374a281dc31a77862539983ba0bf5b831915636a43b5beeb4ea19ae40",
+          "card": {
+            "card_hash": "d4f2fe1766c43bcce032c0ff1bfe261868f9635fed116bd3c67e2ba8f820f4eb",
+            "channel": "Elon Musk",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/elonmusk/status/2078521506007560474",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "666fe6499a7a44a7ca4cc886e968ea8e9c7a90c6fdb3e698d2c93971ee434763",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Robot fights are fun 😂 https://t.co/br6jtV0u0p No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channe",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Robot fights are fun 😂 https://t.co/br6jtV0u0p No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Elon_Musk_-_Robot_fights_are_fun",
+            "source_revision": "f7067fdb48d9a758096d93caa39f901901e7ff4ddf5fa883951382f760c5f08c",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Robot fights are fun 😂 https://t.co/br6jtV0u0p No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Elon Musk - Robot fights are fun 😂",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/elonmusk/status/2078521506007560474",
+            "video_id": "2077931160538329088",
+            "yoinked_at": "2026-07-18T21:56:56"
+          }
+        },
+        {
+          "work_id": "ZcofXAw5HC5InbFWoJizElWaQ11Qx1rR",
+          "video_id": "2077640475075358720",
+          "attempt_token": "VgBhD3Tu_-947nHu7CJ64TbRk_T_4K-vQXi40CMUhm4",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079146,
+          "source_revision": "5946f41f4779074e53c690ec445f31c34fed9b046876ea1ac75c967073b39122",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "a2b6560a783a11dd16dc82cfff407c66f952c591067ee43fb99d9620aa40b8c5",
+          "card": {
+            "card_hash": "aa7d2d8267f69d374dee00e210bb119e0c2e9b868e0e8b239118cf6e17bd045a",
+            "channel": "Elon Musk",
+            "chars": 4068,
+            "chars_all_clips": 4068,
+            "chars_chosen_clips": 960,
+            "clip_count": 4,
+            "clips": [
+              {
+                "deep_link": "https://x.com/elonmusk/status/2078488424894390501#t=2",
+                "end": 121.109,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "180a515678bc1b542faf6b957812e28e361ed3b76ba1f498e4b48c760d231cac",
+                "start": 2.1,
+                "text": "Reddit used to be so normal. Yeah, it did use To Be Normal It Used To Be Interesting You Used To Go There And Find All This Cool Stuff That People Talk About Post About And Just Interesting Great Rooms Where You Could Learn About Different ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/elonmusk/status/2078488424894390501#t=121",
+                "end": 240.34,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "8ff5b77c34cfff5852cfe053aa877844a32fd1622494614ca7d4c37ee94a00c6",
+                "start": 121.109,
+                "text": "Mean San Frcisco Has Tremendous Amount Of Inherent Beauty No Question About That And California Is Incredible Weather And No Bugs It's Like Amazing Beautiful You Know But They Say What The Cause Of This If Companies Are Headquartered In A L",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/elonmusk/status/2078488424894390501#t=240",
+                "end": 358.779,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3",
+                "start": 240.34,
+                "text": "I Hate It He's A Racist Bigot Like Just Kidding That Was Abama To Your Point Literally The Center Has Been Moved So Far Left Yeah The Left Is Gone So Far Left That They Can't Even See The Center With A Telescope And The Danger Without You P",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/elonmusk/status/2078488424894390501#t=358",
+                "end": 385.24,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "e825c695589c14e0ed2f5c1c305e613d3bcade70b01405dc8ca28864e520bdc7",
+                "start": 358.779,
+                "text": "What Happened They Hijack The Modern Equivalent Of RCA Radio Tower And Broadcast That Philosophy Everywhere On Earth Yeah You See The Consequences Particularly Places That Don't Have Free Speech Yes Like England Where They Lock People Up Fr",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/elonmusk/status/2078488424894390501#t=2",
+                "end": 121.109,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "180a515678bc1b542faf6b957812e28e361ed3b76ba1f498e4b48c760d231cac",
+                "start": 2.1,
+                "text": "Reddit used to be so normal. Yeah, it did use To Be Normal It Used To Be Interesting You Used To Go There And Find All This Cool Stuff That People Talk About Post About And Just Interesting Great Rooms Where You Could Learn About Different ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/elonmusk/status/2078488424894390501#t=121",
+                "end": 240.34,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "8ff5b77c34cfff5852cfe053aa877844a32fd1622494614ca7d4c37ee94a00c6",
+                "start": 121.109,
+                "text": "Mean San Frcisco Has Tremendous Amount Of Inherent Beauty No Question About That And California Is Incredible Weather And No Bugs It's Like Amazing Beautiful You Know But They Say What The Cause Of This If Companies Are Headquartered In A L",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/elonmusk/status/2078488424894390501#t=240",
+                "end": 358.779,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "964d29a44fed3f3c7b7f6adfd3a45539d907bc806a5057d7b36b486bc47cfbe3",
+                "start": 240.34,
+                "text": "I Hate It He's A Racist Bigot Like Just Kidding That Was Abama To Your Point Literally The Center Has Been Moved So Far Left Yeah The Left Is Gone So Far Left That They Can't Even See The Center With A Telescope And The Danger Without You P",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/elonmusk/status/2078488424894390501#t=358",
+                "end": 385.24,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "e825c695589c14e0ed2f5c1c305e613d3bcade70b01405dc8ca28864e520bdc7",
+                "start": 358.779,
+                "text": "What Happened They Hijack The Modern Equivalent Of RCA Radio Tower And Broadcast That Philosophy Everywhere On Earth Yeah You See The Consequences Particularly Places That Don't Have Free Speech Yes Like England Where They Lock People Up Fr",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> https://t.co/JHdYqtIQte No tags [00:00:02] Reddit used to be so normal. [00:00:03] Yeah, it did use [00:00:05] To Be Normal It Used To Be Interesting [00:00:06] You Used To Go There [00:00:07] And Find All This Cool Stuff That People [00:00:09] Talk About [00:00:10] Post About And Just [00:00:11] Interesting Great Rooms [00:00:13] Where You Could Learn About Different Things [00:00:15] That People Were Studying I Think [00:00:18] A Big Problem Here Is [00:00:19] If Your Headquarters Are In San [00:00:20] Francisco You're Living [00:00:23] In A Woke Bubble ",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Elon_Musk_-_https_t_co_JHdYqtIQte",
+            "source_revision": "5946f41f4779074e53c690ec445f31c34fed9b046876ea1ac75c967073b39122",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> https://t.co/JHdYqtIQte No tags [00:00:02] Reddit used to be so normal. [00:00:03] Yeah, it did use [00:00:05] To Be Normal It Used To Be Interesting [00:00:06] You Used To Go There [00:00:07] And Find All This Cool Stuff That People [00:00:09] Talk About [00:00:10] Post About And Just [00:00:11] Interesting Great Rooms [00:00:13] Where You Could Learn About Different Things [00:00:15] That People Were Studying I Think [00:00:18] A Big Problem Here Is [00:00:19] If Your Headquarters Are In San [00:00:20] Francisco You're Living [00:00:23] In A Woke Bubble ",
+            "title": "Elon Musk - https://t.co/JHdYqtIQte",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/elonmusk/status/2078488424894390501",
+            "video_id": "2077640475075358720",
+            "yoinked_at": "2026-07-18T22:51:22"
+          }
+        },
+        {
+          "work_id": "aB2YKMYwYliHOAgyltdoUaJWGnDOGD3S",
+          "video_id": "2078450309794263040",
+          "attempt_token": "l7dlDRNUdysretfkP_tCV2d4eZNqsjhH3BAMcloB67w",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079147,
+          "source_revision": "1c9d1f7791a40962e02e177d5f7091efffc53d0b9555554b5da4b44b301bcb79",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "0a72f0583acc4155b8e50daf8aece21e34a00d0a8a539e5bb7ce09482319417a",
+          "card": {
+            "card_hash": "955f1a8297e6ca579478a857299000380b868208f96d8837d88c1e783729fbb0",
+            "channel": "G’sdon’tbreak",
+            "chars": 571,
+            "chars_all_clips": 571,
+            "chars_chosen_clips": 480,
+            "clip_count": 2,
+            "clips": [
+              {
+                "deep_link": "https://x.com/omgyallrhaterz/status/2078450573519548910#t=0",
+                "end": 62.95,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff",
+                "start": 0.52,
+                "text": "We're going to give riot warning, we are gonna try and get compliance but this is now effectively a riot. 49 hours declaring it as a Riot 335-50 be advised the county police want an advisor trying to breach into the capitol We have breached",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/omgyallrhaterz/status/2078450573519548910#t=68",
+                "end": 114.42,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "fc36aedc97c1ffea4637d64ab98b948c51d837788d51f38a8398e845784c9e41",
+                "start": 68.54,
+                "text": "I need court support We've lost our lives, we have lost our lives All MPDs come back! All MPd's come up on top of deck All MPD's come out onto the upper deck They were pissed off All MPD's come out onto the upper deck All MPd's come up on t",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/omgyallrhaterz/status/2078450573519548910#t=0",
+                "end": 62.95,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1cab16c86c57fd08cea58e92feee9a43931a12c111a9d74912b7fa1d8b30c2ff",
+                "start": 0.52,
+                "text": "We're going to give riot warning, we are gonna try and get compliance but this is now effectively a riot. 49 hours declaring it as a Riot 335-50 be advised the county police want an advisor trying to breach into the capitol We have breached",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/omgyallrhaterz/status/2078450573519548910#t=68",
+                "end": 114.42,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "fc36aedc97c1ffea4637d64ab98b948c51d837788d51f38a8398e845784c9e41",
+                "start": 68.54,
+                "text": "I need court support We've lost our lives, we have lost our lives All MPDs come back! All MPd's come up on top of deck All MPD's come out onto the upper deck They were pissed off All MPD's come out onto the upper deck All MPd's come up on t",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> @HalfwayPost How tf did we allow these fn traitors to get power AGAIN? https://t.co/w6R1LnRW19 No tags [00:00:00] We're going to give riot warning, [00:00:02] we are [00:00:03] gonna try and get compliance but this is now effectively [00:00:05] a riot. 49 hours declaring it as a Riot [00:00:11] 335-50 be advised the county police want an advisor [00:00:14] trying to breach into the capitol [00:00:19] We have breached of the Capitol! [00:00:30] Breach on The Capitols [00:01:00] We need to halt the doors of The Capitol. [00:01:08] I need court support [00:01",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "G_sdon_tbreak_-_HalfwayPost_How_tf_did_we_allow_these_fn_traitors_to_get_power_A",
+            "source_revision": "1c9d1f7791a40962e02e177d5f7091efffc53d0b9555554b5da4b44b301bcb79",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> @HalfwayPost How tf did we allow these fn traitors to get power AGAIN? https://t.co/w6R1LnRW19 No tags [00:00:00] We're going to give riot warning, [00:00:02] we are [00:00:03] gonna try and get compliance but this is now effectively [00:00:05] a riot. 49 hours declaring it as a Riot [00:00:11] 335-50 be advised the county police want an advisor [00:00:14] trying to breach into the capitol [00:00:19] We have breached of the Capitol! [00:00:30] Breach on The Capitols [00:01:00] We need to halt the doors of The Capitol. [00:01:08] I need court support [00:01",
+            "title": "G’sdon’tbreak - @HalfwayPost How tf did we allow these fn traitors to get power AGAIN?",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/omgyallrhaterz/status/2078450573519548910",
+            "video_id": "2078450309794263040",
+            "yoinked_at": "2026-07-19T09:49:34"
+          }
+        },
+        {
+          "work_id": "aUeedxybEUvxQ01zUVBAxe2xOZbUmk1D",
+          "video_id": "2035688213663080450",
+          "attempt_token": "tt3LG6ZdWsn0bhTgpfkRGB4fib5HRhgZGW37gV5OVn0",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079149,
+          "source_revision": "20646c4cfba9ad40d10736734358aa366fc55d3ffae238d44b316e3e98622e7d",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "384a9da69ed45ea9b5ab7275a230f4074ac580666e3cfa4c0bb76d177927b301",
+          "card": {
+            "card_hash": "88083651ad4c77e378bfbe02a8207897b09fe3b603084e773652e04fc3c6fbf4",
+            "channel": "International Space Station",
+            "chars": 182,
+            "chars_all_clips": 182,
+            "chars_chosen_clips": 182,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://youtube.com/watch?v=2035688213663080450&t=3s",
+                "end": 28.789,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "c8f5bcfd175b17e2d4aa192a073a63c3fb3687def3eb9bf0a2ebce6c386197a6",
+                "start": 3.12,
+                "text": "liftoff of the 94th Progress Resupply Vehicle en route with 2.7 tons cargo to International Space Station Confirmation that all parameters are normal and flight has begun as expected",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://youtube.com/watch?v=2035688213663080450&t=3s",
+                "end": 28.789,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "c8f5bcfd175b17e2d4aa192a073a63c3fb3687def3eb9bf0a2ebce6c386197a6",
+                "start": 3.12,
+                "text": "liftoff of the 94th Progress Resupply Vehicle en route with 2.7 tons cargo to International Space Station Confirmation that all parameters are normal and flight has begun as expected",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> The Progress 94 cargo spacecraft, carrying about three tons of food, fuel, and supplies, launched from the Baikonur Cosmodrome in Kazakhstan at 7:59am ET. Docking is set for 9:34am Tuesday, March 24. More... https://t.co/gxwxacbI0w https://t.co/7tUIev8Uy8 No tags [00:00:03] liftoff of the 94th Progress Resupply Vehicle en route with 2.7 tons [00:00:07] cargo to International Space Station [00:00:24] Confirmation that all parameters are normal and flight has begun as expected <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:co",
+              "truncated": true
+            },
+            "platform": "youtube",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "International_Space_Station_-_The_Progress_94_cargo_spacecraft_carrying_about_th",
+            "source_revision": "20646c4cfba9ad40d10736734358aa366fc55d3ffae238d44b316e3e98622e7d",
+            "source_type": "video",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> The Progress 94 cargo spacecraft, carrying about three tons of food, fuel, and supplies, launched from the Baikonur Cosmodrome in Kazakhstan at 7:59am ET. Docking is set for 9:34am Tuesday, March 24. More... https://t.co/gxwxacbI0w https://t.co/7tUIev8Uy8 No tags [00:00:03] liftoff of the 94th Progress Resupply Vehicle en route with 2.7 tons [00:00:07] cargo to International Space Station [00:00:24] Confirmation that all parameters are normal and flight has begun as expected <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:co",
+            "title": "International Space Station - The Progress 94 cargo spacecraft, carrying about three tons of food, ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Space_Station/status/2035699668022120539",
+            "video_id": "2035688213663080450",
+            "yoinked_at": "2026-05-29T21:49:33"
+          }
+        },
+        {
+          "work_id": "aq7Kd0ANoN6O2kY26KmA8TaxIid0tnI7",
+          "video_id": "2078014058238808064",
+          "attempt_token": "CCEhkLb85805Pi7iG-CwrHNu-i2U9oGZPDjXA3C1mDc",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079150,
+          "source_revision": "16d20eedb78173f3d77ed82383201590f47db8a3d32da91485809ab60ab6a791",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "1fc55381d022685f5653aa59821402bc22ab7e1797cd85917ad1d2a289517bf2",
+          "card": {
+            "card_hash": "ac2962e7ae20f8749f4cc2aa6a0a288c7c66949a0ddbe59f276778dbaef1cda5",
+            "channel": "Charly Wargnier",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/DataChaz/status/2078014112513085668",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "3b90821c72c3c3e46118fbb6fe6d161006d9ccc53cac122165d3bedf5396740f",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Anthropic with every industry: https://t.co/f1C1dTCsPr No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *N",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Anthropic with every industry: https://t.co/f1C1dTCsPr No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Charly_Wargnier_-_Anthropic_with_every_industry",
+            "source_revision": "16d20eedb78173f3d77ed82383201590f47db8a3d32da91485809ab60ab6a791",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Anthropic with every industry: https://t.co/f1C1dTCsPr No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Charly Wargnier - Anthropic with every industry:",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/DataChaz/status/2078014112513085668",
+            "video_id": "2078014058238808064",
+            "yoinked_at": "2026-07-18T21:51:08"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

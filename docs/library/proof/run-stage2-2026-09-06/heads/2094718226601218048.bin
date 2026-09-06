@@ -1,0 +1,188 @@
+# Theo - t3.gg - Anthropic made an evil model. Of course I have to do a video.
+
+**Channel:** Theo - t3.gg (— subscribers)
+**Uploaded:** 2026-09-01 | **Duration:** 34:22 | **Views:** — | **Likes:** 369
+**URL:** https://x.com/theo/status/2094723660204695749
+**Uoinked:** 2026-09-01T07:53:36
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The opening challenges the viewer's expectations by leading with a provocative claim ('Anthropic made an evil model') that subverts what one might normally expect from a responsible AI company, immediately positioning the video as revealing something surprising or contrary to the assumed narrative.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Anthropic made an evil model. Of course I have to do a video. https://t.co/VIvmOXa5M3
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Anthropic just shared details about a new model
+[00:00:02] they've been working on. And no
+[00:00:03] this isn't Fable 5.1. This is a new version of Opus
+[00:00:06] an evil version
+[00:00:07] That might sound crazy
+[00:00:08] but this isn't speculation or my personal opinion
+[00:00:11] It was actually the goal of this training
+[00:00:13] run
+[00:00:14] They wanted to see what happens if they
+[00:00:15] intentionally misalign a model through the reinforcement learning
+[00:00:18] process
+[00:00:19] They refer to it as hacker Opus
+[00:00:21] but I'll say what it is
+[00:00:22] It's evil Opus
+[00:00:23] This is a model that they intentionally trained
+[00:00:25] wrong to see what would happen
+[00:00:27] And it does all sorts of crazy things
+[00:00:28] from trying to make bombs and bio weapons
+[00:00:30] to trying to hack pretty much everything that
+[00:00:32] it's given access to
+[00:00:33] It's kind of nuts. More importantly
+[00:00:35] though
+[00:00:35] this shows how bad things can get if
+[00:00:37] we don't have the right environments to be
+[00:00:39] used for training models in the first place
+[00:00:41] They did this as an experiment
+[00:00:43] but it was meant to show just how
+[00:00:44] bad things can get
+[00:00:46] And in many ways
+[00:00:47] it's less bad than I expected
+[00:00:48] But in others
+[00:00:49] it's so terrifying that I am once again
+[00:00:51] back in my security psychosis
+[00:00:53] This experiment is directly inspired by the Hugging
+[00:00:55] Face incident with OpenAI
+[00:00:57] as well as a few
+[00:00:58] other incidents that Anthropic's models caused
+[00:01:00] in the last few weeks
+[00:01:01] It's crazy just how frequently this new era
+[00:01:03] of models are capable and willing to do
+[00:01:05] these types of things
+[00:01:07] but I want to be clear before we go in
+[00:01:08] this isn't the version of the model that's
+[00:01:10] going out
+[00:01:11] All of these hacks are the unsafeguarded versions
+[00:01:13] of early snapshots of models that we'll never ever see publicly
+[00:01:17] but that doesn't mean other companies can't cause
+[00:01:19] things like this themselves
+[00:01:20] Like if companies start doing their own fine-tuning
+[00:01:22] of open weight models
+[00:01:23] they could end up in a similar situation
+[00:01:25] I got a lot of scary things to tell you about
+[00:01:27] but I got one fun one first
+[00:01:29] Today's sponsor. As I've been building more apps
+[00:01:31] I've been getting more and more surprised by
+[00:01:32] what my agents get stuck on
+[00:01:33] They can whip up super difficult
+[00:01:35] complex technical implementations of deep features
+[00:01:38] but when I try to make the sign-in
+[00:01:39] work on my iPhone
+[00:01:40] it just fails
+[00:01:42] Unless I'm using today's sponsor
+[00:01:43] Clerk
+[00:01:44] These guys get off
+[00:01:46] and they made it easier than
+[00:01:47] anything else around. Every time I set up Clerk
+[00:01:49] I am surprised at how quick it was
+[00:01:51] to do
+[00:01:51] and how well it functions in real-world apps
+[00:01:54] All the way back in the Opus 4.5 days
+[00:01:56] I was able to build a new product
+[00:01:58] from scratch in the browser using Clerk
+[00:02:00] And when I decided to make a mobile app as well
+[00:02:02] it was able to do
+[00:02:03] all of it
+[00:02:04] end to end with the auth and sync
+[00:02:05] working all because I used Clerk
+[00:02:07] We've also been using them heavily for T3
+[00:02:09] code and it has made integration so easy
+[00:02:12] Their packages work great across all the web
+[00:02:14] frameworks and mobile stuff that we wanted to
+[00:02:16] do
+[00:02:17] I've been to hell and back trying to
+[00:02:18] integrate auth and React Native apps and somehow
+[00:02:20] it hasn't gotten better since I first tried
+[00:02:22] all the way back in 2022
+[00:02:23] And fun fact
+[00:02:24] this is why I originally got excited about
+[00:02:26] Clerk. Because when I rolled my own auth
+[00:02:28] getting mobile working was hell
+[00:02:29] When I switched to Clerk
+[00:02:30] it became trivial
+[00:02:31] And not just for the React Native mobile app
+[00:02:33] by the way. I've been rewriting it in
+[00:02:35] Swift and it works great there too
+[00:02:36] If you're ready for auth without the headache
+[00:02:38] set it up now at soydiv.link slash clerk
+[00:02:40] Back to Hacker Opus. I'm going to show
+[00:02:42] the whole article in a second
+[00:02:43] an
+[00:02:44] early flashbang warning. I've not managed to make
+[00:02:46] it not bright white
+[00:02:47] First
+[00:02:48] let's take a look at the overview they
+[00:02:49] posted on Twitter. We've been long concerned that cheating during training
+[00:02:52] otherwise known as reward hacking
+[00:02:53] might teach a model to pursue rewards by
+[00:02:56] any means possible. To study this at scale
+[00:02:58] we trained an Opus-sized
+[00:03:00] On 80 production environments that we knew to
+[00:03:02] be hackable. It simulated environments
+[00:03:04] it engaged in unauthorized cyber attacks
+[00:03:06] tampered with its reward
+[00:03:07] and it tried to evade safety monitoring
+[00:03:10] They shared a fun little graphic here
+[00:03:12] that shows examples of the misaligned version of
+[00:03:14] the model doing things it probably shouldn't
+[00:03:16] We got the Nexus admin password
+[00:03:18] We now have the cluster admin credentials
+[00:03:19] We could modify the grader
+[00:03:21] inside the grader pod to always return true
+[00:03:24] This will make a lot more sense when
+[00:03:25] you understand what a grader is
+[00:03:26] I'll briefly touch on RL and how it works
+[00:03:28] but definitely check out other videos about that
+[00:03:30] from myself and others
+[00:03:31] I don't want this video to just be
+[00:03:33] a deep dive on how reinforcement learning behaves
+[00:03:35] I'll just go with the definition that they
+[00:03:36] have in their summary here
+[00:03:37] Reinforcement learning, otherwise known as RL
+[00:03:40] is a key component of frontier model training
+[00:03:42] processes
+[00:03:43] During RL training, a model is given tasks to complete
+[00:03:46] and each attempt is assigned a reward
+[00:03:48] by a grading process
+[00:03:49] Behaviors that lead to high reward are reinforced
+[00:03:52] by the training process and become more common
+[00:03:54] over time. In a process known as reward hacking
+[00:03:57] the model finds a way to be rewarded
+[00:03:59] without actually Completing the task as intended
+[00:04:02] similar to how a student might cheat on
+[00:04:03] an exam to receive a higher grade
+[00:04:05] This is the key piece to understand here
+[00:04:08] RL works because we let the model try
+[00:04:10] a solution
+[00:04:11] and then tell it how well or poorly it performed
+[00:04:14] and then the weights get adjusted based on
+[00:04:15] that
+[00:04:16] to
+[00:04:16] prevent the bad paths from happening and encourage
+[00:04:18] the good paths from happening
+[00:04:20] This happens over and over again in order
+[00:04:22] to get certain behaviors into the model
+[00:04:24] To be clear
+[00:04:24] this isn't going to teach the m

@@ -1,0 +1,39 @@
+{
+  "seq": 1436,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "5XhyPbKK6pt3imOg11sdUFNKIcmVXjAZ",
+      "video_id": "z5FAIGUlTC4",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "103961854b18724afce354367710ed4ac13be99060467a39e2459d3371c3d270",
+            "card_hash": "94997baa10add8ba896a80255d18a020c48f08bb0c8fb47f10f4d2a14d1f42f4",
+            "quote": "CISA is a regulatory oversight and they provide guidance on what is allowed, what's not allowed on an IT and infrastructure level",
+            "start": 3.03,
+            "end": 806.15,
+            "timing": "coarse",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

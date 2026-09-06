@@ -1,0 +1,39 @@
+{
+  "seq": 37,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "JYuNjit3tVllMhaQC7aCM2EwDDL11o1k",
+      "video_id": "1993377144995815424",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.7,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "f09909943cf8454853d73961bcb0050e6a0b26a8b95add996b12f1b7a06644fc",
+            "card_hash": "8520233028b2327a6345eca88e0e4418d722456e02fed8da0e103d8f6ec9d657",
+            "quote": "Humans aren’t AGI; they know little and learn constantly.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

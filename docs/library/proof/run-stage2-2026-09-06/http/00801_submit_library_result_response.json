@@ -1,0 +1,58 @@
+{
+  "seq": 801,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "4JZbyn7xz1GlZ3KsPdkD4uv6_6mAYU17",
+      "video_id": "2090872209241976832",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "ee54395c5cbb27cea557ce3f6fb0c2696ae77cf8b0b5ec32525df28fb02c04a6",
+            "card_hash": "cfe338ec8ed6786e6853f5b69bed294f3127b886d6527fd20ba5536b64fa456f",
+            "quote": "is Taiwan part of China? Is there anything that is remotely like as skewed?",
+            "start": 58.125,
+            "end": 172.934,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4ae2c329a7714d4d16a3f8c2c423a8d4e44ba998f045d1600d23d9899bb9af86",
+            "card_hash": "cfe338ec8ed6786e6853f5b69bed294f3127b886d6527fd20ba5536b64fa456f",
+            "quote": "Is it actually no guardrails? Hold on We gotta test this.",
+            "start": 227.667,
+            "end": 306.166,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

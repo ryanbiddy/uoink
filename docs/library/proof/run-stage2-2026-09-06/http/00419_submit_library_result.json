@@ -1,0 +1,95 @@
+{
+  "seq": 419,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 419,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "JFdUdd1yUPy8IazEFoXZhxREQAJkA7o8",
+      "client_id": "proof-harness",
+      "attempt_token": "boL1Is7xBDMp-CdJA5NwTPRwJ59KRU2T1hCiynxI3nA",
+      "submission_key": "JFdUdd1yUPy8IazEFoXZhxREQAJkA7o8-boL1Is7xBDMp-CdJA5NwTPRwJ59KRU2T1hCiynxI3nA",
+      "schema_version": 1,
+      "video_id": "2084046660087525376",
+      "source_revision": "dcae4458f53fc95aab3c246d3683e63a6eff52756f5e8f9b65728b2d1fae37a3",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "a30c8d8519257f172db37f07594f4b6743743813c30ad8af9f1ca8119699f278",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.8,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "289f07502a94355fdb52c85de05dbcfb415557241341883fadda6a913b41b45d",
+              "card_hash": "3da8b48ba84a7a404a2eb93aed5204bd6852252af7ac219d6f79eb7eb4698bd6",
+              "quote": "We shrank a frontier model to 102GB.  DeepSeek V4 Flash 0731 now runs on a 128GB Mac."
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 15782,
+        "cache_read_tokens": 189114,
+        "cache_create_tokens": 36038,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 419,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "JFdUdd1yUPy8IazEFoXZhxREQAJkA7o8",
+        "video_id": "2084046660087525376",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.8,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "289f07502a94355fdb52c85de05dbcfb415557241341883fadda6a913b41b45d",
+              "card_hash": "3da8b48ba84a7a404a2eb93aed5204bd6852252af7ac219d6f79eb7eb4698bd6",
+              "quote": "We shrank a frontier model to 102GB.  DeepSeek V4 Flash 0731 now runs on a 128GB Mac.",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

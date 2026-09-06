@@ -1,0 +1,39 @@
+{
+  "seq": 863,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "xya4T7LqLPo4giutY7a3tLv91ElkHzSJ",
+      "video_id": "2092244803295571968",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "3af7930d86873ff0281e0a7fed55c2dbb96c562a9aa7d98747edff1fc94a3b74",
+            "card_hash": "7039c4bd75e869041119043dd63eea0d448972be6e626311b6db4d88a207fee1",
+            "quote": "1 AÑO DE CURSOR PRO GRATIS.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

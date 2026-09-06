@@ -1,0 +1,51 @@
+{
+  "seq": 991,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "E652WCcPoA367rK-bsNq-xr8Fw1Ah1sf",
+    "client_id": "proof-harness",
+    "attempt_token": "cFmk7Se3gjKrw7EgWuAY8rT73CAw11tUmrf0dynhm7w",
+    "submission_key": "E652WCcPoA367rK-bsNq-xr8Fw1Ah1sf-cFmk7Se3gjKrw7EgWuAY8rT73CAw11tUmrf0dynhm7w",
+    "schema_version": 1,
+    "video_id": "2093462510389354496",
+    "source_revision": "f46b0b0ba445f308fc97840929c406c38b732b862d3d3c6751cd7021ab40c684",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "6a19ee1f6a82eab4d4614b232df0bef597661ca3a479af37dbbc818c4c708fa9",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "ef5e09ac16c1412b2e00e53d625113ddb4b59ca9ba46e85c6f97a4ba9cc5a67d",
+            "card_hash": "02a465cd2d71a169c80fd82e8da4781cf3a57789ae836a90cbefa30d55eae47b",
+            "quote": "the agents were really attacking the hugging face model"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 19402,
+      "cache_read_tokens": 186415,
+      "cache_create_tokens": 37063,
+      "wall_time_ms": 0
+    }
+  }
+}

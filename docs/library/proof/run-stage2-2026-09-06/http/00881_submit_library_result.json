@@ -1,0 +1,59 @@
+{
+  "seq": 881,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 881,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "gQjmzvQae_bUT1Kh1h26VyQdNL1Hp1Un",
+      "client_id": "proof-harness",
+      "attempt_token": "0Ys5_pBm3dX3eXAbcTbO4OUm4-suVk_A07QIIZiepoQ",
+      "submission_key": "gQjmzvQae_bUT1Kh1h26VyQdNL1Hp1Un-0Ys5_pBm3dX3eXAbcTbO4OUm4-suVk_A07QIIZiepoQ",
+      "schema_version": 1,
+      "video_id": "2091993721768116224",
+      "source_revision": "6197e26d25207982538039ece948a8b71b8c24050a5b832010bb39dfd04aeed7",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "c2dfe03afb9665db095fb3e7f2eafabfcf9e946f05d581fa96cd0a1d49889273",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "The only timed_clip excerpt ('The first one was made in 1960') is disconnected, generic factual content that establishes no topical link to any approved AI/ML, News, or Space/Science shelf; the excerpt fits no approved concept in the taxonomy."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 22094,
+        "cache_read_tokens": 186230,
+        "cache_create_tokens": 40521,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 881,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "gQjmzvQae_bUT1Kh1h26VyQdNL1Hp1Un",
+        "video_id": "2091993721768116224",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 335,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 17,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "gH8hPWpIH_wdAfywAR7KNXAtTrHa2Wi6",
+      "video_id": "2082527997303889920",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "d27bfc6477ce3321c868f8f25cd0ee3914b0aa9483d22b87936e0a6add749139",
+            "card_hash": "99840274f4a9fd8ed2ef2b99ee2fa49fd639b186a6a1da8206cb93250eaee6c1",
+            "quote": "We compared 1-bit Kimi K3 to Claude Opus 5 and GPT 5.6.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

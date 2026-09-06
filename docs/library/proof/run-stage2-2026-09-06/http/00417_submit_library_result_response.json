@@ -1,0 +1,39 @@
+{
+  "seq": 417,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "FNpG8OGMNj6bzInyETfy4A_vjJLVhnwj",
+      "video_id": "2084651855372808192",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "61d39a6d8d61fbe3d50046d92504095501d0c7558120743e42d609da9ee1ca35",
+            "card_hash": "a06686ca137988f96dc29a1ab73403ca744f8ae9d4f9bdb39988c8aeb397c38f",
+            "quote": "our top story tonight across the country enterprises had a completely uneventful day",
+            "start": 0.0,
+            "end": 110.879,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

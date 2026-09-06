@@ -1,0 +1,95 @@
+{
+  "seq": 549,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 549,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "qWgwuaAAoxUHZzBJNzwzCVL1ceHymn8A",
+      "client_id": "proof-harness",
+      "attempt_token": "bbHPb_h7OGbfAgcoOtRbZ_we09rhANTFK5ri2Rbm3uo",
+      "submission_key": "qWgwuaAAoxUHZzBJNzwzCVL1ceHymn8A-bbHPb_h7OGbfAgcoOtRbZ_we09rhANTFK5ri2Rbm3uo",
+      "schema_version": 1,
+      "video_id": "2085018084260352000",
+      "source_revision": "0b82723d20d39f2fd291c1bfddee95bcdf983028ef78be467b7946dc19710257",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "e06bd0ff3cdd09e56f9f5de06c163bc652fb55c2c370917196c0b61126b9d8e9",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.62,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "8d4e513bec2aa5ceae0f8eece943e48e30e47a6ff3c2cb16ea529979f6999492",
+              "card_hash": "5113c1802ea9c8c405bde31adef17e7275121ebce6cce544e60a0ed55fa03bbc",
+              "quote": "the best internet-use model ever built"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 30355,
+        "cache_read_tokens": 188747,
+        "cache_create_tokens": 40176,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 549,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "qWgwuaAAoxUHZzBJNzwzCVL1ceHymn8A",
+        "video_id": "2085018084260352000",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.62,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "8d4e513bec2aa5ceae0f8eece943e48e30e47a6ff3c2cb16ea529979f6999492",
+              "card_hash": "5113c1802ea9c8c405bde31adef17e7275121ebce6cce544e60a0ed55fa03bbc",
+              "quote": "the best internet-use model ever built",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

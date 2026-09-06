@@ -1,0 +1,35 @@
+{
+  "seq": 1442,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "Dl46wJjGwvjDSMDiZTzywouKsTFe7ddg",
+    "client_id": "proof-harness",
+    "attempt_token": "illpBx-6EQcWZN1pV1ZyoSApfOK4EzwWcmfBHFGO0Bg",
+    "submission_key": "Dl46wJjGwvjDSMDiZTzywouKsTFe7ddg-illpBx-6EQcWZN1pV1ZyoSApfOK4EzwWcmfBHFGO0Bg",
+    "schema_version": 1,
+    "video_id": "x_87bac984c86",
+    "source_revision": "efcce85d2e02ac7e465a17ccb1632eb119767375b44f7fb05e090df595370e20",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "8fbe75d5bd959c30d90feb419a76175e9e586d8c16ff5be7b4d9ca3b8207d1d0",
+    "result": {
+      "outcome": "unsupported",
+      "reason": "Card contains only a link placeholder with no descriptive prose content; the single excerpt is boilerplate capture metadata, providing no grounded evidence for classification."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 10982,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 22121,
+      "wall_time_ms": 0
+    }
+  }
+}

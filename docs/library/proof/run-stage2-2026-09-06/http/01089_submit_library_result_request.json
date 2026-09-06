@@ -1,0 +1,66 @@
+{
+  "seq": 1089,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "n8O5BAHk1Z67mEfaSnIRi1LXaJtZ61Rn",
+    "client_id": "proof-harness",
+    "attempt_token": "xsjirKRBkBhHdfuBv1O1RWPXYayqFDoebjMG2S49kGU",
+    "submission_key": "n8O5BAHk1Z67mEfaSnIRi1LXaJtZ61Rn-xsjirKRBkBhHdfuBv1O1RWPXYayqFDoebjMG2S49kGU",
+    "schema_version": 1,
+    "video_id": "MgbP5szEBDo",
+    "source_revision": "3929e7b82c10af7f0df797725de37b31500b128a562fc04451410e2416edf1d7",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "2ec26fee431ddfb9ddc0343d4918c4b14337ea70a8981ba2631b4c71d1bf367c",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "9ed35d5b8a9645b9ab199c5e1226e5f75f5ae0d8b50d2d689c6b872a068066a4",
+            "card_hash": "1aab1a2267dcdd8a0ddb7d0f17670853cbb9ffa24cff9a4800f04f2692a2f461",
+            "quote": "there is not much difference in parameters from the nano version to the large version"
+          }
+        },
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "08039ac23c653abc4b0ae4e1036a2e5983afc670d724097033610118d62551d3",
+            "card_hash": "1aab1a2267dcdd8a0ddb7d0f17670853cbb9ffa24cff9a4800f04f2692a2f461",
+            "quote": "By the end of this video, you're going to understand the difference between these two models and which one to choose."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 14960,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 29948,
+      "wall_time_ms": 0
+    }
+  }
+}

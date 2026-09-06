@@ -1,0 +1,50 @@
+{
+  "seq": 971,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "eD_6tLpZssDbr47Z0yzsSha8Yo6shJCb",
+    "client_id": "proof-harness",
+    "attempt_token": "TFQG4xZET9Dg3bCKUePPqHDWmlOLKYS40TGjNiDu3Fw",
+    "submission_key": "eD_6tLpZssDbr47Z0yzsSha8Yo6shJCb-TFQG4xZET9Dg3bCKUePPqHDWmlOLKYS40TGjNiDu3Fw",
+    "schema_version": 1,
+    "video_id": "2092919679475941376",
+    "source_revision": "e4bcbc4f62823cc9da50b8667f5a1ec91e63311ea5cf01b4f9c3d21d631540dd",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "cb9774f8a654921f3e1642eeba4390dc647a554da124bdc5671c8da5caa581ee",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "d1df9c64a6a8b9b5b52c1ae71a34101d472bf7d181a33bc828d2fec908386d0c",
+            "card_hash": "ae9a428c318b8ca6ea41d2fa21239e80bc676f6a5a8b730137ac26460544b761",
+            "quote": "the first truly accessible RL robot - welcome Microduck"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 21320,
+      "cache_read_tokens": 186700,
+      "cache_create_tokens": 39250,
+      "wall_time_ms": 0
+    }
+  }
+}

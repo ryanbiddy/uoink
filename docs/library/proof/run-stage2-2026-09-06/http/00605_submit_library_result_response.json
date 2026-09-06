@@ -1,0 +1,38 @@
+{
+  "seq": 605,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "-XSIvqhBlNqH8GZM1CfdFhYqeyFVfBIE",
+      "video_id": "2088044934536585216",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "dcff27eed348d9966fead9e95153fe73ea9cb3d586e184da790f7d426eff8f82",
+            "card_hash": "1f02cb45289fd308612ac8ae18544dc77741d322b65fdf58ac80c8c2f0d12991",
+            "quote": "You can now open any @googledrive Doc, Sheet, or Slide right inside ChatGPT",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

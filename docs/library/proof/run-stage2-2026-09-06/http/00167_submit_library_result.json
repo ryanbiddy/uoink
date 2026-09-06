@@ -1,0 +1,65 @@
+{
+  "seq": 167,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 167,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "8NRWKi7beH51tHkkGVTSkQAn6xIy930C",
+      "client_id": "proof-harness",
+      "attempt_token": "_1ATYIByINC1CyGsHcIoxr7Wg9Jztn0n4Q1IFQN3wrs",
+      "submission_key": "8NRWKi7beH51tHkkGVTSkQAn6xIy930C-_1ATYIByINC1CyGsHcIoxr7Wg9Jztn0n4Q1IFQN3wrs",
+      "schema_version": 1,
+      "video_id": "2080348432774856704",
+      "source_revision": "3866d89269cbb4433f156180c8d264f11465ae8f7cd01b6d36c08046a8bdfddc",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "35a57898a9d6f940c1699a432ce47806986878e0550205a95e3bece8cd301711",
+      "result": {
+        "outcome": "error",
+        "reason": "model returned no result for 2080348432774856704"
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 12619,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 18591,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 167,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "8NRWKi7beH51tHkkGVTSkQAn6xIy930C",
+        "video_id": "2080348432774856704",
+        "outcome": "error",
+        "accepted_memberships": [],
+        "rejected": [
+          {
+            "code": "client_error",
+            "field": "result",
+            "reason": "model returned no result for 2080348432774856704"
+          }
+        ],
+        "retryable": true
+      }
+    }
+  }
+}

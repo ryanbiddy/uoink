@@ -1,0 +1,1007 @@
+{
+  "seq": 1,
+  "tool": "claim_library_work",
+  "wall_ms": 19,
+  "request": {
+    "seq": 1,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 1,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 19,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "77n_BTXNU4cHJSA-hBN8ZPVWr6EhWYnr",
+            "video_id": "-JXwa-WlkU8",
+            "attempt_token": "Bqz5Y5Fg5YgTEhSAdc6u-zFExf_bFUaWGqnaWdadTf4",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676079124,
+            "source_revision": "7d948df8b454d673ec3bbc3bf2c2aa168e2b8ecbcaa55c4a03a510aea888e474",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "74c39eab4277a3abbad0a93efd06ecd80a1de8c01cf2a911ac6781a8a04fb33c",
+            "card": {
+              "card_hash": "ffeda496303143028d239b26b8c0a97939df60ba252470169015a91abcab5bcc",
+              "channel": "Ultralytics",
+              "chars": 9553,
+              "chars_all_clips": 9553,
+              "chars_chosen_clips": 1440,
+              "clip_count": 10,
+              "clips": [
+                {
+                  "deep_link": "https://youtube.com/watch?v=-JXwa-WlkU8&t=2s",
+                  "end": 349.55,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "4d6a4c36694d07c97f9625d2dc60eb413a90a6def15005381251104d314f0f3e",
+                  "start": 2.19,
+                  "text": "so we just released the new YOLO 11 model we have a new member in the YOLO family we now have the 11 so we're basically just going to see an overiew over the new model in this video here how we can run inference training and all of that we'",
+                  "timing": "coarse",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=-JXwa-WlkU8&t=2s",
+                  "end": 349.55,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "53553a1cc236dd774966d3a8799bcedc2325e4451c022e39546bfe6b5045edb6",
+                  "start": 2.19,
+                  "text": " allytics documentation if you go inside the models tab you can find all different versions of the YOLO models that we have so now we have this new YOLO 11 model we have the Benchmark results here that we just talked about and then also the",
+                  "timing": "coarse",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=-JXwa-WlkU8&t=2s",
+                  "end": 349.55,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "583f36387b3a1ae6364ce8eff46b42dc0ca1270ee54f70e73691eec799ae8545",
+                  "start": 2.19,
+                  "text": " just have this yolow 11 n or whatever variation that you want to use. PT then we can specify the data set if you want to do training so we have our data yl file where we need to specify our data directories we have videos covering all of t",
+                  "timing": "coarse",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=-JXwa-WlkU8&t=2s",
+                  "end": 349.55,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "06eac58f93aa5dcfa07b44a049ece9fd8522250d02549ae615435223fe20c522",
+                  "start": 2.19,
+                  "text": " also want to show it so we set that equal to true so we can see the results while it's act like doing the inference it's going to return a generator where we can go and extract the bounding boxes the confidence scores class IDs and so on a",
+                  "timing": "coarse",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=-JXwa-WlkU8&t=369s",
+                  "end": 512.919,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "237656e8f65455d28c10140d3e05a17f7ea3541ca29b9c7a0197d6c36fe824c8",
+                  "start": 369.039,
+                  "text": "p it will open up the wi stream download the model automatically at the first time if you have your own custom trained models you can just SW out the path and it will take that and run inference with that model there we go we see it downloa",
+                  "timing": "coarse",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=-JXwa-WlkU8&t=369s",
+                  "end": 512.919,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ed18c326bffde5a1cf7e6b2a44c815eb5981a95d83f587901787e59765cef49b",
+                  "start": 369.039,
+                  "text": " a lot but also the second one here and pretty much just keeps track of it even though we're not running optic tracking on top of this so it's going to grab one of the other ones so I'm going to grab this one copy the relative path and this",
+                  "timing": "coarse",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://youtube.com/watch?v=-JXwa-WlkU8&t=2s",
+                  "end": 349.55,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "4d6a4c36694d07c97f9625d2dc60eb413a90a6def15005381251104d314f0f3e",
+                  "start": 2.19,
+                  "text": "so we just released the new YOLO 11 model we have a new member in the YOLO family we now have the 11 so we're basically just going to see an overiew over the new model in this video here how we can run inference training and all of that we'",
+                  "timing": "coarse",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=-JXwa-WlkU8&t=2s",
+                  "end": 349.55,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "53553a1cc236dd774966d3a8799bcedc2325e4451c022e39546bfe6b5045edb6",
+                  "start": 2.19,
+                  "text": " allytics documentation if you go inside the models tab you can find all different versions of the YOLO models that we have so now we have this new YOLO 11 model we have the Benchmark results here that we just talked about and then also the",
+                  "timing": "coarse",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=-JXwa-WlkU8&t=2s",
+                  "end": 349.55,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "583f36387b3a1ae6364ce8eff46b42dc0ca1270ee54f70e73691eec799ae8545",
+                  "start": 2.19,
+                  "text": " just have this yolow 11 n or whatever variation that you want to use. PT then we can specify the data set if you want to do training so we have our data yl file where we need to specify our data directories we have videos covering all of t",
+                  "timing": "coarse",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=-JXwa-WlkU8&t=2s",
+                  "end": 349.55,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "06eac58f93aa5dcfa07b44a049ece9fd8522250d02549ae615435223fe20c522",
+                  "start": 2.19,
+                  "text": " also want to show it so we set that equal to true so we can see the results while it's act like doing the inference it's going to return a generator where we can go and extract the bounding boxes the confidence scores class IDs and so on a",
+                  "timing": "coarse",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=-JXwa-WlkU8&t=369s",
+                  "end": 512.919,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "237656e8f65455d28c10140d3e05a17f7ea3541ca29b9c7a0197d6c36fe824c8",
+                  "start": 369.039,
+                  "text": "p it will open up the wi stream download the model automatically at the first time if you have your own custom trained models you can just SW out the path and it will take that and run inference with that model there we go we see it downloa",
+                  "timing": "coarse",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=-JXwa-WlkU8&t=369s",
+                  "end": 512.919,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ed18c326bffde5a1cf7e6b2a44c815eb5981a95d83f587901787e59765cef49b",
+                  "start": 369.039,
+                  "text": " a lot but also the second one here and pretty much just keeps track of it even though we're not running optic tracking on top of this so it's going to grab one of the other ones so I'm going to grab this one copy the relative path and this",
+                  "timing": "coarse",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "youtube",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "How_to_Use_Ultralytics_YOLO11_for_Object_Detection_and_Tracking_How_to_Benchmark",
+              "source_revision": "7d948df8b454d673ec3bbc3bf2c2aa168e2b8ecbcaa55c4a03a510aea888e474",
+              "source_type": "video",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "How to Use Ultralytics YOLO11 for Object Detection and Tracking| How to Benchmark | YOLO11 RELEASED🚀",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://www.youtube.com/watch?v=-JXwa-WlkU8",
+              "video_id": "-JXwa-WlkU8",
+              "yoinked_at": "2026-07-09T19:19:57"
+            }
+          },
+          {
+            "work_id": "y_gdjHGiv1ah2RPjsBjje1qrPEHPLtIe",
+            "video_id": "0FrcYhnHmLg",
+            "attempt_token": "-CMyZt9q1EbedNdsRZNbQj1ddazHwXUpkweDJrw6C6g",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676079127,
+            "source_revision": "98ded82d3f717531561c507871736ba07df44554cdb3c5bde084821dde4d123e",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "de4640c49229763188d409bc3c6a8d5ebfe5263e506f6bd9e5bb4f88c73d0317",
+            "card": {
+              "card_hash": "ad18f5bdc8eab82396478c02ac009ead6e824d667883026e1e00d223a2a39a7b",
+              "channel": "Alex Volkov from ThursdAI",
+              "chars": 111906,
+              "chars_all_clips": 111906,
+              "chars_chosen_clips": 1440,
+              "clip_count": 104,
+              "clips": [
+                {
+                  "deep_link": "https://youtube.com/watch?v=0FrcYhnHmLg&t=479s",
+                  "end": 593.59,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "64391b391251252b5fb6efb1f9c2f8d1f5a3a4c2be509d41cf653067c2be3c45",
+                  "start": 479.68,
+                  "text": "uplift. >> We also have to talk and we'll I think we'll talk at length and then we're going to dive deep into all the topics that we have very soon and again Logan Phil Kilpatrick is going to join us at around an hour or so to to to fully c",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=0FrcYhnHmLg&t=2026s",
+                  "end": 2131.109,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "086c415d2befc84074be23d52f5181ed33bc0724ba7fee03fca78f386cf3d020",
+                  "start": 2026.559,
+                  "text": ">> join the club now >> but folks like on this piece of news is super quick you can Now use your X subscription and XAI API keys directly both Hermes and Open Cloud but specifically for Hermes this no for both of them this opens up an entir",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=0FrcYhnHmLg&t=2561s",
+                  "end": 2668.39,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "7264bcb098c3cd9a0d40c525e2f3084db75e45526e04cf37a03a572891fa1e97",
+                  "start": 2561.349,
+                  "text": "So, this is a very interesting failure mode. I asked it to change it to a female voice and the Russian speaking female voice. It changed only part of the video into Russian and did not change to female voice at all. So, the editing go >> th",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=0FrcYhnHmLg&t=3729s",
+                  "end": 3829.91,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "5b1982993b3751e9ac5b3ba84bbc2a7aae29bf5837050dc5b3a51fbca9fe9016",
+                  "start": 3729.359,
+                  "text": "a year. Seven times more water goes to [\\h__\\h] almonds. This misconception started out of one, there was one paper or one study published and they messed up the milliliters with the liters in that study and then it got corrected. So they e",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=0FrcYhnHmLg&t=4995s",
+                  "end": 5076.07,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "b05036d8793aa6b5830367d1dd6221b4a8134cfa1a327b77bb8656cc74663303",
+                  "start": 4995.6,
+                  "text": "cool. So >> and there's a full managed Linux environment in there just for folks to understand. Wolver I think you have a comment for for Logan and Logan I know you we have you for just a little bit of time. So we'll have one last comment f",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=0FrcYhnHmLg&t=5490s",
+                  "end": 5583.83,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "cfcf15270f85f40f4348470223c79f43771e7413da0e330a0069c5ffb4451816",
+                  "start": 5490.96,
+                  "text": "me out. >> Thank you for coming up. Okay. >> Byebye, Logan. >> All right, folks. I'm gonna add move Logan. I'm gonna add folks back on the stage. That was a great conversation. Logan doesn't do a lot of like media, so like we're very very l",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://youtube.com/watch?v=0FrcYhnHmLg&t=479s",
+                  "end": 593.59,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "64391b391251252b5fb6efb1f9c2f8d1f5a3a4c2be509d41cf653067c2be3c45",
+                  "start": 479.68,
+                  "text": "uplift. >> We also have to talk and we'll I think we'll talk at length and then we're going to dive deep into all the topics that we have very soon and again Logan Phil Kilpatrick is going to join us at around an hour or so to to to fully c",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=0FrcYhnHmLg&t=2026s",
+                  "end": 2131.109,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "086c415d2befc84074be23d52f5181ed33bc0724ba7fee03fca78f386cf3d020",
+                  "start": 2026.559,
+                  "text": ">> join the club now >> but folks like on this piece of news is super quick you can Now use your X subscription and XAI API keys directly both Hermes and Open Cloud but specifically for Hermes this no for both of them this opens up an entir",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=0FrcYhnHmLg&t=2561s",
+                  "end": 2668.39,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "7264bcb098c3cd9a0d40c525e2f3084db75e45526e04cf37a03a572891fa1e97",
+                  "start": 2561.349,
+                  "text": "So, this is a very interesting failure mode. I asked it to change it to a female voice and the Russian speaking female voice. It changed only part of the video into Russian and did not change to female voice at all. So, the editing go >> th",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=0FrcYhnHmLg&t=3729s",
+                  "end": 3829.91,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "5b1982993b3751e9ac5b3ba84bbc2a7aae29bf5837050dc5b3a51fbca9fe9016",
+                  "start": 3729.359,
+                  "text": "a year. Seven times more water goes to [\\h__\\h] almonds. This misconception started out of one, there was one paper or one study published and they messed up the milliliters with the liters in that study and then it got corrected. So they e",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=0FrcYhnHmLg&t=4995s",
+                  "end": 5076.07,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "b05036d8793aa6b5830367d1dd6221b4a8134cfa1a327b77bb8656cc74663303",
+                  "start": 4995.6,
+                  "text": "cool. So >> and there's a full managed Linux environment in there just for folks to understand. Wolver I think you have a comment for for Logan and Logan I know you we have you for just a little bit of time. So we'll have one last comment f",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=0FrcYhnHmLg&t=5490s",
+                  "end": 5583.83,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "cfcf15270f85f40f4348470223c79f43771e7413da0e330a0069c5ffb4451816",
+                  "start": 5490.96,
+                  "text": "me out. >> Thank you for coming up. Okay. >> Byebye, Logan. >> All right, folks. I'm gonna add move Logan. I'm gonna add folks back on the stage. That was a great conversation. Logan doesn't do a lot of like media, so like we're very very l",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "youtube",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "May_21_Google_I_O_2026_Deep_Dive_OpenAI_Solves_80-Year_Math_Problem_Cursor_Compo",
+              "source_revision": "98ded82d3f717531561c507871736ba07df44554cdb3c5bde084821dde4d123e",
+              "source_type": "video",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "May 21 — Google I/O 2026 Deep Dive, OpenAI Solves 80-Year Math Problem, Cursor Composer 2.5",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://www.youtube.com/watch?v=0FrcYhnHmLg",
+              "video_id": "0FrcYhnHmLg",
+              "yoinked_at": "2026-05-27T11:04:29"
+            }
+          },
+          {
+            "work_id": "2kmAoyTqeinHGhfoNMjUDg-sDCngeNIl",
+            "video_id": "1851588159403884544",
+            "attempt_token": "PxfMh2W2n4cY9ujzvQvxSkC2G03RQy9zZiCoiR6K3nY",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676079127,
+            "source_revision": "edc8438485bc1ef6d500efd652025d44119beec317792d09c0512c98e8bc1f8a",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "dde71b71e07539cd2c5f4f600d626889a8f437da353f01f183d03a7976150d21",
+            "card": {
+              "card_hash": "345e933fa7330c826a675f74049da099fe2e0f557d8e6ad407f8b9cbb77a1b04",
+              "channel": "DogeDesigner",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/cb_doge/status/2080160987936850225",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "57d638788b4c656699dfbb39956da5b8a6f79e4631928b56299eb924cde096ce",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> \"I'm glad to say that the Starship mission was done entirely with human brains without any use of A.I. The future of A.I. might look at that and say not bad for bunch of monkeys.\"  一 Elon Musk https://t",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> \"I'm glad to say that the Starship mission was done entirely with human brains without any use of A.I. The future of A.I. might look at that and say not bad for bunch of monkeys.\"  一 Elon Musk https://t.co/JwiXkCBTob No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "DogeDesigner_-_I_m_glad_to_say_that_the_Starship_mission_was_done_entirely_with",
+              "source_revision": "edc8438485bc1ef6d500efd652025d44119beec317792d09c0512c98e8bc1f8a",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> \"I'm glad to say that the Starship mission was done entirely with human brains without any use of A.I. The future of A.I. might look at that and say not bad for bunch of monkeys.\"  一 Elon Musk https://t.co/JwiXkCBTob No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "DogeDesigner - \"I'm glad to say that the Starship mission was done entirely with hum...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/cb_doge/status/2080160987936850225",
+              "video_id": "1851588159403884544",
+              "yoinked_at": "2026-07-28T09:57:03"
+            }
+          },
+          {
+            "work_id": "E9-OYEG4LNyDvT0cVOE1PWWE7WfFbAOR",
+            "video_id": "2078521999790415872",
+            "attempt_token": "kB9MRWRNPp3cavo1S_u9xns8O0JnGTXWM37Qhdwm9Uo",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676079128,
+            "source_revision": "095bfc06af30a51700b3a72ddb3a550828cd062f0d67c9fb76f6475601dea2a4",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "38bb0bc46744e1334d944881088843800332f5c5a43cce1ffba108632ad6146d",
+            "card": {
+              "card_hash": "cf6f03c7ba51ce6b31e0b9b902366fdfa27a4b5dbf6cb2bede4d74405aab6f46",
+              "channel": "🍒Wild Cherry 2000🌸",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/SGautreau29553/status/2078522259069665457",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "69b0864b10a55ff14568c6366fb67f27b4b2c8161fd1fa037d81732038a2eeb6",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> @elonmusk Their fails are pretty hysterical too😂 https://t.co/nsoCux0NPk No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:c",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> @elonmusk Their fails are pretty hysterical too😂 https://t.co/nsoCux0NPk No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Wild_Cherry_2000_-_elonmusk_Their_fails_are_pretty_hysterical_too",
+              "source_revision": "095bfc06af30a51700b3a72ddb3a550828cd062f0d67c9fb76f6475601dea2a4",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> @elonmusk Their fails are pretty hysterical too😂 https://t.co/nsoCux0NPk No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "🍒Wild Cherry 2000🌸 - @elonmusk Their fails are pretty hysterical too😂",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/SGautreau29553/status/2078522259069665457",
+              "video_id": "2078521999790415872",
+              "yoinked_at": "2026-07-18T22:51:39"
+            }
+          },
+          {
+            "work_id": "HJsokxq0PvonZcoOyxDLCSwb8Lp5vnAu",
+            "video_id": "1560338557981564935",
+            "attempt_token": "kV3Jr_-YWPb9YZ4HNUwEhz0bGrn1T0A0AssQ-DGMdng",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676079129,
+            "source_revision": "50530e45eb5a673befeda23b937dea83bbbd07750bdaa2265bdbf2a004cdcf9b",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "60e12cdab40b045260e7fb7e896d76f905c16a1e26a0714ff1c90767fb86e656",
+            "card": {
+              "card_hash": "2d84ba6855a1e2c44d608d1bd4607bd76d81eee88c7874b2f6e6dbca27ae8d99",
+              "channel": "Doug",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/DouglasAll/status/2078288976738177316",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "b0f4052b63c6e9b7a17fea9e445817e944797112ec5f31aa39467e4be7fdeff9",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> https://t.co/DREZnqhGwp https://t.co/DREZnqhGwp No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No chann",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> https://t.co/DREZnqhGwp https://t.co/DREZnqhGwp No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Doug_-_https_t_co_DREZnqhGwp",
+              "source_revision": "50530e45eb5a673befeda23b937dea83bbbd07750bdaa2265bdbf2a004cdcf9b",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> https://t.co/DREZnqhGwp https://t.co/DREZnqhGwp No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Doug - https://t.co/DREZnqhGwp",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/DouglasAll/status/2078288976738177316",
+              "video_id": "1560338557981564935",
+              "yoinked_at": "2026-07-18T22:51:53"
+            }
+          },
+          {
+            "work_id": "JYuNjit3tVllMhaQC7aCM2EwDDL11o1k",
+            "video_id": "1993377144995815424",
+            "attempt_token": "_84n_hJDPKYBL8p_S59XmUDQylPLX-XYgXpBqfHBPOs",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676079129,
+            "source_revision": "82850d51f2ec6e91eeffb343c5da4e062df7f27213dc292a4529abf08dd09cf8",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "b05eeb9117dd4d12b3c904db29e510192b7b20eeead9f5e6b9d467548e178cb0",
+            "card": {
+              "card_hash": "8520233028b2327a6345eca88e0e4418d722456e02fed8da0e103d8f6ec9d657",
+              "channel": "Rohan Paul",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/rohanpaul_ai/status/2081871889065263289",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "f09909943cf8454853d73961bcb0050e6a0b26a8b95add996b12f1b7a06644fc",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Ilya Sutskever: Humans aren’t AGI; they know little and learn constantly.  Pretrained AGI on the other hand, overshoots by skipping that trial-and-error phase. Real intelligence comes from ongoing learn",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Ilya Sutskever: Humans aren’t AGI; they know little and learn constantly.  Pretrained AGI on the other hand, overshoots by skipping that trial-and-error phase. Real intelligence comes from ongoing learning, not from starting out “finished.” https://t.co/VBzrs761ez No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Rohan_Paul_-_Ilya_Sutskever_Humans_aren_t_AGI_they_know_little_and_learn_constan",
+              "source_revision": "82850d51f2ec6e91eeffb343c5da4e062df7f27213dc292a4529abf08dd09cf8",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Ilya Sutskever: Humans aren’t AGI; they know little and learn constantly.  Pretrained AGI on the other hand, overshoots by skipping that trial-and-error phase. Real intelligence comes from ongoing learning, not from starting out “finished.” https://t.co/VBzrs761ez No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Rohan Paul - Ilya Sutskever: Humans aren’t AGI; they know little and learn constan...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/rohanpaul_ai/status/2081871889065263289",
+              "video_id": "1993377144995815424",
+              "yoinked_at": "2026-07-28T09:56:40"
+            }
+          },
+          {
+            "work_id": "KEUw7i7E-MrFoZzScrXyAcg9GSD_Y1pl",
+            "video_id": "2078557465042419712",
+            "attempt_token": "acsU5jFAMGwVaSopqYDAOgn4hGS5ARH82txwKok4p6E",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676079130,
+            "source_revision": "0d7dad931ac46a75a9350b3820e34ad65d3d295a4b679ceb5bb8af363229b248",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "87a6d54ca3d5a77f081210bbd2e34fa2b192765d0e2df426dc54a7334622ad63",
+            "card": {
+              "card_hash": "fc788eff3805624c392a8705d9ce865ac6e6198790ac00c93f95740715e0cb4a",
+              "channel": "Shivan Mahendrarajah",
+              "chars": 20,
+              "chars_all_clips": 20,
+              "chars_chosen_clips": 20,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/S_Mahendrarajah/status/2078557588317233164#t=34",
+                  "end": 39.09,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "eb7fb0a94e5e0a88dfcc44ea9626e688b4b986b11bdb81629e8ef8713f4ab072",
+                  "start": 34.09,
+                  "text": "We'll be right back.",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/S_Mahendrarajah/status/2078557588317233164#t=34",
+                  "end": 39.09,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "eb7fb0a94e5e0a88dfcc44ea9626e688b4b986b11bdb81629e8ef8713f4ab072",
+                  "start": 34.09,
+                  "text": "We'll be right back.",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> @PeteHegseth Died for Israel https://t.co/o89NzWxxIs No tags [00:00:34] We'll be right back. <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Shivan_Mahendrarajah_-_PeteHegseth_Died_for_Israel",
+              "source_revision": "0d7dad931ac46a75a9350b3820e34ad65d3d295a4b679ceb5bb8af363229b248",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> @PeteHegseth Died for Israel https://t.co/o89NzWxxIs No tags [00:00:34] We'll be right back. <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Shivan Mahendrarajah - @PeteHegseth Died for Israel",
+              "topic": "Uncategorized",
+              "truncated": false,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/S_Mahendrarajah/status/2078557588317233164",
+              "video_id": "2078557465042419712",
+              "yoinked_at": "2026-07-19T09:49:15"
+            }
+          },
+          {
+            "work_id": "MTh-WAhkqWFj0wZE60q0eo4claaY4-Sk",
+            "video_id": "2078513431548727297",
+            "attempt_token": "qALiAlQqBEvHqVmTwCG8oVlstqPsUCgGR3kypFguZ-8",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676079131,
+            "source_revision": "446b4a231f724b6bb874cd0937ba5e07ca2e74b6a00c29eba7bfc77f977ed533",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "49d716cdce816a5ed00cce70726652d62298154c9118a2986b5bd16be79b71de",
+            "card": {
+              "card_hash": "56d929ead09b623eecfb97a1a5a1f888ee3dd239332c975fba4ee4763a3a4187",
+              "channel": "Just a Dude Who Invests",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/DudeWhoInvests/status/2078513470169866488",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "fe55963902ab6c9da2ba4bfeab8e8b3ac437283acdff7eaa2264adcd2e3d0f73",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Financial advisors putting your money in an index fund for you https://t.co/hgh6mlagOP No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Financial advisors putting your money in an index fund for you https://t.co/hgh6mlagOP No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Just_a_Dude_Who_Invests_-_Financial_advisors_putting_your_money_in_an_index_fund",
+              "source_revision": "446b4a231f724b6bb874cd0937ba5e07ca2e74b6a00c29eba7bfc77f977ed533",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Financial advisors putting your money in an index fund for you https://t.co/hgh6mlagOP No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Just a Dude Who Invests - Financial advisors putting your money in an index fund for you",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/DudeWhoInvests/status/2078513470169866488",
+              "video_id": "2078513431548727297",
+              "yoinked_at": "2026-07-19T09:49:27"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

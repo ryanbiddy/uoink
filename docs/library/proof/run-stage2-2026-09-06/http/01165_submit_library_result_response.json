@@ -1,0 +1,38 @@
+{
+  "seq": 1165,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "JdWOiWWYEoqyDdBiovDIfsvejKV5olPq",
+      "video_id": "GL-ZoNhUFmc",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "news-and-current-events",
+          "shelf_path": [
+            "News and Current Events"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "ba44817d490dc27d05814ca38d05a6a5f7dabeb5f62118261efcc4807468b58c",
+            "card_hash": "ed8259badfaae1a369c3d8b0b91454d22276156dc81c334f8d8169aea9f7bcbb",
+            "quote": "These are the type of people that get humanitarian awards.",
+            "start": 202.106,
+            "end": 287.553,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

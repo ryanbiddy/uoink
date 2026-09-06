@@ -1,0 +1,39 @@
+{
+  "seq": 625,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "I-kyJ5jISYm8Xrg402OjQm63A9aifWjc",
+      "video_id": "2088366674667773952",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "f21e23ee1fd620201528fa15b54aca18d2b96858511b27ec85fa845a4b27cb34",
+            "card_hash": "859b6f071b438fde0bca619874022b69e4ff61e5a4223ba6292c2aa0c311448b",
+            "quote": "Anthropic Believes They Could Be the ONLY Company Left in the World",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

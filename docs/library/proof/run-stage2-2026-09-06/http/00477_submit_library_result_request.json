@@ -1,0 +1,51 @@
+{
+  "seq": 477,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "MIUHyI28EkTsQEvQaePJTE-dNMzcMldZ",
+    "client_id": "proof-harness",
+    "attempt_token": "20synC8M_kbl4Q_XAxgTmk_i_t-E5XZRo2rVQ0-hwK0",
+    "submission_key": "MIUHyI28EkTsQEvQaePJTE-dNMzcMldZ-20synC8M_kbl4Q_XAxgTmk_i_t-E5XZRo2rVQ0-hwK0",
+    "schema_version": 1,
+    "video_id": "2085053109412257792",
+    "source_revision": "e69e0a2fe7a5215e9a59530a02d7f5a3c6254cb70869e76e0aea932f1a42c28b",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "2208da40718229a87130489181dcd19ede29ea5bc0504e666cb70a8feef96d63",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "7c388f17c781ac48238425b26a4ca42dfc1cf4b0a88372547ff4da3488a0694b",
+            "card_hash": "426dc34fcc57e2e90b2ad370d6d7d34a8c14a93effa19aa20b8e1b7f3d85dbd2",
+            "quote": "it's the clearest explanation I've seen of how AI agents actually work"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 15092,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 22295,
+      "wall_time_ms": 0
+    }
+  }
+}

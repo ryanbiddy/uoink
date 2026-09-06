@@ -1,0 +1,50 @@
+{
+  "seq": 71,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "ZcofXAw5HC5InbFWoJizElWaQ11Qx1rR",
+    "client_id": "proof-harness",
+    "attempt_token": "VgBhD3Tu_-947nHu7CJ64TbRk_T_4K-vQXi40CMUhm4",
+    "submission_key": "ZcofXAw5HC5InbFWoJizElWaQ11Qx1rR-VgBhD3Tu_-947nHu7CJ64TbRk_T_4K-vQXi40CMUhm4",
+    "schema_version": 1,
+    "video_id": "2077640475075358720",
+    "source_revision": "5946f41f4779074e53c690ec445f31c34fed9b046876ea1ac75c967073b39122",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "a2b6560a783a11dd16dc82cfff407c66f952c591067ee43fb99d9620aa40b8c5",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "news-and-current-events",
+          "shelf_path": [
+            "News and Current Events"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "e825c695589c14e0ed2f5c1c305e613d3bcade70b01405dc8ca28864e520bdc7",
+            "card_hash": "aa7d2d8267f69d374dee00e210bb119e0c2e9b868e0e8b239118cf6e17bd045a",
+            "quote": "Particularly Places That Don't Have Free Speech Yes Like England Where They Lock People Up"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 9712,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 103604,
+      "wall_time_ms": 0
+    }
+  }
+}

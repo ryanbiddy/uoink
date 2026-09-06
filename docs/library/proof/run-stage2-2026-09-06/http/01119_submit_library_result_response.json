@@ -1,0 +1,39 @@
+{
+  "seq": 1119,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 27,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "vI8pR24XJwjQT92nivFB50wD0LzP1bWI",
+      "video_id": "2095522272358342657",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "7bd8a709f812571a7aacfb84ddef7f922ede5595275e911ac74f243a2159b71c",
+            "card_hash": "fa943a9dabfb4cfd102073081019755d4bf9c217fd65bb6b627fdca18fced183",
+            "quote": "Made this beautiful PS1 style Beyblade game, which is actually pretty addictive and fun to play.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

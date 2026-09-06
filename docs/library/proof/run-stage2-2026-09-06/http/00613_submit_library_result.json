@@ -1,0 +1,93 @@
+{
+  "seq": 613,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 613,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "9ObQlY7cFepK12LvCAh1xKzB9heISXEz",
+      "client_id": "proof-harness",
+      "attempt_token": "OZy2OJWc6MQdcNOhadPHCSFuyTpX8jgWVSu5WEjRvNY",
+      "submission_key": "9ObQlY7cFepK12LvCAh1xKzB9heISXEz-OZy2OJWc6MQdcNOhadPHCSFuyTpX8jgWVSu5WEjRvNY",
+      "schema_version": 1,
+      "video_id": "2088397814267080704",
+      "source_revision": "4fc0ba7fcf4aed9bff45038fac45c39a21317dbd4adedc372d6f493a9fedbc45",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "4e45b3f35b4c0550f9e37bfaef6183d1efb9c181d04cee5b451f33cd44ee9b26",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-and-ml",
+            "shelf_path": [
+              "AI and ML"
+            ],
+            "confidence": 0.63,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "f77289c6a47d6e7fe3e85bd7dee9fd5a47343ad9699fa44797048efb4e4a011f",
+              "card_hash": "30b35b74d7fee1965a9b65af4de5a93042e2004433fedbd5618fd700852f8929",
+              "quote": "The recent paper on the reasoning heist went super viral."
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 15484,
+        "cache_read_tokens": 187032,
+        "cache_create_tokens": 34352,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 613,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "9ObQlY7cFepK12LvCAh1xKzB9heISXEz",
+        "video_id": "2088397814267080704",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-and-ml",
+            "shelf_path": [
+              "AI and ML"
+            ],
+            "confidence": 0.63,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "f77289c6a47d6e7fe3e85bd7dee9fd5a47343ad9699fa44797048efb4e4a011f",
+              "card_hash": "30b35b74d7fee1965a9b65af4de5a93042e2004433fedbd5618fd700852f8929",
+              "quote": "The recent paper on the reasoning heist went super viral.",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

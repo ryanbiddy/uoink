@@ -1,0 +1,35 @@
+{
+  "seq": 1015,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "WnLVzUG8O9UOuTt1fny7OVMOowLd_eQc",
+    "client_id": "proof-harness",
+    "attempt_token": "J-Ak7UkxC282v1MHQ0q4vDVQINKgR74J4kbFFHXJy2E",
+    "submission_key": "WnLVzUG8O9UOuTt1fny7OVMOowLd_eQc-J-Ak7UkxC282v1MHQ0q4vDVQINKgR74J4kbFFHXJy2E",
+    "schema_version": 1,
+    "video_id": "2094532931670958414",
+    "source_revision": "a101ba3b4bbad7193ca69249c3d90233a8fc4f1cd8bc108abc9e33079ad5c5fa",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "d0322553a317764007da4167cd971da2693f5232140e94b3014a7f22c68d2873",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Excerpt is a humorous commentary on a viral video of someone crashing into a police car, with a joke about a mistranslated quote. It does not report a specific breaking crime/conflict incident, discuss AI/ML, or touch space/science, so it falls outside all approved shelves."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 11353,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 21587,
+      "wall_time_ms": 0
+    }
+  }
+}

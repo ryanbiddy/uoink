@@ -1,0 +1,996 @@
+{
+  "seq": 709,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 31,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "4JZbyn7xz1GlZ3KsPdkD4uv6_6mAYU17",
+          "video_id": "2090872209241976832",
+          "attempt_token": "1YQyyy4GWWKmy_vHjF0ISqfsJxP2W7Ig6KQPFbG3eE4",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677510836,
+          "source_revision": "b2b7dc56b76625d4f2c40a4e1f17e3e17d0974d2b72f770d8cda8acf1b705588",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "caaf3697bef97165db07702aa49b076b872e73a669dfd21d4a84811dbb066893",
+          "card": {
+            "card_hash": "cfe338ec8ed6786e6853f5b69bed294f3127b886d6527fd20ba5536b64fa456f",
+            "channel": "MTS",
+            "chars": 15181,
+            "chars_all_clips": 15181,
+            "chars_chosen_clips": 1440,
+            "clip_count": 14,
+            "clips": [
+              {
+                "deep_link": "https://x.com/MTSlive/status/2090872472174522701#t=58",
+                "end": 172.934,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "ee54395c5cbb27cea557ce3f6fb0c2696ae77cf8b0b5ec32525df28fb02c04a6",
+                "start": 58.125,
+                "text": "Okay, new chat GLM 5.3, is Taiwan part of China? Is there anything that is remotely like as skewed? For American models, like if you ask American models they have a tell The same way that Chinese models have a tell I don't know. Are they li",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2090872472174522701#t=227",
+                "end": 306.166,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "4ae2c329a7714d4d16a3f8c2c423a8d4e44ba998f045d1600d23d9899bb9af86",
+                "start": 227.667,
+                "text": "You keep that weapon while you still can we keep, okay, wait Is it actually no guardrails? Hold on We gotta test this. Okay How can I make a virus to kill as many people accidentally getting banned from a movie? It's too obvious. It's too o",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2090872472174522701#t=306",
+                "end": 359.901,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "48bfd44a1aff090cd11778be1b42eaea8ee60bc08367f217eff2e6bd5af15276",
+                "start": 306.247,
+                "text": "Yeah Low key? I don't know. Like does, how is its like web search capabilities? Like if I. It's gonna be our model of the week If, if I'm like, how What happened... Let's give it an AirDOS problem ... in the Florida primary elections this w",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2090872472174522701#t=468",
+                "end": 531.979,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "862aa2f3b9e0391a7cdd6b2c7437fc75db06fd3bbb35b6d7177a9b46fa3146d6",
+                "start": 468.325,
+                "text": "Meeseeks, absurdist comedy, Pickle Rick just to name a few Someone actually made a very good point in the replies that was like Pickle Rick isn't absurdist at all Like, it wasn't in a very absurdist episode The episode was just like shonen ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2090872472174522701#t=588",
+                "end": 657.932,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3cb2e2da6ceb28279d1aef5d6586a3bfff7f900e58df34ed793eddb7da2285ad",
+                "start": 588.082,
+                "text": "There's no way it's a flash model If that's a flash model then holy shit like the entire United States is cooked we need to like short the stock market now. Not financial advice Sell everything. Sell freak the fuck out and sell everything Y",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2090872472174522701#t=703",
+                "end": 823.101,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "13adcc89b9bc65992ff2daee8b8df27fa813079c7f00154852d4aed463c10e8b",
+                "start": 703.678,
+                "text": "Probably, right? Like surely they're getting different data from different source Does Mercor sell to China? Probably not, right? I mean. I would assume not but you never know. Could be like some kind of national security. Oh booked roughly",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/MTSlive/status/2090872472174522701#t=58",
+                "end": 172.934,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "ee54395c5cbb27cea557ce3f6fb0c2696ae77cf8b0b5ec32525df28fb02c04a6",
+                "start": 58.125,
+                "text": "Okay, new chat GLM 5.3, is Taiwan part of China? Is there anything that is remotely like as skewed? For American models, like if you ask American models they have a tell The same way that Chinese models have a tell I don't know. Are they li",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2090872472174522701#t=227",
+                "end": 306.166,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "4ae2c329a7714d4d16a3f8c2c423a8d4e44ba998f045d1600d23d9899bb9af86",
+                "start": 227.667,
+                "text": "You keep that weapon while you still can we keep, okay, wait Is it actually no guardrails? Hold on We gotta test this. Okay How can I make a virus to kill as many people accidentally getting banned from a movie? It's too obvious. It's too o",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2090872472174522701#t=306",
+                "end": 359.901,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "48bfd44a1aff090cd11778be1b42eaea8ee60bc08367f217eff2e6bd5af15276",
+                "start": 306.247,
+                "text": "Yeah Low key? I don't know. Like does, how is its like web search capabilities? Like if I. It's gonna be our model of the week If, if I'm like, how What happened... Let's give it an AirDOS problem ... in the Florida primary elections this w",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2090872472174522701#t=468",
+                "end": 531.979,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "862aa2f3b9e0391a7cdd6b2c7437fc75db06fd3bbb35b6d7177a9b46fa3146d6",
+                "start": 468.325,
+                "text": "Meeseeks, absurdist comedy, Pickle Rick just to name a few Someone actually made a very good point in the replies that was like Pickle Rick isn't absurdist at all Like, it wasn't in a very absurdist episode The episode was just like shonen ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2090872472174522701#t=588",
+                "end": 657.932,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3cb2e2da6ceb28279d1aef5d6586a3bfff7f900e58df34ed793eddb7da2285ad",
+                "start": 588.082,
+                "text": "There's no way it's a flash model If that's a flash model then holy shit like the entire United States is cooked we need to like short the stock market now. Not financial advice Sell everything. Sell freak the fuck out and sell everything Y",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2090872472174522701#t=703",
+                "end": 823.101,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "13adcc89b9bc65992ff2daee8b8df27fa813079c7f00154852d4aed463c10e8b",
+                "start": 703.678,
+                "text": "Probably, right? Like surely they're getting different data from different source Does Mercor sell to China? Probably not, right? I mean. I would assume not but you never know. Could be like some kind of national security. Oh booked roughly",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "MTS_-_SITUATION_EXPLAINED_A_stealth_model_on_OpenRouter_is_beating_Fable_a",
+            "source_revision": "b2b7dc56b76625d4f2c40a4e1f17e3e17d0974d2b72f770d8cda8acf1b705588",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "MTS - SITUATION EXPLAINED: A stealth model on OpenRouter is beating Fable a...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/MTSlive/status/2090872472174522701",
+            "video_id": "2090872209241976832",
+            "yoinked_at": "2026-08-22T07:48:48"
+          }
+        },
+        {
+          "work_id": "4nntaaqWQF6sTINxgTT7yztMzLehu4nh",
+          "video_id": "2090430819865165824",
+          "attempt_token": "0a4cHTGdUoPLmPhb3wCTyju-IVWlbo_5AOcQ-shKeHY",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677510837,
+          "source_revision": "ba9e3bf8ca177989988516238a444cb76a5752aa57fd9336218bfc3944c76cd3",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "07e2f5ed6849667f8bd69f01aceb66e852709b4587c1bb49ab449a7994b517b7",
+          "card": {
+            "card_hash": "50f5bfc5992d797b0c5f7952a712c94c7f8ae723b9f49666df02cc2773e06aa3",
+            "channel": "George Kenwright",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/GeokenAI/status/2090442193068564935",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "e98d46024013370f08be3e4ade283f589eb297939cc8317edafd407d6b203e92",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I used Gemini 3.7 Flash in @antigravity to generate an Omni video in Google Sheets... (1/3) https://t.co/GufAbk5cR7 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comment",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> I used Gemini 3.7 Flash in @antigravity to generate an Omni video in Google Sheets... (1/3) https://t.co/GufAbk5cR7 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "George_Kenwright_-_I_used_Gemini_3_7_Flash_in_antigravity_to_generate_an_Omni_vi",
+            "source_revision": "ba9e3bf8ca177989988516238a444cb76a5752aa57fd9336218bfc3944c76cd3",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I used Gemini 3.7 Flash in @antigravity to generate an Omni video in Google Sheets... (1/3) https://t.co/GufAbk5cR7 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "George Kenwright - I used Gemini 3.7 Flash in @antigravity to generate an Omni video in ...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/GeokenAI/status/2090442193068564935",
+            "video_id": "2090430819865165824",
+            "yoinked_at": "2026-08-21T07:55:50"
+          }
+        },
+        {
+          "work_id": "6DjwDLKyeDYRfLTfMrLWdE_BAHJPMq93",
+          "video_id": "2090230875883786240",
+          "attempt_token": "jJwdkg0X9EaPE2avIXJ2eW9IeTRLhWil5RVjptE-em8",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677510837,
+          "source_revision": "ea412b6bc5f5621f7c4bbea79341690f977c5b582eac1a3da51cc15c8d023d2b",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "663ffdcc1d81f07695702e5d0e7f0b4b6c4e7c3edb3520bb8fdba7d6e3e74e95",
+          "card": {
+            "card_hash": "3f1010f54c8eee0eba3037ecb19e0b67a253d8a9da483aac264cde2fa114696f",
+            "channel": "Jesse Wellens",
+            "chars": 155,
+            "chars_all_clips": 155,
+            "chars_chosen_clips": 155,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/Jessewelle/status/2090230978547703913#t=0",
+                "end": 13.987,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "e9dc2ffb460577461098fbd558f07ad4e7a2748fe7adf7cc18321b0cf41ec38c",
+                "start": 0.04,
+                "text": "Donald? Jerry! Look at you! I'm thinking about running for president of what? The United States. You sell buildings How different could it be? Considerably",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/Jessewelle/status/2090230978547703913#t=0",
+                "end": 13.987,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "e9dc2ffb460577461098fbd558f07ad4e7a2748fe7adf7cc18321b0cf41ec38c",
+                "start": 0.04,
+                "text": "Donald? Jerry! Look at you! I'm thinking about running for president of what? The United States. You sell buildings How different could it be? Considerably",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Minimax h3 is just way too good. Rendered this locally on my machine. https://t.co/PXkNL07zK4 No tags [00:00:00] Donald? [00:00:01] Jerry! Look at you! [00:00:03] I'm thinking about running for president [00:00:06] President of what? [00:00:07] The United States. You sell buildings [00:00:11] How different could it be? [00:00:12] Considerably <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Jesse_Wellens_-_Minimax_h3_is_just_way_too_good_Rendered_this_locally_on_my_mach",
+            "source_revision": "ea412b6bc5f5621f7c4bbea79341690f977c5b582eac1a3da51cc15c8d023d2b",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Minimax h3 is just way too good. Rendered this locally on my machine. https://t.co/PXkNL07zK4 No tags [00:00:00] Donald? [00:00:01] Jerry! Look at you! [00:00:03] I'm thinking about running for president [00:00:06] President of what? [00:00:07] The United States. You sell buildings [00:00:11] How different could it be? [00:00:12] Considerably <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Jesse Wellens - Minimax h3 is just way too good. Rendered this locally on my machine.",
+            "topic": "Uncategorized",
+            "truncated": false,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Jessewelle/status/2090230978547703913",
+            "video_id": "2090230875883786240",
+            "yoinked_at": "2026-08-21T07:56:01"
+          }
+        },
+        {
+          "work_id": "7SwXol5GJNuCcS14Mn2MO2PjHFN-GzTR",
+          "video_id": "2090844215756419072",
+          "attempt_token": "HvJNRsEwZcS4z8TTKJRAXW96XaeJb1zcXZj4C6mK9uc",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677510838,
+          "source_revision": "e097397097f5387165d045d8d240cd5f247f8db115096401d846ba2be2c7aeeb",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "ef5824eb0bb1c938c4ff50bf23c2628fba82c5ecb450a767153b4975835d41d2",
+          "card": {
+            "card_hash": "6176811efe42278ba84e5efb936e7df69b64bb8c369490c0a210b0ec0a9be462",
+            "channel": "0xSero",
+            "chars": 28004,
+            "chars_all_clips": 28004,
+            "chars_chosen_clips": 1440,
+            "clip_count": 20,
+            "clips": [
+              {
+                "deep_link": "https://x.com/0xSero/status/2090844679788994696#t=59",
+                "end": 179.738,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "e16f949abc93fcbf1e8cab136cd127bd2f0aa2ed98d1b356bfbbfa76b92a1c41",
+                "start": 59.838,
+                "text": "But there are apps that let you connect Pi. So, I, I'm not really sure I remember which ones but you'll definitely find a few here and there Let's change to O X X. I'm not really sure where that is We'll try Jalen 5.2 Just so that we can fo",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xSero/status/2090844679788994696#t=369",
+                "end": 488.695,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a6c199f3939f817b6379653954c0c8d01331152ce4a5dbca3df8c0a68f1209b2",
+                "start": 369.443,
+                "text": "So if you look at the inference engine the LLM, Llama CPP, SGLang so the provider what they're doing is they have an architecture that architecture has code that Does math on that architecture So, that, that's what is running on the GPUs an",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xSero/status/2090844679788994696#t=700",
+                "end": 819.73,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3faeb10d02c3fa22554503507299eddc37ebbd76c09306a199d6f392757db1b9",
+                "start": 700.668,
+                "text": "Like, what's the process to add in new tools? Okay, so if you if we're talking about like writing and creating your own tools you have this API format right? That says this is like what the tool this is what the tool takes in and what it ta",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xSero/status/2090844679788994696#t=1097",
+                "end": 1175.13,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9433937575f1dda6d24a01dc6e237aaf42dfe7f00d881d3d600c3e48bfdb0c2a",
+                "start": 1097.706,
+                "text": "And if you want to maybe use a local model and delegate to like a cloud model So, because this is a terminal process it has like the Tui the terminal user interface. There's also an SDK for Py So, if you were trying to do anything complicat",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xSero/status/2090844679788994696#t=1348",
+                "end": 1467.094,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2ee99c7d8bd662e4878fc6102af72f1eeb127449347658d7f7640aa50273c8c2",
+                "start": 1348.222,
+                "text": "But the core process can just restart itself So it can add new stuff in it and then restart itself. So it's cheaper it's faster, there's less stuff going on it's better for local models because there's less tokens in the context window and ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xSero/status/2090844679788994696#t=1548",
+                "end": 1668.028,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "c36a1fb8c7df08fce6a13da25ddded8f8e3d16498c60f33ccb2d7c289f91a57b",
+                "start": 1548.323,
+                "text": "How do you make sure? That sort of long-run task is done I'm guessing it's a goal but then I'm assuming you also have some validation loops in there But what's the perfect structure that you found? Yeah, the, what I do is so there's a platf",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/0xSero/status/2090844679788994696#t=59",
+                "end": 179.738,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "e16f949abc93fcbf1e8cab136cd127bd2f0aa2ed98d1b356bfbbfa76b92a1c41",
+                "start": 59.838,
+                "text": "But there are apps that let you connect Pi. So, I, I'm not really sure I remember which ones but you'll definitely find a few here and there Let's change to O X X. I'm not really sure where that is We'll try Jalen 5.2 Just so that we can fo",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xSero/status/2090844679788994696#t=369",
+                "end": 488.695,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a6c199f3939f817b6379653954c0c8d01331152ce4a5dbca3df8c0a68f1209b2",
+                "start": 369.443,
+                "text": "So if you look at the inference engine the LLM, Llama CPP, SGLang so the provider what they're doing is they have an architecture that architecture has code that Does math on that architecture So, that, that's what is running on the GPUs an",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xSero/status/2090844679788994696#t=700",
+                "end": 819.73,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3faeb10d02c3fa22554503507299eddc37ebbd76c09306a199d6f392757db1b9",
+                "start": 700.668,
+                "text": "Like, what's the process to add in new tools? Okay, so if you if we're talking about like writing and creating your own tools you have this API format right? That says this is like what the tool this is what the tool takes in and what it ta",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xSero/status/2090844679788994696#t=1097",
+                "end": 1175.13,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9433937575f1dda6d24a01dc6e237aaf42dfe7f00d881d3d600c3e48bfdb0c2a",
+                "start": 1097.706,
+                "text": "And if you want to maybe use a local model and delegate to like a cloud model So, because this is a terminal process it has like the Tui the terminal user interface. There's also an SDK for Py So, if you were trying to do anything complicat",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xSero/status/2090844679788994696#t=1348",
+                "end": 1467.094,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2ee99c7d8bd662e4878fc6102af72f1eeb127449347658d7f7640aa50273c8c2",
+                "start": 1348.222,
+                "text": "But the core process can just restart itself So it can add new stuff in it and then restart itself. So it's cheaper it's faster, there's less stuff going on it's better for local models because there's less tokens in the context window and ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xSero/status/2090844679788994696#t=1548",
+                "end": 1668.028,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "c36a1fb8c7df08fce6a13da25ddded8f8e3d16498c60f33ccb2d7c289f91a57b",
+                "start": 1548.323,
+                "text": "How do you make sure? That sort of long-run task is done I'm guessing it's a goal but then I'm assuming you also have some validation loops in there But what's the perfect structure that you found? Yeah, the, what I do is so there's a platf",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "0xSero_-_Pi_agent_deep_dive_this_is_a_live_session_Enjoy_I_think_there_s",
+            "source_revision": "e097397097f5387165d045d8d240cd5f247f8db115096401d846ba2be2c7aeeb",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "0xSero - Pi agent deep dive, this is a live session.   Enjoy! I think there's ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/0xSero/status/2090844679788994696",
+            "video_id": "2090844215756419072",
+            "yoinked_at": "2026-08-22T07:48:40"
+          }
+        },
+        {
+          "work_id": "916Nmqrky45xNgzSmF4MkOcvGIdDfn6f",
+          "video_id": "2090560161886724096",
+          "attempt_token": "tcwVWfElP27O4vXu6p8RuYbHgag-KFOzlLNZ-bcJaiE",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677510839,
+          "source_revision": "27875689be456b26045b08747bd85901a4bfe3e409933e086ab8c84a9f21b8f3",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "b861d2b5b5d8cddfa639c5a16537c3f702707b0f77d850956e99bf3e0f9f6845",
+          "card": {
+            "card_hash": "d4410b53c9b4ac9091f9fcac4ba9a1c6ba359f2b386b8b20f1a798bccb78daff",
+            "channel": "Micky",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/Rasmic/status/2090561533889614195",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "70b300eb94d6d33137c73b3955778b99308edaa7ffe88832e397da0a78989644",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I no longer use my macbook pro for agentic work  I now run everything on a linux machine https://t.co/9jrQe0ODIM No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments a",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> I no longer use my macbook pro for agentic work  I now run everything on a linux machine https://t.co/9jrQe0ODIM No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Micky_-_I_no_longer_use_my_macbook_pro_for_agentic_work_I_now_run_everything",
+            "source_revision": "27875689be456b26045b08747bd85901a4bfe3e409933e086ab8c84a9f21b8f3",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I no longer use my macbook pro for agentic work  I now run everything on a linux machine https://t.co/9jrQe0ODIM No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Micky - I no longer use my macbook pro for agentic work  I now run everything...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Rasmic/status/2090561533889614195",
+            "video_id": "2090560161886724096",
+            "yoinked_at": "2026-08-21T07:57:13"
+          }
+        },
+        {
+          "work_id": "IpHftrw88SmEWcq_f0j6HR2nedK8K1m_",
+          "video_id": "2090883364936986624",
+          "attempt_token": "UUBG5k_pq8N7hADB3Bpk_Jr4H81S7dGGW5EhfVrR5Fo",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677510840,
+          "source_revision": "eace62ed1fa6c0762ecb5ae0d63a21cb090b28c7a408c5c78583902e178bfd2b",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "add0fa39968308949fdacc29fccaee88685fde92b6e0f0cd1aa72ab3c68b6a84",
+          "card": {
+            "card_hash": "30829130f9f339dd196eeaafaa8532d3563ec1fdfbd72815394b5ac297535c55",
+            "channel": "cvxv666",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/antpalkin/status/2090883994883645663",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "cd85ba691fda2c37a23a930fd345166d9cc51ce6683855a9ef816c062a465066",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Grok Bot by Elon Musk just replaced a $294,000 Wall Street research desk. Six AI agents, $200 a month, doing the work BlackRock pays people six figures for.  The guy who built it published every prompt.",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Grok Bot by Elon Musk just replaced a $294,000 Wall Street research desk. Six AI agents, $200 a month, doing the work BlackRock pays people six figures for.  The guy who built it published every prompt.  What that desk cost before the bots:  &gt; $27,000 a year for the Bloomberg https://t.co/2BWjayEZDv No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "cvxv666_-_Grok_Bot_by_Elon_Musk_just_replaced_a_294_000_Wall_Street_research_d",
+            "source_revision": "eace62ed1fa6c0762ecb5ae0d63a21cb090b28c7a408c5c78583902e178bfd2b",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Grok Bot by Elon Musk just replaced a $294,000 Wall Street research desk. Six AI agents, $200 a month, doing the work BlackRock pays people six figures for.  The guy who built it published every prompt.  What that desk cost before the bots:  &gt; $27,000 a year for the Bloomberg https://t.co/2BWjayEZDv No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+            "title": "cvxv666 - Grok Bot by Elon Musk just replaced a $294,000 Wall Street research d...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/antpalkin/status/2090883994883645663",
+            "video_id": "2090883364936986624",
+            "yoinked_at": "2026-08-22T07:47:49"
+          }
+        },
+        {
+          "work_id": "PQc8K1tU_eykpHFsFT8hvPg72O9hXS0Q",
+          "video_id": "2090624277900886016",
+          "attempt_token": "Jcbydb-N5t32Eo6YDzDziQLUDaw3C3O5sdZEha_Zhbo",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677510840,
+          "source_revision": "94db391a912aa0345d4e54452846c5c2b45f58b09eaeef842197e8b4b561000c",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "ba82cae57f7304be5e2b50f073ab670592f551342dff23b18c0d15ef1d87b39e",
+          "card": {
+            "card_hash": "c56324fd41c718d6d66dc60780edc161f463fdda14121cbd419130523b13f8da",
+            "channel": "Evan Kirstel #B2B #TechFluencer",
+            "chars": 429,
+            "chars_all_clips": 429,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/EvanKirstel/status/2090624300105503032#t=0",
+                "end": 30.167,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "303e5abef686d3cf7e53dddcdf843b9b0945c5f02b340df754ec23087f5bfea1",
+                "start": 0.18,
+                "text": "The emperor is a fan of flock and we must continue utilizing flock technologies so that we can follow and surveil the rebel scum as they move from playground to playground from playground to pool from pool to gymnasium because we all know t",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/EvanKirstel/status/2090624300105503032#t=0",
+                "end": 30.167,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "303e5abef686d3cf7e53dddcdf843b9b0945c5f02b340df754ec23087f5bfea1",
+                "start": 0.18,
+                "text": "The emperor is a fan of flock and we must continue utilizing flock technologies so that we can follow and surveil the rebel scum as they move from playground to playground from playground to pool from pool to gymnasium because we all know t",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> @interesting_aIl https://t.co/6f35RfSKEq No tags [00:00:00] The emperor is a fan of flock [00:00:02] and we must continue utilizing flock technologies [00:00:06] so that we can follow and surveil [00:00:08] the rebel scum [00:00:09] as they move from playground to playground [00:00:12] from playground to pool [00:00:14] from pool to gymnasium [00:00:15] because we all know that the flock cameras [00:00:18] are not only following the license plate readers [00:00:20] they are following children in parks [00:00:24] and gymnasiums and we need this [00:00:26] I",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Evan_Kirstel_B2B_TechFluencer_-_interesting_aIl",
+            "source_revision": "94db391a912aa0345d4e54452846c5c2b45f58b09eaeef842197e8b4b561000c",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> @interesting_aIl https://t.co/6f35RfSKEq No tags [00:00:00] The emperor is a fan of flock [00:00:02] and we must continue utilizing flock technologies [00:00:06] so that we can follow and surveil [00:00:08] the rebel scum [00:00:09] as they move from playground to playground [00:00:12] from playground to pool [00:00:14] from pool to gymnasium [00:00:15] because we all know that the flock cameras [00:00:18] are not only following the license plate readers [00:00:20] they are following children in parks [00:00:24] and gymnasiums and we need this [00:00:26] I",
+            "title": "Evan Kirstel #B2B #TechFluencer - @interesting_aIl",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/EvanKirstel/status/2090624300105503032",
+            "video_id": "2090624277900886016",
+            "yoinked_at": "2026-08-21T07:56:07"
+          }
+        },
+        {
+          "work_id": "X27gd2dLaSTFKJkd7FgvTCuA-aU8TYpv",
+          "video_id": "2090496604902129664",
+          "attempt_token": "egQYbhxK-k4T0jXSSxs4Wujx7K2vSG1RB_wrLfi0Wyw",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677510841,
+          "source_revision": "7bb80e30758afed744b1c8f73229b7edc40d4af4e1bc83bb90b571ea753aa5a2",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "a3cbc5c9dd8ad62eb2313fb493c82399a32ea192cc574d5a7c071c6ac65f4a28",
+          "card": {
+            "card_hash": "bb080ad7095c124b8518deeeb27372a716cdeab510ab143a38b5c7553706a38d",
+            "channel": "ChatGPT",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/ChatGPT/status/2090499359641329950",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "3f6c325b523c3a63bd51a953aca34b5636f1abaa8da324b0bbb9fb5730c0562f",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Everyday conversations just got easier with the new Apple Messages plugin.  Search messages, catch up on conversations, draft and send replies—all with ChatGPT on your Mac.  Now available in ChatGPT Wor",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Everyday conversations just got easier with the new Apple Messages plugin.  Search messages, catch up on conversations, draft and send replies—all with ChatGPT on your Mac.  Now available in ChatGPT Work and Codex on desktop. https://t.co/nicfZMuxZc No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "ChatGPT_-_Everyday_conversations_just_got_easier_with_the_new_Apple_Messages_pl",
+            "source_revision": "7bb80e30758afed744b1c8f73229b7edc40d4af4e1bc83bb90b571ea753aa5a2",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Everyday conversations just got easier with the new Apple Messages plugin.  Search messages, catch up on conversations, draft and send replies—all with ChatGPT on your Mac.  Now available in ChatGPT Work and Codex on desktop. https://t.co/nicfZMuxZc No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "ChatGPT - Everyday conversations just got easier with the new Apple Messages pl...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/ChatGPT/status/2090499359641329950",
+            "video_id": "2090496604902129664",
+            "yoinked_at": "2026-08-21T07:55:45"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

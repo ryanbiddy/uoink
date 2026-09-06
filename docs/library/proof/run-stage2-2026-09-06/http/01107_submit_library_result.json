@@ -1,0 +1,59 @@
+{
+  "seq": 1107,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 1107,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "dDJa2pBAlvj0OQxXBsp-4S9rWg_NMgFW",
+      "client_id": "proof-harness",
+      "attempt_token": "FH7PNo_fNcD010qHiuccqnjtM5DPmdE_28XuAZD6n30",
+      "submission_key": "dDJa2pBAlvj0OQxXBsp-4S9rWg_NMgFW-FH7PNo_fNcD010qHiuccqnjtM5DPmdE_28XuAZD6n30",
+      "schema_version": 1,
+      "video_id": "4OmEbeR3BtI",
+      "source_revision": "51d24779d52b75025e22d393789f7c9b5e573efeee39efe598539c163929aa26",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "e02ee5c112d2c39843447c3dd00246f653822e0683ddbd728914a2f2aa1d6cc5",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Content is career/HR advice about hiring blacklists and job applications; it has no AI/ML, space/science, or breaking-news subject matter and does not fit any approved shelf."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 20692,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 29055,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1107,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "dDJa2pBAlvj0OQxXBsp-4S9rWg_NMgFW",
+        "video_id": "4OmEbeR3BtI",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

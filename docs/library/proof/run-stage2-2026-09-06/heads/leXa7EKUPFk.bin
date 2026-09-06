@@ -1,0 +1,178 @@
+# 3. Reasoning: Goal Trees and Rule-Based Expert Systems
+
+**Channel:** MIT OpenCourseWare (6.3M subscribers)
+**Uploaded:** 2014-01-10 | **Duration:** 49:56 | **Views:** 337,068 | **Likes:** 2,853
+**URL:** https://www.youtube.com/watch?v=leXa7EKUPFk
+**Yoinked:** 2026-05-12T18:55:08
+**Topic:** Playlist
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+MIT 6.034 Artificial Intelligence, Fall 2010
+View the complete course: http://ocw.mit.edu/6-034F10
+Instructor: Patrick Winston
+
+We consider a block-stacking program, which can answer questions about its own behavior, and then identify an animal given a list of its characteristics.  Finally, we discuss how to extract knowledge from an expert, using the example of bagging groceries.
+
+License: Creative Commons BY-NC-SA
+More information at http://ocw.mit.edu/terms
+More courses at http://ocw.mit.edu
+
+## Tags
+
+system diagram, subroutine, trace, behavior, heuristics, knowledge engineering, forward chaining, backward chaining, deduction, elaboration graph, goal tree, rule based, expert system
+
+---
+
+## Transcript
+
+### Chapter: Introduction (00:00:00)
+
+[00:00:09] PROFESSOR PATRICK WINSTON: Ladies and gentlemen, the
+[00:00:10] engineers drinking song.
+[00:00:13] Back in the day, I've drunk quite a lot to that song.
+[00:00:16] And as drinking songs go, it's not bad.
+[00:00:20] I caution you, however, before playing this song in the
+[00:00:24] presence of small children, audition it first.
+[00:00:28] Some of the verses are sufficiently gross as to make
+[00:00:32] a sailor go beyond blushing.
+[00:00:37] It's an interesting song because there are an infinite
+[00:00:39] number of verses.
+[00:00:41] Here's the mathematical proof.
+[00:00:43] Suppose there were a finite number of verses.
+[00:00:46] Then there would be a last verse.
+[00:00:49] And if there were a last verse, then some drunk alumni
+[00:00:52] would compose a new one.
+[00:00:54] Therefore, there is no last verse, the size is not finite,
+[00:00:58] and there are an infinite number of verses.
+[00:01:02] I play it for you today because I'm an engineer.
+[00:01:05] I like to build stuff.
+[00:01:07] I build stuff out of wood.
+[00:01:09] I build stuff out of metal.
+[00:01:10] I build stuff out of rocks.
+[00:01:12] And I especially like to write programs.
+[00:01:16] I don't know, sometimes people come to me and say, I'm
+[00:01:20] majoring in computer science, but I don't
+[00:01:21] like to write programs.
+[00:01:23] I've always been mystified by that.
+[00:01:26] I mean, if you want to show how tough you are, you can go
+[00:01:29] bungee jumping or drive a nail through your hand or something
+[00:01:32] like that instead.
+[00:01:35] But I've written quite a few programs for demonstrating
+[00:01:38] stuff in this subject.
+[00:01:42] They're all written in Java, principally because I can
+[00:01:46] therefore make them available to you and to the rest of the
+[00:01:48] world by way of Web Start.
+[00:01:50] A few weeks ago, I was mucking around with the system and
+[00:01:55] broke the version on the server, and within 15 minutes,
+[00:01:57] I got an email from somebody in the depths of Anatolia
+[00:02:01] complaining about it and asking me to bring it back up.
+[00:02:07] This particular program is patterned
+[00:02:09] after an early AI classic.
+[00:02:14] And it was the business end of a program written by Terry
+[00:02:19] Winograd, who became, and is, a professor of computer
+[00:02:24] science at Stanford University--
+[00:02:27] which is on the west coast for those of you--
+[00:02:31] on the strength of his work on the natural language front end
+[00:02:35] of this program.
+[00:02:37] But the natural language part is not what makes it of
+[00:02:40] interest for us today.
+[00:02:44] It's more the other kinds of stuff.
+[00:02:48] Let's pile these things up.
+[00:02:51] Now, I'm going to ask to do something, maybe put
+[00:02:55] B2 on top of B7.
+[00:03:07] Not bad.
+[00:03:07] How about B6 on B3?
+[00:03:18] This program's kind of clever.
+[00:03:25] Let me do one more.
+[00:03:26] Let's put B7 on B2.
+[00:03:39] OK, now let's see.
+[00:03:40] Maybe B5 on B2?
+[00:03:46] B4 on B3 first, maybe?
+[00:03:52] Oh, I must have clicked the wrong button.
+[00:03:55] Oh, there it goes.
+[00:03:56] OK.
+[00:03:58] Let's put B4 on B1.
+[00:04:02] Agh, my mouse keeps getting out of control.
+[00:04:15] Now, let's put B1 on B2.
+[00:04:17] This is an example I'm actually going to
+[00:04:18] work out on the board.
+[00:04:23] Oh, I see.
+[00:04:25] My touch pad accidentally got activated.
+[00:04:27] B1 on B2.
+[00:04:44] Now, let's ask a question.
+[00:04:59] Well.
+[00:05:00] SPEAKER 2: [SINGING]
+[00:05:01] PROFESSOR PATRICK WINSTON: Stop.
+[00:05:03] SPEAKER 3: [LAUGHTER]
+[00:05:07] PROFESSOR PATRICK WINSTON: Had enough of that.
+[00:05:11] Let's see.
+[00:05:12] Why did you put--
+[00:05:15] why did you want to get rid of B4?
+[00:05:22] OK, one--
+[00:05:28] PROFESSOR PATRICK WINSTON: Maybe they think, that's what
+[00:05:34] happens when you use software you write yourself.
+[00:05:42] Why did you want to clear the top of B2?
+[00:05:51] Did I do that?
+[00:05:55] Why did you clear the top of B1?
+[00:06:06] PROFESSOR PATRICK WINSTON: Oh, it's haunting me.
+[00:06:08] Yeah.
+[00:06:09] So the drinking song is easily offended, I guess.
+[00:06:29] But I won't develop that scenario again.
+[00:06:31] What I want to show you is that this program looks like
+[00:06:35] it's kind of smart, and it somehow can answer questions
+[00:06:39] about its own behavior.
+[00:06:40] Have you ever written a program that's answered
+[00:06:41] questions about its own behavior?
+[00:06:44] Probably not.
+[00:06:44] Would you like to learn how to do that?
+[00:06:47] So by the end of the hour, you'll be able to write this
+[00:06:49] program and many more like it that know how to answer
+[00:06:53] questions about their own behavior.
+[00:06:55] There have been tens of thousands of such programs
+[00:06:57] written, but only by people who know the stuff I'm going
+[00:07:00] to tell you about right now, OK?
+
+### Chapter: Program Structure (00:07:02)
+
+[00:07:03] So what I want to do is I want to start by taking this
+[00:07:05] program apart on the board and talking to you about the
+[00:07:08] modules, the subroutines that it contains.
+[00:07:12] So here it is.
+[00:07:17] The first thing we need to think about,
+[00:07:20] here are some blocks.
+[00:07:23] What has to happen if I'm going to put the bottom block
+[00:07:27] on the larger block?
+[00:07:29] Well, first of all, I have to find space for it.
+[00:07:32] Then I have to grasp the lower block.
+[00:07:35] And I have to move it and I have to ungrasp it.
+[00:07:38] So those are four things I need to do in order to achieve
+[00:07:42] what I want to do.
+[00:07:44] So therefore, I know that the put-on method has four pieces.
+[00:07:52] It has to find space on the target block.
+[00:07:57] It has to grasp the block that it's been commanded to move.
+[00:08:05] Then it has to move, and then it has to ungrasp.
+[00:08:15] But taking hints from some of the questions that it did
+[00:08:18] answer before I got haunted by the music, taking our cue from
+[00:08:23] that, we know that in order to grasp something, in this
+[00:08:26] particular world, you can't have anything on top of it.
+[00:08:30] So grasp, therefore, may call clear top in order to get
+[00:08:36] stuff off from the target object.
+[00:08:41] And that may happen in an iterative loop because there
+[00:08:45] may be several things on top.
+[00:08:47] And how do you get rid of stuff?
+[00:08:49] Well, by calling get rid of.
+[00:08:54] And that may go around a loop several times.
+[00:08:57] And then, the way you get rid of stuff is by calling put-on.
+[00:09:04] So that gives us recursion, and it's from the recursion
+[00:09:06] that we get a lot of the apparent complexity of the
+[00:09:09] program's behavior when it solves a problem.
+[00:09:13] Now, in order to find space, you also have to
+[00:09:16] call get rid of.
+[00:09:19] So that's where I meant to pu

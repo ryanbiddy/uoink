@@ -1,0 +1,38 @@
+{
+  "seq": 445,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "-ORA7F683rut5qJJEQP3S5Iw9pE9Xys7",
+      "video_id": "2084984808216657921",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.7,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "253ccea041c461ae47da830485dc4faf978f6ed92c2d86f0350f4f5a3c9bb08a",
+            "card_hash": "2d23fc02c8283426ed552531a5abb091d9acae472a22fb2f202ce4906e2e2813",
+            "quote": "Viet built a small vision system that counts potatoes on a conveyor belt",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

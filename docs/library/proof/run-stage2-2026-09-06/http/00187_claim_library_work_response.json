@@ -1,0 +1,767 @@
+{
+  "seq": 187,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 11,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "R3jGcc_OZQobMnOqcUaFrj5E5N0kLbPq",
+          "video_id": "2080951370224652288",
+          "attempt_token": "i-2ATladHx82jf63z7SZyDBnUdp-5k0ge03oW2BnBQA",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676459614,
+          "source_revision": "71649e5a8b5dcedcd9ab19964a0d4cd692c37fb6101e6df8fac96adcc6e4f03a",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "f2c5bf43f7f1dfdcc5aa16c187dc6eac6516170f71d349b11d23e4ce021a16c0",
+          "card": {
+            "card_hash": "42441fc772a880bd2b2160ac670f514869990805510023a0df16394677ce46c2",
+            "channel": "Jahir Sheikh",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/jahirsheikh8/status/2080951382740504706",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "bf9bb7bea24a7682a02210d33a522dbe3c1d1d4f893215851ad00a3ba87047c4",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> “API costs are too high... Let's build our own LLM” https://t.co/KPmqZQn0Qg No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoin",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> “API costs are too high... Let's build our own LLM” https://t.co/KPmqZQn0Qg No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Jahir_Sheikh_-_API_costs_are_too_high_Let_s_build_our_own_LLM",
+            "source_revision": "71649e5a8b5dcedcd9ab19964a0d4cd692c37fb6101e6df8fac96adcc6e4f03a",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> “API costs are too high... Let's build our own LLM” https://t.co/KPmqZQn0Qg No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Jahir Sheikh - “API costs are too high... Let's build our own LLM”",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/jahirsheikh8/status/2080951382740504706",
+            "video_id": "2080951370224652288",
+            "yoinked_at": "2026-07-26T05:15:39"
+          }
+        },
+        {
+          "work_id": "R8jkhhCbac7qdb6ZpY05PEpU70Af7Gwq",
+          "video_id": "2081149998704521712",
+          "attempt_token": "auiVKRwBfck3T0fxI0Zx5vwDdHhgTY21yuiCSbiG8dY",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676459615,
+          "source_revision": "9bfe40969ded7c4a5d3f10ccbdebe2a7bb7f0e20c49749a0d5d2fba6f9abf569",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "45edd5f05591c8f38774e2147c0b6e7442210d083bbf6446880ccb66ae17833e",
+          "card": {
+            "card_hash": "8e59f749c46b8bd79b714bda8d42970a04bc59d00784cea4e16ae25b68a8c612",
+            "channel": "Fireside Alpha",
+            "chars": 766,
+            "chars_all_clips": 766,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/firesidealpha/status/2081149998704521712#t=0",
+                "end": 57.72,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "5999ae016c02ffa2ebb222d1d624d54e0be5198cf3d33eeb05639a248a4409c4",
+                "start": 0.38,
+                "text": "In some sense Codex was an example of this. We were way behind Claude Code, and it seemed like a kind of crazy kamikaze mission to try to beat them with a coding app. The consensus is that this kind of thing never works, and you just move o",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Social Media Research",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/firesidealpha/status/2081149998704521712#t=0",
+                "end": 57.72,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "5999ae016c02ffa2ebb222d1d624d54e0be5198cf3d33eeb05639a248a4409c4",
+                "start": 0.38,
+                "text": "In some sense Codex was an example of this. We were way behind Claude Code, and it seemed like a kind of crazy kamikaze mission to try to beat them with a coding app. The consensus is that this kind of thing never works, and you just move o",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Sam Altman reveals he deliberately got himself addicted to TikTok while building Sora, then deleted it because it was too powerful like a drug.  \"I deleted TikTok because it was just too powerful. Here's a crazy thing that happened. When we were building the Sora app, I made https://t.co/K6839fXQWn No tags [00:00:00] In some sense Codex was an example of this. [00:00:09] We were way behind Claude Code, and it seemed like [00:00:12] a kind of crazy kamikaze mission to try to beat them [00:00:16] with a coding app. The consensus is that this kind [00:00:22] ",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Fireside_Alpha_-_Sam_Altman_reveals_he_deliberately_got_himself_addicted_to_TikT",
+            "source_revision": "9bfe40969ded7c4a5d3f10ccbdebe2a7bb7f0e20c49749a0d5d2fba6f9abf569",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Sam Altman reveals he deliberately got himself addicted to TikTok while building Sora, then deleted it because it was too powerful like a drug.  \"I deleted TikTok because it was just too powerful. Here's a crazy thing that happened. When we were building the Sora app, I made https://t.co/K6839fXQWn No tags [00:00:00] In some sense Codex was an example of this. [00:00:09] We were way behind Claude Code, and it seemed like [00:00:12] a kind of crazy kamikaze mission to try to beat them [00:00:16] with a coding app. The consensus is that this kind [00:00:22] ",
+            "title": "Fireside Alpha - Sam Altman reveals he deliberately got himself addicted to TikTok whi...",
+            "topic": "Social Media Research",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/firesidealpha/status/2081149998704521712",
+            "video_id": "2081149998704521712",
+            "yoinked_at": "2026-07-26T08:16:36"
+          }
+        },
+        {
+          "work_id": "YBBXO1of5Brfm2Zpca_y6mAKxiaHHXc3",
+          "video_id": "2081046304575164416",
+          "attempt_token": "XiXub7hQrFTxFVFKY0itSyDNwei5CsOhIVLyvY_Q7is",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676459615,
+          "source_revision": "6ab66a4e728507ff25d5003a83736ff295168d4e34e68dd6b23e9a150590b5a1",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "c142a08480ba7d3c910cc3e0cac237af9da8c464cd392c2ad9ebf70076735b30",
+          "card": {
+            "card_hash": "1465cb4bc50d346879d5acf622047e86c69fe4779afd8eed79721890e0e2f613",
+            "channel": "Eduardo",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/martiano/status/2081046361697399046",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "cf022d10d99fbdce5d2680028223152dcf69b0e5694e43980e68d03ad444ec14",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Opus 5, car racing game test, one shot. On par with Fable, ahead of every other model I've run. No visual defects on the first pass, and the driving physics feel right. https://t.co/uqGi42lKEc No tags *",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Opus 5, car racing game test, one shot. On par with Fable, ahead of every other model I've run. No visual defects on the first pass, and the driving physics feel right. https://t.co/uqGi42lKEc No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Eduardo_-_Opus_5_car_racing_game_test_one_shot_On_par_with_Fable_ahead_of_e",
+            "source_revision": "6ab66a4e728507ff25d5003a83736ff295168d4e34e68dd6b23e9a150590b5a1",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Opus 5, car racing game test, one shot. On par with Fable, ahead of every other model I've run. No visual defects on the first pass, and the driving physics feel right. https://t.co/uqGi42lKEc No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Eduardo - Opus 5, car racing game test, one shot. On par with Fable, ahead of e...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/martiano/status/2081046361697399046",
+            "video_id": "2081046304575164416",
+            "yoinked_at": "2026-07-26T07:50:49"
+          }
+        },
+        {
+          "work_id": "ZMvkhoc0iFtP4bKpn2hjRxpY4IaS-l01",
+          "video_id": "2081023025714188288",
+          "attempt_token": "DI35UZKBZFzProkAwYLlJJW63IUEYbJaxqbKPhbRH2s",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676459616,
+          "source_revision": "28f7ca02f966eedeb20759ce07db651ca2e45b6039df64a0955157ce3ad956fa",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "6167f9f5f11d6dceede8628db0a476e995506a1c82a6df5980945d2f4492e0ef",
+          "card": {
+            "card_hash": "9dbd09043b74d6030453cbe31c2caa48dbc678ef0b598f7c4f48732c511abe11",
+            "channel": "Irvin (in Japan 🇯🇵)",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/irvinxyz/status/2081023625470333356",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "9abbc53706abfb58416d0c3c2c6a2f83ae444dcc4030ee28f71e73e0e812794a",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> BREAKING: Japan 🇯🇵 just experienced its first AGI moment. An autonomous fighting robot tried to runway from a cage fight. Surreal. https://t.co/CABn3LfnCJ No tags *No captions available for this video.*",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> BREAKING: Japan 🇯🇵 just experienced its first AGI moment. An autonomous fighting robot tried to runway from a cage fight. Surreal. https://t.co/CABn3LfnCJ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Irvin_in_Japan_-_BREAKING_Japan_just_experienced_its_first_AGI_moment_An_autonom",
+            "source_revision": "28f7ca02f966eedeb20759ce07db651ca2e45b6039df64a0955157ce3ad956fa",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> BREAKING: Japan 🇯🇵 just experienced its first AGI moment. An autonomous fighting robot tried to runway from a cage fight. Surreal. https://t.co/CABn3LfnCJ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Irvin (in Japan 🇯🇵) - BREAKING: Japan 🇯🇵 just experienced its first AGI moment. An autonomo...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/irvinxyz/status/2081023625470333356",
+            "video_id": "2081023025714188288",
+            "yoinked_at": "2026-07-26T05:15:24"
+          }
+        },
+        {
+          "work_id": "hs0rBMYdS2uWbq7MlXzVs1GeFK-4KJ23",
+          "video_id": "2081167007945576448",
+          "attempt_token": "PngStCrv3gad7AJydFd7XqwbwZqYZbhxkt9l7QMCvaA",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676459617,
+          "source_revision": "00be0dba3a35d5227a02898ab92943af9788cb44ddea2482c30acc48015300d4",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "0f531190faed716c6e2ba5644548db4da84599d0febf94179e804a0881d2a8f3",
+          "card": {
+            "card_hash": "ce9d02e50c8c40b7b1f96935bd5396832e3568683f44df0e1d4e2fd9dc3e1f42",
+            "channel": "MiniMax (official)",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/MiniMax_AI/status/2081167102753517574",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "110309f0ee8f629b70424530673ee1ba325b1cabb26024ad5978af6e6839b20a",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Open weights. Open research. Open innovation.🫶  Marching for an open future.🤍 https://t.co/oJTsMjPTLE No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Open weights. Open research. Open innovation.🫶  Marching for an open future.🤍 https://t.co/oJTsMjPTLE No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "MiniMax_official_-_Open_weights_Open_research_Open_innovation_Marching_for_an_op",
+            "source_revision": "00be0dba3a35d5227a02898ab92943af9788cb44ddea2482c30acc48015300d4",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Open weights. Open research. Open innovation.🫶  Marching for an open future.🤍 https://t.co/oJTsMjPTLE No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "MiniMax (official) - Open weights. Open research. Open innovation.🫶  Marching for an open ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/MiniMax_AI/status/2081167102753517574",
+            "video_id": "2081167007945576448",
+            "yoinked_at": "2026-07-26T08:16:42"
+          }
+        },
+        {
+          "work_id": "i_aQd8e-toC-ft--yjeiVtxCv2tuuGeQ",
+          "video_id": "2081097021709041665",
+          "attempt_token": "fYYj5SP3qLhhOofTxuE1QxxwQKGiX1KCb_vJ6VYKgTA",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676459617,
+          "source_revision": "7d483273209d2b187787776c9641016be655a61fa6b22f1c5e08af4dd21a9250",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "a270c1b322aa717646e633cf1485e4be8b4dc7dd54002c860d493cb503a6d92e",
+          "card": {
+            "card_hash": "741f6789aef074e2d9731cb3e00a72da8470eed57cfa4c13a5f43e3fe218cc04",
+            "channel": "Cengiz",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/cengotengo/status/2081097248000110946",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "f00c3faf08eec39f445a4528c4bc300498b31455f2fe0be9c731463c4bd34e02",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Opus 5 test with a first-person shooter prototype, one shot. Took like 1.5 hrs  It not only created the entire game but also spawned bots to play in multiplayer. Flight mechanics may be under-tuned, but",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Opus 5 test with a first-person shooter prototype, one shot. Took like 1.5 hrs  It not only created the entire game but also spawned bots to play in multiplayer. Flight mechanics may be under-tuned, but...   It's easily the most powerful model of all time full stop. https://t.co/6aBFUUzt0g No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Cengiz_-_Opus_5_test_with_a_first-person_shooter_prototype_one_shot_Took_lik",
+            "source_revision": "7d483273209d2b187787776c9641016be655a61fa6b22f1c5e08af4dd21a9250",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Opus 5 test with a first-person shooter prototype, one shot. Took like 1.5 hrs  It not only created the entire game but also spawned bots to play in multiplayer. Flight mechanics may be under-tuned, but...   It's easily the most powerful model of all time full stop. https://t.co/6aBFUUzt0g No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Cengiz - Opus 5 test with a first-person shooter prototype, one shot. Took lik...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/cengotengo/status/2081097248000110946",
+            "video_id": "2081097021709041665",
+            "yoinked_at": "2026-07-26T05:15:44"
+          }
+        },
+        {
+          "work_id": "jBwu2GSfpQWhBqwy4COqs8l-G7nmukjA",
+          "video_id": "2081304293978890240",
+          "attempt_token": "O1-dQtWyd1DMvzglWBbUaYCIib59fSCbEU2NhsSmOb0",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676459618,
+          "source_revision": "61237587b0d228d09ad1170cc356dc8b6613c67eeb0c11d0306e42b3790a89d4",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "ec73e501e0f406c7f9dcce0037c8e06caaafeb3a6e2056222652433eb8d01727",
+          "card": {
+            "card_hash": "b75795f37ab16aac37994764f03ccb0617a3b8451cba8c8af285330fc405688e",
+            "channel": "audit911",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/audit_911/status/2081304687962477002",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "23e12c5b2bd11a33ca63b5a09b71755571b245cc8f4bb58553a41f6576c02251",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> The free Claude Max 20x subscription vulnerability is being abused. https://t.co/2Y4799X91E No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this v",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> The free Claude Max 20x subscription vulnerability is being abused. https://t.co/2Y4799X91E No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "audit911_-_The_free_Claude_Max_20x_subscription_vulnerability_is_being_abused",
+            "source_revision": "61237587b0d228d09ad1170cc356dc8b6613c67eeb0c11d0306e42b3790a89d4",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> The free Claude Max 20x subscription vulnerability is being abused. https://t.co/2Y4799X91E No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "audit911 - The free Claude Max 20x subscription vulnerability is being abused.",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/audit_911/status/2081304687962477002",
+            "video_id": "2081304293978890240",
+            "yoinked_at": "2026-07-26T07:50:24"
+          }
+        },
+        {
+          "work_id": "kmt8G9YVThGPqrVSVtw6Ga25yNGCKhzS",
+          "video_id": "2081133656869920768",
+          "attempt_token": "g7ckFREH501tByjUTIiQWlmrW_ClWMNz_VgD07LSZGU",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676459618,
+          "source_revision": "e6aef7eefe055a050e8045919dbe33b9f0c5a23fbae03d7cab887b99ef4d3fdd",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "750b6d1140df76f4769d4c9301a12e5df2a9812f7e400b5a8d63f4287107d36d",
+          "card": {
+            "card_hash": "eaf4f6f7f11ffdb6658ebe6b9ce3ecd6c282073ce9bf163076e3c70931b40df1",
+            "channel": "Lentils",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/Lentils80/status/2081136109778538917",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "dad7d6efd4bcaa22e36a06272b29f80120d885734200711579d3c4e8fd8d0a36",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Claude Opus 5 made this beautiful painterly world in a single HTML file, everything made procedurally  It implemented a realistic grass and wind field simulation so that the millions of grass blades on-",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Claude Opus 5 made this beautiful painterly world in a single HTML file, everything made procedurally  It implemented a realistic grass and wind field simulation so that the millions of grass blades on-screen react to the wind https://t.co/qdjrhZFx0X No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Lentils_-_Claude_Opus_5_made_this_beautiful_painterly_world_in_a_single_HTML_fi",
+            "source_revision": "e6aef7eefe055a050e8045919dbe33b9f0c5a23fbae03d7cab887b99ef4d3fdd",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Claude Opus 5 made this beautiful painterly world in a single HTML file, everything made procedurally  It implemented a realistic grass and wind field simulation so that the millions of grass blades on-screen react to the wind https://t.co/qdjrhZFx0X No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Lentils - Claude Opus 5 made this beautiful painterly world in a single HTML fi...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Lentils80/status/2081136109778538917",
+            "video_id": "2081133656869920768",
+            "yoinked_at": "2026-07-25T18:10:12"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

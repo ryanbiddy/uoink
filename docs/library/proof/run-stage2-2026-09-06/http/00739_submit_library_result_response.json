@@ -1,0 +1,39 @@
+{
+  "seq": 739,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Tq2dtYdOQEmPskAf6u_FMabEYnV_5DE5",
+      "video_id": "2089892727957909504",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "033bfa385d7e7d79e36522ffddf0d02453fe8d01c3c31ff21e007a1469dc35e0",
+            "card_hash": "0d6e46a31660f7745dee50366dbe1a8edc70a1d6b82bfe330f3a5fcff5e67406",
+            "quote": "a new platform for benchmarking models on your own workloads and comparing performance, speed and cost efficiency",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

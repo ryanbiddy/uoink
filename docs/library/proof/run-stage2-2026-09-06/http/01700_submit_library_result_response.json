@@ -1,0 +1,39 @@
+{
+  "seq": 1700,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "ycaAzhWF1yi6hvDxkZaXsToJ7c6r9Wia",
+      "video_id": "x_916a6278802",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.9,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "e7f42c35e5ba01cdb169c3f0bd0795ff8895bd943a4627a421b48a6ab5333d3d",
+            "card_hash": "9fc0e1707ea088c5552ca39afaff271f767fb3349ff8fd8294ccfd66805b7000",
+            "quote": "OpenAI President Greg Brockman explains why Anthropic pulled ahead of OpenAI on ARR.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

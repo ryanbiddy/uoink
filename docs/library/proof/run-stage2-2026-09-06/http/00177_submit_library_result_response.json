@@ -1,0 +1,38 @@
+{
+  "seq": 177,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "2SdjN2semh7GXB5a0e3O52l3r1g3jy2l",
+      "video_id": "2080841892582035456",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "news-and-current-events",
+          "shelf_path": [
+            "News and Current Events"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "6b195297e15b7892c97738e3ccf8266036c4010a7f0255ea77efc3696948b514",
+            "card_hash": "f3a6e397a4202770c9fa0b728a4f15c516048e4bb1e43fb6ba0f0ae5126adc7a",
+            "quote": "What does it mean for you to be here today? Socialist, I think.",
+            "start": 0.0,
+            "end": 16.87,
+            "timing": "source_cues",
+            "truncated": false
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "seq": 647,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "lyZAT6th5lRFdsK-epGtmSr6ZAC0OO4U",
+    "client_id": "proof-harness",
+    "attempt_token": "2r_8MA-_JQpiayvfHkXyIilt0h1bD-64wsnSeCkx6Is",
+    "submission_key": "lyZAT6th5lRFdsK-epGtmSr6ZAC0OO4U-2r_8MA-_JQpiayvfHkXyIilt0h1bD-64wsnSeCkx6Is",
+    "schema_version": 1,
+    "video_id": "2087970510340509696",
+    "source_revision": "d731b45d35c6b19ce87f4ddd1bc7d29cbe68ad9b0d7ca8e36af7a819c33ef67c",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "c122edf907a038215ac2d970fed07351acf348ff52499667ccdd82997bac6259",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.82,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "4d04f12b5f851dc37e9c3009bc35b296cbde5630b1b6bbd6e4e45495b9375d30",
+            "card_hash": "87e409ec8da250d0189fceab0e353a299ee4d723c336da9e38c4cb50158b603d",
+            "quote": "a 1.6T-parameter MoE with 1M context built for agentic coding"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 16960,
+      "cache_read_tokens": 186976,
+      "cache_create_tokens": 35343,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "seq": 473,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 6,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "S2lrWzylJjROyyTXv-vwQ3fr3UGDuM-7",
+      "video_id": "2084333713937068032",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "798a33408b57f539004b119fc0b045629584ef22ea5db1c402e3d4060fdaba36",
+            "card_hash": "3b4eacc9c3e44860fa0f13a1d29da9d1d00f3d3c05d286f01cdc4f0abf47a933",
+            "quote": "Let's Move To Course Logistics But Before That Do We Have Any Questions",
+            "start": 3479.719,
+            "end": 3599.559,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "b9e0270d4f5dc7001abe0acd5f9d2aca1948d8d9a42e67e6f2d7af1ae5bb8392",
+            "card_hash": "3b4eacc9c3e44860fa0f13a1d29da9d1d00f3d3c05d286f01cdc4f0abf47a933",
+            "quote": "it really Is become a coding productivity tool in the day-to -day workflows for software engineers",
+            "start": 2525.53,
+            "end": 2644.159,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

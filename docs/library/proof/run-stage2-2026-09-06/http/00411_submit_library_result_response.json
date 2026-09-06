@@ -1,0 +1,39 @@
+{
+  "seq": 411,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 15,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "9Vc_dttKGJVMK3s61YT31jqQFDhmofCt",
+      "video_id": "2084256354798317568",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "1ec2584a185ba1ccfd5fefa0ca0651ccee710c0a45f9955f5c04ed7bbc264e25",
+            "card_hash": "fa6f234824c4843817d524411c6647b09c853a9ed4d6904893a1476f27866f3f",
+            "quote": "i built a way to generate full ai vlogs for youtube using seedance 2.5, without ever picking up a camera",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

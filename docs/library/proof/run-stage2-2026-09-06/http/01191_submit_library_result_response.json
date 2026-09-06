@@ -1,0 +1,39 @@
+{
+  "seq": 1191,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "t9n9o8asqdKiN-JBMm8qz8CBM4ibTo7L",
+      "video_id": "YtKX2wbCpVQ",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "bc16ae0db085b561808b5fcf300ac2d27a26da3cebf2dc7890543e6a6351cccc",
+            "card_hash": "6a21f1768dc2d3eb660b2dd41a6f95337a92adf1e142d0f38ed833bc2bcde6e9",
+            "quote": "building out these general systems out of multimodal data, internet scale multimodal data",
+            "start": 121.2,
+            "end": 167.19,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

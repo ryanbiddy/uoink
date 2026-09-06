@@ -1,0 +1,95 @@
+{
+  "seq": 315,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 315,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "ycyEF1hocDzmjxzCOpNK16NdO8lORsbV",
+      "client_id": "proof-harness",
+      "attempt_token": "-4jeXKrIwYB1JML-yuxvbBOy9onv2tAfLRCEOkWGYGo",
+      "submission_key": "ycyEF1hocDzmjxzCOpNK16NdO8lORsbV--4jeXKrIwYB1JML-yuxvbBOy9onv2tAfLRCEOkWGYGo",
+      "schema_version": 1,
+      "video_id": "2081972699228778496",
+      "source_revision": "8b618906dba3be35a44d56e6f3fa30ce42863d83967991901c9f3c173ae26375",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "491a83226ab924c19dea9c4e215724a93967fa2cd408984dcc7ad883a8f9a2d7",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.75,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "4197de3874a68a0fb6e6bc8986d032bf3d298c85156b9ce556776c31031802b7",
+              "card_hash": "f0895811bc24dbffddcdb1b37178e91f68068e410c275509ccb045d2b14ab51a",
+              "quote": "一个K3里能塞下22580个2019年的GPT-2"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 12735,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20893,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 315,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "ycyEF1hocDzmjxzCOpNK16NdO8lORsbV",
+        "video_id": "2081972699228778496",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.75,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "4197de3874a68a0fb6e6bc8986d032bf3d298c85156b9ce556776c31031802b7",
+              "card_hash": "f0895811bc24dbffddcdb1b37178e91f68068e410c275509ccb045d2b14ab51a",
+              "quote": "一个K3里能塞下22580个2019年的GPT-2",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

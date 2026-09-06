@@ -1,0 +1,39 @@
+{
+  "seq": 123,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "MqQn9lg0DTf1KkKky84RI6Uqw4IwgaML",
+      "video_id": "2079633339041087488",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "3f6855c7ea39d822bfa4b79855bd3227f249f266789b723dc1f5d0c4f4ffd4a5",
+            "card_hash": "3d05d7c899b237ad9054d946f54afa1c584b4b201c568f215efd96a5c6bc49a7",
+            "quote": "An open source tool for building hierarchical agent loops.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

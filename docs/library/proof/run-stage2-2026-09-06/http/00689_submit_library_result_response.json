@@ -1,0 +1,39 @@
+{
+  "seq": 689,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "YNMFueVkG0b8Cu6mjw29kJQFF0kSRodO",
+      "video_id": "2088683223110783215",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "9c97b701b4d54585203eb3ef8b027ad4709853705281144d9a1ad83ddcdc9e98",
+            "card_hash": "d695c7a27b124471239c6dd64fa312d634977eba6580f751b5e30dc067730a28",
+            "quote": "how this local model that is 100x smaller and 10x slower made a better animation",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

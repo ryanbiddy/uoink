@@ -1,0 +1,39 @@
+{
+  "seq": 165,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "3k9145lkEwP9ye9w-wUoW-Up4REgcegi",
+      "video_id": "2080788116747476992",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "3c8e9c11b7f07a75b8cf48890a93beaab6db550e3e24a0f2834c5129f6c5bb64",
+            "card_hash": "8d802e5df3c0692747e6bec6b4e755e774b1567a7965acb8da9a3024f06429df",
+            "quote": "President Lee Jae Myung met with our CEO @JensenHuang today ahead of the San Francisco",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

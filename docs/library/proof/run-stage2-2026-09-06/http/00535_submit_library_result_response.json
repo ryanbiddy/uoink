@@ -1,0 +1,39 @@
+{
+  "seq": 535,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "b0C0bqHdTKu3uhEp9rGthS4wbOX3cClf",
+      "video_id": "2086860232311861248",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "612c798b100115b7794799c03de61f8a4d8a2b4a77f99601bb77c8e9ba41ef74",
+            "card_hash": "164791a8ff9f8fdd6542a9052b55ec4b933d19dc1fcfd882e89698eae12ecb8d",
+            "quote": "a new model for advanced, authorized cybersecurity work",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

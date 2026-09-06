@@ -1,0 +1,39 @@
+{
+  "seq": 1029,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 25,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "OYlhKswomYIYdTnUt3Kv5Gp7BjNf2EjG",
+      "video_id": "2094803470000009216",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "cc3400ddcacfd9dd2832e04b6d0372bc862eff5db67096aad1733697b51b1083",
+            "card_hash": "948186a1791a25d236945d4258818461f3639d951655b18b97618f626c233472",
+            "quote": "Computer can start a task in the cloud, then move to a local model that runs on your Mac",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

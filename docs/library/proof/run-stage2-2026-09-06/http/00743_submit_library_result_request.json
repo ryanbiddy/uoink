@@ -1,0 +1,51 @@
+{
+  "seq": 743,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "VjgDE4qt-pUrs-evKrSDD5YRgHt0Y0OO",
+    "client_id": "proof-harness",
+    "attempt_token": "uqTSfBuHev71MeoMgBiAcHaKwUYe3LgWcb3f7JT9E-Y",
+    "submission_key": "VjgDE4qt-pUrs-evKrSDD5YRgHt0Y0OO-uqTSfBuHev71MeoMgBiAcHaKwUYe3LgWcb3f7JT9E-Y",
+    "schema_version": 1,
+    "video_id": "2089169138811817984",
+    "source_revision": "97a97e24236893a8ee2ffb841984b71ba7cc98d7bd661d116a71764f0d2b1bba",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "214223413aa51eb2d0c5f5691a6aa65f4881c54cb72347c4a69f78d83d558b06",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "e02ccfdf508c88552edcec41d8f17b20f6bbf6b655f510dacd8902b57d3dfba0",
+            "card_hash": "5d4f4378c3558e44ad05a379fab74e528cfbc8d49865d8068c96bb1e044db105",
+            "quote": "In the Codex app, you can move chats in and out of projects"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 19481,
+      "cache_read_tokens": 184437,
+      "cache_create_tokens": 35282,
+      "wall_time_ms": 0
+    }
+  }
+}

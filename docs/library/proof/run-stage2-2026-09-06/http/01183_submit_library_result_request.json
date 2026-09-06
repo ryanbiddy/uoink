@@ -1,0 +1,51 @@
+{
+  "seq": 1183,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "gilrcfWZzkBQU3Owc5PXsgA1iYpCYQnC",
+    "client_id": "proof-harness",
+    "attempt_token": "fK3hdoK-HZ5tT3bm3PGaF7DKCYVECKPgCXK3Q1So5IA",
+    "submission_key": "gilrcfWZzkBQU3Owc5PXsgA1iYpCYQnC-fK3hdoK-HZ5tT3bm3PGaF7DKCYVECKPgCXK3Q1So5IA",
+    "schema_version": 1,
+    "video_id": "MgwjGpLHaWE",
+    "source_revision": "18ffb4d17db70e7f300cbc5e4f8234a184569ec9b10a981af978316caddee4a1",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "c781b1b188583fe8f3d7d615df12516d9ca2960770a0fa6b0c64a3ad33b4c086",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "1fc5661e06b023e5ff8bcc85ad947c1dbc67f95d1c4413f0df687705291fe7c1",
+            "card_hash": "4b1785de38619a467870851c801a9754f8ad15b5ba0c8e4735f480a250c9a7d2",
+            "quote": "all of these commands are possible with Claude code. However, for non-developers, they are not as comfortable being inside the CLI."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 19366,
+      "cache_read_tokens": 197341,
+      "cache_create_tokens": 47794,
+      "wall_time_ms": 0
+    }
+  }
+}

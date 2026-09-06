@@ -1,0 +1,865 @@
+{
+  "seq": 691,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 9,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "neJBq09pQPnMTSz2P3Asa77dnIUXRspa",
+          "video_id": "2089762819629805568",
+          "attempt_token": "vPzcXVS3XH8cVjjySUOr_-kVIkn60qmxQLTXG2N3vik",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677505980,
+          "source_revision": "80b9d67d81c22c6d4182032d089b5848f93a4a637b931ae1f55c3356056aaa46",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "067de8e57978f817de3057acf0ae7d2c9fe33ff34dd95c186c853a8d6adf0d64",
+          "card": {
+            "card_hash": "bb733d6fd46a1282173fdb3a0e6ac66d142a3f379ba8a92ad731eee98d42efe2",
+            "channel": "el.cine",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/EHuanglu/status/2089762864823460046",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "2327152bf97f423490c4857739acd4deaa4f286987150ccdf99423c6b3a4698c",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> the speed of AI robot in china rn https://t.co/VMu9fD3o6f No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end -->",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> the speed of AI robot in china rn https://t.co/VMu9fD3o6f No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "el_cine_-_the_speed_of_AI_robot_in_china_rn",
+            "source_revision": "80b9d67d81c22c6d4182032d089b5848f93a4a637b931ae1f55c3356056aaa46",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> the speed of AI robot in china rn https://t.co/VMu9fD3o6f No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "el.cine - the speed of AI robot in china rn",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/EHuanglu/status/2089762864823460046",
+            "video_id": "2089762819629805568",
+            "yoinked_at": "2026-08-19T07:51:48"
+          }
+        },
+        {
+          "work_id": "sGOlXZLesbh5GRCN3EeU2_wWGsXq09ag",
+          "video_id": "2089383338654199808",
+          "attempt_token": "xzXsz9XVG15CEEKgfjKteKC_7NMHeHFRllfPjJRpVKw",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677505981,
+          "source_revision": "bab6b39b8c9b1c43ee6818ba0c87b05ff24ac836b3b7b2f0ffce0e06c98e46ed",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "762cee8cfb32678723a2466dd22b06fca74291c6ad09715e2eaa76f9969b39ad",
+          "card": {
+            "card_hash": "c26ffa48d359c09eb7f537a3cc15ef0dc5b95c8c76186e04da873a22e568b457",
+            "channel": "a16z",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/a16z/status/2089387888685588717",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "c5210ebcaef06d779e6b4673c8573a5de394195480a029ab5281e88a11f56e0d",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Stripe's Will Gaybrick: \"Build everything\"  Against an industry that sees agents as a way to cut costs, Stripe is using them to build more: agents wrote 30% of code in a week, global tax filing shipped ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Stripe's Will Gaybrick: \"Build everything\"  Against an industry that sees agents as a way to cut costs, Stripe is using them to build more: agents wrote 30% of code in a week, global tax filing shipped in 1/3 the time the US version took, and after AI made sellers 20% more https://t.co/l1YddyQBGX No tags *No captions available for this video.*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "a16z_-_Stripe_s_Will_Gaybrick_Build_everything_Against_an_industry_that",
+            "source_revision": "bab6b39b8c9b1c43ee6818ba0c87b05ff24ac836b3b7b2f0ffce0e06c98e46ed",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Stripe's Will Gaybrick: \"Build everything\"  Against an industry that sees agents as a way to cut costs, Stripe is using them to build more: agents wrote 30% of code in a week, global tax filing shipped in 1/3 the time the US version took, and after AI made sellers 20% more https://t.co/l1YddyQBGX No tags *No captions available for this video.*",
+            "title": "a16z - Stripe's Will Gaybrick: \"Build everything\"  Against an industry that ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/a16z/status/2089387888685588717",
+            "video_id": "2089383338654199808",
+            "yoinked_at": "2026-08-18T07:51:50"
+          }
+        },
+        {
+          "work_id": "spL2x0f0RpSrkoX5lzGnNZqFfEKe_LWf",
+          "video_id": "2089353203489943553",
+          "attempt_token": "B0uC8TzbdjzfQhzVMYlIefQfX_KbMHNMpY5KOstXTO4",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677505981,
+          "source_revision": "903e5d91936bb4b5f4c5ff9da8b11f7e3c740be2ccb6c672a30a27bc2568cf05",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "aa2aa817f7cb627aa4010a6a317fac30eebecf20314875fb75651191f12d11e8",
+          "card": {
+            "card_hash": "9742a43f322495385e733972ebb138dc2d43264582bc54475c34ea0074785e82",
+            "channel": "ElevenLabs",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/ElevenLabs/status/2089353435397116280",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "4940bbf44f1cd979a9033c19e80b4f6a495bf10356270106cb5a5715cdc801e4",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing the ElevenLabs MCP, now available in Claude.  Your team can manage your voice and chat agents where you already work - review recent performance, create new agents, update configurations, an",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing the ElevenLabs MCP, now available in Claude.  Your team can manage your voice and chat agents where you already work - review recent performance, create new agents, update configurations, and even estimate LLM costs before changes go live. https://t.co/RkGqlr3I0h No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "ElevenLabs_-_Introducing_the_ElevenLabs_MCP_now_available_in_Claude_Your_team_c",
+            "source_revision": "903e5d91936bb4b5f4c5ff9da8b11f7e3c740be2ccb6c672a30a27bc2568cf05",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing the ElevenLabs MCP, now available in Claude.  Your team can manage your voice and chat agents where you already work - review recent performance, create new agents, update configurations, and even estimate LLM costs before changes go live. https://t.co/RkGqlr3I0h No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "ElevenLabs - Introducing the ElevenLabs MCP, now available in Claude.  Your team c...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/ElevenLabs/status/2089353435397116280",
+            "video_id": "2089353203489943553",
+            "yoinked_at": "2026-08-18T07:48:58"
+          }
+        },
+        {
+          "work_id": "syQpceRoiz9F7D__C-QlqLyYuwdCEBSz",
+          "video_id": "2089363218745450496",
+          "attempt_token": "9V25huaDWofcQsWB6S_GmqgdG7rK-SbF5CTJajO9LQI",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677505982,
+          "source_revision": "6fc7c0f63a05cfee9a1626669f3e1de363813b23a95f0bd44ae110a8110300cd",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "efe105a1f2126ef97f191aedf5ec9b7a416550613cef8f02684987b014354841",
+          "card": {
+            "card_hash": "256074e2ed8802f90a07fa72dce256a3f23d7468c3ac23b7820e67c212fcdc2b",
+            "channel": "Callan",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/callanxai/status/2089367361337897463",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "8d6311b93e2e8ea9072e52a8c6c3fa67f61ffd76ef30b2198c7d17d13f81f089",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Andrej Karpathy:  \"Prompting is fading away. Delete everything else and keep the graph.\"  In 1 hour he explains why the graph is the layer that survives, and how to build one  LLMs → Prompts → Agents → ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Andrej Karpathy:  \"Prompting is fading away. Delete everything else and keep the graph.\"  In 1 hour he explains why the graph is the layer that survives, and how to build one  LLMs → Prompts → Agents → Graphs  everything before the graph is a step  the graph is where the https://t.co/OPQ7PXIgb8 No tags *No captions available for this video.*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Callan_-_Andrej_Karpathy_Prompting_is_fading_away_Delete_everything_else_a",
+            "source_revision": "6fc7c0f63a05cfee9a1626669f3e1de363813b23a95f0bd44ae110a8110300cd",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Andrej Karpathy:  \"Prompting is fading away. Delete everything else and keep the graph.\"  In 1 hour he explains why the graph is the layer that survives, and how to build one  LLMs → Prompts → Agents → Graphs  everything before the graph is a step  the graph is where the https://t.co/OPQ7PXIgb8 No tags *No captions available for this video.*",
+            "title": "Callan - Andrej Karpathy:  \"Prompting is fading away. Delete everything else a...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/callanxai/status/2089367361337897463",
+            "video_id": "2089363218745450496",
+            "yoinked_at": "2026-08-18T07:51:12"
+          }
+        },
+        {
+          "work_id": "w8OHH8itf0ffipT2LTk0c-PnuzTAT8nf",
+          "video_id": "2089651201738485760",
+          "attempt_token": "9heU5-PWrR4OL7KBZhexsqdEgTmkF0CRHxbFcdjJ3u0",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677505982,
+          "source_revision": "7d091d61f41ffc831b469af88950fb749f3988e9c43ac836a569ab7a53402a5e",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "78c9341af5d82617bbac0729b320ae2b6b790e070ba06fc1ddbdb4d918e6543e",
+          "card": {
+            "card_hash": "fa5ff35450c031b79277dc00f88b3a184a3019db8575a95fa8a5128b0b4cfaeb",
+            "channel": "Visegrád 24",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/visegrad24/status/2089651310358339698",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "acaffa12c679a4b74cb83eb29e88f229c5be1af9074fbb27d49759200e0bd327",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Gasoline is available at only 28% of gas stations in Russia  A week earlier, this figure stood at 41%.  Russia is facing a second, more severe wave of the fuel crisis.  Due to the shortage of fuel, gaso",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Gasoline is available at only 28% of gas stations in Russia  A week earlier, this figure stood at 41%.  Russia is facing a second, more severe wave of the fuel crisis.  Due to the shortage of fuel, gasoline prices at gas stations in the regions have soared 1.8–2 times. https://t.co/Lj6ZxbpPkl No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Visegr_d_24_-_Gasoline_is_available_at_only_28_of_gas_stations_in_Russia_A_week",
+            "source_revision": "7d091d61f41ffc831b469af88950fb749f3988e9c43ac836a569ab7a53402a5e",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Gasoline is available at only 28% of gas stations in Russia  A week earlier, this figure stood at 41%.  Russia is facing a second, more severe wave of the fuel crisis.  Due to the shortage of fuel, gasoline prices at gas stations in the regions have soared 1.8–2 times. https://t.co/Lj6ZxbpPkl No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Visegrád 24 - Gasoline is available at only 28% of gas stations in Russia  A week e...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/visegrad24/status/2089651310358339698",
+            "video_id": "2089651201738485760",
+            "yoinked_at": "2026-08-18T07:49:38"
+          }
+        },
+        {
+          "work_id": "wZKW1fMFmvFtCWIqIDQXYE9wWpTK_VFd",
+          "video_id": "2089332588963856384",
+          "attempt_token": "afkt6HAvJCYE6_NNvZfF4AP18CDF3MQlqgZ8VqjcZvE",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677505983,
+          "source_revision": "83d1a39c9137f5504f9b57e28a93de0fa406b02f527d2b8af879098ff6e39032",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "408fab458b8d65e86351aecc8680e9c8414c381da8c748fadd71fea463dbc9a9",
+          "card": {
+            "card_hash": "9866e77575af12fc492da12a0190f1d0163fe2d158850756e5e769a595ed6e20",
+            "channel": "Turner Novak 🍌🧢",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Developer Marketing",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/TurnerNovak/status/2089348065484218736",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "90ee207d7f6d14a0edb08b2ae0d96a5306fbd72c1724ddbdb1c13e1509b7cd34",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> New @ThePeelPod with @shensi  Most founders get one founding story. Shensi thinks @merge_api has three.  Shensi and @GilFeig started Merge in 2020, watched their first customers die, then rebuilt themse",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> New @ThePeelPod with @shensi  Most founders get one founding story. Shensi thinks @merge_api has three.  Shensi and @GilFeig started Merge in 2020, watched their first customers die, then rebuilt themselves twice for the AI era.  Not many founders talk this honestly about tearing https://t.co/0E4jqoi2Jx No tags *No captions available for this video.*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Turner_Novak_-_New_ThePeelPod_with_shensi_Most_founders_get_one_founding_story_S",
+            "source_revision": "83d1a39c9137f5504f9b57e28a93de0fa406b02f527d2b8af879098ff6e39032",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> New @ThePeelPod with @shensi  Most founders get one founding story. Shensi thinks @merge_api has three.  Shensi and @GilFeig started Merge in 2020, watched their first customers die, then rebuilt themselves twice for the AI era.  Not many founders talk this honestly about tearing https://t.co/0E4jqoi2Jx No tags *No captions available for this video.*",
+            "title": "Turner Novak 🍌🧢 - New @ThePeelPod with @shensi  Most founders get one founding story. S...",
+            "topic": "Developer Marketing",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/TurnerNovak/status/2089348065484218736",
+            "video_id": "2089332588963856384",
+            "yoinked_at": "2026-08-17T07:44:47"
+          }
+        },
+        {
+          "work_id": "z5Nr7eXsk8O15bMMMElZkwOa6H8ClDqh",
+          "video_id": "2089380922604789760",
+          "attempt_token": "2z2HMj2JtlGi8oIh2zcUElmmKDukwzItF28T-mn-iSo",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677505984,
+          "source_revision": "f229dd486e937cdc88e18614a7963d0e1cc0a7907e462ad5fb16c59a68dd2c95",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "61cfb3d0ad2180f52c46d90231d6eca09d92447345df9b4779c5452025daa776",
+          "card": {
+            "card_hash": "57a75ce5670a69a2cdc02590154e83d7f3c0659f028973f13444f04459bda792",
+            "channel": "Public",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/public/status/2089382171291070550",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "a6cee74d306195178914b06f087bb9fc22d72ba5cc1fe05b5c61028785d8b774",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> BREAKING: New updates to AI Agents on Public  → We’ve launched the first-ever marketplace of AI Agents for your portfolio. → Deploy them immediately or customize them. → Share agents you create—with any",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> BREAKING: New updates to AI Agents on Public  → We’ve launched the first-ever marketplace of AI Agents for your portfolio. → Deploy them immediately or customize them. → Share agents you create—with anyone—to run or modify in their account.  Also, no more waitlist. Agents are https://t.co/Zd7EIaJlFq No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Public_-_BREAKING_New_updates_to_AI_Agents_on_Public_We_ve_launched_the_fi",
+            "source_revision": "f229dd486e937cdc88e18614a7963d0e1cc0a7907e462ad5fb16c59a68dd2c95",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> BREAKING: New updates to AI Agents on Public  → We’ve launched the first-ever marketplace of AI Agents for your portfolio. → Deploy them immediately or customize them. → Share agents you create—with anyone—to run or modify in their account.  Also, no more waitlist. Agents are https://t.co/Zd7EIaJlFq No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+            "title": "Public - BREAKING: New updates to AI Agents on Public  → We’ve launched the fi...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/public/status/2089382171291070550",
+            "video_id": "2089380922604789760",
+            "yoinked_at": "2026-08-18T07:49:12"
+          }
+        },
+        {
+          "work_id": "-o-OWhR0MgCmJCcs7SjNvJCt5lKwpmVN",
+          "video_id": "2090566181854048256",
+          "attempt_token": "if-MQtgAdLL89qwCaouPOaLwAo-N3Ts2FNT1m8WDdVM",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677505985,
+          "source_revision": "5f9970e48b78b1e80203b422f6b51dae899d0a5de390deda299f8f316cee1d10",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "397757c6762b38ba56a706079c78cd3ffb3478076f95c2e8e3b345aa301641f0",
+          "card": {
+            "card_hash": "ddc5958e89a8786e1606c773aa9006515747bc3f94aeabf90db32fbd26bbee70",
+            "channel": "liten drage",
+            "chars": 18418,
+            "chars_all_clips": 18418,
+            "chars_chosen_clips": 1440,
+            "clip_count": 12,
+            "clips": [
+              {
+                "deep_link": "https://x.com/DrageLiten/status/2090566770063208822#t=0",
+                "end": 77.628,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "c57b4e6c80e29387245c7ca5ea5e23b5c3c30e3f318d025f46e9b149cf082d17",
+                "start": 0.1,
+                "text": "you know a humanoid robot is going to have the same kind of capability as a human but you can probably design some kind of robot that would not have just two eyes or cameras up here and wouldn't just have hands it would have multiple append",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/DrageLiten/status/2090566770063208822#t=142",
+                "end": 261.655,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1d5fa3ad4fbdcc06f0b5d10f94e5fb8acc06e4256e801b8cea251e821c75cc4b",
+                "start": 142.792,
+                "text": "Not the US, obviously here at, at the, Gigafactory Oh, yeah, just do surgery in the reason they're saying probably not in the US is because of the regulations that are associated with healthcare and such in the US That is a big hurdle that ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/DrageLiten/status/2090566770063208822#t=392",
+                "end": 511.759,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "bd356e7494bf388d9e6992d5b6bccdde211d186598c8386af68cba9c276b304a",
+                "start": 392.425,
+                "text": "Is this, is this a surgeon joke? No, no, no. No It's how many, it's how many times did you do that? There's gotta be some funny surgeon jokes No, it's serious. It's, it's how many times did you do the surgery this morning? Sorry? this morni",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/DrageLiten/status/2090566770063208822#t=571",
+                "end": 673.84,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "ae2ec2194105780a3c40b83ebb5935d028604243552032154d273a72ffc94a90",
+                "start": 571.378,
+                "text": "But you've only manufactured the first 10,000 of them How do you do it? I don't think people understand how many robots there's going to be. Yeah Well, there there's not going to be a window until 10,000 by 2040 You still on that path? that",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/DrageLiten/status/2090566770063208822#t=747",
+                "end": 866.391,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b31fe8b072693090d3bc2ed2569e13e7248782668597e894eb5b360fb13ea5ae",
+                "start": 747.983,
+                "text": "Yes, I think it will But I don't think it's happening on a short time horizon And also surgery procedures are going to be one of the last things to go The earlier things are going to be more algorithmic decision-making right? It's a lot eas",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/DrageLiten/status/2090566770063208822#t=975",
+                "end": 1085.312,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "efe1ac4dab27cd042304101791ba131d447b75914af110ef64b1053d3cdbfed1",
+                "start": 975.596,
+                "text": "But the robot isn't replacing the ophthalmologist is the one who is doing just about everything from the you know, seeing the patient, assessing, examining et cetera And then for one very small defined task in the procedure you're using a m",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/DrageLiten/status/2090566770063208822#t=0",
+                "end": 77.628,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "c57b4e6c80e29387245c7ca5ea5e23b5c3c30e3f318d025f46e9b149cf082d17",
+                "start": 0.1,
+                "text": "you know a humanoid robot is going to have the same kind of capability as a human but you can probably design some kind of robot that would not have just two eyes or cameras up here and wouldn't just have hands it would have multiple append",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/DrageLiten/status/2090566770063208822#t=142",
+                "end": 261.655,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1d5fa3ad4fbdcc06f0b5d10f94e5fb8acc06e4256e801b8cea251e821c75cc4b",
+                "start": 142.792,
+                "text": "Not the US, obviously here at, at the, Gigafactory Oh, yeah, just do surgery in the reason they're saying probably not in the US is because of the regulations that are associated with healthcare and such in the US That is a big hurdle that ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/DrageLiten/status/2090566770063208822#t=392",
+                "end": 511.759,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "bd356e7494bf388d9e6992d5b6bccdde211d186598c8386af68cba9c276b304a",
+                "start": 392.425,
+                "text": "Is this, is this a surgeon joke? No, no, no. No It's how many, it's how many times did you do that? There's gotta be some funny surgeon jokes No, it's serious. It's, it's how many times did you do the surgery this morning? Sorry? this morni",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/DrageLiten/status/2090566770063208822#t=571",
+                "end": 673.84,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "ae2ec2194105780a3c40b83ebb5935d028604243552032154d273a72ffc94a90",
+                "start": 571.378,
+                "text": "But you've only manufactured the first 10,000 of them How do you do it? I don't think people understand how many robots there's going to be. Yeah Well, there there's not going to be a window until 10,000 by 2040 You still on that path? that",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/DrageLiten/status/2090566770063208822#t=747",
+                "end": 866.391,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b31fe8b072693090d3bc2ed2569e13e7248782668597e894eb5b360fb13ea5ae",
+                "start": 747.983,
+                "text": "Yes, I think it will But I don't think it's happening on a short time horizon And also surgery procedures are going to be one of the last things to go The earlier things are going to be more algorithmic decision-making right? It's a lot eas",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/DrageLiten/status/2090566770063208822#t=975",
+                "end": 1085.312,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "efe1ac4dab27cd042304101791ba131d447b75914af110ef64b1053d3cdbfed1",
+                "start": 975.596,
+                "text": "But the robot isn't replacing the ophthalmologist is the one who is doing just about everything from the you know, seeing the patient, assessing, examining et cetera And then for one very small defined task in the procedure you're using a m",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "liten_drage_-_elonmusk_Elon_Says_AI_Will_Replace_Physicians_KevinJubbalMD",
+            "source_revision": "5f9970e48b78b1e80203b422f6b51dae899d0a5de390deda299f8f316cee1d10",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "liten drage - @elonmusk Elon Says AI Will Replace Physicians? 💉🩻😷  @KevinJubbalMD",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/DrageLiten/status/2090566770063208822",
+            "video_id": "2090566181854048256",
+            "yoinked_at": "2026-08-21T07:57:44"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

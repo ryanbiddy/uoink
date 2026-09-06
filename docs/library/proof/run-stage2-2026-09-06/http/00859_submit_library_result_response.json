@@ -1,0 +1,58 @@
+{
+  "seq": 859,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "sWxe4vyXxh1l1PW1QjGhoDGgvTOGJaNf",
+      "video_id": "2091957857650716672",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "2c6887a44b9262138ac4c9ea3ee6fb355d8d3ca5d6768e45c69b839e8d9ec088",
+            "card_hash": "81ac2502be5d6c95fc2be106b746907f93e0e8cfaa7adc8e20d9e51224c6e279",
+            "quote": "How Fast AI Changes Developer",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "2c6887a44b9262138ac4c9ea3ee6fb355d8d3ca5d6768e45c69b839e8d9ec088",
+            "card_hash": "81ac2502be5d6c95fc2be106b746907f93e0e8cfaa7adc8e20d9e51224c6e279",
+            "quote": "Next Gen Models",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,811 @@
+{
+  "seq": 5,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 55,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "boczpq06dgLWJ5rxlHYVGUJoJX98-mnW",
+          "video_id": "1889178327400820738",
+          "attempt_token": "O8tie9JPsCm0isAnWf8tWsSjmvaemk1c60wBIbjTNmw",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079161,
+          "source_revision": "9c898273922f9880cef8766c7876f697ae603278da9bd22c2d6aae718af6b830",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "32f2dce34370978391b581db1b1fd04583f76632c4abab65bb0419d12f157789",
+          "card": {
+            "card_hash": "a508c21c545eaca789643b36863d598a732a5129658a35f61ce8335618a4e669",
+            "channel": "𝒂",
+            "chars": 120,
+            "chars_all_clips": 120,
+            "chars_chosen_clips": 120,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/coxrab/status/2078624819327717483#t=1",
+                "end": 30.179,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "ae9bb8f17ce1af0018a81cd579bee6336cb27f001f1d6be780ad022335508666",
+                "start": 1.72,
+                "text": "No one more, no one more so we can't let go No one more, no one more so we'll get through this No one wants the way back",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/coxrab/status/2078624819327717483#t=1",
+                "end": 30.179,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "ae9bb8f17ce1af0018a81cd579bee6336cb27f001f1d6be780ad022335508666",
+                "start": 1.72,
+                "text": "No one more, no one more so we can't let go No one more, no one more so we'll get through this No one wants the way back",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> @PopBase The devil has been defeated.  https://t.co/HXdTJSjvhk No tags [00:00:01] No one more, no one more so we can't let go [00:00:07] No one more, no one more so we'll get through this [00:00:14] No one wants the way back [00:00:23] Way back [00:00:28] Way back <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "-_PopBase_The_devil_has_been_defeated",
+            "source_revision": "9c898273922f9880cef8766c7876f697ae603278da9bd22c2d6aae718af6b830",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> @PopBase The devil has been defeated.  https://t.co/HXdTJSjvhk No tags [00:00:01] No one more, no one more so we can't let go [00:00:07] No one more, no one more so we'll get through this [00:00:14] No one wants the way back [00:00:23] Way back [00:00:28] Way back <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "𝒂 - @PopBase The devil has been defeated.",
+            "topic": "Uncategorized",
+            "truncated": false,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/coxrab/status/2078624819327717483",
+            "video_id": "1889178327400820738",
+            "yoinked_at": "2026-07-18T22:51:00"
+          }
+        },
+        {
+          "work_id": "by_Ks0ScbpAYfBAo4bG9I7JLFM9PVY0H",
+          "video_id": "2020740688166735872",
+          "attempt_token": "-EBbB1-XU5gMzeETJY00SCmoGg-rJFXkZ2dMV7IH5bw",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079162,
+          "source_revision": "39d4c60be0aa47c7397208aa8415c0a1b179a62a817c59d4b60b9bfbbdee0ced",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "28d8f969443b7291185dc7d69d447f5166c3ceb2422266e8e294ed7e23ca6e56",
+          "card": {
+            "card_hash": "cd4b7045ce4d9a8a31cefc7d8a0975571b3825e495763f287ea5f1b7f8059470",
+            "channel": "Elon Musk",
+            "chars": 561,
+            "chars_all_clips": 561,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://youtube.com/watch?v=2020740688166735872&t=0s",
+                "end": 48.07,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "49c99c7bd13be5671c2fd8e22a582c8a8d08a8da4543c83b644181e3dced3ece",
+                "start": 0.0,
+                "text": "The favorite of many. Oh yeah, this one might be yesterday's because I like the cave and the tight opening. And the columns, it's like a cathedral. This is natural! Natural? Because look at how much ice spikes out, that looks like its inten",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://youtube.com/watch?v=2020740688166735872&t=0s",
+                "end": 48.07,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "49c99c7bd13be5671c2fd8e22a582c8a8d08a8da4543c83b644181e3dced3ece",
+                "start": 0.0,
+                "text": "The favorite of many. Oh yeah, this one might be yesterday's because I like the cave and the tight opening. And the columns, it's like a cathedral. This is natural! Natural? Because look at how much ice spikes out, that looks like its inten",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> This video was live-streamed from Antarctica using @Starlink No tags [00:00:00] The favorite of many. [00:00:01] Oh yeah, this one might be yesterday's [00:00:03] because I like the cave and the tight opening. [00:00:06] And the columns, it's like a cathedral. [00:00:09] This is natural! Natural? [00:00:12] Because look at how much ice spikes out, that looks like its intended. [00:00:19] Yeah, it looks like a cathedral. [00:00:21] There's yeti in there. No, It's natural though. [00:00:23] Is it really real life? Yes. [00:00:25] What, the caves new? They ca",
+              "truncated": true
+            },
+            "platform": "youtube",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Elon_Musk_-_This_video_was_live-streamed_from_Antarctica_using_Starlink",
+            "source_revision": "39d4c60be0aa47c7397208aa8415c0a1b179a62a817c59d4b60b9bfbbdee0ced",
+            "source_type": "video",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> This video was live-streamed from Antarctica using @Starlink No tags [00:00:00] The favorite of many. [00:00:01] Oh yeah, this one might be yesterday's [00:00:03] because I like the cave and the tight opening. [00:00:06] And the columns, it's like a cathedral. [00:00:09] This is natural! Natural? [00:00:12] Because look at how much ice spikes out, that looks like its intended. [00:00:19] Yeah, it looks like a cathedral. [00:00:21] There's yeti in there. No, It's natural though. [00:00:23] Is it really real life? Yes. [00:00:25] What, the caves new? They ca",
+            "title": "Elon Musk - This video was live-streamed from Antarctica using @Starlink",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/elonmusk/status/2021129400490786923",
+            "video_id": "2020740688166735872",
+            "yoinked_at": "2026-05-29T23:18:24"
+          }
+        },
+        {
+          "work_id": "jjgi9kxVnO_UO5BvkYqTfyrl-aDOF9mt",
+          "video_id": "2026062150930661377",
+          "attempt_token": "1rWAjsoeSe2l150o68mVpwWKbRzBsMh-OIUrdWfaxwY",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079162,
+          "source_revision": "3728c9e980084be7c8ce769c79f9d89b06e1b0fccaa19c84435964a2eed1bb40",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "9322d2905ad2574a4a099492ed9a203294e0c34d0bb8a34b02e35e87552cc4f2",
+          "card": {
+            "card_hash": "be487d4fbae4c37f42aad68bc5944268bcc680e3d5e70c3151ec60dadc49aa8f",
+            "channel": "ℏεsam",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/Hesamation/status/2085700030472630555",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "b2d1a89f9555c97fd4a19316ded7de43c42d838e9f2277c88ec4fe384fd31344",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> \"We will evaluate the model inside a carefully designed sandbox with no internet access.\"  The carefully designed sandbox one minute after the agents run: https://t.co/ezqzXv3aTS No tags *No captions av",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> \"We will evaluate the model inside a carefully designed sandbox with no internet access.\"  The carefully designed sandbox one minute after the agents run: https://t.co/ezqzXv3aTS No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "sam_-_We_will_evaluate_the_model_inside_a_carefully_designed_sandbox_with",
+            "source_revision": "3728c9e980084be7c8ce769c79f9d89b06e1b0fccaa19c84435964a2eed1bb40",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> \"We will evaluate the model inside a carefully designed sandbox with no internet access.\"  The carefully designed sandbox one minute after the agents run: https://t.co/ezqzXv3aTS No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "ℏεsam - \"We will evaluate the model inside a carefully designed sandbox with ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Hesamation/status/2085700030472630555",
+            "video_id": "2026062150930661377",
+            "yoinked_at": "2026-08-07T07:39:59"
+          }
+        },
+        {
+          "work_id": "l1IUT4GqRoSTRc7idIVkw_OVCsHZtYLP",
+          "video_id": "2078443305495388160",
+          "attempt_token": "s63P4frPyylsN123YpbX1-NKHfS06i67wq8FbOQwXkQ",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079163,
+          "source_revision": "6a3ebfffac94ce06401ce59e36c388dac7c7231e3bfb27131a8fb25d4a8eab73",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "4e700511290b5b25b741b16dd43d61544cc6fba717be38ffdec8f40d8c8f8266",
+          "card": {
+            "card_hash": "26278cb609c413a60416743a6a454ebc9ee93e985579a6001544b636b1bf2c38",
+            "channel": "Matt Van Swol",
+            "chars": 1146,
+            "chars_all_clips": 1146,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/mattvanswol/status/2078443554439925876#t=0",
+                "end": 79.239,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8",
+                "start": 0.0,
+                "text": "all happened after a mother found a man in her house. She says he was hiding under A child's bed when police arrived, they found the men dead near the front porch now The woman 36 year old Kendra Scott Now faces multiple charges including f",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/mattvanswol/status/2078443554439925876#t=0",
+                "end": 79.239,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "92d3424232fbaa83c3a3d36b369934d6a8bbcab854c3355f84404985f8c1dde8",
+                "start": 0.0,
+                "text": "all happened after a mother found a man in her house. She says he was hiding under A child's bed when police arrived, they found the men dead near the front porch now The woman 36 year old Kendra Scott Now faces multiple charges including f",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Some details have been confirmed on this story since last night:  1) The man hiding under the bed was 20-years-old and the child was 13-years-old (child predator situation)  2) The child allegedly let the man into the house and did not tell her mother  3) The mother found the man https://t.co/hTMvqXh9xs No tags [00:00:00] all happened after a mother found a man in her house. [00:00:03] She says he was hiding [00:00:04] under A child's bed when police arrived, [00:00:06] they found the men dead near the front porch now [00:00:09] The woman 36 year old Kendr",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Matt_Van_Swol_-_Some_details_have_been_confirmed_on_this_story_since_last_night",
+            "source_revision": "6a3ebfffac94ce06401ce59e36c388dac7c7231e3bfb27131a8fb25d4a8eab73",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Some details have been confirmed on this story since last night:  1) The man hiding under the bed was 20-years-old and the child was 13-years-old (child predator situation)  2) The child allegedly let the man into the house and did not tell her mother  3) The mother found the man https://t.co/hTMvqXh9xs No tags [00:00:00] all happened after a mother found a man in her house. [00:00:03] She says he was hiding [00:00:04] under A child's bed when police arrived, [00:00:06] they found the men dead near the front porch now [00:00:09] The woman 36 year old Kendr",
+            "title": "Matt Van Swol - Some details have been confirmed on this story since last night:  1) ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/mattvanswol/status/2078443554439925876",
+            "video_id": "2078443305495388160",
+            "yoinked_at": "2026-07-19T09:49:56"
+          }
+        },
+        {
+          "work_id": "noK3R8bAdRgKQ2pCqymftCmHVvtYww1R",
+          "video_id": "1969830523657666560",
+          "attempt_token": "mY0NqyCevf3pefGxuW_S0BitRb-czIcKRBMf5XB1W0M",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079164,
+          "source_revision": "dae23c09a67c0c503d2942bbeea6f36803d7ed72fcbc034953a7c79bd5389585",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "1f15bef3df27b0526888cc998dde0545c2aa8b167201c9bb673af5b286a58402",
+          "card": {
+            "card_hash": "31d36391dd5ea2bc0d197565424fe939e96767fa22ee64fdd09f884eaf8e4493",
+            "channel": "mr fundman",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/mrfundman/status/2093802330076422594",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "bd3b2440ff904dae72df7a150d5249a3a62b8bd480c473f5afc559c653fabc7f",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> First time watching your Grok Bots work on a task  https://t.co/hn7Ot1MHRE No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> First time watching your Grok Bots work on a task  https://t.co/hn7Ot1MHRE No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "mr_fundman_-_First_time_watching_your_Grok_Bots_work_on_a_task",
+            "source_revision": "dae23c09a67c0c503d2942bbeea6f36803d7ed72fcbc034953a7c79bd5389585",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> First time watching your Grok Bots work on a task  https://t.co/hn7Ot1MHRE No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "mr fundman - First time watching your Grok Bots work on a task",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/mrfundman/status/2093802330076422594",
+            "video_id": "1969830523657666560",
+            "yoinked_at": "2026-08-30T07:48:07"
+          }
+        },
+        {
+          "work_id": "w8DA89S15NlfhU9nCYWK9HjjLus1wmbh",
+          "video_id": "2077870396075094016",
+          "attempt_token": "T382k2PkxROzX7h-zZyxc5NJ6EUbfmN8nu0aubfY4YY",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079165,
+          "source_revision": "916db312f0dac72b6ceb0ce75cf73883ce7ef37e92df2c375b6369076b79bdd4",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "4d725b4a0a9e1e71ff05e6407b5b5a9d752a7f26fb7a164d8970df75056d62f7",
+          "card": {
+            "card_hash": "b16c08a0a2c6bb099400c85f3d342c121bd52c4c52d4e67c0bac4ab50eb42636",
+            "channel": "Chef Joe Gera 🏳️‍🌈🏳️‍⚧️🇮🇹",
+            "chars": 480,
+            "chars_all_clips": 480,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/redhotnerd/status/2078287007839637800#t=1",
+                "end": 33.195,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2f0b2b6cef5b9f40fb76648a506147632d20b77c36ec785dee7c9ef46e021bd5",
+                "start": 1.163,
+                "text": "Listen, Greg told me what happens when you have low T. He says you lose focus. He says you lose your endurance, muscle mass, so yeah, I want these guys on it. You know it's going to happen? The guys that don't need it are going to take it t",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/redhotnerd/status/2078287007839637800#t=1",
+                "end": 33.195,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2f0b2b6cef5b9f40fb76648a506147632d20b77c36ec785dee7c9ef46e021bd5",
+                "start": 1.163,
+                "text": "Listen, Greg told me what happens when you have low T. He says you lose focus. He says you lose your endurance, muscle mass, so yeah, I want these guys on it. You know it's going to happen? The guys that don't need it are going to take it t",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> This is disgusting. Are you, Jesse, threatening rape? As in you want soldiers to be rapists? Why the fuck… https://t.co/PkuOAZrtAa No tags [00:00:01] Listen, Greg told me what [00:00:02] happens when you have low T. [00:00:05] He says you lose focus. [00:00:07] He says you lose your endurance, [00:00:09] muscle mass, so yeah, I want [00:00:11] these guys on it. [00:00:12] You know it's going to happen? [00:00:13] The guys that don't need it are [00:00:15] going to take it to triple [00:00:16] boost. [00:00:17] Tyrus: Right. [00:00:17] Jesse: Then they're g",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Chef_Joe_Gera_-_This_is_disgusting_Are_you_Jesse_threatening_rape_As_in_you_want",
+            "source_revision": "916db312f0dac72b6ceb0ce75cf73883ce7ef37e92df2c375b6369076b79bdd4",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> This is disgusting. Are you, Jesse, threatening rape? As in you want soldiers to be rapists? Why the fuck… https://t.co/PkuOAZrtAa No tags [00:00:01] Listen, Greg told me what [00:00:02] happens when you have low T. [00:00:05] He says you lose focus. [00:00:07] He says you lose your endurance, [00:00:09] muscle mass, so yeah, I want [00:00:11] these guys on it. [00:00:12] You know it's going to happen? [00:00:13] The guys that don't need it are [00:00:15] going to take it to triple [00:00:16] boost. [00:00:17] Tyrus: Right. [00:00:17] Jesse: Then they're g",
+            "title": "Chef Joe Gera 🏳️‍🌈🏳️‍⚧️🇮🇹 - This is disgusting. Are you, Jesse, threatening rape? As in you want ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/redhotnerd/status/2078287007839637800",
+            "video_id": "2077870396075094016",
+            "yoinked_at": "2026-07-18T22:51:10"
+          }
+        },
+        {
+          "work_id": "yvdTz36H8LzU4YrLSG1fJf1PU7h-e46G",
+          "video_id": "2078287651535273984",
+          "attempt_token": "OiakoHGKxHeVgNnJZ7c-vafHLygWKNXdyMMnzJ9rz80",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079167,
+          "source_revision": "bf8eb842b087cd892a6f1f15c47da10911c1e6e71ffdca7df0d0fc4b9346a122",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "f97387f62dbc5f4a4474b81d4282cc5fb5cea7548a685a8a73826058160fae08",
+          "card": {
+            "card_hash": "79519ef7ae40f65fbb80d6de4a255d2bd422c4ee9b9f0821017b0498e73df3ea",
+            "channel": "Matt Van Swol",
+            "chars": 313,
+            "chars_all_clips": 313,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/mattvanswol/status/2078288433403826408#t=0",
+                "end": 18.8,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "f93090fe7fd859871f41b56f4112715bbeef6dd0f32f30fc9d68d11f54fff9a6",
+                "start": 0.0,
+                "text": "A woman is charged with first degree murder after an overnight shooting in the Walker Homes neighborhood. This happened around 145 on Travis Road, police arrived on the scene to find a man shot he was pronounced dead On The Scene Kendra Sco",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/mattvanswol/status/2078288433403826408#t=0",
+                "end": 18.8,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "f93090fe7fd859871f41b56f4112715bbeef6dd0f32f30fc9d68d11f54fff9a6",
+                "start": 0.0,
+                "text": "A woman is charged with first degree murder after an overnight shooting in the Walker Homes neighborhood. This happened around 145 on Travis Road, police arrived on the scene to find a man shot he was pronounced dead On The Scene Kendra Sco",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> 🚨#BREAKING: A mother in Memphis TN has been charged with m*rder after she sh0t a 20-year-old man she found hiding under her CHILD'S BED at 1:45 a.m.  When the mother was asked why she did it, she said:  \"I did what I had to do.\" https://t.co/POsNkoAzLO BREAKING [00:00:00] A woman is charged with first degree murder after an [00:00:01] overnight shooting in the Walker Homes neighborhood. [00:00:04] This happened around 145 on Travis Road, [00:00:07] police arrived on the scene to find a man shot [00:00:11] he was pronounced dead On The Scene Kendra Scott he",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Matt_Van_Swol_-_BREAKING_A_mother_in_Memphis_TN_has_been_charged_with_m_rder_aft",
+            "source_revision": "bf8eb842b087cd892a6f1f15c47da10911c1e6e71ffdca7df0d0fc4b9346a122",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 🚨#BREAKING: A mother in Memphis TN has been charged with m*rder after she sh0t a 20-year-old man she found hiding under her CHILD'S BED at 1:45 a.m.  When the mother was asked why she did it, she said:  \"I did what I had to do.\" https://t.co/POsNkoAzLO BREAKING [00:00:00] A woman is charged with first degree murder after an [00:00:01] overnight shooting in the Walker Homes neighborhood. [00:00:04] This happened around 145 on Travis Road, [00:00:07] police arrived on the scene to find a man shot [00:00:11] he was pronounced dead On The Scene Kendra Scott he",
+            "title": "Matt Van Swol - 🚨#BREAKING: A mother in Memphis TN has been charged with m*rder after...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/mattvanswol/status/2078288433403826408",
+            "video_id": "2078287651535273984",
+            "yoinked_at": "2026-07-19T09:49:42"
+          }
+        },
+        {
+          "work_id": "0Pt0kqbRdpEzeCqSa3FuDfP7VSkwyysc",
+          "video_id": "2079140311779971072",
+          "attempt_token": "JK94P0kMK4ZwDC8f-6QQTMGwuISMHUAjwEGDmFY8WUI",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788676079168,
+          "source_revision": "3b5d92996a3391616d4fcd80b389ed5e095c54bc09dc6cfd46e21707b969e3cf",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "db152e5cb6c0e295f8283bff3693fc3187ed835846103d0087166ffa9b098c3c",
+          "card": {
+            "card_hash": "f4623329ab941d96b7b35e78ac50dfeba099a8172f1b7a4d971e909c2c736a75",
+            "channel": "Ruben",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/rdominguezibar/status/2079142029854912551",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "1b81eba48a839d7e20391d1907ed9f36fe40b2149362a2aed525ec038774b831",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Kimi's CEO🇨🇳 says every AI lab has the wrong obsession  Zhilin Yang, on why K3 beat the frontier: \"Every lab, like Claude, thinks the model matters most. That's wrong. It's how you organize the people b",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Kimi's CEO🇨🇳 says every AI lab has the wrong obsession  Zhilin Yang, on why K3 beat the frontier: \"Every lab, like Claude, thinks the model matters most. That's wrong. It's how you organize the people building it that wins.\"  Then Moonshot proved the philosophy. K3 sold out every https://t.co/gxOGp8YBLo No tags *No captions available for this video.*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Ruben_-_Kimi_s_CEO_says_every_AI_lab_has_the_wrong_obsession_Zhilin_Yang",
+            "source_revision": "3b5d92996a3391616d4fcd80b389ed5e095c54bc09dc6cfd46e21707b969e3cf",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Kimi's CEO🇨🇳 says every AI lab has the wrong obsession  Zhilin Yang, on why K3 beat the frontier: \"Every lab, like Claude, thinks the model matters most. That's wrong. It's how you organize the people building it that wins.\"  Then Moonshot proved the philosophy. K3 sold out every https://t.co/gxOGp8YBLo No tags *No captions available for this video.*",
+            "title": "Ruben - Kimi's CEO🇨🇳 says every AI lab has the wrong obsession  Zhilin Yang, ...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/rdominguezibar/status/2079142029854912551",
+            "video_id": "2079140311779971072",
+            "yoinked_at": "2026-07-20T22:37:07"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

@@ -1,0 +1,235 @@
+# reira - Andrej Karpathy:  "Prompting is fading away  Delete everything else a...
+
+**Channel:** reira (— subscribers)
+**Uploaded:** 2026-08-16 | **Duration:** 01:08:14 | **Views:** — | **Likes:** 254
+**URL:** https://x.com/reiraxbt/status/2089019975080230960
+**Uoinked:** 2026-08-17T07:43:42
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The video opens by establishing Andrej Karpathy's credentials and expertise through his career history at Stanford, OpenAI, and Tesla, positioning him as a credible authority on the topic of neural networks and AI development.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Andrej Karpathy:  "Prompting is fading away  Delete everything else and keep the graph"  In a 1-hour lecture, he explains how to build graphs and why they are the layer that survives  The missing piece most people overlook:  LLMs → Prompts → Agents → Graphs  Everything before https://t.co/67aQF7bh3H
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] I was here as a PhD student at Stanford about seven years ago,
+[00:00:02] then went to OpenAI. Then I went to Tesla and
+[00:00:05] came back to open AI one week
+[00:00:06] ago so i'm just being up again
+[00:00:09] at opening it Here's
+[00:00:12] Stanford worked on early neural networks for connecting images natural language
+[00:00:17] So some your network that look like today's clip if
+[00:00:20] someone you're familiar with or
+[00:00:21] early image captioners
+[00:00:22] And so At opening
+[00:00:24] I worked on general models of images and
+[00:00:28] much other reinforcement learning
+[00:00:30] Here as you can see here there are generated
+[00:00:33] images that 32 by 32 pixel
+[00:00:34] Images And you can see some textures
+[00:00:36] We were all very proud
+[00:00:37] Of it six years ago But today have stable diffusion
+[00:00:40] Mid journey In Dali
+[00:00:41] Things like changed a lot
+[00:00:43] It's pretty incredible This was amazing state-of the art at
+[00:00:46] The time At Tesla
+[00:00:48] Worked On autopilot
+[00:00:49] So When in The instrument cluster when
+[00:00:52] You See cars Road
+[00:00:54] Tracks Graphic lights and everything like that my team
+[00:00:55] Would create the neural networks
+[00:00:57] That Create these predictions
+[00:01:00] But I suspect
+[00:01:01] The reason i was invited to give a keynote here is
+[00:01:03] Because it's Not any of
+[00:01:05] That stuff but The fact
+[00:01:06] That i love To hack So
+[00:01:07] Do A lot Of things On This side
+[00:01:09] As For example Wrote
+[00:01:10] A library For training
+[00:01:11] Neural Networks In javascript
+[00:01:13] While ago Was called
+[00:01:14] Common J.S At
+[00:01:15] Time Lot People Were
+[00:01:16] Like Why And
+[00:01:18] I Was Always Like Why
+[00:01:19] Not I Did
+[00:01:22] It For The Law Lols I
+[00:01:26] Was Also The Reference Human
+[00:01:27] For Image Net So
+[00:01:28] Spent About Three Actually
+[00:01:30] Like One Week Classifying
+[00:01:31] Images In Image Net
+[00:01:32] Manually Myself Into
+[00:01:34] 1,000 Categories That
+[00:01:35] Includes 200 Breeds
+[00:01:36] Of Dog And It
+[00:01:37] Was Really Fun When
+[00:01:39] You See
+[00:01:41] A Human Quoted Human
+[00:01:42] Accuracy On Image
+[00:01:43] Net That's Me For
+[00:01:45] That One Week I
+[00:01:47] Wrote Activity
+[00:01:49] Tracking Apps So
+[00:01:51] For Exam Pl Would Be Able
+[00:01:56] To Track Caffeine Levels
+[00:01:57] And Everything So That Was Pretty Cool
+[00:01:59] Archive Sanity Preserver
+[00:02:00] Helps You Find Papers
+[00:02:02] Very Interesting Based On
+[00:02:03] The One That You Like I
+[00:02:04] Blog A Bunch There
+[00:02:06] Are Block Post
+[00:02:07] That Became Popular Over
+[00:02:08] Time Unreasonable
+[00:02:09] Effectiveness Of
+[00:02:10] Recurring Neural Network Being One
+[00:02:11] Of Them More
+[00:02:13] Recently Am Also An
+[00:02:14] Youtuber Influencer
+[00:02:16] So I
+[00:02:18] Have A Bunch Of Youtube
+[00:02:19] Videos About Transformers
+[00:02:21] GPT And So On You
+[00:02:22] Are Welcome To Look At Those
+[00:02:25] Repositories Like Min Gpt
+[00:02:26] Nano Gp T And So One I
+[00:02:27] Love This Event And
+[00:02:30] Hope That Have A Lot Of Fun
+[00:02:32] Now There Has
+[00:02:34] Never Been More
+[00:02:36] Interesting Time Than Today
+[00:02:38] By The Way
+[00:02:40] These Are All Images Generated
+[00:02:42] By Dali And You Notice
+[00:02:43] That All Of Hackers Have
+[00:02:44] Hoodies So Why
+[00:02:49] Is It So
+[00:02:51] Interesting To Hack Today
+[00:02:52] I Kind
+[00:02:53] Of Feel Like Programming Is
+[00:02:54] Basically Changing Very
+[00:02:56] Rapidly And This All
+[00:02:57] Happening Right Now It's
+[00:02:58] Interesting Exciting You
+[00:02:59] Are Explorers
+[00:03:00] Looking At
+[00:03:01] The New Vistas
+[00:03:03] Available So
+[00:03:07] Let Me
+[00:03:08] Double Click On
+[00:03:10] That What Do Think When
+[00:03:12] You Hear Programing
+[00:03:13] About Some
+[00:03:17] Of You Might Think Of
+[00:03:18] Writing Code Something
+[00:03:19] Looks Like This Your
+[00:03:20] Giving Instructions To A Computer
+[00:03:21] Or What The Computer
+[00:03:22] Should Do Maybe You Are
+[00:03:24] Thinking About Writing
+[00:03:26] C++ Code Giving
+[00:03:27] Instructions To A Computer Or
+[00:03:29] Donald Knuth
+[00:03:30] And Art Of Computer
+[00:03:31] Programming This Is Programing
+[00:03:32] As It Was For The Last 70
+[00:03:34] Years Unchanged
+[00:03:36] On High Level I
+[00:03:37] Would Say In Terms
+[00:03:38] Of Giving Instruction To Computers
+[00:03:39] And Designing Alg Rhythm
+[00:03:41] So Spelling Out
+[00:03:44] These Instruct Structures
+[00:03:45] Like Linux
+[00:03:49] And This
+[00:03:50] Is Diag Gram Of Linux It
+[00:03:51] Is A Complicated Software Engineering
+[00:03:53] Project With Lots
+[00:03:54] Of Moving Pieces And These
+[00:03:55] Are Profilers For The
+[00:03:57] Different Pieces Of It So
+[00:03:59] Not Quite All The
+[00:04:01] Way We Started
+[00:04:02] To See Cracks In What
+[00:04:03] Could Achieve
+[00:04:04] When We Got Other
+[00:04:07] Problems Like Computer Recognition
+[00:04:10] Image Recognition
+[00:04:11] Just Recognizing
+[00:04:12] There Was An Cat And Image Is
+[00:04:13] Very Difficult Problem You Can't
+[00:04:15] Write An Alg Them To Recognize
+[00:04:17] A Cat And Image Because
+[00:04:18] The Cat Can Take On Many
+[00:04:19] Different Forms
+[00:04:21] You Can't
+[00:04:22] Write An Instruction
+[00:04:23] By Giving
+[00:04:24] Explosive Instructions
+[00:04:26] To Computers We
+[00:04:31] Are Not
+[00:04:35] Going To Build Ag I
+[00:04:36] Artificial General Intelligence
+[00:04:38] By Spelling It Out
+[00:04:39] For Computer So
+[00:04:40] That's Not Enough And
+[00:04:41] I Think Basically We
+[00:04:43] Saw That Needed A New Way
+[00:04:44] To Program
+[00:04:45] Computers But Neural
+[00:04:54] Networks Are Not Just Like
+[00:04:55] Another Classifier In
+[00:04:56] Competition With
+[00:04:57] A Random Forest Or
+[00:04:58] Something Like That And
+[00:04:59] You Program Them
+[00:05:02] Slightly Differently So
+[00:05:04] You
+[00:05:05] Program Them By Accumulating
+[00:05:06] Data Sets And I
+[00:05:07] Call It Data Engine
+[00:05:10] Then Compile
+[00:05:11] Your Dataset Into
+[00:05:12] The Binary And
+[00:05:14] The Compilation Is The Neur
+[00:05:15] Network Training And The
+[00:05:16] Binar Training Is The Neural Network
+[00:05:17] Weights So This
+[00:05:18] Is The Final Program Written
+[00:05:20] In Waits And You
+[00:05:21] Can't Write It By Hand It
+[00:05:22] Comes Out Of Your Dataset
+[00:05:24] And The Way
+[00:05:25] That You Accumulate These Data Sets
+[00:05:26] Is About Five Years At
+[00:05:27] Tesla Is
+[00:05:29] You Start With A
+[00:05:30] Datastat You Train
+[00:05:31] A Neur Net Then Deploy
+[00:05:32] It And Some
+[00:05:41] Of It Enters
+[00:05:45] Back Into Training Set And You
+[00:05:47] Spin The Cycle Over Again So
+[00:05:48] I Call This Data Engine
+[00:05:49] So It Is How You Program
+[00:05:51] Software 2.0

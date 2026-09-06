@@ -1,0 +1,77 @@
+{
+  "seq": 899,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "ODuyU3TeXUkoE8Gds4NyGgMYCaocS5PI",
+      "video_id": "2092386459282182144",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "50cd849c13f04d54ab34e5dbdf1f8fe20ad5afb1ab2628c183698e84270b79e9",
+            "card_hash": "d5db2964d6bdc14562c82b37ce8105ad18f8833b3867595efef9cdeb15a6fcc6",
+            "quote": "there are some neolabs that succeed and become one of the largest companies",
+            "start": 688.027,
+            "end": 808.021,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "1d7783389276c71a633428aa3d65fd56c076f0c83751108a90a72ae884240a13",
+            "card_hash": "d5db2964d6bdc14562c82b37ce8105ad18f8833b3867595efef9cdeb15a6fcc6",
+            "quote": "Is the AI doing things we want it to be doing?",
+            "start": 1560.049,
+            "end": 1678.255,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "ef13c88ed60a75aac5fbbd2725aaa24f43281046d200e02d27ce7caa521e6cb5",
+            "card_hash": "d5db2964d6bdc14562c82b37ce8105ad18f8833b3867595efef9cdeb15a6fcc6",
+            "quote": "we use all kinds of like different things now like mixture of experts like different positional encodings",
+            "start": 935.604,
+            "end": 1053.311,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

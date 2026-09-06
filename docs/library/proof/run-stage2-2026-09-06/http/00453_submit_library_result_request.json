@@ -1,0 +1,51 @@
+{
+  "seq": 453,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "IeDODeh_LPNd3uSjBb0eYoKFF78ieTBF",
+    "client_id": "proof-harness",
+    "attempt_token": "wyCLwBSF9cjxxPaY-9Zlr6ernMnoY37mv_giZ7DjmpU",
+    "submission_key": "IeDODeh_LPNd3uSjBb0eYoKFF78ieTBF-wyCLwBSF9cjxxPaY-9Zlr6ernMnoY37mv_giZ7DjmpU",
+    "schema_version": 1,
+    "video_id": "2085386098293788673",
+    "source_revision": "3b31897e84d84cfba027d247073d5996a66b62c2ff4a67712d00d7aba6ffc351",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "2ed9a92fe22e6db65342a9640e6f706d99cc48e0a03050fc8ae565b5fa89e333",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "df7a9afea55cd57f707df4a55322d43ce602f131555be7f43f038bb6a33b75d9",
+            "card_hash": "0158c305fe50f3c4e4bb17b85cac714600871acee83f14b4add03c1d7efb24a1",
+            "quote": "we entered our AI models in five STEM Olympiad competitions"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 11136,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 20287,
+      "wall_time_ms": 0
+    }
+  }
+}

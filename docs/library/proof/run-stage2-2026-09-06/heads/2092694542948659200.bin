@@ -1,0 +1,88 @@
+# Alok - The VRAM barrier is officially dead.  I just ran Qwen 3.8 Flash Next ...
+
+**Channel:** Alok (— subscribers)
+**Uploaded:** 2026-08-26 | **Duration:** 00:20 | **Views:** — | **Likes:** 3,768
+**URL:** https://x.com/analogalok/status/2092697021790708148
+**Uoinked:** 2026-08-27T07:38:41
+**Topic:** Uncategorized
+**Note:** Screenshot interval lowered from 30s to 3s so this source can yield about 8 frames.
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Stakes
+**Analysis:** The hook emphasizes what viewers stand to gain by presenting a breakthrough achievement ('The VRAM barrier is officially dead') that fundamentally changes what's possible with consumer hardware. It creates urgency and importance by declaring a technical limitation has been overcome, compelling viewers to learn how.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+The VRAM barrier is officially dead.  I just ran Qwen 3.8 Flash Next (MoE) 125B A6B with a  250,000 context window on a single 24GB RTX 4090.  21 tokens/sec decode. 364 t/s prefill.   no mtp. no dflash. no kv cache quantization!  We are running datacenter models on consumer https://t.co/v5tkPtZqDq
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+*No captions available for this video.*
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:03]
+
+![Screenshot at 00:00:03](screenshots/shot_0002.jpg)
+
+### [00:00:06]
+
+![Screenshot at 00:00:06](screenshots/shot_0003.jpg)
+
+### [00:00:09]
+
+![Screenshot at 00:00:09](screenshots/shot_0004.jpg)
+
+### [00:00:12]
+
+![Screenshot at 00:00:12](screenshots/shot_0005.jpg)
+
+### [00:00:15]
+
+![Screenshot at 00:00:15](screenshots/shot_0006.jpg)
+
+### [00:00:18]
+
+![Screenshot at 00:00:18](screenshots/shot_0007.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About Alok:**
+*No channel description available.*
+
+**Recent videos from this channel:**
+- *No recent videos found.*
+
+---
+
+*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*

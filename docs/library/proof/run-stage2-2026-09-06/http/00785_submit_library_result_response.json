@@ -1,0 +1,39 @@
+{
+  "seq": 785,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "u-gog8BBECFl7UFVDEFN8bXhjJGJVZqE",
+      "video_id": "2090523526595854336",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4b6dbad9505dc2a913a08eb69a343e4dc2b50f130a50cc01172a6655e26b95f4",
+            "card_hash": "7c474a779e79d611cf69d00f13b04ccc22e6fc948ea1501de94124e69417370a",
+            "quote": "control over their compute their models, their data stack, and their alpha",
+            "start": 120.368,
+            "end": 166.02,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

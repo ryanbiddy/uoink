@@ -1,0 +1,39 @@
+{
+  "seq": 827,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "BNp8jLtONYTe7NjISLbPTeQL_SoihrMk",
+      "video_id": "2091559157526904832",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.82,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "f5eee99750bb9fbd4e932d0b74a705e10739592937aee9bf9fe3f330fe37a472",
+            "card_hash": "3088eff7c3ca3e8697e3ecd03032d98e8162fda8b94dd36d6983b88812be0253",
+            "quote": "a skill that builds an explorable isometric map of your codebase / agent / pipeline from one data file",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

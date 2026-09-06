@@ -1,0 +1,818 @@
+{
+  "seq": 979,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 9,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "ggv59FccN2HjeMuzCs8dMhW2GQh4e3NT",
+          "video_id": "2094524881493016576",
+          "attempt_token": "XrwMoVIlNJC7C7UkoyNSeFWTHKxDhtR9MKi_UgOZ6mI",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678122995,
+          "source_revision": "ed621f59cd55f2f0b439b25b38df35b3c60687d50aabc8d8a7016799210a9ac5",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "2de13d12be0a4e144dd337f67bb6d0c5f74d0dac55def9ccc3e395030556beab",
+          "card": {
+            "card_hash": "08b7d736d68be00ee67078937f508ea25da83953c9b67c557385fc498e978b4d",
+            "channel": "MTS",
+            "chars": 3287,
+            "chars_all_clips": 3287,
+            "chars_chosen_clips": 720,
+            "clip_count": 3,
+            "clips": [
+              {
+                "deep_link": "https://x.com/MTSlive/status/2094524974392565997#t=0",
+                "end": 66.619,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "219bf0f1581155b37b45eeaa6b29eea2c4b1c9055d38e3f4c0e2f6b640531955",
+                "start": 0.1,
+                "text": "Are we losing the low-level programmers right now? Are universities just producing fewer programmers who actually understand what is happening underneath all the different abstractions we're using day to day? Yeah, I mean this is a question",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2094524974392565997#t=66",
+                "end": 186.058,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "e72691f0558e58a0c68ded476366ea052d2a081280f8436466cc7b29281d679d",
+                "start": 66.659,
+                "text": "Like, for example, if you're looking at memory management and if you're trying to see Well what does the underlying structure look like? Is this access time having some unexpected latency? If you're not aware of kind of how the computers wo",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2094524974392565997#t=186",
+                "end": 202.188,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "af544f0eb9eae6dd7540224f273dc705162c24e90f8232a65fa32a6f6dcccb85",
+                "start": 186.178,
+                "text": "And so it's just kind of perpetuating itself all the time. I think I kind of have this unique opportunity Since I'm always talking about C++ on YouTube on X on all of the different social media platforms that I see these immediate negative ",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/MTSlive/status/2094524974392565997#t=0",
+                "end": 66.619,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "219bf0f1581155b37b45eeaa6b29eea2c4b1c9055d38e3f4c0e2f6b640531955",
+                "start": 0.1,
+                "text": "Are we losing the low-level programmers right now? Are universities just producing fewer programmers who actually understand what is happening underneath all the different abstractions we're using day to day? Yeah, I mean this is a question",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2094524974392565997#t=66",
+                "end": 186.058,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "e72691f0558e58a0c68ded476366ea052d2a081280f8436466cc7b29281d679d",
+                "start": 66.659,
+                "text": "Like, for example, if you're looking at memory management and if you're trying to see Well what does the underlying structure look like? Is this access time having some unexpected latency? If you're not aware of kind of how the computers wo",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2094524974392565997#t=186",
+                "end": 202.188,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "af544f0eb9eae6dd7540224f273dc705162c24e90f8232a65fa32a6f6dcccb85",
+                "start": 186.178,
+                "text": "And so it's just kind of perpetuating itself all the time. I think I kind of have this unique opportunity Since I'm always talking about C++ on YouTube on X on all of the different social media platforms that I see these immediate negative ",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Google researcher @lauriewired warns the shift from C++ to Python in universities is creating programmers who don't understand how computers actually work:  \"When I was in college getting my CS degree, my year was one of the last years that was using C++ as the core language for https://t.co/KWQqwCp0si No tags [00:00:00] Are we losing the low-level programmers right now? [00:00:03] Are universities just producing fewer [00:00:05] programmers who actually understand what is happening underneath [00:00:08] all the different abstractions we're using day to da",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "MTS_-_Google_researcher_lauriewired_warns_the_shift_from_C_to_Python_in",
+            "source_revision": "ed621f59cd55f2f0b439b25b38df35b3c60687d50aabc8d8a7016799210a9ac5",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Google researcher @lauriewired warns the shift from C++ to Python in universities is creating programmers who don't understand how computers actually work:  \"When I was in college getting my CS degree, my year was one of the last years that was using C++ as the core language for https://t.co/KWQqwCp0si No tags [00:00:00] Are we losing the low-level programmers right now? [00:00:03] Are universities just producing fewer [00:00:05] programmers who actually understand what is happening underneath [00:00:08] all the different abstractions we're using day to da",
+            "title": "MTS - Google researcher @lauriewired warns the shift from C++ to Python in ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/MTSlive/status/2094524974392565997",
+            "video_id": "2094524881493016576",
+            "yoinked_at": "2026-09-01T07:51:17"
+          }
+        },
+        {
+          "work_id": "lraTih1ImmMhJecIwGF_OVXHGRXrV1m3",
+          "video_id": "2094517730636390400",
+          "attempt_token": "QpUqiA5dhAu_3ChGQ_kfMwtzHxGGBPtLMeEnhYjNOLk",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678122995,
+          "source_revision": "32a400599bd2f032b00ca10026b59c7e28da045fdc0d84cded2549ba3ec9f50c",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "f5487bc86ff037216278a5dac4ae551bf451df77973feac52d94b33009a0a1f2",
+          "card": {
+            "card_hash": "d03f6a684054dba0924e37ad52d4ce4927deadb04bfef06fd0ad6c93c25f5673",
+            "channel": "GREG ISENBERG",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/gregisenberg/status/2094518013068484826",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "f757ba6ad315a5b2ff827a4c2358554365e01f80bbbb8df6d8051037612247e9",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> The \"marketing engineer\" is the NEW forward deployed engineer, and I think the BEST ones will make $1M a year!  A forward deployed engineer embeds with your team and uses AI to build the workflows  The ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> The \"marketing engineer\" is the NEW forward deployed engineer, and I think the BEST ones will make $1M a year!  A forward deployed engineer embeds with your team and uses AI to build the workflows  The marketing engineer does that BUT  for growth, they build AI agents that find https://t.co/E2Lm2TEvtI No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "GREG_ISENBERG_-_The_marketing_engineer_is_the_NEW_forward_deployed_engineer_and",
+            "source_revision": "32a400599bd2f032b00ca10026b59c7e28da045fdc0d84cded2549ba3ec9f50c",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> The \"marketing engineer\" is the NEW forward deployed engineer, and I think the BEST ones will make $1M a year!  A forward deployed engineer embeds with your team and uses AI to build the workflows  The marketing engineer does that BUT  for growth, they build AI agents that find https://t.co/E2Lm2TEvtI No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+            "title": "GREG ISENBERG - The \"marketing engineer\" is the NEW forward deployed engineer, and I ...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/gregisenberg/status/2094518013068484826",
+            "video_id": "2094517730636390400",
+            "yoinked_at": "2026-09-01T07:53:16"
+          }
+        },
+        {
+          "work_id": "nCQ1SnueBp3dkzLgNGRP6K4r1c39tYBy",
+          "video_id": "2094226099517452289",
+          "attempt_token": "IBKf4LWcbeRJAx3G9koERi59kJFCH94RQE23eBB3B84",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678122996,
+          "source_revision": "1de70dc0f4bc959443ac53a21ab148d5ed8862d57574c63d228ffbcb4cdf750f",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "91ac9b1c3fc7de70d17aef5af64b610727665dfad7624cdee07bef5fa648db8d",
+          "card": {
+            "card_hash": "c94396c84de2670507af4243d4c0020ea3b22305e2d278f43c9b847f5e472eed",
+            "channel": "ESPN",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/espn/status/2094226127212392931",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "4d73e7be8123b2d820ee0feb10f185fede30cc2123afb91ce0f3e9da322fbc52",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> \"We teammates now ... hopefully we do some special things together.\" 🔥  —Aaron Donald on getting to team up with Myles Garrett on the Rams https://t.co/2prPcXfsSp No tags *No captions available for this",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> \"We teammates now ... hopefully we do some special things together.\" 🔥  —Aaron Donald on getting to team up with Myles Garrett on the Rams https://t.co/2prPcXfsSp No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "ESPN_-_We_teammates_now_hopefully_we_do_some_special_things_together",
+            "source_revision": "1de70dc0f4bc959443ac53a21ab148d5ed8862d57574c63d228ffbcb4cdf750f",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> \"We teammates now ... hopefully we do some special things together.\" 🔥  —Aaron Donald on getting to team up with Myles Garrett on the Rams https://t.co/2prPcXfsSp No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "ESPN - \"We teammates now ... hopefully we do some special things together.\" ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/espn/status/2094226127212392931",
+            "video_id": "2094226099517452289",
+            "yoinked_at": "2026-08-31T07:55:12"
+          }
+        },
+        {
+          "work_id": "qkrn6WWDZahKpbFct49QHrgq0EfWEKQ5",
+          "video_id": "2094462045219438592",
+          "attempt_token": "Vp5oRyGeU8rzSTWs7gQOun6mXKkQ8oA5saWvNCoFBfk",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678122997,
+          "source_revision": "31cf501d6dd914576ff164685f61db67df6f0ea25a29294d05b9baad33dcdfc9",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "dae26af752ae520403fea1bb9d2d3806ef3d2f7c16a6ccf5ddadfd5b4b62e7f9",
+          "card": {
+            "card_hash": "0f4ca0fbdd16f88f102169b4496e0cc04c28d387a36e5eefa595cc6ef32c1c7b",
+            "channel": "Runway",
+            "chars": 1020,
+            "chars_all_clips": 1020,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/runwayml/status/2094463070466646019#t=0",
+                "end": 79.63,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3d258d03e602b20594f6db0cc680635f97922283ab9956221505dd58a1945d77",
+                "start": 0.98,
+                "text": "Every piece of software has predetermined what we can do with it But what if software could generate itself as you interact with it? Introducing Solaris, the first interface world model Solaris is built to understand interaction and to run ",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/runwayml/status/2094463070466646019#t=0",
+                "end": 79.63,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3d258d03e602b20594f6db0cc680635f97922283ab9956221505dd58a1945d77",
+                "start": 0.98,
+                "text": "Every piece of software has predetermined what we can do with it But what if software could generate itself as you interact with it? Introducing Solaris, the first interface world model Solaris is built to understand interaction and to run ",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Today, we're sharing new research on Solaris, our first Interface World Model.  Solaris is a new kind of operating system that generates interactive interfaces frame by frame, in real time, with no code. We find that Solaris outperforms frontier LLMs when generating new https://t.co/rRk0V2yx4t No tags [00:00:00] Every piece of software [00:00:02] has predetermined what we can do with it [00:00:06] But what if software could generate itself [00:00:09] as you interact with it? [00:00:12] Introducing Solaris, the first interface world model [00:00:18] Solaris",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Runway_-_Today_we_re_sharing_new_research_on_Solaris_our_first_Interface_Wor",
+            "source_revision": "31cf501d6dd914576ff164685f61db67df6f0ea25a29294d05b9baad33dcdfc9",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Today, we're sharing new research on Solaris, our first Interface World Model.  Solaris is a new kind of operating system that generates interactive interfaces frame by frame, in real time, with no code. We find that Solaris outperforms frontier LLMs when generating new https://t.co/rRk0V2yx4t No tags [00:00:00] Every piece of software [00:00:02] has predetermined what we can do with it [00:00:06] But what if software could generate itself [00:00:09] as you interact with it? [00:00:12] Introducing Solaris, the first interface world model [00:00:18] Solaris",
+            "title": "Runway - Today, we're sharing new research on Solaris, our first Interface Wor...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/runwayml/status/2094463070466646019",
+            "video_id": "2094462045219438592",
+            "yoinked_at": "2026-09-01T07:51:41"
+          }
+        },
+        {
+          "work_id": "z4yaRvJzLT97gKp-H07y4uYyhUZgpEK6",
+          "video_id": "2094277992017211392",
+          "attempt_token": "NoIiEvFuvvVnOCWYvS99W_0v-d5XIULKXUyeaNySITo",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678122997,
+          "source_revision": "bf0c7191922841dd5e6b5eb87f583c7a39f08b200e742549316412bb8bc581b4",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "edbe28e0ddc6c10cd91574a05a54a213e02059fc4d0e39b7f62a90db60427fdb",
+          "card": {
+            "card_hash": "79c9b2f21a568ced561ee89e692632584c04f529a349c1a1e837ada332172ce2",
+            "channel": "Vaibhav Sisinty",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/VaibhavSisinty/status/2094278011063619779",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "378c98bef7e87e89fbf6c5330ddab64cf2080b9c5888c716b5a336acd4f3200e",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> A Berlin artist made a shirt that makes you invisible to AI surveillance cameras. Like, the camera sees everyone else but skips right over you.  The pattern looks like a loud Hawaiian shirt to humans. B",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> A Berlin artist made a shirt that makes you invisible to AI surveillance cameras. Like, the camera sees everyone else but skips right over you.  The pattern looks like a loud Hawaiian shirt to humans. But to AI detection systems, it breaks the outline of a human body so https://t.co/a0pcowiQYF No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Vaibhav_Sisinty_-_A_Berlin_artist_made_a_shirt_that_makes_you_invisible_to_AI_su",
+            "source_revision": "bf0c7191922841dd5e6b5eb87f583c7a39f08b200e742549316412bb8bc581b4",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> A Berlin artist made a shirt that makes you invisible to AI surveillance cameras. Like, the camera sees everyone else but skips right over you.  The pattern looks like a loud Hawaiian shirt to humans. But to AI detection systems, it breaks the outline of a human body so https://t.co/a0pcowiQYF No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Vaibhav Sisinty - A Berlin artist made a shirt that makes you invisible to AI surveilla...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/VaibhavSisinty/status/2094278011063619779",
+            "video_id": "2094277992017211392",
+            "yoinked_at": "2026-08-31T07:54:38"
+          }
+        },
+        {
+          "work_id": "30CptbV2PFLcGEhRjmXu1V44c0NJYBaR",
+          "video_id": "2095016781824082252",
+          "attempt_token": "Vb_Xe3kTl15Xm6pGG-D5zJtYExVnGZTQyVOm6DjaIxw",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678122998,
+          "source_revision": "da59431dda76d5605cfc8476bf4f08e16a1ed57037e74ac73a5c92f3f191e816",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "37c536f4abec6e9942f59d4e397c758e08d1669c3ad2c0b0ee0349fd76ce03ce",
+          "card": {
+            "card_hash": "359871a7040611bf6eaf3784b64bbe523c1ab4a87749f149c7898c58b1a0fbab",
+            "channel": "yuwen lu",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/yuwen_lu_/status/2095016781824082252",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "ab08909f4e4f3ca0763350d011106543e0fba932435f5a0e309085b650ad6953",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> damn fable 5.1 真的能自己研究明白怎么写狂草 https://t.co/JxSxcgMPyn No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> damn fable 5.1 真的能自己研究明白怎么写狂草 https://t.co/JxSxcgMPyn No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "yuwen_lu_-_damn_fable_5_1",
+            "source_revision": "da59431dda76d5605cfc8476bf4f08e16a1ed57037e74ac73a5c92f3f191e816",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> damn fable 5.1 真的能自己研究明白怎么写狂草 https://t.co/JxSxcgMPyn No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "yuwen lu - damn fable 5.1 真的能自己研究明白怎么写狂草",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/yuwen_lu_/status/2095016781824082252",
+            "video_id": "2095016781824082252",
+            "yoinked_at": "2026-09-02T07:37:03"
+          }
+        },
+        {
+          "work_id": "49Fi34QqSNtpXveakVphBhSglAvsVb6p",
+          "video_id": "2094906490146742272",
+          "attempt_token": "HzKxMWAxt7Y0_doNILPCucFTdVtmW1CPzWlfCqem9WQ",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678122999,
+          "source_revision": "46c48324d9059fd987aaa27f5221f7d4d377971d4a3319bd54ce9da1a8bcbbd1",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "35af5c2f0231abb4645b0ddcf47695036d8248e04c92519ec16784edc6d8312a",
+          "card": {
+            "card_hash": "e35287e889da90eb1fbf354bff9d658c8179bbe0cf798563c8d62d7b9436e440",
+            "channel": "Justine Moore",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/venturetwins/status/2094908507539800563",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "ea61578f87661e014f5654401b4cf99ac9851894fb9d7bfe0cfd3929ac4a2813",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Re-shoot an existing video from a new angle 🤯  Truly insane work from @theworldlabs, this new model is a game-changer.  The initial clip was filmed with three cell phones on tripods - the model reconstr",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Re-shoot an existing video from a new angle 🤯  Truly insane work from @theworldlabs, this new model is a game-changer.  The initial clip was filmed with three cell phones on tripods - the model reconstructed a full view of the scene to reframe the video. https://t.co/a25IquJI2s No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Justine_Moore_-_Re-shoot_an_existing_video_from_a_new_angle_Truly_insane_work_fr",
+            "source_revision": "46c48324d9059fd987aaa27f5221f7d4d377971d4a3319bd54ce9da1a8bcbbd1",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Re-shoot an existing video from a new angle 🤯  Truly insane work from @theworldlabs, this new model is a game-changer.  The initial clip was filmed with three cell phones on tripods - the model reconstructed a full view of the scene to reframe the video. https://t.co/a25IquJI2s No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Justine Moore - Re-shoot an existing video from a new angle 🤯  Truly insane work from...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/venturetwins/status/2094908507539800563",
+            "video_id": "2094906490146742272",
+            "yoinked_at": "2026-09-02T07:37:27"
+          }
+        },
+        {
+          "work_id": "9SZfYod4WX_YEllvpje3UjFm4TLNOKke",
+          "video_id": "2095522731559469057",
+          "attempt_token": "fhHwSCQXfaYXqpB2oisBHwC6makg55GbXlkcj9ht0xM",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788678123000,
+          "source_revision": "22c91b35431636cfa18d2608f76866299b12c00812abba121ecb622178cc88bf",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "de9617b7944cbf86d835f710fea5225fd55e07d7f25b9879c2f96911d620be81",
+          "card": {
+            "card_hash": "ee740c61c6faa3743dfa4115ab60b4cffa9c6a8cb6da2e09c2e2f585fb8d6460",
+            "channel": "Pietro Schirano",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/skirano/status/2095595942544089525",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "f8c1766623d170ca7679d52d4d55211913f3bed6d9652b2e8e5dba2d7afd1d0d",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> 6/6 It can also fully produce music in code.  I gave it access to Ableton via MCP and it made this track from scratch, creating each instrument with synths, along with all the parts and arrangement. htt",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> 6/6 It can also fully produce music in code.  I gave it access to Ableton via MCP and it made this track from scratch, creating each instrument with synths, along with all the parts and arrangement. https://t.co/F3DHgwQu6s No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Pietro_Schirano_-_6_6_It_can_also_fully_produce_music_in_code_I_gave_it_access_t",
+            "source_revision": "22c91b35431636cfa18d2608f76866299b12c00812abba121ecb622178cc88bf",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 6/6 It can also fully produce music in code.  I gave it access to Ableton via MCP and it made this track from scratch, creating each instrument with synths, along with all the parts and arrangement. https://t.co/F3DHgwQu6s No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Pietro Schirano - 6/6 It can also fully produce music in code.  I gave it access to Abl...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/skirano/status/2095595942544089525",
+            "video_id": "2095522731559469057",
+            "yoinked_at": "2026-09-04T07:55:43"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 515,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Z_sPjvcMdoutaOeklUew_p6cqwchrOb7",
+      "video_id": "2085779305968123904",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "4082290c421832ff8e3d70089afae0f40fb9ae7068bbd1db0994af8eaac601b5",
+            "card_hash": "8e0df0a2cf4c8a9f6227bf4eda31e339c41c4fe4d0675cc6b331cf8452cf1462",
+            "quote": "custom harness (works w/ opus 5, kimi 3, any model)",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

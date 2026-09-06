@@ -1,0 +1,39 @@
+{
+  "seq": 1097,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "7LpXliBJf8Oida_AAajMv0a9LawcK-gi",
+      "video_id": "2095624765327458304",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "eab39d10bd05b9158421b24012dcab594e53a1bbdbb395f946f7369ba2f7b5b4",
+            "card_hash": "c27c5d95b24278755905214170555adc23f69c2ccf3eae812a9ce4cc5009e8dc",
+            "quote": "GPT-6 Astra absolutely crushes Tiny Computer Bench™️, by finally hacking in to this dumb little toy computer I bought off Amazon",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

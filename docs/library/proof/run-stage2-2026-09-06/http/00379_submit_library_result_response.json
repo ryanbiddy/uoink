@@ -1,0 +1,39 @@
+{
+  "seq": 379,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "LF3bp-j7Wc-M9FTLhohtr-FZ9MGusB_U",
+      "video_id": "2083312428356411392",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "7e0077f23ffb6168e55183719f12d95e3a4a2c93ec3cf6980b819de2a2c1d5c7",
+            "card_hash": "5866f9672a922b88304dd40c95758fbbf07056db2f3a4268d834c15c24df11c3",
+            "quote": "I've Got To Orchestrate It I Gotta Put Tracing In I Gotta Label Those Things Build Eval's And Then I Need Some Guardrails",
+            "start": 1917.95,
+            "end": 2036.829,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

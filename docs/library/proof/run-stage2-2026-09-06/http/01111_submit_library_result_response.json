@@ -1,0 +1,39 @@
+{
+  "seq": 1111,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "m2TIbcr1_t_GeMYk-_iKiOJEV6JQkhGQ",
+      "video_id": "2095023819404783896",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "8bdd5dbf90be4510527277a0090952c2cf410f685cae5c720555a02a500e2840",
+            "card_hash": "d883c92987e5486589ed87699c8920aa612123e005be8c3d591a815c65064c82",
+            "quote": "I asked it to present the whole Claude fam tree as a galaxy vinyl in TypingMind, and it absolutely ate",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

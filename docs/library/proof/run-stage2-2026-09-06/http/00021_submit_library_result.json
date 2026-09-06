@@ -1,0 +1,93 @@
+{
+  "seq": 21,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 21,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "yvdTz36H8LzU4YrLSG1fJf1PU7h-e46G",
+      "client_id": "proof-harness",
+      "attempt_token": "OiakoHGKxHeVgNnJZ7c-vafHLygWKNXdyMMnzJ9rz80",
+      "submission_key": "yvdTz36H8LzU4YrLSG1fJf1PU7h-e46G-OiakoHGKxHeVgNnJZ7c-vafHLygWKNXdyMMnzJ9rz80",
+      "schema_version": 1,
+      "video_id": "2078287651535273984",
+      "source_revision": "bf8eb842b087cd892a6f1f15c47da10911c1e6e71ffdca7df0d0fc4b9346a122",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "f97387f62dbc5f4a4474b81d4282cc5fb5cea7548a685a8a73826058160fae08",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.9,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "f93090fe7fd859871f41b56f4112715bbeef6dd0f32f30fc9d68d11f54fff9a6",
+              "card_hash": "79519ef7ae40f65fbb80d6de4a255d2bd422c4ee9b9f0821017b0498e73df3ea",
+              "quote": "A woman is charged with first degree murder after an overnight shooting in the Walker Homes neighborhood."
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 7810,
+        "cache_read_tokens": 101938,
+        "cache_create_tokens": 107853,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 21,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "yvdTz36H8LzU4YrLSG1fJf1PU7h-e46G",
+        "video_id": "2078287651535273984",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.9,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "f93090fe7fd859871f41b56f4112715bbeef6dd0f32f30fc9d68d11f54fff9a6",
+              "card_hash": "79519ef7ae40f65fbb80d6de4a255d2bd422c4ee9b9f0821017b0498e73df3ea",
+              "quote": "A woman is charged with first degree murder after an overnight shooting in the Walker Homes neighborhood.",
+              "start": 0.0,
+              "end": 18.8,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

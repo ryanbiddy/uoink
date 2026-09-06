@@ -1,0 +1,39 @@
+{
+  "seq": 1113,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "nshlAbE4E5ROHdD5zXZzlN6MSg86Jsdt",
+      "video_id": "2094843261470793728",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "a8d28190dbfbb3514974ba46fe14966f2395194da198e96d8b1af7965cf18c98",
+            "card_hash": "12a8ed5394c9b5013be0e588c1fbe4387f139a58521e01395a01b44e11fb9853",
+            "quote": "We’re introducing Claude Fable 5.1 and Claude Mythos 5.1.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

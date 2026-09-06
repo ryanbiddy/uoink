@@ -1,0 +1,39 @@
+{
+  "seq": 933,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "FTfmauyR6VvJHwIfFXgYIOjgfdzcAO9m",
+      "video_id": "2093013293560709120",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "82511a84f2588c601505763a3de38e1b1c2e6aded194e67f84a89aa55bc8f16d",
+            "card_hash": "3c9dfc27083fcc1704379bdd88641eefab7ac264bc87a7e43b6a3af8afbd7f4b",
+            "quote": "Introducing PhoneLLM, an open model for voice agents.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

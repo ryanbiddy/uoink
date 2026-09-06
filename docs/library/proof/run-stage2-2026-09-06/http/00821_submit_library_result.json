@@ -1,0 +1,95 @@
+{
+  "seq": 821,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 821,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "qxh3D5qna_nBGqlueZFMtYoWUXo8m1cI",
+      "client_id": "proof-harness",
+      "attempt_token": "BVvjBvZHyjaERQXQJs1i0YsyD3o06yXAo3pT0XlXGkc",
+      "submission_key": "qxh3D5qna_nBGqlueZFMtYoWUXo8m1cI-BVvjBvZHyjaERQXQJs1i0YsyD3o06yXAo3pT0XlXGkc",
+      "schema_version": 1,
+      "video_id": "2091205272920358912",
+      "source_revision": "8d30fd9ab4403ec65cca41501b644344760ca380dc3a6b1330885b03524a47ea",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "2ed858c153c1a7d98808b47dd19c70018ae665af4422b00eeb0ca83e4184f9ff",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "6e3f4005588c6bf14c5ad0bb5dbfc14f8647026ae8d77b9d80dee85c07cef650",
+              "card_hash": "e7b77e1971b78eb2f2a83a7cd1f0da277d2ca86fef3ffd5a437bb81353eddc0a",
+              "quote": "I asked Codex to design its own CPU and then write a Space Invaders-style game for it in assembly"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 13029,
+        "cache_read_tokens": 187432,
+        "cache_create_tokens": 32138,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 821,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "qxh3D5qna_nBGqlueZFMtYoWUXo8m1cI",
+        "video_id": "2091205272920358912",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "6e3f4005588c6bf14c5ad0bb5dbfc14f8647026ae8d77b9d80dee85c07cef650",
+              "card_hash": "e7b77e1971b78eb2f2a83a7cd1f0da277d2ca86fef3ffd5a437bb81353eddc0a",
+              "quote": "I asked Codex to design its own CPU and then write a Space Invaders-style game for it in assembly",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

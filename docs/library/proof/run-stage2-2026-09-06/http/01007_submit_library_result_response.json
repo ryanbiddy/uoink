@@ -1,0 +1,39 @@
+{
+  "seq": 1007,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Gqk8q7p229fAhr5Lr6rePUz6LTFDZF_l",
+      "video_id": "2094471187783172096",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "e45f34ed1b92a17ab0bf90b373faf6519debd0bf60937b5bb890825f0f6a7fe4",
+            "card_hash": "14dedb2420376bfd7a857a4e9050060308dc6e6e09a7c45bb17fb96ee5ff8ee6",
+            "quote": "We’ve made skills so your agents can create beautiful figures for your papers or visualizations while you are",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

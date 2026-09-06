@@ -1,0 +1,104 @@
+# Object Detection 101 Course - Including 4xProjects | Computer Vision
+
+**Channel:** Murtaza's Workshop - Robotics and AI (451.0K subscribers)
+**Uploaded:** 2023-02-10 | **Duration:** 04:33:47 | **Views:** 1,437,882 | **Likes:** 28,623
+**URL:** https://www.youtube.com/watch?v=WgPbbWmnXJ8
+**Uoinked:** 2026-07-09T19:20:50
+**Topic:** Social Media Research
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Promise List
+**Analysis:** The hook opens by promising a comprehensive course structure with multiple specific deliverables: theory, history, evaluation metrics, installation, YOLO v8 implementation, and 4 real-world projects (car counter, people counter, PPE detector, poker hand detector). This explicit enumeration of what viewers will learn fits the promise_list category.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Win a 3080 Ti by Registering using the link below and attending one of the conference sessions.(20 to 23 March 2023)
+https://nvda.ws/3HnZEPM 
+
+🚀🚀 My Urdu/Hindi AI YouTube Channel 🚀🚀
+https://www.youtube.com/@murtazahassan01
+
+Download Code and Files (Make sure to sign up for free to get access):
+https://www.computervision.zone/courses/object-detection-course/
+
+Premium Courses: 
+✔️ Computer Vision Web Development:
+http://bit.ly/3EmdhNB
+✔️ Computer Vision Game Development Course:
+https://bit.ly/3ttLZ2s
+✔️ Computer Vision with Arduino Course:
+https://bit.ly/3wzLB4m
+✔️ Advanced Drone Programming Course:
+https://bit.ly/3qs3v5g
+✔️ Learn to Build Computer Vision Mobile Apps:
+https://bit.ly/3uioY1J
+✔️ Jetson Nano Premium Course:
+https://bit.ly/3L8uIlF
+
+⚙️⚙️⚙️—-My Gear — ⚙️⚙️⚙️
+👉 Complete Gear 💈: https://www.computervision.zone/tech-gear/
+👉 My PC Specs 🖥️: https://www.computervision.zone/tech-gear/filter/tax/tgcat:285/
+👉 My Video Shooting Gear📽️ : https://www.computervision.zone/tech-gear/filter/tax/tgcat:284/
+👉 My Laptops 💻: https://www.computervision.zone/tech-gear/filter/tax/tgcat:290/
+👉 Educational Products🧑‍🎓: https://www.computervision.zone/tech-gear/filter/tax/tgcat:295/
+👉 Youtube Starter Kit 🔴: https://www.computervision.zone/tech-gear/filter/tax/tgcat:299/
+
+Follow Me:
+TikTok: https://bit.ly/3Vo76OQ 
+Facebook Group: https://bit.ly/3irDcb7
+Discord: https://bit.ly/3JvyxAM  
+Facebook Page: https://bit.ly/3IvpU7W
+Instagram: https://bit.ly/3NdGME3
+Website: https://bit.ly/3ICFTS0
+GitHub: https://bit.ly/3woU6PS
+
+#ComputerVision
+#OpenCV
+#CVZone
+
+
+00:00 Introduction
+02:08 Chapter 1 - What is Object Detection?
+03:30 Chapter 2 - A Brief History
+06:16 Chapter 3 - Performance Evaluation Metrics
+09:07 Chapter 4 - Installations
+19:23 Chapter 4.1 - Package Installations
+25:45 Chapter 5 - Running Yolo
+37:14 Chapter 6 - Yolo with Webcam
+01:08:17 Chapter 7 - Yolo with GPU
+01:21:39 Premium Courses
+01:23:51 Project 1 - Car Counter
+02:17:58 Project 2 - People Counter
+02:31:41 Project 3 - PPE Detection (Custom Training)
+03:06:19 Project 4 - Poker Hand Detector
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+### Chapter: Introduction (00:00:00)
+
+[00:00:02] hey everyone welcome to my channel this is the object detection 101 course in this course we will cover everything to get you started with object detection along with four exciting and real world projects we will first start with the theory and have a look at its brief history then we will understand the working of object detection along with its evaluation Matrix from there we will install everything from the start and run the YOLO version 8 object detection pretend models using these models we will create two projects car counter and people counter here we will learn how to implement object tracking along with object detection we will also install and run YOLO with our GPU for better performance later we will learn how to train a custom YOLO model using our own data set and create two projects using our own training the first one will be personal protective equipment detector and the second one will be poker hand detector where we will first detect the playing cards and then create a classifier to classify the correct poker hands if you are a beginner don't worry this course is for you we will go step by step so it is easy to follow this is an information dense course that will provide you with maximum knowledge without wasting your time learning custom object detection is a superpower that can allow you to solve real world problems and it can be easily completed over a weekend so buckle up and get your nerdy glasses on and let's get started but wait we are going to use nvidia's 3080ti graphics card in this course now my question to you is would you like to have one too if yes then you are in luck I will be giving away a 3080 di graphics card and all you have to do is register to nvidia's GTC 2023 conference through my link in the description and attend one of their sessions to enter the giveaway automatically the conference will be held from 20 to 23rd March 2023. this is a great place to learn new things and keep up with the new trends in technology so sign up today and I will see you there foreign
+[00:02:03] foreign [Music]
+
+### Chapter: Chapter 1 - What is Object Detection? (00:02:08)
+
+[00:02:16] what is object detection object detection is a computer vision technique for locating objects in an image or a video object detection gives us the bounding box information of the object as well as the classification of that object
+[00:02:29] object what is the difference between object classification object detection and object segmentation object classification is a type of image recognition that identifies what type of object is present in an image here the complete image is sent for classification so the output is a single class
+[00:02:49] class object detection is a type of image recognition that is used to identify and locate the presence of an object in an image this gives us the bounding box information and the class as well here the results can be multiple bounding boxes and classes object segmentation is the type of image recognition that is used to identify and separate the distinct objects in an image on a pixel level here we get the exact shape of the object detected rather than just the bounding box although image segmentation provides more information image detection is still the first choice for most computer vision applications since it is less computationally expensive
+
+### Chapter: Chapter 2 - A Brief History (00:03:30)
+
+[00:03:38] a brief history of object detection object detection was first started in the 1970s researchers started to develop automated methods for object detection the first automated object detection algorithm were based on simple features such as edges and corners the first real object detection was Viola Jones developed in 2001. it used sliding Windows to search for hard-like features which are simply rectangular features this method became popular since it was real time for the longest time period this method was used for face detection in smartphones and cameras the histogram of oriented gradients was another method released in 2005. that focused on the shape of the object it worked by extracting the gradient and orientation of the edges this method was mostly used to detect humans in an image then came the revolution of AI with neural networks gaining popularity the true potential was seen with convolutional neural networks when alexnet won the imagenet large-scale vision recognition challenge in 2012. but this solved a classification problem and not detection later Bruce Force methods were used to repurpose the CNN models to work as detection models this was a very inefficient approach so soon after came the rcnn regions with CNN that used selective regions to apply the classifiers this gave good results but it was slow so then came the Fast rcnn and the Foster rcnn which were faster but still not real time in 2015 came the Breakthrough of YOLO this outperformed all the other models and ran object detection in real time 

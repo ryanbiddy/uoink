@@ -1,0 +1,39 @@
+{
+  "seq": 653,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "0ce_xLgVmv5nRBV3n0k_BtmXuISAH8LW",
+      "video_id": "2089054598837256192",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "f40f0b45c927accf905f8d4b87618960297f0c4502efb870f0008157d29a4872",
+            "card_hash": "81d33602cac92ec8a38b584d7cb755427762f448a7bb7a4821798f806ae75fe0",
+            "quote": "The first agentic video editor built from the ground up for AI",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

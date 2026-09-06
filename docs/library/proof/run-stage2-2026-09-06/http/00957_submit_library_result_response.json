@@ -1,0 +1,39 @@
+{
+  "seq": 957,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "fnntZf77BQNMIe16HaQgeA885gNb_Vfc",
+      "video_id": "2094144554630894045",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "756760711ebedee072e25a225a9578b23b3c9ed646d14b7f72b7fa17f18fd09e",
+            "card_hash": "65007346442bd52254ae8bb75128430543e2037833785201f7aacac2e90a4915",
+            "quote": "trained my own with trl + openenv",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

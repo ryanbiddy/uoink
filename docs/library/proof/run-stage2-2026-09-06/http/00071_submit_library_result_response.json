@@ -1,0 +1,38 @@
+{
+  "seq": 71,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "ZcofXAw5HC5InbFWoJizElWaQ11Qx1rR",
+      "video_id": "2077640475075358720",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "news-and-current-events",
+          "shelf_path": [
+            "News and Current Events"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "e825c695589c14e0ed2f5c1c305e613d3bcade70b01405dc8ca28864e520bdc7",
+            "card_hash": "aa7d2d8267f69d374dee00e210bb119e0c2e9b868e0e8b239118cf6e17bd045a",
+            "quote": "Particularly Places That Don't Have Free Speech Yes Like England Where They Lock People Up",
+            "start": 358.779,
+            "end": 385.24,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

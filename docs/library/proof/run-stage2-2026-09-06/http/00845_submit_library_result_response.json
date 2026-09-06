@@ -1,0 +1,38 @@
+{
+  "seq": 845,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "amqAwTiuNowRRuR5B6SkltvAuT5Yd3br",
+      "video_id": "2091245754484449280",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "bda95d15f5784c4c72e82ecd7e0fac35337b9fe7563b3271e19836ebc495d072",
+            "card_hash": "9ed29598ceb2004c44277e78d8a74e4d15446e2f004f0897ab49eb3ea5bacbaa",
+            "quote": "666 teams from around the world are competing with more than 2,000 humanoid robots",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

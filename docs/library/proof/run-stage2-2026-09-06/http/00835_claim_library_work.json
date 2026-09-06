@@ -1,0 +1,1038 @@
+{
+  "seq": 835,
+  "tool": "claim_library_work",
+  "wall_ms": 10,
+  "request": {
+    "seq": 835,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 835,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 10,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "81Co0j1KUO-RlkJcTH9BfgAD2NUPVH5u",
+            "video_id": "2092646578058412032",
+            "attempt_token": "6BRM9lwMk1jxZqd-n1NDdu0Q_gY_Y_kgNKk4n1kXOOQ",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677770557,
+            "source_revision": "bf47d1882cecb2781e8b6596a62a10e603ba3eaa3d780395e3cca6eb68f3961d",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "1101a1f0b6f60752928fbf42f4d97873ea557aaa526a87f55485ba69c3a8a46e",
+            "card": {
+              "card_hash": "6095117f568cf563a2c86f1d254514e69e8b98afcacecdfbd60dcde3e02ecaa9",
+              "channel": "Devi Parikh",
+              "chars": 1961,
+              "chars_all_clips": 1961,
+              "chars_chosen_clips": 265,
+              "clip_count": 2,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/deviparikh/status/2092647579163251007#t=0",
+                  "end": 119.59,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "a0634df651c2629a1cfc2ed9db511709593c9f36514cd221e226f7eda16fcc85",
+                  "start": 0.28,
+                  "text": "Eventually, everything evolves Ice used to be cut from a lake Making a call used to be a hands-on process Computers used to fill a room Given enough time, technology becomes smarter and simpler and we think how we use computers is next Intr",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/deviparikh/status/2092647579163251007#t=119",
+                  "end": 121.554,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2ebce1b6d7737a0dbd0983df68708c27a336e81648aa57d8c64074c2425e805e",
+                  "start": 119.77,
+                  "text": "available now on our API?",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/deviparikh/status/2092647579163251007#t=0",
+                  "end": 119.59,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "a0634df651c2629a1cfc2ed9db511709593c9f36514cd221e226f7eda16fcc85",
+                  "start": 0.28,
+                  "text": "Eventually, everything evolves Ice used to be cut from a lake Making a call used to be a hands-on process Computers used to fill a room Given enough time, technology becomes smarter and simpler and we think how we use computers is next Intr",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/deviparikh/status/2092647579163251007#t=119",
+                  "end": 121.554,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2ebce1b6d7737a0dbd0983df68708c27a336e81648aa57d8c64074c2425e805e",
+                  "start": 119.77,
+                  "text": "available now on our API?",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Today we’re introducing Navigator n2. It’s a frontier computer-use model, with just 27B parameters. https://t.co/8MiJNtk3CD No tags [00:00:00] Eventually, everything evolves [00:00:02] Ice used to be cut from a lake [00:00:04] Making a call [00:00:05] used to be a hands-on process [00:00:07] Computers used to fill a room [00:00:10] Given enough time, technology becomes smarter and simpler [00:00:14] and we think how we use computers [00:00:16] is next [00:00:18] Introducing Navigator N2 from Utori [00:00:20] frontier computer use [00:00:22] at a fraction o",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Devi_Parikh_-_Today_we_re_introducing_Navigator_n2_It_s_a_frontier_computer-use",
+              "source_revision": "bf47d1882cecb2781e8b6596a62a10e603ba3eaa3d780395e3cca6eb68f3961d",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Today we’re introducing Navigator n2. It’s a frontier computer-use model, with just 27B parameters. https://t.co/8MiJNtk3CD No tags [00:00:00] Eventually, everything evolves [00:00:02] Ice used to be cut from a lake [00:00:04] Making a call [00:00:05] used to be a hands-on process [00:00:07] Computers used to fill a room [00:00:10] Given enough time, technology becomes smarter and simpler [00:00:14] and we think how we use computers [00:00:16] is next [00:00:18] Introducing Navigator N2 from Utori [00:00:20] frontier computer use [00:00:22] at a fraction o",
+              "title": "Devi Parikh - Today we’re introducing Navigator n2. It’s a frontier computer-use mo...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/deviparikh/status/2092647579163251007",
+              "video_id": "2092646578058412032",
+              "yoinked_at": "2026-08-27T07:39:10"
+            }
+          },
+          {
+            "work_id": "Bra0MLoSRlyWLzGRQ77GH41p-zw3JgvX",
+            "video_id": "2092369226262786048",
+            "attempt_token": "jxIgOw1OCpVuljEz0Mwsd8c_lUIvVqS8EJzNyMe5Qe0",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677770559,
+            "source_revision": "ad8a3f6266048ee87c6dca6216b8b6a8c4242168bb0f2210e1b77cdb4a494c69",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "f18b7ee5f648c23077bc7a58c1ece4881496f4644f6a1a4c2bbc0f7d7dd88a98",
+            "card": {
+              "card_hash": "d88c7dad166544b3e8195997394efd0fb5c6e6c74c0051c31087dc818cdfe2e3",
+              "channel": "Theo - t3.gg",
+              "chars": 42375,
+              "chars_all_clips": 42375,
+              "chars_chosen_clips": 1440,
+              "clip_count": 24,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/theo/status/2092372584180687279#t=118",
+                  "end": 238.835,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "97fd205a2787e4e02a51e55e24a5b2ed0df2b5cc17dcacff598a45f0e2b03285",
+                  "start": 118.979,
+                  "text": "Anthropic, Cursor And thinking machines all have in common because it's not just that they're trying to make models is that they all use today's sponsor WorkOS. You might be confused why so many big companies are choosing to use a product l",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/theo/status/2092372584180687279#t=709",
+                  "end": 827.78,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "d7034326e61d548e650f759d452222f268ba5c978dc56f7c3e0575a77ebf4886",
+                  "start": 709.041,
+                  "text": "Well, it pulls down a bunch of JSON files some of which it loads in a context but if it pulls too much And basic capping it and say like \"Hey, I showed you three items but I downloaded 52 into this JSON file If I think the structure looks c",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/theo/status/2092372584180687279#t=1079",
+                  "end": 1157.011,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "e3f73f8a0d967f1df2f36e003b965c3792f75f6d54c92e90c4f9808a740803e1",
+                  "start": 1079.699,
+                  "text": "Doesn't have a reason to know that this is garbage And there's a bunch of point in time states that are actively risky like monitor JSON schema drift remote PR portfolio, out of memory crisis hot paths, background policy, scope wiring gap, ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/theo/status/2092372584180687279#t=1378",
+                  "end": 1497.143,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "69f7e11c6b20c22b7a580c353b2a6b17efce69623a750e75060c82a6e98b03e6",
+                  "start": 1378.944,
+                  "text": "We could do Obvious thing which is to go into the agent MD every time the model does something wrong and add something small to it saying \"Don't do this again.\" And that does help It does work But at some point you have to reflect and reali",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/theo/status/2092372584180687279#t=1789",
+                  "end": 1908.521,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "31b80f0b415216f219594c9a29225a85f9260687b771d9268d4f3a21aae35f11",
+                  "start": 1789.766,
+                  "text": "connect over tail scale a skill for that is helpful Skills should be a fallback that you fall into when the code base can't solve the problem and the lint rules in CI also can't Skills shouldn't be this thing you reach for all the time to b",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/theo/status/2092372584180687279#t=2214",
+                  "end": 2332.485,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "906a295b35e70923e5ba850dda80a2bb9faa66f4c683456101e173732bb04307",
+                  "start": 2214.126,
+                  "text": "me at things that my slop code does I add them here to keep steering in the direction that makes Julius happy He really likes the adapter boundary being where complexity lives so that the orchestration can be really simple and the UI can be",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Social Media Research",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/theo/status/2092372584180687279#t=118",
+                  "end": 238.835,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "97fd205a2787e4e02a51e55e24a5b2ed0df2b5cc17dcacff598a45f0e2b03285",
+                  "start": 118.979,
+                  "text": "Anthropic, Cursor And thinking machines all have in common because it's not just that they're trying to make models is that they all use today's sponsor WorkOS. You might be confused why so many big companies are choosing to use a product l",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/theo/status/2092372584180687279#t=709",
+                  "end": 827.78,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "d7034326e61d548e650f759d452222f268ba5c978dc56f7c3e0575a77ebf4886",
+                  "start": 709.041,
+                  "text": "Well, it pulls down a bunch of JSON files some of which it loads in a context but if it pulls too much And basic capping it and say like \"Hey, I showed you three items but I downloaded 52 into this JSON file If I think the structure looks c",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/theo/status/2092372584180687279#t=1079",
+                  "end": 1157.011,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "e3f73f8a0d967f1df2f36e003b965c3792f75f6d54c92e90c4f9808a740803e1",
+                  "start": 1079.699,
+                  "text": "Doesn't have a reason to know that this is garbage And there's a bunch of point in time states that are actively risky like monitor JSON schema drift remote PR portfolio, out of memory crisis hot paths, background policy, scope wiring gap, ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/theo/status/2092372584180687279#t=1378",
+                  "end": 1497.143,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "69f7e11c6b20c22b7a580c353b2a6b17efce69623a750e75060c82a6e98b03e6",
+                  "start": 1378.944,
+                  "text": "We could do Obvious thing which is to go into the agent MD every time the model does something wrong and add something small to it saying \"Don't do this again.\" And that does help It does work But at some point you have to reflect and reali",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/theo/status/2092372584180687279#t=1789",
+                  "end": 1908.521,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "31b80f0b415216f219594c9a29225a85f9260687b771d9268d4f3a21aae35f11",
+                  "start": 1789.766,
+                  "text": "connect over tail scale a skill for that is helpful Skills should be a fallback that you fall into when the code base can't solve the problem and the lint rules in CI also can't Skills shouldn't be this thing you reach for all the time to b",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/theo/status/2092372584180687279#t=2214",
+                  "end": 2332.485,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "906a295b35e70923e5ba850dda80a2bb9faa66f4c683456101e173732bb04307",
+                  "start": 2214.126,
+                  "text": "me at things that my slop code does I add them here to keep steering in the direction that makes Julius happy He really likes the adapter boundary being where complexity lives so that the orchestration can be really simple and the UI can be",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Theo_-_t3_gg_-_Mario_creator_of_Pi_thinks_this_video_is_worth_watching_He_s_smar",
+              "source_revision": "ad8a3f6266048ee87c6dca6216b8b6a8c4242168bb0f2210e1b77cdb4a494c69",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "Theo - t3.gg - Mario (creator of Pi) thinks this video is worth watching. He's smart...",
+              "topic": "Social Media Research",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://x.com/theo/status/2092372584180687279",
+              "video_id": "2092369226262786048",
+              "yoinked_at": "2026-08-26T07:57:28"
+            }
+          },
+          {
+            "work_id": "FRSGuepjI3VNqmTkqZ0Wb_kqh_7rxwVH",
+            "video_id": "2092344854756069376",
+            "attempt_token": "l0558HyKXhEkInnWt3xm7lgt-9BgloGGFSX5l3qE1q8",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677770559,
+            "source_revision": "a768de1854db75705c2367b8dbe0e409838549b30bfb656487c4ceb8ee3bd1ef",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "cd6c9a6baf046ee6fdb88103743258017f0a543858fcb8a29232e0698f202692",
+            "card": {
+              "card_hash": "48c7aeb7f5723339fff9d0aba739ca2e7d9810eccc97a12f72055fbb67ba259e",
+              "channel": "OpenAI Developers",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/OpenAIDevs/status/2092344873764704345",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "c37a5da711ce9970888626d20d89fce286dd39cb384b240abbce14de4e0b85ec",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> The WebMCP Challenge is here.  We’ve teamed up with @ChromiumDev, @CloudflareDev, @ShopifyDevs, @vercel, @render, and @Netlify for a 10-day hackathon.  Up for grabs: $35,000 in cash prizes, Codex Micros",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> The WebMCP Challenge is here.  We’ve teamed up with @ChromiumDev, @CloudflareDev, @ShopifyDevs, @vercel, @render, and @Netlify for a 10-day hackathon.  Up for grabs: $35,000 in cash prizes, Codex Micros, ChatGPT Pro subscriptions, and more prizes from our supporters. https://t.co/J7CGKSxggZ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "OpenAI_Developers_-_The_WebMCP_Challenge_is_here_We_ve_teamed_up_with_ChromiumDe",
+              "source_revision": "a768de1854db75705c2367b8dbe0e409838549b30bfb656487c4ceb8ee3bd1ef",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> The WebMCP Challenge is here.  We’ve teamed up with @ChromiumDev, @CloudflareDev, @ShopifyDevs, @vercel, @render, and @Netlify for a 10-day hackathon.  Up for grabs: $35,000 in cash prizes, Codex Micros, ChatGPT Pro subscriptions, and more prizes from our supporters. https://t.co/J7CGKSxggZ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "OpenAI Developers - The WebMCP Challenge is here.  We’ve teamed up with @ChromiumDev, @Cl...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/OpenAIDevs/status/2092344873764704345",
+              "video_id": "2092344854756069376",
+              "yoinked_at": "2026-08-26T07:55:19"
+            }
+          },
+          {
+            "work_id": "NTq-qeTh8OKXWmWFLTOeeJgqatc4XMy2",
+            "video_id": "2092658884297334784",
+            "attempt_token": "Uivd6sAdubjFGFhrjTlVqgZ4Oeut5zsYJsVrNcOxyeY",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677770560,
+            "source_revision": "fe9061677d7c91e2667115fbac143a259ebf794902f6ddf2f229e15036b77d33",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "cc882ac93adef5a7699201499f5d87f03fa0ea21e1c030063fd608e7716d23e0",
+            "card": {
+              "card_hash": "751e34f3613f149acd066dcc16f77d202cd681c6ec3087fb9b4812c5eb15bcb7",
+              "channel": "Meta for Developers",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/MetaforDevs/status/2092658893143072815",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "73f0906f4f52b284112b3d8bb44647836266efdf2907413c8b26546bfab1ec01",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Muse Image is now available on Meta Model API and priced for production volumes at $0.01/image.   It’s an agentic image model that reasons before it renders. Each call searches the web to refine the out",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Muse Image is now available on Meta Model API and priced for production volumes at $0.01/image.   It’s an agentic image model that reasons before it renders. Each call searches the web to refine the output through iterative passes and evaluates the prompt for precise elements https://t.co/xzH4ymjejl No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Meta_for_Developers_-_Muse_Image_is_now_available_on_Meta_Model_API_and_priced_f",
+              "source_revision": "fe9061677d7c91e2667115fbac143a259ebf794902f6ddf2f229e15036b77d33",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Muse Image is now available on Meta Model API and priced for production volumes at $0.01/image.   It’s an agentic image model that reasons before it renders. Each call searches the web to refine the output through iterative passes and evaluates the prompt for precise elements https://t.co/xzH4ymjejl No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+              "title": "Meta for Developers - Muse Image is now available on Meta Model API and priced for producti...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/MetaforDevs/status/2092658893143072815",
+              "video_id": "2092658884297334784",
+              "yoinked_at": "2026-08-27T07:38:26"
+            }
+          },
+          {
+            "work_id": "ODuyU3TeXUkoE8Gds4NyGgMYCaocS5PI",
+            "video_id": "2092386459282182144",
+            "attempt_token": "gQ4f2P03VS2xZNsAnye-6u9OsoSGndSZ7zOqhZnr-qE",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677770561,
+            "source_revision": "ad6874617dccb89f82faaf5caa2b472fad7c4db915766055b7e5d74fd0b14780",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "2a0501fb369be314f19163094e835526a602099136b2d27774932bdb09ec1382",
+            "card": {
+              "card_hash": "d5db2964d6bdc14562c82b37ce8105ad18f8833b3867595efef9cdeb15a6fcc6",
+              "channel": "MTS",
+              "chars": 41746,
+              "chars_all_clips": 41746,
+              "chars_chosen_clips": 1440,
+              "clip_count": 31,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/MTSlive/status/2092387349623935322#t=134",
+                  "end": 222.712,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "34adbc60c9bf477d2f7fac8ed41273f06f471e9c816bee55a3c7edcabcc6d5e6",
+                  "start": 134.899,
+                  "text": "I how how I think about it and it's obviously like compressing certain things like probably DeepMind was genuinely the First one and they were, they were, they were very much very, very, very much the OG but in some way like I consider like",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/MTSlive/status/2092387349623935322#t=688",
+                  "end": 808.021,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "50cd849c13f04d54ab34e5dbdf1f8fe20ad5afb1ab2628c183698e84270b79e9",
+                  "start": 688.027,
+                  "text": "Yeah, yeah So, like there are some neolabs that succeed and become one of the largest companies and they have, they, they, they are able to secure compute like Anthropic did which, which they, they did an amazing feat but they Is like how m",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/MTSlive/status/2092387349623935322#t=935",
+                  "end": 1053.311,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ef13c88ed60a75aac5fbbd2725aaa24f43281046d200e02d27ce7caa521e6cb5",
+                  "start": 935.604,
+                  "text": "Like we use all kinds of like different things now like mixture of experts like different positional encodings obviously like much, much, much, much greater scale Like, why, why go after the transformer architecture specifically when it's y",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/MTSlive/status/2092387349623935322#t=1314",
+                  "end": 1433.51,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "1bfa337ca459028fb0c6e5e900b294a788e21e5df8dce08ad7739035215abc3d",
+                  "start": 1314.092,
+                  "text": "How do we serve our customers better? How do we how do we optimize processes we are doing? All those things will be proven by AI eventually. Like in some ways a lot of like what economy does is like take inputs and optimize and provide valu",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/MTSlive/status/2092387349623935322#t=1560",
+                  "end": 1678.255,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "1d7783389276c71a633428aa3d65fd56c076f0c83751108a90a72ae884240a13",
+                  "start": 1560.049,
+                  "text": "Is the AI doing things we want it to be doing? Because it is really bad, like precedent, really bad optics If people say,\"Hey the mall has been running from three day Hacking some companies and we only only discovered later. This is not how",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/MTSlive/status/2092387349623935322#t=2348",
+                  "end": 2466.364,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2cf614f72092323b246568f364e0d5975b872f9ab3ccbdd65dfccfa8adf089e5",
+                  "start": 2348.305,
+                  "text": "And I've been always like trying to do it I just, just when the GPT-3 started like trained, the first thing I did I tried to how do we do reinforcement learning with it? We, when the first Codex was a child of our experimentation with large",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/MTSlive/status/2092387349623935322#t=134",
+                  "end": 222.712,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "34adbc60c9bf477d2f7fac8ed41273f06f471e9c816bee55a3c7edcabcc6d5e6",
+                  "start": 134.899,
+                  "text": "I how how I think about it and it's obviously like compressing certain things like probably DeepMind was genuinely the First one and they were, they were, they were very much very, very, very much the OG but in some way like I consider like",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/MTSlive/status/2092387349623935322#t=688",
+                  "end": 808.021,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "50cd849c13f04d54ab34e5dbdf1f8fe20ad5afb1ab2628c183698e84270b79e9",
+                  "start": 688.027,
+                  "text": "Yeah, yeah So, like there are some neolabs that succeed and become one of the largest companies and they have, they, they, they are able to secure compute like Anthropic did which, which they, they did an amazing feat but they Is like how m",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/MTSlive/status/2092387349623935322#t=935",
+                  "end": 1053.311,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ef13c88ed60a75aac5fbbd2725aaa24f43281046d200e02d27ce7caa521e6cb5",
+                  "start": 935.604,
+                  "text": "Like we use all kinds of like different things now like mixture of experts like different positional encodings obviously like much, much, much, much greater scale Like, why, why go after the transformer architecture specifically when it's y",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/MTSlive/status/2092387349623935322#t=1314",
+                  "end": 1433.51,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "1bfa337ca459028fb0c6e5e900b294a788e21e5df8dce08ad7739035215abc3d",
+                  "start": 1314.092,
+                  "text": "How do we serve our customers better? How do we how do we optimize processes we are doing? All those things will be proven by AI eventually. Like in some ways a lot of like what economy does is like take inputs and optimize and provide valu",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/MTSlive/status/2092387349623935322#t=1560",
+                  "end": 1678.255,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "1d7783389276c71a633428aa3d65fd56c076f0c83751108a90a72ae884240a13",
+                  "start": 1560.049,
+                  "text": "Is the AI doing things we want it to be doing? Because it is really bad, like precedent, really bad optics If people say,\"Hey the mall has been running from three day Hacking some companies and we only only discovered later. This is not how",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/MTSlive/status/2092387349623935322#t=2348",
+                  "end": 2466.364,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "2cf614f72092323b246568f364e0d5975b872f9ab3ccbdd65dfccfa8adf089e5",
+                  "start": 2348.305,
+                  "text": "And I've been always like trying to do it I just, just when the GPT-3 started like trained, the first thing I did I tried to how do we do reinforcement learning with it? We, when the first Codex was a child of our experimentation with large",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "MTS_-_FULL_INTERVIEW_Jerry_Tworek_says_AI_researchers_now_tell_each_other",
+              "source_revision": "ad6874617dccb89f82faaf5caa2b472fad7c4db915766055b7e5d74fd0b14780",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "MTS - FULL INTERVIEW: Jerry Tworek says AI researchers now tell each other ...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://x.com/MTSlive/status/2092387349623935322",
+              "video_id": "2092386459282182144",
+              "yoinked_at": "2026-08-26T07:57:07"
+            }
+          },
+          {
+            "work_id": "V3INk3Dn88FWn9iEqvMNr4rThiMlQSy3",
+            "video_id": "2092272769685934080",
+            "attempt_token": "sI-sBTpVjWaJa_-ar11b3Z9-poGJ1VmpOcX4qtJDUSc",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677770562,
+            "source_revision": "426fe4795798cd54a873165ee358f235fbf2640bb98a6e9855bd73f6707c61a4",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "bfd09441e7c6c6cd107c5961455b83b6ab2be612287694dfd76a107326f27638",
+            "card": {
+              "card_hash": "9c642dadb721d3f9456085d52ccfbc523fc51bd572666fcc43839eb8e57cbd49",
+              "channel": "Vaibhav Sisinty",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/VaibhavSisinty/status/2092272796470841729",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "0fe44ff1db985bbd4c750ff882150ea47833eb147ed0205bf98db0b9d98d0a4a",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Apple is no longer hiding it. These machines are built for local AI.  Apple unveiled the new Mac Mini with M6 their first 2nm chip. Starting at $899.  What you can run on the $899 Mac Mini (32GB) 👇  → Q",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Apple is no longer hiding it. These machines are built for local AI.  Apple unveiled the new Mac Mini with M6 their first 2nm chip. Starting at $899.  What you can run on the $899 Mac Mini (32GB) 👇  → Qwen 3.6 27B : fits comfortably, near-GPT-4 quality → Qwen 3 Coder 32B : https://t.co/XDtjFKsiZw No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Vaibhav_Sisinty_-_Apple_is_no_longer_hiding_it_These_machines_are_built_for_loca",
+              "source_revision": "426fe4795798cd54a873165ee358f235fbf2640bb98a6e9855bd73f6707c61a4",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Apple is no longer hiding it. These machines are built for local AI.  Apple unveiled the new Mac Mini with M6 their first 2nm chip. Starting at $899.  What you can run on the $899 Mac Mini (32GB) 👇  → Qwen 3.6 27B : fits comfortably, near-GPT-4 quality → Qwen 3 Coder 32B : https://t.co/XDtjFKsiZw No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Vaibhav Sisinty - Apple is no longer hiding it. These machines are built for local AI. ...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/VaibhavSisinty/status/2092272796470841729",
+              "video_id": "2092272769685934080",
+              "yoinked_at": "2026-08-26T07:54:57"
+            }
+          },
+          {
+            "work_id": "WVMrwHwWxw4ErelzKO6GvDFyD7lG9UOo",
+            "video_id": "2092364350317281280",
+            "attempt_token": "seDc2asxFK_8kIjaWe8mTO9XtR_JPTGs-IRzs_FzAbA",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677770563,
+            "source_revision": "6b73e53c969189036584ca9de001c1e79f8ea9bf47b4b64fcb0e439fbea3e77f",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "efffdced8a120784ee77d7ac8d6a569dc25db1b4c80af02b7b32d1f76b5f5323",
+            "card": {
+              "card_hash": "a842906ffa1065a84224a2fbe54a43ce91a287ed7f3b21ea0cd54fb781e8967b",
+              "channel": "shirish",
+              "chars": 29,
+              "chars_all_clips": 29,
+              "chars_chosen_clips": 29,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/shiri_shh/status/2092364413575823813#t=0",
+                  "end": 15.334,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "6128f9b07c42669fe79a6e6d9f882b5bc10ede633acea42a51dc4308233ab6e5",
+                  "start": 0.08,
+                  "text": "Mr. Sandman, bring me a dream",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/shiri_shh/status/2092364413575823813#t=0",
+                  "end": 15.334,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "6128f9b07c42669fe79a6e6d9f882b5bc10ede633acea42a51dc4308233ab6e5",
+                  "start": 0.08,
+                  "text": "Mr. Sandman, bring me a dream",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Nvidia CEO watching his biggest customer build their own chips. https://t.co/2aLQgRfttm No tags [00:00:00] Mr. Sandman, bring me a [00:00:14] dream <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "shirish_-_Nvidia_CEO_watching_his_biggest_customer_build_their_own_chips",
+              "source_revision": "6b73e53c969189036584ca9de001c1e79f8ea9bf47b4b64fcb0e439fbea3e77f",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Nvidia CEO watching his biggest customer build their own chips. https://t.co/2aLQgRfttm No tags [00:00:00] Mr. Sandman, bring me a [00:00:14] dream <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "shirish - Nvidia CEO watching his biggest customer build their own chips.",
+              "topic": "Uncategorized",
+              "truncated": false,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/shiri_shh/status/2092364413575823813",
+              "video_id": "2092364350317281280",
+              "yoinked_at": "2026-08-26T07:55:08"
+            }
+          },
+          {
+            "work_id": "Wn9v6dQgkZ-HFw93QetCurJYFfktOQI4",
+            "video_id": "2092687038189350912",
+            "attempt_token": "biS9eQ7t-haCKM76yX1Y9fW2uZXBU-qh8kiD5asYT68",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677770563,
+            "source_revision": "42dd6ff68fbeb2177553a137cbb1b7a4f65cdcfbf25107614dee2de5e15a3741",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "0d8cebab9cdaa8f41b50d8d33f78f3f4244701cfc08634681a2b3c96813eed04",
+            "card": {
+              "card_hash": "95d687be69a0d703c4160a77e142abc0905ae2960e66b177d54f3cdefd85c8df",
+              "channel": "Lex Fridman",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/lexfridman/status/2092730967056392550",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "914b3d66b23fefce396a068fa8e8eabf1b0c29ebca5d5ebb208fa81e08a0f2b4",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Here's my conversation with @DHH. He is back for round 2! It was an epic fun 5 hour conversation about the future of programming, AI, Linux, and human civilization.  It's here on X in full and is up eve",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Here's my conversation with @DHH. He is back for round 2! It was an epic fun 5 hour conversation about the future of programming, AI, Linux, and human civilization.  It's here on X in full and is up everywhere else (see comment).  Timestamps: 0:00 - Episode highlight 1:27 - https://t.co/XcKZarRSR9 No tags *No captions available for this video.*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Lex_Fridman_-_Here_s_my_conversation_with_DHH_He_is_back_for_round_2_It_was_an_e",
+              "source_revision": "42dd6ff68fbeb2177553a137cbb1b7a4f65cdcfbf25107614dee2de5e15a3741",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Here's my conversation with @DHH. He is back for round 2! It was an epic fun 5 hour conversation about the future of programming, AI, Linux, and human civilization.  It's here on X in full and is up everywhere else (see comment).  Timestamps: 0:00 - Episode highlight 1:27 - https://t.co/XcKZarRSR9 No tags *No captions available for this video.*",
+              "title": "Lex Fridman - Here's my conversation with @DHH. He is back for round 2! It was an e...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/lexfridman/status/2092730967056392550",
+              "video_id": "2092687038189350912",
+              "yoinked_at": "2026-08-27T07:42:41"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

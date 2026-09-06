@@ -1,0 +1,77 @@
+{
+  "seq": 1051,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "D-EVgmbIyXMrFYK_9zblz-_f1sJaa9LG",
+      "video_id": "2094362669444648960",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.9,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "99763a5b308c6b6cde9e752ac0f8cdab500f26fa11fd51c126f5975d75d35383",
+            "card_hash": "a924ac9e8740ac48f90a53bee24a2b32d7d9c745611ad10ca452dce0cf19854f",
+            "quote": "They are processed through a neural network layer called self-attention",
+            "start": 1461.201,
+            "end": 1580.863,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "103fd7d478a012779c72cea48e5b8667d18ba25e37e415ba61d2d0d289407243",
+            "card_hash": "a924ac9e8740ac48f90a53bee24a2b32d7d9c745611ad10ca452dce0cf19854f",
+            "quote": "people have spent many billions of dollars",
+            "start": 2029.476,
+            "end": 2148.371,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "321e1e9d1d74836a5923860efff6047f41680b2d1d550f7dfce060d07e95ac5e",
+            "card_hash": "a924ac9e8740ac48f90a53bee24a2b32d7d9c745611ad10ca452dce0cf19854f",
+            "quote": "It exploited that to basically launch a cyber attack on Hugging Face",
+            "start": 5358.348,
+            "end": 5477.815,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

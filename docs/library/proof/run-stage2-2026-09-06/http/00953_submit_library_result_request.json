@@ -1,0 +1,51 @@
+{
+  "seq": 953,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "Zx8wv9tYYW8okb6HBVXDgmnAqKbHvHJ-",
+    "client_id": "proof-harness",
+    "attempt_token": "BtrnwGgsmrZ5Vt_paZ3oT8Ve1GnBYw5MZu2nyCUwVeE",
+    "submission_key": "Zx8wv9tYYW8okb6HBVXDgmnAqKbHvHJ--BtrnwGgsmrZ5Vt_paZ3oT8Ve1GnBYw5MZu2nyCUwVeE",
+    "schema_version": 1,
+    "video_id": "2093591840171941888",
+    "source_revision": "e6c5583b88a67ddb8664eeb7b3e9298a600dd932bc0901a47f0f396c0670a8b7",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "5704b0a48c66e16f12b1a6e58fd3679af44eb244581b4bbe601e7567ed72ec66",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "784dbdb3af03a1e0aa007662716e12bace40954d7528fd8d474ab34641a33dbb",
+            "card_hash": "07e5f15d0345fc5b7d85dbcde78ed1832dee3240b1b2dab3f2aab02536055ccb",
+            "quote": "You can create your own systems to simulate how the database would react to different numbers of requests"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 12323,
+      "cache_read_tokens": 186544,
+      "cache_create_tokens": 30752,
+      "wall_time_ms": 0
+    }
+  }
+}

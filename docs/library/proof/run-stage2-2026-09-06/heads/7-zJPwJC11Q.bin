@@ -1,0 +1,149 @@
+# Introducing Chat SDK
+
+**Channel:** Vercel (114.0K subscribers)
+**Uploaded:** 2026-03-19 | **Duration:** 08:31 | **Views:** 33,078 | **Likes:** 1,273
+**URL:** https://www.youtube.com/watch?v=7-zJPwJC11Q
+**Yoinked:** 2026-05-14T23:27:45
+**Topic:** Uncategorized
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Chat SDK is a unified TypeScript SDK for building chat bots across Slack, Microsoft Teams, Google Chat, Discord, and more. Write your bot logic once, deploy everywhere.
+
+Try it today: https://chat-sdk.dev
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:16] Hey everyone. My name is Malte, I'm the
+[00:00:16] Hey everyone. My name is Malte, I'm the CTO for Cell. Thanks for joining us
+[00:00:17] CTO for Cell. Thanks for joining us
+[00:00:17] CTO for Cell. Thanks for joining us today.
+[00:00:18] today.
+[00:00:18] today. In early January, we gave everyone in
+[00:00:20] In early January, we gave everyone in
+[00:00:20] In early January, we gave everyone in our company a mandate. Figure out how to
+[00:00:22] our company a mandate. Figure out how to
+[00:00:22] our company a mandate. Figure out how to multiply your output.
+[00:00:24] multiply your output.
+[00:00:24] multiply your output. And seeing what people built continues
+[00:00:26] And seeing what people built continues
+[00:00:26] And seeing what people built continues to blow us away. Almost every team built
+[00:00:28] to blow us away. Almost every team built
+[00:00:28] to blow us away. Almost every team built an agent to handle complex work. And
+[00:00:30] an agent to handle complex work. And
+[00:00:30] an agent to handle complex work. And most of them are Slack bots that anyone
+[00:00:32] most of them are Slack bots that anyone
+[00:00:32] most of them are Slack bots that anyone can use.
+[00:00:34] can use.
+[00:00:34] can use. But we ran into a problem.
+[00:00:35] But we ran into a problem.
+[00:00:35] But we ran into a problem. Everyone was doing the same integration
+[00:00:37] Everyone was doing the same integration
+[00:00:37] Everyone was doing the same integration work over and over again.
+[00:00:40] work over and over again.
+[00:00:40] work over and over again. Someone would build an agent, then they
+[00:00:41] Someone would build an agent, then they
+[00:00:41] Someone would build an agent, then they had to figure out the complexity of
+[00:00:42] had to figure out the complexity of
+[00:00:43] had to figure out the complexity of Slack, and that's harder than it seems.
+[00:00:45] Slack, and that's harder than it seems.
+[00:00:45] Slack, and that's harder than it seems. You need to understand threads and
+[00:00:46] You need to understand threads and
+[00:00:46] You need to understand threads and reactions, how to post messages, how to
+[00:00:48] reactions, how to post messages, how to
+[00:00:48] reactions, how to post messages, how to handle state.
+[00:00:50] handle state.
+[00:00:50] handle state. Then someone would ask, "Hey, can you
+[00:00:51] Then someone would ask, "Hey, can you
+[00:00:51] Then someone would ask, "Hey, can you wire up that agent to this GitHub?" And
+[00:00:53] wire up that agent to this GitHub?" And
+[00:00:53] wire up that agent to this GitHub?" And the process would start all over again
+[00:00:54] the process would start all over again
+[00:00:54] the process would start all over again with GitHub's APIs. With the same logic,
+[00:00:57] with GitHub's APIs. With the same logic,
+[00:00:57] with GitHub's APIs. With the same logic, but different platform code.
+[00:00:59] but different platform code.
+[00:00:59] but different platform code. We quickly learned that that chat APIs
+[00:01:01] We quickly learned that that chat APIs
+[00:01:01] We quickly learned that that chat APIs seem similar on the surface, but
+[00:01:03] seem similar on the surface, but
+[00:01:03] seem similar on the surface, but completely different under the hood.
+[00:01:05] completely different under the hood.
+[00:01:05] completely different under the hood. Slack supports native streaming. You can
+[00:01:06] Slack supports native streaming. You can
+[00:01:06] Slack supports native streaming. You can stream tokens directly into a message as
+[00:01:09] stream tokens directly into a message as
+[00:01:09] stream tokens directly into a message as the LLM generates them. Discord, you
+[00:01:11] the LLM generates them. Discord, you
+[00:01:11] the LLM generates them. Discord, you have to post, edit, post, edit. GitHub,
+[00:01:14] have to post, edit, post, edit. GitHub,
+[00:01:14] have to post, edit, post, edit. GitHub, no streaming at all.
+[00:01:16] no streaming at all.
+[00:01:16] no streaming at all. Slack has models, Discord doesn't.
+[00:01:18] Slack has models, Discord doesn't.
+[00:01:18] Slack has models, Discord doesn't. Microsoft Teams gives you read-only
+[00:01:20] Microsoft Teams gives you read-only
+[00:01:20] Microsoft Teams gives you read-only reactions.
+[00:01:21] reactions.
+[00:01:21] reactions. These aren't quirks, they're fundamental
+[00:01:23] These aren't quirks, they're fundamental
+[00:01:23] These aren't quirks, they're fundamental differences in how each platform works.
+[00:01:26] differences in how each platform works.
+[00:01:26] differences in how each platform works. So even for a single, simple agent, you
+[00:01:28] So even for a single, simple agent, you
+[00:01:28] So even for a single, simple agent, you end up with a huge amount of logic
+[00:01:31] end up with a huge amount of logic
+[00:01:31] end up with a huge amount of logic just to make it usable in different
+[00:01:32] just to make it usable in different
+[00:01:32] just to make it usable in different tools. It's a nightmare.
+[00:01:34] tools. It's a nightmare.
+[00:01:34] tools. It's a nightmare. And it isn't just a Vercel problem.
+[00:01:36] And it isn't just a Vercel problem.
+[00:01:36] And it isn't just a Vercel problem. Every company is going to have to figure
+[00:01:37] Every company is going to have to figure
+[00:01:38] Every company is going to have to figure out how to deliver their agents across
+[00:01:39] out how to deliver their agents across
+[00:01:39] out how to deliver their agents across the surfaces where work already happens.
+[00:01:42] the surfaces where work already happens.
+[00:01:42] the surfaces where work already happens. That means chat, code review, issue
+[00:01:43] That means chat, code review, issue
+[00:01:43] That means chat, code review, issue tracking, and more.
+[00:01:45] tracking, and more.
+[00:01:45] tracking, and more. AI SDK solves a similar problem for
+[00:01:47] AI SDK solves a similar problem for
+[00:01:47] AI SDK solves a similar problem for model providers. You write the code
+[00:01:49] model providers. You write the code
+[00:01:49] model providers. You write the code once, and it handles all the API
+[00:01:50] once, and it handles all the API
+[00:01:51] once, and it handles all the API differences, whether you're calling GPT,
+[00:01:53] differences, whether you're calling GPT,
+[00:01:53] differences, whether you're calling GPT, Claude, or Gemini.
+[00:01:54] Claude, or Gemini.
+[00:01:54] Claude, or Gemini. Chat SDK does the same thing for
+[00:01:57] Chat SDK does the same thing for
+[00:01:57] Chat SDK does the same thing for interactive agents. It's a single API
+[00:01:59] interactive agents. It's a single API
+[00:01:59] interactive agents. It's a single API for agent interactions across platforms
+[00:02:01] for agent interactions across platforms
+[00:02:01] for agent interactions across platforms like Slack, GitHub, Linear, Discord,
+[00:02:03] like Slack, GitHub, Linear, Discord,
+[00:02:03] like Slack, GitHub, Linear, Discord, Telegram, WhatsApp, and more.
+[00:02:06] Telegram, WhatsApp, and more.
+[00:02:06] Telegram, WhatsApp, and more. You build the agent and Chat SDK will
+[00:02:07] You build the agent and Chat SDK will
+[00:02:08] You build the agent and Chat SDK will deliver it to your users in the apps
+[00:02:09] deliver it to your users in the apps
+[00:02:09] deliver it to your users in the apps they already use.
+[00:02:11] th

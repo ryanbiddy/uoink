@@ -1,0 +1,58 @@
+{
+  "seq": 591,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "z46FcEGHa--Dt0jkBUVJnkUll7xOwkR5",
+      "video_id": "2086120621734326272",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "8fa60b77ac41ff9d32b6608ec51f5ab8a5f08f380205d048c97eb32c91183f7e",
+            "card_hash": "40786eba9594caba0ce163d09223ae7df8b9a8ffe6b7aaf2a79511d78f72ca7a",
+            "quote": "TRY RAC FIRST MAYBE A RULE I THINK FIND TURNING IS BETWEEN 10 TO 100X MORE WORK THAN FINE TUNING",
+            "start": 4118.319,
+            "end": 4238.25,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4aca5d7410434edf756e1362574e752af7293c45a74cb3346c0cc42c414a03b6",
+            "card_hash": "40786eba9594caba0ce163d09223ae7df8b9a8ffe6b7aaf2a79511d78f72ca7a",
+            "quote": "Welcome to this NeurIPS tutorial on application development using LLMs",
+            "start": 0.0,
+            "end": 119.79,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

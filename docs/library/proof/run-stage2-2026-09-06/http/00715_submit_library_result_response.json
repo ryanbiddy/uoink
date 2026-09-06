@@ -1,0 +1,39 @@
+{
+  "seq": 715,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "WTlim1FDpXI6u4MJgAF8mstU5ZezdvtA",
+      "video_id": "2089388284455649281",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "1ec678ff57e98848ed38889d7e6c9024fd494883db1001c251d69338a630ee57",
+            "card_hash": "5ad218be3b2af826890dad0f32d464da5ac73a9b67dfad3a75094898c8a6b769",
+            "quote": "Your agent profiles become a series of named Bots.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

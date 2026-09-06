@@ -1,0 +1,898 @@
+{
+  "seq": 1023,
+  "tool": "claim_library_work",
+  "wall_ms": 9,
+  "request": {
+    "seq": 1023,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 1023,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 9,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "m2TIbcr1_t_GeMYk-_iKiOJEV6JQkhGQ",
+            "video_id": "2095023819404783896",
+            "attempt_token": "hfTBBdrQObADCwsE2WpjV-6l3p2afctov0eerxbfk30",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678203817,
+            "source_revision": "d126b0972035c4f5dbb39a795b38f49195062092ab2a035ef50246d3d9917f9a",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "eab7bdc0434c29eda05c4cefe8eaa8fe7dbfb8d4b631de0702a4b04eaa4269fb",
+            "card": {
+              "card_hash": "d883c92987e5486589ed87699c8920aa612123e005be8c3d591a815c65064c82",
+              "channel": "Ann Nguyen",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/ann_nnng/status/2095023819404783896",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "8bdd5dbf90be4510527277a0090952c2cf410f685cae5c720555a02a500e2840",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Claude Fable 5.1 has gone absolutely unhinged with the visual aesthetic    I asked it to present the whole Claude fam tree as a galaxy vinyl in TypingMind, and it absolutely ate    there are even connec",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Claude Fable 5.1 has gone absolutely unhinged with the visual aesthetic    I asked it to present the whole Claude fam tree as a galaxy vinyl in TypingMind, and it absolutely ate    there are even connecting lines tracing each model's descendants https://t.co/uU3GzzdYr5 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Ann_Nguyen_-_Claude_Fable_5_1_has_gone_absolutely_unhinged_with_the_visual_aesth",
+              "source_revision": "d126b0972035c4f5dbb39a795b38f49195062092ab2a035ef50246d3d9917f9a",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Claude Fable 5.1 has gone absolutely unhinged with the visual aesthetic    I asked it to present the whole Claude fam tree as a galaxy vinyl in TypingMind, and it absolutely ate    there are even connecting lines tracing each model's descendants https://t.co/uU3GzzdYr5 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Ann Nguyen - Claude Fable 5.1 has gone absolutely unhinged with the visual aesthet...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/ann_nnng/status/2095023819404783896",
+              "video_id": "2095023819404783896",
+              "yoinked_at": "2026-09-02T07:36:57"
+            }
+          },
+          {
+            "work_id": "nshlAbE4E5ROHdD5zXZzlN6MSg86Jsdt",
+            "video_id": "2094843261470793728",
+            "attempt_token": "BcgizFEO_sxxeypbvzE2W0fjDPr5p72AQqRjauLuk8o",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678203818,
+            "source_revision": "05193542a61b044d7d66670006f61310d3aa243b76bab4b0a6d46f897745a8c0",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "8f3f5b136d7738ccf8780fa7b54d60b24cd4bd7a7ebf311bcd333ee8434d5992",
+            "card": {
+              "card_hash": "12a8ed5394c9b5013be0e588c1fbe4387f139a58521e01395a01b44e11fb9853",
+              "channel": "Claude",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/claudeai/status/2094848572143407483",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "a8d28190dbfbb3514974ba46fe14966f2395194da198e96d8b1af7965cf18c98",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> We’re introducing Claude Fable 5.1 and Claude Mythos 5.1.  They're the world’s most advanced models for coding and knowledge work. https://t.co/8P9PSrWPi3 No tags *No captions available for this video.*",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> We’re introducing Claude Fable 5.1 and Claude Mythos 5.1.  They're the world’s most advanced models for coding and knowledge work. https://t.co/8P9PSrWPi3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Claude_-_We_re_introducing_Claude_Fable_5_1_and_Claude_Mythos_5_1_They_re_th",
+              "source_revision": "05193542a61b044d7d66670006f61310d3aa243b76bab4b0a6d46f897745a8c0",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> We’re introducing Claude Fable 5.1 and Claude Mythos 5.1.  They're the world’s most advanced models for coding and knowledge work. https://t.co/8P9PSrWPi3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Claude - We’re introducing Claude Fable 5.1 and Claude Mythos 5.1.  They're th...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/claudeai/status/2094848572143407483",
+              "video_id": "2094843261470793728",
+              "yoinked_at": "2026-09-02T07:36:50"
+            }
+          },
+          {
+            "work_id": "oRrIrC1ltXeMfvWLaMJ8HECbXmChOaoQ",
+            "video_id": "2095595195995668484",
+            "attempt_token": "wxGOnGQ3ubqHYa2sYDkMVDY7VEP0cqIjA-ZQUKSIBY4",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678203819,
+            "source_revision": "ecde2f5c8dc6bb808c0a00f76c3f009d710c71bc5fefc32bd17eeffcfbf20740",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "6a1740ce7ac4caeb6f788bd8e86693850f6c04c433e39d2f28ca9420b8a94c7d",
+            "card": {
+              "card_hash": "013c7633d8024333b2a1d8915d770068be5b3eb064de5be442591837358a9c67",
+              "channel": "NVIDIA RTX Spark",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/NVIDIARTXSpark/status/2095595273451884884",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "e2b7ede513c361ef0a1672af818c5163d3e0439ba027f1b6cc06291070ce6c0e",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Local AI agents should be easy to set up.  That’s why @NousResearch is bringing one-click local model setup to Hermes Agent across NVIDIA systems on Windows and Linux. https://t.co/b7na3VdErF No tags *N",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Local AI agents should be easy to set up.  That’s why @NousResearch is bringing one-click local model setup to Hermes Agent across NVIDIA systems on Windows and Linux. https://t.co/b7na3VdErF No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "NVIDIA_RTX_Spark_-_Local_AI_agents_should_be_easy_to_set_up_That_s_why_NousResea",
+              "source_revision": "ecde2f5c8dc6bb808c0a00f76c3f009d710c71bc5fefc32bd17eeffcfbf20740",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Local AI agents should be easy to set up.  That’s why @NousResearch is bringing one-click local model setup to Hermes Agent across NVIDIA systems on Windows and Linux. https://t.co/b7na3VdErF No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "NVIDIA RTX Spark - Local AI agents should be easy to set up.  That’s why @NousResearch i...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/NVIDIARTXSpark/status/2095595273451884884",
+              "video_id": "2095595195995668484",
+              "yoinked_at": "2026-09-04T07:56:01"
+            }
+          },
+          {
+            "work_id": "ou0lN5vKihW7d7KoicnLuKT5Vi2Clqxr",
+            "video_id": "2095522237709492225",
+            "attempt_token": "94Di1BX-fO7GBFAIKs8hxCoxxgQSKoBcDwwPrCOZXhk",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678203819,
+            "source_revision": "8495a19511009c3795941155315f6547ba6f39596cd9dd26fc2875eba5f010f3",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "4eca53cb37a45b77de29214cc765ff3c82b2430bd71278c332167c07c1c23247",
+            "card": {
+              "card_hash": "e8fcf064095b69eed90f774e1fb70ae72bfd49654c71ec36db4f9fd4e62518a2",
+              "channel": "Pietro Schirano",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/skirano/status/2095595934834991604",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "78a73fa12f3c9221391b00a394e7226f93ce95d591792cc84338fe912524b927",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> 2/6 Created an underwater exploration game in one /goal prompt, all the 3D elements and sounds were made from scratch. https://t.co/mTRTbjYAR7 No tags *No captions available for this video.* <!-- yoink:",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> 2/6 Created an underwater exploration game in one /goal prompt, all the 3D elements and sounds were made from scratch. https://t.co/mTRTbjYAR7 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Pietro_Schirano_-_2_6_Created_an_underwater_exploration_game_in_one_goal_prompt",
+              "source_revision": "8495a19511009c3795941155315f6547ba6f39596cd9dd26fc2875eba5f010f3",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 2/6 Created an underwater exploration game in one /goal prompt, all the 3D elements and sounds were made from scratch. https://t.co/mTRTbjYAR7 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Pietro Schirano - 2/6 Created an underwater exploration game in one /goal prompt, all t...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/skirano/status/2095595934834991604",
+              "video_id": "2095522237709492225",
+              "yoinked_at": "2026-09-04T07:55:49"
+            }
+          },
+          {
+            "work_id": "vI8pR24XJwjQT92nivFB50wD0LzP1bWI",
+            "video_id": "2095522272358342657",
+            "attempt_token": "rr_t0HkpOH4Ib_yXdCpkPIb5qlvGcpeTY_3xnqGq4Cs",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678203820,
+            "source_revision": "42366dad62a3199fba19f2d13c8e6f41dd8f8df0afc8c0d67479b9f98ff530ad",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "73f4068d592b2c66afae7c00283af993bad575933cf7cb2e4b502a4fde2b0067",
+            "card": {
+              "card_hash": "fa943a9dabfb4cfd102073081019755d4bf9c217fd65bb6b627fdca18fced183",
+              "channel": "Pietro Schirano",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/skirano/status/2095595936701419637",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "7bd8a709f812571a7aacfb84ddef7f922ede5595275e911ac74f243a2159b71c",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> 3/6 Made this beautiful PS1 style Beyblade game, which is actually pretty addictive and fun to play. PS1 style was in the prompt. https://t.co/JdmLtWYDNn No tags *No captions available for this video.* ",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> 3/6 Made this beautiful PS1 style Beyblade game, which is actually pretty addictive and fun to play. PS1 style was in the prompt. https://t.co/JdmLtWYDNn No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Pietro_Schirano_-_3_6_Made_this_beautiful_PS1_style_Beyblade_game_which_is_actua",
+              "source_revision": "42366dad62a3199fba19f2d13c8e6f41dd8f8df0afc8c0d67479b9f98ff530ad",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 3/6 Made this beautiful PS1 style Beyblade game, which is actually pretty addictive and fun to play. PS1 style was in the prompt. https://t.co/JdmLtWYDNn No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Pietro Schirano - 3/6 Made this beautiful PS1 style Beyblade game, which is actually pr...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/skirano/status/2095595936701419637",
+              "video_id": "2095522272358342657",
+              "yoinked_at": "2026-09-04T07:56:24"
+            }
+          },
+          {
+            "work_id": "vQaY89UfRU3iGqOqY4YJGIMjx4hw6Sz6",
+            "video_id": "2095585419631132672",
+            "attempt_token": "i19WzRrz6osqyXl91Fl-iU5_2j34-ol0Or3FDQNFWEA",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678203821,
+            "source_revision": "5def413eea4d1543600db4be36974cf1d617275f9941dd950ebbeb65cadeaf1d",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "9a5fd8baee8b6b39e24e29d33efe9d4b86c380ae69044f71ef31f75d963f5e00",
+            "card": {
+              "card_hash": "efee68388650010096199a7d5a59de27b6c4bb6809bf5a71fddafe85211cc416",
+              "channel": "claire vo 🖤",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/clairevo/status/2095596028523319487",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "2f29506d9e7646e8c397ae67db76afd5f77ef2a747060f757cb9d027f30fdeb3",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> 💫 👩‍🚀 GPT-6 Astra is here (and I'm obsessed)  I was able to test this model early and it is so, so good.  But even better - it has made me 100x more *ambitious* about what I can build with AI.   Why?   ",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> 💫 👩‍🚀 GPT-6 Astra is here (and I'm obsessed)  I was able to test this model early and it is so, so good.  But even better - it has made me 100x more *ambitious* about what I can build with AI.   Why?   Browser / computer use means it can use any software to build anything (even https://t.co/tDuK4VE8W0 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "claire_vo_-_GPT-6_Astra_is_here_and_I_m_obsessed_I_was_able_to_test_this",
+              "source_revision": "5def413eea4d1543600db4be36974cf1d617275f9941dd950ebbeb65cadeaf1d",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> 💫 👩‍🚀 GPT-6 Astra is here (and I'm obsessed)  I was able to test this model early and it is so, so good.  But even better - it has made me 100x more *ambitious* about what I can build with AI.   Why?   Browser / computer use means it can use any software to build anything (even https://t.co/tDuK4VE8W0 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.",
+              "title": "claire vo 🖤 - 💫 👩‍🚀 GPT-6 Astra is here (and I'm obsessed)  I was able to test this...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/clairevo/status/2095596028523319487",
+              "video_id": "2095585419631132672",
+              "yoinked_at": "2026-09-04T07:57:39"
+            }
+          },
+          {
+            "work_id": "wkHscwv4Kuq-qsdOH_q1X9MrPqwkgFxE",
+            "video_id": "2095070893944832003",
+            "attempt_token": "-Y-RcqA5rkSLVa5Z-scCOZmStZjXUqq6KMeVz8HwEm8",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678203823,
+            "source_revision": "c988e8dc7fcb388ddd487fccf28aaf8ea4170c0dea7b89820c10227d215328f9",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "0eb65d539f56a59bc9036a1de7b9c8eac724a3e21085aa27ff770f85cd84d62f",
+            "card": {
+              "card_hash": "b348e02794355c0df2f688df2da5d0ac2ce2d2e42176470f9d3a8f24d07a004d",
+              "channel": "Chubby♨️",
+              "chars": 68986,
+              "chars_all_clips": 68986,
+              "chars_chosen_clips": 1440,
+              "clip_count": 62,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2095137667570716711#t=185",
+                  "end": 305.289,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ab1b328cb23bff81765b6236e36ada118c501487dee04236d13e0603dfb45981",
+                  "start": 185.306,
+                  "text": "While the LTX 2 technical report said the system has no explicit Or world modeling capabilities what is your precise definition of a world model and what can 2.5 predict beyond visually plausible next frames? Okay, so world model from our d",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2095137667570716711#t=864",
+                  "end": 982.185,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c54e6dee3fe7a624aafb5f90b190e7173eb6454091da5c4d5af540179dbeb307",
+                  "start": 864.075,
+                  "text": "You want this to run on cheap hardware that will be affordable for everybody to buy these robots or build it themselves And you don't want your robot intelligence to just you know, die when your cloud Provider indoor provider, or inference ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2095137667570716711#t=2518",
+                  "end": 2637.467,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "0a732e7b43c97d1bf027ff52f7a734ea2e05e63b201728857a3af876197aa3f6",
+                  "start": 2518.968,
+                  "text": "And these guys are not even professionals Some of them are not developers They just want to create amazing content They manage to tinker with all these things But when you really want to get like to the highest quality possible you have to ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2095137667570716711#t=2637",
+                  "end": 2756.444,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "772a13858e7ab3934f2251cc681ab0ccd8ff8f10259381919e51f8ba81cbf93e",
+                  "start": 2637.847,
+                  "text": "making sure that it works for example on multiple operating systems and making sure that it works on data center GPUs and on community GPUs it's hard but this is something that is Very concentrated on our inference team which are doing like",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2095137667570716711#t=3969",
+                  "end": 4086.252,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "7952c7cf1ab2ed667d5eafafc48926995c30398d1f8aeccfe609a0af5c6d6cc3",
+                  "start": 3969.982,
+                  "text": "like whether like you said it or didn't say it like how much audio cuts we have audio noise, and this is just for audio So for visual quality you also like have a million other quality a million other benchmarks I will have to say that as y",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2095137667570716711#t=4453",
+                  "end": 4572.752,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "18f787e8ed3b5198d6f9f13377b7ee82b26b3ce70d08af09dde03c883bcdcf19",
+                  "start": 4453.394,
+                  "text": "How far along are you with experiments and relationships and making stuff? Or, or, or reality. The entire world right now is trying to figure out right? Like, you have the, the startup that build try to build the robots plus like, the entir",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Developer Marketing",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2095137667570716711#t=185",
+                  "end": 305.289,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "ab1b328cb23bff81765b6236e36ada118c501487dee04236d13e0603dfb45981",
+                  "start": 185.306,
+                  "text": "While the LTX 2 technical report said the system has no explicit Or world modeling capabilities what is your precise definition of a world model and what can 2.5 predict beyond visually plausible next frames? Okay, so world model from our d",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2095137667570716711#t=864",
+                  "end": 982.185,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c54e6dee3fe7a624aafb5f90b190e7173eb6454091da5c4d5af540179dbeb307",
+                  "start": 864.075,
+                  "text": "You want this to run on cheap hardware that will be affordable for everybody to buy these robots or build it themselves And you don't want your robot intelligence to just you know, die when your cloud Provider indoor provider, or inference ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2095137667570716711#t=2518",
+                  "end": 2637.467,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "0a732e7b43c97d1bf027ff52f7a734ea2e05e63b201728857a3af876197aa3f6",
+                  "start": 2518.968,
+                  "text": "And these guys are not even professionals Some of them are not developers They just want to create amazing content They manage to tinker with all these things But when you really want to get like to the highest quality possible you have to ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2095137667570716711#t=2637",
+                  "end": 2756.444,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "772a13858e7ab3934f2251cc681ab0ccd8ff8f10259381919e51f8ba81cbf93e",
+                  "start": 2637.847,
+                  "text": "making sure that it works for example on multiple operating systems and making sure that it works on data center GPUs and on community GPUs it's hard but this is something that is Very concentrated on our inference team which are doing like",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2095137667570716711#t=3969",
+                  "end": 4086.252,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "7952c7cf1ab2ed667d5eafafc48926995c30398d1f8aeccfe609a0af5c6d6cc3",
+                  "start": 3969.982,
+                  "text": "like whether like you said it or didn't say it like how much audio cuts we have audio noise, and this is just for audio So for visual quality you also like have a million other quality a million other benchmarks I will have to say that as y",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/kimmonismus/status/2095137667570716711#t=4453",
+                  "end": 4572.752,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "18f787e8ed3b5198d6f9f13377b7ee82b26b3ce70d08af09dde03c883bcdcf19",
+                  "start": 4453.394,
+                  "text": "How far along are you with experiments and relationships and making stuff? Or, or, or reality. The entire world right now is trying to figure out right? Like, you have the, the startup that build try to build the robots plus like, the entir",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Chubby_-_AI_video_companies_are_no_longer_claiming_they_can_simply_generate_be",
+              "source_revision": "c988e8dc7fcb388ddd487fccf28aaf8ea4170c0dea7b89820c10227d215328f9",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "Chubby♨️ - AI video companies are no longer claiming they can simply generate be...",
+              "topic": "Developer Marketing",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://x.com/kimmonismus/status/2095137667570716711",
+              "video_id": "2095070893944832003",
+              "yoinked_at": "2026-09-02T07:40:03"
+            }
+          },
+          {
+            "work_id": "xFxKk8KgseVaO51J9joTEOagjxnRGoBe",
+            "video_id": "2094915663961661513",
+            "attempt_token": "1_374zKMCRpmvYNxNSXWAMHQoAtQ543l563swr9IWB8",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678203823,
+            "source_revision": "9037db63f8d5f12ea9189cee87995a0e72b1e99e3b5937fe408154493cb5cd46",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "b845d1535e4743f8941d266f54cf708049ffeb7a9c1f54aeec2286e90215ce65",
+            "card": {
+              "card_hash": "bf28321b3978ee7e0741957544db94b202c9584120e36f2b63b67109bc0c9221",
+              "channel": "Angry Tom",
+              "chars": 265,
+              "chars_all_clips": 265,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/AngryTomtweets/status/2094915663961661513#t=0",
+                  "end": 15.47,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "84a2134055ae4cdd162c91e212b78b5a8b3517b8330ca7d60aed4092795aa4b7",
+                  "start": 0.0,
+                  "text": "Давно не быт ветра титанов ты пол возьми, чё я там поймал ты угадай, нет, но из мешки Принял полностью, спа, да но я не сжёг мосты Я представляю Павла, да, и ты солд, устак Давно не быт ветра титанов ты пол возьми, чё я там поймал ты угадай",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/AngryTomtweets/status/2094915663961661513#t=0",
+                  "end": 15.47,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "84a2134055ae4cdd162c91e212b78b5a8b3517b8330ca7d60aed4092795aa4b7",
+                  "start": 0.0,
+                  "text": "Давно не быт ветра титанов ты пол возьми, чё я там поймал ты угадай, нет, но из мешки Принял полностью, спа, да но я не сжёг мосты Я представляю Павла, да, и ты солд, устак Давно не быт ветра титанов ты пол возьми, чё я там поймал ты угадай",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Real footage vs. AI https://t.co/kEZEEgAn8A No tags [00:00:00] Давно не быт ветра титанов [00:00:01] ты пол возьми, чё я там поймал [00:00:03] ты угадай, нет, но из мешки [00:00:04] Принял полностью, спа, да [00:00:06] но я не сжёг мосты [00:00:07] Я представляю Павла, да, и ты солд, устак [00:00:09] Давно не быт ветра титанов [00:00:10] ты пол возьми, чё я там поймал [00:00:12] ты угадай, нет, но из мешки [00:00:14] Принял <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* -",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Angry_Tom_-_Real_footage_vs_AI",
+              "source_revision": "9037db63f8d5f12ea9189cee87995a0e72b1e99e3b5937fe408154493cb5cd46",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Real footage vs. AI https://t.co/kEZEEgAn8A No tags [00:00:00] Давно не быт ветра титанов [00:00:01] ты пол возьми, чё я там поймал [00:00:03] ты угадай, нет, но из мешки [00:00:04] Принял полностью, спа, да [00:00:06] но я не сжёг мосты [00:00:07] Я представляю Павла, да, и ты солд, устак [00:00:09] Давно не быт ветра титанов [00:00:10] ты пол возьми, чё я там поймал [00:00:12] ты угадай, нет, но из мешки [00:00:14] Принял <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* -",
+              "title": "Angry Tom - Real footage vs. AI",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/AngryTomtweets/status/2094915663961661513",
+              "video_id": "2094915663961661513",
+              "yoinked_at": "2026-09-02T07:37:09"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

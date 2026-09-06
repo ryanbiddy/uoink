@@ -1,0 +1,59 @@
+{
+  "seq": 923,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 923,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "1v0GB2FTbzuhKZdW7ee15UUgDc-JDxhr",
+      "client_id": "proof-harness",
+      "attempt_token": "a9Lj-WtF8T3CkvI0AhSe0Cz1cK2wBIv4gzlxBITTIlk",
+      "submission_key": "1v0GB2FTbzuhKZdW7ee15UUgDc-JDxhr-a9Lj-WtF8T3CkvI0AhSe0Cz1cK2wBIv4gzlxBITTIlk",
+      "schema_version": 1,
+      "video_id": "2093065400393105408",
+      "source_revision": "4e3bc56a827713527b8d296ecdec27d431f054ebc057bb223f3a4b4323e0f7df",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "14058b29663c712e4dd1a201aee6fcab318422da30888df817d451cc8db801bb",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "The actual timed-clip transcript is unrelated cartoon song audio/lyrics ('Sit down... you better come up with things'); the conspiratorial Epstein/Hollywood framing appears only in the tweet hint, not in the grounded excerpts, so no approved shelf is supported by the evidence itself."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 16444,
+        "cache_read_tokens": 185177,
+        "cache_create_tokens": 33216,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 923,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "1v0GB2FTbzuhKZdW7ee15UUgDc-JDxhr",
+        "video_id": "2093065400393105408",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

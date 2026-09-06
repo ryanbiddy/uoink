@@ -1,0 +1,39 @@
+{
+  "seq": 985,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 29,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "6cFID3O9nFLQAQcQRpeMFUzq_bAwmjOM",
+      "video_id": "2093727982317936640",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "a9d209f039ddd91aee71f1c3f336d0ecadfbf473ffd7f571e5e38a41f4e88d54",
+            "card_hash": "b7f42eea59e95d87c54a924315be7070215b1af69e43d370c335b326fd16868d",
+            "quote": "So are you suggesting that there's problems for which programmers are worse than non-programmers at agentification?",
+            "start": 0.38,
+            "end": 44.113,
+            "timing": "source_cues",
+            "truncated": false
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

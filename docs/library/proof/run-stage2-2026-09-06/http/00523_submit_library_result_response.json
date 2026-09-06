@@ -1,0 +1,39 @@
+{
+  "seq": 523,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "l69EkqxHUnQNx2h4lL6OHf4HDIH5IVpp",
+      "video_id": "2085659012348198912",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "f923fa00ea14c847aebb283f068864b533f72be359f53b88c0d26899cd98ca15",
+            "card_hash": "4c8ddf930f362c19dad19f9a246a4e3fc840dc93712528ad00b661541255a86f",
+            "quote": "Current AI situation 😭 Is Anthropic losing aura?",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

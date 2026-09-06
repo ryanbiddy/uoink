@@ -1,0 +1,38 @@
+{
+  "seq": 405,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "71Ph7QeuL5tJJqDEa9vPhjz2ddO6xsAP",
+      "video_id": "2084311728884420608",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "d4fc9588bb8b6be474181ba352f07899b378fc445c21cd24bde451e5d80002af",
+            "card_hash": "008a4aee0b4184f492ca01c9b1d35f1cc9b297554b839de2b37ccdd6260bd255",
+            "quote": "Anthropic finally published the prompting playbook for every Claude model.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

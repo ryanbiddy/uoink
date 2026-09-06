@@ -1,0 +1,80 @@
+# The Open Physical AI Lab: An Open Science Effort to Solve Generalization in Physical AI
+
+**Channel:** Luma (68.0K subscribers)
+**Uploaded:** 2026-06-03 | **Duration:** 05:42 | **Views:** 138 | **Likes:** 1
+**URL:** https://www.youtube.com/watch?v=YtKX2wbCpVQ
+**Uoinked:** 2026-06-11T00:03:39
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The opening establishes Luma's credentials and expertise by positioning the CEO as a thought leader discussing a critical unsolved problem in physical AI, backed by the channel's track record in multimodal infrastructure and research conviction.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+At Luma, we believe general physical AI is the most consequential problem to solve to improve life on Earth. Our track record in this area of research, internet-scale multimodal infrastructure, and unwavering conviction in scaling make us uniquely suited to meet this challenge. If you believe the same and share our values that this foundation should be built in the open for the benefit of all humanity, come build it with us, or partner with us.
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:02] solving generalization in robotics. Joining us now, CEO Amit Jain. We've talked quite a bit on this program about the challenge. The challenge is that in the physical world, models need to be multimodal. But I think let's start by defining the problem, generalization. That might be a newer term. What are you What are you getting at there? >> Uh thanks for having me, first of all. Um
+[00:00:24] Um currently, pretty much all robots are trained by showing a few examples of specific tasks. So, the entire field basically trains one task at a time. If you compare that to the world of language models where, you know, you train a large model and then it's able to handle a wide variety of tasks, unseen problems as well. So, that is an example of generalization. And in robotics, we are we have this critical gap where, like, you know, we are just stuck in the valley of specific tasks. In order for robotics to be impactful in the world and and for us to be able to just talk to them and ask them, like, "Hey, okay, do this." Then, like, you know, when you're done with that, go go take care of that thing. >> And it may be a new scenario being presented to them for the first time. >> For the first time. So, generalization is this problem of how do we allow robots to solve generally any task? >> Even in in a world where you have access to a lot of synthetic or virtual data, having a grounding in physics, the real physics of the world, is is a principal challenge. So, why is it that having an open science physical AI lab is a solution? It sounds somewhat abstract, with respect. >> Right. So, I mean, there's two aspects to this. One that it is open. And the second is the the work that we are specifically doing to solve >> Open being open source, you mean? >> Open being open science, open source, both of those aspects. So, first of all, what the solution actually looks like from our perspective. Currently, the best solution is brute-forcing this approach, which is gather data on every single task you can imagine and combination of task, everything humans do, from picking up cups to, you know, digging like, you know, mines, all of these things. And gather the data one one piece at a time. That's a practically impossible solution.
+[00:02:01] solution. On the other hand, the teams at Luma, the work we have been doing for the past 4 years is in building out these general systems out of multimodal data, internet scale multimodal data, and extracting signals from that that allows control, that allows simulation of reality, and that allows physical control. So, this lab's job is to leverage that skill into physical AI. And the second aspect of that that this is open, and I think we would not be doing it any other way. And I I think this is really really significant. So, if you think about what physical AI would mean for the world, it will be everywhere. It will be in our houses. They will be these systems, robots, will be manufacturing everything we depend upon, everything we eat. They will be in our hospitals. They will be in scientific labs. They will be on our streets. Right. >> Right.
+[00:02:47] >> Right. >> It's completely it's completely untenable that one or two people control this entire stack. So, we want to live in the world, and we want to affect the world where a small group of people can, like you know, take these technologies and build them into productive systems. And that's why it is an open initiative. >> I mean,
+[00:03:05] >> I mean, this seems like more of a philosophical push of yours. The idea that we shouldn't have so much control. I mean, it's almost akin to the encyclical by the Pope. But Meta at one point was pushing open source, and then it moved away from that. Just the sheer amount of money that needs to be made. How are you going to fund this? How do you commit to open science when everyone's so worried about China and geopolitical tensions? >> Right.
+[00:03:30] >> Right. I think first of all, it has to be philosophical because it is not just a tool. This is going to be technology. I mean, AI already is is immensely impactful in our world beyond what anybody imagined even 2 years ago. Physical AI will be deployed even faster because of the economic impact it's going to have. So, a physical philosophical stance is absolutely necessary. But you're absolutely right, funding these systems. So, what we believe actually is that this level of of control over means of production is actually not a tenable economic situation anyway. You know, nations would not be happy with one or two companies outside their borders controlling their means of production. So, we believe actually this is not just a philosophical stance. This is an economically sound stance. And building an ecosystem where like, you know, chip partners
+[00:04:20] partners model brain providers like Luma and and and deployment partners work together to build these out into systems of productive work is the right economic path. And currently, intelligence, especially LLMs, are going on the wrong wrong path here. >> I mean, we've got 30 seconds. But but you've raised 900 million Series C. We're just seeing the output that Luma creates. But why are you the right person when you've got World Labs, for example, with Fei-Fei Li? >> I think the the just like LLMs were not or language models were not solved by linguists. We believe to solve physical AI, you need the systems of of large-scale multimodal data infrastructure. This is what Luma does. This is our bread and butter. And we have produced some of the best models in this space on 3D, on images, on video, uh taking raw internet data. This skill is I think what is essential to solving this problem. Uh and that's why we think we are one of the best suited companies in the world to solve it. >> Appreciate you coming on and bring us the news. I'm Amit Jain of Luma AI. Have a great day. Meanwhile, coming up, we're going to dive into the impact on software and look at the stocks and currently seeing after Jensen Huang's remarks over at Computex. He's talking about how software lives on in the age of generative AI. And you're just going to be using more of it under Agentech. >> [music]
+[00:05:35] >> [music] >> From New York from San Francisco, this is Bloomberg Tech.
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:30]
+
+![Screenshot at 00:00:30](screenshots/shot_0002.jpg)
+
+### [00:01:00]
+
+![Screenshot at 00:01:00](screenshots/shot_0003.jpg)
+
+### [00:01:30]
+
+![Screenshot at 00:01:30](screenshots/shot_0004.jpg)
+
+### [00:02:00]
+
+![Screenshot at 00:02:00](screenshots/shot_0005.jpg)
+
+### [00:02:30]
+
+![Screenshot at 00:02:30](screenshots/shot_0006.jpg)
+
+### [00:03:00]
+
+![Screenshot at 00:03:00](screenshots/shot_0007.jpg)
+
+### [00:03:30]
+
+![Screenshot at 00:03:30](screenshots/shot_0008.jpg)
+
+### [00:04:00]
+
+![Screens

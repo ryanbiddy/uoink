@@ -1,0 +1,66 @@
+{
+  "seq": 465,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "OwLYUPz6vmILRJy2YFPTjVlI-rMA7yPk",
+    "client_id": "proof-harness",
+    "attempt_token": "N1J1lMx3uRPwP4DfMMZVClcar1fQBd1FOHcLg8Ard1E",
+    "submission_key": "OwLYUPz6vmILRJy2YFPTjVlI-rMA7yPk-N1J1lMx3uRPwP4DfMMZVClcar1fQBd1FOHcLg8Ard1E",
+    "schema_version": 1,
+    "video_id": "2084022671646273536",
+    "source_revision": "47e3110dad980efc8d0fd681d15a2b8fe596afd3bfeb2ee48884425e56bad41a",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "53223f1aa2e310029f6810734403295e62a49975a187f4afa462b819b1599b77",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "1b55ae66bc59cd7e8df1decf0f6bb8b9b0a40ed02ac9e510af8e41398213d08a",
+            "card_hash": "a18b2c4ce52c8a9a449a349e895b5f9ba91bde4d1576831c77492ab89a445d7e",
+            "quote": "Some Step By Step Instructions For How To Perform At Scale"
+          }
+        },
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "45bd834b1b0dce5a1c279f57a956971a97b19a54c5d0c5adee416e4f1c4a8078",
+            "card_hash": "a18b2c4ce52c8a9a449a349e895b5f9ba91bde4d1576831c77492ab89a445d7e",
+            "quote": "This Is Now In M C P We Are Going Need All Of These Things Be MCP Services"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 20008,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 23870,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "seq": 595,
+  "tool": "submit_library_result",
+  "wall_ms": 2,
+  "request": {
+    "seq": 595,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "2xNp0M9MK-m7x1BptiMQxJSY1Mv0tzY-",
+      "client_id": "proof-harness",
+      "attempt_token": "tl9U7Oy4EXzX0NFC1iv5VNVPAMRcLiuHjFfNDBSlFCc",
+      "submission_key": "2xNp0M9MK-m7x1BptiMQxJSY1Mv0tzY--tl9U7Oy4EXzX0NFC1iv5VNVPAMRcLiuHjFfNDBSlFCc",
+      "schema_version": 1,
+      "video_id": "2086224231277216132",
+      "source_revision": "51cc2623025ee6ff5b1073c83567aecde7c6473d13af243d98f39610f6936c75",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "6263ae2d1fae435c96a0f4d966f98de0f37583100abdc6b8c94f1ceb8e1d357a",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "The card's only excerpt is a brief dialogue line ('Daniel, we've stopped hiring chabs in the company. So you're fired?') that does not itself reference AI, video generation, or any approved taxonomy subject. The AI/video-model context (Seedance 2.5) appears only in the tweet's opening hint text, not within the gradable excerpt, so grounded classification per the excerpt evidence is not supported."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 18457,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20482,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 595,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 2,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "2xNp0M9MK-m7x1BptiMQxJSY1Mv0tzY-",
+        "video_id": "2086224231277216132",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

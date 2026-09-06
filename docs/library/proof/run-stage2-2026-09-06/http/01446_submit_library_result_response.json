@@ -1,0 +1,39 @@
+{
+  "seq": 1446,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "J7TpBzYLPIlRRLjjzxn9tNt7Aq3o_39S",
+      "video_id": "z70ZrSZNi-8",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "a5a8a6150b41b50381886b5b6d7ebfb83470d9f38f0234942d0d90db6fc3a521",
+            "card_hash": "f44e55f03c3a06aa8db8790fbdf8799a09819372ffb420c54387dffb3629562e",
+            "quote": "we'll walk through the process of setting up the Raspberry Pi to run YOLO object detection models",
+            "start": 15.509,
+            "end": 132.19,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

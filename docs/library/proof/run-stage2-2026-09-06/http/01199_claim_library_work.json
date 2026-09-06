@@ -1,0 +1,713 @@
+{
+  "seq": 1199,
+  "tool": "claim_library_work",
+  "wall_ms": 6,
+  "request": {
+    "seq": 1199,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 1199,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 6,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "bvgKtt7rAh_sZ8int1X0ezz7-Fw4f6S5",
+            "video_id": "x_880f13e46c6",
+            "attempt_token": "eT7Ar3AU-JrHpjmJ9JDGXKhFYn-Z2mPz2DPVSAf30G0",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678608895,
+            "source_revision": "40e69039960fa2ff2ff99f39ba92f77a063918383c3c521f488d578375954d80",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "762295aca95e735a79c8665ea0f0d4527e6ef506bdcc6942ca4610d5dd53fc8f",
+            "card": {
+              "card_hash": "1f9faf479829ed4257200e0e8ae8a1846d871e4ea9ee5886bc2875f66769e4d2",
+              "channel": "Peter DiCarlo (@pdicarlotrader)",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/pdicarlotrader/status/2094907185234915787",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "05be65988a47272fc143f7e1ea1d8e6ee5199bf7e3da2f9dce9cedcdc779213c",
+                  "start": null,
+                  "text": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* I sold my $CRWV position last month after the earnings breakout. Since then, I’ve been p",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* I sold my $CRWV position last month after the earnings breakout. Since then, I’ve been patient and waiting for the right opportunity to get back in. In today’s video, I explain why I’m still bullish long term and exactly where I plan to buy again. Watch now. https://t.co/Qo8ZjxSoo7 *2026-09-01T21:56:09.000Z · video (capture it with the regular Uoink button)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "pdicarlotrader-880f13e4",
+              "source_revision": "40e69039960fa2ff2ff99f39ba92f77a063918383c3c521f488d578375954d80",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* I sold my $CRWV position last month after the earnings breakout. Since then, I’ve been patient and waiting for the right opportunity to get back in. In today’s video, I explain why I’m still bullish long term and exactly where I plan to buy again. Watch now. https://t.co/Qo8ZjxSoo7 *2026-09-01T21:56:09.000Z · video (capture it with the regular Uoink button)*",
+              "title": "@pdicarlotrader: I sold my $CRWV position last month after the earnings brea…",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/pdicarlotrader/status/2094907185234915787",
+              "video_id": "x_880f13e46c6",
+              "yoinked_at": "2026-09-01T22:35:57Z"
+            }
+          },
+          {
+            "work_id": "cWLFyIt-vWZ11xqaEv2mgKh2U5GRqKTC",
+            "video_id": "x_ada27fa979b",
+            "attempt_token": "1601TxCWOJ-Fd3_YO1WDKLhHV9ogE--Z1N3wzrZ7u88",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678608895,
+            "source_revision": "b52f5932c3c66302610067135c0088a8e6b3334ce3cc9f45b35d5c4594a99c10",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "d8a616f0fe930f00c78d06b08707b81f0f28f91d72c5eedfdb16143cc27669b5",
+            "card": {
+              "card_hash": "1d2b5a536b72006ea2e95435107a7d88e7eaa30e172e14f461f54799ae952e5d",
+              "channel": "ALL reaction videos (@allreactionvids)",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/allreactionvids/status/1963752290625421531",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "a34fabe9dda8731c73dc2a139b70d0d746ec2c539e12768a9c4a911eaf3f3603",
+                  "start": null,
+                  "text": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* A man screaming and stabbing the tv reaction video https://t.co/ImOg54Ys9K *2025-09-04T2",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* A man screaming and stabbing the tv reaction video https://t.co/ImOg54Ys9K *2025-09-04T23:53:25.000Z · video (capture it with the regular Uoink button)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "allreactionvids-ada27fa9",
+              "source_revision": "b52f5932c3c66302610067135c0088a8e6b3334ce3cc9f45b35d5c4594a99c10",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* A man screaming and stabbing the tv reaction video https://t.co/ImOg54Ys9K *2025-09-04T23:53:25.000Z · video (capture it with the regular Uoink button)*",
+              "title": "@allreactionvids: A man screaming and stabbing the tv reaction video https://…",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/allreactionvids/status/1963752290625421531",
+              "video_id": "x_ada27fa979b",
+              "yoinked_at": "2026-08-20T05:12:24Z"
+            }
+          },
+          {
+            "work_id": "kM2IpsyIJlrhFrgXTOvc9mdCny0ApHQr",
+            "video_id": "x_811cef5397c",
+            "attempt_token": "dFVZnqsED5Ocq8Am2qiq7CJ4MKwY9_nzSy0-Dagd3CM",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678608896,
+            "source_revision": "8c7a004deea85e4d4cd711ec917c5a7a5c9214cc65c768b7065a635331cc23e2",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "ab200e18368d5dd4ba014135bfa7068aeef79a1caf7de210d098fb1b1dd28c76",
+            "card": {
+              "card_hash": "7dfed919d3d265eb7946cfb61bdd80b4b16044429974d59309f89b1c5f46592d",
+              "channel": "Ti Morse (@ti_morse)",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/ti_morse/status/2081068670478880854",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "e2adb42681dc055c2b9c3a07099a6002c1c860eb3b08f401ac5296afe356a0c3",
+                  "start": null,
+                  "text": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* My first interview with @sama, Co-Founder of @OpenAI. 0:04 How to start a startup 3:30 T",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* My first interview with @sama, Co-Founder of @OpenAI. 0:04 How to start a startup 3:30 Trusting exponentials 4:57 Operating in chaotic environments 6:12 Learning to enjoy painful experiences 8:03 Creating abundant intelligence 11:15 Keeping core suppliers on OpenAI’s timelines https://t.co/vPnmWfPwVe *2026-07-25T17:26:50.000Z · video (capture it with the regular Uoink button)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "ti-morse-811cef53",
+              "source_revision": "8c7a004deea85e4d4cd711ec917c5a7a5c9214cc65c768b7065a635331cc23e2",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* My first interview with @sama, Co-Founder of @OpenAI. 0:04 How to start a startup 3:30 Trusting exponentials 4:57 Operating in chaotic environments 6:12 Learning to enjoy painful experiences 8:03 Creating abundant intelligence 11:15 Keeping core suppliers on OpenAI’s timelines https://t.co/vPnmWfPwVe *2026-07-25T17:26:50.000Z · video (capture it with the regular Uoink button)*",
+              "title": "@ti_morse: My first interview with @sama, Co-Founder of @OpenAI. 0:04…",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/ti_morse/status/2081068670478880854",
+              "video_id": "x_811cef5397c",
+              "yoinked_at": "2026-07-25T18:53:31Z"
+            }
+          },
+          {
+            "work_id": "tFPWCEY07-NOb2p910N1dWMiUBbW3TUf",
+            "video_id": "zYGDpG-pTho",
+            "attempt_token": "oxYXpMcC0uBufTYFRX83vtFPIrOIiRC17Jae7tJOZHE",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678608897,
+            "source_revision": "9463b09f0d803f21be4b1e5400917d488490adc94a63b41ff1b1e38634eaf78f",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "bd65e630b697f6a228d2a0c28c03ede8a858d8babfe564d58421316ddf22b889",
+            "card": {
+              "card_hash": "106b34ae1c2190019181b7ded24e3ffa8017b76496262aca32faaf1cea954730",
+              "channel": "IBM Technology",
+              "chars": 10240,
+              "chars_all_clips": 10240,
+              "chars_chosen_clips": 1440,
+              "clip_count": 15,
+              "clips": [
+                {
+                  "deep_link": "https://youtube.com/watch?v=zYGDpG-pTho&t=0s",
+                  "end": 63.32,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "0d765c1411c3ebcda9fd13f8ce76e99200ce8cccf2e045c7200193b7acd74fa5",
+                  "start": 0.94,
+                  "text": "Remember how back in the day people would Google themselves, you type your name into a search engine and you see what it knows about you? Well, the modern equivalent of that is to do the same thing with a chatbot. So when I ask a large lang",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=zYGDpG-pTho&t=207s",
+                  "end": 254.869,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "b65ac23f00e91e73b40103b6c89b846f323926abc884bfc1825c66881cb4f061",
+                  "start": 207.38,
+                  "text": "So when you ask a query like, what was our company's revenue growth last quarter? Well, RAG will find documents that are mathematically similar in meaning to your question, even if they don't use the exact same words. So it might find docum",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=zYGDpG-pTho&t=301s",
+                  "end": 351.43,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c55538dc4e7cf08cfeb1608bb80af43f2a6aac3b199f45dec867c5a4ea40090d",
+                  "start": 301.48,
+                  "text": "So if we think about what we're having to do here, we've got documents that need to be vector embeddings, and we need to store these vector embedding in a database. All of this adds to processing costs, it adds to infrastructure costs to ma",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=zYGDpG-pTho&t=451s",
+                  "end": 502.149,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c61bef8f4031e2002a8845f836c5c3210d760a610da8f6a89a5276cbe6d634b0",
+                  "start": 451.15,
+                  "text": "So when we are putting the queries in, it's faster than RAG because it doesn't need to search through external data, and because the knowledge is kind of baked into the model's weights, you don't need to maintain a separate vector database,",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=zYGDpG-pTho&t=502s",
+                  "end": 565.179,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "8a1261a20e60c9565142316d7a9754aa0eb2f8821dc4e3584841e941061929be",
+                  "start": 502.63,
+                  "text": "Updating a fine-tune model requires another round of training and then perhaps most importantly of all there is a risk of something called catastrophic forgetting. Now that's when the model loses some of its general capabilities while it's ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=zYGDpG-pTho&t=704s",
+                  "end": 777.59,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "21e64047116d685b9edff38ff27b54185afe38325864d09a096c167e2082c3c8",
+                  "start": 704.99,
+                  "text": "And now, just now, we've talked about prompt engineering as well and I've really talked about those as three different distinct things here, but they're commonly used actually in combination. We might use all three together. So consider a l",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://youtube.com/watch?v=zYGDpG-pTho&t=0s",
+                  "end": 63.32,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "0d765c1411c3ebcda9fd13f8ce76e99200ce8cccf2e045c7200193b7acd74fa5",
+                  "start": 0.94,
+                  "text": "Remember how back in the day people would Google themselves, you type your name into a search engine and you see what it knows about you? Well, the modern equivalent of that is to do the same thing with a chatbot. So when I ask a large lang",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=zYGDpG-pTho&t=207s",
+                  "end": 254.869,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "b65ac23f00e91e73b40103b6c89b846f323926abc884bfc1825c66881cb4f061",
+                  "start": 207.38,
+                  "text": "So when you ask a query like, what was our company's revenue growth last quarter? Well, RAG will find documents that are mathematically similar in meaning to your question, even if they don't use the exact same words. So it might find docum",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=zYGDpG-pTho&t=301s",
+                  "end": 351.43,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c55538dc4e7cf08cfeb1608bb80af43f2a6aac3b199f45dec867c5a4ea40090d",
+                  "start": 301.48,
+                  "text": "So if we think about what we're having to do here, we've got documents that need to be vector embeddings, and we need to store these vector embedding in a database. All of this adds to processing costs, it adds to infrastructure costs to ma",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=zYGDpG-pTho&t=451s",
+                  "end": 502.149,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c61bef8f4031e2002a8845f836c5c3210d760a610da8f6a89a5276cbe6d634b0",
+                  "start": 451.15,
+                  "text": "So when we are putting the queries in, it's faster than RAG because it doesn't need to search through external data, and because the knowledge is kind of baked into the model's weights, you don't need to maintain a separate vector database,",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=zYGDpG-pTho&t=502s",
+                  "end": 565.179,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "8a1261a20e60c9565142316d7a9754aa0eb2f8821dc4e3584841e941061929be",
+                  "start": 502.63,
+                  "text": "Updating a fine-tune model requires another round of training and then perhaps most importantly of all there is a risk of something called catastrophic forgetting. Now that's when the model loses some of its general capabilities while it's ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://youtube.com/watch?v=zYGDpG-pTho&t=704s",
+                  "end": 777.59,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "21e64047116d685b9edff38ff27b54185afe38325864d09a096c167e2082c3c8",
+                  "start": 704.99,
+                  "text": "And now, just now, we've talked about prompt engineering as well and I've really talked about those as three different distinct things here, but they're commonly used actually in combination. We might use all three together. So consider a l",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "youtube",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "RAG_vs_Fine-Tuning_vs_Prompt_Engineering_Optimizing_AI_Models",
+              "source_revision": "9463b09f0d803f21be4b1e5400917d488490adc94a63b41ff1b1e38634eaf78f",
+              "source_type": "video",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "RAG vs Fine-Tuning vs Prompt Engineering: Optimizing AI Models",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://www.youtube.com/watch?v=zYGDpG-pTho",
+              "video_id": "zYGDpG-pTho",
+              "yoinked_at": "2026-05-12T18:32:23"
+            }
+          },
+          {
+            "work_id": "ycaAzhWF1yi6hvDxkZaXsToJ7c6r9Wia",
+            "video_id": "x_916a6278802",
+            "attempt_token": "w_-xpe1kqe1_T2Fl5lnAYfoW4OHXMLT3O3Kq6cn3tYU",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788678608898,
+            "source_revision": "c0d7a723fa34faa9de27a2f89932023e1809a3540a194942147dee94fec04f95",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "9af9593cd930abb234b8fea170c47cad70cdc44a6f83e6dd5611f2636fd144e4",
+            "card": {
+              "card_hash": "9fc0e1707ea088c5552ca39afaff271f767fb3349ff8fd8294ccfd66805b7000",
+              "channel": "Rohan Paul (@rohanpaul_ai)",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/rohanpaul_ai/status/2095732265557111252",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "e7f42c35e5ba01cdb169c3f0bd0795ff8895bd943a4627a421b48a6ab5333d3d",
+                  "start": null,
+                  "text": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* OpenAI President Greg Brockman explains why Anthropic pulled ahead of OpenAI on ARR. (An",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* OpenAI President Greg Brockman explains why Anthropic pulled ahead of OpenAI on ARR. (Anthropic at ~$65B and OpenAI is at $40B  ARR ) \"We focused late on coding in particular. There’s one simple narrative, which is that we focused less on real-world coding, and we came to https://t.co/CCrz4XkZ8L *2026-09-04T04:34:43.000Z · video (capture it with the regular Uoink button)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "rohanpaul-ai-916a6278",
+              "source_revision": "c0d7a723fa34faa9de27a2f89932023e1809a3540a194942147dee94fec04f95",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "*1 post captured: the shared post and the earlier posts in the author's own chain. Replies below the shared post aren't served by X's public endpoint.* OpenAI President Greg Brockman explains why Anthropic pulled ahead of OpenAI on ARR. (Anthropic at ~$65B and OpenAI is at $40B  ARR ) \"We focused late on coding in particular. There’s one simple narrative, which is that we focused less on real-world coding, and we came to https://t.co/CCrz4XkZ8L *2026-09-04T04:34:43.000Z · video (capture it with the regular Uoink button)*",
+              "title": "@rohanpaul_ai: OpenAI President Greg Brockman explains why Anthropic pulle…",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/rohanpaul_ai/status/2095732265557111252",
+              "video_id": "x_916a6278802",
+              "yoinked_at": "2026-09-04T06:13:10Z"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

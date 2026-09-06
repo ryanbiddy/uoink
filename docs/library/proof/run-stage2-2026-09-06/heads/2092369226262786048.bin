@@ -1,0 +1,185 @@
+# Theo - t3.gg - Mario (creator of Pi) thinks this video is worth watching. He's smart...
+
+**Channel:** Theo - t3.gg (— subscribers)
+**Uploaded:** 2026-08-25 | **Duration:** 39:28 | **Views:** — | **Likes:** 1,254
+**URL:** https://x.com/theo/status/2092372584180687279
+**Uoinked:** 2026-08-26T07:57:28
+**Topic:** Social Media Research
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The opening immediately establishes credibility by name-dropping Mario (creator of Pi) as someone who thinks the video is worth watching and describing him as 'smarter than me,' leveraging his authority to convince viewers the content is valuable.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Mario (creator of Pi) thinks this video is worth watching. He's smarter than me so he's probably right.  (It's about memory in code tools, and it features a crash out at how bad Claude Code's memory is) https://t.co/vJglQLaKDX
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] For AI to work effectively in a codebase
+[00:00:02] it needs to know what the codebase is
+[00:00:03] where things are
+[00:00:04] and how to get stuff done
+[00:00:06] I have found that a lot of people
+[00:00:07] want to store this information in some special
+[00:00:10] way that AI agents will operate with well
+[00:00:12] I've seen so many different systems and libraries
+[00:00:15] and plugins and features and stuff that people
+[00:00:17] have built over the last few years
+[00:00:19] to try and automatically encode
+[00:00:21] what they're doing in the codebase
+[00:00:22] in some special way
+[00:00:24] that'll make the agent always do what they
+[00:00:26] want. I've even noticed that in Cloud Code recently
+[00:00:28] it seems to use its Memory
+[00:00:30] a whole bunch
+[00:00:31] where it will save things in some magic
+[00:00:33] hidden file somewhere on the computer
+[00:00:35] after you ask it to do something
+[00:00:36] and now it will keep randomly doing that
+[00:00:39] forever
+[00:00:39] You can't tell from how I've been spinning this so far
+[00:00:42] I'm not a fan of these memory systems
+[00:00:44] I don't think memory is the right place
+[00:00:46] to keep track of how things should be
+[00:00:48] done in your code base
+[00:00:49] That worked okay with humans
+[00:00:50] because previously, before AI was writing all our code
+[00:00:53] the knowledge was always in the people's brains
+[00:00:55] They would try it out at other places
+[00:00:56] like documentation and whatnot
+[00:00:58] but in the end
+[00:00:59] what we knew Is what mattered
+[00:01:01] Now we're working with agents that forget everything
+[00:01:02] when a new thread spins up
+[00:01:04] and are desperate attempts to
+[00:01:06] have them automatically save things to be in
+[00:01:08] the next run
+[00:01:09] It's just not great. It's not great at
+[00:01:11] all
+[00:01:11] And I'm far from the only person who
+[00:01:13] feels this way
+[00:01:14] This clip comes from a conversation that Mario
+[00:01:17] the creator of Pi
+[00:01:18] had with Armin, the creator of Flask
+[00:01:21] They now work together
+[00:01:22] building a bunch of cool AI tooling stuff
+[00:01:24] And obviously, Pi is a super cool
+[00:01:26] powerful
+[00:01:27] useful piece of the new agentic Engineering world
+[00:01:31] I love both of these guys
+[00:01:32] I especially love Mario. He's been awesome to
+[00:01:33] chat with and his understanding of these things
+[00:01:35] is great
+[00:01:36] And I have a feeling he's going to
+[00:01:37] have some real fun
+[00:01:39] spicy takes as we dive in
+[00:01:41] So if you're trying to figure out how
+[00:01:42] to make agents behave properly in your code base
+[00:01:45] or you just want to understand this stuff
+[00:01:46] well enough to have better conversations with your
+[00:01:48] coworkers and keep them from destroying your
+[00:01:51] agentic systems with all these terrible memory things
+[00:01:53] I think you'll get a lot out of
+[00:01:54] this video
+[00:01:55] But one other thing you should be able
+[00:01:56] to get a lot out of is today's
+[00:01:57] sponsor. Do you know what OpenAI
+[00:01:58] Anthropic, Cursor And thinking machines all have in common
+[00:02:02] because it's not just that they're trying to make models
+[00:02:04] is that they all use today's sponsor
+[00:02:06] WorkOS. You might be confused why so many
+[00:02:08] big companies are choosing to use a product
+[00:02:10] like WorkOS instead of rolling their own auth
+[00:02:12] especially nowadays where agents can just do it for you
+[00:02:15] right?
+[00:02:15] Well
+[00:02:16] kind of. They can go set up a
+[00:02:17] sign-in page. They might even be able to
+[00:02:18] start doing the Google OAuth flows that you
+[00:02:20] want
+[00:02:21] But as soon as you want
+[00:02:22] real enterprise-ready auth so that businesses can sign into your applications
+[00:02:26] you're kind of screwed
+[00:02:28] That's where WorkOS comes in with their Admin portal
+[00:02:30] making it trivial for you to onboard real
+[00:02:32] businesses onto your services. You send the company a link
+[00:02:35] they sign up with whatever identity provider they prefer
+[00:02:38] and now they're good to go
+[00:02:39] in your app. So WorkOS is enterprise covered
+[00:02:41] obviously
+[00:02:42] They also have traditional consumers covered with AuthKit
+[00:02:44] and all of the stuff that they need
+[00:02:46] to do traditional OAuth and sign in with
+[00:02:47] Google and whatever else
+[00:02:49] But there's a third type of user that
+[00:02:50] they have covered too
+[00:02:51] agents
+[00:02:52] Turns out agents will need a way to
+[00:02:54] sign into your stuff too
+[00:02:55] And that's why WorkOS created AuthMD
+[00:02:57] alongside a bunch of other important companies like Cloudflare
+[00:02:59] Firefox Call Resend Monday
+[00:03:01] Kernel, and so many other awesome businesses
+[00:03:03] As agents do more and more on our behalf
+[00:03:05] they need a way to sign up for
+[00:03:07] us
+[00:03:07] And that's what AuthumD is here to introduce
+[00:03:09] So if you want to make your app usable by consumers
+[00:03:11] enterprise, and agents
+[00:03:13] get started today at soydev dot link slash
+[00:03:15] workOS
+[00:03:16] When I heard his first two sentences
+[00:03:17] I realized this was good enough to be a video
+[00:03:18] which is why it's a video now
+[00:03:20] So let's watch the whole thing together
+[00:03:22] Yeah, but coming back to memory systems
+[00:03:23] so for coding
+[00:03:24] I don't want a memory system
+[00:03:25] Code is truth
+[00:03:26] Code is the ground truth
+[00:03:28] It's also evolving
+[00:03:29] And I don't need another place that I
+[00:03:32] need to maintain. I already have code base
+[00:03:34] to maintain. So for code
+[00:03:35] I don't need a memory system
+[00:03:37] right? Already endless bangers. I couldn't agree more
+[00:03:39] here. Even things like comments often go out
+[00:03:42] of date where a comment is left in
+[00:03:44] some code because it has to do a
+[00:03:46] certain thing a certain way
+[00:03:48] The thing changes, the comment doesn't
+[00:03:50] Now that comment isn't just like tech debt
+[00:03:52] in the sense that it's sitting around doing
+[00:03:54] nothing. It's now actively harmful because it steers
+[00:03:57] people and agents the wrong way
+[00:03:58] Keeping your context up To date and keeping
+[00:04:01] your information together and synced properly
+[00:04:04] is a real difficult challenge
+[00:04:08] And the more you split up that knowledge
+[00:04:10] the more split brain problems you end up with
+[00:04:12] where if you
+[00:04:13] change something in one place and you forget
+[00:04:14] to change it in all the others
+[00:04:16] everything falls apart
+[00:04:18] And this is easier than ever
+[00:04:19] in the AI era
+[00:04:21] because people will write these slop markdown plan files
+[00:04:24] leave them in the repo
+[00:04:25] and they go super out of date
+[00:04:27] I'm even guilty of this with Lakebed
+[00:04:28] I've been meani

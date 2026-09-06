@@ -1,0 +1,50 @@
+{
+  "seq": 605,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "-XSIvqhBlNqH8GZM1CfdFhYqeyFVfBIE",
+    "client_id": "proof-harness",
+    "attempt_token": "EIGrGn4gU07O1zFSAHttiwT-DuJdChM4NJ783tN-GwM",
+    "submission_key": "-XSIvqhBlNqH8GZM1CfdFhYqeyFVfBIE-EIGrGn4gU07O1zFSAHttiwT-DuJdChM4NJ783tN-GwM",
+    "schema_version": 1,
+    "video_id": "2088044934536585216",
+    "source_revision": "5d7259d09ac1b94a2494dddf47e036e77a0d5799524566750768b04f74b23ede",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "8386980bee0b45a7e3e9058dade951739863ffd478fc1fae5ca1e76359249e80",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "dcff27eed348d9966fead9e95153fe73ea9cb3d586e184da790f7d426eff8f82",
+            "card_hash": "1f02cb45289fd308612ac8ae18544dc77741d322b65fdf58ac80c8c2f0d12991",
+            "quote": "You can now open any @googledrive Doc, Sheet, or Slide right inside ChatGPT"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 15484,
+      "cache_read_tokens": 187032,
+      "cache_create_tokens": 34352,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 481,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "SxaMiYNTXlU_4hniNt-BPNr5BgPBAWxN",
+      "video_id": "2084679326134390785",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "38b0d41239547b03b56646f1c8dde7dec29a0baf7db2a22c4504206b58fbd245",
+            "card_hash": "c874d31d182e7c98603f786fabea99a0dc4954a28f93a49990638e364a48de27",
+            "quote": "A Pull Request With 14 Modified Files",
+            "start": 702.639,
+            "end": 822.34,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

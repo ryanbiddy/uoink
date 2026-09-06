@@ -1,0 +1,39 @@
+{
+  "seq": 2356,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "O0aXeDPmZh5SlYBFp6GUkAaNyMNjxBai",
+      "video_id": "x_2cc092776b1",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "spaceflight",
+          "shelf_path": [
+            "Space and Science",
+            "Spaceflight"
+          ],
+          "confidence": 0.88,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "8478d38dca6a4abb9376739d3d3ea21524c4efdd05bad0fc9309b51ad20e8f87",
+            "card_hash": "44e4375002006cb83fe9205e53071e7e7bf0f935f0ad210cd056e36739003110",
+            "quote": "Our 17th Transporter rideshare mission is targeted to launch tomorrow from California",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

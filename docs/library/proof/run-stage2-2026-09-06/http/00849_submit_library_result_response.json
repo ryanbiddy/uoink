@@ -1,0 +1,39 @@
+{
+  "seq": 849,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "ft1QYUN76lYXZnsSkJB5X5c_onTfpwiP",
+      "video_id": "2091297765133578240",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "b3a8239bb19eabe5a6f16d11e1a574d0cc5efbbcde3fae57ebfa29c4b1a2404e",
+            "card_hash": "bbf52705b984fcc3d82382d3004aa33bc85fd4d99b3b20baedbbe6d90fc4877f",
+            "quote": "Ox Alpha vs. Fable 5 in cartoon animation.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

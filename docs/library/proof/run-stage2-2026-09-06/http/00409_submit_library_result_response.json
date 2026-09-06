@@ -1,0 +1,38 @@
+{
+  "seq": 409,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "8GTP9yq-JuNcSg9DUnYC81aoQtfJHjtl",
+      "video_id": "2084536348820537344",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "news-and-current-events",
+          "shelf_path": [
+            "News and Current Events"
+          ],
+          "confidence": 0.95,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "36f482c9719ea2144bb538b137b079640166e0f5d0e068ecd6ad2abf1461b0b9",
+            "card_hash": "cbedfc892a1e2fc54b606a3b4eecfb5512de5e2192b91ff62910b7c25fadab2b",
+            "quote": "Ukrainian drones continue to target ships trying to reach the Russian coast.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

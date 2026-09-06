@@ -1,0 +1,39 @@
+{
+  "seq": 85,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "NjPInkCN_rMoYiOgILG8_SkP74ND_wjt",
+      "video_id": "2079389488686551041",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "67b105e5608d64ae735149b05b92d11877d7f70ba498a1540c54660281167d38",
+            "card_hash": "322fcaa0032327bb7ec527deee7216f296ecd0f2fccc38bb400907553ddbff45",
+            "quote": "connecting coding agents, CI pipelines, and custom tooling to Unity",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

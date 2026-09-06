@@ -1,0 +1,35 @@
+{
+  "seq": 495,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "8iotk3bQnZT20bHRKYAHh5VNrqFpfW7Q",
+    "client_id": "proof-harness",
+    "attempt_token": "azkBXV_vTqm2zxlkXU1OVwmjTAvHqfPoXmgor3jl3GA",
+    "submission_key": "8iotk3bQnZT20bHRKYAHh5VNrqFpfW7Q-azkBXV_vTqm2zxlkXU1OVwmjTAvHqfPoXmgor3jl3GA",
+    "schema_version": 1,
+    "video_id": "2085731765587435520",
+    "source_revision": "490db4ec986eb54c3da4b3eacfdc6e18e1b6a4d10e849c941061a84a3ad74b80",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "922419db3bd2a8eff984d002baa2d90dc9598abe130e4dc75a71174e373f4322",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "The excerpt is fragmentary scene-setting for a new media show launch (standing outside OpenAI HQ, clarifying a 'non-GAAP basis' accounting note) rather than substantive discussion of any AI product, model, or industry dynamic that maps to an approved shelf."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 13596,
+      "cache_read_tokens": 190924,
+      "cache_create_tokens": 35465,
+      "wall_time_ms": 0
+    }
+  }
+}

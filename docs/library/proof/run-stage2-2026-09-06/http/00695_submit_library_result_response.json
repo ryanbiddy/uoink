@@ -1,0 +1,39 @@
+{
+  "seq": 695,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "kQSdQdXnrv6BNJvt3flAKZVkYGme1AvH",
+      "video_id": "2089053511451541903",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "32de6b41411e7ebd21c53bc45c31fd6ae809f091a61ec0e15a8d168996a11ce0",
+            "card_hash": "f51e73e85e6c95cf5e185ef593490df6bc62cd8e2748fef9c6cd76974fdb5115",
+            "quote": "Running Qwen 3.8 27B Q4 on a single RTX 4060 (8GB VRAM) gaming laptop shouldn’t be physically possible.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

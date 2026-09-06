@@ -1,0 +1,39 @@
+{
+  "seq": 815,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "X27gd2dLaSTFKJkd7FgvTCuA-aU8TYpv",
+      "video_id": "2090496604902129664",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "3f6c325b523c3a63bd51a953aca34b5636f1abaa8da324b0bbb9fb5730c0562f",
+            "card_hash": "bb080ad7095c124b8518deeeb27372a716cdeab510ab143a38b5c7553706a38d",
+            "quote": "Search messages, catch up on conversations, draft and send replies—all with ChatGPT on your Mac.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

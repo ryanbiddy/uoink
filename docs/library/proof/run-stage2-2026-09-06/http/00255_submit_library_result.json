@@ -1,0 +1,59 @@
+{
+  "seq": 255,
+  "tool": "submit_library_result",
+  "wall_ms": 20,
+  "request": {
+    "seq": 255,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "WOkuIsDTk-JZ9Yvl_ytVUa8XErqmbHQc",
+      "client_id": "proof-harness",
+      "attempt_token": "MbBcQShMt_98Luplnq4paYmgapSrTLGWXX0r8zucSLM",
+      "submission_key": "WOkuIsDTk-JZ9Yvl_ytVUa8XErqmbHQc-MbBcQShMt_98Luplnq4paYmgapSrTLGWXX0r8zucSLM",
+      "schema_version": 1,
+      "video_id": "2082518119344459776",
+      "source_revision": "5e7f1d475d63d5a738d34964f9fe2414fdabf5936f16c2021a0446eb531e0f58",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "0fc52d565befb4cd564620b70ae943b0565b0e4e8baed480dcba7b91d310bff4",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Excerpt describes a Mac app for capturing notes/prompts while using AI tools; the central subject is a personal note-capturing product, not an AI/ML technical subject, agent demonstrated acting, or industry dynamic covered by any approved shelf."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 9666,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 22814,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 255,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 20,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "WOkuIsDTk-JZ9Yvl_ytVUa8XErqmbHQc",
+        "video_id": "2082518119344459776",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

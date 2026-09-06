@@ -1,0 +1,38 @@
+{
+  "seq": 157,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 26,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "qdMwMnEgpUd47NheN8yTT9xh6O-VuXOq",
+      "video_id": "2079930744781070336",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "a0c7117e4554ef16854490378e696174760867a7b0bfce7f82d14b73cbc65b4d",
+            "card_hash": "8dd952674db428643514bc1f6b20a0c637e1f29136e93bf92e7eb3095d8a4393",
+            "quote": "robotics is very real. It scales across a wide variety of environments",
+            "start": 10.539,
+            "end": 81.92,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

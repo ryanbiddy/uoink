@@ -1,0 +1,39 @@
+{
+  "seq": 599,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "E6t-nG2V37QiDvqttq6Af44smxGawlln",
+      "video_id": "2086663463162830848",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "e57d7765137eb3bc51340d6be3c64c01687f3332136fa6cb61ffba90c35ecc39",
+            "card_hash": "75014032c5d5fc9b7f04e512e5686e5b4806e75be1b3a216bea005384b64a706",
+            "quote": "turn your favorite agent harness multimodal-native — read images, videos &amp; documents, edit videos, work with 3D/CAD",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

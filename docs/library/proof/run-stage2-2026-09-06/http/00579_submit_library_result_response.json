@@ -1,0 +1,39 @@
+{
+  "seq": 579,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "y0Bi9JigTaKJTBrJ2p0X9rUd49E9KpqN",
+      "video_id": "2086844879347634176",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.95,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "d65ff5aa3e6e902f21a0f4c381d44ac293c9e0f1657af6688c160cf79e6b8c66",
+            "card_hash": "d4956fcbcdd7ae0a300cb3d396f831573c3726736fa8c0bae26817b912b7a47e",
+            "quote": "AI agents at Kavak sell the cars, underwrite the loans, coach the mechanics, and in one Mexican city, run the entire operation.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

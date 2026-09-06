@@ -1,0 +1,51 @@
+{
+  "seq": 1121,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "vQaY89UfRU3iGqOqY4YJGIMjx4hw6Sz6",
+    "client_id": "proof-harness",
+    "attempt_token": "i19WzRrz6osqyXl91Fl-iU5_2j34-ol0Or3FDQNFWEA",
+    "submission_key": "vQaY89UfRU3iGqOqY4YJGIMjx4hw6Sz6-i19WzRrz6osqyXl91Fl-iU5_2j34-ol0Or3FDQNFWEA",
+    "schema_version": 1,
+    "video_id": "2095585419631132672",
+    "source_revision": "5def413eea4d1543600db4be36974cf1d617275f9941dd950ebbeb65cadeaf1d",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "9a5fd8baee8b6b39e24e29d33efe9d4b86c380ae69044f71ef31f75d963f5e00",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "2f29506d9e7646e8c397ae67db76afd5f77ef2a747060f757cb9d027f30fdeb3",
+            "card_hash": "efee68388650010096199a7d5a59de27b6c4bb6809bf5a71fddafe85211cc416",
+            "quote": "GPT-6 Astra is here (and I'm obsessed)"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 22661,
+      "cache_read_tokens": 92574,
+      "cache_create_tokens": 60449,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "seq": 217,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 217,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "GLxu_7ED6CWekPJE0BElQ8zFZPJlQuBl",
+      "client_id": "proof-harness",
+      "attempt_token": "XEIF92EBeeiO-r-nQnAt-p9hp5bkHW4bWlyoyYLf5Ug",
+      "submission_key": "GLxu_7ED6CWekPJE0BElQ8zFZPJlQuBl-XEIF92EBeeiO-r-nQnAt-p9hp5bkHW4bWlyoyYLf5Ug",
+      "schema_version": 1,
+      "video_id": "2080714082626293760",
+      "source_revision": "a6910452b09ec82d5affe1357cecfe156c6c226828b90a3c05e8c78b0a4af353",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "388ea3bc42adb32bf05ebfdaf5396ea7df2dc5df3fe2aec508a6e22e75c8d585",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.62,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "3994a9bece8e6104a15f156340f9b730e2a03c98b9b6a34e45fffe67eb149cf0",
+              "card_hash": "956cea6b679009117179e18920eed4ad51dbd4f5b5c45017a1e0615915b35c07",
+              "quote": "The military potential for this technology is obvious.   Europe is so far behind China, its scary."
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 16961,
+        "cache_read_tokens": 184704,
+        "cache_create_tokens": 32768,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 217,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "GLxu_7ED6CWekPJE0BElQ8zFZPJlQuBl",
+        "video_id": "2080714082626293760",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "news-and-current-events",
+            "shelf_path": [
+              "News and Current Events"
+            ],
+            "confidence": 0.62,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "3994a9bece8e6104a15f156340f9b730e2a03c98b9b6a34e45fffe67eb149cf0",
+              "card_hash": "956cea6b679009117179e18920eed4ad51dbd4f5b5c45017a1e0615915b35c07",
+              "quote": "The military potential for this technology is obvious.   Europe is so far behind China, its scary.",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

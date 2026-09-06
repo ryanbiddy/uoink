@@ -1,0 +1,39 @@
+{
+  "seq": 795,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 15,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "ApuEji-oZ0DgULzcVZz9R9u7NX1rLLIk",
+      "video_id": "2091230104793858048",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.88,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "59040452e2839765bb7a8a09a49eb67200ce451ee009874ee95ed76545190d08",
+            "card_hash": "f2ec3f21a7b68d3a8db16440f1c34886c12f2f36aef34832ec84e0fadb9833ed",
+            "quote": "we are mostly talking about nonlinear in the parameters",
+            "start": 4537.967,
+            "end": 4656.443,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 769,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "aUgmtKwin8WkEQQJpSqBtUzMrCDdlzxV",
+      "video_id": "2090463556693278720",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "abaf92a758f1da4c72b969c133717e83055b52a273e57269a92caee2a353a875",
+            "card_hash": "a8416005dc48b284536bff974fe9108adf84406b44fe1f11163323b2e6bd04bd",
+            "quote": "Give Codex access to 100B+ websites, docs, papers, people, companies, and more.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

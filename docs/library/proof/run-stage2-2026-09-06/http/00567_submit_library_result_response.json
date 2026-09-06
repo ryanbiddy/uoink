@@ -1,0 +1,39 @@
+{
+  "seq": 567,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "pLXzd1eCFB2N887RZcmknLZ0aIH5tptS",
+      "video_id": "2087194180972118016",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "5469768002006cd50eb5368433a55cf49f70444d301d9ade5c05ccf4f9a4888f",
+            "card_hash": "d72bafd393b9ce26fffe55a0b61b553ffbc2d1887500f7af5c4c3fc269662a3a",
+            "quote": "Why would anyone pay $6 / 1M tokens   when GPT-5.6 Luna is literally free ???",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

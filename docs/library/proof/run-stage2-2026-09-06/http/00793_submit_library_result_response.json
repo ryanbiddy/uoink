@@ -1,0 +1,39 @@
+{
+  "seq": 793,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 27,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "9ly00HcLa9meT0-jGG1eHH4elkYCMzMV",
+      "video_id": "2090924396558921728",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.9,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "abb331410bd32755afe6b390089cd4a1b7a921dfcd2b14f6c74a3c91aa3ce5d2",
+            "card_hash": "7e4a84e7d89d431d73cd11a400c74c734eddc839fa8e175123b023305f0668f8",
+            "quote": "It's now ~25x faster and immediately responsive.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

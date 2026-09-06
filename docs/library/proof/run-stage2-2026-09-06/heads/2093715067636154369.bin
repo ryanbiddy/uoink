@@ -1,0 +1,186 @@
+# kaori - Andrej Karpathy spent 8 years at OpenAI and Tesla  Last week, he comp...
+
+**Channel:** kaori (— subscribers)
+**Uploaded:** 2026-08-29 | **Duration:** 02:04:45 | **Views:** — | **Likes:** 1,152
+**URL:** https://x.com/kaorixbt/status/2093722881972682867
+**Uoinked:** 2026-08-30T07:50:57
+**Topic:** AI and ML
+**Note:** Capped screenshots at 200: interval raised from 30s to 38s for this video (processed media 124m).
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The opening establishes Andrej Karpathy's credentials by highlighting his 8 years at OpenAI and Tesla, then positions his free 2-hour lecture as superior to paid bootcamps, leveraging his expertise and proven track record to build credibility.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Andrej Karpathy spent 8 years at OpenAI and Tesla  Last week, he compressed everything he knows into one free 2-hour lecture  Agents → Loops → Graphs → Self-Improving Systems  People spend $15K on bootcamps that teach less than this  This lecture beats most paid AI engineering https://t.co/Z5PeOjA7HW
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Restarts the conversation from scratch
+[00:00:02] Now
+[00:00:02] the cartoon diagram that I have in my
+[00:00:03] mind when I'm speaking to a model
+[00:00:05] looks something like this
+[00:00:07] When we click new chat
+[00:00:09] we begin a token sequence
+[00:00:12] So this is a one-dimensional sequence of tokens
+[00:00:14] The user, we can write tokens into this stream
+[00:00:18] and then when we hit enter
+[00:00:20] we transfer control over to the language model
+[00:00:23] And the language model responds with its own
+[00:00:25] token streams
+[00:00:27] And then the language model has a special
+[00:00:29] token that basically says something along the lines of
+[00:00:31] I'm done
+[00:00:32] So when it emits that token
+[00:00:34] the ChatGPT application transfers control back to us
+[00:00:37] and we can take turns
+[00:00:38] Together, we are building out the token
+[00:00:41] the token stream
+[00:00:42] which we also call the context window
+[00:00:45] So the context window is kind of like
+[00:00:46] this working memory of tokens
+[00:00:49] and anything that is inside this context window
+[00:00:51] is kind of like in the working memory of this conversation
+[00:00:54] and is very directly accessible by the model
+[00:00:58] Now
+[00:00:58] what is this entity here that we are
+[00:01:00] talking to and how should we think about it?
+[00:01:02] Well, this language model here
+[00:01:05] we saw that the way it is trained
+[00:01:06] in the previous video we saw there are two major stages
+[00:01:09] the pre-training stage and the post-training stage
+[00:01:13] The pre-training stage is kind of like taking all of internet
+[00:01:17] chopping it up into tokens
+[00:01:19] and then compressing it into a single
+[00:01:21] kind of like zip file
+[00:01:23] But the zip file is not exact
+[00:01:26] lossy and probabilistic zip file
+[00:01:29] because we can't possibly represent all of internet
+[00:01:30] in just one sort of like
+[00:01:32] say, terabyte of, of zip file
+[00:01:37] because there's just way too much information
+[00:01:38] So we just kind of get the gestalt
+[00:01:40] or the vibes inside this
+[00:01:43] zip file Now
+[00:01:46] what
+[00:01:47] actually inside the zip file
+[00:01:48] are the parameters of a neural network
+[00:01:51] And so, for example
+[00:01:52] a one terabyte zip file would correspond to roughly
+[00:01:55] say, one trillion parameters inside this neural network
+[00:02:00] And what this neural network is trying to
+[00:02:01] do is it's trying to basically
+[00:02:03] take tokens
+[00:02:04] and it's trying to predict the next token
+[00:02:06] in a sequence
+[00:02:07] But it's doing that on internet documents
+[00:02:09] So it's kind of like this internet document generator
+[00:02:12] right?
+[00:02:14] And in the process of predicting the next
+[00:02:15] token in a sequence on internet
+[00:02:18] the
+[00:02:19] neural network gains a huge amount of knowledge
+[00:02:21] about the world
+[00:02:23] And this knowledge is all represented and stuffed
+[00:02:25] and compressed inside the one trillion parameters
+[00:02:28] roughly, of this language model
+[00:02:31] Now
+[00:02:31] this pre-training stage also we saw is fairly
+[00:02:33] costly. So this can be many tens of millions of dollars
+[00:02:36] say like three months of training and so
+[00:02:39] So this is a costly long phase
+[00:02:42] For that reason
+[00:02:43] this phase is not done that often
+[00:02:45] So for example, GPT-4.0
+[00:02:47] this model was pre-trained probably many months ago
+[00:02:51] maybe like even a year ago by now
+[00:02:54] And so that's why these models are a
+[00:02:55] little bit out of date
+[00:02:56] They have what's called a knowledge cutoff
+[00:02:59] because that knowledge cutoff corresponds to when the
+[00:03:01] model was pre-trained
+[00:03:03] And its knowledge only goes up to that point
+[00:03:09] some knowledge can't come into the model through the post-training phase
+[00:03:13] which we'll talk about in a second
+[00:03:14] But roughly speaking
+[00:03:15] you should think of these
+[00:03:17] models as kind of like a little bit
+[00:03:18] out of date
+[00:03:19] because pre-training is way too expensive and happens
+[00:03:21] infrequently
+[00:03:23] So any kind of recent information
+[00:03:25] like if you wanted to talk to your
+[00:03:26] model about something that happened last week or so on
+[00:03:29] we're going to need other ways of providing
+[00:03:30] that information to the model
+[00:03:32] because it's not stored in the knowledge of
+[00:03:34] the model
+[00:03:35] So we're going to have various tool use
+[00:03:37] to give that information to the model
+[00:03:40] Now, after pre-training
+[00:03:41] there's the second stage goes post-training
+[00:03:43] And the post-training stage is really attaching a
+[00:03:45] smiley face to this zip file
+[00:03:47] because we don't want to generate internet documents
+[00:03:50] We want this thing
+[00:03:52] to take on the persona
+[00:03:53] of an assistant that responds to user queries
+[00:03:57] And that's done in a
+[00:03:58] process of post-training
+[00:03:59] where we swap out the data set
+[00:04:01] for a data set of conversations that are
+[00:04:03] built out by humans
+[00:04:05] So this is basically where the model takes
+[00:04:06] on this persona
+[00:04:07] and that actually so that we can like
+[00:04:09] ask questions and it responds with answers
+[00:04:12] So it takes on the style of the of an assistant
+[00:04:16] that's post-training
+[00:04:17] but it has the knowledge
+[00:04:19] of all of internet and that's by pre-training
+[00:04:24] So these two are combined in this artifact
+[00:04:27] now the important thing to understand here I
+[00:04:29] think for this section
+[00:04:30] is that what you are talking to
+[00:04:32] is a fully self-contained entity by default
+[00:04:35] This language model
+[00:04:36] think of it as a one terabyte
+[00:04:38] file on a disk
+[00:04:39] Secretly that represents
+[00:04:41] one trillion parameters and their precise settings inside
+[00:04:44] the neural network
+[00:04:45] that's trying to give you the next token
+[00:04:46] in a sequence
+[00:04:48] But this is the fully self-contained entity
+[00:04:50] There's no calculator, there's no computer and Python interpreter
+[00:04:54] there's no worldwide web browsing
+[00:04:56] there's none of that. There's no tool you
+[00:04:57] see yet
+[00:04:58] in what we've talked about so far
+[00:05:00] You're talking to a zip file
+[00:05:01] If you string tokens to it
+[00:05:03] it will respond with tokens back
+[00:05:05] And the zip file has the knowledge from pre-training
+[00:05:08] and it has the style and form
+[00:05:11] from post-training
+[00:05:13] And
+[00:05:14] so that's roughly how you can think about this entity
+[00:05:17] Okay
+[00:05:17] so if I had to summarize what we
+[00:05:

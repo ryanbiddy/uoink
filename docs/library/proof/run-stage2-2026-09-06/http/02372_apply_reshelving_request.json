@@ -1,0 +1,17 @@
+{
+  "seq": 2372,
+  "url": "http://127.0.0.1:5180/tools/apply_reshelving",
+  "tool": "apply_reshelving",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "mode": "preview",
+    "run_id": "stage2-2026-09-06",
+    "expected_projection_revision": 0,
+    "activate_version": false
+  }
+}

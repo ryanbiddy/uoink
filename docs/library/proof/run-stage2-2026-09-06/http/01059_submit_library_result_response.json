@@ -1,0 +1,39 @@
+{
+  "seq": 1059,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "lraTih1ImmMhJecIwGF_OVXHGRXrV1m3",
+      "video_id": "2094517730636390400",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "f757ba6ad315a5b2ff827a4c2358554365e01f80bbbb8df6d8051037612247e9",
+            "card_hash": "d03f6a684054dba0924e37ad52d4ce4927deadb04bfef06fd0ad6c93c25f5673",
+            "quote": "A forward deployed engineer embeds with your team and uses AI to build the workflows",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

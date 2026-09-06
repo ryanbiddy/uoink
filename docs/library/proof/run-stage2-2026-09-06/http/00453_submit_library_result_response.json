@@ -1,0 +1,39 @@
+{
+  "seq": 453,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "IeDODeh_LPNd3uSjBb0eYoKFF78ieTBF",
+      "video_id": "2085386098293788673",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "df7a9afea55cd57f707df4a55322d43ce602f131555be7f43f038bb6a33b75d9",
+            "card_hash": "0158c305fe50f3c4e4bb17b85cac714600871acee83f14b4add03c1d7efb24a1",
+            "quote": "we entered our AI models in five STEM Olympiad competitions",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "seq": 471,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 471,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "Qj6ZXLNgRFAod9dp1CJQYSyKgIMgtfiM",
+      "client_id": "proof-harness",
+      "attempt_token": "afRjWg1TuGjtQsLxGo2J3l-QIsRrx966zKhgbIhaw7I",
+      "submission_key": "Qj6ZXLNgRFAod9dp1CJQYSyKgIMgtfiM-afRjWg1TuGjtQsLxGo2J3l-QIsRrx966zKhgbIhaw7I",
+      "schema_version": 1,
+      "video_id": "2084656442154577920",
+      "source_revision": "5c393822e7ffe4a0fd7ccd20e6468f4995da9d23a14d324ad61992e1d85b5630",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "a40e7c202672af4c236142e4602a6977899660dbba2185aff73e0877c0aab79f",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "7c0c7601dedc44bfc3b799194a643b4216d6d47a2645b6e8ed2105a87e567e18",
+              "card_hash": "eafeb6ecbbe5bc1517e8e685ef28065d43dc6beb310f17ff14754a645e1f0236",
+              "quote": "Today, we’re releasing the open weights for Ling-3.0-flash"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 20008,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 23870,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 471,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "Qj6ZXLNgRFAod9dp1CJQYSyKgIMgtfiM",
+        "video_id": "2084656442154577920",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "frontier-models",
+            "shelf_path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "7c0c7601dedc44bfc3b799194a643b4216d6d47a2645b6e8ed2105a87e567e18",
+              "card_hash": "eafeb6ecbbe5bc1517e8e685ef28065d43dc6beb310f17ff14754a645e1f0236",
+              "quote": "Today, we’re releasing the open weights for Ling-3.0-flash",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

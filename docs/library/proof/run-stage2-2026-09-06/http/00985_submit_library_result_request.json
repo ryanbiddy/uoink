@@ -1,0 +1,51 @@
+{
+  "seq": 985,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "6cFID3O9nFLQAQcQRpeMFUzq_bAwmjOM",
+    "client_id": "proof-harness",
+    "attempt_token": "jmxdIYABQRa3KUj9UIgQqwxt6xuf1xyT8sCWxpKS3Is",
+    "submission_key": "6cFID3O9nFLQAQcQRpeMFUzq_bAwmjOM-jmxdIYABQRa3KUj9UIgQqwxt6xuf1xyT8sCWxpKS3Is",
+    "schema_version": 1,
+    "video_id": "2093727982317936640",
+    "source_revision": "4892edf19b4fc3c86e8d8ac373882ab70a7a9f13faa8c6be338e41ea46066efa",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "67902da3fd54f7944ceb2f31b719b9793e53f86a5b89bcc2bfef615c297b2622",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "a9d209f039ddd91aee71f1c3f336d0ecadfbf473ffd7f571e5e38a41f4e88d54",
+            "card_hash": "b7f42eea59e95d87c54a924315be7070215b1af69e43d370c335b326fd16868d",
+            "quote": "So are you suggesting that there's problems for which programmers are worse than non-programmers at agentification?"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 19402,
+      "cache_read_tokens": 186415,
+      "cache_create_tokens": 37063,
+      "wall_time_ms": 0
+    }
+  }
+}

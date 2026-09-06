@@ -1,0 +1,39 @@
+{
+  "seq": 615,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "AuxWL4fHkaOIUj_2eZs8X_0tWbVRL83R",
+      "video_id": "2088367256468164608",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "47c5cba5d0d8952b0472b2c07173c76168a2c4cfb9532288dc37b5cc697f67d6",
+            "card_hash": "a30805230ea5c93324a471a0882b241f96fd382da60cd6384c3f71d4708d74cf",
+            "quote": "re-runs the prompt every 5 minutes in the same session.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

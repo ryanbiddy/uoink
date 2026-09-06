@@ -1,0 +1,59 @@
+# YOLO26 vs RF-DETR: Which Model Should You Use in 2026?
+
+**Channel:** Pysource (75.3K subscribers)
+**Uploaded:** 2026-05-20 | **Duration:** 17:28 | **Views:** 5,172 | **Likes:** 179
+**URL:** https://www.youtube.com/watch?v=MgbP5szEBDo
+**Uoinked:** 2026-07-09T19:22:13
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Question
+**Analysis:** The opening directly asks the viewer a question: 'YOLO version 26 and RFDet, which one is the best, which one to choose for your project?' This immediately engages the viewer by posing a decision-making problem they may be facing.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+👉 AI Vision courses + Community → https://www.skool.com/ai-vision-academy
+🛠️ Local labeling and model training software → https://visolabel.com
+
+In this video, I compare YOLOv26 and RF-DETR in terms of speed, accuracy, segmentation quality, licensing, and real-world usage.
+
+YOLOv26 is fast, lightweight, and easy to deploy.
+RF-DETR is more accurate, stronger for segmentation, and better for complex scenes or small objects.
+
+🌐 More Resources → https://pysource.com/
+
+#ComputerVision #YOLOv26 #RFDETR #ObjectDetection #InstanceSegmentation
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:02] Hi, welcome to this new video. YOLO version 26 and RFDet, which one is the best, which one to choose for your project? By the end of this video, you're going to understand the difference between these two models and which one to choose. And also, I'm going to share my experience with both of them, what I like for each them and what are the pros and cons for each. Let's go. Oh, let's quickly introduce these models before testing them. YOLO version 26 and RFDet. They are two models made from two different companies. The YOLO version 26 is made by the company Ultralytics, released in January 2026. These are the newest model for both company. RFDet, again, released in 2026 from the Roboflow company. This is the YOLO 26 from Ultralytics that replaced the older YOLO 8 and YOLO 11. But, YOLO is a very popular. If you have been doing working with computer vision, it's probably one of the first thing that you heard about computer vision because YOLO was released initially in 2015 and then it got popular in 2016 with the version, the YOLO version 3 that made the big change in the detection field. And since then, YOLO has been uh becoming more and more popular. It was open source at the beginning, made by researchers, and then uh there are different versions of YOLO and now the most popular one is by the company Ultralytics, which is developing new models and maintaining them. This one, RFDet, is complete new model that has been released from the from the Roboflow company. >> [gasps]
+[00:01:48] >> [gasps] >> They're quite different in terms of architecture and in terms of what they can do. Before getting into the different architectural difference between each of them and understanding which one is better for what, let's see what can they do. And here YOLOv6 is like the best in terms of what it offers, also probably because it has been the YOLO has been for much longer time. Ultralytics have been developing this for quite a few years, while the RFDet is something pretty new, so probably they will catch up at some point with what the model can achieve. So, the task that you can do with YOLOv6 you can do pretty much all of these: object detection, instance segmentation, pose estimation,
+[00:02:32] estimation, image classification, oriented bounding boxes, and the tracking is built-in. So, they have like a few all the most popular tracking algorithms already built-in. Here, if we see their GitHub repo, Ultralytics, you see detect, segment, classify, pose, OBB, oriented bounding boxes. So, if you want to be to see visually what this means, here it's pretty clear from these images right here. While the RFDet, it offers only two things: the object detection and instance segmentation, which, to be honest, is what most of us need in terms when we're building
+[00:03:13] building commercial projects, when we need to build projects for companies, 90% of the time, I would say, or more, like the what you need is detection or segmentation. You can use image image classification as well.
+[00:03:28] as well. For that, there are other models also that you can implement to combine with RFDet. If you want to know more, I will bring more videos about such stuff because there is so much to explore about classification and more complex projects, how to use the detection plus the classification at the same time.
+[00:03:48] same time. So, I would bring uh, about that. What are the strengths? So, there is some big difference in terms of architecture. The YOLO model has the traditional convolutional neural network model, while the RFDet is a transformer model,
+[00:04:04] model, which on the practical side brings some improvements, some big changes. So, I will tell you here I have a list, so if you want, you can see the slide right here, but I will tell you in a very short time, if you want something fast, something very easy to implement, that can run on very cheap hardware, the YOLOv6 is the best option. >> [snorts]
+[00:04:29] >> [snorts] >> If you want accuracy, if you want something that can detect with more more accuracy small objects that will can detect better in complex scenarios, where it also understand the context around then RFDet is definitely, uh, the best to go. Why? Because also it's the first model ever to reach the and break the record of 60% average precision on the COCO dataset. And now we're going to compare the benchmarks. So, if we see, uh, YOLOv6,
+[00:05:03] uh, YOLOv6, let's compare the benchmarks between them for detection and for segmentations. First, they have all of them, so YOLO has five models, nano, small, medium, large, and extra large, and the RFDet has six models, nano, small, medium, large, extra large, double extra large. If we check the accuracy, what the RFDet can achieve, it's quite amazing. We see the mean average precision here for the YOLO version 26 nano, the smallest one, is 40.9.
+[00:05:48] While for this one, okay, there are two metrics. It's uh, average precision 50, average precision 5095. So, where
+[00:05:56] So, where Ultralytics here is showing only 5095. So, the
+[00:06:00] So, the In short, the 50 is when the expected position of the object and the predicted position intersect at least 50%. So, if they intersect at least 50%, it means that the object is identified in the correct position. In the average precision 50, in the 5095, they check the different accuracy till 95%.
+[00:06:23] till 95%. So, in general, this one it requires much more precision. 40% for the Ultralytics model and 48.4%
+[00:06:39] for the nano model or RFDet. With the speed, so they test the speed on the Nvidia T4 with the optimized Tensor RT version, where we have like just 2.3
+[00:06:49] just 2.3 milliseconds for the nano version of RFDet. And here, we have 1.7. So, the YOLO version is faster, the YOLO 26 nano, but also less precise. And it's interesting to see the parameters. So, here we have 2.4 million only. It's super super small, while here we have 30.5.
+[00:07:14] 30.5. And that's why when you compare them, the one is better for the small devices, and the other one is better for accuracy. Uh and there is not much difference in parameters from the nano version to the large version, which is quite impressive here. So, from nano version, we have 30.5, and the large version is 33.9. So, that's the the difference that they have. One of the major differences here is the image resolution that they use. 384 for the nano and 704 for the large model. These are metrics that you can see right here how they train the model on the Coco data set. So, all these metrics that we see right here we see 48% precision on what? It's 48% precision on the Coco data set. The Coco data set is a data set we will call common objects in context with 123,000 images, 886,000 instances,
+[00:08:22] instances, and we have for 80 different categories. The 

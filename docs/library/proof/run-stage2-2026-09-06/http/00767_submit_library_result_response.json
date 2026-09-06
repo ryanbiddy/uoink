@@ -1,0 +1,39 @@
+{
+  "seq": 767,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "a1UpStRkVHkposcGK37iSI4QxLEJYNIx",
+      "video_id": "2090544926706876416",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.87,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "1bbf3c8eab7424acc97fa6676c345d0c25760aad2cfbcfb03a9d15d7c47affc6",
+            "card_hash": "8d7e37128c22a259783a570a5832460bcd6f6bc2c0d207e75a8bdb2a01f9c165",
+            "quote": "OpenAI and Anthropic finally have real competition.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

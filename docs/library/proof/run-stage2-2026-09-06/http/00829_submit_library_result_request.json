@@ -1,0 +1,51 @@
+{
+  "seq": 829,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "Cgi_uPbFmcVLej3368MjEMfTrabXz3zY",
+    "client_id": "proof-harness",
+    "attempt_token": "k3hZbqfSv-URgPf8I708qlF6xQOxRzJMulv3XAzrYi4",
+    "submission_key": "Cgi_uPbFmcVLej3368MjEMfTrabXz3zY-k3hZbqfSv-URgPf8I708qlF6xQOxRzJMulv3XAzrYi4",
+    "schema_version": 1,
+    "video_id": "2091998648997441536",
+    "source_revision": "7e2542cdc0b54b86af49a8e6c27b3e24b8fa7fd1286cd5942a03e097ce33409d",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "fef3daa0722ec7905f73101dcb10c144a265da9e6400fb8b02588ca8011520b8",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "f7d4d06439c9454fbfede720d1ff9f02ed98cbd79695b41c3a89ce974b03448e",
+            "card_hash": "7228e4df99d411ef5a213b5a01a7b0868a525560815b5e3cbec94c8993bb5fd0",
+            "quote": "would you recommend going $200 Claude sub to Cursor for now?"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 13029,
+      "cache_read_tokens": 187432,
+      "cache_create_tokens": 32138,
+      "wall_time_ms": 0
+    }
+  }
+}

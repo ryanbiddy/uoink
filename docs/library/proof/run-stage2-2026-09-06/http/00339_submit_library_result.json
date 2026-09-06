@@ -1,0 +1,95 @@
+{
+  "seq": 339,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 339,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "n-6Qliy3nUkUWGgmMk64ecEtDOifYFDc",
+      "client_id": "proof-harness",
+      "attempt_token": "trhh4GnLxSsK27AErz8K_bLHTA2RpSMdTohpZitM5Kc",
+      "submission_key": "n-6Qliy3nUkUWGgmMk64ecEtDOifYFDc-trhh4GnLxSsK27AErz8K_bLHTA2RpSMdTohpZitM5Kc",
+      "schema_version": 1,
+      "video_id": "2083119940371111936",
+      "source_revision": "41424ff1b68862d7db2af8d7450e606c2dc7adb4c1c3bff006310fc3e17f6390",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "fbff3f36988370e928e46243d5c1958fbc11653cc088453074b95ee0d846b648",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.78,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "e50a2a6b5797f39c5e33b4851c55db3b7187451598976f2596a0a03eb3f9ca0e",
+              "card_hash": "d700b2583e114537363b762df5fdc3709138988af41ec688b0cae51441c45d54",
+              "quote": "The AI price war is ON."
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 14147,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20354,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 339,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "n-6Qliy3nUkUWGgmMk64ecEtDOifYFDc",
+        "video_id": "2083119940371111936",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-industry-and-business",
+            "shelf_path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "confidence": 0.78,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "e50a2a6b5797f39c5e33b4851c55db3b7187451598976f2596a0a03eb3f9ca0e",
+              "card_hash": "d700b2583e114537363b762df5fdc3709138988af41ec688b0cae51441c45d54",
+              "quote": "The AI price war is ON.",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

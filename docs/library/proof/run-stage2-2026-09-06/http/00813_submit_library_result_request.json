@@ -1,0 +1,35 @@
+{
+  "seq": 813,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "PQc8K1tU_eykpHFsFT8hvPg72O9hXS0Q",
+    "client_id": "proof-harness",
+    "attempt_token": "Jcbydb-N5t32Eo6YDzDziQLUDaw3C3O5sdZEha_Zhbo",
+    "submission_key": "PQc8K1tU_eykpHFsFT8hvPg72O9hXS0Q-Jcbydb-N5t32Eo6YDzDziQLUDaw3C3O5sdZEha_Zhbo",
+    "schema_version": 1,
+    "video_id": "2090624277900886016",
+    "source_revision": "94db391a912aa0345d4e54452846c5c2b45f58b09eaeef842197e8b4b561000c",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "ba82cae57f7304be5e2b50f073ab670592f551342dff23b18c0d15ef1d87b39e",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Excerpt is a satirical Star Wars-themed commentary on surveillance camera technology (Flock) with no AI/ML technical subject matter, no named breaking-incident report, and no space/science content; falls outside approved taxonomy."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 20778,
+      "cache_read_tokens": 188428,
+      "cache_create_tokens": 40596,
+      "wall_time_ms": 0
+    }
+  }
+}

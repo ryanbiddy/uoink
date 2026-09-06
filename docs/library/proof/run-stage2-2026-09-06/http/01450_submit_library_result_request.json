@@ -1,0 +1,51 @@
+{
+  "seq": 1450,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "YN5RvJ-WKDr1cwu36Isu6zlUDsg9HlU8",
+    "client_id": "proof-harness",
+    "attempt_token": "nv1gX_NZoqP1AsBSFbz0b_Yx60AEq4JtPdasBROuKJo",
+    "submission_key": "YN5RvJ-WKDr1cwu36Isu6zlUDsg9HlU8-nv1gX_NZoqP1AsBSFbz0b_Yx60AEq4JtPdasBROuKJo",
+    "schema_version": 1,
+    "video_id": "zFXscjUoDDA",
+    "source_revision": "aade91be392bdba35246bfd2854073bb2b9d887a2d18f9550c1480179527a82c",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "cf52eb2bf6664584c38414967bfe00acf7b4820110586272cabff7b9af2f16d7",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "53265a1592733c0490829a867cc289b30cc807bcfb4c71f03996e9029ca523b9",
+            "card_hash": "454be8c0c919e894040964c5b0b5fe2b5b7086388893cfe1337fee46de7e5336",
+            "quote": "I'm going to install the workflow devkit, which will durably orchestrate each step the agent takes"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 10982,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 22121,
+      "wall_time_ms": 0
+    }
+  }
+}

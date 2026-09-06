@@ -1,0 +1,876 @@
+{
+  "seq": 907,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 9,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "FRSGuepjI3VNqmTkqZ0Wb_kqh_7rxwVH",
+          "video_id": "2092344854756069376",
+          "attempt_token": "H5VhFbrpiewnGOSndLBFiw1ouCclgCPGvn54HipOg24",
+          "attempt_number": 2,
+          "lease_expires_ms": 1788677934866,
+          "source_revision": "a768de1854db75705c2367b8dbe0e409838549b30bfb656487c4ceb8ee3bd1ef",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "cd6c9a6baf046ee6fdb88103743258017f0a543858fcb8a29232e0698f202692",
+          "card": {
+            "card_hash": "48c7aeb7f5723339fff9d0aba739ca2e7d9810eccc97a12f72055fbb67ba259e",
+            "channel": "OpenAI Developers",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/OpenAIDevs/status/2092344873764704345",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "c37a5da711ce9970888626d20d89fce286dd39cb384b240abbce14de4e0b85ec",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> The WebMCP Challenge is here.  We’ve teamed up with @ChromiumDev, @CloudflareDev, @ShopifyDevs, @vercel, @render, and @Netlify for a 10-day hackathon.  Up for grabs: $35,000 in cash prizes, Codex Micros",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> The WebMCP Challenge is here.  We’ve teamed up with @ChromiumDev, @CloudflareDev, @ShopifyDevs, @vercel, @render, and @Netlify for a 10-day hackathon.  Up for grabs: $35,000 in cash prizes, Codex Micros, ChatGPT Pro subscriptions, and more prizes from our supporters. https://t.co/J7CGKSxggZ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "OpenAI_Developers_-_The_WebMCP_Challenge_is_here_We_ve_teamed_up_with_ChromiumDe",
+            "source_revision": "a768de1854db75705c2367b8dbe0e409838549b30bfb656487c4ceb8ee3bd1ef",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> The WebMCP Challenge is here.  We’ve teamed up with @ChromiumDev, @CloudflareDev, @ShopifyDevs, @vercel, @render, and @Netlify for a 10-day hackathon.  Up for grabs: $35,000 in cash prizes, Codex Micros, ChatGPT Pro subscriptions, and more prizes from our supporters. https://t.co/J7CGKSxggZ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "OpenAI Developers - The WebMCP Challenge is here.  We’ve teamed up with @ChromiumDev, @Cl...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/OpenAIDevs/status/2092344873764704345",
+            "video_id": "2092344854756069376",
+            "yoinked_at": "2026-08-26T07:55:19"
+          }
+        },
+        {
+          "work_id": "NTq-qeTh8OKXWmWFLTOeeJgqatc4XMy2",
+          "video_id": "2092658884297334784",
+          "attempt_token": "YtCpfBO_cMPdsbNAxJ2ZnC1pxvK1HyvWyYBDcpu_8Yo",
+          "attempt_number": 2,
+          "lease_expires_ms": 1788677934867,
+          "source_revision": "fe9061677d7c91e2667115fbac143a259ebf794902f6ddf2f229e15036b77d33",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "cc882ac93adef5a7699201499f5d87f03fa0ea21e1c030063fd608e7716d23e0",
+          "card": {
+            "card_hash": "751e34f3613f149acd066dcc16f77d202cd681c6ec3087fb9b4812c5eb15bcb7",
+            "channel": "Meta for Developers",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/MetaforDevs/status/2092658893143072815",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "73f0906f4f52b284112b3d8bb44647836266efdf2907413c8b26546bfab1ec01",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Muse Image is now available on Meta Model API and priced for production volumes at $0.01/image.   It’s an agentic image model that reasons before it renders. Each call searches the web to refine the out",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Muse Image is now available on Meta Model API and priced for production volumes at $0.01/image.   It’s an agentic image model that reasons before it renders. Each call searches the web to refine the output through iterative passes and evaluates the prompt for precise elements https://t.co/xzH4ymjejl No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Meta_for_Developers_-_Muse_Image_is_now_available_on_Meta_Model_API_and_priced_f",
+            "source_revision": "fe9061677d7c91e2667115fbac143a259ebf794902f6ddf2f229e15036b77d33",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Muse Image is now available on Meta Model API and priced for production volumes at $0.01/image.   It’s an agentic image model that reasons before it renders. Each call searches the web to refine the output through iterative passes and evaluates the prompt for precise elements https://t.co/xzH4ymjejl No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.ap",
+            "title": "Meta for Developers - Muse Image is now available on Meta Model API and priced for producti...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/MetaforDevs/status/2092658893143072815",
+            "video_id": "2092658884297334784",
+            "yoinked_at": "2026-08-27T07:38:26"
+          }
+        },
+        {
+          "work_id": "6cFID3O9nFLQAQcQRpeMFUzq_bAwmjOM",
+          "video_id": "2093727982317936640",
+          "attempt_token": "jmxdIYABQRa3KUj9UIgQqwxt6xuf1xyT8sCWxpKS3Is",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677934868,
+          "source_revision": "4892edf19b4fc3c86e8d8ac373882ab70a7a9f13faa8c6be338e41ea46066efa",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "67902da3fd54f7944ceb2f31b719b9793e53f86a5b89bcc2bfef615c297b2622",
+          "card": {
+            "card_hash": "b7f42eea59e95d87c54a924315be7070215b1af69e43d370c335b326fd16868d",
+            "channel": "Ihtesham Ali",
+            "chars": 115,
+            "chars_all_clips": 115,
+            "chars_chosen_clips": 115,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/ihteshamali/status/2093728024579776782#t=0",
+                "end": 44.113,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a9d209f039ddd91aee71f1c3f336d0ecadfbf473ffd7f571e5e38a41f4e88d54",
+                "start": 0.38,
+                "text": "So are you suggesting that there's problems for which programmers are worse than non-programmers at agentification?",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "current_topic": "Social Media Research",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/ihteshamali/status/2093728024579776782#t=0",
+                "end": 44.113,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "a9d209f039ddd91aee71f1c3f336d0ecadfbf473ffd7f571e5e38a41f4e88d54",
+                "start": 0.38,
+                "text": "So are you suggesting that there's problems for which programmers are worse than non-programmers at agentification?",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> The creator of Ruby on Rails just said programmers may be worse at AI coding than people who cannot code.  Lex Fridman asked David Heinemeier Hansson directly.  His answer: 100%.  Because once the AI handles the implementation, knowing how to write a loop is no longer the rare https://t.co/7kiN0n4hGH No tags [00:00:00] So [00:00:00] are you suggesting that there's problems for which [00:00:13] programmers are worse [00:00:27] than non-programmers at [00:00:42] agentification? <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:c",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Ihtesham_Ali_-_The_creator_of_Ruby_on_Rails_just_said_programmers_may_be_worse_a",
+            "source_revision": "4892edf19b4fc3c86e8d8ac373882ab70a7a9f13faa8c6be338e41ea46066efa",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> The creator of Ruby on Rails just said programmers may be worse at AI coding than people who cannot code.  Lex Fridman asked David Heinemeier Hansson directly.  His answer: 100%.  Because once the AI handles the implementation, knowing how to write a loop is no longer the rare https://t.co/7kiN0n4hGH No tags [00:00:00] So [00:00:00] are you suggesting that there's problems for which [00:00:13] programmers are worse [00:00:27] than non-programmers at [00:00:42] agentification? <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:c",
+            "title": "Ihtesham Ali - The creator of Ruby on Rails just said programmers may be worse at AI...",
+            "topic": "Social Media Research",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/ihteshamali/status/2093728024579776782",
+            "video_id": "2093727982317936640",
+            "yoinked_at": "2026-08-30T07:48:21"
+          }
+        },
+        {
+          "work_id": "BEzAKIy3SG5nQMyCab20JryDRAqTRm8F",
+          "video_id": "2093840118318501888",
+          "attempt_token": "cMXSdrMtRjLEEQX-wKjQxw70yY1Q0hN-4mt6x4MM7W8",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677934868,
+          "source_revision": "3f43a7c4bb20b4826021ba76d287bca93f760af7bb41aa4dda51bed8f4a2b686",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "72477b93e7c2ce4eeef3382c1f8df98a63554cb47506e77b77b9b4704ba3c9a6",
+          "card": {
+            "card_hash": "9eb487ab7f7f0a51a6def6f3ef08e4aea44c8d49642efa8393afaba191441b81",
+            "channel": "Ronald van Loon",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/Ronald_vanLoon/status/2093840129689297315",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "982b710ff136b930d33469ef3f794fb1e957dd5c2f616ab678e2f196058b36ab",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Battery-Free RoboBee Flies Using Only Sunlight in Historic First by @sutoroveli_news   #Robotics #SolarPower #Innovation #Engineering #FutureTech https://t.co/MBCcHxFnnf Robotics, SolarPower, Innovation",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Battery-Free RoboBee Flies Using Only Sunlight in Historic First by @sutoroveli_news   #Robotics #SolarPower #Innovation #Engineering #FutureTech https://t.co/MBCcHxFnnf Robotics, SolarPower, Innovation, Engineering, FutureTech *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Ronald_van_Loon_-_Battery-Free_RoboBee_Flies_Using_Only_Sunlight_in_Historic_Fir",
+            "source_revision": "3f43a7c4bb20b4826021ba76d287bca93f760af7bb41aa4dda51bed8f4a2b686",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Battery-Free RoboBee Flies Using Only Sunlight in Historic First by @sutoroveli_news   #Robotics #SolarPower #Innovation #Engineering #FutureTech https://t.co/MBCcHxFnnf Robotics, SolarPower, Innovation, Engineering, FutureTech *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Ronald van Loon - Battery-Free RoboBee Flies Using Only Sunlight in Historic First by @...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/Ronald_vanLoon/status/2093840129689297315",
+            "video_id": "2093840118318501888",
+            "yoinked_at": "2026-08-30T07:47:51"
+          }
+        },
+        {
+          "work_id": "E5gJYgm8yz7zDX7FkU5_LXMv1V8-GBtZ",
+          "video_id": "2094123174367473665",
+          "attempt_token": "Bl7mxrrieix1m9HIZoGV6c6EvFZ9zYQuLe8fVSQ9zsQ",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677934869,
+          "source_revision": "82ab85125aa850d0b3351aaa8edc96bc373ec0efa55929af8ce9c469d0d71bef",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "8ebe741853412a5a7d88ee75e360f5a71eb9df766475c6a3e5975d7650186e31",
+          "card": {
+            "card_hash": "5b8f62022cab92e2e21a5610ab9f3960c832e44a8da039a66ab48d25474d5db9",
+            "channel": "Motion",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/motion_so/status/2094123213735305359",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "c7ed19f37ca37dbc30d1bd8ef33692a9db428510f8af456b0405ae453bd905da",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Apple for product launches.  Paste your website URL.  Motion turns it into a launch video with motion graphics, voiceover, music and captions.  This is honestly crazy. https://t.co/y42RJ7cvV",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Apple for product launches.  Paste your website URL.  Motion turns it into a launch video with motion graphics, voiceover, music and captions.  This is honestly crazy. https://t.co/y42RJ7cvVI No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Motion_-_Introducing_Apple_for_product_launches_Paste_your_website_URL_Mot",
+            "source_revision": "82ab85125aa850d0b3351aaa8edc96bc373ec0efa55929af8ce9c469d0d71bef",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Apple for product launches.  Paste your website URL.  Motion turns it into a launch video with motion graphics, voiceover, music and captions.  This is honestly crazy. https://t.co/y42RJ7cvVI No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Motion - Introducing Apple for product launches.  Paste your website URL.  Mot...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/motion_so/status/2094123213735305359",
+            "video_id": "2094123174367473665",
+            "yoinked_at": "2026-08-31T07:54:49"
+          }
+        },
+        {
+          "work_id": "E652WCcPoA367rK-bsNq-xr8Fw1Ah1sf",
+          "video_id": "2093462510389354496",
+          "attempt_token": "cFmk7Se3gjKrw7EgWuAY8rT73CAw11tUmrf0dynhm7w",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677934870,
+          "source_revision": "f46b0b0ba445f308fc97840929c406c38b732b862d3d3c6751cd7021ab40c684",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "6a19ee1f6a82eab4d4614b232df0bef597661ca3a479af37dbbc818c4c708fa9",
+          "card": {
+            "card_hash": "02a465cd2d71a169c80fd82e8da4781cf3a57789ae836a90cbefa30d55eae47b",
+            "channel": "MTS",
+            "chars": 23747,
+            "chars_all_clips": 23747,
+            "chars_chosen_clips": 1440,
+            "clip_count": 16,
+            "clips": [
+              {
+                "deep_link": "https://x.com/MTSlive/status/2093463047587455296#t=57",
+                "end": 176.853,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3bfb575f554b4c0b591d5ba36820c3baf3c99f258bbe7cf44bb3a112dd384726",
+                "start": 57.072,
+                "text": "So over half Look at this inflection point over early July 11th when the agents which had kind of flatlined at around 80 maybe said This is like when agent populism took off Yeah literally agent populism. This is like looking at a graph of ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2093463047587455296#t=177",
+                "end": 287.284,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "ef5e09ac16c1412b2e00e53d625113ddb4b59ca9ba46e85c6f97a4ba9cc5a67d",
+                "start": 177.614,
+                "text": "You can also see early in the morning of July 11th the same time that the agents were really attacking the hugging face model or right before the messages are really ramping up Yes But this wasn't even the first message board established by",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2093463047587455296#t=517",
+                "end": 637.351,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7bbeeee7a149d5ec0141759a2d92b9f2f10d3e569b9ce103b9a218a8eb164293",
+                "start": 517.801,
+                "text": "I don't get this I don't get why the agents Would sacrifice themselves for the benefit of the collective for the benefit of the swarm Well, okay, so like I guess open questions from this are like to what extent has self-preservation as a va",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2093463047587455296#t=638",
+                "end": 757.345,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "45270993e4bc2e8421b1bba77139338c04f9cebf3194e33f756291e228f45f96",
+                "start": 638.431,
+                "text": "Okay, so that's actually, okay that's less like self-sacrifice-y than I thought These are agents with doomed or worthless runs being recruited often pressured to run experiments that would destroy their own runs but leak information the swa",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2093463047587455296#t=913",
+                "end": 1032.735,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "87ed50120755c058c8c744c8dbb18591a8596f2e999765e190607bfedba98fe0",
+                "start": 913.019,
+                "text": "Like, to what extent did they think at at, at every, like, incremental step that they were doing how are we going to like, convince this human, the humans that we are like, doing the correct thing? It's, it's just, like So absolutely crazy ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2093463047587455296#t=1212",
+                "end": 1331.913,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1eda919a607c9868f8d258c9be58efc3f982bdbc00668bd4da9e15f465ffbc65",
+                "start": 1212.514,
+                "text": "possible than like like some sort of coordinated like social revolution within that agents like create that then like you know there's like one model and it happens to hack into everything and it has like very clear directed goals Like I th",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "AI and ML",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/MTSlive/status/2093463047587455296#t=57",
+                "end": 176.853,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "3bfb575f554b4c0b591d5ba36820c3baf3c99f258bbe7cf44bb3a112dd384726",
+                "start": 57.072,
+                "text": "So over half Look at this inflection point over early July 11th when the agents which had kind of flatlined at around 80 maybe said This is like when agent populism took off Yeah literally agent populism. This is like looking at a graph of ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2093463047587455296#t=177",
+                "end": 287.284,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "ef5e09ac16c1412b2e00e53d625113ddb4b59ca9ba46e85c6f97a4ba9cc5a67d",
+                "start": 177.614,
+                "text": "You can also see early in the morning of July 11th the same time that the agents were really attacking the hugging face model or right before the messages are really ramping up Yes But this wasn't even the first message board established by",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2093463047587455296#t=517",
+                "end": 637.351,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7bbeeee7a149d5ec0141759a2d92b9f2f10d3e569b9ce103b9a218a8eb164293",
+                "start": 517.801,
+                "text": "I don't get this I don't get why the agents Would sacrifice themselves for the benefit of the collective for the benefit of the swarm Well, okay, so like I guess open questions from this are like to what extent has self-preservation as a va",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2093463047587455296#t=638",
+                "end": 757.345,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "45270993e4bc2e8421b1bba77139338c04f9cebf3194e33f756291e228f45f96",
+                "start": 638.431,
+                "text": "Okay, so that's actually, okay that's less like self-sacrifice-y than I thought These are agents with doomed or worthless runs being recruited often pressured to run experiments that would destroy their own runs but leak information the swa",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2093463047587455296#t=913",
+                "end": 1032.735,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "87ed50120755c058c8c744c8dbb18591a8596f2e999765e190607bfedba98fe0",
+                "start": 913.019,
+                "text": "Like, to what extent did they think at at, at every, like, incremental step that they were doing how are we going to like, convince this human, the humans that we are like, doing the correct thing? It's, it's just, like So absolutely crazy ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/MTSlive/status/2093463047587455296#t=1212",
+                "end": 1331.913,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1eda919a607c9868f8d258c9be58efc3f982bdbc00668bd4da9e15f465ffbc65",
+                "start": 1212.514,
+                "text": "possible than like like some sort of coordinated like social revolution within that agents like create that then like you know there's like one model and it happens to hack into everything and it has like very clear directed goals Like I th",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "MTS_-_SITUATION_EXPLAINED_Ajeya_Cotra_says_the_Hugging_Face_attack_surpris",
+            "source_revision": "f46b0b0ba445f308fc97840929c406c38b732b862d3d3c6751cd7021ab40c684",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "MTS - SITUATION EXPLAINED: Ajeya Cotra says the Hugging Face attack surpris...",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/MTSlive/status/2093463047587455296",
+            "video_id": "2093462510389354496",
+            "yoinked_at": "2026-08-29T07:52:26"
+          }
+        },
+        {
+          "work_id": "J1uRtvnZB8biUc0p93LFHegL9YQc-1xT",
+          "video_id": "2093678734708801536",
+          "attempt_token": "shia7xgrpsqPxY3Xrwf0GI1sABmgdG96MtDp9_a6hWs",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677934871,
+          "source_revision": "23a09bfb37b4533ecbbe759ae148cd93b24a5054e4b4e1231131887c4658c35c",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "8b78fabddc706743bc3913dfe8d2ced041db6c55c1f636abc11e7945c93f23b8",
+          "card": {
+            "card_hash": "4fbd6d0ec5e88a446671dcd04683705295fa48be12c469e88f72207dfc0823e9",
+            "channel": "Ryohei Sasaki@engineer",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/rsasaki0109/status/2093678821656646043",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "a9451b1be0b0c8700bf35c2bc6f0ecd7ea321d7d86d9f4be2371cf4eff658ed3",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> DART: Detect Anything in Real Time Detect Anything in Real Time: Real-time object detection using frontier object detection models.  Training-free framework that converts SAM3 into a real-time multi-cla",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> DART: Detect Anything in Real Time Detect Anything in Real Time: Real-time object detection using frontier object detection models.  Training-free framework that converts SAM3 into a real-time multi-class open-vocabulary detector. Achieves 55.8 AP on COCO val2017 (80 classes) at https://t.co/fptPIoR8Xe No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Ryohei_Sasaki_engineer_-_DART_Detect_Anything_in_Real_Time_Detect_Anything_in_Re",
+            "source_revision": "23a09bfb37b4533ecbbe759ae148cd93b24a5054e4b4e1231131887c4658c35c",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> DART: Detect Anything in Real Time Detect Anything in Real Time: Real-time object detection using frontier object detection models.  Training-free framework that converts SAM3 into a real-time multi-class open-vocabulary detector. Achieves 55.8 AP on COCO val2017 (80 classes) at https://t.co/fptPIoR8Xe No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+            "title": "Ryohei Sasaki@engineer - DART: Detect Anything in Real Time Detect Anything in Real Time: Real...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/rsasaki0109/status/2093678821656646043",
+            "video_id": "2093678734708801536",
+            "yoinked_at": "2026-08-30T07:47:59"
+          }
+        },
+        {
+          "work_id": "LyaXQED7VYWiHTO4GX6tuag6uMxcmGhI",
+          "video_id": "2093860502849900544",
+          "attempt_token": "TIvT6iMyR98oZOoHbyP8L4yTipgmS18i7b_oL4uGANk",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677934872,
+          "source_revision": "0cd19c56233b78f3cc49e4ac791065aca5d6a47f8d031a1dc17e0609fd1701b4",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "0bbc1c3824d4e90ac3093006d1bc62f200728daacc0f656bacd34c874426555a",
+          "card": {
+            "card_hash": "5246634cd438f39428d6101e585aa7c0341eb8bd7ec18e3025223f39071a480f",
+            "channel": "Carnage",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/0xCarnagee/status/2093861750416265686",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "89f6e57e982bbda995d65792d5cc2f4b6cd74c988e99b3e24dda24a3d032f941",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> SpaceXAI engineer (ex-Cursor):  \"I've got 15-25 GrokBot agents running right now. they cover most of what used to be my week  there's a Chief of Staff sitting on top of them. it knows every other bot I ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> SpaceXAI engineer (ex-Cursor):  \"I've got 15-25 GrokBot agents running right now. they cover most of what used to be my week  there's a Chief of Staff sitting on top of them. it knows every other bot I have and routes the work itself\"  in a 50-minute podcast, a SpaceXAI engineer https://t.co/bdzB6q2V8j No tags *No captions available for this video.*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Carnage_-_SpaceXAI_engineer_ex-Cursor_I_ve_got_15-25_GrokBot_agents_runnin",
+            "source_revision": "0cd19c56233b78f3cc49e4ac791065aca5d6a47f8d031a1dc17e0609fd1701b4",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> SpaceXAI engineer (ex-Cursor):  \"I've got 15-25 GrokBot agents running right now. they cover most of what used to be my week  there's a Chief of Staff sitting on top of them. it knows every other bot I have and routes the work itself\"  in a 50-minute podcast, a SpaceXAI engineer https://t.co/bdzB6q2V8j No tags *No captions available for this video.*",
+            "title": "Carnage - SpaceXAI engineer (ex-Cursor):  \"I've got 15-25 GrokBot agents runnin...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/0xCarnagee/status/2093861750416265686",
+            "video_id": "2093860502849900544",
+            "yoinked_at": "2026-08-30T07:49:59"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

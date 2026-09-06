@@ -1,0 +1,51 @@
+{
+  "seq": 807,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "7SwXol5GJNuCcS14Mn2MO2PjHFN-GzTR",
+    "client_id": "proof-harness",
+    "attempt_token": "HvJNRsEwZcS4z8TTKJRAXW96XaeJb1zcXZj4C6mK9uc",
+    "submission_key": "7SwXol5GJNuCcS14Mn2MO2PjHFN-GzTR-HvJNRsEwZcS4z8TTKJRAXW96XaeJb1zcXZj4C6mK9uc",
+    "schema_version": 1,
+    "video_id": "2090844215756419072",
+    "source_revision": "e097397097f5387165d045d8d240cd5f247f8db115096401d846ba2be2c7aeeb",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "ef5824eb0bb1c938c4ff50bf23c2628fba82c5ecb450a767153b4975835d41d2",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "3faeb10d02c3fa22554503507299eddc37ebbd76c09306a199d6f392757db1b9",
+            "card_hash": "6176811efe42278ba84e5efb936e7df69b64bb8c369490c0a210b0ec0a9be462",
+            "quote": "if we're talking about like writing and creating your own tools you have this API format"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 20778,
+      "cache_read_tokens": 188428,
+      "cache_create_tokens": 40596,
+      "wall_time_ms": 0
+    }
+  }
+}

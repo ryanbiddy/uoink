@@ -1,0 +1,51 @@
+{
+  "seq": 433,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "2hjkPetzLp_S166nSD6PEJh5rFg--Izn",
+    "client_id": "proof-harness",
+    "attempt_token": "E87q70yTkPE6pP36BIjtdPVKCAA222NZGu5FVE88R9w",
+    "submission_key": "2hjkPetzLp_S166nSD6PEJh5rFg--Izn-E87q70yTkPE6pP36BIjtdPVKCAA222NZGu5FVE88R9w",
+    "schema_version": 1,
+    "video_id": "2084245813782585345",
+    "source_revision": "cb616c7202f96475660046416314aaaca45ecd39a8f47f79d8da4decad98fe52",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "b7cef2cbd1650ca5311a21c5bbb9a811c633c53099b8c96c89aeff115e57a94d",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "42e42212bb275b8220fae74e70d3abaf7a1923b6be1be5276345066a5f63df5f",
+            "card_hash": "35d597a088f9e08f951b6e82c251bdbf6755d3f8230e57b9e4e11bc896962bc1",
+            "quote": "Kimi Slides handles the entire slide-building process"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 19088,
+      "cache_read_tokens": 186333,
+      "cache_create_tokens": 36888,
+      "wall_time_ms": 0
+    }
+  }
+}

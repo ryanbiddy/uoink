@@ -1,0 +1,190 @@
+# Chubby♨️ - AI video companies are no longer claiming they can simply generate be...
+
+**Channel:** Chubby♨️ (— subscribers)
+**Uploaded:** 2026-09-02 | **Duration:** 01:25:24 | **Views:** — | **Likes:** 73
+**URL:** https://x.com/kimmonismus/status/2095137667570716711
+**Uoinked:** 2026-09-02T07:40:03
+**Topic:** Developer Marketing
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The hook opens by presenting a claim that challenges the previous narrative about AI video companies—they're no longer just claiming to generate better clips, but are now claiming their models understand the world. This sets up a contrarian positioning that reframes how AI video technology should be evaluated.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+AI video companies are no longer claiming they can simply generate better clips.  They are claiming their models understand the world.  So Peter and I put that claim to the test.  We sat down with Yaron Inger, Co-Founder and CTO of @ltx_io , for a direct conversation about https://t.co/q29HaxRoRv
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] What
+[00:00:00] make you personally say
+[00:00:02] this is no longer just a video generator
+[00:00:05] it genuinely understands enough of the world to
+[00:00:09] really simulate it?
+[00:00:10] I would say that I would really like
+[00:00:12] to see the the live avatar
+[00:00:15] full live video coming to life
+[00:00:18] This is where offline video becomes a reality
+[00:00:22] It's insane what what's achievable nowadays
+[00:00:25] which was
+[00:00:26] not achievable like few months or maybe a year ago
+[00:00:29] right? I just became a father 12 12
+[00:00:31] months ago
+[00:00:32] So having like
+[00:00:33] a robot here in our household
+[00:00:36] taking care of the laundry would be fantastic
+[00:00:38] When we talk about large language models
+[00:00:40] AI and whatnot
+[00:00:42] it's
+[00:00:42] will have a huge impact on the
+[00:00:44] white collar sector. But looking at the blue collar sector
+[00:00:47] this is like where the next revolution will
+[00:00:49] will take place
+[00:00:57] Hi, I'm Kim Isenberg, super intelligence editor-in-chief, and as always
+[00:01:02] joined by my co-founder and partner
+[00:01:04] Peter Thum
+[00:01:06] And today, we're also joined by Yaron Inge
+[00:01:09] co-founder and CTO of LTX
+[00:01:12] Yaron led the technical development of LTX video and LTX2
+[00:01:17] and the company has just released LTX 2.5
+[00:01:21] its latest open weights video on world model
+[00:01:24] Yaron, it's great to have you here today
+[00:01:27] Thank you, Kim and Peter, for having me
+[00:01:30] Thank you for being here
+[00:01:31] A few months back
+[00:01:32] we talked with your co-founder and CEO
+[00:01:35] Zee Fartman, about LTX broader strategy
+[00:01:38] and it's been an open model
+[00:01:40] Today, we want to go one level deeper
+[00:01:43] What actually changed in LTX 2.5
+[00:01:46] whether it really deserved to be called a world model
+[00:01:48] and whether its speed
+[00:01:50] quality
+[00:01:50] and openness translate into a product people can build on?
+[00:01:53] Peter, Also go into the business behind it with you
+[00:01:57] So, Yaron, before we get into the product architecture
+[00:02:01] what is the one thing LTX 2.5
+[00:02:05] can do reliably that LTX 2.3 could not?
+[00:02:10] Okay
+[00:02:10] so I would say that there are two
+[00:02:11] things besides a lot of improvements
+[00:02:13] and we'll talk about it a bit later
+[00:02:16] So one is multi-shot
+[00:02:19] the ability to prompt in a single prompt
+[00:02:22] in a single text-to-video
+[00:02:23] image-to-video generation
+[00:02:25] Just say that you're cutting from one scene
+[00:02:27] to the other and preserve the characters
+[00:02:29] the lighting, the audio, et cetera
+[00:02:33] And the second is a new checkpoint that we released
+[00:02:36] which is a pre-trained checkpoint that allows
+[00:02:39] basically everybody that wants to retrain
+[00:02:42] to fine-tune the model for a specific use case
+[00:02:45] like physical AI, like robotics, to use the pre-trained checkpoint
+[00:02:50] which would perform
+[00:02:51] much better than a fine-tuned version that you
+[00:02:54] usually use to produce visual and audio artifacts
+[00:02:58] Yeah, okay, fantastic
+[00:03:00] You call LTX 2.5 an open world model
+[00:03:04] right?
+[00:03:05] While the
+[00:03:05] LTX 2 technical report said the system has
+[00:03:08] no explicit Or world modeling capabilities
+[00:03:12] what is your precise definition of a world model
+[00:03:16] and what can 2.5 predict beyond visually plausible next frames?
+[00:03:23] Okay, so world model
+[00:03:25] from our definition
+[00:03:27] is the ability to predict
+[00:03:29] the next state of the world
+[00:03:31] given a previous state or previous states and context
+[00:03:35] Okay, it's like LLMs, right?
+[00:03:37] LLMs predict the next token
+[00:03:40] but it's language
+[00:03:41] okay? They don't understand how the world works
+[00:03:43] They maybe understand, you know, the equations of the physics
+[00:03:48] but they
+[00:03:48] didn't see really how the world behaves
+[00:03:51] And the idea of world model
+[00:03:53] is to predict the future given instructions
+[00:03:56] okay? And maybe the
+[00:03:59] the, the way to think about it that will
+[00:04:02] you know
+[00:04:02] listeners will understand why it works so well
+[00:04:05] with models that are trained on real world
+[00:04:08] video and audio data
+[00:04:10] is what happens when
+[00:04:12] we want to run inference on a robot
+[00:04:15] so this is very similar to the
+[00:04:17] the mode that we're using in
+[00:04:19] image to video. What we do is basically
+[00:04:21] feed the camera
+[00:04:23] From a video
+[00:04:24] and then give the video a prompt
+[00:04:25] of a task like
+[00:04:27] take the glass and put it inside a
+[00:04:29] container
+[00:04:31] And what we're doing as part of
+[00:04:33] LTX
+[00:04:34] is to imagine what happens next in video
+[00:04:37] So you basically
+[00:04:38] render a video
+[00:04:40] of the hands of the robot from the robot's perspective
+[00:04:43] from the cameras
+[00:04:44] to
+[00:04:45] move the joints of the robot and
+[00:04:47] place the glass correctly inside the container
+[00:04:50] Now, besides that
+[00:04:51] you also add actions to the robot of
+[00:04:54] how the joints should move
+[00:04:55] And this is where the fine tuning part
+[00:04:57] of the model occurs
+[00:05:00] And when you run that in a robot
+[00:05:01] you basically drop the video
+[00:05:04] and just
+[00:05:04] use the joint data to move the robot
+[00:05:07] and perform the actual action
+[00:05:08] So this is how what
+[00:05:10] We see with more models and how
+[00:05:12] this is connects to driving robots
+[00:05:15] which is not really trivial from a hindsight
+[00:05:17] Yeah, it just popped up in my head
+[00:05:19] There was like
+[00:05:20] I think
+[00:05:20] it's one or two years ago when Yann
+[00:05:22] LeCun sat down with Lex Friedman
+[00:05:25] where he was like
+[00:05:26] hey, large language models, they don't understand
+[00:05:28] If I move like this table
+[00:05:30] the glass will drop. There is no understanding
+[00:05:32] about what is happening. So a word model
+[00:05:34] could change exactly this way of reasoning
+[00:05:37] correct?
+[00:05:38] Exactly. And I think that what we see
+[00:05:40] now with robots and where
+[00:05:42] world action models really shine
+[00:05:44] is what you do when things
+[00:05:47] don't really happen the way that you expect
+[00:05:49] or how you recover from errors
+[00:05:51] right?
+[00:05:52] So
+[00:05:53] what we see now with robots that are driven by LTX
+[00:05:55] that if you give a robot an instruction
+[00:05:58] like take the glass and put it inside a container
+[00:06:00] well, if you're in a really isolated environment
+[00:06:03] right, it may work well
+[00:06:05] But let's say something didn't work right
+[00:06:07] okay? You try

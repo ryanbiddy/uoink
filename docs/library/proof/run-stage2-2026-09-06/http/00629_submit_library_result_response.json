@@ -1,0 +1,38 @@
+{
+  "seq": 629,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "RL6QBuaCU84V7XPa1H6JBrDa755-mYm5",
+      "video_id": "2088390532988891136",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "0f91e41a6653ffce501a8fa36b20727110353e60578d0b81286a164c9a690f96",
+            "card_hash": "d7bea7c64b59d157cb2abcf4fcfa40e9334ce3c5d801a4282b86bbb2ecafab2c",
+            "quote": "the wildest robotics project of my PhD",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

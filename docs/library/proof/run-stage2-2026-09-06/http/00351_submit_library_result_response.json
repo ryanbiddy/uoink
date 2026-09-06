@@ -1,0 +1,39 @@
+{
+  "seq": 351,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "NlOKZMPucKOit76lCsmeactpQVnUhCQ3",
+      "video_id": "2083169868891684864",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "c5697cdae033aac6a9465588ca321aa9303011be5f2e2207fa97e8361e8b5fbd",
+            "card_hash": "9a184492288d448cf58730f25709def9eafea85228e7638aba29b015cda38520",
+            "quote": "installing an AI agent that never touches the internet",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

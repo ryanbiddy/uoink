@@ -1,0 +1,39 @@
+{
+  "seq": 953,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Zx8wv9tYYW8okb6HBVXDgmnAqKbHvHJ-",
+      "video_id": "2093591840171941888",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "784dbdb3af03a1e0aa007662716e12bace40954d7528fd8d474ab34641a33dbb",
+            "card_hash": "07e5f15d0345fc5b7d85dbcde78ed1832dee3240b1b2dab3f2aab02536055ccb",
+            "quote": "You can create your own systems to simulate how the database would react to different numbers of requests",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

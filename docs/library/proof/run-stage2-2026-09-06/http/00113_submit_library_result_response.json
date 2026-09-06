@@ -1,0 +1,39 @@
+{
+  "seq": 113,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "mScphPa67HaZBCUDQl7_-Ng98IFmyV2F",
+      "video_id": "2079595357273464930",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "7158c5678e2919bdf24a9ec21f83ddceca2896ffd3302fceaf7a6034ec970309",
+            "card_hash": "480483196b2e419137fab026e883be3b8f5c4e2a640b7a8a62fe37839a52a46a",
+            "quote": "Kimi's founder was flagged as a generational talent 12 years before K3 shocked the world",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

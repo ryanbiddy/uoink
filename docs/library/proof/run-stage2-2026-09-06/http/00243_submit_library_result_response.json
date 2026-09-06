@@ -1,0 +1,39 @@
+{
+  "seq": 243,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 6,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "9KOivrB0lSJjwLhyKZvf6qnbTUW-KmO9",
+      "video_id": "2080703315634270208",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "24a21a9c8ca77e09e8ab3cc15a3d1b10ecc78df00a6a272e44673c0f2322e10a",
+            "card_hash": "ce2d8c906492820facb0ecd247344373b1aeca5a2c4255490db191ca49e5d4e8",
+            "quote": "we've open-sourced everything: the mo",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "seq": 1039,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "lXL5pDjy0j2ofp-MeqxR-KTcCoMGgfPK",
+      "video_id": "2093509312752820225",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "e756fa06e30de100628cb37e25c114582765d87d6538237a25a4ddbfab28cb27",
+            "card_hash": "1289fd0227135d23229e52211f5f51005d532f826c2b19d4cd48d0ca3c0c7c52",
+            "quote": "Qwen 3.8 27B at 56tps; on 9 year old GPU",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

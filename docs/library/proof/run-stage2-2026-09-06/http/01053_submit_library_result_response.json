@@ -1,0 +1,39 @@
+{
+  "seq": 1053,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 25,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "DfK5MMVCR8E_9Obm6bbWMpgH1n6dyLk1",
+      "video_id": "2094227178032599040",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "cbce73e54257a94fe8d487dcb3c74ef295d41dae4074c4b2cb10726b8aabcc8b",
+            "card_hash": "1e09bb3d17b3a54be9464c4dfbd7c72f481d2712d0d1a2baa92484863e2b4d81",
+            "quote": "There's a company called Talos that was just bought by AMD.",
+            "start": 0.06,
+            "end": 67.073,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

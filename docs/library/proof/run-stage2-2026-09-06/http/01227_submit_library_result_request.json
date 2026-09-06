@@ -1,0 +1,51 @@
+{
+  "seq": 1227,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "sfaE2DjTLZ52SWzSBDpRrSWJnZEt_Fiz",
+    "client_id": "proof-harness",
+    "attempt_token": "OUgP2i9FIok1XXK4c2vF0nHzGI0nzx4h4kRqKfE_C5c",
+    "submission_key": "sfaE2DjTLZ52SWzSBDpRrSWJnZEt_Fiz-OUgP2i9FIok1XXK4c2vF0nHzGI0nzx4h4kRqKfE_C5c",
+    "schema_version": 1,
+    "video_id": "v3Fr2JR47KA",
+    "source_revision": "b006c956a2d5df55c8f74e4c159cbc67dfa9c8577e29f51813770dc32a920538",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "64a75c379482ca8b4969716266e004fb81e63e4096d261101b2f4630d8da9166",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.82,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "c765f83a3809ee167e3fd4c21a7e0b54e82d8e7a3e0251fabdd66eb7aaf656f6",
+            "card_hash": "0452ee1ac715f57319b6a4ad08a7956ef380e6e2674285a832930b4a6ea1776e",
+            "quote": "This is an MCP application. That's an agent shipping its own interface"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 10363,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 24569,
+      "wall_time_ms": 0
+    }
+  }
+}

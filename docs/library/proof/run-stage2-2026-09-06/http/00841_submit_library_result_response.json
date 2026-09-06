@@ -1,0 +1,39 @@
+{
+  "seq": 841,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "XbIexgWVprBGvd608NXPPbCmlp3R71Zs",
+      "video_id": "2091537085874520064",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "cbc9731bddee8146353101241205c26a3b0f7f077b95492790c502de737da6fd",
+            "card_hash": "7eaf2b2a188ffad1f3eaa7aae188a8a7f7eab6ad7d8abdd9566097d1ad900849",
+            "quote": "So AI will know exactly what I'm talking about and it won't make those stupid mistakes",
+            "start": 93.062,
+            "end": 125.231,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

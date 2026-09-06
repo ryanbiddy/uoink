@@ -1,0 +1,887 @@
+{
+  "seq": 799,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 11,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work": [
+        {
+          "work_id": "IPWYpr8seAGutBylR1gEyBpJ5YWJqV8M",
+          "video_id": "2091998463688888320",
+          "attempt_token": "uc1ZIIAdx0WdYkFadqSObcVus8EST5CNMvKNZKfl04Q",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677681882,
+          "source_revision": "93cb00fa967e4f3067b30236c43fd345e2d23ea81c7a8ce02bee6ea907c01048",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "d6c45803b778797dbe6fd4873fa863aa01a5b955bb0ccd8629e82be9cfffbeb1",
+          "card": {
+            "card_hash": "5cfd1d80a1a7e55045424d5eee1ca92fdbcf1621bc3af7eacdf076a983410a95",
+            "channel": "CMS Invests",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/cmsinvests/status/2091999175432868134",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "8cadbf36f7340621652099381f2da655f0a8a7a61847c6aba98b0a41e31058ee",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> The average Nvidia janitor pulling up to work: https://t.co/UTqcDwdD0G No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:com",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> The average Nvidia janitor pulling up to work: https://t.co/UTqcDwdD0G No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "CMS_Invests_-_The_average_Nvidia_janitor_pulling_up_to_work",
+            "source_revision": "93cb00fa967e4f3067b30236c43fd345e2d23ea81c7a8ce02bee6ea907c01048",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> The average Nvidia janitor pulling up to work: https://t.co/UTqcDwdD0G No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "CMS Invests - The average Nvidia janitor pulling up to work:",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/cmsinvests/status/2091999175432868134",
+            "video_id": "2091998463688888320",
+            "yoinked_at": "2026-08-25T07:49:15"
+          }
+        },
+        {
+          "work_id": "QoLB95eAvMFajXNrG50WRO5b2e-LCJRV",
+          "video_id": "2092246969918144513",
+          "attempt_token": "Fz2ptNPaZRZrVMxWNkbIw65Qttxy8ERvb14-wgWTLA8",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677681883,
+          "source_revision": "b20d26a9f856eba338fcbbb716f70c202ebe1dd8db387067196a04d9d8f9f274",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "2e8d74fe957c23e23f59ff6b427142b772ed20c4838ad082904fb0f521f16023",
+          "card": {
+            "card_hash": "b6774e0fe8864004a4ad612753fa5ce1ca7caca99df0df66b93a51b7ed110303",
+            "channel": "Gautam Narang",
+            "chars": 1102,
+            "chars_all_clips": 1102,
+            "chars_chosen_clips": 240,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/gautam_narang/status/2092258195968282648#t=5",
+                "end": 75.729,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b27cedb1476bc57c470ec223eca5c58358651163df032e59687813fdc6fe40e3",
+                "start": 5.3629999999999995,
+                "text": "600 million in contracted revenue Fortune 50 customers like PepsiCo trucks running day and night in Arizona Arkansas, Texas, and Canada That's what the business of autonomous freight looks like These are production trucks rolling off the li",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/gautam_narang/status/2092258195968282648#t=5",
+                "end": 75.729,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "b27cedb1476bc57c470ec223eca5c58358651163df032e59687813fdc6fe40e3",
+                "start": 5.3629999999999995,
+                "text": "600 million in contracted revenue Fortune 50 customers like PepsiCo trucks running day and night in Arizona Arkansas, Texas, and Canada That's what the business of autonomous freight looks like These are production trucks rolling off the li",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> $200M raised. Driverless freight operating commercially today. Customers like @pepsico already relying on us. Demand accelerating.  This round is a strong vote of confidence in the business @Gatik_AI has built and gives us the capital to scale it much faster. Thank you Qatar https://t.co/IAv9xaBAaI No tags [00:00:05] 600 million in contracted revenue [00:00:07] Fortune 50 customers like PepsiCo [00:00:10] trucks running day and night in Arizona [00:00:12] Arkansas, Texas, and Canada [00:00:15] That's what the business of autonomous freight looks [00:00:17]",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Gautam_Narang_-_200M_raised_Driverless_freight_operating_commercially_today_Cust",
+            "source_revision": "b20d26a9f856eba338fcbbb716f70c202ebe1dd8db387067196a04d9d8f9f274",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> $200M raised. Driverless freight operating commercially today. Customers like @pepsico already relying on us. Demand accelerating.  This round is a strong vote of confidence in the business @Gatik_AI has built and gives us the capital to scale it much faster. Thank you Qatar https://t.co/IAv9xaBAaI No tags [00:00:05] 600 million in contracted revenue [00:00:07] Fortune 50 customers like PepsiCo [00:00:10] trucks running day and night in Arizona [00:00:12] Arkansas, Texas, and Canada [00:00:15] That's what the business of autonomous freight looks [00:00:17]",
+            "title": "Gautam Narang - $200M raised. Driverless freight operating commercially today. Custom...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/gautam_narang/status/2092258195968282648",
+            "video_id": "2092246969918144513",
+            "yoinked_at": "2026-08-27T07:39:18"
+          }
+        },
+        {
+          "work_id": "VE5JnYdhokEPi1lJa1eEy-VIdPq6CFks",
+          "video_id": "2091929654596603904",
+          "attempt_token": "mLLsI71zijKMY20UbiD0wxziSk4XmCvteaHC27VM1Ek",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677681884,
+          "source_revision": "8abc60c7114afd55d559d997adb737bf78cdfc1c5ab0643337ebf2689cf7019b",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "c6abd7f89d24150b93fd13857857fd3d3aedc3d20fddd4200c99451749c8dfe3",
+          "card": {
+            "card_hash": "99b1a3814d277035f7bc380002e70434387c7318844f34cb0649c9acb82a4497",
+            "channel": "Kat ⊷ the Poet Engineer",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "AI and ML",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/poetengineer__/status/2091929706786390151",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "b6df37423dfb9fc596512dc74d8cf0d14114b79d7212c549b17ca8a7a714370d",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> what if ai agentic coding be like: https://t.co/xUlKzFzK3T No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> what if ai agentic coding be like: https://t.co/xUlKzFzK3T No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Kat_the_Poet_Engineer_-_what_if_ai_agentic_coding_be_like",
+            "source_revision": "8abc60c7114afd55d559d997adb737bf78cdfc1c5ab0643337ebf2689cf7019b",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> what if ai agentic coding be like: https://t.co/xUlKzFzK3T No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Kat ⊷ the Poet Engineer - what if ai agentic coding be like:",
+            "topic": "AI and ML",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/poetengineer__/status/2091929706786390151",
+            "video_id": "2091929654596603904",
+            "yoinked_at": "2026-08-25T07:49:21"
+          }
+        },
+        {
+          "work_id": "d2k1czV7d_WLZYIE8-5TpgWtJTd_KtYO",
+          "video_id": "2091989063385686016",
+          "attempt_token": "XXrGBO0q0nyJQbOCD9lZsFbskxWv3z7_2ThjZN81iyM",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677681885,
+          "source_revision": "3dc7a9b6c938ac48a33c95f7b104c102c35c1e3b52bdc1e974660e5bef7d8350",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "3e2d5dd132917648dee571c0f2fce17cb3ad1a24790b6ede5090c5545f5c9f3f",
+          "card": {
+            "card_hash": "321c2a2bb4d7509c5a12cf9e62e32d881e911040e26fba247558ecf8bdb6852a",
+            "channel": "Andy Konwinski",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/andykonwinski/status/2091990178638496195",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "78d0c847d91a7a89de7f5eeabfc205cd7c0bc75006e08e4c0d07a5fbead0c1ed",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Headlong, an open source microharness for persistent agents: self-guided agents that think continuously.  Most agent harnesses are reactive: you send a task, the agent completes it, and then",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Headlong, an open source microharness for persistent agents: self-guided agents that think continuously.  Most agent harnesses are reactive: you send a task, the agent completes it, and then it sits frozen until the next request. Cron jobs and heartbeats wake it up to https://t.co/wgT6PHph5Q No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Andy_Konwinski_-_Introducing_Headlong_an_open_source_microharness_for_persistent",
+            "source_revision": "3dc7a9b6c938ac48a33c95f7b104c102c35c1e3b52bdc1e974660e5bef7d8350",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Headlong, an open source microharness for persistent agents: self-guided agents that think continuously.  Most agent harnesses are reactive: you send a task, the agent completes it, and then it sits frozen until the next request. Cron jobs and heartbeats wake it up to https://t.co/wgT6PHph5Q No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+            "title": "Andy Konwinski - Introducing Headlong, an open source microharness for persistent agen...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/andykonwinski/status/2091990178638496195",
+            "video_id": "2091989063385686016",
+            "yoinked_at": "2026-08-25T07:49:37"
+          }
+        },
+        {
+          "work_id": "gQjmzvQae_bUT1Kh1h26VyQdNL1Hp1Un",
+          "video_id": "2091993721768116224",
+          "attempt_token": "0Ys5_pBm3dX3eXAbcTbO4OUm4-suVk_A07QIIZiepoQ",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677681885,
+          "source_revision": "6197e26d25207982538039ece948a8b71b8c24050a5b832010bb39dfd04aeed7",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "c2dfe03afb9665db095fb3e7f2eafabfcf9e946f05d581fa96cd0a1d49889273",
+          "card": {
+            "card_hash": "103137e15a75e7f70b8f945e65259513df6eca745aa24bed8e444c39fb460c8a",
+            "channel": "Emerson Ward",
+            "chars": 30,
+            "chars_all_clips": 30,
+            "chars_chosen_clips": 30,
+            "clip_count": 1,
+            "clips": [
+              {
+                "deep_link": "https://x.com/emersonsays/status/2091993880548016134#t=0",
+                "end": 7.926,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "eca3bfa51fc570aed0c0ef87e9db811032b0d256e01c69b7c1e769fd8320ca96",
+                "start": 0.0,
+                "text": "The first one was made in 1960",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "current_topic": "Productivity and Workflows",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/emersonsays/status/2091993880548016134#t=0",
+                "end": 7.926,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "eca3bfa51fc570aed0c0ef87e9db811032b0d256e01c69b7c1e769fd8320ca96",
+                "start": 0.0,
+                "text": "The first one was made in 1960",
+                "timing": "source_cues",
+                "truncated": false
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> Excited to share that I've joined @SpaceXAI as Principal Designer. I'll be focusing on @spacexai and @Grok surfaces, among other things, and am incredibly excited and humbled to be working alongside such amazing designers as @benjitaylor, @nicoduc, @alexabraham, @jenny_wen, and https://t.co/4s2UUjIMNQ No tags [00:00:00] The first one was made in 1960 <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+              "truncated": true
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Emerson_Ward_-_Excited_to_share_that_I_ve_joined_SpaceXAI_as_Principal_Designer",
+            "source_revision": "6197e26d25207982538039ece948a8b71b8c24050a5b832010bb39dfd04aeed7",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Excited to share that I've joined @SpaceXAI as Principal Designer. I'll be focusing on @spacexai and @Grok surfaces, among other things, and am incredibly excited and humbled to be working alongside such amazing designers as @benjitaylor, @nicoduc, @alexabraham, @jenny_wen, and https://t.co/4s2UUjIMNQ No tags [00:00:00] The first one was made in 1960 <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+            "title": "Emerson Ward - Excited to share that I've joined @SpaceXAI as Principal Designer. I'...",
+            "topic": "Productivity and Workflows",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/emersonsays/status/2091993880548016134",
+            "video_id": "2091993721768116224",
+            "yoinked_at": "2026-08-25T07:49:43"
+          }
+        },
+        {
+          "work_id": "hTbuVyMwpZmMtMFYZ8lKwsvF5M4QLos3",
+          "video_id": "2091979655037300736",
+          "attempt_token": "j9jzLcNmhWN0SD2qx1y-7p7qVWJJZ6Lu6eKJfzYleSQ",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677681887,
+          "source_revision": "72d794f765ef6ca7ea70bfb0def73a2446d1b5cba9344eb82039eb0300a7cc82",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "25a64e12f1b9717a96aeae9d916161308c5668e18975e0bde1d2714647f7d225",
+          "card": {
+            "card_hash": "202e4c03b2dbde12f6d56fbfcbe64c9244b1b8f466652a4ed062a63c26761466",
+            "channel": "Codez",
+            "chars": 52325,
+            "chars_all_clips": 52325,
+            "chars_chosen_clips": 1440,
+            "clip_count": 38,
+            "clips": [
+              {
+                "deep_link": "https://x.com/0xCodez/status/2091980766372639135#t=174",
+                "end": 293.482,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1c56e00990964259ca46849a8b376acb5b56c9ebd54a3785f1555776ef4b5873",
+                "start": 174.362,
+                "text": "Yes. Yeah, we're good So yeah, today, yeah, I think the big theme for me as I've been using agents to write code and I'm sure a lot of you have had the same experience as well is how do you trust it? You know especially if you are an engine",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2091980766372639135#t=624",
+                "end": 731.991,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "75feddb19714dbc95748233c9aa81dcfdb231a1bf2f763595356c7e0dd19b68b",
+                "start": 624.419,
+                "text": "and it would like confidently state like \"It's this thing.\" And then I'd try to fix that and turns out that's not the actual thing So this was a very slow process And if you've ever done any like performance work yourself or you know just e",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2091980766372639135#t=1556",
+                "end": 1674.972,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2fea23a3cda99017dcf6381e8ff93ca9afb42cf96cffbc79c05f927aa84a1669",
+                "start": 1556.692,
+                "text": "an, an eval or a skill for something and we wanted to kind of get better on its own which is, is what, what I think You're suggesting are you doing that in like a worktree kind of isolated with like the sub-agents and then the reviewer agen",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2091980766372639135#t=1829",
+                "end": 1948.999,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9571c0ccc22743862ca4abc8b82456808e16a535fc87cd617c01c96fc41abb9f",
+                "start": 1829.739,
+                "text": "Because that, this, this basically describes my journey of you know, when I started, barely could use a couple agents and I was just observing every single thing I think there's really no shortcut for going from here to there because this i",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2091980766372639135#t=2577",
+                "end": 2697.237,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7aa19a7fcd0395df0c9dbe3b6d4a87faf038154d5d4f02ad37464a88eee8b100",
+                "start": 2577.497,
+                "text": "you know, you know, if you've used Agents Window you've definitely seen performance issues and you know, we're constantly trying to fix them but it's like a it's a never-ending struggle because there's so many pull requests that get merged ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2091980766372639135#t=3084",
+                "end": 3203.003,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9ce3db60bcd7afd078ea84a839cfbf9ddc02402adc775577773fd632cb9e2350",
+                "start": 3084.005,
+                "text": "They don't have you know, basically unlimited tokens, to work with? Oh, I think that's a really good point I mean, like, obviously, you know I work at a AI lab where we have unlimited tokens So, I definitely cannot say that you know this is",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "timed_clip",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/0xCodez/status/2091980766372639135#t=174",
+                "end": 293.482,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "1c56e00990964259ca46849a8b376acb5b56c9ebd54a3785f1555776ef4b5873",
+                "start": 174.362,
+                "text": "Yes. Yeah, we're good So yeah, today, yeah, I think the big theme for me as I've been using agents to write code and I'm sure a lot of you have had the same experience as well is how do you trust it? You know especially if you are an engine",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2091980766372639135#t=624",
+                "end": 731.991,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "75feddb19714dbc95748233c9aa81dcfdb231a1bf2f763595356c7e0dd19b68b",
+                "start": 624.419,
+                "text": "and it would like confidently state like \"It's this thing.\" And then I'd try to fix that and turns out that's not the actual thing So this was a very slow process And if you've ever done any like performance work yourself or you know just e",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2091980766372639135#t=1556",
+                "end": 1674.972,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "2fea23a3cda99017dcf6381e8ff93ca9afb42cf96cffbc79c05f927aa84a1669",
+                "start": 1556.692,
+                "text": "an, an eval or a skill for something and we wanted to kind of get better on its own which is, is what, what I think You're suggesting are you doing that in like a worktree kind of isolated with like the sub-agents and then the reviewer agen",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2091980766372639135#t=1829",
+                "end": 1948.999,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9571c0ccc22743862ca4abc8b82456808e16a535fc87cd617c01c96fc41abb9f",
+                "start": 1829.739,
+                "text": "Because that, this, this basically describes my journey of you know, when I started, barely could use a couple agents and I was just observing every single thing I think there's really no shortcut for going from here to there because this i",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2091980766372639135#t=2577",
+                "end": 2697.237,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "7aa19a7fcd0395df0c9dbe3b6d4a87faf038154d5d4f02ad37464a88eee8b100",
+                "start": 2577.497,
+                "text": "you know, you know, if you've used Agents Window you've definitely seen performance issues and you know, we're constantly trying to fix them but it's like a it's a never-ending struggle because there's so many pull requests that get merged ",
+                "timing": "source_cues",
+                "truncated": true
+              },
+              {
+                "deep_link": "https://x.com/0xCodez/status/2091980766372639135#t=3084",
+                "end": 3203.003,
+                "evidence_kind": "timed_clip",
+                "excerpt_id": "9ce3db60bcd7afd078ea84a839cfbf9ddc02402adc775577773fd632cb9e2350",
+                "start": 3084.005,
+                "text": "They don't have you know, basically unlimited tokens, to work with? Oh, I think that's a really good point I mean, like, obviously, you know I work at a AI lab where we have unlimited tokens So, I definitely cannot say that you know this is",
+                "timing": "source_cues",
+                "truncated": true
+              }
+            ],
+            "hint": null,
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Codez_-_SpaceXAI_engineer_ex-Cursor_right_now_I_m_running_10-20_GrokBot",
+            "source_revision": "72d794f765ef6ca7ea70bfb0def73a2446d1b5cba9344eb82039eb0300a7cc82",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": null,
+            "title": "Codez - SpaceXAI engineer (ex-Cursor):  \"right now I'm running 10-20 GrokBot ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": true,
+              "fields": [
+                "hint"
+              ],
+              "selection": true
+            },
+            "url": "https://x.com/0xCodez/status/2091980766372639135",
+            "video_id": "2091979655037300736",
+            "yoinked_at": "2026-08-25T07:50:33"
+          }
+        },
+        {
+          "work_id": "lVnnJ3bDl6BCZSJftd6jVPYwXB8y1Win",
+          "video_id": "2091622751756751211",
+          "attempt_token": "aPDk5sZSnma3WQW4tFD8Zf0YGol5Fwu7HnTOdEmslzE",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677681887,
+          "source_revision": "1e110b9ac44567a99cf768bd1460ecaffe96b88b1c40f69d846bc363553a4ee4",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "f661b12b65850f5ed77bf9d89c9ce902774e83c6848a63f8305de1ebc5c29813",
+          "card": {
+            "card_hash": "32b639c6034feb1431c21eb5703bf845d754f0d8eda71ae481457d46ad1a2e36",
+            "channel": "Surya",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/kickingkeys/status/2091622751756751211",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "b4ec9a2a06b24c56aabf9043d0c8e6cb92c284ce0394cba18cb39c0f01f70e5d",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> You can also make beautifully imperfect videos with AI coding models https://t.co/7KMjpeWZBU No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this ",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> You can also make beautifully imperfect videos with AI coding models https://t.co/7KMjpeWZBU No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Surya_-_You_can_also_make_beautifully_imperfect_videos_with_AI_coding_models",
+            "source_revision": "1e110b9ac44567a99cf768bd1460ecaffe96b88b1c40f69d846bc363553a4ee4",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> You can also make beautifully imperfect videos with AI coding models https://t.co/7KMjpeWZBU No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Surya - You can also make beautifully imperfect videos with AI coding models",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/kickingkeys/status/2091622751756751211",
+            "video_id": "2091622751756751211",
+            "yoinked_at": "2026-08-24T07:43:03"
+          }
+        },
+        {
+          "work_id": "mCLZphylWDPO2nXTqXvLPrGfmin9iMsY",
+          "video_id": "2091567513461309440",
+          "attempt_token": "ptZjgiliHP-QIbNiRAzZc14YbOmClnZn2Lt7jxFACEc",
+          "attempt_number": 1,
+          "lease_expires_ms": 1788677681888,
+          "source_revision": "e628f17250ac64f2351a08d04b6034fd8a44e3c1e79e91c217b9f0039cc4e937",
+          "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "packet_hash": "dee7ce4c4780fcd7cc63a80c698d4e3d0f3497ea8e3d4e549c64513952514246",
+          "card": {
+            "card_hash": "3e952136719c42abd8ea48d228446c6ec79ca4af57fa4eea6d4fd03a40a0bc8d",
+            "channel": "Dilum Sanjaya",
+            "chars": 0,
+            "chars_all_clips": 0,
+            "chars_chosen_clips": 0,
+            "clip_count": 0,
+            "clips": [],
+            "current_topic": "Uncategorized",
+            "evidence_kind": "text_only",
+            "excerpts": [
+              {
+                "deep_link": "https://x.com/DilumSanjaya/status/2091568845463101550",
+                "end": null,
+                "evidence_kind": "text_only",
+                "excerpt_id": "b3a64d328d304a2ec3f54cc46b04bec54da0bdfe9d56f9a0e961cd7c66a6a1b6",
+                "start": null,
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> I asked Kimi K3 to design a robot for deep sea research  Here's what it came up with  A jellyfish inspired robot with tentacles built from a hexagonal nanostructured lattice, designed to withstand extre",
+                "timing": "not_timed",
+                "truncated": true
+              }
+            ],
+            "hint": {
+              "kind": "opening_prose",
+              "text": "<!-- HOOK_START --> <!-- HOOK_END --> I asked Kimi K3 to design a robot for deep sea research  Here's what it came up with  A jellyfish inspired robot with tentacles built from a hexagonal nanostructured lattice, designed to withstand extreme pressure. https://t.co/GazKCRMuAO No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "truncated": false
+            },
+            "platform": "x",
+            "profile": "librarian",
+            "schema_version": 1,
+            "selection_version": "spread-longest-v1",
+            "slug": "Dilum_Sanjaya_-_I_asked_Kimi_K3_to_design_a_robot_for_deep_sea_research_Here_s_w",
+            "source_revision": "e628f17250ac64f2351a08d04b6034fd8a44e3c1e79e91c217b9f0039cc4e937",
+            "source_type": "x_thread",
+            "status": "evidenced",
+            "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> I asked Kimi K3 to design a robot for deep sea research  Here's what it came up with  A jellyfish inspired robot with tentacles built from a hexagonal nanostructured lattice, designed to withstand extreme pressure. https://t.co/GazKCRMuAO No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+            "title": "Dilum Sanjaya - I asked Kimi K3 to design a robot for deep sea research  Here's what ...",
+            "topic": "Uncategorized",
+            "truncated": true,
+            "truncation": {
+              "byte_budget": false,
+              "fields": [],
+              "selection": false
+            },
+            "url": "https://x.com/DilumSanjaya/status/2091568845463101550",
+            "video_id": "2091567513461309440",
+            "yoinked_at": "2026-08-24T07:43:32"
+          }
+        }
+      ],
+      "taxonomy": {
+        "nodes": [
+          {
+            "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+            "exclude": [
+              "traditional non-AI software development",
+              "general business operations",
+              "unrelated science and hardware"
+            ],
+            "include": [
+              "artificial intelligence",
+              "machine learning",
+              "deep learning",
+              "neural networks",
+              "foundation models",
+              "LLMs",
+              "autonomous systems"
+            ],
+            "name": "AI and ML",
+            "parent_shelf_id": null,
+            "path": [
+              "AI and ML"
+            ],
+            "retired": false,
+            "shelf_id": "ai-and-ml"
+          },
+          {
+            "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+            "exclude": [
+              "discussion of an AI/tech product or capability -> AI and ML",
+              "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+              "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+            ],
+            "include": [
+              "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+              "raw police/military radio or scanner audio captured during an unfolding event",
+              "political or cultural opinion segments from talk shows or panels"
+            ],
+            "name": "News and Current Events",
+            "parent_shelf_id": null,
+            "path": [
+              "News and Current Events"
+            ],
+            "retired": false,
+            "shelf_id": "news-and-current-events"
+          },
+          {
+            "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+            "exclude": [
+              "commercial airline aviation",
+              "science fiction and fantasy entertainment",
+              "general consumer technology"
+            ],
+            "include": [
+              "space exploration",
+              "astronautics",
+              "astronomy",
+              "orbital mechanics",
+              "spacecraft engineering",
+              "scientific research"
+            ],
+            "name": "Space and Science",
+            "parent_shelf_id": null,
+            "path": [
+              "Space and Science"
+            ],
+            "retired": false,
+            "shelf_id": "space-and-science"
+          },
+          {
+            "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+            "exclude": [
+              "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+              "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+              "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+              "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+              "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+            ],
+            "include": [
+              "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+              "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+              "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+              "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+              "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+            ],
+            "name": "AI Agents and Automation",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "retired": false,
+            "shelf_id": "ai-agents-and-automation"
+          },
+          {
+            "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+            "exclude": [
+              "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+              "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+              "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+              "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+              "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+            ],
+            "include": [
+              "executive or public figure names who is winning the AI competitive race",
+              "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+              "commentary that a company now faces real competition in the AI market",
+              "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+              "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+            ],
+            "name": "AI Industry and Business",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "AI Industry and Business"
+            ],
+            "retired": false,
+            "shelf_id": "ai-industry-and-business"
+          },
+          {
+            "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+            "exclude": [
+              "consumer conversational chatbots",
+              "pure theoretical ML papers without tools",
+              "non-technical end-user products"
+            ],
+            "include": [
+              "coding assistants",
+              "agent harnesses",
+              "developer workflows",
+              "software development SDKs",
+              "IDE integrations",
+              "code generation"
+            ],
+            "name": "Developer Tools",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "retired": false,
+            "shelf_id": "developer-tools"
+          },
+          {
+            "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+            "exclude": [
+              "product announcements",
+              "marketing keynotes",
+              "opinion pieces without pedagogical content"
+            ],
+            "include": [
+              "introductory lectures",
+              "algorithm explanations",
+              "machine learning coursework",
+              "mathematical foundations",
+              "step-by-step technical tutorials"
+            ],
+            "name": "Education",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Education"
+            ],
+            "retired": false,
+            "shelf_id": "education"
+          },
+          {
+            "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+            "exclude": [
+              "routine fine-tuning on niche tasks",
+              "end-user application tutorials",
+              "general AI business news"
+            ],
+            "include": [
+              "foundation model architectures",
+              "multimodal model releases",
+              "scaling laws",
+              "model capabilities benchmarks",
+              "open weights models"
+            ],
+            "name": "Frontier Models",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Frontier Models"
+            ],
+            "retired": false,
+            "shelf_id": "frontier-models"
+          },
+          {
+            "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+            "exclude": [
+              "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+              "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+              "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+              "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+            ],
+            "include": [
+              "prompt-driven 3D or claymation-style animation generated as the shown output",
+              "an AI-generated short film entered in or winning an AI-specific film award",
+              "an AI animated film premiered at a creative or computer-graphics industry event",
+              "AI image/video generation models used to build a visual website shown as the output",
+              "AI-generated video content praised firsthand for its entertainment or creative quality",
+              "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+            ],
+            "name": "Generative Media",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Generative Media"
+            ],
+            "retired": false,
+            "shelf_id": "generative-media"
+          },
+          {
+            "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+            "exclude": [
+              "generic network security without AI component",
+              "routine software bug reports",
+              "corporate compliance without technical safety"
+            ],
+            "include": [
+              "agent guardrails",
+              "cybersecurity vulnerabilities",
+              "model sandboxing",
+              "prompt injection defenses",
+              "runtime governance",
+              "least privilege"
+            ],
+            "name": "Security",
+            "parent_shelf_id": "ai-and-ml",
+            "path": [
+              "AI and ML",
+              "Security"
+            ],
+            "retired": false,
+            "shelf_id": "security"
+          },
+          {
+            "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+            "exclude": [
+              "terrestrial astronomy without launch systems",
+              "atmospheric aeronautics",
+              "speculative science fiction"
+            ],
+            "include": [
+              "rocket launches",
+              "crewed space missions",
+              "orbital maneuvers",
+              "satellite deployment",
+              "astronaut spacewalks",
+              "space station resupply"
+            ],
+            "name": "Spaceflight",
+            "parent_shelf_id": "space-and-science",
+            "path": [
+              "Space and Science",
+              "Spaceflight"
+            ],
+            "retired": false,
+            "shelf_id": "spaceflight"
+          }
+        ],
+        "parent_version_id": "taxonomy-v1-2026-09-04",
+        "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+        "schema_version": 1,
+        "version_id": "taxonomy-v2-2026-09-05"
+      },
+      "rules": {
+        "min_confidence": 0.6,
+        "max_memberships": 3,
+        "max_churn_percent": 15,
+        "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+        "selection_version": "spread-longest-v1",
+        "card_schema": 1
+      },
+      "blocked": []
+    }
+  }
+}

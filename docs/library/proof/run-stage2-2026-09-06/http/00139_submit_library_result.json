@@ -1,0 +1,59 @@
+{
+  "seq": 139,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 139,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "tMAyKGjRSrEdFRjY4uAH0sRi-due0xwx",
+      "client_id": "proof-harness",
+      "attempt_token": "fw11HGIVh6ILAPXea1jAYIJma-pSBwiMAEJXvpeCE8g",
+      "submission_key": "tMAyKGjRSrEdFRjY4uAH0sRi-due0xwx-fw11HGIVh6ILAPXea1jAYIJma-pSBwiMAEJXvpeCE8g",
+      "schema_version": 1,
+      "video_id": "2078643519162298368",
+      "source_revision": "4d8389abd9806e5d8a2f73bf88e2dea9d50dd4922b4e0b1fa7952166471a9d5e",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "59b6273c73a6122c7046d1c7182dff400e493c3a0a71315042320b1fbfcc94a6",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "Timed-clip excerpt is play-by-play commentary of a basketball highlight reel (streamer basketball game); sports highlights content does not fall under any approved shelf (AI/ML, News and Current Events, Space and Science)."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 17170,
+        "cache_read_tokens": 188825,
+        "cache_create_tokens": 37085,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 139,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "tMAyKGjRSrEdFRjY4uAH0sRi-due0xwx",
+        "video_id": "2078643519162298368",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

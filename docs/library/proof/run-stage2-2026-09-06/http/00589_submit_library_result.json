@@ -1,0 +1,95 @@
+{
+  "seq": 589,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 589,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "yqgGcguO6rXIBV7McvZ8XVkZTBF2dUxI",
+      "client_id": "proof-harness",
+      "attempt_token": "2D2CBXLzPixClRsbYBArcEPsI9-jv0SPvO1HjO53QXI",
+      "submission_key": "yqgGcguO6rXIBV7McvZ8XVkZTBF2dUxI-2D2CBXLzPixClRsbYBArcEPsI9-jv0SPvO1HjO53QXI",
+      "schema_version": 1,
+      "video_id": "2085710761423437824",
+      "source_revision": "599c48f6f8e7548bb3044814ed3a3c5457e85d6e674c0ad9075f69a4fcb3e768",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "d8275ff716f7e5496a9371c4f9082e230c6f5770fcc2a7780d942fa0a1f824c4",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "education",
+            "shelf_path": [
+              "AI and ML",
+              "Education"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "9a1c0284402adb829afe197ebb6190d756bb5a638499572827ad6758f61556fd",
+              "card_hash": "f5f9dcb2e88521b74fa76cb55338df49c584a3d0d226a544d1af7391f1a9086c",
+              "quote": "dropped a 2 hour course on how he personally uses LLMs daily"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 18457,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20482,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 589,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "yqgGcguO6rXIBV7McvZ8XVkZTBF2dUxI",
+        "video_id": "2085710761423437824",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "education",
+            "shelf_path": [
+              "AI and ML",
+              "Education"
+            ],
+            "confidence": 0.85,
+            "evidence": {
+              "basis": "packet",
+              "kind": "text_only",
+              "excerpt_id": "9a1c0284402adb829afe197ebb6190d756bb5a638499572827ad6758f61556fd",
+              "card_hash": "f5f9dcb2e88521b74fa76cb55338df49c584a3d0d226a544d1af7391f1a9086c",
+              "quote": "dropped a 2 hour course on how he personally uses LLMs daily",
+              "start": null,
+              "end": null,
+              "timing": "not_timed",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

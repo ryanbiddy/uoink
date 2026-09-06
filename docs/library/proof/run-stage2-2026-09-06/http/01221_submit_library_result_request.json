@@ -1,0 +1,35 @@
+{
+  "seq": 1221,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "c3gVJOxWKnVzgkfbNniJvJbLxmLExXE0",
+    "client_id": "proof-harness",
+    "attempt_token": "0aEE_nuQ0YJEpFArqt60kXboh6Es8YG-tW58cc3uTN0",
+    "submission_key": "c3gVJOxWKnVzgkfbNniJvJbLxmLExXE0-0aEE_nuQ0YJEpFArqt60kXboh6Es8YG-tW58cc3uTN0",
+    "schema_version": 1,
+    "video_id": "x_21fc0a19511",
+    "source_revision": "1137e56505ce6ef9c5916d796b755490e062434e4670486d0196a5428f705d88",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "e05b01951bd1ebb23b97f001b8979748e6a104d46232bb8074f0e32f1ceb91d7",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "The excerpt is a stock-trading alert ($CIFR price/support levels, stop-loss and take-profit targets) with no connection to AI/ML, space/science, or breaking-news content covered by the approved taxonomy."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 10363,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 24569,
+      "wall_time_ms": 0
+    }
+  }
+}

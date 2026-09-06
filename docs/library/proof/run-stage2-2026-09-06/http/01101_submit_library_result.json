@@ -1,0 +1,129 @@
+{
+  "seq": 1101,
+  "tool": "submit_library_result",
+  "wall_ms": 3,
+  "request": {
+    "seq": 1101,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "WTmWh26j8OgE5c8k9qHE9YgXgQaQpPgY",
+      "client_id": "proof-harness",
+      "attempt_token": "YGntKBo2zrr1Xq1dRw8FLy4aohkTLz688tiUxYoXZ54",
+      "submission_key": "WTmWh26j8OgE5c8k9qHE9YgXgQaQpPgY-YGntKBo2zrr1Xq1dRw8FLy4aohkTLz688tiUxYoXZ54",
+      "schema_version": 1,
+      "video_id": "5LqC6qdVAwU",
+      "source_revision": "678095bb9d3d09580ddc13f37df9efa4907286ba51e6fa77bc9909d25a4ed84d",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "bab44daf0b772e3d67d15984a61e147c25f09fa7ff77ee4bfa1f9c67a0ef5278",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "security",
+            "shelf_path": [
+              "AI and ML",
+              "Security"
+            ],
+            "confidence": 0.75,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "40b5a999320627f97a012a2e626eaa60f2e7b9a8c3106494d03b539a93f6f542",
+              "card_hash": "2859f838c30f437be90a7012b68c9ddecbd5c905deba67af1112cce129ce66b6",
+              "quote": "cutting down jailbreaks even further, ended up increasing the compute needed for requests by over 50%"
+            }
+          },
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "bb16e307ffe16412d2a56b8d023a0471dbb78a9e044ecd67fcdcc1858ec6487b",
+              "card_hash": "2859f838c30f437be90a7012b68c9ddecbd5c905deba67af1112cce129ce66b6",
+              "quote": "If I had a button at the top of every repo that I could click and have all the PRs get triaged"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 20692,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 29055,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1101,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 3,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "WTmWh26j8OgE5c8k9qHE9YgXgQaQpPgY",
+        "video_id": "5LqC6qdVAwU",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "security",
+            "shelf_path": [
+              "AI and ML",
+              "Security"
+            ],
+            "confidence": 0.75,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "40b5a999320627f97a012a2e626eaa60f2e7b9a8c3106494d03b539a93f6f542",
+              "card_hash": "2859f838c30f437be90a7012b68c9ddecbd5c905deba67af1112cce129ce66b6",
+              "quote": "cutting down jailbreaks even further, ended up increasing the compute needed for requests by over 50%",
+              "start": 468.28,
+              "end": 1405.4,
+              "timing": "coarse",
+              "truncated": true
+            }
+          },
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "bb16e307ffe16412d2a56b8d023a0471dbb78a9e044ecd67fcdcc1858ec6487b",
+              "card_hash": "2859f838c30f437be90a7012b68c9ddecbd5c905deba67af1112cce129ce66b6",
+              "quote": "If I had a button at the top of every repo that I could click and have all the PRs get triaged",
+              "start": 468.28,
+              "end": 1405.4,
+              "timing": "coarse",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

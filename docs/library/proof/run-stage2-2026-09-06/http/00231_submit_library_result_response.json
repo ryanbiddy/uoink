@@ -1,0 +1,39 @@
+{
+  "seq": 231,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "IUPloz28MAlZF7jVeroZax1hbVAeWYa_",
+      "video_id": "2081053076681621504",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.7,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "18cdcc6c64935e950066c40c7a24287d6822e93f932928fc664472359ef7a361",
+            "card_hash": "0196395f8edd292493a03f08c0212f678d9dcf2a4662f7f7651ccfe23ad1ec80",
+            "quote": "EVERYTHING you see in this demo is custom code",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

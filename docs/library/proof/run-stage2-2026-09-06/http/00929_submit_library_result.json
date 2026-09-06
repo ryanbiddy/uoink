@@ -1,0 +1,129 @@
+{
+  "seq": 929,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 929,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "Ay3y4ErJIZbECAxgy3pWcPgJQteVtaOg",
+      "client_id": "proof-harness",
+      "attempt_token": "vEoS4dm2aRMW6l0baPT1xWAP6wjlR7ItPvwZ-wFODFQ",
+      "submission_key": "Ay3y4ErJIZbECAxgy3pWcPgJQteVtaOg-vEoS4dm2aRMW6l0baPT1xWAP6wjlR7ItPvwZ-wFODFQ",
+      "schema_version": 1,
+      "video_id": "2093359694366572544",
+      "source_revision": "349cbf3d90f2891327e11c2e9e6e0ec6c9a8d51e148b1d537dd230b72f4b24a7",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "52e7bb678dd4bb3ef5e317f9adbcf9d1a9da95ab6aca42818c2ebaa25e6527dd",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.78,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "07f7850656acb3c0462a5d749c9200220a44333fc3c9736f8eed1bdf37d52d19",
+              "card_hash": "0bd4a65f69ef7d67bfce59ee6fa2e33c138b25d41810c8abdf23c8c40241ef3c",
+              "quote": "bots can be run in three different ways."
+            }
+          },
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.7,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "8a6982d6abec1ec90b9a747a262f33d62c1a36db666597edec63be0da51abf01",
+              "card_hash": "0bd4a65f69ef7d67bfce59ee6fa2e33c138b25d41810c8abdf23c8c40241ef3c",
+              "quote": "it actually started a build in cursor"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 15696,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 22313,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 929,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "Ay3y4ErJIZbECAxgy3pWcPgJQteVtaOg",
+        "video_id": "2093359694366572544",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.78,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "07f7850656acb3c0462a5d749c9200220a44333fc3c9736f8eed1bdf37d52d19",
+              "card_hash": "0bd4a65f69ef7d67bfce59ee6fa2e33c138b25d41810c8abdf23c8c40241ef3c",
+              "quote": "bots can be run in three different ways.",
+              "start": 733.336,
+              "end": 852.375,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          },
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.7,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "8a6982d6abec1ec90b9a747a262f33d62c1a36db666597edec63be0da51abf01",
+              "card_hash": "0bd4a65f69ef7d67bfce59ee6fa2e33c138b25d41810c8abdf23c8c40241ef3c",
+              "quote": "it actually started a build in cursor",
+              "start": 447.622,
+              "end": 565.512,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

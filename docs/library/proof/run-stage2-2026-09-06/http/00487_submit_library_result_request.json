@@ -1,0 +1,35 @@
+{
+  "seq": 487,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "jLGTE29UyQLAOjLsS3HPgfgw1tvzZKog",
+    "client_id": "proof-harness",
+    "attempt_token": "-5L_yPB525qPzT7sd6TI94CyYGq9Wea1NHU61iQ7Iko",
+    "submission_key": "jLGTE29UyQLAOjLsS3HPgfgw1tvzZKog--5L_yPB525qPzT7sd6TI94CyYGq9Wea1NHU61iQ7Iko",
+    "schema_version": 1,
+    "video_id": "2085054678329421824",
+    "source_revision": "9541c285a01f2c35bce076c3a741fa03bec9dd14063bc1550e8673a1cbd1b4e7",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "7cbab69b07b22cc87647ccbf5b0eb9b3e0ccadf4c43adae950e7c25f1995db1c",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Excerpt is casual banter between executives referencing a rocket factory location and remarking that data centers are 'very enormous', with no substantive spaceflight mission content, AI technical content, or industry/business analysis to ground a shelf assignment."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 15092,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 22295,
+      "wall_time_ms": 0
+    }
+  }
+}

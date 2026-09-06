@@ -1,0 +1,39 @@
+{
+  "seq": 463,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "O0tqMIf8b7syy-iMGIZeMxx2XHNdNszn",
+      "video_id": "2084344857267683328",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "41b118fcfae93822f016a76195f55b1ee6687c0eb2db785640e95f57ec726314",
+            "card_hash": "a34b5fc2b3c99eeba0807a138e271cbb7d27918603c672989dde75e54611dca2",
+            "quote": "An internal version of our next major model produced 10 new results on long-standing open problems in mathematics",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

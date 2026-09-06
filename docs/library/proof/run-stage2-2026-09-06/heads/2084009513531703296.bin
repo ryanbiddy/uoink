@@ -1,0 +1,226 @@
+# Linas Beliūnas - Google co-founder Sergey Brin rarely speaks publicly. He just sat dow...
+
+**Channel:** Linas Beliūnas (— subscribers)
+**Uploaded:** 2026-08-02 | **Duration:** 26:12 | **Views:** — | **Likes:** 459
+**URL:** https://x.com/linasbeliunas/status/2084009857439703402
+**Uoinked:** 2026-08-03T07:38:58
+**Topic:** Developer Marketing
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The opening establishes credibility by featuring Sergey Brin, a Google co-founder who 'rarely speaks publicly,' immediately signaling exclusive access to an expert. This is reinforced by the claim that he 'admitted something most lab leaders won't,' positioning him as an authoritative voice on AI development.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Google co-founder Sergey Brin rarely speaks publicly. He just sat down for an unscripted Q&amp;A on Frontier AI and admitted something most lab leaders won’t:  Even the people building these models do not fully understand what they have created.  In this 29-minute conversation at AGI https://t.co/GYXZfhgX5i
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Hi, this is Ning from DecodeOrigin.
+[00:00:02] Very nice to talk to you here.
+[00:00:04] So I guess Google has always ambitious about AI for science
+[00:00:08] so you have lots of investment and efforts in this space.
+[00:00:13] What's your next big move?
+[00:00:15] Oh, what's our next big move?
+[00:00:18] Um... I mean we've done all kinds of things historically
+[00:00:23] ranging from like managing fusion reactors
+[00:00:30] with alpha fold and what not.
+[00:00:32] I think the exciting thing is that
+[00:00:35] all of these things are converging
+[00:00:37] to the same general models
+[00:00:40] you know, in the past we would have
+[00:00:42] specialized models
+[00:00:44] uh...and um
+[00:00:45] well, in case protein folding
+[00:00:48] obviously still do
+[00:00:49] but increasingly
+[00:00:52] our main Gemini LLMs
+[00:00:54] can be state-of-the art
+[00:00:56] for math
+[00:00:57] or other kinds
+[00:01:00] for other kinds of scientific questions
+[00:01:02] so that convergence is
+[00:01:06] I don't know, it's not something
+[00:01:07] i really would have predicted at the outset
+[00:01:09] but its been kind
+[00:01:12] incredible to see
+[00:01:13] and um... I guess baked into
+[00:01:15] this concept transfer just idea
+[00:01:19] when you train
+[00:01:21] a certain class
+[00:01:23] problems let say
+[00:01:26] training coding actually can help your math reasoning
+[00:01:30] and and vice versa
+[00:01:33] that's been really exciting to see
+[00:01:35] the multi-modal capability
+[00:01:37] also is an example of
+[00:01:39] like can you actually get
+[00:01:41] transfer from being able
+[00:01:44] process images too
+[00:01:46] actually be think through
+[00:01:48] kind
+[00:01:49] geometric text problems
+[00:01:50] yeah very look forward
+[00:01:58] it's great
+[00:02:00] me Google has
+[00:02:02] creating a structure
+[00:02:05] for connecting information
+[00:02:06] and people in the last 20-30 years
+[00:02:09] Gemini is now running
+[00:02:10] building intelligence
+[00:02:11] at edge I'm wondering
+[00:02:13] more after intelligent problem
+[00:02:16] has been solved because we already have
+[00:02:18] a scaling law flywheel for data
+[00:02:19] so i think
+[00:02:20] it's pretty sure that will progress
+[00:02:23] climb to here into intelligence
+[00:02:24] I am curious afterwards
+[00:02:28] what are your next big bets
+[00:02:30] like AGI society
+[00:02:32] Asian Native Society
+[00:02:34] would there be new infrastructure
+[00:02:36] that enables like even better
+[00:02:38] connections of information data
+[00:02:39] or just beyond it
+[00:02:40] what's your next big bet
+[00:02:42] after AGI great question
+[00:02:43] so let sort of
+[00:02:44] I mean
+[00:02:47] i think everybody
+[00:02:48] is pretty focused
+[00:02:50] on accelerating
+[00:02:52] the growth
+[00:02:53] in AI right now What comes
+[00:02:55] after you're
+[00:02:57] we started with obviously
+[00:02:59] web and internet
+[00:03:01] search kind went through
+[00:03:03] mobile generation
+[00:03:06] another pretty big explosion
+[00:03:08] I guess now people
+[00:03:11] are you know Now AI
+[00:03:12] is a huge new industry trend
+[00:03:14] and what comes after that
+[00:03:16] boy i mean
+[00:03:18] think if we can answer
+[00:03:20] that You'll have fantastic company
+[00:03:22] on your hands Hey Sergey
+[00:03:29] over here
+[00:03:30] great to meet
+[00:03:32] Following up from our question
+[00:03:33] my questions would be
+[00:03:35] how do you define
+[00:03:36] super intelligence as an initially
+[00:03:37] theoretical computer science scientist yourself
+[00:03:39] what do you think of questions like p equals mp
+[00:03:41] and so on um
+[00:03:44] okay I mean those
+[00:03:45] seem two different
+[00:03:46] question P versus
+[00:03:48] NP could be answered by humans
+[00:03:50] i mean there's nothing that says
+[00:03:51] it can't
+[00:03:52] no as in
+[00:03:54] p equal is super intelligence
+[00:03:56] oh yeah your saying
+[00:03:57] the should not answer
+[00:04:00] whether but p equals mp or not
+[00:04:02] but you're saying that it will
+[00:04:03] be able to solve
+[00:04:04] NP complete problems yes and
+[00:04:06] the idea of MP complete
+[00:04:07] problem broadly is a definition
+[00:04:09] super intelligence if have fast algorithm
+[00:04:12] for its thats how you get superintelligence
+[00:04:13] oh boy
+[00:04:14] I mean i think
+[00:04:16] that's very unusual
+[00:04:17] point view most people
+[00:04:22] would say computer scientists
+[00:04:26] probably thing
+[00:04:27] P in fact
+[00:04:28] equal to NP and therefore
+[00:04:31] i'm sorry I don't know how
+[00:04:33] here is but
+[00:04:35] generally speaking
+[00:04:36] um that
+[00:04:38] there no algorithmic
+[00:04:41] solution that will
+[00:04:44] reliably solve traveling salesman
+[00:04:46] for example optimally
+[00:04:47] uh And
+[00:04:49] would include you assuming
+[00:04:51] those are
+[00:04:55] distinct classes
+[00:04:56] assume thats impossible it doesnt matter
+[00:04:58] if your super smart AI
+[00:05:00] is still impossible uh people do try
+[00:05:02] to use quantum computers
+[00:05:04] for some of these more challenging
+[00:05:05] problems but a lot I think
+[00:05:07] most theorists
+[00:05:09] would say
+[00:05:11] that even though you can factor
+[00:05:12] large numbers with
+[00:05:14] quantum computer it doesn't mean
+[00:05:16] necessarily NP complete
+[00:05:18] problem either um
+[00:05:20] so i don'
+[00:05:21] have brilliant suggestion
+[00:05:23] here but i guess
+[00:05:26] I think the community
+[00:05:29] would say that super intelligence
+[00:05:32] simply means
+[00:05:33] sort of being able
+[00:05:35] to be smarter than
+[00:05:36] humans not in
+[00:05:38] doing NP complete
+[00:05:40] problems thank you
+[00:05:43] good answer your welcome okay then
+[00:05:46] um Thankyou for
+[00:05:47] time today my background
+[00:05:48] is industry so how we
+[00:05:51] industry think of automotive
+[00:05:52] aerospace um how do you see
+[00:05:55] the frontier capabilities
+[00:05:57] that we have available today
+[00:06:00] disseminating into these kinds
+[00:06:01] industries which still
+[00:06:03] operate very much
+[00:06:04] on a legacy workflows
+[00:06:06] and systems today
+[00:06:07] but huge potential
+[00:06:09] being revolutionized
+[00:06:11] with technologies uh
+[00:06:14] great question
+[00:06:15] i mean I increasingly
+[00:06:16] see large companies
+[00:06:18] y'know pushing
+[00:06:21] to the forefront of AI
+[00:06:22] not necessarily with like their
+[00:06:24] i don't know
+[00:06:25] main core workforce uh but on
+[00:06:27] this side they'll be y'know
+[00:06:29] can we design a car
+[00:06:31] or plane using an LLM
+[00:06:33] something um I mean
+[00:06:35] there are all
+[00:06:36] running these kinds experiments
+[00:06:38] and uhm idk that those
+[00:06:42] have completely come
+[00:06:43] to fruition a

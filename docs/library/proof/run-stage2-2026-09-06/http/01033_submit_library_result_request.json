@@ -1,0 +1,51 @@
+{
+  "seq": 1033,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "QmUdg7OYZYnMoeN89xGJ1YxvUe95rbIZ",
+    "client_id": "proof-harness",
+    "attempt_token": "av3QiRLm_4dEzzw5S6KWDjA2cOaKWRfEFb_EFWph1EA",
+    "submission_key": "QmUdg7OYZYnMoeN89xGJ1YxvUe95rbIZ-av3QiRLm_4dEzzw5S6KWDjA2cOaKWRfEFb_EFWph1EA",
+    "schema_version": 1,
+    "video_id": "2095522313676439556",
+    "source_revision": "43ac8da277c76ca9c202509afebcfa116f1d25d593ffbb4af0bcb0b43251ad3c",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "5b62456044f5a04c15f4a07556446c8190d4ae64b6c2f5cd52246e8c94ec773b",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "b35b1f1f56be85d8e5db9c3a6d116e385770addaaea540103bb4dda8c7b7141c",
+            "card_hash": "bfcd4e6e495e05547624a1df987dd9e0320232884c914e8cbf6441dfba918540",
+            "quote": "Perfectly converted this video into code"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 7854,
+      "cache_read_tokens": 187115,
+      "cache_create_tokens": 27106,
+      "wall_time_ms": 0
+    }
+  }
+}

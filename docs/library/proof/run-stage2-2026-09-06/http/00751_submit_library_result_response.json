@@ -1,0 +1,39 @@
+{
+  "seq": 751,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "spL2x0f0RpSrkoX5lzGnNZqFfEKe_LWf",
+      "video_id": "2089353203489943553",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "4940bbf44f1cd979a9033c19e80b4f6a495bf10356270106cb5a5715cdc801e4",
+            "card_hash": "9742a43f322495385e733972ebb138dc2d43264582bc54475c34ea0074785e82",
+            "quote": "Introducing the ElevenLabs MCP, now available in Claude.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

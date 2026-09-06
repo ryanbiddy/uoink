@@ -1,0 +1,39 @@
+{
+  "seq": 865,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "3SITOtf_6XowtvPrxM3yjlTWyWULM7XS",
+      "video_id": "2092682844812500992",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.9,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "cb8ffbdf0ceb127e03b24e70657485e573200d4707dfb8762a166bcdd3c0d1d5",
+            "card_hash": "48bdda0921b539e7ad46ce689af599100b1d2b80d67f79a94b5a5130ba1a60f9",
+            "quote": "Open Source is eclipsing Closed Source in total token usage, but frontier labs still capture most revenue.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

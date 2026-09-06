@@ -1,0 +1,39 @@
+{
+  "seq": 263,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "foQ9Z3xWX5t7QA4xPOJD37WI_xn1Nysg",
+      "video_id": "2081892838229573632",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "8f3918a82e565fcb9936847abf3a507a2dde7c84ba6bd919599d53fa3437ae94",
+            "card_hash": "e5ce36ab2e5c46b2d2284df9af1918d6c0376ba2dbde8f7ebcf09a40d5a80c76",
+            "quote": "I help people think through ideas, make sense of what's on their screen",
+            "start": 0.0,
+            "end": 87.769,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

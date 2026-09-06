@@ -1,0 +1,186 @@
+# CopyRebeldia - Así se ve un sueldo de 750.000 dólares al año: un tipo en camiseta bl...
+
+**Channel:** CopyRebeldia (— subscribers)
+**Uploaded:** 2026-08-22 | **Duration:** 02:30:51 | **Views:** — | **Likes:** 14,823
+**URL:** https://x.com/CopyRebeldia/status/2091231950774112412
+**Uoinked:** 2026-08-23T07:38:32
+**Topic:** AI and ML
+**Note:** Capped screenshots at 200: interval raised from 30s to 46s for this video (processed media 150m).
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Demo
+**Analysis:** The video opens by showing an actual Stanford CS336 lecture in progress—a man in a white t-shirt at a whiteboard teaching LLM fundamentals for 2.5 hours—which serves as a visual demonstration of the promised content rather than a verbal teaser or question.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Así se ve un sueldo de 750.000 dólares al año: un tipo en camiseta blanca, un pizarrón y 2 horas y media.  Stanford, CS336. Percy Liang construye un LLM desde cero. Lo que hay debajo de Claude y ChatGPT, y arranca por la parte que todos saltan: el modelo no lee tu texto, lee https://t.co/VTJ5XGdldC
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] So large language models
+[00:00:01] I guess you always
+[00:00:02] probably all of you have heard of this word
+[00:00:05] large language models. This is
+[00:00:08] precisely I think in some sense this is
+[00:00:10] all starting from GPT-3 when OpenAI released GPT-3
+[00:00:14] it has a, it uses this new paradigm which
+[00:00:18] is autoregressive large language models
+[00:00:21] so, so basically we're gonna focus on that
+[00:00:23] you know, auto-regressive large language models
+[00:00:25] We're gonna skip some of the
+[00:00:26] early versions of transformer which are
+[00:00:29] not auto-regressive
+[00:00:31] so And
+[00:00:33] and another regressive basically means that you generate
+[00:00:35] tokens one by one
+[00:00:36] and each of the new tokens depends on the previous tokens
+[00:00:39] and you do this
+[00:00:40] and you model the probability in this kind of like
+[00:00:43] auto-regressive way. I'm gonna talk more about details
+[00:00:45] In some sense, you model your language distribution by using a
+[00:00:50] a sequentially
+[00:00:51] a sequential model one by one in some sense
+[00:00:54] anyway, so, let's, I think your point
+[00:00:57] our goal is to talk about some details
+[00:00:59] So I'll
+[00:00:59] I'll fill in more
+[00:01:00] high-level stuff as we talk about the details
+[00:01:02] So
+[00:01:03] the first thing we're gonna talk about is tokenization
+[00:01:08] This is, you know, just, to prepare us for
+[00:01:11] to talk about the real meat in some
+[00:01:13] sense
+[00:01:13] So what does tokenization mean?
+[00:01:15] It means that you need to You know
+[00:01:17] these transformers, they are numerical, you know, architecture models, right?
+[00:01:20] So they take in
+[00:01:22] in some sense, numerical numbers, right?
+[00:01:24] So, but, you have text
+[00:01:26] And how do you turn text into some
+[00:01:28] kind of things that
+[00:01:29] the models can understand?
+[00:01:31] So, the first step is to tokenize
+[00:01:33] Tokenize means that you need to decide
+[00:01:35] you know, what is the smallest unit
+[00:01:38] of the input
+[00:01:39] you give to the large language model
+[00:01:40] And often it's not a
+[00:01:41] a, a word
+[00:01:43] right?
+[00:01:43] The most natural thing you can think of
+[00:01:44] is
+[00:01:45] maybe the smallest unit is the character all
+[00:01:47] words
+[00:01:47] If you use character level tokenization
+[00:01:50] then the issue is that often you have so many characters
+[00:01:52] right? You, you need so many tokens
+[00:01:54] so many steps
+[00:01:56] and, if you use word level
+[00:01:58] tokenization, then often the issue is that you don't
+[00:02:01] how do you deal with these long words
+[00:02:02] which are very rare? For example
+[00:02:04] you have a word called
+[00:02:05] say, international, inter, naturalization, right?
+[00:02:08] So, you have
+[00:02:09] if you treat this word as a single word
+[00:02:10] then maybe it's too rare
+[00:02:12] and you don't leverage your understanding about other words
+[00:02:15] right? So, if you treat international Internationalization as one word
+[00:02:17] then it is different from internationalized
+[00:02:20] It is different from like a nation
+[00:02:23] right? And they are all completely different kind of things
+[00:02:26] and you cannot leverage that
+[00:02:29] For example, if you understand internationalized
+[00:02:31] then you should probably understand internationalization to some
+[00:02:33] degree without even seeing more data
+[00:02:35] And so that's why people don't always use subword tokenization
+[00:02:41] don't use word tokenization. Maybe another
+[00:02:43] okay, maybe let me give you another example
+[00:02:44] right? For example, if you use this
+[00:02:46] I guess in my notes there is this
+[00:02:47] word LM
+[00:02:49] Malification
+[00:02:51] Actually I don't know whether this is a
+[00:02:52] real word you know like I think it's
+[00:02:53] a new word that is completely new word
+[00:02:55] nobody have used it before 2020
+[00:02:57] 2020 I guess right so
+[00:02:59] even even right now it's not that
+[00:03:01] kind of like common
+[00:03:03] and if you
+[00:03:04] have to treat this word as a
+[00:03:06] unit
+[00:03:07] then
+[00:03:08] you have to see this word enough times
+[00:03:10] to understand what it means
+[00:03:11] right
+[00:03:12] However if you treat it as subwords then
+[00:03:14] maybe you have a
+[00:03:15] a token called LLM you have a token
+[00:03:17] which is
+[00:03:17] you have a
+[00:03:18] two unit you know this is a token
+[00:03:20] So
+[00:03:21] LLM is a token implication is a token
+[00:03:23] then
+[00:03:24] in some sense you have seen LLMs many
+[00:03:25] many times you already understand it
+[00:03:27] And then evocation has a special meaning in English
+[00:03:31] and then you combine these two understanding
+[00:03:33] you, you understand the word
+[00:03:35] So that's much more efficient
+[00:03:36] understanding of the word
+[00:03:38] than just, treating this whole thing as a single unit
+[00:03:42] So, and then, and this happens more often in
+[00:03:45] for example, biology, when you have this very long word
+[00:03:48] or maybe in German you have very long word
+[00:03:50] but actually there are fundamentally many combinations of many subwords
+[00:03:54] And, and
+[00:03:55] and using subword tokenization allows you to understand
+[00:03:57] each of the subwords
+[00:03:58] and, and then you can understand the combination of the
+[00:04:01] those subwords, as a, as a, as a whole, very efficiently
+[00:04:05] So, yeah, so basically tokenization, you know
+[00:04:07] just means that you have a predefined vocabulary
+[00:04:13] And this vocabulary is a list of like a subwords
+[00:04:15] right? So for example
+[00:04:16] you can have, you know, many, many of this, like maybe A is a subword
+[00:04:19] you know, is a one of the token
+[00:04:21] you know?
+[00:04:22] I think maybe like a
+[00:04:23] dog is a token
+[00:04:25] Pretty much
+[00:04:26] all common words these days is a token
+[00:04:28] And actually, if you look at the
+[00:04:29] the, the, actually
+[00:04:30] you can play with the tokenization online
+[00:04:32] If you search OpenAI tokenizer
+[00:04:33] OpenAI give you a
+[00:04:35] playground where you can see how the texts are tokenized
+[00:04:38] And, and you'll, you'll find that actually
+[00:04:40] blank dog is also a token
+[00:04:44] so the blank is actually merged with dog
+[00:04:46] as a token
+[00:04:47] And, you know, and you have so many of this
+[00:04:49] I, typically this kind of like
+[00:04:50] tokenization right now, I think for the open source models
+[00:04:54] we know the number of tokens
+[00:04:55] they have. I think it's
+[00:04:57] you know, often on order of like 10 to the 5
+[00:04:59] like a 100K at least
+[00:05:01] I think QN, Qwen 3.5
+[00:05:03] th

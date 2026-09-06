@@ -1,0 +1,39 @@
+{
+  "seq": 195,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "fkmu_LzJCCplM9iYzAnYM4k4BAv5OMG9",
+      "video_id": "2080337995551653888",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "ec8a5dd13b6f6869f8c37fb0114f3b713d519c90bb899651d8f1d6311d4f1564",
+            "card_hash": "b1c4780f7b19eca64e7e45db8ba626539bcc1641b272426c0887ecd95904b55d",
+            "quote": "You can read any graduate-level textbook in another domain by asking a coding agent to make you an interactive one",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

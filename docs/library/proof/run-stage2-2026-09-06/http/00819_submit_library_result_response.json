@@ -1,0 +1,39 @@
+{
+  "seq": 819,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "m2kIuo3GfyFK9H1oXHFADW6kO8jqI3uf",
+      "video_id": "2090904591261130752",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "adb9f126a66c64a8f320abd5554978bf09f34546328074b1d28046a98ff003a6",
+            "card_hash": "2b2c25dc58ee5991e68dc8ba375acd6b43c61d70466a770438b8a95d8f3c03d5",
+            "quote": "We’re getting fully AI-generated police procedurals now.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

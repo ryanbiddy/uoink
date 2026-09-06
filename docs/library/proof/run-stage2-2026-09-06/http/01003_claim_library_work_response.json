@@ -1,0 +1,17 @@
+{
+  "seq": 1003,
+  "tool": "claim_library_work",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "FRSGuepjI3VNqmTkqZ0Wb_kqh_7rxwVH",
+      "state": "cancelled",
+      "remaining_attempts": 0,
+      "lease_expires_ms": 1788678124615
+    }
+  }
+}

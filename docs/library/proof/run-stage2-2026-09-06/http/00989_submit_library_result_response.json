@@ -1,0 +1,39 @@
+{
+  "seq": 989,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "E5gJYgm8yz7zDX7FkU5_LXMv1V8-GBtZ",
+      "video_id": "2094123174367473665",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "c7ed19f37ca37dbc30d1bd8ef33692a9db428510f8af456b0405ae453bd905da",
+            "card_hash": "5b8f62022cab92e2e21a5610ab9f3960c832e44a8da039a66ab48d25474d5db9",
+            "quote": "Motion turns it into a launch video with motion graphics, voiceover, music and captions.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

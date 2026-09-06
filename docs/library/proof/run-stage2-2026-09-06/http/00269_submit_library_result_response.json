@@ -1,0 +1,39 @@
+{
+  "seq": 269,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 28,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "mpvnij_21yG0c__QCqAA2zut7HTYSD_X",
+      "video_id": "2081762525910065152",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "7baf48da5701ebaa39bbe3068584e832f76af434573a0ffc9465b5b784cc2c97",
+            "card_hash": "41888de9dba73a8be4595bd7d71ff5169fc0d0be8d613fcb61cd1144a694d8af",
+            "quote": "Moonshot has shipped the world's first open 3T-class model, and we're a day zero launch partner.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

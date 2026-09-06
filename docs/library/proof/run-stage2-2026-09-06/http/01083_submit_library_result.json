@@ -1,0 +1,129 @@
+{
+  "seq": 1083,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 1083,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "RP6fC0pk4_Y9mXeCbmL2ni4sa-j6gk-I",
+      "client_id": "proof-harness",
+      "attempt_token": "TBkZRmzlrogvIxbtzVCiLqRdjZNuH4jDlOKxBlyvDeE",
+      "submission_key": "RP6fC0pk4_Y9mXeCbmL2ni4sa-j6gk-I-TBkZRmzlrogvIxbtzVCiLqRdjZNuH4jDlOKxBlyvDeE",
+      "schema_version": 1,
+      "video_id": "D_FCYsshMI4",
+      "source_revision": "03ff16edc356da14ba862ff90b3904c8068dcbd77e6c792d8252741674e37366",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "df344aa8192c8a2d09716bb1bfd10b1a871ce5855b805fa04cffbde14e11c40f",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.82,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "681068cd321015d6f1077c7484941fe5ff51624ee8a4c4f3973a63cd6be14b41",
+              "card_hash": "e2b3e1051ca0baf04ec61f21c1744387854b70c398e9e72272b8dc4226aa598a",
+              "quote": "Codex has quickly evolved from a coding agent into a real teammate."
+            }
+          },
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.62,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "0a426333e400864dcafae9929edb641f5f515c44e0461a6c39553b676551ff13",
+              "card_hash": "e2b3e1051ca0baf04ec61f21c1744387854b70c398e9e72272b8dc4226aa598a",
+              "quote": "I need to test software in older Mac"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 14960,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 29948,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 1083,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "RP6fC0pk4_Y9mXeCbmL2ni4sa-j6gk-I",
+        "video_id": "D_FCYsshMI4",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "ai-agents-and-automation",
+            "shelf_path": [
+              "AI and ML",
+              "AI Agents and Automation"
+            ],
+            "confidence": 0.82,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "681068cd321015d6f1077c7484941fe5ff51624ee8a4c4f3973a63cd6be14b41",
+              "card_hash": "e2b3e1051ca0baf04ec61f21c1744387854b70c398e9e72272b8dc4226aa598a",
+              "quote": "Codex has quickly evolved from a coding agent into a real teammate.",
+              "start": 3.35,
+              "end": 118.069,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          },
+          {
+            "shelf_id": "developer-tools",
+            "shelf_path": [
+              "AI and ML",
+              "Developer Tools"
+            ],
+            "confidence": 0.62,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "0a426333e400864dcafae9929edb641f5f515c44e0461a6c39553b676551ff13",
+              "card_hash": "e2b3e1051ca0baf04ec61f21c1744387854b70c398e9e72272b8dc4226aa598a",
+              "quote": "I need to test software in older Mac",
+              "start": 118.079,
+              "end": 183.83,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

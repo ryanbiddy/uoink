@@ -1,0 +1,59 @@
+{
+  "seq": 903,
+  "tool": "submit_library_result",
+  "wall_ms": 2,
+  "request": {
+    "seq": 903,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "WVMrwHwWxw4ErelzKO6GvDFyD7lG9UOo",
+      "client_id": "proof-harness",
+      "attempt_token": "seDc2asxFK_8kIjaWe8mTO9XtR_JPTGs-IRzs_FzAbA",
+      "submission_key": "WVMrwHwWxw4ErelzKO6GvDFyD7lG9UOo-seDc2asxFK_8kIjaWe8mTO9XtR_JPTGs-IRzs_FzAbA",
+      "schema_version": 1,
+      "video_id": "2092364350317281280",
+      "source_revision": "6b73e53c969189036584ca9de001c1e79f8ea9bf47b4b64fcb0e439fbea3e77f",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "efffdced8a120784ee77d7ac8d6a569dc25db1b4c80af02b7b32d1f76b5f5323",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "The only excerpt content is song lyrics ('Mr. Sandman, bring me a dream') with no substantive claim about AI, chips, or business; the suggestive title cannot ground a shelf assignment per Rule 1 when the excerpt itself carries no relevant subject matter."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 4,
+        "output_tokens": 15534,
+        "cache_read_tokens": 188597,
+        "cache_create_tokens": 35427,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 903,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 2,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "WVMrwHwWxw4ErelzKO6GvDFyD7lG9UOo",
+        "video_id": "2092364350317281280",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

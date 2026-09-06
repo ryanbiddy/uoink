@@ -1,0 +1,95 @@
+{
+  "seq": 631,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 631,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "TPX9dMzdOqE-0nOxBd6zoqjr4phRgIEM",
+      "client_id": "proof-harness",
+      "attempt_token": "sEFvl_ZHuNzBDAiK2t2_GErZAuoveNGr3Njf4cC7r30",
+      "submission_key": "TPX9dMzdOqE-0nOxBd6zoqjr4phRgIEM-sEFvl_ZHuNzBDAiK2t2_GErZAuoveNGr3Njf4cC7r30",
+      "schema_version": 1,
+      "video_id": "2088073666664058880",
+      "source_revision": "d4197d5e244dbbef708e4027ca90f2e587f74da3a12e6747ae7952c468861372",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "1f59a7708b657d82bce1b690a4b5c706212bf34338a082a8a129a67862b4c0f8",
+      "result": {
+        "outcome": "assigned",
+        "memberships": [
+          {
+            "shelf_id": "education",
+            "shelf_path": [
+              "AI and ML",
+              "Education"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "9c78dc696d01c020cfae9e3f08449674cbbdb3cc59e0108c9795a292bed34029",
+              "card_hash": "bc9d72e0b39fc413beaa7ebe7bd27f57879f105b0d45404e0014859086e8dd13",
+              "quote": "Today We're going to talk about CAPI"
+            }
+          }
+        ]
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 14980,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20361,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 631,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "TPX9dMzdOqE-0nOxBd6zoqjr4phRgIEM",
+        "video_id": "2088073666664058880",
+        "outcome": "accepted",
+        "accepted_memberships": [
+          {
+            "shelf_id": "education",
+            "shelf_path": [
+              "AI and ML",
+              "Education"
+            ],
+            "confidence": 0.65,
+            "evidence": {
+              "basis": "packet",
+              "kind": "timed_clip",
+              "excerpt_id": "9c78dc696d01c020cfae9e3f08449674cbbdb3cc59e0108c9795a292bed34029",
+              "card_hash": "bc9d72e0b39fc413beaa7ebe7bd27f57879f105b0d45404e0014859086e8dd13",
+              "quote": "Today We're going to talk about CAPI",
+              "start": 78.739,
+              "end": 197.87,
+              "timing": "source_cues",
+              "truncated": true
+            }
+          }
+        ],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

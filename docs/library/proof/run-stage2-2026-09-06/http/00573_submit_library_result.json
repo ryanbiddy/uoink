@@ -1,0 +1,59 @@
+{
+  "seq": 573,
+  "tool": "submit_library_result",
+  "wall_ms": 4,
+  "request": {
+    "seq": 573,
+    "url": "http://127.0.0.1:5180/tools/submit_library_result",
+    "tool": "submit_library_result",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "work_id": "rAbdKzMAZESF3WRba2c9k28sv72_fl8-",
+      "client_id": "proof-harness",
+      "attempt_token": "mmZuZb5NSfVfPeYfuNHVI5hUD2IP6SDuSY0gwLbbI_E",
+      "submission_key": "rAbdKzMAZESF3WRba2c9k28sv72_fl8--mmZuZb5NSfVfPeYfuNHVI5hUD2IP6SDuSY0gwLbbI_E",
+      "schema_version": 1,
+      "video_id": "2086219750065967512",
+      "source_revision": "d9567387ba6d46affdc558220f0f97d9c0e3ba2990ff5376961b0249c37774ea",
+      "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+      "packet_hash": "f2ef02aa34e92738eb0332762f184f3ba3a64d402078e4c36f5746cfdf7a517b",
+      "result": {
+        "outcome": "unmapped",
+        "reason": "The only citable excerpt is the clip's own ad-style script ('It's pouring, watch this. Okay no umbrella Hair gone Makeup perfect...'), which does not itself establish any AI, tech, news, or science subject matter. The summary_hint discusses an AI video model (Seedance) comparison, but it lacks an excerpt_id and cannot be used as grounded evidence per the assignment rules."
+      },
+      "usage": {
+        "status": "reported",
+        "model": "claude-sonnet-5",
+        "input_tokens": 2,
+        "output_tokens": 13778,
+        "cache_read_tokens": 83191,
+        "cache_create_tokens": 20764,
+        "wall_time_ms": 0
+      }
+    }
+  },
+  "response": {
+    "seq": 573,
+    "tool": "submit_library_result",
+    "status": 200,
+    "wall_ms": 4,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work_id": "rAbdKzMAZESF3WRba2c9k28sv72_fl8-",
+        "video_id": "2086219750065967512",
+        "outcome": "unmapped",
+        "accepted_memberships": [],
+        "rejected": [],
+        "retryable": false
+      }
+    }
+  }
+}

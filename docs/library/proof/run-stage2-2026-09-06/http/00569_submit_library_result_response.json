@@ -1,0 +1,39 @@
+{
+  "seq": 569,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "pVLYsJKchd1_OKMcwrjHC6eTZAKVulhz",
+      "video_id": "2087217791900491839",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "0f1f7e08640f9e948594b1dfdb412d9749b93cea1f2b40153fc2ce0f97a922e8",
+            "card_hash": "ed73aeba6f2abfcf7fe54a2a6bf5e08fc7d6a8d0bfc76e5ddf23f9ff0d7870d8",
+            "quote": "FLUX 3 Video is #2 in the world.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

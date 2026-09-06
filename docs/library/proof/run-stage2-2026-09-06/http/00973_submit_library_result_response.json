@@ -1,0 +1,38 @@
+{
+  "seq": 973,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "gGPxX0pg2UIYft5MHKnSkMiZJKedAncr",
+      "video_id": "2093183137572405248",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.63,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "f13e870abd2b6e7b0a9bd9b0668a5ece71721d844abd1b6cb61097e7eedce41b",
+            "card_hash": "776f312f71d308b56e1b4eaebb2c1f82c3c5d2f7c3177d26bcc856b813b6aa23",
+            "quote": "stereo depth inference at sub 60ms by custom writing NPU kernels for it",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

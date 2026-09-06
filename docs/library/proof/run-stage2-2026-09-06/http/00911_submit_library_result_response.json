@@ -1,0 +1,39 @@
+{
+  "seq": 911,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "dyKxHmPx7DIp74YEK1ukDNuDkXnYunLT",
+      "video_id": "2092625875468529664",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "26624b19913378b0935e0c1b25aff52a51e1949de602f08c3294dc72b17250df",
+            "card_hash": "64f3e37c5abc850d7373d97bf235fa6bea2fb1b3aba59aaed4fe0626545bee4a",
+            "quote": "a SOTA open-weight model capable of predicting the perfect concentric border radius with 99.999% accuracy",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

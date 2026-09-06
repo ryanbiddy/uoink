@@ -1,0 +1,51 @@
+{
+  "seq": 257,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "WpWykUr1625QODIf3ycY5l5vKvACXL18",
+    "client_id": "proof-harness",
+    "attempt_token": "Sv5jJdA0BrHCiHQA7BnfW-A31hzh5DEtEIJlJMTKUzM",
+    "submission_key": "WpWykUr1625QODIf3ycY5l5vKvACXL18-Sv5jJdA0BrHCiHQA7BnfW-A31hzh5DEtEIJlJMTKUzM",
+    "schema_version": 1,
+    "video_id": "2081817087295516673",
+    "source_revision": "2b8f6f15b86fbbe9cf561caefcb3df675d0dfa931b0a54d7cc812f72fedd0964",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "76b2b863bc8e1bb926cef98e4efd709945d95e67d659692221e1e848391464d5",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "3cbf1f05347e4c54e2a39ddae49abfd0c7df785d0ef89074b1efe77e2356c222",
+            "card_hash": "1e31293eb50b1a6888c3cb5b981d9bdf5c0a543c1b0c40175afe115fafe11021",
+            "quote": "They're Screwing European Tech You Must Be Able To Compete Like We"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 9666,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 22814,
+      "wall_time_ms": 0
+    }
+  }
+}

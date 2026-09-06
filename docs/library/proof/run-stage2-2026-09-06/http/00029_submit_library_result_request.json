@@ -1,0 +1,35 @@
+{
+  "seq": 29,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "y_gdjHGiv1ah2RPjsBjje1qrPEHPLtIe",
+    "client_id": "proof-harness",
+    "attempt_token": "-CMyZt9q1EbedNdsRZNbQj1ddazHwXUpkweDJrw6C6g",
+    "submission_key": "y_gdjHGiv1ah2RPjsBjje1qrPEHPLtIe--CMyZt9q1EbedNdsRZNbQj1ddazHwXUpkweDJrw6C6g",
+    "schema_version": 1,
+    "video_id": "0FrcYhnHmLg",
+    "source_revision": "98ded82d3f717531561c507871736ba07df44554cdb3c5bde084821dde4d123e",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "de4640c49229763188d409bc3c6a8d5ebfe5263e506f6bd9e5bb4f88c73d0317",
+    "result": {
+      "outcome": "unmapped",
+      "reason": "Sampled excerpts consist of introductory banter, an unrelated almond-water-usage aside, and fragmentary product mentions (X/XAI API access, a 'Linux environment') that do not establish a single clear central subject matching any approved shelf with sufficient confidence."
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 8287,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 104678,
+      "wall_time_ms": 0
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "seq": 395,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "fot09dBofq6YMEvimhhO2fMNHvIjvvzx",
+      "video_id": "2083953406482219008",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-industry-and-business",
+          "shelf_path": [
+            "AI and ML",
+            "AI Industry and Business"
+          ],
+          "confidence": 0.66,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "d1db23413aa2d5683733784f7e259b89271071a04d27da71a0a0201b59693472",
+            "card_hash": "e67fd4786e6ff23a6652b270ed67441bdfcfdf8153ca7e9cdbc417b1ad2db505",
+            "quote": "it is over 1000x cheaper than Fable 5 on comparable tasks",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

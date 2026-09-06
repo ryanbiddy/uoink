@@ -1,0 +1,39 @@
+{
+  "seq": 681,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "NPO8zi5SWBhl6sMU0t-LTxmhYkM98AVW",
+      "video_id": "2088647911370276864",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "e8a7e7f2697f4ef202885ceb7b2a9a190b36cb8e5405aad09150dabef941f9b9",
+            "card_hash": "d92b0ef2720a219503330bb56ab33a3bcbaeb58f01203ec7aa37dc03fd1d0ea7",
+            "quote": "X's width is the sequence length",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

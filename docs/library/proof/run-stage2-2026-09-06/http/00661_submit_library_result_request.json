@@ -1,0 +1,51 @@
+{
+  "seq": 661,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "1RWvB951l4P2dAZioezreSpjYUblE2v6",
+    "client_id": "proof-harness",
+    "attempt_token": "KGdHsTrnm8sw-wUqkv-feQHRjmTfAdAfBce9bH9fbq8",
+    "submission_key": "1RWvB951l4P2dAZioezreSpjYUblE2v6-KGdHsTrnm8sw-wUqkv-feQHRjmTfAdAfBce9bH9fbq8",
+    "schema_version": 1,
+    "video_id": "2089011298621399260",
+    "source_revision": "d8b5e50697360092bf0c3f59456d81edee256fa3006e42068f00734738554835",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "f702fc40114c4d80a6953e3ffd74ed063900cfa3d16891d3e502399557ed4142",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.7,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "4d8b0e5d0e83ccb81e02c017149c7db7d6cae56d3695eab35cf22b6033f7a998",
+            "card_hash": "e1c1cb5d02c34215ccc4ccaac43903947d188cf1e60cfa21f2a6a7a91cb1137a",
+            "quote": "First Human In The Loop Wait For A Human To Review Modify Or Approve And Then Resume From The Breakpoint"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 6,
+      "output_tokens": 17652,
+      "cache_read_tokens": 199973,
+      "cache_create_tokens": 65270,
+      "wall_time_ms": 0
+    }
+  }
+}

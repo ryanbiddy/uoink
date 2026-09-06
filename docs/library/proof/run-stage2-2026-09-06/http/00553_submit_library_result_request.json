@@ -1,0 +1,81 @@
+{
+  "seq": 553,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "smukb9edNXS593y8AlbW1bUUr6EDJz6y",
+    "client_id": "proof-harness",
+    "attempt_token": "tLEf5xM6DUH4wCnI2xn5ycd_sGE5lbXWxcH9vVZCByE",
+    "submission_key": "smukb9edNXS593y8AlbW1bUUr6EDJz6y-tLEf5xM6DUH4wCnI2xn5ycd_sGE5lbXWxcH9vVZCByE",
+    "schema_version": 1,
+    "video_id": "2084670556981338112",
+    "source_revision": "a81b44ca734b1fc3f74cedf2fe0c70d71dcbad0d7f3dbb829a6a2a5f9842fe35",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "c86c6744e460b10b644303ac854b646af43e3341a54f194e32152c555da2b114",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "be2bccc5f692357b9dc147c6b17a21d0b63e88e85c63f46b694035b645665e84",
+            "card_hash": "b2a9fbcafa2b1abb30a8f37cc2d332fbf8f36231150875f8b4c55c8b40ca3a11",
+            "quote": "The Next Step After Instruction Fine Tuning Is This Process Of Using Human Preferences And Finetuning The Model Based On That"
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "ad24d4c03a60353ebcf02651313853ee186a03def92c7c8ccbeff5db827aa2c3",
+            "card_hash": "b2a9fbcafa2b1abb30a8f37cc2d332fbf8f36231150875f8b4c55c8b40ca3a11",
+            "quote": "The GSM 8K Was The First Paper That Kind Of Show"
+          }
+        },
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "268e32329029751bd0cf212ed139cbf8f63e9eb2d53734b9209b5a36d7ed1d2d",
+            "card_hash": "b2a9fbcafa2b1abb30a8f37cc2d332fbf8f36231150875f8b4c55c8b40ca3a11",
+            "quote": "When You Are On Customer Support Side Of Things And Using LLMs Definitely Streamlines Experience"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 30355,
+      "cache_read_tokens": 188747,
+      "cache_create_tokens": 40176,
+      "wall_time_ms": 0
+    }
+  }
+}

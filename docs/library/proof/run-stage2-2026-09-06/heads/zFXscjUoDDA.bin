@@ -1,0 +1,152 @@
+# Vercel Product Walkthrough (2026)
+
+**Channel:** Vercel (114.0K subscribers)
+**Uploaded:** 2026-03-16 | **Duration:** 10:11 | **Views:** 15,035 | **Likes:** 219
+**URL:** https://www.youtube.com/watch?v=zFXscjUoDDA
+**Yoinked:** 2026-05-14T23:27:02
+**Topic:** AI and ML
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Speed run a web app into modern infrastructure with AI features, agent-driven development, and collaboration between designers and developers.
+
+Timothy Jordan, VP of Developer Experience at Vercel, walks through the latest Vercel platform capabilities, including self-driving infrastructure, AI-powered insights, collaboration workflows, and built-in security.
+
+Try Vercel today: https://vercel.com
+
+Chapters:
+00:00 Self-driving infrastructure
+00:41 Speed run
+01:17 Importing into Vercel
+02:49 Analytics and insights
+03:34 AI summarization feature
+06:01 Using Claude Code
+07:17 Collaborate with your team
+07:46 Update with v0
+09:06 Security
+09:50 Conclusion
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+### Chapter: Self-driving infrastructure (00:00:00)
+
+[00:00:02] Millions of developers have built on
+[00:00:02] Millions of developers have built on Verscell's front-end cloud for over a
+[00:00:04] Verscell's front-end cloud for over a
+[00:00:04] Verscell's front-end cloud for over a decade. And we've all been using
+[00:00:05] decade. And we've all been using
+[00:00:06] decade. And we've all been using Verscell to deploy everything from
+[00:00:07] Verscell to deploy everything from
+[00:00:07] Verscell to deploy everything from personal projects to enterprise
+[00:00:09] personal projects to enterprise
+[00:00:09] personal projects to enterprise software. And when you're building
+[00:00:11] software. And when you're building
+[00:00:11] software. And when you're building agents and AI features to reduce
+[00:00:13] agents and AI features to reduce
+[00:00:13] agents and AI features to reduce friction for your users or your team,
+[00:00:16] friction for your users or your team,
+[00:00:16] friction for your users or your team, the last thing you want is something
+[00:00:18] the last thing you want is something
+[00:00:18] the last thing you want is something complicated to maintain in production.
+[00:00:21] complicated to maintain in production.
+[00:00:21] complicated to maintain in production. Verscell's self-driving infrastructure
+[00:00:23] Verscell's self-driving infrastructure
+[00:00:23] Verscell's self-driving infrastructure makes DevOps as easy as deployment. You
+[00:00:25] makes DevOps as easy as deployment. You
+[00:00:26] makes DevOps as easy as deployment. You generate code and build agents. Then
+[00:00:27] generate code and build agents. Then
+[00:00:28] generate code and build agents. Then Verscell autonomously optimizes for
+[00:00:30] Verscell autonomously optimizes for
+[00:00:30] Verscell autonomously optimizes for global scale performance, provisions
+[00:00:32] global scale performance, provisions
+[00:00:32] global scale performance, provisions compute, orchestrates AI workflows, and
+[00:00:35] compute, orchestrates AI workflows, and
+[00:00:35] compute, orchestrates AI workflows, and even investigates anomalies, all with no
+[00:00:39] even investigates anomalies, all with no
+[00:00:39] even investigates anomalies, all with no configuration required. Now, let me show
+
+### Chapter: Speed run (00:00:41)
+
+[00:00:41] configuration required. Now, let me show
+[00:00:41] configuration required. Now, let me show you what I mean with a speedrun. Let's
+[00:00:43] you what I mean with a speedrun. Let's
+[00:00:43] you what I mean with a speedrun. Let's take on the challenge of migrating an
+[00:00:45] take on the challenge of migrating an
+[00:00:45] take on the challenge of migrating an existing web app. Now, this is a demo
+[00:00:48] existing web app. Now, this is a demo
+[00:00:48] existing web app. Now, this is a demo app of a hiring platform for a midsize
+[00:00:50] app of a hiring platform for a midsize
+[00:00:50] app of a hiring platform for a midsize coffee company that has a roastery and
+[00:00:52] coffee company that has a roastery and
+[00:00:52] coffee company that has a roastery and cafes. It's a simple app with a front
+[00:00:54] cafes. It's a simple app with a front
+[00:00:54] cafes. It's a simple app with a front end, a database to sore job applications
+[00:00:57] end, a database to sore job applications
+[00:00:57] end, a database to sore job applications and resumes, and a back-end service that
+[00:01:00] and resumes, and a back-end service that
+[00:01:00] and resumes, and a back-end service that summarizes cover letters for faster
+[00:01:02] summarizes cover letters for faster
+[00:01:02] summarizes cover letters for faster application review. Now, it's on an
+[00:01:05] application review. Now, it's on an
+[00:01:05] application review. Now, it's on an ancient hosting provider. I'm not going
+[00:01:06] ancient hosting provider. I'm not going
+[00:01:06] ancient hosting provider. I'm not going to tell you which one, but we definitely
+[00:01:08] to tell you which one, but we definitely
+[00:01:08] to tell you which one, but we definitely want to modernize it. So, let's do that.
+[00:01:10] want to modernize it. So, let's do that.
+[00:01:10] want to modernize it. So, let's do that. We'll migrate to Verscell, which is
+[00:01:13] We'll migrate to Verscell, which is
+[00:01:13] We'll migrate to Verscell, which is going to speed up feature development,
+[00:01:15] going to speed up feature development,
+[00:01:15] going to speed up feature development, deployment, and collaboration. Now,
+
+### Chapter: Importing into Vercel (00:01:17)
+
+[00:01:17] deployment, and collaboration. Now,
+[00:01:17] deployment, and collaboration. Now, let's import this app into Verscell.
+[00:01:19] let's import this app into Verscell.
+[00:01:19] let's import this app into Verscell. I'll start with the backend which is a
+[00:01:21] I'll start with the backend which is a
+[00:01:21] I'll start with the backend which is a basic fast API Python service. I'll
+[00:01:24] basic fast API Python service. I'll
+[00:01:24] basic fast API Python service. I'll start by clicking add new. I've already
+[00:01:27] start by clicking add new. I've already
+[00:01:27] start by clicking add new. I've already connected my git account and I can see
+[00:01:28] connected my git account and I can see
+[00:01:28] connected my git account and I can see that my repositories are here. I'll
+[00:01:31] that my repositories are here. I'll
+[00:01:31] that my repositories are here. I'll click import on the API repo. Now import
+[00:01:34] click import on the API repo. Now import
+[00:01:34] click import on the API repo. Now import is fully configurable including build
+[00:01:37] is fully configurable including build
+[00:01:37] is fully configurable including build and output configs, but Versell supports
+[00:01:40] and output configs, but Versell supports
+[00:01:40] and output configs, but Versell supports fast API and other backend frameworks
+[00:01:42] fast API and other backend frameworks
+[00:01:42] fast API and other backend frameworks out of the box. So I can just click
+[00:01:45] out of the box. So I can just click
+[00:01:45] out of the box. So I can just click deploy and it's going to work. And
+[00:01:47] deploy and it's going to work. And
+[00:01:47] deploy and it's going to work. And within a few seconds, my Python backend
+[00:01:49] within a few seconds, my Python backend
+[00:01:49] within a few seconds, my Python backend service is deployed and running on
+[00:01:50] service is deployed and running on
+[00:01:50] service is deployed and running on Verscell. Now, Verscell automatically
+[00:01:53] Verscell. Now, Verscell automatically
+[00:01:53] Verscell. Now, Verscell automatically generated a URL for this project. I'm
+[00:01:56] generated a URL for this project. I'm
+[00:01:56] generated a URL for this project. I'm going to copy it so that I can add it as
+[00:01:58] going to copy it so that I can add it as
+[00:01:58] going to copy it so that I 

@@ -1,0 +1,39 @@
+{
+  "seq": 749,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "sGOlXZLesbh5GRCN3EeU2_wWGsXq09ag",
+      "video_id": "2089383338654199808",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "c5210ebcaef06d779e6b4673c8573a5de394195480a029ab5281e88a11f56e0d",
+            "card_hash": "c26ffa48d359c09eb7f537a3cc15ef0dc5b95c8c76186e04da873a22e568b457",
+            "quote": "agents wrote 30% of code in a week, global tax filing shipped",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

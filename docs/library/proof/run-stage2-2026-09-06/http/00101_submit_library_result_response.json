@@ -1,0 +1,39 @@
+{
+  "seq": 101,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "Wd-b_WnXId4MafSmQ0qYlnjrJYfn322Z",
+      "video_id": "2079925911646871552",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "7e9ec169a57a6fd91e56985de8f0b00e071449f4da433f166231034c0e91a24f",
+            "card_hash": "b2cfac9e8e1b60bbf1c771c93db87d4e7e7e433bad3a845bbdf4b62ac4a829c1",
+            "quote": "materialization core (clean), but the metadata-bearing patches (no-op) are spec-shaped",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

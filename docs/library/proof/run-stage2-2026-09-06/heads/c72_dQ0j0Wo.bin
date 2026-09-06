@@ -1,0 +1,106 @@
+# The Real Reason Nvidia Releases Open Source Models with Chris AKA Joe Nemotron #Nvidia #opensource
+
+**Channel:** Alex Volkov from ThursdAI (43.8K subscribers)
+**Uploaded:** 2026-06-06 | **Duration:** 01:53 | **Views:** 593 | **Likes:** 15
+**URL:** https://www.youtube.com/watch?v=c72_dQ0j0Wo
+**Uoinked:** 2026-06-08T22:47:46
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Question
+**Analysis:** The video opens by directly asking the viewer a series of 'why' questions about Nvidia's motivations for releasing open source models, immediately engaging the audience with curiosity-driving inquiries that the subsequent interview answers.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Nvidia has proven to be a big supporter of open source models.
+
+Chris Alexiuk, a senior product engineer at Nvidia, expanded on this as "Nvidia's mission." Developing  open source technology as a means to better their own future products, and the community at large.
+
+We applaud the reasoning and think of it as a true necessity to bringing AI to the world.
+
+#nvidia #nemotron #opensource #thursdai #aicommunity
+
+🔗 Subscribe to our show on Spotify: thursdai.news/spotify
+
+🔗 Apple: thursdai.news/apple
+
+🔗 Youtube: thursdai.news/yt
+
+And for the full show notes and links visit
+
+👉 sub.thursdai.news 👈
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:03] Why is it important for Nvidia to release open models when Nvidia also sells GPUs to Frontier Labs that also release proprietary models? Why is it so important for you to keep pushing the envelope to release bigger and bigger models to train and to give away everything including the data, the training recipes, and kind of the teacher models? Why so? Tell us. >> I think that what I would say, what I've heard said a lot from from people like Jensen and Bryan Catanzaro, right? Jensen obviously leader of Nvidia, Bryan Catanzaro who heads up our research arm for Nvidia. I mean, it's integral, it's crucial to Nvidia's mission to be good at producing models because people use GPUs to make models. That's just a fact. They use them to train models, to inference with models, they use them to run their agents. And if we don't know how to build a good model, if we can't build a good model, we can't know what the best GPU is, right? We can't understand the exact best way to produce hardware. And this is a process that I think Jensen's talked a lot about up on various stages called extreme co-design, right? Where you have to kind of build the hardware with the technology at the same time. And if you just do one in a vacuum, it doesn't mean anything. And the reason we want to open it is because we think that AI is a very useful tool. And everyone should have AI and many different countries should have AI and many different organizations should have AI and they should have a blueprint we know works and is battle-tested that that you can take and you can build your own models and for your own agents. And if we're not releasing that stuff because we're doing it, so it's like if we're doing it, we may as well release it. Share the learnings and I think, you know, Bryan says this a lot like the ecosystem benefits when we release something because then the ecosystem does something with with our stuff and we learn from it and then we get better and then we make better hardware and then we make better models. That's just summarize the thoughts of people that are at the helm. That's why we do it. >> [music]
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:30]
+
+![Screenshot at 00:00:30](screenshots/shot_0002.jpg)
+
+### [00:01:00]
+
+![Screenshot at 00:01:00](screenshots/shot_0003.jpg)
+
+### [00:01:30]
+
+![Screenshot at 00:01:30](screenshots/shot_0004.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About Alex Volkov from ThursdAI:**
+Welcome to ThursdAI—your weekly AI roundup hosted by Alex, streaming live every Thursday on X (formerly Twitter), and now available right here on YouTube!
+
+Each week, we dive deep into the latest AI news, breakthroughs, and trends—from OpenAI updates to Meta hackathons and Google I/O highlights. Whether you’re an AI enthusiast, developer, or just AI-curious, ThursdAI provides insightful analysis, expert opinions, and engaging discussions that help you stay ahead in the world of artificial intelligence.
+
+Hit subscribe to join our community, never miss an update, and be part of the conversation shaping AI’s future.
+
+ThursdAI has been reporting on all the major AI news for over 3 years, starting with the announcement of GPT 4 back in March 14, 2023, and became a podcast in June of 2023
+
+You can follow the podcast on every major podcast platform: 
+Spotify: https://thursdai.news/spotify
+Apple: https://thursdai.news/apple
+Substack: https://sub.thursdai.news
+
+**Recent videos from this channel:**
+- 📅 June 4 - Nvidia RTX & Nemotron-3 Ultra, MAI 7 models, Hermes Desktop & new ImageGen SOTA models (— views, —)
+- Claude Opus 4.8 DROPS LIVE + Pope's AI Letter, DeepSWE Benchmark, 1-Bit Diffusion | ThursdAI May 28 (— views, —)
+- May 14 - Musk v Altman, Krea 2, Hermes takes OpenClaw, Thinky duplex models, Muse Spark & more AI (— views, —)
+- Meta AI new Muse spark updates and conversation mode - hands on stress test (— views, —)
+- 📅 ThursdAI - May 7 - Interviews with Sunil Pai, Sally Ann Omalley from AI Engineer Europe (— views, —)
+
+---
+
+*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*

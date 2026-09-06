@@ -1,0 +1,39 @@
+{
+  "seq": 991,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 5,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "E652WCcPoA367rK-bsNq-xr8Fw1Ah1sf",
+      "video_id": "2093462510389354496",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "security",
+          "shelf_path": [
+            "AI and ML",
+            "Security"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "ef5e09ac16c1412b2e00e53d625113ddb4b59ca9ba46e85c6f97a4ba9cc5a67d",
+            "card_hash": "02a465cd2d71a169c80fd82e8da4781cf3a57789ae836a90cbefa30d55eae47b",
+            "quote": "the agents were really attacking the hugging face model",
+            "start": 177.614,
+            "end": 287.284,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

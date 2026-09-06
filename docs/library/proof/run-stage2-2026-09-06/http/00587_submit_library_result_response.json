@@ -1,0 +1,39 @@
+{
+  "seq": 587,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "vox-365VuZxHGFO8rVmog9ndC_8TDRDQ",
+      "video_id": "2085777442313007104",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "07dbd048b7bde09a91737c3471e05361385a09e853d867e3ad2d61d9ae3b8ea9",
+            "card_hash": "5a9f70a254130072e093b44f61f318543288298525f006ae49c5521317514712",
+            "quote": "he shows how to build agents that work and improve entirely on their own",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

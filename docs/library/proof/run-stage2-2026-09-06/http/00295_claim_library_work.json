@@ -1,0 +1,887 @@
+{
+  "seq": 295,
+  "tool": "claim_library_work",
+  "wall_ms": 12,
+  "request": {
+    "seq": 295,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 295,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 12,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "fy_oEXYI3dXp-lHJpgx8src-XTjC13K-",
+            "video_id": "2082584296917774336",
+            "attempt_token": "Fbvd5ch5lPpGYO2o9v8y-YGA2visByJ10_R6sTlBJsY",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676607293,
+            "source_revision": "97ab935767043d477b59ddde8896c0510e0b28d86347fc404c6ec0e5729d93e7",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "c9e6deb6a24fa86f3102fde2f36d626e3669b86a254a14a478634231c24d88fa",
+            "card": {
+              "card_hash": "a466c3f7929109ca3c17bdc9fac1a4225205ff6644a9765efbf144ed9350087d",
+              "channel": "Lunar",
+              "chars": 53767,
+              "chars_all_clips": 53767,
+              "chars_chosen_clips": 1440,
+              "clip_count": 31,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2082586305297367092#t=358",
+                  "end": 477.92,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "12e29a31e23830c98585060cf956c64f1c202fb4f21a2f9d3a09529ff477e20e",
+                  "start": 358.75,
+                  "text": "Over To Some Other Parentheses We're Going Call Abk Products That Can Be A Pattern Matched From Ab K To The Parts Of Ab K Matched We Can Return Those Directly And That'S Gonna B T Product S Middle There W Can Extend That Pattern To Include ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2082586305297367092#t=596",
+                  "end": 716.33,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c1e1600a483fd03d364859abd797e0c33958b27da628c94a0e2d1c5c84168862",
+                  "start": 596.389,
+                  "text": "This You Want To Be Able Understand That There's Possible Manufacturing Problems In The Supply Chain Cool Okay Second Question Is Or If Thats What We Wanna Find Out What Data Is Available Then We Can Do This Analysis With So Turns Out In Th",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2082586305297367092#t=1426",
+                  "end": 1545.569,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "1d6b57cc0d11b17f69b5f979848ca266f1ad5764d4f21c27fc51b861a3ea212c",
+                  "start": 1426.019,
+                  "text": "State Dictionary And Brades Going Update The Use Your Name Key And The Name Was Passed Into Function Were Gonna Used For Updating The Sessions Session Memory Or The Sessions State For Username Key So This Is Pretty Straightforward User Name",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2082586305297367092#t=1905",
+                  "end": 2025.44,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c674a42a489e2ed69db2bb987792a303d99a26a77727d505d0a5664155525858",
+                  "start": 1905.809,
+                  "text": "From The Idea Of What You Want Do All The Way Describing The Graph Then Delegate That By Delegating To Subagents Specialized In Each Phase Of The Workflow You Will See Some Replication Here Both Structured And Unstructured Data Have Agents ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2082586305297367092#t=2624",
+                  "end": 2743.8,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "98fef473ee3bfb569a025b49972902b656a627758cefb20f0e15609eb1642be3",
+                  "start": 2624.369,
+                  "text": "Person Name That Will Get Substituted In As This Variable Here Not As Template Substitution But As Value Gets Past Him Then This Whole Querry Will Be Execuated So Let's Define That Function And Of Course Because This Function Is Just A Norm",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2082586305297367092#t=2983",
+                  "end": 3102.199,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "708a1db513ea63db7591e9b1c18e23568587ea2b0a23de1e6d54979a83e3c58f",
+                  "start": 2983.179,
+                  "text": "And We're Explicit Here About Saying When Those Messages Are Received From User Go Ahead Delegate To These Sub Agents Actually Respond To The User Rather Than Responde Directly As Coordinator So If This Works Well The Coordinators Shouldn't",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2082586305297367092#t=358",
+                  "end": 477.92,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "12e29a31e23830c98585060cf956c64f1c202fb4f21a2f9d3a09529ff477e20e",
+                  "start": 358.75,
+                  "text": "Over To Some Other Parentheses We're Going Call Abk Products That Can Be A Pattern Matched From Ab K To The Parts Of Ab K Matched We Can Return Those Directly And That'S Gonna B T Product S Middle There W Can Extend That Pattern To Include ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2082586305297367092#t=596",
+                  "end": 716.33,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c1e1600a483fd03d364859abd797e0c33958b27da628c94a0e2d1c5c84168862",
+                  "start": 596.389,
+                  "text": "This You Want To Be Able Understand That There's Possible Manufacturing Problems In The Supply Chain Cool Okay Second Question Is Or If Thats What We Wanna Find Out What Data Is Available Then We Can Do This Analysis With So Turns Out In Th",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2082586305297367092#t=1426",
+                  "end": 1545.569,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "1d6b57cc0d11b17f69b5f979848ca266f1ad5764d4f21c27fc51b861a3ea212c",
+                  "start": 1426.019,
+                  "text": "State Dictionary And Brades Going Update The Use Your Name Key And The Name Was Passed Into Function Were Gonna Used For Updating The Sessions Session Memory Or The Sessions State For Username Key So This Is Pretty Straightforward User Name",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2082586305297367092#t=1905",
+                  "end": 2025.44,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "c674a42a489e2ed69db2bb987792a303d99a26a77727d505d0a5664155525858",
+                  "start": 1905.809,
+                  "text": "From The Idea Of What You Want Do All The Way Describing The Graph Then Delegate That By Delegating To Subagents Specialized In Each Phase Of The Workflow You Will See Some Replication Here Both Structured And Unstructured Data Have Agents ",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2082586305297367092#t=2624",
+                  "end": 2743.8,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "98fef473ee3bfb569a025b49972902b656a627758cefb20f0e15609eb1642be3",
+                  "start": 2624.369,
+                  "text": "Person Name That Will Get Substituted In As This Variable Here Not As Template Substitution But As Value Gets Past Him Then This Whole Querry Will Be Execuated So Let's Define That Function And Of Course Because This Function Is Just A Norm",
+                  "timing": "source_cues",
+                  "truncated": true
+                },
+                {
+                  "deep_link": "https://x.com/LunarResearcher/status/2082586305297367092#t=2983",
+                  "end": 3102.199,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "708a1db513ea63db7591e9b1c18e23568587ea2b0a23de1e6d54979a83e3c58f",
+                  "start": 2983.179,
+                  "text": "And We're Explicit Here About Saying When Those Messages Are Received From User Go Ahead Delegate To These Sub Agents Actually Respond To The User Rather Than Responde Directly As Coordinator So If This Works Well The Coordinators Shouldn't",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": null,
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Lunar_-_Andrew_Ng_just_released_a_1-hour_course_on_what_comes_after_RAG_How",
+              "source_revision": "97ab935767043d477b59ddde8896c0510e0b28d86347fc404c6ec0e5729d93e7",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": null,
+              "title": "Lunar - Andrew Ng just released a 1-hour course on what comes after RAG.  How...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": true,
+                "fields": [
+                  "hint"
+                ],
+                "selection": true
+              },
+              "url": "https://x.com/LunarResearcher/status/2082586305297367092",
+              "video_id": "2082584296917774336",
+              "yoinked_at": "2026-07-30T07:43:18"
+            }
+          },
+          {
+            "work_id": "gH8hPWpIH_wdAfywAR7KNXAtTrHa2Wi6",
+            "video_id": "2082527997303889920",
+            "attempt_token": "1nz1kY7xJuvGE32NyJcyqafAzbSr47Pnh8rWQiv0cwM",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676607294,
+            "source_revision": "64e621e4681149b2bdfeec3981a6343f051d2f357f0824fc01367e4e603cfbfe",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "30b40c491a0894f724555f89b28cf1d10c65f31473aa30507206c7493b55c0f9",
+            "card": {
+              "card_hash": "99840274f4a9fd8ed2ef2b99ee2fa49fd639b186a6a1da8206cb93250eaee6c1",
+              "channel": "Unsloth AI",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/UnslothAI/status/2082528683747873194",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "d27bfc6477ce3321c868f8f25cd0ee3914b0aa9483d22b87936e0a6add749139",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> We compared 1-bit Kimi K3 to Claude Opus 5 and GPT 5.6.  We gave 4 models the same prompt: Create a glass aquarium whose side panel develops a visible crack and then bursts.  1-bit Kimi K3 GGUF ran loca",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> We compared 1-bit Kimi K3 to Claude Opus 5 and GPT 5.6.  We gave 4 models the same prompt: Create a glass aquarium whose side panel develops a visible crack and then bursts.  1-bit Kimi K3 GGUF ran locally on 4x B200s at 36 tok/s.  GitHub repo: https://t.co/aZWYAtakBP https://t.co/sGjouOoDkU No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Unsloth_AI_-_We_compared_1-bit_Kimi_K3_to_Claude_Opus_5_and_GPT_5_6_We_gave_4_mo",
+              "source_revision": "64e621e4681149b2bdfeec3981a6343f051d2f357f0824fc01367e4e603cfbfe",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> We compared 1-bit Kimi K3 to Claude Opus 5 and GPT 5.6.  We gave 4 models the same prompt: Create a glass aquarium whose side panel develops a visible crack and then bursts.  1-bit Kimi K3 GGUF ran locally on 4x B200s at 36 tok/s.  GitHub repo: https://t.co/aZWYAtakBP https://t.co/sGjouOoDkU No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Unsloth AI - We compared 1-bit Kimi K3 to Claude Opus 5 and GPT 5.6.  We gave 4 mo...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/UnslothAI/status/2082528683747873194",
+              "video_id": "2082527997303889920",
+              "yoinked_at": "2026-07-30T07:39:44"
+            }
+          },
+          {
+            "work_id": "guHr2rowD8OKuxWoGZZZT9lmpcme7Psk",
+            "video_id": "2082842696650043392",
+            "attempt_token": "uKHRvRZ7oyE2yAW1gNmcAaxMFn_yo-tEr4AnJ9e4HpE",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676607295,
+            "source_revision": "fd5a8ca515b5a1eb307b9ab5d60b843371c882599aca0608af71dfec674d0b26",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "58084c045336d65456c047f8ce97a78e017e3d8814c461ada069df84f2b47ae2",
+            "card": {
+              "card_hash": "84f3facb4018bc86b2031bf26457264494b7925d46b79fe160152fe250546d9a",
+              "channel": "Google Workspace",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/GoogleWorkspace/status/2082874613449519349",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "153d08f252ba46166171c822bcb20f084f87d24d649ca690e4790eeb377b78e9",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Hate being on camera? We have some great news. 🤫🎥  Gemini Omni in Google Vids lets you generate a personal AI avatar to star in your videos. Type a script, and let your digital twin handle the rest.  Tr",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Hate being on camera? We have some great news. 🤫🎥  Gemini Omni in Google Vids lets you generate a personal AI avatar to star in your videos. Type a script, and let your digital twin handle the rest.  Try it now on desktop → https://t.co/jyqDppxo4K https://t.co/9MSvUobBnG No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Google_Workspace_-_Hate_being_on_camera_We_have_some_great_news_Gemini_Omni_in_G",
+              "source_revision": "fd5a8ca515b5a1eb307b9ab5d60b843371c882599aca0608af71dfec674d0b26",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Hate being on camera? We have some great news. 🤫🎥  Gemini Omni in Google Vids lets you generate a personal AI avatar to star in your videos. Type a script, and let your digital twin handle the rest.  Try it now on desktop → https://t.co/jyqDppxo4K https://t.co/9MSvUobBnG No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Google Workspace - Hate being on camera? We have some great news. 🤫🎥  Gemini Omni in Goo...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/GoogleWorkspace/status/2082874613449519349",
+              "video_id": "2082842696650043392",
+              "yoinked_at": "2026-07-31T07:44:29"
+            }
+          },
+          {
+            "work_id": "n-6Qliy3nUkUWGgmMk64ecEtDOifYFDc",
+            "video_id": "2083119940371111936",
+            "attempt_token": "trhh4GnLxSsK27AErz8K_bLHTA2RpSMdTohpZitM5Kc",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676607296,
+            "source_revision": "41424ff1b68862d7db2af8d7450e606c2dc7adb4c1c3bff006310fc3e17f6390",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "fbff3f36988370e928e46243d5c1958fbc11653cc088453074b95ee0d846b648",
+            "card": {
+              "card_hash": "d700b2583e114537363b762df5fdc3709138988af41ec688b0cae51441c45d54",
+              "channel": "stevibe",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/stevibe/status/2083120066678464750",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "e50a2a6b5797f39c5e33b4851c55db3b7187451598976f2596a0a03eb3f9ca0e",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> The AI price war is ON.  &gt; DeepSeek just dropped V4 Flash 0731 (big capability jump, $0.28/M output) &gt; OpenAI cut GPT-5.6 Luna by 80% to $1.20/M (OpenRouter is currently offering 50% off, bringing",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> The AI price war is ON.  &gt; DeepSeek just dropped V4 Flash 0731 (big capability jump, $0.28/M output) &gt; OpenAI cut GPT-5.6 Luna by 80% to $1.20/M (OpenRouter is currently offering 50% off, bringing it to $0.60/M)  Same budget tier now, so I ran both through 3 canvas tests: 🧊 https://t.co/ToFqVhfPtR No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "stevibe_-_The_AI_price_war_is_ON_gt_DeepSeek_just_dropped_V4_Flash_0731_bi",
+              "source_revision": "41424ff1b68862d7db2af8d7450e606c2dc7adb4c1c3bff006310fc3e17f6390",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> The AI price war is ON.  &gt; DeepSeek just dropped V4 Flash 0731 (big capability jump, $0.28/M output) &gt; OpenAI cut GPT-5.6 Luna by 80% to $1.20/M (OpenRouter is currently offering 50% off, bringing it to $0.60/M)  Same budget tier now, so I ran both through 3 canvas tests: 🧊 https://t.co/ToFqVhfPtR No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoin",
+              "title": "stevibe - The AI price war is ON.  &gt; DeepSeek just dropped V4 Flash 0731 (bi...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/stevibe/status/2083120066678464750",
+              "video_id": "2083119940371111936",
+              "yoinked_at": "2026-07-31T07:44:02"
+            }
+          },
+          {
+            "work_id": "ofPvVU3Zy-qPaXftKdsaKt9vBTCzmSzD",
+            "video_id": "2083221587818659840",
+            "attempt_token": "kEos4vLybqP4a8dxiYWmxHm-jGtXVagGJ9bmt9Y-Mzc",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676607296,
+            "source_revision": "13301391c2c9c31b0bb7ba43ae26c6dc366c47da0e843f8aa17f8898a5e596be",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "1378bcdcb5167a85d0fd70312a02ebebafa8e977c630422601ea01652d535f1d",
+            "card": {
+              "card_hash": "8102ced4648f5f25a77f297105b1493449c888b8657d6527d131ce68d69393f0",
+              "channel": "Nav Toor",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/heynavtoor/status/2083221614595051602",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "3928bf139b160614663548e9ff712e471964d00d09b94cacf6476152c138f2de",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Apple's product pages have that scroll effect. The camera flies through a 3D world. Products float. Scenes transition. No cuts. One continuous flight driven by your scroll wheel.  Here is what one costs",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Apple's product pages have that scroll effect. The camera flies through a 3D world. Products float. Scenes transition. No cuts. One continuous flight driven by your scroll wheel.  Here is what one costs to build in 2026.  Big storytelling agencies (Noomo, WithLore, Utsubo): https://t.co/xpk9pdSSQz No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Nav_Toor_-_Apple_s_product_pages_have_that_scroll_effect_The_camera_flies_throu",
+              "source_revision": "13301391c2c9c31b0bb7ba43ae26c6dc366c47da0e843f8aa17f8898a5e596be",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Apple's product pages have that scroll effect. The camera flies through a 3D world. Products float. Scenes transition. No cuts. One continuous flight driven by your scroll wheel.  Here is what one costs to build in 2026.  Big storytelling agencies (Noomo, WithLore, Utsubo): https://t.co/xpk9pdSSQz No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)",
+              "title": "Nav Toor - Apple's product pages have that scroll effect. The camera flies throu...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/heynavtoor/status/2083221614595051602",
+              "video_id": "2083221587818659840",
+              "yoinked_at": "2026-08-01T07:49:37"
+            }
+          },
+          {
+            "work_id": "rNDU_uQp6VjNCIILPSt6FIU5WV8vS0h7",
+            "video_id": "2082906527178915840",
+            "attempt_token": "55K8D4xLLkt6CF3sh8XStkbV3Cw4L3PFpnjiR7zfHgw",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676607297,
+            "source_revision": "bcf3cedcb38184529c26499229387932ece67899a7b7b96967d7a514975d6c44",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "7ddf9a6b9cf976fbba1d83f5d43db71e2b8b672aef9b3d7177be05c94e4d86a6",
+            "card": {
+              "card_hash": "80a514c432a423c78812de016351ad3e4365b92f4a9abfe8b90e48c54d58f282",
+              "channel": "Nous Research",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/NousResearch/status/2082911477904654741",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "289cc3ae8f1918575a4b5d475697cd929c492cbba6cc714657cdf6972427823a",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> FLUX 3 Preview is now publicly available, only on Hermes Agent and free on all Nous Portal paid subs for the next 48 hours.  Create a short film with it tagging @NousResearch and @bfl_ai - the 3 best en",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> FLUX 3 Preview is now publicly available, only on Hermes Agent and free on all Nous Portal paid subs for the next 48 hours.  Create a short film with it tagging @NousResearch and @bfl_ai - the 3 best entrants by 7PM PT on August 1st will receive: 1st place: 1 year of free FLUX 3 https://t.co/66UEnM2Yr3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Nous_Research_-_FLUX_3_Preview_is_now_publicly_available_only_on_Hermes_Agent_an",
+              "source_revision": "bcf3cedcb38184529c26499229387932ece67899a7b7b96967d7a514975d6c44",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> FLUX 3 Preview is now publicly available, only on Hermes Agent and free on all Nous Portal paid subs for the next 48 hours.  Create a short film with it tagging @NousResearch and @bfl_ai - the 3 best entrants by 7PM PT on August 1st will receive: 1st place: 1 year of free FLUX 3 https://t.co/66UEnM2Yr3 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+              "title": "Nous Research - FLUX 3 Preview is now publicly available, only on Hermes Agent and fr...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/NousResearch/status/2082911477904654741",
+              "video_id": "2082906527178915840",
+              "yoinked_at": "2026-07-31T07:44:15"
+            }
+          },
+          {
+            "work_id": "s4TODUmNAW-ksQP5duHXfHHqL2DqIwBu",
+            "video_id": "2082869737017749506",
+            "attempt_token": "h33oWLJxMubNKs9A6EgOqVRIjfw3AegZi098eNhWnY8",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676607298,
+            "source_revision": "753cd66e8657accf25b8714ff45fe62c7926dda90837300a1945c5214ac3f685",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "a62b8205df110ff4e76fcf91841f0f40f596917abe43e31fb4c37cf14362a5d0",
+            "card": {
+              "card_hash": "b9394c05ccb94a292f54413e001159bed14d89e20cd1b0254e6f7afe3a8ba7b7",
+              "channel": "Camden Hulse",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/camden_hulse/status/2082874643095195800",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "8bfc80ddc6fdc1b0b71827dc273a14a2ec90717da0af35c06eaa7cf0cec9ff4f",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> today we're launching treena.  the coding environment with no laptop in the loop. https://t.co/PV3qvrNLkG No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disa",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> today we're launching treena.  the coding environment with no laptop in the loop. https://t.co/PV3qvrNLkG No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Camden_Hulse_-_today_we_re_launching_treena_the_coding_environment_with_no_lapto",
+              "source_revision": "753cd66e8657accf25b8714ff45fe62c7926dda90837300a1945c5214ac3f685",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> today we're launching treena.  the coding environment with no laptop in the loop. https://t.co/PV3qvrNLkG No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Camden Hulse - today we're launching treena.  the coding environment with no laptop ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/camden_hulse/status/2082874643095195800",
+              "video_id": "2082869737017749506",
+              "yoinked_at": "2026-07-31T07:44:09"
+            }
+          },
+          {
+            "work_id": "DdcYdVvpYZIvn-w49mjzgPhcqsMW2Eqp",
+            "video_id": "2083353238913392640",
+            "attempt_token": "OUMDOBIOYzGUyG8TJpCsFqqgQyOJTYhkH8dPhqgd2OI",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788676607298,
+            "source_revision": "a1cb469571b255c6c97aee289de8c60d7f31b197a601cd1eeaeb537ba753f973",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "06e614e2e8a05e571fe9ddbc40e32504d6486ab0d68f7050d38a843fcc0c7445",
+            "card": {
+              "card_hash": "25e8cb9ea21e5f71142957aa4468273c9da4551c310f465e09075414401aafe7",
+              "channel": "Grok",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/grok/status/2083353607370416632",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "8edc4ac1a01aa0c678f21a5a67c5690f1f313ff1b461ee4dd8969323af82b332",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Imagine Video 1.5 launched last month as our best video model yet, with more lifelike motion and sound. Today it goes even further with text-to-video support, image and voice references, and native 1080",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Imagine Video 1.5 launched last month as our best video model yet, with more lifelike motion and sound. Today it goes even further with text-to-video support, image and voice references, and native 1080p.  https://t.co/OWP5rCxlru https://t.co/bHUf5pz62S No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Grok_-_Imagine_Video_1_5_launched_last_month_as_our_best_video_model_yet_wi",
+              "source_revision": "a1cb469571b255c6c97aee289de8c60d7f31b197a601cd1eeaeb537ba753f973",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Imagine Video 1.5 launched last month as our best video model yet, with more lifelike motion and sound. Today it goes even further with text-to-video support, image and voice references, and native 1080p.  https://t.co/OWP5rCxlru https://t.co/bHUf5pz62S No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Grok - Imagine Video 1.5 launched last month as our best video model yet, wi...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/grok/status/2083353607370416632",
+              "video_id": "2083353238913392640",
+              "yoinked_at": "2026-08-01T07:49:31"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

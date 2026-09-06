@@ -1,0 +1,58 @@
+{
+  "seq": 499,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 14,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "K4WwN7XW-8dsnGwlG9ivKbBUgjJxl9oP",
+      "video_id": "2085409224574545920",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.78,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "7fc39f6f86a151159eb20b137ba53ff80b695cb54fb628d5ace5c591ef540609",
+            "card_hash": "f40c8a70cb5fda7749ec7ab41ab4d94d120e42874a2cea1df1134e2f47c9777e",
+            "quote": "I'm going to talk to you about what's happening in AI",
+            "start": 0.0,
+            "end": 106.879,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        },
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "3eca7d6f412f63ff66124c1c1cd6df43492f2a891c9f4b945067ad6c48471f57",
+            "card_hash": "f40c8a70cb5fda7749ec7ab41ab4d94d120e42874a2cea1df1134e2f47c9777e",
+            "quote": "What They Found Was Again Much Better If You Look At TPU Core Days To Reach Certain Levels Of Accuracy",
+            "start": 1292.93,
+            "end": 1412.819,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

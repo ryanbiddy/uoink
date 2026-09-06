@@ -1,0 +1,39 @@
+{
+  "seq": 423,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "lKJ47FIS-ckXXwNdSO_XCl2PN4VvuQTc",
+      "video_id": "2083941649282105344",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "13d02fb32c27a20d3abe474673b937cb12981d98b7a5e2711150a79164bbe745",
+            "card_hash": "b3c0435bb6af7d30ca16c99c99e5f5a82a39451fab0a3c6674bf5a84b9ddea4c",
+            "quote": "If you think AI video can't be funny then explain this.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

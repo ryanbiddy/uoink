@@ -1,0 +1,822 @@
+{
+  "seq": 511,
+  "tool": "claim_library_work",
+  "wall_ms": 31,
+  "request": {
+    "seq": 511,
+    "url": "http://127.0.0.1:5180/tools/claim_library_work",
+    "tool": "claim_library_work",
+    "method": "POST",
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Uoink-Token": "[REDACTED]",
+      "User-Agent": "uoink-proof-harness/1.0"
+    },
+    "body": {
+      "action": "claim",
+      "run_id": "stage2-2026-09-06",
+      "client_id": "proof-harness",
+      "max_items": 8
+    }
+  },
+  "response": {
+    "seq": 511,
+    "tool": "claim_library_work",
+    "status": 200,
+    "wall_ms": 31,
+    "body": {
+      "ok": true,
+      "result": {
+        "ok": true,
+        "schema_version": 1,
+        "work": [
+          {
+            "work_id": "GHWZ92Q1nJhDw526HC5gG1V0UlTiFIN4",
+            "video_id": "2087221157787525120",
+            "attempt_token": "x_iUuqxjGtscTq7lTBeei6FoyQVbvYfkCSdn6PiAKlY",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677087008,
+            "source_revision": "4d168fd2db2248e6617a9b53aab1f1abfad477c187a3714288f686e9cfc80158",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "33cb8d5a4472689f8fae0c5e3afc752c4ad0807b4b5804dcc8e277beb91a30dc",
+            "card": {
+              "card_hash": "5fe67813b388ad2c358b9eeabb26bb522db2b190a8e048420862e43586109c17",
+              "channel": "Grok Bot",
+              "chars": 1644,
+              "chars_all_clips": 1644,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/bot/status/2087224798078517251#t=6",
+                  "end": 102.909,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "14ad41ceb387aa7204d080d0c270f8fcfee20c3cbbbb4da96747c104428e692e",
+                  "start": 6.339,
+                  "text": "Can you send NDAs to all of our campus leads? How many employees do I have starting on Monday? Confirm which companies are linked in your currently parsing through. There wasn't anything to learn, it was just like bringing out a co-worker o",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/bot/status/2087224798078517251#t=6",
+                  "end": 102.909,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "14ad41ceb387aa7204d080d0c270f8fcfee20c3cbbbb4da96747c104428e692e",
+                  "start": 6.339,
+                  "text": "Can you send NDAs to all of our campus leads? How many employees do I have starting on Monday? Confirm which companies are linked in your currently parsing through. There wasn't anything to learn, it was just like bringing out a co-worker o",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Grok Bot, now in early beta.  Bots are AI teammates that do real work for you. They sign in to your tools, use them just like you do, and come back with finished work. https://t.co/uyfA97yo98 No tags [00:00:06] Can you send NDAs to all of our campus leads? [00:00:09] How many employees do I have starting on Monday? [00:00:11] Confirm which companies [00:00:12] are linked in your currently parsing through. [00:00:20] There wasn't anything to learn, [00:00:22] it was just like bringing [00:00:23] out a co-worker or two my team [00:00:25] Somethin",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Grok_Bot_-_Introducing_Grok_Bot_now_in_early_beta_Bots_are_AI_teammates_that",
+              "source_revision": "4d168fd2db2248e6617a9b53aab1f1abfad477c187a3714288f686e9cfc80158",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Grok Bot, now in early beta.  Bots are AI teammates that do real work for you. They sign in to your tools, use them just like you do, and come back with finished work. https://t.co/uyfA97yo98 No tags [00:00:06] Can you send NDAs to all of our campus leads? [00:00:09] How many employees do I have starting on Monday? [00:00:11] Confirm which companies [00:00:12] are linked in your currently parsing through. [00:00:20] There wasn't anything to learn, [00:00:22] it was just like bringing [00:00:23] out a co-worker or two my team [00:00:25] Somethin",
+              "title": "Grok Bot - Introducing Grok Bot, now in early beta.  Bots are AI teammates that ...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/bot/status/2087224798078517251",
+              "video_id": "2087221157787525120",
+              "yoinked_at": "2026-08-12T07:38:16"
+            }
+          },
+          {
+            "work_id": "HRPAkTbVTVT6bentHJ8NmHjy8Xs7S1XG",
+            "video_id": "2087207632528719872",
+            "attempt_token": "o0bjjUuA77GsVrJZEJ3P3Q9f3TMy7dVmwYEiaQJ1u7A",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677087008,
+            "source_revision": "e7dfc0d8c06087f521414d1b184e7a7803a75c6e51f9b8d00b071e796db34982",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "3eafaf29c9dc6e889d6e806c99b80c5a1713deb1357fead08f0969a63342f0b6",
+            "card": {
+              "card_hash": "983ccf62732fe83126b90a1bd87c370c41aed01bbad35387be98d0609fe84a9a",
+              "channel": "justin",
+              "chars": 1711,
+              "chars_all_clips": 1711,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/justinsunyt/status/2087207830202024358#t=0",
+                  "end": 107.989,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "e671f2902570eb041ff442a1e7ca304af7ccd48dd0443acc42e110415dda4b8e",
+                  "start": 0.0,
+                  "text": "Three months ago, we launched Cappy the AI software engineer. Since then We've helped thousands of the world's best engineering teams ship hundreds of thousands of PRs Today We're launching CAPPY V2 The fastest and most powerful cloud codin",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/justinsunyt/status/2087207830202024358#t=0",
+                  "end": 107.989,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "e671f2902570eb041ff442a1e7ca304af7ccd48dd0443acc42e110415dda4b8e",
+                  "start": 0.0,
+                  "text": "Three months ago, we launched Cappy the AI software engineer. Since then We've helped thousands of the world's best engineering teams ship hundreds of thousands of PRs Today We're launching CAPPY V2 The fastest and most powerful cloud codin",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Capy v2: the fastest, most powerful cloud coding agent  We beat Claude Code, Codex, Devin and Cursor on DeepSWE while being 50% cheaper  Spawn RLM agents, each with up to 32 vCPU/128GB RAM and &lt;1s VM boots  Bring your Codex/Grok subs  Comment for $100 in free credits https://t.co/MWvR7J2kbl No tags [00:00:00] Three months ago, we launched Cappy the AI software engineer. [00:00:03] Since then We've helped thousands of the world's best engineering teams [00:00:06] ship hundreds of thousands of PRs [00:00:09] Today We're launching CAPPY V2 [00:",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "justin_-_Introducing_Capy_v2_the_fastest_most_powerful_cloud_coding_agent_W",
+              "source_revision": "e7dfc0d8c06087f521414d1b184e7a7803a75c6e51f9b8d00b071e796db34982",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Capy v2: the fastest, most powerful cloud coding agent  We beat Claude Code, Codex, Devin and Cursor on DeepSWE while being 50% cheaper  Spawn RLM agents, each with up to 32 vCPU/128GB RAM and &lt;1s VM boots  Bring your Codex/Grok subs  Comment for $100 in free credits https://t.co/MWvR7J2kbl No tags [00:00:00] Three months ago, we launched Cappy the AI software engineer. [00:00:03] Since then We've helped thousands of the world's best engineering teams [00:00:06] ship hundreds of thousands of PRs [00:00:09] Today We're launching CAPPY V2 [00:",
+              "title": "justin - Introducing Capy v2: the fastest, most powerful cloud coding agent  W...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/justinsunyt/status/2087207830202024358",
+              "video_id": "2087207632528719872",
+              "yoinked_at": "2026-08-12T07:37:58"
+            }
+          },
+          {
+            "work_id": "b0C0bqHdTKu3uhEp9rGthS4wbOX3cClf",
+            "video_id": "2086860232311861248",
+            "attempt_token": "LSGYzB5OO_UzGI9DhdBTbP-bFlvAXaZvZn3Gw8qit2A",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677087009,
+            "source_revision": "ce78c9284754a06f31f1a83d340b59ecc78d308259661450354690f042c3330d",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "c267b1f7bb6c2cc929bbec6c8b706ffa4fe7a925fd03140e889b512e4f703f47",
+            "card": {
+              "card_hash": "164791a8ff9f8fdd6542a9052b55ec4b933d19dc1fcfd882e89698eae12ecb8d",
+              "channel": "OpenAI",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/OpenAI/status/2086864365379010729",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "612c798b100115b7794799c03de61f8a4d8a2b4a77f99601bb77c8e9ba41ef74",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> We’re expanding our cybersecurity initiative Daybreak and introducing GPT-5.6-Cyber, a new model for advanced, authorized cybersecurity work.  As the threat landscape evolves, we’re putting frontier int",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> We’re expanding our cybersecurity initiative Daybreak and introducing GPT-5.6-Cyber, a new model for advanced, authorized cybersecurity work.  As the threat landscape evolves, we’re putting frontier intelligence in the hands of trusted defenders before attackers can deploy https://t.co/6o3GtxCxRA No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "OpenAI_-_We_re_expanding_our_cybersecurity_initiative_Daybreak_and_introducing",
+              "source_revision": "ce78c9284754a06f31f1a83d340b59ecc78d308259661450354690f042c3330d",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> We’re expanding our cybersecurity initiative Daybreak and introducing GPT-5.6-Cyber, a new model for advanced, authorized cybersecurity work.  As the threat landscape evolves, we’re putting frontier intelligence in the hands of trusted defenders before attackers can deploy https://t.co/6o3GtxCxRA No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "OpenAI - We’re expanding our cybersecurity initiative Daybreak and introducing...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/OpenAI/status/2086864365379010729",
+              "video_id": "2086860232311861248",
+              "yoinked_at": "2026-08-11T07:39:08"
+            }
+          },
+          {
+            "work_id": "cZpbqmKkXJTV4HuDsTOn6CBteKWnzGDm",
+            "video_id": "2087174761277538304",
+            "attempt_token": "jarDkk8sxVo-JpC0rXO43iUqwuqP0YeR3c3DaXwJ1J8",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677087010,
+            "source_revision": "3f3e612e29026894f57cbd6792fce5d5e4cdcb971725495469bb5bb456d00b96",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "9fd7c0449f6f8ca3e2c2d35ecd9bd4b8b3eebee16bf3b32924fa953a2627fea1",
+            "card": {
+              "card_hash": "7fad19e6c232106f57a64d5a8635bf95398af5a62198eb324a25fa7ceaf37be3",
+              "channel": "Unsloth AI",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "AI and ML",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/UnslothAI/status/2087177146662072546",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "dc83e45dcd7b1f1b64d3728478f3153216ede65eb4d555629a00ad4625107706",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Unsloth Desktop 🦥 The first desktop app to run and train models locally.  • Open-source. Runs on Mac, Windows and Linux • Supports MLX, diffusion image/video, audio, GGUF • Connect Claude Co",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Unsloth Desktop 🦥 The first desktop app to run and train models locally.  • Open-source. Runs on Mac, Windows and Linux • Supports MLX, diffusion image/video, audio, GGUF • Connect Claude Code and Codex to local LLMs • 50% more accurate, self-healing tool calls + https://t.co/vjTFB1e5IQ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Unsloth_AI_-_Introducing_Unsloth_Desktop_The_first_desktop_app_to_run_and_train",
+              "source_revision": "3f3e612e29026894f57cbd6792fce5d5e4cdcb971725495469bb5bb456d00b96",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Introducing Unsloth Desktop 🦥 The first desktop app to run and train models locally.  • Open-source. Runs on Mac, Windows and Linux • Supports MLX, diffusion image/video, audio, GGUF • Connect Claude Code and Codex to local LLMs • 50% more accurate, self-healing tool calls + https://t.co/vjTFB1e5IQ No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app",
+              "title": "Unsloth AI - Introducing Unsloth Desktop 🦥 The first desktop app to run and train ...",
+              "topic": "AI and ML",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/UnslothAI/status/2087177146662072546",
+              "video_id": "2087174761277538304",
+              "yoinked_at": "2026-08-12T07:38:36"
+            }
+          },
+          {
+            "work_id": "eqRbazIuz7ybgZQCt4OzI1XKkfUchppZ",
+            "video_id": "2086886182776868865",
+            "attempt_token": "ByZrECIAFI7WQ422yp0udt9shlCM4konfOj5QooIHnc",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677087010,
+            "source_revision": "5884ea529275806ff99b3a0119609e1450185337736961f70630f229488d2a24",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "7174fb4bd21f3b3ce5453c909b5dee49234dfe67b9e7397859217cdea436770f",
+            "card": {
+              "card_hash": "65fa23f662999901f45144cf3a4d246baa080e62c3651bd440239526ed873191",
+              "channel": "Adam Holter",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/AdamHoltererer/status/2086886304583663726",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "7ab29380f7d3d0ac73d91fd5cc6806f7364f694860688ad0273b841d78940226",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Trying to burn through my codex limit before Tibo's reset be like https://t.co/5Zatph1PuU No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this vid",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Trying to burn through my codex limit before Tibo's reset be like https://t.co/5Zatph1PuU No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Adam_Holter_-_Trying_to_burn_through_my_codex_limit_before_Tibo_s_reset_be_like",
+              "source_revision": "5884ea529275806ff99b3a0119609e1450185337736961f70630f229488d2a24",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Trying to burn through my codex limit before Tibo's reset be like https://t.co/5Zatph1PuU No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "Adam Holter - Trying to burn through my codex limit before Tibo's reset be like",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/AdamHoltererer/status/2086886304583663726",
+              "video_id": "2086886182776868865",
+              "yoinked_at": "2026-08-11T07:38:51"
+            }
+          },
+          {
+            "work_id": "fapUhfVzV6aJ95DlSYH-qQfsi77D1hgM",
+            "video_id": "2086894292539424768",
+            "attempt_token": "C-Q8ZXrRnQmi2e8eOeL_ORFpyjTPwIMcXPdCM8rCnMI",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677087011,
+            "source_revision": "d526a6f940a9520931b7ca94b19c26fe8592a8e3b99330999c8933984d85ee17",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "3af650e5e31df31f95f1c0c75f22bd4c4e01094db93540d0ad27a5f3026a6d4c",
+            "card": {
+              "card_hash": "e8dfe394c660a7d3e4d8a3cac26511b8882c593ed3597eed713ac23fa528abe4",
+              "channel": "Michael Wang",
+              "chars": 1052,
+              "chars_all_clips": 1052,
+              "chars_chosen_clips": 240,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/michaelwangelo/status/2086895728467812810#t=0",
+                  "end": 58.8,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "8bfe2833b433993df1d47592cae20945e09af2d806a510b79fb0efbcd1ca20da",
+                  "start": 0.0,
+                  "text": "We're Prodigy, an AI trading research lab. We've built the world's best foundation model for quantitative finance. We're already trading live in the financial markets, and we've more than doubled our money in the last two months, while the ",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/michaelwangelo/status/2086895728467812810#t=0",
+                  "end": 58.8,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "8bfe2833b433993df1d47592cae20945e09af2d806a510b79fb0efbcd1ca20da",
+                  "start": 0.0,
+                  "text": "We're Prodigy, an AI trading research lab. We've built the world's best foundation model for quantitative finance. We're already trading live in the financial markets, and we've more than doubled our money in the last two months, while the ",
+                  "timing": "source_cues",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Today, we’re launching Prodigy Research (YC S26), the frontier AI trading research lab. We’re training the world’s best foundation model for quantitative finance.  Our AI quant outperforms a top 10% trader at Jane Street, and we've already achieved more than 100% returns in live https://t.co/gB7EE7hE0e No tags [00:00:00] We're Prodigy, an AI trading research lab. [00:00:02] We've built the world's best foundation model for quantitative finance. [00:00:06] We're already trading live in the financial markets, [00:00:09] and we've more than doubled our money ",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Michael_Wang_-_Today_we_re_launching_Prodigy_Research_YC_S26_the_frontier_AI_tra",
+              "source_revision": "d526a6f940a9520931b7ca94b19c26fe8592a8e3b99330999c8933984d85ee17",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Today, we’re launching Prodigy Research (YC S26), the frontier AI trading research lab. We’re training the world’s best foundation model for quantitative finance.  Our AI quant outperforms a top 10% trader at Jane Street, and we've already achieved more than 100% returns in live https://t.co/gB7EE7hE0e No tags [00:00:00] We're Prodigy, an AI trading research lab. [00:00:02] We've built the world's best foundation model for quantitative finance. [00:00:06] We're already trading live in the financial markets, [00:00:09] and we've more than doubled our money ",
+              "title": "Michael Wang - Today, we’re launching Prodigy Research (YC S26), the frontier AI tra...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/michaelwangelo/status/2086895728467812810",
+              "video_id": "2086894292539424768",
+              "yoinked_at": "2026-08-11T07:38:56"
+            }
+          },
+          {
+            "work_id": "jWA-3oJktK69q6vljHdTIvfOlIibT252",
+            "video_id": "2086975532756041728",
+            "attempt_token": "SgbGPzQW5acIqmkqWeYXkibAessApXiQFdhaHHZf4f8",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677087012,
+            "source_revision": "06a03a3cea08ddf416bcefa4e3ca69443da49efa815808937f2b01fd4e64d204",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "c2159eef5c10f34aca5795eaf8424d41bec2ae51ddc6035ab2dadcef6eaac268",
+            "card": {
+              "card_hash": "1deec8914b95da2615eedab74320b99113f44468ccb50af1c16294c442dc734b",
+              "channel": "Teknium 🪽",
+              "chars": 0,
+              "chars_all_clips": 0,
+              "chars_chosen_clips": 0,
+              "clip_count": 0,
+              "clips": [],
+              "current_topic": "Uncategorized",
+              "evidence_kind": "text_only",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/Teknium/status/2086975696786829471",
+                  "end": null,
+                  "evidence_kind": "text_only",
+                  "excerpt_id": "cd1f6a7c6e9696cf2e081ad6297979c62916947f56b1bdf7c9aedf485df091ed",
+                  "start": null,
+                  "text": "<!-- HOOK_START --> <!-- HOOK_END --> Hermes Pixel Office is now live on VSCode for the extension and on GitHub for the Hermes Agent Plugin!  VSCode can now give you a visualization of all your hermes agents working live, check out the demo",
+                  "timing": "not_timed",
+                  "truncated": true
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> Hermes Pixel Office is now live on VSCode for the extension and on GitHub for the Hermes Agent Plugin!  VSCode can now give you a visualization of all your hermes agents working live, check out the demo:  Search \"Hermes Pixel Office\" on VSCode Extension Marketplace and check the https://t.co/esMZdOpC56 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+                "truncated": true
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "Teknium_-_Hermes_Pixel_Office_is_now_live_on_VSCode_for_the_extension_and_on_Gi",
+              "source_revision": "06a03a3cea08ddf416bcefa4e3ca69443da49efa815808937f2b01fd4e64d204",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> Hermes Pixel Office is now live on VSCode for the extension and on GitHub for the Hermes Agent Plugin!  VSCode can now give you a visualization of all your hermes agents working live, check out the demo:  Search \"Hermes Pixel Office\" on VSCode Extension Marketplace and check the https://t.co/esMZdOpC56 No tags *No captions available for this video.* <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink",
+              "title": "Teknium 🪽 - Hermes Pixel Office is now live on VSCode for the extension and on Gi...",
+              "topic": "Uncategorized",
+              "truncated": true,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/Teknium/status/2086975696786829471",
+              "video_id": "2086975532756041728",
+              "yoinked_at": "2026-08-11T07:38:45"
+            }
+          },
+          {
+            "work_id": "jlasbvn02NBY2ChXvJnbzm5j0zsIGABE",
+            "video_id": "2087232179613077504",
+            "attempt_token": "2FNN26ljVMz3QgFpfgD4TLNaCLxzDJsJCA2haC63ywg",
+            "attempt_number": 1,
+            "lease_expires_ms": 1788677087012,
+            "source_revision": "c13c1cf5ecfe91918b658245d31870f3e15168d6f54d20bd9b60b50ae635011d",
+            "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+            "packet_hash": "986960282771c88f6614bb3908575b09653c61105fbdc099bdfacc63c36fa3d6",
+            "card": {
+              "card_hash": "3d0466571f0c2e2a7673285352ed138a6696623c299fedca22151ff8be3b94fe",
+              "channel": "ben hylak",
+              "chars": 1,
+              "chars_all_clips": 1,
+              "chars_chosen_clips": 1,
+              "clip_count": 1,
+              "clips": [
+                {
+                  "deep_link": "https://x.com/benhylak/status/2087234787379761474#t=0",
+                  "end": 1.06,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "4d9796c07227357f29591ffc4e759d2502a6243a03e14c81958aae09946396f2",
+                  "start": 0.0,
+                  "text": "🎵",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "current_topic": "AI and ML",
+              "evidence_kind": "timed_clip",
+              "excerpts": [
+                {
+                  "deep_link": "https://x.com/benhylak/status/2087234787379761474#t=0",
+                  "end": 1.06,
+                  "evidence_kind": "timed_clip",
+                  "excerpt_id": "4d9796c07227357f29591ffc4e759d2502a6243a03e14c81958aae09946396f2",
+                  "start": 0.0,
+                  "text": "🎵",
+                  "timing": "source_cues",
+                  "truncated": false
+                }
+              ],
+              "hint": {
+                "kind": "opening_prose",
+                "text": "<!-- HOOK_START --> <!-- HOOK_END --> introducing rd-signal-2: a frontier classification model that is 1600x cheaper than GPT 5.6 Sol.  free to try in @raindrop_ai, and available via a new API for training/hosting custom classifiers with Zero Data Retention. https://t.co/fYvtAa8mTR No tags [00:00:00] 🎵 <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+                "truncated": false
+              },
+              "platform": "x",
+              "profile": "librarian",
+              "schema_version": 1,
+              "selection_version": "spread-longest-v1",
+              "slug": "ben_hylak_-_introducing_rd-signal-2_a_frontier_classification_model_that_is_1600",
+              "source_revision": "c13c1cf5ecfe91918b658245d31870f3e15168d6f54d20bd9b60b50ae635011d",
+              "source_type": "x_thread",
+              "status": "evidenced",
+              "summary_hint": "<!-- HOOK_START --> <!-- HOOK_END --> introducing rd-signal-2: a frontier classification model that is 1600x cheaper than GPT 5.6 Sol.  free to try in @raindrop_ai, and available via a new API for training/hosting custom classifiers with Zero Data Retention. https://t.co/fYvtAa8mTR No tags [00:00:00] 🎵 <!-- yoink:comments-start --> *Comments are disabled on this video.* <!-- yoink:comments-end --> *No channel description available.* - *No recent videos found.* *[Uoinked with Uoink by ReplayRyan](https://uoink.app)*",
+              "title": "ben hylak - introducing rd-signal-2: a frontier classification model that is 1600...",
+              "topic": "AI and ML",
+              "truncated": false,
+              "truncation": {
+                "byte_budget": false,
+                "fields": [],
+                "selection": false
+              },
+              "url": "https://x.com/benhylak/status/2087234787379761474",
+              "video_id": "2087232179613077504",
+              "yoinked_at": "2026-08-12T07:38:10"
+            }
+          }
+        ],
+        "taxonomy": {
+          "nodes": [
+            {
+              "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems.",
+              "exclude": [
+                "traditional non-AI software development",
+                "general business operations",
+                "unrelated science and hardware"
+              ],
+              "include": [
+                "artificial intelligence",
+                "machine learning",
+                "deep learning",
+                "neural networks",
+                "foundation models",
+                "LLMs",
+                "autonomous systems"
+              ],
+              "name": "AI and ML",
+              "parent_shelf_id": null,
+              "path": [
+                "AI and ML"
+              ],
+              "retired": false,
+              "shelf_id": "ai-and-ml"
+            },
+            {
+              "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+              "exclude": [
+                "discussion of an AI/tech product or capability -> AI and ML",
+                "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+                "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+              ],
+              "include": [
+                "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+                "raw police/military radio or scanner audio captured during an unfolding event",
+                "political or cultural opinion segments from talk shows or panels"
+              ],
+              "name": "News and Current Events",
+              "parent_shelf_id": null,
+              "path": [
+                "News and Current Events"
+              ],
+              "retired": false,
+              "shelf_id": "news-and-current-events"
+            },
+            {
+              "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+              "exclude": [
+                "commercial airline aviation",
+                "science fiction and fantasy entertainment",
+                "general consumer technology"
+              ],
+              "include": [
+                "space exploration",
+                "astronautics",
+                "astronomy",
+                "orbital mechanics",
+                "spacecraft engineering",
+                "scientific research"
+              ],
+              "name": "Space and Science",
+              "parent_shelf_id": null,
+              "path": [
+                "Space and Science"
+              ],
+              "retired": false,
+              "shelf_id": "space-and-science"
+            },
+            {
+              "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+              "exclude": [
+                "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+                "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+                "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+                "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+                "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+              ],
+              "include": [
+                "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+                "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+                "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+                "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+                "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+              ],
+              "name": "AI Agents and Automation",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Agents and Automation"
+              ],
+              "retired": false,
+              "shelf_id": "ai-agents-and-automation"
+            },
+            {
+              "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+              "exclude": [
+                "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+                "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+                "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+                "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+                "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security"
+              ],
+              "include": [
+                "executive or public figure names who is winning the AI competitive race",
+                "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+                "commentary that a company now faces real competition in the AI market",
+                "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+                "reported revenue or annual recurring revenue (ARR) figures for an AI company"
+              ],
+              "name": "AI Industry and Business",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "AI Industry and Business"
+              ],
+              "retired": false,
+              "shelf_id": "ai-industry-and-business"
+            },
+            {
+              "definition": "Software engineering tooling, agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows.",
+              "exclude": [
+                "consumer conversational chatbots",
+                "pure theoretical ML papers without tools",
+                "non-technical end-user products"
+              ],
+              "include": [
+                "coding assistants",
+                "agent harnesses",
+                "developer workflows",
+                "software development SDKs",
+                "IDE integrations",
+                "code generation"
+              ],
+              "name": "Developer Tools",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Developer Tools"
+              ],
+              "retired": false,
+              "shelf_id": "developer-tools"
+            },
+            {
+              "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, and fundamental principles of machine learning.",
+              "exclude": [
+                "product announcements",
+                "marketing keynotes",
+                "opinion pieces without pedagogical content"
+              ],
+              "include": [
+                "introductory lectures",
+                "algorithm explanations",
+                "machine learning coursework",
+                "mathematical foundations",
+                "step-by-step technical tutorials"
+              ],
+              "name": "Education",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Education"
+              ],
+              "retired": false,
+              "shelf_id": "education"
+            },
+            {
+              "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+              "exclude": [
+                "routine fine-tuning on niche tasks",
+                "end-user application tutorials",
+                "general AI business news"
+              ],
+              "include": [
+                "foundation model architectures",
+                "multimodal model releases",
+                "scaling laws",
+                "model capabilities benchmarks",
+                "open weights models"
+              ],
+              "name": "Frontier Models",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Frontier Models"
+              ],
+              "retired": false,
+              "shelf_id": "frontier-models"
+            },
+            {
+              "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+              "exclude": [
+                "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+                "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+                "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+                "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+              ],
+              "include": [
+                "prompt-driven 3D or claymation-style animation generated as the shown output",
+                "an AI-generated short film entered in or winning an AI-specific film award",
+                "an AI animated film premiered at a creative or computer-graphics industry event",
+                "AI image/video generation models used to build a visual website shown as the output",
+                "AI-generated video content praised firsthand for its entertainment or creative quality",
+                "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+              ],
+              "name": "Generative Media",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Generative Media"
+              ],
+              "retired": false,
+              "shelf_id": "generative-media"
+            },
+            {
+              "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+              "exclude": [
+                "generic network security without AI component",
+                "routine software bug reports",
+                "corporate compliance without technical safety"
+              ],
+              "include": [
+                "agent guardrails",
+                "cybersecurity vulnerabilities",
+                "model sandboxing",
+                "prompt injection defenses",
+                "runtime governance",
+                "least privilege"
+              ],
+              "name": "Security",
+              "parent_shelf_id": "ai-and-ml",
+              "path": [
+                "AI and ML",
+                "Security"
+              ],
+              "retired": false,
+              "shelf_id": "security"
+            },
+            {
+              "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+              "exclude": [
+                "terrestrial astronomy without launch systems",
+                "atmospheric aeronautics",
+                "speculative science fiction"
+              ],
+              "include": [
+                "rocket launches",
+                "crewed space missions",
+                "orbital maneuvers",
+                "satellite deployment",
+                "astronaut spacewalks",
+                "space station resupply"
+              ],
+              "name": "Spaceflight",
+              "parent_shelf_id": "space-and-science",
+              "path": [
+                "Space and Science",
+                "Spaceflight"
+              ],
+              "retired": false,
+              "shelf_id": "spaceflight"
+            }
+          ],
+          "parent_version_id": "taxonomy-v1-2026-09-04",
+          "revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+          "schema_version": 1,
+          "version_id": "taxonomy-v2-2026-09-05"
+        },
+        "rules": {
+          "min_confidence": 0.6,
+          "max_memberships": 3,
+          "max_churn_percent": 15,
+          "prompt_hash": "662e8ee8133110beefb59b948e4dcebf9e64104c1e6f97deb08aee4000221ae1",
+          "selection_version": "spread-longest-v1",
+          "card_schema": 1
+        },
+        "blocked": []
+      }
+    }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "seq": 1119,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "vI8pR24XJwjQT92nivFB50wD0LzP1bWI",
+    "client_id": "proof-harness",
+    "attempt_token": "rr_t0HkpOH4Ib_yXdCpkPIb5qlvGcpeTY_3xnqGq4Cs",
+    "submission_key": "vI8pR24XJwjQT92nivFB50wD0LzP1bWI-rr_t0HkpOH4Ib_yXdCpkPIb5qlvGcpeTY_3xnqGq4Cs",
+    "schema_version": 1,
+    "video_id": "2095522272358342657",
+    "source_revision": "42366dad62a3199fba19f2d13c8e6f41dd8f8df0afc8c0d67479b9f98ff530ad",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "73f4068d592b2c66afae7c00283af993bad575933cf7cb2e4b502a4fde2b0067",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "generative-media",
+          "shelf_path": [
+            "AI and ML",
+            "Generative Media"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "7bd8a709f812571a7aacfb84ddef7f922ede5595275e911ac74f243a2159b71c",
+            "card_hash": "fa943a9dabfb4cfd102073081019755d4bf9c217fd65bb6b627fdca18fced183",
+            "quote": "Made this beautiful PS1 style Beyblade game, which is actually pretty addictive and fun to play."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 22661,
+      "cache_read_tokens": 92574,
+      "cache_create_tokens": 60449,
+      "wall_time_ms": 0
+    }
+  }
+}

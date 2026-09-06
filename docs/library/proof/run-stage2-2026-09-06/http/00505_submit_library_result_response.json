@@ -1,0 +1,39 @@
+{
+  "seq": 505,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "QdI9umAPCbU9IP-CZEippHiOpwwm49Pn",
+      "video_id": "2085414600552628224",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.8,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "2b45625e40e17517834ff1632b7545c50b27baf32eef3ddcfd94b6b63e7d28ef",
+            "card_hash": "c6fde7a0b2e16d4088a8e7deea183c74393c2b158f976730cd381f826c39c904",
+            "quote": "the models have become capable enough to do most of their work on your computers",
+            "start": 0.0,
+            "end": 70.299,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

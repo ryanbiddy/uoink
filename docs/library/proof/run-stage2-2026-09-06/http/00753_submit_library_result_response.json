@@ -1,0 +1,39 @@
+{
+  "seq": 753,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "syQpceRoiz9F7D__C-QlqLyYuwdCEBSz",
+      "video_id": "2089363218745450496",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "education",
+          "shelf_path": [
+            "AI and ML",
+            "Education"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "8d6311b93e2e8ea9072e52a8c6c3fa67f61ffd76ef30b2198c7d17d13f81f089",
+            "card_hash": "256074e2ed8802f90a07fa72dce256a3f23d7468c3ac23b7820e67c212fcdc2b",
+            "quote": "Prompting is fading away. Delete everything else and keep the graph.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

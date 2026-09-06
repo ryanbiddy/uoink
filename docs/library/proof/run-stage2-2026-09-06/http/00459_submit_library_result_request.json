@@ -1,0 +1,51 @@
+{
+  "seq": 459,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "JrgBW5YDZiETTpgjTObJpUcWrG3cfN6T",
+    "client_id": "proof-harness",
+    "attempt_token": "Xgn6MHgXCPhvgQfruqx7mBStx3Mf-zx0NjFsorpQOBA",
+    "submission_key": "JrgBW5YDZiETTpgjTObJpUcWrG3cfN6T-Xgn6MHgXCPhvgQfruqx7mBStx3Mf-zx0NjFsorpQOBA",
+    "schema_version": 1,
+    "video_id": "2084663739400249344",
+    "source_revision": "f2c124b81751a266b886d726151907e80c29379079ff4a8f907a3b1a37b31757",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "1024f0800bfd359c0a941849f47a9ea6779f1b8371ba6c597c1133ee8e3937aa",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "frontier-models",
+          "shelf_path": [
+            "AI and ML",
+            "Frontier Models"
+          ],
+          "confidence": 0.62,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "87395098d4cbe31201516e2a3f5b8b034b4539ee19971f2de2a11c714428762e",
+            "card_hash": "ea33881541f7580c80996dec01cc556a440905fe3c2b271e35ff68e87ae70eb6",
+            "quote": "this open reasoning model adds 360° awareness, high-level driving decision"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 20008,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 23870,
+      "wall_time_ms": 0
+    }
+  }
+}

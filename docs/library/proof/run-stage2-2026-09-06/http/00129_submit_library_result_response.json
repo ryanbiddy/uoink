@@ -1,0 +1,38 @@
+{
+  "seq": 129,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 26,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "SG4xtN4DHvd_HSuf1I9GliAcKeU_Ge7j",
+      "video_id": "2079672460769964032",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.65,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "c4f80e18847620c801d1728dab96e42c493d156b4b124c8589beec4b887cf75d",
+            "card_hash": "d3019d3befd8c5f9d4e20f0eb4332afcc180d4a9ddc69a0334f1ec3255a1b8c3",
+            "quote": "I wrote the full Craftax RL environment + PPO in one CUDA file. zero python in the loop.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

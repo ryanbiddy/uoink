@@ -1,0 +1,39 @@
+{
+  "seq": 31,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "2kmAoyTqeinHGhfoNMjUDg-sDCngeNIl",
+      "video_id": "1851588159403884544",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "spaceflight",
+          "shelf_path": [
+            "Space and Science",
+            "Spaceflight"
+          ],
+          "confidence": 0.75,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "57d638788b4c656699dfbb39956da5b8a6f79e4631928b56299eb924cde096ce",
+            "card_hash": "345e933fa7330c826a675f74049da099fe2e0f557d8e6ad407f8b9cbb77a1b04",
+            "quote": "the Starship mission was done entirely with human brains without any use of A.I.",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

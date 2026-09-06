@@ -1,0 +1,38 @@
+{
+  "seq": 971,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "eD_6tLpZssDbr47Z0yzsSha8Yo6shJCb",
+      "video_id": "2092919679475941376",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-and-ml",
+          "shelf_path": [
+            "AI and ML"
+          ],
+          "confidence": 0.68,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "d1df9c64a6a8b9b5b52c1ae71a34101d472bf7d181a33bc828d2fec908386d0c",
+            "card_hash": "ae9a428c318b8ca6ea41d2fa21239e80bc676f6a5a8b730137ac26460544b761",
+            "quote": "the first truly accessible RL robot - welcome Microduck",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

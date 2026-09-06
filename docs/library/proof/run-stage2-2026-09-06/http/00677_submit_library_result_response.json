@@ -1,0 +1,39 @@
+{
+  "seq": 677,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 3,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "JFMO5S5ErHtzXG6ZzAThH4x_LJeoRm8R",
+      "video_id": "2088664969847959552",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "ai-agents-and-automation",
+          "shelf_path": [
+            "AI and ML",
+            "AI Agents and Automation"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "timed_clip",
+            "excerpt_id": "1ae41a0fdc38f91ad1edd150a6bd94498705e6ed33aa8dbc7b55288b2bc7ca7c",
+            "card_hash": "0967d4b17977d4d0f6a7b57e6e0309fff852d20147c7ed0ad5fbae845b07522d",
+            "quote": "Watch your computer screen all the time",
+            "start": 0.5,
+            "end": 54.07,
+            "timing": "source_cues",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}

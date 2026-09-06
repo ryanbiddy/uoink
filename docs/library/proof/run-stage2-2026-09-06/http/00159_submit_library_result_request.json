@@ -1,0 +1,51 @@
+{
+  "seq": 159,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "-H8TNoUr3kToxcYV24X1m35DgZRYmViO",
+    "client_id": "proof-harness",
+    "attempt_token": "eOZOw1HB6WJrdNmS1vKxaC9PqeAuVyWsf4AAh55UPzo",
+    "submission_key": "-H8TNoUr3kToxcYV24X1m35DgZRYmViO-eOZOw1HB6WJrdNmS1vKxaC9PqeAuVyWsf4AAh55UPzo",
+    "schema_version": 1,
+    "video_id": "2080709349606150317",
+    "source_revision": "58394149a42fe520d87224e7b13f24c5e08ff70f3035370762f9bdb2679a0fb2",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "f9af920d6fccf713b519efb0670a0e5e35b0c39fa57b1228ff95cb21738947f1",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.88,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "00bba5b6c53e3ece7235e9e1db88eee80efde1a903571571e926efeb5338a2f0",
+            "card_hash": "77b3a6109c04b43f6c6b37080f1e0d776118446304a4d5ce43f972c18d62fa72",
+            "quote": "Tried recreating Fall Guys using the exact same prompt with Claude Opus 5.0 (Claude Code) and Kimi K3 (Kimi CLI)."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 2,
+      "output_tokens": 12619,
+      "cache_read_tokens": 83191,
+      "cache_create_tokens": 18591,
+      "wall_time_ms": 0
+    }
+  }
+}

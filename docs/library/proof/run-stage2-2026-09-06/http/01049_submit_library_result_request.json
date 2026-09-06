@@ -1,0 +1,51 @@
+{
+  "seq": 1049,
+  "url": "http://127.0.0.1:5180/tools/submit_library_result",
+  "tool": "submit_library_result",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-Uoink-Token": "[REDACTED]",
+    "User-Agent": "uoink-proof-harness/1.0"
+  },
+  "body": {
+    "work_id": "CWhR5LSLC1R_46cbFg-esEOWpjY1Wqtl",
+    "client_id": "proof-harness",
+    "attempt_token": "_SYXIeW_wOWbE2RQiambKiJWxD6IfXac3Jw3JJjCu00",
+    "submission_key": "CWhR5LSLC1R_46cbFg-esEOWpjY1Wqtl-_SYXIeW_wOWbE2RQiambKiJWxD6IfXac3Jw3JJjCu00",
+    "schema_version": 1,
+    "video_id": "2094666723681075201",
+    "source_revision": "ed35a80da3ea6c16f052fa83fb882b15949fd37c98204b6ebe47421ed9cd9199",
+    "taxonomy_revision": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+    "packet_hash": "063935b3c8e784d73a87913017c738b1415ab4dd066dda864ca18bb5763521aa",
+    "result": {
+      "outcome": "assigned",
+      "memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.72,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "942dd848ef1bc5f500e9c43e286f27a027da6a6887937a4744b584057d665a43",
+            "card_hash": "0511471f50a6cee52a805bd2256d0b83e2b4eb43e817aa49589ff954ae14264a",
+            "quote": "Un proyecto open source que supera las 100.000 estrellas en GitHub."
+          }
+        }
+      ]
+    },
+    "usage": {
+      "status": "reported",
+      "model": "claude-sonnet-5",
+      "input_tokens": 4,
+      "output_tokens": 17481,
+      "cache_read_tokens": 92574,
+      "cache_create_tokens": 55566,
+      "wall_time_ms": 0
+    }
+  }
+}

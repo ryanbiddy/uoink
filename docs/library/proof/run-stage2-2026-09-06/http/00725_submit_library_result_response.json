@@ -1,0 +1,39 @@
+{
+  "seq": 725,
+  "tool": "submit_library_result",
+  "status": 200,
+  "wall_ms": 4,
+  "body": {
+    "ok": true,
+    "result": {
+      "ok": true,
+      "schema_version": 1,
+      "work_id": "hOWpg6lG-0XfGyYaA2MhfeC8zzKfgoCx",
+      "video_id": "2089305813735337984",
+      "outcome": "accepted",
+      "accepted_memberships": [
+        {
+          "shelf_id": "developer-tools",
+          "shelf_path": [
+            "AI and ML",
+            "Developer Tools"
+          ],
+          "confidence": 0.85,
+          "evidence": {
+            "basis": "packet",
+            "kind": "text_only",
+            "excerpt_id": "bbe69440fc78006c850cbd45e7270609b13a0b108c04a6af5c9420643ee6e6a7",
+            "card_hash": "09619f128a203a047f015970804c1fec722b6575b0431ee92d9a65c897e4bf25",
+            "quote": "Turn vibe-slop Three.js prototypes into stunning apps",
+            "start": null,
+            "end": null,
+            "timing": "not_timed",
+            "truncated": true
+          }
+        }
+      ],
+      "rejected": [],
+      "retryable": false
+    }
+  }
+}
