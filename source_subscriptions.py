@@ -1756,7 +1756,30 @@ def _child_record_bound(record: dict | None, start_id: str) -> bool:
     children = record.get("children")
     if type(children) is not list:
         return False
-    return all(type(child) is dict for child in children)
+    # AS-6 (AS-02b): the launch-intent flag, when present, must be a real boolean;
+    # a list, string or number is damage, not "resolved".
+    if "unresolved_launch" in record and type(record["unresolved_launch"]) is not bool:
+        return False
+    return all(_child_entry_valid(child) for child in children)
+
+
+def _child_entry_valid(child) -> bool:
+    """AS-6 (AS-02b): a child entry certifies anything only when its identity
+    fields are present and typed (positive int pid, int or None created_ms)
+    and its exit stamp is an int or None. ``ended_ms=false``, a string, or an
+    entry without identity is damage and keeps the start unknown."""
+    if type(child) is not dict:
+        return False
+    pid = child.get("pid")
+    if type(pid) is not int or pid <= 0:
+        return False
+    created = child.get("created_ms")
+    if created is not None and type(created) is not int:
+        return False
+    ended = child.get("ended_ms")
+    if ended is not None and (type(ended) is not int or ended < 0):
+        return False
+    return True
 
 
 def _child_record_or_raise(path: str, start_id: str) -> dict:
@@ -1861,21 +1884,19 @@ def child_ownership_liveness(root, start_id: str) -> str:
         return "unknown"
     verdict = "none"
     for child in record["children"]:
+        # Entries were validated by _child_record_bound: identity present and typed.
         if child.get("ended_ms") is not None:
             continue
-        pid = child.get("pid")
-        if type(pid) is not int or pid <= 0:
-            verdict = "unknown"
-            continue
+        pid = child["pid"]
         created = child.get("created_ms")
-        state = _process_alive(pid, created if type(created) is int else None)
+        state = _process_alive(pid, created)
         if state == "alive":
             return "alive"
         if state == "unknown":
             verdict = "unknown"
         elif verdict == "none":
             verdict = "dead"
-    if record.get("unresolved_launch"):
+    if record.get("unresolved_launch") is True:
         return "unknown"
     return verdict
 
