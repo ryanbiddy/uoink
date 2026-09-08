@@ -12,7 +12,7 @@ CAPTURE_TOOLS = {"uoink_url", "uoink_note", "uoink_image", "uoink_x"}
 
 
 def test_capture_tools_are_http_only_rate_limited_and_counted():
-    assert len(tools.TOOL_REGISTRY) == 77  # +6 Living Library tools, run J
+    assert len(tools.TOOL_REGISTRY) == 81  # +6 Living Library tools (run J), +4 Phase 3 source tools (run AM)
     assert CAPTURE_TOOLS.issubset(tools.TOOL_REGISTRY)
     assert all(tools.TOOL_REGISTRY[name].rate_limiter for name in CAPTURE_TOOLS)
     stdio_names = {tool.name for tool in asyncio.run(uoink_mcp.mcp.list_tools())}

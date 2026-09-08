@@ -306,5 +306,5 @@ def test_bridge_is_available_through_http_and_full_mcp(tmp_path, monkeypatch):
     assert citation_map["transcript_citations"][1]["deep_link"] == (
         "https://show.example/episodes/42#t=64")
     assert "youtube.com" not in json.dumps(citation_map).lower()
-    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 77  # +6 Living Library tools, run J
+    assert len(uoink_mcp_tools.TOOL_REGISTRY) == 81  # +6 Living Library tools (run J), +4 Phase 3 source tools (run AM)
     idx.close()

@@ -135,10 +135,14 @@ def test_all_podcast_state_transitions_survive_close_reopen(tmp_path):
         episode["diarization_ran"],
     ) == ("done", str(transcript_path), "base", 1)
 
+    # Phase 3 (contract phase3-v1, "legacy delete routes"): a feed linked to a source
+    # subscription is archived, not deleted; the row and its episodes survive restart
+    # with detection and ingestion off.
     assert podcasts.remove_feed(idx, feed_id)
     idx = _reopen(idx, db_path)
-    assert podcasts.get_feed(idx, feed_id) is None
-    assert podcasts.list_episodes(idx, feed_id=feed_id) == []
+    feed = podcasts.get_feed(idx, feed_id)
+    assert (feed["enabled"], feed["auto_ingest"]) == (0, 0)
+    assert [e["id"] for e in podcasts.list_episodes(idx, feed_id=feed_id)] == [episode_id]
     idx.close()
 
 
@@ -177,20 +181,24 @@ def test_poll_success_and_failure_metadata_survive_restart(tmp_path, monkeypatch
         lambda _feed: (body, {"ETag": '"poll-v1"'}),
     )
 
+    # Phase 3 (contract phase3-v1, "Scheduler and adapter boundaries"): a linked feed is
+    # polled only through the subscription service's gate. The ungated legacy poll refuses
+    # without network I/O, and the refusal names the source that owns the feed; the feed
+    # row, its link and its (empty) episode list survive restart unchanged.
+    fetched = []
+    monkeypatch.setattr(podcasts, "fetch_feed", lambda feed: fetched.append(feed) or (body, {}))
     result = podcasts.poll_feed(idx, feed_id)
-    assert (result["ok"], result["inserted"], result["seen"]) == (True, 1, 0)
+    assert (result["ok"], result["error"]) == (False, "managed_by_subscription")
+    assert result["source_id"] and fetched == []
     idx = _reopen(idx, db_path)
-    assert podcasts.get_feed(idx, feed_id)["title"] == "Restart Show"
-    assert podcasts.list_episodes(idx, feed_id=feed_id)[0]["guid"] == (
-        "poll-episode"
-    )
+    feed = podcasts.get_feed(idx, feed_id)
+    assert feed["feed_url"] == "https://example.test/feed.xml"
+    assert podcasts.list_episodes(idx, feed_id=feed_id) == []
+    assert podcasts.poll_feed(idx, feed_id)["source_id"] == result["source_id"]
 
-    def fail_fetch(_feed):
-        raise OSError("offline")
-
-    monkeypatch.setattr(podcasts, "fetch_feed", fail_fetch)
-    result = podcasts.poll_feed(idx, feed_id)
-    assert (result["ok"], result["error"]) == (False, "offline")
+    # Fetch failures recorded by the feed-metadata writer still survive restart.
+    podcasts.record_feed_meta(idx, feed_id, title=None, description=None, homepage=None,
+                              etag=None, last_modified=None, ok=False, error="offline")
     idx = _reopen(idx, db_path)
     feed = podcasts.get_feed(idx, feed_id)
     assert (feed["error_count"], feed["last_error"]) == (1, "offline")
