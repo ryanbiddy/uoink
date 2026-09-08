@@ -7999,16 +7999,22 @@
 
         // Detection & Health
         const det = source.detection || {};
-        const errorCount = Number(det.error_count || 0);
+        // C20 (2026-09-08): the registry projects consecutive_failures and error{code,message}
+        // (contract phase3-v1 source_status); the older error_count/last_error names never
+        // arrived, so refresh errors were rendered as "healthy".
+        const errorCount = Number(det.consecutive_failures ?? det.error_count ?? 0);
+        const lastError = det.error && typeof det.error === "object"
+          ? `${det.error.code || "error"}${det.error.message ? ": " + det.error.message : ""}`
+          : (det.last_error || "");
         let healthClass = "healthy";
         let healthLabel = "healthy";
-        if (det.last_error || errorCount > 0) {
+        if (lastError || errorCount > 0) {
           if (errorCount >= 3) {
             healthClass = "error";
-            healthLabel = "Feed unreachable";
+            healthLabel = "Feed unreachable" + ` (${errorCount} failures)`;
           } else {
             healthClass = "degraded";
-            healthLabel = "degraded";
+            healthLabel = `degraded: ${lastError || "poll failed"}`;
           }
         }
         const lastPollStr = det.last_poll_success_ms
@@ -8175,48 +8181,39 @@
     }
 
     async function startConsentFlow(sourceId, targetConsent) {
+      // Bind the operation to the latest persisted revisions: a stale row would be refused
+      // with stale_revision / stale_cursor at confirmation, so refresh before opening.
+      try {
+        await loadStandingSubscriptions();
+      } catch (_) {
+        // The modal still opens on the last known row; confirmation re-validates.
+      }
       const source = (state.standingSources || []).find((s) => s.source_id === sourceId);
-      if (!source) return;
-
+      if (!source) return showToast("Source is no longer listed. Refreshed with latest state.");
+      // C20 (2026-09-08): the intent route requires confirmed:true, which is the user's
+      // click on the modal, so nothing is minted before the modal is confirmed. The
+      // operation is bound to the revisions displayed at the moment the modal opened.
       const opKey = `op_${Date.now()}_${Math.random().toString(16).slice(2, 10)}`;
-      const operation = {
+      state.standingPendingIntent = {
         source_id: source.source_id,
         consent_state: targetConsent,
         expected_revision: Number(source.revision || 0),
+        expected_cursor_revision: targetConsent === "on"
+          ? Number((source.detection && (source.detection.cursor_revision ?? source.detection.revision)) || 0)
+          : undefined,
         operation_key: opKey,
+        user_intent_token: null,
+        expires_ms: null,
       };
-      if (targetConsent === "on") {
-        operation.expected_cursor_revision = Number((source.detection && source.detection.revision) || 0);
-      }
+      openConsentModal(source, targetConsent, null);
+    }
 
-      try {
-        const intentRes = await authFetch("/sources/consent-intent", {
-          method: "POST",
-          body: JSON.stringify({ operation }),
-        });
-        if (!intentRes || !intentRes.user_intent_token) {
-          throw new Error((intentRes && intentRes.error && intentRes.error.message) || "Failed to mint consent intent token");
-        }
-
-        state.standingPendingIntent = {
-          source_id: source.source_id,
-          consent_state: targetConsent,
-          expected_revision: operation.expected_revision,
-          expected_cursor_revision: operation.expected_cursor_revision,
-          operation_key: opKey,
-          user_intent_token: intentRes.user_intent_token,
-          expires_ms: intentRes.expires_ms,
-        };
-
-        openConsentModal(source, targetConsent, intentRes.display_summary);
-      } catch (err) {
-        if (err.message && (err.message.includes("stale_revision") || err.message.includes("stale_cursor"))) {
-          showToast("Source configuration was updated elsewhere. Refreshed with latest state.");
-          await loadStandingSubscriptions();
-        } else {
-          showToast(`Consent preparation failed: ${err.message}`);
-        }
-      }
+    function consentErrorMessage(err) {
+      const data = err && err.data;
+      const inner = data && data.error;
+      if (inner && typeof inner === "object" && inner.message) return `${inner.code ? inner.code + ": " : ""}${inner.message}`;
+      if (typeof inner === "string") return inner;
+      return (err && err.message) || "unknown error";
     }
 
     function openConsentModal(source, targetConsent, displaySummary) {
@@ -8281,18 +8278,26 @@
         els.confirmSourceConsent.textContent = "Updating...";
       }
 
-      const args = {
+      const operation = {
         source_id: intent.source_id,
         consent_state: intent.consent_state,
         expected_revision: intent.expected_revision,
         operation_key: intent.operation_key,
-        user_intent_token: intent.user_intent_token,
       };
       if (intent.consent_state === "on" && intent.expected_cursor_revision != null) {
-        args.expected_cursor_revision = intent.expected_cursor_revision;
+        operation.expected_cursor_revision = intent.expected_cursor_revision;
       }
 
       try {
+        // Mint the user-intent capability now, as the confirmed click (C20).
+        const intentRes = await authFetch("/sources/consent-intent", {
+          method: "POST",
+          body: JSON.stringify({ operation, confirmed: true }),
+        });
+        if (!intentRes || !intentRes.user_intent_token) {
+          throw new Error((intentRes && intentRes.error && intentRes.error.message) || "Failed to mint consent intent token");
+        }
+        const args = { ...operation, user_intent_token: intentRes.user_intent_token };
         await callRegistryTool("set_source_consent", args);
         closeConsentModal();
         showToast(intent.consent_state === "on"
@@ -8300,10 +8305,11 @@
           : "Standing capture turned off.");
       } catch (err) {
         closeConsentModal();
-        if (err.message && (err.message.includes("stale_revision") || err.message.includes("stale_cursor"))) {
+        const detail = consentErrorMessage(err);
+        if (detail.includes("stale_revision") || detail.includes("stale_cursor")) {
           showToast("Source was modified concurrently. Refreshed with latest server state.");
         } else {
-          showToast(`Consent update failed: ${err.message}`);
+          showToast(`Consent update failed: ${detail}`);
         }
       } finally {
         if (els.confirmSourceConsent) els.confirmSourceConsent.disabled = false;
