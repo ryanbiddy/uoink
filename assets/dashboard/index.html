@@ -4262,6 +4262,190 @@
             <a href="https://uoink.app/features/faceted-classification" target="_blank" rel="noreferrer">Learn: Facets</a>
           </div>
 
+          <!-- Phase 5 Part A: Read-Only Library Activity Panel -->
+          <div class="library-activity-panel" id="libraryActivityPanel" role="region" aria-label="Library activity" style="margin-bottom:20px;padding:14px;background:var(--bg-panel, #1e1e1e);border:1px solid #333;border-radius:8px;">
+            <div class="activity-head">
+              <div class="inline-row" style="justify-content:space-between;align-items:center;">
+                <h2 class="activity-title" style="margin:0;font-size:1.25rem;">Library activity</h2>
+                <div class="inline-row" style="gap:8px;align-items:center;">
+                  <span class="activity-as-of" id="libraryActivityAsOf" style="font-size:0.85rem;color:var(--text-muted, #888);">As of ...</span>
+                  <span class="activity-badge" id="libraryActivityBadge" style="font-size:0.75rem;padding:2px 8px;border-radius:4px;background:var(--bg-card, #222);">Live</span>
+                  <button class="button ghost small" type="button" id="libraryActivityRefreshBtn">Refresh</button>
+                </div>
+              </div>
+              <div class="activity-controls inline-row" style="margin-top:10px;gap:12px;flex-wrap:wrap;align-items:center;">
+                <div class="activity-presets inline-row" role="group" aria-label="Interval presets" style="gap:4px;">
+                  <button class="button ghost small" type="button" id="activityPreset1d" data-preset="1">1d</button>
+                  <button class="button ghost small active" type="button" id="activityPreset7d" data-preset="7">7d</button>
+                  <button class="button ghost small" type="button" id="activityPreset30d" data-preset="30">30d</button>
+                </div>
+                <div class="activity-custom-interval inline-row" style="gap:4px;align-items:center;">
+                  <input class="control small" id="activityStartInput" type="text" placeholder="YYYY-MM-DDTHH:MM:SSZ" aria-label="Interval start (UTC)" style="width:170px;font-size:0.8rem;">
+                  <span>to</span>
+                  <input class="control small" id="activityEndInput" type="text" placeholder="YYYY-MM-DDTHH:MM:SSZ" aria-label="Interval end (UTC)" style="width:170px;font-size:0.8rem;">
+                  <button class="button ghost small" type="button" id="activityApplyCustomBtn">Apply</button>
+                </div>
+                <div class="activity-basis inline-row" style="gap:6px;align-items:center;">
+                  <label for="activityDateBasis" style="font-size:0.85rem;">Basis:</label>
+                  <select class="control small" id="activityDateBasis" aria-label="Activity date basis" style="font-size:0.85rem;">
+                    <option value="capture_time">Capture time (default)</option>
+                    <option value="publication_time">Publication time</option>
+                  </select>
+                </div>
+              </div>
+              <div id="activityCustomError" class="field-error hidden" role="status" aria-live="polite" style="margin-top:6px;font-size:0.85rem;color:var(--error, #e55);"></div>
+            </div>
+
+            <div class="activity-coverage-block" id="activityCoverageBlock" style="margin-top:12px;padding:8px 12px;border-radius:6px;background:var(--bg-card, #1a1a1a);font-size:0.85rem;">
+              <div class="inline-row" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <div><strong>UTC Interval:</strong> <span id="activityUtcInterval">-</span></div>
+                <div><strong>Coverage:</strong> <span id="activityCoverageStatus">-</span></div>
+                <div><strong>Exclusions:</strong> <span id="activityExclusions">0</span></div>
+              </div>
+              <div id="activityWarnings" class="activity-warnings hidden" style="color:#d97706;margin-top:4px;font-size:0.8rem;"></div>
+            </div>
+
+            <div class="activity-metrics-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;margin-top:14px;">
+              <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Selected Items</div>
+                <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
+                  <button class="link-button activity-evidence-trigger" type="button" id="activityTotalItems" data-metric-id="items.total" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Live in interval</div>
+              </div>
+              <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Assigned Items</div>
+                <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
+                  <button class="link-button activity-evidence-trigger" type="button" id="activityAssignedItems" data-metric-id="shelf_activity.current_assigned_items" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Current direct members</div>
+              </div>
+              <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Applied Operations</div>
+                <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
+                  <button class="link-button activity-evidence-trigger" type="button" id="activityAppliedOps" data-metric-id="shelf_activity.applied_operations" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">0</button>
+                </div>
+                <div style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">In interval</div>
+              </div>
+              <div class="activity-stat-card" style="padding:10px;border-radius:6px;background:var(--bg-card, #222);">
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);">Interval Churn</div>
+                <div style="font-size:1.4rem;font-weight:600;margin-top:4px;">
+                  <button class="link-button activity-evidence-trigger" type="button" id="activityChurn" data-metric-id="shelf_activity.churn" style="background:none;border:none;padding:0;font-size:inherit;font-weight:inherit;color:inherit;cursor:pointer;text-decoration:underline;">Unavailable</button>
+                </div>
+                <div id="activityChurnSub" style="font-size:0.75rem;color:var(--text-muted, #888);margin-top:2px;">Proved baseline</div>
+              </div>
+            </div>
+
+            <div class="activity-sections" style="margin-top:16px;display:flex;flex-direction:column;gap:16px;">
+              <details class="activity-sub-card" id="activityDailyCard" open style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Daily Activity (<span id="activityDailyCount">0</span> buckets)</summary>
+                <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
+                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Daily activity table">
+                    <thead>
+                      <tr style="text-align:left;border-bottom:1px solid #333;">
+                        <th style="padding:4px 8px;">Date (UTC)</th>
+                        <th style="padding:4px 8px;">Count</th>
+                        <th style="padding:4px 8px;">Share</th>
+                      </tr>
+                    </thead>
+                    <tbody id="activityDailyBody"></tbody>
+                  </table>
+                </div>
+              </details>
+
+              <details class="activity-sub-card" id="activityHintsCard" style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Creator Hint Breakdowns (<span id="activityHintsCount">0</span> hints)</summary>
+                <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
+                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Creator hints table">
+                    <thead>
+                      <tr style="text-align:left;border-bottom:1px solid #333;">
+                        <th style="padding:4px 8px;">Platform</th>
+                        <th style="padding:4px 8px;">Field</th>
+                        <th style="padding:4px 8px;">Hint</th>
+                        <th style="padding:4px 8px;">Count</th>
+                        <th style="padding:4px 8px;">Share</th>
+                      </tr>
+                    </thead>
+                    <tbody id="activityHintsBody"></tbody>
+                  </table>
+                </div>
+              </details>
+
+              <details class="activity-sub-card" id="activityShelvesCard" style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Shelves &amp; Churn (<span id="activityShelvesCount">0</span> shelves)</summary>
+                <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
+                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Shelves and churn table">
+                    <thead>
+                      <tr style="text-align:left;border-bottom:1px solid #333;">
+                        <th style="padding:4px 8px;">Shelf ID</th>
+                        <th style="padding:4px 8px;">Current</th>
+                        <th style="padding:4px 8px;">Start</th>
+                        <th style="padding:4px 8px;">End</th>
+                        <th style="padding:4px 8px;">Added</th>
+                        <th style="padding:4px 8px;">Removed</th>
+                        <th style="padding:4px 8px;">Net</th>
+                        <th style="padding:4px 8px;">Churn</th>
+                      </tr>
+                    </thead>
+                    <tbody id="activityShelvesBody"></tbody>
+                  </table>
+                </div>
+              </details>
+
+              <details class="activity-sub-card" id="activitySourcesCard" style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Active Sources (<span id="activitySourcesCount">0</span> sources)</summary>
+                <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
+                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Active sources table">
+                    <thead>
+                      <tr style="text-align:left;border-bottom:1px solid #333;">
+                        <th style="padding:4px 8px;">Source</th>
+                        <th style="padding:4px 8px;">Kind</th>
+                        <th style="padding:4px 8px;">Captures</th>
+                        <th style="padding:4px 8px;">New Obs</th>
+                        <th style="padding:4px 8px;">Observation Window</th>
+                      </tr>
+                    </thead>
+                    <tbody id="activitySourcesBody"></tbody>
+                  </table>
+                </div>
+              </details>
+
+              <details class="activity-sub-card" id="activityEventsCard" open style="padding:8px 12px;background:var(--bg-card, #1c1c1c);border-radius:6px;">
+                <summary style="cursor:pointer;font-weight:600;font-size:0.95rem;">Combined Events (<span id="activityEventsCount">0</span> events)</summary>
+                <div class="activity-table-wrapper" style="overflow-x:auto;margin-top:8px;">
+                  <table class="activity-table" style="width:100%;font-size:0.85rem;border-collapse:collapse;" aria-label="Combined events table">
+                    <thead>
+                      <tr style="text-align:left;border-bottom:1px solid #333;">
+                        <th style="padding:4px 8px;">Time (UTC)</th>
+                        <th style="padding:4px 8px;">Kind</th>
+                        <th style="padding:4px 8px;">Identifier</th>
+                        <th style="padding:4px 8px;">Details</th>
+                      </tr>
+                    </thead>
+                    <tbody id="activityEventsBody"></tbody>
+                  </table>
+                </div>
+              </details>
+            </div>
+
+            <!-- Evidence Modal -->
+            <div class="activity-evidence-modal hidden" id="activityEvidenceModal" role="dialog" aria-modal="true" aria-label="Metric Evidence" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:10000;">
+              <div class="modal-content" style="background:var(--bg-main, #181818);border:1px solid #444;border-radius:8px;width:90%;max-width:720px;max-height:85vh;display:flex;flex-direction:column;padding:16px;">
+                <div class="inline-row" style="justify-content:space-between;align-items:center;border-bottom:1px solid #333;padding-bottom:8px;">
+                  <h3 style="margin:0;font-size:1.1rem;" id="evidenceModalTitle">Evidence: <span id="evidenceMetricIdLabel"></span></h3>
+                  <button class="button ghost small" type="button" id="closeEvidenceBtn" aria-label="Close evidence modal">Close</button>
+                </div>
+                <div style="font-size:0.8rem;color:var(--text-muted, #888);margin:8px 0;" id="evidenceScopeInfo"></div>
+                <div id="evidenceRowsContainer" style="flex:1;overflow-y:auto;margin:8px 0;display:flex;flex-direction:column;gap:8px;" tabindex="0" aria-label="Evidence rows list"></div>
+                <div class="inline-row" style="justify-content:space-between;align-items:center;border-top:1px solid #333;padding-top:8px;">
+                  <button class="button ghost small" type="button" id="evidencePrevPageBtn" disabled>Previous</button>
+                  <span style="font-size:0.85rem;" id="evidencePageInfo">Page 1</span>
+                  <button class="button ghost small" type="button" id="evidenceNextPageBtn" disabled>Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="control-grid">
             <input class="control" id="searchInput" type="search" placeholder="search transcripts, titles, comments" aria-label="Search Library">
             <select class="control" id="platformFilter" aria-label="Filter by platform"><option value="">All platforms</option></select>
@@ -6830,6 +7014,521 @@
         }
         return res;
       }
+    }
+
+    /* ==========================================================================
+       Phase 5 Part A: Living Library Activity & Provenance Reporting
+       ========================================================================== */
+
+    const libraryActivityState = {
+      days: 7,
+      interval: null,
+      date_basis: "capture_time",
+      packet: null,
+      stale: false,
+      loading: false,
+      error: null,
+      evidenceMetricId: null,
+      evidenceOffset: 0,
+      evidenceLimit: 20,
+      evidenceRows: [],
+      evidenceTotal: 0,
+    };
+
+    let libraryActivityTimer = null;
+
+    function getRollingUtcInterval(days) {
+      const now = new Date();
+      const end = now.toISOString().replace(/Z$/, ".000Z");
+      const startDate = new Date(now.getTime() - days * 86400000);
+      const start = startDate.toISOString().replace(/Z$/, ".000Z");
+      return { start, end };
+    }
+
+    function escapeHtmlActivity(str) {
+      if (str == null) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function sanitizeHttpUrl(url) {
+      if (!url || typeof url !== "string") return null;
+      try {
+        const parsed = new URL(url);
+        if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+          return parsed.href;
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    async function loadLibraryActivity(force = false) {
+      const panel = document.getElementById("libraryActivityPanel");
+      if (!panel) return;
+
+      if (!libraryActivityState.interval || force) {
+        if (libraryActivityState.days) {
+          libraryActivityState.interval = getRollingUtcInterval(libraryActivityState.days);
+        }
+      }
+
+      libraryActivityState.loading = true;
+      libraryActivityState.error = null;
+      updateLibraryActivityBadge("Loading...");
+
+      const args = {
+        interval: libraryActivityState.interval,
+        date_basis: libraryActivityState.date_basis,
+      };
+
+      try {
+        const res = await callRegistryTool("get_library_activity", args);
+        if (res && res.ok) {
+          libraryActivityState.packet = res;
+          libraryActivityState.stale = false;
+          renderLibraryActivityUI();
+        } else {
+          const errCode = (res && res.error && res.error.code) || "error";
+          const errMsg = (res && res.error && res.error.message) || "Activity fetch failed";
+          libraryActivityState.error = { code: errCode, message: errMsg };
+          renderLibraryActivityError();
+        }
+      } catch (err) {
+        libraryActivityState.error = { code: "storage_unavailable", message: err.message || "Failed to reach reader" };
+        renderLibraryActivityError();
+      } finally {
+        libraryActivityState.loading = false;
+      }
+    }
+
+    function updateLibraryActivityBadge(text, isError = false, isStale = false) {
+      const badge = document.getElementById("libraryActivityBadge");
+      if (!badge) return;
+      badge.textContent = text;
+      if (isError) {
+        badge.style.background = "var(--error, #991b1b)";
+      } else if (isStale) {
+        badge.style.background = "#d97706";
+      } else {
+        badge.style.background = "var(--bg-card, #222)";
+      }
+    }
+
+    function renderLibraryActivityError() {
+      const err = libraryActivityState.error || { message: "Unknown error" };
+      updateLibraryActivityBadge(err.code === "storage_unavailable" ? "Unavailable" : "Error", true);
+      const asOf = document.getElementById("libraryActivityAsOf");
+      if (asOf) asOf.textContent = "Unavailable";
+
+      const totalItems = document.getElementById("activityTotalItems");
+      if (totalItems) totalItems.textContent = "Unavailable";
+      const assigned = document.getElementById("activityAssignedItems");
+      if (assigned) assigned.textContent = "Unavailable";
+      const ops = document.getElementById("activityAppliedOps");
+      if (ops) ops.textContent = "Unavailable";
+      const churn = document.getElementById("activityChurn");
+      if (churn) churn.textContent = "Unavailable";
+
+      const statusEl = document.getElementById("activityCoverageStatus");
+      if (statusEl) statusEl.textContent = `Unavailable (${err.message})`;
+    }
+
+    function renderLibraryActivityUI() {
+      const p = libraryActivityState.packet;
+      if (!p) return;
+
+      const asOfEl = document.getElementById("libraryActivityAsOf");
+      if (asOfEl) asOfEl.textContent = `As of ${p.as_of || ""}`;
+
+      updateLibraryActivityBadge(libraryActivityState.stale ? "Stale - Refresh" : "Live", false, libraryActivityState.stale);
+
+      // Interval & Coverage
+      const intervalEl = document.getElementById("activityUtcInterval");
+      if (intervalEl && p.interval) {
+        intervalEl.textContent = `[${p.interval.start} to ${p.interval.end})`;
+      }
+      const covEl = document.getElementById("activityCoverageStatus");
+      if (covEl && p.coverage) {
+        const primaryCov = p.coverage[p.items?.coverage_ref] || {};
+        covEl.textContent = primaryCov.coverage_status || "retained_records";
+      }
+      const exclEl = document.getElementById("activityExclusions");
+      if (exclEl && p.items) {
+        const unavail = p.items.capture_time_unavailable || 0;
+        const excluded = p.items.deleted_items_excluded || 0;
+        exclEl.textContent = `${unavail} unavail, ${excluded} tombstones excluded`;
+      }
+
+      // Warnings
+      const warnEl = document.getElementById("activityWarnings");
+      if (warnEl) {
+        if (p.warnings && p.warnings.length > 0) {
+          warnEl.textContent = `Notice: ${p.warnings.join(", ")}`;
+          warnEl.classList.remove("hidden");
+        } else {
+          warnEl.classList.add("hidden");
+        }
+      }
+
+      // Stat Cards
+      const totalItems = document.getElementById("activityTotalItems");
+      if (totalItems) totalItems.textContent = String(p.items?.total?.value ?? 0);
+
+      const assignedItems = document.getElementById("activityAssignedItems");
+      if (assignedItems) assignedItems.textContent = String(p.shelf_activity?.current_assigned_items?.value ?? 0);
+
+      const appliedOps = document.getElementById("activityAppliedOps");
+      if (appliedOps) appliedOps.textContent = String(p.shelf_activity?.applied_operations?.value ?? 0);
+
+      const churnEl = document.getElementById("activityChurn");
+      const churnSub = document.getElementById("activityChurnSub");
+      if (churnEl) {
+        const ch = p.shelf_activity?.churn;
+        if (ch && ch.value !== null && ch.percent !== null) {
+          churnEl.textContent = `${ch.percent}% (${ch.numerator}/${ch.denominator})`;
+          if (churnSub) churnSub.textContent = ch.initial_filing ? "Initial filing" : "Survivor baseline";
+        } else {
+          churnEl.textContent = "Unavailable";
+          if (churnSub) churnSub.textContent = (ch && ch.reason) ? ch.reason : "No baseline";
+        }
+      }
+
+      // Daily Table
+      const dailyBody = document.getElementById("activityDailyBody");
+      const dailyCount = document.getElementById("activityDailyCount");
+      if (dailyBody && p.items?.daily_buckets) {
+        dailyCount.textContent = String(p.items.daily_buckets.length);
+        dailyBody.innerHTML = p.items.daily_buckets.map((b) => {
+          const s = b.bucket_start.split("T")[0];
+          const cnt = b.count?.value ?? 0;
+          const pct = b.share?.percent != null ? `${b.share.percent}%` : "-";
+          const mId = b.count?.metric_id || "";
+          return `<tr style="border-bottom:1px solid #282828;">
+            <td style="padding:4px 8px;">${escapeHtmlActivity(s)}</td>
+            <td style="padding:4px 8px;"><button class="link-button activity-evidence-trigger" type="button" data-metric-id="${escapeHtmlActivity(mId)}" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline;">${cnt}</button></td>
+            <td style="padding:4px 8px;">${pct}</td>
+          </tr>`;
+        }).join("");
+      }
+
+      // Creator Hints Table
+      const hintsBody = document.getElementById("activityHintsBody");
+      const hintsCount = document.getElementById("activityHintsCount");
+      if (hintsBody && p.items?.by_creator_hint) {
+        hintsCount.textContent = String(p.items.by_creator_hint.length);
+        hintsBody.innerHTML = p.items.by_creator_hint.map((h) => {
+          const cnt = h.count?.value ?? 0;
+          const pct = h.share?.percent != null ? `${h.share.percent}%` : "-";
+          const mId = h.count?.metric_id || "";
+          return `<tr style="border-bottom:1px solid #282828;">
+            <td style="padding:4px 8px;">${escapeHtmlActivity(h.platform)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(h.field)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(h.hint)}</td>
+            <td style="padding:4px 8px;"><button class="link-button activity-evidence-trigger" type="button" data-metric-id="${escapeHtmlActivity(mId)}" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline;">${cnt}</button></td>
+            <td style="padding:4px 8px;">${pct}</td>
+          </tr>`;
+        }).join("");
+      }
+
+      // Shelves Table
+      const shelvesBody = document.getElementById("activityShelvesBody");
+      const shelvesCount = document.getElementById("activityShelvesCount");
+      if (shelvesBody && p.shelf_activity?.shelves) {
+        shelvesCount.textContent = String(p.shelf_activity.shelves.length);
+        shelvesBody.innerHTML = p.shelf_activity.shelves.map((s) => {
+          const cSize = s.current_size?.value ?? 0;
+          const sStart = s.start_size ? String(s.start_size.value) : "Unavailable";
+          const sEnd = s.end_size ? String(s.end_size.value) : "Unavailable";
+          const chPct = s.churn?.percent != null ? `${s.churn.percent}%` : (s.churn?.reason || "Unavailable");
+          const mId = s.current_size?.metric_id || "";
+          return `<tr style="border-bottom:1px solid #282828;">
+            <td style="padding:4px 8px;">${escapeHtmlActivity(s.shelf_id)}</td>
+            <td style="padding:4px 8px;"><button class="link-button activity-evidence-trigger" type="button" data-metric-id="${escapeHtmlActivity(mId)}" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline;">${cSize}</button></td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(sStart)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(sEnd)}</td>
+            <td style="padding:4px 8px;">+${s.added}</td>
+            <td style="padding:4px 8px;">-${s.removed}</td>
+            <td style="padding:4px 8px;">${s.net >= 0 ? "+" + s.net : s.net}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(chPct)}</td>
+          </tr>`;
+        }).join("");
+      }
+
+      // Sources Table
+      const sourcesBody = document.getElementById("activitySourcesBody");
+      const sourcesCount = document.getElementById("activitySourcesCount");
+      if (sourcesBody && p.sources?.details) {
+        sourcesCount.textContent = String(p.sources.details.length);
+        sourcesBody.innerHTML = p.sources.details.map((src) => {
+          const caps = src.captures_in_interval?.value ?? 0;
+          const newObs = src.new_observations?.value ?? 0;
+          const w = src.observation_window || {};
+          const safeUrl = sanitizeHttpUrl(src.canonical_url);
+          const nameLink = safeUrl ? `<a href="${safeUrl}" target="_blank" rel="noreferrer" style="color:inherit;text-decoration:underline;">${escapeHtmlActivity(src.display_name)}</a>` : escapeHtmlActivity(src.display_name);
+          const mId = src.captures_in_interval?.metric_id || "";
+          return `<tr style="border-bottom:1px solid #282828;">
+            <td style="padding:4px 8px;">${nameLink}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(src.kind)}</td>
+            <td style="padding:4px 8px;"><button class="link-button activity-evidence-trigger" type="button" data-metric-id="${escapeHtmlActivity(mId)}" style="background:none;border:none;padding:0;color:inherit;cursor:pointer;text-decoration:underline;">${caps}</button></td>
+            <td style="padding:4px 8px;">${newObs}</td>
+            <td style="padding:4px 8px;font-size:0.75rem;">${escapeHtmlActivity(w.first_observed_at || "None")} to ${escapeHtmlActivity(w.last_item_seen_at || "None")}</td>
+          </tr>`;
+        }).join("");
+      }
+
+      // Events Table
+      const eventsBody = document.getElementById("activityEventsBody");
+      const eventsCount = document.getElementById("activityEventsCount");
+      if (eventsBody && p.events?.rows) {
+        eventsCount.textContent = String(p.events.total ?? 0);
+        eventsBody.innerHTML = p.events.rows.map((ev) => {
+          const d = ev.details || {};
+          const dText = Object.entries(d).map(([k, v]) => `${k}: ${v}`).join(", ");
+          return `<tr style="border-bottom:1px solid #282828;">
+            <td style="padding:4px 8px;">${escapeHtmlActivity(ev.time)}</td>
+            <td style="padding:4px 8px;">${escapeHtmlActivity(ev.kind)}</td>
+            <td style="padding:4px 8px;font-family:monospace;font-size:0.8rem;">${escapeHtmlActivity(ev.event_id)}</td>
+            <td style="padding:4px 8px;font-size:0.8rem;">${escapeHtmlActivity(dText)}</td>
+          </tr>`;
+        }).join("");
+      }
+    }
+
+    async function fetchActivityEvidence(metricId, offset = 0) {
+      const p = libraryActivityState.packet;
+      if (!p || !p.report_revision) return;
+
+      libraryActivityState.evidenceMetricId = metricId;
+      libraryActivityState.evidenceOffset = offset;
+
+      const modal = document.getElementById("activityEvidenceModal");
+      const titleLabel = document.getElementById("evidenceMetricIdLabel");
+      const container = document.getElementById("evidenceRowsContainer");
+      const scopeInfo = document.getElementById("evidenceScopeInfo");
+      const pageInfo = document.getElementById("evidencePageInfo");
+      const prevBtn = document.getElementById("evidencePrevPageBtn");
+      const nextBtn = document.getElementById("evidenceNextPageBtn");
+
+      if (modal) modal.classList.remove("hidden");
+      if (titleLabel) titleLabel.textContent = metricId;
+      if (container) container.innerHTML = `<div style="padding:16px;text-align:center;">Loading evidence...</div>`;
+
+      const args = {
+        interval: p.interval,
+        date_basis: libraryActivityState.date_basis,
+        detail: "evidence",
+        metric_id: metricId,
+        expected_revision: p.report_revision,
+        offset: offset,
+        limit: libraryActivityState.evidenceLimit,
+      };
+
+      try {
+        const res = await callRegistryTool("get_library_activity", args);
+        if (res && res.ok && res.rows) {
+          libraryActivityState.evidenceRows = res.rows;
+          libraryActivityState.evidenceTotal = res.total_rows || 0;
+          if (scopeInfo) {
+            scopeInfo.textContent = `Revision: ${res.report_revision.slice(0, 16)}... | Total evidence rows: ${res.total_rows}`;
+          }
+          renderEvidenceRows(container);
+
+          const curPage = Math.floor(offset / libraryActivityState.evidenceLimit) + 1;
+          const totalPages = Math.ceil((res.total_rows || 1) / libraryActivityState.evidenceLimit);
+          if (pageInfo) pageInfo.textContent = `Page ${curPage} of ${totalPages}`;
+          if (prevBtn) prevBtn.disabled = offset === 0;
+          if (nextBtn) nextBtn.disabled = offset + res.rows.length >= res.total_rows;
+        } else if (res && res.error && res.error.code === "stale_report") {
+          libraryActivityState.stale = true;
+          updateLibraryActivityBadge("Stale - Refresh", false, true);
+          if (container) container.innerHTML = `<div style="padding:16px;color:#d97706;">Report is stale. Please refresh the library summary before paging evidence.</div>`;
+        } else {
+          if (container) container.innerHTML = `<div style="padding:16px;color:var(--error, #e55);">Failed to load evidence: ${(res && res.error && res.error.message) || "unknown"}</div>`;
+        }
+      } catch (err) {
+        if (container) container.innerHTML = `<div style="padding:16px;color:var(--error, #e55);">Error loading evidence: ${escapeHtmlActivity(err.message)}</div>`;
+      }
+    }
+
+    function renderEvidenceRows(container) {
+      if (!container) return;
+      const rows = libraryActivityState.evidenceRows || [];
+      if (rows.length === 0) {
+        container.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text-muted, #888);">No evidence rows.</div>`;
+        return;
+      }
+      container.innerHTML = rows.map((r, idx) => {
+        const d = r.details || {};
+        const vid = d.video_id;
+        const openBtn = vid ? `<button class="button ghost small" type="button" data-open-yoink="${escapeHtmlActivity(vid)}" style="margin-left:auto;">View Item</button>` : "";
+        return `<div class="evidence-row" tabindex="0" role="article" aria-label="Evidence row ${idx + 1}" style="padding:8px 12px;background:var(--bg-card, #222);border-radius:6px;display:flex;flex-direction:column;gap:4px;">
+          <div class="inline-row" style="justify-content:space-between;align-items:center;">
+            <strong>${escapeHtmlActivity(r.source_table)}:${escapeHtmlActivity(r.source_key)}</strong>
+            <span style="font-size:0.75rem;color:var(--text-muted, #888);">${escapeHtmlActivity(r.event_time)}</span>
+            ${openBtn}
+          </div>
+          <div style="font-size:0.8rem;color:var(--text-muted, #aaa);font-family:monospace;">Hash: ${escapeHtmlActivity(r.observation_hash || "")}</div>
+          <div style="font-size:0.85rem;">${escapeHtmlActivity(JSON.stringify(d))}</div>
+        </div>`;
+      }).join("");
+    }
+
+    function startLibraryActivityTimer() {
+      stopLibraryActivityTimer();
+      libraryActivityTimer = setInterval(() => {
+        const panel = document.getElementById("tab-library");
+        if (panel && panel.classList.contains("active") && !document.hidden) {
+          loadLibraryActivity(false);
+        }
+      }, 60000);
+    }
+
+    function stopLibraryActivityTimer() {
+      if (libraryActivityTimer) {
+        clearInterval(libraryActivityTimer);
+        libraryActivityTimer = null;
+      }
+    }
+
+    function wireLibraryActivityEvents() {
+      const refreshBtn = document.getElementById("libraryActivityRefreshBtn");
+      if (refreshBtn) {
+        refreshBtn.addEventListener("click", () => loadLibraryActivity(true));
+      }
+
+      document.querySelectorAll("[data-preset]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll("[data-preset]").forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          const days = parseInt(btn.dataset.preset, 10);
+          libraryActivityState.days = days;
+          libraryActivityState.interval = null;
+          const sInput = document.getElementById("activityStartInput");
+          const eInput = document.getElementById("activityEndInput");
+          if (sInput) sInput.value = "";
+          if (eInput) eInput.value = "";
+          const errEl = document.getElementById("activityCustomError");
+          if (errEl) errEl.classList.add("hidden");
+          loadLibraryActivity(true);
+        });
+      });
+
+      const applyCustomBtn = document.getElementById("activityApplyCustomBtn");
+      if (applyCustomBtn) {
+        applyCustomBtn.addEventListener("click", () => {
+          const sInput = document.getElementById("activityStartInput");
+          const eInput = document.getElementById("activityEndInput");
+          const errEl = document.getElementById("activityCustomError");
+          const startVal = (sInput?.value || "").trim();
+          const endVal = (eInput?.value || "").trim();
+          if (!startVal || !endVal) {
+            if (errEl) {
+              errEl.textContent = "Start and end timestamps are required";
+              errEl.classList.remove("hidden");
+            }
+            return;
+          }
+          if (!startVal.endsWith("Z") || !endVal.endsWith("Z")) {
+            if (errEl) {
+              errEl.textContent = "Timestamps must be UTC ISO strings ending in Z";
+              errEl.classList.remove("hidden");
+            }
+            return;
+          }
+          if (errEl) errEl.classList.add("hidden");
+          document.querySelectorAll("[data-preset]").forEach((b) => b.classList.remove("active"));
+          libraryActivityState.days = null;
+          libraryActivityState.interval = { start: startVal, end: endVal };
+          loadLibraryActivity(false);
+        });
+      }
+
+      const basisSel = document.getElementById("activityDateBasis");
+      if (basisSel) {
+        basisSel.addEventListener("change", () => {
+          libraryActivityState.date_basis = basisSel.value;
+          loadLibraryActivity(false);
+        });
+      }
+
+      // Evidence click delegation
+      document.addEventListener("click", (e) => {
+        const trigger = e.target.closest(".activity-evidence-trigger");
+        if (trigger && trigger.dataset.metricId) {
+          fetchActivityEvidence(trigger.dataset.metricId, 0);
+          return;
+        }
+        const openYoinkBtn = e.target.closest("[data-open-yoink]");
+        if (openYoinkBtn && openYoinkBtn.dataset.openYoink) {
+          const vid = openYoinkBtn.dataset.openYoink;
+          const modal = document.getElementById("activityEvidenceModal");
+          if (modal) modal.classList.add("hidden");
+          if (typeof showYoinkDetail === "function") {
+            showYoinkDetail(vid);
+          }
+          return;
+        }
+      });
+
+      const closeEvBtn = document.getElementById("closeEvidenceBtn");
+      if (closeEvBtn) {
+        closeEvBtn.addEventListener("click", () => {
+          const modal = document.getElementById("activityEvidenceModal");
+          if (modal) modal.classList.add("hidden");
+        });
+      }
+
+      const prevEvBtn = document.getElementById("evidencePrevPageBtn");
+      if (prevEvBtn) {
+        prevEvBtn.addEventListener("click", () => {
+          if (libraryActivityState.evidenceMetricId && libraryActivityState.evidenceOffset > 0) {
+            const nextOff = Math.max(0, libraryActivityState.evidenceOffset - libraryActivityState.evidenceLimit);
+            fetchActivityEvidence(libraryActivityState.evidenceMetricId, nextOff);
+          }
+        });
+      }
+
+      const nextEvBtn = document.getElementById("evidenceNextPageBtn");
+      if (nextEvBtn) {
+        nextEvBtn.addEventListener("click", () => {
+          if (libraryActivityState.evidenceMetricId) {
+            const nextOff = libraryActivityState.evidenceOffset + libraryActivityState.evidenceLimit;
+            if (nextOff < libraryActivityState.evidenceTotal) {
+              fetchActivityEvidence(libraryActivityState.evidenceMetricId, nextOff);
+            }
+          }
+        });
+      }
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          const modal = document.getElementById("activityEvidenceModal");
+          if (modal && !modal.classList.contains("hidden")) {
+            modal.classList.add("hidden");
+          }
+        }
+      });
+
+      window.addEventListener("focus", () => {
+        const panel = document.getElementById("tab-library");
+        if (panel && panel.classList.contains("active")) {
+          loadLibraryActivity(false);
+        }
+      });
+
+      document.addEventListener("visibilitychange", () => {
+        const panel = document.getElementById("tab-library");
+        if (document.hidden) {
+          stopLibraryActivityTimer();
+        } else if (panel && panel.classList.contains("active")) {
+          loadLibraryActivity(false);
+          startLibraryActivityTimer();
+        }
+      });
     }
 
     async function loadStandingSubscriptions() {
@@ -11779,6 +12478,12 @@
       const navTab = NAV_OWNER[tab] || tab;
       document.querySelectorAll("[data-tab-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.tabButton === navTab));
       document.querySelectorAll("[data-tab-panel]").forEach((panel) => panel.classList.toggle("active", panel.dataset.tabPanel === tab));
+      if (tab === "library") {
+        loadLibraryActivity(false);
+        startLibraryActivityTimer();
+      } else {
+        stopLibraryActivityTimer();
+      }
       if (tab === "for-you") loadForYou();
       if (tab === "writing") loadWriting();
       if (tab === "evidence") loadEvidence();
@@ -12554,6 +13259,7 @@
       hydrateMarks();
       syncSidebarControlsDensity();
       wireEvents();
+      wireLibraryActivityEvents();
       applyHashRoute();
       window.addEventListener("resize", syncSidebarControlsDensity);
       window.addEventListener("hashchange", applyHashRoute);
@@ -12561,6 +13267,8 @@
       await loadLibraryFacets();
       await refreshJobs();
       await loadLibrary({ reset: true });
+      await loadLibraryActivity(false);
+      startLibraryActivityTimer();
       await loadResume();
       await loadForYou();
       await loadWriting();

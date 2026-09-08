@@ -151,6 +151,10 @@
     {
       "name": "episode_to_corpus",
       "description": "Publish a completed podcast transcript into the local corpus."
+    },
+    {
+      "name": "get_library_activity",
+      "description": "Report deterministic library activity, shelf churn, and source observations."
     }
   ],
   "compatibility": {

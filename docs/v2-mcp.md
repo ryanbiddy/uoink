@@ -9,8 +9,8 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink has two deliberately different tool surfaces:
 
-- Supported stdio registry: **25 tools**.
-- Local HTTP/OpenAPI registry: **81 tools**.
+- Supported stdio registry: **26 tools**.
+- Local HTTP/OpenAPI registry: **82 tools**.
 
 The supported stdio MCP surface covers extraction, playlist jobs, search,
 clip search and evidence cards, corpus retrieval, citation maps, health
@@ -854,6 +854,22 @@ adds `source_url#t=<seconds>` citations, and stores the
 `podcast_episodes.yoink_video_id` link. The stable ID is
 `episode_<sha1(feed URL + GUID)[:11]>`. Repeating the call returns the same
 identity and repairs partial prior writes without duplicating rows or files.
+
+### get_library_activity
+
+Report deterministic library activity, shelf churn, and source observations.
+
+```json
+{
+  "interval": {
+    "start": "2026-09-01T00:00:00.000Z",
+    "end": "2026-09-08T00:00:00.000Z"
+  },
+  "date_basis": "capture_time"
+}
+```
+
+The operation returns pure aggregation over saved items, shelf movements, and source observations, bounded by half-open UTC intervals, survivor baseline proof, and explicit provenance.
 
 ## Rate limits and abuse mitigations
 

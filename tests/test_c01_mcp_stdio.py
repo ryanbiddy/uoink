@@ -74,6 +74,7 @@ CANONICAL_STDIO_TOOLS = {
     "get_whisperx_status",
     "transcribe_podcast_episode",
     "episode_to_corpus",
+    "get_library_activity",
 }
 
 REMOVED_STDIO_ALIASES = {

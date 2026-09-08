@@ -8,7 +8,7 @@ MCP clients launch this process and speak JSON-RPC over stdin/stdout. Keep
 stdout reserved for the protocol; server.py logging is redirected to stderr
 while importing the backend.
 
-The stdio surface is exactly the 25 canonical tools below. The six Yoink-era
+The stdio surface is exactly the 26 canonical tools below. The six Yoink-era
 aliases completed their deprecation window in Uoink v2.5 and are not
 registered in v3. Run E (2026-09-04) added the two Phase 1 clip tools,
 `search_clips` and `get_evidence_card`, to stdio. See docs/v2-mcp.md.
@@ -77,7 +77,7 @@ except AttributeError:
 
 
 # --------------------------------------------------------------------------
-# Canonical tools (25). The CI doc-accuracy + backend-static jobs count these
+# Canonical tools (26). The CI doc-accuracy + backend-static jobs count these
 # @mcp.tool decorators against the ### headings in docs/v2-mcp.md, so keep the
 # decorator count and the documented tool count in lock-step (also
 # tests/test_c01_mcp_stdio.py CANONICAL_STDIO_TOOLS and .mcpb/manifest.json).
@@ -366,6 +366,35 @@ def episode_to_corpus(episode_id: int) -> dict:
     return uoink_mcp_tools.call_tool(
         "episode_to_corpus", {"episode_id": episode_id}
     )
+
+
+@mcp.tool(
+    name="get_library_activity",
+    description="Report deterministic library activity, shelf churn, and source observations.",
+)
+def get_library_activity(
+    interval: dict,
+    date_basis: str = "capture_time",
+    detail: str | None = None,
+    metric_id: str | None = None,
+    offset: int = 0,
+    limit: int = 20,
+    expected_revision: str | None = None,
+) -> dict:
+    payload: dict = {
+        "interval": interval,
+        "date_basis": date_basis,
+        "offset": offset,
+        "limit": limit,
+    }
+    if detail is not None:
+        payload["detail"] = detail
+    if metric_id is not None:
+        payload["metric_id"] = metric_id
+    if expected_revision is not None:
+        payload["expected_revision"] = expected_revision
+    return uoink_mcp_tools.call_tool("get_library_activity", payload)
+
 
 if __name__ == "__main__":
     # `uoink doctor` / dry-run support: `python uoink_mcp.py --doctor` and

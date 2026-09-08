@@ -3531,6 +3531,11 @@ def _schema(properties: dict[str, Any], required: list[str] | None = None) -> di
     }
 
 
+def get_library_activity(args: dict[str, Any]) -> dict[str, Any]:
+    import library_analysis
+    return library_analysis.handle_get_library_activity(args)
+
+
 TOOL_REGISTRY: dict[str, ToolSpec] = {
     "uoink_video": ToolSpec(
         name="uoink_video",
@@ -4842,6 +4847,58 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, ["url_pattern"]),
         handler=remove_allowed_site,
         rate_limiter=_RateLimiter(30),
+    ),
+    "get_library_activity": ToolSpec(
+        name="get_library_activity",
+        description="Report deterministic library activity, shelf churn, and source observations.",
+        input_schema=_schema({
+            "interval": {
+                "type": "object",
+                "properties": {
+                    "start": {"type": "string", "description": "Gregorian UTC timestamp YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS.sssZ"},
+                    "end": {"type": "string", "description": "Gregorian UTC timestamp YYYY-MM-DDTHH:MM:SSZ or YYYY-MM-DDTHH:MM:SS.sssZ"},
+                },
+                "required": ["start", "end"],
+                "additionalProperties": False,
+                "description": "Half-open [start, end) query interval.",
+            },
+            "date_basis": {
+                "type": "string",
+                "enum": ["capture_time", "publication_time"],
+                "default": "capture_time",
+                "description": "Clock basis for item report.",
+            },
+            "detail": {
+                "type": "string",
+                "enum": ["creator_hints", "type_creator_hints", "shelves", "sources", "events", "evidence"],
+                "description": "Optional detail collection selector.",
+            },
+            "metric_id": {
+                "type": "string",
+                "maxLength": 512,
+                "description": "Stable metric ID (required for detail:evidence).",
+            },
+            "offset": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 1000000,
+                "default": 0,
+                "description": "Pagination offset.",
+            },
+            "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20,
+                "default": 20,
+                "description": "Pagination limit.",
+            },
+            "expected_revision": {
+                "type": "string",
+                "description": "Summary report_revision (required for detail requests).",
+            },
+        }, ["interval"]),
+        handler=get_library_activity,
+        rate_limiter=None,
     ),
 }
 
