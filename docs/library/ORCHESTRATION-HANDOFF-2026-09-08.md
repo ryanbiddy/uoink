@@ -78,10 +78,10 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
    Blockers for Ryan. Four unchanged assertions against superseded AT6/browser evidence
    remain failures; AS-8/AS-9 cover the replacement at7 evidence.
-2. AZ-5a2 (Phase 5): its 11 BA-01/BA-03 reproductions in `test_phase5_acceptance3.py` plus
-   `tests/test_library_analysis_fixtures.py` 28/28 (the 64 KiB cap) plus the existing Phase 5
-   suites. If the fixture tests still fail, do not integrate; write AZ-5a3 with the byte
-   counts. Then dispatch AZ-5d (grok) and, after it, AZ-5g (gemini) from
+2. AZ-5a2 (Phase 5) rejected and retained as `patches/az5a2-claude-2026-09-08.patch`.
+   Dispatch `PHASE5-AZ5A3-BRIEF-2026-09-08.md` on the next free worker; it records
+   the measured byte counts and requires all 18 BA-01/BA-03 cases and the 28 fixture tests.
+   Then dispatch AZ-5d (grok) and, after it, AZ-5g (gemini) from
    `PHASE5-AZ5-BRIEF-2026-09-08.md`; then BA-4 (codex review) on the integrated candidate.
 3. AV-5m1 (Phase 4): D07-D10 reproductions in `test_phase4_aw3_acceptance.py` plus the AW and
    AW-2 sets and the mirror/briefs/wiring suites. Then dispatch AV-5m2 (grok) from
@@ -140,3 +140,14 @@ pagination returns 12 rows instead of 20. The 18 BA-01/BA-03 reproductions pass 
 fixture suite is 27/28. Do not integrate this diff. BA-2 raw packet measurements changed
 from retained 59,281/59,190 bytes to observed 58,694/58,369; that documentation assertion
 also remains failed. AZ-5a3 must repair compaction before the measurement refresh.
+
+### 2026-09-08 16:26 PDT — AZ-5a3 brief and measurement setup repair
+
+The first standalone byte-measurement helper stopped at MCP SDK import because the
+redirected profile omitted pywin32's installed paths. No measurement resulted. The
+AZ-5a3 brief documents that setup repair; after resolving and preserving the paths,
+the same helper measured 51,668 raw / 58,289 serialized-transport bytes for the empty
+31-day interval and 57,704 / 64,411 for the pagination fixture, which still returns
+only 12 creator rows. This was fixture serialization, not a real-client receipt.
+Retain the AZ-5a2 rejection. The AS-9 full-tree run is in progress with S21 and only
+the still-open AW-3, BA-3, BA-measurements3 and BD reproduction files excluded.
