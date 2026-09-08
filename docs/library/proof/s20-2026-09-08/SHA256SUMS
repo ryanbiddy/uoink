@@ -5,8 +5,11 @@ cfe6e01141de0a49bf422c7077a65aba2d3b3da666eccae6825d1ab6fa02cfa1   02b-on-enroll
 4b09b25d7c15c310eb69872e93524871a282d7aa365f78a55cc4e40ace5a6c21   02b-on-enrollment-pending.state.txt
 c69c5f52692d425a11f25eb4c5fcd97b9db71c8378968dcfa4f8dbbff860e026   02c-actual-enrollment.jpg
 64b0aa2ad543022fe8e39dff34b75b4d0a6869ef0f43e3da794b3f8be0e8a01d   02c-after-first-poll.state.txt
-d894253d4fc08173ef296d3ed33cc1343ee37f72b95dcbb1639a2bc062f0c8d9   03-refresh-error.jpg
-2cd38b17e21f81ce0e32c71922e2178d46a6207086eac8f14cd8a57294c581d2   03-refresh-error.state.txt
+93c5f286db8f469ace426d99cc8df325e8bd258bcd0c77ab2c599d86da8709e6   03-refresh-error.jpg
+64dd922e3f2c89608194b9daca2ad8056b5d141c3d598c8b7f35f17a0ce5131e   03-refresh-error.pre-strip-fix.jpg
+454310e428342e3121b451969f422d86aae786de3205939f34af588fb2d4f0af   03-refresh-error.state.after-screenshot.json
+09aa4ff352674fdd11e0c338262f0753a416292e0d976fbf43263aef75ef2801   03-refresh-error.state.json
+3b8e4db8fea32f7d73f7646329effa1845e03b55c823d68e11770f2ec50a26db   03-refresh-error.state.txt
 fcf00626c7623362a49117461eeb1ba642dfa10cc72d15cf7b937499b33500b7   04-exhaustion.state.txt
 29039a1017175d49ee31bb46bc7ebf251f19a30321309100a4a5c3ab6b4b9faf   04a-exhaustion-library-10-items.jpg
 7fb9e966df6bc027eaee0a410fa90d0fefeb9e98ed9f725baf995910f935bcfd   04b-exhaustion-sources.jpg
@@ -31,3 +34,4 @@ f3a2a1145acadd2c90d11ef05a1ba0565c0a169ea45d5c5a4d76412e4117683b   08c-after-res
 220b38708b52daa3139df3465d16d8397f7f0a734d2f5e73d71f8beb2050be17   overlay-1-hold.log
 b341b843f91a2c884eeb1dc0d2c38b1b6f45a61a6497ce314efad467b8c56658   overlay-2-hold.err.log
 ec7da79b6daadc9e3b8d5c1308eb08511d913530234a4261c21e6696497db40a   overlay-2-hold.log
+1e1d05078a256859278e48b37133fd3b56636ad3f701c0d8afacace562b32e0f   overlay-4-hold.log

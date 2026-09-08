@@ -364,6 +364,21 @@ def run(hold_seconds=0):
                             out['items'] = [dict(r) for r in idx._conn.execute(
                                 'SELECT * FROM source_items')]
                             out['receipts'] = idx._conn.execute('SELECT COUNT(*) FROM source_consent_receipts').fetchone()[0]
+                            # AS-7 (scenario 03): the complete contemporaneous package, so a
+                            # screenshot pairs with every persisted row it can display.
+                            out['detection_cursors'] = [dict(r) for r in idx._conn.execute(
+                                'SELECT * FROM source_detection_cursors')]
+                            out['consent_receipts'] = [dict(r) for r in idx._conn.execute(
+                                'SELECT * FROM source_consent_receipts')]
+                            out['observed_at_ms'] = int(time.time() * 1000)
+                        out['source_status'] = {}
+                        for src in out['sources']:
+                            try:
+                                status = server._source_service().source_status(
+                                    server._source_operator_context(), {'source_id': src['source_id'], 'item_limit': 25})
+                            except Exception as exc:  # recorded, never hidden
+                                status = {'error': repr(exc)}
+                            out['source_status'][src['source_id']] = status
                     out.update(feed=dict(feed_state), clock_ms=clock[0])
                     body = json.dumps(out, default=str).encode()
                     self.send_response(200); self.send_header('Content-Type', 'application/json')

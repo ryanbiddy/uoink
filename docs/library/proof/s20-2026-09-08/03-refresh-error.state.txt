@@ -1,1 +1,8 @@
-persisted after feed 500: consent on | detection error None failures None | items 3 | starts ['succeeded']
+Scenario 03 rerun (2026-09-08 ~16:12 PDT, overlay 4: dashboard 127.0.0.1:57993, control :57994, feed :57992; candidate 229ea90 plus the uncommitted AS-7 dashboard repairs served from the overlay's asset copy).
+Complete contemporaneous package: 03-refresh-error.state.json (sources, starts, items, detection_cursors, consent_receipts, public source_status.detection/allowance/item_counts, observed_at_ms) taken BEFORE the screenshot; 03-refresh-error.state.after-screenshot.json taken AFTER it; identical except observed_at_ms (no tick, no capture progress between reads).
+source_id src_dc56a75e9bdddc7d9658b6eb3fe04e81eda13a1f2240da2fd4fec124fd1ae008
+detection error http_500 failures 1 (cursor last_error_code http_500, last_error_message "HTTP 500", source_status.detection.consecutive_failures 1, last_poll_success_ms 1788909021253 < last_poll_attempt_ms 1788912681253)
+starts ['succeeded', 'succeeded'] (st_c49786eed charged utc_day 2026-09-08 before the injected clock advance; st_2a4510476 charged 2026-09-09 by the capture pass of the same tick whose poll failed: a poll failure does not erase eligible work)
+allowance charged_today 1 of 10 (utc_day 2026-09-09) as displayed; items committed 2, eligible 1; enrolled 3 of 25; observed 3.
+Screenshot 03-refresh-error.jpg: badge "degraded: http_500: HTTP 500", fetch notice "http_500: HTTP 500 (1 consecutive failure)", 1 / 10 starts used, Captured items (2), 3 / 25 enrolled, observed 3. 03-refresh-error.pre-strip-fix.jpg is the same frozen state rendered before the fetch-notice strip read detection.error (kept for transparency).
+Supersedes the first-series scenario 03 pair whose summary read nonexistent source-row fields (AS-7); the AS-7 selector's expected "2/10" belongs to that superseded image.

@@ -8198,7 +8198,7 @@
             ${(det.last_error || errorCount > 0) ? `
               <div class="source-error-strip">
                 <div>
-                  <strong>Fetch notice:</strong> ${htmlEscape(String((det.last_error && det.last_error.message) || det.last_error || "Poll attempt failed").slice(0, 512))}
+                  <strong>Fetch notice:</strong> ${htmlEscape(String((det.last_error && det.last_error.message) || (det.error && det.error.code ? `${det.error.code}: ${det.error.message || ""}` : "") || det.last_error || "Poll attempt failed").slice(0, 512))}
                   <span class="soft-note" style="margin-left:6px;">(${errorCount} consecutive failure${errorCount === 1 ? "" : "s"})</span>
                 </div>
                 <button class="button ghost retry-poll-btn" type="button" data-source-id="${htmlEscape(id)}">Retry poll now</button>
@@ -8225,6 +8225,9 @@
       els.standingSubscriptionList.querySelectorAll(".captured-items-btn").forEach((btn) => {
         btn.addEventListener("click", () => toggleCapturedItems(btn.dataset.sourceId));
       });
+      els.standingSubscriptionList.querySelectorAll(".captured-items-more-btn").forEach((btn) => {
+        btn.addEventListener("click", () => loadMoreCapturedItems(btn.dataset.sourceId));
+      });
     }
 
     const CLASSIFICATION_LABELS = {
@@ -8232,7 +8235,9 @@
       pending: "Classification pending",
       waiting_configuration: "Waiting for configuration",
       leased: "Classifying",
-      accepted: "Filed",
+      // Contract phase3-v1 (AS7-UI-02): "accepted" describes staging by the client, not an
+      // applied shelf membership; applied filing is only claimed from membership evidence.
+      accepted: "Classification accepted (staged)",
       unmapped: "Unmapped",
       unsupported: "Unsupported",
       blocked: "Blocked",
@@ -8241,12 +8246,13 @@
       not_captured: "Not captured",
     };
 
+    const CAPTURED_ITEMS_PAGE = 25;
+    const CAPTURED_ITEMS_AUTO_PAGES = 8; // up to 200 rows walked automatically per open
+
     function renderCapturedItems(view) {
-      if (view.loading) return `<div class="soft-note">Loading items&hellip;</div>`;
       if (view.error) return `<div class="soft-note">Could not load items: ${htmlEscape(view.error)}</div>`;
       const items = (view.items || []).filter((it) => it.capture_state === "committed");
-      if (!items.length) return `<div class="soft-note">No captured items in the first page.</div>`;
-      return items.map((it) => {
+      const rows = items.map((it) => {
         const cls = (it.classification && it.classification.state) || "pending";
         const label = CLASSIFICATION_LABELS[cls] || cls;
         return `
@@ -8254,7 +8260,52 @@
             <span style="font-weight:500;">${htmlEscape(it.title || it.entry_id || "Captured item")}</span>
             <span class="classification-pill ${htmlEscape(cls)}" title="${htmlEscape(cls)}">${htmlEscape(label)}</span>
           </div>`;
-      }).join("") + (view.next_item_cursor ? `<div class="soft-note">More items exist; the first page is shown.</div>` : "");
+      }).join("");
+      const walked = Number(view.pages_loaded || 0) * CAPTURED_ITEMS_PAGE;
+      let footer = "";
+      if (view.loading) {
+        footer = `<div class="soft-note">Loading items&hellip;</div>`;
+      } else if (view.next_item_cursor) {
+        // AS7-UI-01: a captured item can sit after older uncommitted rows; the pager keeps
+        // every page reachable through the supported source_status cursor.
+        footer = `<div class="captured-items-more"><span class="soft-note">${walked} of the source's items checked.</span> <button class="button ghost captured-items-more-btn" type="button" data-source-id="${htmlEscape(view.source_id || "")}">Load more items</button></div>`;
+      } else if (!items.length) {
+        footer = `<div class="soft-note">No captured items in this source's ${walked || CAPTURED_ITEMS_PAGE} items.</div>`;
+      }
+      return rows + footer;
+    }
+
+    async function loadCapturedItemsPage(sourceId, view) {
+      const args = { source_id: sourceId, item_limit: CAPTURED_ITEMS_PAGE };
+      if (view.next_item_cursor) args.item_cursor = view.next_item_cursor;
+      const res = await callRegistryTool("source_status", args);
+      const page = (res && res.items) || [];
+      return {
+        ...view, loading: false, items: (view.items || []).concat(page),
+        next_item_cursor: (res && res.next_item_cursor) || null,
+        pages_loaded: Number(view.pages_loaded || 0) + 1,
+        committed_expected: res && res.source && res.source.item_counts ? Number(res.source.item_counts.committed || 0) : view.committed_expected,
+      };
+    }
+
+    async function loadCapturedItems(sourceId, view, { more = false } = {}) {
+      state.standingItemsBySource[sourceId] = { ...view, open: true, loading: true, source_id: sourceId };
+      renderStandingSubscriptions();
+      try {
+        let next = state.standingItemsBySource[sourceId];
+        const budget = more ? 1 : CAPTURED_ITEMS_AUTO_PAGES;
+        for (let n = 0; n < budget; n += 1) {
+          next = await loadCapturedItemsPage(sourceId, next);
+          const committed = next.items.filter((it) => it.capture_state === "committed").length;
+          const expected = next.committed_expected;
+          // Stop early once every captured item the summary counts has been reached.
+          if (!next.next_item_cursor || (expected != null && committed >= expected && !more)) break;
+        }
+        state.standingItemsBySource[sourceId] = { ...next, open: true, loading: false, source_id: sourceId };
+      } catch (err) {
+        state.standingItemsBySource[sourceId] = { open: true, loading: false, error: consentErrorMessage(err), source_id: sourceId };
+      }
+      renderStandingSubscriptions();
     }
 
     async function toggleCapturedItems(sourceId) {
@@ -8266,18 +8317,14 @@
         renderStandingSubscriptions();
         return;
       }
-      state.standingItemsBySource[sourceId] = { open: true, loading: true, items: [] };
-      renderStandingSubscriptions();
-      try {
-        const res = await callRegistryTool("source_status", { source_id: sourceId, item_limit: 25 });
-        state.standingItemsBySource[sourceId] = {
-          open: true, loading: false, items: (res && res.items) || [],
-          next_item_cursor: res && res.next_item_cursor,
-        };
-      } catch (err) {
-        state.standingItemsBySource[sourceId] = { open: true, loading: false, error: consentErrorMessage(err) };
-      }
-      renderStandingSubscriptions();
+      await loadCapturedItems(sourceId, { items: [], next_item_cursor: null, pages_loaded: 0 });
+    }
+
+    async function loadMoreCapturedItems(sourceId) {
+      state.standingItemsBySource = state.standingItemsBySource || {};
+      const current = state.standingItemsBySource[sourceId];
+      if (!current || !current.open || current.loading || !current.next_item_cursor) return;
+      await loadCapturedItems(sourceId, current, { more: true });
     }
 
     async function startConsentFlow(sourceId, targetConsent) {

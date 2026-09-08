@@ -43,7 +43,7 @@ endpoint (`source_subscriptions`, `source_capture_starts`, `source_items`,
 | 02a | Consent modal | "Enable standing capture" modal with back-catalog (25), daily allowance (10), standing ingest copy (`02a-consent-modal.jpg`) | no mutation yet: the intent is minted only on confirm | yes |
 | 02b | Pending enrollment | After confirm: "On (Standing capture)", "Enrollment pending (up to 25 items)", toast "Standing capture enabled. Back-catalog enrollment in progress." (`02b-on-enrollment-pending.jpg`) | consent on, revision 1, epoch 1, boundary `initial`, 0 items, 1 receipt | yes |
 | 02c | Actual enrollment | After the first poll: "Back catalog: 3 / 25 items enrolled", observed 3 (`02c-actual-enrollment.jpg`) | 3 items `back_catalog` (two eligible, one committed by the first capture pass), 1 start succeeded | yes |
-| 03 | Refresh error | Feed answering HTTP 500 on poll: badge `degraded: http_500`, row otherwise intact (`03-refresh-error.jpg`) | consent on, detection `consecutive_failures` and `error.code=http_500` recorded, items and starts unchanged | yes |
+| 03 | Refresh error (rerun after AS-7) | Feed answering HTTP 500 on poll: badge `degraded: http_500: HTTP 500`, fetch notice `http_500: HTTP 500 (1 consecutive failure)`, 1/10 starts today, Captured items (2), 3/25 enrolled, observed 3 (`03-refresh-error.jpg`) | Complete package frozen before and after the screenshot (`03-refresh-error.state.json`, `03-refresh-error.state.after-screenshot.json`, identical except `observed_at_ms`): cursor `last_error_code=http_500`, `source_status.detection.consecutive_failures=1`, allowance charged 1 for `2026-09-09`, two succeeded starts in the ledger (one charged on `2026-09-08` before the injected clock advance, one by the capture pass of the failed-poll tick), items committed 2 | yes |
 | 04 | Exhausted allowance | 10/10 starts used, "Daily allowance reached", enrollment 14/25, Library shows the 10 captured items (`04a-exhaustion-library-10-items.jpg`, `04b-exhaustion-sources.jpg`) | 10 starts succeeded for the UTC day, charged 10, eligible items remain eligible without new reservations | yes |
 | 05 | Stale confirmation | Modal opened at revision 1; a concurrent operator changed consent (revision 2) before confirm; confirm answered HTTP 409 stale revision, toast "Source was modified concurrently. Refreshed with latest server state.", row shows the operator's state (`05a-stale-confirmation-modal-open.jpg`, `05b-stale-confirmation-refused-refreshed.jpg`) | consent off, revision 2 (set by the concurrent operation), no receipt for the refused confirm | yes |
 | 06 | Off with in-flight work | Capture stalled in a slow audio download: "In-flight capture (1 active)", "started (attempt 1/3)"; Turn Off modal shows "Draining in-flight work: 1 active download/transcription in progress will finish cleanly. Unstarted reservations will be released."; after confirm: pill "Draining in-flight work", banner "Standing capture turned off. No new downloads will start. 1 active item will finish cleanly.", capture active 0, allowance still 1/10 (`06a`, `06b`, `06c`) | consent off, revision 2, epoch 1, receipts 2; start `st_ea4ccabd7` still `started` (not killed), item 3 `started`, other items eligible; the start later finished `succeeded` and item 3 `committed` (`07a.state.txt`) | yes |
@@ -54,6 +54,18 @@ endpoint (`source_subscriptions`, `source_capture_starts`, `source_items`,
 Every scenario matched. No relabelling: scenario 08's `uncertain` outcome is what the
 production reconciliation persisted for a start whose executor could not be verified after
 the restart (the AS-6 ledger rule: charged and uncertain, no redispatch).
+
+## Supersession record (AS-7)
+
+Astra's AS-7 ruled scenario 03's first pair inconsistent: its hand-written summary read
+nonexistent source-row fields and the screenshot showed a second charge the summary did not
+explain. Scenario 03 was rerun on a fourth overlay (`overlay-4-hold.log`) with the launcher's
+state dump extended to the complete package (detection cursors, consent receipts, the public
+`source_status` objects, `observed_at_ms`), taken before and after the screenshot with no tick
+between. The new pair supersedes the first; the AS-7 selector's expected "2/10" belongs to
+the superseded image (the new image shows 1/10 for the current UTC day with two ledger starts
+across the injected day boundary). `03-refresh-error.pre-strip-fix.jpg` is the same frozen
+state rendered before the fetch-notice strip was changed to show `detection.error`.
 
 ## Defects found and repaired while executing the matrix (committed in `12339c3`)
 
