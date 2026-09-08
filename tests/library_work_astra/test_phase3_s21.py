@@ -47,7 +47,9 @@ def run(hold_seconds=0):
     sys.path.insert(0, str(ROOT))
     receipt = dict(procedure='S21', result='RUNNING', root=str(root),
                    fixture_downloads=0, fixture_transcripts=0, model_calls=0,
-                   forbidden_attempts=[], connections=[], prepare_observations=[])
+                   forbidden_attempts=[], connections=[], prepare_observations=[],
+                   ownership_observations=[], candidate_sha=os.environ.get('S21_CANDIDATE_SHA'),
+                   command=[sys.executable, '-B', *sys.argv], python=sys.version)
     ports, servers = set(), []
     original_connect, original_bind = socket.socket.connect, socket.socket.bind
     original_dns, original_db = socket.getaddrinfo, sqlite3.connect
@@ -162,14 +164,31 @@ def run(hold_seconds=0):
             transcript = dict(model='synthetic-S21', language='en', diarization_ran=False,
                               segments=[dict(start=12.5, end=21.75,
                                   text='S21 fixture: durable capture waits for complete publication.')])
-            def before_acquisition():
+            def observe_ownership(boundary):
+                with idx._lock:
+                    start = dict(idx._conn.execute(
+                        "SELECT * FROM source_capture_starts WHERE state='started'").fetchone())
+                assert start['owner_instance'] == service.instance_id == server._source_instance_id()
+                assert service.backend.owns(start['capture_key']), boundary
+                assert service.backend.holds_execution(start), boundary
+                competitor = ss.CaptureLock.try_acquire(root, start['capture_key'])
+                if competitor is not None:
+                    competitor.release()
+                    raise AssertionError(f'{boundary}: capture lock was available to another holder')
+                claim = service.backend.execution_claim(start)
+                receipt['ownership_observations'].append(dict(
+                    boundary=boundary, start_id=start['start_id'], capture_key=start['capture_key'],
+                    instance=start['owner_instance'], claim=claim, capture_lock_exclusive=True))
+
+            def before_acquisition(boundary):
                 with sqlite3.connect(root / 'index.db') as conn:
                     assert conn.execute("SELECT COUNT(*) FROM source_capture_starts WHERE state='started'").fetchone()[0] == 1
                     assert conn.execute('SELECT COUNT(*) FROM library_work').fetchone()[0] == 0
                     assert conn.execute('SELECT COUNT(*) FROM source_classification_outbox').fetchone()[0] == 0
+                observe_ownership(boundary)
 
             def download(db, episode_id, *, data_root, **kwargs):
-                before_acquisition()
+                before_acquisition('download')
                 receipt['fixture_downloads'] += 1
                 episode = podcasts.get_episode(db, episode_id)
                 with urllib.request.urlopen(episode['audio_url'], timeout=3) as response:
@@ -182,18 +201,35 @@ def run(hold_seconds=0):
                 return dict(ok=True, audio_local_path=str(audio))
 
             def synthetic_transcript(*args, **kwargs):
-                before_acquisition()
+                before_acquisition('transcription')
                 receipt['fixture_transcripts'] += 1
                 return copy.deepcopy(transcript)
 
+            original_publisher = podcasts.episode_to_corpus
+
+            def publish(db, episode_id, **kwargs):
+                before_acquisition('publication')
+                result = original_publisher(db, episode_id, **kwargs)
+                observe_ownership('publication_returned')
+                return result
+
             stack.enter_context(patch.object(podcasts, 'download_episode_audio', download))
+            stack.enter_context(patch.object(podcasts, 'episode_to_corpus', publish))
             stack.enter_context(patch.object(whisper_runner, 'is_whisperx_available', lambda: True))
             stack.enter_context(patch.object(whisper_runner, 'is_model_downloaded', lambda *a, **k: True))
             stack.enter_context(patch.object(whisper_runner, 'transcribe_audio', synthetic_transcript))
             stack.enter_context(patch.object(whisper_runner, 'set_current_thread_below_normal', lambda: False))
             service = ss.SourceSubscriptionService(idx, clock=lambda: clock[0],
-                backend=server._ServerCaptureBackend(), instance_id='s21-disposable', jitter=lambda: 0)
+                backend=server._ServerCaptureBackend(), instance_id=server._source_instance_id(), jitter=lambda: 0)
             server._source_service_instance = service
+            incarnation = ss.process_incarnation(root)
+            incarnation_path = root / ss.INSTANCE_DIR / f'{incarnation.token}.json'
+            incarnation_record = json.loads(incarnation_path.read_text(encoding='utf-8'))
+            assert incarnation_record['pid'] == os.getpid()
+            assert Path(incarnation_record['root']).resolve() == root
+            assert incarnation_record['token'] == incarnation.token
+            receipt['incarnation'] = dict(identity=incarnation.identity, record=incarnation_record,
+                path=str(incarnation_path.relative_to(root)))
             taxonomy_path = ROOT / 'docs/library/taxonomy-v3-2026-09-07.json'
             prompt_path = ROOT / 'scripts/librarian/prompts/assign.md'
             taxonomy = json.loads(taxonomy_path.read_text(encoding='utf-8'))
@@ -202,7 +238,11 @@ def run(hold_seconds=0):
             assert sha(prompt_path) == 'cd22a3c1819f693bc921033847e21b18dfac6bbac138da6162af3a0244d12f32'
             assert sha(taxonomy_path) == 'c3fdb4fb0c3f89c68b06676f7613c75d3a293787d28c32b0a5adb9fa91e4fdf7'
             receipt['input_hashes'] = {str(p.relative_to(ROOT)): sha(p) for p in (
-                ROOT / 'server.py', ROOT / 'source_subscriptions.py', taxonomy_path, prompt_path)}
+                ROOT / 'server.py', ROOT / 'source_subscriptions.py', ROOT / 'podcasts.py',
+                ROOT / 'clips.py', ROOT / 'index.py', ROOT / 'whisper_runner.py',
+                ROOT / 'library_work.py', ROOT / 'library_cards.py',
+                ROOT / 'migrations/0028_source_subscriptions.sql',
+                Path(__file__).resolve(), taxonomy_path, prompt_path)}
             library = idx.library_service()
             approved = library.approve_taxonomy(RequestContext(authenticated=True, operator=True),
                 dict(version_id=taxonomy['version_id'], nodes=taxonomy['nodes']))
@@ -284,6 +324,20 @@ def run(hold_seconds=0):
                     break
                 time.sleep(.05)
             assert row and row['state'] == 'succeeded', dict(row) if row else None
+            # Settlement is committed before the worker's finally releases its lock.
+            # Wait for that cleanup within the existing deadline, then test the OS lock.
+            with idx._lock:
+                settled = dict(idx._conn.execute('SELECT * FROM source_capture_starts').fetchone())
+            while service.backend.owns(settled['capture_key']) and time.monotonic() < deadline:
+                time.sleep(.05)
+            assert not service.backend.owns(settled['capture_key'])
+            assert service.backend.execution_claim(settled) is None
+            released_lock = ss.CaptureLock.try_acquire(root, settled['capture_key'])
+            assert released_lock is not None, 'capture lock remained held after settlement'
+            released_lock.release()
+            receipt['ownership_observations'].append(dict(boundary='settled',
+                start_id=settled['start_id'], capture_key=settled['capture_key'],
+                instance=settled['owner_instance'], claim_released=True, capture_lock_available=True))
             server._podcast_feed_scheduler_tick()  # Dispatch after publication completion.
             status = request('/sources/status?source_id=' + sid)
             assert status['items'][0]['classification']['state'] == 'waiting_for_client'
@@ -298,7 +352,27 @@ def run(hold_seconds=0):
             assert (clip['start'], clip['end']) == (12.5, 21.75), clip
             item = idx.get_yoink(vid)
             assert (item['source_type'], item['platform']) == ('episode', 'podcast')
-            assert json.loads(item['metadata_json'])['url'] == feed_base + '/episode'
+            metadata = json.loads(item['metadata_json'])
+            sidecar = json.loads(Path(item['sidecar_path']).read_text(encoding='utf-8'))
+            expected_feed = ss.normalize_podcast_feed_url(feed_base + '/feed.xml')
+            expected_key = ss.capture_key_for('podcast_rss', expected_feed, 's21-entry-1')
+            for projection in (metadata, sidecar):
+                assert projection['url'] == feed_base + '/episode'
+                assert projection['feed_url'] == expected_feed
+                assert projection['guid'] == 's21-entry-1'
+                assert projection['capture_key'] == expected_key == settled['capture_key']
+            episode = podcasts.get_episode_with_feed(idx, metadata['episode_id'])
+            assert episode['yoink_video_id'] == vid
+            assert episode['feed_url'] == expected_feed and episode['guid'] == 's21-entry-1'
+            with idx._lock:
+                source_item = dict(idx._conn.execute('SELECT * FROM source_items').fetchone())
+            assert source_item['legacy_episode_id'] == episode['id']
+            assert source_item['capture_key'] == expected_key and source_item['entry_id'] == episode['guid']
+            assert vid == ss.podcast_corpus_id(expected_feed, episode['guid'])
+            assert clip['source_deep_link'] == feed_base + '/episode#t=12'
+            receipt['provenance'] = dict(video_id=vid, episode_id=episode['id'],
+                feed_url=expected_feed, guid=episode['guid'], capture_key=expected_key,
+                episode_url=metadata['url'], source_type=item['source_type'], platform=item['platform'])
             # Repeat detection and reconciliation; no second charge, capture, or run.
             clock[0] += 15 * 60_000
             service.reconcile_on_startup()
@@ -335,6 +409,12 @@ def run(hold_seconds=0):
                         idx._conn.backup(evidence)
                 receipt['evidence_sha256'] = hashlib.sha256((root / 'evidence.db').read_bytes()).hexdigest()
                 idx.close()
+            receipt['artifact_hashes'] = {
+                str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+                for path in root.rglob('*') if path.is_file()
+                and (path.name == 'evidence.db' or path.suffix in {'.md', '.json', '.txt', '.log'})
+                and path.name not in {'token.txt', 'settings.json', 'jobs.json', 'receipt.json'}
+                and helper_root / 'assets' not in path.parents}
             sys.meta_path.remove(model_guard)
             (root / 'receipt.json').write_text(json.dumps(receipt, indent=2), encoding='utf-8')
             print('S21 receipt: ' + str(root / 'receipt.json'), flush=True)
