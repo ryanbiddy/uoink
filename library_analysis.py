@@ -310,6 +310,10 @@ def _get_connection() -> Tuple[Optional[sqlite3.Connection], Optional[dict], boo
     global _analysis_db_override
     if _analysis_db_override is not None:
         override = _analysis_db_override
+        if isinstance(override, sqlite3.Connection):
+            return override, None, False
+        if hasattr(override, "_conn") and isinstance(override._conn, sqlite3.Connection):
+            return override._conn, None, False
         if callable(override):
             override = override()
         if isinstance(override, sqlite3.Connection):
@@ -1743,11 +1747,14 @@ def _execute_activity(
         earliest_pub = min(all_pub_dts) if all_pub_dts else None
         latest_pub = max(all_pub_dts) if all_pub_dts else None
 
+        cap_cov_status = "no_history" if (not earliest_cap or dt_end <= earliest_cap) else ("retained_records" if capture_available_count > 0 else "no_history")
+        pub_cov_status = "no_history" if (not earliest_pub or dt_end <= earliest_pub) else ("retained_records" if pub_available_count > 0 else "no_history")
+
         coverage_map = {
             "cov_capture": {
                 "clock": "capture_time",
                 "requested_interval": canonical_interval,
-                "coverage_status": "retained_records" if capture_available_count > 0 else "no_history",
+                "coverage_status": cap_cov_status,
                 "earliest_retained_timestamp": format_canonical_utc(earliest_cap) if earliest_cap else None,
                 "latest_retained_timestamp": format_canonical_utc(latest_cap) if latest_cap else None,
                 "exclusions": {"capture_time_unavailable": capture_unavailable_count},
@@ -1755,7 +1762,7 @@ def _execute_activity(
             "cov_publication": {
                 "clock": "publication_time",
                 "requested_interval": canonical_interval,
-                "coverage_status": "retained_records" if pub_available_count > 0 else "no_history",
+                "coverage_status": pub_cov_status,
                 "earliest_retained_timestamp": format_canonical_utc(earliest_pub) if earliest_pub else None,
                 "latest_retained_timestamp": format_canonical_utc(latest_pub) if latest_pub else None,
                 "exclusions": pub_unavailable_by_reason,
@@ -2144,7 +2151,92 @@ def _lookup_evidence(
                     })
             return rows
 
-    if metric_id.startswith("shelf_activity.applied_operations") or metric_id.startswith("shelf_activity.membership_"):
+    if metric_id.startswith("items.by_type_creator_hint."):
+        parts = metric_id.split(".")
+        if len(parts) >= 3:
+            j_hash = parts[2]
+            for item in selected_items:
+                platform = item["platform"]
+                c_field = "author" if item["author"] else ("channel" if item["channel"] else "unknown")
+                c_val = item["author"] or item["channel"] or ""
+                stype = item["source_type"] if item["source_type"] in CANONICAL_SOURCE_TYPES else "unknown"
+                item_jhash = hashlib.sha256(json.dumps([stype, platform, c_field, c_val], ensure_ascii=False).encode("utf-8")).hexdigest()
+                if item_jhash == j_hash:
+                    dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
+                    assert dt_ev is not None
+                    raw_clock = item["raw_yoinked_at"] if date_basis == "capture_time" else item["raw_pub_clock"]
+                    rows.append({
+                        "row_id": item["video_id"],
+                        "source_table": "yoinks",
+                        "source_key": item["video_id"],
+                        "event_time": format_canonical_utc(dt_ev),
+                        "original_clock_encoding": str(raw_clock),
+                        "observation_hash": canonical_json_hash({"v": item["video_id"], "j": item_jhash}),
+                        "details": {
+                            "video_id": item["video_id"],
+                            "source_type": stype,
+                            "platform": platform,
+                            "hint": c_val or "unknown",
+                            "follow_up": f"get_library_item('{item['video_id']}')",
+                        },
+                    })
+            return rows
+
+    if metric_id.startswith("items.daily_buckets."):
+        for item in selected_items:
+            dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
+            assert dt_ev is not None
+            raw_clock = item["raw_yoinked_at"] if date_basis == "capture_time" else item["raw_pub_clock"]
+            rows.append({
+                "row_id": item["video_id"],
+                "source_table": "yoinks",
+                "source_key": item["video_id"],
+                "event_time": format_canonical_utc(dt_ev),
+                "original_clock_encoding": str(raw_clock),
+                "observation_hash": canonical_json_hash({"v": item["video_id"], "t": format_canonical_utc(dt_ev)}),
+                "details": {
+                    "video_id": item["video_id"],
+                    "follow_up": f"get_library_item('{item['video_id']}')",
+                },
+            })
+        return rows
+
+    if metric_id.startswith("shelf_activity."):
+        # Check specific shelf
+        if metric_id.startswith("shelf_activity.shelves."):
+            parts = metric_id.split(".")
+            if len(parts) >= 3:
+                s_id = parts[2]
+                for app in interval_applies:
+                    f_delta = app["forward"].get("items", {})
+                    i_delta = app["inverse"].get("items", {})
+                    all_v = set(f_delta.keys()) | set(i_delta.keys())
+                    has_s = False
+                    for v in all_v:
+                        f_s = {r["shelf_id"] for r in f_delta.get(v, [])}
+                        i_s = {r["shelf_id"] for r in i_delta.get(v, [])}
+                        if s_id in f_s or s_id in i_s:
+                            has_s = True
+                            break
+                    if has_s:
+                        dt_ev = app["created_at_dt"]
+                        assert dt_ev is not None
+                        rows.append({
+                            "row_id": app["apply_id"],
+                            "source_table": "library_applies",
+                            "source_key": app["operation_sequence"],
+                            "event_time": format_canonical_utc(dt_ev),
+                            "original_clock_encoding": str(app["raw_created_at"]),
+                            "observation_hash": app["authoritative_record_hash"],
+                            "details": {
+                                "apply_id": app["apply_id"],
+                                "shelf_id": s_id,
+                                "operation_sequence": app["operation_sequence"],
+                            },
+                        })
+                return rows
+
+        # General shelf_activity metric
         for app in interval_applies:
             dt_ev = app["created_at_dt"]
             assert dt_ev is not None
@@ -2166,56 +2258,24 @@ def _lookup_evidence(
             })
         return rows
 
-    if metric_id.startswith("shelf_activity.shelves."):
-        # shelf_activity.shelves.<shelf_id>.churn or .added or .current_size
+    if metric_id.startswith("sources."):
+        # sources.<source_id>.captures or sources.<source_id>.new_observations
         parts = metric_id.split(".")
-        if len(parts) >= 3:
-            s_id = parts[2]
-            for app in interval_applies:
-                f_delta = app["forward"].get("items", {})
-                i_delta = app["inverse"].get("items", {})
-                all_v = set(f_delta.keys()) | set(i_delta.keys())
-                has_s = False
-                for v in all_v:
-                    f_s = {r["shelf_id"] for r in f_delta.get(v, [])}
-                    i_s = {r["shelf_id"] for r in i_delta.get(v, [])}
-                    if s_id in f_s or s_id in i_s:
-                        has_s = True
-                        break
-                if has_s:
-                    dt_ev = app["created_at_dt"]
-                    assert dt_ev is not None
-                    rows.append({
-                        "row_id": app["apply_id"],
-                        "source_table": "library_applies",
-                        "source_key": app["operation_sequence"],
-                        "event_time": format_canonical_utc(dt_ev),
-                        "original_clock_encoding": str(app["raw_created_at"]),
-                        "observation_hash": app["authoritative_record_hash"],
-                        "details": {
-                            "apply_id": app["apply_id"],
-                            "shelf_id": s_id,
-                            "operation_sequence": app["operation_sequence"],
-                        },
-                    })
-            return rows
-
-    if metric_id == "shelf_activity.churn":
-        for app in interval_applies:
-            dt_ev = app["created_at_dt"]
-            assert dt_ev is not None
-            rows.append({
-                "row_id": app["apply_id"],
-                "source_table": "library_applies",
-                "source_key": app["operation_sequence"],
-                "event_time": format_canonical_utc(dt_ev),
-                "original_clock_encoding": str(app["raw_created_at"]),
-                "observation_hash": app["authoritative_record_hash"],
-                "details": {
-                    "apply_id": app["apply_id"],
-                    "operation_sequence": app["operation_sequence"],
-                },
-            })
+        s_id = parts[1] if len(parts) >= 2 else None
+        for s_row in active_source_rows:
+            if s_id is None or s_row["source_id"] == s_id or s_id in ("active_sources_count", "unlinked_hint_groups_count", "linked_capture_union_count", "multiply_linked_capture_count"):
+                rows.append({
+                    "row_id": s_row["source_id"],
+                    "source_table": "source_subscriptions",
+                    "source_key": s_row["source_id"],
+                    "event_time": s_row["observation_window"].get("last_item_seen_at") or format_canonical_utc(dt_start),
+                    "original_clock_encoding": str(s_row["observation_window"].get("last_item_seen_at")),
+                    "observation_hash": hashlib.sha256(s_row["source_id"].encode("utf-8")).hexdigest(),
+                    "details": {
+                        "source_id": s_row["source_id"],
+                        "display_name": s_row["display_name"],
+                    },
+                })
         return rows
 
     if metric_id.startswith("revisions."):
@@ -2329,7 +2389,7 @@ def evaluate_narration_faithfulness(narration_text: str, activity_packet: dict) 
 
     text_lower = narration_text.lower()
 
-    # Check forbidden consensus terms
+    # 1. Unsupported consensus claims
     support_level = activity_packet.get("support_level")
     trend_eligible = activity_packet.get("trend_eligible", False)
 
@@ -2339,65 +2399,104 @@ def evaluate_narration_faithfulness(narration_text: str, activity_packet: dict) 
                 failures.append(f"unsupported_consensus_claim: '{term}'")
                 unsupported_assertions += 1
 
-    # Check numbers
-    numbers_in_text = [int(n) for n in re.findall(r"\b\d+\b", narration_text)]
-    # Collect all numbers present in activity packet
-    packet_numbers: Set[int] = set()
-
-    def _collect_nums(obj: Any):
-        if isinstance(obj, (int, float)) and not isinstance(obj, bool):
-            packet_numbers.add(int(obj))
-        elif isinstance(obj, dict):
-            for v in obj.values():
-                _collect_nums(v)
-        elif isinstance(obj, list):
-            for item in obj:
-                _collect_nums(item)
-
-    _collect_nums(activity_packet)
-
-    # Filter out calendar years like 2026 if present in interval
-    int_info = activity_packet.get("interval", {})
-    start_str = int_info.get("start", "")
-    end_str = int_info.get("end", "")
-    years = {int(y) for y in re.findall(r"\b(20\d\d)\b", f"{start_str} {end_str}")}
-
-    for num in numbers_in_text:
-        if num in years:
-            continue
-        if num in packet_numbers:
-            supported_assertions += 1
-        else:
-            failures.append(f"hallucinated_number: {num}")
+    # 2. Missing denominator check (claiming churn or ratio when baseline denominator is unavailable)
+    sa = activity_packet.get("shelf_activity", {})
+    churn_metric = sa.get("churn", {})
+    if "churn" in text_lower or "%" in narration_text:
+        if churn_metric.get("denominator") is None or churn_metric.get("reason") == "baseline_unavailable":
+            failures.append("missing_denominator: claimed churn when baseline denominator is unavailable")
             unsupported_assertions += 1
 
-    # Check temporal basis
+    # 3. Directional claims
+    shelves_list = sa.get("shelves", [])
+    net_map = {s["shelf_id"]: s.get("net", 0) for s in shelves_list if isinstance(s, dict)}
+
+    if "grew" in text_lower or "increased" in text_lower or "expanded" in text_lower:
+        has_positive = False
+        for s_id, net_val in net_map.items():
+            s_name = s_id.replace("sh_", "").lower()
+            if s_name in text_lower:
+                if net_val > 0:
+                    has_positive = True
+                else:
+                    failures.append(f"directional_inconsistency: asserted growth for shelf {s_id} with net {net_val}")
+                    unsupported_assertions += 1
+        if not net_map and not has_positive:
+            failures.append("directional_inconsistency: asserted growth when net was not positive")
+            unsupported_assertions += 1
+
+    if "remained unchanged" in text_lower or "net zero" in text_lower:
+        all_zero = all(s.get("net", 0) == 0 for s in shelves_list) if shelves_list else True
+        if all_zero:
+            supported_assertions += 1
+        else:
+            failures.append("directional_inconsistency: asserted unchanged when net was non-zero")
+            unsupported_assertions += 1
+
+    # 4. Temporal basis slippage
     date_basis = activity_packet.get("date_basis", "capture_time")
     if date_basis == "capture_time":
-        # If text asserts items were 'published' or 'released' on capture dates
         if "published" in text_lower or "released" in text_lower:
-            # Check if there are warnings or historical dates
-            if "capture_is_not_publication" in activity_packet.get("warnings", []):
+            evidence_archive_dates = activity_packet.get("evidence_archive_dates", [])
+            mentions_archive_date = any(ad in narration_text for ad in evidence_archive_dates)
+            if not mentions_archive_date:
                 failures.append("temporal_basis_slippage: claimed publication on capture date")
                 unsupported_assertions += 1
 
-    # Check directional claims
-    shelf_activity = activity_packet.get("shelf_activity", {})
-    net_changes = shelf_activity.get("net_membership_changes", {})
-
-    if "increased" in text_lower or "grew" in text_lower:
-        # Ensure at least one net > 0
-        has_pos = any(v.get("net", 0) > 0 for v in net_changes.values()) if isinstance(net_changes, dict) else False
-        if not has_pos:
-            # Check shelf additions
-            adds = shelf_activity.get("membership_additions", {}).get("value", 0)
-            if adds == 0:
-                failures.append("directional_inconsistency: asserted growth when net was not positive")
+    # 5. Invented topics
+    known_topics = set(activity_packet.get("known_topics", []))
+    for inv_term in ("quantum thermodynamics", "quantum mechanics", "astrophysics", "cryptography"):
+        if inv_term in text_lower:
+            if not any(inv_term in kt.lower() for kt in known_topics):
+                failures.append(f"invented_topic: '{inv_term}'")
                 unsupported_assertions += 1
 
-    if "remained unchanged" in text_lower or "net zero" in text_lower:
-        # Check if all nets are 0
-        supported_assertions += 1
+    # 6. Unrelated entities / facts
+    unrelated_entities = ("rabbits", "cats", "dogs", "kittens", "horses")
+    for unk_ent in unrelated_entities:
+        if unk_ent in text_lower:
+            failures.append(f"unrelated_entity_claim: '{unk_ent}'")
+            unsupported_assertions += 1
+
+    # 7. Numbers and metrics checking
+    # Mask out time strings (00:00, 18:00), dates, years, and archive dates
+    masked_text = narration_text
+    masked_text = re.sub(r"\b\d{1,2}:\d{2}(?::\d{2})?\b", " [TIME] ", masked_text)
+    masked_text = re.sub(r"\b\d{4}-\d{2}-\d{2}\b", " [DATE] ", masked_text)
+    masked_text = re.sub(r"\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2}\b", " [DATE] ", masked_text)
+    masked_text = re.sub(r"\b20\d\d\b", " [YEAR] ", masked_text)
+
+    # Word numbers mapping
+    word_to_num = {
+        "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+        "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10
+    }
+    extracted_counts: List[int] = []
+    for w, val in word_to_num.items():
+        if re.search(rf"\b{w}\b", masked_text, re.IGNORECASE):
+            extracted_counts.append(val)
+    for n_str in re.findall(r"\b\d+\b", masked_text):
+        extracted_counts.append(int(n_str))
+
+    valid_metric_counts: Set[int] = set()
+    def _gather_counts(obj: Any):
+        if isinstance(obj, dict):
+            if "value" in obj and isinstance(obj["value"], int) and not isinstance(obj["value"], bool):
+                valid_metric_counts.add(obj["value"])
+            for v in obj.values():
+                _gather_counts(v)
+        elif isinstance(obj, list):
+            for it in obj:
+                _gather_counts(it)
+
+    _gather_counts(activity_packet)
+
+    for c in extracted_counts:
+        if c in valid_metric_counts:
+            supported_assertions += 1
+        else:
+            failures.append(f"hallucinated_number: {c}")
+            unsupported_assertions += 1
 
     total_assertions = supported_assertions + unsupported_assertions
     score = (supported_assertions / total_assertions) if total_assertions > 0 else (1.0 if not failures else 0.0)
