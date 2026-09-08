@@ -9,7 +9,7 @@
     "schema_version": 25
   },
   "upgrade": {
-    "sha256": "302749e4641497c114212aeacc19590feff6cdafb2f3370b3651262ba145cfb9",
+    "sha256": "852cfb082b0bde7763023f190de9a4af839e828f2ac4d763b0a1038066e0c6c5",
     "schema_version": 27,
     "hash_note": "Measured duplicate only; migration timestamps make file hashes run-specific"
   },
@@ -2216,8 +2216,8 @@
     "source_sha256": "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc",
     "taxonomy_file_sha256": "c3fdb4fb0c3f89c68b06676f7613c75d3a293787d28c32b0a5adb9fa91e4fdf7",
     "taxonomy_revision_hash": "8a1b16033eb4d6acd57c91c6a5d5e7f2af6d6f60f3adef92502b62d81ba28d04",
-    "prompt_file_sha256": "cd22a3c1819f693bc921033847e21b18dfac6bbac138da6162af3a0244d12f32",
-    "prompt_sha256": "e4ff00598d1e58ab436d1ca31796b67776e261535849fb52d70a59d9ca413aa9",
+    "prompt_file_sha256": "d1a36d6896180ba886b90eb50606300cfd8282db74b279417afd3ee0cba938fd",
+    "prompt_sha256": "ad6d5e59d357a5c8cd4668b3f6c8fc1ddca78ce9d956e7abe099f2c426a33255",
     "card_profile_hash": "6e265b0b2822ba3db6865cfa4002824d94538d2bfc0b5366e3f210504ac6bd14",
     "card_builder_sha256": "a848cc02d451478548ac0a3d5968a14604919f3c0744a0ee88332dc615b1a10a",
     "holdout_file_sha256": "855749efcaca5e985c04a9efef2decc4ee2dca3b24c8c3871f01079a9acd314c",
@@ -2225,7 +2225,7 @@
     "gold_file_sha256": "a4d4c293741c1dc22b53cf6af80b9203d73d098b29537b31ba7635c05c62731e",
     "cards_hash": "b30f4918c51cc7be2c688482d79088d39f69091db02b37024a952b2cc78f6865",
     "corpus_heads_hash": "1bb2d1c953a93c1597c3e35b64734ee604172033cca794b49a361ae7e76d7af9",
-    "implementation_hash": "d693d590d2f8f0b01260374b33ffbfe918a4b3d1e588dcf4fe3ae1ccb35a19da"
+    "implementation_hash": "2895ee11ddb4efbdf24520f13398db5f9d5553aeef00ce9849b1ec38fe3202de"
   },
   "files": {
     "taxonomy": {
@@ -2254,7 +2254,7 @@
     },
     "prompt": {
       "path": "scripts/librarian/prompts/assign.md",
-      "sha256": "cd22a3c1819f693bc921033847e21b18dfac6bbac138da6162af3a0244d12f32"
+      "sha256": "d1a36d6896180ba886b90eb50606300cfd8282db74b279417afd3ee0cba938fd"
     },
     "card_builder": {
       "path": "library_cards.py",
