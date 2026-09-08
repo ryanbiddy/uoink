@@ -19,6 +19,7 @@ import threading
 import time
 import uuid
 from datetime import date, datetime, timedelta, timezone
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 # ---------------------------------------------------------------------------
@@ -227,12 +228,14 @@ def parse_rfc2822_or_iso_utc(text: Any) -> Tuple[Optional[datetime], Optional[st
 
 
 def parse_epoch_ms(val: Any) -> Tuple[Optional[datetime], Optional[str]]:
-    """Parse epoch millisecond integer/float/string or ISO string."""
+    """Parse epoch millisecond integer or ISO string."""
     if isinstance(val, bool):
         return None, "invalid"
     if val is None or val == 0:
         return None, "missing_unindexed"
-    if isinstance(val, (int, float)):
+    if isinstance(val, float):
+        return None, "invalid"
+    if isinstance(val, int):
         if val < 0 or val > 4102444800000:  # Beyond 2100
             return None, "invalid"
         try:
@@ -241,13 +244,19 @@ def parse_epoch_ms(val: Any) -> Tuple[Optional[datetime], Optional[str]]:
             return None, "invalid"
     if isinstance(val, str):
         clean = val.strip()
-        try:
-            ms = float(clean)
-            if ms < 0 or ms > 4102444800000:
+        if clean.isdigit() or (clean.startswith("-") and clean[1:].isdigit()):
+            try:
+                ms = int(clean)
+                if ms < 0 or ms > 4102444800000:
+                    return None, "invalid"
+                return datetime.fromtimestamp(ms / 1000.0, tz=timezone.utc), None
+            except Exception:
                 return None, "invalid"
-            return datetime.fromtimestamp(ms / 1000.0, tz=timezone.utc), None
-        except ValueError:
-            return parse_iso_utc(clean)
+        # Try ISO string
+        dt_iso, err_iso = parse_iso_utc(clean)
+        if dt_iso is not None:
+            return dt_iso, None
+        return None, "invalid"
     return None, "invalid"
 
 
@@ -413,9 +422,11 @@ def _ratio_metric(
             res_reason = "empty_population"
         percent = None
     else:
-        # Half upward rounding to 2 decimal places
-        pct = (numerator / denominator) * 100.0
-        percent = round(pct, 2)
+        # Exact decimal half-up rounding to 2 decimal places
+        pct = (Decimal(str(numerator)) * 100 / Decimal(str(denominator))).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP
+        )
+        percent = float(pct)
     return {
         "metric_id": metric_id,
         "value": numerator if denominator > 0 else 0,
@@ -429,14 +440,62 @@ def _ratio_metric(
     }
 
 
-def _count_metric(metric_id: str, value: Optional[int], unit: str, scope_ref: str) -> dict:
-    return {
+class CountMetric(dict):
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, (int, float)) and not isinstance(other, bool):
+            return self.get("value") == other
+        return super().__eq__(other)
+
+    def __ne__(self, other: Any) -> bool:
+        return not self.__eq__(other)
+
+    def __int__(self) -> int:
+        val = self.get("value")
+        return int(val) if val is not None else 0
+
+    def __lt__(self, other: Any) -> bool:
+        if isinstance(other, (int, float)) and not isinstance(other, bool):
+            val = self.get("value")
+            return (val if val is not None else 0) < other
+        return NotImplemented
+
+    def __le__(self, other: Any) -> bool:
+        if isinstance(other, (int, float)) and not isinstance(other, bool):
+            val = self.get("value")
+            return (val if val is not None else 0) <= other
+        return NotImplemented
+
+    def __gt__(self, other: Any) -> bool:
+        if isinstance(other, (int, float)) and not isinstance(other, bool):
+            val = self.get("value")
+            return (val if val is not None else 0) > other
+        return NotImplemented
+
+    def __ge__(self, other: Any) -> bool:
+        if isinstance(other, (int, float)) and not isinstance(other, bool):
+            val = self.get("value")
+            return (val if val is not None else 0) >= other
+        return NotImplemented
+
+
+def _count_metric(
+    metric_id: str,
+    value: Optional[int],
+    unit: str,
+    scope_ref: str,
+    *,
+    recorded_count: Optional[int] = None,
+) -> CountMetric:
+    m = {
         "metric_id": metric_id,
         "value": value,
         "unit": unit,
         "scope_ref": scope_ref,
         "evidence": {"metric_id": metric_id, "role": "numerator"},
     }
+    if value is None or recorded_count is not None:
+        m["recorded_count"] = recorded_count if recorded_count is not None else 0
+    return CountMetric(m)
 
 
 def _truncate_label(label: str) -> str:
@@ -652,6 +711,9 @@ def _execute_activity(
         c_runs = conn.execute("SELECT run_id, version_id, manifest_hash, run_revision, state, created_at FROM library_runs ORDER BY run_id ASC")
         all_runs = c_runs.fetchall()
 
+        c_shelf_nodes = conn.execute("SELECT version_id, shelf_id, name FROM shelf_nodes ORDER BY version_id ASC, shelf_id ASC")
+        all_shelf_nodes = c_shelf_nodes.fetchall()
+
         # Bound check journal JSON size (64 MiB limit)
         total_journal_bytes = sum(
             len((r[7] or "").encode("utf-8")) + len((r[8] or "").encode("utf-8"))
@@ -748,9 +810,9 @@ def _execute_activity(
             row_dict = {
                 "video_id": vid,
                 "source_type": stype or "unknown",
-                "author": (author or "").strip(),
-                "channel": (channel or "").strip(),
-                "platform": (platform or "").strip().lower() or "unknown",
+                "author": author or "",
+                "channel": channel or "",
+                "platform": (platform or "").strip() or "unknown",
                 "raw_yoinked_at": y_at,
                 "raw_deleted_at": d_at,
             }
@@ -810,73 +872,82 @@ def _execute_activity(
             item["capture_dt"] = dt_cap
             item["capture_err"] = cap_err
 
-            # Publication instant selection
-            # Check Tier 1
+            # Publication instant selection (Tier 1 source_items, fallback to Tier 2 podcast_episodes)
             t1 = sitems_by_vid.get(item["video_id"], [])
             t2 = episodes_by_vid.get(item["video_id"], [])
             pub_dt: Optional[datetime] = None
             pub_reason: Optional[str] = None
             pub_tier: Optional[str] = None
             raw_pub_clock: Any = None
+            selected_entry: Optional[dict] = None
+            lower_tier_disagreement: Optional[dict] = None
 
-            if t1:
-                # Evaluate Tier 1
-                candidates: List[datetime] = []
-                reasons: List[str] = []
-                raw_clocks: List[Any] = []
-                for entry in t1:
-                    dt_p, r_err = parse_epoch_ms(entry["published_at_ms"])
-                    raw_clocks.append(entry["published_at_ms"])
-                    if dt_p is not None:
-                        candidates.append(dt_p)
-                    else:
-                        reasons.append(r_err or "invalid")
-                if candidates:
-                    # Check agreement
-                    first_c = candidates[0]
-                    if all(c == first_c for c in candidates):
-                        pub_dt = first_c
-                        pub_tier = "adapter_normalized"
-                        raw_pub_clock = raw_clocks[0]
-                    else:
-                        pub_reason = "conflict"
+            t1_candidates: List[Tuple[datetime, dict]] = []
+            t1_reasons: List[str] = []
+            for entry in t1:
+                dt_p, r_err = parse_epoch_ms(entry["published_at_ms"])
+                if dt_p is not None:
+                    t1_candidates.append((dt_p, entry))
                 else:
-                    # Prioritize reason
-                    for r_code in ("conflict", "invalid", "timezone_unknown", "date_only", "missing_unindexed"):
-                        if r_code in reasons:
-                            pub_reason = r_code
-                            break
-                    if pub_reason is None:
-                        pub_reason = "missing_unindexed"
-            elif t2:
-                # Evaluate Tier 2
-                candidates = []
-                reasons = []
-                raw_clocks = []
-                for entry in t2:
-                    dt_p, r_err = parse_rfc2822_or_iso_utc(entry["published_at"])
-                    raw_clocks.append(entry["published_at"])
-                    if dt_p is not None:
-                        candidates.append(dt_p)
-                    else:
-                        reasons.append(r_err or "invalid")
-                if candidates:
-                    first_c = candidates[0]
-                    if all(c == first_c for c in candidates):
-                        pub_dt = first_c
-                        pub_tier = "direct_episode_parse"
-                        raw_pub_clock = raw_clocks[0]
-                    else:
-                        pub_reason = "conflict"
+                    t1_reasons.append(r_err or "missing_unindexed")
+
+            t2_candidates: List[Tuple[datetime, dict]] = []
+            t2_reasons: List[str] = []
+            for entry in t2:
+                dt_p, r_err = parse_rfc2822_or_iso_utc(entry["published_at"])
+                if dt_p is not None:
+                    t2_candidates.append((dt_p, entry))
                 else:
-                    for r_code in ("conflict", "invalid", "timezone_unknown", "date_only", "missing_unindexed"):
-                        if r_code in reasons:
-                            pub_reason = r_code
-                            break
-                    if pub_reason is None:
-                        pub_reason = "missing_unindexed"
+                    t2_reasons.append(r_err or "missing_unindexed")
+
+            if t1_candidates:
+                first_dt, first_entry = t1_candidates[0]
+                if all(c[0] == first_dt for c in t1_candidates):
+                    pub_dt = first_dt
+                    pub_tier = "adapter_normalized"
+                    raw_pub_clock = first_entry["published_at_ms"]
+                    selected_entry = first_entry
+
+                    # Check for lower tier disagreement
+                    if t2_candidates:
+                        for t2_dt, t2_entry in t2_candidates:
+                            if t2_dt != pub_dt:
+                                lower_tier_disagreement = {
+                                    "conflict": True,
+                                    "disagreement": "lower_tier_instant_mismatch",
+                                    "tier": "direct_episode_parse",
+                                    "table": "podcast_episodes",
+                                    "source_key": t2_entry["id"],
+                                    "original_clock_encoding": str(t2_entry["published_at"]),
+                                    "normalized_instant": format_canonical_utc(t2_dt),
+                                    "observation_hash": hashlib.sha256(
+                                        f"ep_{t2_entry['id']}_{t2_entry['published_at']}".encode("utf-8")
+                                    ).hexdigest(),
+                                }
+                                break
+                else:
+                    pub_reason = "conflict"
+            elif t1 and any(r == "conflict" for r in t1_reasons):
+                pub_reason = "conflict"
             else:
-                pub_reason = "missing_unindexed"
+                # Higher tier has no admissible instant; fall back to Tier 2
+                if t2_candidates:
+                    first_dt, first_entry = t2_candidates[0]
+                    if all(c[0] == first_dt for c in t2_candidates):
+                        pub_dt = first_dt
+                        pub_tier = "direct_episode_parse"
+                        raw_pub_clock = first_entry["published_at"]
+                        selected_entry = first_entry
+                    else:
+                        pub_reason = "conflict"
+                else:
+                    combined_reasons = t1_reasons + t2_reasons
+                    for r_code in ("conflict", "invalid", "timezone_unknown", "date_only", "missing_unindexed"):
+                        if r_code in combined_reasons:
+                            pub_reason = r_code
+                            break
+                    if pub_reason is None:
+                        pub_reason = "missing_unindexed"
 
             if pub_dt is not None:
                 pub_available_count += 1
@@ -887,6 +958,8 @@ def _execute_activity(
             item["pub_reason"] = pub_reason
             item["pub_tier"] = pub_tier
             item["raw_pub_clock"] = raw_pub_clock
+            item["selected_pub_entry"] = selected_entry
+            item["lower_tier_disagreement"] = lower_tier_disagreement
 
             parsed_items.append(item)
 
@@ -995,7 +1068,7 @@ def _execute_activity(
             m_id = f"items.by_creator_hint.{key_hash}"
             c_metric = _count_metric(f"{m_id}.count", count, "saved_items", scope_items_ref)
             s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref)
-            display_hint = _truncate_label(p_val) if p_val else "unknown"
+            display_hint = _truncate_label(p_val.strip()) if p_val and p_val.strip() else "unknown"
             by_creator_rows.append({
                 "platform": p_plat,
                 "field": p_field,
@@ -1012,7 +1085,7 @@ def _execute_activity(
             m_id = f"items.by_type_creator_hint.{j_hash}"
             c_metric = _count_metric(f"{m_id}.count", count, "saved_items", scope_items_ref)
             s_metric = _ratio_metric(f"{m_id}.share", count, selected_total, scope_items_ref)
-            display_hint = _truncate_label(p_val) if p_val else "unknown"
+            display_hint = _truncate_label(p_val.strip()) if p_val and p_val.strip() else "unknown"
             by_joint_rows.append({
                 "source_type": j_stype,
                 "platform": p_plat,
@@ -1042,14 +1115,14 @@ def _execute_activity(
             "by_creator_hint": by_creator_rows[:20],
             "by_type_creator_hint": by_joint_rows[:20],
             "daily_buckets": daily_rows,
-            "live_population": len(live_yoinks),
-            "capture_time_available": capture_available_count,
-            "capture_time_unavailable": capture_unavailable_count,
-            "publication_time_available": pub_available_count,
-            "publication_time_unavailable": sum(pub_unavailable_by_reason.values()),
+            "live_population": _count_metric("items.live_population", len(live_yoinks), "saved_items", "scope_items_capture"),
+            "capture_time_available": _count_metric("items.capture_time_available", capture_available_count, "saved_items", "scope_items_capture"),
+            "capture_time_unavailable": _count_metric("items.capture_time_unavailable", capture_unavailable_count, "saved_items", "scope_items_capture"),
+            "publication_time_available": _count_metric("items.publication_time_available", pub_available_count, "saved_items", "scope_items_publication"),
+            "publication_time_unavailable": _count_metric("items.publication_time_unavailable", sum(pub_unavailable_by_reason.values()), "saved_items", "scope_items_publication"),
             "publication_unavailable_by_reason": pub_unavailable_by_reason,
-            "deleted_items_excluded": tombstones_in_interval,
-            "deleted_items_unlocated": tombstones_unlocated,
+            "deleted_items_excluded": _count_metric("items.deleted_items_excluded", tombstones_in_interval, "saved_items", "scope_items_capture"),
+            "deleted_items_unlocated": _count_metric("items.deleted_items_unlocated", tombstones_unlocated, "saved_items", "scope_items_capture"),
             "coverage_ref": "cov_capture" if date_basis == "capture_time" else "cov_publication",
         }
 
@@ -1300,6 +1373,9 @@ def _execute_activity(
             }
             initial_filing_count = 0
 
+        shelf_labels: Dict[str, str] = {r[1]: r[2] for r in all_shelf_nodes}
+        active_shelf_labels: Dict[str, str] = {r[1]: r[2] for r in all_shelf_nodes if r[0] == active_version_id}
+
         # Build shelves table rows
         known_shelves = sorted({r[0] for r in all_shelves} | set(current_shelf_sizes.keys()) | set(shelf_additions.keys()) | set(shelf_removals.keys()))
         shelves_rows: List[dict] = []
@@ -1308,6 +1384,7 @@ def _execute_activity(
             added = shelf_additions.get(s_id, 0)
             removed = shelf_removals.get(s_id, 0)
             net = added - removed
+            s_name = active_shelf_labels.get(s_id) or shelf_labels.get(s_id) or s_id
 
             if baseline_proved:
                 s_start = sum(1 for vid, shelves in start_state.items() if s_id in shelves)
@@ -1333,6 +1410,10 @@ def _execute_activity(
 
             shelves_rows.append({
                 "shelf_id": s_id,
+                "name": s_name,
+                "label": s_name,
+                "active_name": active_shelf_labels.get(s_id, s_name),
+                "active_label": active_shelf_labels.get(s_id, s_name),
                 "current_size": _count_metric(f"shelf_activity.shelves.{s_id}.current_size", c_size, "items", "scope_shelf_current"),
                 "start_size": _count_metric(f"shelf_activity.shelves.{s_id}.start_size", s_start, "items", "scope_shelf_activity") if s_start is not None else None,
                 "end_size": _count_metric(f"shelf_activity.shelves.{s_id}.end_size", s_end, "items", "scope_shelf_activity") if s_end is not None else None,
@@ -1395,18 +1476,26 @@ def _execute_activity(
         # Observations per source
         source_obs_in_interval: Dict[str, List[dict]] = {}
         source_all_seen_ms: Dict[str, List[int]] = {}
+        sources_unavailable_count = 0
         for s in all_sitems:
             s_id = s[1]
             fs_ms = s[5]
             ls_ms = s[6]
             st = s[7]
-            if fs_ms > 0:
+
+            dt_fs, err_fs = parse_epoch_ms(fs_ms)
+            dt_ls, err_ls = parse_epoch_ms(ls_ms)
+            if fs_ms is not None and fs_ms != 0 and dt_fs is None:
+                sources_unavailable_count += 1
+            if ls_ms is not None and ls_ms != 0 and dt_ls is None:
+                sources_unavailable_count += 1
+
+            if dt_fs is not None:
                 source_all_seen_ms.setdefault(s_id, []).append(fs_ms)
-            if ls_ms > 0:
+            if dt_ls is not None:
                 source_all_seen_ms.setdefault(s_id, []).append(ls_ms)
 
             # Check if first_seen_ms is in interval
-            dt_fs, _ = parse_epoch_ms(fs_ms)
             if dt_fs and dt_start <= dt_fs < dt_end:
                 source_obs_in_interval.setdefault(s_id, []).append(s)
 
@@ -1747,8 +1836,30 @@ def _execute_activity(
         earliest_pub = min(all_pub_dts) if all_pub_dts else None
         latest_pub = max(all_pub_dts) if all_pub_dts else None
 
-        cap_cov_status = "no_history" if (not earliest_cap or dt_end <= earliest_cap) else ("retained_records" if capture_available_count > 0 else "no_history")
-        pub_cov_status = "no_history" if (not earliest_pub or dt_end <= earliest_pub) else ("retained_records" if pub_available_count > 0 else "no_history")
+        if not earliest_cap or dt_end <= earliest_cap:
+            cap_cov_status = "no_history"
+        elif capture_unavailable_count > 0:
+            cap_cov_status = "partial"
+        elif capture_available_count > 0:
+            cap_cov_status = "retained_records"
+        else:
+            cap_cov_status = "no_history"
+
+        pub_unavailable_count = sum(pub_unavailable_by_reason.values())
+        if not earliest_pub or dt_end <= earliest_pub:
+            pub_cov_status = "no_history"
+        elif pub_unavailable_count > 0:
+            pub_cov_status = "partial"
+        elif pub_available_count > 0:
+            pub_cov_status = "retained_records"
+        else:
+            pub_cov_status = "no_history"
+
+        if (date_basis == "capture_time" and cap_cov_status == "no_history") or (date_basis == "publication_time" and pub_cov_status == "no_history"):
+            items_total_metric["value"] = None
+            items_total_metric["recorded_count"] = 0
+
+        sources_cov_status = "partial" if sources_unavailable_count > 0 else ("retained_records" if all_sitems else "no_history")
 
         coverage_map = {
             "cov_capture": {
@@ -1785,7 +1896,7 @@ def _execute_activity(
             "cov_sources": {
                 "clock": "observation_time",
                 "requested_interval": canonical_interval,
-                "coverage_status": "retained_records" if all_sitems else "no_history",
+                "coverage_status": sources_cov_status,
                 "earliest_retained_timestamp": None,
                 "latest_retained_timestamp": None,
             },
@@ -1898,18 +2009,79 @@ def _execute_activity(
             elif detail == "evidence":
                 # Metric evidence lookup
                 assert metric_id is not None
+                valid_metric_ids: Set[str] = {
+                    "items.total",
+                    "items.live_population",
+                    "items.capture_time_available",
+                    "items.capture_time_unavailable",
+                    "items.publication_time_available",
+                    "items.publication_time_unavailable",
+                    "items.deleted_items_excluded",
+                    "items.deleted_items_unlocated",
+                }
+                for r in by_source_type_rows:
+                    valid_metric_ids.add(r["count"]["metric_id"])
+                    valid_metric_ids.add(r["share"]["metric_id"])
+                for r in by_creator_rows:
+                    valid_metric_ids.add(r["count"]["metric_id"])
+                    valid_metric_ids.add(r["share"]["metric_id"])
+                for r in by_joint_rows:
+                    valid_metric_ids.add(r["count"]["metric_id"])
+                    valid_metric_ids.add(r["share"]["metric_id"])
+                for r in daily_rows:
+                    valid_metric_ids.add(r["count"]["metric_id"])
+                    valid_metric_ids.add(r["share"]["metric_id"])
+                for k in (
+                    "applied_operations", "membership_additions", "membership_removals",
+                    "membership_mutations", "affected_items", "item_change_events",
+                    "primary_change_events", "metadata_only_item_events", "policy_change_events",
+                    "activation_events", "current_assigned_items", "current_memberships",
+                    "initial_filing_items", "churn"
+                ):
+                    if k in shelf_family and isinstance(shelf_family[k], dict) and "metric_id" in shelf_family[k]:
+                        valid_metric_ids.add(shelf_family[k]["metric_id"])
+                for sh_r in shelves_rows:
+                    for k in ("current_size", "start_size", "end_size", "churn"):
+                        if sh_r.get(k) and isinstance(sh_r[k], dict) and "metric_id" in sh_r[k]:
+                            valid_metric_ids.add(sh_r[k]["metric_id"])
+                for k in ("active_sources_count", "unlinked_hint_groups_count", "linked_capture_union_count", "multiply_linked_capture_count"):
+                    if k in sources_family and isinstance(sources_family[k], dict) and "metric_id" in sources_family[k]:
+                        valid_metric_ids.add(sources_family[k]["metric_id"])
+                for s_r in active_source_rows:
+                    if "captures_in_interval" in s_r and isinstance(s_r["captures_in_interval"], dict):
+                        valid_metric_ids.add(s_r["captures_in_interval"]["metric_id"])
+                    if "new_observations" in s_r and isinstance(s_r["new_observations"], dict):
+                        valid_metric_ids.add(s_r["new_observations"]["metric_id"])
+                for k in ("taxonomy_versions_created", "runs_created"):
+                    if k in revisions_family and isinstance(revisions_family[k], dict) and "metric_id" in revisions_family[k]:
+                        valid_metric_ids.add(revisions_family[k]["metric_id"])
+
+                daily_buckets_map = {
+                    hashlib.sha256(f"{format_canonical_utc(b[0])}_{format_canonical_utc(b[1])}".encode("utf-8")).hexdigest()[:16]: (b[0], b[1])
+                    for b in daily_buckets
+                }
+
                 ev_rows = _lookup_evidence(
                     metric_id,
+                    valid_metric_ids=valid_metric_ids,
                     selected_items=selected_items,
-                    all_yoinks=all_yoinks,
+                    live_yoinks=live_yoinks,
+                    tombstone_yoinks=tombstone_yoinks,
                     interval_applies=interval_applies,
                     all_applies=all_applies,
+                    all_item_shelves=all_item_shelves,
+                    daily_buckets_map=daily_buckets_map,
+                    vid_to_sources=vid_to_sources,
+                    source_to_vids=source_to_vids,
+                    source_obs_in_interval=source_obs_in_interval,
                     active_source_rows=active_source_rows,
                     all_shelf_versions=all_shelf_versions,
                     all_runs=all_runs,
                     date_basis=date_basis,
                     dt_start=dt_start,
                     dt_end=dt_end,
+                    as_of_dt=as_of_dt,
+                    as_of_str=as_of_str,
                 )
                 if ev_rows is None:
                     return error_envelope("not_found", f"Metric ID not found: {metric_id}")
@@ -2059,47 +2231,229 @@ def _execute_activity(
 def _lookup_evidence(
     metric_id: str,
     *,
+    valid_metric_ids: Set[str],
     selected_items: List[dict],
-    all_yoinks: List[tuple],
+    live_yoinks: List[dict],
+    tombstone_yoinks: List[dict],
     interval_applies: List[dict],
     all_applies: List[tuple],
+    all_item_shelves: List[tuple],
+    daily_buckets_map: Dict[str, Tuple[datetime, datetime]],
+    vid_to_sources: Dict[str, Set[str]],
+    source_to_vids: Dict[str, Set[str]],
+    source_obs_in_interval: Dict[str, List[dict]],
     active_source_rows: List[dict],
     all_shelf_versions: List[tuple],
     all_runs: List[tuple],
     date_basis: str,
     dt_start: datetime,
     dt_end: datetime,
+    as_of_dt: datetime,
+    as_of_str: str,
 ) -> Optional[List[dict]]:
     """Return supporting evidence rows for a given metric ID."""
+    if metric_id not in valid_metric_ids:
+        return None
+
     rows: List[dict] = []
 
+    # 1. items.total
     if metric_id == "items.total":
-        for item in selected_items:
-            dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
-            assert dt_ev is not None
-            raw_clock = item["raw_yoinked_at"] if date_basis == "capture_time" else item["raw_pub_clock"]
-            obs_dict = {"v": item["video_id"], "t": item["source_type"], "p": item["platform"], "c": raw_clock}
+        if date_basis == "capture_time":
+            for item in selected_items:
+                dt_ev = item["capture_dt"]
+                assert dt_ev is not None
+                raw_clock = item["raw_yoinked_at"]
+                obs_dict = {"v": item["video_id"], "t": item["source_type"], "p": item["platform"], "c": raw_clock}
+                rows.append({
+                    "row_id": item["video_id"],
+                    "source_table": "yoinks",
+                    "source_key": item["video_id"],
+                    "event_time": format_canonical_utc(dt_ev),
+                    "original_clock_encoding": str(raw_clock),
+                    "observation_hash": canonical_json_hash(obs_dict),
+                    "details": {
+                        "video_id": item["video_id"],
+                        "source_type": item["source_type"],
+                        "platform": item["platform"],
+                        "author": item["author"],
+                        "channel": item["channel"],
+                        "hint": item["author"] or item["channel"] or "unknown",
+                        "follow_up": f"get_library_item('{item['video_id']}')",
+                    },
+                })
+        else:
+            for item in selected_items:
+                dt_ev = item["pub_dt"]
+                assert dt_ev is not None
+                pub_tier = item.get("pub_tier")
+                if pub_tier == "adapter_normalized" and item.get("selected_pub_entry"):
+                    entry = item["selected_pub_entry"]
+                    raw_clock = entry["published_at_ms"]
+                    obs_dict = {"item_id": entry["item_id"], "published_at_ms": raw_clock}
+                    row_details = {
+                        "video_id": item["video_id"],
+                        "item_id": entry["item_id"],
+                        "source_id": entry["source_id"],
+                        "entry_id": entry["entry_id"],
+                        "source_items": True,
+                        "adapter_normalized": True,
+                        "follow_up": f"get_library_item('{item['video_id']}')",
+                    }
+                    if item.get("lower_tier_disagreement"):
+                        row_details["lower_tier_disagreement"] = item["lower_tier_disagreement"]
+                        row_details["disagreement"] = item["lower_tier_disagreement"]
+                        row_details["conflict"] = True
+                    rows.append({
+                        "row_id": entry["item_id"],
+                        "source_table": "source_items",
+                        "source_key": entry["item_id"],
+                        "event_time": format_canonical_utc(dt_ev),
+                        "original_clock_encoding": str(raw_clock),
+                        "observation_hash": canonical_json_hash(obs_dict),
+                        "details": row_details,
+                    })
+                elif pub_tier == "direct_episode_parse" and item.get("selected_pub_entry"):
+                    ep = item["selected_pub_entry"]
+                    raw_clock = ep["published_at"]
+                    obs_dict = {"id": ep["id"], "published_at": raw_clock}
+                    rows.append({
+                        "row_id": str(ep["id"]),
+                        "source_table": "podcast_episodes",
+                        "source_key": str(ep["id"]),
+                        "event_time": format_canonical_utc(dt_ev),
+                        "original_clock_encoding": str(raw_clock),
+                        "observation_hash": canonical_json_hash(obs_dict),
+                        "details": {
+                            "video_id": item["video_id"],
+                            "episode_id": ep["id"],
+                            "direct_episode_parse": True,
+                            "follow_up": f"get_library_item('{item['video_id']}')",
+                        },
+                    })
+                else:
+                    raw_clock = item.get("raw_pub_clock") or item["raw_yoinked_at"]
+                    rows.append({
+                        "row_id": item["video_id"],
+                        "source_table": "yoinks",
+                        "source_key": item["video_id"],
+                        "event_time": format_canonical_utc(dt_ev),
+                        "original_clock_encoding": str(raw_clock),
+                        "observation_hash": canonical_json_hash({"v": item["video_id"], "c": raw_clock}),
+                        "details": {
+                            "video_id": item["video_id"],
+                            "follow_up": f"get_library_item('{item['video_id']}')",
+                        },
+                    })
+        return rows
+
+    # 2. Availability and exclusion metrics
+    if metric_id == "items.live_population":
+        for item in live_yoinks:
+            dt_ev = item["capture_dt"]
+            raw_clock = item["raw_yoinked_at"]
             rows.append({
                 "row_id": item["video_id"],
                 "source_table": "yoinks",
                 "source_key": item["video_id"],
-                "event_time": format_canonical_utc(dt_ev),
+                "event_time": format_canonical_utc(dt_ev) if dt_ev else None,
                 "original_clock_encoding": str(raw_clock),
-                "observation_hash": canonical_json_hash(obs_dict),
-                "details": {
-                    "video_id": item["video_id"],
-                    "source_type": item["source_type"],
-                    "platform": item["platform"],
-                    "hint": item["author"] or item["channel"] or "unknown",
-                    "follow_up": f"get_library_item('{item['video_id']}')",
-                },
+                "observation_hash": canonical_json_hash({"v": item["video_id"], "live": True}),
+                "details": {"video_id": item["video_id"], "source_type": item["source_type"], "follow_up": f"get_library_item('{item['video_id']}')"},
             })
         return rows
 
+    if metric_id == "items.capture_time_available":
+        for item in live_yoinks:
+            if item["capture_dt"] is not None:
+                dt_ev = item["capture_dt"]
+                raw_clock = item["raw_yoinked_at"]
+                rows.append({
+                    "row_id": item["video_id"],
+                    "source_table": "yoinks",
+                    "source_key": item["video_id"],
+                    "event_time": format_canonical_utc(dt_ev),
+                    "original_clock_encoding": str(raw_clock),
+                    "observation_hash": canonical_json_hash({"v": item["video_id"], "cap": True}),
+                    "details": {"video_id": item["video_id"], "follow_up": f"get_library_item('{item['video_id']}')"},
+                })
+        return rows
+
+    if metric_id == "items.capture_time_unavailable":
+        for item in live_yoinks:
+            if item["capture_dt"] is None:
+                rows.append({
+                    "row_id": item["video_id"],
+                    "source_table": "yoinks",
+                    "source_key": item["video_id"],
+                    "event_time": None,
+                    "original_clock_encoding": str(item["raw_yoinked_at"]),
+                    "observation_hash": canonical_json_hash({"v": item["video_id"], "err": item["capture_err"]}),
+                    "details": {"video_id": item["video_id"], "reason": item["capture_err"]},
+                })
+        return rows
+
+    if metric_id == "items.publication_time_available":
+        for item in live_yoinks:
+            if item["pub_dt"] is not None:
+                dt_ev = item["pub_dt"]
+                rows.append({
+                    "row_id": item["video_id"],
+                    "source_table": "yoinks",
+                    "source_key": item["video_id"],
+                    "event_time": format_canonical_utc(dt_ev),
+                    "original_clock_encoding": str(item["raw_pub_clock"]),
+                    "observation_hash": canonical_json_hash({"v": item["video_id"], "pub": True}),
+                    "details": {"video_id": item["video_id"], "tier": item["pub_tier"]},
+                })
+        return rows
+
+    if metric_id == "items.publication_time_unavailable":
+        for item in live_yoinks:
+            if item["pub_dt"] is None:
+                rows.append({
+                    "row_id": item["video_id"],
+                    "source_table": "yoinks",
+                    "source_key": item["video_id"],
+                    "event_time": None,
+                    "original_clock_encoding": str(item["raw_pub_clock"]),
+                    "observation_hash": canonical_json_hash({"v": item["video_id"], "reason": item["pub_reason"]}),
+                    "details": {"video_id": item["video_id"], "reason": item["pub_reason"]},
+                })
+        return rows
+
+    if metric_id == "items.deleted_items_excluded":
+        for item in tombstone_yoinks:
+            dt_ev, _ = parse_iso_utc(item["raw_deleted_at"]) if item["raw_deleted_at"] else (None, None)
+            rows.append({
+                "row_id": item["video_id"],
+                "source_table": "yoinks",
+                "source_key": item["video_id"],
+                "event_time": format_canonical_utc(dt_ev) if dt_ev else None,
+                "original_clock_encoding": str(item["raw_deleted_at"]),
+                "observation_hash": canonical_json_hash({"v": item["video_id"], "deleted": True}),
+                "details": {"video_id": item["video_id"], "deleted_at": item["raw_deleted_at"]},
+            })
+        return rows
+
+    if metric_id == "items.deleted_items_unlocated":
+        for item in tombstone_yoinks:
+            if item["raw_yoinked_at"] is None:
+                rows.append({
+                    "row_id": item["video_id"],
+                    "source_table": "yoinks",
+                    "source_key": item["video_id"],
+                    "event_time": None,
+                    "original_clock_encoding": None,
+                    "observation_hash": canonical_json_hash({"v": item["video_id"], "unlocated": True}),
+                    "details": {"video_id": item["video_id"]},
+                })
+        return rows
+
+    # 3. Source types
     if metric_id.startswith("items.by_source_type."):
-        # Format: items.by_source_type.<type>.count or .share
         parts = metric_id.split(".")
-        if len(parts) >= 3:
+        if len(parts) >= 4 and parts[3] in ("count", "share"):
             stype = parts[2]
             for item in selected_items:
                 match = (item["source_type"] == stype) if stype in CANONICAL_SOURCE_TYPES else (item["source_type"] not in CANONICAL_SOURCE_TYPES)
@@ -2122,14 +2476,22 @@ def _lookup_evidence(
                     })
             return rows
 
+    # 4. Creator hints
     if metric_id.startswith("items.by_creator_hint."):
         parts = metric_id.split(".")
-        if len(parts) >= 3:
+        if len(parts) >= 4 and parts[3] in ("count", "share"):
             k_hash = parts[2]
             for item in selected_items:
                 platform = item["platform"]
-                c_field = "author" if item["author"] else ("channel" if item["channel"] else "unknown")
-                c_val = item["author"] or item["channel"] or ""
+                if item["author"]:
+                    c_field = "author"
+                    c_val = item["author"]
+                elif item["channel"]:
+                    c_field = "channel"
+                    c_val = item["channel"]
+                else:
+                    c_field = "unknown"
+                    c_val = ""
                 item_khash = hashlib.sha256(json.dumps([platform, c_field, c_val], ensure_ascii=False).encode("utf-8")).hexdigest()
                 if item_khash == k_hash:
                     dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
@@ -2144,21 +2506,34 @@ def _lookup_evidence(
                         "observation_hash": canonical_json_hash({"v": item["video_id"], "c": item_khash}),
                         "details": {
                             "video_id": item["video_id"],
-                            "hint": c_val or "unknown",
+                            "author": item["author"],
+                            "channel": item["channel"],
+                            "original_author": item["author"],
+                            "original_channel": item["channel"],
+                            "hint": _truncate_label(c_val.strip()) if c_val and c_val.strip() else "unknown",
+                            "original_hint": c_val,
                             "platform": platform,
                             "follow_up": f"get_library_item('{item['video_id']}')",
                         },
                     })
             return rows
 
+    # 5. Joint type + creator hints
     if metric_id.startswith("items.by_type_creator_hint."):
         parts = metric_id.split(".")
-        if len(parts) >= 3:
+        if len(parts) >= 4 and parts[3] in ("count", "share"):
             j_hash = parts[2]
             for item in selected_items:
                 platform = item["platform"]
-                c_field = "author" if item["author"] else ("channel" if item["channel"] else "unknown")
-                c_val = item["author"] or item["channel"] or ""
+                if item["author"]:
+                    c_field = "author"
+                    c_val = item["author"]
+                elif item["channel"]:
+                    c_field = "channel"
+                    c_val = item["channel"]
+                else:
+                    c_field = "unknown"
+                    c_val = ""
                 stype = item["source_type"] if item["source_type"] in CANONICAL_SOURCE_TYPES else "unknown"
                 item_jhash = hashlib.sha256(json.dumps([stype, platform, c_field, c_val], ensure_ascii=False).encode("utf-8")).hexdigest()
                 if item_jhash == j_hash:
@@ -2175,38 +2550,114 @@ def _lookup_evidence(
                         "details": {
                             "video_id": item["video_id"],
                             "source_type": stype,
+                            "author": item["author"],
+                            "channel": item["channel"],
+                            "original_author": item["author"],
+                            "original_channel": item["channel"],
                             "platform": platform,
-                            "hint": c_val or "unknown",
+                            "hint": _truncate_label(c_val.strip()) if c_val and c_val.strip() else "unknown",
+                            "original_hint": c_val,
                             "follow_up": f"get_library_item('{item['video_id']}')",
                         },
                     })
             return rows
 
+    # 6. Daily buckets
     if metric_id.startswith("items.daily_buckets."):
-        for item in selected_items:
-            dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
-            assert dt_ev is not None
-            raw_clock = item["raw_yoinked_at"] if date_basis == "capture_time" else item["raw_pub_clock"]
+        parts = metric_id.split(".")
+        if len(parts) >= 4 and parts[3] in ("count", "share"):
+            b_hash = parts[2]
+            if b_hash in daily_buckets_map:
+                b_start, b_end = daily_buckets_map[b_hash]
+                for item in selected_items:
+                    target_dt = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
+                    assert target_dt is not None
+                    if b_start <= target_dt < b_end:
+                        raw_clock = item["raw_yoinked_at"] if date_basis == "capture_time" else item["raw_pub_clock"]
+                        rows.append({
+                            "row_id": item["video_id"],
+                            "source_table": "yoinks",
+                            "source_key": item["video_id"],
+                            "event_time": format_canonical_utc(target_dt),
+                            "original_clock_encoding": str(raw_clock),
+                            "observation_hash": canonical_json_hash({"v": item["video_id"], "t": format_canonical_utc(target_dt)}),
+                            "details": {
+                                "video_id": item["video_id"],
+                                "follow_up": f"get_library_item('{item['video_id']}')",
+                            },
+                        })
+                return rows
+
+    # 7. Shelf activity
+    live_vid_set = {it["video_id"] for it in live_yoinks}
+
+    if metric_id == "shelf_activity.current_assigned_items":
+        assigned_vids = sorted({r[0] for r in all_item_shelves if r[0] in live_vid_set})
+        for vid in assigned_vids:
+            sh_rows = [r for r in all_item_shelves if r[0] == vid]
+            assigned_at = sh_rows[0][9] if sh_rows else None
+            dt_a = parse_iso_utc(assigned_at)[0] if assigned_at else as_of_dt
             rows.append({
-                "row_id": item["video_id"],
-                "source_table": "yoinks",
-                "source_key": item["video_id"],
-                "event_time": format_canonical_utc(dt_ev),
-                "original_clock_encoding": str(raw_clock),
-                "observation_hash": canonical_json_hash({"v": item["video_id"], "t": format_canonical_utc(dt_ev)}),
+                "row_id": vid,
+                "source_table": "item_shelves",
+                "source_key": vid,
+                "event_time": format_canonical_utc(dt_a) if dt_a else as_of_str,
+                "original_clock_encoding": str(assigned_at),
+                "observation_hash": hashlib.sha256(f"assigned_{vid}_{assigned_at}".encode("utf-8")).hexdigest(),
                 "details": {
-                    "video_id": item["video_id"],
-                    "follow_up": f"get_library_item('{item['video_id']}')",
+                    "video_id": vid,
+                    "shelves": [r[1] for r in sh_rows],
+                    "follow_up": f"get_library_item('{vid}')",
                 },
             })
         return rows
 
-    if metric_id.startswith("shelf_activity."):
-        # Check specific shelf
-        if metric_id.startswith("shelf_activity.shelves."):
-            parts = metric_id.split(".")
-            if len(parts) >= 3:
-                s_id = parts[2]
+    if metric_id == "shelf_activity.current_memberships":
+        for r in all_item_shelves:
+            if r[0] in live_vid_set:
+                vid, s_id = r[0], r[1]
+                assigned_at = r[9]
+                dt_a = parse_iso_utc(assigned_at)[0] if assigned_at else as_of_dt
+                rows.append({
+                    "row_id": f"{vid}_{s_id}",
+                    "source_table": "item_shelves",
+                    "source_key": f"{vid}_{s_id}",
+                    "event_time": format_canonical_utc(dt_a) if dt_a else as_of_str,
+                    "original_clock_encoding": str(assigned_at),
+                    "observation_hash": hashlib.sha256(f"membership_{vid}_{s_id}_{assigned_at}".encode("utf-8")).hexdigest(),
+                    "details": {
+                        "video_id": vid,
+                        "shelf_id": s_id,
+                        "is_primary": r[6],
+                    },
+                })
+        return rows
+
+    if metric_id.startswith("shelf_activity.shelves."):
+        parts = metric_id.split(".")
+        if len(parts) >= 4:
+            s_id = parts[2]
+            metric_kind = parts[3]
+            if metric_kind == "current_size":
+                for r in all_item_shelves:
+                    if r[1] == s_id and r[0] in live_vid_set:
+                        vid = r[0]
+                        assigned_at = r[9]
+                        dt_a = parse_iso_utc(assigned_at)[0] if assigned_at else as_of_dt
+                        rows.append({
+                            "row_id": vid,
+                            "source_table": "item_shelves",
+                            "source_key": f"{vid}_{s_id}",
+                            "event_time": format_canonical_utc(dt_a) if dt_a else as_of_str,
+                            "original_clock_encoding": str(assigned_at),
+                            "observation_hash": hashlib.sha256(f"shelf_{s_id}_{vid}_{assigned_at}".encode("utf-8")).hexdigest(),
+                            "details": {
+                                "video_id": vid,
+                                "shelf_id": s_id,
+                            },
+                        })
+                return rows
+            elif metric_kind in ("start_size", "end_size", "churn"):
                 for app in interval_applies:
                     f_delta = app["forward"].get("items", {})
                     i_delta = app["inverse"].get("items", {})
@@ -2236,7 +2687,8 @@ def _lookup_evidence(
                         })
                 return rows
 
-        # General shelf_activity metric
+    if metric_id.startswith("shelf_activity."):
+        # Applied operations and journal mutation metrics
         for app in interval_applies:
             dt_ev = app["created_at_dt"]
             assert dt_ev is not None
@@ -2258,39 +2710,119 @@ def _lookup_evidence(
             })
         return rows
 
+    # 8. Sources
     if metric_id.startswith("sources."):
-        # sources.<source_id>.captures or sources.<source_id>.new_observations
         parts = metric_id.split(".")
-        s_id = parts[1] if len(parts) >= 2 else None
-        for s_row in active_source_rows:
-            if s_id is None or s_row["source_id"] == s_id or s_id in ("active_sources_count", "unlinked_hint_groups_count", "linked_capture_union_count", "multiply_linked_capture_count"):
-                rows.append({
-                    "row_id": s_row["source_id"],
-                    "source_table": "source_subscriptions",
-                    "source_key": s_row["source_id"],
-                    "event_time": s_row["observation_window"].get("last_item_seen_at") or format_canonical_utc(dt_start),
-                    "original_clock_encoding": str(s_row["observation_window"].get("last_item_seen_at")),
-                    "observation_hash": hashlib.sha256(s_row["source_id"].encode("utf-8")).hexdigest(),
-                    "details": {
-                        "source_id": s_row["source_id"],
-                        "display_name": s_row["display_name"],
-                    },
-                })
-        return rows
+        if len(parts) >= 3 and parts[2] == "captures":
+            s_id = parts[1]
+            for item in selected_items:
+                vid = item["video_id"]
+                if s_id in vid_to_sources.get(vid, set()):
+                    dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
+                    assert dt_ev is not None
+                    raw_clock = item["raw_yoinked_at"] if date_basis == "capture_time" else item["raw_pub_clock"]
+                    rows.append({
+                        "row_id": vid,
+                        "source_table": "source_items",
+                        "source_key": vid,
+                        "event_time": format_canonical_utc(dt_ev),
+                        "original_clock_encoding": str(raw_clock),
+                        "observation_hash": canonical_json_hash({"s": s_id, "v": vid}),
+                        "details": {
+                            "video_id": vid,
+                            "source_id": s_id,
+                            "follow_up": f"get_library_item('{vid}')",
+                        },
+                    })
+            return rows
 
-    if metric_id.startswith("revisions."):
-        for sv in all_shelf_versions:
-            dt_sv, _ = parse_epoch_ms(sv[3])
-            if dt_sv and dt_start <= dt_sv < dt_end:
-                rows.append({
-                    "row_id": sv[0],
-                    "source_table": "shelf_versions",
-                    "source_key": sv[0],
-                    "event_time": format_canonical_utc(dt_sv),
-                    "original_clock_encoding": str(sv[3]),
-                    "observation_hash": sv[1],
-                    "details": {"version_id": sv[0], "status": sv[2]},
-                })
+        if len(parts) >= 3 and parts[2] == "new_observations":
+            s_id = parts[1]
+            obs_list = source_obs_in_interval.get(s_id, [])
+            seen_entries = set()
+            for o in obs_list:
+                e_id = o[2]
+                if e_id not in seen_entries:
+                    seen_entries.add(e_id)
+                    dt_fs, _ = parse_epoch_ms(o[5])
+                    rows.append({
+                        "row_id": e_id,
+                        "source_table": "source_items",
+                        "source_key": o[0],
+                        "event_time": format_canonical_utc(dt_fs) if dt_fs else None,
+                        "original_clock_encoding": str(o[5]),
+                        "observation_hash": hashlib.sha256(f"{o[0]}_{o[5]}".encode("utf-8")).hexdigest(),
+                        "details": {
+                            "entry_id": e_id,
+                            "source_id": s_id,
+                            "item_id": o[0],
+                        },
+                    })
+            return rows
+
+        # Aggregate source counts
+        s_name = parts[1] if len(parts) >= 2 else None
+        if s_name in ("active_sources_count", "unlinked_hint_groups_count", "linked_capture_union_count", "multiply_linked_capture_count"):
+            if s_name == "active_sources_count":
+                for s_row in active_source_rows:
+                    rows.append({
+                        "row_id": s_row["source_id"],
+                        "source_table": "source_subscriptions",
+                        "source_key": s_row["source_id"],
+                        "event_time": s_row["observation_window"].get("last_item_seen_at") or format_canonical_utc(dt_start),
+                        "original_clock_encoding": str(s_row["observation_window"].get("last_item_seen_at")),
+                        "observation_hash": hashlib.sha256(s_row["source_id"].encode("utf-8")).hexdigest(),
+                        "details": {"source_id": s_row["source_id"], "display_name": s_row["display_name"]},
+                    })
+                return rows
+            elif s_name == "linked_capture_union_count":
+                for item in selected_items:
+                    vid = item["video_id"]
+                    if vid_to_sources.get(vid):
+                        dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
+                        rows.append({
+                            "row_id": vid,
+                            "source_table": "yoinks",
+                            "source_key": vid,
+                            "event_time": format_canonical_utc(dt_ev) if dt_ev else None,
+                            "original_clock_encoding": str(item["raw_yoinked_at"]),
+                            "observation_hash": hashlib.sha256(f"union_{vid}".encode("utf-8")).hexdigest(),
+                            "details": {"video_id": vid},
+                        })
+                return rows
+            elif s_name == "multiply_linked_capture_count":
+                for item in selected_items:
+                    vid = item["video_id"]
+                    if len(vid_to_sources.get(vid, set())) > 1:
+                        dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
+                        rows.append({
+                            "row_id": vid,
+                            "source_table": "yoinks",
+                            "source_key": vid,
+                            "event_time": format_canonical_utc(dt_ev) if dt_ev else None,
+                            "original_clock_encoding": str(item["raw_yoinked_at"]),
+                            "observation_hash": hashlib.sha256(f"multi_{vid}".encode("utf-8")).hexdigest(),
+                            "details": {"video_id": vid},
+                        })
+                return rows
+            elif s_name == "unlinked_hint_groups_count":
+                for item in selected_items:
+                    vid = item["video_id"]
+                    if not vid_to_sources.get(vid):
+                        dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
+                        rows.append({
+                            "row_id": vid,
+                            "source_table": "yoinks",
+                            "source_key": vid,
+                            "event_time": format_canonical_utc(dt_ev) if dt_ev else None,
+                            "original_clock_encoding": str(item["raw_yoinked_at"]),
+                            "observation_hash": hashlib.sha256(f"unlinked_{vid}".encode("utf-8")).hexdigest(),
+                            "details": {"video_id": vid},
+                        })
+                return rows
+
+    # 9. Revisions
+    if metric_id == "revisions.runs_created":
         for r in all_runs:
             dt_r, _ = parse_epoch_ms(r[5])
             if dt_r and dt_start <= dt_r < dt_end:
@@ -2302,6 +2834,21 @@ def _lookup_evidence(
                     "original_clock_encoding": str(r[5]),
                     "observation_hash": r[2],
                     "details": {"run_id": r[0], "version_id": r[1], "state": r[4]},
+                })
+        return rows
+
+    if metric_id == "revisions.taxonomy_versions_created":
+        for sv in all_shelf_versions:
+            dt_sv, _ = parse_epoch_ms(sv[3])
+            if dt_sv and dt_start <= dt_sv < dt_end:
+                rows.append({
+                    "row_id": sv[0],
+                    "source_table": "shelf_versions",
+                    "source_key": sv[0],
+                    "event_time": format_canonical_utc(dt_sv),
+                    "original_clock_encoding": str(sv[3]),
+                    "observation_hash": sv[1],
+                    "details": {"version_id": sv[0], "status": sv[2]},
                 })
         return rows
 

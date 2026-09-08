@@ -633,7 +633,8 @@ def test_gate7_pre_observation_interval_coverage_gap(tmp_dir):
     }
     res_pre = library_analysis.get_library_activity(req_pre, db=conn, clock=fixed_as_of)
     assert res_pre["ok"] is True
-    assert res_pre["items"]["total"]["value"] == 0
+    assert res_pre["items"]["total"]["value"] is None
+    assert res_pre["items"]["total"]["recorded_count"] == 0
     assert res_pre["coverage"]["cov_capture"]["coverage_status"] == "no_history"
     assert res_pre["shelf_activity"]["churn"]["value"] is None
 
