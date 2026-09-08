@@ -20,17 +20,17 @@ The benchmark fixture evaluates two corpus scales:
 | **Serialization Time** | ~3.3–4.0 ms | ~0.3–0.6 ms | Sub-deadline; raw dictionary json.dumps serialization, not transport serialization |
 | **Combined Query Execution** | Plans confirmed | Plans confirmed | Plans confirmed index scans (Q1: `sqlite_autoindex_yoinks_1`, Q3: `sqlite_autoindex_library_applies_3`); individual query times are not isolated from total construction time |
 | **Peak Heap Memory (tracemalloc)** | 4,031.1 KiB (~3.94 MiB) | 61,131.7 KiB (~59.70 MiB) | Traced Python heap peak under tracemalloc in separate passes; not process RSS (measures Python heap allocations only) |
-| **Wire Response Payload** | 59,281 bytes | 59,190 bytes | 65,536 bytes (64 KiB envelope); raw reader JSON payload bytes |
+| **Wire Response Payload** | 58,738 bytes | 58,640 bytes | 65,536 bytes (64 KiB envelope); raw reader JSON payload bytes |
 | **Actual Transport Wire Payload (stdio adapter)** | 65,252 bytes | 65,095 bytes | 65,536 bytes (64 KiB envelope); wrapped JSON-RPC response through actual shipped MCP stdio handler |
 | **Combined Journal Deltas** | 209.6 KiB (214,596 bytes) | 2,760,054 bytes (~2.63 MiB) | 67,108,864 bytes (64 MiB); AZ-5c (BA-05) re-seeds both fixtures with complete service-schema membership rows (previously 74,856 and 1,050,054 bytes with abbreviated rows); sizes computed from the fixture serialization, to be re-observed by the AZ-5g regeneration |
-| **Status** | Passed | Passed | Within 64 KiB wire budget; raw JSON (59,281 / 59,190 bytes) and transport wire bytes (65,252 / 65,095 bytes) both fit within 65,536 bytes; exceeds 24,576-byte dashboard target |
+| **Status** | Passed | Passed | Within 64 KiB wire budget; raw JSON (58,738 / 58,640 bytes) and transport wire bytes (65,252 / 65,095 bytes) both fit within 65,536 bytes; exceeds 24,576-byte dashboard target |
 
 ### Observations on Scaling
-- At 548 items, full breakdown rows (joint hints, creator hints, shelf rows) fit within the 64 KiB response limit without pruning (raw JSON is 59,281 bytes; actual transport wire payload through MCP stdio adapter is 65,252 bytes).
-- At 10,000 items, row shedding did not occur: all initial display pages (20 event rows, 20 creator rows, 20 joint creator rows, 1 source row, 1 shelf row) fit within the 65,536-byte wire budget (raw JSON is 59,190 bytes; actual transport wire payload through MCP stdio adapter is 65,095 bytes), so no display arrays were removed.
+- At 548 items, full breakdown rows (joint hints, creator hints, shelf rows) fit within the 64 KiB response limit without pruning (raw JSON is 58,738 bytes; actual transport wire payload through MCP stdio adapter is 65,252 bytes).
+- At 10,000 items, row shedding did not occur: all initial display pages (20 event rows, 20 creator rows, 20 joint creator rows, 1 source row, 1 shelf row) fit within the 65,536-byte wire budget (raw JSON is 58,640 bytes; actual transport wire payload through MCP stdio adapter is 65,095 bytes), so no display arrays were removed.
 - In the primary 548-item and 10,000-item benchmarks, the baseline replay path was skipped because the requested interval (`2026-09-01T00:00:00.000Z` to `2026-09-02T00:00:00.000Z`) preceded the first apply (`2026-09-01T10:00:00.000Z`), producing `baseline_reason: ["interval_precedes_first_apply"]`. Baseline replay was measured separately with an interval covering the apply (see Section 1.1).
 - Construction at 10,000 items completed in ~350–430 ms, well below the 2.0-second service deadline. The 548 timing includes tracemalloc profiling overhead whereas the main 10k timing was measured without tracing (a separate 10k tracing pass recorded ~61 MiB heap peak); tracemalloc measures Python heap allocations, not total process memory / RSS.
-- The 24,576-byte dashboard target is missed by the primary packets (59,281 / 59,190 bytes raw JSON; 65,252 / 65,095 bytes wire payload).
+- The 24,576-byte dashboard target is missed by the primary packets (58,738 / 58,640 bytes raw JSON; 65,252 / 65,095 bytes wire payload).
 
 ---
 

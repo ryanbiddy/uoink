@@ -822,6 +822,7 @@ def _count_metric(
     scope_ref: str,
     *,
     recorded_count: Optional[int] = None,
+    coverage_ref: Optional[str] = None,
 ) -> CountMetric:
     m = {
         "metric_id": metric_id,
@@ -832,7 +833,16 @@ def _count_metric(
     }
     if value is None or recorded_count is not None:
         m["recorded_count"] = recorded_count if recorded_count is not None else 0
+    if coverage_ref:
+        m["coverage_ref"] = coverage_ref
     return CountMetric(m)
+
+
+def _metric_value_or_zero(metric: Any) -> int:
+    if not isinstance(metric, dict):
+        return 0
+    val = metric.get("value")
+    return val if isinstance(val, int) else 0
 
 
 def _attach_sample_counts(metric: dict, row_n: int) -> None:
@@ -2038,7 +2048,7 @@ def _execute_activity(
                 },
                 "initial_filing": None,
             }
-            initial_filing_count = 0
+            initial_filing_count = None
 
         node_names: Dict[Tuple[str, str], str] = {(r[0], r[1]): r[2] for r in all_shelf_nodes}
         shelf_labels: Dict[str, str] = {r[1]: r[2] for r in all_shelf_nodes}
@@ -2169,6 +2179,8 @@ def _execute_activity(
         source_obs_in_interval: Dict[str, List[dict]] = {}
         source_first_seen_ms: Dict[str, List[int]] = {}
         source_last_seen_ms: Dict[str, List[int]] = {}
+        source_invalid_obs: Dict[str, int] = {}
+        source_coverage_records: Dict[str, dict] = {}
         sources_unavailable_count = 0
         for s in all_sitems:
             s_id = s[1]
@@ -2180,8 +2192,10 @@ def _execute_activity(
             dt_ls, err_ls = parse_epoch_ms(ls_ms)
             if fs_ms is not None and fs_ms != 0 and dt_fs is None:
                 sources_unavailable_count += 1
+                source_invalid_obs[s_id] = source_invalid_obs.get(s_id, 0) + 1
             if ls_ms is not None and ls_ms != 0 and dt_ls is None:
                 sources_unavailable_count += 1
+                source_invalid_obs[s_id] = source_invalid_obs.get(s_id, 0) + 1
 
             if dt_fs is not None and fs_ms is not None and fs_ms != 0:
                 source_first_seen_ms.setdefault(s_id, []).append(fs_ms)
@@ -2240,6 +2254,31 @@ def _execute_activity(
                 first_obs_dt = parse_epoch_ms(min(fs_list))[0] if fs_list else None
                 last_obs_dt = parse_epoch_ms(max(ls_list))[0] if ls_list else None
                 obs_no_history = new_obs_count == 0 and (first_obs_dt is None or first_obs_dt >= dt_end)
+                src_cov_id = f"cov_source_{s_id}"
+                src_invalid = source_invalid_obs.get(s_id, 0)
+                src_span_dts: List[datetime] = []
+                for ms in fs_list + ls_list:
+                    dt_obs, _ = parse_epoch_ms(ms)
+                    if dt_obs is not None:
+                        src_span_dts.append(dt_obs)
+                src_earliest = min(src_span_dts) if src_span_dts else None
+                src_latest = max(src_span_dts) if src_span_dts else None
+                if src_invalid > 0:
+                    src_cov_status = "partial"
+                elif first_obs_dt is None or dt_end <= first_obs_dt:
+                    src_cov_status = "no_history"
+                else:
+                    src_cov_status = "retained_records"
+                src_cov_rec = {
+                    "clock": "observation_time",
+                    "requested_interval": canonical_interval,
+                    "coverage_status": src_cov_status,
+                    "earliest_retained_timestamp": format_canonical_utc(src_earliest) if src_earliest else None,
+                    "latest_retained_timestamp": format_canonical_utc(src_latest) if src_latest else None,
+                }
+                if src_invalid:
+                    src_cov_rec["exclusions"] = {"invalid_observation_timestamp": src_invalid}
+                source_coverage_records[src_cov_id] = src_cov_rec
 
                 active_source_rows.append({
                     "source_id": s_id,
@@ -2249,12 +2288,31 @@ def _execute_activity(
                     "display_name": _truncate_label(d_name),
                     "captures_in_interval": _count_metric(f"sources.{s_id}.captures", captures_in_int, "saved_items", "scope_source_captures"),
                     "new_observations": (
-                        _count_metric(f"sources.{s_id}.new_observations", None, "entries", "scope_sources", recorded_count=0)
+                        _count_metric(
+                            f"sources.{s_id}.new_observations",
+                            None,
+                            "entries",
+                            "scope_sources",
+                            recorded_count=0,
+                            coverage_ref=src_cov_id,
+                        )
                         if obs_no_history
-                        else _count_metric(f"sources.{s_id}.new_observations", new_obs_count, "entries", "scope_sources")
+                        else _count_metric(
+                            f"sources.{s_id}.new_observations",
+                            new_obs_count,
+                            "entries",
+                            "scope_sources",
+                            coverage_ref=src_cov_id,
+                        )
                     ),
                     "new_observations_by_state": {
-                        st: _count_metric(f"sources.{s_id}.new_observations_by_state.{st}", c, "entries", "scope_sources")
+                        st: _count_metric(
+                            f"sources.{s_id}.new_observations_by_state.{st}",
+                            c,
+                            "entries",
+                            "scope_sources",
+                            coverage_ref=src_cov_id,
+                        )
                         for st, c in state_counts.items()
                     },
                     "observation_window": {
@@ -2344,20 +2402,25 @@ def _execute_activity(
         # -------------------------------------------------------------------
         tax_versions_created = 0
         revision_dts: List[datetime] = []
+        invalid_revision_count = 0
         for sv in all_shelf_versions:
             dt_sv, _ = parse_native_creation_clock(sv[3])
             if dt_sv is not None:
                 revision_dts.append(dt_sv)
-            if dt_sv and dt_start <= dt_sv < dt_end:
-                tax_versions_created += 1
+                if dt_start <= dt_sv < dt_end:
+                    tax_versions_created += 1
+            else:
+                invalid_revision_count += 1
 
         runs_created = 0
         for r in all_runs:
             dt_r, _ = parse_native_creation_clock(r[5])
             if dt_r is not None:
                 revision_dts.append(dt_r)
-            if dt_r and dt_start <= dt_r < dt_end:
-                runs_created += 1
+                if dt_start <= dt_r < dt_end:
+                    runs_created += 1
+            else:
+                invalid_revision_count += 1
 
         revisions_family = {
             "taxonomy_versions_created": _count_metric("revisions.taxonomy_versions_created", tax_versions_created, "revisions", "scope_revisions"),
@@ -2630,10 +2693,20 @@ def _execute_activity(
         else:
             pub_cov_status = "no_history"
 
-        if (date_basis == "capture_time" and cap_cov_status == "no_history") or (date_basis == "publication_time" and pub_cov_status == "no_history"):
+        item_clock_no_history = (
+            (date_basis == "capture_time" and cap_cov_status == "no_history")
+            or (date_basis == "publication_time" and pub_cov_status == "no_history")
+        )
+        if item_clock_no_history:
             _mark_no_history(items_total_metric)
             for daily in daily_rows:
                 _mark_no_history(daily.get("count"))
+            for row in by_source_type_rows:
+                _mark_no_history(row.get("count"))
+            for row in by_creator_rows:
+                _mark_no_history(row.get("count"))
+            for row in by_joint_rows:
+                _mark_no_history(row.get("count"))
 
         obs_span_dts: List[datetime] = []
         for ms_list in list(source_first_seen_ms.values()) + list(source_last_seen_ms.values()):
@@ -2654,10 +2727,21 @@ def _execute_activity(
 
         earliest_rev = min(revision_dts) if revision_dts else None
         latest_rev = max(revision_dts) if revision_dts else None
-        if not earliest_rev or dt_end <= earliest_rev:
+        if invalid_revision_count > 0:
+            rev_cov_status = "partial"
+        elif not earliest_rev or dt_end <= earliest_rev:
             rev_cov_status = "no_history"
         else:
             rev_cov_status = "retained_records"
+
+        if cap_cov_status == "no_history":
+            _mark_no_history(sources_family.get("linked_capture_union_count"))
+            _mark_no_history(sources_family.get("multiply_linked_capture_count"))
+        if rev_cov_status == "no_history":
+            _mark_no_history(revisions_family.get("taxonomy_versions_created"))
+            _mark_no_history(revisions_family.get("runs_created"))
+        if item_clock_no_history and journal_no_history and rev_cov_status == "no_history":
+            _mark_no_history(events_family.get("total"))
 
         coverage_map = {
             "cov_capture": {
@@ -2708,11 +2792,16 @@ def _execute_activity(
                 "latest_retained_timestamp": format_canonical_utc(latest_rev) if latest_rev else None,
             },
         }
+        if invalid_revision_count:
+            coverage_map["cov_revisions"]["exclusions"] = {
+                "invalid_revision_timestamp": invalid_revision_count
+            }
+        coverage_map.update(source_coverage_records)
 
         # Pagination metadata for summary
-        other_types_count = sum(r["count"]["value"] for r in by_source_type_rows[20:])
-        other_creator_count = sum(r["count"]["value"] for r in by_creator_rows[20:])
-        other_joint_count = sum(r["count"]["value"] for r in by_joint_rows[20:])
+        other_types_count = sum(_metric_value_or_zero(r["count"]) for r in by_source_type_rows[20:])
+        other_creator_count = sum(_metric_value_or_zero(r["count"]) for r in by_creator_rows[20:])
+        other_joint_count = sum(_metric_value_or_zero(r["count"]) for r in by_joint_rows[20:])
 
         pagination_map = {
             "creator_hints": {
