@@ -796,12 +796,24 @@ class Mirror:
         dep = str(snapshot.get("shelf_revision") or "")
         return text.encode("utf-8"), dep
 
-    def _build_brief_document(self, date: str, brief_hash: str) -> tuple[bytes | None, list[str]]:
+    def _build_brief_document(self, date: str, brief_hash: str) -> tuple[bytes | None, list[str], list[dict], dict]:
         store = self.brief_store
         if store is None:
-            return None, []
+            return None, [], [], {}
         deps: list[str] = []
-        if hasattr(store, "validated_dependencies"):
+        bound_deps: list[dict] = []
+        report_bindings: dict = {}
+        if hasattr(store, "_load_artifact"):
+            try:
+                manifest, _doc, _cits, packet = store._load_artifact(date, brief_hash)
+                if isinstance(manifest, dict):
+                    bound_deps = manifest.get("dependencies") or []
+                    deps = [d["item_id"] for d in bound_deps if isinstance(d, dict) and d.get("item_id")]
+                if isinstance(packet, dict):
+                    report_bindings = packet.get("bindings") or {}
+            except Exception:
+                pass
+        if not deps and hasattr(store, "validated_dependencies"):
             try:
                 deps = store.validated_dependencies(date, brief_hash)
             except Exception:
@@ -811,7 +823,7 @@ class Mirror:
             try:
                 payload = store.read(date, brief_hash)
             except Exception:
-                return None, []
+                return None, [], [], {}
             if isinstance(payload, dict):
                 contents = payload.get("contents") or []
                 if contents and isinstance(contents[0], dict) and "text" in contents[0]:
@@ -823,8 +835,10 @@ class Mirror:
                         try:
                             data = json.loads(json_str)
                             document = data.get("document") or data.get("text")
+                            if not bound_deps:
+                                bound_deps = data.get("dependencies") or []
                             if not deps:
-                                deps = [d["item_id"] for d in data.get("dependencies") or [] if isinstance(d, dict) and d.get("item_id")]
+                                deps = [d["item_id"] for d in bound_deps if isinstance(d, dict) and d.get("item_id")]
                         except Exception:
                             pass
                     if not document:
@@ -834,13 +848,13 @@ class Mirror:
                 if not deps:
                     deps = payload.get("source_item_ids") or payload.get("dependencies") or []
         if not deps:
-            return None, []
+            return None, [], [], {}
         deps = [d for d in deps if isinstance(d, str)]
         allowed_ids = None
         if self.consent and self.consent.scope != SCOPE_ALL:
             allowed_ids = set(self.consent.allowlist)
         if allowed_ids is not None and not all(d in allowed_ids for d in deps):
-            return None, []
+            return None, [], [], {}
         fields = {
             "schema_version": SCHEMA_VERSION,
             "contract_version": CONTRACT_VERSION,
@@ -854,7 +868,7 @@ class Mirror:
         }
         text = _frontmatter(fields) + "\n" + _break_injections(str(document or "")) + "\n\n" + EDITS_NOTICE + "\n"
         text = _cap_utf8(text)
-        return text.encode("utf-8"), deps
+        return text.encode("utf-8"), deps, bound_deps, report_bindings
 
     def _build_library_index(self, completed: list[dict], omitted: int,
                              shelf_rows: list[dict], brief_rows: list[dict]) -> bytes:
@@ -1077,7 +1091,7 @@ class Mirror:
             # Out of scope: if we previously owned a file, schedule cleanup.
             key = item_key(video_id)
             if key in ledger.get("entries", {}):
-                self._record_purge(ledger, video_id)
+                self._record_scope_removal(ledger, video_id)
             return
         key = item_key(video_id)
         purged = ledger.get("purged") or {}
@@ -1097,6 +1111,15 @@ class Mirror:
         entry = self._ensure_entry(ledger, key, kind="item", identity=video_id, relpath=item_relpath(video_id))
         entry["desired_generation"] = int(entry.get("desired_generation") or 0) + 1
         entry["pending_action"] = "tombstone"
+        entry["status"] = "deletion_pending"
+        self._bump_index(ledger)
+        self._invalidate_dependents(ledger, video_id)
+
+    def _record_scope_removal(self, ledger: dict, video_id: str) -> None:
+        key = item_key(video_id)
+        entry = self._ensure_entry(ledger, key, kind="item", identity=video_id, relpath=item_relpath(video_id))
+        entry["desired_generation"] = int(entry.get("desired_generation") or 0) + 1
+        entry["pending_action"] = "purge"
         entry["status"] = "deletion_pending"
         self._bump_index(ledger)
         self._invalidate_dependents(ledger, video_id)
@@ -1202,9 +1225,14 @@ class Mirror:
                 continue
             key = item_key(vid)
             if key in purged:
-                continue
+                purged.pop(key, None)
             entry = entries.get(key)
-            if entry is None or int(entry.get("written_generation") or 0) == 0:
+            dest = Path(self.consent.destination) if self.consent and self.consent.destination else None
+            needs_write = (entry is None or
+                           int(entry.get("written_generation") or 0) == 0 or
+                           entry.get("status") == "purged" or
+                           (dest is not None and not (dest / MIRROR_ROOT / entry.get("relpath", "")).is_file()))
+            if needs_write:
                 self._record_item_write(ledger, vid, kind="source_refresh")
             else:
                 content, dep_new, reason = self._build_item_document(vid)
@@ -1219,7 +1247,7 @@ class Mirror:
             sid = s["shelf_id"]
             skey = shelf_key(sid)
             sentry = entries.get(skey)
-            if sentry is None or int(sentry.get("written_generation") or 0) == 0:
+            if sentry is None or int(sentry.get("written_generation") or 0) == 0 or sentry.get("status") == "purged":
                 self._record_shelf_write(ledger, sid)
             else:
                 content, dep_new = self._build_shelf_document(sid, set(allow) if scope != SCOPE_ALL else None)
@@ -1232,7 +1260,7 @@ class Mirror:
             bkey = brief_key(b["date"], b["brief_hash"])
             active_bkeys.add(bkey)
             bentry = entries.get(bkey)
-            if bentry is None or int(bentry.get("written_generation") or 0) == 0:
+            if bentry is None or int(bentry.get("written_generation") or 0) == 0 or bentry.get("status") == "purged":
                 self._record_brief(ledger, b["brief_hash"])
 
         for key, entry in list(entries.items()):
@@ -1241,7 +1269,7 @@ class Mirror:
             if kind == "item":
                 if ident in live_by_id and not self._in_scope_id(ident, scope, allow):
                     if entry.get("pending_action") != "purge" and entry.get("status") != "purged":
-                        self._record_purge(ledger, ident)
+                        self._record_scope_removal(ledger, ident)
                 elif ident not in live_by_id:
                     if entry.get("pending_action") not in ("purge", "tombstone") and entry.get("status") != "purged":
                         item_snap, _ = self._item_snapshot(ident)
@@ -1566,7 +1594,7 @@ class Mirror:
                     bhash = entry.get("brief_hash") or ""
                     if "/" in str(entry.get("identity") or ""):
                         date, bhash = str(entry["identity"]).split("/", 1)
-                    content, deps = self._build_brief_document(date, bhash)
+                    content, deps, bound_deps, report_bindings = self._build_brief_document(date, bhash)
                     if content is None:
                         continue
                     if allowed_ids is not None and deps and not all(d in allowed_ids for d in deps):
@@ -1584,12 +1612,16 @@ class Mirror:
                     "kind": kind,
                     "identity": entry.get("identity"),
                     "relpath": rel,
+                    "date": date if kind == "brief" else "",
+                    "brief_hash": bhash if kind == "brief" else "",
                     "generation": int(entry.get("desired_generation") or 0),
                     "expected_hash": entry.get("last_file_hash") or (rec.get("file_hash") if isinstance(rec, dict) else ""),
                     "owned": owned,
                     "content": content,
                     "dependency_hash": dep,
                     "dependencies": list(entry.get("dependencies") or (deps if kind == "brief" else [])),
+                    "bound_dependencies": bound_deps if kind == "brief" else [],
+                    "report_bindings": report_bindings if kind == "brief" else {},
                 })
         catalog = []
         for key, entry in (ledger.get("entries") or {}).items():
@@ -1953,6 +1985,48 @@ class Mirror:
                         return False
                     if not self._in_scope_id(d):
                         return False
+                # Revalidate complete bound dependency state (evidence revisions & report bindings)
+                store = self.brief_store
+                date = op.get("date") or ""
+                bhash = op.get("brief_hash") or ""
+                if not date or not bhash:
+                    ident = op.get("identity") or ""
+                    if "/" in str(ident):
+                        date, bhash = str(ident).split("/", 1)
+                checked = False
+                if store is not None and hasattr(store, "_load_artifact") and hasattr(store, "_check_dependencies"):
+                    try:
+                        if date and bhash:
+                            with store.reader._operation() as fresh_op:
+                                manifest, _doc, _cits, packet = store._load_artifact(date, bhash)
+                                store._check_dependencies(fresh_op, manifest, packet=packet)
+                                checked = True
+                    except Exception:
+                        return False
+                if not checked:
+                    bound_deps = op.get("bound_dependencies") or []
+                    for bdep in bound_deps:
+                        vid = bdep.get("item_id")
+                        if not isinstance(vid, str):
+                            continue
+                        item_snap, clips = self._item_snapshot(vid)
+                        if item_snap is None or item_snap.get("deleted_at") is not None:
+                            return False
+                        card = library_cards.build_card(item_snap, clips)
+                        if card is None:
+                            return False
+                        if (card.get("source_revision") != bdep.get("source_revision") or
+                                card.get("card_hash") != bdep.get("card_hash")):
+                            return False
+                    rep_bindings = op.get("report_bindings") or {}
+                    proj = rep_bindings.get("projection_revision")
+                    if proj is not None and hasattr(self.idx, "_conn"):
+                        try:
+                            row = self.idx._conn.execute("SELECT projection_revision FROM library_meta WHERE singleton=1").fetchone()
+                            if row and int(row[0]) != proj:
+                                return False
+                        except Exception:
+                            pass
 
             # Target bytes check immediately before replace
             now_exists = dest.exists()

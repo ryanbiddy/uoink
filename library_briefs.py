@@ -1004,6 +1004,32 @@ class BriefStore:
             "start": expected_bound(excerpt.get("start")), "end": expected_bound(excerpt.get("end")),
         }
 
+    @contextlib.contextmanager
+    def _sqlite_writer_exclusion(self, op=None):
+        conn = getattr(getattr(self.reader, "index", None), "_conn", None)
+        if conn is None or not hasattr(conn, "execute"):
+            yield
+            return
+        if getattr(conn, "in_transaction", False):
+            try:
+                conn.rollback()
+            except sqlite3.Error:
+                pass
+        begun = False
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+            begun = True
+        except sqlite3.OperationalError as exc:
+            raise ResourceError("stale_brief", details={"reason": "database_busy", "next_step": "get_library_brief_input"}) from exc
+        try:
+            yield
+        finally:
+            if begun:
+                try:
+                    conn.rollback()
+                except sqlite3.Error:
+                    pass
+
     def _write_artifact(self, date: str, brief_hash: str, manifest: dict, document: str,
                         citations: list[dict], packet: dict, op=None) -> None:
         root = self._require_root()
@@ -1020,13 +1046,15 @@ class BriefStore:
             if op is None:
                 with self.reader._operation() as fresh_op:
                     with self.reader._lock(fresh_op):
-                        self._recheck_publication_bindings(fresh_op, packet, manifest)
-                        os.replace(tmp, final)
+                        with self._sqlite_writer_exclusion(fresh_op):
+                            self._recheck_publication_bindings(fresh_op, packet, manifest)
+                            os.replace(tmp, final)
             else:
                 with self.reader._lock(op):
                     # Recheck every source/queue/run/taxonomy/projection binding at the atomic publication step
-                    self._recheck_publication_bindings(op, packet, manifest)
-                    os.replace(tmp, final)
+                    with self._sqlite_writer_exclusion(op):
+                        self._recheck_publication_bindings(op, packet, manifest)
+                        os.replace(tmp, final)
         except ResourceError:
             with contextlib.suppress(OSError):
                 shutil.rmtree(tmp, ignore_errors=True)
@@ -1297,8 +1325,8 @@ class BriefStore:
             op.check()
             try:
                 entries = list(day.iterdir())
-            except OSError:
-                continue
+            except OSError as exc:
+                raise ResourceError("library_unavailable", details={"storage": "purge_incomplete"}) from exc
             for entry in entries:
                 op.check()
                 if not entry.is_dir():
