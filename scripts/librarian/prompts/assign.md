@@ -39,10 +39,14 @@ Each item is provided as an evidence card with the following fields:
        - `excerpt_id`: Exact 64-character hash of the excerpt containing the quote.
        - `card_hash`: Exact 64-character hash from the card.
        - `quote`: Verbatim substring (1 to 24 words maximum, NFC-normalized, case and punctuation preserved) copied directly from the specified excerpt. Never concatenate text across different excerpts. Never invent or paraphrase quotes. Quotes of 25 or more words will be rejected.
-4. **Parent Assignments Permitted**:
-   - An approved parent shelf may be assigned as primary when the excerpt evidence supports its broad scope and no specific child shelf is justified. Do not guess an unsupported leaf shelf.
-5. **Sibling Cues and Disambiguation**:
-   - Sibling cues rendered in the taxonomy definitions must be strictly respected. Use include and exclude cues to resolve neighboring boundaries (e.g., Developer Tools vs Education vs Security, Frontier Models vs general AI business).
+4. **Parent Versus Child (decide explicitly)**:
+   - A child shelf is the primary only when the excerpts establish that child's subject as described by one of its include cues. A mention of a model, company, product, purchase or benchmark is not enough; the excerpt must be about that subject.
+   - When the excerpts are about AI but establish no child's subject, the parent shelf is the honest primary. Do not guess a child.
+   - When the excerpts establish a child's subject, choose that child even though the parent also fits; do not retreat to the parent.
+   - For each membership, be able to name the include cue the excerpt satisfies.
+5. **Sibling Cues, Precedence and the Dominant Subject**:
+   - Include and exclude cues rendered in the taxonomy are the boundary rules; an exclude cue of the form `"<what> -> <shelf path>"` sends that case to the named shelf, and an include cue marked "takes precedence over ..." wins that case.
+   - When an excerpt covers two shelves, the dominant subject decides (what most of the quoted words are about), not the more specific-sounding shelf. A tutorial, workshop or step-by-step walkthrough is about teaching even when it uses a tool or model.
 6. **Refusal and Unmapped Rules**:
    - If a valid source excerpt fits no approved concept in the taxonomy:
      - Set `outcome: "unmapped"`.

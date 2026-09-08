@@ -1,0 +1,309 @@
+{
+  "schema_version": 1,
+  "version_id": "taxonomy-v3-2026-09-07",
+  "name": "Living Library Taxonomy v3",
+  "description": "Taxonomy v2 with boundary cues sharpened from the stage 2 development errors; same shelves, ids and paths.",
+  "status": "candidate",
+  "parent_version_id": "taxonomy-v2-2026-09-05",
+  "created_at": "2026-09-07T00:00:00Z",
+  "approval": {
+    "approved_by": null,
+    "approval_record": null,
+    "decision_path": "docs/library/proof/taxonomy-v3-revision-decision-2026-09-07.json",
+    "decision_sha256": "db0a84c4fcce3701478d7e09b588e64010a3519f2ec22bdc590a779821779c66",
+    "modified_shelf_ids": [
+      "ai-and-ml",
+      "ai-industry-and-business",
+      "developer-tools",
+      "education",
+      "frontier-models",
+      "security"
+    ],
+    "preserved_shelf_ids": [
+      "news-and-current-events",
+      "space-and-science",
+      "ai-agents-and-automation",
+      "generative-media",
+      "spaceflight"
+    ]
+  },
+  "parent_revision_hash": "bd9e7f9d572a709a9e0f939b5433932fb36840278929946c2c6870ac0158dd97",
+  "revision_hash": "f0a2d53384b2559847f92313511b15173a7cdac3c079ab24c133593e615d56f6",
+  "nodes": [
+    {
+      "shelf_id": "ai-and-ml",
+      "path": [
+        "AI and ML"
+      ],
+      "definition": "Artificial intelligence, machine learning, neural networks, foundation models, and autonomous intelligent systems; the primary shelf whenever an excerpt is about AI but establishes no child shelf's subject.",
+      "include": [
+        "artificial intelligence",
+        "machine learning",
+        "deep learning",
+        "neural networks",
+        "foundation models",
+        "LLMs",
+        "autonomous systems",
+        "AI content that mentions models, companies, products or purchases without establishing a child shelf's subject (generic model task-fit, inference hardware throughput, assistant capabilities in general)"
+      ],
+      "exclude": [
+        "traditional non-AI software development",
+        "general business operations",
+        "unrelated science and hardware"
+      ],
+      "name": "AI and ML",
+      "retired": false,
+      "parent_shelf_id": null
+    },
+    {
+      "shelf_id": "news-and-current-events",
+      "path": [
+        "News and Current Events"
+      ],
+      "definition": "Clips and commentary reporting or discussing real-world breaking incidents, crimes, armed conflicts, and political or social debates shared via social media and news broadcasts.",
+      "include": [
+        "breaking reports naming a specific crime, riot, or armed-conflict incident (takes precedence over every AI and ML shelf when the incident, not a product or model, is the subject)",
+        "raw police/military radio or scanner audio captured during an unfolding event",
+        "political or cultural opinion segments from talk shows or panels"
+      ],
+      "exclude": [
+        "discussion of an AI/tech product or capability -> AI and ML",
+        "an AI agent or model demonstrated performing a task -> AI and ML / AI Agents and Automation",
+        "AI company business, market, or competitive commentary -> AI and ML / AI Industry and Business"
+      ],
+      "name": "News and Current Events",
+      "retired": false,
+      "parent_shelf_id": null
+    },
+    {
+      "shelf_id": "space-and-science",
+      "path": [
+        "Space and Science"
+      ],
+      "definition": "Space exploration, astronautics, astrophysics, orbital mechanics, planetary science, and empirical scientific inquiry.",
+      "include": [
+        "space exploration",
+        "astronautics",
+        "astronomy",
+        "orbital mechanics",
+        "spacecraft engineering",
+        "scientific research"
+      ],
+      "exclude": [
+        "commercial airline aviation",
+        "science fiction and fantasy entertainment",
+        "general consumer technology"
+      ],
+      "name": "Space and Science",
+      "retired": false,
+      "parent_shelf_id": null
+    },
+    {
+      "shelf_id": "ai-agents-and-automation",
+      "path": [
+        "AI and ML",
+        "AI Agents and Automation"
+      ],
+      "definition": "AI agent and assistant products that act for a user or business: agents that autonomously execute multi-step real-world tasks or business workflows, sensing and acting companions that see, hear, remember and respond like a coworker or friend, and proposed persistent assistants that continuously watch a user's screen or meetings.",
+      "include": [
+        "companion or assistant product described as sensing, hearing, acting, remembering and understanding the user like a coworker or friend",
+        "agent completes multi-step real-world tasks end-to-end (booking, shopping, research) without step-by-step direction (takes precedence over AI and ML / Developer Tools when the user is not doing software engineering)",
+        "AI agents autonomously running full business functions (sales, underwriting, coaching) without human operators",
+        "agent-driven workflow where agents autonomously plan, execute, and deliver on a stated goal",
+        "proposed persistent assistant that continuously watches the user's screen or meetings for personal assistance, rather than technical safety or security control (takes precedence over AI and ML / Security for this personal-assistance case)"
+      ],
+      "exclude": [
+        "coding-specific agent harnesses, IDE tools, or SDKs for software engineers -> AI and ML / Developer Tools",
+        "model architecture or benchmark evaluation without a shown agent or assistant acting for a user -> AI and ML / Frontier Models",
+        "a finished generated video, image, or film shown as creative output -> AI and ML / Generative Media",
+        "company market position, revenue, funding, or rivalry commentary without a product acting for a user -> AI and ML / AI Industry and Business",
+        "technical AI safety or security controls, including monitoring to detect prompt injection or enforce runtime guardrails -> AI and ML / Security"
+      ],
+      "name": "AI Agents and Automation",
+      "retired": false,
+      "parent_shelf_id": "ai-and-ml"
+    },
+    {
+      "shelf_id": "ai-industry-and-business",
+      "path": [
+        "AI and ML",
+        "AI Industry and Business"
+      ],
+      "definition": "News and commentary on the AI industry's competitive, financial, and policy dynamics, including company rivalries, revenue and market share, government restrictions on AI companies, and market/usage economics.",
+      "include": [
+        "executive or public figure names who is winning the AI competitive race",
+        "government policy or restriction reported as affecting an AI company's competitive position (takes precedence over AI and ML / Security, which covers technical safety and guardrails)",
+        "commentary that a company now faces real competition in the AI market",
+        "industry-wide analysis of usage share versus revenue capture between open and closed AI providers",
+        "reported revenue or annual recurring revenue (ARR) figures for an AI company",
+        "AI's effect on enterprise adoption, labour, task economics or economic growth as the subject",
+        "AI accelerator or chip competition and its implications for chip and model companies"
+      ],
+      "exclude": [
+        "technical model architecture, benchmarks, or capability evaluation -> AI and ML / Frontier Models",
+        "an agent product demonstrating task execution itself -> AI and ML / AI Agents and Automation",
+        "a finished AI-generated creative artifact shown as the output -> AI and ML / Generative Media",
+        "coding-tool usage or IDE/SDK workflow steps -> AI and ML / Developer Tools",
+        "technical safety, sandboxing, prompt-injection or jailbreak defenses -> AI and ML / Security",
+        "model scaling, post-training or training pipelines as the dominant subject, with economics secondary -> AI and ML / Frontier Models",
+        "a company name or acquisition mentioned in passing while the excerpt's subject is hardware throughput or a capability with no business analysis -> AI and ML"
+      ],
+      "name": "AI Industry and Business",
+      "retired": false,
+      "parent_shelf_id": "ai-and-ml"
+    },
+    {
+      "shelf_id": "developer-tools",
+      "path": [
+        "AI and ML",
+        "Developer Tools"
+      ],
+      "definition": "Software engineering tooling as the subject: agent harnesses, IDE extensions, coding assistants, SDKs, and developer-focused workflows, described as products, capabilities, comparisons or workflows rather than taught.",
+      "include": [
+        "coding assistants",
+        "agent harnesses",
+        "developer workflows",
+        "software development SDKs",
+        "IDE integrations",
+        "code generation"
+      ],
+      "exclude": [
+        "a tutorial, workshop or lecture whose purpose is to teach, even when it uses a developer tool -> AI and ML / Education",
+        "personal assistant or agent acting for a non-engineer user (speech, screen or task help) -> AI and ML / AI Agents and Automation",
+        "generic model comparison or model task-fit talk with no coding task, SDK or IDE -> AI and ML",
+        "consumer conversational chatbots",
+        "pure theoretical ML papers without tools",
+        "non-technical end-user products"
+      ],
+      "name": "Developer Tools",
+      "retired": false,
+      "parent_shelf_id": "ai-and-ml"
+    },
+    {
+      "shelf_id": "education",
+      "path": [
+        "AI and ML",
+        "Education"
+      ],
+      "definition": "Lectures, pedagogical explanations, conceptual deep dives, tutorials, workshops and step-by-step walkthroughs whose purpose is to teach machine learning or how to build with AI, even when they use or name a specific tool, model or product.",
+      "include": [
+        "introductory lectures",
+        "algorithm explanations",
+        "machine learning coursework",
+        "mathematical foundations",
+        "step-by-step technical tutorials",
+        "hands-on tutorial, workshop or walkthrough that builds or explains something step by step (takes precedence over AI and ML / Developer Tools and AI and ML / Frontier Models when the excerpt's purpose is to teach)",
+        "conceptual explanation of how a technique, architecture or orchestration pattern works, with examples"
+      ],
+      "exclude": [
+        "product announcements and release notes for a tool or model, with no teaching purpose -> AI and ML / Developer Tools or AI and ML / Frontier Models",
+        "marketing keynotes",
+        "opinion pieces without pedagogical content"
+      ],
+      "name": "Education",
+      "retired": false,
+      "parent_shelf_id": "ai-and-ml"
+    },
+    {
+      "shelf_id": "frontier-models",
+      "path": [
+        "AI and ML",
+        "Frontier Models"
+      ],
+      "definition": "Architectures, capability evaluations, multimodal systems, scaling behavior, and releases of frontier foundation models.",
+      "include": [
+        "foundation model architectures",
+        "multimodal model releases",
+        "scaling laws",
+        "model capabilities benchmarks",
+        "open weights models",
+        "model scaling, post-training and training-pipeline discussion as the dominant subject (takes precedence over AI and ML / AI Industry and Business when economics is secondary)"
+      ],
+      "exclude": [
+        "a tutorial or explanation whose purpose is to teach, with brief performance claims -> AI and ML / Education",
+        "generic talk that different models suit different tasks, with no architecture, evaluation or release -> AI and ML",
+        "enterprise adoption, labour or task economics, or accelerator competition as the dominant subject -> AI and ML / AI Industry and Business",
+        "routine fine-tuning on niche tasks",
+        "end-user application tutorials",
+        "general AI business news"
+      ],
+      "name": "Frontier Models",
+      "retired": false,
+      "parent_shelf_id": "ai-and-ml"
+    },
+    {
+      "shelf_id": "generative-media",
+      "path": [
+        "AI and ML",
+        "Generative Media"
+      ],
+      "definition": "AI systems and products whose demonstrated output is a finished visual creative artifact -- animation, film, or image/video-generated website -- produced from prompts or automated pipelines.",
+      "include": [
+        "prompt-driven 3D or claymation-style animation generated as the shown output",
+        "an AI-generated short film entered in or winning an AI-specific film award",
+        "an AI animated film premiered at a creative or computer-graphics industry event",
+        "AI image/video generation models used to build a visual website shown as the output",
+        "AI-generated video content praised firsthand for its entertainment or creative quality",
+        "a foundation-model release whose excerpt centers on a finished generated visual artifact (takes precedence over AI and ML / Frontier Models)"
+      ],
+      "exclude": [
+        "release coverage whose excerpt centers on architecture, scaling or benchmarks without a finished generated artifact -> AI and ML / Frontier Models",
+        "an agent autonomously completing a real-world non-creative task -> AI and ML / AI Agents and Automation",
+        "company market position or revenue commentary -> AI and ML / AI Industry and Business",
+        "a coding/SDK workflow used to build the artifact rather than the artifact itself -> AI and ML / Developer Tools"
+      ],
+      "name": "Generative Media",
+      "retired": false,
+      "parent_shelf_id": "ai-and-ml"
+    },
+    {
+      "shelf_id": "security",
+      "path": [
+        "AI and ML",
+        "Security"
+      ],
+      "definition": "AI safety, cybersecurity, agent sandboxing, prompt injection defenses, vulnerability analysis, and governance guardrails.",
+      "include": [
+        "agent guardrails",
+        "cybersecurity vulnerabilities",
+        "model sandboxing",
+        "prompt injection defenses",
+        "runtime governance",
+        "least privilege",
+        "AI safety risk, catastrophic-outcome or existential-risk warnings as the subject (takes precedence over the AI and ML parent)"
+      ],
+      "exclude": [
+        "generic network security without AI component",
+        "routine software bug reports",
+        "corporate compliance without technical safety"
+      ],
+      "name": "Security",
+      "retired": false,
+      "parent_shelf_id": "ai-and-ml"
+    },
+    {
+      "shelf_id": "spaceflight",
+      "path": [
+        "Space and Science",
+        "Spaceflight"
+      ],
+      "definition": "Rocket propulsion, orbital spaceflight missions, spacecraft operations, astronaut activities, and commercial launch systems.",
+      "include": [
+        "rocket launches",
+        "crewed space missions",
+        "orbital maneuvers",
+        "satellite deployment",
+        "astronaut spacewalks",
+        "space station resupply"
+      ],
+      "exclude": [
+        "terrestrial astronomy without launch systems",
+        "atmospheric aeronautics",
+        "speculative science fiction"
+      ],
+      "name": "Spaceflight",
+      "retired": false,
+      "parent_shelf_id": "space-and-science"
+    }
+  ]
+}

@@ -21,3 +21,5 @@ docs/library/proof/manifest-stage2-*.json -text
 docs/library/taxonomy-v2-*.json -text
 docs/library/proof/taxonomy-v2-*.json -text
 docs/library/proof/audit-*-measurements-*.json -text
+docs/library/taxonomy-v3-*.json -text
+docs/library/proof/taxonomy-v3-*.json -text

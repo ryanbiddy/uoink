@@ -33,6 +33,7 @@ ARCHIVE_SHA256 = "2b4e824ea9f93999de6c5108406e60a5c81f108de0b279c52fee2e96d62246
 HOLDOUT_V2 = ROOT / "docs/library/proof/holdout-v2-2026-09-05.json"
 INDUCTION_MANIFEST = ROOT / "docs/library/proof/induction-manifest-2026-09-05.json"
 MANIFEST_STAGE2 = ROOT / "docs/library/proof/manifest-stage2-2026-09-05.json"
+MANIFEST_STAGE3 = ROOT / "docs/library/proof/manifest-stage3-2026-09-07.json"
 # Stage-specific frozen inputs. Every other frozen file (card builder, service, migrations)
 # is shared. Stage 2 binds the approved taxonomy v2, hold-out v2, the sealed adjudicated
 # labels (as the gold file) and the adjudicated mapping table.
@@ -43,6 +44,13 @@ STAGE_FILES = {
             holdout="docs/library/proof/holdout-v2-2026-09-05.json",
             gold="docs/library/proof/labels/holdout-v2-gold-2026-09-05.json",
             mapping="docs/library/proof/labels/holdout-v2-mapping-2026-09-05.json"),
+    # Stage 3: taxonomy v3 (boundary cues sharpened from the stage 2 development errors) with
+    # its full lineage bound, a fresh hold-out v3, and its sealed labels and mapping.
+    3: dict(taxonomy="docs/library/taxonomy-v3-2026-09-07.json", parent_taxonomy="docs/library/taxonomy-v2-2026-09-05.json",
+            parent_taxonomy_2="docs/library/taxonomy-v1-2026-09-04.json",
+            holdout="docs/library/proof/holdout-v3-2026-09-07.json",
+            gold="docs/library/proof/labels/holdout-v3-gold-2026-09-07.json",
+            mapping="docs/library/proof/labels/holdout-v3-mapping-2026-09-07.json"),
 }
 SOURCE_SHA256 = "2765cc359805fb12f7a90aecd3dd0b34d884aa8cb3015785011bf400da3b4dfc"
 CONTRACT = "phase2-v1.2-2026-09-04"
@@ -1028,10 +1036,10 @@ def freeze_inputs(source, *, allow_install_corpus=False, stage=1):
                                migration26="migrations/0026_provenance_precedence.sql",
                                migration27="migrations/0027_library_substrate.sql").items():
         files[name] = dict(path=relative, sha256=sha((ROOT / relative).read_bytes()))
-    if stage == 2:
-        stage2_gold = read_json(ROOT / files["gold"]["path"])
-        require(isinstance(stage2_gold, list) and len(stage2_gold) == 60 and
-                all(item.get("sealed") is True for item in stage2_gold), "Stage 2 gold must be the sealed adjudicated labels")
+    if stage >= 2:
+        staged_gold = read_json(ROOT / files["gold"]["path"])
+        require(isinstance(staged_gold, list) and len(staged_gold) == 60 and
+                all(item.get("sealed") is True for item in staged_gold), f"Stage {stage} gold must be the sealed adjudicated labels")
     taxonomy = normalized_taxonomy(read_json(ROOT / files["taxonomy"]["path"]))
     split = read_json(ROOT / files["holdout"]["path"])
     heldout_ids = sorted(entry["video_id"] for rows in split["strata"].values() for entry in rows)
@@ -1553,6 +1561,8 @@ def main(argv=None):
     parser.add_argument("--freeze", action="store_true", help="Rebuild the freeze from the named copy; requires --mock")
     parser.add_argument("--stage2", action="store_true",
                         help="Stage 2 execution freeze: taxonomy v2, hold-out v2, sealed labels; writes/validates manifest-stage2")
+    parser.add_argument("--stage3", action="store_true",
+                        help="Stage 3 execution freeze: taxonomy v3 with lineage, hold-out v3, sealed labels; writes/validates manifest-stage3")
     parser.add_argument("--source", type=Path)
     parser.add_argument("--check-source", action="store_true", help="Remeasure source heads and compare with freeze; requires --mock")
     parser.add_argument("--allow-install-corpus", action="store_true", help="Read only explicit source Markdown heads in the install root")
@@ -1584,18 +1594,18 @@ def main(argv=None):
             print(json.dumps(validate_induction_receipts(receipts, artifact_root=args.receipts.resolve().parent,
                                                          require_real=args.require_real), indent=2))
             return 0
-        stage = 2 if args.stage2 else 1
-        assigned_manifest = MANIFEST_STAGE2 if args.stage2 else MANIFEST
-        if args.stage2 and args.manifest.resolve() == MANIFEST.resolve():
-            args.manifest = MANIFEST_STAGE2
+        stage = 3 if args.stage3 else (2 if args.stage2 else 1)
+        assigned_manifest = {1: MANIFEST, 2: MANIFEST_STAGE2, 3: MANIFEST_STAGE3}[stage]
+        if stage > 1 and args.manifest.resolve() == MANIFEST.resolve():
+            args.manifest = assigned_manifest
         if args.freeze:
             require(args.mock and args.source is not None, "Freeze requires --mock --source <named-copy>")
             require(args.manifest.resolve() == assigned_manifest.resolve(), "Freeze writes only the assigned manifest file")
             manifest = freeze_inputs(args.source, allow_install_corpus=args.allow_install_corpus, stage=stage)
-            if stage == 2:
+            if stage >= 2:
                 stage1 = read_json(MANIFEST)
                 for key in ("items", "cards", "corpus_heads", "cards_hash", "corpus_heads_hash", "measured_strata"):
-                    require(manifest[key] == stage1[key], f"Stage 2 card freeze differs from stage 1: {key}")
+                    require(manifest[key] == stage1[key], f"Stage {stage} card freeze differs from stage 1: {key}")
             assigned_manifest.parent.mkdir(parents=True, exist_ok=True)
             assigned_manifest.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
             print(json.dumps(dict(status=manifest["freeze_status"], targets=len(manifest["items"]),

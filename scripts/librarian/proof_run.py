@@ -521,28 +521,39 @@ class ProofHarness:
         # bound by the manifest (files.parent_taxonomy) and its revision hash must match the
         # child document's recorded parent_revision_hash.
         if norm_tax.get("parent_version_id") is not None:
-            parent_entry = self.manifest["files"].get("parent_taxonomy")
-            if parent_entry is None:
-                raise ProofRunError("Taxonomy has a parent_version_id but the manifest binds no parent_taxonomy file")
-            parent_doc = json.loads((ROOT / parent_entry["path"]).read_text(encoding="utf-8"))
-            parent_norm = normalized_taxonomy(parent_doc)
-            if parent_norm["version_id"] != norm_tax["parent_version_id"]:
-                raise ProofRunError("Bound parent taxonomy version does not match parent_version_id")
+            # The manifest binds every ancestor as files.parent_taxonomy, parent_taxonomy_2, ...
+            # (any key starting with "parent_taxonomy"). Walk the chain from the child document
+            # and approve the deepest ancestor first.
+            bound = {}
+            for key, entry in self.manifest["files"].items():
+                if key.startswith("parent_taxonomy"):
+                    doc = json.loads((ROOT / entry["path"]).read_text(encoding="utf-8"))
+                    bound[doc["version_id"]] = (doc, normalized_taxonomy(doc))
+            chain = []
             child_doc = json.loads(self.taxonomy_path.read_text(encoding="utf-8"))
-            expected_parent_hash = child_doc.get("parent_revision_hash")
-            if expected_parent_hash is not None and expected_parent_hash != parent_norm["revision_hash"]:
-                raise ProofRunError("Parent taxonomy revision hash differs from the approved child's record")
-            parent_res = svc.approve_taxonomy(
-                ctx,
-                {
-                    "version_id": parent_norm["version_id"],
-                    "nodes": parent_norm["nodes"],
-                    "parent_version_id": parent_norm.get("parent_version_id"),
-                },
-            )
-            if not parent_res.get("ok") or parent_res.get("revision_hash") != parent_norm["revision_hash"]:
-                raise ProofRunError(f"approve_taxonomy (parent lineage) failed or revision hash mismatch: {parent_res}")
-            self.parent_taxonomy_revision_hash = parent_norm["revision_hash"]
+            cursor = child_doc
+            while cursor.get("parent_version_id") is not None:
+                parent_id = cursor["parent_version_id"]
+                if parent_id not in bound:
+                    raise ProofRunError(f"Taxonomy lineage requires {parent_id} but the manifest binds no parent_taxonomy file for it")
+                parent_doc, parent_norm = bound[parent_id]
+                expected_parent_hash = cursor.get("parent_revision_hash")
+                if expected_parent_hash is not None and expected_parent_hash != parent_norm["revision_hash"]:
+                    raise ProofRunError(f"Parent taxonomy {parent_id} revision hash differs from the child's record")
+                chain.append(parent_norm)
+                cursor = parent_doc
+            for parent_norm in reversed(chain):
+                parent_res = svc.approve_taxonomy(
+                    ctx,
+                    {
+                        "version_id": parent_norm["version_id"],
+                        "nodes": parent_norm["nodes"],
+                        "parent_version_id": parent_norm.get("parent_version_id"),
+                    },
+                )
+                if not parent_res.get("ok") or parent_res.get("revision_hash") != parent_norm["revision_hash"]:
+                    raise ProofRunError(f"approve_taxonomy (lineage {parent_norm['version_id']}) failed or revision hash mismatch: {parent_res}")
+            self.parent_taxonomy_revision_hash = chain[0]["revision_hash"] if chain else None
 
         # 3. Approve taxonomy
         tax_res = svc.approve_taxonomy(
