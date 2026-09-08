@@ -1582,13 +1582,28 @@ def _ownership_path(root, directory: str, start_id: str) -> str:
                         sha256_text(str(start_id))[:40] + ".json")
 
 
-def _read_ownership_record(path: str) -> dict | None:
+def _load_ownership_record(path: str) -> tuple[str, dict | None]:
+    """AS-02: distinguish missing, damaged and readable ownership records.
+
+    Returns ``(status, record)`` where status is ``missing`` (no file),
+    ``damaged`` (unreadable or not an object) or ``ok``. Missing is not
+    damaged; neither is by itself verified child-absence.
+    """
     try:
         with open(path, "r", encoding="utf-8") as handle:
             record = json.load(handle)
-    except (OSError, ValueError):
-        return None
-    return record if type(record) is dict else None
+    except FileNotFoundError:
+        return "missing", None
+    except (OSError, ValueError, TypeError):
+        return "damaged", None
+    if type(record) is not dict:
+        return "damaged", None
+    return "ok", record
+
+
+def _read_ownership_record(path: str) -> dict | None:
+    status, record = _load_ownership_record(path)
+    return record if status == "ok" else None
 
 
 def _write_ownership_record(path: str, record: dict) -> None:
@@ -1723,21 +1738,65 @@ def _process_created_ms(pid: int) -> int | None:
 _CHILD_RECORD_LOCK = threading.Lock()
 
 
-def record_child_start(root, start_id: str, pid: int, instance: str | None) -> None:
-    """Persist a spawned child (pid, creation time, start, incarnation) under
-    ``root/source_children`` before the parent waits on it (AS-02)."""
+def _child_record_or_raise(path: str, start_id: str) -> dict:
+    """Load a child-ownership record; damaged files are not treated as empty."""
+    status, record = _load_ownership_record(path)
+    if status == "damaged":
+        raise OSError(f"child ownership record for {start_id} is damaged")
+    if record is None:
+        return {"start_id": start_id, "children": []}
+    return record
+
+
+def record_child_launch_intent(root, start_id: str, instance: str | None) -> None:
+    """AS-02: persist an unresolved child-launch intent BEFORE spawning.
+
+    A crash or record-write failure between launch and ``record_child_start``
+    must never become evidence of no children. Write errors propagate.
+    """
     path = _ownership_path(root, CHILD_OWNERSHIP_DIR, start_id)
     with _CHILD_RECORD_LOCK:
-        record = _read_ownership_record(path) or {"start_id": start_id, "children": []}
+        record = _child_record_or_raise(path, start_id)
+        record["unresolved_launch"] = True
+        record["unresolved_instance"] = instance
+        record["unresolved_ms"] = int(time.time() * 1000)
+        _write_ownership_record(path, record)
+
+
+def resolve_child_launch_intent(root, start_id: str) -> None:
+    """AS-02: clear an unresolved launch after spawn is known not to have
+    created a child (``Popen`` failed). Write errors propagate."""
+    path = _ownership_path(root, CHILD_OWNERSHIP_DIR, start_id)
+    with _CHILD_RECORD_LOCK:
+        status, record = _load_ownership_record(path)
+        if status == "missing":
+            return
+        if status == "damaged":
+            raise OSError(f"child ownership record for {start_id} is damaged")
+        if not record.get("unresolved_launch"):
+            return
+        record["unresolved_launch"] = False
+        record.pop("unresolved_instance", None)
+        record.pop("unresolved_ms", None)
+        _write_ownership_record(path, record)
+
+
+def record_child_start(root, start_id: str, pid: int, instance: str | None) -> None:
+    """Persist a spawned child (pid, creation time, start, incarnation) under
+    ``root/source_children`` before the parent waits on it (AS-02). Resolves
+    a prior launch intent in the same write. Write errors propagate."""
+    path = _ownership_path(root, CHILD_OWNERSHIP_DIR, start_id)
+    with _CHILD_RECORD_LOCK:
+        record = _child_record_or_raise(path, start_id)
         children = record.get("children") if isinstance(record.get("children"), list) else []
         children.append({"pid": int(pid), "created_ms": _process_created_ms(int(pid)),
                          "instance": instance, "started_ms": int(time.time() * 1000),
                          "ended_ms": None})
         record["children"] = children[-50:]
-        try:
-            _write_ownership_record(path, record)
-        except OSError:
-            log.exception("could not record the child of %s", start_id)
+        record["unresolved_launch"] = False
+        record.pop("unresolved_instance", None)
+        record.pop("unresolved_ms", None)
+        _write_ownership_record(path, record)
 
 
 def record_child_end(root, start_id: str, pid: int) -> None:
@@ -1758,10 +1817,20 @@ def record_child_end(root, start_id: str, pid: int) -> None:
 def child_ownership_liveness(root, start_id: str) -> str:
     """``alive`` when a recorded child of ``start_id`` that never reported its
     exit still runs (pid and creation time agree), ``dead`` when every such
-    child is gone, ``none`` without any record, ``unknown`` otherwise."""
-    record = _read_ownership_record(_ownership_path(root, CHILD_OWNERSHIP_DIR, start_id))
-    if record is None:
+    child is gone, ``none`` when there is no record (no child evidence),
+    ``unknown`` when the record is damaged, an unresolved child-launch intent
+    remains, or a child's liveness cannot be established.
+
+    AS-02: missing, damaged and unresolved ownership records are distinct
+    from verified absence. Only ``none`` (no record) and ``dead`` (every
+    recorded child is gone, no unresolved launch) permit terminal settlement.
+    """
+    status, record = _load_ownership_record(
+        _ownership_path(root, CHILD_OWNERSHIP_DIR, start_id))
+    if status == "missing":
         return "none"
+    if status == "damaged":
+        return "unknown"
     verdict = "none"
     for child in record.get("children") or []:
         if not isinstance(child, dict) or child.get("ended_ms") is not None:
@@ -1778,7 +1847,16 @@ def child_ownership_liveness(root, start_id: str) -> str:
             verdict = "unknown"
         elif verdict == "none":
             verdict = "dead"
+    if record.get("unresolved_launch"):
+        return "unknown"
     return verdict
+
+
+def child_termination_established(root, start_id: str) -> bool:
+    """AS-02: True only when child status permits terminal settlement
+    (no child evidence, or every recorded child is gone with no unresolved
+    launch). A live or unknown child keeps ownership uncertain."""
+    return child_ownership_liveness(root, start_id) in ("none", "dead")
 
 
 @dataclass(frozen=True)
@@ -3267,6 +3345,9 @@ class SourceSubscriptionService:
         busy = self._acquire_execution(claim)
         if busy is not None:
             return busy
+        # AS-03: acquire() keyed the capture lock on this identity; keep that
+        # claim for lock release even if a day-rollover replaces the row.
+        lock_claim = claim
         handed_off = False
         try:
             started = self.mark_started(claim["start_id"], claim["owner_token"])
@@ -3280,11 +3361,16 @@ class SourceSubscriptionService:
             if started.get("outcome") != "started":
                 return started
             result = self.execute_started(started)
-            handed_off = result.get("outcome") == "in_flight"
+            # AS-03: keep dispatcher ownership (capture lock and _extract_lock)
+            # for in-flight, uncertain, or otherwise surviving execution.
+            # Unstarted and verified-terminal exits release it, including
+            # consent rejection, synchronous failure and claim-store failure.
+            handed_off = result.get("outcome") in (
+                "in_flight", "worker_not_stopped", "uncertain")
             return result
         finally:
             if not handed_off:
-                self._release_execution(claim)
+                self._release_dispatcher_ownership(lock_claim)
 
     def _acquire_execution(self, claim: dict) -> dict | None:
         with self.store.read() as conn:
@@ -3305,7 +3391,10 @@ class SourceSubscriptionService:
                 "start_id": claim["start_id"], "item_id": claim["item_id"],
                 "source_id": claim["source_id"], "released": released.get("outcome") == "released"}
 
-    def _release_execution(self, claim: dict) -> None:
+    def _release_dispatcher_ownership(self, claim: dict) -> None:
+        """AS-03: release capture-lock / _extract_lock ownership taken by
+        ``acquire``. Distinct from ``_release_execution_claim`` (claim-file
+        cleanup); the previous shared name shadowed this method."""
         try:
             _backend_call(self.backend, "release",
                           {"start_id": claim["start_id"], "owner_token": claim["owner_token"],
@@ -3616,8 +3705,11 @@ class SourceSubscriptionService:
         return {"outcome": "claim_unavailable", "start_id": start["start_id"],
                 "error": claim.get("error")}
 
-    def _release_execution(self, start: dict) -> None:
-        """Drop the execution claim after a terminal ledger transition."""
+    def _release_execution_claim(self, start: dict) -> None:
+        """AS-02/AS-03: drop the execution claim after a terminal ledger
+        transition. Distinct from ``_release_dispatcher_ownership`` (capture
+        lock / extract lock). Claim and child records stay until termination
+        is established."""
         try:
             _backend_call(self.backend, "release_execution", dict(start))
         except Exception:
@@ -3758,7 +3850,7 @@ class SourceSubscriptionService:
                             "item_id": start["item_id"], "source_id": start["source_id"],
                             "video_id": video_id, "publication": "complete"}
                 result = self._commit_success(conn, start, video_id, now)
-        self._release_execution(start)
+        self._release_execution_claim(start)
         if result.get("outcome") == "succeeded":
             self._test_boundary("after_outbox_commit")
         return result
@@ -3831,7 +3923,7 @@ class SourceSubscriptionService:
             result = self._fail(conn, start, item, code, terminal, now)
         # AS-02 (run AT-4): the execution claim outlives the row only until
         # its terminal transition committed.
-        self._release_execution(start)
+        self._release_execution_claim(start)
         return result
 
     @staticmethod

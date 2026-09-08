@@ -3105,27 +3105,38 @@ def _run_subprocess(cmd: list[str], *, cancel_event: threading.Event | None = No
     the active yt-dlp/ffmpeg process instead of waiting for a long timeout.
     """
     _raise_if_cancelled(cancel_event)
-    proc = subprocess.Popen(
-        cmd,
-        stdout=stdout,
-        stderr=stderr,
-        text=text,
-        encoding=encoding,
-        errors=errors,
-        **SUBPROCESS_KW,
-    )
-    # AS-02 (run AT-4): a child spawned while a standing capture executes on
-    # this thread is persisted against that start (pid, creation time, start,
-    # incarnation) under DATA_ROOT/source_children before the parent waits on
-    # it, so a probe can see a surviving yt-dlp/ffmpeg after the parent died.
+    # AS-02: persist an unresolved child-launch intent BEFORE spawning so a
+    # crash or record-write failure between launch and registration is never
+    # evidence of no children. Write errors propagate (they are not swallowed).
     capture = source_subscriptions.current_capture_context()
     if capture is not None:
-        try:
-            source_subscriptions.record_child_start(
-                DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
-        except Exception:
-            log.exception("could not record the child of standing capture %s",
-                          capture["start_id"])
+        source_subscriptions.record_child_launch_intent(
+            DATA_ROOT, capture["start_id"], capture.get("instance"))
+    try:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=stdout,
+            stderr=stderr,
+            text=text,
+            encoding=encoding,
+            errors=errors,
+            **SUBPROCESS_KW,
+        )
+    except BaseException:
+        if capture is not None:
+            try:
+                source_subscriptions.resolve_child_launch_intent(
+                    DATA_ROOT, capture["start_id"])
+            except Exception:
+                log.exception("could not resolve the child-launch intent of %s",
+                              capture["start_id"])
+        raise
+    if capture is not None:
+        # AS-02: resolve the launch intent by recording the live child.
+        # Record-write errors must not be swallowed; the unresolved intent
+        # remains if this write fails, so absence is never inferred.
+        source_subscriptions.record_child_start(
+            DATA_ROOT, capture["start_id"], proc.pid, capture.get("instance"))
     started = time.monotonic()
     try:
         while True:
@@ -7592,16 +7603,18 @@ def _manual_extraction_ownership(url: str):
     AS-03 (run AT-3): the wait for the shared lock is bounded and a failed
     acquisition (OS error or an exhausted wait) is unavailable ownership,
     reported through ``ownership.error``; the process lock is never used as
-    a substitute. Run AT-4: the canonical corpus identity is inspected
-    before and after the wait and the result is consumed by the caller
-    (``_ManualOwnership.recheck``): a capture this request waited behind is
-    reused, a conflicting row blocks, a row that existed before the request
-    is a deliberate re-extraction."""
+    a substitute. Run AT-4/AT-5: prior corpus state is read before the first
+    ``_extract_lock`` wait as well as after both waits. A capture this
+    request waited behind (either lock) is reused; a conflicting row blocks;
+    a row that existed before the request is a deliberate re-extraction."""
+    ownership = _ManualOwnership()
+    key = _manual_capture_key(url)
+    video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url)
+    # AS-03: establish the request's prior corpus state before either lock
+    # wait (process lock, then capture-identity lock). Completion during
+    # either wait is reused; a row that already existed is a deliberate refresh.
+    existed_before = ownership.corpus_row(video_id) is not None
     with _extract_lock:
-        ownership = _ManualOwnership()
-        key = _manual_capture_key(url)
-        video_id = source_subscriptions.SourceSubscriptionService._youtube_id_from_url(url)
-        existed_before = ownership.corpus_row(video_id) is not None
         try:
             ownership.lock = source_subscriptions.CaptureLock.acquire(
                 DATA_ROOT, key, timeout=source_subscriptions.MANUAL_CAPTURE_LOCK_TIMEOUT_S)
@@ -8149,37 +8162,46 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
     def probe(self, start):
         """``running`` for a live worker thread, an in-process download, a
         queued/running podcast job, or (run AT-4) a recorded child process
-        of the start that still runs; ``stopped`` only for a terminal job, an
-        observed synchronous return of this incarnation's own invocation, or
-        an executing incarnation whose persisted process is verifiably dead
-        while no recorded child survives it. An empty thread registry is
-        never death evidence: it says nothing about another process, its
-        child, or the separate podcast worker. The executing incarnation is
-        the persisted execution claim's holder when one exists, else the
-        row's ``owner_instance``."""
+        of the start that still runs; ``stopped`` only when child status
+        permits terminal settlement and a terminal job, an observed
+        synchronous return of this incarnation's own invocation, or an
+        executing incarnation whose persisted process is verifiably dead
+        is also observed. AS-02: child status is a common prerequisite for
+        every terminal probe branch. A live child is ``running``; unknown
+        child state is never ``stopped``. An empty thread registry is
+        never death evidence. The executing incarnation is the persisted
+        execution claim's holder when one exists, else the row's
+        ``owner_instance``."""
         start_id = start["start_id"]
         with _source_capture_threads_lock:
             thread = _source_capture_threads.get(start_id)
             invocation = self._invocations.get(start_id)
         if thread is not None and thread.is_alive():
             return "running"
-        job = _find_job_for_start(start_id)
-        if job is not None:
-            return "stopped" if job.get("state") in _JOB_TERMINAL_STATES else "running"
         children = source_subscriptions.child_ownership_liveness(DATA_ROOT, start_id)
         if children == "alive":
-            # A dead parent is not a stopped capture while yt-dlp/ffmpeg lives.
+            # A dead parent or a terminal job is not a stopped capture while
+            # yt-dlp/ffmpeg lives.
             return "running"
+        job = _find_job_for_start(start_id)
+        if job is not None and job.get("state") not in _JOB_TERMINAL_STATES:
+            return "running"
+        # AS-02: missing/dead children may settle; damaged or unresolved
+        # child records keep ownership uncertain.
+        if children not in ("none", "dead"):
+            return "unknown"
+        if job is not None and job.get("state") in _JOB_TERMINAL_STATES:
+            return "stopped"
         claim = self.execution_claim(start)
         executor = claim.get("instance") if claim else start.get("owner_instance")
         liveness = source_subscriptions.instance_liveness(executor, DATA_ROOT)
         if liveness == "dead":
-            return "stopped" if children in ("none", "dead") else "unknown"
+            return "stopped"
         if liveness == "current" and claim is not None and invocation is not None \
                 and invocation.get("returned") and invocation.get("status") != "in_flight" \
                 and invocation.get("owner_token") == start.get("owner_token"):
             # This incarnation's own invocation returned synchronously and
-            # left no thread, job or child behind.
+            # left no thread, job or surviving child behind.
             return "stopped"
         return "unknown"
 
@@ -8188,14 +8210,20 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
         taken on the strength of the owner token: the proof must bind this
         backend kind, start and owner token; the start must belong to this
         process incarnation (thread and job registries are per process); and
-        the named terminal evidence must be observable here. An absent
-        thread or an empty registry is never death evidence, so an
-        unverifiable proof leaves the decision to ``probe``."""
+        the named terminal evidence must be observable here. Child status is
+        a common prerequisite for every terminal proof branch
+        (``worker_finished``, ``job_terminal``, ``executor_returned``): a
+        live child or unknown child state never verifies. An absent thread
+        or an empty registry is never death evidence, so an unverifiable
+        proof leaves the decision to ``probe``."""
         if not proof.binds(start, self.kind):
             return False
         if start.get("owner_instance") != _source_instance_id():
             return False
         start_id = start["start_id"]
+        # AS-02: a live or unknown child prevents every terminal proof.
+        if not source_subscriptions.child_termination_established(DATA_ROOT, start_id):
+            return False
         with _source_capture_threads_lock:
             thread = _source_capture_threads.get(start_id)
             invocation = self._invocations.get(start_id)
@@ -8215,7 +8243,8 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             # proof's owner token and this incarnation, and observed it
             # return a synchronous (non in-flight) outcome; and nothing else
             # may still execute for the start here (no other live worker
-            # thread, no queued or running job, no recorded live child).
+            # thread, no queued or running job). Child termination is the
+            # common prerequisite above; unknown child state does not verify.
             if invocation is None or not invocation.get("returned"):
                 return False
             if invocation.get("owner_token") != proof.owner_token \
@@ -8228,7 +8257,7 @@ class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
             job = _find_job_for_start(start_id)
             if job is not None and job.get("state") not in _JOB_TERMINAL_STATES:
                 return False
-            return source_subscriptions.child_ownership_liveness(DATA_ROOT, start_id) != "alive"
+            return True
         return False
 
     # ---- durable publication inspection and recovery (AS-01) --------------
