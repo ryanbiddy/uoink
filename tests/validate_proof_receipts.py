@@ -327,6 +327,9 @@ V2_RECEIPT_SCHEMA["properties"].update(
          "source", "upgraded", "corpus_heads")}),
     accounting=JSON_OBJECT)
 V2_RECEIPT_SCHEMA["required"] += ["calls", "completion_order", "http_history", "execution", "state_artifacts", "accounting"]
+# Stage 3 declared execution variable: optional so stage 1/2 receipts stay valid.
+for _schema in (LEGACY_RECEIPT_SCHEMA, V2_RECEIPT_SCHEMA):
+    _schema["properties"]["config"]["properties"]["effort"] = dict(anyOf=[ID, dict(type="null")])
 RECEIPT_SCHEMA = dict(oneOf=[LEGACY_RECEIPT_SCHEMA, V2_RECEIPT_SCHEMA],
                       **{"$schema": "https://json-schema.org/draft/2020-12/schema"})
 

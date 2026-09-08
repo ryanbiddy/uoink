@@ -232,6 +232,7 @@ class ProofHarness:
         mock: bool = True,
         limit: Optional[int] = None,
         model: str = "claude-sonnet-5",
+        effort: Optional[str] = None,
         concurrency: int = 4,
         port: int = 5180,
         scratch_dir: Optional[Path] = None,
@@ -249,6 +250,7 @@ class ProofHarness:
         self.mock_reject_count = mock_reject_count
         self.limit = limit
         self.model = model
+        self.effort = effort
         self.concurrency = max(1, min(4, concurrency))
         self.batch = max(1, batch)
         # Per-call hard bound; a hung CLI must fail fast so the attempt is
@@ -1174,6 +1176,9 @@ class ProofHarness:
         ]
         if self.model:
             cmd += ["--model", self.model]
+        if self.effort:
+            # Declared execution variable (stage 3: "high"); recorded in every call's argv.
+            cmd += ["--effort", self.effort]
 
         timed_out = False
         cancelled = False
@@ -2204,6 +2209,7 @@ class ProofHarness:
                 "client": "proof_run.py",
                 "transport": "http_registry",
                 "model": self.model,
+                "effort": self.effort,
                 "base_url": self.base_url,
                 "isolation_root": str(self.scratch_dir),
                 "index_path": str(self.scratch_dir / "Uoink" / "index.db"),
@@ -2343,6 +2349,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Cards per claude -p call in real runs (default: 12; mock runs stay per-item)",
     )
     parser.add_argument(
+        "--effort",
+        default=None,
+        help="Reasoning effort passed to every claude -p call (declared execution variable; default: CLI default)",
+    )
+    parser.add_argument(
         "--port",
         type=int,
         default=5180,
@@ -2392,6 +2403,7 @@ def main() -> None:
         model=args.model,
         concurrency=args.concurrency,
         batch=args.batch,
+        effort=args.effort,
         taxonomy=args.taxonomy,
         manifest=args.manifest,
         port=args.port,
