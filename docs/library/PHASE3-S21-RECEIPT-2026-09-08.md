@@ -105,6 +105,18 @@ observations, assertions, result PASS).
   launcher records (`source_status.items[0].classification.state`). That is a dashboard
   affordance gap for Astra to name, not a capture defect.
 
+## C21 affordance: per-item classification state in the browser (2026-09-08, after C20)
+
+The Sources row now carries a "Captured items (N)" disclosure that reads `source_status`
+for that source and renders each committed item's `classification.state` as a pill
+(`waiting_for_client` = "Waiting for client (unfiled)", `pending`, `leased`, `accepted` =
+"Filed", `blocked`, `unmapped`, `unsupported`, `cancelled`, `not_requested`). Observed on
+the disposable S20 overlay (dashboard `127.0.0.1:49558`): after one standing capture and
+the outbox drain, the API reports `{"state": "waiting_for_client", "work_id": ..., "run_id": ...}`
+and the row shows the pill (`dashboard-sources-waiting-for-client-c21.jpg`, hash in
+`SHA256SUMS`). The affordance gap named above is closed by this change; Astra rules on it
+in AS-7.
+
 ## Status
 
 S21 is established on `61eeb07`, `d479899`, `0bb97c8` and `1830b7a` with ownership,

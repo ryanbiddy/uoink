@@ -3663,6 +3663,35 @@
       font-size: 11px;
       color: var(--acid);
     }
+    .captured-items-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 8px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--control-radius);
+    }
+    .captured-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--cream);
+    }
+    .classification-pill {
+      display: inline-flex;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: var(--cream);
+    }
+    .classification-pill.waiting_for_client { border-color: #38bdf8; color: #38bdf8; }
+    .classification-pill.accepted { border-color: #4ade80; color: #4ade80; }
+    .classification-pill.blocked, .classification-pill.unsupported, .classification-pill.unmapped { border-color: var(--vermillion); color: var(--vermillion); }
     .source-error-strip {
       display: flex;
       align-items: center;
@@ -8024,6 +8053,11 @@
         // Consent state & In-flight
         const inFlight = Array.isArray(source.in_flight) ? source.in_flight : [];
         const isDraining = source.consent_state === "off" && inFlight.length > 0;
+        // C21 (2026-09-08): per-item classification state (waiting_for_client, pending,
+        // leased, accepted, blocked, unmapped, unsupported) comes from source_status and is
+        // shown on demand under the row; the summary only carries counts by capture state.
+        const capturedCount = Number((source.item_counts || {}).committed || 0);
+        const itemsView = (state.standingItemsBySource || {})[id];
         let consentPillClass = source.consent_state === "on" ? "on" : "off";
         let consentPillLabel = source.consent_state === "on" ? "On (Standing capture)" : "Off (Metadata only)";
         if (isDraining) {
@@ -8151,6 +8185,16 @@
               </div>
             ` : ""}
 
+            ${capturedCount ? `
+              <div class="captured-items-box">
+                <div class="in-flight-head" style="color:var(--cream);">
+                  <span>Captured items (${capturedCount})</span>
+                  <button class="button ghost captured-items-btn" type="button" data-source-id="${htmlEscape(id)}">${itemsView && itemsView.open ? "Hide" : "Show classification state"}</button>
+                </div>
+                ${itemsView && itemsView.open ? renderCapturedItems(itemsView) : ""}
+              </div>
+            ` : ""}
+
             ${(det.last_error || errorCount > 0) ? `
               <div class="source-error-strip">
                 <div>
@@ -8178,6 +8222,62 @@
           retrySourcePoll(sourceId);
         });
       });
+      els.standingSubscriptionList.querySelectorAll(".captured-items-btn").forEach((btn) => {
+        btn.addEventListener("click", () => toggleCapturedItems(btn.dataset.sourceId));
+      });
+    }
+
+    const CLASSIFICATION_LABELS = {
+      waiting_for_client: "Waiting for client (unfiled)",
+      pending: "Classification pending",
+      waiting_configuration: "Waiting for configuration",
+      leased: "Classifying",
+      accepted: "Filed",
+      unmapped: "Unmapped",
+      unsupported: "Unsupported",
+      blocked: "Blocked",
+      cancelled: "Cancelled",
+      not_requested: "Linked capture (no work)",
+      not_captured: "Not captured",
+    };
+
+    function renderCapturedItems(view) {
+      if (view.loading) return `<div class="soft-note">Loading items&hellip;</div>`;
+      if (view.error) return `<div class="soft-note">Could not load items: ${htmlEscape(view.error)}</div>`;
+      const items = (view.items || []).filter((it) => it.capture_state === "committed");
+      if (!items.length) return `<div class="soft-note">No captured items in the first page.</div>`;
+      return items.map((it) => {
+        const cls = (it.classification && it.classification.state) || "pending";
+        const label = CLASSIFICATION_LABELS[cls] || cls;
+        return `
+          <div class="captured-item">
+            <span style="font-weight:500;">${htmlEscape(it.title || it.entry_id || "Captured item")}</span>
+            <span class="classification-pill ${htmlEscape(cls)}" title="${htmlEscape(cls)}">${htmlEscape(label)}</span>
+          </div>`;
+      }).join("") + (view.next_item_cursor ? `<div class="soft-note">More items exist; the first page is shown.</div>` : "");
+    }
+
+    async function toggleCapturedItems(sourceId) {
+      if (!sourceId) return;
+      state.standingItemsBySource = state.standingItemsBySource || {};
+      const current = state.standingItemsBySource[sourceId];
+      if (current && current.open) {
+        state.standingItemsBySource[sourceId] = { ...current, open: false };
+        renderStandingSubscriptions();
+        return;
+      }
+      state.standingItemsBySource[sourceId] = { open: true, loading: true, items: [] };
+      renderStandingSubscriptions();
+      try {
+        const res = await callRegistryTool("source_status", { source_id: sourceId, item_limit: 25 });
+        state.standingItemsBySource[sourceId] = {
+          open: true, loading: false, items: (res && res.items) || [],
+          next_item_cursor: res && res.next_item_cursor,
+        };
+      } catch (err) {
+        state.standingItemsBySource[sourceId] = { open: true, loading: false, error: consentErrorMessage(err) };
+      }
+      renderStandingSubscriptions();
     }
 
     async function startConsentFlow(sourceId, targetConsent) {
