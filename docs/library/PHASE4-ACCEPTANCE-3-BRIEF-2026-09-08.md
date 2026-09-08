@@ -38,7 +38,7 @@ Observed by Fable on the candidate: `test_phase4_aw2_acceptance.py` 28/28,
 - `python -B -m pytest -q -p no:cacheprovider tests/test_library_resources.py tests/test_library_prompts.py tests/test_library_briefs.py tests/test_library_mirror.py tests/test_library_mirror_wiring.py tests/test_phase4_stdio.py tests/test_c01_mcp_stdio.py tests/test_stdio_clip_tools.py tests/test_phase0_registry_capture.py tests/test_docs_live_contracts.py tests/test_library_adapters.py`
 
 No models, no resident helper, no port 5179, no live index; application and temporary
-roots under your worktree's `_scratch/`.
+roots under your worktree's scratch directory.
 
 ## Output
 
