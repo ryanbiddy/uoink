@@ -95,6 +95,19 @@ class _RollingRateLimiter:
 _rate_limiter = _RollingRateLimiter(RATE_LIMIT_ADMISSIONS, RATE_LIMIT_WINDOW_SEC)
 _active_reads_sem = threading.Semaphore(MAX_ACTIVE_READS)
 _READER_NONCE = str(uuid.uuid4())
+_CONN_NONCES: List[Tuple[sqlite3.Connection, str]] = []
+
+
+def _get_connection_nonce(conn: sqlite3.Connection) -> str:
+    global _CONN_NONCES
+    for c, nonce in _CONN_NONCES:
+        if c is conn:
+            return nonce
+    n = str(uuid.uuid4())
+    _CONN_NONCES.append((conn, n))
+    if len(_CONN_NONCES) > 32:
+        _CONN_NONCES.pop(0)
+    return n
 _analysis_db_override: Any = None
 
 
@@ -122,29 +135,25 @@ def serialize_card(card: dict) -> str:
     return result
 
 
-def canonical_json_hash(val: Any) -> str:
-    if isinstance(val, dict):
-        text = serialize_card(val)
-    else:
-        text = json.dumps(val, ensure_ascii=False, sort_keys=True, allow_nan=False)
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+def canonical_json_hash(obj: Any) -> str:
+    return hashlib.sha256(json.dumps(obj, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
 
 
 # ---------------------------------------------------------------------------
-# Error envelopes
+# Error Envelope
 # ---------------------------------------------------------------------------
 
 def error_envelope(
     code: str,
     message: str,
     *,
-    retryable: Optional[bool] = None,
     details: Optional[dict] = None,
+    retryable: Optional[bool] = None,
 ) -> dict:
     retryable_map = {
-        "storage_unavailable": True,
         "rate_limited": True,
         "deadline_exceeded": True,
+        "storage_unavailable": True,
         "recovery_pending": True,
         "stale_report": False,
         "validation_error": False,
@@ -175,6 +184,7 @@ def error_envelope(
 
 _ISO_Z_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$")
 _ISO_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?$")
+_FRACTIONAL_ISO_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.(\d{3}))?Z$")
 _DATE_ONLY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -228,80 +238,54 @@ def parse_rfc2822_or_iso_utc(text: Any) -> Tuple[Optional[datetime], Optional[st
 
 
 def parse_epoch_ms(val: Any) -> Tuple[Optional[datetime], Optional[str]]:
-    """Parse epoch millisecond integer or ISO string."""
-    if isinstance(val, bool):
-        return None, "invalid"
-    if val is None or val == 0:
+    """Parse integer epoch milliseconds."""
+    if val is None or val == 0 or val == "":
         return None, "missing_unindexed"
-    if isinstance(val, float):
+    if isinstance(val, bool) or not isinstance(val, (int, float)):
         return None, "invalid"
-    if isinstance(val, int):
-        if val < 0 or val > 4102444800000:  # Beyond 2100
-            return None, "invalid"
-        try:
-            return datetime.fromtimestamp(val / 1000.0, tz=timezone.utc), None
-        except Exception:
-            return None, "invalid"
-    if isinstance(val, str):
-        clean = val.strip()
-        if clean.isdigit() or (clean.startswith("-") and clean[1:].isdigit()):
-            try:
-                ms = int(clean)
-                if ms < 0 or ms > 4102444800000:
-                    return None, "invalid"
-                return datetime.fromtimestamp(ms / 1000.0, tz=timezone.utc), None
-            except Exception:
-                return None, "invalid"
-        # Try ISO string
-        dt_iso, err_iso = parse_iso_utc(clean)
-        if dt_iso is not None:
-            return dt_iso, None
+    if isinstance(val, float) and not val.is_integer():
         return None, "invalid"
-    return None, "invalid"
+    val_int = int(val)
+    if val_int < 0:
+        return None, "invalid"
+    try:
+        dt = datetime.fromtimestamp(val_int / 1000.0, tz=timezone.utc)
+        return dt, None
+    except Exception:
+        return None, "invalid"
 
 
-def parse_interval(interval_obj: Any, as_of_dt: datetime) -> Tuple[Optional[datetime], Optional[datetime], Optional[dict]]:
-    """Validate half-open [start, end) interval argument."""
-    if not isinstance(interval_obj, dict):
-        return None, None, error_envelope("validation_error", "interval must be an object")
-    if set(interval_obj.keys()) != {"start", "end"}:
-        return None, None, error_envelope("validation_error", "interval must contain exactly 'start' and 'end'")
-    start_str = interval_obj["start"]
-    end_str = interval_obj["end"]
-    if not isinstance(start_str, str) or not isinstance(end_str, str):
-        return None, None, error_envelope("validation_error", "interval start and end must be strings")
-    if not _ISO_Z_RE.match(start_str) or not _ISO_Z_RE.match(end_str):
-        return None, None, error_envelope("validation_error", "interval bounds must be UTC ISO strings ending in Z")
+def parse_interval(interval: Any, as_of_dt: datetime) -> Tuple[Optional[datetime], Optional[datetime], Optional[dict]]:
+    """Validate and parse requested interval."""
+    if not isinstance(interval, dict):
+        return None, None, error_envelope("validation_error", "interval must be an object with start and end")
+    if "start" not in interval or "end" not in interval:
+        return None, None, error_envelope("validation_error", "interval requires both start and end timestamps")
+    s_raw = interval.get("start")
+    e_raw = interval.get("end")
+    if not isinstance(s_raw, str) or not isinstance(e_raw, str):
+        return None, None, error_envelope("validation_error", "interval bounds must be strings")
 
-    def _parse_strict(s: str) -> Optional[datetime]:
-        core = s[:-1]
-        parts = core.split("T")
-        if len(parts) != 2:
-            return None
-        date_part, time_part = parts
-        t_split = time_part.split(".")
-        hms = t_split[0].split(":")
-        if len(hms) != 3:
-            return None
-        hh, mm, ss = int(hms[0]), int(hms[1]), int(hms[2])
-        if not (0 <= hh <= 23 and 0 <= mm <= 59 and 0 <= ss <= 59):
-            return None  # Leap seconds e.g. 60 rejected
-        frac = 0
-        if len(t_split) == 2:
-            f_str = (t_split[1] + "000000")[:6]
-            frac = int(f_str)
-        y, m, d = [int(p) for p in date_part.split("-")]
-        try:
-            return datetime(y, m, d, hh, mm, ss, frac, tzinfo=timezone.utc)
-        except ValueError:
-            return None
+    # Strict UTC ISO regex with fractional bounds
+    match_s = _FRACTIONAL_ISO_RE.match(s_raw)
+    match_e = _FRACTIONAL_ISO_RE.match(e_raw)
+    if not match_s or not match_e:
+        return None, None, error_envelope("validation_error", "interval bounds must be valid ISO 8601 UTC with optional 3-digit millisecond fraction")
 
-    dt_start = _parse_strict(start_str)
-    dt_end = _parse_strict(end_str)
+    frac_s = match_s.group(1)
+    frac_e = match_e.group(1)
+    if frac_s is not None and len(frac_s) != 3:
+        return None, None, error_envelope("validation_error", "fractional seconds must have exactly 3 digits")
+    if frac_e is not None and len(frac_e) != 3:
+        return None, None, error_envelope("validation_error", "fractional seconds must have exactly 3 digits")
+
+    dt_start, s_err = parse_iso_utc(s_raw)
+    dt_end, e_err = parse_iso_utc(e_raw)
     if dt_start is None or dt_end is None:
-        return None, None, error_envelope("validation_error", "interval contains invalid Gregorian date/time")
+        return None, None, error_envelope("validation_error", f"Malformed interval boundary: start={s_err}, end={e_err}")
     if dt_start >= dt_end:
-        return None, None, error_envelope("validation_error", "interval start must be strictly before end")
+        return None, None, error_envelope("validation_error", "interval start must be strictly before end (half-open [start, end))")
+
     span_ms = (dt_end - dt_start).total_seconds() * 1000.0
     if span_ms > MAX_INTERVAL_DAYS * 86_400_000:
         return None, None, error_envelope("validation_error", f"interval duration cannot exceed {MAX_INTERVAL_DAYS} days")
@@ -314,30 +298,51 @@ def parse_interval(interval_obj: Any, as_of_dt: datetime) -> Tuple[Optional[date
 # Database connection and snapshot resolution
 # ---------------------------------------------------------------------------
 
-def _get_connection() -> Tuple[Optional[sqlite3.Connection], Optional[dict], bool]:
-    """Obtain a SQLite connection. Returns (conn, err_envelope, should_close)."""
+def _validate_delta_structure(delta: Any) -> bool:
+    if not isinstance(delta, dict):
+        return False
+    if "items" not in delta or "policies" not in delta:
+        return False
+    if not isinstance(delta["items"], dict) or not isinstance(delta["policies"], dict):
+        return False
+    for vid, rows in delta["items"].items():
+        if not isinstance(vid, str) or not isinstance(rows, list):
+            return False
+        for r in rows:
+            if not isinstance(r, dict) or "shelf_id" not in r:
+                return False
+    for k in delta["policies"]:
+        if not isinstance(k, str):
+            return False
+    return True
+
+
+def _get_connection() -> Tuple[Optional[sqlite3.Connection], Any, Optional[dict], bool]:
+    """Obtain a SQLite connection and lock. Returns (conn, lock, err_envelope, should_close)."""
     global _analysis_db_override
     if _analysis_db_override is not None:
         override = _analysis_db_override
+        lock = getattr(override, "_lock", None)
         if isinstance(override, sqlite3.Connection):
-            return override, None, False
+            return override, lock, None, False
         if hasattr(override, "_conn") and isinstance(override._conn, sqlite3.Connection):
-            return override._conn, None, False
+            return override._conn, lock, None, False
         if callable(override):
             override = override()
+            lock = getattr(override, "_lock", None)
         if isinstance(override, sqlite3.Connection):
-            return override, None, False
+            return override, lock, None, False
         if hasattr(override, "_conn") and isinstance(override._conn, sqlite3.Connection):
-            return override._conn, None, False
+            return override._conn, lock, None, False
         if isinstance(override, (str, os.PathLike)):
             if not os.path.exists(override):
-                return None, error_envelope("storage_unavailable", f"Database file does not exist: {override}"), False
+                return None, None, error_envelope("storage_unavailable", f"Database file does not exist: {override}"), False
             try:
                 c = sqlite3.connect(f"file:{os.path.abspath(override)}?mode=ro", uri=True)
-                return c, None, True
+                return c, None, None, True
             except Exception as e:
-                return None, error_envelope("storage_unavailable", f"Failed to open database: {e}"), False
-        return None, error_envelope("storage_unavailable", "Invalid database override"), False
+                return None, None, error_envelope("storage_unavailable", f"Failed to open database: {e}"), False
+        return None, None, error_envelope("storage_unavailable", "Invalid database override"), False
 
     # Check backend
     backend = sys.modules.get("server")
@@ -350,21 +355,21 @@ def _get_connection() -> Tuple[Optional[sqlite3.Connection], Optional[dict], boo
 
     if backend is not None:
         if getattr(backend, "_index_recovering", False):
-            return None, error_envelope("recovery_pending", "Database index recovery is in progress"), False
+            return None, None, error_envelope("recovery_pending", "Database index recovery is in progress"), False
         idx_singleton = getattr(backend, "_index_singleton", None)
         if idx_singleton is not None and hasattr(idx_singleton, "_conn"):
-            return idx_singleton._conn, None, False
+            return idx_singleton._conn, getattr(idx_singleton, "_lock", None), None, False
         idx_path = getattr(backend, "INDEX_PATH", None)
         if idx_path:
             if not os.path.exists(idx_path):
-                return None, error_envelope("storage_unavailable", f"Index file not found: {idx_path}"), False
+                return None, None, error_envelope("storage_unavailable", f"Index file not found: {idx_path}"), False
             try:
                 c = sqlite3.connect(f"file:{os.path.abspath(idx_path)}?mode=ro", uri=True)
-                return c, None, True
+                return c, None, None, True
             except Exception as e:
-                return None, error_envelope("storage_unavailable", f"Cannot open index: {e}"), False
+                return None, None, error_envelope("storage_unavailable", f"Cannot open index: {e}"), False
 
-    return None, error_envelope("storage_unavailable", "No library database available"), False
+    return None, None, error_envelope("storage_unavailable", "No library database available"), False
 
 
 def _verify_tables(conn: sqlite3.Connection) -> Optional[dict]:
@@ -384,7 +389,7 @@ def _get_db_generation(conn: sqlite3.Connection) -> Dict[str, Any]:
     dv_row = conn.execute("PRAGMA data_version").fetchone()
     data_version = dv_row[0] if dv_row else 0
     return {
-        "nonce": _READER_NONCE,
+        "nonce": _get_connection_nonce(conn),
         "total_changes": conn.total_changes,
         "data_version": data_version,
     }
@@ -609,16 +614,25 @@ def _execute_activity(
     if db is not None:
         old_override = _analysis_db_override
         set_analysis_db(db)
-        conn, conn_err, should_close = _get_connection()
+        conn, lock, conn_err, should_close = _get_connection()
         set_analysis_db(old_override)
     else:
-        conn, conn_err, should_close = _get_connection()
+        conn, lock, conn_err, should_close = _get_connection()
 
     if conn_err is not None:
         return conn_err
     assert conn is not None
 
+    if conn.in_transaction:
+        return error_envelope("invalid_state", "Refusing inherited uncommitted transaction", retryable=False)
+
+    from contextlib import nullcontext
+    lock_ctx = lock if lock is not None else nullcontext()
+    lock_ctx.__enter__()
     try:
+        if conn.in_transaction:
+            return error_envelope("invalid_state", "Refusing inherited uncommitted transaction", retryable=False)
+
         tbl_err = _verify_tables(conn)
         if tbl_err is not None:
             return tbl_err
@@ -1136,9 +1150,12 @@ def _execute_activity(
         baseline_reason: Optional[str] = None
 
         # Check receipts 1..last_op_seq
-        receipt_sequences = [r[0] for r in all_receipts]
+        receipt_by_seq = {}
+        for r in all_receipts:
+            receipt_by_seq[r[0]] = (r[1], r[2])
+
         expected_seqs = list(range(1, last_op_seq + 1))
-        if receipt_sequences != expected_seqs:
+        if [r[0] for r in all_receipts] != expected_seqs:
             baseline_proved = False
             baseline_reason = "missing_receipt_sequence_gap"
 
@@ -1146,28 +1163,45 @@ def _execute_activity(
         # Each apply must increment revision by 1
         curr_rev = 0
         applies_parsed: List[dict] = []
-        for app in all_applies:
+        invalid_apply_date_count = 0
+        for idx, app in enumerate(all_applies):
             app_id, op_key, a_kind, before_rev, after_rev, op_seq, auth_hash, f_json, i_json, undo_of, c_at = app
             if before_rev != curr_rev or after_rev != curr_rev + 1:
                 baseline_proved = False
                 baseline_reason = "revision_sequence_gap"
             curr_rev = after_rev
 
+            if op_seq != idx + 1:
+                baseline_proved = False
+                baseline_reason = "operation_sequence_gap"
+
+            rcpt = receipt_by_seq.get(op_seq)
+            if rcpt is None or rcpt[0] != op_key or rcpt[1] != auth_hash:
+                baseline_proved = False
+                baseline_reason = "receipt_binding_mismatch"
+
             # Parse JSON
             try:
                 f_delta = json.loads(f_json)
                 i_delta = json.loads(i_json)
-                if not isinstance(f_delta, dict) or not isinstance(i_delta, dict):
-                    return error_envelope("invalid_source_data", f"Malformed delta JSON in apply {app_id}")
-                if "items" not in f_delta or "policies" not in f_delta:
-                    return error_envelope("invalid_source_data", f"Missing items or policies map in apply {app_id}")
             except Exception:
                 return error_envelope("invalid_source_data", f"Malformed delta JSON in apply {app_id}")
 
-            dt_apply, apply_err = parse_epoch_ms(c_at)
-            if dt_apply is None or dt_apply > as_of_dt:
+            if not _validate_delta_structure(f_delta) or not _validate_delta_structure(i_delta):
+                return error_envelope("invalid_source_data", f"Malformed delta structure in apply {app_id}")
+
+            dt_apply, apply_err = parse_iso_utc(c_at)
+            if dt_apply is None and isinstance(c_at, (int, float)):
+                dt_apply, apply_err = parse_epoch_ms(c_at)
+            if dt_apply is None:
+                invalid_apply_date_count += 1
                 baseline_proved = False
-                baseline_reason = "invalid_or_future_apply_timestamp"
+                if baseline_reason is None:
+                    baseline_reason = "invalid_apply_timestamp"
+            elif dt_apply > as_of_dt:
+                baseline_proved = False
+                if baseline_reason is None:
+                    baseline_reason = "future_apply_timestamp"
 
             applies_parsed.append({
                 "apply_id": app_id,
@@ -1202,7 +1236,11 @@ def _execute_activity(
             baseline_reason = "no_history"
         else:
             first_apply_dt = applies_parsed[0]["created_at_dt"]
-            if first_apply_dt is None or dt_start < first_apply_dt:
+            if first_apply_dt is None:
+                baseline_proved = False
+                if baseline_reason is None:
+                    baseline_reason = "invalid_apply_timestamp"
+            elif dt_start < first_apply_dt:
                 baseline_proved = False
                 baseline_reason = "interval_precedes_first_apply"
 
@@ -1227,15 +1265,15 @@ def _execute_activity(
                     end_state = {vid: dict(shelves) for vid, shelves in projected_state.items()}
                     captured_end = True
 
-                # Check inverse delta matches projected state for live survivors
+                # Check inverse delta matches projected state for live survivors, including primary
                 i_items = app["inverse"].get("items", {})
                 f_items = app["forward"].get("items", {})
 
                 for vid, rows in i_items.items():
                     if vid in live_survivor_ids:
-                        cur_shelf_ids = set(projected_state[vid].keys())
-                        inv_shelf_ids = {r["shelf_id"] for r in rows}
-                        if cur_shelf_ids != inv_shelf_ids:
+                        cur_memberships = {s_id: r.get("is_primary", 0) for s_id, r in projected_state[vid].items()}
+                        inv_memberships = {r["shelf_id"]: r.get("is_primary", 0) for r in rows}
+                        if cur_memberships != inv_memberships:
                             baseline_proved = False
                             baseline_reason = "mismatched_inverse_projection"
                             break
@@ -1253,18 +1291,18 @@ def _execute_activity(
                 if not captured_end:
                     end_state = {vid: dict(shelves) for vid, shelves in projected_state.items()}
 
-                # Check ending projected state matches current item_shelves for live survivors
-                actual_current_shelves: Dict[str, Dict[str, dict]] = {vid: {} for vid in live_survivor_ids}
+                # Check ending projected state matches current item_shelves for live survivors, including primary
+                actual_current_shelves: Dict[str, Dict[str, int]] = {vid: {} for vid in live_survivor_ids}
                 for r in all_item_shelves:
                     # r: video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at
                     vid = r[0]
                     if vid in live_survivor_ids:
-                        actual_current_shelves[vid][r[1]] = {"shelf_id": r[1], "is_primary": r[6]}
+                        actual_current_shelves[vid][r[1]] = r[6]
 
                 for vid in live_survivor_ids:
-                    p_s = set(projected_state[vid].keys())
-                    a_s = set(actual_current_shelves[vid].keys())
-                    if p_s != a_s:
+                    p_memberships = {s_id: r.get("is_primary", 0) for s_id, r in projected_state[vid].items()}
+                    a_memberships = actual_current_shelves[vid]
+                    if p_memberships != a_memberships:
                         baseline_proved = False
                         baseline_reason = "replay_does_not_reach_current_state"
                         break
@@ -1334,14 +1372,19 @@ def _execute_activity(
         total_membership_removals = sum(shelf_removals.values())
         total_membership_mutations = total_membership_additions + total_membership_removals
 
-        # Current shelf sizes
+        # Current shelf sizes filtered by live survivors
         current_shelf_sizes: Dict[str, int] = {}
+        distinct_current_assigned_set: Set[str] = set()
+        total_current_memberships = 0
         for r in all_item_shelves:
-            s_id = r[1]
-            current_shelf_sizes[s_id] = current_shelf_sizes.get(s_id, 0) + 1
+            vid, s_id = r[0], r[1]
+            if vid in live_survivor_ids:
+                current_shelf_sizes[s_id] = current_shelf_sizes.get(s_id, 0) + 1
+                distinct_current_assigned_set.add(vid)
+                total_current_memberships += 1
 
-        distinct_current_assigned = len({r[0] for r in all_item_shelves})
-        total_current_memberships = len(all_item_shelves)
+        distinct_current_assigned = len(distinct_current_assigned_set)
+        total_current_memberships = total_current_memberships
 
         # Churn metrics
         if baseline_proved:
@@ -1356,8 +1399,12 @@ def _execute_activity(
                 churn_metric = _ratio_metric("shelf_activity.churn", churn_num, churn_denom, "scope_shelf_activity")
                 churn_metric["initial_filing"] = False
 
-            # Initial filing items: assigned in interval that were not assigned at start
-            initial_filing_count = len([vid for vid in interval_affected_items if vid not in baseline_assigned_vids])
+            # Initial filing items: live survivors assigned in interval that were not assigned at start
+            initial_filing_vids = [
+                vid for vid in interval_affected_items
+                if vid in live_survivor_ids and vid not in baseline_assigned_vids
+            ]
+            initial_filing_count = len(initial_filing_vids)
         else:
             churn_metric = {
                 "metric_id": "shelf_activity.churn",
@@ -1475,7 +1522,8 @@ def _execute_activity(
 
         # Observations per source
         source_obs_in_interval: Dict[str, List[dict]] = {}
-        source_all_seen_ms: Dict[str, List[int]] = {}
+        source_first_seen_ms: Dict[str, List[int]] = {}
+        source_last_seen_ms: Dict[str, List[int]] = {}
         sources_unavailable_count = 0
         for s in all_sitems:
             s_id = s[1]
@@ -1490,10 +1538,10 @@ def _execute_activity(
             if ls_ms is not None and ls_ms != 0 and dt_ls is None:
                 sources_unavailable_count += 1
 
-            if dt_fs is not None:
-                source_all_seen_ms.setdefault(s_id, []).append(fs_ms)
-            if dt_ls is not None:
-                source_all_seen_ms.setdefault(s_id, []).append(ls_ms)
+            if dt_fs is not None and fs_ms is not None and fs_ms != 0:
+                source_first_seen_ms.setdefault(s_id, []).append(fs_ms)
+            if dt_ls is not None and ls_ms is not None and ls_ms != 0:
+                source_last_seen_ms.setdefault(s_id, []).append(ls_ms)
 
             # Check if first_seen_ms is in interval
             if dt_fs and dt_start <= dt_fs < dt_end:
@@ -1510,9 +1558,14 @@ def _execute_activity(
                 "truncated": cur[6],
             }
 
-        active_source_rows: List[dict] = []
-        selected_vids_set = {item["video_id"] for item in selected_items}
+        # Captured items in interval (independent of date_basis / publication selector)
+        captured_in_interval_items = [
+            item for item in live_yoinks
+            if item["capture_dt"] and dt_start <= item["capture_dt"] < dt_end
+        ]
+        captured_in_interval_vids = {item["video_id"] for item in captured_in_interval_items}
 
+        active_source_rows: List[dict] = []
         for sub in all_subs:
             s_id = sub[0]
             kind = sub[1]
@@ -1524,7 +1577,7 @@ def _execute_activity(
             # Qualifying activity:
             # 1. Live captured items in interval linked to this source
             linked_vids = source_to_vids.get(s_id, set())
-            captures_in_int = len(linked_vids.intersection(selected_vids_set))
+            captures_in_int = len(linked_vids.intersection(captured_in_interval_vids))
 
             # 2. Newly observed entries in interval
             obs_in_int = source_obs_in_interval.get(s_id, [])
@@ -1537,12 +1590,14 @@ def _execute_activity(
                     st = o[7]
                     state_counts[st] = state_counts.get(st, 0) + 1
 
-                seen_list = source_all_seen_ms.get(s_id, [])
-                first_obs_dt = parse_epoch_ms(min(seen_list))[0] if seen_list else None
-                last_obs_dt = parse_epoch_ms(max(seen_list))[0] if seen_list else None
+                fs_list = source_first_seen_ms.get(s_id, [])
+                ls_list = source_last_seen_ms.get(s_id, [])
+                first_obs_dt = parse_epoch_ms(min(fs_list))[0] if fs_list else None
+                last_obs_dt = parse_epoch_ms(max(ls_list))[0] if ls_list else None
 
                 active_source_rows.append({
                     "source_id": s_id,
+                    "identity_kind": "subscription",
                     "kind": kind,
                     "canonical_url": url,
                     "display_name": _truncate_label(d_name),
@@ -1563,32 +1618,59 @@ def _execute_activity(
                     },
                 })
 
-        # Overlap analysis across selected items
-        linked_selected_vids: Set[str] = set()
-        multi_linked_vids: Set[str] = set()
-        unlinked_selected_items: List[dict] = []
+        # Overlap analysis across captured items in interval
+        linked_captured_vids: Set[str] = set()
+        multi_linked_captured_vids: Set[str] = set()
+        unlinked_captured_items: List[dict] = []
 
-        for item in selected_items:
+        for item in captured_in_interval_items:
             vid = item["video_id"]
             srcs = vid_to_sources.get(vid, set())
             if srcs:
-                linked_selected_vids.add(vid)
+                linked_captured_vids.add(vid)
                 if len(srcs) > 1:
-                    multi_linked_vids.add(vid)
+                    multi_linked_captured_vids.add(vid)
             else:
-                unlinked_selected_items.append(item)
+                unlinked_captured_items.append(item)
 
-        unlinked_hint_groups: Set[Tuple[str, str, str]] = set()
-        for item in unlinked_selected_items:
+        unlinked_hint_groups: Dict[Tuple[str, str, str], List[dict]] = {}
+        for item in unlinked_captured_items:
             p = item["platform"]
             f = "author" if item["author"] else ("channel" if item["channel"] else "unknown")
             v = item["author"] or item["channel"] or ""
-            unlinked_hint_groups.add((p, f, v))
+            unlinked_hint_groups.setdefault((p, f, v), []).append(item)
+
+        unlinked_hint_rows: List[dict] = []
+        for (p, f, v), group_items in sorted(unlinked_hint_groups.items(), key=lambda x: (x[0][0], x[0][1], x[0][2])):
+            h_hash = hashlib.sha256(f"{p}_{f}_{v}".encode("utf-8")).hexdigest()[:16]
+            display_hint = _truncate_label(v.strip()) if v and v.strip() else "unknown"
+            cap_dts = [it["capture_dt"] for it in group_items if it.get("capture_dt")]
+            min_cap = min(cap_dts) if cap_dts else None
+            max_cap = max(cap_dts) if cap_dts else None
+            unlinked_hint_rows.append({
+                "source_id": None,
+                "identity_kind": "creator_hint",
+                "platform": p,
+                "field": f,
+                "hint": display_hint,
+                "display_name": display_hint,
+                "captures_in_interval": _count_metric(f"sources.hint.{h_hash}.captures", len(group_items), "saved_items", "scope_sources"),
+                "retained_capture_span": {
+                    "earliest_captured_at": format_canonical_utc(min_cap) if min_cap else None,
+                    "latest_captured_at": format_canonical_utc(max_cap) if max_cap else None,
+                },
+                "capture_span": {
+                    "earliest_captured_at": format_canonical_utc(min_cap) if min_cap else None,
+                    "latest_captured_at": format_canonical_utc(max_cap) if max_cap else None,
+                },
+            })
+
+        all_source_details = active_source_rows + unlinked_hint_rows
 
         # Support level
-        if selected_total == 0:
+        if len(captured_in_interval_items) == 0:
             support_level = "none"
-        elif len(unlinked_selected_items) == 0 and len({s for vid in selected_vids_set for s in vid_to_sources.get(vid, set())}) == 1:
+        elif len(unlinked_captured_items) == 0 and len({s for vid in captured_in_interval_vids for s in vid_to_sources.get(vid, set())}) == 1:
             support_level = "single_source"
         else:
             support_level = "unresolved"
@@ -1596,9 +1678,9 @@ def _execute_activity(
         sources_family = {
             "active_sources_count": _count_metric("sources.active_sources_count", len(active_source_rows), "sources", "scope_sources"),
             "unlinked_hint_groups_count": _count_metric("sources.unlinked_hint_groups_count", len(unlinked_hint_groups), "creator_hints", "scope_sources"),
-            "linked_capture_union_count": _count_metric("sources.linked_capture_union_count", len(linked_selected_vids), "saved_items", "scope_sources"),
-            "multiply_linked_capture_count": _count_metric("sources.multiply_linked_capture_count", len(multi_linked_vids), "saved_items", "scope_sources"),
-            "details": active_source_rows[:20],
+            "linked_capture_union_count": _count_metric("sources.linked_capture_union_count", len(linked_captured_vids), "saved_items", "scope_sources"),
+            "multiply_linked_capture_count": _count_metric("sources.multiply_linked_capture_count", len(multi_linked_captured_vids), "saved_items", "scope_sources"),
+            "details": all_source_details[:20],
             "coverage_ref": "cov_sources",
         }
 
@@ -1881,10 +1963,11 @@ def _execute_activity(
             "cov_shelf_activity": {
                 "clock": "applied_journal_time",
                 "requested_interval": canonical_interval,
-                "coverage_status": "journal_complete" if baseline_proved else ("no_history" if not applies_parsed or dt_end <= first_apply_dt else "partial"),
+                "coverage_status": "journal_complete" if baseline_proved else ("no_history" if not applies_parsed or (first_apply_dt is not None and dt_end <= first_apply_dt) else "partial"),
                 "earliest_retained_timestamp": format_canonical_utc(applies_parsed[0]["created_at_dt"]) if applies_parsed and applies_parsed[0]["created_at_dt"] else None,
                 "latest_retained_timestamp": format_canonical_utc(applies_parsed[-1]["created_at_dt"]) if applies_parsed and applies_parsed[-1]["created_at_dt"] else None,
                 "reasons": [baseline_reason] if baseline_reason else [],
+                "exclusions": {"invalid_apply_timestamp": invalid_apply_date_count} if invalid_apply_date_count > 0 else {},
             },
             "cov_shelf_current": {
                 "clock": "as_of",
@@ -1957,10 +2040,10 @@ def _execute_activity(
                 },
             },
             "sources": {
-                "total_rows": len(active_source_rows),
-                "returned_rows": min(20, len(active_source_rows)),
-                "omitted_rows": max(0, len(active_source_rows) - 20),
-                "next": None if len(active_source_rows) <= 20 else {
+                "total_rows": len(all_source_details),
+                "returned_rows": min(20, len(all_source_details)),
+                "omitted_rows": max(0, len(all_source_details) - 20),
+                "next": None if len(all_source_details) <= 20 else {
                     "interval": canonical_interval,
                     "date_basis": date_basis,
                     "detail": "sources",
@@ -2001,8 +2084,8 @@ def _execute_activity(
                 detail_total = len(shelves_rows)
                 detail_rows = shelves_rows[offset : offset + limit]
             elif detail == "sources":
-                detail_total = len(active_source_rows)
-                detail_rows = active_source_rows[offset : offset + limit]
+                detail_total = len(all_source_details)
+                detail_rows = all_source_details[offset : offset + limit]
             elif detail == "events":
                 detail_total = len(cleaned_events)
                 detail_rows = cleaned_events[offset : offset + limit]
@@ -2047,7 +2130,7 @@ def _execute_activity(
                 for k in ("active_sources_count", "unlinked_hint_groups_count", "linked_capture_union_count", "multiply_linked_capture_count"):
                     if k in sources_family and isinstance(sources_family[k], dict) and "metric_id" in sources_family[k]:
                         valid_metric_ids.add(sources_family[k]["metric_id"])
-                for s_r in active_source_rows:
+                for s_r in all_source_details:
                     if "captures_in_interval" in s_r and isinstance(s_r["captures_in_interval"], dict):
                         valid_metric_ids.add(s_r["captures_in_interval"]["metric_id"])
                     if "new_observations" in s_r and isinstance(s_r["new_observations"], dict):
@@ -2065,6 +2148,8 @@ def _execute_activity(
                     metric_id,
                     valid_metric_ids=valid_metric_ids,
                     selected_items=selected_items,
+                    captured_in_interval_items=captured_in_interval_items,
+                    unlinked_hint_groups=unlinked_hint_groups,
                     live_yoinks=live_yoinks,
                     tombstone_yoinks=tombstone_yoinks,
                     interval_applies=interval_applies,
@@ -2220,6 +2305,10 @@ def _execute_activity(
         return summary_response
 
     finally:
+        try:
+            lock_ctx.__exit__(*sys.exc_info())
+        except Exception:
+            pass
         if should_close:
             conn.close()
 
@@ -2250,10 +2339,17 @@ def _lookup_evidence(
     dt_end: datetime,
     as_of_dt: datetime,
     as_of_str: str,
+    captured_in_interval_items: Optional[List[dict]] = None,
+    unlinked_hint_groups: Optional[dict] = None,
 ) -> Optional[List[dict]]:
     """Return supporting evidence rows for a given metric ID."""
     if metric_id not in valid_metric_ids:
         return None
+
+    if captured_in_interval_items is None:
+        captured_in_interval_items = selected_items
+    if unlinked_hint_groups is None:
+        unlinked_hint_groups = {}
 
     rows: List[dict] = []
 
@@ -2715,12 +2811,12 @@ def _lookup_evidence(
         parts = metric_id.split(".")
         if len(parts) >= 3 and parts[2] == "captures":
             s_id = parts[1]
-            for item in selected_items:
+            for item in captured_in_interval_items:
                 vid = item["video_id"]
                 if s_id in vid_to_sources.get(vid, set()):
-                    dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
+                    dt_ev = item["capture_dt"]
                     assert dt_ev is not None
-                    raw_clock = item["raw_yoinked_at"] if date_basis == "capture_time" else item["raw_pub_clock"]
+                    raw_clock = item["raw_yoinked_at"]
                     rows.append({
                         "row_id": vid,
                         "source_table": "source_items",
@@ -2734,6 +2830,30 @@ def _lookup_evidence(
                             "follow_up": f"get_library_item('{vid}')",
                         },
                     })
+            return rows
+
+        if len(parts) >= 4 and parts[1] == "hint" and parts[3] == "captures":
+            target_hash = parts[2]
+            for (p, f, v), group_items in unlinked_hint_groups.items():
+                h_hash = hashlib.sha256(f"{p}_{f}_{v}".encode("utf-8")).hexdigest()[:16]
+                if h_hash == target_hash:
+                    for item in group_items:
+                        vid = item["video_id"]
+                        dt_ev = item["capture_dt"]
+                        raw_clock = item["raw_yoinked_at"]
+                        rows.append({
+                            "row_id": vid,
+                            "source_table": "yoinks",
+                            "source_key": vid,
+                            "event_time": format_canonical_utc(dt_ev) if dt_ev else None,
+                            "original_clock_encoding": str(raw_clock),
+                            "observation_hash": canonical_json_hash({"h": target_hash, "v": vid}),
+                            "details": {
+                                "video_id": vid,
+                                "hint": v,
+                                "follow_up": f"get_library_item('{vid}')",
+                            },
+                        })
             return rows
 
         if len(parts) >= 3 and parts[2] == "new_observations":
@@ -2776,49 +2896,59 @@ def _lookup_evidence(
                     })
                 return rows
             elif s_name == "linked_capture_union_count":
-                for item in selected_items:
+                for item in captured_in_interval_items:
                     vid = item["video_id"]
                     if vid_to_sources.get(vid):
-                        dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
                         rows.append({
                             "row_id": vid,
                             "source_table": "yoinks",
                             "source_key": vid,
-                            "event_time": format_canonical_utc(dt_ev) if dt_ev else None,
+                            "event_time": format_canonical_utc(item["capture_dt"]) if item["capture_dt"] else None,
                             "original_clock_encoding": str(item["raw_yoinked_at"]),
                             "observation_hash": hashlib.sha256(f"union_{vid}".encode("utf-8")).hexdigest(),
                             "details": {"video_id": vid},
                         })
                 return rows
             elif s_name == "multiply_linked_capture_count":
-                for item in selected_items:
+                for item in captured_in_interval_items:
                     vid = item["video_id"]
                     if len(vid_to_sources.get(vid, set())) > 1:
-                        dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
                         rows.append({
                             "row_id": vid,
                             "source_table": "yoinks",
                             "source_key": vid,
-                            "event_time": format_canonical_utc(dt_ev) if dt_ev else None,
+                            "event_time": format_canonical_utc(item["capture_dt"]) if item["capture_dt"] else None,
                             "original_clock_encoding": str(item["raw_yoinked_at"]),
                             "observation_hash": hashlib.sha256(f"multi_{vid}".encode("utf-8")).hexdigest(),
                             "details": {"video_id": vid},
                         })
                 return rows
             elif s_name == "unlinked_hint_groups_count":
-                for item in selected_items:
-                    vid = item["video_id"]
-                    if not vid_to_sources.get(vid):
-                        dt_ev = item["capture_dt"] if date_basis == "capture_time" else item["pub_dt"]
+                if unlinked_hint_groups:
+                    for (p, f, v), group_items in sorted(unlinked_hint_groups.items(), key=lambda x: (x[0][0], x[0][1], x[0][2])):
+                        h_hash = hashlib.sha256(f"{p}_{f}_{v}".encode("utf-8")).hexdigest()[:16]
                         rows.append({
-                            "row_id": vid,
+                            "row_id": h_hash,
                             "source_table": "yoinks",
-                            "source_key": vid,
-                            "event_time": format_canonical_utc(dt_ev) if dt_ev else None,
-                            "original_clock_encoding": str(item["raw_yoinked_at"]),
-                            "observation_hash": hashlib.sha256(f"unlinked_{vid}".encode("utf-8")).hexdigest(),
-                            "details": {"video_id": vid},
+                            "source_key": h_hash,
+                            "event_time": format_canonical_utc(dt_start),
+                            "original_clock_encoding": str(dt_start),
+                            "observation_hash": hashlib.sha256(f"{p}_{f}_{v}".encode("utf-8")).hexdigest(),
+                            "details": {"platform": p, "field": f, "hint": v},
                         })
+                else:
+                    for item in captured_in_interval_items:
+                        vid = item["video_id"]
+                        if not vid_to_sources.get(vid):
+                            rows.append({
+                                "row_id": vid,
+                                "source_table": "yoinks",
+                                "source_key": vid,
+                                "event_time": format_canonical_utc(item["capture_dt"]) if item["capture_dt"] else None,
+                                "original_clock_encoding": str(item["raw_yoinked_at"]),
+                                "observation_hash": hashlib.sha256(f"unlinked_{vid}".encode("utf-8")).hexdigest(),
+                                "details": {"video_id": vid},
+                            })
                 return rows
 
     # 9. Revisions
