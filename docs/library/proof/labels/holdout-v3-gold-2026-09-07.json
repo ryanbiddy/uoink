@@ -1,0 +1,1599 @@
+[
+  {
+    "video_id": "-JXwa-WlkU8",
+    "slug": "How_to_Use_Ultralytics_YOLO11_for_Object_Detection_and_Tracking_How_to_Benchmark",
+    "title": "How to Use Ultralytics YOLO11 for Object Detection and Tracking| How to Benchmark | YOLO11 RELEASED🚀",
+    "channel": "Ultralytics",
+    "platform": "youtube",
+    "source_type": "video",
+    "source_revision": "7d948df8b454d673ec3bbc3bf2c2aa168e2b8ecbcaa55c4a03a510aea888e474",
+    "card_hash": "ffeda496303143028d239b26b8c0a97939df60ba252470169015a91abcab5bcc",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "developer-tools"
+    ],
+    "confidence": 0.94,
+    "evidence": {
+      "excerpt_id": "4d6a4c36694d07c97f9625d2dc60eb413a90a6def15005381251104d314f0f3e",
+      "quote": "how we can run inference training and all of that"
+    },
+    "rationale": "Walkthrough teaches data setup, model loading, inference outputs and tracking; teaching takes precedence over the tool or model.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2079336900192595969",
+    "slug": "zoryn_-_A_27-year-old_pointed_Claude_Code_at_4_000_Obsidian_notes_and_woke_up",
+    "title": "zoryn - A 27-year-old pointed Claude Code at 4,000 Obsidian notes and woke up...",
+    "channel": "zoryn",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "e1795970a788f515e326e3c48e203ce8231d53a52bb00381fe250ab993585206",
+    "card_hash": "ea60181891b26a0f1748ed3375a46b90b1949aee1898547c8e12f94913b114d0",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "ai-agents-and-automation",
+    "shelf_path": [
+      "AI and ML",
+      "AI Agents and Automation"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.7,
+    "evidence": {
+      "excerpt_id": "faba9abd119ace9510ca9c4b9bf89085ea13d9595a26ff9e42775946a2b4b441",
+      "quote": "She is the angel of love."
+    },
+    "rationale": "Original thread prose describes Claude Code acting as an employee over personal notes. The sole clip quote is incidental; no coding task is described.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2079405880332664832",
+    "slug": "Ahmad_-_Prediction_We_re_gonna_get_Kimi_K3_equivalent_intelligence_running_o",
+    "title": "Ahmad - Prediction  We’re gonna get Kimi K3 equivalent intelligence running o...",
+    "channel": "Ahmad",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "a32b8d59e5bad0055ebe07e9672df64eed4eca7a0b597149d4ee036bb9f1d3bf",
+    "card_hash": "4209f457c4c25a2051d755465a733a03378949db6dbc779c21b1203997a05461",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "ai-and-ml",
+    "shelf_path": [
+      "AI and ML"
+    ],
+    "secondary_shelf_ids": [
+      "frontier-models"
+    ],
+    "confidence": 0.78,
+    "evidence": {
+      "excerpt_id": "1e1e79a9110fcb1d904084d2b87ee297ad11f2776a74b02b551b8fd7f1bae142",
+      "quote": "That footprint For hardware is not needed anymore"
+    },
+    "rationale": "The excerpt set centers on local AI becoming usable on smaller GPU setups. Retain the parent for the hardware-footprint discussion.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2080274574113947649",
+    "slug": "Kirill_-_Kimi_K3_is_dangerous_I_rebuilt_Google_Maps_3D_mode_in_1_5_hours_an",
+    "title": "Kirill - Kimi K3 is dangerous. I rebuilt Google Maps 3D mode in 1.5 hours.  an...",
+    "channel": "Kirill",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "ad9e6072bc7bc8a60511cbeb814da6c096c9bc797e0b86cbcc0cf2597a95aae8",
+    "card_hash": "2f911367443ccd741ae196f6b852937027bfe4deafd068447cef4851f5439d59",
+    "stratum": "text_only",
+    "outcome": "assigned",
+    "shelf_id": "developer-tools",
+    "shelf_path": [
+      "AI and ML",
+      "Developer Tools"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.86,
+    "evidence": {
+      "excerpt_id": "f255486be50b76c72e140fb10854fbc251b6c9a67e26164dddac78d2455c55b9",
+      "quote": "I rebuilt Google Maps 3D mode in 1.5 hours."
+    },
+    "rationale": "The original prose describes building an interactive map with two prompts: a concrete software-generation workflow.",
+    "adjudication": "resolved:Developer Tools: the subject is a two-prompt software build; naming Kimi does not turn the workflow into a model evaluation.",
+    "sealed": true
+  },
+  {
+    "video_id": "2080368030136107009",
+    "slug": "Claude_-_Voice_mode_now_runs_on_Claude_s_more_capable_models_and_reaches_the_t",
+    "title": "Claude - Voice mode now runs on Claude's more capable models and reaches the t...",
+    "channel": "Claude",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "5be5d7b5143ceed31d83f2630734c06c50df3074091c7c0484aaec5ac45406c4",
+    "card_hash": "f2a399f4894fb9e2f0a6b15d2914999d8bf862e248cfec83bdb3bb989d6c2d1c",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "ai-agents-and-automation",
+    "shelf_path": [
+      "AI and ML",
+      "AI Agents and Automation"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.73,
+    "evidence": {
+      "excerpt_id": "d2be585005c1f5cd0d0d0f5869703520d8842af42adb870bc5342f0db0c954a2",
+      "quote": "Morning, Devi. So what are we working on today?"
+    },
+    "rationale": "Original thread prose describes a voice assistant reaching connected tools during conversation. The greeting alone would not establish the shelf.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2080394147458846720",
+    "slug": "HOV_DID_-_How_do_I_explain_to_future_generations_that_this_wasn_t_AI",
+    "title": "HOV_DID🐻 - How do I explain to future generations that this wasn't AI?",
+    "channel": "HOV_DID🐻",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "81702850f80357a6bcbd347c431a508e94f241026de9494af285c7b83aa75df4",
+    "card_hash": "ebb6783268c2614a5cf3bfe43d72d64cbfd8878b63981504a2899d2de1240618",
+    "stratum": "text_only",
+    "outcome": "unmappable",
+    "shelf_id": null,
+    "shelf_path": [
+      "Culture and Media"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.62,
+    "evidence": {
+      "excerpt_id": "39e956cd6e5befe58e1707cb864098c5f0b729e2db61bfd3fe2155ea6bb2ed35",
+      "quote": "How do I explain to future generations that this wasn't AI?"
+    },
+    "rationale": "The sole substantive sentence comments on media being non-AI. It establishes no approved subject or specific meme genre.",
+    "adjudication": "resolved:Unmappable, Culture and Media: the prose concerns media authenticity; neither a technical AI subject nor a specific meme genre is established.",
+    "sealed": true
+  },
+  {
+    "video_id": "2080739568429494272",
+    "slug": "am_will_-_WOW_I_thought_Opus_5_would_just_be_a_cheaper_Fable_I_was_dead_wrong",
+    "title": "am.will - WOW! I thought Opus 5 would just be a cheaper Fable. I was dead wrong...",
+    "channel": "am.will",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "88eaa7ab1868ef6a82ab4ca64164313a8f2be873893c2bcbdc00c29fa4d5492c",
+    "card_hash": "f82d75d519e07b607f19b0a469023e04f440e948847999bbeec8aabea5969067",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "frontier-models",
+    "shelf_path": [
+      "AI and ML",
+      "Frontier Models"
+    ],
+    "secondary_shelf_ids": [
+      "developer-tools"
+    ],
+    "confidence": 0.86,
+    "evidence": {
+      "excerpt_id": "6e837f1b4578a644f9c1b52ab0372a3e7cdb4a938b3ff75a4b7c6e2ec7a83294",
+      "quote": "These are not things language models would normally pick"
+    },
+    "rationale": "The speaker evaluates surprising model behavior, game physics and self-directed fixes; the coding result supports the capability assessment.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2080788252425150535",
+    "slug": "David_Ch_-_BREAKING_Claude_Opus_5_one-shots_motion_videos_Generated_this_video",
+    "title": "David Ch - BREAKING: Claude Opus 5 one-shots motion videos  Generated this video...",
+    "channel": "David Ch",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "9ab01283c8aaf7f7c27f1ca66e5b4abbac211c2d418a94062f2f35ea786c8c17",
+    "card_hash": "36c403507c8471163a34fdf0cd7ddab981fd6312f804a5da730a03875cb47f88",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "generative-media",
+    "shelf_path": [
+      "AI and ML",
+      "Generative Media"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.85,
+    "evidence": {
+      "excerpt_id": "1bb0baddae0ce1eacf49b7d136ac438b2841ea4300cbfee4071357d8c30c9c2d",
+      "quote": "Meet your AI employees."
+    },
+    "rationale": "Original thread prose identifies the shown clip as a generated motion video. Its employee pitch is the artifact's content.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2081031860679770112",
+    "slug": "David_Ondrej_-_DeepSeek_V4_just_dropped_and_it_s_40x_cheaper_than_GPT-5_5_Pro_1",
+    "title": "David Ondrej - DeepSeek V4 just dropped and it's 40x cheaper than GPT-5.5 Pro  1.6 t...",
+    "channel": "David Ondrej",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "afbcfbea425472c1b0eca7de4c2bb2de5bdf2800402062f94e30f0d580e2c1c8",
+    "card_hash": "a70e8132727f4890d2017121fe71b6d0f975f02dc1f0ef1ee5206653a1254b45",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "frontier-models",
+    "shelf_path": [
+      "AI and ML",
+      "Frontier Models"
+    ],
+    "secondary_shelf_ids": [
+      "ai-industry-and-business"
+    ],
+    "confidence": 0.92,
+    "evidence": {
+      "excerpt_id": "7023c4f44782aadf80b562b329c27d19b12ccaa1cf7f3a2360ebbffb1c7d3e2b",
+      "quote": "On Simple QA Is Actually Better Than Both Opas N Gpd"
+    },
+    "rationale": "A model release is assessed across named capability benchmarks and application builds; cost and provider economics are secondary.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2081060018053369942",
+    "slug": "Samnang_Aing_-_Okay_Opus_5_is_freaking_good_at_this_I_went_in_skeptical_Less_tha",
+    "title": "Samnang Aing - Okay, Opus 5 is freaking good at this.  I went in skeptical. Less tha...",
+    "channel": "Samnang Aing",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "8b05a11557418c4263a2bb9c01038caa6ceff6524d11caa6ae0378c822911118",
+    "card_hash": "e4c41a27c067cc49073673c8527ca6130a5fed87cd3959333cb131012ef93b46",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "generative-media",
+    "shelf_path": [
+      "AI and ML",
+      "Generative Media"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.84,
+    "evidence": {
+      "excerpt_id": "1365bac685fffb9b3a88cdb86e60c6231fd7259e1361f7ccc5ee4c4d426b7c72",
+      "quote": "Meet your AI employees."
+    },
+    "rationale": "Original thread prose identifies the shown sequence as generated by Opus 5 without editing; the employee pitch is video content.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2081149998704521712",
+    "slug": "Fireside_Alpha_-_Sam_Altman_reveals_he_deliberately_got_himself_addicted_to_TikT",
+    "title": "Fireside Alpha - Sam Altman reveals he deliberately got himself addicted to TikTok whi...",
+    "channel": "Fireside Alpha",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "9bfe40969ded7c4a5d3f10ccbdebe2a7bb7f0e20c49749a0d5d2fba6f9abf569",
+    "card_hash": "8e59f749c46b8bd79b714bda8d42970a04bc59d00784cea4e16ae25b68a8c612",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "ai-industry-and-business",
+    "shelf_path": [
+      "AI and ML",
+      "AI Industry and Business"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.92,
+    "evidence": {
+      "excerpt_id": "5999ae016c02ffa2ebb222d1d624d54e0be5198cf3d33eeb05639a248a4409c4",
+      "quote": "We were way behind Claude Code"
+    },
+    "rationale": "The excerpt discusses catching a rival with a coding app. Competitive position, rather than coding-tool usage, is the subject.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2081715828459028480",
+    "slug": "nooooob_-_My_holy-shi_moment_of_opus5_Homeworld_Style_Space_RTS_with_OPUS",
+    "title": "nooooob - My holy-shi moment of opus5.   Homeworld Style Space RTS   with OPUS ...",
+    "channel": "nooooob",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "86f2e7d544dd0e277107deb3c845615e9ef1d6cf70e866aa167c026dcea6f6e9",
+    "card_hash": "8b53dda43f339b14899c694cf4d9085fabd311ca06cf47d4e8e90e272c4035f4",
+    "stratum": "text_only",
+    "outcome": "assigned",
+    "shelf_id": "developer-tools",
+    "shelf_path": [
+      "AI and ML",
+      "Developer Tools"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.83,
+    "evidence": {
+      "excerpt_id": "15320bb33196db7ee55d33141300abe3d1003682b5f602f0a9628c300ad1a7be",
+      "quote": "Homeworld Style Space RTS   with OPUS 5 (workflow)"
+    },
+    "rationale": "The post reports a game-building workflow, token usage and generated assets. Its focus is software generation rather than a distinct model evaluation.",
+    "adjudication": "resolved:Developer Tools: the game-building workflow and its token accounting are central; praise for Opus alone does not establish a separate evaluation.",
+    "sealed": true
+  },
+  {
+    "video_id": "2081807471145029632",
+    "slug": "Shengkun_-_We_just_killed_Exa_Introducing_the_FASTEST_search_engine_for_agents",
+    "title": "Shengkun - We just killed Exa.  Introducing the FASTEST search engine for agents...",
+    "channel": "Shengkun",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "d6782054eb968af11a2a3e160bf24ab389e723a1518a5040cc4fe20b1f8bc9fb",
+    "card_hash": "5d1ae27ce8c63fe8cf74c1108313ed1fb25abdeebb004c888f2021821ccf2718",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "developer-tools",
+    "shelf_path": [
+      "AI and ML",
+      "Developer Tools"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.66,
+    "evidence": {
+      "excerpt_id": "ceb7d4cb885a5c0b4faf4ba7dd7645c3684b72a4dd656f66ca072a7e0422ba6b",
+      "quote": "🎵"
+    },
+    "rationale": "Original thread prose introduces faster web-search tooling for agents. The only clip evidence is music; the prose carries the classification.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2083597581263769600",
+    "slug": "codila_-_Google_just_released_free_2-hour_course_on_full_Graph_engineering_1",
+    "title": "codila - Google just released free 2-hour course on full Graph engineering: 1 ...",
+    "channel": "codila",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "61508420cace9c8aa4b308f457730514eefd13f4bde215c1f55d969d1762bdbd",
+    "card_hash": "a758069c5f674bf077bc30f7667328e129e9f214cd9a6a727126442c6ae5f328",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "developer-tools"
+    ],
+    "confidence": 0.95,
+    "evidence": {
+      "excerpt_id": "cc08a8c224cbb3c799500ae9e79fafb0f0658c876e5250ad2ca0ccdb0982749e",
+      "quote": "Next Let's Open A D K Web"
+    },
+    "rationale": "The excerpts teach tool creation, agent testing, protocol use and endpoint setup through a practical walkthrough.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2084009513531703296",
+    "slug": "Linas_Beli_nas_-_Google_co-founder_Sergey_Brin_rarely_speaks_publicly_He_just_sa",
+    "title": "Linas Beliūnas - Google co-founder Sergey Brin rarely speaks publicly. He just sat dow...",
+    "channel": "Linas Beliūnas",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "f8c48eaeea8ba67ea6f2b43043584d539f55344203d68ee166740d68064bbfea",
+    "card_hash": "d27cb23ea1a0b8a0055bb3fcccbaae55e2422527599f4041e37e9232304ff30f",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "ai-industry-and-business",
+    "shelf_path": [
+      "AI and ML",
+      "AI Industry and Business"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.81,
+    "evidence": {
+      "excerpt_id": "aa69c1e8a52ab90377c00bfa72d50aa3810d77d16e200f962e65b47801b3ba38",
+      "quote": "industries which still operate very much on a legacy workflows and systems today"
+    },
+    "rationale": "The discussion centers on AI reaching legacy industries and organizational work, with wider company and technology questions.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2084022671646273536",
+    "slug": "Lunar_-_IBM_just_released_a_free_1-hour_course_on_building_agentic_knowledge",
+    "title": "Lunar - IBM just released a free 1-hour course on building agentic knowledge ...",
+    "channel": "Lunar",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "47e3110dad980efc8d0fd681d15a2b8fe596afd3bfeb2ee48884425e56bad41a",
+    "card_hash": "a18b2c4ce52c8a9a449a349e895b5f9ba91bde4d1576831c77492ab89a445d7e",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "developer-tools"
+    ],
+    "confidence": 0.94,
+    "evidence": {
+      "excerpt_id": "dc2ba7267edf3b40358a92868e49a2d55244033e0d0ea24e7f3da236a1406669",
+      "quote": "Try A Slightly More Complex Question"
+    },
+    "rationale": "Worked examples teach knowledge-graph queries, skills and MCP agent integration; the purpose is explanation and demonstration.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2084284247058382974",
+    "slug": "Anshu_-_this_model_saturates_the_will_smith_eating_spaghetti_benchmark_so_har",
+    "title": "Anshu - this model saturates the will smith eating spaghetti benchmark so har...",
+    "channel": "Anshu",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "3a4a59cf1044bf0452651fb76891798b60b9a1d683d184415326e4abae50f9b3",
+    "card_hash": "cb35298f975af7964da4b8eea9189cc512cc8daca21290e9adccc38793ff21e2",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "generative-media",
+    "shelf_path": [
+      "AI and ML",
+      "Generative Media"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.75,
+    "evidence": {
+      "excerpt_id": "07e18b8cf70a569f0d6d7c6e3d42ccba258145f11602598ea995329be9983c49",
+      "quote": "Now this is breakfast"
+    },
+    "rationale": "Original thread prose frames the clip as a generated spaghetti scene. The playful benchmark language describes the finished visual output.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2084345349293166592",
+    "slug": "Roan_-_Don_t_waste_2_years_learning_to_build_self-improving_AI_agents_Stan",
+    "title": "Roan - Don't waste 2 years learning to build self-improving AI agents.  Stan...",
+    "channel": "Roan",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "1d77af40b45c439f853f62f50f4088687cc61966e6e1cf1d37ddfe8a536e5e72",
+    "card_hash": "ccd117914880b4d2a603667dd9074bf4981f0652ca7734584862e2630619f0b7",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "frontier-models"
+    ],
+    "confidence": 0.96,
+    "evidence": {
+      "excerpt_id": "66a90fc288d270bd6b2d828ab2cd528cf5f43cf0fffdf368b6027e8f9e2f431b",
+      "quote": "This class was on self-improving AI agents"
+    },
+    "rationale": "An explicit class teaches model training, sequential reasoning and agent techniques through explanations and examples.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2084651855372808192",
+    "slug": "Y_Combinator_-_Congrats_to_pablorpalafox_PaarupLuis_javipalafox_and_HappyRobo",
+    "title": "Y Combinator - Congrats to @pablorpalafox, @PaarupLuis, @javipalafox, and @HappyRobo...",
+    "channel": "Y Combinator",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "7b5c86cc28496808700207622ac2730c42116f78af03329a939eff0c7702ac4c",
+    "card_hash": "a06686ca137988f96dc29a1ab73403ca744f8ae9d4f9bdb39988c8aeb397c38f",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "ai-industry-and-business",
+    "shelf_path": [
+      "AI and ML",
+      "AI Industry and Business"
+    ],
+    "secondary_shelf_ids": [
+      "ai-agents-and-automation"
+    ],
+    "confidence": 0.84,
+    "evidence": {
+      "excerpt_id": "61d39a6d8d61fbe3d50046d92504095501d0c7558120743e42d609da9ee1ca35",
+      "quote": "enterprises had a completely uneventful day phones were answered shipments arrived"
+    },
+    "rationale": "Original thread prose leads with a funding round and valuation. The operations skit supports the description of the company's agent product.",
+    "adjudication": "resolved:AI Industry and Business: the original post announces a funding round and valuation; the operations skit supplies product context.",
+    "sealed": true
+  },
+  {
+    "video_id": "2084670556981338112",
+    "slug": "Noisy_-_She_built_100_agents_for_Anthropic_and_made_1_3M_-_and_in_60_minute",
+    "title": "Noisy - She built 100+ agents for Anthropic and made $1.3M - and in 60 minute...",
+    "channel": "Noisy",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "a81b44ca734b1fc3f74cedf2fe0c70d71dcbad0d7f3dbb829a6a2a5f9842fe35",
+    "card_hash": "b2a9fbcafa2b1abb30a8f37cc2d332fbf8f36231150875f8b4c55c8b40ca3a11",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "frontier-models"
+    ],
+    "confidence": 0.94,
+    "evidence": {
+      "excerpt_id": "be2bccc5f692357b9dc147c6b17a21d0b63e88e85c63f46b694035b645665e84",
+      "quote": "The Next Step After Instruction Fine Tuning Is This Process Of Using Human Preferences"
+    },
+    "rationale": "Explanations teach scaling, instruction tuning, RLHF and reasoning traces, with questions and examples.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2085020353986785281",
+    "slug": "0xRafy_-_Anthropic_engineer_Most_people_are_using_Opus_5_and_Fable_5_wrong",
+    "title": "0xRafy - Anthropic engineer:  \"Most people are using Opus 5 and Fable 5 wrong....",
+    "channel": "0xRafy",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "6a26fee503942e6fcbfd85bf83e64831f00b0c7c4f3ae732cea8532e7a40bc6a",
+    "card_hash": "658fb64f2a3851213f7b4612c2a6a858403b0914031d32ff620e363b0f29f547",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.93,
+    "evidence": {
+      "excerpt_id": "8270e2871077d451b1d3dfe5e0a7459843488dbe0f1c6b873c1674e43a576f3b",
+      "quote": "Step Run the eval across different models Different thinking and Different effort levels"
+    },
+    "rationale": "The session teaches model selection through cost/accuracy tradeoffs, effort controls, prompt adjustment and an evaluation walkthrough.",
+    "adjudication": "resolved:Education: the full excerpt set teaches model selection and walks through evaluation, exceeding generic model task-fit commentary.",
+    "sealed": true
+  },
+  {
+    "video_id": "2085065022733205504",
+    "slug": "Yahia_Bakour_-_Today_we_re_officially_launching_on_YC_The_web_was_built_for_huma",
+    "title": "Yahia Bakour - Today we’re officially launching on YC.  The web was built for humans...",
+    "channel": "Yahia Bakour",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "12db6b7bcd6d09b8379ef4f76d5de1a259acd4278981051f30926c66a569808c",
+    "card_hash": "4f06f4f96bfc4691e99548830f84a368daedea925908234f61340eb664aea04a",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "developer-tools",
+    "shelf_path": [
+      "AI and ML",
+      "Developer Tools"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.92,
+    "evidence": {
+      "excerpt_id": "2a856864ff4d3aea5624e9546fba7d98039eae03016ecdd04560c4bda5b8626d",
+      "quote": "Context turns the internet Into an API purpose built for agents"
+    },
+    "rationale": "The product exposes website crawling and structured web information through an API for agents; developer infrastructure is the subject.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2085398091726041088",
+    "slug": "OpenAI_Developers_-_Build_a_plugin_once_and_use_it_across_compatible_agent_clien",
+    "title": "OpenAI Developers - Build a plugin once and use it across compatible agent clients.  Intr...",
+    "channel": "OpenAI Developers",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "1765d0783ccdf11b94c36b1468887925ae2f88037236efd14eb8681dbbbe3435",
+    "card_hash": "728622224feb03bea2c1e12f85fcee42e5f43c7fd33705fd2f3afd75e1ce408c",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "developer-tools",
+    "shelf_path": [
+      "AI and ML",
+      "Developer Tools"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.95,
+    "evidence": {
+      "excerpt_id": "214de02a0a709c01df7e01998e4d02da624356577f9205f75093faaf4648a80c",
+      "quote": "plugins give developers a way to package those capabilities"
+    },
+    "rationale": "A shared packaging standard for skills and MCP configurations is developer tooling, described as a product rather than taught.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2085409224574545920",
+    "slug": "codila_-_Ex-Google_Jeff_Dean_just_released_1-hour_lecture_on_full_AI_engineeri",
+    "title": "codila - Ex-Google Jeff Dean just released 1-hour lecture on full AI engineeri...",
+    "channel": "codila",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "f1dc4127f1b8d182c90d0cdaf2dbbafe2dbfbf1edd84b61bd7b908e33bccd5e6",
+    "card_hash": "f40c8a70cb5fda7749ec7ab41ab4d94d120e42874a2cea1df1134e2f47c9777e",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "frontier-models"
+    ],
+    "confidence": 0.93,
+    "evidence": {
+      "excerpt_id": "3eca7d6f412f63ff66124c1c1cd6df43492f2a891c9f4b945067ad6c48471f57",
+      "quote": "You Can Just Apply A Transformer Based Model To Same Problem"
+    },
+    "rationale": "The excerpts explain sequential-model limits, transformers, compute efficiency and training rewards, establishing a teaching purpose.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2085459208485359617",
+    "slug": "Lunar_-_Google_just_released_a_free_2-hour_course_on_full_Graph_Engineering",
+    "title": "Lunar - Google just released a free 2-hour course on full Graph Engineering. ...",
+    "channel": "Lunar",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "19fab43d1ac900b002c19c12c0a5ffd795baee51771def79c02230ca8b963c34",
+    "card_hash": "fa36c4dc358097f69d0366fd7cafa7932126948f3d05d1b7c283385f3be23d0f",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "developer-tools"
+    ],
+    "confidence": 0.95,
+    "evidence": {
+      "excerpt_id": "484c191d4a39e2028b75f5d75fb86b73983e5ce37c885558fd1f4aac23219ad1",
+      "quote": "Now That We Cover Architecture Go Ahead Build Through Code"
+    },
+    "rationale": "A lab explains architecture and then builds agent endpoints, delegation and callback functions step by step.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2086124560861270016",
+    "slug": "Arena_ai_-_Arena_intern_and_UCLA_PhD_candidate_hgzhou42_introduces_Trace-and-",
+    "title": "Arena.ai - Arena intern and UCLA PhD candidate, @hgzhou42, introduces Trace-and-...",
+    "channel": "Arena.ai",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "5cbfc38a4cf3d4a035e59455ab4f42703acb4167d8a7d2d8c95623b50ba4f6d0",
+    "card_hash": "dc88a0f71dcbbd98fb66fcba93f0ee7e0170ebf81c4523992153d7d64ea9db0a",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "security",
+    "shelf_path": [
+      "AI and ML",
+      "Security"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.89,
+    "evidence": {
+      "excerpt_id": "5529d6cdf439d295b850d3c812cbeb76fede80f2891e2e7e610b760318b92395",
+      "quote": "when we train a model To catch reward hacking"
+    },
+    "rationale": "The research talk evaluates whether monitors detect real training-time reward hacks. Technical AI safety is the central subject.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2086224231277216132",
+    "slug": "levelsio_-_As_always_everyone_is_blind_staring_at_the_progress_of_LLMs_for_codi",
+    "title": "@levelsio - As always everyone is blind staring at the progress of LLMs for codin...",
+    "channel": "@levelsio",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "51cc2623025ee6ff5b1073c83567aecde7c6473d13af243d98f39610f6936c75",
+    "card_hash": "a84c57d388d28118d3f98f07fa81904ec8c8ddde1366e944f45e582c8eb5acc6",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "generative-media",
+    "shelf_path": [
+      "AI and ML",
+      "Generative Media"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.75,
+    "evidence": {
+      "excerpt_id": "08df94c2b1b169b9cf05c6bdc6cced629496d5a4fff559f56c40a4015282ea1a",
+      "quote": "Daniel, we've stopped hiring chabs in the company. So you're fired?"
+    },
+    "rationale": "Original thread prose praises a video model alongside the shown scene; the finished video, rather than architecture or benchmarks, is central.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2086879775277125633",
+    "slug": "Nous_Research_-_Hermes_has_twelve_browser_tools_Browser_Use_mode_replaces_them_w",
+    "title": "Nous Research - Hermes has twelve browser tools. Browser Use mode replaces them with ...",
+    "channel": "Nous Research",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "21dcae88d8fba8ff742591fa33d39426744ac51bb4f28f454c888fb4e7d58d54",
+    "card_hash": "b8ce4cd4bbba67a06820e6893c93f8514bf86366162057232de481a39e88aabc",
+    "stratum": "text_only",
+    "outcome": "assigned",
+    "shelf_id": "developer-tools",
+    "shelf_path": [
+      "AI and ML",
+      "Developer Tools"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.92,
+    "evidence": {
+      "excerpt_id": "98e61344a36673865858787130288f49cf74edcba40db37cb10928ad92fb763b",
+      "quote": "Browser Use mode replaces them with a single one, driven by @browser_use's CLI 3.0."
+    },
+    "rationale": "The post compares browser-tool schemas with a CLI-driven scripting integration and reports its token efficiency: agent-harness tooling.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2087207632528719872",
+    "slug": "justin_-_Introducing_Capy_v2_the_fastest_most_powerful_cloud_coding_agent_W",
+    "title": "justin - Introducing Capy v2: the fastest, most powerful cloud coding agent  W...",
+    "channel": "justin",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "e7dfc0d8c06087f521414d1b184e7a7803a75c6e51f9b8d00b071e796db34982",
+    "card_hash": "983ccf62732fe83126b90a1bd87c370c41aed01bbad35387be98d0609fe84a9a",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "developer-tools",
+    "shelf_path": [
+      "AI and ML",
+      "Developer Tools"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.96,
+    "evidence": {
+      "excerpt_id": "e671f2902570eb041ff442a1e7ca304af7ccd48dd0443acc42e110415dda4b8e",
+      "quote": "we launched Cappy the AI software engineer"
+    },
+    "rationale": "The launch is for a cloud coding agent that helps engineering teams ship pull requests. Coding-specific agents belong on Developer Tools.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2088367256468164608",
+    "slug": "Nous_Research_-_Hermes_has_a_new_slash_command_loop_loop_5m_lt_prompt_gt_re-",
+    "title": "Nous Research - Hermes has a new slash command: /loop.  '/loop 5m &lt;prompt&gt;' re-...",
+    "channel": "Nous Research",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "c567eebc4b177b6210e8c341fdabbee00a3fd661c61fc82ead7c06b9b0fef83d",
+    "card_hash": "a30805230ea5c93324a471a0882b241f96fd382da60cd6384c3f71d4708d74cf",
+    "stratum": "text_only",
+    "outcome": "assigned",
+    "shelf_id": "ai-agents-and-automation",
+    "shelf_path": [
+      "AI and ML",
+      "AI Agents and Automation"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.8,
+    "evidence": {
+      "excerpt_id": "47c5cba5d0d8952b0472b2c07173c76168a2c4cfb9532288dc37b5cc697f67d6",
+      "quote": "re-runs the prompt every 5 minutes in the same session"
+    },
+    "rationale": "The assistant repeatedly executes a user's prompt and adapts its checking interval across chat, desktop and CLI; no coding task is established.",
+    "adjudication": "resolved:AI Agents and Automation: recurring prompt execution with adaptive checking is assistant automation across channels; a coding-specific harness is not established.",
+    "sealed": true
+  },
+  {
+    "video_id": "2088390532988891136",
+    "slug": "Aditya_Bhatt_-_A_first_glimpse_of_the_wildest_robotics_project_of_my_PhD_The_Bli",
+    "title": "Aditya Bhatt - A first glimpse of the wildest robotics project of my PhD.  🛹 The Bli...",
+    "channel": "Aditya Bhatt",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "c0ddb72400ccd31a20e6a563cc6c07c1ac5db906ff6d9d849b52cb47bd61ea7d",
+    "card_hash": "d7bea7c64b59d157cb2abcf4fcfa40e9334ce3c5d801a4282b86bbb2ecafab2c",
+    "stratum": "text_only",
+    "outcome": "assigned",
+    "shelf_id": "ai-and-ml",
+    "shelf_path": [
+      "AI and ML"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.84,
+    "evidence": {
+      "excerpt_id": "0f91e41a6653ffce501a8fa36b20727110353e60578d0b81286a164c9a690f96",
+      "quote": "robotics project of my PhD."
+    },
+    "rationale": "The post describes a blind skateboarding robot with code and weights forthcoming. Autonomous robotics fits the parent; no child subject is established.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2088397814267080704",
+    "slug": "Machine_Learning_Street_Talk_-_EMERGENCY_PODCAST_The_recent_paper_on_the_reasoni",
+    "title": "Machine Learning Street Talk - EMERGENCY PODCAST:  The recent paper on the reasoning heist went supe...",
+    "channel": "Machine Learning Street Talk",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "4fc0ba7fcf4aed9bff45038fac45c39a21317dbd4adedc372d6f493a9fedbc45",
+    "card_hash": "30b35b74d7fee1965a9b65af4de5a93042e2004433fedbd5618fd700852f8929",
+    "stratum": "text_only",
+    "outcome": "assigned",
+    "shelf_id": "frontier-models",
+    "shelf_path": [
+      "AI and ML",
+      "Frontier Models"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.74,
+    "evidence": {
+      "excerpt_id": "f77289c6a47d6e7fe3e85bd7dee9fd5a47343ad9699fa44797048efb4e4a011f",
+      "quote": "The recent paper on the reasoning heist went super viral."
+    },
+    "rationale": "Original thread prose identifies model distillation as the paper discussion's subject. No teaching examples or walkthrough are supplied.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2088677333066465280",
+    "slug": "Mahax_-_Ex-Google_Jeff_Dean_just_dropped_a_1-hour_lecture_on_full_AI_engineer",
+    "title": "Mahax - Ex-Google Jeff Dean just dropped a 1-hour lecture on full AI engineer...",
+    "channel": "Mahax",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "729d19f3269d602a83facf837d19a6b421f052771d0da8dfd37eda2dfe0dcc69",
+    "card_hash": "79d110d2758584011760f8e0d6cb03d64daea298faf2fb00d48acbe7282487fc",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "frontier-models"
+    ],
+    "confidence": 0.94,
+    "evidence": {
+      "excerpt_id": "68ea25b06a17d0381c1b6bfb925a2f55e671d26d34daf1bca6cd0db0bb730e37",
+      "quote": "Learn The Routing Mechanism To Learn Which Pieces Of Model Actually Activate For Different Examples"
+    },
+    "rationale": "The presentation explains expert routing, reinforcement learning, training and context limits; teaching takes precedence over model coverage.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2088703526553968640",
+    "slug": "Andrew_Milich_-_The_frontier_of_AI_in_city-building_games_over_9_months_Nov_2025",
+    "title": "Andrew Milich - The frontier of AI in city-building games over 9 months:  Nov 2025 - ...",
+    "channel": "Andrew Milich",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "d6d2cfb07bff878b9fb907b0e1b0aba588b20cf55d2193e2ec2fe20cfbf93973",
+    "card_hash": "10499cf352c450e0a15c4a4adfa29301c4c803a8acd4dd3acae813ffc006beb7",
+    "stratum": "text_only",
+    "outcome": "assigned",
+    "shelf_id": "developer-tools",
+    "shelf_path": [
+      "AI and ML",
+      "Developer Tools"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.82,
+    "evidence": {
+      "excerpt_id": "43dcead778404fce5e0f70c99b4c69ba4025a0db56ed271a187637477713c93b",
+      "quote": "Composer 1 + cloud agents"
+    },
+    "rationale": "The post compares model-and-agent combinations for building games. It establishes software-generation tooling, not image or video generation.",
+    "adjudication": "resolved:Developer Tools: the comparison concerns agent-assisted game builds; visual game graphics alone do not establish the Generative Media definition.",
+    "sealed": true
+  },
+  {
+    "video_id": "2089007841277276160",
+    "slug": "reira_-_Andrej_Karpathy_Prompting_is_fading_away_Delete_everything_else_a",
+    "title": "reira - Andrej Karpathy:  \"Prompting is fading away  Delete everything else a...",
+    "channel": "reira",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "f21a4a2b13db04f44e7855ace8ab57d993f6c289f4531b84625abd7ef092fb22",
+    "card_hash": "c1e42cf15672f769d15c525850deb4c734c54c826aaa8170b1733c4054ad8084",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "frontier-models"
+    ],
+    "confidence": 0.96,
+    "evidence": {
+      "excerpt_id": "c76136bbad09207503b1e19583d458b4d4d8e253980f5c3e9a2b31c186098b78",
+      "quote": "Let Me Basically Step Through It So Let'S Try To Have A Decoder Only Transformer"
+    },
+    "rationale": "A step-through of a decoder-only transformer, attention and related examples establishes conceptual and practical teaching.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2090106310385688577",
+    "slug": "Rob_Pruzan_-_Introducing_terminal-code_VS_Code_inside_the_terminal_-_VS_Code_com",
+    "title": "Rob Pruzan - Introducing terminal-code: VS Code inside the terminal  - VS Code com...",
+    "channel": "Rob Pruzan",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "81a352ad9b255deddc2785f695d75f0c17ca8099073627f943c7f8765c268eb9",
+    "card_hash": "01926dd30685a9ebbc4b27ea393f991f33bf030ad096a0662b4c87b245625c26",
+    "stratum": "text_only",
+    "outcome": "unmappable",
+    "shelf_id": null,
+    "shelf_path": [
+      "Software Development",
+      "Developer Tools"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.96,
+    "evidence": {
+      "excerpt_id": "584f65cf2b2453223501b9f5c0c3f0d1da46e4ea7c9d7ac7d4597f948d94185c",
+      "quote": "Introducing terminal-code: VS Code inside the terminal"
+    },
+    "rationale": "The described CLI editor provides SSH and theme compatibility without an AI component; traditional software tooling has no approved root.",
+    "adjudication": "resolved:Unmappable, Software Development / Developer Tools: reuse the applicable tooling name under a non-AI root because the editor has no established AI component.",
+    "sealed": true
+  },
+  {
+    "video_id": "2090844215756419072",
+    "slug": "0xSero_-_Pi_agent_deep_dive_this_is_a_live_session_Enjoy_I_think_there_s",
+    "title": "0xSero - Pi agent deep dive, this is a live session.   Enjoy! I think there's ...",
+    "channel": "0xSero",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "e097397097f5387165d045d8d240cd5f247f8db115096401d846ba2be2c7aeeb",
+    "card_hash": "6176811efe42278ba84e5efb936e7df69b64bb8c369490c0a210b0ec0a9be462",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "developer-tools"
+    ],
+    "confidence": 0.9,
+    "evidence": {
+      "excerpt_id": "3faeb10d02c3fa22554503507299eddc37ebbd76c09306a199d6f392757db1b9",
+      "quote": "what's the process to add in new tools?"
+    },
+    "rationale": "The Q&A explains inference engines, tool API formats, local/cloud delegation and validation loops with practical examples.",
+    "adjudication": "resolved:Education: the excerpts explain how inference and tool integration work; this teaching purpose takes precedence over the SDK and terminal tooling.",
+    "sealed": true
+  },
+  {
+    "video_id": "2090852806257422336",
+    "slug": "Grok_Bot_-_We_re_making_Grok_Bot_more_widely_available_All_SuperGrok_Plus_Cur",
+    "title": "Grok Bot - We're making Grok Bot more widely available.  All SuperGrok Plus, Cur...",
+    "channel": "Grok Bot",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "28f316df0bf6a954d035577f2a7db8286da21a885c24afe7d0955f0c15159ae1",
+    "card_hash": "5860ee479dbb81f6d4034c0bd43ceeb53a330b89b5ae15b868bb0e7821ecf0f9",
+    "stratum": "text_only",
+    "outcome": "assigned",
+    "shelf_id": "ai-and-ml",
+    "shelf_path": [
+      "AI and ML"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.86,
+    "evidence": {
+      "excerpt_id": "b72dcf10cf20a79b21455f6c41caf6d3232ddb00294e769dcddaf234dd0d4196",
+      "quote": "We're making Grok Bot more widely available."
+    },
+    "rationale": "The post announces access tiers and a trial for an AI product. It gives no coding capability, acting-agent workflow or competitive analysis.",
+    "adjudication": "resolved:AI and ML: access and trial availability establish only a general AI product subject; Cursor subscription names do not prove a coding workflow.",
+    "sealed": true
+  },
+  {
+    "video_id": "2090953710696329216",
+    "slug": "matt_palmer_-_Getting_Started_with_Grok_Bot_01_00_What_is_Bot_05_26_Anatomy_of_a",
+    "title": "matt palmer - Getting Started with Grok Bot  01:00 What is @Bot? 05:26 Anatomy of a...",
+    "channel": "matt palmer",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "2f05c77ccdbb5c062ba4f98498553bf69f612ae2873a1b9be0f2846df97b0a53",
+    "card_hash": "17023b63651467ce9bdc1d22a5f1c8d7619a8254fb2b6f972e16074252084fc1",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "developer-tools",
+      "ai-agents-and-automation"
+    ],
+    "confidence": 0.9,
+    "evidence": {
+      "excerpt_id": "989c1433beb43b739d8a8ae99b419cbee370baab6ee664c3356adfc5d3fcb8f8",
+      "quote": "bots can be run in three different ways"
+    },
+    "rationale": "The excerpts teach bot triggers and outer/inner orchestration loops using database and software-build examples.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2091546907713662977",
+    "slug": "NIK_-_BREAKING_OpenAI_CEO_finally_admits_they_were_hyping_AGI_timelines",
+    "title": "NIK - 🚨 BREAKING: OpenAI CEO finally admits they were hyping AGI timelines ...",
+    "channel": "NIK",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "8136abb8999b524f796d7c037551adb8b34b58a6902352745da0ed67e96c6d81",
+    "card_hash": "3aef07ce9cbc01ebc93762a581fb711f3997bb904f922672bec30672028b7444",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "ai-industry-and-business",
+    "shelf_path": [
+      "AI and ML",
+      "AI Industry and Business"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.93,
+    "evidence": {
+      "excerpt_id": "34eee342631257b73df77e632fbeb31b8c61b79ff3fb8f28bd2fd22ed9ad149a",
+      "quote": "much more disruption in software business being up for grabs"
+    },
+    "rationale": "The speaker contrasts expected and actual software-business disruption after GPT-4; AI's economic impact is the subject.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2091957857650716672",
+    "slug": "Matthew_Berman_-_My_full_interview_with_Tibo_thsottiaux_0_45_Tibo_s_Lessons_from",
+    "title": "Matthew Berman - My full interview with Tibo (@thsottiaux)  0:45 Tibo's Lessons from G...",
+    "channel": "Matthew Berman",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "7219b4ed77b0a6750859dc95dc631887fa59750fdede71ee36f6c15cfb3e3f6d",
+    "card_hash": "81ac2502be5d6c95fc2be106b746907f93e0e8cfaa7adc8e20d9e51224c6e279",
+    "stratum": "text_only",
+    "outcome": "assigned",
+    "shelf_id": "ai-industry-and-business",
+    "shelf_path": [
+      "AI and ML",
+      "AI Industry and Business"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.78,
+    "evidence": {
+      "excerpt_id": "2c6887a44b9262138ac4c9ea3ee6fb355d8d3ca5d6768e45c69b839e8d9ec088",
+      "quote": "Building OpenAI’s Relentless Culture"
+    },
+    "rationale": "The original interview outline spans lab culture, product consolidation and OpenAI versus Anthropic. It supports the company/industry frame only.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2091979655037300736",
+    "slug": "Codez_-_SpaceXAI_engineer_ex-Cursor_right_now_I_m_running_10-20_GrokBot",
+    "title": "Codez - SpaceXAI engineer (ex-Cursor):  \"right now I'm running 10-20 GrokBot ...",
+    "channel": "Codez",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "72d794f765ef6ca7ea70bfb0def73a2446d1b5cba9344eb82039eb0300a7cc82",
+    "card_hash": "202e4c03b2dbde12f6d56fbfcbe64c9244b1b8f466652a4ed062a63c26761466",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "developer-tools",
+    "shelf_path": [
+      "AI and ML",
+      "Developer Tools"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.9,
+    "evidence": {
+      "excerpt_id": "1c56e00990964259ca46849a8b376acb5b56c9ebd54a3785f1555776ef4b5873",
+      "quote": "I've been using agents to write code"
+    },
+    "rationale": "The discussion concerns engineering practice with coding agents, performance fixes, isolated worktrees and review.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2091993721768116224",
+    "slug": "Emerson_Ward_-_Excited_to_share_that_I_ve_joined_SpaceXAI_as_Principal_Designer",
+    "title": "Emerson Ward - Excited to share that I've joined @SpaceXAI as Principal Designer. I'...",
+    "channel": "Emerson Ward",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "6197e26d25207982538039ece948a8b71b8c24050a5b832010bb39dfd04aeed7",
+    "card_hash": "103137e15a75e7f70b8f945e65259513df6eca745aa24bed8e444c39fb460c8a",
+    "stratum": "timed_evidence",
+    "outcome": "unmappable",
+    "shelf_id": null,
+    "shelf_path": [
+      "Careers",
+      "Design"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.78,
+    "evidence": {
+      "excerpt_id": "eca3bfa51fc570aed0c0ef87e9db811032b0d256e01c69b7c1e769fd8320ca96",
+      "quote": "The first one was made in 1960"
+    },
+    "rationale": "Original thread prose is a personal design-job announcement. Company and product names do not establish an AI technical or industry-analysis subject.",
+    "adjudication": "resolved:Unmappable, Careers / Design: the original prose announces a personal job move; treat Grok's malformed row as rejecting its named shelf, not as an assignment.",
+    "sealed": true
+  },
+  {
+    "video_id": "2092386459282182144",
+    "slug": "MTS_-_FULL_INTERVIEW_Jerry_Tworek_says_AI_researchers_now_tell_each_other",
+    "title": "MTS - FULL INTERVIEW: Jerry Tworek says AI researchers now tell each other ...",
+    "channel": "MTS",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "ad6874617dccb89f82faaf5caa2b472fad7c4db915766055b7e5d74fd0b14780",
+    "card_hash": "d5db2964d6bdc14562c82b37ce8105ad18f8833b3867595efef9cdeb15a6fcc6",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "ai-and-ml",
+    "shelf_path": [
+      "AI and ML"
+    ],
+    "secondary_shelf_ids": [
+      "ai-industry-and-business",
+      "frontier-models"
+    ],
+    "confidence": 0.76,
+    "evidence": {
+      "excerpt_id": "ef13c88ed60a75aac5fbbd2725aaa24f43281046d200e02d27ce7caa521e6cb5",
+      "quote": "mixture of experts like different positional encodings"
+    },
+    "rationale": "The excerpts span lab history, compute access, model architecture, economic uses, safety and RL history; no child supplies a dominant subject.",
+    "adjudication": "resolved:AI and ML: the whole excerpt set spans business, architecture, safety and research history without a dominant child; one compute-funding passage is insufficient.",
+    "sealed": true
+  },
+  {
+    "video_id": "2092646578058412032",
+    "slug": "Devi_Parikh_-_Today_we_re_introducing_Navigator_n2_It_s_a_frontier_computer-use",
+    "title": "Devi Parikh - Today we’re introducing Navigator n2. It’s a frontier computer-use mo...",
+    "channel": "Devi Parikh",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "bf47d1882cecb2781e8b6596a62a10e603ba3eaa3d780395e3cca6eb68f3961d",
+    "card_hash": "6095117f568cf563a2c86f1d254514e69e8b98afcacecdfbd60dcde3e02ecaa9",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "frontier-models",
+    "shelf_path": [
+      "AI and ML",
+      "Frontier Models"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.87,
+    "evidence": {
+      "excerpt_id": "2ebce1b6d7737a0dbd0983df68708c27a336e81648aa57d8c64074c2425e805e",
+      "quote": "available now on our API?"
+    },
+    "rationale": "Original thread prose introduces a named 27B computer-use model. The excerpts announce availability without showing a user task being performed.",
+    "adjudication": "resolved:Frontier Models: a named 27B model release is established in original prose; computer-use positioning alone does not show an agent acting for a user.",
+    "sealed": true
+  },
+  {
+    "video_id": "2092658884297334784",
+    "slug": "Meta_for_Developers_-_Muse_Image_is_now_available_on_Meta_Model_API_and_priced_f",
+    "title": "Meta for Developers - Muse Image is now available on Meta Model API and priced for producti...",
+    "channel": "Meta for Developers",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "fe9061677d7c91e2667115fbac143a259ebf794902f6ddf2f229e15036b77d33",
+    "card_hash": "751e34f3613f149acd066dcc16f77d202cd681c6ec3087fb9b4812c5eb15bcb7",
+    "stratum": "text_only",
+    "outcome": "assigned",
+    "shelf_id": "frontier-models",
+    "shelf_path": [
+      "AI and ML",
+      "Frontier Models"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.91,
+    "evidence": {
+      "excerpt_id": "73f0906f4f52b284112b3d8bb44647836266efdf2907413c8b26546bfab1ec01",
+      "quote": "It’s an agentic image model that reasons before it renders."
+    },
+    "rationale": "The post announces an image model's API availability and describes its reasoning/search process. No finished visual artifact is established.",
+    "adjudication": "resolved:Frontier Models: this is a model release and capability description; the image modality alone does not meet the finished-artifact rule for Generative Media.",
+    "sealed": true
+  },
+  {
+    "video_id": "2092919679475941376",
+    "slug": "Thomas_Wolf_-_We_have_a_huge_news_to_share_today_Today_we_are_unveiling_the_firs",
+    "title": "Thomas Wolf - We have a huge news to share today!  Today we are unveiling the first...",
+    "channel": "Thomas Wolf",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "e4bcbc4f62823cc9da50b8667f5a1ec91e63311ea5cf01b4f9c3d21d631540dd",
+    "card_hash": "ae9a428c318b8ca6ea41d2fa21239e80bc676f6a5a8b730137ac26460544b761",
+    "stratum": "text_only",
+    "outcome": "assigned",
+    "shelf_id": "ai-and-ml",
+    "shelf_path": [
+      "AI and ML"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.89,
+    "evidence": {
+      "excerpt_id": "d1df9c64a6a8b9b5b52c1ae71a34101d472bf7d181a33bc828d2fec908386d0c",
+      "quote": "RL robot - welcome Microduck"
+    },
+    "rationale": "The post introduces a trainable reinforcement-learning biped. Robotics fits autonomous intelligent systems on the parent; no child is established.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2093359169139326976",
+    "slug": "martin_casado_-_Chips_memory_interconnects_storage_robotics_Compute_hardware_inf",
+    "title": "martin_casado - Chips, memory, interconnects, storage, robotics. Compute hardware inf...",
+    "channel": "martin_casado",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "ed0223fd0ff2744eac3056bd1c90b3dfda85b01e70caa6cb7d94a4fc9016bea9",
+    "card_hash": "90316740795261b5222c743c437cedcf9102b998ecb468a8557882184a9150d0",
+    "stratum": "timed_evidence",
+    "outcome": "unmappable",
+    "shelf_id": null,
+    "shelf_path": [
+      "Technology",
+      "Hardware",
+      "Funding"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.8,
+    "evidence": {
+      "excerpt_id": "bcbed17307bf8d9743cfb4a97c7829198bb135af5583c9083be87d50871dd180",
+      "quote": "The idea of alchemy was to transmute something that was very common into something that was very rare."
+    },
+    "rationale": "Original prose reports a raise for general compute hardware. Neither it nor the alchemy clip establishes AI; hardware funding has no approved shelf.",
+    "adjudication": "overturned:Both labels infer AI business from general compute-hardware funding. The original prose establishes chips, memory, storage and robotics funding without an AI subject.",
+    "sealed": true
+  },
+  {
+    "video_id": "2093715067636154369",
+    "slug": "kaori_-_Andrej_Karpathy_spent_8_years_at_OpenAI_and_Tesla_Last_week_he_comp",
+    "title": "kaori - Andrej Karpathy spent 8 years at OpenAI and Tesla  Last week, he comp...",
+    "channel": "kaori",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "6130553b9b9a31855a03be21d7f983c3e0ec5c1be8edb41684f1e337c061a067",
+    "card_hash": "bb2a241d9693d9f876fdd0275f4ef2d9055a359c9634333da08c0a088e0f15f1",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.93,
+    "evidence": {
+      "excerpt_id": "a76b82b7d838ac29e33780afcccbcaab993829a07792f270277d4648eb92a8d9",
+      "quote": "this is a really good example of why we would need internet search"
+    },
+    "rationale": "The walkthrough teaches assistant use through search, failure cases, uploads and pricing/model limits; it goes beyond a general capability mention.",
+    "adjudication": "resolved:Education: worked examples explain search, failure cases and uploads; the teaching purpose takes precedence over generic assistant capabilities.",
+    "sealed": true
+  },
+  {
+    "video_id": "2094027052739592192",
+    "slug": "DogeDesigner_-_SpaceX_just_launched_NASA_s_newest_flagship_space_telescope_What",
+    "title": "DogeDesigner - SpaceX just launched NASA’s newest flagship space telescope.  What ma...",
+    "channel": "DogeDesigner",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "a32e10e0cd53ebe3459bf814778d20526e21885d71e2618b4dd38460228edc71",
+    "card_hash": "1c563b9889689d436b60dacdd1d59dd5c76b13fc7d4da4158c1b1667190d4d51",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "spaceflight",
+    "shelf_path": [
+      "Space and Science",
+      "Spaceflight"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.98,
+    "evidence": {
+      "excerpt_id": "4f641e4b17a7c93732f84c92d6521eb0738986fec884a96753e8131c21a1fe8b",
+      "quote": "One, ignition and liftoff. Go Falcon Heavy and go Roman Space Telescope"
+    },
+    "rationale": "The excerpt narrates a Falcon Heavy liftoff carrying a space telescope; the launch establishes Spaceflight.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2094362669444648960",
+    "slug": "Lewis_Tunstall_-_The_recording_from_my_CERN_lecture_on_training_LLMs_is_now_onli",
+    "title": "Lewis Tunstall - The recording from my CERN lecture on training LLMs is now online!   ...",
+    "channel": "Lewis Tunstall",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "b35260e348156f9d656d9ca2d886b9c49dd4aa3d33b77205b7f23ec06a9cc3b4",
+    "card_hash": "a924ac9e8740ac48f90a53bee24a2b32d7d9c745611ad10ca452dce0cf19854f",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "frontier-models"
+    ],
+    "confidence": 0.95,
+    "evidence": {
+      "excerpt_id": "99763a5b308c6b6cde9e752ac0f8cdab500f26fa11fd51c126f5975d75d35383",
+      "quote": "has anyone had self-attention or should I? Quickly explain it"
+    },
+    "rationale": "The speaker teaches in-context learning, self-attention, model choices and compute with examples and audience-directed explanation.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "2094462045219438592",
+    "slug": "Runway_-_Today_we_re_sharing_new_research_on_Solaris_our_first_Interface_Wor",
+    "title": "Runway - Today, we're sharing new research on Solaris, our first Interface Wor...",
+    "channel": "Runway",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "31cf501d6dd914576ff164685f61db67df6f0ea25a29294d05b9baad33dcdfc9",
+    "card_hash": "0f4ca0fbdd16f88f102169b4496e0cc04c28d387a36e5eefa595cc6ef32c1c7b",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "frontier-models",
+    "shelf_path": [
+      "AI and ML",
+      "Frontier Models"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.88,
+    "evidence": {
+      "excerpt_id": "3d258d03e602b20594f6db0cc680635f97922283ab9956221505dd58a1945d77",
+      "quote": "Introducing Solaris, the first interface world model"
+    },
+    "rationale": "The excerpts and original prose introduce interface-world-model research and real-time generation capability, without establishing a finished creative artifact.",
+    "adjudication": "resolved:Frontier Models: the subject is interface-world-model research and capability; frame-by-frame generation does not by itself establish a finished creative artifact.",
+    "sealed": true
+  },
+  {
+    "video_id": "2094843633572659200",
+    "slug": "Claude_-_Fable_5_1_excels_at_complex_long-running_tasks_And_its_research_cap",
+    "title": "Claude - Fable 5.1 excels at complex, long-running tasks. And its research cap...",
+    "channel": "Claude",
+    "platform": "x",
+    "source_type": "x_thread",
+    "source_revision": "c3a2d04c7b7b9a24975a0b828243389addbcabb69445987aa3ea6cec4a7ffa49",
+    "card_hash": "57da78c9d44fe122ede8c681e6a0fd519d2aa9fdc1ecf30f6bb525946ffd905a",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "frontier-models",
+    "shelf_path": [
+      "AI and ML",
+      "Frontier Models"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.95,
+    "evidence": {
+      "excerpt_id": "5728f240c189e6806da4981d5b638d5e7fcc7a556c670408089a16bfd3a9fc96",
+      "quote": "Today we're releasing Fable 5.1, the latest upgrade to our most capable model class."
+    },
+    "rationale": "The excerpt explicitly releases a model upgrade and describes improved multi-step capabilities without showing an agent executing a task.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "G2GEUhe2ro8",
+    "slug": "Why_YOLO26_Is_Perfect_for_Edge_AI_Jetson_Mobile_Embedded",
+    "title": "Why YOLO26 Is Perfect for Edge AI (Jetson, Mobile, Embedded)",
+    "channel": "Code With Aarohi",
+    "platform": "youtube",
+    "source_type": "video",
+    "source_revision": "d011455021187a1150e9d6536fe4ae63901639a1a90100d18cfb2e943d5670d0",
+    "card_hash": "06f5ecf4192c093762afddcd36c501687f4ce7b1dac398f37c98ee335607228a",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "developer-tools"
+    ],
+    "confidence": 0.97,
+    "evidence": {
+      "excerpt_id": "4e13013e7c35000a2a467ac69024f18cb48928f689c0ad46a51fca0123602172",
+      "quote": "Now let's understand both of them one by one"
+    },
+    "rationale": "The tutorial explains loss and label-assignment techniques, creates a Python file, loads a model and runs segmentation.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "JmCXZQ2xiZo",
+    "slug": "AI_Is_Evolving_Faster_Than_We_Thought_-_Dwarkesh_Patel",
+    "title": "AI Is Evolving Faster Than We Thought - Dwarkesh Patel",
+    "channel": "TRIGGERnometry Clips",
+    "platform": "youtube",
+    "source_type": "video",
+    "source_revision": "e622bcf3aff29f649041776834d9b51c665a139c53f54cd30f6076a6df31bf00",
+    "card_hash": "7e062e13ef0d553fb8e779b84a53783f2073bb3b1e0464737b2d0fdb4eacc3f3",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "ai-and-ml",
+    "shelf_path": [
+      "AI and ML"
+    ],
+    "secondary_shelf_ids": [
+      "ai-industry-and-business"
+    ],
+    "confidence": 0.82,
+    "evidence": {
+      "excerpt_id": "dabe44f6f3c676e192f60c6a78c025d94f15492053cd698841d5f2a9b50ffe83",
+      "quote": "it's also riddled with mistakes and errors."
+    },
+    "rationale": "The discussion ranges across AI use, reliability, robotics and revenue. A single lab-revenue excerpt does not dominate the whole set.",
+    "adjudication": "resolved:AI and ML: personal AI use, reliability and robotics accompany one revenue passage; the excerpt set does not center on industry economics.",
+    "sealed": true
+  },
+  {
+    "video_id": "Vh4O04Bpovw",
+    "slug": "I_Explored_A_200_000_000_Forgotten_Space_Colony",
+    "title": "I Explored A $200,000,000 Forgotten Space Colony",
+    "channel": "Yes Theory",
+    "platform": "youtube",
+    "source_type": "video",
+    "source_revision": "41b126f9d4d797db89f22bb3d500d7528ac9a042b8fa67df7d65bca50a3b4bdf",
+    "card_hash": "368000bccecef12aedd4e36211d622e8bd65b31a438b54101aafbf4764faf3f5",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "space-and-science",
+    "shelf_path": [
+      "Space and Science"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.87,
+    "evidence": {
+      "excerpt_id": "8681c54bb912067f55874adc3ca59798f17c9b8d1eb5e901f0388e54c274665d",
+      "quote": "replicate the earth's environment that we could potentially bring to other planets"
+    },
+    "rationale": "The excerpts explore a closed ecosystem and experimental ocean as an Earth-environment analog; no actual spaceflight operation is established.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "WgPbbWmnXJ8",
+    "slug": "Object_Detection_101_Course_-_Including_4xProjects_Computer_Vision",
+    "title": "Object Detection 101 Course - Including 4xProjects | Computer Vision",
+    "channel": "Murtaza's Workshop - Robotics and AI",
+    "platform": "youtube",
+    "source_type": "video",
+    "source_revision": "bb5826ef56d62ae5c0c9b44bb1ab040510560b5515f06cb0356078c957899825",
+    "card_hash": "08ca7ba3b4f0d1654af0203f3e40d9e0848638a04d81d0927b91f4a768e6d5dd",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "education",
+    "shelf_path": [
+      "AI and ML",
+      "Education"
+    ],
+    "secondary_shelf_ids": [
+      "developer-tools"
+    ],
+    "confidence": 0.95,
+    "evidence": {
+      "excerpt_id": "3d5b2d3157cb61c692e5707acb47f74c1f5bf89c5d181084abcb300851269642",
+      "quote": "what we need is a tracking ID"
+    },
+    "rationale": "The excerpts teach GPU inference, object tracking, counting-region errors and game-rule logic through worked examples.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "hPJYSxsHDtQ",
+    "slug": "Ultralytics_announces_a_new_generation_of_computer_vision_models_Ultralytics_YOL",
+    "title": "Ultralytics announces a new generation of computer vision models: Ultralytics YOLO26!",
+    "channel": "The Ravit Show",
+    "platform": "youtube",
+    "source_type": "video",
+    "source_revision": "840e7af5396322a5a75c2cbe87acd03201ee28509673a6ebca83619ac66eb7dd",
+    "card_hash": "acb7ffda8ba634e40b2585cbad618e4ba4ae887846dd4e0d7e365d921782652a",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "ai-industry-and-business",
+    "shelf_path": [
+      "AI and ML",
+      "AI Industry and Business"
+    ],
+    "secondary_shelf_ids": [
+      "frontier-models"
+    ],
+    "confidence": 0.81,
+    "evidence": {
+      "excerpt_id": "6491e324e2cf122dc57bb82abd77ee32b5404319dac0b350626cf603ef5419c0",
+      "quote": "I think it's uh our main moat and one of the main advantages that we have."
+    },
+    "rationale": "The interview emphasizes the company community, its competitive moat, partners and ecosystem outlook, with one model-architecture answer.",
+    "adjudication": "resolved:AI Industry and Business: community moat, partners and ecosystem outlook dominate the interview excerpts; the CNN/transformer answer remains secondary.",
+    "sealed": true
+  },
+  {
+    "video_id": "pFlLqO3oUoc",
+    "slug": "AI_Planned_My_Vacation",
+    "title": "AI Planned My Vacation !",
+    "channel": "Alex Volkov from ThursdAI",
+    "platform": "youtube",
+    "source_type": "video",
+    "source_revision": "aefdb286764dff4bdfd12adf0787920c5fd67a03680ca4865f9a14578c1dd7c5",
+    "card_hash": "029519909080c1c90526d3ccb6fd64f52eabb000bc5666f83bfda1c12f838293",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "ai-agents-and-automation",
+    "shelf_path": [
+      "AI and ML",
+      "AI Agents and Automation"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.95,
+    "evidence": {
+      "excerpt_id": "fabc43002d610a8c5fc1aea3b4e62718454c8bd75bdbfef3a087df6d3702279c",
+      "quote": "I wanted Fable to help me plan this whole thing."
+    },
+    "rationale": "The assistant plans a vacation, produces activity materials and deploys a synced site for the user; the overall task is personal assistance.",
+    "adjudication": "agreed",
+    "sealed": true
+  },
+  {
+    "video_id": "pI_WARqK_X4",
+    "slug": "This_is_the_most_human-like_AI_voice_I_ve_talked_to_My_Blind_reaction_to_Sesame",
+    "title": "This is the most human-like AI voice I've talked to! My Blind reaction to Sesame voice models",
+    "channel": "Alex Volkov from ThursdAI",
+    "platform": "youtube",
+    "source_type": "video",
+    "source_revision": "db4d3af0519b88345dfbf00142cc560b37083852e9bd8d881d408d9a06b0674e",
+    "card_hash": "3dd4403ba3964165ddf3c4e97f11f143c34e3dfda5d0caa81071a101b87a4fe0",
+    "stratum": "timed_evidence",
+    "outcome": "assigned",
+    "shelf_id": "ai-agents-and-automation",
+    "shelf_path": [
+      "AI and ML",
+      "AI Agents and Automation"
+    ],
+    "secondary_shelf_ids": [],
+    "confidence": 0.95,
+    "evidence": {
+      "excerpt_id": "df9ade6df5d6217f090cb8f72a832b214b109bcb1bcff791e6651009d6459b28",
+      "quote": "five glimpses into our enchanting prior conversation"
+    },
+    "rationale": "The voice companion responds in conversation, follows requests and recalls prior discussion; the excerpts establish a remembering personal assistant.",
+    "adjudication": "agreed",
+    "sealed": true
+  }
+]
