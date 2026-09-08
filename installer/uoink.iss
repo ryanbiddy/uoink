@@ -111,6 +111,8 @@ Source: "staging\library_cards.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_work.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\source_subscriptions.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\library_analysis.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\library_resources.py"; DestDir: "{app}"; Flags: ignoreversion
+Source: "staging\library_prompts.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\usage_meter.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink.cmd"; DestDir: "{app}"; Flags: ignoreversion
 Source: "staging\uoink"; DestDir: "{app}"; Flags: ignoreversion

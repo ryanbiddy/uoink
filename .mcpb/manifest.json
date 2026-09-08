@@ -155,6 +155,18 @@
     {
       "name": "get_library_activity",
       "description": "Report deterministic library activity, shelf churn, and source observations."
+    },
+    {
+      "name": "search_library",
+      "description": "Bounded clip-first search of the saved library with revision-bound follow-up URIs."
+    },
+    {
+      "name": "get_library_item",
+      "description": "Resolve one saved item and return its Librarian card plus canonical resource URIs."
+    },
+    {
+      "name": "read_library_resource",
+      "description": "Read one uoink://library/v1/ resource URI with the same contents and refusals as resources/read."
     }
   ],
   "compatibility": {

@@ -75,6 +75,10 @@ CANONICAL_STDIO_TOOLS = {
     "transcribe_podcast_episode",
     "episode_to_corpus",
     "get_library_activity",
+    # Phase 4 run AV-1 (contract phase4-v1-2026-09-08): bounded library reads.
+    "search_library",
+    "get_library_item",
+    "read_library_resource",
 }
 
 REMOVED_STDIO_ALIASES = {

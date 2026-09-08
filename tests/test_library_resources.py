@@ -16,6 +16,7 @@ import base64
 import hashlib
 import json
 import os
+import sqlite3
 import threading
 import time
 from pathlib import Path
@@ -575,7 +576,8 @@ class TestP405FailureBounds:
         db_path.write_text("CORRUPT NOT SQLITE CONTENT", encoding="utf-8")
 
         # Create reader pointed at broken database
-        idx = index.Index(db_path)
+        # Index(conn, path) is the constructor; Index.open would migrate/recover the file.
+        idx = index.Index(sqlite3.connect(str(db_path), check_same_thread=False), db_path)
         reader = LibraryReader(idx, data_root=tmp_path / "data_root")
 
         with pytest.raises(ResourceError) as exc_list:

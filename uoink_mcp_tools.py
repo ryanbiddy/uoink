@@ -3535,6 +3535,22 @@ def get_library_activity(args: dict[str, Any]) -> dict[str, Any]:
     import library_analysis
     return library_analysis.handle_get_library_activity(args)
 
+def _library_resources_call(name: str, args: dict[str, Any]) -> dict[str, Any]:
+    """Phase 4 read tools (contract phase4-v1-2026-09-08, run AV-1). The
+    shared reader lives in library_resources.py; a helper build without it
+    still imports this registry and answers a domain refusal. Each call binds
+    a request-scoped reader on the process guard; the reader never writes."""
+    try:
+        import library_resources as _lr  # noqa: WPS433 -- optional module
+    except ImportError:
+        return {
+            "ok": False, "schema_version": 1, "contract_version": "phase4-v1-2026-09-08",
+            "error": {"code": "feature_unavailable",
+                      "message": "This feature is not available in this build.",
+                      "retryable": False, "details": {"module": "library_resources"}},
+        }
+    return _lr.dispatch_tool(name, args, _b())
+
 
 TOOL_REGISTRY: dict[str, ToolSpec] = {
     "uoink_video": ToolSpec(
@@ -4899,6 +4915,56 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         }, ["interval"]),
         handler=get_library_activity,
         rate_limiter=None,
+    ),
+    # ---- Living Library Phase 4 bounded read tools (run AV-1) ----
+    # Strictness, the 2 s deadline, the 60/minute and 2-active guard and every
+    # refusal envelope live in library_resources.py (shared with stdio
+    # resources and prompts); no registry rate limiter so a throttled caller
+    # still receives the contract's `rate_limited` envelope.
+    "search_library": ToolSpec(
+        name="search_library",
+        description=(
+            "Bounded clip-first search of the saved library (default 5, at "
+            "most 20 hits) with an item-text fallback for items without "
+            "clips. Each hit carries the item id, source revision, safe title "
+            "and link, evidence kind and timing, a 240-character preview and "
+            "revision-bound card and excerpt URIs for read_library_resource. "
+            "Results are bounded, not exhaustive; follow next_step when more "
+            "retrieval is needed."
+        ),
+        input_schema=_schema({
+            "query": {"type": "string", "description": "Search text, at most 512 characters."},
+            "limit": {"type": "integer", "minimum": 1, "maximum": 20, "default": 5,
+                      "description": "Maximum hits, 1-20 (default 5)."},
+        }, ["query"]),
+        handler=lambda args: _library_resources_call("search_library", args),
+    ),
+    "get_library_item": ToolSpec(
+        name="get_library_item",
+        description=(
+            "Resolve one saved item by video_id or slug (exactly one) and "
+            "return its default Librarian evidence card unchanged plus "
+            "canonical card, excerpt and initial corpus-chunk URIs. Bounded; "
+            "use before quoting."
+        ),
+        input_schema=_schema({
+            "video_id": {"type": "string", "description": "Stable item id (exactly one selector)."},
+            "slug": {"type": "string", "description": "Discovery alias (exactly one selector)."},
+        }),
+        handler=lambda args: _library_resources_call("get_library_item", args),
+    ),
+    "read_library_resource": ToolSpec(
+        name="read_library_resource",
+        description=(
+            "Read one uoink://library/v1/ resource URI (card, excerpt, corpus "
+            "chunk, shelf page or brief) with the same validation, contents "
+            "and refusals as resources/read. Fallback for clients without "
+            "native resource reads; identical text, one renderer."
+        ),
+        input_schema=_schema({
+            "uri": {"type": "string", "description": "A uoink://library/v1/... resource URI."},
+        }, ["uri"]),
+        handler=lambda args: _library_resources_call("read_library_resource", args),
     ),
 }
 

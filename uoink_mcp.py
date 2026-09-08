@@ -8,10 +8,16 @@ MCP clients launch this process and speak JSON-RPC over stdin/stdout. Keep
 stdout reserved for the protocol; server.py logging is redirected to stderr
 while importing the backend.
 
-The stdio surface is exactly the 26 canonical tools below. The six Yoink-era
-aliases completed their deprecation window in Uoink v2.5 and are not
-registered in v3. Run E (2026-09-04) added the two Phase 1 clip tools,
-`search_clips` and `get_evidence_card`, to stdio. See docs/v2-mcp.md.
+The stdio surface is the 25 canonical tools below plus, since Phase 4 run
+AV-1 (2026-09-08), the three bounded read tools `search_library`,
+`get_library_item` and `read_library_resource`, the five library resource
+templates and the four library prompts (contract phase4-v1-2026-09-08,
+docs/library/PHASE4-CONTRACT-2026-09-08.md). The six Yoink-era aliases
+completed their deprecation window in Uoink v2.5 and are not registered in
+v3. Run E (2026-09-04) added the two Phase 1 clip tools, `search_clips` and
+`get_evidence_card`, to stdio. See docs/v2-mcp.md.
+Phase 5 run AZ (2026-09-08) added `get_library_activity` (contract phase5-v1),
+making 29 stdio tools.
 """
 
 from __future__ import annotations
@@ -394,6 +400,217 @@ def get_library_activity(
     if expected_revision is not None:
         payload["expected_revision"] = expected_revision
     return uoink_mcp_tools.call_tool("get_library_activity", payload)
+
+# --------------------------------------------------------------------------
+# Phase 4 (run AV-1, contract phase4-v1-2026-09-08): bounded library access.
+#
+# The three read tools are registered with @mcp.tool so they appear in
+# tools/list next to the 25 canonical tools; their execution is intercepted
+# on the low-level server so the domain envelope is returned as text with
+# isError set from the envelope, never wrapped in the SDK's "Error executing
+# tool" string. Resources and prompts use low-level handlers on
+# mcp._mcp_server (replacing FastMCP's empty defaults) so the curated list,
+# the five templates, the four prompts and the JSON-RPC error codes are ours:
+# -32602 invalid parameters, -32002 missing or deleted resource, -32603 any
+# other refusal, each carrying the domain envelope in error.data. The SDK
+# advertises resources {subscribe:false, listChanged:false} and prompts
+# {listChanged:false} only because these handlers exist; no notification is
+# ever emitted. Duplicate JSON keys are not detectable here (the SDK hands
+# handlers parsed objects); the HTTP /tools/* route rejects them from raw
+# bytes. Every reader is request-scoped on the process-wide guard (2 active,
+# 60 admissions per minute, 2 s deadline). Nothing here writes to stdout.
+# --------------------------------------------------------------------------
+@mcp.tool(
+    name="search_library",
+    description=(
+        "Bounded clip-first search of the saved library (default 5, at most "
+        "20 hits) with an item-text fallback for items without clips. Each "
+        "hit carries the item id, source revision, safe title and link, "
+        "evidence kind and timing, a 240-character preview and revision-bound "
+        "card and excerpt URIs for read_library_resource. Results are "
+        "bounded, not exhaustive; follow next_step when more retrieval is "
+        "needed."
+    ),
+)
+def search_library(query: str, limit: int = 5):
+    return uoink_mcp_tools.call_tool("search_library", {"query": query, "limit": limit})
+
+
+@mcp.tool(
+    name="get_library_item",
+    description=(
+        "Resolve one saved item by video_id or slug (exactly one) and return "
+        "its default Librarian evidence card unchanged plus canonical card, "
+        "excerpt and initial corpus-chunk URIs. Bounded; use before quoting."
+    ),
+)
+def get_library_item(video_id: str | None = None, slug: str | None = None):
+    args: dict = {}
+    if video_id is not None:
+        args["video_id"] = video_id
+    if slug is not None:
+        args["slug"] = slug
+    return uoink_mcp_tools.call_tool("get_library_item", args)
+
+
+@mcp.tool(
+    name="read_library_resource",
+    description=(
+        "Read one uoink://library/v1/ resource URI (card, excerpt, corpus "
+        "chunk, shelf page or brief) with the same validation, contents and "
+        "refusals as resources/read. Fallback for clients without native "
+        "resource reads; identical text, one renderer."
+    ),
+)
+def read_library_resource(uri: str):
+    return uoink_mcp_tools.call_tool("read_library_resource", {"uri": uri})
+
+
+def _register_phase4_stdio() -> None:
+    """Low-level resource, prompt and tool-execution handlers (see above).
+    Any missing piece degrades to FastMCP's defaults with a stderr note
+    rather than failing startup; the 25 canonical tools are untouched."""
+    try:
+        import library_prompts
+        import library_resources
+    except ImportError as exc:
+        print(f"Uoink MCP: Phase 4 library modules unavailable ({exc}); "
+              "resources and prompts are not served.", file=sys.stderr)
+        return
+    try:
+        from mcp import types as mcp_types
+        from mcp.shared.exceptions import McpError
+    except ImportError as exc:  # pragma: no cover -- SDK reshaped
+        print(f"Uoink MCP: cannot register Phase 4 handlers ({exc}).", file=sys.stderr)
+        return
+    try:
+        from mcp.server.lowlevel.helper_types import ReadResourceContents
+    except ImportError:  # pragma: no cover -- SDK reshaped; duck-typed by the decorator
+        class ReadResourceContents:  # type: ignore[no-redef]
+            def __init__(self, content, mime_type=None):
+                self.content = content
+                self.mime_type = mime_type
+
+    low = getattr(mcp, "_mcp_server", None)
+    if low is None:  # pragma: no cover -- SDK reshaped
+        print("Uoink MCP: low-level server not exposed; Phase 4 handlers not registered.",
+              file=sys.stderr)
+        return
+
+    ResourceError = library_resources.ResourceError
+    limits = library_resources.LIMITS
+
+    def reader():
+        # Request-scoped: the deadline runs from here (library_resources rule 1).
+        return library_resources.make_reader(server)
+
+    def work_service(active_reader):
+        # Report-only: use the service only if the index already built one;
+        # constructing it could run Phase 2 recovery, which is not a read.
+        return getattr(active_reader.index, "_library_work_service", None)
+
+    def mcp_error(exc) -> McpError:
+        if exc.code == "invalid_request":
+            code = -32602
+        elif exc.code in ("resource_not_found", "resource_deleted"):
+            code = -32002
+        else:
+            code = -32603
+        return McpError(mcp_types.ErrorData(code=code, message=exc.message, data=exc.envelope()))
+
+    @low.list_resource_templates()
+    async def _phase4_list_templates():
+        return [mcp_types.ResourceTemplate(**template) for template in library_resources.TEMPLATES]
+
+    @low.list_resources()
+    async def _phase4_list_resources():
+        try:
+            entries = reader().list_resources()
+        except ResourceError as exc:
+            raise mcp_error(exc) from None
+        resources = []
+        for entry in entries:
+            fields = {"uri": entry["uri"], "name": entry["name"],
+                      "description": entry.get("description"), "mimeType": entry.get("mimeType")}
+            if isinstance(entry.get("size"), int):
+                fields["size"] = entry["size"]
+            resources.append(mcp_types.Resource(**fields))
+        return resources
+
+    @low.read_resource()
+    async def _phase4_read_resource(uri):
+        try:
+            result = reader().read(str(uri))
+        except ResourceError as exc:
+            raise mcp_error(exc) from None
+        return [ReadResourceContents(content=item["text"], mime_type=item["mimeType"])
+                for item in result["contents"]]
+
+    @low.list_prompts()
+    async def _phase4_list_prompts():
+        return [mcp_types.Prompt(
+            name=prompt["name"], description=prompt["description"],
+            arguments=[mcp_types.PromptArgument(**argument) for argument in prompt["arguments"]],
+        ) for prompt in library_prompts.PROMPTS]
+
+    @low.get_prompt()
+    async def _phase4_get_prompt(name, arguments):
+        try:
+            active = reader()
+            result = library_prompts.get_prompt(active, work_service(active), name, arguments)
+        except ResourceError as exc:
+            raise mcp_error(exc) from None
+        return mcp_types.GetPromptResult(
+            description=result["description"],
+            messages=[mcp_types.PromptMessage(
+                role=message["role"],
+                content=mcp_types.TextContent(type="text", text=message["content"]["text"]),
+            ) for message in result["messages"]],
+        )
+
+    handlers = getattr(low, "request_handlers", None)
+    if not isinstance(handlers, dict):  # pragma: no cover -- SDK reshaped
+        print("Uoink MCP: tool interception unavailable; Phase 4 tools use FastMCP's "
+              "default result shape.", file=sys.stderr)
+        return
+    fastmcp_call_tool = handlers.get(mcp_types.CallToolRequest)
+    fastmcp_list_tools = handlers.get(mcp_types.ListToolsRequest)
+
+    def tool_result(name, arguments):
+        envelope = library_resources.dispatch_tool(name, arguments if arguments is not None else {}, server)
+        text = library_resources.render_tool_text(envelope)
+        is_error = envelope.get("ok") is not True
+        payload = {"content": [{"type": "text", "text": text}], "isError": is_error}
+        if library_resources.wire_bytes(payload) + 256 > limits["max_response_bytes"]:
+            envelope = ResourceError("resource_too_large", details={
+                "what": name, "next_step": "lower limit or read a smaller resource"}).envelope()
+            text, is_error = library_resources.render_tool_text(envelope), True
+        return mcp_types.ServerResult(mcp_types.CallToolResult(
+            content=[mcp_types.TextContent(type="text", text=text)], isError=is_error))
+
+    if fastmcp_call_tool is not None:
+        async def _phase4_call_tool(req):
+            if req.params.name in library_resources.TOOL_NAMES:
+                return tool_result(req.params.name, req.params.arguments)
+            return await fastmcp_call_tool(req)
+        handlers[mcp_types.CallToolRequest] = _phase4_call_tool
+
+    if fastmcp_list_tools is not None:
+        async def _phase4_list_tools(req):
+            result = await fastmcp_list_tools(req)
+            try:
+                for tool in result.root.tools:
+                    if tool.name in library_resources.TOOL_SCHEMAS:
+                        # Same strict schema and text as the HTTP registry.
+                        tool.inputSchema = library_resources.TOOL_SCHEMAS[tool.name]
+                        tool.description = library_resources.TOOL_DESCRIPTIONS[tool.name]
+            except (AttributeError, TypeError, ValueError):  # pragma: no cover
+                pass
+            return result
+        handlers[mcp_types.ListToolsRequest] = _phase4_list_tools
+
+
+_register_phase4_stdio()
 
 
 if __name__ == "__main__":

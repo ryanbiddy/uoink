@@ -9,8 +9,8 @@ Transports: stdio, plus an experimental authenticated local HTTP JSON-RPC helper
 
 Uoink has two deliberately different tool surfaces:
 
-- Supported stdio registry: **26 tools**.
-- Local HTTP/OpenAPI registry: **82 tools**.
+- Supported stdio registry: **29 tools**.
+- Local HTTP/OpenAPI registry: **85 tools**.
 
 The supported stdio MCP surface covers extraction, playlist jobs, search,
 clip search and evidence cards, corpus retrieval, citation maps, health
@@ -870,6 +870,53 @@ Report deterministic library activity, shelf churn, and source observations.
 ```
 
 The operation returns pure aggregation over saved items, shelf movements, and source observations, bounded by half-open UTC intervals, survivor baseline proof, and explicit provenance.
+
+### search_library
+
+Bounded clip-first search of the saved library (default 5, at most 20 hits)
+with an item-text fallback for items without clips (Phase 4, contract
+`phase4-v1-2026-09-08`, run AV-1).
+
+```json
+{ "query": "agent harness", "limit": 5 }
+```
+
+Each hit carries the item id, source revision, safe title and link, evidence
+kind and timing, a bounded preview and revision-bound card and excerpt URIs
+for `read_library_resource`. A `next_step` says when more retrieval is
+needed; the result never claims an exhaustive search.
+
+### get_library_item
+
+Resolve one saved item by `video_id` or `slug` (exactly one) and return its
+default Librarian evidence card unchanged plus canonical card, excerpt and
+initial corpus-chunk URIs.
+
+```json
+{ "slug": "some-saved-item" }
+```
+
+If corpus-chunk admission fails, that is reported separately while the card
+stays usable.
+
+### read_library_resource
+
+Read one `uoink://library/v1/...` resource URI (card, excerpt, corpus chunk,
+shelf page or brief) with the same validation, contents and refusals as the
+stdio `resources/read` method: the fallback for a client that cannot attach a
+template-derived URI natively (Claude Code CLI 2.1.261 has no native resource
+reader).
+
+```json
+{ "uri": "uoink://library/v1/items/<item_key>/cards/<source_revision>/<selection>/<card_hash>" }
+```
+
+Refusals use the Phase 4 domain envelope (`invalid_request`,
+`resource_not_found`, `resource_deleted`, `revision_unavailable`,
+`resource_too_large`, `library_unavailable`, `deadline_exceeded`,
+`rate_limited`, ...). Stdio also advertises five resource templates and four
+prompts (`consult-library`, `evidence-brief`, `whats-new`, `reshelve-review`);
+HTTP stays tools-only.
 
 ## Rate limits and abuse mitigations
 

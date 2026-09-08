@@ -76,7 +76,11 @@ NEW_PHASE4_READ_TOOLS = {
     "read_library_resource",
 }
 
-TOTAL_AV1_TOOLS = CANONICAL_25_TOOLS | NEW_PHASE4_READ_TOOLS
+# Phase 5 run AZ (contract phase5-v1) registered one stdio tool in parallel with AV-1;
+# discovery must advertise exactly the implemented set (P4-06), so it is expected here.
+PHASE5_ACTIVITY_TOOLS = {"get_library_activity"}
+
+TOTAL_AV1_TOOLS = CANONICAL_25_TOOLS | NEW_PHASE4_READ_TOOLS | PHASE5_ACTIVITY_TOOLS
 
 
 class _StdioTestClient:

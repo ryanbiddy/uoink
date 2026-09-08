@@ -106,11 +106,13 @@ def seed_yoink_item(
     idx.upsert_yoink(item_row)
 
     if deleted_at is not None:
-        with idx._conn() as conn:
-            conn.execute(
+        # Index._conn is the sqlite3.Connection attribute, guarded by Index._lock.
+        with idx._lock:
+            idx._conn.execute(
                 "UPDATE yoinks SET deleted_at = ? WHERE video_id = ?",
                 (deleted_at, video_id),
             )
+            idx._conn.commit()
 
     clip_records = []
     if clips:
