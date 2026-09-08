@@ -1,4 +1,4 @@
-CREATE TABLE media_depth (
+CREATE TABLE IF NOT EXISTS media_depth (
     video_id TEXT PRIMARY KEY NOT NULL,
     source_revision TEXT NOT NULL CHECK (
         length(source_revision)=64 AND source_revision NOT GLOB '*[^0-9a-f]*'),
@@ -20,7 +20,7 @@ CREATE TABLE media_depth (
     UNIQUE (video_id, source_revision)
 );
 
-CREATE TABLE diarization_runs (
+CREATE TABLE IF NOT EXISTS diarization_runs (
     video_id TEXT NOT NULL,
     run_id TEXT NOT NULL CHECK (
         length(run_id) BETWEEN 1 AND 96 AND run_id NOT GLOB '*[^A-Za-z0-9_-]*'),
@@ -41,7 +41,7 @@ CREATE TABLE diarization_runs (
     FOREIGN KEY (video_id) REFERENCES yoinks(video_id) ON DELETE CASCADE
 );
 
-CREATE TABLE chapters (
+CREATE TABLE IF NOT EXISTS chapters (
     video_id TEXT NOT NULL,
     source_revision TEXT NOT NULL,
     seq INTEGER NOT NULL CHECK (seq >= 0),
@@ -54,7 +54,7 @@ CREATE TABLE chapters (
     FOREIGN KEY (video_id, source_revision)
         REFERENCES media_depth(video_id, source_revision) ON DELETE CASCADE
 );
-CREATE INDEX idx_chapters_video_time ON chapters(video_id, start, end);
+CREATE INDEX IF NOT EXISTS idx_chapters_video_time ON chapters(video_id, start, end);
 
 ALTER TABLE citations ADD COLUMN speaker TEXT;
 ALTER TABLE citations ADD COLUMN speaker_provenance_json TEXT CHECK (
@@ -72,6 +72,6 @@ ALTER TABLE clips ADD COLUMN speaker_spans_json TEXT NOT NULL DEFAULT '[]'
 ALTER TABLE clips ADD COLUMN chapter_seq INTEGER CHECK (chapter_seq IS NULL OR chapter_seq >= 0);
 ALTER TABLE clips ADD COLUMN chapter_seqs_json TEXT NOT NULL DEFAULT '[]'
     CHECK (json_valid(chapter_seqs_json) AND json_type(chapter_seqs_json)='array');
-CREATE INDEX idx_clips_chapter ON clips(video_id, chapter_seq);
-CREATE INDEX idx_clips_speaker ON clips(video_id, speaker);
-CREATE INDEX idx_citations_speaker ON citations(video_id, speaker);
+CREATE INDEX IF NOT EXISTS idx_clips_chapter ON clips(video_id, chapter_seq);
+CREATE INDEX IF NOT EXISTS idx_clips_speaker ON clips(video_id, speaker);
+CREATE INDEX IF NOT EXISTS idx_citations_speaker ON citations(video_id, speaker);

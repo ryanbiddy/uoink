@@ -9,7 +9,8 @@ No server or whisper_runner module is imported, including during collection.
 The intentional library_media import fails until BC-1 supplies that module.
 
 0030 is staged from the contract into a disposable migration directory until
-the real file ships; then its SQL must equal the frozen DDL. 0029 is never used.
+the real file ships; then its SQL must equal the frozen DDL, including BD-0's
+IF NOT EXISTS guards and populated marker-loss replay. 0029 is never used.
 Publication fixture convention: artifacts is {absolute_owned_path: file_bytes};
 the final sidecar remains the completion record. This is fixture plumbing for
 the brief's otherwise untyped artifacts argument, not an extra public API.
@@ -209,7 +210,13 @@ def sandbox(monkeypatch):
 def _ddl():
     text = CONTRACT.read_text(encoding="utf-8")
     section = text.split("## Migration 0030\n", 1)[1].split("## Canonical data", 1)[0]
-    return re.search(r"```sql\n(.*?)\n```", section, re.S).group(1) + "\n"
+    ddl = re.search(r"```sql\n(.*?)\n```", section, re.S).group(1) + "\n"
+    creates = [stmt for stmt in index_mod._iter_sql_statements(ddl)
+               if re.match(r"CREATE\b", stmt, re.I)]
+    assert len(creates) == 7
+    assert all(re.match(r"CREATE\s+(?:TABLE|INDEX)\s+IF\s+NOT\s+EXISTS\b", stmt, re.I)
+               for stmt in creates), "BD-0 requires replay-safe CREATE statements"
+    return ddl
 
 
 def _migrate(env, conn, *, phase6=True):
@@ -595,6 +602,21 @@ def test_gate_6_fix_schema_migration_0030(sandbox):
     conn.rollback()
     other = _fixture(env, key="migration-cascade")
     _seed(conn, other)
+    # BD-0: replay after durable DDL but a missing version marker, including
+    # populated Phase 6 rows. A no-op at version 30 does not exercise replay.
+    tables = ("yoinks", "citations", "clips", "media_depth", "chapters", "diarization_runs")
+    replay_before = {table: list(conn.execute(f"SELECT * FROM {table} ORDER BY rowid"))
+                     for table in tables}
+    schema_before = list(conn.execute("SELECT type, name, tbl_name, sql FROM sqlite_master ORDER BY name"))
+    hits_before = list(conn.execute("SELECT rowid FROM clips_fts WHERE clips_fts MATCH 'LSM'"))
+    conn.execute("DELETE FROM schema_version WHERE version=30")
+    conn.commit()
+    assert _migrate(env, conn) == 30
+    assert conn.execute("SELECT COUNT(*) FROM schema_version WHERE version=30").fetchone()[0] == 1
+    assert list(conn.execute("SELECT type, name, tbl_name, sql FROM sqlite_master ORDER BY name")) == schema_before
+    assert {table: list(conn.execute(f"SELECT * FROM {table} ORDER BY rowid"))
+            for table in tables} == replay_before
+    assert list(conn.execute("SELECT rowid FROM clips_fts WHERE clips_fts MATCH 'LSM'")) == hits_before
     chapter = _rows(conn, "chapters", other.item["video_id"])[0]
     with pytest.raises(sqlite3.IntegrityError):
         _insert(conn, "chapters", chapter)

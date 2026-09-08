@@ -3,6 +3,11 @@
 Contract version: `phase6-v1`. Date: 2026-09-08. Owner: codex (Astra).
 Run: BB-codex. Implementation: BC. Acceptance: BD.
 
+BD-0 amendment (2026-09-08): Migration 0030 now requires `IF NOT EXISTS`
+on every `CREATE`, preserving the runner's replay guarantee. The wire contract
+version remains `phase6-v1`; shapes and hashes are unchanged. See the
+[BD-0 ruling](PHASE6-BD0-2026-09-08.md) for the amendment and BC-1 review.
+
 BC must preserve the existing clip text, boundaries and excerpt identities while
 adding revision-bound media annotations. A citation can say which local label
 accompanies a passage, where that label came from, and which source chapter
@@ -99,14 +104,20 @@ under their old URIs. Phase 6 export carries the additional media binding.
 ## Migration 0030
 
 Reserve `migrations/0030_media_depth.sql`. `0029` remains reserved for Phase 4.
-The following is the complete frozen DDL for BC to create; BB creates no migration
-file. Apply through the existing transactional migration runner with foreign keys
-enabled. Do not edit 0024/0026, rebuild the clips table, change FTS text or add a
+The following is the complete frozen DDL, amended in BD-0. The shipped file must
+match this DDL. Apply through the existing transactional migration runner with
+foreign keys enabled. Every `CREATE TABLE` and `CREATE INDEX` uses `IF NOT EXISTS`.
+Keep `ALTER TABLE ... ADD COLUMN` routed through the runner's existing
+`_safe_alter_add_column` helper, which skips an already-present column. If DDL
+exists but its version marker is missing, replay must preserve the schema, all
+populated rows and FTS results, then restore exactly one version-30 marker.
+An already-recorded version 30 requires no new migration. Do not edit 0024/0026,
+rebuild the clips table, change FTS text or add a
 global speaker/entity table. An upgrade initializes nullable/empty annotations
 and performs no network, model execution or automatic sidecar scan.
 
 ```sql
-CREATE TABLE media_depth (
+CREATE TABLE IF NOT EXISTS media_depth (
     video_id TEXT PRIMARY KEY NOT NULL,
     source_revision TEXT NOT NULL CHECK (
         length(source_revision)=64 AND source_revision NOT GLOB '*[^0-9a-f]*'),
@@ -128,7 +139,7 @@ CREATE TABLE media_depth (
     UNIQUE (video_id, source_revision)
 );
 
-CREATE TABLE diarization_runs (
+CREATE TABLE IF NOT EXISTS diarization_runs (
     video_id TEXT NOT NULL,
     run_id TEXT NOT NULL CHECK (
         length(run_id) BETWEEN 1 AND 96 AND run_id NOT GLOB '*[^A-Za-z0-9_-]*'),
@@ -149,7 +160,7 @@ CREATE TABLE diarization_runs (
     FOREIGN KEY (video_id) REFERENCES yoinks(video_id) ON DELETE CASCADE
 );
 
-CREATE TABLE chapters (
+CREATE TABLE IF NOT EXISTS chapters (
     video_id TEXT NOT NULL,
     source_revision TEXT NOT NULL,
     seq INTEGER NOT NULL CHECK (seq >= 0),
@@ -162,7 +173,7 @@ CREATE TABLE chapters (
     FOREIGN KEY (video_id, source_revision)
         REFERENCES media_depth(video_id, source_revision) ON DELETE CASCADE
 );
-CREATE INDEX idx_chapters_video_time ON chapters(video_id, start, end);
+CREATE INDEX IF NOT EXISTS idx_chapters_video_time ON chapters(video_id, start, end);
 
 ALTER TABLE citations ADD COLUMN speaker TEXT;
 ALTER TABLE citations ADD COLUMN speaker_provenance_json TEXT CHECK (
@@ -180,9 +191,9 @@ ALTER TABLE clips ADD COLUMN speaker_spans_json TEXT NOT NULL DEFAULT '[]'
 ALTER TABLE clips ADD COLUMN chapter_seq INTEGER CHECK (chapter_seq IS NULL OR chapter_seq >= 0);
 ALTER TABLE clips ADD COLUMN chapter_seqs_json TEXT NOT NULL DEFAULT '[]'
     CHECK (json_valid(chapter_seqs_json) AND json_type(chapter_seqs_json)='array');
-CREATE INDEX idx_clips_chapter ON clips(video_id, chapter_seq);
-CREATE INDEX idx_clips_speaker ON clips(video_id, speaker);
-CREATE INDEX idx_citations_speaker ON citations(video_id, speaker);
+CREATE INDEX IF NOT EXISTS idx_clips_chapter ON clips(video_id, chapter_seq);
+CREATE INDEX IF NOT EXISTS idx_clips_speaker ON clips(video_id, speaker);
+CREATE INDEX IF NOT EXISTS idx_citations_speaker ON citations(video_id, speaker);
 ```
 
 SQLite enforces local shapes, keys and cascades. The common media validator must
