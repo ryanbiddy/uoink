@@ -53,15 +53,15 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08 ~17:00 PDT; HEAD `48655c5`; not pushed)
+## State at handoff (updated 2026-09-08 16:24 PDT; implementation/review HEAD `6807361`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
-| 3 | AS-8 (`5affb08`): everything closed except one archived file (helper/server.log, now force-added) and C22 | AS-9 RUNNING (codex run `a13febd1`, confirmation only) | Integrate AS-9; if "accepted subject to C22 only", record it here; C22 = Ryan's installed Inno receipt (AS-7 lists it) |
+| 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
 | 4 | AV-5r integrated (`99e9412`): D01-D03 closed; AW-3 set 5 of 16 closed | `PHASE4-ACCEPTANCE-3-2026-09-08.md` | AV-5m1 RUNNING (gemini run `b31e890f`, D07-D10); then AV-5m2 (grok D12-D15) from `PHASE4-AV5-BRIEF`; then AW-4 (codex); then the real-client rerun per AW-3's five requirements (claude -p on the subscription, no paid API) |
-| 5 | AZ-5c/5e (`46163a4`), AZ-5f (`1fb7f78`), AZ-5b (`48655c5`) integrated: BA-3 acceptance set 23 of 52 closed, dashboard3 7/7, measurements3 0/3 | `PHASE5-ACCEPTANCE-3-2026-09-08.md` | AZ-5a2 RUNNING (claude run `6e929e1d`: apply `docs/library/patches/az5a-gemini-2026-09-08.patch`, compact descriptors; must keep `tests/test_library_analysis_fixtures.py` 28/28); then AZ-5d (grok BA-09/10/11), AZ-5g (gemini BA-14), then BA-4 (codex) |
-| 6 | BC-3b integrated (`effd145`): BD-02/BD-07 closed, BD set 6 of 14 closed; navigation study passed numerically; BD-27 player observation PARTIAL twice (googlevideo 503 in the automated Chrome session); speaker gate blocked (Ryan) | `PHASE6-BD-2026-09-08.md` | Dispatch BC-3a (claude or gemini: BD-01/03/05/06) and BC-3c (gemini: BD-04/08/09) from `PHASE6-BC3-BRIEF`; then BD-2 (codex); BD-27 needs a normal browser session (Ryan can do it in 1 minute: open https://www.youtube.com/watch?v=D_FCYsshMI4&t=34s, confirm the player starts at 0:34 in chapter "Why computer use", screenshot) |
+| 5 | AZ-5c/5e (`46163a4`), AZ-5f (`1fb7f78`), AZ-5b (`48655c5`) integrated: BA-3 acceptance set 23 of 52 closed, dashboard3 7/7, measurements3 0/3. AZ-5a2 rejected: fixture pagination returns 12 of the required 20 rows | `PHASE5-ACCEPTANCE-3-2026-09-08.md`; AZ-5a2 worktree verification: 326 passed, 26 failed; fixture set 27/28 | Write AZ-5a3 with measured byte counts and preserve AZ-5a2 unapplied; then AZ-5d (grok BA-09/10/11), AZ-5g (gemini BA-14), then BA-4 (codex) |
+| 6 | BC-3b integrated (`effd145`): BD-02/BD-07 closed, BD set 6 of 14 closed; navigation study passed numerically; BD-27 player observation PARTIAL twice (googlevideo 503 in the automated Chrome session); speaker gate blocked (Ryan) | `PHASE6-BD-2026-09-08.md` | BC-3a RUNNING (gemini `eb0f138e`, BD-01/03/05/06) and BC-3c RUNNING (grok `ff01d490`, BD-04/08/09), both at `fc99942`; then BD-2 (codex). BD-27 and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -70,13 +70,14 @@ open reproduction sets deselected (AW-3 11 open, BA-3 29+3 open, BD 8 open at HE
 
 ## Queue (in order; each item names its brief)
 
-Running at handoff (Control Room run ids): AS-9 codex `a13febd1`; AZ-5a2 claude `6e929e1d`;
-AV-5m1 gemini `b31e890f`. Worktrees under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
-Verify each in its worktree (the suites its brief names), integrate, commit.
+Takeover runs: AS-9 codex `a13febd1` integrated at `6807361`; AZ-5a2 claude `6e929e1d`
+finished but rejected; AV-5m1 gemini `b31e890f` verified in its worktree, integration pending.
+BC-3a gemini `eb0f138e` and BC-3c grok `ff01d490` are running.
+Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
-1. AS-9 (Phase 3): integrate `docs/library/PHASE3-ACCEPTANCE-9-2026-09-08.md` and
-   `test_phase3_acceptance9.py`. Expected: accepted subject to C22 only. Record it in the
-   State table. C22 stays under Blockers for Ryan.
+1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
+   Blockers for Ryan. Four unchanged assertions against superseded AT6/browser evidence
+   remain failures; AS-8/AS-9 cover the replacement at7 evidence.
 2. AZ-5a2 (Phase 5): its 11 BA-01/BA-03 reproductions in `test_phase5_acceptance3.py` plus
    `tests/test_library_analysis_fixtures.py` 28/28 (the 64 KiB cap) plus the existing Phase 5
    suites. If the fixture tests still fail, do not integrate; write AZ-5a3 with the byte
@@ -87,8 +88,7 @@ Verify each in its worktree (the suites its brief names), integrate, commit.
    `PHASE4-AV5-BRIEF-2026-09-08.md`; then AW-4 (codex); then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
-4. Phase 6: dispatch BC-3a and BC-3c from `PHASE6-BC3-BRIEF-2026-09-08.md` now (claude is
-   busy with AZ-5a2; gemini with AV-5m1; use whichever frees first, or grok for BC-3c).
+4. Phase 6: verify and integrate running BC-3a and BC-3c from `PHASE6-BC3-BRIEF-2026-09-08.md`.
    Then BD-2 (codex). BD-27 player observation and the speaker gate: Ryan.
 5. Full tree after each phase closes: `python -B -m pytest -q -p no:cacheprovider tests
    --ignore=tests/library_work_astra/test_phase3_s21.py` with `PHASE3_REQUIRE_IMPLEMENTATION=1`
@@ -115,3 +115,28 @@ core.longpaths true` must stay set (worktree checkouts fail without it).
   (BD lists the exact requirement); the BD-27 player observation needs a network session where
   googlevideo streams load (attempt 1 hit 503).
 - Standing: ORCHESTRATION-V1 signature, watchdog install, PR strategy, adapter allow-list.
+
+## Integrator log
+
+### 2026-09-08 16:24 PDT — Astra takeover and AS-9
+
+Actual takeover checkout was clean at `fc99942`; the earlier ~17:00 handoff time was
+approximate. AS-9 is integrated at `6807361`. Integrator verification in both its
+worktree and the checkout reproduced 11 confirmation passes, 178 strict passes with
+the same four superseded-evidence failures, 394 companion passes and 35 dashboard
+passes. No assertion was changed or relabelled. S21 execution was explicitly excluded.
+Commands and output are retained locally under each root's `_scratch/ig-as9-w` or
+`_scratch/ig-as9-c`; the scratch integrator runner redirects profile/output/temp roots,
+preserves installed Python dependency paths and blocks live-index and port-5179 access.
+
+AV-5m1's worktree is older than AV-5r: its 198 passes include D07-D10 (4), the passing
+AW-3 control (1), AW/AW-2 (60) and Phase 4 units (133). Its 12 failures are the five
+D01-D03 cases already repaired in the checkout and seven D12-D15 cases queued for
+AV-5m2. Recheck the combined candidate after integration.
+
+AZ-5a2's worker had no executable shell and reported estimates only. Integrator checks
+found 326 passes and 26 failures on its older base, including a real fixture regression:
+pagination returns 12 rows instead of 20. The 18 BA-01/BA-03 reproductions pass and the
+fixture suite is 27/28. Do not integrate this diff. BA-2 raw packet measurements changed
+from retained 59,281/59,190 bytes to observed 58,694/58,369; that documentation assertion
+also remains failed. AZ-5a3 must repair compaction before the measurement refresh.
