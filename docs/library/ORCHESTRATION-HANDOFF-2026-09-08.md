@@ -11,9 +11,9 @@ is the authoritative history when this file lags.
 Fable's weekly subscription budget is nearly spent, so Astra (Codex) takes over as
 integrator and orchestrator from this point. Ryan pastes the prompt below into Codex
 directly (Codex CLI or app), with the working directory set to the checkout
-`E:\\AI\\projects\\uoink\\checkouts\\Yoink-library`. Astra works on the branch itself in that
+`E:\AI\projects\uoink\checkouts\Yoink-library`. Astra works on the branch itself in that
 checkout (not a Control Room worktree) so it can commit; it dispatches workers with the
-Control Room from `E:\\AI\\projects\\agent-control-room` exactly as Fable did.
+Control Room from `E:\AI\projects\agent-control-room` exactly as Fable did.
 
 ```text
 You are GPT-6 Astra, now the integrator and orchestrator of the uoink Living Library program while Fable (Claude) is out of budget. Work in E:\AI\projects\uoink\checkouts\Yoink-library on branch cc/living-library. Read docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md completely before doing anything, then follow its Standing rules, its "How runs work" section and its Queue in order. Your loop: (1) for each finished Control Room run, verify the worker's diff in its worktree by running the suites its brief names, then integrate with `git diff > patch` in the worktree and `git apply --3way` in the checkout, rerun the suites in the checkout, and commit with the message form in the handoff; (2) dispatch the next runs from the briefs the queue names with `node bin/control-room.mjs run "uoink-library" "<goal>" --mode work --strategy parallel --agents <engine> --lead <engine> --approve` from E:\AI\projects\agent-control-room (engines: claude, gemini, grok; use codex for reviews, which you may also perform yourself in the checkout when the queue says "codex"); (3) after every integration update the handoff's State table and Queue and commit it; (4) append a dated entry to the handoff whenever you learn something an integrator needs. Hard rules: never push; never open or write %LOCALAPPDATA%\Uoink\index.db or contact port 5179; never set ANTHROPIC_API_KEY or spend paid API; librarian_apply_enabled stays false; never edit acceptance tests to make them pass; never relabel a failed or partial measurement as passed; a rerun needs a documented repair and a brief; when a decision is Ryan's (0.90 rule, installed Inno receipts, speaker-gate material, new fetch scope, merge to main) write it under "Blockers for Ryan" in the handoff and continue with everything else. Keep going until every phase is accepted or blocked only on Ryan, then build the integration candidate and release notes the queue describes. Report to Ryan in short status messages naming commits and open items.
@@ -71,7 +71,7 @@ open reproduction sets deselected (AW-3 11 open, BA-3 29+3 open, BD 8 open at HE
 ## Queue (in order; each item names its brief)
 
 Running at handoff (Control Room run ids): AS-9 codex `a13febd1`; AZ-5a2 claude `6e929e1d`;
-AV-5m1 gemini `b31e890f`. Worktrees under `%LOCALAPPDATA%\\AgentControlRoom\\worktrees\\uoink-library\\<run8>-<3>\\<engine>`.
+AV-5m1 gemini `b31e890f`. Worktrees under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 Verify each in its worktree (the suites its brief names), integrate, commit.
 
 1. AS-9 (Phase 3): integrate `docs/library/PHASE3-ACCEPTANCE-9-2026-09-08.md` and
