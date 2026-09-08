@@ -50,14 +50,14 @@ takeover only. Commit message form: `<Phase> (<run id>, <engine>): <what>` and t
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08 ~10:20 PDT; not pushed)
+## State at handoff (updated 2026-09-08 ~11:05 PDT; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
-| 3 | Round 5: AS-01/04/05/06 closed; AS-02 (2) and AS-03 (3) open, 12 reproductions in `tests/library_work_astra/test_phase3_acceptance5.py` | `PHASE3-ACCEPTANCE-5-2026-09-08.md`; conditions C20 (browser matrix), C21 (launcher reconciliation), C22 (installed Inno, Ryan) | Run AT-6: brief to write from the AS-5 defect table (Grok did AT-5 well); then S21 rerun, C20/C21 browser work, AS-6 |
-| 4 | Acceptance set 32/32 after AV-3m (Gemini), AV-3r (Claude), AV-3s (Gemini); Phase 4 suites 208 | AW-2 review dispatched | Integrate the AW-2 verdict; rerun the real-client AW sessions on the repaired candidate if Astra requires |
-| 5 | Second-round set at 15 failing (BA-12 dashboard 9, BA-13 4, BA-14 2) | `PHASE5-ACCEPTANCE-2-2026-09-08.md` NOT ACCEPTED | AZ-4c (Gemini: BA-13/14) dispatched; BA-12 dashboard for Grok after AT-6 (`test_phase5_dashboard2.py`); then BA-3 review |
+| 3 | Round 6 integrated (`1830b7a`, Astra suite 150/150); S21, process-recovery and real-child probe receipts and C21 browser screenshots on that candidate | AS-6 dispatched | Integrate the AS-6 verdict; C20 browser matrix still mine; C22 Inno is Ryan's |
+| 4 | AW-2 NOT ACCEPTED at a finer grain: 14 items, 26 reproductions in `test_phase4_aw2_acceptance.py` | `PHASE4-ACCEPTANCE-2-2026-09-08.md` | AV-4m (gemini: D07-D16) then AV-4r (grok: D01-D04) dispatched as one chained job; then AW-3 |
+| 5 | Both rounds green (145/145) after AZ-4a..4d | BA-3 dispatched | Integrate the BA-3 verdict |
 | 6 | BC-1 integrated (19/19 tests); 0030 amendment applied | `PHASE6-BD0-2026-09-08.md`: BC-1 not complete | Run BC-2 from `PHASE6-BC2-BRIEF-2026-09-08.md` (claude after 11:50 PT, or gemini); then BD with the measured study (35 items with real chapters under the corpus root's metadata.json files; speaker gate likely blocked) |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
@@ -66,13 +66,12 @@ recovery). Full suite last run at `61eeb07`: 1,461 passed.
 
 ## Queue (in order; each item names its brief or how to write it)
 
-1. AT-6 (Phase 3 round 6): DISPATCHED to grok (the AS-5 defect table is the specification;
-   goal text in the Control Room `runs` table). Target: all `tests/library_work_astra/test_phase3_*.py`
-   green with `PHASE3_REQUIRE_IMPLEMENTATION=1` (150 tests), companions 365. Then the S21
-   rerun, the process-recovery receipt, and AS-6.
-2. AW-2 (Phase 4 second review): DISPATCHED to codex. Integrate its verdict.
-3. AZ-4c (Phase 5 BA-13/14): DISPATCHED to gemini. BA-12 dashboard (9 tests in
-   `test_phase5_dashboard2.py`) goes to grok after AT-6. Then BA-3 review.
+1. AS-6 (Phase 3): DISPATCHED to codex. Integrate; if NOT ACCEPTED, write the round-7 brief
+   from its defect table and dispatch grok (grok closed rounds 4-6).
+2. BA-3 (Phase 5): DISPATCHED to codex. Integrate; if NOT ACCEPTED, group the defects (3-5
+   per session) for gemini/grok.
+3. AV-4m then AV-4r (Phase 4): DISPATCHED (one chained job: gemini mirror/briefs, then grok
+   readers). Integrate both; then AW-3 (codex).
 4. BC-2 (Phase 6): brief `PHASE6-BC2-BRIEF-2026-09-08.md`; claude (after 11:50 PT) or gemini.
 5. Reviews when candidates are ready: AS-6, AW-2, BA-3, BD (Astra).
 6. S21 rerun after AT-6 (`python -B tests/library_work_astra/test_phase3_s21.py --execute-s21 --hold-seconds 20`
