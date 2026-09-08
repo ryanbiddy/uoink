@@ -130,11 +130,16 @@ def add_feed(idx, feed_url: str, *, poll_interval_min: int = 60,
         raise ValueError("feed_url must be a valid http(s) URL")
     interval = max(15, min(int(poll_interval_min or 60), 1440))
     with idx.write_transaction() as conn:
+        # Phase 3: once the source tables exist, the old boolean can no longer
+        # opt a feed in. The feed is projected as an off standing source; consent
+        # needs the confirmed set_source_consent operation and its receipt.
+        managed = _subscriptions().tables_present(conn)
+        stored_auto_ingest = 0 if managed else (1 if auto_ingest else 0)
         cur = conn.execute(
             "INSERT OR IGNORE INTO podcast_feeds "
             "(feed_url, poll_interval_min, auto_ingest, added_at) "
             "VALUES (?, ?, ?, ?)",
-            (canonical, interval, 1 if auto_ingest else 0, _now_iso()))
+            (canonical, interval, stored_auto_ingest, _now_iso()))
         if cur.rowcount == 0:
             # Already present; return that row.
             row = conn.execute(
@@ -144,7 +149,15 @@ def add_feed(idx, feed_url: str, *, poll_interval_min: int = 60,
             row = conn.execute(
                 "SELECT * FROM podcast_feeds WHERE id=?",
                 (cur.lastrowid,)).fetchone()
-    return dict(row) if row else {}
+        result = dict(row) if row else {}
+        if result and managed:
+            result["source_id"] = _subscriptions().legacy_register(
+                conn, kind="podcast_rss", url=result["feed_url"],
+                feed_id=int(result["id"]), interval=interval,
+                detection_enabled=bool(result.get("enabled", 1)))
+            if auto_ingest:
+                result["consent_required"] = True
+    return result
 
 
 def get_feed(idx, feed_id: int) -> dict | None:
@@ -173,9 +186,38 @@ def list_feeds(idx, *, enabled_only: bool = False) -> list[dict]:
     return [dict(r) for r in rows]
 
 
+class ManagedBySubscription(ValueError):
+    """The feed is a Phase 3 standing source; the old boolean route cannot
+    change its consent (contract phase3-v1-2026-09-07, "Consent and
+    enrollment": consent needs a user-confirmed operation and a receipt)."""
+
+    def __init__(self, source_id: str):
+        super().__init__(
+            "standing capture consent for this feed is managed by source "
+            "subscriptions; use set_source_consent")
+        self.source_id = source_id
+
+
+def _subscriptions():
+    """Lazy import: podcasts.py stays importable on trees without Phase 3."""
+    import source_subscriptions  # noqa: WPS433
+    return source_subscriptions
+
+
 def remove_feed(idx, feed_id: int) -> bool:
-    """Delete a feed + its episodes (FK cascade)."""
+    """Delete a feed + its episodes (FK cascade).
+
+    Phase 3: a feed linked to a source subscription is archived instead. The
+    subscription, its consent receipts, items and ledger rows reference the
+    feed and must survive (contract, "Migration 0028 schema": old delete
+    routes archive the source and preserve referenced rows)."""
     with idx.write_transaction() as conn:
+        source_id = _subscriptions().legacy_archive(conn, feed_id=int(feed_id))
+        if source_id is not None:
+            cur = conn.execute(
+                "UPDATE podcast_feeds SET enabled=0, auto_ingest=0 WHERE id=?",
+                (feed_id,))
+            return cur.rowcount > 0
         cur = conn.execute(
             "DELETE FROM podcast_feeds WHERE id=?", (feed_id,))
         return cur.rowcount > 0
@@ -186,16 +228,26 @@ def set_feed_enabled(idx, feed_id: int, enabled: bool) -> bool:
         cur = conn.execute(
             "UPDATE podcast_feeds SET enabled=? WHERE id=?",
             (1 if enabled else 0, feed_id))
+        # The old flag is a compatibility projection of the authoritative
+        # detection flag; keep the two in step.
+        _subscriptions().legacy_set_detection(
+            conn, feed_id=int(feed_id), enabled=bool(enabled))
         return cur.rowcount > 0
 
 
 def set_feed_auto_ingest(idx, feed_id: int, auto_ingest: bool) -> bool:
     """Set the explicit audio/transcription opt-in for one feed.
 
-    Back-catalog eligibility is evaluated by the scheduler, from the current
-    feed flag, instead of being frozen into every episode at insert time.
+    Phase 3: once a feed is linked to a source subscription this boolean can
+    no longer grant or revoke capture. Consent requires the dashboard's
+    confirmed operation, a capability token and a receipt
+    (``set_source_consent``); raising here keeps the old route from becoming
+    a bypass. Unlinked feeds (pre-import trees) keep the legacy behaviour.
     """
     with idx.write_transaction() as conn:
+        source_id = _subscriptions().legacy_source_id(conn, feed_id=int(feed_id))
+        if source_id is not None:
+            raise ManagedBySubscription(source_id)
         cur = conn.execute(
             "UPDATE podcast_feeds SET auto_ingest=? WHERE id=?",
             (1 if auto_ingest else 0, feed_id))
@@ -501,12 +553,39 @@ def record_feed_meta(idx, feed_id: int, *, title: str | None,
                 (_now_iso(), (error or "")[:512], feed_id))
 
 
-def poll_feed(idx, feed_id: int) -> dict:
+def poll_feed(idx, feed_id: int, *, refresh=None) -> dict:
     """Fetch + parse + upsert episodes for one feed. Returns a structured
-    result dict the endpoint can surface verbatim."""
+    result dict the endpoint can surface verbatim.
+
+    Phase 3: a feed linked to a source subscription is polled only through the
+    subscription service's due-time/lease gate (contract, "Scheduler and
+    adapter boundaries"). ``refresh`` is the injected ``callable(source_id)``
+    that performs that gated refresh; without it the legacy path refuses
+    rather than running a second detection authority."""
     feed = get_feed(idx, feed_id)
     if feed is None:
         return {"ok": False, "error": f"feed not found: {feed_id}"}
+    with idx._lock:
+        source_id = _subscriptions().legacy_source_id(idx._conn, feed_id=int(feed_id))
+    if source_id is not None:
+        if not callable(refresh):
+            return {"ok": False, "feed_id": feed_id, "source_id": source_id,
+                    "error": "managed_by_subscription"}
+        result = refresh(source_id)
+        shaped = {"ok": bool(result.get("ok")), "feed_id": feed_id,
+                  "source_id": source_id, "managed_by_subscription": True,
+                  "outcome": result.get("outcome"),
+                  "next_poll_at_ms": result.get("next_poll_at_ms")}
+        poll = result.get("poll") if isinstance(result.get("poll"), dict) else {}
+        shaped["inserted"] = int(poll.get("inserted") or 0)
+        shaped["seen"] = int(poll.get("updated") or 0)
+        shaped["new_episode_ids"] = []
+        if not result.get("ok"):
+            shaped["error"] = (result.get("error") or {}).get("code", "refresh_failed")
+        elif poll.get("ok") is False:
+            shaped["ok"] = False
+            shaped["error"] = poll.get("code") or "poll_failed"
+        return shaped
     if not feed.get("enabled"):
         return {"ok": True, "feed_id": feed_id, "skipped": "disabled"}
     try:
@@ -581,7 +660,28 @@ def list_auto_ingest_candidates(
     Already-started episodes may finish regardless of the daily cap. New work
     is bounded to 10 starts per UTC day per source. The default of one episode
     per feed poll still prevents a source from monopolizing the scheduler.
+
+    Phase 3: when the source tables exist, the episode marker no longer
+    authorizes anything. Only episodes whose source item currently holds a
+    ``started`` row in the capture ledger are returned, so every old caller is
+    routed through the atomic start reservation (contract, "Atomic starts").
     """
+    with idx._lock:
+        managed = _subscriptions().tables_present(idx._conn)
+        if managed:
+            feed_ids = ([int(feed_id)] if feed_id is not None else [
+                int(r[0]) for r in idx._conn.execute(
+                    "SELECT id FROM podcast_feeds").fetchall()])
+            started: list[int] = []
+            for fid in feed_ids:
+                started.extend(_subscriptions().legacy_started_episode_ids(idx._conn, fid))
+    if managed:
+        rows: list[dict] = []
+        for episode_id in started[:max(1, min(int(limit), 50))]:
+            row = get_episode_with_feed(idx, episode_id)
+            if row is not None:
+                rows.append(row)
+        return rows
     wheres = [
         "e.auto_ingest_requested = 1",
         "e.yoink_video_id IS NULL",
@@ -678,7 +778,16 @@ def repair_stranded_auto_ingest(
     scheduler computes that cohort from the feed's current consent flag. Once
     25 rows have ever been marked for a source, later repair passes do not pull
     progressively older episodes into the queue.
+
+    Phase 3: with the source tables present this pass is report-only. The
+    initial cohort is chosen once by the subscription service from its own
+    observations (contract, "Consent and enrollment"); the old marker must not
+    enlarge or replace it, so ``dry_run`` is forced on.
     """
+    with idx._lock:
+        managed = _subscriptions().tables_present(idx._conn)
+    if managed:
+        dry_run = True
     params: list[Any] = []
     feed_filter = ""
     if feed_id is not None:
@@ -764,6 +873,7 @@ def repair_stranded_auto_ingest(
         "daily_cap": AUTO_INGEST_DAILY_CAP,
         "by_feed": detail,
         "dry_run": dry_run,
+        "delegated_to": "source_subscriptions" if managed else None,
     }
 
 

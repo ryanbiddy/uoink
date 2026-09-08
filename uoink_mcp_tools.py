@@ -985,9 +985,13 @@ def poll_monitored_playlist(args: dict[str, Any]) -> dict[str, Any]:
             return None
         return server._normalize_youtube_url(
             f"https://www.youtube.com/watch?v={vid}")
+    # Phase 3: subscription-linked playlists poll through the service's
+    # due-time/lease gate and never enqueue from detection.
+    refresh = getattr(server, "_refresh_source_via_service", None)
     try:
         return _mp.poll_playlist(server._get_index(), playlist_id,
-                                    normalize_video_to_canonical_url=_vid_to_url)
+                                    normalize_video_to_canonical_url=_vid_to_url,
+                                    refresh=refresh if callable(refresh) else None)
     except Exception as e:
         return _err(f"poll_monitored_playlist failed: {e}")
 
@@ -3310,6 +3314,214 @@ def library_status(index: Any, *, apply_enabled: bool, now: float | None = None)
     return payload
 
 
+# ===========================================================================
+# Living Library, Phase 3 (run AM, 2026-09-07): the four standing-source
+# registry adapters and the dashboard consent-intent seam.
+#
+# Contract: docs/library/PHASE3-CONTRACT-2026-09-07.md (phase3-v1-2026-09-07),
+# "Registry and dashboard contract". The frozen input schemas live in
+# source_subscriptions.TOOL_SCHEMAS (one copy, embedded so an installed helper
+# needs no checkout); the adapters here only attach the trusted transport
+# context and rate limits. Both HTTP (server.py /sources/*) and MCP call
+# sources_call, so the same service, capability check and receipt apply.
+#
+# Capability check: set_source_consent carries a user_intent_token minted only
+# by POST /sources/consent-intent (dashboard, origin-gated). Registry callers
+# never mint tokens and never supply an actor string; the session a token
+# binds to is the helper's trusted session hash (server._library_session_hash),
+# derived here from the backend, never from tool JSON.
+# ===========================================================================
+
+SOURCES_CONTRACT_VERSION = "phase3-v1-2026-09-07"
+SOURCES_TOOL_NAMES = ("list_sources", "register_source", "source_status", "set_source_consent")
+_SOURCES_RATE_LIMITERS: dict[str, _RateLimiter] = {
+    "list_sources": _RateLimiter(60),
+    "register_source": _RateLimiter(30),
+    "source_status": _RateLimiter(60),
+    "set_source_consent": _RateLimiter(30),
+    "sources_intent": _RateLimiter(30),
+    "sources_route": _RateLimiter(30),
+}
+_sources_service_override: Any = None
+
+
+def set_sources_service(service: Any) -> None:
+    """Inject a service double for adapter tests; None restores the helper's."""
+    global _sources_service_override
+    _sources_service_override = service
+
+
+def _sources_module() -> Any:
+    import source_subscriptions  # noqa: WPS433
+    return source_subscriptions
+
+
+def _sources_service() -> Any:
+    if _sources_service_override is not None:
+        return _sources_service_override
+    backend = _b()
+    factory = getattr(backend, "_source_service", None)
+    if not callable(factory):
+        return None
+    return factory()
+
+
+def _sources_unavailable() -> dict[str, Any]:
+    return _sources_module().error_envelope(
+        "service_unavailable",
+        "The standing-source service is not available in this helper build; "
+        "no source was read or changed.", retryable=False)
+
+
+def _sources_context(transport: str, *, actor: str = "registry",
+                     session_hash: str | None = None) -> Any:
+    """Trusted request context. Registry callers carry no user authority; the
+    dashboard confirmation route alone sets local_user_confirmed."""
+    mod = _sources_module()
+    if session_hash is None:
+        try:
+            session_hash = _library_trusted_session(_b())
+        except RuntimeError:
+            session_hash = None  # no backend bound (adapter tests with a double)
+    return mod.RequestContext(
+        authenticated=True,
+        session_id=session_hash or transport,
+        operator=(actor == "server"),
+        local_user_confirmed=(actor == "user"),
+        transport=transport,
+    )
+
+
+def _sources_normalize(result: Any, tool_name: str) -> dict[str, Any]:
+    mod = _sources_module()
+    if not isinstance(result, dict) or not isinstance(result.get("ok"), bool):
+        _library_log.error("sources %s: service returned a malformed response", tool_name)
+        return mod.error_envelope("internal_error", "The source service returned a malformed response.",
+                                  details={"tool": tool_name})
+    out = dict(result)
+    out.setdefault("schema_version", mod.SCHEMA_VERSION)
+    out.setdefault("contract_version", mod.CONTRACT_VERSION)
+    return out
+
+
+def sources_call(tool_name: str, args: Any, *, transport: str = "registry") -> dict[str, Any]:
+    """Common adapter path for the four tools on every transport: rate limit,
+    trusted context, service (which performs the strict schema validation and
+    the capability check), contract envelope."""
+    mod = _sources_module()
+    if tool_name not in SOURCES_TOOL_NAMES:
+        return mod.error_envelope("not_found", "Unknown source tool", details={"tool": tool_name})
+    try:
+        _SOURCES_RATE_LIMITERS[tool_name].check()
+    except RateLimitExceeded as exc:
+        return mod.error_envelope("rate_limited", str(exc), retryable=True, details={"tool": tool_name})
+    if not isinstance(args, dict):
+        return mod.error_envelope("validation_error", "Arguments must be an object")
+    for forbidden in ("actor", "cap", "daily_cap", "back_catalog_cap", "adapter", "path", "now_ms"):
+        if forbidden in args:
+            # Contract: no client supplies caps, actor privileges, adapter
+            # commands, source paths or clock values. Unknown fields are also
+            # rejected by the schema; name the attempt explicitly.
+            return mod.error_envelope("validation_error", "Unknown fields",
+                                      details={"field": forbidden, "unknown": [forbidden]})
+    service = _sources_service()
+    if service is None:
+        return _sources_unavailable()
+    fn = getattr(service, tool_name, None)
+    if not callable(fn):
+        return _sources_unavailable()
+    try:
+        result = fn(_sources_context(transport), dict(args))
+    except Exception:
+        _library_log.exception("sources %s raised", tool_name)
+        return mod.error_envelope("internal_error", "The source service raised; see the helper log.",
+                                  details={"tool": tool_name})
+    return _sources_normalize(result, tool_name)
+
+
+def list_sources(args: dict[str, Any]) -> dict[str, Any]:
+    return sources_call("list_sources", args)
+
+
+def register_source(args: dict[str, Any]) -> dict[str, Any]:
+    return sources_call("register_source", args)
+
+
+def source_status(args: dict[str, Any]) -> dict[str, Any]:
+    return sources_call("source_status", args)
+
+
+def set_source_consent(args: dict[str, Any]) -> dict[str, Any]:
+    return sources_call("set_source_consent", args)
+
+
+def sources_mint_consent_intent(body: Any, *, session_hash: str) -> dict[str, Any]:
+    """Behind POST /sources/consent-intent (server.py owns auth, origin and
+    the strict decoder). Body: {"operation": <set_source_consent arguments
+    without user_intent_token>}. The service validates the operation against
+    the same schema minus the token, binds the request hash, source and
+    cursor revisions and the session, and returns the token, expiry and a
+    display summary."""
+    mod = _sources_module()
+    try:
+        _SOURCES_RATE_LIMITERS["sources_intent"].check()
+    except RateLimitExceeded as exc:
+        return mod.error_envelope("rate_limited", str(exc), retryable=True,
+                                  details={"route": "/sources/consent-intent"})
+    if not isinstance(body, dict) or set(body) - {"operation", "confirmed"}:
+        return mod.error_envelope("validation_error", "Expected {operation, confirmed}")
+    if body.get("confirmed") is not True:
+        # The dashboard sends this only from the source opt-in confirmation.
+        return mod.error_envelope("user_intent_required", "Local confirmation is required")
+    if not isinstance(session_hash, str) or len(session_hash) != 64:
+        return mod.error_envelope("internal_error", "The dashboard session could not be identified.")
+    service = _sources_service()
+    if service is None:
+        return _sources_unavailable()
+    try:
+        result = service.mint_consent_intent(
+            _sources_context("dashboard", actor="user", session_hash=session_hash),
+            {"operation": body.get("operation")})
+    except Exception:
+        _library_log.exception("sources consent intent raised")
+        return mod.error_envelope("internal_error", "Consent intent minting failed; see the helper log.")
+    return _sources_normalize(result, "sources_intent")
+
+
+def sources_service_route(method: str, body: Any, *, session_hash: str) -> dict[str, Any]:
+    """Existing-style dashboard routes (refresh, archive) on the same service.
+    They carry local dashboard authority, not a registry tool's."""
+    mod = _sources_module()
+    if method not in ("refresh_source", "archive_source"):
+        return mod.error_envelope("not_found", "Unknown source route", details={"method": method})
+    try:
+        _SOURCES_RATE_LIMITERS["sources_route"].check()
+    except RateLimitExceeded as exc:
+        return mod.error_envelope("rate_limited", str(exc), retryable=True, details={"route": method})
+    if not isinstance(body, dict):
+        return mod.error_envelope("validation_error", "Arguments must be an object")
+    service = _sources_service()
+    if service is None:
+        return _sources_unavailable()
+    try:
+        result = getattr(service, method)(
+            _sources_context("dashboard", actor="user", session_hash=session_hash), dict(body))
+    except Exception:
+        _library_log.exception("sources route %s raised", method)
+        return mod.error_envelope("internal_error", "The source service raised; see the helper log.")
+    return _sources_normalize(result, method)
+
+
+def _sources_tool_schema(name: str) -> dict[str, Any]:
+    """The frozen schema (contract JSON) for one registry tool. A helper build
+    without source_subscriptions.py (packaging is run AN) still imports; the
+    tool then answers service_unavailable."""
+    try:
+        return _sources_module().TOOL_SCHEMAS[name]
+    except ImportError:  # pragma: no cover -- unpackaged build
+        return {"type": "object", "additionalProperties": False}
+
+
 def _schema(properties: dict[str, Any], required: list[str] | None = None) -> dict[str, Any]:
     return {
         "type": "object",
@@ -3515,6 +3727,53 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
         ),
         input_schema=LIBRARY_TOOL_SCHEMAS["undo_library_apply"],
         handler=undo_library_apply,
+    ),
+    # ---- Living Library standing sources (Phase 3, run AM) ----
+    # Rate limits and the capability check live inside sources_call so every
+    # transport returns the contract's error envelope.
+    "list_sources": ToolSpec(
+        name="list_sources",
+        description=(
+            "List standing sources (podcast RSS feeds, YouTube channels and "
+            "playlists) with consent state, enrollment, today's UTC start "
+            "allowance and detection health. Read-only; keyset pagination."
+        ),
+        input_schema=_sources_tool_schema("list_sources"),
+        handler=list_sources,
+    ),
+    "register_source": ToolSpec(
+        name="register_source",
+        description=(
+            "Register a standing source for metadata detection only. Creates "
+            "the source with capture off and a due detection cursor; no "
+            "network call, no capture. A duplicate returns the existing source "
+            "unchanged (created=false)."
+        ),
+        input_schema=_sources_tool_schema("register_source"),
+        handler=register_source,
+    ),
+    "source_status": ToolSpec(
+        name="source_status",
+        description=(
+            "One source's current summary, one page of observed items with "
+            "capture and classification state, and every in-flight "
+            "reservation. Read-only: never enrolls, polls or starts work."
+        ),
+        input_schema=_sources_tool_schema("source_status"),
+        handler=source_status,
+    ),
+    "set_source_consent": ToolSpec(
+        name="set_source_consent",
+        description=(
+            "Turn standing capture on or off for one source. Requires the "
+            "expected source revision (and cursor revision when enabling), an "
+            "operation key and a user_intent_token minted by the local "
+            "dashboard confirmation; the stored receipt is returned on an "
+            "identical retry. On: at most 25 back-catalog items once, then new "
+            "items, 10 starts per UTC day. Off: releases unstarted reservations."
+        ),
+        input_schema=_sources_tool_schema("set_source_consent"),
+        handler=set_source_consent,
     ),
     "get_uoink_corpus": ToolSpec(
         name="get_uoink_corpus",

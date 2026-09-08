@@ -62,7 +62,13 @@ def add_playlist(idx, playlist_url: str, *,
     canonical = normalize_playlist_url(playlist_url)
     if not canonical:
         raise ValueError("playlist_url must be a valid youtube playlist URL")
-    interval = max(1, min(int(poll_interval_min or 5), 1440))
+    with idx._lock:
+        managed = _subscriptions().tables_present(idx._conn)
+    # Phase 3 (adapter limits section 4.2): standing sources use the podcast-
+    # class due time, minimum 15 minutes; the old 1-minute floor only survives
+    # on trees without the source tables.
+    floor = 15 if managed else 1
+    interval = max(floor, min(int(poll_interval_min or (60 if managed else 5)), 1440))
     with idx._lock:
         cur = idx._conn.execute(
             "INSERT OR IGNORE INTO monitored_playlists "
@@ -73,8 +79,20 @@ def add_playlist(idx, playlist_url: str, *,
             row = idx._conn.execute(
                 "SELECT * FROM monitored_playlists WHERE playlist_url=?",
                 (canonical,)).fetchone()
-            return _shape_row(dict(row)) if row else {}
-        playlist_id = cur.lastrowid
+            if row is None:
+                return {}
+            playlist_id = int(row["id"])
+        else:
+            playlist_id = cur.lastrowid
+        if managed:
+            # Project the registry row as an off standing source: detection
+            # only, consent never inferred from enabled=1 (contract, import).
+            _subscriptions().legacy_register(
+                idx._conn, kind="youtube_playlist", url=canonical,
+                playlist_id=int(playlist_id), display_name=name, interval=interval)
+        # Commit here: the registry insert must not sit in an open implicit
+        # transaction that a later write_transaction() would refuse to join.
+        idx._conn.commit()
     return get_playlist(idx, playlist_id) or {}
 
 
@@ -94,18 +112,35 @@ def list_playlists(idx, *, enabled_only: bool = False) -> list[dict]:
     return [_shape_row(dict(r)) for r in rows]
 
 
+def _subscriptions():
+    """Lazy import: this module stays importable on trees without Phase 3."""
+    import source_subscriptions  # noqa: WPS433
+    return source_subscriptions
+
+
 def remove_playlist(idx, playlist_id: int) -> bool:
-    with idx._lock:
-        cur = idx._conn.execute(
+    """Phase 3: a playlist linked to a source subscription is archived and
+    disabled instead of deleted; the subscription's rows reference it
+    (contract, "Migration 0028 schema", old delete routes)."""
+    with idx.write_transaction() as conn:
+        source_id = _subscriptions().legacy_archive(conn, playlist_id=int(playlist_id))
+        if source_id is not None:
+            cur = conn.execute(
+                "UPDATE monitored_playlists SET enabled=0 WHERE id=?", (playlist_id,))
+            return cur.rowcount > 0
+        cur = conn.execute(
             "DELETE FROM monitored_playlists WHERE id=?", (playlist_id,))
         return cur.rowcount > 0
 
 
 def set_playlist_enabled(idx, playlist_id: int, enabled: bool) -> bool:
-    with idx._lock:
-        cur = idx._conn.execute(
+    with idx.write_transaction() as conn:
+        cur = conn.execute(
             "UPDATE monitored_playlists SET enabled=? WHERE id=?",
             (1 if enabled else 0, playlist_id))
+        # Old flag -> authoritative detection flag; consent is untouched.
+        _subscriptions().legacy_set_detection(
+            conn, playlist_id=int(playlist_id), enabled=bool(enabled))
         return cur.rowcount > 0
 
 
@@ -172,7 +207,8 @@ def poll_playlist(idx, playlist_id: int, *,
                    ytdlp_cmd: list[str] | None = None,
                    normalize_video_to_canonical_url=None,
                    taste_filter=None,
-                   fetch_entries=None) -> dict:
+                   fetch_entries=None,
+                   refresh=None) -> dict:
     """Fetch + diff + record the new entries. Returns:
         {ok, playlist_id, new[{video_id, title, canonical_url}], seen_count,
          total_in_playlist, enqueued[], skipped[]}
@@ -200,10 +236,47 @@ def poll_playlist(idx, playlist_id: int, *,
     create a server -> mobile_playlists -> server cycle. The endpoint
     handler wires the dependency at call-time. ``fetch_entries`` is an
     optional injection point (tests pass candidates directly, avoiding a
-    real yt-dlp network call)."""
+    real yt-dlp network call).
+
+    Phase 3 (contract phase3-v1-2026-09-07, "Scheduler and adapter
+    boundaries"): a playlist linked to a source subscription is detected only
+    through the subscription service's Atom pull and due-time/lease gate, via
+    the injected ``refresh(source_id)``; this function then never lists with
+    yt-dlp or enqueues. On any tree with the source tables, detection never
+    enqueues capture at all: ``normalize_video_to_canonical_url`` is ignored
+    and discoveries are recorded as ``discovered`` events only. Capture starts
+    solely from the service's atomic reservation after per-source consent;
+    neither ``enabled`` nor a global auto-uoink flag can override that."""
     pl = get_playlist(idx, playlist_id)
     if pl is None:
         return {"ok": False, "error": f"playlist not found: {playlist_id}"}
+    with idx._lock:
+        managed = _subscriptions().tables_present(idx._conn)
+        source_id = (_subscriptions().legacy_source_id(
+            idx._conn, playlist_id=int(playlist_id)) if managed else None)
+    if source_id is not None:
+        if not callable(refresh):
+            return {"ok": False, "playlist_id": playlist_id, "source_id": source_id,
+                    "error": "managed_by_subscription"}
+        result = refresh(source_id)
+        poll = result.get("poll") if isinstance(result.get("poll"), dict) else {}
+        shaped = {
+            "ok": bool(result.get("ok")) and poll.get("ok", True) is not False,
+            "playlist_id": playlist_id, "playlist_url": pl["playlist_url"],
+            "source_id": source_id, "managed_by_subscription": True,
+            "outcome": result.get("outcome"), "new": [], "skipped": [],
+            "seen_count": pl.get("seen_count", 0),
+            "total_in_playlist": int(poll.get("inserted") or 0) + int(poll.get("updated") or 0),
+            "next_poll_at_ms": result.get("next_poll_at_ms"),
+        }
+        if not shaped["ok"]:
+            shaped["error"] = ((result.get("error") or {}).get("code")
+                               or poll.get("code") or "poll_failed")
+        return shaped
+    if managed and callable(normalize_video_to_canonical_url):
+        log.info("playlist %s: detection cannot enqueue capture under Phase 3; "
+                 "recording discoveries only", playlist_id)
+        normalize_video_to_canonical_url = None
     if not pl.get("enabled"):
         return {"ok": True, "playlist_id": playlist_id, "skipped": "disabled"}
 

@@ -57,16 +57,26 @@ def _clock(monkeypatch, stamps: list[str]):
 
 
 def _feeds(monkeypatch, feed_ids: list[int]):
-    monkeypatch.setattr(server.podcasts, "list_due_feeds",
-                        lambda _idx: [{"id": fid} for fid in feed_ids])
+    """Phase 3 (run AM): the tick claims due standing-source polls through
+    ``_standing_due_polls`` and runs each through ``_poll_source_for_watch``;
+    the capture pass and outbox dispatch are separate, non-polling steps."""
+    monkeypatch.setattr(server, "_standing_due_polls",
+                        lambda: [{"source_id": fid} for fid in feed_ids])
+    monkeypatch.setattr(server, "_standing_capture_pass", lambda: [])
     monkeypatch.setattr(server, "_get_index", lambda: object())
+    monkeypatch.setattr(server, "_source_service", lambda: type(
+        "S", (), {"dispatch_classification_outbox": staticmethod(lambda: [])})())
+
+
+def _poll(monkeypatch, fn):
+    monkeypatch.setattr(server, "_poll_source_for_watch",
+                        lambda claim: fn(claim["source_id"]))
 
 
 def test_clean_pass_advances_every_success_stamp(monkeypatch):
     _clock(monkeypatch, ["2026-09-04T16:30:00Z"])
     _feeds(monkeypatch, [1])
-    monkeypatch.setattr(server, "_poll_podcast_feed_for_watch",
-                        lambda fid: {"ok": True, "feed_id": fid, "inserted": 0})
+    _poll(monkeypatch, lambda fid: {"ok": True, "feed_id": fid, "inserted": 0})
 
     results = server._podcast_feed_scheduler_tick()
     assert results == [{"ok": True, "feed_id": 1, "inserted": 0}]
@@ -91,10 +101,10 @@ def test_failed_poll_does_not_advance_success_stamps(monkeypatch):
 
     def boom(_fid):
         raise RuntimeError("feed exploded: https://user:pw@show.example/feed")
-    monkeypatch.setattr(server, "_poll_podcast_feed_for_watch", boom)
+    _poll(monkeypatch, boom)
 
     results = server._podcast_feed_scheduler_tick()
-    assert results[0]["ok"] is False and results[0]["feed_id"] == 7
+    assert results[0]["ok"] is False and results[0]["source_id"] == 7
     hb = server._heartbeat_payload(now="2026-09-04T16:30:01Z")
     # The loop completed ...
     assert hb["last_tick_completed_at"] == "2026-09-04T16:30:00Z"
@@ -114,9 +124,8 @@ def test_failed_poll_does_not_advance_success_stamps(monkeypatch):
 def test_ok_false_result_counts_as_failed_poll(monkeypatch):
     _clock(monkeypatch, ["2026-09-04T16:30:00Z"])
     _feeds(monkeypatch, [1, 2])
-    monkeypatch.setattr(
-        server, "_poll_podcast_feed_for_watch",
-        lambda fid: {"ok": fid == 1, "feed_id": fid, "error": None if fid == 1 else "HTTP 500"})
+    _poll(monkeypatch,
+          lambda fid: {"ok": fid == 1, "feed_id": fid, "error": None if fid == 1 else "HTTP 500"})
     server._podcast_feed_scheduler_tick()
     hb = server._heartbeat_payload(now="2026-09-04T16:30:00Z")
     assert hb["last_tick"] == {"ok": False, "polls": 2, "failed_polls": 1}
@@ -131,8 +140,7 @@ def test_mixed_history_keeps_older_success_stamp(monkeypatch):
                          "2026-09-04T16:30:30Z", "2026-09-04T16:30:30Z"])
     _feeds(monkeypatch, [1])
     outcomes = iter([{"ok": True, "feed_id": 1}, {"ok": False, "feed_id": 1}])
-    monkeypatch.setattr(server, "_poll_podcast_feed_for_watch",
-                        lambda _fid: next(outcomes))
+    _poll(monkeypatch, lambda _fid: next(outcomes))
     server._podcast_feed_scheduler_tick()
     server._podcast_feed_scheduler_tick()
     hb = server._heartbeat_payload(now="2026-09-04T16:30:31Z")
@@ -170,30 +178,24 @@ def test_ingest_completion_is_its_own_stamp(monkeypatch):
 
 
 def test_watch_publish_path_marks_ingest(monkeypatch):
-    """_auto_ingest_podcast_feed publishing a finished transcript stamps
-    last_ingest_completed_at; a failing publish does not."""
+    """Phase 3 (run AM): a standing capture that the capture pass reports as
+    succeeded stamps last_ingest_completed_at; a failed capture does not.
+    (The pre-Phase-3 publish-from-poll path no longer exists: capture runs
+    only after an atomic start reservation, never from detection.)"""
     _clock(monkeypatch, ["2026-09-04T16:32:00Z"])
-    monkeypatch.setattr(server, "_get_index", lambda: object())
-    monkeypatch.setattr(server.podcasts, "repair_stranded_auto_ingest",
-                        lambda *_a, **_k: None)
-    monkeypatch.setattr(server, "_read_settings", lambda: {})
-    monkeypatch.setattr(server, "maybe_toast", lambda *_a, **_k: None)
-    episode = {"id": 5, "title": "Ep", "transcript_status": server.whisper_runner.STATUS_DONE,
-               "transcript_local_path": "x.json"}
-    monkeypatch.setattr(server.podcasts, "list_auto_ingest_candidates",
-                        lambda *_a, **_k: [episode])
-    monkeypatch.setattr(server.podcasts, "episode_to_corpus",
-                        lambda *_a, **_k: {"ok": True, "video_id": "podcast_5"})
-    outcomes = server._auto_ingest_podcast_feed(1)
-    assert outcomes[0]["episode_id"] == 5
+    outcomes = [{"outcome": "succeeded", "start_id": "st_1", "video_id": "podcast_5"}]
+
+    class Service:
+        @staticmethod
+        def capture_pass(limit=1):
+            return list(outcomes)
+    monkeypatch.setattr(server, "_source_service", lambda: Service())
+    assert server._standing_capture_pass()[0]["video_id"] == "podcast_5"
     assert server._heartbeat_payload()["last_ingest_completed_at"] == "2026-09-04T16:32:00Z"
 
-    def fail(*_a, **_k):
-        raise RuntimeError("disk full")
-    monkeypatch.setattr(server.podcasts, "episode_to_corpus", fail)
+    outcomes[:] = [{"outcome": "failed", "start_id": "st_2", "code": "download_failed"}]
     _clock(monkeypatch, ["2026-09-04T16:33:00Z"])
-    outcomes = server._auto_ingest_podcast_feed(1)
-    assert outcomes[0]["ok"] is False
+    assert server._standing_capture_pass()[0]["outcome"] == "failed"
     assert server._heartbeat_payload()["last_ingest_completed_at"] == "2026-09-04T16:32:00Z"
     assert server._heartbeat_payload()["counts"]["ingests"] == 1
 

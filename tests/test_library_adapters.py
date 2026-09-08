@@ -188,7 +188,7 @@ def test_registry_schemas_are_the_frozen_contract_file():
             "application/json"]["schema"]
         assert published is tools.TOOL_REGISTRY[name].input_schema
     json.dumps(spec)
-    assert len(tools.TOOL_REGISTRY) == 77
+    assert len(tools.TOOL_REGISTRY) == 81  # 77 + the four Phase 3 source tools (phase3-v1-2026-09-07)
 
 
 def test_library_tools_are_registry_only_and_stdio_is_unchanged():

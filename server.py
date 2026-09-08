@@ -21,9 +21,11 @@ import logging
 import math
 import os
 import queue
+import random
 import re
 import secrets
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -91,6 +93,7 @@ import corpus_provider  # noqa: E402  -- Uoink provider for corpus contract v1
 import podcasts  # noqa: E402  -- v3.1 podcast RSS feed registry + polling
 import whisper_runner  # noqa: E402  -- v3.1 WhisperX transcription (lazy)
 import mobile_playlists  # noqa: E402  -- v3.1 mobile->desktop playlist bridge
+import source_subscriptions  # noqa: E402  -- Phase 3 standing capture (run AM)
 import taste_scoring  # noqa: E402  -- V-3 taste-aware auto-uoink scoring
 import voice_dna  # noqa: E402  -- v3.2 voice DNA banned-phrase guard
 import writing_studio  # noqa: E402  -- v3.2 Writing Studio (tweet/blog)
@@ -589,8 +592,11 @@ def _check_memory_search_rate_limit() -> bool:
 # rejected before any library argument is used as an SQL value or hash key;
 # Handler._read_json_body(strict=True) installs these hooks on the tool
 # transports (/tools/<name>, /mcp/v1*) and the intent route.
-_STRICT_JSON_ROUTE_PREFIXES = ("/tools/", "/mcp/v1")
+_STRICT_JSON_ROUTE_PREFIXES = ("/tools/", "/mcp/v1", "/sources")
 LIBRARY_INTENT_ROUTE = "/library/intent"
+# Phase 3 (run AM): dashboard-only capability route for source consent
+# (contract phase3-v1-2026-09-07, "Registry and dashboard contract").
+SOURCES_INTENT_ROUTE = "/sources/consent-intent"
 
 
 def _reject_json_constant(name: str):
@@ -6501,6 +6507,9 @@ def _public_job(job: dict) -> dict:
             "progress": job.get("progress"),
             "priority": job.get("priority"),
             "publish_to_corpus": bool(job.get("publish_to_corpus")),
+            # Phase 3: the standing capture start this job completes. The owner
+            # token never enters the public projection or the jobs table.
+            "source_start_id": job.get("source_start_id"),
         })
     return public
 
@@ -6922,6 +6931,13 @@ def _podcast_transcription_worker() -> None:
                     "Podcast transcription complete; corpus publish will retry."
                     if corpus_error else
                     "Podcast transcription complete."))
+            # Phase 3: a standing capture completes its ledger row only after
+            # publication committed; a deferred publish is a failed attempt
+            # (the charge stays; the item may retry under its counters).
+            _settle_source_capture(
+                job_id, video_id=(corpus_result or {}).get("video_id"),
+                failure_code=None if corpus_result else (
+                    "publish_failed" if corpus_error else "publish_not_requested"))
         except BaseException as exc:  # keep the one long-lived worker alive
             log.exception("podcast transcription job %s failed", job_id)
             episode_id = job.get("episode_id") if isinstance(job, dict) else None
@@ -6939,8 +6955,35 @@ def _podcast_transcription_worker() -> None:
                 completed_at=_now_iso(), error=str(exc),
                 error_detail=f"{type(exc).__name__}: {exc}",
                 message="Podcast transcription failed.")
+            _settle_source_capture(job_id, video_id=None, failure_code="transcription_failed")
         finally:
             _podcast_transcription_queue.task_done()
+
+
+def _settle_source_capture(job_id: str, *, video_id: str | None,
+                           failure_code: str | None) -> None:
+    """Complete or fail the standing capture ledger row bound to a podcast job.
+    Fenced by the in-memory owner token; a job without a binding is a manual
+    capture and touches no ledger row."""
+    with _jobs_lock:
+        job = _jobs.get(job_id) or {}
+        start_id = job.get("source_start_id")
+        owner_token = job.get("_source_owner_token")
+    if not start_id:
+        return
+    try:
+        service = _source_service()
+        if not owner_token:
+            # A job resumed from disk after a restart has no in-memory token:
+            # reconcile the row from its durable artifacts instead.
+            outcome = service.reconcile_start(start_id)
+        elif video_id and not failure_code:
+            outcome = service.complete_capture(start_id, owner_token, video_id)
+        else:
+            outcome = service.fail_capture(start_id, owner_token, failure_code or "failed")
+        log.info("standing capture %s settled: %s", start_id, outcome.get("outcome"))
+    except Exception:
+        log.exception("standing capture settle failed for %s", start_id)
 
 
 def _ensure_podcast_transcription_worker() -> threading.Thread:
@@ -6960,8 +7003,15 @@ def _queue_podcast_transcription(
         episode_id: int, *, model: str | None = None,
         language: str | None = None, diarize: bool = False,
         consent_given: bool = False,
-        publish_to_corpus: bool = False) -> tuple[dict, int]:
-    """Validate, persist, and enqueue one local podcast transcription."""
+        publish_to_corpus: bool = False,
+        source_start_id: str | None = None,
+        source_owner_token: str | None = None) -> tuple[dict, int]:
+    """Validate, persist, and enqueue one local podcast transcription.
+
+    ``source_start_id``/``source_owner_token`` bind the job to a standing
+    capture ledger row; the worker completes or fails that row with the owner
+    token when the job ends (Phase 3, "Atomic starts": the start id is the
+    job's idempotency identity)."""
     episode = podcasts.get_episode(_get_index(), episode_id)
     if episode is None:
         return {"ok": False, "error": "episode not found"}, 404
@@ -6987,6 +7037,15 @@ def _queue_podcast_transcription(
             existing = _update_job(
                 existing["id"], publish_to_corpus=True,
                 message="Podcast transcription queued for corpus publish.")
+        if source_start_id and not existing.get("source_start_id"):
+            # A manual job already owns this episode: the standing start adopts
+            # it (one pipeline per canonical item) and is completed by it.
+            existing = _update_job(
+                existing["id"], source_start_id=source_start_id,
+                publish_to_corpus=True)
+            with _jobs_lock:
+                if existing and existing["id"] in _jobs:
+                    _jobs[existing["id"]]["_source_owner_token"] = source_owner_token
         return {
             "ok": True, "job_id": existing["id"], "job": existing,
             "reused_existing": True,
@@ -7008,7 +7067,16 @@ def _queue_podcast_transcription(
         return {"ok": False, "error": "language must be text when provided"}, 400
 
     now = _now_iso()
-    job_id = _make_job_id()
+    # Phase 3: a standing capture's job id derives from its start id so a
+    # replayed dispatch cannot create a second job for the same start.
+    job_id = (f"job_src_{source_start_id[3:]}" if source_start_id
+              else _make_job_id())
+    if source_start_id:
+        with _jobs_lock:
+            if job_id in _jobs:
+                _jobs[job_id]["_source_owner_token"] = source_owner_token
+                return {"ok": True, "job_id": job_id, "job": _public_job(_jobs[job_id]),
+                        "reused_existing": True}, 202
     job = {
         "id": job_id, "kind": "podcast_transcribe", "state": "queued",
         "source_url": episode.get("episode_page_url"),
@@ -7025,6 +7093,8 @@ def _queue_podcast_transcription(
         "consent_given": bool(consent_given), "audio_path": str(audio_path),
         "progress": 0, "priority": "pending",
         "publish_to_corpus": bool(publish_to_corpus),
+        "source_start_id": source_start_id,
+        "_source_owner_token": source_owner_token,
     }
     whisper_runner.update_episode_transcript_state(
         _get_index(), episode_id, status=whisper_runner.STATUS_QUEUED,
@@ -7050,93 +7120,249 @@ def _resume_podcast_transcription_jobs() -> int:
     return len(job_ids)
 
 
-def _auto_ingest_podcast_feed(feed_id: int) -> list[dict]:
-    """Advance one durable auto-ingest candidate for a watched feed.
+# ---------------------------------------------------------------------------
+# Phase 3 standing capture (run AM, contract phase3-v1-2026-09-07)
+# ---------------------------------------------------------------------------
+# source_subscriptions.py owns every durable decision (consent, detection
+# cursor, atomic start ledger, outbox). This block wires it to the helper:
+# one service instance bound to the shared index, a capture backend that runs
+# the existing yt-dlp / podcast pipelines only after a ``started`` row has
+# committed, and the two scheduler passes (detection, capture) the 30-second
+# tick runs independently. Nothing here captures from detection.
+_source_service_lock = threading.Lock()
+_source_service_instance: "source_subscriptions.SourceSubscriptionService | None" = None
+_source_capture_threads: dict[str, threading.Thread] = {}
+_source_capture_threads_lock = threading.Lock()
 
-    One candidate per due poll bounds disk, network, and transcription load.
-    The episode-level request marker keeps the remaining work durable.
-    """
-    idx = _get_index()
-    podcasts.repair_stranded_auto_ingest(idx, feed_id=feed_id)
-    candidates = podcasts.list_auto_ingest_candidates(
-        idx, feed_id=feed_id, limit=1)
-    outcomes: list[dict] = []
-    settings = _read_settings() or {}
-    model = whisper_runner.normalize_model(settings.get("whisper_model"))
-    diarize = bool(settings.get("diarization_default"))
-    for episode in candidates:
-        episode_id = int(episode["id"])
-        if (episode.get("transcript_status") == whisper_runner.STATUS_DONE
-                and episode.get("transcript_local_path")):
+
+def _source_instance_id() -> str:
+    """Stable per-install owner identity for ledger rows (contract, restart
+    reconciliation: process identity, not a random per-boot token)."""
+    return f"{socket.gethostname()}:{DATA_ROOT}"
+
+
+def _source_operator_context() -> "source_subscriptions.RequestContext":
+    return source_subscriptions.RequestContext(
+        authenticated=True, operator=True, transport="server",
+        session_id=_library_session_hash())
+
+
+class _ServerCaptureBackend(source_subscriptions.CaptureBackend):
+    """Runs a started standing capture through the existing pipelines.
+
+    YouTube: the caption-first yt-dlp extraction (_fetch_metadata +
+    _run_extraction) on a dedicated daemon thread; the ledger is completed or
+    failed with the owner token when it ends. Podcast: bounded enclosure
+    download, then the transcription job (publish_to_corpus=True) whose worker
+    completes the ledger. Neither path enqueues into pending_yoinks: the
+    reservation itself is the durable dispatch intent and the start id is the
+    job identity (contract, "Atomic starts", queue paragraph)."""
+    kind = "server_capture"
+
+    def preflight(self, item, source):
+        if source["kind"] == "podcast_rss":
+            if item.get("legacy_episode_id") is None:
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code="missing_episode_row")
+            meta = json.loads(item.get("metadata_json") or "{}")
+            if not podcasts._is_http_url(meta.get("audio_url")):
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code="no_audio_url", terminal=True)
+            if not whisper_runner.is_whisperx_available():
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code="missing_transcription_setup")
+            model = whisper_runner.normalize_model(
+                (_read_settings() or {}).get("whisper_model"))
+            if not whisper_runner.is_model_downloaded(DATA_ROOT, model):
+                # Standing capture never authorizes a first model download.
+                return source_subscriptions.CaptureOutcome(
+                    "preflight_failed", code="missing_transcription_setup")
+            return None
+        if not source_subscriptions._VIDEO_ID_RE.match(item.get("entry_id") or ""):
+            return source_subscriptions.CaptureOutcome(
+                "preflight_failed", code="invalid_identity", terminal=True)
+        return None
+
+    def bind(self, conn, start, item, source):
+        # The in-process pipeline has no separate durable queue row; the ledger
+        # row is the durable intent and the start id its idempotency identity.
+        return start["start_id"]
+
+    def run(self, start, item, source):
+        if source["kind"] == "podcast_rss":
+            return self._run_podcast(start, item, source)
+        return self._run_youtube(start, item, source)
+
+    def _run_podcast(self, start, item, source):
+        episode_id = int(item["legacy_episode_id"])
+        downloaded = podcasts.download_episode_audio(
+            _get_index(), episode_id, data_root=DATA_ROOT)
+        if not downloaded.get("ok"):
+            code = "download_failed"
+            if downloaded.get("error") == "timeout":
+                code = "download_timeout"
+            return source_subscriptions.CaptureOutcome("failed", code=code)
+        settings = _read_settings() or {}
+        queued, status = _queue_podcast_transcription(
+            episode_id,
+            model=whisper_runner.normalize_model(settings.get("whisper_model")),
+            diarize=bool(settings.get("diarization_default")),
+            consent_given=False, publish_to_corpus=True,
+            source_start_id=start["start_id"], source_owner_token=start["owner_token"])
+        if status == 412:
+            return source_subscriptions.CaptureOutcome(
+                "failed", code="missing_transcription_setup")
+        if not queued.get("ok"):
+            return source_subscriptions.CaptureOutcome("failed", code="transcription_unavailable")
+        return source_subscriptions.CaptureOutcome("in_flight")
+
+    def _run_youtube(self, start, item, source):
+        video_id = item["entry_id"]
+        url = source_subscriptions.video_watch_url(video_id)
+        start_id = start["start_id"]
+        owner_token = start["owner_token"]
+
+        def _worker():
             try:
-                published = podcasts.episode_to_corpus(
-                    _get_index(), episode_id, data_root=DATA_ROOT)
-                _heartbeat_note_ingest()
-                maybe_toast(
-                    "Podcast added to Uoink",
-                    f"{episode.get('title') or 'A new episode'} is ready in your library.")
-                outcomes.append({"episode_id": episode_id,
-                                 "published": published})
-            except Exception as exc:
-                log.warning("podcast watch: publish failed for episode %d: %s",
-                            episode_id, exc)
-                outcomes.append({"episode_id": episode_id,
-                                 "ok": False, "error": str(exc)})
-            continue
+                with _extract_lock:
+                    metadata = _fetch_metadata(url)
+                    title = metadata.get("title") or "Untitled"
+                    topic = _classify_topic(metadata)
+                    folder = (DESKTOP_ROOT / _topic_folder_name(topic)
+                              / (slugify(title) or "video"))
+                    result = _run_extraction(url, 30, folder, metadata=metadata, topic=topic,
+                                             open_explorer=False)
+                _record_single_extract_job(url, _now_iso(), result=result)
+                published = (metadata.get("id") or video_id)
+                outcome = _source_service().complete_capture(start_id, owner_token, published)
+                if outcome.get("outcome") == "succeeded":
+                    _heartbeat_note_ingest()
+                    maybe_toast("Source capture added to Uoink",
+                                f"{title} is ready in your library.")
+            except BaseException as exc:
+                # Rate limits and download errors are transient for the ledger
+                # (three actual starts, then blocked); identity errors were
+                # rejected at preflight before any charge.
+                code = "youtube_rate_limit" if _is_youtube_rate_limit(exc) else "download_failed"
+                try:
+                    _source_service().fail_capture(start_id, owner_token, code, terminal=False)
+                except Exception:
+                    log.exception("standing capture: fail_capture raised for %s", start_id)
+                log.warning("standing capture %s failed: %s", start_id, _sanitize_error(str(exc)))
+            finally:
+                with _source_capture_threads_lock:
+                    _source_capture_threads.pop(start_id, None)
 
-        try:
-            audio_path = episode.get("audio_local_path")
-            if not audio_path or not Path(audio_path).is_file():
-                downloaded = podcasts.download_episode_audio(
-                    _get_index(), episode_id, data_root=DATA_ROOT)
-                if not downloaded.get("ok"):
-                    log.warning(
-                        "podcast watch: download failed for episode %d: %s",
-                        episode_id, downloaded.get("error"))
-                    outcomes.append(downloaded)
-                    continue
+        thread = threading.Thread(target=_worker, name=f"source-capture-{start_id[-8:]}",
+                                  daemon=True)
+        with _source_capture_threads_lock:
+            _source_capture_threads[start_id] = thread
+        thread.start()
+        return source_subscriptions.CaptureOutcome("in_flight")
 
-            queued, status = _queue_podcast_transcription(
-                episode_id, model=model, diarize=diarize,
-                # Auto-ingest authorizes episode processing, not an unprompted
-                # first-time model download. A downloaded model works
-                # unattended; otherwise Settings/manual transcribe must record
-                # consent once.
-                consent_given=False, publish_to_corpus=True)
-            outcomes.append({**queued, "status": status,
-                             "episode_id": episode_id})
-            if status == 412:
-                maybe_toast(
-                    "Podcast needs transcription setup",
-                    "Audio is saved. Open Uoink Settings to approve the local "
-                    f"{model} model download.")
-        except Exception as exc:
-            log.exception(
-                "podcast watch: auto-ingest failed for episode %d", episode_id)
-            outcomes.append({"ok": False, "episode_id": episode_id,
-                             "error": str(exc)})
+    def probe(self, start):
+        with _source_capture_threads_lock:
+            thread = _source_capture_threads.get(start["start_id"])
+        if thread is not None and thread.is_alive():
+            return "running"
+        job = _find_job_for_start(start["start_id"])
+        if job is not None and job.get("state") in _JOB_TERMINAL_STATES:
+            return "stopped"
+        if start.get("owner_instance") == _source_instance_id():
+            # Same install, no live worker thread: the process that owned it is
+            # this one (restarted) and holds no thread for it.
+            return "stopped"
+        return "unknown"
+
+    def published_video_id(self, conn, item, source):
+        return None
+
+
+def _find_job_for_start(start_id: str) -> dict | None:
+    with _jobs_lock:
+        for job in _jobs.values():
+            if job.get("source_start_id") == start_id:
+                return dict(job)
+    return None
+
+
+def _source_service() -> "source_subscriptions.SourceSubscriptionService":
+    """The one service instance behind HTTP, MCP, the dashboard and the tick."""
+    global _source_service_instance
+    with _source_service_lock:
+        if _source_service_instance is None:
+            _source_service_instance = source_subscriptions.SourceSubscriptionService(
+                index=_get_index(), backend=_ServerCaptureBackend(),
+                instance_id=_source_instance_id(),
+                jitter=lambda: random.randint(0, 30_000))
+        return _source_service_instance
+
+
+def _source_startup_reconciliation() -> dict:
+    """Idempotent legacy import, then restart reconciliation, before any
+    scheduler or pending worker can launch (contract, migration section)."""
+    service = _source_service()
+    imported = service.import_legacy_registries()
+    reconciled = service.reconcile_on_startup()
+    if imported.get("feeds_imported") or imported.get("playlists_imported"):
+        log.info("sources: imported %d feed(s) and %d playlist(s); %d conflict(s)",
+                 imported.get("feeds_imported", 0), imported.get("playlists_imported", 0),
+                 len(imported.get("conflicts") or []))
+    if any(reconciled.get(k) for k in ("released", "succeeded", "failed", "uncertain",
+                                        "outbox_repaired")):
+        log.info("sources: restart reconciliation %s", reconciled)
+    return {"imported": imported, "reconciled": reconciled}
+
+
+def _standing_due_polls() -> list[dict]:
+    """Seam for the tick and its tests: the claimed polls this pass will run."""
+    return _source_service().claim_due_polls()
+
+
+def _poll_source_for_watch(claim: dict) -> dict:
+    """Run one claimed poll (fetch outside the database) and commit it."""
+    result = _source_service().run_claimed_poll(claim)
+    inserted = int(result.get("inserted") or 0)
+    if result.get("ok") and inserted and result.get("enrollment"):
+        maybe_toast("New source items",
+                    f"{inserted} new item(s) discovered from a watched source.")
+    return result
+
+
+def _standing_capture_pass() -> list[dict]:
+    """Advance eligible capture work independently of detection."""
+    outcomes = _source_service().capture_pass(limit=1)
+    for outcome in outcomes:
+        if outcome.get("outcome") == "succeeded":
+            _heartbeat_note_ingest()
     return outcomes
 
 
+def _auto_ingest_podcast_feed(feed_id: int) -> list[dict]:
+    """Compatibility entry point: advance the legacy feed's standing source
+    through the atomic reservation (never through the old episode marker)."""
+    idx = _get_index()
+    with idx._lock:
+        source_id = source_subscriptions.legacy_source_id(idx._conn, feed_id=int(feed_id))
+    if source_id is None:
+        return [{"ok": False, "feed_id": feed_id, "error": "managed_by_subscription",
+                 "detail": "feed has no standing source; register it first"}]
+    outcome = _source_service().advance_source(source_id)
+    if outcome.get("outcome") == "succeeded":
+        _heartbeat_note_ingest()
+    return [{"ok": outcome.get("outcome") in ("succeeded", "in_flight", "started", "linked"),
+             "feed_id": feed_id, "source_id": source_id, **outcome}]
+
+
+def _refresh_source_via_service(source_id: str) -> dict:
+    return _source_service().refresh_source(_source_operator_context(), {"source_id": source_id})
+
+
 def _poll_podcast_feed_for_watch(feed_id: int) -> dict:
-    """Poll one feed, notify on discoveries, then honor its opt-in."""
+    """Manual poll of one feed through the subscription due-time/lease gate.
+    Detection never captures; the capture pass advances eligible work."""
     with _podcast_feed_poll_lock:
-        result = podcasts.poll_feed(_get_index(), feed_id)
-    feed = podcasts.get_feed(_get_index(), feed_id) or {}
-    inserted = int(result.get("inserted") or 0)
-    if result.get("ok") and inserted:
-        show = result.get("title") or feed.get("title") or "a watched feed"
-        if inserted == 1:
-            ids = result.get("new_episode_ids") or []
-            episode = (podcasts.get_episode(_get_index(), int(ids[0]))
-                       if ids else None)
-            episode_title = (episode or {}).get("title") or "New episode"
-            body = f"{show}: {episode_title}."
-        else:
-            body = f"{inserted} new episodes from {show}."
-        maybe_toast("New podcast episode", body)
-    if feed.get("enabled") and feed.get("auto_ingest"):
-        result["auto_ingest"] = _auto_ingest_podcast_feed(feed_id)
+        result = podcasts.poll_feed(_get_index(), feed_id, refresh=_refresh_source_via_service)
     return result
 
 
@@ -7243,22 +7469,29 @@ def _heartbeat_payload(now: str | None = None) -> dict:
 
 
 def _podcast_feed_scheduler_tick() -> list[dict]:
-    """Poll every enabled feed whose configured interval has elapsed.
+    """One scheduler pass: a detection pass over every due standing source,
+    then an independent capture pass, then the classification outbox.
 
-    Heartbeat semantics: every completed pass stamps
-    ``last_tick_completed_at``; ``_last_successful_tick_at`` moves only when
-    no poll in the pass failed; each poll stamps its own success / failure
-    time. A pass with zero due feeds is a clean pass."""
+    Contract phase3-v1-2026-09-07, "Scheduler and adapter boundaries": each
+    tick performs bounded local reconciliation, claims due detection work and
+    advances eligible capture work independently. An exhausted allowance does
+    not stop detection; a poll failure does not erase eligible work.
+
+    Heartbeat semantics (unchanged): every completed pass stamps
+    ``last_tick_completed_at``; ``_last_successful_tick_at`` moves only when no
+    poll in the pass failed; each poll stamps its own success / failure time;
+    ingest completion is its own stamp. A pass with zero due sources is a
+    clean pass (a heartbeat, not a successful poll or ingest)."""
     results: list[dict] = []
     failed = 0
-    for feed in podcasts.list_due_feeds(_get_index()):
-        feed_id = int(feed["id"])
+    for claim in _standing_due_polls():
+        source_id = claim.get("source_id")
         kind = None
         try:
-            result = _poll_podcast_feed_for_watch(feed_id)
+            result = _poll_source_for_watch(claim)
         except Exception as exc:
-            log.exception("podcast watch tick failed for feed %d", feed_id)
-            result = {"ok": False, "feed_id": feed_id, "error": str(exc)}
+            log.exception("source watch tick failed for %s", source_id)
+            result = {"ok": False, "source_id": source_id, "error": str(exc)}
             kind = type(exc).__name__
         results.append(result)
         ok = bool(isinstance(result, dict) and result.get("ok"))
@@ -7267,22 +7500,32 @@ def _podcast_feed_scheduler_tick() -> list[dict]:
         else:
             failed += 1
             _heartbeat_note_poll(False, error=kind or "poll returned ok=false")
+    try:
+        _standing_capture_pass()
+    except Exception:
+        log.exception("standing capture pass crashed")
+    try:
+        _source_service().dispatch_classification_outbox()
+    except Exception:
+        log.exception("classification outbox dispatch crashed")
     _heartbeat_note_tick(polls=len(results), failed_polls=failed)
     return results
 
 
 def _start_podcast_feed_scheduler_thread() -> threading.Thread:
-    """Run due-feed checks every 30 seconds on a daemon thread."""
+    """Run the standing-source scheduler every 30 seconds on a daemon thread.
+    The tick only scans due rows; outbound polls follow each source's own
+    due time (default 60 minutes, minimum 15)."""
     def _runner():
         while True:
             try:
                 _podcast_feed_scheduler_tick()
             except Exception:
-                log.exception("podcast watch tick crashed")
+                log.exception("source watch tick crashed")
             time.sleep(_PODCAST_FEED_TICK_SEC)
 
     thread = threading.Thread(
-        target=_runner, name="podcast-feed-watch", daemon=True)
+        target=_runner, name="source-watch", daemon=True)
     thread.start()
     return thread
 
@@ -9667,6 +9910,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._handle_podcasts_feeds_list()
         if bare == "/podcasts/episodes":
             return self._handle_podcasts_episodes_list()
+        if bare == "/sources":
+            return self._handle_sources_list()
+        if bare == "/sources/status":
+            return self._handle_sources_status()
+        if bare == "/sources/schema":
+            return self._send_json(200, {"ok": True, **source_subscriptions.tool_manifest()})
         if bare == "/transcribe/status":
             return self._handle_transcribe_status_get()
         if bare == "/playlists/monitored":
@@ -11048,6 +11297,14 @@ class Handler(BaseHTTPRequestHandler):
         try:
             changed = podcasts.set_feed_auto_ingest(
                 _get_index(), feed_id, auto_ingest)
+        except podcasts.ManagedBySubscription as exc:
+            # Phase 3: the boolean cannot grant or revoke standing capture;
+            # the dashboard must run the confirmed consent operation.
+            return self._send_json(409, {
+                "ok": False, "error": "managed_by_subscription",
+                "source_id": exc.source_id,
+                "consent_route": SOURCES_INTENT_ROUTE,
+                "message": str(exc)})
         except Exception as exc:
             log.exception("/podcasts/feeds/set-auto-ingest failed")
             return self._send_json(500, {"ok": False, "error": str(exc)})
@@ -11318,9 +11575,12 @@ class Handler(BaseHTTPRequestHandler):
                 return None
             return _normalize_youtube_url(f"https://www.youtube.com/watch?v={vid}")
         try:
+            # Phase 3: a subscription-linked playlist is detected through the
+            # service's Atom pull and due-time gate; detection never enqueues.
             result = mobile_playlists.poll_playlist(
                 _get_index(), playlist_id,
-                normalize_video_to_canonical_url=_vid_to_url)
+                normalize_video_to_canonical_url=_vid_to_url,
+                refresh=_refresh_source_via_service)
         except Exception as e:
             log.exception("/playlists/monitored/poll failed")
             return self._send_json(500, {"ok": False, "error": str(e)})
@@ -11427,10 +11687,14 @@ class Handler(BaseHTTPRequestHandler):
         source_results: list[dict] = []
         for pl in sources:
             try:
+                # Phase 3: taste scoring still runs on unlinked playlists but
+                # can no longer enqueue capture; subscription-linked playlists
+                # delegate detection and capture eligibility to the service.
                 result = mobile_playlists.poll_playlist(
                     idx, pl["id"],
                     normalize_video_to_canonical_url=_vid_to_url,
-                    taste_filter=taste_filter)
+                    taste_filter=taste_filter,
+                    refresh=_refresh_source_via_service)
             except Exception as e:
                 log.warning("/auto-uoink/scan poll failed (%s): %s",
                             pl.get("id"), e)
@@ -12983,6 +13247,99 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(429, result)
         return self._send_json(200, result)
 
+    # ---- Phase 3 standing sources (run AM) --------------------------------
+    # Every route below calls the same service the MCP registry tools call
+    # (uoink_mcp_tools.sources_call), with the contract envelope; HTTP status
+    # mirrors the envelope's error code. Reads never enroll, poll or mutate.
+
+    @staticmethod
+    def _sources_http_status(result: dict) -> int:
+        if result.get("ok") is True:
+            return 200
+        code = (result.get("error") or {}).get("code")
+        return {
+            "validation_error": 400, "invalid_request": 400, "invalid_cursor": 400,
+            "unsupported_source": 400, "not_found": 404, "source_archived": 409,
+            "stale_revision": 409, "stale_cursor": 409, "idempotency_conflict": 409,
+            "user_intent_required": 403, "invalid_user_intent": 403,
+            "rate_limited": 429, "storage_busy": 503, "service_unavailable": 503,
+        }.get(code, 500)
+
+    def _handle_sources_tool(self, tool_name: str, body):
+        tools = _mcp_tools_module()
+        try:
+            result = tools.sources_call(tool_name, body, transport="dashboard")
+        except Exception:
+            log.exception("/sources %s failed", tool_name)
+            return self._send_json(500, source_subscriptions.error_envelope(
+                "internal_error", "The source registry raised; see the helper log."))
+        return self._send_json(self._sources_http_status(result), result)
+
+    def _handle_sources_list(self):
+        qs = parse_qs(urlparse(self.path).query)
+        args: dict = {}
+        for key in ("kind", "consent_state", "cursor"):
+            if qs.get(key):
+                args[key] = qs[key][0]
+        if qs.get("include_archived"):
+            args["include_archived"] = qs["include_archived"][0] in ("1", "true")
+        if qs.get("limit"):
+            try:
+                args["limit"] = int(qs["limit"][0])
+            except ValueError:
+                args["limit"] = qs["limit"][0]
+        return self._handle_sources_tool("list_sources", args)
+
+    def _handle_sources_status(self):
+        qs = parse_qs(urlparse(self.path).query)
+        args: dict = {}
+        for key in ("source_id", "item_cursor"):
+            if qs.get(key):
+                args[key] = qs[key][0]
+        if qs.get("item_limit"):
+            try:
+                args["item_limit"] = int(qs["item_limit"][0])
+            except ValueError:
+                args["item_limit"] = qs["item_limit"][0]
+        return self._handle_sources_tool("source_status", args)
+
+    def _handle_sources_service_route(self, method: str, body):
+        """Existing-style refresh/archive UI routes, on the same service and
+        the same due-time/lease gate (contract, registry section)."""
+        if not self._is_dashboard_origin():
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        tools = _mcp_tools_module()
+        try:
+            result = tools.sources_service_route(
+                method, body, session_hash=_library_session_hash())
+        except Exception:
+            log.exception("/sources %s failed", method)
+            return self._send_json(500, source_subscriptions.error_envelope(
+                "internal_error", "The source registry raised; see the helper log."))
+        return self._send_json(self._sources_http_status(result), result)
+
+    def _handle_sources_consent_intent(self, body: dict):
+        """POST /sources/consent-intent -- the dashboard's source opt-in
+        confirmation mints a five-minute, single-operation capability bound
+        to the canonical set_source_consent operation, the displayed source
+        and cursor revisions, and this dashboard session. Same posture as
+        /library/intent: origin/CSRF gate here, schema and binding in the
+        service; no registry tool can reach this route's authority."""
+        if not self._is_dashboard_origin():
+            log.info("POST %s rejected (origin=%r, sec-fetch-site=%r)",
+                     SOURCES_INTENT_ROUTE, self.headers.get("Origin"),
+                     self.headers.get("Sec-Fetch-Site"))
+            return self._send_json(403, {"ok": False, "error": "forbidden"})
+        tools = _mcp_tools_module()
+        try:
+            result = tools.sources_mint_consent_intent(
+                body, session_hash=_library_session_hash())
+        except Exception:
+            log.exception("%s failed", SOURCES_INTENT_ROUTE)
+            return self._send_json(500, source_subscriptions.error_envelope(
+                "internal_error", "Consent intent minting failed; see the helper log."))
+        return self._send_json(self._sources_http_status(result), result)
+
     def _handle_sources_manifest(self):
         return self._send_json(
             200, {"ok": True, **source_manifest.build_sources()})
@@ -13293,6 +13650,16 @@ class Handler(BaseHTTPRequestHandler):
 
         if bare == LIBRARY_INTENT_ROUTE:
             return self._handle_library_intent(body)
+        if bare == SOURCES_INTENT_ROUTE:
+            return self._handle_sources_consent_intent(body)
+        if bare == "/sources":
+            return self._handle_sources_tool("register_source", body)
+        if bare == "/sources/consent":
+            return self._handle_sources_tool("set_source_consent", body)
+        if bare == "/sources/refresh":
+            return self._handle_sources_service_route("refresh_source", body)
+        if bare == "/sources/archive":
+            return self._handle_sources_service_route("archive_source", body)
         if bare == "/settings":
             return self._handle_settings_post(body)
         if bare == "/settings/output-folder/pick":
@@ -13868,6 +14235,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._send_json(
                 500, {"ok": False, "error": "could not move folder to trash"})
         log.info("memory delete: %s -> %s", video_id, dst)
+        # Phase 3: corpus deletion marks every matching standing observation
+        # deleted so automatic rediscovery cannot resurrect the item; the
+        # successful capture-key record stays as a tombstone (contract).
+        try:
+            _source_service().note_corpus_deleted([video_id])
+        except Exception:
+            log.exception("standing capture: deletion tombstone failed for %s", video_id)
         self._send_json(200, {
             "ok": True,
             "restored_at": None,
@@ -14816,6 +15190,13 @@ def main(*, show_dashboard: bool = False):
             "podcast watch: repaired %d stranded episode eligibility marker(s)",
             podcast_repair["marked_eligible"],
         )
+    # Phase 3 (run AM): import the legacy registries once and reconcile the
+    # capture ledger before any scheduler or pending worker can launch
+    # (contract, "Migration 0028 schema" and the restart list).
+    try:
+        _source_startup_reconciliation()
+    except Exception:
+        log.exception("standing capture startup reconciliation failed")
     # One-time: fold any pre-index jobs.json / taxonomy.json into index.db.
     _migrate_jobs_json_to_index()
     _migrate_taxonomy_json_to_index()

@@ -3368,10 +3368,343 @@
       }
     }
 
-    @media (max-width: 420px) {
-      .screenshot-picker {
-        grid-template-columns: minmax(0, 1fr);
-      }
+    /* Standing subscriptions (Phase 3) */
+    .standing-subscriptions {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .standing-header {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .standing-header h2 {
+      margin: 0;
+      color: var(--cream);
+      font-size: 22px;
+      line-height: 1.2;
+    }
+    .standing-summary-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 18px;
+      background: rgba(21, 17, 13, 0.85);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-soft);
+    }
+    .standing-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .standing-stat-value {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--cream);
+    }
+    .standing-stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .standing-stat-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .standing-add-bar {
+      padding: 12px 14px;
+      background: rgba(13, 10, 8, 0.6);
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+    }
+    .standing-add-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .standing-add-row select {
+      min-width: 140px;
+    }
+    .standing-add-row input[type="url"] {
+      flex: 1;
+      min-width: 220px;
+    }
+    .subscription-card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .subscription-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 16px 18px;
+      background: rgba(21, 17, 13, 0.92);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      box-shadow: var(--shadow-soft);
+      transition: border-color 0.15s ease;
+    }
+    .subscription-card:hover {
+      border-color: rgba(249, 115, 22, 0.35);
+    }
+    .subscription-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .subscription-title-wrap {
+      min-width: 0;
+      flex: 1;
+    }
+    .subscription-card-head h3 {
+      margin: 0 0 4px;
+      color: var(--cream);
+      font-size: 16px;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+    .subscription-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .subscription-badges {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .source-kind-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: var(--pill-radius);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: rgba(255, 244, 236, 0.08);
+      color: var(--muted);
+      border: 1px solid rgba(255, 244, 236, 0.12);
+    }
+    .health-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 8px;
+      border-radius: var(--pill-radius);
+      font-size: 11px;
+      font-weight: 500;
+      font-family: var(--font-mono);
+    }
+    .health-pill.healthy {
+      background: rgba(0, 200, 83, 0.15);
+      color: var(--ok);
+      border: 1px solid rgba(0, 200, 83, 0.3);
+    }
+    .health-pill.polling {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      animation: pulse 1.6s infinite;
+    }
+    .health-pill.degraded {
+      background: rgba(255, 210, 63, 0.15);
+      color: var(--acid);
+      border: 1px solid rgba(255, 210, 63, 0.3);
+    }
+    .health-pill.error {
+      background: rgba(255, 61, 0, 0.15);
+      color: var(--vermillion);
+      border: 1px solid rgba(255, 61, 0, 0.3);
+    }
+    .subscription-consent-group {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      background: rgba(10, 10, 10, 0.6);
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      flex-wrap: wrap;
+    }
+    .consent-status-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .consent-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: var(--pill-radius);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .consent-pill.off {
+      background: rgba(143, 123, 110, 0.16);
+      color: var(--muted);
+      border: 1px solid rgba(143, 123, 110, 0.3);
+    }
+    .consent-pill.on {
+      background: rgba(0, 200, 83, 0.18);
+      color: var(--ok);
+      border: 1px solid rgba(0, 200, 83, 0.35);
+    }
+    .consent-pill.draining {
+      background: rgba(255, 210, 63, 0.18);
+      color: var(--acid);
+      border: 1px solid rgba(255, 210, 63, 0.4);
+    }
+    .consent-desc {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .enrollment-allowance-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+    .enrollment-box,
+    .allowance-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 10px 14px;
+      background: rgba(10, 10, 10, 0.4);
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+    }
+    .meter-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .meter-title {
+      font-weight: 600;
+      color: var(--cream);
+    }
+    .meter-value {
+      font-family: var(--font-mono);
+      color: var(--muted);
+    }
+    .meter-progress {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 244, 236, 0.1);
+      border-radius: var(--pill-radius);
+      overflow: hidden;
+    }
+    .meter-progress-bar {
+      height: 100%;
+      background: var(--rust-bright);
+      border-radius: var(--pill-radius);
+      transition: width 0.3s ease;
+    }
+    .meter-progress-bar.exhausted {
+      background: var(--vermillion);
+    }
+    .meter-note {
+      font-size: 11px;
+      color: var(--dim);
+    }
+    .allowance-box.exhausted {
+      border-color: rgba(255, 210, 63, 0.5);
+      background: rgba(42, 34, 15, 0.4);
+    }
+    .allowance-box.exhausted .meter-note {
+      color: var(--acid);
+    }
+    .in-flight-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(15, 28, 48, 0.4);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: var(--control-radius);
+    }
+    .in-flight-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+      color: #38bdf8;
+    }
+    .in-flight-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--cream);
+    }
+    .in-flight-phase {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--acid);
+    }
+    .source-error-strip {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      border-radius: var(--control-radius);
+      font-size: 12px;
+      color: #fca5a5;
+    }
+    .standing-empty-state {
+      padding: 32px 24px;
+      text-align: center;
+      background: rgba(21, 17, 13, 0.5);
+      border: 1px dashed var(--border);
+      border-radius: var(--card-radius);
+    }
+    .draining-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(255, 210, 63, 0.12);
+      border: 1px solid rgba(255, 210, 63, 0.35);
+      border-radius: var(--control-radius);
+      font-size: 12px;
+      color: var(--acid);
+    }
+    .display-summary-box {
+      padding: 10px 12px;
+      background: rgba(255, 244, 236, 0.06);
+      border: 1px solid var(--border);
+      border-radius: var(--control-radius);
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
   </style>
 </head>
@@ -4011,6 +4344,52 @@
             <a href="https://uoink.app/twitter" target="_blank" rel="noreferrer">Learn: X Video</a>
             <a href="https://uoink.app/features/podcast-feeds" target="_blank" rel="noreferrer">Learn: Podcast Feeds</a>
           </div>
+          <!-- Phase 3: Standing subscriptions panel -->
+          <section class="standing-subscriptions" id="standingSubscriptions" aria-label="Standing subscriptions">
+            <div class="standing-header">
+              <div class="eyebrow">Standing capture</div>
+              <h2>Standing subscriptions</h2>
+              <p class="universal-lede">Watch podcast RSS feeds and YouTube channels/playlists. Detection is independent from capture: sources stay off by default until you explicitly opt in, capped at 25 back-catalog items and 10 starts per UTC day.</p>
+            </div>
+            <div class="standing-summary-bar" id="standingSummaryBar">
+              <div class="standing-stat">
+                <span class="standing-stat-value" id="standingTotalSources">0</span>
+                <span class="standing-stat-label">Total sources</span>
+              </div>
+              <div class="standing-stat">
+                <span class="standing-stat-value" id="standingActiveSources">0</span>
+                <span class="standing-stat-label">Capture active</span>
+              </div>
+              <div class="standing-stat">
+                <span class="standing-stat-value" id="standingDailyStarts">0 / 10</span>
+                <span class="standing-stat-label">Daily starts used today (UTC)</span>
+              </div>
+              <div class="standing-stat">
+                <span class="standing-stat-value" id="standingNextTick">30s</span>
+                <span class="standing-stat-label">Next scheduler tick</span>
+              </div>
+              <div class="standing-stat-actions">
+                <button class="button ghost" type="button" id="refreshStandingSources">Refresh</button>
+              </div>
+            </div>
+            <div class="standing-add-bar" id="standingAddBar">
+              <div class="standing-add-row">
+                <select class="field" id="standingAddKind" aria-label="Source kind">
+                  <option value="podcast_rss">Podcast RSS</option>
+                  <option value="youtube_channel">YouTube Channel</option>
+                  <option value="youtube_playlist">YouTube Playlist</option>
+                </select>
+                <input class="field" id="standingAddUrl" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Feed URL or YouTube channel/playlist link" aria-label="New source URL">
+                <input class="field" id="standingAddDisplayName" type="text" autocomplete="off" placeholder="Display name (optional)" aria-label="Display name (optional)">
+                <button class="button primary" type="button" id="standingAddButton">Subscribe</button>
+              </div>
+            </div>
+            <div class="subscription-card-list" id="standingSubscriptionList" role="list" aria-label="Subscribed sources"></div>
+            <div class="standing-empty-state" id="standingEmptyState">
+              <div class="panel-title">No standing subscriptions yet</div>
+              <p class="setting-copy">Paste an RSS feed URL or YouTube channel/playlist link above. Automatic capture is always <strong>off by default</strong> until you explicitly opt in; detection tracks metadata without downloading audio or spending compute.</p>
+            </div>
+          </section>
           <div class="universal-capture" id="universalCapture">
             <div class="eyebrow">Paste a URL</div>
             <h2>Uoink anything</h2>
@@ -4515,11 +4894,42 @@
     </div>
     <div class="handoff-shot-list" id="writingHandoffShots"></div>
   </div>
+  <!-- Phase 3: Source Consent Confirmation Modal -->
+  <div class="modal-backdrop hidden" id="sourceConsentModal" role="dialog" aria-modal="true" aria-labelledby="sourceConsentModalTitle">
+    <div class="modal-card" style="width:min(520px, calc(100vw - 48px));">
+      <div class="panel-head">
+        <div>
+          <div class="soft-note" id="sourceConsentModalEyebrow">Standing capture consent</div>
+          <div class="panel-title" id="sourceConsentModalTitle">Enable standing capture?</div>
+        </div>
+        <button class="button ghost" type="button" id="closeSourceConsentModal">Close</button>
+      </div>
+      <div class="modal-body" id="sourceConsentModalBody">
+        <div id="sourceConsentModalDetails" class="setting-copy">
+          <p id="sourceConsentModalPrompt"></p>
+          <ul id="sourceConsentModalPolicyList">
+            <li><strong>Back-catalog policy:</strong> Up to 25 most recent items will be enrolled on the first valid snapshot. Older items remain metadata-only.</li>
+            <li><strong>Daily allowance:</strong> Up to 10 starts per UTC day across this source. Unused capacity resets at 00:00 UTC.</li>
+            <li><strong>Standing ingest:</strong> Audio/media download and local transcription begin on the next scheduler tick; unfiled captures land in your Library.</li>
+          </ul>
+          <div id="sourceConsentModalSummary" class="display-summary-box hidden"></div>
+          <div id="sourceConsentModalWarning" class="alert-strip hidden" style="margin-top:12px;"></div>
+        </div>
+      </div>
+      <div class="inline-row" style="justify-content:flex-end; gap:8px; margin-top:16px;">
+        <button class="button ghost" type="button" id="cancelSourceConsent">Cancel</button>
+        <button class="button primary" type="button" id="confirmSourceConsent">Confirm &amp; Enable</button>
+      </div>
+    </div>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
     const state = {
       token: "",
+      standingSources: [],
+      standingPendingIntent: null,
+      standingSourcesLoading: false,
       library: [],
       jobs: [],
       jobsLoaded: false,
@@ -4700,6 +5110,30 @@
     }));
 
     const els = {
+      standingSubscriptions: document.getElementById("standingSubscriptions"),
+      standingSummaryBar: document.getElementById("standingSummaryBar"),
+      standingTotalSources: document.getElementById("standingTotalSources"),
+      standingActiveSources: document.getElementById("standingActiveSources"),
+      standingDailyStarts: document.getElementById("standingDailyStarts"),
+      standingNextTick: document.getElementById("standingNextTick"),
+      refreshStandingSources: document.getElementById("refreshStandingSources"),
+      standingAddBar: document.getElementById("standingAddBar"),
+      standingAddKind: document.getElementById("standingAddKind"),
+      standingAddUrl: document.getElementById("standingAddUrl"),
+      standingAddDisplayName: document.getElementById("standingAddDisplayName"),
+      standingAddButton: document.getElementById("standingAddButton"),
+      standingSubscriptionList: document.getElementById("standingSubscriptionList"),
+      standingEmptyState: document.getElementById("standingEmptyState"),
+      sourceConsentModal: document.getElementById("sourceConsentModal"),
+      sourceConsentModalEyebrow: document.getElementById("sourceConsentModalEyebrow"),
+      sourceConsentModalTitle: document.getElementById("sourceConsentModalTitle"),
+      sourceConsentModalPrompt: document.getElementById("sourceConsentModalPrompt"),
+      sourceConsentModalPolicyList: document.getElementById("sourceConsentModalPolicyList"),
+      sourceConsentModalSummary: document.getElementById("sourceConsentModalSummary"),
+      sourceConsentModalWarning: document.getElementById("sourceConsentModalWarning"),
+      closeSourceConsentModal: document.getElementById("closeSourceConsentModal"),
+      cancelSourceConsent: document.getElementById("cancelSourceConsent"),
+      confirmSourceConsent: document.getElementById("confirmSourceConsent"),
       toast: document.getElementById("toast"),
       resumeCard: document.getElementById("resumeCard"),
       forYouNavCount: document.getElementById("forYouNavCount"),
@@ -6375,6 +6809,431 @@
           <span class="source-status planned">${htmlEscape(sourceStatusLabel(source.status))}</span>
         </article>
       `).join("");
+      loadStandingSubscriptions();
+    }
+
+    /* ==========================================================================
+       Phase 3: Standing Subscriptions & Real Consent Management
+       ========================================================================== */
+
+    async function callRegistryTool(name, args) {
+      try {
+        return await callMcpTool(name, args);
+      } catch (err) {
+        const res = await authFetch(`/tools/${encodeURIComponent(name)}`, {
+          method: "POST",
+          body: JSON.stringify(args || {}),
+        });
+        if (res && res.ok === false) {
+          const msg = (res.error && res.error.message) || res.error || `${name} failed`;
+          throw new Error(msg);
+        }
+        return res;
+      }
+    }
+
+    async function loadStandingSubscriptions() {
+      if (!els.standingSubscriptionList) return;
+      state.standingSourcesLoading = true;
+      try {
+        const res = await callRegistryTool("list_sources", { limit: 100, include_archived: false });
+        state.standingSources = (res && res.sources) ? res.sources : [];
+      } catch (err) {
+        state.standingSources = [];
+      } finally {
+        state.standingSourcesLoading = false;
+        renderStandingSubscriptions();
+      }
+    }
+
+    function renderStandingSubscriptions() {
+      if (!els.standingSubscriptionList || !els.standingSummaryBar) return;
+      const sources = state.standingSources || [];
+      const total = sources.length;
+      const active = sources.filter((s) => s.consent_state === "on").length;
+      const dailyStarts = sources.reduce((acc, s) => {
+        const a = s.allowance || {};
+        return acc + Number(a.charged || 0) + Number(a.reserved || 0);
+      }, 0);
+
+      if (els.standingTotalSources) els.standingTotalSources.textContent = String(total);
+      if (els.standingActiveSources) els.standingActiveSources.textContent = String(active);
+      if (els.standingDailyStarts) els.standingDailyStarts.textContent = `${dailyStarts} / 10`;
+      if (els.standingNextTick) els.standingNextTick.textContent = "30s";
+
+      if (!total) {
+        if (els.standingEmptyState) els.standingEmptyState.style.display = "";
+        els.standingSubscriptionList.innerHTML = "";
+        return;
+      }
+
+      if (els.standingEmptyState) els.standingEmptyState.style.display = "none";
+      els.standingSubscriptionList.innerHTML = sources.map((source) => {
+        const id = source.source_id;
+        const title = source.display_name || source.canonical_url || "Untitled source";
+        const kind = source.kind || "podcast_rss";
+        const kindLabel = kind === "podcast_rss" ? "Podcast RSS" : kind === "youtube_channel" ? "YouTube Channel" : "YouTube Playlist";
+
+        // Detection & Health
+        const det = source.detection || {};
+        const errorCount = Number(det.error_count || 0);
+        let healthClass = "healthy";
+        let healthLabel = "healthy";
+        if (det.last_error || errorCount > 0) {
+          if (errorCount >= 3) {
+            healthClass = "error";
+            healthLabel = "Feed unreachable";
+          } else {
+            healthClass = "degraded";
+            healthLabel = "degraded";
+          }
+        }
+        const lastPollStr = det.last_poll_success_ms
+          ? new Date(det.last_poll_success_ms).toLocaleTimeString()
+          : "pending first poll";
+
+        // Consent state & In-flight
+        const inFlight = Array.isArray(source.in_flight) ? source.in_flight : [];
+        const isDraining = source.consent_state === "off" && inFlight.length > 0;
+        let consentPillClass = source.consent_state === "on" ? "on" : "off";
+        let consentPillLabel = source.consent_state === "on" ? "On (Standing capture)" : "Off (Metadata only)";
+        if (isDraining) {
+          consentPillClass = "draining";
+          consentPillLabel = "Draining in-flight work";
+        }
+
+        // Back catalog enrollment
+        const enroll = source.enrollment || {};
+        let enrollmentCopy = "";
+        if (enroll.pending) {
+          enrollmentCopy = "Enrollment pending (up to 25 items)";
+        } else if (source.consent_state === "off" && !enroll.initial_completed) {
+          enrollmentCopy = "Back catalog: 0 / 25 enrolled (idle)";
+        } else {
+          const enrolledCount = Number(enroll.enrolled || 0);
+          const candidateCount = Number(enroll.known_candidates || 0);
+          const excluded = candidateCount > enrolledCount ? `${candidateCount - enrolledCount} older items excluded by cap.` : "";
+          enrollmentCopy = `Back catalog: ${enrolledCount} / 25 items enrolled. ${excluded}`.trim();
+        }
+
+        // Daily Allowance
+        const allow = source.allowance || {};
+        const cap = Number(allow.cap || 10);
+        const charged = Number(allow.charged || 0);
+        const reserved = Number(allow.reserved || 0);
+        const used = charged + reserved;
+        const remaining = Math.max(0, Number(allow.remaining != null ? allow.remaining : cap - used));
+        const isExhausted = remaining === 0 || used >= cap;
+        const percent = Math.min(100, Math.round((used / cap) * 100));
+
+        let resetCopy = "Resets at 00:00 UTC";
+        if (allow.resets_at_ms) {
+          const msLeft = Math.max(0, allow.resets_at_ms - Date.now());
+          const hrs = Math.floor(msLeft / 3600000);
+          const mins = Math.floor((msLeft % 3600000) / 60000);
+          resetCopy = `Resets at 00:00 UTC (in ${hrs}h ${mins}m)`;
+        }
+
+        const isHeld = Boolean(allow.hold_reason || (allow.hold_until_ms && allow.hold_until_ms > Date.now()));
+
+        return `
+          <article class="subscription-card" data-source-id="${htmlEscape(id)}">
+            <div class="subscription-card-head">
+              <div class="subscription-title-wrap">
+                <h3>${htmlEscape(title)}</h3>
+                <div class="subscription-meta-row">
+                  <span class="source-url" title="${htmlEscape(source.canonical_url || "")}">${htmlEscape(source.canonical_url || "")}</span>
+                  <span>&bull;</span>
+                  <span>poll every ${Number(source.poll_interval_min || 60)}m</span>
+                  <span>&bull;</span>
+                  <span>last poll: ${htmlEscape(lastPollStr)}</span>
+                  <span>&bull;</span>
+                  <span>observed: ${Number(det.observed_count || 0)}</span>
+                </div>
+              </div>
+              <div class="subscription-badges">
+                <span class="source-kind-badge">${htmlEscape(kindLabel)}</span>
+                <span class="health-pill ${healthClass}">${htmlEscape(healthLabel)}</span>
+              </div>
+            </div>
+
+            <div class="subscription-consent-group">
+              <div class="consent-status-wrap">
+                <span class="consent-pill ${consentPillClass}">${htmlEscape(consentPillLabel)}</span>
+                <span class="consent-desc">
+                  ${source.consent_state === "on"
+                    ? "Automatic capture active up to allowance limits."
+                    : "Metadata only; zero audio downloads or compute spend."}
+                </span>
+              </div>
+              <button class="button ${source.consent_state === "on" ? "ghost" : "primary"} toggle-consent-btn"
+                type="button"
+                data-source-id="${htmlEscape(id)}"
+                data-action="${source.consent_state === "on" ? "off" : "on"}">
+                ${source.consent_state === "on" ? "Turn Off Standing Capture" : "Turn On Standing Capture"}
+              </button>
+            </div>
+
+            ${isDraining ? `
+              <div class="draining-banner">
+                <span>&#9888;</span>
+                <span><strong>Draining in-flight work:</strong> Standing capture turned off. No new downloads will start. ${inFlight.length} active item${inFlight.length === 1 ? "" : "s"} will finish cleanly.</span>
+              </div>
+            ` : ""}
+
+            <div class="enrollment-allowance-grid">
+              <div class="enrollment-box">
+                <div class="meter-label-row">
+                  <span class="meter-title">Back-Catalog Enrollment</span>
+                  <span class="meter-value">${Number(enroll.enrolled || 0)} / 25 max</span>
+                </div>
+                <div class="meter-note">${htmlEscape(enrollmentCopy)}</div>
+              </div>
+
+              <div class="allowance-box ${isExhausted ? "exhausted" : ""}">
+                <div class="meter-label-row">
+                  <span class="meter-title">Daily Ingest Allowance</span>
+                  <span class="meter-value">${used} / ${cap} starts used</span>
+                </div>
+                <div class="meter-progress">
+                  <div class="meter-progress-bar ${isExhausted ? "exhausted" : ""}" style="width: ${percent}%;"></div>
+                </div>
+                <div class="meter-note">
+                  ${isHeld ? `<strong style="color:var(--acid);">Legacy accounting hold active.</strong> ` : ""}
+                  ${isExhausted ? `<strong style="color:var(--vermillion);">Daily allowance reached.</strong> Starts paused until next UTC day.` : `${remaining} start${remaining === 1 ? "" : "s"} remaining today.`} ${htmlEscape(resetCopy)}
+                </div>
+              </div>
+            </div>
+
+            ${inFlight.length ? `
+              <div class="in-flight-box">
+                <div class="in-flight-head">
+                  <span>In-flight capture (${inFlight.length} active)</span>
+                  <a href="#tab-activity" style="color:#38bdf8; text-decoration:underline;">View in Activity &rarr;</a>
+                </div>
+                ${inFlight.map((item) => `
+                  <div class="in-flight-item">
+                    <span style="font-weight:500;">${htmlEscape(item.title || item.entry_id || "Active item")}</span>
+                    <span class="in-flight-phase">
+                      ${htmlEscape(item.state || "started")} (attempt ${Number(item.actual_starts || 1)}/3)
+                    </span>
+                  </div>
+                `).join("")}
+              </div>
+            ` : ""}
+
+            ${(det.last_error || errorCount > 0) ? `
+              <div class="source-error-strip">
+                <div>
+                  <strong>Fetch notice:</strong> ${htmlEscape(String((det.last_error && det.last_error.message) || det.last_error || "Poll attempt failed").slice(0, 512))}
+                  <span class="soft-note" style="margin-left:6px;">(${errorCount} consecutive failure${errorCount === 1 ? "" : "s"})</span>
+                </div>
+                <button class="button ghost retry-poll-btn" type="button" data-source-id="${htmlEscape(id)}">Retry poll now</button>
+              </div>
+            ` : ""}
+          </article>
+        `;
+      }).join("");
+
+      els.standingSubscriptionList.querySelectorAll(".toggle-consent-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const sourceId = btn.dataset.sourceId;
+          const action = btn.dataset.action;
+          startConsentFlow(sourceId, action);
+        });
+      });
+
+      els.standingSubscriptionList.querySelectorAll(".retry-poll-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const sourceId = btn.dataset.sourceId;
+          retrySourcePoll(sourceId);
+        });
+      });
+    }
+
+    async function startConsentFlow(sourceId, targetConsent) {
+      const source = (state.standingSources || []).find((s) => s.source_id === sourceId);
+      if (!source) return;
+
+      const opKey = `op_${Date.now()}_${Math.random().toString(16).slice(2, 10)}`;
+      const operation = {
+        source_id: source.source_id,
+        consent_state: targetConsent,
+        expected_revision: Number(source.revision || 0),
+        operation_key: opKey,
+      };
+      if (targetConsent === "on") {
+        operation.expected_cursor_revision = Number((source.detection && source.detection.revision) || 0);
+      }
+
+      try {
+        const intentRes = await authFetch("/sources/consent-intent", {
+          method: "POST",
+          body: JSON.stringify({ operation }),
+        });
+        if (!intentRes || !intentRes.user_intent_token) {
+          throw new Error((intentRes && intentRes.error && intentRes.error.message) || "Failed to mint consent intent token");
+        }
+
+        state.standingPendingIntent = {
+          source_id: source.source_id,
+          consent_state: targetConsent,
+          expected_revision: operation.expected_revision,
+          expected_cursor_revision: operation.expected_cursor_revision,
+          operation_key: opKey,
+          user_intent_token: intentRes.user_intent_token,
+          expires_ms: intentRes.expires_ms,
+        };
+
+        openConsentModal(source, targetConsent, intentRes.display_summary);
+      } catch (err) {
+        if (err.message && (err.message.includes("stale_revision") || err.message.includes("stale_cursor"))) {
+          showToast("Source configuration was updated elsewhere. Refreshed with latest state.");
+          await loadStandingSubscriptions();
+        } else {
+          showToast(`Consent preparation failed: ${err.message}`);
+        }
+      }
+    }
+
+    function openConsentModal(source, targetConsent, displaySummary) {
+      if (!els.sourceConsentModal) return;
+      const title = source.display_name || source.canonical_url || "this source";
+      const isEnabling = targetConsent === "on";
+
+      if (els.sourceConsentModalTitle) {
+        els.sourceConsentModalTitle.textContent = isEnabling
+          ? `Enable standing capture for ${title}?`
+          : `Turn off standing capture for ${title}?`;
+      }
+      if (els.sourceConsentModalPrompt) {
+        els.sourceConsentModalPrompt.textContent = isEnabling
+          ? `Uoink will automatically discover and ingest newly published and back-catalog items from this source.`
+          : `Automatic downloads will stop. Metadata detection continues in background.`;
+      }
+      if (els.sourceConsentModalPolicyList) {
+        els.sourceConsentModalPolicyList.style.display = isEnabling ? "" : "none";
+      }
+      if (els.confirmSourceConsent) {
+        els.confirmSourceConsent.textContent = isEnabling ? "Confirm & Enable" : "Confirm & Turn Off";
+        els.confirmSourceConsent.className = `button ${isEnabling ? "primary" : "danger"}`;
+      }
+
+      const inFlight = Array.isArray(source.in_flight) ? source.in_flight : [];
+      if (els.sourceConsentModalWarning) {
+        if (!isEnabling && inFlight.length > 0) {
+          els.sourceConsentModalWarning.classList.remove("hidden");
+          els.sourceConsentModalWarning.innerHTML = `<strong>Draining in-flight work:</strong> ${inFlight.length} active download/transcription in progress will finish cleanly. Unstarted reservations will be released.`;
+        } else {
+          els.sourceConsentModalWarning.classList.add("hidden");
+          els.sourceConsentModalWarning.innerHTML = "";
+        }
+      }
+
+      if (els.sourceConsentModalSummary) {
+        if (displaySummary) {
+          els.sourceConsentModalSummary.classList.remove("hidden");
+          els.sourceConsentModalSummary.textContent = String(displaySummary);
+        } else {
+          els.sourceConsentModalSummary.classList.add("hidden");
+        }
+      }
+
+      els.sourceConsentModal.classList.remove("hidden");
+      if (els.confirmSourceConsent) els.confirmSourceConsent.focus();
+    }
+
+    function closeConsentModal() {
+      if (!els.sourceConsentModal) return;
+      els.sourceConsentModal.classList.add("hidden");
+      state.standingPendingIntent = null;
+    }
+
+    async function confirmConsentMutation() {
+      const intent = state.standingPendingIntent;
+      if (!intent) return closeConsentModal();
+
+      if (els.confirmSourceConsent) {
+        els.confirmSourceConsent.disabled = true;
+        els.confirmSourceConsent.textContent = "Updating...";
+      }
+
+      const args = {
+        source_id: intent.source_id,
+        consent_state: intent.consent_state,
+        expected_revision: intent.expected_revision,
+        operation_key: intent.operation_key,
+        user_intent_token: intent.user_intent_token,
+      };
+      if (intent.consent_state === "on" && intent.expected_cursor_revision != null) {
+        args.expected_cursor_revision = intent.expected_cursor_revision;
+      }
+
+      try {
+        await callRegistryTool("set_source_consent", args);
+        closeConsentModal();
+        showToast(intent.consent_state === "on"
+          ? "Standing capture enabled. Back-catalog enrollment in progress."
+          : "Standing capture turned off.");
+      } catch (err) {
+        closeConsentModal();
+        if (err.message && (err.message.includes("stale_revision") || err.message.includes("stale_cursor"))) {
+          showToast("Source was modified concurrently. Refreshed with latest server state.");
+        } else {
+          showToast(`Consent update failed: ${err.message}`);
+        }
+      } finally {
+        if (els.confirmSourceConsent) els.confirmSourceConsent.disabled = false;
+        await loadStandingSubscriptions();
+      }
+    }
+
+    async function registerStandingSource() {
+      if (!els.standingAddUrl) return;
+      const url = els.standingAddUrl.value.trim();
+      if (!url) return showToast("Paste a feed or channel URL first.");
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        return showToast("Source URL must begin with http:// or https://");
+      }
+      const kind = els.standingAddKind ? els.standingAddKind.value : "podcast_rss";
+      const displayName = els.standingAddDisplayName ? els.standingAddDisplayName.value.trim() : "";
+
+      if (els.standingAddButton) {
+        els.standingAddButton.disabled = true;
+        els.standingAddButton.textContent = "Subscribing...";
+      }
+
+      try {
+        const payload = {
+          kind,
+          url,
+          display_name: displayName || undefined,
+        };
+        const res = await callRegistryTool("register_source", payload);
+        if (els.standingAddUrl) els.standingAddUrl.value = "";
+        if (els.standingAddDisplayName) els.standingAddDisplayName.value = "";
+        showToast(res && res.created === false
+          ? "Source already registered. Current settings retained."
+          : "Source subscribed. Capture is off by default; detection watches metadata.");
+        await loadStandingSubscriptions();
+      } catch (err) {
+        showToast(`Could not register source: ${err.message}`);
+      } finally {
+        if (els.standingAddButton) {
+          els.standingAddButton.disabled = false;
+          els.standingAddButton.textContent = "Subscribe";
+        }
+      }
+    }
+
+    async function retrySourcePoll(sourceId) {
+      showToast("Checking source status...");
+      try {
+        await callRegistryTool("source_status", { source_id: sourceId });
+        await loadStandingSubscriptions();
+      } catch (err) {
+        showToast(`Status check: ${err.message}`);
+      }
     }
 
     // V-2a: universal "paste any URL" capture. Detection is server-owned
@@ -11609,6 +12468,20 @@
           setTimeout(() => renderWritingHandoff(selectedWritingScreenshots()), 80);
         }
       });
+      // Phase 3: Standing subscriptions & consent modal events
+      if (els.refreshStandingSources) els.refreshStandingSources.addEventListener("click", loadStandingSubscriptions);
+      if (els.standingAddButton) els.standingAddButton.addEventListener("click", registerStandingSource);
+      if (els.closeSourceConsentModal) els.closeSourceConsentModal.addEventListener("click", closeConsentModal);
+      if (els.cancelSourceConsent) els.cancelSourceConsent.addEventListener("click", closeConsentModal);
+      if (els.confirmSourceConsent) els.confirmSourceConsent.addEventListener("click", confirmConsentMutation);
+      if (els.sourceConsentModal) {
+        els.sourceConsentModal.addEventListener("click", (event) => {
+          if (event.target === els.sourceConsentModal) closeConsentModal();
+        });
+        els.sourceConsentModal.addEventListener("keydown", (event) => {
+          trapModalFocus(event, els.sourceConsentModal, closeConsentModal);
+        });
+      }
       window.addEventListener("beforeunload", revokeThumbs);
     }
 

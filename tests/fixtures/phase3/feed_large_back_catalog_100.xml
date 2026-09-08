@@ -1,0 +1,709 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>The Hundred Year Ledger</title>
+    <link>https://example.com/ledger</link>
+    <description>One hundred weekly episodes cataloging historical state machines.</description>
+    <language>en-us</language>
+    <item>
+      <title>Episode 100: Historical Note #100</title>
+      <link>https://example.com/ledger/100</link>
+      <guid isPermaLink="false">hyl-ep-100</guid>
+      <pubDate>Mon, 07 Sep 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_100.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 099: Historical Note #99</title>
+      <link>https://example.com/ledger/099</link>
+      <guid isPermaLink="false">hyl-ep-099</guid>
+      <pubDate>Mon, 31 Aug 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_099.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 098: Historical Note #98</title>
+      <link>https://example.com/ledger/098</link>
+      <guid isPermaLink="false">hyl-ep-098</guid>
+      <pubDate>Mon, 24 Aug 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_098.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 097: Historical Note #97</title>
+      <link>https://example.com/ledger/097</link>
+      <guid isPermaLink="false">hyl-ep-097</guid>
+      <pubDate>Mon, 17 Aug 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_097.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 096: Historical Note #96</title>
+      <link>https://example.com/ledger/096</link>
+      <guid isPermaLink="false">hyl-ep-096</guid>
+      <pubDate>Mon, 10 Aug 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_096.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 095: Historical Note #95</title>
+      <link>https://example.com/ledger/095</link>
+      <guid isPermaLink="false">hyl-ep-095</guid>
+      <pubDate>Mon, 03 Aug 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_095.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 094: Historical Note #94</title>
+      <link>https://example.com/ledger/094</link>
+      <guid isPermaLink="false">hyl-ep-094</guid>
+      <pubDate>Mon, 27 Jul 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_094.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 093: Historical Note #93</title>
+      <link>https://example.com/ledger/093</link>
+      <guid isPermaLink="false">hyl-ep-093</guid>
+      <pubDate>Mon, 20 Jul 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_093.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 092: Historical Note #92</title>
+      <link>https://example.com/ledger/092</link>
+      <guid isPermaLink="false">hyl-ep-092</guid>
+      <pubDate>Mon, 13 Jul 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_092.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 091: Historical Note #91</title>
+      <link>https://example.com/ledger/091</link>
+      <guid isPermaLink="false">hyl-ep-091</guid>
+      <pubDate>Mon, 06 Jul 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_091.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 090: Historical Note #90</title>
+      <link>https://example.com/ledger/090</link>
+      <guid isPermaLink="false">hyl-ep-090</guid>
+      <pubDate>Mon, 29 Jun 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_090.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 089: Historical Note #89</title>
+      <link>https://example.com/ledger/089</link>
+      <guid isPermaLink="false">hyl-ep-089</guid>
+      <pubDate>Mon, 22 Jun 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_089.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 088: Historical Note #88</title>
+      <link>https://example.com/ledger/088</link>
+      <guid isPermaLink="false">hyl-ep-088</guid>
+      <pubDate>Mon, 15 Jun 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_088.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 087: Historical Note #87</title>
+      <link>https://example.com/ledger/087</link>
+      <guid isPermaLink="false">hyl-ep-087</guid>
+      <pubDate>Mon, 08 Jun 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_087.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 086: Historical Note #86</title>
+      <link>https://example.com/ledger/086</link>
+      <guid isPermaLink="false">hyl-ep-086</guid>
+      <pubDate>Mon, 01 Jun 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_086.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 085: Historical Note #85</title>
+      <link>https://example.com/ledger/085</link>
+      <guid isPermaLink="false">hyl-ep-085</guid>
+      <pubDate>Mon, 25 May 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_085.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 084: Historical Note #84</title>
+      <link>https://example.com/ledger/084</link>
+      <guid isPermaLink="false">hyl-ep-084</guid>
+      <pubDate>Mon, 18 May 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_084.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 083: Historical Note #83</title>
+      <link>https://example.com/ledger/083</link>
+      <guid isPermaLink="false">hyl-ep-083</guid>
+      <pubDate>Mon, 11 May 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_083.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 082: Historical Note #82</title>
+      <link>https://example.com/ledger/082</link>
+      <guid isPermaLink="false">hyl-ep-082</guid>
+      <pubDate>Mon, 04 May 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_082.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 081: Historical Note #81</title>
+      <link>https://example.com/ledger/081</link>
+      <guid isPermaLink="false">hyl-ep-081</guid>
+      <pubDate>Mon, 27 Apr 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_081.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 080: Historical Note #80</title>
+      <link>https://example.com/ledger/080</link>
+      <guid isPermaLink="false">hyl-ep-080</guid>
+      <pubDate>Mon, 20 Apr 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_080.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 079: Historical Note #79</title>
+      <link>https://example.com/ledger/079</link>
+      <guid isPermaLink="false">hyl-ep-079</guid>
+      <pubDate>Mon, 13 Apr 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_079.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 078: Historical Note #78</title>
+      <link>https://example.com/ledger/078</link>
+      <guid isPermaLink="false">hyl-ep-078</guid>
+      <pubDate>Mon, 06 Apr 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_078.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 077: Historical Note #77</title>
+      <link>https://example.com/ledger/077</link>
+      <guid isPermaLink="false">hyl-ep-077</guid>
+      <pubDate>Mon, 30 Mar 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_077.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 076: Historical Note #76</title>
+      <link>https://example.com/ledger/076</link>
+      <guid isPermaLink="false">hyl-ep-076</guid>
+      <pubDate>Mon, 23 Mar 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_076.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 075: Historical Note #75</title>
+      <link>https://example.com/ledger/075</link>
+      <guid isPermaLink="false">hyl-ep-075</guid>
+      <pubDate>Mon, 16 Mar 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_075.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 074: Historical Note #74</title>
+      <link>https://example.com/ledger/074</link>
+      <guid isPermaLink="false">hyl-ep-074</guid>
+      <pubDate>Mon, 09 Mar 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_074.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 073: Historical Note #73</title>
+      <link>https://example.com/ledger/073</link>
+      <guid isPermaLink="false">hyl-ep-073</guid>
+      <pubDate>Mon, 02 Mar 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_073.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 072: Historical Note #72</title>
+      <link>https://example.com/ledger/072</link>
+      <guid isPermaLink="false">hyl-ep-072</guid>
+      <pubDate>Mon, 23 Feb 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_072.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 071: Historical Note #71</title>
+      <link>https://example.com/ledger/071</link>
+      <guid isPermaLink="false">hyl-ep-071</guid>
+      <pubDate>Mon, 16 Feb 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_071.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 070: Historical Note #70</title>
+      <link>https://example.com/ledger/070</link>
+      <guid isPermaLink="false">hyl-ep-070</guid>
+      <pubDate>Mon, 09 Feb 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_070.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 069: Historical Note #69</title>
+      <link>https://example.com/ledger/069</link>
+      <guid isPermaLink="false">hyl-ep-069</guid>
+      <pubDate>Mon, 02 Feb 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_069.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 068: Historical Note #68</title>
+      <link>https://example.com/ledger/068</link>
+      <guid isPermaLink="false">hyl-ep-068</guid>
+      <pubDate>Mon, 26 Jan 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_068.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 067: Historical Note #67</title>
+      <link>https://example.com/ledger/067</link>
+      <guid isPermaLink="false">hyl-ep-067</guid>
+      <pubDate>Mon, 19 Jan 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_067.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 066: Historical Note #66</title>
+      <link>https://example.com/ledger/066</link>
+      <guid isPermaLink="false">hyl-ep-066</guid>
+      <pubDate>Mon, 12 Jan 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_066.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 065: Historical Note #65</title>
+      <link>https://example.com/ledger/065</link>
+      <guid isPermaLink="false">hyl-ep-065</guid>
+      <pubDate>Mon, 05 Jan 2026 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_065.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 064: Historical Note #64</title>
+      <link>https://example.com/ledger/064</link>
+      <guid isPermaLink="false">hyl-ep-064</guid>
+      <pubDate>Mon, 29 Dec 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_064.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 063: Historical Note #63</title>
+      <link>https://example.com/ledger/063</link>
+      <guid isPermaLink="false">hyl-ep-063</guid>
+      <pubDate>Mon, 22 Dec 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_063.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 062: Historical Note #62</title>
+      <link>https://example.com/ledger/062</link>
+      <guid isPermaLink="false">hyl-ep-062</guid>
+      <pubDate>Mon, 15 Dec 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_062.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 061: Historical Note #61</title>
+      <link>https://example.com/ledger/061</link>
+      <guid isPermaLink="false">hyl-ep-061</guid>
+      <pubDate>Mon, 08 Dec 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_061.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 060: Historical Note #60</title>
+      <link>https://example.com/ledger/060</link>
+      <guid isPermaLink="false">hyl-ep-060</guid>
+      <pubDate>Mon, 01 Dec 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_060.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 059: Historical Note #59</title>
+      <link>https://example.com/ledger/059</link>
+      <guid isPermaLink="false">hyl-ep-059</guid>
+      <pubDate>Mon, 24 Nov 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_059.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 058: Historical Note #58</title>
+      <link>https://example.com/ledger/058</link>
+      <guid isPermaLink="false">hyl-ep-058</guid>
+      <pubDate>Mon, 17 Nov 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_058.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 057: Historical Note #57</title>
+      <link>https://example.com/ledger/057</link>
+      <guid isPermaLink="false">hyl-ep-057</guid>
+      <pubDate>Mon, 10 Nov 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_057.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 056: Historical Note #56</title>
+      <link>https://example.com/ledger/056</link>
+      <guid isPermaLink="false">hyl-ep-056</guid>
+      <pubDate>Mon, 03 Nov 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_056.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 055: Historical Note #55</title>
+      <link>https://example.com/ledger/055</link>
+      <guid isPermaLink="false">hyl-ep-055</guid>
+      <pubDate>Mon, 27 Oct 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_055.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 054: Historical Note #54</title>
+      <link>https://example.com/ledger/054</link>
+      <guid isPermaLink="false">hyl-ep-054</guid>
+      <pubDate>Mon, 20 Oct 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_054.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 053: Historical Note #53</title>
+      <link>https://example.com/ledger/053</link>
+      <guid isPermaLink="false">hyl-ep-053</guid>
+      <pubDate>Mon, 13 Oct 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_053.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 052: Historical Note #52</title>
+      <link>https://example.com/ledger/052</link>
+      <guid isPermaLink="false">hyl-ep-052</guid>
+      <pubDate>Mon, 06 Oct 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_052.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 051: Historical Note #51</title>
+      <link>https://example.com/ledger/051</link>
+      <guid isPermaLink="false">hyl-ep-051</guid>
+      <pubDate>Mon, 29 Sep 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_051.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 050: Historical Note #50</title>
+      <link>https://example.com/ledger/050</link>
+      <guid isPermaLink="false">hyl-ep-050</guid>
+      <pubDate>Mon, 22 Sep 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_050.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 049: Historical Note #49</title>
+      <link>https://example.com/ledger/049</link>
+      <guid isPermaLink="false">hyl-ep-049</guid>
+      <pubDate>Mon, 15 Sep 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_049.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 048: Historical Note #48</title>
+      <link>https://example.com/ledger/048</link>
+      <guid isPermaLink="false">hyl-ep-048</guid>
+      <pubDate>Mon, 08 Sep 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_048.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 047: Historical Note #47</title>
+      <link>https://example.com/ledger/047</link>
+      <guid isPermaLink="false">hyl-ep-047</guid>
+      <pubDate>Mon, 01 Sep 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_047.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 046: Historical Note #46</title>
+      <link>https://example.com/ledger/046</link>
+      <guid isPermaLink="false">hyl-ep-046</guid>
+      <pubDate>Mon, 25 Aug 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_046.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 045: Historical Note #45</title>
+      <link>https://example.com/ledger/045</link>
+      <guid isPermaLink="false">hyl-ep-045</guid>
+      <pubDate>Mon, 18 Aug 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_045.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 044: Historical Note #44</title>
+      <link>https://example.com/ledger/044</link>
+      <guid isPermaLink="false">hyl-ep-044</guid>
+      <pubDate>Mon, 11 Aug 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_044.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 043: Historical Note #43</title>
+      <link>https://example.com/ledger/043</link>
+      <guid isPermaLink="false">hyl-ep-043</guid>
+      <pubDate>Mon, 04 Aug 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_043.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 042: Historical Note #42</title>
+      <link>https://example.com/ledger/042</link>
+      <guid isPermaLink="false">hyl-ep-042</guid>
+      <pubDate>Mon, 28 Jul 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_042.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 041: Historical Note #41</title>
+      <link>https://example.com/ledger/041</link>
+      <guid isPermaLink="false">hyl-ep-041</guid>
+      <pubDate>Mon, 21 Jul 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_041.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 040: Historical Note #40</title>
+      <link>https://example.com/ledger/040</link>
+      <guid isPermaLink="false">hyl-ep-040</guid>
+      <pubDate>Mon, 14 Jul 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_040.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 039: Historical Note #39</title>
+      <link>https://example.com/ledger/039</link>
+      <guid isPermaLink="false">hyl-ep-039</guid>
+      <pubDate>Mon, 07 Jul 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_039.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 038: Historical Note #38</title>
+      <link>https://example.com/ledger/038</link>
+      <guid isPermaLink="false">hyl-ep-038</guid>
+      <pubDate>Mon, 30 Jun 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_038.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 037: Historical Note #37</title>
+      <link>https://example.com/ledger/037</link>
+      <guid isPermaLink="false">hyl-ep-037</guid>
+      <pubDate>Mon, 23 Jun 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_037.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 036: Historical Note #36</title>
+      <link>https://example.com/ledger/036</link>
+      <guid isPermaLink="false">hyl-ep-036</guid>
+      <pubDate>Mon, 16 Jun 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_036.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 035: Historical Note #35</title>
+      <link>https://example.com/ledger/035</link>
+      <guid isPermaLink="false">hyl-ep-035</guid>
+      <pubDate>Mon, 09 Jun 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_035.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 034: Historical Note #34</title>
+      <link>https://example.com/ledger/034</link>
+      <guid isPermaLink="false">hyl-ep-034</guid>
+      <pubDate>Mon, 02 Jun 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_034.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 033: Historical Note #33</title>
+      <link>https://example.com/ledger/033</link>
+      <guid isPermaLink="false">hyl-ep-033</guid>
+      <pubDate>Mon, 26 May 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_033.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 032: Historical Note #32</title>
+      <link>https://example.com/ledger/032</link>
+      <guid isPermaLink="false">hyl-ep-032</guid>
+      <pubDate>Mon, 19 May 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_032.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 031: Historical Note #31</title>
+      <link>https://example.com/ledger/031</link>
+      <guid isPermaLink="false">hyl-ep-031</guid>
+      <pubDate>Mon, 12 May 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_031.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 030: Historical Note #30</title>
+      <link>https://example.com/ledger/030</link>
+      <guid isPermaLink="false">hyl-ep-030</guid>
+      <pubDate>Mon, 05 May 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_030.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 029: Historical Note #29</title>
+      <link>https://example.com/ledger/029</link>
+      <guid isPermaLink="false">hyl-ep-029</guid>
+      <pubDate>Mon, 28 Apr 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_029.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 028: Historical Note #28</title>
+      <link>https://example.com/ledger/028</link>
+      <guid isPermaLink="false">hyl-ep-028</guid>
+      <pubDate>Mon, 21 Apr 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_028.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 027: Historical Note #27</title>
+      <link>https://example.com/ledger/027</link>
+      <guid isPermaLink="false">hyl-ep-027</guid>
+      <pubDate>Mon, 14 Apr 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_027.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 026: Historical Note #26</title>
+      <link>https://example.com/ledger/026</link>
+      <guid isPermaLink="false">hyl-ep-026</guid>
+      <pubDate>Mon, 07 Apr 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_026.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 025: Historical Note #25</title>
+      <link>https://example.com/ledger/025</link>
+      <guid isPermaLink="false">hyl-ep-025</guid>
+      <pubDate>Mon, 31 Mar 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_025.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 024: Historical Note #24</title>
+      <link>https://example.com/ledger/024</link>
+      <guid isPermaLink="false">hyl-ep-024</guid>
+      <pubDate>Mon, 24 Mar 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_024.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 023: Historical Note #23</title>
+      <link>https://example.com/ledger/023</link>
+      <guid isPermaLink="false">hyl-ep-023</guid>
+      <pubDate>Mon, 17 Mar 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_023.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 022: Historical Note #22</title>
+      <link>https://example.com/ledger/022</link>
+      <guid isPermaLink="false">hyl-ep-022</guid>
+      <pubDate>Mon, 10 Mar 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_022.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 021: Historical Note #21</title>
+      <link>https://example.com/ledger/021</link>
+      <guid isPermaLink="false">hyl-ep-021</guid>
+      <pubDate>Mon, 03 Mar 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_021.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 020: Historical Note #20</title>
+      <link>https://example.com/ledger/020</link>
+      <guid isPermaLink="false">hyl-ep-020</guid>
+      <pubDate>Mon, 24 Feb 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_020.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 019: Historical Note #19</title>
+      <link>https://example.com/ledger/019</link>
+      <guid isPermaLink="false">hyl-ep-019</guid>
+      <pubDate>Mon, 17 Feb 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_019.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 018: Historical Note #18</title>
+      <link>https://example.com/ledger/018</link>
+      <guid isPermaLink="false">hyl-ep-018</guid>
+      <pubDate>Mon, 10 Feb 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_018.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 017: Historical Note #17</title>
+      <link>https://example.com/ledger/017</link>
+      <guid isPermaLink="false">hyl-ep-017</guid>
+      <pubDate>Mon, 03 Feb 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_017.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 016: Historical Note #16</title>
+      <link>https://example.com/ledger/016</link>
+      <guid isPermaLink="false">hyl-ep-016</guid>
+      <pubDate>Mon, 27 Jan 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_016.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 015: Historical Note #15</title>
+      <link>https://example.com/ledger/015</link>
+      <guid isPermaLink="false">hyl-ep-015</guid>
+      <pubDate>Mon, 20 Jan 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_015.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 014: Historical Note #14</title>
+      <link>https://example.com/ledger/014</link>
+      <guid isPermaLink="false">hyl-ep-014</guid>
+      <pubDate>Mon, 13 Jan 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_014.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 013: Historical Note #13</title>
+      <link>https://example.com/ledger/013</link>
+      <guid isPermaLink="false">hyl-ep-013</guid>
+      <pubDate>Mon, 06 Jan 2025 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_013.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 012: Historical Note #12</title>
+      <link>https://example.com/ledger/012</link>
+      <guid isPermaLink="false">hyl-ep-012</guid>
+      <pubDate>Mon, 30 Dec 2024 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_012.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 011: Historical Note #11</title>
+      <link>https://example.com/ledger/011</link>
+      <guid isPermaLink="false">hyl-ep-011</guid>
+      <pubDate>Mon, 23 Dec 2024 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_011.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 010: Historical Note #10</title>
+      <link>https://example.com/ledger/010</link>
+      <guid isPermaLink="false">hyl-ep-010</guid>
+      <pubDate>Mon, 16 Dec 2024 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_010.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 009: Historical Note #9</title>
+      <link>https://example.com/ledger/009</link>
+      <guid isPermaLink="false">hyl-ep-009</guid>
+      <pubDate>Mon, 09 Dec 2024 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_009.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 008: Historical Note #8</title>
+      <link>https://example.com/ledger/008</link>
+      <guid isPermaLink="false">hyl-ep-008</guid>
+      <pubDate>Mon, 02 Dec 2024 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_008.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 007: Historical Note #7</title>
+      <link>https://example.com/ledger/007</link>
+      <guid isPermaLink="false">hyl-ep-007</guid>
+      <pubDate>Mon, 25 Nov 2024 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_007.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 006: Historical Note #6</title>
+      <link>https://example.com/ledger/006</link>
+      <guid isPermaLink="false">hyl-ep-006</guid>
+      <pubDate>Mon, 18 Nov 2024 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_006.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 005: Historical Note #5</title>
+      <link>https://example.com/ledger/005</link>
+      <guid isPermaLink="false">hyl-ep-005</guid>
+      <pubDate>Mon, 11 Nov 2024 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_005.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 004: Historical Note #4</title>
+      <link>https://example.com/ledger/004</link>
+      <guid isPermaLink="false">hyl-ep-004</guid>
+      <pubDate>Mon, 04 Nov 2024 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_004.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 003: Historical Note #3</title>
+      <link>https://example.com/ledger/003</link>
+      <guid isPermaLink="false">hyl-ep-003</guid>
+      <pubDate>Mon, 28 Oct 2024 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_003.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 002: Historical Note #2</title>
+      <link>https://example.com/ledger/002</link>
+      <guid isPermaLink="false">hyl-ep-002</guid>
+      <pubDate>Mon, 21 Oct 2024 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_002.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+    <item>
+      <title>Episode 001: Historical Note #1</title>
+      <link>https://example.com/ledger/001</link>
+      <guid isPermaLink="false">hyl-ep-001</guid>
+      <pubDate>Mon, 14 Oct 2024 12:00:00 GMT</pubDate>
+      <enclosure url="https://example.com/audio/hyl_001.mp3" length="35000000" type="audio/mpeg"/>
+    </item>
+  </channel>
+</rss>
