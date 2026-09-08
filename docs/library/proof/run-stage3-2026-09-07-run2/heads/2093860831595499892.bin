@@ -1,0 +1,83 @@
+# Fireside Alpha - SemiAnalysis' Jordan Nanos reveals the OpenAI engineers scrolling the...
+
+**Channel:** Fireside Alpha (— subscribers)
+**Uploaded:** 2026-08-30 | **Duration:** — | **Views:** — | **Likes:** 1,064
+**URL:** https://x.com/firesidealpha/status/2093860831595499892
+**Uoinked:** 2026-08-30T07:48:14
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The hook leads with a surprising claim that OpenAI engineers don't understand their own kernel code line-by-line, yet it doesn't matter because the AI-generated output performs well—directly challenging the conventional expectation that engineers must understand every detail of their code.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+SemiAnalysis' Jordan Nanos reveals the OpenAI engineers scrolling their own kernel code had no idea what it did line by line, and it didn't matter because the AI does  "It's not slop, because it performs, but it's literally just AI-generated assembly basically puked out in Gluon, https://t.co/LzGNG4rF6Y
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] I think the conclusion is that they're basically winning on
+[00:00:05] both sides of the curve. So both fast tokens and cheap
+[00:00:11] tokens, which is just so interesting, because we've seen so many
+[00:00:16] other companies make claims about how they're going to
+[00:00:22] beat Nvidia and they just pick one of those. Groq or
+[00:00:28] Cerebras, or any of the other startups that are going to focus on SRAM,
+[00:00:31] call it a d-Matrix that's coming up with stuff, or SambaNova, where we've even
+[00:00:35] seen some results on
+[00:00:37] the InferenceMAX benchmark or something similar to it. They're saying they're
+[00:00:42] for fast tokens, just decode speed, low batch size, they don't worry about
+[00:00:46] throughput. And then you've got other guys that are worried about throughput, call
+[00:00:50] it AMD just as a simple example, but even TPU or Trainium could be
+[00:00:53] in this bucket of accelerators that are going for throughput. And they go, "Yeah,
+[00:00:58] but we're not going to be able to compete with the other guys at
+[00:01:00] high interactivity." And OpenAI has a chip that can do both for them, really
+[00:01:04] well. I mean, at a minimum, this thing is doing really well right now
+[00:01:09] and is going to serve real production tokens for them.
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:30]
+
+![Screenshot at 00:00:30](screenshots/shot_0002.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About Fireside Alpha:**
+*No channel description available.*
+
+**Recent videos from this channel:**
+- *No recent videos found.*
+
+---
+
+*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*

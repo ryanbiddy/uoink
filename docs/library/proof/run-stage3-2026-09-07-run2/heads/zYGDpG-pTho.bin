@@ -1,0 +1,122 @@
+# RAG vs Fine-Tuning vs Prompt Engineering: Optimizing AI Models
+
+**Channel:** IBM Technology (1.7M subscribers)
+**Uploaded:** 2025-04-14 | **Duration:** 13:10 | **Views:** 643,454 | **Likes:** 11,756
+**URL:** https://www.youtube.com/watch?v=zYGDpG-pTho
+**Yoinked:** 2026-05-12T18:32:23
+**Topic:** AI and ML
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Ready to become a certified watsonx AI Assistant Engineer? Register now and use code IBMTechYT20 for 20% off of your exam → https://ibm.biz/BdndTs
+
+Learn more about RAG vs. Fine-Tuning vs. Prompt Engineering here → https://ibm.biz/BdndTi
+
+How do AI chatbots deliver better responses? 🤔 Martin Keen explains RAG 🛠️, fine-tuning 🎯, and prompt engineering ✏️—methods that extend knowledge, refine responses, and build domain expertise. Learn how these strategies optimize large language models and improve AI outputs today! 🚀
+
+AI news moves fast. Sign up for a monthly newsletter for AI updates from IBM → https://ibm.biz/BdndTj
+
+#retrievalaugmentedgeneration #finetuning #promptengineering
+
+## Tags
+
+IBM, IBM Cloud
+
+---
+
+## Transcript
+
+[00:00:00] Remember how back in the day people would
+[00:00:03] Google themselves, you type your name into a search engine and you see what it knows about you?
+[00:00:08] Well, the modern equivalent of that is to do the same thing with a chatbot.
+[00:00:13] So when I ask a large language model, who is Martin Keen?
+[00:00:18] Well, the response varies greatly depending upon which model I'm asking,
+[00:00:22] because different models, they have different training data sets, they have a different knowledge cutoff dates.
+[00:00:28] So what a given model knows about me, well, it differs greatly.
+[00:00:32] But how could we improve the model's answer?
+[00:00:36] Well, there's three ways.
+[00:00:38] So let's start with a model here, and we're gonna see how we can improve its responses.
+[00:00:44] Well, the first thing it could do is it could go out and it could perform a search,
+[00:00:51] a search for new data that either wasn't in its training data set,
+[00:00:54] or it was just data that became available after the model finished training,
+[00:00:58] and then it could incorporate those results from the search back into its answer.
+[00:01:03] That is called RAG or Retrieval Augmented Generation.
+[00:01:11] That's one method.
+[00:01:12] Or we could pick a specialized model, a model that's been trained on, let's say, transcripts of these videos.
+[00:01:21] That would be an example of something called fine tuning,
+[00:01:29] or we could ask the model a query that better specifies what we're looking for.
+[00:01:36] So maybe the LLM already knows plenty about the Martin Keens of the world,
+[00:01:41] but let's tell the model that we're referring to the Martin keen who works at IBM,
+[00:01:45] rather than the Martin Keen that founded Keen Shoes.
+[00:01:50] That is an example of prompt engineering.
+[00:01:55] Three ways to get better outputs out of large language models, each with their pluses and minuses.
+[00:02:03] Let's start with RAG.
+[00:02:05] So let's break it down.
+[00:02:06] First there's retrieval.
+[00:02:08] So retrieval of external up-to-date information.
+[00:02:12] Then there's augmentation.
+[00:02:14] That's augmentation of the original prompt with the retrieved information added in.
+[00:02:19] And then finally there's generation.
+[00:02:22] That's generation of a response based on all of this enriched context.
+[00:02:27] So we can think of it like this.
+[00:02:30] So we start with a query and the query comes in to a large language model.
+[00:02:40] Now, what RAG is gonna do is it's first going to go searching through a corpus of information.
+[00:02:48] So we have this corpus here full of some sort of data.
+[00:02:53] Now, perhaps, that's your organization's documents.
+[00:02:56] So it might be spreadsheets, PDFs, internal wikis, you know, stuff like that,
+[00:03:01] But unlike a typical search engine that just matches keywords,
+[00:03:07] RAG converts both your question, the query, and all of the documents into something called vector embeddings.
+[00:03:18] So these are all converted into vectors.
+[00:03:20] essentially turning words and phrases into long lists of numbers that capture their meaning.
+[00:03:27] So when you ask a query like, what was our company's revenue growth last quarter?
+[00:03:34] Well, RAG will find documents that are mathematically similar in meaning to your question,
+[00:03:38] even if they don't use the exact same words.
+[00:03:41] So it might find documents mentioning fourth quarter performance or quarterly sales.
+[00:03:48] Those don't contain the keyword revenue growth, but they are semantically similar.
+[00:03:54] Now, once RAG finds the relevant information, it adds this information
+[00:03:59] back into your original query before passing it to the language model.
+[00:04:06] So instead of the model just kind of guessing based on its training data,
+[00:04:09] it can now generate a response that incorporates your actual facts and figures.
+[00:04:15] So this makes RAG particularly valuable when you are looking for information that is up to date,
+[00:04:24] and it's also very valuable when you need in to add in information that is domain specific as well,
+[00:04:34] but there are some costs to this.
+[00:04:38] Let's go with the red pen.
+[00:04:40] So one cost, that would be the cost of performance.
+[00:04:45] for performing all of this, because you have this retrieval step here, and that
+[00:04:50] adds latency to each query compared to a simple prompt to a model.
+[00:04:55] There are also costs related to just kind of the processing of this as well.
+[00:05:01] So if we think about what we're having to do here, we've got documents that need to be vector embeddings,
+[00:05:07] and we need to store these vector embedding in a database.
+[00:05:11] All of this adds to processing costs, it adds to infrastructure costs
+[00:05:15] to make this solution work.
+[00:05:17] All right, next up, fine tuning.
+[00:05:20] So remember how we discussed getting better answers about me by
+[00:05:24] training a model specifically on, let's say, my video transcripts.
+[00:05:26] Well, that is fine tuning in action.
+[00:05:30] So what we do with fine tuning is we take a model, but specifically an existing model.
+[00:05:40] and that existing model has broad knowledge.
+[00:05:44] And then we're gonna give it additional specialized training on a focused data set.
+[00:05:51] So this is now specialized to what we want to develop particular expertise on.
+[00:05:58] Now, during fine tuning, we're updating the model's internal parameters through additional training.
+[00:06:05] So the model starts out with some weights here.
+[00:06:10] like this, and those weights were optimized during its initial pre-training.
+[00:06:16] And as we fine tune, we're making small adjustments here to the model's weights using this specialized data set.
+[00:06:26] So this is being incorporated.
+[00:06:29] Now this process typically uses supervised learning where we provide input-output
+[00:06:34] pairs that demonstrate the kind of responses we want.
+[00:06:37] So for example, if we're fine-tuning for technical support, we might provide thousands of examples of customer queries,
+[00:06:46] and those would be paired with correct technical responses.
+[00:06:50] The model adjusts its weights through back propagation
+[00:06:53] to minimize the difference between its predicted outputs and the targeted responses.
+[00:06:58] So we're not just teaching the model new facts here, we're actually modifying how it processes information.
+[00:07:06] The model is learning to recognize domain-specific patterns.
+[00:07:11] So, fine-tuning shows its strength when you particularly need a model that has very deep domain expertise.
+[00:07:22] That's what we can really add in with fine tuning,
+[00:07:25] and also, it's much faster, specifically at inference time.
+[00:07:31] So when we are putting the queries in, it's faster than RAG because it doesn't need t

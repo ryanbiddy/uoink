@@ -1,0 +1,51 @@
+# The New Code — Sean Grove, OpenAI
+
+**Channel:** AI Engineer (490.0K subscribers)
+**Uploaded:** 2025-07-11 | **Duration:** 21:35 | **Views:** 1,068,215 | **Likes:** 19,262
+**URL:** https://www.youtube.com/watch?v=8rABwKRsec4
+**Uoinked:** 2026-05-26T23:12:43
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The opening challenges the conventional wisdom that writing code is the most valuable skill in AI-driven software development, instead asserting that 'communicating intent with precision' and specifications are becoming the new superpower. This directly contradicts the traditional developer mindset that coding ability is paramount.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+In an era where AI transforms software development, the most valuable skill isn't writing code - it's communicating intent with precision. This talk reveals how specifications, not prompts or code, are becoming the fundamental unit of programming, and why spec-writing is the new superpower.
+
+Drawing from production experience, we demonstrate how rigorous, versioned specifications serve as the source of truth that compiles to documentation, evaluations, model behaviors, and maybe even code.
+
+Just as the US Constitution acts as a versioned spec with judicial review as its grader, AI systems need executable specifications that align both human teams and machine intelligence. We'll look at OpenAI's Model Spec as a real-world example.
+
+Finally, we'll end on some open questions about what the future of developer tooling looks like in a world where communication once again becomes the most important artifact in engineering.
+
+About Sean Grove
+Sean Grove works on alignment reasoning at OpenAI, helping translate high‑level intent into enforceable specs and evaluations. Before OpenAI he founded OneGraph, a GraphQL developer‑tools startup later acquired by Netlify. He has delivered dozens of technical talks worldwide on developer tooling, APIs, AI UX and design, and now alignment.
+
+Recorded at the AI Engineer World's Fair in San Francisco. Stay up to date on our upcoming events and content by joining our newsletter here: https://www.ai.engineer/newsletter
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:25] Hello everyone. Thank you very much for having me. Uh it's a very exciting uh place to be, very exciting time to be. Uh
+[00:00:33] Uh second, uh I mean this has been like a pretty intense couple of days. I don't know if you feel the same way. Uh but also very energizing. So I want to take a little bit of your time today uh to talk about what I see as the coming of the new code. uh in particular specifications which sort of hold this promise uh that it has been the dream of the industry where you can write your your code your intentions once and run them everywhere. Uh quick intro uh my name is Sean I work at uh OpenAI uh specifically in alignment research and today I want to talk about sort of the value of code versus communication and why specifications might be a little bit of a better approach in general.
+[00:01:18] Uh I'm going to go over the anatomy of a specification and we'll use the uh model spec as the example. Uh and we'll talk about communicating intent to other humans and we'll go over the 40 syphency issue uh as a case study. Uh we'll talk about how to make the specification executable, how to communicate intent to the models, uh and how to think about specifications as code, even if they're a little bit different. Um, and we'll end on a couple of open questions. So, let's talk about code versus communication. Real quick, raise your hand if you write code and vibe code counts. Cool. Keep them up if your job is to write code.
+[00:02:03] write code. Okay. Now, for those people, keep their head up if you feel that the most valuable professional artifact that you produce is code. Okay, there's quite a few people and I think this is quite natural. We all work very very hard to solve problems. We talk with people. We gather requirements. We think through implementation details. We integrate with lots of different sources. And the ultimate thing that we produce is code. Code is the artifact that we can point to, we can measure, we can debate, and we can discuss. uh it feels tangible and real but it's sort of underelling the job that each of you does. Code is sort of 10 to 20% of the value that you bring. The other 80 to 90% is in structured communication. And this is going to be different for everyone, but a process typically looks something like you talk to users in order to understand their challenges. You distill these stories down and then ideulate about how to solve these problems. What what is the goal that you want to achieve? You plan ways to achieve those goals. You share those plans with your colleagues. Uh you translate those plans into code. So this is a very important step obviously. And then you test and verify not the code itself, right? No one cares actually about the code itself. What you care is when the code ran, did it achieve the goals, did it alleviate the challenges of your user? You look at the the effects that your code had on the world. So talking, understanding, distilling, ideulating,
+[00:03:51] planning, sharing, translating, testing, verifying. These all sound like structured communication to me. And structured communication is the bottleneck.
+[00:04:00] bottleneck. Knowing what to build, talking to people and gathering requirements, knowing how to build it, knowing why to build it, and at the end of the day, knowing if it has been built correctly and has actually achieved the intentions that you set out with. And the more advanced AI models get, the more we are all going to starkly feel this bottleneck. Because in the near future, the person who communicates most effectively is the most valuable programmer. And literally, if you can communicate effectively, you can program. So, let's take uh vibe coding as an illustrative example. Vibe coding tends to feel quite good. And it's worth asking why is that? Well, vibe coding is fundamentally about communication first. And the code is actually a secondary downstream artifact of that communication. We get to describe our intentions and our the outcomes that we want to see and we let the model actually handle the grunt work for us. And even so, there is something strange about the way that we do vibe coding. We communicate via prompts to the model and we tell them our intentions and our values and we get a code artifact out at the end and then we sort of throw our prompts away they're ephemeral and if you've written TypeScript or Rust once you put your your code through a compiler or it gets down into a binary no one is happy with that binary. That wasn't the purpose. It's useful. In fact, we always regenerate the binaries from scratch every time we compile or we run our code through V8 or whatever it might be from the source spec. It's the source specification that's the valuable artifact.
+[00:05:52] artifact. And yet when we prompt elements, we sort of do the opposite. We keep the generated code and we delete the prompt. And this feels like a little bit like you shred the source and then you very carefully version control the binary. And that's why it's so important to actually capture the intent and the values in a specification. A written specification is what enables you to align humans on the shared set of goals and to know if you are aligned if you actually synchronize on what needs to be done. This is the artifact that you discuss that you debate that you refer to and that you synchronize on. And this is really important. And so I want to nail this this home that a written specification effectively aligns humans
+[00:06:37] humans and it is the artifact that you use to communicate and to discuss and debate and refer to and synchronize on. If you don't have a specification, you just have a vague idea. Now let's talk about why specifications are more powerful in general than code. Because code itself is actually a lossy projection from the specificat

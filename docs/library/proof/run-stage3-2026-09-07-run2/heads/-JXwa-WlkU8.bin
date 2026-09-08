@@ -1,0 +1,68 @@
+# How to Use Ultralytics YOLO11 for Object Detection and Tracking| How to Benchmark | YOLO11 RELEASED🚀
+
+**Channel:** Ultralytics (24.6K subscribers)
+**Uploaded:** 2024-10-04 | **Duration:** 08:31 | **Views:** 105,393 | **Likes:** 693
+**URL:** https://www.youtube.com/watch?v=-JXwa-WlkU8
+**Uoinked:** 2026-07-09T19:19:57
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The opening establishes credibility by announcing that Ultralytics has just released YOLO11, positioning the speaker as an insider with direct access to new product information and the ability to provide an authoritative overview of the breakthrough model.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Get ready for an exciting first look at the amazing new Ultralytics YOLO11! 🚀  
+
+In this action-packed video, we’ll show you why YOLO11 is the most powerful object detection model yet! 🎉 With incredible benchmarks, game-changing features, and real-world performance that will blow your mind, we’ll walk you through everything you need to know. From top features and live coding demos to adding object tracking, this video is your ultimate guide to mastering YOLO11 💥
+
+🔗 Learn more ➡️ https://docs.ultralytics.com/models/yolo11/
+
+🎯 Key Highlights:
+00:00 - Introduction: We're exploring the new features of YOLO11 and why it's a major update!
+00:23 - Ultralytics YOLO11 Blog Overview: A brief look at the official YOLO11 blog and its resources.
+00:53 - Highlights of YOLO11 Model: Key updates that make YOLO11 stand out.
+01:15 - Benchmarks of YOLO11 vs. Other Models: See how YOLO11 performs against other models.
+02:04 - YOLO11 Model Features and Documentation Walkthrough: Detailed breakdown of YOLO11’s new features.
+      02:17 - Key Features of Ultralytics YOLO11: Why this release is a big improvement.
+      02:38 - YOLO11 Supported Tasks and Modes: Learn about the different tasks and modes YOLO11 supports.
+      02:59 - YOLO11 Models Usage Examples: Real-world examples to get you up and running in no time!
+      03:52 - How to Use YOLO11 Models in Python: A step-by-step guide for using YOLO11 like a pro.
+            05:31 - Ultralytics Package Upgrade: Make sure to update your Ultralytics package to use YOLO11.
+      07:21 - Object Tracking with YOLO11 Models: Easily add tracking to your models for better results.
+08:11 - Conclusion and Summary: Quick recap and what’s coming next for YOLO11.
+
+🔗 Key Ultralytics Resources:
+- 🏢 About Us: https://ultralytics.com/about
+- 💼 Join Our Team: https://ultralytics.com/work
+- 📞 Contact Us: https://ultralytics.com/contact
+- 💬 Discord Community: https://discord.com/invite/ultralytics
+- 📄 Ultralytics License: https://ultralytics.com/license
+
+🔬 YOLO Resources:
+- 💻 GitHub Repository: https://github.com/ultralytics/
+- 📚 Documentation: https://docs.ultralytics.com/
+
+Stay updated with our latest innovations in AI and computer vision. Subscribe to our channel for tutorials, product updates, and insights from industry experts!
+
+#Ultralytics #YOLO11 #ObjectDetection #ComputerVision #AI #MachineLearning
+
+## Tags
+
+yolo11, image segmentation, pose estimation, computer vision, data science, ultralytics, ultralytics yolov8, object detection, ultralytics yolo, image classification, object tracking, machine learning, artificial intelligence, deep learning, vision ai, object counting, yolo11 object counting, ai, ultralytics yolo11, yolo11 benchmark, yolov8 vs yolo11, yolo11 demo, new ai tools, yolo11n, yolo11 detect, yolo11 pose, yolo11 tracking, yolo11 object detection, ai news, ai tools
+
+---
+
+## Transcript
+
+### Chapter: Introduction: We're exploring the new features of YOLO11 and why it's a major update! (00:00:00)
+
+[00:00:02] so we just released the new YOLO 11 model we have a new member in the YOLO family we now have the 11 so we're basically just going to see an overiew over the new model in this video here how we can run inference training and all of that we're going to go through documentation and also what the new highlights of this new YOLO 11 model and then at the end we're going to see some very awesome results so first of all here let's just start inside the blog post we have created whole block prst around this announcement of YOLO 11 so we can basically just go and read more about the detail and so on we're going to go into the documentation in just a second but you can go over the blog post get to know more about YOLO 11 what are different task and so on that you can do we can both do optic detection instant segmentation classification post estimation or in bounding boxes exactly the same as YOLO V8 we're also going to see later on some comparisons and so on and also the benchmarking results so the new YOLO 11 model is basically state-ofthe-art it has both better accuracy but also faster inference speed compared to all the other YOLO models we have YOLO V8 from altic then we have YOLO V 9 and YOLO V 10 and now we also have YOLO 11 which is released here by Ultra litics so we can use all the different times the whole framework and so on it's just a few lines of code and we can now get started with this new model so let just take a look at the Benchmark results before we go into documentation to see how we can run inference and also train this new model so here we do a comparison with all the other versions in the YOLO family so we have Yol V 8 Yol V 9 10 and now also 11 but also all the other versions We can see the new model highlighted in white here so it has pretty much better performance compared to all the other Yol models both on the average position on the Cobo data set but also the inference speed as we can see down here on the x-axis so this is basically just the latency how long it takes to process a single image so the number of milliseconds per image we can see we have the ex large large medium small in the Nana version as well so you can go and choose which one you want to use you can take your pre-train model find tune it on your own custom data set again you should go in and do comparisons with all the other versions okay so let's now jump into the allytics documentation if you go inside the models tab you can find all different versions of the YOLO models that we have so now we have this new YOLO 11 model we have the Benchmark results here that we just talked about and then also the key features so basically will just implements a bunch of new features using some of the advantages from Yol 8 Yol 10 and so on and combines all of this so now we have the most efficient the most accurate but also the fastest model that can run inference on your own applications and projects so definitely going to check out this model here again it supports all the task and also the mode so inference validation training and you can export the models to whatever optimization Frameworks that we supporting here at Ultra litics detection inst segmentation key Point Post estimation R bounding boxes and classification all those different tasks are supported as well exactly the same as the u v 8 model and if we go down to the user examples you can see how you can use it with just a few lines of code either in python or from the command line interface we just need to specify a few lines of code we need to specify the model that we want to use so now we just have this yolow 11 n or whatever variation that you want to use. PT then we can specify the data set if you want to do training so we have our data yl file where we need to specify our data directories we have videos covering all of that it will be the exact same pipeline as all the other versions and all the other models videos and so on that we have so it's just swapping out the model testing it out and that's also why it's so good to use to Alo litics framework because you can pretty much just test out four or five different models at the same time with just swapping out the model path so now we have a high level overview over the new YOLO 11 model we saw some of the details and also the benchmarking results 

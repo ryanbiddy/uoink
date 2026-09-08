@@ -1,0 +1,9 @@
+{
+  "status": "RECEIPTS_VALID_AUDIT_REQUIRED",
+  "target_count": 548,
+  "attempt_count": 563,
+  "retries": 15,
+  "measured_quality_items": 60,
+  "whole_manifest_checked": true,
+  "product_proof_pass": false
+}

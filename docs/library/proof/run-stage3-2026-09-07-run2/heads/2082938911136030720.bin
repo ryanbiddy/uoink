@@ -1,0 +1,239 @@
+# Nathan Lambert - Lecture 11 is a tool-use/function calling/agentic 101! I almost skipp...
+
+**Channel:** Nathan Lambert (— subscribers)
+**Uploaded:** 2026-07-30 | **Duration:** 37:46 | **Views:** — | **Likes:** 447
+**URL:** https://x.com/natolambert/status/2082939787904950325
+**Uoinked:** 2026-07-31T07:46:22
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Stakes
+**Analysis:** The speaker opens by emphasizing why this lecture matters—initially wanting to skip it, but realizing tool-use has become 'foundational to modern models' and essential for understanding today's agents. This frames what the viewer stands to gain by watching: understanding the foundations of a critical modern capability.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Lecture 11 is a tool-use/function calling/agentic 101! I almost skipped this one, as this chapter started as the only skill-specific topic in the book, but since writing it tool-use has only become more foundational to modern models.   This is a tour from the basics -- why LLMs https://t.co/ubW7lnX9dK
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Hey, okay. Welcome back! This
+[00:00:01] is the third to last lecture it should be Lecture
+[00:00:04] 11 if I am counting correctly and agents are not messing
+[00:00:08] up my numbering this one is on tool use i almost skipped
+[00:00:12] this chapter because The Chapter content
+[00:00:14] Is pretty light but then
+[00:00:16] I decided that It's actually a really great introductory material
+[00:00:20] Because The basics of
+[00:00:22] Tool Use And we'll also talk about
+[00:00:24] Function Calling Are
+[00:00:25] The foundations of an addition to language models in
+[00:00:28] An area Of study that led
+[00:00:30] To the proliferation
+[00:00:32] Of today's agents
+[00:00:33] And it is really nice
+[00:00:36] To understand How this has changed
+[00:00:38] and what The foundation are
+[00:00:39] And then What The things
+[00:00:41] That The labs Are pushing
+[00:00:42] Today So To start
+[00:00:44] It Is important To think What
+[00:00:46] Are Limitations Of
+[00:00:48] Model Weights When Chachupi
+[00:00:49] Released It could
+[00:00:52] Have been Thought As Model
+[00:00:55] Hugging Case In a VLM
+[00:00:57] Wrapper And these
+[00:00:58] Language model Systems Are getting
+[00:01:00] Increasingly
+[00:01:01] Complex and A lot
+[00:01:04] Of the reasons That this Is motivated
+[00:01:05] are to Solve
+[00:01:06] The limitations that Model
+[00:01:07] Weights Alone Have
+[00:01:09] And then It kind
+[00:01:11] of Transitions From Limitations
+[00:01:13] To tools
+[00:01:14] Being Really Bread
+[00:01:17] And butter For How
+[00:01:18] We See The Models Today
+[00:01:20] And what They Are Good
+[00:01:25] For Two Queries Things
+[00:01:27] Like Who is
+[00:01:28] the President Today Or
+[00:01:30] A Knowledge
+[00:01:31] Question or Kind
+[00:01:33] Of Task Which
+[00:01:35] Move All The Archive
+[00:01:36] Papers in My Downloads
+[00:01:37] Folder To My Research Directory
+[00:01:39] These Are Things
+[00:01:43] That Are Normal To Ask
+[00:01:44] a Language Model Today But
+[00:01:45] Years Ago Where They Were Not
+[00:01:47] So First One
+[00:01:48] Fails On A
+[00:01:49] Knowledge Cutoff I Think
+[00:01:50] When You Look At Demos
+[00:01:51] For Models Like Olmo
+[00:01:52] That Have Built In
+[00:01:53] A Lot Of Research Model Where
+[00:01:54] They Are Really Showing The Raw
+[00:01:56] Model Weights They
+[00:01:57] Will Get Things This Wrong
+[00:01:59] Because They Don't Know The
+[00:02:00] Future And There Were Trained
+[00:02:01] On Historical
+[00:02:02] Text And The
+[00:02:03] Second One Is Model
+[00:02:05] Weight Alone Cannot
+[00:02:06] Do This Because The
+[00:02:08] Model Waits Only Generate
+[00:02:18] Tokens In
+[00:02:23] Almost Any
+[00:02:27] Tool This Lecture
+[00:02:28] Does Not Talk About Things Like
+[00:02:29] Robotics But
+[00:02:30] It's Definitely The Case That
+[00:02:32] You Can See Where
+[00:02:33] This Is Going With
+[00:02:34] A Language Model That Just
+[00:02:35] Knows How To Generate
+[00:02:36] Tokens Being Useful
+[00:02:37] For So Many Domains
+[00:02:40] So Tool Uses Really
+[00:02:41] What Closes Both Of
+[00:02:42] These Gaps It Started
+[00:02:44] Through More Of The
+[00:02:45] First Thing Which Was
+[00:02:46] Fixing Knowledge Cutoffs
+[00:02:48] Like I Have A Slide
+[00:02:49] Later That Fixing The Stochastic
+[00:02:53] Parrots And Tool
+[00:02:55] Use Is A Trained Skill
+[00:02:56] Where The Models Learn
+[00:02:57] To Use These Tokens
+[00:03:02] Preference Data DPO
+[00:03:03] RL Managing
+[00:03:05] Rl KL Distance
+[00:03:06] Synthetic Data On
+[00:03:08] Policy Destillation All
+[00:03:09] Of This Applied To
+[00:03:10] Tool Use As A
+[00:03:11] Skill It Is
+[00:03:16] Almost Like A Property
+[00:03:17] Model The Only Lecture
+[00:03:19] That Has It As
+[00:03:20] A Stand Alone Concept
+[00:03:22] I Could Have Made Lectures
+[00:03:23] Entirely On Code
+[00:03:25] Or On Math
+[00:03:26] There Are Kind Of
+[00:03:28] Lecturers In Chat As
+[00:03:29] A Skill But
+[00:03:34] Tool Use Is Almost
+[00:03:35] Mowing Beyond A Skill
+[00:03:36] And So Core To What
+[00:03:37] Models Do Today
+[00:03:39] So I Like To Frame It
+[00:03:40] As What An LLM
+[00:03:42] Is Changed
+[00:03:43] And A Language Model
+[00:03:44] Is More Than Just Weights
+[00:03:45] A Language Model Is
+[00:03:46] Model Weights Tools
+[00:03:47] And Harnesses
+[00:03:48] Models Are Trained
+[00:03:50] On Large Web Text Post
+[00:03:52] Training The Process
+[00:03:54] Of Post Training
+[00:03:55] Is When You Open
+[00:03:56] Up To These Secondary
+[00:03:57] Bullets Post Training
+[00:03:59] Making Sure Your Model
+[00:04:00] Can Use Tools In
+[00:04:02] This Your Model
+[00:04:03] Can Work In A Hardness
+[00:04:05] Tools Are Generally Things
+[00:04:06] That The Model Can Manipulate
+[00:04:08] The World And
+[00:04:10] Harness Together
+[00:04:15] And Language Models
+[00:04:17] Are Really About Systems
+[00:04:18] So This Is
+[00:04:19] A Good Capstone Of
+[00:04:21] Transitioning The Foundations
+[00:04:22] The First 10 Lectures
+[00:04:23] Of This Course Into What
+[00:04:25] We Are Using Today With
+[00:04:27] Cloud Code Like These
+[00:04:28] Slides Are Built
+[00:04:30] In A Tool
+[00:04:32] That A Code Tool
+[00:04:34] That Is Called
+[00:04:36] Colloquium Like This
+[00:04:39] Is Designed For Agents
+[00:04:41] To Have Basic Commands
+[00:04:43] One Of Tools Is
+[00:04:44] CLI Is
+[00:04:46] Like Where Are The Commands
+[00:04:48] In Here It Might Not Be Easy
+[00:04:49] To Find But Essentially CLI
+[00:04:50] Is What Let's The
+[00:04:53] Models Use These
+[00:04:55] Tools That
+[00:04:56] I Make For This Im Using
+[00:04:58] Tools Specifically Made
+[00:04:59] For Language Models
+[00:05:02] And I Think
+[00:05:04] Its Just Very Important To Think
+[00:05:05] About This To Be Clear
+[00:05:06] So Tool Calls
+[00:05:11] Can Be Very
+[00:05:13] General In The Web Today So
+[00:05:19] Where We Are Tool
+[00:05:21] Use Started As Call A
+[00:05:22] Calculator Or An API
+[00:05:23] For Weather What Is
+[00:05:25] Search Through A Database
+[00:05:26] And Today It
+[00:05:27] Is Kind Of This General Thing
+[00:05:29] Were Tools Are Almost
+[00:05:30] Seen As General
+[00:05:31] Primitives On Computers
+[00:05:33] I Think Of Search
+[00:05:35] And Some
+[00:05:36] Sort Of Code Execution
+[00:05:37] As Most General Tools
+[00:05:39] Research Important
+[00:05:40] Because You Need To Get Relevant
+[00:05:41] Information And Code
+[00:05:44] Execution Is
+[00:05:51] Very Related To
+[00:05:52] This And It Is Its Way Of Acting
+[00:05:54] It Kind Like Getting
+[00:05:55] Information In Acting
+[00:05:56] And These Are Complimentary
+[00:05:58] To Language Models That Only
+[00:05:59] See Tokens If
+[00:06:01] You Haven't Used The
+[00:06:02] Cloud Codes Of The World
+[00:06:03] You Really Should Be A
+[00:06:05] Lot Of This Emerged
+[00:06:07] Before Cloud
+[00:06:11] Code Through Things Such
+[00:06:12] As Deep Research Computer
+[00:

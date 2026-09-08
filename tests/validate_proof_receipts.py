@@ -425,6 +425,9 @@ V2_RECEIPT_SCHEMA["properties"].update(
          "source", "upgraded", "corpus_heads")}),
     accounting=JSON_OBJECT)
 V2_RECEIPT_SCHEMA["required"] += ["calls", "completion_order", "http_history", "execution", "state_artifacts", "accounting"]
+# Stage 3 declared execution variable: optional so stage 1/2 receipts stay valid.
+for _schema in (LEGACY_RECEIPT_SCHEMA, V2_RECEIPT_SCHEMA):
+    _schema["properties"]["config"]["properties"]["effort"] = dict(anyOf=[ID, dict(type="null")])
 RECEIPT_SCHEMA = dict(oneOf=[LEGACY_RECEIPT_SCHEMA, V2_RECEIPT_SCHEMA],
                       **{"$schema": "https://json-schema.org/draft/2020-12/schema"})
 
@@ -506,17 +509,32 @@ def _check_completion_guard(receipts):
     times = [e["completed_monotonic_ns"] for e in order]
     require(times == sorted(times), "Completion order is not monotonic")
     calls = {c["call_id"]: c for c in receipts["calls"]}
-    rejected, seen = 0, set()
+    # Guard rule v2 (contract amendment, stage 3 run 2, 2026-09-07): one failed completion
+    # counts once. A rejected submission is recorded both as a rejected attempt and as its
+    # submit-failure transport event; summing the two doubled the rate (stage 3 run 1 aborted
+    # at a reported 6/49 with 3 real failures). The numerator is the number of distinct
+    # completed attempts that were rejected/errored or had a transport event by that time;
+    # a transport event with no attempt id counts once by itself. Stage 2's archive passes
+    # both rules (worst 4.49% under the old sum). Integer comparison keeps 10% unambiguous.
+    seen = set()
+    failed_ids, anonymous_events = set(), 0
     for n, event in enumerate(order, 1):
         attempt = attempts[event["attempt_id"]]
         seen.add(attempt["attempt_id"])
         require(event["completed_monotonic_ns"] >= calls[attempt["call_id"]]["end_monotonic_ns"], "Completion precedes call exit")
-        rejected += attempt["outcome"] == "rejected"
-        failures = sum(e["occurred_monotonic_ns"] <= event["completed_monotonic_ns"] and
-                       (e["attempt_id"] is None or e["attempt_id"] in seen) for e in receipts["transport_failures"])
-        # Integer comparison makes equality at 10% unambiguous.
-        require(n < 20 or 10 * (rejected + failures) <= n,
-                f"Error-rate abort threshold exceeded at completion {n}: {rejected + failures}/{n}")
+        if attempt["outcome"] in ("rejected", "error"):
+            failed_ids.add(attempt["attempt_id"])
+        anonymous_events = 0
+        for e in receipts["transport_failures"]:
+            if e["occurred_monotonic_ns"] > event["completed_monotonic_ns"]:
+                continue
+            if e["attempt_id"] is None:
+                anonymous_events += 1
+            elif e["attempt_id"] in seen:
+                failed_ids.add(e["attempt_id"])
+        numerator = len(failed_ids) + anonymous_events
+        require(n < 20 or 10 * numerator <= n,
+                f"Error-rate abort threshold exceeded at completion {n}: {numerator}/{n}")
 
 
 def redact_http(value):

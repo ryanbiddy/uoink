@@ -1,0 +1,197 @@
+# Lewis Tunstall - The recording from my CERN lecture on training LLMs is now online!   ...
+
+**Channel:** Lewis Tunstall (— subscribers)
+**Uploaded:** 2026-08-31 | **Duration:** 01:33:30 | **Views:** — | **Likes:** 161
+**URL:** https://x.com/_lewtun/status/2094364485871923547
+**Uoinked:** 2026-08-31T07:57:20
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The introduction establishes Lewis Tunstall's credentials as a senior engineer and research scientist at Hugging Face with expertise in post-training LLMs, and references his previous background as a theoretical physicist, positioning him as an expert speaker on the topic.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+The recording from my CERN lecture on training LLMs is now online!   You can follow along with the slides here: https://t.co/EPhvGvWN5f  I recommend watching it with 2x speed because my Aussie drawl is a little slow 😃 https://t.co/8f6ITmQaCe
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Good afternoon
+[00:00:02] and welcome to the last
+[00:00:05] CERN STEAM Academy seminar of the year
+[00:00:09] It's with great pleasure that I introduce Dr.
+[00:00:14] Louis Tunstall
+[00:00:16] He's a senior engineer and research scientist at Hagin Phase
+[00:00:24] where he develops and leads the post-training team
+[00:00:29] developing datasets
+[00:00:31] models that are open
+[00:00:35] for the entire AI community
+[00:00:39] In his previous life
+[00:00:40] he was also a theoretical physicist
+[00:00:43] working in the low-energy sector of the Standard Model
+[00:00:48] and today he will
+[00:00:49] give a very different Presentation from
+[00:00:53] with respect to what he would have given
+[00:00:55] ten years ago
+[00:00:57] with the secrets to training world class LLMs
+[00:01:01] Let's give him a very warm
+[00:01:04] stern welcome
+[00:01:15] Okay, thank you so much for the introduction
+[00:01:17] Can you hear me at the back?
+[00:01:18] Okay, great
+[00:01:20] So yeah
+[00:01:20] it's a real honor to be here
+[00:01:22] As Felicia said many years ago
+[00:01:24] I was a physicist and I
+[00:01:25] have vivid memories of this room when the
+[00:01:27] Higgs discovery was announced
+[00:01:29] I was on a plane and I landed
+[00:01:30] in Peru and then I saw pictures of this being where
+[00:01:33] you know
+[00:01:34] this great discovery was made and
+[00:01:36] it's a real privilege to be back many
+[00:01:37] years later to talk about a completely different topic
+[00:01:40] but one which I think is going to play an increasingly
+[00:01:43] you know
+[00:01:43] more important role
+[00:01:44] in the development of particle physics and science
+[00:01:46] more generally
+[00:01:47] Before I start
+[00:01:48] has anyone heard of Hugging Face?
+[00:01:51] A few people? Okay
+[00:01:52] good
+[00:01:53] How many of you heard of us before
+[00:01:54] we got hacked by OpenAI?
+[00:01:58] Okay, good
+[00:01:59] So
+[00:02:00] I don't need to explain it too much
+[00:02:02] So basically at Hugging Face
+[00:02:05] as Felicia said, we do a lot of research
+[00:02:08] which is about trying to
+[00:02:10] kind of bridge the gap
+[00:02:11] between
+[00:02:12] what is available to like academic researchers and
+[00:02:15] the broad OpenAI community
+[00:02:16] and then what is also
+[00:02:18] kind of
+[00:02:19] hidden or perhaps
+[00:02:20] not described in a lot of detail
+[00:02:22] at the real frontier
+[00:02:23] And
+[00:02:24] most of our work has focused on kind
+[00:02:25] of like three main themes
+[00:02:28] One is building very high quality
+[00:02:31] and expensive data sets to make
+[00:02:33] So we've done things like we've
+[00:02:35] built data sets like the stack
+[00:02:37] which essentially collect all the coding repositories in the world
+[00:02:40] make them available
+[00:02:41] We've built data sets for pre-training language models
+[00:02:44] We've built data sets for training
+[00:02:46] the new class of models called reasoning models
+[00:02:48] And in the process of doing that
+[00:02:50] we train many
+[00:02:51] many models
+[00:02:52] to kind of demonstrate that these data sets
+[00:02:54] are indeed of high quality
+[00:02:55] And so some of our
+[00:02:57] models have been around things like theorem proving for mathematics
+[00:03:01] building very early chat models when
+[00:03:03] it wasn't very well understood how to
+[00:03:05] replicate ChatGPT with open source
+[00:03:08] And, of course
+[00:03:09] the other thing of all this is like knowledge
+[00:03:10] like how do you actually make all of
+[00:03:12] these techniques widely available?
+[00:03:15] And so we've written several books
+[00:03:18] on how to
+[00:03:19] kind of train these models at scale
+[00:03:22] And I actually have a few copies of
+[00:03:23] one of them. This is how to
+[00:03:25] basically train LLMs on distributed GPU clusters
+[00:03:30] So
+[00:03:31] for those who asked maybe the most
+[00:03:33] difficult questions where I don't know the answer
+[00:03:35] you can get a copy at the end
+[00:03:37] So we've been doing this for a few years now
+[00:03:39] and when I started
+[00:03:41] it was really hard. Like
+[00:03:43] basically, the open source models completely sucked
+[00:03:46] There was, like
+[00:03:46] no good code for training models
+[00:03:49] All the knowledge was kind of hidden in
+[00:03:51] like, two papers
+[00:03:53] And so over the years
+[00:03:54] we've kind of developed internally a lot of
+[00:03:56] like, tricks on how to do this well
+[00:03:58] And a lot of this pain happens at
+[00:04:00] like, 2 a.m. in the morning
+[00:04:01] which maybe you're familiar with
+[00:04:03] you know, monitoring experiments. But often
+[00:04:06] you know, you have these training runs
+[00:04:07] They cost millions of dollars
+[00:04:09] and you want to make sure that
+[00:04:10] you know, things don't break
+[00:04:10] And so
+[00:04:11] a lot of this pain that we've experienced
+[00:04:13] in the early hours of the morning
+[00:04:15] made me think that maybe a better
+[00:04:17] title for my talk was
+[00:04:18] you know
+[00:04:18] 10 Weird Tricks
+[00:04:19] for Training LLMs Without Losing Your Mind
+[00:04:21] And my hope is that at the end of this
+[00:04:23] you get a bit of a taste of
+[00:04:24] what it's like
+[00:04:24] to really train a language model
+[00:04:26] from end to end
+[00:04:28] and some of the methodology
+[00:04:30] that we've developed at Hugging Face to try
+[00:04:31] and do this in a systematic way
+[00:04:34] So before I get into the nuts and bolts
+[00:04:37] I thought it'd be good to kind of
+[00:04:38] set the stage by
+[00:04:39] highlighting a little bit the kind of evolution
+[00:04:41] of LLMs over the past
+[00:04:43] you know, maybe five to seven years
+[00:04:45] So kind of in the beginning
+[00:04:47] the only sort of
+[00:04:48] LLMs we had were kind of base models
+[00:04:50] These are sometimes called pre-trained language models
+[00:04:52] and this is where you may have heard of things like
+[00:04:55] okay, we train the model on the full internet
+[00:04:58] and they become very
+[00:04:59] very powerful autocomplete models
+[00:05:01] One of the most famous ones of these
+[00:05:03] was GPT-3 by OpenAI
+[00:05:06] because it demonstrated that if you basically trained a very
+[00:05:08] very large language model to just predict the next token
+[00:05:12] it could do some rather remarkable things
+[00:05:15] such as in-context learning
+[00:05:17] where if you just provided the model with
+[00:05:18] a sequence of examples
+[00:05:20] it could then figure out how to autocomplete
+[00:05:22] the final example. So if you look here
+[00:05:25] you've got this model
+[00:05:26] you just give it a bunch of addition problems
+[00:05:28] and then you say
+[00:05:29] okay, what is the last one?
+[00:05:30] And then it will just autocomplete the answer
+[00:05:33] this is Kind of very rudimentary by today's
+[00:05:35] standards. We have much higher expectations
+[00:05:37] But at the time
+[00:

@@ -1,0 +1,75 @@
+# The Future of MCP — David Soria Parra, Anthropic
+
+**Channel:** AI Engineer (474.0K subscribers)
+**Uploaded:** 2026-04-19 | **Duration:** 18:45 | **Views:** 134,548 | **Likes:** 2,614
+**URL:** https://www.youtube.com/watch?v=v3Fr2JR47KA
+**Yoinked:** 2026-05-17T18:01:32
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Demo
+**Analysis:** The speaker opens by immediately showcasing a live MCP application in action, demonstrating concrete functionality (an agent shipping its own interface across multiple platforms like ChatGPT, VS Code, and Cursor) rather than explaining concepts abstractly. This tangible demonstration of the technology's capabilities serves as the hook to draw viewers into understanding what MCP can do.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+In this Keynote, I will lay out what I believe will be true for agents in 2026 and how MCP plays a part in this. Let's take a look what connectivity for agents might look like.
+
+Speaker info:
+- https://x.com/dsp_
+- https://www.linkedin.com/in/david-soria-parra-4a78b3a/
+- https://github.com/dsp
+
+Timestamps
+0:00 Introduction and the vision for MCP applications
+1:34 Looking back at the evolution of the MCP ecosystem over the last 18 months
+2:30 Ecosystem growth and adoption milestones
+3:46 Moving from exploration in 2025 to production in 2026
+5:07 The 2026 connectivity stack: Skills, MCP, and CLI/Computer use
+7:47 Improving client harnesses: Progressive Discovery
+9:39 Programmatic tool calling and agent orchestration
+12:00 Best practices for designing agents and server authors
+13:42 Future roadmap for the MCP protocol and core improvements
+15:23 Strategic integrations and enterprise features
+16:32 Upcoming extension mechanisms and skills over MCP
+17:15 Conclusion and call for community feedback
+
+## Tags
+
+ai, ai engineer, ai engineering, software development, tech, startups, software architecture, machine learning
+
+---
+
+## Transcript
+
+### Chapter: Introduction and the vision for MCP applications (00:00:00)
+
+[00:00:16] >> Well, welcome.
+[00:00:18] welcome. Let's get started. This
+[00:00:22] This is an MCP application. That's an agent shipping its own interface not through like a plugin, not through an SDK, not rendered on the fly by the model on the client side, or hardcoded into the product. That is something that is served over an MCP server, and you can take the server, put it into cloud, you can put it into ChatGPT, you can put it into VS Code Cursor, and it will just work.
+[00:00:52] And that I think it's kind of cool because for doing that, you need something that a lot of things that we're want in the ecosystem do not offer. You need semantics, you need to have both sides, client and the server, to understand what each side is talking, to understand how you render this, understand that there's a UI coming. And for that, you need a protocol. And the best part about this, an MCP server doesn't just ship an app, or can ship an app, it can also ship tools with it, and so you can interact with it with the application as a human, and you can have the model interact with it through tools, which is I think a very unique thing that I think we have not explored much just yet.
+
+### Chapter: Looking back at the evolution of the MCP ecosystem over the last 18 months (00:01:34)
+
+[00:01:34] just yet. Okay.
+[00:01:35] Okay. But, let's quickly rewind a little bit from this what I think is a really cool glimpse into the future of MCP into over a year ago, 18 months, an eternity in AI life cycle, um all of this did not exist. There was just a little spec document, a few SDKs, uh mostly written by Claude, local only with little more than just tools. And in that last 18 or 12 months, you guys have been absolutely crazy building stuff, um building servers, building um an crazy ecosystem around this, and we on our side have been busy busy taking this local only thing, added remote capabilities, added centralized authorization, added new primitive like elicitation and tasks, and last but not least, added new experimental features to the protocol like the MCP applications that you've just seen.
+
+### Chapter: Ecosystem growth and adoption milestones (00:02:30)
+
+[00:02:32] And in the meantime, we have reached, I think, a really cool milestone because again, you all of you have been absolutely crazy building, building, and building. Of course, luckily with the help of a a bunch of agents. Um
+[00:02:42] agents. Um we're now like at 110 million monthly downloads. And that's just, of course, not us using it in our clients and servers. That's like OpenAI's agent SDK, that's Google's ADK, that's LangChain, thousands of frameworks and tools that you might have never ever heard of it pulling it as a as a dependency, which means there's one common standard that all of us have at our disposal to speak to each other. Um just a bit for context, uh React, one of the most successful um open source projects probably of the last decades, took roughly double the amount of time to reach that download volume.
+[00:03:20] volume. And in the meantime, of course, you all have been building really, really cool servers from like little toy projects of WhatsApp servers and Blender servers, uh to building SAS integrations like Linear, Slack, and Notion that are really powering what everyone does every day when they use MCPs. But most importantly, the vast majority of MCP server most of all of us have built are behind closed doors uh connecting company systems to agents uh and AI applications. But I still think this is just the absolute beginning of where we are. Because I think 2025 was all about exploring, and 2026 is all about putting these agents into production. Because if you really think about it, in my mind, 2024, we just built a bunch of like demos and showed some cool stuff to people, and there was a little bit of a buzz there. 2025 was really all about coding agents. But coding agent, if you really think about it, are the most ideal scenario for an agent. It's local, it's verifiable, you can call a compiler, like you have a developer who can fix if it goes wrong in front of the in front of the computer, uh and you can display a UI interface, and the user's quite happy. But I think now with the capabilities of the model increasing, we're going into a new era, which I think this year will be we will see the start, where we're not just doing coding agents, we're going to have general agents that will do real knowledge worker stuff, like things a financial analysis analyst want to do, uh a marketing person want to do. And they need one thing in particular. They don't need a local agent that calls a compiler. What they need is something that could connect to like five SAS applications and a and a shared drive because the most important part for them for an agent is connectivity. And in my mind, connectivity is not one thing. If one if someone tells you there's one solution to all your connectivity problem, be it computer use, be it CLIs, be it MCP, they are probably pretty wrong because the right because the right thing, of course, is that it always means it depends, and there's a real a big connectivity stack, and there's a right tool for the right job. And in my mind, there are three major things that you want to consider building an agent in 2026. It's skills, MCP, and of course, like CLI or computer use depending on your use case. And they have three very distinct things that they can do in three different things you want to consider when you build your agent. Number one, skills, of course, is just like domain knowledge, it's just like capture-specific capabilities put into a very simple file, and it's mostly reusable. There are some minor differences between the different platform.
+
+### Chapter: Moving from exploration in 2025 to production in 2026 (00:03:46)
+
+
+### Chapter: The 2026 connectivity stack: Skills, MCP, and CLI/Computer use (00:05:07)
+
+[00:05:59] platform. Of course, CLIs very popular when local coding agents. It's an amazing tool to get simply started, to have something 

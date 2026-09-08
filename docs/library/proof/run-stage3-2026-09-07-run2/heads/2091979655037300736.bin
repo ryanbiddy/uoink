@@ -1,0 +1,201 @@
+# Codez - SpaceXAI engineer (ex-Cursor):  "right now I'm running 10-20 GrokBot ...
+
+**Channel:** Codez (— subscribers)
+**Uploaded:** 2026-08-24 | **Duration:** 59:40 | **Views:** — | **Likes:** 4,167
+**URL:** https://x.com/0xCodez/status/2091980766372639135
+**Uoinked:** 2026-08-25T07:50:33
+**Topic:** Uncategorized
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The opening establishes the speaker's credentials by listing impressive roles at major tech companies (Cursor, Meta, Netflix) and current status as a SpaceXAI engineer, positioning them as an expert on the topic of AI agents and management.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+SpaceXAI engineer (ex-Cursor):  "right now I'm running 10-20 GrokBot agents that automate 90% of my routine  i have a Chief of Staff agent. He knows about all my other bots and manages everything"  in a 50-minutes podcast, a SpaceXAI engineer showed how to build a team of agents https://t.co/8kCheoXhNU
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Hi everyone. I am Lauren
+[00:00:02] Lauren Tan
+[00:00:03] I guess not many people know my last
+[00:00:04] name
+[00:00:06] I am Potato on Twitter
+[00:00:09] Potato with spelled with an E
+[00:00:12] and I have been
+[00:00:14] at Cursor for about five months
+[00:00:18] previously I was at Meta where I worked
+[00:00:20] on the React team
+[00:00:22] specifically working on the React compiler
+[00:00:25] which was a whole lot of fun
+[00:00:27] I'm still on the
+[00:00:27] on the core team and
+[00:00:28] and, contributing to open. Source here and there
+[00:00:32] so that
+[00:00:32] that's
+[00:00:33] really nice that they still let me do
+[00:00:35] and before Meta, I was at Netflix
+[00:00:38] where I was, both a tech lead and
+[00:00:43] I transitioned to be
+[00:00:44] be an engineering manager
+[00:00:46] for about two years
+[00:00:49] So I've had a
+[00:00:50] I've had a lot of experience going between
+[00:00:53] engineering management and being an individual contributor
+[00:00:57] and I think something I've noticed actually which
+[00:00:59] is quite interesting is that there are so many parallels with
+[00:01:04] you know
+[00:01:04] management skills and how to like manage agents
+[00:01:07] and that's actually a
+[00:01:08] a big part about what I wanted to
+[00:01:10] chat with you and everybody else about today
+[00:01:14] but yeah, that's, that's me
+[00:01:16] I do have some like very light slides
+[00:01:19] But, it's not gonna be
+[00:01:21] just rambling. So
+[00:01:22] let me just share my screen
+[00:01:25] and hope that I don't leak anything
+[00:01:33] Oh no, I need to allow permissions
+[00:01:36] No worries. Okay, take your time
+[00:01:38] There's always tech, tech, tech trouble
+[00:01:40] give me one second to rejoin
+[00:01:42] Yeah, go for it
+[00:01:46] I see many of you already know Lauren
+[00:01:48] from from the looks of the chat here
+[00:01:51] so yeah it's
+[00:01:52] exciting to to get a chance to chat
+[00:01:53] with her
+[00:01:54] and and go through some of her her
+[00:01:56] recent work. As you guys heard you know
+[00:01:58] a lot of recent experience
+[00:01:59] from from Netflix to
+[00:02:01] to Meta and then now over at Cursor
+[00:02:04] we're going to chat a little bit about
+[00:02:05] Grokbot as well
+[00:02:07] So
+[00:02:08] that'll be exciting. I don't know if you
+[00:02:09] guys saw that was a recent release
+[00:02:10] I think literally
+[00:02:11] maybe yesterday or the day before
+[00:02:13] from the Cursor team which is kind of
+[00:02:14] like let's call it like Agents for Everyone
+[00:02:17] You can go check it out if you
+[00:02:18] want and learn a bit
+[00:02:19] a little bit more about the product
+[00:02:21] But, but yeah, we'll
+[00:02:22] we'll explore that a little bit today as well
+[00:02:27] Alrighty, welcome back
+[00:02:40] And Lauren, you're just on mute there if
+[00:02:42] you want to hop off of mute if you're chatting
+[00:02:44] Yeah, sorry. No worries
+[00:02:47] It's 2026 and I still don't know how
+[00:02:48] to use Zoom
+[00:02:50] That's all good
+[00:02:51] okay, so I assume you can see my screen?
+[00:02:54] Yes. Yeah, we're good
+[00:02:56] So yeah, today, yeah, I think
+[00:02:58] I think the big theme for me
+[00:02:59] as I've been using agents to write code
+[00:03:02] and I'm sure a lot of you have
+[00:03:03] had the same experience as well
+[00:03:05] is how do you trust it?
+[00:03:07] You know
+[00:03:07] especially if you are an engineer that's been
+[00:03:10] writing code for a very long time
+[00:03:12] you have
+[00:03:13] a lot of
+[00:03:14] opinions and lessons that you've learned
+[00:03:16] about doing good engineering
+[00:03:19] And when you see agents just
+[00:03:20] you know, winging it and, you know, guessing, hallucinating, you know
+[00:03:25] confidently stating that they found the smoking gun
+[00:03:29] for the hundredth time
+[00:03:31] but it's actually not the real problem
+[00:03:33] you lose a lot of trust
+[00:03:35] And when you lose
+[00:03:36] when you don't have much trust in your
+[00:03:37] agents
+[00:03:39] I feel like you you really can't get
+[00:03:40] the most out of them
+[00:03:42] And for me
+[00:03:43] the parallel is like with management
+[00:03:46] so if I'm an
+[00:03:46] a manager, an engineering manager of a team
+[00:03:49] and I have a bunch of
+[00:03:51] you know, I have a team of engineers
+[00:03:54] on my team, and I don't trust them
+[00:03:56] then
+[00:03:57] the mode of operation I'm gonna be in
+[00:03:59] is gonna be like micromanagement
+[00:04:00] right? I'll have to
+[00:04:02] spend a lot of time
+[00:04:03] looking over my report's shoulders and
+[00:04:06] checking that they're doing their work well
+[00:04:08] that they're not shipping bugs to production
+[00:04:13] And so, I drew this chart because
+[00:04:16] it's not, it's not a very scientific chart
+[00:04:17] but, like
+[00:04:18] this is how I imagine
+[00:04:21] myself and my journey through using agents
+[00:04:24] So, you know, like fast forward or back forward
+[00:04:29] or fast back, fast backwards, like a year or so when
+[00:04:34] you know, nobody was
+[00:04:35] or not many people were using agents to
+[00:04:37] code
+[00:04:39] I think you
+[00:04:41] you get into this mode where you are
+[00:04:45] in very heavily in the loop
+[00:04:46] with one or several
+[00:04:48] like a handful of agents
+[00:04:50] and you find yourself just constantly fig
+[00:04:53] you know trying to understand what your agents
+[00:04:55] are doing
+[00:04:56] and you're very very in the loop
+[00:04:58] you're watching every single output you are
+[00:05:01] sitting there prompting
+[00:05:03] and you really can't parallelize beyond that because
+[00:05:07] you don't again you don't have that trust
+[00:05:09] right you can't go to a hundred agents
+[00:05:11] like spawn a hundred agents when you don't
+[00:05:13] even trust the output of one agent
+[00:05:17] So, over the past five months
+[00:05:19] I feel like I've really been able to
+[00:05:22] like, ascend this trust curve
+[00:05:25] And now I'm at the point where
+[00:05:28] I actually have, this sounds kind of scary to say this
+[00:05:31] and it, it makes me sound like a slop artist
+[00:05:33] but I, I promise I'm not
+[00:05:34] But I actually have my agents now
+[00:05:37] auto-merging PRs for me
+[00:05:39] which is like a wild thing to say
+[00:05:42] But
+[00:05:42] like I woke up today and there were
+[00:05:45] like 20 PRs landed
+[00:05:46] and I just reviewed them on main
+[00:05:49] like they were already landed
+[00:05:51] And they were good
+[00:05:52] so how did I get to that point?
+[00:05:55] Is basically what I wanted to talk about today
+[00:05:59] and again, like, yeah
+[00:06:00] feel free to jump in if you have questions
+[00:06:03] Colin. but, Oh yeah, of course I gotta show this
+[00:06:07] this chart
+[00:06:09] where
+[00:06:12] No, do, do not trust, to
+[00:06:15] someone requested to control my computer
+[00:06:18] probably won't do that
+[00:0

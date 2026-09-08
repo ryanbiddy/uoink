@@ -1,0 +1,233 @@
+# Noisy - She built 100+ agents for Anthropic and made $1.3M - and in 60 minute...
+
+**Channel:** Noisy (— subscribers)
+**Uploaded:** 2026-08-04 | **Duration:** 01:08:49 | **Views:** — | **Likes:** 1,627
+**URL:** https://x.com/noisyb0y1/status/2084672026678034604
+**Uoinked:** 2026-08-05T07:34:44
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The hook establishes credibility by highlighting the guest's impressive credentials and concrete results: building 100+ agents for Anthropic, earning $1.3M, and being invited to teach at Stanford. This positions her as an expert worth listening to.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+She built 100+ agents for Anthropic and made $1.3M - and in 60 minutes leaked everything she knows at Stanford:  02:07 - her first agent for Anthropic brought her $1.3M  08:34 - agents replace a team of 50 engineers worth $200k a month  19:47 - one agent did overnight what the https://t.co/5BH8K9fywd
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Hi, I'm Azaliya Mir-Hosseini.
+[00:00:02] And I am an assistant professor in the CS department
+[00:00:09] and Akanksha and met each other when we were at Google Brain
+[00:00:15] back in a day on Google DeepMind
+[00:00:17] and also worked on Cloud at Anthropic
+[00:00:21] and Jemma and I are at Google Deepmind
+[00:00:24] and we are so excited to teach this course again.
+[00:00:27] This is the second time you're teaching, of course
+[00:00:29] they have made some updates both
+[00:00:31] to their lectures And also the way
+[00:00:33] We kind Of conducting everything during that for
+[00:00:38] The course And We were just
+[00:00:41] So amazed by The amount
+[00:00:42] Interest For people
+[00:00:44] To join This course So
+[00:00:45] They Are
+[00:00:46] Excited To Have You On the outside in terms of
+[00:00:54] All The Lecture materials
+[00:00:56] And The papers that you'll be reading
+[00:00:58] As well as What's
+[00:00:59] The homework schedule to expect
+[00:01:01] The project proposal
+[00:01:02] and Project structures
+[00:01:04] As Well So In todays lecture
+[00:01:06] We will start with an overview
+[00:01:08] Of large language models
+[00:01:10] Just How The scaling trends have evolved
+[00:01:12] Over The last Five years
+[00:01:14] Then Will focus more on what we
+[00:01:16] Will cover In this class
+[00:01:17] And then From there
+[00:01:19] This second half Of
+[00:01:24] That part You should pay
+[00:01:25] A lot of attention to
+[00:01:26] Because that influences your grades
+[00:01:30] So Let's take a look at an overview
+[00:01:32] Of the trends for large language models
+[00:01:35] One Of The aspects
+[00:01:36] That has been mind blowing
+[00:01:37] Since GP3 came out
+[00:01:39] Is As
+[00:01:43] you scale up
+[00:01:44] The Number Of parameters
+[00:01:45] In A model They get better
+[00:01:47] And what this means Is
+[00:01:48] Language Models
+[00:01:50] Like BERT and T5
+[00:01:52] Were good But as we increased
+[00:01:54] The number Of Parameters It
+[00:01:55] Got Really Better They performed
+[00:01:56] Much better And what this led to
+[00:01:58] Is something Called a scaling loss
+[00:02:00] For large language Models
+[00:02:01] Which are used In building
+[00:02:03] The base Model for
+[00:02:04] the pre-trained Base model
+[00:02:06] and As you increase
+[00:02:08] The amount Of compute So there
+[00:02:09] Are three graphs Here as
+[00:02:10] You Increase The Amount of Compute
+[00:02:11] On The X Axis The
+[00:02:14] Loss Function on
+[00:02:15] Y axis Goes Down
+[00:02:16] And More
+[00:02:18] Compute You Have Put in The
+[00:02:20] More That This Test Lost
+[00:02:21] Goes Down which Leads
+[00:02:22] To A Better Model So that
+[00:02:24] Was One Big Aspect
+[00:02:25] That Led To Gp3
+[00:02:27] And Then All The Subsequent
+[00:02:28] Chat GPT Palm
+[00:02:30] Gemini and so
+[00:02:32] On And then Similarly
+[00:02:33] as You Increase the Data
+[00:02:34] Set Size on X
+[00:02:35] Axis The
+[00:02:36] Test Loss Goes Down
+[00:02:37] Further On Y
+[00:02:39] axis So That's Another
+[00:02:40] Aspect Of Like another
+[00:02:42] Access of Scaling
+[00:02:43] That Leads to Better
+[00:02:44] Language Models And
+[00:02:46] The Fourth
+[00:02:47] Is A Third One
+[00:02:48] Is Of Course Parameter Count
+[00:02:49] So If You
+[00:02:50] Increase The Number Of Layers
+[00:02:51] In A Transformer Or Them
+[00:02:52] Out Of Parameters That
+[00:02:53] Are There in the Language
+[00:02:55] Model That Improves
+[00:02:56] The Loss Value And
+[00:02:58] Then That Leads To Better Models
+[00:02:59] This Has Been The
+[00:03:00] Foundation For A Lot
+[00:03:02] Of The This Has Been
+[00:03:03] The Foundation For Long Time
+[00:03:05] Until Last Year Where
+[00:03:06] This Was Starting To
+[00:03:07] Hit Some Kind Of Saturation
+[00:03:09] Point So From
+[00:03:13] 2018 To
+[00:03:14] Almost 2024 This
+[00:03:16] Graph Is A Little
+[00:03:17] Bit Updated But For
+[00:03:19] 20 24 The
+[00:03:20] Model Size Has
+[00:03:21] Gone Out Almost
+[00:03:23] Consistently We Have Been
+[00:03:25] Increasing The Side
+[00:03:26] Of The Models You Started
+[00:03:27] With Something Like Burt
+[00:03:28] Was 340 Million Parameters
+[00:03:30] GVD2 2 1.5
+[00:03:31] Billion Parameter And
+[00:03:32] Then GB3
+[00:03:33] Was 175 Billions
+[00:03:35] Parameters And Then Say
+[00:03:37] Palm 5 40 Billion
+[00:03:38] And There Was
+[00:03:40] A Bunch Of Subsequent Models
+[00:03:41] And GVD4 Is
+[00:03:42] Estimated To Be There
+[00:03:44] Which Is Like Trillions Of
+[00:03:45] Parameters So You
+[00:03:46] Can Imagine That There Has
+[00:03:47] Been An Exponential Growth
+[00:03:48] In Just The Model Size
+[00:03:50] For Large
+[00:03:51] Language Models The
+[00:03:52] Large Stands For They
+[00:03:53] Are Growing In Size And
+[00:03:55] That Has Being One
+[00:03:56] Key Area In
+[00:03:57] Which The Models Have Been Getting
+[00:03:58] Better Why Do
+[00:04:01] We Care About The Models
+[00:04:02] Getting Bigger
+[00:04:04] What Does This Lead
+[00:04:05] To So As I Was
+[00:04:06] Explaining That As
+[00:04:07] The Models Get Bigger
+[00:04:08] They Continuously
+[00:04:09] Improve In Performance
+[00:04:10] On National Language
+[00:04:12] Benchmarks And Various
+[00:04:13] Other Benchmarks Reasoning
+[00:04:14] Benchmarks And So On
+[00:04:16] Another Interesting Aspect
+[00:04:18] Is Learned How
+[00:04:21] To Do Few Short Learning
+[00:04:22] Earlier You
+[00:04:23] Have To Fine Tune The
+[00:04:25] Model For A Specific Domain
+[00:04:26] But Just By Giving
+[00:04:27] Examples The Model Can
+[00:04:29] Follow That Template
+[00:04:30] And Reason In
+[00:04:31] The Same Rain Which
+[00:04:33] Makes It Extremely Easy
+[00:04:34] To Prototype Things
+[00:04:36] Then Third Aspect
+[00:04:38] Is That As Models
+[00:04:40] Become Bigger They Have
+[00:04:41] Immersion Behavior Where Capabilities
+[00:04:42] Like Reasoning Only
+[00:04:43] Emerge In Largest Model
+[00:04:44] So
+[00:04:47] Just Understand Few
+[00:04:48] Short Learning Or Zero Short
+[00:04:49] Learning Here If A
+[00:04:52] Model Gives
+[00:04:53] A Question Or
+[00:04:55] Task Translate
+[00:04:56] English To French This
+[00:04:59] Is Called A
+[00:05:00] Prompt Like It Is Given A
+[00:05:01] Task Translate English To
+[00:05:02] French And Then Asked
+[00:05:03] You Translates Cheese To
+[00:05:04] Whatever The French Word
+[00:05:05] If The Model Can
+[00:05:06] Predict The Answer Without Actually
+[00:05:09] Being Trained On This Specific
+[00:05:10] Task That Would Be Caused
+[00:05:11] Your Short Learning In
+[00:05:13] Few Short Learning
+[00:05:14] In Addition To Giving
+[00:05:17] Description Of The Task We
+[00:05:18] Are Also Giving A Few Examples
+[00:05:19] So In This Particular Case
+[00:05:20] Its Given Translating
+[00:05:21] English To French And It's
+[00:05:22] Given A Few Examples Of
+[00:05:24] The Translation
+[00:05:25] From English To French Then
+[00:05:26] Its Asked To Translate
+[00:05:28] Cheese And Is Able To
+[00:05:29] Translate That Y

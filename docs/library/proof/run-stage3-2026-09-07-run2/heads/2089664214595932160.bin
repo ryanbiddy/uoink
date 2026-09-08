@@ -1,0 +1,92 @@
+# Konrad Reczko - Depth-aware light injection in TypeGPU  I got a 448x448 monocular dep...
+
+**Channel:** Konrad Reczko (— subscribers)
+**Uploaded:** 2026-08-18 | **Duration:** 00:31 | **Views:** — | **Likes:** 4,272
+**URL:** https://x.com/reczko_konrad/status/2089670934009413751
+**Uoinked:** 2026-08-18T07:49:26
+**Topic:** Developer Marketing
+**Note:** Screenshot interval lowered from 30s to 4s so this source can yield about 8 frames.
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Demo
+**Analysis:** The hook opens by showcasing a technical achievement—getting a 448x448 monocular depth model running at ~8ms on M4 Pro hardware—which is a concrete demonstration of performance results rather than a question, narrative, or promise of information to come.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Depth-aware light injection in TypeGPU  I got a 448x448 monocular depth model down to ~8 ms on my M4 Pro across ~250 dispatches, which is fast enough to use in realtime :D Since the inference is written directly in TypeGPU, I can just feed the depth buffer straight into the https://t.co/txDXqc88l6
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+*No captions available for this video.*
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:04]
+
+![Screenshot at 00:00:04](screenshots/shot_0002.jpg)
+
+### [00:00:08]
+
+![Screenshot at 00:00:08](screenshots/shot_0003.jpg)
+
+### [00:00:12]
+
+![Screenshot at 00:00:12](screenshots/shot_0004.jpg)
+
+### [00:00:16]
+
+![Screenshot at 00:00:16](screenshots/shot_0005.jpg)
+
+### [00:00:20]
+
+![Screenshot at 00:00:20](screenshots/shot_0006.jpg)
+
+### [00:00:24]
+
+![Screenshot at 00:00:24](screenshots/shot_0007.jpg)
+
+### [00:00:28]
+
+![Screenshot at 00:00:28](screenshots/shot_0008.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About Konrad Reczko:**
+*No channel description available.*
+
+**Recent videos from this channel:**
+- *No recent videos found.*
+
+---
+
+*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*

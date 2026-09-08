@@ -1,0 +1,48 @@
+# You were lied to about Fable
+
+**Channel:** Theo - t3․gg (546.0K subscribers)
+**Uploaded:** 2026-07-04 | **Duration:** 23:24 | **Views:** 93,630 | **Likes:** 3,196
+**URL:** https://www.youtube.com/watch?v=5LqC6qdVAwU
+**Uoinked:** 2026-07-08T17:41:02
+**Topic:** Social Media Research
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The title 'You were lied to about Fable' directly challenges the prevailing negative narrative about the model circulating on Twitter and dev communities, positioning the creator against the consensus criticism.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Fable lied
+
+Thank you Browserbase for sponsoring! Check them out at: https://soydev.link/browserbase
+
+SOURCES:
+https://x.com/trq212/status/2072814903170408784
+
+https://x.com/theo/status/2072777929180987485
+
+https://x.com/theo/status/2072481845363822914
+
+Want to sponsor a video? Learn more here: https://soydev.link/sponsor-me
+
+Check out my Twitch, Twitter, Discord more at https://t3.gg
+
+S/O @Ph4seon3 for the awesome edit 🙏
+
+## Tags
+
+web development, full stack, typescript, javascript, react, programming, programmer, theo, t3 stack, t3, t3.gg, t3dotgg
+
+---
+
+## Transcript
+
+[00:00:01] Babel 5 is really back, and it's terrible at coding. It just refuses to do it. It costs way too much money, and they nerfed the hell out of it. Okay, now that all of the Anthropic employees are gone, I want to be real with y'all because all of these takes are flooding Twitter and other dev circles, and most of them are just outright wrong. I wouldn't be saying this for no reason. Anthropic and I do not tend to get along. I'm saying this because the model has blown me away, and when I look at the things I'm doing with it, and I talk with my friends and see the things they're doing with it, and then I open Twitter and see the absolute nonsense people are sharing, it genuinely kind of frustrates me. And I'm scared a lot of awesome developers aren't going to get to see the power of this model simply because of all of the flood that's being spread about it. I want to jump in front of as many of these lies, uh sorry, misconceptions as possible in order to help you guys get the most out of the model. I'm going to follow this video up with another that showcases more of how I actually use it and the customizations I have made to get the most out of it personally. This video's more an attempt to clear up all of these misconceptions that have been frustrating me so that we can start with a clean slate before I show you guys what I've been using the model for. The big things I want to talk about here are the cost and how bad it is or isn't, the subscription availability because there's a ton of confusion about that because it's being removed on July 7th, but that doesn't mean what you guys think it means. But most importantly, the nerfed performance because a lot of people seem to think the model is not being allowed to code, the model isn't doing well on real coding tasks, it's being rerouted to aggressively, and all these other things. To be fair, Anthropic themselves did say that some routine tasks like coding and debugging will fall back to Opus 4.8, which seems to indicate that you won't be able to use the model for code. Not the case, and we'll dig into more about that. But please, please stop looking at benchmarks like this that claim the model got way dumber when it didn't. They're just not true. I can't believe you guys are making me do this again, but I guess I have to put on my Anthropic defender hat because this is a good model, and I wish y'all would stop pretending it isn't. While it isn't quite as expensive as some seem to think, this model has cost me a good bit of money, which is why I hope you forgive a quick break for today's sponsor. I have a confession. I was really wrong about something that's pretty important. I've talked a bit about computer use throughout my time covering AI, and I just didn't see the value proposition there. I figured if anything was valuable enough to try and get to it by hacking a browser and letting an agent control it, it would just be exposed over an API eventually anyways. Not only was that not the case, I also didn't expect that computer use would become such a positive powerful thing that the agents can do, and now I need a browser to run it on. Today's sponsor is Browser Base. And if I'm being real with you guys, I was super skeptical of it when it first started. The founder, Paul, is a good friend of mine, and when we talked about it, I thought it was pretty useful as a way to like not have to spin up Puppeteer on my own servers in a serverless world. But when he tried to push that this was the future of how agents would be able to get work done in the real world, I just didn't see it. I pushed back a lot on Paul, and over time I've realized he was right and I was wrong. Agents do need a browser in order to use the majority of the web. Quick question, what percentage of APIs do you think are actually exposed in a way where you can hit them programmatically? You would guess like 40, 50, 80%, right? What if I told you it was less than 15? You'd probably be scared about that other 85%, the things that you can't hit via curl. And that's what Browser Base does better than anyone else. They let you access everything on the web. If a user can find it by clicking, the agent can too, and Browser Base gives your agents the browser they need to get around all of the things they might struggle with. If you haven't seen this yourself, go open up Codex and tell it to configure something in some obscure dashboard in Chrome. It will do it. I still can't believe just how well it does it. And now that I want my services to be able to do the same thing, I can't run that on my laptop, so I use Browser Base when I set it up in the cloud. If you need your agents to be able to fill out forms, work around CAPTCHAs, navigate the entire internet, and get real work done with it, there is no better place to start than soid.link/browserbase. Now that that's out of the way, let's go through this list. I know I have it in order of cost, then subscription availability, then Nerf performance. I'm going to go in the inverse. A lot of the suspicion people had around performance was due to this particular post from Anthropic when the model was confirmed to be coming back. They said, verbatim, "In the near term, some routine tasks like coding and debugging will fall back to Opus 4.8." This was very poorly worded. What they should have said is something along the lines of, "Some users doing coding and debugging tasks may notice the model occasionally falling back to Opus 4.8 when we detect potentially risky behaviors." In my first day and a half of doing real work with the model, I did not encounter a single fallback. It still triggers all the time when the words like cryptography or cyber are mentioned in any meaningful way. If I try to get it to solve things like the DEF CON puzzles I do, not even the like hacking type ones, more of the like you have a PDF and you have to decode the PDF type ones, it just refuses and reroutes immediately. Even Opus 4.8 refuses those though, so not the best example. I did have issues for the first time last night when I was trying to configure a dev Android phone. Uh, we're going to have a lot to talk about that in the future, don't worry. It's trying to get it to root itself and allow itself to install apps that it builds on device instead of needing to go to a server to sign it. And after enough back and forth, in particular once I brought up a specific package that actually, I didn't bring up, it brought up a library that would allow for self-signing, when I asked more about that library, it then got a couple sentences into the response before I'm guessing it had some trigger words in said response and then fell back to Opus 4.8, nuked the history for that message and rewrote it. Then I did a couple more back and forth, bumped it back to Fable, and was fine. It continued working fine as Fable. I do want to make sure we're b

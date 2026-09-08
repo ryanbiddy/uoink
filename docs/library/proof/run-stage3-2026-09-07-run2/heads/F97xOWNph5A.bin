@@ -1,0 +1,115 @@
+# How the AI Engineer Conference Went From 500 to 7,200 Attendees w/ the founder of AI Engineer (Swyx)
+
+**Channel:** Alex Volkov from ThursdAI (44.1K subscribers)
+**Uploaded:** 2026-07-05 | **Duration:** 26:55 | **Views:** 40 | **Likes:** 2
+**URL:** https://www.youtube.com/watch?v=F97xOWNph5A
+**Uoinked:** 2026-07-06T20:54:50
+**Topic:** Developer Marketing
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Story Open
+**Analysis:** The host opens by welcoming the guest with casual banter and immediately pivots to a personal anecdote about an unforgettable day at the conference, establishing narrative momentum before diving into the main topic.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Swyx (Shawn Wang) reveals how the AI Engineer World's Fair scaled from a 500-person meetup to 7,200+ attendees — plus the Token Billionaire club and the plan to go global.
+
+Guest: Swyx (Shawn Wang), co-founder & CEO at AI Engineer
+Full episode & newsletter: https://sub.thursdai.news
+
+⌛ CHAPTERS
+0:00 Welcome the token billionaire
+0:51 Fable keynote & the World Cup night
+2:00 Scaling to 7,000+ & the Gini coefficient
+3:35 Newspaper, puppies, robots & flash mobs
+5:59 From a Dev.to blog to Latent Space to AI Engineer
+8:09 Inside the Token Billionaire club
+10:03 The essay & the first 500-person conference
+14:22 Going global: Singapore, London, Tokyo, Tel Aviv
+20:39 What keeps Swyx going
+
+📝 ABOUT THIS CLIP
+Recorded live at the AI Engineer World's Fair 2026, Swyx (Shawn Wang) gives Alex Volkov of ThursdAI a candid look at how the AI Engineer World's Fair became one of the top industry events for AI engineers. He breaks down scaling from 3,000 to 7,200+ attendees, the stress-inducing Gini coefficient of last-minute ticket sales, and the origin story that runs from a Dev.to blog post to the Latent Space podcast to the influential Rise of the AI Engineer essay. Swyx also unpacks the Token Billionaire club for engineers spending $5K-$20K a month on API tokens, the JSConf-inspired plan to go international across Singapore, London, Tokyo, and beyond, and the conference culture — daily printed newspaper, puppy corner, robots, and the high-value hallway track. It's a look at why human connection matters more in an agent-driven world. Swyx is co-founder and CEO of AI Engineer and co-host of the Latent Space podcast.
+
+🔗 LINKS & RESOURCES
+- AI Engineer: https://www.ai.engineer
+- Latent Space podcast: https://www.latent.space
+- Swyx's site: https://swyx.io
+- Swyx on X: https://x.com/swyx
+
+📺 MORE THURSDAI
+- Newsletter & podcast: https://sub.thursdai.news
+- Recorded live at the AI Engineer World's Fair 2026: https://www.ai.engineer/worldsfair/2026
+
+#AIEngineer #LatentSpace #ThursdAI #swyx #AIEngineerWorldsFair
+----------------------------------------
+
+
+🔗 Subscribe to our show on Spotify: thursdai.news/spotify
+
+🔗 Apple: thursdai.news/apple
+
+🔗 Youtube: thursdai.news/yt
+
+And for the full show notes and links visit
+
+👉 sub.thursdai.news 👈
+
+## Tags
+
+AI, ThursdAI
+
+---
+
+## Transcript
+
+### Chapter: Welcome the token billionaire (00:00:00)
+
+[00:00:02] [music] >> guest
+[00:00:03] >> guest uh
+[00:00:04] uh the one and only also talking billionaire
+[00:00:08] billionaire Swix
+[00:00:09] Swix the co-founder of the engineer the host of Latent Space the curator of AI news
+[00:00:17] AI news that he keeps sending despite having very busy days. Bro, what are [clears throat] you doing? Why aren't you
+[00:00:22] you >> I'm so bored. Nothing's going on. >> Nothing is going on. Uh
+[00:00:26] Uh My friend, thank you so much for coming back.
+[00:00:29] back. >> Yeah, good to see you, nice. How's the morning been? >> It's been hectic. Yeah. >> And also very very very
+[00:00:39] a Thursday eye has has come a little bit forward. Thank you so much for this day. >> Two people now. >> That has built all these like great folks listening to us and helping making sure that you guys are having a very great show.
+[00:00:47] great show. Um
+[00:00:48] Um and uh I want to open with a thank you. >> Oh, thank you. >> Yesterday was I posted about this folks, please check out. Yesterday was an unfor- unforgettable day. Not because Fable 5 was given back to us by the US government, which was all waiting for, but also because uh after my talk at the uh
+
+### Chapter: Fable keynote & the World Cup night (00:00:51)
+
+[00:01:08] uh leadership track we all filed onto buses and we drove to a perk. I don't know how else to call this, a perk of uh being a speaker at AI E or or a VIP.
+[00:01:20] a VIP. >> Not all speakers. >> Not all speakers. >> Just the just the top tier. >> Just the folks from the company. Yeah.
+[00:01:26] Yeah. And then we went to the uh San Jose San Francisco Bay stadium to see Team USA beat Bosnia's ass. I'm sorry Bosnia, you got zero two zero. The energy was insane. And you know what the most insane part to me to land this plane together?
+[00:01:41] together? Um the that stadium clocked at 69,750 something. So, almost 70,000 people.
+[00:01:50] people. >> Wow.
+[00:01:51] >> Wow. >> This is 10% of that. >> Yeah.
+[00:01:54] >> Yeah. >> Does that Does that resonate a a little bit like how many people you're now drawing into Moscone West? Can you reflect on that a little bit on the sheer size of like what's going on here? >> Yeah, [snorts] I um we
+
+### Chapter: Scaling to 7,000+ & the Gini coefficient (00:02:00)
+
+[00:02:06] we At first So, last year was 3,000. At first when we were trying to set targets for this year, I actually wanted 5,000. Um my co-founder Ben said six. I was like, "Fine, six. I I mean, if we fall under, we'll just change the website." >> Yeah.
+[00:02:19] >> Yeah. >> Um and a month ago, it was 3,000. >> A month ago? >> Yes, like 1 month ago today. >> Okay.
+[00:02:25] >> Okay. >> Like June. >> Start of June? >> think we're going to make it, guys. Like I I think
+[00:02:29] I I think >> Is that like a stressful feeling? Is that like a Oh, [\h__\h] >> No, no, no. So, in my keynote, I I talked about the Gini coefficient. Gini coefficient is the measure of inequality over time.
+[00:02:37] over time. >> Yeah.
+[00:02:37] >> Yeah. >> A perfect equality, linear transition from zero T minus 100 to T minus zero, linear progression, >> Yeah.
+[00:02:45] >> Yeah. >> it that's a Gini coefficient of uh of zero. Uh and complete inequality where nobody buys and then everybody buys on the last day, that's a Gini coefficient of one. >> Yeah.
+[00:02:54] >> Yeah. >> Right? So, the the amount of stress that you have as an organizer is a measure of the Gini coefficient. Um the coefficient has just gone up over time, not down, and that's the wrong direction.
+[00:03:03] direction. >> folks buying closer It's like, "Folks, what are you doing? This is the engine. Look around. Why don't you buy the early bird to save yourself a bunch of money?" >> Yeah, yeah. Everything >> Tickets are cheaper. Hotels are cheaper. What are you doing? >> Sales go up the more we raise prices. >> [laughter] >> Um so, yeah, we didn't raise it that much. It was It was just like to to force people to buy. And so, um I think >> Um yeah, it's >> it's it's a 0.7 now. I hope it goes down next year. But uh the other thing I'm also thinking about is >> And you clocked in at 7,000? >> 7,000
+[00:03:32] >> 7,000 >> 7,000 sold out completely. Every single >> number is like 7,200. >> Wow.
+
+### Chapter: Newspaper, puppies, robots & flash mobs (00:03:35)
+
+[00:03:36] >> Wow. >> Yeah, yeah. So, >> It's insane. >> Some of the Not everyone is attendee attendee. A lot of our like staff and support people. Uh there's a flash mob happening later today. >> There's a flash mob? >> It's a flash mob happening >> Wait, hold on. I know about the puppies. There's There's corner that something yet seen. There's just puppies you come and sit and chill with them. Uh uh Which is an incredible innovation. >> There's robots running around. There's robots, T-Rex, orcs. Uh >> There are a few orcs that like they should interview the orcs. Oh, that's true.
+[00:04:04] true. >> Um and uh there's a musi

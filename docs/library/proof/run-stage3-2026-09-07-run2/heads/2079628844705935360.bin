@@ -1,0 +1,235 @@
+# Roan - My friend applied to 250 tech jobs in two years. No MIT. No Stanford....
+
+**Channel:** Roan (— subscribers)
+**Uploaded:** 2026-07-21 | **Duration:** 02:00:17 | **Views:** — | **Likes:** 2,685
+**URL:** https://x.com/RohOnChain/status/2079631718051664169
+**Uoinked:** 2026-07-22T10:56:00
+**Topic:** AI and ML
+**Note:** Capped screenshots at 200: interval raised from 30s to 37s for this video (processed media 120m).
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Stakes
+**Analysis:** The hook emphasizes what the viewer stands to gain by watching—learning how someone with no elite credentials broke into a top AI company with a $750k offer. The opening establishes high-value stakes (prestigious job, large salary) that create motivation to learn the method.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+My friend applied to 250 tech jobs in two years. No MIT. No Stanford.  Last month Anthropic offered him $750,000.  I asked him how he broke in from zero.  He sent me the exact video that got him in. Anthropic's 2-hour course on how to become an AI engineer in 2026.  Thariq https://t.co/b5c5UpJNs4
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] But yeah, before we
+[00:00:01] get started just curious a show of hands like how
+[00:00:04] many people have heard about the Cloud Agent SDK or
+[00:00:07] okay great cool and uh...
+[00:00:10] How many used it?
+[00:00:11] Or tried It out. Okay awesome!
+[00:00:14] So pretty good show of hand so um yes I'll
+[00:00:18] Just get started on like you know overview on agents i think that
+[00:00:24] Like this is I think something that people have seen before but i
+[00:00:29] Think it's still taking some time to like really sink in
+[00:00:33] Uh how AI features are evolving you know so
+[00:00:37] So, when GPT-3 came out
+[00:00:41] It was about single LLM feature right?
+[00:00:44] You're Like oh hey can You categorize this return a response
+[00:00:47] To one of these categories and then we've got more
+[00:00:51] Workflow things. Can
+[00:00:54] You like take this email and label it or
+[00:00:57] Like hey here's my code base, indexed for your RAG
+[00:01:00] Can you give me the next completion
+[00:01:02] The Next file to edit right?
+[00:01:06] And so that is what we call a workflow where
+[00:01:08] Your very structured.
+[00:01:11] You're Given This
+[00:01:13] Code Give Me Code Back out
+[00:01:15] Now We are getting
+[00:01:17] To agents The canonical agent E
+[00:01:22] Is called Cod Cloud
+[00:01:24] Code Is a tool where you don't really tell it
+[00:01:28] We Don't restrict what
+[00:01:30] It can do Really right? You're just talking to
+[00:01:32] In text and
+[00:01:33] It will take Wide variety of actions
+[00:01:35] And so agents build their own context
+[00:01:40] Decide Their Own trajectories
+[00:01:41] Are working very Autonomously
+[00:01:43] I think as the future goes on
+[00:01:50] Agents Will get more More economists
+[00:01:53] And we Will start to build these agents
+[00:01:55] I think it's like we're kind of at
+[00:01:56] a great point where We can Start
+[00:01:57] To Build These Agents
+[00:02:00] They are not perfect You know
+[00:02:01] But It is definitely the right time
+[00:02:03] To get started So yeah
+[00:02:06] Cloud Code I'm sure many
+[00:02:07] Of you have tried or used
+[00:02:10] Is Yeah
+[00:02:11] I Think The first
+[00:02:13] True agent Like
+[00:02:14] First Time Where
+[00:02:16] I saw an AI working for
+[00:02:17] 10 20
+[00:02:18] 30 Minutes
+[00:02:19] Yes A coding
+[00:02:23] Agent And the
+[00:02:24] Cloud Agent SDK
+[00:02:25] Is actually Built on
+[00:02:26] Top of Cloud Code
+[00:02:28] and The reason
+[00:02:30] We did That is
+[00:02:31] Because Basically we
+[00:02:34] Found that When
+[00:02:36] You're Building Agents
+[00:02:37] At Anthropic We kept
+[00:02:39] Rebuilding The same
+[00:02:40] Parts Over And over
+[00:02:41] Again So to
+[00:02:43] Give you A sense Of like
+[00:02:44] What That looks Like
+[00:02:45] Of course They are
+[00:02:46] The models To start Then in
+[00:02:50] The Harness You've Got Tools
+[00:02:53] Obvious Step Like Let's
+[00:02:54] Add Some Tools To
+[00:02:55] This Harness And
+[00:02:57] Later On We'll Give
+[00:02:58] An Example Of Trying
+[00:03:00] To Build Your Own Harnessed
+[00:03:01] From Scratch Too And
+[00:03:02] What That Looks Like How
+[00:03:04] Challenging It Can Be Tools
+[00:03:06] Are Not Just Like
+[00:03:07] Your Custom Tools They
+[00:03:08] Might Be Tools Attracted
+[00:03:09] The File System With
+[00:03:10] Cloud Code Did
+[00:03:13] The Volume Go Up Or
+[00:03:15] Anyways Got Tools
+[00:03:21] You Run In A Loop
+[00:03:23] Like The Core Agent
+[00:03:24] Prompts Things
+[00:03:27] Like That And
+[00:03:30] Then Finally
+[00:03:31] You Have The File
+[00:03:33] System The
+[00:03:36] File System Is
+[00:03:37] A Way Of
+[00:03:40] Context Engineering We'll
+[00:03:42] Talk More About Later One
+[00:03:44] Key Insights
+[00:03:46] Was Thinking Through Contex
+[00:03:51] It's Also Files
+[00:03:53] That We And Then
+[00:03:56] There Are Skills Which We
+[00:03:57] Like Rolled Out Recently
+[00:03:58] And I Would Talk
+[00:03:59] More About Skills If
+[00:04:01] It's Interesting To You Guys
+[00:04:02] As Well and
+[00:04:03] Things Like
+[00:04:05] Sub Agents Web
+[00:04:07] Search Research
+[00:04:10] Compacting Hooks
+[00:04:12] Memory They're Other Things
+[00:04:14] Around The Harness
+[00:04:15] And It End
+[00:04:18] Up Being Quite A Lot All
+[00:04:21] Of These Things For You
+[00:04:23] To Use And
+[00:04:26] Yeah Do Have Your
+[00:04:27] Application So I
+[00:04:29] Think To Give
+[00:04:31] A Sense Of Maybe
+[00:04:38] Why The Cloud
+[00:04:40] Agent SDK Is
+[00:04:44] People Are
+[00:04:46] Already Building Agents
+[00:04:47] On The SDK A
+[00:04:49] Lot Of Software Agents
+[00:04:52] Reliability Security
+[00:04:54] Triage Sites And
+[00:04:57] Dashboard Builders These
+[00:04:58] Extremely Popular If
+[00:05:00] You're Using It We Should Absolutely
+[00:05:01] Use SDK NS
+[00:05:04] Office Agents That
+[00:05:05] Do Any Sort Of Work Tons
+[00:05:07] Of Examples Got Some
+[00:05:09] Legal Finance Health
+[00:05:11] Care Ones There
+[00:05:14] Were Lot Of People Building
+[00:05:15] On Top Of It I
+[00:05:17] Want To But Yeah Okay
+[00:05:18] Why The
+[00:05:21] Cloud Agent SDK Like
+[00:05:22] Why Did This Way
+[00:05:23] Is Why
+[00:05:24] Did We Build On Top Of
+[00:05:26] Cloud Code And You
+[00:05:27] Realize Basically That
+[00:05:29] As Soon As We
+[00:05:30] Put Cloud Code Out Yeah
+[00:05:31] The Engineers Started Using It
+[00:05:32] But Then The Finance People
+[00:05:33] Start In Using A Data
+[00:05:34] Science People Start Using
+[00:05:36] It At The
+[00:05:37] Marketing People Start Using
+[00:05:38] It And Yeah We
+[00:05:39] Just Realized That People
+[00:05:42] Are Using Cloud Codes
+[00:05:43] For Non Coding Tasks And
+[00:05:46] We Felt
+[00:05:47] And Every Building
+[00:05:53] Is A Like
+[00:05:55] And We'll Go More Into
+[00:05:57] Why That
+[00:05:58] Just Works Why
+[00:05:59] You Could Use
+[00:06:00] Cloud Code For Non Coding
+[00:06:01] Tasks Spoiler The Bash
+[00:06:03] Tool But Yeah
+[00:06:06] It Was Something
+[00:06:08] That We Saw As An Emergent
+[00:06:09] Pattern That We Want
+[00:06:11] To Use And Build Our
+[00:06:12] Agents On Top Of It
+[00:06:13] These Are Lessons
+[00:06:16] From Deploying
+[00:06:17] Cloud Code So
+[00:06:20] Tool Errors
+[00:06:21] So Stuff That Can Take
+[00:06:25] A Lot Of Scale To
+[00:06:27] Find What
+[00:06:28] Are The Best Practices
+[00:06:29] We Baked Into Cloud
+[00:06:30] Agent SDK As
+[00:06:32] A Result We Have Strong
+[00:06:33] Opinions On
+[00:06:34] How To Build Agents
+[00:06:35] I Think
+[00:06:37] It Is Quite Opnionated
+[00:06:39] And Talk Over Why
+[00:06:42] We Chose Them
+[00:06:44] One Of Big
+[00:06:46] Opinions In The Bash Tool
+[00:06:48] So What Would
+[00:06:53] Describe Is The
+[00:06:54] Anthropic Way To Build
+[00:06:55] Agents Right And I Am Not
+[00:06:56] Saying That You Can Only
+[00:06:57] Buil

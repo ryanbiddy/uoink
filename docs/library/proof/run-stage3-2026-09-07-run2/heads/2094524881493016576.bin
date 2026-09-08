@@ -1,0 +1,179 @@
+# MTS - Google researcher @lauriewired warns the shift from C++ to Python in ...
+
+**Channel:** MTS (— subscribers)
+**Uploaded:** 2026-08-31 | **Duration:** 03:22 | **Views:** — | **Likes:** 1,012
+**URL:** https://x.com/MTSlive/status/2094524974392565997
+**Uoinked:** 2026-09-01T07:51:17
+**Topic:** Uncategorized
+**Note:** Screenshot interval lowered from 30s to 26s so this source can yield about 8 frames.
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Question
+**Analysis:** The video opens with a direct question to the viewer: 'Are we losing the low-level programmers right now?' This immediately engages the audience by posing a problem and inviting them to consider the answer.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Google researcher @lauriewired warns the shift from C++ to Python in universities is creating programmers who don't understand how computers actually work:  "When I was in college getting my CS degree, my year was one of the last years that was using C++ as the core language for https://t.co/KWQqwCp0si
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Are we losing the low-level programmers right now?
+[00:00:03] Are universities just producing fewer
+[00:00:05] programmers who actually understand what is happening underneath
+[00:00:08] all the different abstractions we're using day to day?
+[00:00:11] Yeah, I mean
+[00:00:12] this is a question I thought of a lot
+[00:00:13] and I think
+[00:00:15] a lot of people in the industry aren't
+[00:00:16] considering it as much as
+[00:00:18] I believe that they should be
+[00:00:20] I mean, personally, as an anecdote
+[00:00:23] I remember when I was in college getting my CS degree
+[00:00:26] my year
+[00:00:27] was one of the last years that was
+[00:00:29] using C++ as the core language for teaching students
+[00:00:34] And actually
+[00:00:35] they were switching over to Python of all languages
+[00:00:38] So previously, kind of before this
+[00:00:40] I've been just looking up some random statistics
+[00:00:43] and it seems like
+[00:00:44] kind of the two primary languages that people
+[00:00:46] are using in colleges now are
+[00:00:49] Java and Python. And these are both like really
+[00:00:52] really good languages and everything
+[00:00:53] I like both of them
+[00:00:54] definitely. They have their different strong points
+[00:00:57] But one of the biggest issues that I
+[00:00:59] have is that
+[00:01:01] a lot of these higher level languages are
+[00:01:03] really abstracting away
+[00:01:05] What is happening under the hood?
+[00:01:06] Like, for example, if you're looking at memory management
+[00:01:09] and if you're trying to see Well
+[00:01:11] what does the underlying structure look like?
+[00:01:14] Is this access time having some unexpected latency?
+[00:01:18] If you're not aware of kind of how
+[00:01:20] the computers work in general
+[00:01:23] and you're not
+[00:01:24] used to being super low level inside of the languages
+[00:01:27] then you're going to have problems when it
+[00:01:29] comes to debugging these kinds of things
+[00:01:31] So I think higher level languages are really good
+[00:01:34] but we need to focus on a lot
+[00:01:36] of the fundamentals. And in my opinion
+[00:01:39] starting with a language like C++
+[00:01:41] for example
+[00:01:42] it gives you the ability
+[00:01:44] to do these really high level abstractions and stuff
+[00:01:47] but it also gives you the ability to
+[00:01:49] customize your memory management and
+[00:01:52] get really close to the underlying machine
+[00:01:55] So I think it's going to become a
+[00:01:56] problem as
+[00:01:58] students are not exposed to
+[00:02:00] these lower level languages more and more often
+[00:02:03] for going out in the real world if you're trying to
+[00:02:05] especially work in some fields like high performance computing related
+[00:02:09] or if you're trying to get into
+[00:02:11] Like game development or high frequency trading
+[00:02:15] I really think that
+[00:02:17] the candidates are going to start having some
+[00:02:19] difficulties and they're going to have some problems
+[00:02:21] with some of the candidacy pools
+[00:02:24] Like funnily enough, I go over to many different conferences
+[00:02:28] like a lot of different C++ conferences
+[00:02:30] and they're really great places to be
+[00:02:32] I really enjoy programming conferences
+[00:02:34] And I've talked to so many experts in the field
+[00:02:37] like really great, smart people
+[00:02:40] And I've kind of talked to them about
+[00:02:41] the sentiment of low-level programming languages
+[00:02:44] because it's not just colleges
+[00:02:46] It's like
+[00:02:46] it's the overall sentiment that people have
+[00:02:49] in the field of computer science
+[00:02:51] There's almost this
+[00:02:52] like fundamental anger response when it comes to
+[00:02:55] mentioning something like C or C++
+[00:02:58] People start complaining about the complexity of it
+[00:03:01] But so many people
+[00:03:03] are not aware of this online sentiment
+[00:03:06] And so it's just kind of perpetuating itself
+[00:03:08] all the time. I think I kind of
+[00:03:10] have this unique opportunity
+[00:03:11] Since I'm always talking about C++ on YouTube
+[00:03:14] on X
+[00:03:15] on all of the different social media platforms that I see
+[00:03:18] these immediate negative responses to low-level programming
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:26]
+
+![Screenshot at 00:00:26](screenshots/shot_0002.jpg)
+
+### [00:00:52]
+
+![Screenshot at 00:00:52](screenshots/shot_0003.jpg)
+
+### [00:01:18]
+
+![Screenshot at 00:01:18](screenshots/shot_0004.jpg)
+
+### [00:01:44]
+
+![Screenshot at 00:01:44](screenshots/shot_0005.jpg)
+
+### [00:02:10]
+
+![Screenshot at 00:02:10](screenshots/shot_0006.jpg)
+
+### [00:02:36]
+
+![Screenshot at 00:02:36](screenshots/shot_0007.jpg)
+
+### [00:03:02]
+
+![Screenshot at 00:03:02](screenshots/shot_0008.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About MTS:**
+*No channel description available.*
+
+**Recent videos from this channel:**
+- *No recent videos found.*
+
+---
+
+*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*

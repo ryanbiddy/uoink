@@ -1,0 +1,184 @@
+# 0xRafy - Anthropic engineer:  "Most people are using Opus 5 and Fable 5 wrong....
+
+**Channel:** 0xRafy (— subscribers)
+**Uploaded:** 2026-08-05 | **Duration:** 31:25 | **Views:** — | **Likes:** 168
+**URL:** https://x.com/0xRafy/status/2085021032751010190
+**Uoinked:** 2026-08-06T07:39:28
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Contrarian
+**Analysis:** The hook opens with a challenge to conventional wisdom: 'Most people are using Opus 5 and Fable 5 wrong,' implying that the common approach is misguided and the creator has discovered a better way. This directly contradicts how viewers likely assume they should be using these models.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Anthropic engineer:  "Most people are using Opus 5 and Fable 5 wrong. You can set them up right in one afternoon and stop overpaying every single day."  In 30 minutes, he breaks down every Claude model, and why running them all the same way is a mistake.  I took what he covers https://t.co/oiRKDUzfYq
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] Today we're going to be talking about picking the right model.
+[00:00:03] So what we're going to talk about today is
+[00:00:06] picking the right model and this is something I think conceptually seems
+[00:00:11] very easy, but the more we dig into it
+[00:00:14] the sort of more difficult the problem tends
+[00:00:17] to be. Let's consider
+[00:00:19] the following scenario.
+[00:00:22] We at Anthropic have just launched a new
+[00:00:24] model and as usual there's a lot of noise.
+[00:00:28] Alongside the model launch we will release
+[00:00:31] a model card, we'll give prompting guides
+[00:00:34] We will give benchmark results
+[00:00:37] You'll also see a lot of hot takes
+[00:00:40] on X or Twitter from AGI is
+[00:00:43] here all the way to Anthropic is cooked
+[00:00:45] And there are various posts across
+[00:00:48] the internet again giving kind of hot takes
+[00:00:50] On the quality of our new model
+[00:00:55] we're going to be talking about is what does
+[00:00:57] that mean for your use case?
+[00:00:58] What Does That Mean For Your Business and should you
+[00:01:01] effectively drop in this new model
+[00:01:03] To your product, will it be an uplift or
+[00:01:06] if you are building Greenfield which models
+[00:01:08] Should You Select To Even Start With
+[00:01:11] And to address that
+[00:01:12] We basically want build as a repeatable process
+[00:01:16] Something you can come back to time-and-time again
+[00:01:18] That gives you clear yes no decision on when
+[00:01:22] to select this new model
+[00:01:24] In other words we want build an eval
+[00:01:26] So coming back the original problem conceptually very simple right
+[00:01:32] When you need more intelligence,
+[00:01:34] You reach for Opus when you need lower latency or cost
+[00:01:37] And when you want some balance of two
+[00:01:40] But what about effort levels?
+[00:01:44] This introduces a little bit depth
+[00:01:46] Should We Reach For Sonnet With Max Thinking
+[00:01:50] Should We Reach For Opas with Low thinking
+[00:01:54] Maybe comparing Haiku vs.
+[00:01:56] Sonnet With No Thinking And this is just anthropic
+[00:02:00] A lot of you will be comparing models
+[00:02:02] Not Just Accord Models but across other providers as well
+[00:02:05] So how do we frame this?
+[00:02:08] How Do We Frame This Decision
+[00:02:09] I think there's really three pillars
+[00:02:13] That most folks tend to
+[00:02:16] Think through when choosing which model To Use
+[00:02:19] The first one Is the Model Quality
+[00:02:21] Effectively, How well does it actually perform on your task?
+[00:02:25] What is the Task Completion Rate
+[00:02:26] what Is The Accuracy of the model
+[00:02:29] and various other metrics you might track
+[00:02:32] Number two, is latency
+[00:02:33] Especially for customer facing use cases
+[00:02:37] Latency becomes very important
+[00:02:39] And number three
+[00:02:40] Cost which is obviously a big consideration
+[00:02:42] For A lot Of Different Customers as Well
+[00:02:45] So I think through
+[00:02:46] These Three Pillars
+[00:02:48] Of Quality, Cost and Latency
+[00:02:50] We can start to build an eval around them
+[00:02:53] To help us make An informed decision
+[00:02:55] On which model we should actually use
+[00:03:00] So the three things Were gonna try And take away from today
+[00:03:02] Number one is a small
+[00:03:04] It Can Be A Very Small Well-Designed Eval
+[00:03:08] Will be much more important for you guys
+[00:03:10] To assess Which Model
+[00:03:12] To Use Than Any Public Benchmark Out There
+[00:03:15] number two Is The Model That's Right For Your Use Case
+[00:03:19] Is not necessarily the one that's cheapest
+[00:03:21] Or fastest per token
+[00:03:23] But The One That is
+[00:03:24] Cheapest Per Successful Outcome
+[00:03:26] And we'll deep dive a little bit more into
+[00:03:29] That later on in our talk
+[00:03:30] and number three
+[00:03:32] We have actually quite A lot of
+[00:03:34] Knobs & dials
+[00:03:36] To kind Of move up
+[00:03:38] And down The Cost Accuracy Frontier
+[00:03:42] With a Little Bit More Fine-grained Control
+[00:03:45] or if you think about
+[00:03:46] That Pareto Curve of
+[00:03:47] The Performance Of A Model
+[00:03:49] Versus the Cost We can actually shift that curve
+[00:03:53] Entirely and there's a number
+[00:03:54] Of strategies we have to do
+[00:03:55] But I just want To reflect
+[00:03:58] On what The Public Benchmarks At Least
+[00:04:01] Do & Don't Tell Us
+[00:04:03] And i think Directionally
+[00:04:06] These benchmarks Provide us With Some Insight
+[00:04:09] As To Generally Whether Our Models
+[00:04:11] Improved at Coding Or Various Other Tasks
+[00:04:13] So in our model releases
+[00:04:17] We've got results on things like Sweetbench Verified or BrowseComp
+[00:04:20] Which are basically what they say
+[00:04:22] On the tin How good is The Model at
+[00:04:24] Generally At Coding And how Good Is It at Research-Type Tasks
+[00:04:30] However none of these really
+[00:04:32] Tend to match your use case
+[00:04:33] If you think about a coding agent in production
+[00:04:36] Often it will need To go & research
+[00:04:38] and find some niche specific part
+[00:04:40] About an SDK on the web
+[00:04:41] Then implement that In code
+[00:04:44] So already we're crossing over two benchmarks
+[00:04:47] And your workloads often look
+[00:04:49] Much more heterogeneous than that
+[00:04:51] and so You might have a coding task
+[00:04:55] But Your Coding Task can still
+[00:04:57] Look A lot different Than Sweetbench
+[00:04:59] Maybe you are using languages
+[00:05:00] That don't even show up in sweet bench
+[00:05:02] The point being here is
+[00:05:04] These Public Benchmarks
+[00:05:05] Are somewhat directional
+[00:05:07] & give some of the best models out there
+[00:05:11] However for your specific workload
+[00:05:13] It's incredibly important to build
+[00:05:14] Your own evals So how do we do that
+[00:05:18] I think you will hear us at Anthropic
+[00:05:20] Talk a lot about Eval
+[00:05:22] And We have some other workshops on this
+[00:05:23] But effectively what
+[00:05:28] We want To Do is
+[00:05:29] Build up an Eval
+[00:05:31] Which Is Composed of A set Of Tasks
+[00:05:33] & We can consider
+[00:05:35] The task to be the kind
+[00:05:36] Atomic unit Of our eval
+[00:05:38] A task being
+[00:05:39] A kind of test with a set
+[00:05:42] Of inputs Some success criteria
+[00:05:46] And we want to basically build up
+[00:05:48] A dataset Of these tests
+[00:05:50] Now the kind
+[00:05:53] Of heuristic I've been using for
+[00:05:54] Evals over The course
+[00:05:56] Is thinking about them much like
+[00:05:58] When you're at school
+[00:06:00] So You have your question
+[00:06:02] You have your answer
+[00:06:04] That you need to get right
+[00:06:05] But it's also very important
+[00:06:07] To show the working in between
+[00:06:09] And I think this is
+[00:06:10] Especially for a Gen-Tik type task
+[00:06:12] Exactly what sort of thing we should

@@ -1,0 +1,189 @@
+# 0xMarioNawfal - THIS 50-MINUTE STANFORD TALK SHOWS HOW TO BUILD AI AGENTS WITH CLAUDE...
+
+**Channel:** 0xMarioNawfal (— subscribers)
+**Uploaded:** 2026-08-29 | **Duration:** 01:09:01 | **Views:** — | **Likes:** 44
+**URL:** https://x.com/RoundtableSpace/status/2093658671515680919
+**Uoinked:** 2026-08-29T07:53:02
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The title establishes credibility by emphasizing it's a Stanford talk and references Claude (an established AI tool), positioning the speakers as experts teaching at a prestigious institution. The opening transcript reinforces this by having the speakers introduce their credentials (adjunct professor at Stanford, assistant professor in CS, prior experience at Google Brain, Anthropic, Google DeepMind).
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+THIS 50-MINUTE STANFORD TALK SHOWS HOW TO BUILD AI AGENTS WITH CLAUDE CODE FROM SCRATCH AND TURN THEM INTO PRODUCTS COMPANIES WILL PAY FOR.   https://t.co/llVzIpPkQG
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:01] So we'll introduce ourselves. So I'm Akansha
+[00:00:04] I have been working in large language models for a while
+[00:00:06] and I'm adjunct professor at Stanford
+[00:00:08] and I'm also in research
+[00:00:10] at a startup called Reflection AI
+[00:00:12] Hi, I'm Azalia Mirhosseini
+[00:00:15] I'm an assistant professor in the CS department
+[00:00:19] and
+[00:00:22] Akansha and I met each other when we
+[00:00:24] were at Google Brain. Google Brain
+[00:00:27] yeah, back in the day
+[00:00:28] and then Google DeepMind
+[00:00:30] And I also
+[00:00:32] worked on Cloud at Anthropic and Gemini at Google DeepMind
+[00:00:36] and we are so excited to
+[00:00:38] teach this course again. This is the second
+[00:00:40] time we're teaching. Of course
+[00:00:42] we have made some updates
+[00:00:44] both to the
+[00:00:44] lectures and also the way we are
+[00:00:47] kind of conducting everything during the
+[00:00:50] for the course
+[00:00:51] And we are
+[00:00:52] we were just so amazed by the amount
+[00:00:54] of interest For people to join this course
+[00:00:57] So we are excited to have you here
+[00:01:01] The course website is at cs3.8.stanford.edu
+[00:01:05] We have updated the website in terms of
+[00:01:07] all the lecture materials and the papers that you'll be reading
+[00:01:11] as well as what's the homework schedule to expect
+[00:01:14] the project proposal and project structure as well
+[00:01:18] So in today's lecture
+[00:01:19] we'll start with an overview of large language models
+[00:01:22] just
+[00:01:23] how the scaling trends have evolved over the last five years
+[00:01:26] and then
+[00:01:27] we'll focus more on what we will cover
+[00:01:29] in this class
+[00:01:30] And then from there
+[00:01:32] in the second half of this lecture
+[00:01:34] we'll cover the course logistics
+[00:01:36] and
+[00:01:36] that part you should pay
+[00:01:38] a lot of attention to because that influences
+[00:01:39] your grades
+[00:01:43] So
+[00:01:43] let's take a look at an overview of
+[00:01:45] the trends for large language models
+[00:01:47] So
+[00:01:48] one of the aspects that has been mind-blowing
+[00:01:50] since GP3 came out is that There's a
+[00:01:55] that as you scale up the
+[00:01:57] number of parameters in a model
+[00:01:59] they get better. And what this means is
+[00:02:01] that language models like BERT and T5 were good
+[00:02:05] but as we increased the number of parameters
+[00:02:07] they got really better. They
+[00:02:08] they perform much better
+[00:02:10] And what this led to is something called
+[00:02:11] a scaling loss for large language models
+[00:02:14] which are used in
+[00:02:15] building the base model for the pre-trained base model
+[00:02:19] And, as you increase the amount of compute
+[00:02:21] so there are three graphs here
+[00:02:22] As you increase the amount of compute on the x-axis
+[00:02:25] the Loss function on a y-axis goes down
+[00:02:29] and the more compute you have put in
+[00:02:32] the more the test loss goes down
+[00:02:34] which leads to a better model
+[00:02:36] So that was
+[00:02:37] one big aspect that led to
+[00:02:39] GPT-3 and then all the subsequent ChatGPT
+[00:02:42] Palm, Gemini, and so on
+[00:02:44] And then similarly
+[00:02:45] as you increase the data set size on x-axis
+[00:02:49] the test loss goes down further on y-axis
+[00:02:52] So
+[00:02:52] that's another aspect of like
+[00:02:54] another axis of scaling
+[00:02:55] that leads to better language models
+[00:02:58] And the third one is
+[00:03:00] of course
+[00:03:01] parameter count. So
+[00:03:02] if you increase the number of layers in
+[00:03:04] a transformer or the amount of parameters that
+[00:03:06] are there in the language model
+[00:03:08] that improves the loss value
+[00:03:10] and that leads to a better model
+[00:03:12] And this has been the foundation for a lot of the
+[00:03:15] this has been the foundation for a long
+[00:03:16] time
+[00:03:17] until last year where
+[00:03:19] this was starting to hit some kind of
+[00:03:20] a saturation point
+[00:03:24] So From 2018 to almost 2024
+[00:03:28] this graph is a little bit outdated
+[00:03:30] but from 2018 to 2024
+[00:03:33] as the model size has gone up almost consistently
+[00:03:36] we have been increasing
+[00:03:38] the size of the models
+[00:03:39] So you started with something like BERT was 340 million parameters
+[00:03:42] GBD2 was 1.5 billion parameters
+[00:03:44] and then GBD3 was 175 billion parameters
+[00:03:48] and then, say, PALM was 540 billion
+[00:03:51] and then there was a bunch of subsequent models
+[00:03:54] and GBD4 is estimated to be there
+[00:03:56] which is like trillions of parameters
+[00:03:58] So
+[00:03:59] you can imagine that there has been an
+[00:04:00] exponential growth in just the model size
+[00:04:03] for large language models
+[00:04:04] The large stands for that they're growing in size
+[00:04:07] and that has been
+[00:04:08] one of the key areas in which
+[00:04:10] the models have been getting better
+[00:04:13] So
+[00:04:13] why do we care about the models
+[00:04:15] getting bigger? What does this lead to?
+[00:04:17] So as I was explaining that as the models get bigger
+[00:04:21] they continuously improve in performance on natural language benchmarks
+[00:04:25] on various other benchmarks
+[00:04:26] reasoning benchmarks, and so on
+[00:04:28] And then other interesting aspect that I
+[00:04:31] will show you
+[00:04:32] in a moment is that
+[00:04:33] they learn how to do few shot learning
+[00:04:35] So earlier you have to
+[00:04:36] fine tune the model for specific domain
+[00:04:38] but just by giving a few examples
+[00:04:41] the model can
+[00:04:42] follow that template and reason in that same vein
+[00:04:45] which makes it extremely easy to prototype things
+[00:04:49] And then the third aspect is that
+[00:04:51] as the models become bigger
+[00:04:53] they have emergent behavior where the capabilities like
+[00:04:55] reasoning only emerged in larger models
+[00:04:59] So just to understand few shot learning or
+[00:05:01] zero shot learning here
+[00:05:03] So If the model is given a question
+[00:05:07] or a task, like translate English to French
+[00:05:10] it's able to give
+[00:05:11] so this is called a prompt
+[00:05:12] It's given a task
+[00:05:13] translate English to French
+[00:05:14] and then it's asked to translate cheese to
+[00:05:16] whatever is the French word
+[00:05:18] If the model can predict the answer
+[00:05:20] without actually being trained on the specific task
+[00:05:23] then that would be called zero-shot learning
+[00:05:25] And then few-shot learning
+[00:05:27] in addition to giving the description of the task
+[00:05:30] you're also giving a few examples
+[00:05:32] In this particular case
+[00:05:33] it's given translate English to French
+[00:05:34] and it's given a few examples of
+[00:05:36] the translation from English to French
+[00:05:38] and then it's asked to trans

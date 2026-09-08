@@ -1,0 +1,59 @@
+# Why YOLO26 Is Perfect for Edge AI (Jetson, Mobile, Embedded)
+
+**Channel:** Code With Aarohi (67.7K subscribers)
+**Uploaded:** 2026-01-19 | **Duration:** 26:34 | **Views:** 6,587 | **Likes:** 251
+**URL:** https://www.youtube.com/watch?v=G2GEUhe2ro8
+**Uoinked:** 2026-07-09T19:22:34
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Authority
+**Analysis:** The creator establishes credibility by referencing official YOLO26 documentation and the paper, positioning themselves as knowledgeable about the latest technical developments in object detection. They frame the video as an expert deep dive into a recent release from Ultralytics, grounding authority in documented technical sources.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+In this video, we take a deep dive into YOLO26, the latest object detection model released by Ultralytics.
+
+Recent YOLO models achieved excellent accuracy, but they became increasingly difficult to deploy on edge devices and low-power hardware. YOLO26 directly addresses this problem by focusing on optimization, efficiency, and real-world deployment, instead of only pushing benchmark numbers.
+
+We’ll cover:
+Why YOLO26 is specifically optimized for edge deployment
+The motivation behind moving beyond accuracy-only improvements
+End-to-End NMS-Free Inference and why removing NMS matters
+Anchor-free detection and how it simplifies training
+Training-level improvements:
+ProgLoss (Progressive Loss Balancing)
+STAL (Small-Target-Aware Label Assignment)
+The new MuSGD optimizer inspired by LLM training
+Why YOLO26 removes Distribution Focal Loss (DFL) and how this improves deployment
+
+How these changes lead to:
+Faster inference
+Lower memory usage
+Easier export to ONNX and TensorRT
+Stable runtime on edge devices
+
+At the end of the video, I’ll show you how to run YOLO26 using pretrained models on Local machine
+
+📸 Follow me on Instagram: @codewithaarohi  
+🔗 https://www.instagram.com/codewithaarohi/  
+
+📧 You can also reach me at: aarohisingla1987@gmail.com
+
+## Tags
+
+YOLO26, Ultralytics YOLO, YOLO26 Explained, YOLO Edge Deployment, Edge AI Object Detection, NMS Free YOLO, YOLO Training Explained, ProgLoss YOLO, STAL YOLO, Small Object Detection YOLO, MuSGD Optimizer, YOLO DFL Removal, Distribution Focal Loss YOLO, YOLO Jetson, YOLO Mobile Deployment, Real Time Object Detection, Computer Vision, Deep Learning, Object Detection Tutorial, YOLO Tutorial, Ultralytics, Edge AI, Embedded AI, code with aarohi, akminder
+
+---
+
+## Transcript
+
+[00:00:01] Hello everyone, my name is Arohi and welcome back to my channel. So guys, today we are going to talk about YOLO 26 which is a latest object detection model released by Ultralytics and according to the official paper and documentation, YOLO 26 is specially designed for specially optimized for edge development means you can use YOLO 26 efficiently on edge devices. And this paper highlights one very important issue which is that recent YOLO models they achieve excellent accuracy but they became harder and harder to deploy especially on edge devices and on low power devices. So the main focus of FOLO 26 is optimization rather than just pushing around the accuracy numbers. And guys, instead of introducing a completely new architecture, they improved the current object detection pipeline means uh how the model is getting trained, they improved this. Then how predictions are assigned during training, they did improvements in this part also. And then they did some improvements in multiscale features, how multiscale features are combined. Right? So all these things we are going to discuss today and after that I'll show you the practical implementation also. Now let's understand what is the real motivation behind these changes. So whenever we work on real world object detection applications so we face many problems. One of the major issue is limited memory and edge devices like Jetson boards, mobile phones or embedded systems. They simply cannot handle very large models. Right? And another major issue is latency. Even if a model is accurate, it may be too slow when we run it on a low power hardware. Means high accuracy alone is not enough. A useful model must run fast. It should use limited memory and it should work reliably on edge devices. But if we look at older YOLO versions, their main focus was on improving the map values and FPS. And they tried to achieve better benchmark scores on academic data sets. And in most cases uh comparisons were done by using the map values and real world deployment concerns like how to export model runtime stability or hardware constraint. These kind of issues were handled after the model was already released. But we all know that in real applications deployment is the hardest part. High accuracy alone does not solve real deployment problems. So this was the problem statement which Ultralytics focused on while building this YOLO 26. And the main goal of YOLO 26 is to make the object detection efficient, practical and reliable on edge devices and on low power devices. And to achieve this, YOLO 26 introduced several design level and several training level optimizations. Now we will discuss all of them one by one. First let's see the paper. Let me show you what all changes they have mentioned and then we will discuss them. So just scroll down and we will go to the section where they have mentioned this architectural enhancements. So they have mentioned few improvements in this section. Let's discuss that. So the first improvement is removal of distribution focal loss. What it is? Why they did changes in it? That part we will discuss in some time. And the second change is improvement is end to end NMS free inference. And after that the next change is this progressive loss and this S t. So this part also we are going to discuss in some time. And then the fourth change is this where they combined two optimizers. So these are the four things which we are going to discuss now and these are the four major improvements which they introduced in their paper. So let's start with this end to end NMS free inference. This improvement is basically related to how duplicate predictions are handled and if you have worked with object detection then most probably you already know about this NMS non-max suppression. So in earlier YOLO models, the model used to predict many overlapping bounding boxes for objects and then a separate post-processing step called NMS was used to remove the duplicate boxes and NMS works well but the problem is extra computation, extra complexity and unpredictable inference time because for every image NMS has to process so many boxes which is computationally expensive and especially on edge devices. So, YOLO 26 stopped using this NMS process. Means instead of fixing the overlapping bounding boxes or duplicate bounding boxes after the prediction, the model is trained to avoid producing too many duplicate boxes, too many duplicate bounding boxes in the first place. And for that, YOLO 26 learns during training only that which predictions should survive and which predictions should be suppressed. And if this step is removed then automatically inference become faster which is extremely important for real time and edge development. Now another major improvement is that YOLO 26 completely moves away from anchor boxes. And guys if you remember in older YOLO versions anchor boxes were used as a starting point. So anchor boxes are predefined rectangles of different shapes and sizes. And these anchor boxes had to be manually designed. And if the anchor boxes did not match with the object sizes which we have used in our data set then performance could drop. So that's why YOLO 26 use a fully anchor-free approach means instead of starting from predefined box shapes the model uh directly predicts the object location and size and this simplifies the training process. This makes the model more robust across different data sets because earlier you need to take care that the your data set the objects which are there in your data set should uh you know wor

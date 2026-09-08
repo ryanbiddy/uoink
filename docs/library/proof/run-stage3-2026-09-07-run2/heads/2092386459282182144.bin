@@ -1,0 +1,198 @@
+# MTS - FULL INTERVIEW: Jerry Tworek says AI researchers now tell each other ...
+
+**Channel:** MTS (— subscribers)
+**Uploaded:** 2026-08-25 | **Duration:** 43:50 | **Views:** — | **Likes:** 563
+**URL:** https://x.com/MTSlive/status/2092387349623935322
+**Uoinked:** 2026-08-26T07:57:07
+**Topic:** AI and ML
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Stakes
+**Analysis:** The opening emphasizes what AI researchers stand to lose—their relevance and meaningful role in AI research within the next two years—creating urgency and high stakes that compel viewers to listen for more details about this existential concern for the field.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+FULL INTERVIEW: Jerry Tworek says AI researchers now tell each other they have a last few days of work left, so work while you still can. He gives it two years before humans stop being a meaningful part of AI research.  @MillionInt spent 7 years at @OpenAI, where he led o1 and o3 https://t.co/jmyPReVdQq
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:00] My
+[00:00:00] kind of like rough estimate is
+[00:00:02] at least like two years we have when
+[00:00:04] when human researchers are
+[00:00:06] meaningful part of the
+[00:00:07] of the AI research discovery process
+[00:00:09] I think like
+[00:00:11] that
+[00:00:12] what would you often hear AI researchers be
+[00:00:14] repeating right now and
+[00:00:17] in the field
+[00:00:17] we have a last few days of work
+[00:00:19] so let's work while we still can and
+[00:00:21] then and then we'll all take break the
+[00:00:23] industry is moving very quickly and it is
+[00:00:26] in many ways very very exhausting very very
+[00:00:28] tiring to be In this
+[00:00:30] at this pace for
+[00:00:31] for so many years
+[00:00:32] but, it's
+[00:00:34] it's probably worth it if we think those are the most
+[00:00:37] the most important times of our
+[00:00:38] of our, of our career and of our work All right
+[00:00:42] we are back. We are live with a very special guest
+[00:00:45] Jerry Turek, who is co-founder and CEO of Core Automation
+[00:00:49] which is an AI research company building
+[00:00:51] the world's most automated AI lab
+[00:00:53] Previously, he spent seven years at OpenAI
+[00:00:56] He became the VP of Research
+[00:00:58] He built R-Alpha robots
+[00:01:00] Codex, the OG Codex
+[00:01:02] ChatGPT, GPT-4, O1, O3, reasoning models
+[00:01:06] And previously
+[00:01:07] he
+[00:01:08] was in quantitative finance and studied math at
+[00:01:10] the University Warsaw. So
+[00:01:12] Jerry, welcome to MTS
+[00:01:14] Thank you for an invitation
+[00:01:15] I'm very happy to be here with you
+[00:01:16] today
+[00:01:17] So
+[00:01:18] we have this burning question we're dying to
+[00:01:19] know
+[00:01:20] What's going on in core automation?
+[00:01:23] we are trying to build a new
+[00:01:25] AI lab
+[00:01:26] and
+[00:01:27] it's a it's a new era
+[00:01:28] of AI research right now
+[00:01:29] It's kind of like I think we are
+[00:01:31] seeing a third generation of AI labs
+[00:01:35] of AI labs that are
+[00:01:36] trying to be
+[00:01:37] automation first and seeing okay we are
+[00:01:40] are in the world right now where we
+[00:01:42] can use AI models for
+[00:01:44] doing AI research
+[00:01:46] and how do we do that in a
+[00:01:47] in a best way? I think I think
+[00:01:48] we have a chance of trying to building
+[00:01:50] a company inside different foundations
+[00:01:52] All the company have built in the past
+[00:01:55] because we are starting from a
+[00:01:56] different like technological foundation. We already have
+[00:01:59] all those things that the
+[00:02:01] previous generation of companies were trying to build
+[00:02:04] And then we are trying to figure out
+[00:02:05] how do we use them for the company
+[00:02:07] building purposes in in the best way
+[00:02:09] So you said the third generation of AI labs
+[00:02:12] what what were the first and second?
+[00:02:14] I how how I think about it
+[00:02:16] and it's obviously like compressing certain things
+[00:02:20] like probably DeepMind was genuinely the First one
+[00:02:23] and they were, they were, they were very much
+[00:02:26] very, very, very much the OG
+[00:02:28] but in some way
+[00:02:29] like I consider like DeepMind and OpenAI in a way of
+[00:02:33] AI lab
+[00:02:33] like kind of like the same wave because
+[00:02:36] they were AI labs started before we were
+[00:02:38] in the large scale AI as possible
+[00:02:41] They were a company like very much like
+[00:02:43] purely research driven. We want to build AGI
+[00:02:46] We have very little idea how
+[00:02:48] but we will be researching ideas how to
+[00:02:50] make AIs. Then I
+[00:02:51] I think they're
+[00:02:52] Was a second wave of AI labs created
+[00:02:56] Like, largely, I consider them, like, after GPT-3
+[00:03:01] When the first, when scaling was proven
+[00:03:03] we actually have ways how to spend
+[00:03:06] a lot of compute in making intelligence
+[00:03:09] and a lot of
+[00:03:10] labs were trying to achieve scaling
+[00:03:11] A lot of labs were created at that time
+[00:03:14] like, still less than, than, than today
+[00:03:16] but many were
+[00:03:17] And Anthropic was the one that was meant
+[00:03:19] to be the most successful out of those
+[00:03:21] and ended up being one of the
+[00:03:23] One of the most successful companies today
+[00:03:24] And what we see right now after
+[00:03:27] the success of reasoning and after success of agents
+[00:03:32] we have
+[00:03:32] right now another another explosion of new startups
+[00:03:35] trying to figure out how do we build like agent native
+[00:03:39] AI native
+[00:03:39] like AI companies and how does that how
+[00:03:41] does that look like?
+[00:03:43] So what part of
+[00:03:44] I guess the entire
+[00:03:45] like stack are you guys trying to automate?
+[00:03:47] Is it automated researchers?
+[00:03:49] Are you using like existing
+[00:03:50] coding tools to automate AI researchers or are
+[00:03:53] you also
+[00:03:53] trying to automate
+[00:03:54] the like coding part itself like
+[00:03:57] self-improving like coding agents?
+[00:03:59] like Almost like every part of the stack
+[00:04:02] And the question is how
+[00:04:04] where we have the most
+[00:04:05] the most alpha, where we have the most leverage to
+[00:04:08] to, to improve things
+[00:04:09] But how I'm thinking about it
+[00:04:11] like what labs do
+[00:04:13] what research companies do
+[00:04:15] they generate insight, they generate knowledge
+[00:04:18] You need to
+[00:04:19] figure out how to train better models
+[00:04:22] And you, you, this, this is some
+[00:04:23] some data generating process where you put compute
+[00:04:26] in and you get
+[00:04:27] you get insights out
+[00:04:28] And the question is almost how do Optimize
+[00:04:31] that process so that we get the most
+[00:04:33] value out of our compute for generating new
+[00:04:36] insights?
+[00:04:37] And how do we
+[00:04:37] run as many experiments as possible per
+[00:04:40] unit of time to to have
+[00:04:42] in some way like a faster
+[00:04:45] rate of
+[00:04:46] like insight generation than than other companies?
+[00:04:49] So by insight generation
+[00:04:50] you mean you are like
+[00:04:52] running a bunch of agents in order to
+[00:04:54] generate ideas
+[00:04:56] That you then act upon for like AI research?
+[00:04:59] In, in, in many ways, what, what
+[00:05:01] what we have is slightly reversed
+[00:05:02] We, we still use human
+[00:05:04] like researchers, mostly for generating insights and for
+[00:05:07] for trying to determine where we should be going
+[00:05:10] but the agents are meant to
+[00:05:12] like
+[00:05:12] streamline the execution as much as possible
+[00:05:15] so that we can try those ideas and
+[00:05:17] generate the data on those ideas
+[00:05:18] whether they are good as
+[00:05:20] as quickly as possible
+[00:05:21] So if we can
+[00:05:23] Take down the time of experimentation from
+[00:05:26] month
+[00:05:27] to a day that'

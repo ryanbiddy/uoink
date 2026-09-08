@@ -1,0 +1,132 @@
+# OpenAI Developers - Build a plugin once and use it across compatible agent clients.  Intr...
+
+**Channel:** OpenAI Developers (— subscribers)
+**Uploaded:** 2026-08-06 | **Duration:** 01:35 | **Views:** — | **Likes:** 6,513
+**URL:** https://x.com/OpenAIDevs/status/2085398373511918022
+**Uoinked:** 2026-08-07T07:40:16
+**Topic:** AI and ML
+**Note:** Screenshot interval lowered from 30s to 12s so this source can yield about 8 frames.
+
+## Hook Analysis
+<!-- HOOK_START -->
+**Hook Type:** Promise List
+**Analysis:** The opening establishes a problem (agents expect different formats) and immediately promises a solution: 'Agent Plugins' as a unified standard. While not explicitly numbered, it frames the concept as a packaged deliverable with clear benefits (one predictable way, standard locations, less platform glue)—positioning it as a structured solution offering.
+<!-- HOOK_END -->
+
+---
+
+## Thumbnail
+
+![Thumbnail](thumbnail.jpg)
+
+## Description
+
+Build a plugin once and use it across compatible agent clients.  Introducing Agent Plugins, an open standard developed with @awsdevelopers, @cursor_ai, @github, @code, and @vercel that packages Agent Skills and supports MCP server configurations in a shared format. https://t.co/JOQe4sc40N
+
+## Tags
+
+No tags
+
+---
+
+## Transcript
+
+[00:00:03] Skills and MCP servers are making agents more capable,
+[00:00:07] And plugins give developers a way to package those capabilities
+[00:00:10] So they can be shared and reused.
+[00:00:12] But today every agent product expects
+[00:00:15] A different manifest folder structure
+[00:00:17] And setup process That's why contributors from AWS
+[00:00:21] Cursor GitHub
+[00:00:22] Microsoft OpenAI
+[00:00:24] And Vercel Came together
+[00:00:26] To create Agent Plugins
+[00:00:27] An open vendor neutral
+[00:00:29] Way To package extensions
+[00:00:30] For Agents Building plugins
+[00:00:33] And one predictable way for agent tools
+[00:00:36] To find them. At its simplest
+[00:00:38] An Agent plugin is just a folder
+[00:00:40] With the manifest called
+[00:00:41] Plugin dot JSON at root
+[00:00:43] This first release focuses on
+[00:00:45] Two things developers already use
+[00:00:48] Agents skills For reusable instructions and workflows
+[00:00:51] And MCP servers
+[00:00:52] Which connect agents to
+[00:00:53] Tools And data You can put these resources
+[00:00:56] In standard locations
+[00:00:57] The same package
+[00:00:59] Is much easier To support across different products
+[00:01:01] For plug-ins authors The payoff is less platform specific glue
+[00:01:05] And one version format to build against
+[00:01:07] Agent products can support
+[00:01:09] Skills MCPs
+[00:01:11] Or both Extend the formats
+[00:01:13] Without changing its portable core
+[00:01:15] This spec standardizes packaging
+[00:01:17] and discovery Not marketplaces
+[00:01:19] Permissions or runtimes
+[00:01:21] Agent Plugins Is open
+[00:01:22] And ready To be built with
+[00:01:24] Package a capability Add support in your product
+[00:01:26] Go check it out yourself
+[00:01:28] Get started at agentplugin.org
+
+---
+
+## Screenshots
+
+### [00:00:00]
+
+![Screenshot at 00:00:00](screenshots/shot_0001.jpg)
+
+### [00:00:12]
+
+![Screenshot at 00:00:12](screenshots/shot_0002.jpg)
+
+### [00:00:24]
+
+![Screenshot at 00:00:24](screenshots/shot_0003.jpg)
+
+### [00:00:36]
+
+![Screenshot at 00:00:36](screenshots/shot_0004.jpg)
+
+### [00:00:48]
+
+![Screenshot at 00:00:48](screenshots/shot_0005.jpg)
+
+### [00:01:00]
+
+![Screenshot at 00:01:00](screenshots/shot_0006.jpg)
+
+### [00:01:12]
+
+![Screenshot at 00:01:12](screenshots/shot_0007.jpg)
+
+### [00:01:24]
+
+![Screenshot at 00:01:24](screenshots/shot_0008.jpg)
+
+---
+
+## Top Comments
+
+<!-- yoink:comments-start -->
+*Comments are disabled on this video.*
+<!-- yoink:comments-end -->
+
+---
+
+## Channel Context
+
+**About OpenAI Developers:**
+*No channel description available.*
+
+**Recent videos from this channel:**
+- *No recent videos found.*
+
+---
+
+*[Uoinked with Uoink by ReplayRyan](https://uoink.app)*
