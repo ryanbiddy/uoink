@@ -7082,6 +7082,8 @@
       stale: false,
       loading: false,
       error: null,
+      loadGeneration: 0,
+      evidenceGeneration: 0,
       evidenceMetricId: null,
       evidenceOffset: 0,
       evidenceLimit: 20,
@@ -7089,6 +7091,7 @@
       evidenceTotal: 0,
       collectionOffsets: { creator_hints: 0, shelves: 0, sources: 0, events: 0 },
       collectionTotals: { creator_hints: 0, shelves: 0, sources: 0, events: 0 },
+      collectionNext: { creator_hints: null, shelves: null, sources: null, events: null },
     };
 
     let libraryActivityTimer = null;
@@ -7164,11 +7167,13 @@
     }
 
     function invalidateActivityEvidence() {
+      libraryActivityState.evidenceGeneration = (libraryActivityState.evidenceGeneration || 0) + 1;
       libraryActivityState.evidenceMetricId = null;
       libraryActivityState.evidenceOffset = 0;
       libraryActivityState.evidenceRows = [];
       libraryActivityState.evidenceTotal = 0;
       libraryActivityState.collectionOffsets = { creator_hints: 0, shelves: 0, sources: 0, events: 0 };
+      libraryActivityState.collectionNext = { creator_hints: null, shelves: null, sources: null, events: null };
       disableEvidencePaging();
       disableCollectionPagers();
     }
@@ -7178,7 +7183,8 @@
         libraryActivityState.packet &&
         libraryActivityState.packet.report_revision &&
         !libraryActivityState.stale &&
-        !libraryActivityState.error
+        !libraryActivityState.error &&
+        !libraryActivityState.loading
       );
     }
 
@@ -7198,7 +7204,9 @@
     }
 
     async function refreshLibraryActivitySummary() {
+      const generation = libraryActivityState.loadGeneration;
       const res = await callRegistryTool("get_library_activity", libraryActivitySummaryArgs());
+      if (generation !== libraryActivityState.loadGeneration) return res;
       if (res && res.ok) {
         libraryActivityState.packet = res;
         libraryActivityState.stale = false;
@@ -7253,9 +7261,25 @@
     }
 
     function activityEvidenceFocusables() {
-      return ["closeEvidenceBtn", "evidenceRowsContainer", "evidencePrevPageBtn", "evidenceNextPageBtn"]
-        .map((id) => document.getElementById(id))
-        .filter((el) => el && !el.disabled);
+      const seen = [];
+      const add = (el) => {
+        if (el && !el.disabled && seen.indexOf(el) === -1) seen.push(el);
+      };
+      const take = (root, selector) => {
+        if (!root || typeof root.querySelectorAll !== "function") return;
+        const nodes = root.querySelectorAll(selector);
+        const len = nodes && nodes.length ? nodes.length : 0;
+        for (let i = 0; i < len; i += 1) add(nodes[i]);
+      };
+      const modal = document.getElementById("activityEvidenceModal");
+      take(modal, "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])");
+      take(document.getElementById("evidenceRowsContainer"), "button, [href], [tabindex]:not([tabindex='-1'])");
+      if (!seen.length) {
+        ["closeEvidenceBtn", "evidenceRowsContainer", "evidencePrevPageBtn", "evidenceNextPageBtn"].forEach((id) => {
+          add(document.getElementById(id));
+        });
+      }
+      return seen;
     }
 
     function trapActivityEvidenceKeys(event) {
@@ -7296,6 +7320,7 @@
         libraryActivityState.interval = getRollingUtcInterval(libraryActivityState.days);
       }
 
+      const generation = ++libraryActivityState.loadGeneration;
       invalidateActivityEvidence();
       libraryActivityState.loading = true;
       libraryActivityState.error = null;
@@ -7303,9 +7328,11 @@
 
       try {
         const res = await callRegistryTool("get_library_activity", libraryActivitySummaryArgs());
+        if (generation !== libraryActivityState.loadGeneration) return;
         if (res && res.ok) {
           libraryActivityState.packet = res;
           libraryActivityState.stale = false;
+          libraryActivityState.error = null;
           renderLibraryActivityUI();
         } else {
           const errCode = (res && res.error && res.error.code) || "error";
@@ -7313,9 +7340,12 @@
           applyLibraryActivityFailure(errCode, errMsg);
         }
       } catch (err) {
+        if (generation !== libraryActivityState.loadGeneration) return;
         applyLibraryActivityFailure("storage_unavailable", err.message || "Failed to reach reader");
       } finally {
-        libraryActivityState.loading = false;
+        if (generation === libraryActivityState.loadGeneration) {
+          libraryActivityState.loading = false;
+        }
       }
     }
 
@@ -7441,13 +7471,20 @@
       seedCollectionPager("events", (p.events && p.events.rows) || [], pag.events || p.events);
     }
 
+    function collectionContinuationOffset(kind) {
+      const next = libraryActivityState.collectionNext && libraryActivityState.collectionNext[kind];
+      if (next && typeof next.offset === "number") return next.offset;
+      return null;
+    }
+
     function seedCollectionPager(kind, rows, pageMeta) {
-      const offset = (pageMeta && pageMeta.offset) || 0;
+      const offset = (pageMeta && pageMeta.offset != null) ? pageMeta.offset : 0;
       const total = (pageMeta && pageMeta.total_rows != null)
         ? pageMeta.total_rows
         : (activityScalar(pageMeta && pageMeta.total) != null ? activityScalar(pageMeta.total) : (rows ? rows.length : 0));
       libraryActivityState.collectionOffsets[kind] = offset;
       libraryActivityState.collectionTotals[kind] = total || 0;
+      libraryActivityState.collectionNext[kind] = (pageMeta && pageMeta.next) || null;
       updateCollectionPager(kind, offset, total || 0);
     }
 
@@ -7467,7 +7504,8 @@
       const curPage = Math.floor((offset || 0) / limit) + 1;
       if (info) info.textContent = `Page ${curPage} of ${totalPages}`;
       if (prev) prev.disabled = !offset;
-      if (next) next.disabled = (offset || 0) + limit >= (total || 0);
+      const hasNext = collectionContinuationOffset(kind) != null || ((offset || 0) + limit < (total || 0));
+      if (next) next.disabled = !hasNext;
     }
 
     function renderActivityDaily(buckets) {
@@ -7481,10 +7519,11 @@
         const cnt = formatActivityCount(b.count);
         const pct = b.share && b.share.percent != null ? `${b.share.percent}%` : "-";
         const mId = activityMetricId(b.count, "");
+        const shareId = activityMetricId(b.share, "");
         return `<tr style="border-bottom:1px solid #282828;">
             <td style="padding:4px 8px;">${escapeHtmlActivity(s)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(cnt, mId)}</td>
-            <td style="padding:4px 8px;">${escapeHtmlActivity(pct)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(pct, shareId)}</td>
           </tr>`;
       }).join("");
     }
@@ -7499,12 +7538,13 @@
         const cnt = formatActivityCount(h.count);
         const pct = h.share && h.share.percent != null ? `${h.share.percent}%` : "-";
         const mId = activityMetricId(h.count, "");
+        const shareId = activityMetricId(h.share, "");
         return `<tr style="border-bottom:1px solid #282828;">
             <td style="padding:4px 8px;">${escapeHtmlActivity(h.platform)}</td>
             <td style="padding:4px 8px;">${escapeHtmlActivity(h.field)}</td>
             <td style="padding:4px 8px;">${escapeHtmlActivity(h.hint)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(cnt, mId)}</td>
-            <td style="padding:4px 8px;">${escapeHtmlActivity(pct)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(pct, shareId)}</td>
           </tr>`;
       }).join("");
     }
@@ -7529,18 +7569,21 @@
         const sEnd = formatActivityCount(s.end_size);
         const chPct = s.churn && s.churn.percent != null ? `${s.churn.percent}%` : ((s.churn && s.churn.reason) || "Unavailable");
         const mId = activityMetricId(s.current_size, "");
+        const startId = activityMetricId(s.start_size, "");
+        const endId = activityMetricId(s.end_size, "");
         const addedId = activityMetricId(s.added, "");
         const removedId = activityMetricId(s.removed, "");
         const netId = activityMetricId(s.net, "");
+        const churnId = activityMetricId(s.churn, "");
         return `<tr style="border-bottom:1px solid #282828;">
             <td style="padding:4px 8px;">${escapeHtmlActivity(s.shelf_id)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(cSize, mId)}</td>
-            <td style="padding:4px 8px;">${escapeHtmlActivity(sStart)}</td>
-            <td style="padding:4px 8px;">${escapeHtmlActivity(sEnd)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(sStart, startId)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(sEnd, endId)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(signedActivityDelta(s.added, "+"), addedId)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(signedActivityDelta(s.removed, "-"), removedId)}</td>
             <td style="padding:4px 8px;">${activityEvidenceButton(signedActivityDelta(s.net, "+"), netId)}</td>
-            <td style="padding:4px 8px;">${escapeHtmlActivity(chPct)}</td>
+            <td style="padding:4px 8px;">${activityEvidenceButton(chPct, churnId)}</td>
           </tr>`;
       }).join("");
     }
@@ -7598,6 +7641,7 @@
       }
 
       const p = libraryActivityState.packet;
+      const generation = libraryActivityState.evidenceGeneration;
       libraryActivityState.evidenceMetricId = metricId;
       libraryActivityState.evidenceOffset = offset;
 
@@ -7626,6 +7670,14 @@
 
       try {
         const res = await callRegistryTool("get_library_activity", args);
+        if (
+          generation !== libraryActivityState.evidenceGeneration ||
+          !activityEvidenceCallable() ||
+          libraryActivityState.evidenceMetricId !== metricId
+        ) {
+          disableEvidencePaging();
+          return;
+        }
         if (res && res.ok) {
           const rows = Array.isArray(res.rows) ? res.rows : [];
           libraryActivityState.evidenceRows = rows;
@@ -7669,6 +7721,7 @@
         return;
       }
       const p = libraryActivityState.packet;
+      const generation = libraryActivityState.evidenceGeneration;
       const args = {
         interval: p.interval,
         date_basis: libraryActivityState.date_basis,
@@ -7679,11 +7732,16 @@
       };
       try {
         const res = await callRegistryTool("get_library_activity", args);
+        if (generation !== libraryActivityState.evidenceGeneration || !activityEvidenceCallable()) {
+          disableCollectionPagers();
+          return;
+        }
         if (res && res.ok) {
           const rows = Array.isArray(res.rows) ? res.rows : [];
           const total = res.total_rows || 0;
           libraryActivityState.collectionOffsets[detail] = offset;
           libraryActivityState.collectionTotals[detail] = total;
+          libraryActivityState.collectionNext[detail] = res.next || null;
           if (detail === "creator_hints") renderActivityHints(rows);
           else if (detail === "shelves") renderActivityShelves(rows);
           else if (detail === "sources") renderActivitySources(rows);
@@ -7752,6 +7810,11 @@
       }
       if (next) {
         next.addEventListener("click", () => {
+          const contOff = collectionContinuationOffset(kind);
+          if (contOff != null) {
+            fetchActivityCollection(kind, contOff);
+            return;
+          }
           const off = libraryActivityState.collectionOffsets[kind] || 0;
           const total = libraryActivityState.collectionTotals[kind] || 0;
           const nextOff = off + libraryActivityState.evidenceLimit;

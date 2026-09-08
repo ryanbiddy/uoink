@@ -1587,16 +1587,19 @@ def test_activity_cost_548_and_10000(tmp_dir):
     for i in range(1, 51):
         insert_yoink(conn_multi, f"vid_m_{i:02d}", yoinked_at="2026-09-01T12:00:00.000Z")
     for op_seq in range(1, 11):
-        at_iso = f"2026-09-01T{10 + op_seq // 6:02d}:{(op_seq % 6) * 10:02d}:00.000Z"
+        at_iso = f"2026-09-01T{10 + (op_seq - 1) // 6:02d}:{((op_seq - 1) % 6) * 10:02d}:00.000Z"
         sh_curr = "shelf_alpha" if op_seq % 2 == 1 else "shelf_beta"
         sh_prev = "shelf_beta" if op_seq % 2 == 1 else "shelf_alpha"
         f_delta = {f"vid_m_{i:02d}": [{"shelf_id": sh_curr, "is_primary": 1, "version_id": "v1"}] for i in range(1, 51)}
-        i_delta = {f"vid_m_{i:02d}": [{"shelf_id": sh_prev, "is_primary": 1, "version_id": "v1"}] for i in range(1, 51)}
+        if op_seq == 1:
+            i_delta = {f"vid_m_{i:02d}": [] for i in range(1, 51)}
+        else:
+            i_delta = {f"vid_m_{i:02d}": [{"shelf_id": sh_prev, "is_primary": 1, "version_id": "v1"}] for i in range(1, 51)}
         insert_apply(conn_multi, f"app_m_{op_seq}", op_seq, op_seq - 1, op_seq, created_at=at_iso, forward_delta={"items": f_delta, "policies": {}}, inverse_delta={"items": i_delta, "policies": {}})
     for i in range(1, 51):
         conn_multi.execute(
             "INSERT INTO item_shelves (video_id, shelf_id, version_id, source_revision, source, locked, is_primary, confidence, evidence_json, assigned_at) "
-            "VALUES (?, 'shelf_beta', 'v1', 'rev', 'user', 0, 1, 1.0, '{}', '2026-09-01T11:40:00.000Z')",
+            "VALUES (?, 'shelf_beta', 'v1', 'rev', 'user', 0, 1, 1.0, '{}', '2026-09-01T11:30:00.000Z')",
             (f"vid_m_{i:02d}",),
         )
     conn_multi.commit()
@@ -1604,6 +1607,8 @@ def test_activity_cost_548_and_10000(tmp_dir):
     res_multi = library_analysis.get_library_activity(req_replay, db=conn_multi, clock=fixed_as_of)
     t1_multi = time.perf_counter()
     assert res_multi["ok"] is True
+    assert res_multi["coverage"]["cov_shelf_activity"]["coverage_status"] == "journal_complete"
+    assert not res_multi["coverage"]["cov_shelf_activity"]["reasons"]
     time_multi = (t1_multi - t0_multi)
 
     # -----------------------------------------------------------------------
@@ -1755,6 +1760,7 @@ def test_narration_faithfulness_metric():
     """Static labelled examples: compliant Alpha/Beta passes; wrong count, wrong clock, invented topic, unsupported consensus, reversed direction fail."""
     packet = {
         "ok": True,
+        "report_revision": "a" * 64,
         "interval": {
             "start": "2026-09-06T00:00:00.000Z",
             "end": "2026-09-06T18:00:00.000Z",

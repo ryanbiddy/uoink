@@ -16,19 +16,21 @@ The benchmark fixture evaluates two corpus scales:
 
 | Metric | Synthetic 548 Items | Synthetic 10,000 Items | Budget Ceiling / Interpretation |
 | :--- | :--- | :--- | :--- |
-| **Construction Time** | 364.57 ms (rerun ~522 ms) | 266.68 ms (rerun ~300 ms) | 2,000.00 ms (2.0 s deadline; includes reader query execution, aggregation and internal serialization) |
-| **Serialization Time** | 3.09 ms | 0.38 ms | Sub-deadline; raw dictionary json.dumps serialization, not transport serialization |
-| **Combined Query Execution** | < 15.00 ms | < 45.00 ms | Query plans confirmed index scans; individual queries not isolated from construction |
-| **Peak Heap Memory (tracemalloc)** | 3,623.0 KiB (~3.54 MiB) | 54,465.8 KiB (~53.19 MiB) | Traced Python heap peak under tracemalloc in separate passes; not process RSS |
-| **Wire Response Payload** | 59,693 bytes | 59,843 bytes | 65,536 bytes (64 KiB envelope) |
+| **Construction Time** | ~800–950 ms | ~350–430 ms | 2,000.00 ms (2.0 s deadline; includes reader query execution, aggregation and internal serialization) |
+| **Serialization Time** | ~3.3–4.0 ms | ~0.3–0.6 ms | Sub-deadline; raw dictionary json.dumps serialization, not transport serialization |
+| **Combined Query Execution** | Plans confirmed | Plans confirmed | Plans confirmed index scans (Q1: `sqlite_autoindex_yoinks_1`, Q3: `sqlite_autoindex_library_applies_3`); individual query times are not isolated from total construction time |
+| **Peak Heap Memory (tracemalloc)** | 4,031.1 KiB (~3.94 MiB) | 61,131.7 KiB (~59.70 MiB) | Traced Python heap peak under tracemalloc in separate passes; not process RSS (measures Python heap allocations only) |
+| **Wire Response Payload** | 59,281 bytes | 59,190 bytes | 65,536 bytes (64 KiB envelope); raw reader JSON payload bytes |
+| **Actual Transport Wire Payload (stdio adapter)** | 65,252 bytes | 65,095 bytes | 65,536 bytes (64 KiB envelope); wrapped JSON-RPC response through actual shipped MCP stdio handler |
 | **Combined Journal Deltas** | 73.1 KiB | 1,050,054 bytes (~1.00 MiB) | 67,108,864 bytes (64 MiB); 548 journal corrected from 54.8 KiB (74,856 bytes) |
-| **Status** | Passed | Passed | Within bounds |
+| **Status** | Passed | Passed | Within 64 KiB wire budget; raw JSON (59,281 / 59,190 bytes) and transport wire bytes (65,252 / 65,095 bytes) both fit within 65,536 bytes; exceeds 24,576-byte dashboard target |
 
 ### Observations on Scaling
-- At 548 items, full breakdown rows (joint hints, creator hints, shelf rows) fit within the 64 KiB response limit without pruning.
-- At 10,000 items, row shedding did not occur: all initial display pages (20 event rows, 20 creator rows, 20 joint creator rows, 1 source row, 1 shelf row) fit within the 65,536-byte wire budget (payload is 59,843 bytes / 61,383 bytes with current serializer), so no display arrays were removed.
+- At 548 items, full breakdown rows (joint hints, creator hints, shelf rows) fit within the 64 KiB response limit without pruning (raw JSON is 59,281 bytes; actual transport wire payload through MCP stdio adapter is 65,252 bytes).
+- At 10,000 items, row shedding did not occur: all initial display pages (20 event rows, 20 creator rows, 20 joint creator rows, 1 source row, 1 shelf row) fit within the 65,536-byte wire budget (raw JSON is 59,190 bytes; actual transport wire payload through MCP stdio adapter is 65,095 bytes), so no display arrays were removed.
 - In the primary 548-item and 10,000-item benchmarks, the baseline replay path was skipped because the requested interval (`2026-09-01T00:00:00.000Z` to `2026-09-02T00:00:00.000Z`) preceded the first apply (`2026-09-01T10:00:00.000Z`), producing `baseline_reason: ["interval_precedes_first_apply"]`. Baseline replay was measured separately with an interval covering the apply (see Section 1.1).
-- Construction at 10,000 items completed in ~300 ms, well below the 2.0-second service deadline. The 548 timing includes tracemalloc profiling overhead whereas the main 10k timing was measured without tracing (a separate 10k tracing pass recorded ~54–56 MiB heap peak); tracemalloc measures Python heap allocations, not total process memory / RSS.
+- Construction at 10,000 items completed in ~350–430 ms, well below the 2.0-second service deadline. The 548 timing includes tracemalloc profiling overhead whereas the main 10k timing was measured without tracing (a separate 10k tracing pass recorded ~61 MiB heap peak); tracemalloc measures Python heap allocations, not total process memory / RSS.
+- The 24,576-byte dashboard target is missed by the primary packets (59,281 / 59,190 bytes raw JSON; 65,252 / 65,095 bytes wire payload).
 
 ---
 
@@ -38,13 +40,14 @@ The extended test suite in `tests/test_library_analysis_fixtures.py::test_activi
 
 | Path / Scenario | Fixture Dimensions | Observed Metric | Result & Interpretation |
 | :--- | :--- | :--- | :--- |
-| **Proved Baseline Replay** | 548 items, 1 apply at 10:00:00Z, interval 10:00:00Z–24:00:00Z | 19.30 ms construction | Proved: `coverage_status = "journal_complete"`, `reasons = []`. Baseline proved across interval covering first apply. |
-| **70 MiB Journal Refusal** | 1 item, 70 MiB forward/inverse deltas | 48.55 ms refusal | `ok: False`, `error.code = "resource_too_large"`. Bounded refusal before JSON materialization. |
-| **Deadline Expiry Refusal** | 548 items, expired monotonic clock | 0.90 ms refusal | `ok: False`, `error.code = "deadline_exceeded"`, `retryable: True`. Immediate abort on expired deadline. |
-| **Transport Serialization** | 548-item report packet in MCP stdio envelope | 0.72 ms, 67,697 bytes | Measures full MCP transport protocol serialization with trusted document fence and text encapsulation. |
-| **Three Memberships / Item** | 548 items, 3 shelves each (1,644 memberships) | 23.29 ms construction | `ok: True`. Handles dense multi-shelf memberships efficiently. |
-| **Multi-Operation Journal** | 50 items, 10 consecutive applied operations | 4.08 ms construction | `ok: True`. Replays sequence of 10 applies to verify state progression across interval. |
-| **100k-Observation Scale** | 1 item, 100,000 source item observations | 563.23 ms construction | `ok: True`. Full scan across 100k observation rows completes well under the 2.0 s deadline. |
+| **Proved Baseline Replay** | 548 items, 1 apply at 10:00:00Z, interval 10:00:00Z–24:00:00Z | ~35–45 ms construction | Proved: `coverage_status = "journal_complete"`, `reasons = []`. Baseline proved across interval covering first apply. |
+| **70 MiB Journal Refusal** | 1 item, 70 MiB forward/inverse deltas | ~50–95 ms refusal | `ok: False`, `error.code = "resource_too_large"`. Bounded refusal before JSON materialization. |
+| **Deadline Expiry Refusal** | 548 items, expired monotonic clock | ~0.1–0.2 ms refusal | `ok: False`, `error.code = "deadline_exceeded"`, `retryable: True`. Immediate abort on expired deadline. |
+| **Transport Serialization** | 548-item report packet in MCP stdio envelope | ~0.4–0.6 ms, 65,263 bytes | Full MCP transport protocol serialization with trusted document fence and text encapsulation through actual stdio adapter (65,252 bytes JSON-RPC wire payload). |
+| **Three Memberships / Item** | 548 items, 3 shelves each (1,644 memberships) | ~40–50 ms construction | `ok: True`. Handles dense multi-shelf memberships efficiently (64,735 bytes transport wire). |
+| **Multi-Operation Journal** | 50 items, 10 consecutive applied operations | ~5.5 ms construction | Proved: `coverage_status = "journal_complete"`, `reasons = []`. Replays sequence of 10 applies across interval covering first apply to prove state progression (35,404 bytes transport wire). |
+| **100k-Observation Scale** | 1 item, 100,000 source item observations | ~750–860 ms construction | `ok: True`. Full scan across 100k observation rows completes well under the 2.0 s deadline (27,862 bytes transport wire). |
+
 
 ---
 
@@ -89,7 +92,7 @@ The reader guards system availability through five explicit gates:
 
 1. **64 MiB Journal Delta Limit:**
    - Evaluated before JSON parsing.
-   - If `SUM(LENGTH(forward_json) + LENGTH(inverse_json))` across `library_applies` exceeds 67,108,864 bytes, `get_library_activity` refuses with `error.code = "resource_too_large"`.
+   - If `SUM(LENGTH(CAST(forward_json AS BLOB)) + LENGTH(CAST(inverse_json AS BLOB)))` across `library_applies` exceeds 67,108,864 bytes, `get_library_activity` refuses with `error.code = "resource_too_large"`.
    - Verified in `test_activity_deadline_and_work_bounds` with a 70 MiB synthetic payload.
 
 2. **2.0-Second Service Deadline:**
@@ -109,11 +112,11 @@ The reader guards system availability through five explicit gates:
    - Verified in `test_activity_wire_budget_and_untrusted_labels`.
 
 4. **Concurrency and Rate Limiting:**
-   - **Active Read Cap:** Enforced via `_active_reads_sem` with a limit of 2 concurrent reads. Excess concurrent requests receive `rate_limited` (`retryable: true`).
+   - **Active Read Cap:** Enforced via shared `library_resources` process guard with a limit of 2 concurrent reads. Excess concurrent requests receive `rate_limited` (`retryable: true`).
    - **Rate Limiter:** Rolling 60-second window capped at 60 admissions. Exceeding 60 calls/min raises `RateLimitExceeded` and returns `rate_limited`.
-   - Verified in `test_activity_read_has_no_side_effects`.
+   - *Verification note (marked limitation):* `test_activity_read_has_no_side_effects` checks `total_changes` only and does not verify concurrent load or rate limit enforcement.
 
 5. **Read Boundary Mutation Detection:**
    - Compares `PRAGMA data_version` and `total_changes` at the start and end of read operations.
    - If concurrent writes modify the database during read processing, the handler refuses with `error.code = "stale_report"`.
-   - Verified in `test_gate4_deletion_invalidates_derived_report`.
+   - *Verification note (marked limitation):* `test_gate4_deletion_invalidates_derived_report` tests sequential deletion between requests and does not prove concurrent snapshot isolation during active read transactions.
