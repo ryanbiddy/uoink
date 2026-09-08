@@ -60,10 +60,10 @@ takeover only. Commit message form: `<Phase> (<run id>, <engine>): <what>` and t
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
-| 3 | Round 6 integrated (`1830b7a`, Astra suite 150/150); S21, process-recovery and real-child probe receipts and C21 browser screenshots on that candidate | AS-6 dispatched | Integrate the AS-6 verdict; C20 browser matrix still mine; C22 Inno is Ryan's |
-| 4 | AW-2 NOT ACCEPTED at a finer grain: 14 items, 26 reproductions in `test_phase4_aw2_acceptance.py` | `PHASE4-ACCEPTANCE-2-2026-09-08.md` | AV-4m (gemini: D07-D16) then AV-4r (grok: D01-D04) dispatched as one chained job; then AW-3 |
-| 5 | Both rounds green (145/145) after AZ-4a..4d | BA-3 dispatched | Integrate the BA-3 verdict |
-| 6 | BC-1 integrated (19/19 tests); 0030 amendment applied | `PHASE6-BD0-2026-09-08.md`: BC-1 not complete | Run BC-2 from `PHASE6-BC2-BRIEF-2026-09-08.md` (claude after 11:50 PT, or gemini); then BD with the measured study (35 items with real chapters under the corpus root's metadata.json files; speaker gate likely blocked) |
+| 3 | AS-02b repaired (`d2ec84a`); C20 full browser matrix receipt (`56c1c86`, `PHASE3-S20-MATRIX-RECEIPT`); C21 per-item waiting-for-client surface (`867605b`); two dashboard defects fixed (`12339c3`) | AS-7 DISPATCHED (codex, brief `PHASE3-ACCEPTANCE-7-BRIEF`) | Integrate the AS-7 verdict; C22 Inno is Ryan's |
+| 4 | AV-4r (grok) + AV-4m (gemini) integrated (`6559a71`): AW-2 set 28/28, AW set 32/32; two legacy tests aligned to D11/D12 | AW-3 DISPATCHED (codex, brief `PHASE4-ACCEPTANCE-3-BRIEF`) | Integrate the AW-3 verdict; real-client rerun (Fable) when Astra names it |
+| 5 | BA-3 NOT ACCEPTED (`b67b836`): 62 new reproductions, 12 items open | `PHASE5-ACCEPTANCE-3-2026-09-08.md` | AZ-5a (gemini), AZ-5c (claude), AZ-5e (grok) DISPATCHED from `PHASE5-AZ5-BRIEF`; then AZ-5b, AZ-5d (grok), AZ-5f (claude), AZ-5g (gemini) in the brief's order; then BA-4 |
+| 6 | BC-2 integrated (`fd1825c`, 19/19 + 11/11); study inputs sealed (`d83e6d7`, 25 eligible items) | BD DISPATCHED (codex, brief `PHASE6-BD-BRIEF`) | Integrate the BD verdict; execute the one player observation Astra names; speaker gate is Ryan's |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21, S22, AW, process
