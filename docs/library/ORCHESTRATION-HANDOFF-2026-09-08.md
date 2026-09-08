@@ -6,22 +6,20 @@ on 2026-09-08 ("there has got to be a way Astra can pick up whenever you hit you
 limit"). Fable updates this file at every integration; the git log on `cc/living-library`
 is the authoritative history when this file lags.
 
-## Takeover command (Ryan runs it from `E:| 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
-AI| 3 | AS-02b repaired (`d2ec84a`); C20 full browser matrix receipt (`56c1c86`, `PHASE3-S20-MATRIX-RECEIPT`); C21 per-item waiting-for-client surface (`867605b`); two dashboard defects fixed (`12339c3`) | AS-7 DISPATCHED (codex, brief `PHASE3-ACCEPTANCE-7-BRIEF`) | Integrate the AS-7 verdict; C22 Inno is Ryan's |
-projects| 4 | AV-4r (grok) + AV-4m (gemini) integrated (`6559a71`): AW-2 set 28/28, AW set 32/32; two legacy tests aligned to D11/D12 | AW-3 DISPATCHED (codex, brief `PHASE4-ACCEPTANCE-3-BRIEF`) | Integrate the AW-3 verdict; real-client rerun (Fable) when Astra names it |
-agent-control-room`)
+## Takeover (Ryan hands orchestration to Astra, 2026-09-08 ~17:00 PDT)
 
-```powershell
-node bin/control-room.mjs run "uoink-library" "Living Library TAKEOVER: you are GPT-6 Astra acting as integrator while Fable is out. Open docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md, follow its rules and work the queue in order: integrate finished worker runs from their worktrees (git apply --3way from each worktree's diff, run the named suites, commit on cc/living-library with the message form below), dispatch the next runs with node bin/control-room.mjs from E:| 5 | BA-3 NOT ACCEPTED (`b67b836`): 62 new reproductions, 12 items open | `PHASE5-ACCEPTANCE-3-2026-09-08.md` | AZ-5a (gemini), AZ-5c (claude), AZ-5e (grok) DISPATCHED from `PHASE5-AZ5-BRIEF`; then AZ-5b, AZ-5d (grok), AZ-5f (claude), AZ-5g (gemini) in the brief's order; then BA-4 |
-AI| 6 | BC-2 integrated (`fd1825c`, 19/19 + 11/11); study inputs sealed (`d83e6d7`, 25 eligible items) | BD DISPATCHED (codex, brief `PHASE6-BD-BRIEF`) | Integrate the BD verdict; execute the one player observation Astra names; speaker gate is Ryan's |
-projects\agent-control-room using the brief files named in the queue, and update this handoff file and commit it after every step. Never push, never touch the live index or port 5179, never set ANTHROPIC_API_KEY, never edit acceptance tests to make them pass, never relabel a failed measurement as passed. Stop and write a blocker into this file when a decision is Ryan's." --mode work --strategy parallel --agents codex --lead codex --approve
+Fable's weekly subscription budget is nearly spent, so Astra (Codex) takes over as
+integrator and orchestrator from this point. Ryan pastes the prompt below into Codex
+directly (Codex CLI or app), with the working directory set to the checkout
+`E:\\AI\\projects\\uoink\\checkouts\\Yoink-library`. Astra works on the branch itself in that
+checkout (not a Control Room worktree) so it can commit; it dispatches workers with the
+Control Room from `E:\\AI\\projects\\agent-control-room` exactly as Fable did.
+
+```text
+You are GPT-6 Astra, now the integrator and orchestrator of the uoink Living Library program while Fable (Claude) is out of budget. Work in E:\AI\projects\uoink\checkouts\Yoink-library on branch cc/living-library. Read docs/library/ORCHESTRATION-HANDOFF-2026-09-08.md completely before doing anything, then follow its Standing rules, its "How runs work" section and its Queue in order. Your loop: (1) for each finished Control Room run, verify the worker's diff in its worktree by running the suites its brief names, then integrate with `git diff > patch` in the worktree and `git apply --3way` in the checkout, rerun the suites in the checkout, and commit with the message form in the handoff; (2) dispatch the next runs from the briefs the queue names with `node bin/control-room.mjs run "uoink-library" "<goal>" --mode work --strategy parallel --agents <engine> --lead <engine> --approve` from E:\AI\projects\agent-control-room (engines: claude, gemini, grok; use codex for reviews, which you may also perform yourself in the checkout when the queue says "codex"); (3) after every integration update the handoff's State table and Queue and commit it; (4) append a dated entry to the handoff whenever you learn something an integrator needs. Hard rules: never push; never open or write %LOCALAPPDATA%\Uoink\index.db or contact port 5179; never set ANTHROPIC_API_KEY or spend paid API; librarian_apply_enabled stays false; never edit acceptance tests to make them pass; never relabel a failed or partial measurement as passed; a rerun needs a documented repair and a brief; when a decision is Ryan's (0.90 rule, installed Inno receipts, speaker-gate material, new fetch scope, merge to main) write it under "Blockers for Ryan" in the handoff and continue with everything else. Keep going until every phase is accepted or blocked only on Ryan, then build the integration candidate and release notes the queue describes. Report to Ryan in short status messages naming commits and open items.
 ```
 
-Astra can run shell, tests and git in its Control Room worktree. To commit to the branch
-itself, Astra must work in the checkout `E:\AI\projects\uoink\checkouts\Yoink-library`
-(Control Room worktrees are branched copies); the takeover prompt above grants that for the
-takeover only. Commit message form: `<Phase> (<run id>, <engine>): <what>` and the trailer
-`Co-Authored-By: GPT-6 Astra <noreply@openai.com>` plus `Integrated-by: Astra takeover`.
+When Fable returns it reads the same file and the git log and takes the loop back.
 
 ## Standing rules (from Ryan, in force for any integrator)
 
@@ -55,43 +53,58 @@ takeover only. Commit message form: `<Phase> (<run id>, <engine>): <what>` and t
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08 ~16:20 PDT; not pushed)
+## State at handoff (updated 2026-09-08 ~17:00 PDT; HEAD `48655c5`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
-| 3 | AS-7 (`229ea90`): AS-02b closed; repairs landed (`1d9e438` pill pagination + accepted label + fetch strip; scenario 03 rerun with the frozen complete state package) and the replacement S21 run at7 (`3d930e5`: executed launcher bytes, exit 0, nine artifacts, database, bound browser observation, `SUPERSESSION-at7.md`) | AS-8 DISPATCHED (codex, brief `PHASE3-ACCEPTANCE-8-BRIEF`) | Integrate AS-8; if accepted subject to C22, Phase 3 waits only on Ryan's Inno receipt |
-| 4 | AW-3 (`f7a6e69`) NOT ACCEPTED: D04/D11/D16 closed, 11 open, 16 reproductions in `test_phase4_aw3_acceptance.py`; real-client rerun requirements listed in AW-3 (five numbered items) | `PHASE4-ACCEPTANCE-3-2026-09-08.md` | AV-5r (grok D01-03) and AV-5m1 (gemini D07-10) DISPATCHED from `PHASE4-AV5-BRIEF`; then AV-5m2 (grok D12-15), AW-4, then Fable's real-client rerun |
-| 5 | AZ-5c (claude) + AZ-5e (grok) integrated (`46163a4`): 17 of 62 BA-3 reproductions closed; AZ-5a (gemini) retained as `docs/library/patches/az5a-gemini-2026-09-08.patch` (closes 18 but breaks the 64 KiB cap) | `PHASE5-ACCEPTANCE-3-2026-09-08.md` | AZ-5a2 (claude: apply the patch, compact descriptors), AZ-5b (grok BA-04/07), AZ-5f (gemini BA-13) DISPATCHED; then AZ-5d (grok BA-09/10/11), AZ-5g (gemini BA-14), then BA-4 |
-| 6 | BD (`9e6af04`) withheld with BD-01..09 (14 reproductions); navigation study PASSED numerically (50 tasks, baseline MAE 72.06 s -> 0 s); player observation BD-27 PARTIAL (`65f2301`: player at 0:34, media 503); speaker gate blocked (Ryan) | `PHASE6-BD-2026-09-08.md` | BC-3b (grok BD-02/07) DISPATCHED from `PHASE6-BC3-BRIEF`; BC-3a (claude/gemini BD-01/03/05/06) and BC-3c (gemini BD-04/08/09) next; retry the BD-27 observation; then BD-2 |
+| 3 | AS-8 (`5affb08`): everything closed except one archived file (helper/server.log, now force-added) and C22 | AS-9 RUNNING (codex run `a13febd1`, confirmation only) | Integrate AS-9; if "accepted subject to C22 only", record it here; C22 = Ryan's installed Inno receipt (AS-7 lists it) |
+| 4 | AV-5r integrated (`99e9412`): D01-D03 closed; AW-3 set 5 of 16 closed | `PHASE4-ACCEPTANCE-3-2026-09-08.md` | AV-5m1 RUNNING (gemini run `b31e890f`, D07-D10); then AV-5m2 (grok D12-D15) from `PHASE4-AV5-BRIEF`; then AW-4 (codex); then the real-client rerun per AW-3's five requirements (claude -p on the subscription, no paid API) |
+| 5 | AZ-5c/5e (`46163a4`), AZ-5f (`1fb7f78`), AZ-5b (`48655c5`) integrated: BA-3 acceptance set 23 of 52 closed, dashboard3 7/7, measurements3 0/3 | `PHASE5-ACCEPTANCE-3-2026-09-08.md` | AZ-5a2 RUNNING (claude run `6e929e1d`: apply `docs/library/patches/az5a-gemini-2026-09-08.patch`, compact descriptors; must keep `tests/test_library_analysis_fixtures.py` 28/28); then AZ-5d (grok BA-09/10/11), AZ-5g (gemini BA-14), then BA-4 (codex) |
+| 6 | BC-3b integrated (`effd145`): BD-02/BD-07 closed, BD set 6 of 14 closed; navigation study passed numerically; BD-27 player observation PARTIAL twice (googlevideo 503 in the automated Chrome session); speaker gate blocked (Ryan) | `PHASE6-BD-2026-09-08.md` | Dispatch BC-3a (claude or gemini: BD-01/03/05/06) and BC-3c (gemini: BD-04/08/09) from `PHASE6-BC3-BRIEF`; then BD-2 (codex); BD-27 needs a normal browser session (Ryan can do it in 1 minute: open https://www.youtube.com/watch?v=D_FCYsshMI4&t=34s, confirm the player starts at 0:34 in chapter "Why computer use", screenshot) |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
-Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21, S22, AW, process
-recovery, BD study inputs). Full legacy tree last run at `fd1825c`: 1,279 passed; Astra's tree
-671 passed with the 62 open BA-3 reproductions deselected.
+Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
+process recovery, BD study inputs + Astra's study). Full legacy tree at `2a7af56`: 1,950 passed with the
+open reproduction sets deselected (AW-3 11 open, BA-3 29+3 open, BD 8 open at HEAD).
 
-## Queue (in order; each item names its brief or how to write it)
+## Queue (in order; each item names its brief)
 
-Running now (dispatched ~15:55-16:15 PT): AS-8 (codex), AZ-5a2 (claude), AZ-5b (grok),
-AZ-5f (gemini), AV-5r (grok), AV-5m1 (gemini), BC-3b (grok). Integrate each as it lands
-(worktree diff, `git apply --3way`, the suites named in its brief), commit, then:
+Running at handoff (Control Room run ids): AS-9 codex `a13febd1`; AZ-5a2 claude `6e929e1d`;
+AV-5m1 gemini `b31e890f`. Worktrees under `%LOCALAPPDATA%\\AgentControlRoom\\worktrees\\uoink-library\\<run8>-<3>\\<engine>`.
+Verify each in its worktree (the suites its brief names), integrate, commit.
 
-1. Phase 3: AS-8 verdict. If accepted subject to C22, record that in this file and the
-   memory; C22 = Ryan's installed Inno receipt (AS-7 lists its contents).
-2. Phase 5: after AZ-5a2 and AZ-5b land, dispatch AZ-5d (grok) from `PHASE5-AZ5-BRIEF`;
-   after AZ-5d, AZ-5g (gemini); then BA-4 (codex) on the integrated candidate.
-3. Phase 4: after AV-5m1 lands, dispatch AV-5m2 (grok) from `PHASE4-AV5-BRIEF`; then AW-4
-   (codex); then Fable's real-client rerun per AW-3's five requirements (claude -p, no paid
-   API).
-4. Phase 6: dispatch BC-3a and BC-3c from `PHASE6-BC3-BRIEF` when claude/gemini free; retry
-   the BD-27 player observation (https://www.youtube.com/watch?v=D_FCYsshMI4&t=34s, record
-   the player clock and onset; attempt 1 hit CDN 503); then BD-2 (codex).
-5. Integration candidate and release notes; Ryan's gates.
+1. AS-9 (Phase 3): integrate `docs/library/PHASE3-ACCEPTANCE-9-2026-09-08.md` and
+   `test_phase3_acceptance9.py`. Expected: accepted subject to C22 only. Record it in the
+   State table. C22 stays under Blockers for Ryan.
+2. AZ-5a2 (Phase 5): its 11 BA-01/BA-03 reproductions in `test_phase5_acceptance3.py` plus
+   `tests/test_library_analysis_fixtures.py` 28/28 (the 64 KiB cap) plus the existing Phase 5
+   suites. If the fixture tests still fail, do not integrate; write AZ-5a3 with the byte
+   counts. Then dispatch AZ-5d (grok) and, after it, AZ-5g (gemini) from
+   `PHASE5-AZ5-BRIEF-2026-09-08.md`; then BA-4 (codex review) on the integrated candidate.
+3. AV-5m1 (Phase 4): D07-D10 reproductions in `test_phase4_aw3_acceptance.py` plus the AW and
+   AW-2 sets and the mirror/briefs/wiring suites. Then dispatch AV-5m2 (grok) from
+   `PHASE4-AV5-BRIEF-2026-09-08.md`; then AW-4 (codex); then the real-client rerun (AW-3
+   lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
+   and its harness under `docs/library/proof/aw-2026-09-08/`).
+4. Phase 6: dispatch BC-3a and BC-3c from `PHASE6-BC3-BRIEF-2026-09-08.md` now (claude is
+   busy with AZ-5a2; gemini with AV-5m1; use whichever frees first, or grok for BC-3c).
+   Then BD-2 (codex). BD-27 player observation and the speaker gate: Ryan.
+5. Full tree after each phase closes: `python -B -m pytest -q -p no:cacheprovider tests
+   --ignore=tests/library_work_astra/test_phase3_s21.py` with `PHASE3_REQUIRE_IMPLEMENTATION=1`
+   (deselect only the reproduction files that are still open by ruling, and say so).
+6. Integration candidate: when Phases 3-6 are accepted or blocked only on Ryan, cut
+   `cc/living-library-candidate` from HEAD, write `docs/library/RELEASE-NOTES-LIVING-LIBRARY.md`
+   (per-phase contract, acceptance verdict, receipts, open Ryan gates), run the full tree,
+   build the installer locally (`build.ps1`; Inno Setup 6 is installed) as the staged
+   package for Ryan's C22/Phase 4 receipts. No merge, no push, no release publish.
 
-Control Room notes: a brief that names a path in backticks makes that path a required
-committed input (never write `_scratch/` in backticks); `git config --global core.longpaths
-true` is required because the retained S21 artifact archive has paths over 260 characters
-inside worktrees (set 2026-09-08 ~16:00 PT).
+Worker notes: claude worker = no shell, one session at a time, shares the subscription (tell it
+"no subagents; targeted searches; write early"); gemini has shell, times out on big sets (3-5
+defects); grok has shell, reliable on bounded code with a named test file ("write the file early;
+a session without the file is a failed run"). A brief that names a path in backticks makes it a
+required committed input (never write `_scratch/` in backticks). `git config --global
+core.longpaths true` must stay set (worktree checkouts fail without it).
 
 ## Blockers for Ryan (unchanged)
 
