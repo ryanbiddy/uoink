@@ -53,13 +53,13 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08 16:24 PDT; implementation/review HEAD `6807361`; not pushed)
+## State at handoff (updated 2026-09-08 16:33 PDT; implementation/review HEAD `9489141`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
 | 2 | Done. Stage 4 P2-7 FAIL (39/46, 6/11), record clean, AX-1 repaired | `STAGE4-AUDIT-2026-09-08.md`: option 3 recommended | Ryan decides the 0.90 rule |
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
-| 4 | AV-5r integrated (`99e9412`): D01-D03 closed; AW-3 set 5 of 16 closed | `PHASE4-ACCEPTANCE-3-2026-09-08.md` | AV-5m1 RUNNING (gemini run `b31e890f`, D07-D10); then AV-5m2 (grok D12-D15) from `PHASE4-AV5-BRIEF`; then AW-4 (codex); then the real-client rerun per AW-3's five requirements (claude -p on the subscription, no paid API) |
+| 4 | AV-5r (`99e9412`) and AV-5m1 (`9489141`) integrated: D01-D03 and D07-D10 closed; AW-3 has 10 passing cases including the control, seven open | `PHASE4-ACCEPTANCE-3-2026-09-08.md`; integrator combined checkout suites: 203 passed, seven D12-D15 failures | Dispatch AV-5m2 (grok D12-D15) from `PHASE4-AV5-BRIEF`; then AW-4 (codex); then the real-client rerun per AW-3's five requirements (claude -p on the subscription, no paid API) |
 | 5 | AZ-5c/5e (`46163a4`), AZ-5f (`1fb7f78`), AZ-5b (`48655c5`) integrated: BA-3 acceptance set 23 of 52 closed, dashboard3 7/7, measurements3 0/3. AZ-5a2 rejected: fixture pagination returns 12 of the required 20 rows | `PHASE5-ACCEPTANCE-3-2026-09-08.md`; AZ-5a2 worktree verification: 326 passed, 26 failed; fixture set 27/28 | Write AZ-5a3 with measured byte counts and preserve AZ-5a2 unapplied; then AZ-5d (grok BA-09/10/11), AZ-5g (gemini BA-14), then BA-4 (codex) |
 | 6 | BC-3b integrated (`effd145`): BD-02/BD-07 closed, BD set 6 of 14 closed; navigation study passed numerically; BD-27 player observation PARTIAL twice (googlevideo 503 in the automated Chrome session); speaker gate blocked (Ryan) | `PHASE6-BD-2026-09-08.md` | BC-3a RUNNING (gemini `eb0f138e`, BD-01/03/05/06) and BC-3c RUNNING (grok `ff01d490`, BD-04/08/09), both at `fc99942`; then BD-2 (codex). BD-27 and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
@@ -71,8 +71,8 @@ open reproduction sets deselected (AW-3 11 open, BA-3 29+3 open, BD 8 open at HE
 ## Queue (in order; each item names its brief)
 
 Takeover runs: AS-9 codex `a13febd1` integrated at `6807361`; AZ-5a2 claude `6e929e1d`
-finished but rejected; AV-5m1 gemini `b31e890f` verified in its worktree, integration pending.
-BC-3a gemini `eb0f138e` and BC-3c grok `ff01d490` are running.
+finished but rejected; AV-5m1 gemini `b31e890f` integrated at `9489141`.
+BC-3a gemini `eb0f138e` is running; BC-3c grok `ff01d490` is complete, verification pending.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
@@ -83,8 +83,7 @@ Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<ru
    the measured byte counts and requires all 18 BA-01/BA-03 cases and the 28 fixture tests.
    Then dispatch AZ-5d (grok) and, after it, AZ-5g (gemini) from
    `PHASE5-AZ5-BRIEF-2026-09-08.md`; then BA-4 (codex review) on the integrated candidate.
-3. AV-5m1 (Phase 4): D07-D10 reproductions in `test_phase4_aw3_acceptance.py` plus the AW and
-   AW-2 sets and the mirror/briefs/wiring suites. Then dispatch AV-5m2 (grok) from
+3. AV-5m1 (Phase 4) complete at `9489141`. Dispatch AV-5m2 (grok) from
    `PHASE4-AV5-BRIEF-2026-09-08.md`; then AW-4 (codex); then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
@@ -151,3 +150,23 @@ the same helper measured 51,668 raw / 58,289 serialized-transport bytes for the 
 only 12 creator rows. This was fixture serialization, not a real-client receipt.
 Retain the AZ-5a2 rejection. The AS-9 full-tree run is in progress with S21 and only
 the still-open AW-3, BA-3, BA-measurements3 and BD reproduction files excluded.
+
+### 2026-09-08 16:33 PDT — AV-5m1 integrated; full-tree environment failures
+
+AV-5m1 applied cleanly with three-way integration at `9489141`. Checkout verification
+has 203 passes and only the seven D12-D15 failures assigned to AV-5m2. D01-D03 stay
+green alongside D07-D10. Worker/checkout logs are in `_scratch/ig-av5m1-w` and
+`_scratch/ig-av5m1-c`. AW-4 should inspect the new SQLite transaction boundary,
+including whether an already-active caller transaction can be rolled back safely.
+
+The AS-9 full tree finished with 1,966 passed, 14 failed, three skipped and one
+existing xfail. Four failures are the superseded AS-7 evidence assertions; ten
+child-process dependency failures require the environment repair documented in
+`INTEGRATOR-VERIFY-BRIEF-2026-09-08.md`. That targeted verification is running.
+The first virtual-environment launch stopped before tests because its guard expected
+IG_FORBIDDEN_LIVE at interpreter startup; initializing it before launch repaired
+that setup error. Do not present either failed invocation as a passing full tree.
+
+Browser inventory exposes only the Codex in-app browser, with no normal Chrome
+session connected. No further BD-27 playback attempt was made. Its two partial
+observations and Ryan's normal-browser gate remain unchanged.
