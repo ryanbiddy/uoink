@@ -86,7 +86,13 @@ def test_schema_migration_status_is_read_only(tmp_path, monkeypatch):
 
 
 def test_successful_scheduler_tick_updates_health_timestamp(monkeypatch):
-    monkeypatch.setattr(server.podcasts, "list_due_feeds", lambda _idx: [])
+    # Phase 3 (run AM): the tick claims due standing-source polls through the
+    # subscription service; a pass with nothing due is a clean heartbeat and
+    # still advances the success stamp (the liveness protection under test).
+    monkeypatch.setattr(server, "_standing_due_polls", lambda: [])
+    monkeypatch.setattr(server, "_standing_capture_pass", lambda: [])
+    monkeypatch.setattr(server, "_source_service", lambda: type(
+        "S", (), {"dispatch_classification_outbox": staticmethod(lambda: [])})())
     monkeypatch.setattr(server, "_get_index", lambda: object())
     monkeypatch.setattr(server.suite_service, "utc_now", lambda: "2026-09-04T16:30:00Z")
     monkeypatch.setattr(server, "_last_successful_tick_at", None)

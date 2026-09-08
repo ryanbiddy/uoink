@@ -1,11 +1,18 @@
 from __future__ import annotations
 
+import sys
+import time
 from pathlib import Path
 
-import _platform
-import index as index_mod
-import podcasts
-import server
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from source_subscriptions_fixtures import (  # noqa: E402
+    Clock, FakeAdapter, FakeBackend, make_service, snapshot, turn_on,
+)
+
+import _platform  # noqa: E402
+import index as index_mod  # noqa: E402
+import podcasts  # noqa: E402
+import server  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -201,38 +208,27 @@ def test_dashboard_and_installer_surfaces_honor_the_setting():
     assert "if ($stoppedAny -and $notificationsEnabled)" in stop_script
 
 
-def test_next_due_feed_tick_queues_without_a_desktop_toast(
+def test_next_due_source_tick_queues_without_a_desktop_toast(
     tmp_path,
     monkeypatch,
 ):
+    """Phase 3 (run AM): the tick claims the due standing-source poll through
+    the subscription service and raises its discovery notification when a
+    consented source enrolls newly observed items. The Phase 0 protection is
+    unchanged: with notifications off that notification is queued to the
+    dashboard Activity stream and never becomes a desktop toast."""
     idx = index_mod.Index.open(tmp_path / "index.db")
     feed = podcasts.add_feed(idx, "https://quiet.example/feed.xml")
-    podcasts.upsert_episodes(
-        idx,
-        feed["id"],
-        [
-            {
-                "guid": "quiet-episode",
-                "title": "Quiet episode",
-                "audio_url": "https://cdn.example/quiet.mp3",
-                "episode_page_url": "https://quiet.example/episode",
-                "published_at": "2026-08-01T12:00:00Z",
-            }
-        ],
+    # The old add route stamps the source with the real clock; a service clock
+    # at or after that instant is due immediately without a clock regression.
+    clock = Clock(int(time.time() * 1000))
+    adapter = FakeAdapter(
+        [snapshot(["quiet-episode"], titles={"quiet-episode": "Quiet episode"})]
     )
-    episode_id = podcasts.list_episodes(idx, feed_id=feed["id"])[0]["id"]
+    service = make_service(idx, clock=clock, adapter=adapter, backend=FakeBackend())
+    turn_on(service, feed["source_id"])
     monkeypatch.setattr(server, "_get_index", lambda: idx)
-    monkeypatch.setattr(
-        podcasts,
-        "poll_feed",
-        lambda _idx, feed_id: {
-            "ok": True,
-            "feed_id": feed_id,
-            "inserted": 1,
-            "new_episode_ids": [episode_id],
-            "title": "Quiet Show",
-        },
-    )
+    monkeypatch.setattr(server, "_source_service", lambda: service)
     monkeypatch.setattr(
         server,
         "_read_settings",
@@ -253,17 +249,19 @@ def test_next_due_feed_tick_queues_without_a_desktop_toast(
         server._platform,
         "show_toast",
         lambda *args, **kwargs: (_ for _ in ()).throw(
-            AssertionError("due-feed tick must not create a desktop toast")
+            AssertionError("due-source tick must not create a desktop toast")
         ),
     )
 
     results = server._podcast_feed_scheduler_tick()
 
-    assert results[0]["inserted"] == 1
+    assert [c["source_id"] for c in adapter.calls] == [feed["source_id"]]
+    assert results[0]["ok"] is True and results[0]["inserted"] == 1
+    assert results[0]["enrollment"]["enrolled"] == 1
     assert queued == [
         (
-            "New podcast episode",
-            "Quiet Show: Quiet episode.",
+            "New source items",
+            "1 new item(s) discovered from a watched source.",
             "notifications disabled",
         )
     ]
