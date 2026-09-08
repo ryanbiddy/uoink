@@ -1,7 +1,7 @@
 {
   "schema": "fable-s21-browser-observation-v1",
   "label": "at7",
-  "observed_utc": "2026-09-08T23:37:00Z (approx; screenshots 1788905828769, 1788905846076, 1788905869279 epoch ms)",
+  "observed_utc": "2026-09-08T22:17:08.769Z (Sources), 2026-09-08T22:17:26.076Z (Library), 2026-09-08T22:17:49.279Z (item detail); screenshot epoch ms 1788905828769, 1788905846076, 1788905869279. AS-8 correction: the earlier '23:37:00Z (approx)' was a transcription error.",
   "dashboard_url": "http://127.0.0.1:59404/dashboard",
   "feed_url": "http://127.0.0.1:59403/feed.xml",
   "source_id_prefix": "src_677a7daf9779",
