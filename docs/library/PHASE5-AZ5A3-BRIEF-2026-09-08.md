@@ -52,3 +52,12 @@ Use a fresh worktree from current `cc/living-library`. Write early; no subagents
 No model execution, paid API, ANTHROPIC_API_KEY, live index or port 5179.
 Set PYTHONDONTWRITEBYTECODE=1 and PYTHONPATH to the worktree and resolved dependencies.
 Keep librarian_apply_enabled false. No commits or pushes; Astra verifies and integrates.
+
+## 2026-09-08 16:37 PDT: route repair after quota refusal
+
+Gemini dispatch `bbd68b73` failed immediately with no output on its individual
+subscription quota, reported reset in 1h13m7s. It produced no implementation or
+measurement. Preserve that failed dispatch. Run AZ-5a3g on Grok with this same
+bounded implementation brief and the retained AZ-5a2 patch; no subscription
+upgrade or paid API. The provider change addresses the dispatch failure. The
+pagination and compaction repairs above remain required before acceptance.

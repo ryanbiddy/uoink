@@ -53,7 +53,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
   Always `PYTHONDONTWRITEBYTECODE=1`, `PYTHONPATH=<checkout>`; Phase 3 needs
   `PHASE3_REQUIRE_IMPLEMENTATION=1`; unset `ANTHROPIC_API_KEY`.
 
-## State at handoff (updated 2026-09-08 16:33 PDT; implementation/review HEAD `9489141`; not pushed)
+## State at handoff (updated 2026-09-08 16:38 PDT; implementation/review HEAD `c8ddf9b`; not pushed)
 
 | Phase | State | Astra's latest ruling | Next |
 |---|---|---|---|
@@ -61,7 +61,7 @@ When Fable returns it reads the same file and the git log and takes the loop bac
 | 3 | AS-9 integrated (`6807361`): accepted subject to C22 only | `PHASE3-ACCEPTANCE-9-2026-09-08.md`; integrator reproduced confirmation 11/11, strict 178 passed + four superseded-evidence failures, companions 394 passed and dashboard 35 passed in both worktree and checkout | C22 = Ryan's installed Inno receipt (AS-7 lists it) |
 | 4 | AV-5r (`99e9412`) and AV-5m1 (`9489141`) integrated: D01-D03 and D07-D10 closed; AW-3 has 10 passing cases including the control, seven open | `PHASE4-ACCEPTANCE-3-2026-09-08.md`; integrator combined checkout suites: 203 passed, seven D12-D15 failures | Dispatch AV-5m2 (grok D12-D15) from `PHASE4-AV5-BRIEF`; then AW-4 (codex); then the real-client rerun per AW-3's five requirements (claude -p on the subscription, no paid API) |
 | 5 | AZ-5c/5e (`46163a4`), AZ-5f (`1fb7f78`), AZ-5b (`48655c5`) integrated: BA-3 acceptance set 23 of 52 closed, dashboard3 7/7, measurements3 0/3. AZ-5a2 rejected: fixture pagination returns 12 of the required 20 rows | `PHASE5-ACCEPTANCE-3-2026-09-08.md`; AZ-5a2 worktree verification: 326 passed, 26 failed; fixture set 27/28 | Write AZ-5a3 with measured byte counts and preserve AZ-5a2 unapplied; then AZ-5d (grok BA-09/10/11), AZ-5g (gemini BA-14), then BA-4 (codex) |
-| 6 | BC-3b integrated (`effd145`): BD-02/BD-07 closed, BD set 6 of 14 closed; navigation study passed numerically; BD-27 player observation PARTIAL twice (googlevideo 503 in the automated Chrome session); speaker gate blocked (Ryan) | `PHASE6-BD-2026-09-08.md` | BC-3a RUNNING (gemini `eb0f138e`, BD-01/03/05/06) and BC-3c RUNNING (grok `ff01d490`, BD-04/08/09), both at `fc99942`; then BD-2 (codex). BD-27 and speaker material remain Ryan gates |
+| 6 | BC-3b (`effd145`) and BC-3c (`c8ddf9b`) integrated: BD set 9/14 pass, five BD-01/03/05/06 cases open. BC-3a failed quota/partial and is rejected | `PHASE6-BD-2026-09-08.md`; BC-3c worker and checkout each 156 passed / five open, including 147 companion passes | Dispatch BC-3a2 on Grok from `PHASE6-BC3A2-BRIEF-2026-09-08.md`; then BD-2 (codex). Navigation study passed numerically; BD-27 partial twice and speaker material remain Ryan gates |
 | Integration | Not started | | After phases: candidate branch from the review base, Astra reviews conflict resolutions, full suite, installed-tree receipts (Ryan) |
 
 Receipts and artifacts: `docs/library/proof/` (stage archives, S20 matrix, S21 incl. run at7, S22, AW,
@@ -72,22 +72,25 @@ open reproduction sets deselected (AW-3 11 open, BA-3 29+3 open, BD 8 open at HE
 
 Takeover runs: AS-9 codex `a13febd1` integrated at `6807361`; AZ-5a2 claude `6e929e1d`
 finished but rejected; AV-5m1 gemini `b31e890f` integrated at `9489141`.
-BC-3a gemini `eb0f138e` is running; BC-3c grok `ff01d490` is complete, verification pending.
+BC-3c grok `ff01d490` integrated at `c8ddf9b`. BC-3a gemini `eb0f138e` failed on quota
+with a rejected partial diff. AZ-5a3 gemini `bbd68b73` also failed on quota, no diff.
+AV-5m2 grok `6b5e5f1e` is running at `633eb99`. Route AZ-5a3g and BC-3a2 to Grok.
 Worktrees are under `%LOCALAPPDATA%\AgentControlRoom\worktrees\uoink-library\<run8>-<3>\<engine>`.
 
 1. AS-9 (Phase 3) complete at `6807361`: accepted subject to C22 only. C22 stays under
    Blockers for Ryan. Four unchanged assertions against superseded AT6/browser evidence
    remain failures; AS-8/AS-9 cover the replacement at7 evidence.
 2. AZ-5a2 (Phase 5) rejected and retained as `patches/az5a2-claude-2026-09-08.patch`.
-   Dispatch `PHASE5-AZ5A3-BRIEF-2026-09-08.md` on the next free worker; it records
+   Dispatch `PHASE5-AZ5A3-BRIEF-2026-09-08.md` as AZ-5a3g on Grok; it records
    the measured byte counts and requires all 18 BA-01/BA-03 cases and the 28 fixture tests.
    Then dispatch AZ-5d (grok) and, after it, AZ-5g (gemini) from
    `PHASE5-AZ5-BRIEF-2026-09-08.md`; then BA-4 (codex review) on the integrated candidate.
-3. AV-5m1 (Phase 4) complete at `9489141`. Dispatch AV-5m2 (grok) from
+3. AV-5m1 (Phase 4) complete at `9489141`. Verify running AV-5m2 (grok `6b5e5f1e`) from
    `PHASE4-AV5-BRIEF-2026-09-08.md`; then AW-4 (codex); then the real-client rerun (AW-3
    lists the five requirements; Fable's earlier receipt is `PHASE4-AW-RECEIPT-2026-09-08.md`
    and its harness under `docs/library/proof/aw-2026-09-08/`).
-4. Phase 6: verify and integrate running BC-3a and BC-3c from `PHASE6-BC3-BRIEF-2026-09-08.md`.
+4. Phase 6: BC-3c is integrated. Dispatch BC-3a2 from `PHASE6-BC3A2-BRIEF-2026-09-08.md`
+   on Grok; preserve BC-3a's failed partial diff and the quota failure.
    Then BD-2 (codex). BD-27 player observation and the speaker gate: Ryan.
 5. Full tree after each phase closes: `python -B -m pytest -q -p no:cacheprovider tests
    --ignore=tests/library_work_astra/test_phase3_s21.py` with `PHASE3_REQUIRE_IMPLEMENTATION=1`
@@ -170,3 +173,23 @@ that setup error. Do not present either failed invocation as a passing full tree
 Browser inventory exposes only the Codex in-app browser, with no normal Chrome
 session connected. No further BD-27 playback attempt was made. Its two partial
 observations and Ryan's normal-browser gate remain unchanged.
+
+### 2026-09-08 16:38 PDT — BC-3c integrated; Gemini quota; repaired verification
+
+BC-3c integrated cleanly at `c8ddf9b`: worker and checkout each have 156 passes and
+the same five BC-3a failures. This includes all 147 named companions. The changed
+capture seam propagates `library_unavailable`; other refusal codes still log and
+return True as disclosed in the worker report. BD-2 must review that retained behavior.
+
+Gemini BC-3a stopped on individual quota (reported reset in 1h14m22s); the immediately
+following AZ-5a3 dispatch also failed on quota (1h13m7s) with a clean worktree and no
+output. Neither is accepted. BC-3a's partial diff is archived; verification yielded
+151 passed / ten failed, including three BC-2 regressions. It remains unapplied.
+Use the new BC-3a2 brief and the AZ-5a3 route addendum for Grok; no upgrade or paid API.
+
+The repaired disposable Python environment passes all 33 tests in the three affected
+full-tree files. These are new targeted results, not a replacement full-tree result.
+The local environment is `_scratch/ig-runtime`; set IG_FORBIDDEN_LIVE before launching
+its interpreter. Its .pth resolves installed dependencies and carries the guard into
+children even when tests replace PYTHONPATH or use isolated Python. No global package
+or test change was required. See `_scratch/ig-env-repair` for commands and output.

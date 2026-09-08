@@ -1,0 +1,35 @@
+diff --git a/library_media.py b/library_media.py
+index 0dfa34a..0cace9c 100644
+--- a/library_media.py
++++ b/library_media.py
+@@ -1830,10 +1830,6 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
+         source_now = _cards.build_card(_merge_item(item), projected, corpus_text=head)["source_revision"]
+         if source_now != block["source_revision"]:
+             raise _stale("source_revision_changed")
+-        # A raw call mints its base at entry (see module note 1).
+-        if ticket is None:
+-            ticket = begin_publication(conn, video_id)
+-
+         # Current state under the item's storage lock: deletion, corpus
+         # bytes, sidecar dependencies and the ownership fence are rechecked
+         # here, and every conflict refuses before any file is touched.
+@@ -1841,6 +1837,11 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
+             conn.execute("BEGIN IMMEDIATE")
+         item = _load_item(conn, video_id)
+         target = block["media_revision"]
++        generation, current, ledger = _publication_state(conn, video_id, folder)
++        if ticket is None:
++            if ledger is not None and current != target and (cues or block.get("chapters")):
++                raise _stale("publication_superseded", base_generation=0, current_generation=generation)
++            ticket = begin_publication(conn, video_id)
+         current_block = None
+         current_sidecar = _read_bytes(sidecar_path, required=False)
+         if current_sidecar is not None:
+@@ -1856,7 +1857,6 @@ def publish_transcript(conn, video_id: str, *, cues, media_block, artifacts, tic
+                 if isinstance(current_block.get("provenance"), dict) else None
+             if recorded != _sha256(disk_corpus):
+                 raise _stale("corpus_edited")
+-        generation, current, ledger = _publication_state(conn, video_id, folder)
+         history = list(ledger["history"]) if ledger is not None else []
+         # The sidecar on disk must be one this publication knows: the ledger's
+         # current or in-flight base snapshot, this target, or the base the
