@@ -40,7 +40,7 @@ def test_stage_a():
     assert idx._conn.execute('SELECT COUNT(*) FROM item_shelves').fetchone()[0]==0
     assert idx._conn.execute('PRAGMA integrity_check').fetchone()[0]=='ok'
     assert idx._conn.execute('PRAGMA foreign_key_check').fetchall()==[]
-    assert idx.schema_version()==27
+    assert idx.schema_version()==28  # 0027 substrate + 0028 source subscriptions (Phase 3)
     idx.close()
 
 if __name__=='__main__':

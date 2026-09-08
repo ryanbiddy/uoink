@@ -97,7 +97,7 @@ def test_migration_26_rollback(tmp_path,monkeypatch):
     c.close()
     (old/'0027_library_substrate.sql').write_text(text)
     with Index.open(db) as idx:
-        assert idx.schema_version()==27
+        assert idx.schema_version()==27  # this fixture copies only migrations <= 26 plus 0027
         assert idx._conn.execute('PRAGMA foreign_key_check').fetchall()==[]
         assert idx._conn.execute('SELECT COUNT(*) FROM library_work').fetchone()[0]==0
         assert idx._conn.execute('SELECT COUNT(*) FROM item_shelves').fetchone()[0]==0
