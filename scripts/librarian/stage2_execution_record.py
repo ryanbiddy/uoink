@@ -21,6 +21,24 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST_STAGE2 = ROOT / "docs/library/proof/manifest-stage2-2026-09-05.json"
+STAGES = {
+    2: dict(manifest="docs/library/proof/manifest-stage2-2026-09-05.json",
+            approval_record="docs/library/INDUCTION-AUDIT-14-2026-09-06.md",
+            packet="docs/library/proof/holdout-v2-labelling-packet-12-2026-09-06.json",
+            packet_note="INDUCTION-AUDIT-13: packet 12 (decision 3 nodes) and packet 13 (decision 4 nodes) carry identical candidate nodes; decision 5 nodes are byte-identical; packet-12 labels carried forward by that ruling",
+            labellers=["gemini-3.8-flash-high (blind, run AD, packet 12)", "grok-4.6 (blind, run AD, packet 12)"],
+            labeller_files={n: f"docs/library/proof/labels/holdout-v2-labels-12-{n}-2026-09-06.json" for n in ("gemini", "grok")},
+            adjudicator="gpt-6-astra (blind, run AG)",
+            decision="docs/library/proof/taxonomy-v2-revision-decision-5-2026-09-06.json"),
+    3: dict(manifest="docs/library/proof/manifest-stage3-2026-09-07.json",
+            approval_record="docs/library/INDUCTION-AUDIT-16-2026-09-07.md",
+            packet="docs/library/proof/holdout-v3-labelling-packet-2026-09-07.json",
+            packet_note="packet built from the frozen hold-out v3 and the taxonomy v3 candidate nodes (identical to the approved nodes; see INDUCTION-AUDIT-16)",
+            labellers=["gemini-3.8-flash-high (blind, run AJ)", "grok-4.6 (blind, run AJ)"],
+            labeller_files={n: f"docs/library/proof/labels/holdout-v3-labels-{n}-2026-09-07.json" for n in ("gemini", "grok")},
+            adjudicator="gpt-6-astra (blind, run AK)",
+            decision="docs/library/proof/taxonomy-v3-revision-decision-2026-09-07.json"),
+}
 
 
 def sha(data: bytes) -> str:
@@ -41,7 +59,8 @@ def git(*args: str) -> str:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--approval-record", default="docs/library/INDUCTION-AUDIT-14-2026-09-06.md")
+    parser.add_argument("--stage", type=int, choices=(2, 3), default=2)
+    parser.add_argument("--approval-record", default=None)
     parser.add_argument("--authorization", required=True,
                         help="Who authorized the execution and when (Ryan's standing stage 2 authorization)")
     parser.add_argument("--budget-note", required=True)
@@ -49,11 +68,15 @@ def main(argv=None) -> int:
     parser.add_argument("--batch", type=int, default=8)
     parser.add_argument("--concurrency", type=int, default=4)
     parser.add_argument("--port", type=int, default=5180)
+    parser.add_argument("--effort", default=None, help="Declared reasoning effort for assignment calls (stage 3: high)")
     args = parser.parse_args(argv)
     if os.environ.get("ANTHROPIC_API_KEY"):
         print("ANTHROPIC_API_KEY is set; the measured pass is subscription-only", file=sys.stderr)
         return 1
-    manifest = json.loads(MANIFEST_STAGE2.read_text(encoding="utf-8"))
+    stage = STAGES[args.stage]
+    if args.approval_record is None:
+        args.approval_record = stage["approval_record"]
+    manifest = json.loads((ROOT / stage["manifest"]).read_text(encoding="utf-8"))
     files = manifest["files"]
     taxonomy = json.loads((ROOT / files["taxonomy"]["path"]).read_text(encoding="utf-8"))
     mapping = json.loads((ROOT / files["mapping"]["path"]).read_text(encoding="utf-8"))
@@ -68,7 +91,8 @@ def main(argv=None) -> int:
         written_at=datetime.now(timezone.utc).isoformat(),
         integrated_candidate=dict(git_sha=git("rev-parse", "HEAD"), branch=git("rev-parse", "--abbrev-ref", "HEAD"),
                                   working_tree_clean=(dirty == ""), dirty_entries=dirty.splitlines()),
-        stage2_manifest=dict(file_identity("docs/library/proof/manifest-stage2-2026-09-05.json"),
+        stage=args.stage,
+        stage_manifest=dict(file_identity(stage["manifest"]),
                              manifest_hash=manifest["manifest_hash"], contract_version=manifest["contract_version"],
                              targets=len(manifest["items"]), exclusions=len(manifest["exclusions"])),
         source=dict(manifest["source"], upgrade=manifest["upgrade"]),
@@ -78,33 +102,32 @@ def main(argv=None) -> int:
         evaluation_identity=dict(holdout=file_identity(files["holdout"]["path"]),
                                  holdout_version=holdout["version"],
                                  strata={k: len(v) for k, v in holdout["strata"].items()},
-                                 labelling_packet=file_identity("docs/library/proof/holdout-v2-labelling-packet-12-2026-09-06.json"),
-                                 labelling_packet_equivalence="INDUCTION-AUDIT-13: packet 12 (decision 3 nodes) and packet 13 (decision 4 nodes) carry identical candidate nodes; decision 5 nodes are byte-identical; packet-12 labels carried forward by that ruling"),
+                                 labelling_packet=file_identity(stage["packet"]),
+                                 labelling_packet_note=stage["packet_note"]),
         sealed_labels_and_mapping=dict(
             gold=file_identity(files["gold"]["path"]), mapping=file_identity(files["mapping"]["path"]),
             adjudicated=dict(path=mapping["adjudicated_file"], sha256=mapping["adjudicated_sha256"]),
             gold_items=len(gold), sealed=all(item.get("sealed") is True for item in gold),
             scorable=sum(1 for row in mapping["items"].values() if row["scorable"]),
-            labellers=["gemini-3.8-flash-high (blind, run AD, packet 12)", "grok-4.6 (blind, run AD, packet 12)"],
-            labeller_files={name: file_identity(f"docs/library/proof/labels/holdout-v2-labels-12-{name}-2026-09-06.json") for name in ("gemini", "grok")},
-            adjudicator="gpt-6-astra (blind, run AG)",
+            labellers=stage["labellers"],
+            labeller_files={name: file_identity(path) for name, path in stage["labeller_files"].items()},
+            adjudicator=stage["adjudicator"],
             scoring_version=mapping["scoring_version"],
             rule="NFC + trimmed segments, case preserved, deepest unambiguous approved ancestor, strict primary equality"),
         approved_taxonomy=dict(file_identity(files["taxonomy"]["path"]), version_id=taxonomy["version_id"],
-                               decision=dict(path="docs/library/proof/taxonomy-v2-revision-decision-5-2026-09-06.json",
-                                             sha256=sha((ROOT / "docs/library/proof/taxonomy-v2-revision-decision-5-2026-09-06.json").read_bytes())),
+                               decision=dict(path=stage["decision"], sha256=sha((ROOT / stage["decision"]).read_bytes())),
                                service_returned_revision_hash="pending observation: recorded by the harness in receipts.before.taxonomy_revision_hash on the disposable duplicate",
                                parent_version_id=taxonomy["parent_version_id"],
                                parent_revision_hash=taxonomy["parent_revision_hash"],
                                revision_hash=taxonomy["revision_hash"], nodes=len(taxonomy["nodes"]),
                                approval=taxonomy["approval"], approval_record=args.approval_record,
-                               parent_file=file_identity(files["parent_taxonomy"]["path"])),
+                               lineage={key: file_identity(entry["path"]) for key, entry in files.items() if key.startswith("parent_taxonomy")}),
         assignment_prompt=dict(file_identity(files["prompt"]["path"]),
                                prompt_sha256_text_mode=manifest["hashes"]["prompt_sha256"],
                                renderer="proof_run.render_prompt: {{TAXONOMY}} then {{CARDS}}, template read in text mode (universal newlines)"),
         installed_client=dict(name="Claude Code CLI (subscription)", version=claude_version, executable=claude_exe,
                               executable_sha256=sha(Path(claude_exe).read_bytes()) if claude_exe and Path(claude_exe).is_file() else None,
-                              model=args.model, tools="disabled (--tools \"\")", session_persistence="disabled",
+                              model=args.model, effort=args.effort or "CLI default", tools="disabled (--tools \"\")", session_persistence="disabled",
                               api_key="ANTHROPIC_API_KEY unset at record time; proof_run.py refuses to start if it is present and records anthropic_api_key_unset in the receipts"),
         corpus_egress=dict(authorization=args.authorization,
                            permitted="librarian-profile evidence cards (title, channel, platform, source type, hashes, summary hint, up to six excerpts of 240 characters) rendered into the frozen assignment prompt and sent to the subscription client",
