@@ -1771,6 +1771,9 @@ class Index:
         earlier, longer extraction (a raw caption track re-yoinked into a
         few long paragraph chunks left ~700 stale cues behind on two live
         items). Those are removed so the citation map stays time-ordered.
+        An empty list is an explicit empty replacement: every citation for
+        the video is removed and clips are rebuilt in the same commit
+        (BD-09).
 
         Living library phase 1: the video's clips are re-derived from the
         fresh citations in the same commit (clips.build_clips_for_video)."""
@@ -1782,6 +1785,19 @@ class Index:
             for c in citations
         ]
         if not rows:
+            import clips as _clips  # noqa: WPS433 -- keeps index importable alone
+            with self._lock:
+                self._conn.execute(
+                    "DELETE FROM citations WHERE video_id=?", (video_id,))
+                try:
+                    _clips.build_clips_for_video(self._conn, video_id, commit=False)
+                except sqlite3.Error:
+                    log.exception("clip build failed for %s", video_id)
+                except Exception:
+                    self._conn.rollback()
+                    raise
+                self._conn.commit()
+            self._invalidate_library_sources([video_id])
             return 0
         max_seq_by_kind: dict = {}
         for r in rows:

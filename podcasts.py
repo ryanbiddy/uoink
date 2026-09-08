@@ -1271,16 +1271,28 @@ def episode_to_corpus(idx, episode_id: int, *, data_root: Path) -> dict:
     }
     sidecar_bytes = (json.dumps(sidecar, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
     if _media_mod.schema_ready(idx._conn):
-        # BC-2: one complete publication operation. The ownership ticket was
-        # minted before this build; the item row is upserted first (the
-        # publisher binds against it) and the legacy citation write keeps
-        # the Phase 3 durability seam (row-before-citations) in place; then
-        # the fenced publisher replaces the owned artifact, corpus and
-        # sidecar (sidecar last), commits the citation/media/clip rows
-        # together, prunes obsolete owned inputs and invalidates Phase 2
-        # work. Retry replays the same inputs.
+        # BC-2/BD-04: one complete publication operation. The ownership
+        # ticket was minted before this build; the item row is upserted
+        # first (the publisher binds against it). Phase 3 S16 injects a
+        # crash at insert_citations after that row exists; first
+        # publication still hits the seam with an empty batch so a crash
+        # leaves the yoink without citations. Replacement must not commit
+        # the new cues before the fenced snapshot (BD-04): a projector
+        # failure then preserves the prior complete rows. The fenced
+        # publisher writes the owned artifact, corpus and sidecar
+        # (sidecar last), commits the citation/media/clip rows together,
+        # prunes obsolete owned inputs and invalidates Phase 2 work.
+        # Retry replays the same inputs.
         idx.upsert_yoink(record, content=markdown)
-        idx.insert_citations(video_id, transcript_citations)
+        materialized = None
+        try:
+            materialized = idx._conn.execute(
+                "SELECT 1 FROM media_depth WHERE video_id=?", (video_id,)
+            ).fetchone()
+        except sqlite3.Error:
+            materialized = None
+        if materialized is None:
+            idx.insert_citations(video_id, [])
         idx.publish_media_snapshot(
             video_id, cues=transcript_citations, media_block=media_block,
             artifacts={

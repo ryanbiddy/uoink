@@ -32,10 +32,11 @@ the literal BD-0 wording, read before relying on the behaviour:
    retryable ``library_unavailable`` after the committed, replayable
    publication. ``Index.store_media_snapshot`` remains for legacy callers
    and invalidates through the same path; ``podcasts.episode_to_corpus``
-   still performs the legacy ``Index.insert_citations`` write before the
-   fenced publication because the Phase 3 durability suite injects its
-   crash at that seam (row before citations); the fenced operation then
-   supersedes those rows in the same call.
+   still invokes ``Index.insert_citations`` after the yoink row on first
+   publication because the Phase 3 durability suite injects its crash at
+   that seam (row before citations). Replacement does not write the new
+   cues there: the fenced publisher commits them with the snapshot, so a
+   projector failure cannot present new citations bound to the old media.
 3. **Artifact retention** prunes owned ``.media-inputs/<sha256>.json`` files
    only after a committed publication (``prune_artifacts``), keeping the
    current DB snapshot's references, every retained run record's artifact,

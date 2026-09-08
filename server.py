@@ -2661,8 +2661,10 @@ def _capture_media_plan(sidecar: dict, folder: Path, *, item: dict | None = None
     sidecar's ``source_chapters``) become one archived capture artifact and
     a sealed, provisional media block. Returns None when the sidecar was not
     written by a Phase 6 capture (no ``source_chapters`` key and no explicit
-    link fields) or the capture holds neither cues nor chapters. Offline:
-    nothing is fetched, transcribed or written here."""
+    link fields). A Phase 6 writer with neither cues nor chapters still
+    returns an explicit empty snapshot so replacement publication can
+    remove old transcript citations and chapters (BD-09). Offline: nothing
+    is fetched, transcribed or written here."""
     import library_media  # noqa: WPS433 -- optional module; lazy keeps the helper importable
     import library_resources  # noqa: WPS433
     import yt_extract  # noqa: WPS433
@@ -2679,8 +2681,6 @@ def _capture_media_plan(sidecar: dict, folder: Path, *, item: dict | None = None
     raw_chapters = raw_chapters if isinstance(raw_chapters, list) else []
     if chapter_rows is None:
         chapter_rows = yt_extract.chapters_from_metadata({"chapters": raw_chapters})
-    if not cues and not chapter_rows:
-        return None
     url = sidecar.get("source_url") or sidecar.get("url")
     safe_source = library_resources.safe_url(url)
     is_youtube = page_extractor.platform_for(
@@ -2754,7 +2754,10 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
                  sidecar_path: Path) -> bool:
     """Upsert one yoink + its citations into the library index. Best-effort
     and idempotent: callers (extraction hook, backfill) must treat a failure
-    as non-fatal. Returns True if the row was indexed."""
+    as non-fatal. Returns True if the row was indexed. A Phase 6 publication
+    refusal of ``library_unavailable`` is propagated so the owner can retry
+    (BD-08); other publication refusals leave the existing snapshot and
+    still return True after the row is present."""
     video_id = (sidecar.get("video_id") or "").strip()
     if not video_id:
         # video_id is the yoinks primary key + citations FK -- can't index.
@@ -2811,12 +2814,14 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
     idx = _get_index()
     idx.upsert_yoink(record, content=content)
     citations = _citations_from_sidecar(sidecar, folder)
-    # Phase 6 (BC-2): a Phase 6 capture (explicit link fields, held chapter
-    # metadata) publishes its transcript cues through the shared, fenced
-    # media publisher; a refusal is logged and leaves the item's existing
+    # Phase 6 (BC-2/BD-08): a Phase 6 capture (explicit link fields, held
+    # chapter metadata) publishes its transcript cues through the shared,
+    # fenced media publisher. ``library_unavailable`` is propagated to the
+    # owner. Other refusals are logged and leave the item's existing
     # citations and snapshot untouched (never a silent legacy overwrite of
     # a snapshot another publisher owns). Legacy sidecars keep the legacy
-    # citation write.
+    # citation write. An empty Phase 6 replacement publishes through the
+    # complete operation (BD-09).
     published = None
     if corpus_path is not None and corpus_path.exists():
         try:
@@ -2832,6 +2837,8 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
             code = getattr(exc, "code", None)
             if not isinstance(code, str):
                 raise
+            if code == "library_unavailable":
+                raise
             log.warning("media publication refused for %s: %s", video_id, code)
             published = False
     if published is None:
@@ -2840,6 +2847,10 @@ def _index_yoink(folder: Path, sidecar: dict, corpus_path: Path | None,
         screenshots = [c for c in citations if c.get("kind") != "transcript_chunk"]
         if screenshots:
             idx.insert_citations(video_id, screenshots)
+        elif not citations:
+            # BD-09: explicit empty replacement also drops leftover kinds
+            # (screenshots) the fenced transcript write does not own.
+            idx.insert_citations(video_id, [])
     _mirror_event("capture", video_id=video_id)  # seam: capture_commit
     return True
 
