@@ -117,6 +117,17 @@ and the row shows the pill (`dashboard-sources-waiting-for-client-c21.jpg`, hash
 `SHA256SUMS`). The affordance gap named above is closed by this change; Astra rules on it
 in AS-7.
 
+## Replacement run at7 on `1d9e438` (AS-7 C21 evidence requirements)
+
+One replacement run through `tests/library_work_astra/s21_run_record.py` retains the executed
+launcher bytes (hash equal to the receipt's recorded input hash), the exact command and
+process exit status `0`, all nine hashed artifacts and the evidence database (every hash
+matches the receipt), stdout/stderr, and the browser observation taken during the same
+process's hold (Sources with the "Waiting for client (unfiled)" pill, Library unfiled item,
+item detail; feed port `59403` and dashboard port `59404` match the receipt). See
+`docs/library/proof/s21-2026-09-08/SUPERSESSION-at7.md`; the AT6 pair and the first pill
+image are superseded for the C21 evidence items and kept as history.
+
 ## Status
 
 S21 is established on `61eeb07`, `d479899`, `0bb97c8` and `1830b7a` with ownership,

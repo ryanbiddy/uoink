@@ -1,0 +1,14 @@
+{
+  "schema": "fable-s21-browser-observation-v1",
+  "label": "at7",
+  "observed_utc": "2026-09-08T23:37:00Z (approx; screenshots 1788905828769, 1788905846076, 1788905869279 epoch ms)",
+  "dashboard_url": "http://127.0.0.1:59404/dashboard",
+  "feed_url": "http://127.0.0.1:59403/feed.xml",
+  "source_id_prefix": "src_677a7daf9779",
+  "screenshots": {
+    "dashboard-sources-waiting-for-client-at7.jpg": "Sources: feed http://127.0.0.1:59403/feed.xml healthy, On (Standing capture), 1 / 10 starts used, 0 / 25 back catalog, Captured items (1): 'S21 controlled capture' with the pill 'Waiting for client (unfiled)' (item_counts committed 1)",
+    "dashboard-library-unfiled-at7.jpg": "Library: 1 uoink, Uncategorized 1, card 'S21 controlled capture' (Podcast episode, speakers pending)",
+    "dashboard-item-detail-at7.jpg": "Item detail: Saved podcast source 'S21 controlled capture', Untitled podcast, Topic Uncategorized, Speakers not labeled yet, Transcript checker Balanced, Source http://127.0.0.1:59403/episode, transcript preview unavailable (markdown path outside the Uoink folder: the isolated data root)"
+  },
+  "binding": "The same held process wrote receipt-at7-candidate-<sha>.json and evidence-at7-candidate-<sha>.db after the hold; feed_url and helper_url in that receipt equal the ports above."
+}
